@@ -88,27 +88,30 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   override firstUpdated() {
     this._handleEditingTransition();
+
+    // FIXME: @Mirone
+    this._disposables.add(
+      this.surface.page.slots.onYEvent.on(({ event }) => {
+        if (event.path.includes('prop:edgeless')) {
+          this.requestUpdate();
+        }
+      })
+    );
   }
 
   override render() {
     const { model, surface, index } = this;
-    const {
-      xywh,
-      background,
-      borderRadius,
-      borderSize,
-      borderStyle,
-      hidden,
-      shadowStyle,
-      autoHeight,
-    } = model;
+    const { xywh, background, hidden, edgeless } = model;
+    const { borderRadius, borderSize, borderStyle, shadowStyle } =
+      edgeless.style;
+    const { collapse } = edgeless;
     const bound = Bound.deserialize(xywh);
 
     const style = {
       position: 'absolute',
       zIndex: `${index}`,
       width: `${bound.w}px`,
-      height: autoHeight ? 'inherit' : `${bound.h}px`,
+      height: collapse ? `${bound.h}px` : 'inherit',
       transform: `translate(${bound.x}px, ${bound.y}px)`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       boxSizing: 'border-box',
@@ -141,7 +144,11 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         : `${borderSize}px ${
             borderStyle === StrokeStyle.Dashed ? 'dashed' : borderStyle
           } var(--affine-black-10)`,
-      boxShadow: hidden || !shadowStyle ? 'none' : `var(${shadowStyle})`,
+      boxShadow: editing
+        ? 'var(--affine-active-shadow)'
+        : hidden || !shadowStyle
+          ? 'none'
+          : `var(${shadowStyle})`,
     };
 
     return html`

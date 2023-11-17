@@ -341,43 +341,25 @@ export class EdgelessClipboard implements Clipboard {
   ) {
     const { surface } = this;
     const noteIds = await Promise.all(
-      notes.map(
-        async ({
-          id,
-          xywh,
-          children,
-          background,
-          borderRadius,
-          borderSize,
-          borderStyle,
-          shadowStyle,
-          autoHeight,
-          lastwh,
-        }) => {
-          assertExists(xywh);
+      notes.map(async ({ id, xywh, children, background, edgeless }) => {
+        assertExists(xywh);
 
-          const noteId = this.surface.addElement(
-            NOTE,
-            {
-              xywh,
-              background,
-              borderRadius,
-              borderSize,
-              borderStyle,
-              shadowStyle,
-              autoHeight,
-              lastwh,
-            },
-            this._page.root?.id
-          );
-          const note = surface.pickById(noteId) as NoteBlockModel;
-          if (id) oldToNewIdMap.set(id, noteId);
-          assertExists(note);
+        const noteId = this.surface.addElement(
+          NOTE,
+          {
+            xywh,
+            background,
+            edgeless,
+          },
+          this._page.root?.id
+        );
+        const note = surface.pickById(noteId) as NoteBlockModel;
+        if (id) oldToNewIdMap.set(id, noteId);
+        assertExists(note);
 
-          await addSerializedBlocks(this._page, children, note, 0);
-          return noteId;
-        }
-      )
+        await addSerializedBlocks(this._page, children, note, 0);
+        return noteId;
+      })
     );
     return noteIds;
   }
@@ -468,10 +450,10 @@ export class EdgelessClipboard implements Clipboard {
       isNoteBlock(data as unknown as Selectable)
         ? 'notes'
         : isFrameBlock(data as unknown as Selectable)
-        ? 'frames'
-        : isImageBlock(data as unknown as Selectable)
-        ? 'images'
-        : 'elements'
+          ? 'frames'
+          : isImageBlock(data as unknown as Selectable)
+            ? 'images'
+            : 'elements'
     ) as unknown as {
       frames: SerializedBlock[];
       notes?: SerializedBlock[];

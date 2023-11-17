@@ -277,12 +277,7 @@ export type SerializedBlock = {
   bookmarkTitle?: string;
   rotate?: number;
   hidden?: boolean;
-  borderSize?: number;
-  borderStyle?: string;
-  borderRadius?: number;
-  shadowStyle?: string;
-  autoHeight?: boolean;
-  lastwh?: number[];
+  edgeless?: Record<string, Record<string, unknown> | unknown>;
 };
 
 export type EmbedBlockDoubleClickData = {

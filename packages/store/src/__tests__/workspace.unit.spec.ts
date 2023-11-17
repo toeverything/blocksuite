@@ -314,12 +314,14 @@ describe('addBlock', () => {
         'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
-        'prop:autoHeight': true,
-        'prop:borderRadius': 8,
-        'prop:borderSize': 4,
-        'prop:borderStyle': 'solid',
-        'prop:shadowStyle': '--affine-note-shadow-box',
-        'prop:lastwh': [0, 0],
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowStyle: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'sys:children': [],
@@ -495,12 +497,14 @@ describe('deleteBlock', () => {
         'sys:children': ['2', '3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:autoHeight': true,
-        'prop:borderRadius': 8,
-        'prop:borderSize': 4,
-        'prop:borderStyle': 'solid',
-        'prop:shadowStyle': '--affine-note-shadow-box',
-        'prop:lastwh': [0, 0],
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowStyle: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'prop:text': '',
@@ -555,12 +559,14 @@ describe('deleteBlock', () => {
         'sys:children': ['2'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:autoHeight': true,
-        'prop:borderRadius': 8,
-        'prop:borderSize': 4,
-        'prop:borderStyle': 'solid',
-        'prop:shadowStyle': '--affine-note-shadow-box',
-        'prop:lastwh': [0, 0],
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowStyle: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'prop:text': '',
@@ -606,12 +612,14 @@ describe('deleteBlock', () => {
         'sys:children': ['3', '4'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:autoHeight': true,
-        'prop:borderRadius': 8,
-        'prop:borderSize': 4,
-        'prop:borderStyle': 'solid',
-        'prop:shadowStyle': '--affine-note-shadow-box',
-        'prop:lastwh': [0, 0],
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowStyle: '--affine-note-shadow-box',
+          },
+        },
       },
       '3': {
         'prop:text': '',
@@ -656,12 +664,14 @@ describe('deleteBlock', () => {
         'sys:children': ['2', '3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:autoHeight': true,
-        'prop:borderRadius': 8,
-        'prop:borderSize': 4,
-        'prop:borderStyle': 'solid',
-        'prop:shadowStyle': '--affine-note-shadow-box',
-        'prop:lastwh': [0, 0],
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowStyle: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'prop:text': '',
@@ -721,12 +731,14 @@ describe('deleteBlock', () => {
         'sys:children': ['3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:autoHeight': true,
-        'prop:borderRadius': 8,
-        'prop:borderSize': 4,
-        'prop:borderStyle': 'solid',
-        'prop:shadowStyle': '--affine-note-shadow-box',
-        'prop:lastwh': [0, 0],
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowStyle: '--affine-note-shadow-box',
+          },
+        },
       },
       '3': {
         'prop:text': '',
@@ -782,12 +794,14 @@ describe('deleteBlock', () => {
         'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
-        'prop:autoHeight': true,
-        'prop:borderRadius': 8,
-        'prop:borderSize': 4,
-        'prop:borderStyle': 'solid',
-        'prop:shadowStyle': '--affine-note-shadow-box',
-        'prop:lastwh': [0, 0],
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowStyle: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'sys:children': [],
@@ -816,12 +830,14 @@ describe('deleteBlock', () => {
         'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
-        'prop:autoHeight': true,
-        'prop:borderRadius': 8,
-        'prop:borderSize': 4,
-        'prop:borderStyle': 'solid',
-        'prop:shadowStyle': '--affine-note-shadow-box',
-        'prop:lastwh': [0, 0],
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowStyle: '--affine-note-shadow-box',
+          },
+        },
       },
     });
     assert.equal(root.children.length, 1);
@@ -920,20 +936,19 @@ describe('workspace.exportJSX works', () => {
     expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
       <affine:page>
         <affine:note
-          prop:autoHeight={true}
           prop:background="--affine-background-secondary-color"
-          prop:borderRadius={8}
-          prop:borderSize={4}
-          prop:borderStyle="solid"
+          prop:edgeless={
+            {
+              "style": {
+                "borderRadius": 8,
+                "borderSize": 4,
+                "borderStyle": "solid",
+                "shadowStyle": "--affine-note-shadow-box",
+              },
+            }
+          }
           prop:hidden={false}
           prop:index="a0"
-          prop:lastwh={
-            [
-              0,
-              0,
-            ]
-          }
-          prop:shadowStyle="--affine-note-shadow-box"
         >
           <affine:paragraph
             prop:type="text"

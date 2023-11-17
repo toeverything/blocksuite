@@ -511,20 +511,19 @@ test(scoped`automatic identify url text`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:paragraph
       prop:text={

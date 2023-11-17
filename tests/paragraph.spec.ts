@@ -436,20 +436,19 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -490,20 +489,19 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -543,20 +541,19 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -596,20 +593,19 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -650,20 +646,19 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -707,20 +702,19 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -761,20 +755,19 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -824,20 +817,19 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -878,20 +870,19 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -912,20 +903,19 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -960,20 +950,19 @@ test('should delete paragraph block child can hold cursor in correct position', 
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -996,20 +985,19 @@ test('should delete paragraph block child can hold cursor in correct position', 
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -1497,20 +1485,19 @@ test('delete empty text paragraph block should keep children blocks when followi
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:divider />
   <affine:paragraph
@@ -1536,20 +1523,19 @@ test('delete empty text paragraph block should keep children blocks when followi
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:divider />
   <affine:paragraph
@@ -1605,20 +1591,19 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="abc"
@@ -1656,20 +1641,19 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="abcfg"
@@ -1701,20 +1685,19 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="abcfg"
@@ -1741,20 +1724,19 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="abcfg"

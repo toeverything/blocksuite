@@ -19,6 +19,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
+import { onSoftEnter } from '../../../../_common/components/rich-text/keymap/legacy.js';
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
@@ -98,10 +99,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       page.root.childrenUpdated.on(resetNoteResizeObserver)
     );
 
+    // FIXME: @Mirone use blockUpdated slot
     this._disposables.add(
-      this.edgeless.slots.elementUpdated.on(({ id, props }) => {
-        const model = surface.pickById(id);
-        if (isNoteBlock(model) && 'prop:autoHeight' in props) {
+      page.slots.onYEvent.on(({ event }) => {
+        // @ts-ignore
+        if (event.keysChanged?.has?.('collapse')) {
           resetNoteResizeObserver();
         }
       })

@@ -21,7 +21,7 @@
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.5.3",
-    "@toeverything/theme": "^0.7.24",
+    "@toeverything/theme": "^0.7.25",
     "@types/webfontloader": "^1.6.36",
     "buffer": "^6.0.3",
     "date-fns": "^2.30.0",

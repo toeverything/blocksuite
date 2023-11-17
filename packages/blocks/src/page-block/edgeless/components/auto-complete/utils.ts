@@ -292,11 +292,8 @@ export function createEdgelessElement(
       'affine:note',
       {
         background: current.background,
-        borderRadius: current.borderRadius,
-        borderStyle: current.borderStyle,
-        borderSize: current.borderSize,
-        shadowStyle: current.shadowStyle,
         hidden: current.hidden,
+        edgeless: current.edgeless,
       },
       edgeless.model.id
     );

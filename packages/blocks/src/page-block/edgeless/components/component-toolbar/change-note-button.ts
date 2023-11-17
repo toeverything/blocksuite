@@ -73,12 +73,13 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
       .hidden-status:hover {
         background: var(--affine-hover-color);
-        border-radius: 8px;
+        border-radius: 4px;
       }
 
       .hidden-status .unhover {
         display: flex;
         justify-content: flex-start;
+        align-items: center;
         gap: 4px;
       }
 
@@ -93,6 +94,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       .hidden-status:hover .hover {
         display: flex;
         justify-content: flex-start;
+        align-items: center;
         gap: 4px;
       }
 
@@ -111,6 +113,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         display: flex;
         justify-content: center;
         align-items: center;
+      }
+
+      .item:hover {
+        background-color: var(--affine-hover-color);
       }
 
       edgeless-color-panel {
@@ -202,7 +208,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   private _setShadowStyle(shadowStyle: string) {
     this.notes.forEach(note => {
-      this.surface.page.updateBlock(note, { shadowStyle });
+      note.edgeless.style.shadowStyle = shadowStyle;
     });
   }
 
@@ -231,18 +237,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   }
 
   private _setStrokeWidth(borderSize: number) {
-    this.notes.forEach(ele => {
-      this.surface.updateElement(ele.id, {
-        borderSize,
-      });
+    this.notes.forEach(note => {
+      note.edgeless.style.borderSize = borderSize;
     });
   }
 
   private _setStrokeStyle(borderStyle: StrokeStyle) {
-    this.notes.forEach(ele => {
-      this.surface.updateElement(ele.id, {
-        borderStyle,
-      });
+    this.notes.forEach(note => {
+      note.edgeless.style.borderStyle = borderStyle;
     });
   }
 
@@ -268,31 +270,27 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   }
 
   private _setBorderRadius = (size: number) => {
-    this.notes.forEach(element => {
-      this.surface.updateElement(element.id, {
-        borderRadius: size,
-      });
+    this.notes.forEach(note => {
+      note.edgeless.style.borderRadius = size;
     });
   };
 
-  private _setAutoHeight() {
+  private _setCollapse() {
     this.notes.forEach(element => {
-      const autoHeight = element.autoHeight;
+      const { collapse, collapsedHeight } = element.edgeless;
+      // element.edgeless
+
       const bound = Bound.deserialize(element.xywh);
-      if (autoHeight) {
-        if (element.lastwh.every(v => v !== 0)) {
-          bound.w = element.lastwh[0];
-          bound.h = element.lastwh[1];
-        }
-        this.surface.updateElement(element.id, {
-          autoHeight: !element.autoHeight,
-          xywh: bound.serialize(),
-        });
+      if (collapse) {
+        element.edgeless.collapsedHeight = bound.h;
+        element.edgeless.collapse = false;
       } else {
-        const lastwh = [bound.w, bound.h];
+        if (collapsedHeight) {
+          bound.h = collapsedHeight;
+        }
+        element.edgeless.collapse = true;
         this.surface.updateElement(element.id, {
-          autoHeight: !element.autoHeight,
-          lastwh: lastwh,
+          xywh: bound.serialize(),
         });
       }
     });
@@ -343,15 +341,11 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     const note = this.notes[0];
     const enableIndex =
       this.surface.page.awarenessStore.getFlag('enable_note_index');
-    const {
-      hidden,
-      borderSize,
-      borderStyle,
-      borderRadius,
-      shadowStyle,
-      background,
-      autoHeight,
-    } = note;
+    const { hidden, background, edgeless } = note;
+    const { shadowStyle, borderRadius, borderSize, borderStyle } =
+      edgeless.style;
+
+    const { collapse } = edgeless;
 
     return html`
       ${enableIndex
@@ -363,9 +357,17 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               ? html`<div class="unhover">
                     ${HiddenIcon} Hidden In Page Mode
                   </div>
-                  <div class="hover">${NoteIcon} Show In Page Mode</div> `
+                  <div class="hover">${NoteIcon} Show In Page Mode</div>
+                  <affine-tooltip
+                    >Allow this note show in both page and edgeless
+                    mode</affine-tooltip
+                  > `
               : html`<div class="unhover">${NoteIcon} Shown In Page Mode</div>
-                  <div class="hover">${HiddenIcon} Hide In Page Mode</div>`}
+                  <div class="hover">${HiddenIcon} Hide In Page Mode</div>
+                  <affine-tooltip
+                    >By Clicking it, the note will only appear in this board,
+                    but not in page mode</affine-tooltip
+                  > `}
           </div>`
         : nothing}
 
@@ -399,6 +401,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
           .tooltip=${'Shadow Style'}
           .tipPosition=${'bottom'}
           .iconContainerPadding=${0}
+          .hover=${false}
           @click=${() => this._shadowStylePopper?.toggle()}
         >
           ${NoteShadowIcon}${SmallArrowDownIcon}
@@ -417,6 +420,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
           .tooltip=${this._popperShow ? '' : 'Border Style'}
           .tipPosition=${'bottom'}
           .iconContainerPadding=${0}
+          .hover=${false}
           @click=${() => this._borderStylePopper?.toggle()}
         >
           ${LineStyleIcon}${SmallArrowDownIcon}
@@ -435,6 +439,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
           .tooltip=${'Corners'}
           .tipPosition=${'bottom'}
           .iconContainerPadding=${0}
+          .hover=${false}
           @click=${() => this._borderRadiusPopper?.toggle()}
         >
           ${NoteCornerIcon}${SmallArrowDownIcon}
@@ -455,14 +460,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="edgeless-auto-height-button"
-        .tooltip=${autoHeight ? 'Customized Size' : 'Auto Size'}
+        .tooltip=${collapse ? 'Auto Size' : 'Customized Size'}
         .tipPosition=${'bottom'}
         .iconContainerPadding=${2}
         @click=${() => {
-          this._setAutoHeight();
+          this._setCollapse();
         }}
       >
-        ${autoHeight ? ShrinkIcon : ExpandIcon}
+        ${collapse ? ExpandIcon : ShrinkIcon}
       </edgeless-tool-icon-button>
     `;
   }

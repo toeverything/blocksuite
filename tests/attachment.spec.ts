@@ -133,20 +133,19 @@ test('can insert attachment from slash menu', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `  <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:attachment
     prop:name="${FILE_NAME}"
@@ -174,20 +173,19 @@ test('should undo/redo works for attachment', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `  <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:attachment
     prop:name="${FILE_NAME}"
@@ -205,20 +203,19 @@ test('should undo/redo works for attachment', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:type="text"
@@ -231,20 +228,19 @@ test('should undo/redo works for attachment', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `  <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:attachment
     prop:name="${FILE_NAME}"
@@ -313,20 +309,19 @@ test('should turn attachment to image works', async ({ page }) => {
     page,
     `
     <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:image
     prop:caption=""
@@ -344,20 +339,19 @@ test('should turn attachment to image works', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:attachment
     prop:caption=""
@@ -387,20 +381,19 @@ test('should attachment can be deleted', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:type="text"
@@ -429,20 +422,19 @@ test(`support dragging attachment block directly`, async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `  <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:attachment
     prop:name="${FILE_NAME}"
@@ -479,20 +471,19 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:attachment
       prop:name="${FILE_NAME}"
@@ -534,20 +525,19 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:paragraph
       prop:text="111"

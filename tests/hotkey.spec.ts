@@ -143,20 +143,19 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={
@@ -207,20 +206,19 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -244,20 +242,19 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={
@@ -346,20 +343,19 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={
@@ -399,20 +395,19 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={
@@ -456,20 +451,19 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={
@@ -513,20 +507,19 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={
@@ -585,20 +578,19 @@ test('should single line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={
@@ -639,20 +631,19 @@ test('should single line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="hello"
@@ -686,20 +677,19 @@ test('should multiple line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={
@@ -768,20 +758,19 @@ test('should multiple line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -814,20 +803,19 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="hello"
@@ -841,20 +829,19 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="hello"
@@ -869,20 +856,19 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:list
     prop:checked={false}
@@ -899,20 +885,19 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:list
     prop:checked={false}
@@ -928,20 +913,19 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="hello"
@@ -956,20 +940,19 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="hello"
@@ -1013,20 +996,19 @@ test('should cut work single line', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="ho"
@@ -1042,20 +1024,19 @@ test('should cut work single line', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="hello"
@@ -1080,20 +1061,19 @@ test.skip('should cut work multiple line', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="19"
@@ -1109,20 +1089,19 @@ test.skip('should cut work multiple line', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -1467,20 +1446,19 @@ test('Enter key should as expected after setting heading by shortkey', async ({
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="hello"

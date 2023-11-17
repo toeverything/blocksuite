@@ -18,10 +18,6 @@ export class EdgelessToolIconButton extends LitElement {
       white-space: nowrap;
     }
 
-    .icon-container:hover {
-      background: var(--affine-hover-color);
-    }
-
     .icon-container.active-mode-color[active] {
       color: var(--affine-primary-color);
     }
@@ -72,6 +68,9 @@ export class EdgelessToolIconButton extends LitElement {
   @property({ attribute: false })
   iconContainerPadding = 6;
 
+  @property({ attribute: false })
+  hover = true;
+
   constructor() {
     super();
 
@@ -95,6 +94,11 @@ export class EdgelessToolIconButton extends LitElement {
     });
 
     return html`
+      <style>
+        .icon-container:hover {
+          background: ${this.hover ? `var(--affine-hover-color)` : 'inherit'};
+        }
+      </style>
       <div
         class=${classnames}
         style=${iconContainerStyles}

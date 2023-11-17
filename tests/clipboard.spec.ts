@@ -861,20 +861,19 @@ test('cut will delete all content, and copy will reappear content', async ({
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:list
       prop:checked={false}
@@ -922,20 +921,19 @@ test('cut will delete all content, and copy will reappear content', async ({
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:list
       prop:checked={false}
@@ -988,20 +986,19 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:database
       prop:columns="Array [2]"
@@ -1034,20 +1031,19 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:database
       prop:columns="Array [2]"
@@ -1177,20 +1173,19 @@ test(
       /*xml*/ `
 <affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:paragraph
       prop:text="123"
@@ -1212,20 +1207,19 @@ test(
       /*xml*/ `
 <affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:paragraph
       prop:text="123"
@@ -1332,20 +1326,19 @@ test(scoped`auto identify url`, async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:paragraph
       prop:text={

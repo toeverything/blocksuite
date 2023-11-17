@@ -41,15 +41,17 @@ export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
   props: () => ({
     xywh: `[0,0,${NOTE_WIDTH},95]`,
-    lastwh: [0, 0],
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
     hidden: false,
-    borderRadius: 8,
-    borderSize: 4,
-    borderStyle: 'solid',
-    shadowStyle: NOTE_SHADOWS[1],
-    autoHeight: true,
+    edgeless: {
+      style: {
+        borderRadius: 8,
+        borderSize: 4,
+        borderStyle: 'solid',
+        shadowStyle: NOTE_SHADOWS[1],
+      },
+    },
   }),
   metadata: {
     version: 1,
@@ -74,22 +76,28 @@ export const NoteBlockSchema = defineBlockSchema({
   },
 });
 
-type Props = {
+type NoteProps = {
   xywh: SerializedXYWH;
-  lastwh: Array<number>;
   background: string;
   index: string;
   hidden: boolean;
-  borderSize: number;
-  borderStyle: StrokeStyle;
-  borderRadius: number;
-  shadowStyle: string;
-  autoHeight: boolean;
+  edgeless: NoteEdgelessProps;
+};
+
+type NoteEdgelessProps = {
+  style: {
+    borderRadius: number;
+    borderSize: number;
+    borderStyle: StrokeStyle;
+    shadowStyle: string;
+  };
+  collapse: boolean;
+  collapsedHeight: number;
 };
 
 @EdgelessSelectableMixin
 export class NoteBlockModel
-  extends BaseBlockModel<Props>
+  extends BaseBlockModel<NoteProps>
   implements IEdgelessElement
 {
   override flavour!: EdgelessBlockType.NOTE;

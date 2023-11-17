@@ -207,20 +207,19 @@ test('should format quick bar be able to format text', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -265,20 +264,19 @@ test('should format quick bar be able to format text', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -332,20 +330,19 @@ test.fixme(
       page,
       `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -380,20 +377,19 @@ test.fixme(
       page,
       `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={
@@ -432,20 +428,19 @@ test.fixme(
       page,
       `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -490,20 +485,19 @@ test('should format quick bar be able to format text when select multiple line',
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={
@@ -548,20 +542,19 @@ test('should format quick bar be able to format text when select multiple line',
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -601,20 +594,19 @@ test('should format quick bar be able to link text', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -651,20 +643,19 @@ test('should format quick bar be able to link text', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -702,20 +693,19 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -739,20 +729,19 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:list
     prop:checked={false}
@@ -779,20 +768,19 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -1001,20 +989,19 @@ test('should format quick bar work in single block selection', async ({
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -1086,20 +1073,19 @@ test('should format quick bar work in multiple block selection', async ({
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={
@@ -1173,20 +1159,19 @@ test('should format quick bar with block selection works when update block type'
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:list
     prop:checked={false}
@@ -1216,20 +1201,19 @@ test('should format quick bar with block selection works when update block type'
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="123"
@@ -1275,20 +1259,19 @@ test('should format quick bar show after convert to code block', async ({
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:code
     prop:language="Plain Text"

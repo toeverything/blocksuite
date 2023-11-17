@@ -69,14 +69,14 @@ export class NoteResizeObserver {
 
       const cachedElement = this._cachedElements.get(blockId);
       if (cachedElement) {
-        if (container === cachedElement && model.autoHeight) {
+        if (container === cachedElement && !model.edgeless.collapse) {
           return;
         }
         this._observer.unobserve(cachedElement);
         this._cachedElements.delete(blockId);
       }
 
-      if (!container || !model.autoHeight) return;
+      if (!container || model.edgeless.collapse) return;
       this._lastRects.set(blockId, container.getBoundingClientRect());
       this._observer.observe(container);
       this._cachedElements.set(blockId, container);

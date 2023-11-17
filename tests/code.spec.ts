@@ -94,20 +94,19 @@ test('use markdown syntax can create code block', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="aaa"
@@ -138,20 +137,19 @@ test('use markdown syntax can create code block', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:code
     prop:language="Plain Text"
@@ -389,20 +387,19 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:code
       prop:language="Plain Text"
@@ -448,20 +445,19 @@ test('use code block copy menu of code block copy whole code block', async ({
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:code
       prop:language="javascript"

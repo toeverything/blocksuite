@@ -66,7 +66,8 @@ export function createButtonPopper(
   popperElement: HTMLElement,
   stateUpdated: (state: { display: 'show' | 'hidden' }) => void = () => {
     /** DEFAULT EMPTY FUNCTION */
-  }
+  },
+  clickAway = true
 ) {
   function compute() {
     computePosition(reference, popperElement, {
@@ -110,14 +111,17 @@ export function createButtonPopper(
     }
   };
 
-  const clickAway = listenClickAway(reference, () => hide());
+  let _clickAway: Disposable | undefined;
+  if (clickAway) {
+    _clickAway = listenClickAway(reference, () => hide());
+  }
 
   return {
     show,
     hide,
     toggle,
     dispose: () => {
-      clickAway.dispose();
+      _clickAway?.dispose();
     },
   };
 }

@@ -65,7 +65,6 @@ export type SelectedRect = {
   height: number;
   borderWidth: number;
   borderStyle: string;
-  borderRadius: number;
   rotate: number;
 };
 
@@ -304,7 +303,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     height: 0,
     borderWidth: 0,
     borderStyle: 'solid',
-    borderRadius: 0,
     left: 0,
     top: 0,
     rotate: 0,
@@ -417,18 +415,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       if (isNoteBlock(element)) {
         const curBound = Bound.deserialize(element.xywh);
         const props: Partial<NoteBlockModel> = {};
-        if (curBound.h !== bound.h && element.autoHeight) {
-          props.autoHeight = false;
+        if (curBound.h !== bound.h && !element.edgeless.collapse) {
+          element.edgeless.collapse = true;
         }
 
         bound.w = clamp(bound.w, NOTE_MIN_WIDTH, Infinity);
         bound.h = clamp(bound.h, NOTE_MIN_HEIGHT, Infinity);
         props.xywh = bound.serialize();
-        if ('autoHeight' in props) {
-          this.page.updateBlock(element, props);
-        } else {
-          edgeless.updateElementInLocal(element.id, props);
-        }
+        edgeless.updateElementInLocal(element.id, props);
       } else if (isFrameBlock(element)) {
         edgeless.updateElementInLocal(element.id, {
           xywh: bound.serialize(),
@@ -586,7 +580,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       height: height + padding * 2,
       borderWidth: selection.editing ? 2 : 1,
       borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
-      borderRadius: isSingleNote ? 8 * zoom : 0,
       left: left - padding,
       top: top - padding,
       rotate,
@@ -782,7 +775,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           height: `${_selectedRect.height}px`,
           borderWidth: `${_selectedRect.borderWidth}px`,
           borderStyle: _selectedRect.borderStyle,
-          borderRadius: `${_selectedRect.borderRadius}px`,
           transform: `translate(${_selectedRect.left}px, ${_selectedRect.top}px) rotate(${_selectedRect.rotate}deg)`,
         })}
         disabled="true"

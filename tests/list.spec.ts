@@ -207,22 +207,21 @@ test('nested list blocks', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:note
-    prop:autoHeight={true}
-    prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
-    prop:hidden={false}
-    prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
     }
-    prop:shadowStyle="--affine-note-shadow-box"
-  >
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
     <affine:list
       prop:checked={false}
       prop:collapsed={false}
@@ -255,20 +254,19 @@ test('nested list blocks', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:list
       prop:checked={false}
@@ -333,22 +331,21 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:note
-    prop:autoHeight={true}
-    prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
-    prop:hidden={false}
-    prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
     }
-    prop:shadowStyle="--affine-note-shadow-box"
-  >
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
     <affine:paragraph
       prop:text="text1"
       prop:type="text"
@@ -366,22 +363,21 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:note
-    prop:autoHeight={true}
-    prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
-    prop:hidden={false}
-    prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
     }
-    prop:shadowStyle="--affine-note-shadow-box"
-  >
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
     <affine:paragraph
       prop:text="text1"
       prop:type="text"
@@ -401,22 +397,21 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:note
-    prop:autoHeight={true}
-    prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
-    prop:hidden={false}
-    prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
     }
-    prop:shadowStyle="--affine-note-shadow-box"
-  >
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
     <affine:paragraph
       prop:text="text1"
       prop:type="text"
@@ -446,20 +441,19 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="text1"
@@ -480,20 +474,19 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     page,
     `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text="text1"
@@ -741,20 +734,19 @@ test.describe('toggle list', () => {
       page,
       `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:list
     prop:checked={false}
@@ -789,20 +781,19 @@ test.describe('toggle list', () => {
       page,
       `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:list
     prop:checked={false}

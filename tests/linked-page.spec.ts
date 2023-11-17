@@ -110,22 +110,21 @@ test.describe('multiple page', () => {
 <affine:page
   prop:title="title0"
 >
-  <affine:note
-    prop:autoHeight={true}
-    prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
-    prop:hidden={false}
-    prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
     }
-    prop:shadowStyle="--affine-note-shadow-box"
-  >
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
     <affine:paragraph
       prop:text="page0"
       prop:type="text"
@@ -150,20 +149,19 @@ test.describe('multiple page', () => {
 >
   <affine:surface />
   <affine:note
-    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
-    }
-    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:paragraph
       prop:text="page1"
@@ -535,22 +533,21 @@ test.describe('reference node', () => {
   prop:title="page1"
 >
   <affine:surface />
-  <affine:note
-    prop:autoHeight={true}
-    prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
-    prop:hidden={false}
-    prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
     }
-    prop:shadowStyle="--affine-note-shadow-box"
-  >
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
     <affine:paragraph
       prop:type="text"
     />
@@ -569,22 +566,21 @@ test.describe('reference node', () => {
 <affine:page
   prop:title="page0"
 >
-  <affine:note
-    prop:autoHeight={true}
-    prop:background="--affine-background-secondary-color"
-    prop:borderRadius={8}
-    prop:borderSize={4}
-    prop:borderStyle="solid"
-    prop:hidden={false}
-    prop:index="a0"
-    prop:lastwh={
-      Array [
-        0,
-        0,
-      ]
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
     }
-    prop:shadowStyle="--affine-note-shadow-box"
-  >
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
     <affine:paragraph
       prop:text={
         <>
@@ -793,20 +789,19 @@ test.describe.skip('linked page with clipboard', () => {
       page,
       `
 <affine:note
-  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
-  prop:borderRadius={8}
-  prop:borderSize={4}
-  prop:borderStyle="solid"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowStyle": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
-  prop:lastwh={
-    Array [
-      0,
-      0,
-    ]
-  }
-  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:text={

@@ -29,7 +29,6 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
-import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
 import { mountShapeTextEditor } from '../../utils/text.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 import { EdgelessAutoCompletePanel } from './auto-complete-panel.js';
@@ -256,7 +255,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     } else {
       const model = page.getBlockById(id);
       assertExists(model);
-      bound.h = NOTE_INIT_HEIGHT;
       page.updateBlock(model, { xywh: bound.serialize() });
       const [x, y] = surface.viewport.toViewCoord(
         bound.center[0],
@@ -317,7 +315,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
           break;
         }
         case Direction.Top: {
-          bound.y -= NOTE_INIT_HEIGHT + MAIN_GAP;
+          bound.y -= bound.h + MAIN_GAP;
           break;
         }
       }

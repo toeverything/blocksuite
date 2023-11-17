@@ -9,6 +9,10 @@ const MAX_SIZE = 200;
 @customElement('edgeless-size-panel')
 export class EdgelessSizePanel extends LitElement {
   static override styles = css`
+    :host {
+      box-shadow: var(--affine-menu-shadow);
+    }
+
     .size-container {
       display: flex;
       align-items: center;
