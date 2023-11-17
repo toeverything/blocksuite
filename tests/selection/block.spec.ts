@@ -361,21 +361,21 @@ test('should unindent multi-selection block', async ({ page }) => {
     page,
     `
 <affine:page>
-<affine:note
-  prop:background="--affine-background-secondary-color"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 8,
-        "borderSize": 4,
-        "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
-      },
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
     }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
+    prop:hidden={false}
+    prop:index="a0"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
