@@ -128,10 +128,16 @@ export class SelectionManager {
     const map = new Map<number, BaseSelection[]>();
     this._store.getStates().forEach((state, id) => {
       if (id === this._store.awareness.clientID) return;
-
-      const selections = state.selection.map(json => {
-        return this._jsonToSelection(json);
-      });
+      const selections = state.selection
+        .map(json => {
+          try {
+            return this._jsonToSelection(json);
+          } catch (error) {
+            console.error('Parse remote selection failed:', id, json, error);
+            return null;
+          }
+        })
+        .filter((sel): sel is BaseSelection => !!sel);
       map.set(id, selections);
     });
     return map;
