@@ -382,7 +382,7 @@ test('create link with paste', async ({ page }) => {
   );
 });
 
-test.only('convert link to card', async ({ page }) => {
+test('convert link to card', async ({ page }) => {
   const linkText = 'alinkTexta';
   const link = 'http://example.com';
   await enterPlaygroundRoom(page);

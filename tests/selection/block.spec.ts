@@ -1307,7 +1307,7 @@ test('should be cleared when dragging block card from BlockHub', async ({
   await expect(page.locator('.selected,affine-block-selection')).toHaveCount(0);
 });
 
-test.only('click bottom of page and if the last is embed block, editor should insert a new editable block', async ({
+test('click bottom of page and if the last is embed block, editor should insert a new editable block', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
