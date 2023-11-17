@@ -1,6 +1,13 @@
 import type { Y } from '@blocksuite/store';
 
-import type { IBound, ShapeStyle, StrokeStyle } from '../../consts.js';
+import type {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+  IBound,
+  ShapeStyle,
+  StrokeStyle,
+} from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
 import type { PointLocation } from '../../utils/point-location.js';
@@ -31,12 +38,12 @@ export interface IShape extends ISurfaceElement {
   text?: Y.Text;
   color?: string;
   fontSize?: SHAPE_TEXT_FONT_SIZE;
-  fontFamily?: string;
+  fontFamily?: CanvasTextFontFamily;
+  fontWeight?: CanvasTextFontWeight;
+  fontStyle?: CanvasTextFontStyle;
   textAlign?: 'left' | 'center' | 'right';
   textHorizontalAlign?: 'left' | 'center' | 'right';
   textVerticalAlign?: 'top' | 'center' | 'bottom';
-  bold?: boolean;
-  italic?: boolean;
 }
 
 export interface IShapeLocalRecord extends ISurfaceElementLocalRecord {

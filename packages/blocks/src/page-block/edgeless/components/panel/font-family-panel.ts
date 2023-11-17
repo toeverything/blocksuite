@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { CanvasTextFont } from '../../../../surface-block/consts.js';
+import { CanvasTextFontFamily } from '../../../../surface-block/consts.js';
 
 @customElement('edgeless-font-family-panel')
 export class EdgelessFontFamilyPanel extends LitElement {
@@ -50,7 +50,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value = CanvasTextFont.Inter;
+  value = CanvasTextFontFamily.Inter;
 
   @property({ attribute: false })
   onSelect?: (value: EdgelessFontFamilyPanel['value']) => void;
@@ -67,11 +67,11 @@ export class EdgelessFontFamilyPanel extends LitElement {
       <div class="font-family-container">
         <edgeless-tool-icon-button
           class="inter"
-          .active=${this.value === CanvasTextFont.Inter}
+          .active=${this.value === CanvasTextFontFamily.Inter}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect(CanvasTextFont.Inter);
+            this._onSelect(CanvasTextFontFamily.Inter);
           }}
         >
           <div class="font-family-button">Inter</div>
@@ -79,11 +79,11 @@ export class EdgelessFontFamilyPanel extends LitElement {
 
         <edgeless-tool-icon-button
           class="kalam"
-          .active=${this.value === CanvasTextFont.Kalam}
+          .active=${this.value === CanvasTextFontFamily.Kalam}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect(CanvasTextFont.Kalam);
+            this._onSelect(CanvasTextFontFamily.Kalam);
           }}
         >
           <div class="font-family-button">Kalam</div>
@@ -91,11 +91,11 @@ export class EdgelessFontFamilyPanel extends LitElement {
 
         <edgeless-tool-icon-button
           class="satoshi"
-          .active=${this.value === CanvasTextFont.Satoshi}
+          .active=${this.value === CanvasTextFontFamily.Satoshi}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect(CanvasTextFont.Satoshi);
+            this._onSelect(CanvasTextFontFamily.Satoshi);
           }}
         >
           <div class="font-family-button">Satoshi</div>
@@ -103,11 +103,11 @@ export class EdgelessFontFamilyPanel extends LitElement {
 
         <edgeless-tool-icon-button
           class="poppins"
-          .active=${this.value === CanvasTextFont.Poppins}
+          .active=${this.value === CanvasTextFontFamily.Poppins}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect(CanvasTextFont.Poppins);
+            this._onSelect(CanvasTextFontFamily.Poppins);
           }}
         >
           <div class="font-family-button">Poppins</div>
@@ -115,11 +115,11 @@ export class EdgelessFontFamilyPanel extends LitElement {
 
         <edgeless-tool-icon-button
           class="lora"
-          .active=${this.value === CanvasTextFont.Lora}
+          .active=${this.value === CanvasTextFontFamily.Lora}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect(CanvasTextFont.Lora);
+            this._onSelect(CanvasTextFontFamily.Lora);
           }}
         >
           <div class="font-family-button">Lora</div>
@@ -127,11 +127,11 @@ export class EdgelessFontFamilyPanel extends LitElement {
 
         <edgeless-tool-icon-button
           class="bebas-neue"
-          .active=${this.value === CanvasTextFont.BebasNeue}
+          .active=${this.value === CanvasTextFontFamily.BebasNeue}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect(CanvasTextFont.BebasNeue);
+            this._onSelect(CanvasTextFontFamily.BebasNeue);
           }}
         >
           <div class="font-family-button">Bebas Neue</div>
@@ -139,11 +139,11 @@ export class EdgelessFontFamilyPanel extends LitElement {
 
         <edgeless-tool-icon-button
           class="orelega-one"
-          .active=${this.value === CanvasTextFont.OrelegaOne}
+          .active=${this.value === CanvasTextFontFamily.OrelegaOne}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect(CanvasTextFont.OrelegaOne);
+            this._onSelect(CanvasTextFontFamily.OrelegaOne);
           }}
         >
           <div class="font-family-button">Orelega One</div>

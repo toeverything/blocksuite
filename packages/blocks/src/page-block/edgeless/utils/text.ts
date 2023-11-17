@@ -3,7 +3,11 @@ import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
 import type { FrameBlockModel, GroupElement } from '../../../index.js';
-import { CanvasTextFont } from '../../../surface-block/consts.js';
+import {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+} from '../../../surface-block/consts.js';
 import { ShapeElement, ShapeStyle } from '../../../surface-block/index.js';
 import {
   Bound,
@@ -72,8 +76,8 @@ export function mountShapeTextEditor(
       color,
       fontFamily:
         shapeElement.shapeStyle === ShapeStyle.General
-          ? CanvasTextFont.Inter
-          : CanvasTextFont.Kalam,
+          ? CanvasTextFontFamily.Inter
+          : CanvasTextFontFamily.Kalam,
     });
   }
   const updatedElement = edgeless.surface.pickById(shapeElement.id);
@@ -125,7 +129,7 @@ export function addText(
   edgeless: EdgelessPageBlockComponent,
   event: PointerEventState,
   color: string = GET_DEFAULT_TEXT_COLOR(),
-  fontFamily: CanvasTextFont = CanvasTextFont.Inter
+  fontFamily: CanvasTextFontFamily = CanvasTextFontFamily.Inter
 ) {
   const [x, y] = edgeless.surface.viewport.toModelCoord(event.x, event.y);
   const selected = edgeless.surface.pickTop(x, y);
@@ -140,10 +144,10 @@ export function addText(
       text: new Workspace.Y.Text(),
       textAlign: 'left',
       fontFamily,
+      fontWeight: CanvasTextFontWeight.Regular,
+      fontStyle: CanvasTextFontStyle.Normal,
       fontSize: 24,
       color: color,
-      bold: false,
-      italic: false,
     });
     edgeless.page.captureSync();
     const textElement = edgeless.surface.pickById(id);

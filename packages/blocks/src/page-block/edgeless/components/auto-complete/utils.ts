@@ -3,7 +3,11 @@ import { Workspace } from '@blocksuite/store';
 
 import { getBlockClipboardInfo } from '../../../../_legacy/clipboard/index.js';
 import type { NoteBlockModel } from '../../../../models.js';
-import { CanvasTextFont } from '../../../../surface-block/consts.js';
+import {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+} from '../../../../surface-block/consts.js';
 import {
   Bound,
   type Connection,
@@ -335,10 +339,10 @@ export async function createTextElement(
     text: new Workspace.Y.Text(),
     textAlign: 'left',
     fontSize: 24,
-    fontFamily: CanvasTextFont.Inter,
+    fontFamily: CanvasTextFontFamily.Inter,
     color: GET_DEFAULT_TEXT_COLOR(),
-    bold: false,
-    italic: false,
+    fontWeight: CanvasTextFontWeight.Regular,
+    fontStyle: CanvasTextFontStyle.Normal,
   });
   const group = surface.getGroupParent(current);
   if (group instanceof GroupElement) {

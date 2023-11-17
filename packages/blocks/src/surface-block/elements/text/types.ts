@@ -1,5 +1,10 @@
 import type { Y } from '@blocksuite/store';
 
+import type {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+} from '../../consts.js';
 import type { PhasorElementType } from '../edgeless-element.js';
 import {
   type ISurfaceElement,
@@ -12,10 +17,10 @@ export interface IText extends ISurfaceElement {
   text: Y.Text;
   color: string;
   fontSize: number;
-  fontFamily: string;
+  fontFamily: CanvasTextFontFamily;
+  fontWeight: CanvasTextFontWeight;
+  fontStyle: CanvasTextFontStyle;
   textAlign: 'left' | 'center' | 'right';
-  bold: boolean;
-  italic: boolean;
   hasMaxWidth?: boolean;
 }
 

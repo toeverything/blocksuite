@@ -36,21 +36,18 @@ export function getLineHeight(fontFamily: string, fontSize: number) {
 }
 
 export function getFontString({
+  fontStyle,
+  fontWeight,
   fontSize,
   fontFamily,
-  lineHeight,
-  bold = false,
-  italic = false,
 }: {
-  bold?: boolean;
-  italic?: boolean;
+  fontStyle: string;
+  fontWeight: string;
   fontSize: number;
-  lineHeight: string;
   fontFamily: string;
 }): string {
-  return `${italic ? 'italic' : ''} ${
-    bold ? 'bold' : ''
-  } ${fontSize}px/${lineHeight} ${fontFamily}`.trim();
+  const lineHeight = getLineHeight(fontFamily, fontSize);
+  return `${fontStyle} ${fontWeight} ${fontSize}px/${lineHeight}px ${fontFamily}`.trim();
 }
 
 export function normalizeText(text: string): string {
@@ -344,14 +341,13 @@ export function normalizeTextBound(
   if (!text.text) return bound;
 
   const yText = text.text;
-  const { fontFamily, fontSize } = text;
+  const { fontStyle, fontWeight, fontSize, fontFamily } = text;
   const lineHeightPx = getLineHeight(fontFamily, fontSize);
   const font = getFontString({
-    fontSize: fontSize,
-    lineHeight: `${lineHeightPx}px`,
-    fontFamily: fontFamily,
-    bold: text.bold,
-    italic: text.italic,
+    fontStyle,
+    fontWeight,
+    fontSize,
+    fontFamily,
   });
 
   let lines: ITextDelta[][] = [];

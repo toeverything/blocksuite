@@ -1,6 +1,10 @@
 import { Workspace } from '@blocksuite/store';
 
-import { CanvasTextFont } from '../../consts.js';
+import {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+} from '../../consts.js';
 import {
   type IElementDefaultProps,
   PhasorElementType,
@@ -15,8 +19,8 @@ export const TextElementDefaultProps: IElementDefaultProps<'text'> = {
   text: new Workspace.Y.Text(),
   color: '#000000',
   fontSize: 16,
-  fontFamily: CanvasTextFont.Inter,
+  fontFamily: CanvasTextFontFamily.Inter,
+  fontWeight: CanvasTextFontWeight.Regular,
+  fontStyle: CanvasTextFontStyle.Normal,
   textAlign: 'center',
-  bold: false,
-  italic: false,
 };

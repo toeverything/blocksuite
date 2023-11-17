@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import { CanvasTextFontStyle, CanvasTextFontWeight } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import { Bound } from '../../utils/bound.js';
 import { linePolygonIntersects } from '../../utils/math-utils.js';
@@ -164,7 +165,8 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     const font = getFontString({
       fontSize,
       fontFamily,
-      lineHeight: `${lineHeight}px`,
+      fontWeight: CanvasTextFontWeight.Regular,
+      fontStyle: CanvasTextFontStyle.Normal,
     });
     const lineWidth = getLineWidth(text, font);
 

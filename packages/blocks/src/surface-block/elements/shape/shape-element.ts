@@ -1,4 +1,9 @@
-import { CanvasTextFont, DEFAULT_ROUGHNESS } from '../../consts.js';
+import {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+  DEFAULT_ROUGHNESS,
+} from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
 import { isPointIn } from '../../utils/math-utils.js';
@@ -93,8 +98,22 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
   get fontFamily() {
     const fontFamily =
       (this.yMap.get('fontFamily') as IShape['fontFamily']) ??
-      CanvasTextFont.Inter;
+      CanvasTextFontFamily.Inter;
     return fontFamily;
+  }
+
+  get fontWeight() {
+    return (
+      (this.yMap.get('fontWeight') as IShape['fontWeight']) ??
+      CanvasTextFontWeight.Regular
+    );
+  }
+
+  get fontStyle() {
+    return (
+      (this.yMap.get('fontStyle') as IShape['fontStyle']) ??
+      CanvasTextFontStyle.Normal
+    );
   }
 
   get textAlign() {
@@ -117,16 +136,6 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     return textVerticalAlign;
   }
 
-  get bold() {
-    const isTextBold = (this.yMap.get('bold') as IShape['bold']) ?? false;
-    return isTextBold;
-  }
-
-  get italic() {
-    const isTextItalic = (this.yMap.get('italic') as IShape['italic']) ?? false;
-    return isTextItalic;
-  }
-
   get wrapTextDeltas() {
     const { text, font, w } = this;
     if (!text) return [];
@@ -142,14 +151,12 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
   }
 
   get font() {
-    const { bold, italic, fontSize, fontFamily } = this;
-    const lineHeight = getLineHeight(fontFamily, fontSize);
+    const { fontStyle, fontWeight, fontSize, fontFamily } = this;
     return getFontString({
-      bold,
-      italic,
+      fontStyle,
+      fontWeight,
       fontSize,
-      lineHeight: `${lineHeight}px`,
-      fontFamily: fontFamily,
+      fontFamily,
     });
   }
 

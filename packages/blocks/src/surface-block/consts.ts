@@ -34,7 +34,7 @@ export interface IModelCoord {
   y: number;
 }
 
-export const enum CanvasTextFont {
+export const enum CanvasTextFontFamily {
   Inter = 'Inter',
   Kalam = 'Kalam',
   Satoshi = 'Satoshi',
@@ -42,4 +42,15 @@ export const enum CanvasTextFont {
   Lora = 'Lora',
   BebasNeue = 'BebasNeue',
   OrelegaOne = 'OrelegaOne',
+}
+
+export const enum CanvasTextFontWeight {
+  Light = '300',
+  Regular = '400',
+  SemiBold = '600',
+}
+
+export const enum CanvasTextFontStyle {
+  Normal = 'normal',
+  Italic = 'italic',
 }

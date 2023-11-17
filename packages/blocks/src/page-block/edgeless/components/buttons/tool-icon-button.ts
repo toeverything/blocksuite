@@ -37,6 +37,7 @@ export class EdgelessToolIconButton extends LitElement {
     .icon-container[disabled] {
       pointer-events: none;
       cursor: not-allowed;
+      color: var(--affine-text-disable-color);
     }
 
     .icon-container[coming] {

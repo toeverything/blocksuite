@@ -42,16 +42,16 @@ export class TextElement extends SurfaceElement<IText> {
     return this.yMap.get('fontFamily') as IText['fontFamily'];
   }
 
+  get fontWeight() {
+    return this.yMap.get('fontWeight') as IText['fontWeight'];
+  }
+
+  get fontStyle() {
+    return this.yMap.get('fontStyle') as IText['fontStyle'];
+  }
+
   get textAlign() {
     return this.yMap.get('textAlign') as IText['textAlign'];
-  }
-
-  get bold() {
-    return this.yMap.get('bold') as IText['bold'];
-  }
-
-  get italic() {
-    return this.yMap.get('italic') as IText['italic'];
   }
 
   get hasMaxWidth() {
@@ -62,13 +62,11 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   get font() {
-    const { bold, italic, fontSize, fontFamily } = this;
-    const lineHeight = getLineHeight(fontFamily, fontSize);
+    const { fontStyle, fontWeight, fontSize, fontFamily } = this;
     return getFontString({
-      bold,
-      italic,
+      fontStyle,
+      fontWeight,
       fontSize,
-      lineHeight: `${lineHeight}px`,
       fontFamily,
     });
   }

@@ -391,7 +391,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const { zoom, translateX, translateY } = this.edgeless.surface.viewport;
-    const { fontFamily, fontSize, bold, textAlign, rotate } = this.element;
+    const { fontFamily, fontSize, textAlign, rotate, fontWeight } =
+      this.element;
     const transformOrigin = this.getTransformOrigin(textAlign);
     const offset = this.getTransformOffset(textAlign);
     const paddingOffset = this.getPaddingOffset(textAlign);
@@ -424,7 +425,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
         maxWidth: hasMaxWidth ? `${w}px` : 'none',
         fontSize: `${fontSize}px`,
-        fontWeight: bold ? 'bold' : 'normal',
+        fontWeight,
         transform: transformOperation.join(' '),
         transformOrigin,
         color: isCssVariable(this.element.color)
