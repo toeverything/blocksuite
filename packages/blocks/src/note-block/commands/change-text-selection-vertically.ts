@@ -1,20 +1,20 @@
 import type { Command } from '@blocksuite/block-std';
 
 import {
-  applyTextSelection,
+  applyCarets,
   getCurrentCaretPos,
   getCurrentTextSelectionCarets,
   horizontalGetNextCaret,
 } from '../utils.js';
 
 export const changeTextSelectionVertically: Command<
-  'targetBlock',
+  'focusBlock',
   never,
   { upward: boolean }
 > = (ctx, next) => {
-  const { upward, targetBlock } = ctx;
+  const { upward, focusBlock } = ctx;
   const currentTextSelectionCarets = getCurrentTextSelectionCarets();
-  if (!currentTextSelectionCarets || !targetBlock) {
+  if (!currentTextSelectionCarets || !focusBlock) {
     return;
   }
   const { startCaret, endCaret: prevEndCaret } = currentTextSelectionCarets;
@@ -31,7 +31,7 @@ export const changeTextSelectionVertically: Command<
         ? cursorRect.top - cursorRect.height / 2
         : cursorRect.bottom + cursorRect.height / 2,
     },
-    targetBlock,
+    focusBlock,
     upward,
     cursorRect.height / 2
   );
@@ -44,7 +44,7 @@ export const changeTextSelectionVertically: Command<
     return;
   }
 
-  const result = applyTextSelection(startCaret, nextEndCaret);
+  const result = applyCarets(startCaret, nextEndCaret);
   if (!result) {
     return;
   }

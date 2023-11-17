@@ -1,19 +1,19 @@
 import type { Command } from '@blocksuite/block-std';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import { applyTextSelection, getCurrentTextSelectionCarets } from '../utils.js';
+import { applyCarets, getCurrentTextSelectionCarets } from '../utils.js';
 
 export const changeTextSelectionToBlockStartEnd: Command<
-  'targetBlock',
+  'focusBlock',
   never,
   { tail: boolean }
 > = (ctx, next) => {
-  const { tail, targetBlock } = ctx;
-  if (!targetBlock) {
+  const { tail, focusBlock } = ctx;
+  if (!focusBlock) {
     return;
   }
 
-  const texts = getTextNodesFromElement(targetBlock);
+  const texts = getTextNodesFromElement(focusBlock);
 
   const text = tail ? texts[texts.length - 1] : texts[0];
   if (!text) {
@@ -39,7 +39,7 @@ export const changeTextSelectionToBlockStartEnd: Command<
     return;
   }
 
-  const result = applyTextSelection(startCaret, nextEndCaret);
+  const result = applyCarets(startCaret, nextEndCaret);
   if (!result) {
     return;
   }

@@ -7,13 +7,13 @@ import {
 } from '../utils.js';
 
 export const moveCursorVertically: Command<
-  'targetBlock',
+  'focusBlock',
   never,
   { forward: boolean }
 > = (ctx, next) => {
-  const { forward, targetBlock } = ctx;
+  const { forward, focusBlock } = ctx;
   const cursorRect = getCurrentCaretPos(true);
-  if (!cursorRect || !targetBlock) {
+  if (!cursorRect || !focusBlock) {
     return;
   }
 
@@ -24,7 +24,7 @@ export const moveCursorVertically: Command<
         ? cursorRect.top - cursorRect.height / 2
         : cursorRect.bottom + cursorRect.height / 2,
     },
-    targetBlock,
+    focusBlock,
     forward,
     cursorRect.height / 2
   );

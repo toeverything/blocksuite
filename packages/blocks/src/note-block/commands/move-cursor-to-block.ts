@@ -5,16 +5,16 @@ import { autoScroll } from '../../page-block/text-selection/utils.js';
 import { moveCursor } from '../utils.js';
 
 export const moveCursorToBlock: Command<
-  'targetBlock',
+  'focusBlock',
   never,
   { tail: boolean }
 > = (ctx, next) => {
-  const { tail, targetBlock } = ctx;
-  if (!targetBlock) {
+  const { tail, focusBlock } = ctx;
+  if (!focusBlock) {
     return;
   }
 
-  const texts = getTextNodesFromElement(targetBlock);
+  const texts = getTextNodesFromElement(focusBlock);
   const text = tail ? texts[texts.length - 1] : texts[0];
   if (!text) {
     return;
@@ -34,7 +34,7 @@ export const moveCursorToBlock: Command<
     return;
   }
   const range = selection.getRangeAt(0);
-  const viewport = targetBlock.closest('affine-doc-page')?.viewportElement;
+  const viewport = focusBlock.closest('affine-doc-page')?.viewportElement;
   if (viewport) {
     autoScroll(viewport, range.getBoundingClientRect().top);
   }
