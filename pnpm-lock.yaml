@@ -175,8 +175,8 @@ importers:
         specifier: ^1.5.3
         version: 1.5.3
       '@toeverything/theme':
-        specifier: ^0.7.24
-        version: 0.7.24
+        specifier: ^0.7.25
+        version: 0.7.25
       '@types/webfontloader':
         specifier: ^1.6.36
         version: 1.6.36
@@ -279,8 +279,8 @@ importers:
         specifier: workspace:*
         version: link:../store
       '@toeverything/theme':
-        specifier: ^0.7.24
-        version: 0.7.24
+        specifier: ^0.7.25
+        version: 0.7.25
       lit:
         specifier: ^3.0.2
         version: 3.0.2
@@ -1767,12 +1767,8 @@ packages:
     resolution: {integrity: sha512-Gfkvwk9o9kE9r9XNBmJRfV8zONvXThnm1tcuojL04Uy5uRyqg93DC83lDebl0rocZCfKSjUv+fWYtMQmEDJldg==}
     dev: false
 
-  /@toeverything/theme@0.7.21:
-    resolution: {integrity: sha512-tCk7WXMrLp2qSVb/dXmbUsd68pvCWX1sT7N6iMmSJuF6AopqdeAoHJHmNYy93P7WgX4dX7saPxXCui3Gdq7QkQ==}
-    dev: false
-
-  /@toeverything/theme@0.7.24:
-    resolution: {integrity: sha512-DbQv2/I5MvdES0EaATmP1aU5llX8PfEJEamzKN3Ahiu2FoYOXiE99xkfKPD0c7x/XTiLYQsIv1EsOqwzXR6gPA==}
+  /@toeverything/theme@0.7.25:
+    resolution: {integrity: sha512-FpRzgscPvxiS6wY0Ym0alkzUGCojJ8oshxloAm+xcDXA3RWbrWsRMiWk7rt1f1/IZMgDVF7ud/4cZZsGYh9IjA==}
     dev: false
 
   /@toeverything/y-indexeddb@0.10.0-canary.9(yjs@13.6.8):
