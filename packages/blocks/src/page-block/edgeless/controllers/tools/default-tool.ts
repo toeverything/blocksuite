@@ -379,11 +379,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     } else if (isImageBlock(selected)) {
       const imageService = _edgeless.getService(EdgelessBlockType.IMAGE);
       const json = imageService.block2Json(selected, []);
-      const id = this._surface.addElement(EdgelessBlockType.IMAGE, {
-        xywh: json.xywh,
-        sourceId: json.sourceId,
-        rotate: json.rotate,
-      });
+      const id = this._surface.addElement(
+        EdgelessBlockType.IMAGE,
+        {
+          xywh: json.xywh,
+          sourceId: json.sourceId,
+          rotate: json.rotate,
+        },
+        this._surface.model
+      );
       return _surface.pickById(id);
     } else {
       const id = _surface.addElement(

@@ -12,14 +12,7 @@ import {
   onModelElementUpdated,
   updateBlockElementType,
 } from '../page-block/index.js';
-import {
-  ensureBlockInContainer,
-  getBlockSelectionBySide,
-  pathToBlock,
-  selectBetween,
-  setBlockSelection,
-  setTextSelectionBySide,
-} from './utils.js';
+import { ensureBlockInContainer } from './utils.js';
 
 export class KeymapController implements ReactiveController {
   private _anchorSel: BlockSelection | null = null;
@@ -85,70 +78,81 @@ export class KeymapController implements ReactiveController {
       })
       .try(cmd => [
         // text selection
-        cmd
-          .getTextSelection()
-          .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
-            const textSelection = ctx.currentTextSelection;
-            assertExists(textSelection);
-            const end = textSelection.end;
-            return next({
-              currentSelectionPath: end.path,
-              targetBlock: pathToBlock(this.host, end.path),
-            });
-          })
-          .try(cmd => [
-            // text selection - case 1: move cursor down within the same block
-            cmd.moveCursorVertically({ forward: false }),
-
-            // text selection - case 2: move cursor down to the next block
-            cmd
-              .getNextBlock({
-                filter: block => !!block.model.text,
-              })
-              .inline<'targetBlock'>((ctx, next) =>
-                next({ targetBlock: ctx.nextBlock })
-              )
-              .moveCursorVertically({ forward: false }),
-
-            // text selection - case 3: move cursor to the next block start
-            cmd
-              .getNextBlock({
-                filter: block => !!block.model.text,
-              })
-              .inline<'targetBlock'>((ctx, next) =>
-                next({ targetBlock: ctx.nextBlock })
-              )
-              .moveCursorToBlock({ tail: false }),
-            // text selection - case 4: move cursor to the current block end
-            cmd.moveCursorToBlock({ tail: true }),
-          ]),
+        this._onTextDown(cmd),
 
         // block selection - select the next block
-        cmd
-          .getBlockSelections()
-          .inline<'currentSelectionPath'>((ctx, next) => {
-            const currentBlockSelections = ctx.currentBlockSelections;
-            assertExists(currentBlockSelections);
-            const blockSelection = currentBlockSelections.at(-1);
-            if (!blockSelection) {
-              return;
-            }
-            return next({ currentSelectionPath: blockSelection.path });
-          })
-          .getNextBlock()
-          .inline((ctx, next) => {
-            const { nextBlock } = ctx;
-            assertExists(nextBlock);
-
-            if (!ensureBlockInContainer(nextBlock, this.host)) {
-              return;
-            }
-
-            setBlockSelection(nextBlock);
-            return next();
-          }),
+        this._onBlockDown(cmd),
       ])
       .run();
+  };
+
+  private _onTextDown = (cmd: BlockSuite.CommandChain) => {
+    return cmd
+      .getTextSelection()
+      .inline<'currentSelectionPath' | 'focusBlock'>((ctx, next) => {
+        const textSelection = ctx.currentTextSelection;
+        assertExists(textSelection);
+        const end = textSelection.end;
+        return next({
+          currentSelectionPath: end.path,
+          focusBlock: ctx.std.view.viewFromPath('block', end.path),
+        });
+      })
+      .try(cmd => [
+        // text selection - case 1: move cursor down within the same block
+        cmd.moveCursorVertically({ forward: false }),
+
+        // text selection - case 2: move cursor down to the next block
+        cmd
+          .getNextBlock({
+            filter: block => !!block.model.text,
+          })
+          .inline<'focusBlock'>((ctx, next) =>
+            next({ focusBlock: ctx.nextBlock })
+          )
+          .moveCursorVertically({ forward: false }),
+
+        // text selection - case 3: move cursor to the next block start
+        cmd
+          .getNextBlock({
+            filter: block => !!block.model.text,
+          })
+          .inline<'focusBlock'>((ctx, next) =>
+            next({ focusBlock: ctx.nextBlock })
+          )
+          .moveCursorToBlock({ tail: false }),
+
+        // text selection - case 4: move cursor to the current block end
+        cmd.moveCursorToBlock({ tail: true }),
+      ]);
+  };
+
+  private _onBlockDown = (cmd: BlockSuite.CommandChain) => {
+    return cmd
+      .getBlockSelections()
+      .inline<'currentSelectionPath'>((ctx, next) => {
+        const currentBlockSelections = ctx.currentBlockSelections;
+        assertExists(currentBlockSelections);
+        const blockSelection = currentBlockSelections.at(-1);
+        if (!blockSelection) {
+          return;
+        }
+        return next({ currentSelectionPath: blockSelection.path });
+      })
+      .getNextBlock()
+      .inline<'focusBlock'>((ctx, next) => {
+        const { nextBlock } = ctx;
+        assertExists(nextBlock);
+
+        if (!ensureBlockInContainer(nextBlock, this.host)) {
+          return;
+        }
+
+        return next({
+          focusBlock: nextBlock,
+        });
+      })
+      .selectBlock();
   };
 
   private _onArrowUp = () => {
@@ -160,68 +164,81 @@ export class KeymapController implements ReactiveController {
       })
       .try(cmd => [
         // text selection
-        cmd
-          .getTextSelection()
-          .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
-            const textSelection = ctx.currentTextSelection;
-            assertExists(textSelection);
-            const end = textSelection.end;
-            return next({
-              currentSelectionPath: end.path,
-              targetBlock: pathToBlock(this.host, end.path),
-            });
-          })
-          .try(cmd => [
-            // text selection - case 1: move cursor up within the same block
-            cmd.moveCursorVertically({ forward: true }),
-            // text selection - case 2: move cursor up to the previous block
-            cmd
-              .getPrevBlock({
-                filter: block => !!block.model.text,
-              })
-              .inline<'targetBlock'>((ctx, next) =>
-                next({ targetBlock: ctx.prevBlock })
-              )
-              .moveCursorVertically({ forward: true }),
-            // text selection - case 3: move cursor to the previous block end
-            cmd
-              .getPrevBlock({
-                filter: block => !!block.model.text,
-              })
-              .inline<'targetBlock'>((ctx, next) =>
-                next({ targetBlock: ctx.prevBlock })
-              )
-              .moveCursorToBlock({ tail: true }),
-            // text selection - case 4: move cursor to the current block start
-            cmd.moveCursorToBlock({ tail: false }),
-          ]),
+        this._onTextUp(cmd),
 
         // block selection - select the previous block
-        cmd
-          .getBlockSelections()
-          .inline<'currentSelectionPath'>(async (ctx, next) => {
-            const currentBlockSelections = ctx.currentBlockSelections;
-            assertExists(currentBlockSelections);
-            const blockSelection = currentBlockSelections.at(0);
-            if (!blockSelection) {
-              return;
-            }
-            return next({ currentSelectionPath: blockSelection.path });
-          })
-          .getPrevBlock()
-          .inline((ctx, next) => {
-            const { prevBlock } = ctx;
-            assertExists(prevBlock);
-
-            if (!ensureBlockInContainer(prevBlock, this.host)) {
-              return;
-            }
-
-            setBlockSelection(prevBlock);
-            return next();
-          }),
+        this._onBlockUp(cmd),
       ])
       .run();
+  };
+
+  private _onTextUp = (cmd: BlockSuite.CommandChain) => {
+    return cmd
+      .getTextSelection()
+      .inline<'currentSelectionPath' | 'focusBlock'>((ctx, next) => {
+        const textSelection = ctx.currentTextSelection;
+        assertExists(textSelection);
+        const end = textSelection.end;
+        return next({
+          currentSelectionPath: end.path,
+          focusBlock: ctx.std.view.viewFromPath('block', end.path),
+        });
+      })
+      .try(cmd => [
+        // text selection - case 1: move cursor up within the same block
+        cmd.moveCursorVertically({ forward: true }),
+
+        // text selection - case 2: move cursor up to the previous block
+        cmd
+          .getPrevBlock({
+            filter: block => !!block.model.text,
+          })
+          .inline<'focusBlock'>((ctx, next) =>
+            next({ focusBlock: ctx.prevBlock })
+          )
+          .moveCursorVertically({ forward: true }),
+
+        // text selection - case 3: move cursor to the previous block end
+        cmd
+          .getPrevBlock({
+            filter: block => !!block.model.text,
+          })
+          .inline<'focusBlock'>((ctx, next) =>
+            next({ focusBlock: ctx.prevBlock })
+          )
+          .moveCursorToBlock({ tail: true }),
+
+        // text selection - case 4: move cursor to the current block start
+        cmd.moveCursorToBlock({ tail: false }),
+      ]);
+  };
+
+  private _onBlockUp = (cmd: BlockSuite.CommandChain) => {
+    return cmd
+      .getBlockSelections()
+      .inline<'currentSelectionPath'>(async (ctx, next) => {
+        const currentBlockSelections = ctx.currentBlockSelections;
+        assertExists(currentBlockSelections);
+        const blockSelection = currentBlockSelections.at(0);
+        if (!blockSelection) {
+          return;
+        }
+        return next({ currentSelectionPath: blockSelection.path });
+      })
+      .getPrevBlock()
+      .inline((ctx, next) => {
+        const { prevBlock } = ctx;
+        assertExists(prevBlock);
+
+        if (!ensureBlockInContainer(prevBlock, this.host)) {
+          return;
+        }
+
+        return next({
+          focusBlock: prevBlock,
+        });
+      })
+      .selectBlock();
   };
 
   private _onArrowLeft = () => {
@@ -241,11 +258,9 @@ export class KeymapController implements ReactiveController {
         filter: block => !!block.model.text,
       })
       .inline((ctx, next) => {
-        const prevBlock = ctx.prevBlock;
-        assertExists(prevBlock);
-        setTextSelectionBySide(prevBlock, true);
-        return next();
+        return next({ focusBlock: ctx.prevBlock });
       })
+      .selectBlockTextBySide({ tail: true })
       .run();
   };
 
@@ -267,201 +282,236 @@ export class KeymapController implements ReactiveController {
         filter: block => !!block.model.text,
       })
       .inline((ctx, next) => {
-        const nextBlock = ctx.nextBlock;
-        assertExists(nextBlock);
-        setTextSelectionBySide(nextBlock, false);
-        return next();
+        return next({ focusBlock: ctx.nextBlock });
       })
+      .selectBlockTextBySide({ tail: false })
       .run();
   };
 
   private _onShiftArrowDown = () => {
-    let anchorBlock: BlockElement | null = null;
     return this._std.command
       .pipe()
       .try(cmd => [
         // text selection
-        cmd
-          .getTextSelection()
-          .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
-            const textSelection = ctx.currentTextSelection;
-            assertExists(textSelection);
-            const end = textSelection.end;
-            this._focusBlock = pathToBlock(this.host, end.path);
-            return next({
-              currentSelectionPath: end.path,
-              targetBlock: pathToBlock(this.host, end.path),
-            });
-          })
-          .try(cmd => [
-            // text selection - case 1: change selection downwards within the same block
-            cmd.changeTextSelectionVertically({ upward: false }),
-            // text selection - case 2: change selection downwards to the next block
-            cmd
-              .getNextBlock({
-                filter: block => !!block.model.text,
-              })
-              .inline((ctx, next) => {
-                return next({ targetBlock: ctx.nextBlock });
-              })
-              .changeTextSelectionVertically({ upward: false }),
-            // text selection - case 3: change selection downwards to the next block start
-            cmd
-              .getNextBlock({
-                filter: block => !!block.model.text,
-              })
-              .inline((ctx, next) => {
-                return next({ targetBlock: ctx.nextBlock });
-              })
-              .changeTextSelectionToBlockStartEnd({ tail: false }),
-            // text selection - case 4: change selection to the current block end
-            cmd.changeTextSelectionToBlockStartEnd({ tail: true }),
-          ]),
+        this._onTextShiftDown(cmd),
 
-        //block selection
-        cmd
-          .getBlockSelections()
-          .inline<'currentSelectionPath'>((ctx, next) => {
-            const blockSelections = ctx.currentBlockSelections;
-            assertExists(blockSelections);
-            if (!this._anchorSel) {
-              this._anchorSel = blockSelections.at(-1) ?? null;
-            }
-            if (!this._anchorSel) {
-              return;
-            }
-            anchorBlock = pathToBlock(this.host, this._anchorSel.path);
-            if (!anchorBlock) {
-              return;
-            }
-            return next({
-              currentSelectionPath: this._focusBlock?.path ?? anchorBlock?.path,
-            });
-          })
-          .getNextBlock({})
-          .inline((ctx, next) => {
-            assertExists(ctx.nextBlock);
-            this._focusBlock = ctx.nextBlock;
-            if (!ensureBlockInContainer(this._focusBlock, this.host)) {
-              return;
-            }
-            if (!anchorBlock) {
-              return;
-            }
-            selectBetween(anchorBlock, this._focusBlock, true);
-            return next();
-          }),
+        // block selection
+        this._onBlockShiftDown(cmd),
       ])
       .run();
   };
 
+  private _onTextShiftDown = (cmd: BlockSuite.CommandChain) => {
+    return cmd
+      .getTextSelection()
+      .inline<'currentSelectionPath' | 'focusBlock'>((ctx, next) => {
+        const textSelection = ctx.currentTextSelection;
+        assertExists(textSelection);
+        const end = textSelection.end;
+        return next({
+          currentSelectionPath: end.path,
+          focusBlock: ctx.std.view.viewFromPath('block', end.path),
+        });
+      })
+      .try(cmd => [
+        // text selection - case 1: change selection downwards within the same block
+        cmd.changeTextSelectionVertically({ upward: false }),
+
+        // text selection - case 2: change selection downwards to the next block
+        cmd
+          .getNextBlock({
+            filter: block => !!block.model.text,
+          })
+          .inline((ctx, next) => {
+            return next({ focusBlock: ctx.nextBlock });
+          })
+          .changeTextSelectionVertically({ upward: false }),
+
+        // text selection - case 3: change selection downwards to the next block start
+        cmd
+          .getNextBlock({
+            filter: block => !!block.model.text,
+          })
+          .inline((ctx, next) => {
+            return next({ focusBlock: ctx.nextBlock });
+          })
+          .changeTextSelectionToBlockStartEnd({ tail: false }),
+
+        // text selection - case 4: change selection to the current block end
+        cmd.changeTextSelectionToBlockStartEnd({ tail: true }),
+      ])
+      .inline((ctx, next) => {
+        const { focusBlock } = ctx;
+        this._focusBlock = focusBlock ?? null;
+        return next();
+      });
+  };
+
+  private _onBlockShiftDown = (cmd: BlockSuite.CommandChain) => {
+    return cmd
+      .getBlockSelections()
+      .inline<'currentSelectionPath' | 'anchorBlock'>((ctx, next) => {
+        const blockSelections = ctx.currentBlockSelections;
+        assertExists(blockSelections);
+        if (!this._anchorSel) {
+          this._anchorSel = blockSelections.at(-1) ?? null;
+        }
+        if (!this._anchorSel) {
+          return;
+        }
+
+        const anchorBlock = ctx.std.view.viewFromPath(
+          'block',
+          this._anchorSel.path
+        );
+        if (!anchorBlock) {
+          return;
+        }
+        return next({
+          anchorBlock,
+          currentSelectionPath: this._focusBlock?.path ?? anchorBlock?.path,
+        });
+      })
+      .getNextBlock({})
+      .inline<'focusBlock'>((ctx, next) => {
+        assertExists(ctx.nextBlock);
+        this._focusBlock = ctx.nextBlock;
+        if (!ensureBlockInContainer(this._focusBlock, this.host)) {
+          return;
+        }
+        return next({
+          focusBlock: this._focusBlock,
+        });
+      })
+      .selectBlocksBetween({ tail: true });
+  };
+
   private _onShiftArrowUp = () => {
-    let anchorBlock: BlockElement | null = null;
     return this._std.command
       .pipe()
       .try(cmd => [
         // text selection
-        cmd
-          .getTextSelection()
-          .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
-            const textSelection = ctx.currentTextSelection;
-            assertExists(textSelection);
-            const end = textSelection.end;
-            this._focusBlock = pathToBlock(this.host, end.path);
-            return next({
-              currentSelectionPath: end.path,
-              targetBlock: pathToBlock(this.host, end.path),
-            });
-          })
-          .try(cmd => [
-            // text selection - case 1: change selection upwards within the same block
-            cmd.changeTextSelectionVertically({ upward: true }),
-            // text selection - case 2: change selection upwards to the previous block
-            cmd
-              .getPrevBlock({
-                filter: block => !!block.model.text,
-              })
-              .inline((ctx, next) => {
-                return next({ targetBlock: ctx.prevBlock });
-              })
-              .changeTextSelectionVertically({ upward: true }),
-            // text selection - case 3: change selection upwards to the previous block end
-            cmd
-              .getPrevBlock({
-                filter: block => !!block.model.text,
-              })
-              .inline((ctx, next) => {
-                return next({ targetBlock: ctx.prevBlock });
-              })
-              .changeTextSelectionToBlockStartEnd({ tail: true }),
-            // text selection - case 4: change selection to the current block start
-            cmd.changeTextSelectionToBlockStartEnd({ tail: false }),
-          ]),
+        this._onTextShiftUp(cmd),
 
-        //block selection
-        cmd
-          .getBlockSelections()
-          .inline<'currentSelectionPath'>((ctx, next) => {
-            const blockSelections = ctx.currentBlockSelections;
-            assertExists(blockSelections);
-            if (!this._anchorSel) {
-              this._anchorSel = blockSelections.at(0) ?? null;
-            }
-            if (!this._anchorSel) {
-              return;
-            }
-            anchorBlock = pathToBlock(this.host, this._anchorSel.path);
-            if (!anchorBlock) {
-              return;
-            }
-            return next({
-              currentSelectionPath: this._focusBlock?.path ?? anchorBlock?.path,
-            });
-          })
-          .getPrevBlock({})
-          .inline((ctx, next) => {
-            assertExists(ctx.prevBlock);
-            this._focusBlock = ctx.prevBlock;
-            if (!ensureBlockInContainer(this._focusBlock, this.host)) {
-              return;
-            }
-            if (!anchorBlock) {
-              return;
-            }
-            selectBetween(anchorBlock, this._focusBlock, false);
-            return next();
-          }),
+        // block selection
+        this._onBlockShiftUp(cmd),
       ])
       .run();
+  };
+
+  private _onTextShiftUp = (cmd: BlockSuite.CommandChain) => {
+    return cmd
+      .getTextSelection()
+      .inline<'currentSelectionPath' | 'focusBlock'>((ctx, next) => {
+        const textSelection = ctx.currentTextSelection;
+        assertExists(textSelection);
+        const end = textSelection.end;
+        return next({
+          currentSelectionPath: end.path,
+          focusBlock: ctx.std.view.viewFromPath('block', end.path),
+        });
+      })
+      .try(cmd => [
+        // text selection - case 1: change selection upwards within the same block
+        cmd.changeTextSelectionVertically({ upward: true }),
+        // text selection - case 2: change selection upwards to the previous block
+        cmd
+          .getPrevBlock({
+            filter: block => !!block.model.text,
+          })
+          .inline((ctx, next) => {
+            return next({ focusBlock: ctx.prevBlock });
+          })
+          .changeTextSelectionVertically({ upward: true }),
+        // text selection - case 3: change selection upwards to the previous block end
+        cmd
+          .getPrevBlock({
+            filter: block => !!block.model.text,
+          })
+          .inline((ctx, next) => {
+            return next({ focusBlock: ctx.prevBlock });
+          })
+          .changeTextSelectionToBlockStartEnd({ tail: true }),
+        // text selection - case 4: change selection to the current block start
+        cmd.changeTextSelectionToBlockStartEnd({ tail: false }),
+      ])
+      .inline((ctx, next) => {
+        const { focusBlock } = ctx;
+        this._focusBlock = focusBlock ?? null;
+        return next();
+      });
+  };
+
+  private _onBlockShiftUp = (cmd: BlockSuite.CommandChain) => {
+    return cmd
+      .getBlockSelections()
+      .inline<'currentSelectionPath' | 'anchorBlock'>((ctx, next) => {
+        const blockSelections = ctx.currentBlockSelections;
+        assertExists(blockSelections);
+        if (!this._anchorSel) {
+          this._anchorSel = blockSelections.at(0) ?? null;
+        }
+        if (!this._anchorSel) {
+          return;
+        }
+        const anchorBlock = ctx.std.view.viewFromPath(
+          'block',
+          this._anchorSel.path
+        );
+        if (!anchorBlock) {
+          return;
+        }
+        return next({
+          anchorBlock,
+          currentSelectionPath: this._focusBlock?.path ?? anchorBlock?.path,
+        });
+      })
+      .getPrevBlock({})
+      .inline((ctx, next) => {
+        assertExists(ctx.prevBlock);
+        this._focusBlock = ctx.prevBlock;
+        if (!ensureBlockInContainer(this._focusBlock, this.host)) {
+          return;
+        }
+        return next({
+          focusBlock: this._focusBlock,
+        });
+      })
+      .selectBlocksBetween({ tail: false });
   };
 
   private _onShiftArrowRight = () => {
     return this._std.command
       .pipe()
       .getTextSelection()
-      .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
+      .inline<'currentSelectionPath' | 'focusBlock'>((ctx, next) => {
         const textSelection = ctx.currentTextSelection;
         assertExists(textSelection);
         const end = textSelection.end;
-        this._focusBlock = pathToBlock(this.host, end.path);
         return next({
           currentSelectionPath: end.path,
-          targetBlock: pathToBlock(this.host, end.path),
+          focusBlock: ctx.std.view.viewFromPath('block', end.path),
         });
       })
       .try(cmd => [
         // text selection - case 1: change selection towards right within the same block
         cmd.changeTextSelectionSideways({ left: false }),
+
         // text selection - case 2: change selection towards right to the next block
         cmd
           .getNextBlock({
             filter: block => !!block.model.text,
           })
-          .inline<'targetBlock'>((ctx, next) => {
-            return next({ targetBlock: ctx.nextBlock });
+          .inline<'focusBlock'>((ctx, next) => {
+            return next({ focusBlock: ctx.nextBlock });
           })
           .changeTextSelectionSidewaysToBlock({ left: false }),
       ])
+      .inline((ctx, next) => {
+        const { focusBlock } = ctx;
+        this._focusBlock = focusBlock ?? null;
+        return next();
+      })
       .run();
   };
 
@@ -469,14 +519,13 @@ export class KeymapController implements ReactiveController {
     return this._std.command
       .pipe()
       .getTextSelection()
-      .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
+      .inline<'currentSelectionPath' | 'focusBlock'>((ctx, next) => {
         const textSelection = ctx.currentTextSelection;
         assertExists(textSelection);
         const end = textSelection.end;
-        this._focusBlock = pathToBlock(this.host, end.path);
         return next({
           currentSelectionPath: end.path,
-          targetBlock: pathToBlock(this.host, end.path),
+          focusBlock: ctx.std.view.viewFromPath('block', end.path),
         });
       })
       .try(cmd => [
@@ -487,61 +536,84 @@ export class KeymapController implements ReactiveController {
           .getPrevBlock({
             filter: block => !!block.model.text,
           })
-          .inline<'targetBlock'>((ctx, next) => {
-            return next({ targetBlock: ctx.prevBlock });
+          .inline<'focusBlock'>((ctx, next) => {
+            return next({ focusBlock: ctx.prevBlock });
           })
           .changeTextSelectionSidewaysToBlock({ left: true }),
       ])
+      .inline((ctx, next) => {
+        const { focusBlock } = ctx;
+        this._focusBlock = focusBlock ?? null;
+        return next();
+      })
       .run();
   };
 
   private _onEsc = () => {
-    const blockSelection = getBlockSelectionBySide(this.host, true);
-    if (!blockSelection) {
-      return;
-    }
-    const selection = this.host.root.selection;
-    selection.update(selList => {
-      return selList.filter(sel => !sel.is('block'));
-    });
-    return true;
+    return this._std.command
+      .pipe()
+      .getBlockSelections()
+      .inline((ctx, next) => {
+        const blockSelection = ctx.currentBlockSelections?.at(-1);
+        if (!blockSelection) {
+          return;
+        }
+
+        ctx.std.selection.update(selList => {
+          return selList.filter(sel => !sel.is('block'));
+        });
+
+        return next();
+      })
+      .run();
   };
 
   private _onEnter = () => {
-    const blockSelection = getBlockSelectionBySide(this.host, true);
-    if (!blockSelection) {
-      return;
-    }
-    const element = this._std.view.viewFromPath('block', blockSelection.path);
-    if (!element) {
-      return;
-    }
+    return this._std.command
+      .pipe()
+      .getBlockSelections()
+      .inline((ctx, next) => {
+        const blockSelection = ctx.currentBlockSelections?.at(-1);
+        if (!blockSelection) {
+          return;
+        }
 
-    const page = this._std.page;
-    const { model } = element;
-    const parent = page.getParent(model);
-    if (!parent) {
-      return;
-    }
+        const { view, page, selection } = ctx.std;
 
-    const index = parent.children.indexOf(model) ?? undefined;
+        const element = view.viewFromPath('block', blockSelection.path);
+        if (!element) {
+          return;
+        }
 
-    const blockId = page.addBlock('affine:paragraph', {}, parent, index + 1);
+        const { model } = element;
+        const parent = page.getParent(model);
+        if (!parent) {
+          return;
+        }
 
-    const selection = element.root.selection;
-    const sel = selection.getInstance('text', {
-      from: {
-        path: element.parentPath.concat(blockId),
-        index: 0,
-        length: 0,
-      },
-      to: null,
-    });
-    selection.update(selList => {
-      return selList.filter(sel => !sel.is('block')).concat(sel);
-    });
+        const index = parent.children.indexOf(model) ?? undefined;
 
-    return true;
+        const blockId = page.addBlock(
+          'affine:paragraph',
+          {},
+          parent,
+          index + 1
+        );
+
+        const sel = selection.getInstance('text', {
+          from: {
+            path: element.parentPath.concat(blockId),
+            index: 0,
+            length: 0,
+          },
+          to: null,
+        });
+
+        selection.setGroup('note', [sel]);
+
+        return next();
+      })
+      .run();
   };
 
   private _onSelectAll: UIEventHandler = ctx => {
