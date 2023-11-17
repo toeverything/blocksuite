@@ -6,7 +6,7 @@ import { Slice } from '@blocksuite/store';
 import { matchFlavours } from '../../../_common/utils/index.js';
 
 export const copySelectedModelsCommand: Command<
-  'selectedModels',
+  'selectedModels' | 'onCopy',
   never,
   { event: ClipboardEvent }
 > = (ctx, next) => {
@@ -42,12 +42,18 @@ export const copySelectedModelsCommand: Command<
   models.forEach(traverse);
 
   const slice = Slice.fromModels(ctx.std.page, models);
-  ctx.std.clipboard.copy(ctx.event, slice);
+
+  ctx.std.clipboard.copy(ctx.event, slice).then(() => {
+    ctx.onCopy?.();
+  });
   return next();
 };
 
 declare global {
   namespace BlockSuite {
+    interface CommandData {
+      onCopy?: () => void;
+    }
     interface Commands {
       copySelectedModels: typeof copySelectedModelsCommand;
     }
