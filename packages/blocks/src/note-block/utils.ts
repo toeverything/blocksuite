@@ -1,21 +1,8 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
-import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import {
-  EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
-  EDGELESS_BLOCK_CHILD_PADDING,
-} from '../_common/consts.js';
-import { almostEqual } from '../_common/utils/math.js';
-import { isEdgelessPage } from '../_common/utils/query.js';
-import {
-  autoScroll,
-  caretFromPoint,
-} from '../page-block/text-selection/utils.js';
-import { getClosestPageBlockComponent } from '../page-block/utils/query.js';
-import { deserializeXYWH } from '../surface-block/index.js';
-import type { NoteBlockComponent } from './note-block.js';
+import { caretFromPoint } from '../page-block/text-selection/utils.js';
 
 type Caret = { node: Node; offset: number };
 
@@ -385,239 +372,7 @@ export function moveCursor(caret: Caret) {
   return true;
 }
 
-export function moveCursorVertically(
-  targetBlockElement: BlockElement,
-  forward: boolean
-) {
-  const cursorRect = getCurrentCaretPos(true);
-  if (!cursorRect) {
-    return false;
-  }
-
-  const nextCaret = horizontalGetNextCaret(
-    {
-      x: cursorRect.x + 1,
-      y: forward
-        ? cursorRect.top - cursorRect.height / 2
-        : cursorRect.bottom + cursorRect.height / 2,
-    },
-    targetBlockElement,
-    forward,
-    cursorRect.height / 2
-  );
-
-  if (!nextCaret) {
-    return;
-  }
-
-  return moveCursor(nextCaret);
-}
-
-export function moveCursorToBlock(
-  targetBlockElement: BlockElement,
-  tail: boolean
-) {
-  const texts = getTextNodesFromElement(targetBlockElement);
-  const text = tail ? texts[texts.length - 1] : texts[0];
-  if (!text) {
-    return false;
-  }
-  const nextCaret = {
-    node: text,
-    offset: tail ? text.textContent?.length ?? 0 : 0,
-  };
-
-  const success = moveCursor(nextCaret);
-  if (!success) {
-    return false;
-  }
-
-  const selection = document.getSelection();
-  if (!selection) {
-    return;
-  }
-  const range = selection.getRangeAt(0);
-  const viewport =
-    targetBlockElement.closest('affine-doc-page')?.viewportElement;
-  if (viewport) {
-    autoScroll(viewport, range.getBoundingClientRect().top);
-  }
-
-  return true;
-}
-
-export function tryUpdateNoteSize(noteElement: NoteBlockComponent) {
-  requestAnimationFrame(() => {
-    const page = noteElement.page;
-    if (!page.root) return;
-
-    let zoom = 1;
-    const pageElement = getClosestPageBlockComponent(noteElement);
-    if (pageElement && isEdgelessPage(pageElement)) {
-      zoom = pageElement.surface.viewport.zoom;
-    }
-
-    const bound = noteElement.getBoundingClientRect();
-    const [x, y, w, h] = deserializeXYWH(noteElement.model.xywh);
-    const newModelHeight =
-      bound.height / zoom +
-      EDGELESS_BLOCK_CHILD_PADDING * 2 +
-      EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2;
-    if (!almostEqual(newModelHeight, h)) {
-      page.updateBlock(noteElement.model, {
-        xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
-      });
-    }
-  });
-}
-
-export function changeTextSelectionVertically(
-  targetBlockElement: BlockElement,
-  upward: boolean
-): boolean {
-  const currentTextSelectionCarets = getCurrentTextSelectionCarets();
-  if (!currentTextSelectionCarets) {
-    return false;
-  }
-  const { startCaret, endCaret: prevEndCaret } = currentTextSelectionCarets;
-
-  const cursorRect = getCurrentCaretPos(true);
-  if (!cursorRect) {
-    return false;
-  }
-
-  const nextEndCaret = horizontalGetNextCaret(
-    {
-      x: cursorRect.x + 1,
-      y: upward
-        ? cursorRect.top - cursorRect.height / 2
-        : cursorRect.bottom + cursorRect.height / 2,
-    },
-    targetBlockElement,
-    upward,
-    cursorRect.height / 2
-  );
-
-  if (
-    !nextEndCaret ||
-    (prevEndCaret.node === nextEndCaret.node &&
-      prevEndCaret.offset === nextEndCaret.offset)
-  ) {
-    return false;
-  }
-
-  return applyTextSelection(startCaret, nextEndCaret);
-}
-
-export function changeTextSelectionToBlockStartEnd(
-  targetBlockElement: BlockElement,
-  tail: boolean
-): boolean {
-  const texts = getTextNodesFromElement(targetBlockElement);
-  const text = tail ? texts[texts.length - 1] : texts[0];
-  if (!text) {
-    return false;
-  }
-
-  const nextEndCaret = {
-    node: text,
-    offset: tail ? text.textContent?.length ?? 0 : 0,
-  };
-
-  const currentTextSelectionCarets = getCurrentTextSelectionCarets();
-  if (!currentTextSelectionCarets) {
-    return false;
-  }
-
-  const { startCaret, endCaret } = currentTextSelectionCarets;
-
-  if (
-    endCaret.node === nextEndCaret.node &&
-    endCaret.offset === nextEndCaret.offset
-  ) {
-    return false;
-  }
-
-  return applyTextSelection(startCaret, nextEndCaret);
-}
-
-export function changeTextSelectionSideways(
-  targetBlockElement: BlockElement,
-  left: boolean
-): boolean {
-  const currentTextSelectionCarets = getCurrentTextSelectionCarets();
-  if (!currentTextSelectionCarets) {
-    return false;
-  }
-  const { startCaret, endCaret: prevEndCaret } = currentTextSelectionCarets;
-
-  const texts = getTextNodesFromElement(targetBlockElement);
-
-  const currentTextIndex = texts.findIndex(text => text === prevEndCaret.node);
-
-  if (currentTextIndex === -1) {
-    return false;
-  }
-
-  let nextEndCaret = {
-    node: prevEndCaret.node,
-    offset: left ? prevEndCaret.offset - 1 : prevEndCaret.offset + 1,
-  };
-
-  if (
-    nextEndCaret.offset >= 0 &&
-    nextEndCaret.offset <= texts[currentTextIndex].length
-  ) {
-    return applyTextSelection(startCaret, nextEndCaret);
-  }
-
-  const nextTextIndex = currentTextIndex + (left ? -1 : 1);
-
-  if (nextTextIndex < 0 || nextTextIndex >= texts.length) {
-    return false;
-  }
-
-  nextEndCaret = {
-    node: texts[nextTextIndex],
-    offset: left ? texts[nextTextIndex].length - 1 : 1,
-  };
-
-  return applyTextSelection(startCaret, nextEndCaret);
-}
-
-export function changeTextSelectionSidewaysToBlock(
-  targetBlockElement: BlockElement,
-  left: boolean
-): boolean {
-  const currentTextSelectionCarets = getCurrentTextSelectionCarets();
-  if (!currentTextSelectionCarets) {
-    return false;
-  }
-  const { startCaret } = currentTextSelectionCarets;
-
-  const texts = getTextNodesFromElement(targetBlockElement);
-  if (texts.length === 0) {
-    return false;
-  }
-
-  const nextTextIndex = left ? texts.length - 1 : 0;
-
-  const nextEndCaret = {
-    node: texts[nextTextIndex],
-    offset: left ? texts[nextTextIndex].length - 1 : 1,
-  };
-
-  if (
-    nextEndCaret.offset >= 0 &&
-    nextEndCaret.offset <= texts[nextTextIndex].length
-  ) {
-    return applyTextSelection(startCaret, nextEndCaret);
-  }
-
-  return applyTextSelection(startCaret, nextEndCaret);
-}
-
-function getCurrentTextSelectionCarets():
+export function getCurrentTextSelectionCarets():
   | { startCaret: Caret; endCaret: Caret }
   | undefined {
   const selection = document.getSelection();
@@ -642,7 +397,10 @@ function getCurrentTextSelectionCarets():
   return { startCaret, endCaret };
 }
 
-function applyTextSelection(startCaret: Caret, endCaret: Caret): boolean {
+export function applyTextSelection(
+  startCaret: Caret,
+  endCaret: Caret
+): boolean {
   const selection = document.getSelection();
   if (!selection) {
     return false;
