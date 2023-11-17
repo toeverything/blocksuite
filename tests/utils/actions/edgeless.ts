@@ -728,7 +728,8 @@ type Action =
   | 'releaseFromGroup'
   | 'createFrameOnMoreOption'
   | 'duplicate'
-  | 'renameGroup';
+  | 'renameGroup'
+  | 'autoSize';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -899,6 +900,13 @@ export async function triggerComponentToolbarAction(
     case 'releaseFromGroup': {
       const button = locatorComponentToolbar(page).locator(
         'edgeless-release-from-group-button'
+      );
+      await button.click();
+      break;
+    }
+    case 'autoSize': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-change-note-button .edgeless-auto-height-button'
       );
       await button.click();
       break;

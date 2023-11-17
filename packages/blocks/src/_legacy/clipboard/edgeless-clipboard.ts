@@ -340,24 +340,43 @@ export class EdgelessClipboard implements Clipboard {
   ) {
     const { surface } = this;
     const noteIds = await Promise.all(
-      notes.map(async ({ id, xywh, children, background }) => {
-        assertExists(xywh);
+      notes.map(
+        async ({
+          id,
+          xywh,
+          children,
+          background,
+          borderRadius,
+          borderSize,
+          borderStyle,
+          shadowStyle,
+          autoHeight,
+          lastwh,
+        }) => {
+          assertExists(xywh);
 
-        const noteId = this.surface.addElement(
-          EdgelessBlockType.NOTE,
-          {
-            xywh,
-            background,
-          },
-          this._page.root?.id
-        );
-        const note = surface.pickById(noteId) as NoteBlockModel;
-        if (id) oldToNewIdMap.set(id, noteId);
-        assertExists(note);
+          const noteId = this.surface.addElement(
+            EdgelessBlockType.NOTE,
+            {
+              xywh,
+              background,
+              borderRadius,
+              borderSize,
+              borderStyle,
+              shadowStyle,
+              autoHeight,
+              lastwh,
+            },
+            this._page.root?.id
+          );
+          const note = surface.pickById(noteId) as NoteBlockModel;
+          if (id) oldToNewIdMap.set(id, noteId);
+          assertExists(note);
 
-        await addSerializedBlocks(this._page, children, note, 0);
-        return noteId;
-      })
+          await addSerializedBlocks(this._page, children, note, 0);
+          return noteId;
+        }
+      )
     );
     return noteIds;
   }

@@ -66,17 +66,6 @@ export function addNote(
         // Cannot reuse `handleNativeRangeClick` directly here,
         // since `retargetClick` will re-target to pervious editor
         handleNativeRangeAtPoint(event.raw.clientX, event.raw.clientY);
-
-        // Waiting dom updated, remove note if it is empty
-        requestAnimationFrame(() => {
-          edgeless.selectionManager.slots.updated.once(({ editing }) => {
-            const block = page.getBlockById(noteId);
-            assertExists(block);
-            if (!editing && isEmpty(block)) {
-              page.deleteBlock(edgeless.surface.unwrap(element));
-            }
-          });
-        });
       });
     }
   });

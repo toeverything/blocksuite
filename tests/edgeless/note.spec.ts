@@ -11,7 +11,6 @@ import {
   exitEditing,
   getNoteRect,
   hoverOnNote,
-  initThreeNotes,
   locatorComponentToolbar,
   locatorEdgelessZoomToolButton,
   selectNoteInEdgeless,
@@ -124,6 +123,52 @@ test('resize note in edgeless mode', async ({ page }) => {
   assertRectEqual(newRect, draggedRect);
 });
 
+test('reszie note then auto size and custom size', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+  await activeNoteInEdgeless(page, ids.noteId);
+  await waitNextFrame(page, 400);
+  await type(page, 'hello');
+  await assertRichTexts(page, ['hello']);
+  // unselect note
+  await page.mouse.click(50, 50);
+  await selectNoteInEdgeless(page, ids.noteId);
+
+  const initRect = await getNoteRect(page, ids);
+  const bottomRightResize = page.locator(
+    '.handle[aria-label="bottom-right"] .resize'
+  );
+  const box = await bottomRightResize.boundingBox();
+
+  if (box === null) throw new Error();
+
+  await dragBetweenCoords(
+    page,
+    { x: box.x + 5, y: box.y + 5 },
+    { x: box.x + 5, y: box.y + 105 }
+  );
+
+  const draggedRect = await getNoteRect(page, ids);
+  assertRectEqual(draggedRect, {
+    x: initRect.x,
+    y: initRect.y,
+    w: initRect.w,
+    h: initRect.h + 100,
+  });
+
+  await triggerComponentToolbarAction(page, 'autoSize');
+  await waitNextFrame(page);
+  const autoSizeRect = await getNoteRect(page, ids);
+  assertRectEqual(autoSizeRect, initRect);
+
+  await triggerComponentToolbarAction(page, 'autoSize');
+  await waitNextFrame(page);
+  const rect = await getNoteRect(page, ids);
+  assertRectEqual(rect, draggedRect);
+});
+
 test('add Note', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
@@ -158,9 +203,9 @@ test('add empty Note', async ({ page }) => {
   // click out of note
   await page.mouse.click(250, 200);
 
-  // assert empty note is removed
+  // assert empty note is note removed
   await page.mouse.move(320, 320);
-  await assertBlockCount(page, 'note', 1);
+  await assertBlockCount(page, 'note', 2);
 });
 
 test('always keep at least 1 note block', async ({ page }) => {

@@ -454,6 +454,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       ></component-toolbar-menu-divider>
 
       <edgeless-tool-icon-button
+        class="edgeless-auto-height-button"
         .tooltip=${autoHeight ? 'Customized Size' : 'Auto Size'}
         .tipPosition=${'bottom'}
         .iconContainerPadding=${2}

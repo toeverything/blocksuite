@@ -276,6 +276,13 @@ export type SerializedBlock = {
   background?: string;
   bookmarkTitle?: string;
   rotate?: number;
+  hidden?: boolean;
+  borderSize?: number;
+  borderStyle?: string;
+  borderRadius?: number;
+  shadowStyle?: string;
+  autoHeight?: boolean;
+  lastwh?: number[];
 };
 
 export type EmbedBlockDoubleClickData = {
