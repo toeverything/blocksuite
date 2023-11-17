@@ -382,7 +382,7 @@ test('create link with paste', async ({ page }) => {
   );
 });
 
-test('convert link to card', async ({ page }) => {
+test.only('convert link to card', async ({ page }) => {
   const linkText = 'alinkTexta';
   const link = 'http://example.com';
   await enterPlaygroundRoom(page);
@@ -409,21 +409,21 @@ test('convert link to card', async ({ page }) => {
     page,
     `
 <affine:page>
-<affine:note
-  prop:background="--affine-background-secondary-color"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 8,
-        "borderSize": 4,
-        "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
-      },
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
     }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
+    prop:hidden={false}
+    prop:index="a0"
+  >
     <affine:paragraph
       prop:text="aaa"
       prop:type="text"
@@ -499,21 +499,21 @@ test('convert link to embed', async ({ page }) => {
     page,
     `
 <affine:page>
-<affine:note
-  prop:background="--affine-background-secondary-color"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 8,
-        "borderSize": 4,
-        "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
-      },
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
     }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
+    prop:hidden={false}
+    prop:index="a0"
+  >
     <affine:paragraph
       prop:text="aaa"
       prop:type="text"

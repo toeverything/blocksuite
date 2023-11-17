@@ -19,7 +19,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import { onSoftEnter } from '../../../../_common/components/rich-text/keymap/legacy.js';
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
@@ -82,7 +81,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   private _surfaceRefReferenceSet = new Set<string>();
 
   private _initNoteHeightUpdate() {
-    const { page, surface } = this.edgeless;
+    const { page } = this.edgeless;
     assertExists(page.root);
 
     const resetNoteResizeObserver = throttle(

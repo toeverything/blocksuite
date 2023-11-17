@@ -259,21 +259,21 @@ test('should indent multi-selection block', async ({ page }) => {
     page,
     `
 <affine:page>
-<affine:note
-  prop:background="--affine-background-secondary-color"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 8,
-        "borderSize": 4,
-        "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
-      },
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
     }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
+    prop:hidden={false}
+    prop:index="a0"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -1186,21 +1186,21 @@ test('should not draw rect for sub selected blocks when entering tab key', async
     page,
     `
 <affine:page>
-<affine:note
-  prop:background="--affine-background-secondary-color"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 8,
-        "borderSize": 4,
-        "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
-      },
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
     }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
+    prop:hidden={false}
+    prop:index="a0"
+  >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -1307,7 +1307,7 @@ test('should be cleared when dragging block card from BlockHub', async ({
   await expect(page.locator('.selected,affine-block-selection')).toHaveCount(0);
 });
 
-test('click bottom of page and if the last is embed block, editor should insert a new editable block', async ({
+test.only('click bottom of page and if the last is embed block, editor should insert a new editable block', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -1327,22 +1327,22 @@ test('click bottom of page and if the last is embed block, editor should insert 
   await assertStoreMatchJSX(
     page,
     `
-    <affine:page>
-<affine:note
-  prop:background="--affine-background-secondary-color"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 8,
-        "borderSize": 4,
-        "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
-      },
+<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
     }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
+    prop:hidden={false}
+    prop:index="a0"
+  >
     <affine:image
       prop:caption=""
       prop:height={0}

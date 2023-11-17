@@ -207,21 +207,21 @@ test('nested list blocks', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-<affine:note
-  prop:background="--affine-background-secondary-color"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 8,
-        "borderSize": 4,
-        "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
-      },
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
     }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
+    prop:hidden={false}
+    prop:index="a0"
+  >
     <affine:list
       prop:checked={false}
       prop:collapsed={false}
@@ -331,21 +331,21 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-<affine:note
-  prop:background="--affine-background-secondary-color"
-  prop:edgeless={
-    Object {
-      "style": Object {
-        "borderRadius": 8,
-        "borderSize": 4,
-        "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
-      },
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowStyle": "--affine-note-shadow-box",
+        },
+      }
     }
-  }
-  prop:hidden={false}
-  prop:index="a0"
->
+    prop:hidden={false}
+    prop:index="a0"
+  >
     <affine:paragraph
       prop:text="text1"
       prop:type="text"
