@@ -383,16 +383,16 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         }
       );
       _disposables.add(this._colorSelectorPopper);
-
-      this._textFontFamilyPopper = createButtonPopper(
-        this._textFontFamilyButton,
-        this._textFontFamilyMenu,
-        ({ display }) => {
-          this._fontFamilyPopperShow = display === 'show';
-        }
-      );
-      _disposables.add(this._textFontFamilyPopper);
     }
+
+    this._textFontFamilyPopper = createButtonPopper(
+      this._textFontFamilyButton,
+      this._textFontFamilyMenu,
+      ({ display }) => {
+        this._fontFamilyPopperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._textFontFamilyPopper);
 
     this._textAlignPopper = createButtonPopper(
       this._textAlignButton,

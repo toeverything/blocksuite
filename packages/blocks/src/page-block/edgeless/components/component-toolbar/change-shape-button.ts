@@ -584,7 +584,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           },
         })}
         ${doesAllShapesContainText(this.elements)
-          ? html` <component-toolbar-menu-divider></component-toolbar-menu-divider>
+          ? html`<component-toolbar-menu-divider></component-toolbar-menu-divider>
               <edgeless-change-text-menu
                 .elements=${this.elements}
                 .elementType=${'shape'}

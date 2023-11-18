@@ -21,6 +21,7 @@ export function getLineHeight(fontFamily: string, fontSize: number) {
   // Browser may have minimum font size setting
   // so we need to multiple the multiplier between the actual size and the expected size
   const actualFontSize = Math.max(fontSize, 12);
+  const div = document.createElement('div');
   const span = document.createElement('span');
 
   span.style.fontFamily = fontFamily;
@@ -28,10 +29,11 @@ export function getLineHeight(fontFamily: string, fontSize: number) {
   span.style.lineHeight = 'initial';
   span.textContent = 'M';
 
-  document.body.appendChild(span);
-  const { height } = span.getBoundingClientRect();
+  div.appendChild(span);
+  document.body.appendChild(div);
+  const { height } = div.getBoundingClientRect();
 
-  span.remove();
+  div.remove();
   return height * (fontSize / actualFontSize);
 }
 
