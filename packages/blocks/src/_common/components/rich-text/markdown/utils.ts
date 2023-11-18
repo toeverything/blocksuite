@@ -101,7 +101,7 @@ export function convertToParagraph(
         length: 0,
       });
     }
-    page.updateBlock(model, { type: type });
+    page.updateBlock(model, { type });
   }
   return true;
 }

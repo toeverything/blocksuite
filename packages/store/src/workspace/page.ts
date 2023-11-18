@@ -848,7 +848,9 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     if (hasPropsUpdate) {
-      Object.assign(model, props);
+      model.byPassProxy(() => {
+        Object.assign(model, props);
+      });
       model.propsUpdated.emit({
         oldProps: oldProps,
         newProps: toBlockProps(yMap, this.doc.proxy),

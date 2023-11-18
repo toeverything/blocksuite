@@ -181,6 +181,7 @@ export class BaseBlockModel<
   id!: string;
   yBlock!: YBlock;
   keys!: string[];
+  byPassProxy!: (fn: () => void) => void;
 
   // text is optional
   text?: Text;
@@ -230,9 +231,5 @@ export class BaseBlockModel<
     this.deleted.dispose();
     this.propsUpdated.dispose();
     this.childrenUpdated.dispose();
-  }
-
-  clone(): this {
-    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
   }
 }

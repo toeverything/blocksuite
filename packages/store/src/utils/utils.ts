@@ -1,4 +1,4 @@
-import { fromBase64, toBase64 } from 'lib0/buffer.js';
+import { toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
@@ -117,13 +117,52 @@ export function toBlockProps(
   return props;
 }
 
+function proxyModelProps<Model extends BaseBlockModel>(
+  yBlock: YBlock,
+  model: Model
+): Model {
+  const propsKeys = model.keys;
+  let byPass = false;
+
+  const modelProxy = new Proxy(model, {
+    has: (target, p) => {
+      return Reflect.has(target, p);
+    },
+    set: (target, p, value, receiver) => {
+      if (!byPass && typeof p === 'string' && propsKeys.includes(p)) {
+        yBlock.set(`prop:${p}`, propsToValue(value));
+      }
+
+      return Reflect.set(target, p, value, receiver);
+    },
+    get: (target, p, receiver) => {
+      return Reflect.get(target, p, receiver);
+    },
+    deleteProperty: (target, p) => {
+      if (typeof p === 'string' && propsKeys.includes(p)) {
+        throw new Error('Cannot delete props');
+      }
+
+      return Reflect.deleteProperty(target, p);
+    },
+  });
+
+  modelProxy.byPassProxy = fn => {
+    byPass = true;
+    fn();
+    byPass = false;
+  };
+
+  return modelProxy;
+}
+
 export function schemaToModel(
   id: string,
   schema: BlockSchemaType,
-  block: YBlock,
+  yBlock: YBlock,
   page: Page
 ) {
-  const props = toBlockProps(block, page.doc.proxy);
+  const props = toBlockProps(yBlock, page.doc.proxy);
   const blockModel = schema.model.toModel
     ? schema.model.toModel()
     : new BaseBlockModel();
@@ -136,15 +175,11 @@ export function schemaToModel(
   blockModel.flavour = schema.model.flavour;
   blockModel.role = schema.model.role;
   blockModel.page = page;
-  blockModel.yBlock = block;
+  blockModel.yBlock = yBlock;
 
-  return blockModel;
+  return proxyModelProps(yBlock, blockModel);
 }
 
 export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {
   return toBase64(Y.encodeStateAsUpdateV2(workspace.doc));
-}
-
-export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
-  Y.applyUpdateV2(workspace.doc, fromBase64(update));
 }
