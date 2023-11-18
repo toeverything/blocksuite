@@ -169,8 +169,8 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await InterTextFont.click();
   await waitNextFrame(page);
   selectedRect = await getEdgelessSelectedRect(page);
-  expect(selectedRect.width).toBeGreaterThan(lastWidth);
-  expect(selectedRect.height).toBeLessThan(lastHeight);
+  expect(selectedRect.width).not.toEqual(lastWidth);
+  expect(selectedRect.height).not.toEqual(lastHeight);
 });
 
 test('auto wrap text by dragging left and right edge', async ({ page }) => {

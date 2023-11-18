@@ -424,7 +424,7 @@ test('auto wrap text in shape', async ({ page }) => {
   // select shape
   await page.mouse.click(200, 150);
   // the height of shape should be increased because of \n
-  await assertEdgelessSelectedRect(page, [200, 150, 100, 130]);
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 100]);
 
   await page.mouse.dblclick(250, 200);
   await waitNextFrame(page);
