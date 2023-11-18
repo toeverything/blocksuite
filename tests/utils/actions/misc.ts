@@ -321,7 +321,7 @@ export async function enterPlaygroundWithList(
   type: ListType = 'bulleted'
 ) {
   const room = generateRandomRoomId();
-  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
+  await page.goto(`${DEFAULT_PLAYGROUND}&room=${room}`);
   await initEmptyEditor({ page });
 
   await page.evaluate(
