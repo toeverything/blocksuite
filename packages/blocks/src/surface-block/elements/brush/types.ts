@@ -1,5 +1,9 @@
+import type { LineWidth } from '../../../index.js';
 import type { PhasorElementType } from '../edgeless-element.js';
-import type { ISurfaceElement } from '../surface-element.js';
+import type {
+  ISurfaceElement,
+  ISurfaceElementLocalRecord,
+} from '../surface-element.js';
 
 export interface IBrush extends ISurfaceElement {
   type: PhasorElementType.BRUSH;
@@ -8,4 +12,9 @@ export interface IBrush extends ISurfaceElement {
   points: number[][];
   color: string;
   lineWidth: number;
+}
+
+export interface IBrushLocalRecord extends ISurfaceElementLocalRecord {
+  points?: number[][];
+  lineWidth?: LineWidth;
 }

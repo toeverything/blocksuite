@@ -55,7 +55,10 @@ export class Page extends Space<FlatBlockMap> {
   private _history!: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
-  private _initialized = false;
+  /** Indicate whether the underlying subdoc has been loaded. */
+  private _docLoaded = false;
+  /** Indicate whether the block tree is ready */
+  private _ready = false;
   private _shouldTransact = true;
 
   readonly slots = {
@@ -74,6 +77,7 @@ export class Page extends Space<FlatBlockMap> {
     rootAdded: new Slot<BaseBlockModel>(),
     rootDeleted: new Slot<string | string[]>(),
     textUpdated: new Slot<Y.YTextEvent>(),
+    /** @deprecated should not depend on y-concepts directly */
     yUpdated: new Slot(),
     onYEvent: new Slot<{
       event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>;
@@ -89,6 +93,7 @@ export class Page extends Space<FlatBlockMap> {
           id: string;
           flavour: string;
           parent: string;
+          model: BaseBlockModel;
         }
       | {
           type: 'update';
@@ -97,12 +102,9 @@ export class Page extends Space<FlatBlockMap> {
           props: Partial<BlockProps>;
         }
     >(),
-    yBlockUpdated: new Slot<{
-      id: string;
-      type: 'add' | 'update' | 'delete';
-      props: { [key: string]: { old: unknown; new: unknown } };
-    }>(),
+    /** @deprecated */
     copied: new Slot(),
+    /** @deprecated */
     pasted: new Slot<Record<string, unknown>[]>(),
   };
 
@@ -120,6 +122,10 @@ export class Page extends Space<FlatBlockMap> {
 
   get readonly() {
     return this.awarenessStore.isReadonly(this);
+  }
+
+  get ready() {
+    return this._ready;
   }
 
   get history() {
@@ -533,18 +539,11 @@ export class Page extends Space<FlatBlockMap> {
       oldProps,
       newProps,
     });
-
-    this.slots.blockUpdated.emit({
-      type: 'update',
-      flavour: model.flavour,
-      id: model.id,
-      props,
-    });
   }
 
   addSiblingBlocks(
     targetModel: BaseBlockModel,
-    props: Array<Partial<BaseBlockModel>>,
+    props: Array<Partial<BlockProps>>,
     place: 'after' | 'before' = 'after'
   ): string[] {
     if (!props.length) return [];
@@ -655,7 +654,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   trySyncFromExistingDoc() {
-    if (this._initialized) {
+    if (this._docLoaded) {
       throw new Error('Cannot sync from existing doc more than once');
     }
 
@@ -673,8 +672,12 @@ export class Page extends Space<FlatBlockMap> {
       this._handleYBlockAdd(visited, id);
     });
 
-    this._initialized = true;
-    this.slots.ready.emit();
+    this._docLoaded = true;
+
+    if (this._yBlocks.size > 0) {
+      this._ready = true;
+      this.slots.ready.emit();
+    }
   }
 
   dispose() {
@@ -686,7 +689,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.dispose();
     this.slots.onYEvent.dispose();
 
-    if (this._initialized) {
+    if (this._docLoaded) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
       this._yBlocks.clear();
     }
@@ -780,6 +783,7 @@ export class Page extends Space<FlatBlockMap> {
       id,
       flavour: model.flavour,
       parent: this.getParent(model)?.id ?? '',
+      model,
     });
     model.deleted.emit();
     model.dispose();
@@ -833,10 +837,11 @@ export class Page extends Space<FlatBlockMap> {
         oldProps: oldProps,
         newProps: toBlockProps(yMap, this.doc.proxy),
       });
-      this.slots.yBlockUpdated.emit({
-        id: model.id,
-        props: yProps,
+      this.slots.blockUpdated.emit({
         type: 'update',
+        id: model.id,
+        flavour: model.flavour,
+        props: yProps,
       });
     }
     hasChildrenUpdate && model.childrenUpdated.emit();
@@ -928,12 +933,23 @@ export class Page extends Space<FlatBlockMap> {
     }
   }
 
-  override async waitForLoaded() {
-    await super.waitForLoaded();
-    if (!this._initialized) {
+  override async load(initFn?: () => void) {
+    await super.load();
+    if (!this._docLoaded) {
       this.trySyncFromExistingDoc();
     }
 
+    if (initFn) {
+      await initFn();
+      this._ready = true;
+      this.slots.ready.emit();
+    }
+
     return this;
+  }
+
+  /** @deprecated use page.load() instead */
+  async waitForLoaded() {
+    await this.load();
   }
 }

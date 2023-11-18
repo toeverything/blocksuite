@@ -14,7 +14,7 @@ import {
 import { RemoteColorManager } from '../../../page-block/remote-color-manager/remote-color-manager.js';
 import { RemoteCursor } from '../../icons/index.js';
 import type { Selectable } from '../../utils/index.js';
-import { pick } from '../../utils/iterable.js';
+import { pickValues } from '../../utils/iterable.js';
 
 export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET =
   'affine-edgeless-remote-selection-widget';
@@ -187,14 +187,17 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
   override connectedCallback() {
     super.connectedCallback();
 
-    const { _disposables, surface, page } = this;
+    const { _disposables, surface, page, edgeless } = this;
 
-    Object.values(
-      pick(surface.slots, ['elementAdded', 'elementRemoved', 'elementUpdated'])
-    ).forEach(slot => {
+    pickValues(edgeless.slots, [
+      'elementAdded',
+      'elementRemoved',
+      'elementUpdated',
+    ]).forEach(slot => {
       _disposables.add(slot.on(this._updateOnElementChange));
     });
-    _disposables.add(page.slots.yBlockUpdated.on(this._updateOnElementChange));
+
+    _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
 
     _disposables.add(
       this.selection.slots.remoteUpdated.on(this._updateRemoteRects)

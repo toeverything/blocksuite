@@ -42,6 +42,7 @@ import {
   resetHistory,
   scrollToTop,
   selectAllByKeyboard,
+  setVRangeInVEditor,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -1093,7 +1094,14 @@ test('should select texts on cross-note dragging', async ({ page }) => {
   await initEmptyParagraphState(page, pageId);
 
   // focus last block in first note
-  await focusRichText(page, 2);
+  await setVRangeInVEditor(
+    page,
+    {
+      index: 3,
+      length: 0,
+    },
+    3
+  );
   // goto next note
   await pressArrowDown(page);
   await waitNextFrame(page);
@@ -1868,4 +1876,48 @@ test('should not scroll page when mouse is click down', async ({ page }) => {
   await waitNextFrame(page, 500);
   await page.mouse.up();
   await assertRichTextVRange(page, 10, 22);
+});
+
+test('scroll vertically when inputting long text in a block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  for (let i = 0; i < 40; i++) {
+    await type(page, String(i));
+    await pressShiftEnter(page);
+  }
+
+  const viewportScrollTop = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-doc-viewport');
+    if (!viewport) {
+      throw new Error('viewport not found');
+    }
+    return viewport.scrollTop;
+  });
+
+  expect(viewportScrollTop).toBeGreaterThan(100);
+});
+
+test('scroll vertically when adding multiple blocks', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  for (let i = 0; i < 40; i++) {
+    await type(page, String(i));
+    await pressEnter(page);
+  }
+
+  const viewportScrollTop = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-doc-viewport');
+    if (!viewport) {
+      throw new Error('viewport not found');
+    }
+    return viewport.scrollTop;
+  });
+
+  expect(viewportScrollTop).toBeGreaterThan(400);
 });

@@ -5,6 +5,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
 import { HoverController } from '../_common/components/index.js';
+import { toast } from '../_common/components/toast.js';
 import { AttachmentIcon16 } from '../_common/icons/index.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { stopPropagation } from '../_common/utils/event.js';
@@ -40,6 +41,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _error = false;
 
+  @state()
+  private _isDownloading = false;
+
   private readonly _themeObserver = new ThemeObserver();
 
   private _hoverController = new HoverController(
@@ -54,6 +58,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
             this._captionInput.focus();
           });
         },
+        downloadAttachment: this._downloadAttachment,
         abortController,
       }),
       computePosition: {
@@ -70,7 +75,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     if (this.model.caption) {
       this._showCaption = true;
     }
-    this._checkAttachment();
+    this._checkBlob();
     this._registerDragHandleOption();
 
     // Workaround for https://github.com/toeverything/blocksuite/issues/4724
@@ -81,17 +86,47 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('sourceId')) {
-      this._checkAttachment();
+      this._checkBlob();
     }
     super.willUpdate(changedProperties);
   }
 
-  // Check if the attachment is available
-  private async _checkAttachment() {
+  private _registerDragHandleOption = () => {
+    this._disposables.add(
+      AffineDragHandleWidget.registerOption({
+        flavour: AttachmentBlockSchema.model.flavour,
+        onDragStart: (state, startDragging) => {
+          // Check if start dragging from the image block
+          const target = captureEventTarget(state.raw.target);
+          const attachmentBlock = target?.closest('affine-attachment');
+          if (!attachmentBlock) return false;
+
+          // If start dragging from the attachment element
+          // Set selection and take over dragStart event to start dragging
+          this.root.selection.set([
+            this.root.selection.getInstance('block', {
+              path: attachmentBlock.path,
+            }),
+          ]);
+          startDragging([attachmentBlock], state);
+          return true;
+        },
+      })
+    );
+  };
+
+  /**
+   * Check if the blob is available. It is necessary since the block may be copied from another workspace.
+   */
+  private async _checkBlob() {
     const storage = this.page.blob;
     const sourceId = this.model.sourceId;
     if (!sourceId) return;
     if (!(await hasBlob(storage, sourceId))) {
+      console.warn(
+        'The attachment is unavailable since the blob is missing!',
+        this.model
+      );
       this._error = true;
     }
   }
@@ -105,7 +140,26 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   }
 
   private async _downloadAttachment() {
-    downloadAttachment(this.model);
+    if (this._isDownloading) {
+      toast('Download in progress...');
+      return;
+    }
+
+    const shortName =
+      this.model.name.length < 20
+        ? this.model.name
+        : this.model.name.slice(0, 20) + '...';
+
+    toast(`Downloading ${shortName}`);
+    this._isDownloading = true;
+    try {
+      await downloadAttachment(this.model);
+    } catch (error) {
+      console.error(error);
+      toast(`Failed to download ${shortName}!`);
+    } finally {
+      this._isDownloading = false;
+    }
   }
 
   private _onBlur() {
@@ -135,34 +189,10 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     `;
   }
 
-  private _registerDragHandleOption = () => {
-    this._disposables.add(
-      AffineDragHandleWidget.registerOption({
-        flavour: AttachmentBlockSchema.model.flavour,
-        onDragStart: (state, startDragging) => {
-          // Check if start dragging from the image block
-          const target = captureEventTarget(state.raw.target);
-          const attachmentBlock = target?.closest('affine-attachment');
-          if (!attachmentBlock) return false;
-
-          // If start dragging from the attachment element
-          // Set selection and take over dragStart event to start dragging
-          this.root.selection.set([
-            this.root.selection.getInstance('block', {
-              path: attachmentBlock.path,
-            }),
-          ]);
-          startDragging([attachmentBlock], state);
-          return true;
-        },
-      })
-    );
-  };
-
   override render() {
-    const isLoading =
-      this.model.loadingKey && isAttachmentLoading(this.model.loadingKey);
-    const isError = !isLoading && (this._error || !this.model.sourceId);
+    const isLoading = isAttachmentLoading(this.model.id);
+    const isError = this._error || (!isLoading && !this.model.sourceId);
+
     if (isLoading) {
       return html`<div
         class="affine-attachment-container"
@@ -180,8 +210,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         class="affine-attachment-container"
         @click=${this._focusAttachment}
       >
-        <div class="affine-attachment-name">
-          ${AttachmentIcon16}${this.model.name}
+        <div class="affine-attachment-title">
+          ${AttachmentIcon16}
+          <span class="affine-attachment-name">${this.model.name}</span>
         </div>
         <div class="affine-attachment-desc">Unable to upload</div>
         ${this._attachmentTail(isError)}
@@ -194,8 +225,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         @click=${this._focusAttachment}
         @dblclick=${this._downloadAttachment}
       >
-        <div class="affine-attachment-name">
-          ${AttachmentIcon16}${this.model.name}
+        <div class="affine-attachment-title">
+          ${this._isDownloading ? LoadingIcon : AttachmentIcon16}
+          <span class="affine-attachment-name">${this.model.name}</span>
         </div>
         <div class="affine-attachment-desc">
           ${humanFileSize(this.model.size)}

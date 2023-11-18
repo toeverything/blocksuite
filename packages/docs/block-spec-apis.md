@@ -11,7 +11,7 @@ A block spec contains the following properties:
   - `component`: The component of the block. It represents the UI component of the block.
   - `widgets`: The widgets of the block. It represents the UI widgets of the block.
 
-## Lit-based Example
+## Lit-Based Example
 
 Note that in block spec, the definition of `view` is related to UI frameworks. By default, we provide a `@blocksuite/lit` package to help build a lit block view. But it's still possible to use other UI frameworks. We'll introduce later about how to write custom block renderers.
 

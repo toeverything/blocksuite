@@ -9,7 +9,6 @@ import {
 } from '@blocksuite/virgo';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
-import { getNextBlock } from '../../../../note-block/utils.js';
 import type { PageBlockComponent } from '../../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../../page-block/utils/selection.js';
 import { textFormatConfigs } from '../../../configs/text-format/config.js';
@@ -113,57 +112,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
   blockElement.bindHotKey({
     ArrowUp: ctx => {
-      if (!blockElement.selected?.is('text')) return;
-      const vEditor = _getVirgo();
-      const vRange = vEditor.getVRange();
-      if (!vRange) {
-        return;
-      }
-
-      if (vRange.length !== 0) {
-        vEditor.setVRange({
-          index: vRange.index,
-          length: 0,
-        });
-      }
-
-      const range = vEditor.toDomRange({
-        index: vRange.index,
-        length: 0,
-      });
-      assertExists(range);
-      if (vEditor.isFirstLine(vRange)) {
-        _preventDefault(ctx);
-        return;
-      }
-      return true;
+      _preventDefault(ctx);
     },
     ArrowDown: ctx => {
-      if (!blockElement.selected?.is('text')) return;
-      const vEditor = _getVirgo();
-      const vRange = vEditor.getVRange();
-      if (!vRange) {
-        return;
-      }
-
-      if (vRange.length !== 0) {
-        vEditor.setVRange({
-          index: vRange.index,
-          length: 0,
-        });
-      }
-
-      const range = vEditor.toDomRange({
-        index: vRange.index,
-        length: 0,
-      });
-      assertExists(range);
-      if (vEditor.isLastLine(vRange) && getNextBlock(blockElement)) {
-        _preventDefault(ctx);
-        return;
-      }
-
-      return true;
+      _preventDefault(ctx);
     },
     ArrowRight: ctx => {
       if (blockElement.selected?.is('block')) {
@@ -201,6 +153,18 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
 
       return true;
+    },
+    'Shift-ArrowUp': ctx => {
+      _preventDefault(ctx);
+    },
+    'Shift-ArrowDown': ctx => {
+      _preventDefault(ctx);
+    },
+    'Shift-ArrowRight': ctx => {
+      _preventDefault(ctx);
+    },
+    'Shift-ArrowLeft': ctx => {
+      _preventDefault(ctx);
     },
     Escape: () => {
       if (blockElement.selected?.is('text')) {

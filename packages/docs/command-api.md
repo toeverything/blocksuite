@@ -1,7 +1,6 @@
 # Command API
 
-Commands are the actions that can be triggered by the user.
-With the command API, you can define chainable commands and execute them.
+Commands are the reusable actions for triggering state updates. Inside a command, you can query different states of the editor, or perform operations to update them. With the command API, you can define chainable commands and execute them.
 
 ## Command Chain
 
@@ -11,14 +10,11 @@ Commands are executed in a chain, and each command can decide whether to continu
 std.command.pipe().command1().command2().command3().run();
 ```
 
-You will need to call `pipe()` to start a new chain.
-Then, you can call any command defined in the `Commands` interface.
-And finally, call `run()` to execute the chain.
+You will need to call `pipe()` to start a new chain. Then, you can call any command defined in the `Commands` interface. And finally, call `run()` to execute the chain.
 
 ### Try
 
-If a command fails, the chain will be interrupted.
-However, you can use `try()` to call a list of commands until one of them succeeds.
+If a command fails, the chain will be interrupted. However, you can use `try()` to call a list of commands until one of them succeeds.
 
 ```ts
 std.command
@@ -28,7 +24,25 @@ std.command
   .run();
 ```
 
-In this chain, `command3` will be executed only if `command1` or `command2` succeeds.
+In this chain, `command3` will be executed only if `command1` or `command2` succeeds. If `command1` succeeds, `command2` will not be executed.
+
+### TryAll
+
+`tryAll` is used to attempt to execute an array of commands within a chain. Unlike `try`, which stops executing the list of commands as soon as one of them succeeds, `tryAll` will execute every command in the array, regardless of the individual outcomes of each command.
+
+This means that even if one of the commands succeeds, `tryAll` will still continue to execute the remaining commands in the array. The chain will only proceed to the next command after `tryAll` if at least one command in the array succeeds. If all commands fail, the chain will be interrupted.
+
+```ts
+std.command
+  .pipe()
+  .tryAll(cmd => [cmd.command1(), cmd.command2(), cmd.command3()])
+  .command4()
+  .run();
+```
+
+If `command1`, `command2`, or `command3` succeeds, `command4` will be executed. If all commands in `tryAll` fail, the chain will stop, and `command4` will not be executed.
+
+Use `tryAll` when you want to ensure that multiple strategies or operations are attempted, even if the success of one is enough to allow the chain to continue. This approach is useful when each command in the array should be given a chance to execute, regardless of the success of the others.
 
 ## Writing Commands
 

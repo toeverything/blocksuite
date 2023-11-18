@@ -11,7 +11,7 @@ export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
   rotate: 0,
 
   shapeType: 'rect',
-  shapeStyle: ShapeStyle.Scribbled,
+  shapeStyle: ShapeStyle.General,
   radius: 0,
   filled: false,
   fillColor: '#ffffff',

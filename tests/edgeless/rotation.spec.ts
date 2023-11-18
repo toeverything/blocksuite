@@ -102,11 +102,11 @@ test.describe('rotation', () => {
     );
 
     await dragBetweenCoords(page, { x: 90, y: 90 }, { x: 310, y: 110 });
-    await assertEdgelessSelectedRect(page, [100, 100, 200, 100]);
+    await assertEdgelessSelectedRect(page, [88, 88, 224, 124]);
 
     await rotateElementByHandle(page, 90, 'bottom-right');
     await assertEdgelessSelectedRectRotation(page, 0);
-    await assertEdgelessSelectedRect(page, [150, 50, 100, 200]);
+    await assertEdgelessSelectedRect(page, [138, 38, 124, 224]);
   });
 
   test('combination with resizing', async ({ page }) => {
@@ -149,20 +149,20 @@ test.describe('rotation', () => {
     );
 
     await dragBetweenCoords(page, { x: 90, y: 90 }, { x: 310, y: 110 });
-    await assertEdgelessSelectedRect(page, [100, 100, 200, 100]);
+    await assertEdgelessSelectedRect(page, [88, 88, 224, 124]);
 
     await rotateElementByHandle(page, 90, 'bottom-left');
     await assertEdgelessSelectedRectRotation(page, 0);
-    await assertEdgelessSelectedRect(page, [150, 50, 100, 200]);
+    await assertEdgelessSelectedRect(page, [138, 38, 124, 224]);
 
     await resizeElementByHandle(page, { x: -10, y: -20 }, 'bottom-right');
-    await assertEdgelessSelectedRect(page, [150, 50, 90, 180]);
+    await assertEdgelessSelectedRect(page, [138, 38, 114, 204]);
 
     await rotateElementByHandle(page, -90, 'bottom-right');
     await assertEdgelessSelectedRectRotation(page, 0);
-    await assertEdgelessSelectedRect(page, [105, 95, 180, 90]);
+    await assertEdgelessSelectedRect(page, [93, 83, 204, 114]);
 
     await resizeElementByHandle(page, { x: 20, y: 10 }, 'bottom-right');
-    await assertEdgelessSelectedRect(page, [105, 95, 200, 100]);
+    await assertEdgelessSelectedRect(page, [93, 83, 224, 124]);
   });
 });

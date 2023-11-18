@@ -1,6 +1,6 @@
 import { BrushElement } from './brush/brush-element.js';
 import { BrushElementDefaultProps } from './brush/consts.js';
-import type { IBrush } from './brush/types.js';
+import type { IBrush, IBrushLocalRecord } from './brush/types.js';
 import { ConnectorElement } from './connector/connector-element.js';
 import { ConnectorElementDefaultProps } from './connector/consts.js';
 import { type IConnector } from './connector/types.js';
@@ -20,7 +20,7 @@ import type {
 } from './surface-element.js';
 import { TextElementDefaultProps } from './text/consts.js';
 import { TextElement } from './text/text-element.js';
-import type { IText } from './text/types.js';
+import type { IText, ITextLocalRecord } from './text/types.js';
 
 // eslint-disable-next-line simple-import-sort/exports
 export { BrushElement } from './brush/brush-element.js';
@@ -57,11 +57,14 @@ export type PhasorTypeToElement = {
 
 export type IPhasorElementLocalRecord = {
   shape: IShapeLocalRecord;
-  brush: ISurfaceElementLocalRecord;
+  brush: IBrushLocalRecord;
   connector: ISurfaceElementLocalRecord;
-  text: ISurfaceElementLocalRecord;
+  text: ITextLocalRecord;
   group: IGroupLocalRecord;
 };
+
+export type PhasorElementLocalRecordValues =
+  IPhasorElementLocalRecord[keyof IPhasorElementLocalRecord];
 
 export const ElementCtors = {
   brush: BrushElement,

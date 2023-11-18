@@ -14,8 +14,6 @@ const getIndex = (model: ListBlockModel) => {
       siblings[i].type === model.type
     ) {
       index += 1;
-    } else {
-      index = 0;
     }
   }
 

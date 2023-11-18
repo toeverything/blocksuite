@@ -188,10 +188,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.y += delta[1];
 
     if (selected instanceof ConnectorElement) {
-      this._surface.connector.updateXYWH(selected, bound);
+      surface.connector.updateXYWH(selected, bound);
     }
 
-    surface.setElementBound(selected.id, bound);
+    this._edgeless.updateElementInLocal(selected.id, {
+      xywh: bound.serialize(),
+    });
   }
 
   private _handleBlockDragMove(
@@ -203,7 +205,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.x += delta[0];
     bound.y += delta[1];
 
-    this._page.updateBlock(block, { xywh: bound.serialize() });
+    this._edgeless.updateElementInLocal(block.id, {
+      xywh: bound.serialize(),
+    });
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {
@@ -619,6 +623,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerDragEnd() {
+    this._edgeless.applyLocalRecord(this._toBeMoved.map(ele => ele.id));
+
     if (this._lock) {
       this._page.captureSync();
       this._lock = false;

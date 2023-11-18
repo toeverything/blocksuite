@@ -84,7 +84,7 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
     );
 
     this._disposables.add(
-      this.page.slots.yBlockUpdated.on(({ id }) => {
+      this.page.slots.blockUpdated.on(({ id }) => {
         const note = this.page.getBlockById(id) as NoteBlockModel;
 
         if (!note || matchFlavours(note, ['affine:note'])) {

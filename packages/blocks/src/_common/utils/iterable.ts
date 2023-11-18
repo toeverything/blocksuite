@@ -135,7 +135,7 @@ export function pickArray<T>(target: Array<T>, keys: number[]): Array<T> {
   }, [] as T[]);
 }
 
-export function pick<T, K extends Partial<keyof T>>(
+export function pick<T, K extends keyof T>(
   target: T,
   keys: K[]
 ): { [key in K]: T[K] } {
@@ -148,7 +148,7 @@ export function pick<T, K extends Partial<keyof T>>(
   );
 }
 
-export function pickValues<T, K extends Partial<keyof T>>(
+export function pickValues<T, K extends keyof T>(
   target: T,
   keys: K[]
 ): Array<T[K]> {
@@ -163,4 +163,20 @@ export function pickValues<T, K extends Partial<keyof T>>(
 
 export function lastN<T>(target: Array<T>, n: number) {
   return target.slice(target.length - n, target.length);
+}
+
+export function isEmpty(obj: unknown) {
+  if (Object.getPrototypeOf(obj) === Object.prototype) {
+    return Object.keys(obj as object).length === 0;
+  }
+
+  if (Array.isArray(obj) || typeof obj === 'string') {
+    return (obj as Array<unknown>).length === 0;
+  }
+
+  return false;
+}
+
+export function keys<T>(obj: T): (keyof T)[] {
+  return Object.keys(obj as object) as (keyof T)[];
 }

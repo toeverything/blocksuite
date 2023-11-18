@@ -9,8 +9,10 @@ import {
   formatTextCommand,
   getBlockIndexCommand,
   getBlockSelectionsCommand,
+  getImageSelectionsCommand,
   getNextBlockCommand,
   getPrevBlockCommand,
+  getSelectedBlocksCommand,
   getSelectedModelsCommand,
   getTextSelectionCommand,
   withRootCommand,
@@ -24,10 +26,12 @@ export class PageService extends BlockService<PageBlockModel> {
       .add('getBlockIndex', getBlockIndexCommand)
       .add('getNextBlock', getNextBlockCommand)
       .add('getPrevBlock', getPrevBlockCommand)
+      .add('getSelectedBlocks', getSelectedBlocksCommand)
       .add('copySelectedModels', copySelectedModelsCommand)
       .add('deleteSelectedModels', deleteSelectedModelsCommand)
       .add('getSelectedModels', getSelectedModelsCommand)
       .add('getBlockSelections', getBlockSelectionsCommand)
+      .add('getImageSelections', getImageSelectionsCommand)
       .add('getTextSelection', getTextSelectionCommand)
       .add('deleteText', deleteTextCommand)
       .add('formatBlock', formatBlockCommand)

@@ -75,6 +75,28 @@ export async function getNoteRect(
   return { x, y, w, h };
 }
 
+export async function getNoteProps(page: Page, noteId: string) {
+  const props = await page.evaluate(
+    ([id]) => {
+      const page = window.workspace.getPage('page:home');
+      const block = page?.getBlockById(id);
+      if (block?.flavour === 'affine:note') {
+        return (block as NoteBlockModel).keys.reduce(
+          (pre, key) => {
+            pre[key] = block[key as keyof typeof block] as string;
+            return pre;
+          },
+          {} as Record<string, string | number>
+        );
+      } else {
+        return null;
+      }
+    },
+    [noteId] as const
+  );
+  return props;
+}
+
 export async function registerFormatBarCustomElements(page: Page) {
   await page.click('sl-button[content="Register FormatBar Custom Elements"]');
 }

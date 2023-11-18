@@ -21,6 +21,7 @@ import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
+import { NoteService } from '../note-block/index.js';
 import { NoteBlockSchema } from '../note-block/note-model.js';
 import { DocPageService } from '../page-block/doc/doc-page-service.js';
 import { EdgelessPageService } from '../page-block/edgeless/edgeless-page-service.js';
@@ -107,6 +108,7 @@ export const PagePreset: BlockSpec[] = [
   },
   {
     schema: NoteBlockSchema,
+    service: NoteService,
     view: {
       component: literal`affine-note`,
     },
@@ -192,6 +194,7 @@ export const EdgelessPreset: BlockSpec[] = [
   },
   {
     schema: NoteBlockSchema,
+    service: NoteService,
     view: {
       component: literal`affine-note`,
     },

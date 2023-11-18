@@ -1,6 +1,6 @@
 import '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 
-import { assertEquals, assertExists, Slot } from '@blocksuite/global/utils';
+import { assertEquals, assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BlockProps } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -55,7 +55,6 @@ import {
   ElementCtors,
   ElementDefaultProps,
   GroupElement,
-  type IPhasorElementLocalRecord,
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
@@ -152,10 +151,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _renderer!: Renderer;
   private _yContainer!: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<id, SurfaceElement>();
-  private _elementLocalRecords = new Map<
-    id,
-    IPhasorElementLocalRecord[keyof IPhasorElementLocalRecord]
-  >();
 
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
@@ -170,21 +165,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _lastTime = 0;
   private _cachedViewport = new Bound();
 
-  slots = {
-    elementUpdated: new Slot<{
-      id: id;
-      props: { [index: string]: { old: unknown; new: unknown } };
-    }>(),
-    elementAdded: new Slot<id>(),
-    elementRemoved: new Slot<{ id: id; element: SurfaceElement }>(),
-  };
-
   get edgeless() {
     return this.parentBlockElement as EdgelessPageBlockComponent;
   }
 
   private get _isEdgeless() {
-    return this.root.mode === 'edgeless';
+    return !!this.root.querySelector('affine-edgeless-page');
   }
 
   getBlocks<T extends EdgelessBlockType>(flavour: T) {
@@ -192,9 +178,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     if (flavour === EdgelessBlockType.NOTE) {
       parent = this.edgeless.model;
     }
-    return parent.children.filter(
-      child => child.flavour === flavour
-    ) as EdgelessBlockModelMap[T][];
+    return parent.children
+      .filter(child => child.flavour === flavour)
+      .map(child =>
+        this.edgeless.localRecord.wrap(child)
+      ) as EdgelessBlockModelMap[T][];
   }
 
   getSortedBlocks<T extends EdgelessBlockType>(flavour: T) {
@@ -260,7 +248,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     _disposables.add(edgeless.slots.reorderingShapesUpdated.on(this._reorder));
 
     _disposables.add(
-      this.slots.elementAdded.on(id => {
+      edgeless.slots.elementAdded.on(id => {
         const element = this.pickById(id);
         assertExists(element);
         if (element instanceof ConnectorElement) {
@@ -272,11 +260,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
 
     _disposables.add(
-      this.slots.elementUpdated.on(({ id, props }) => {
-        if ('xywh' in props || 'rotate' in props) {
-          this.edgeless.slots.elementSizeUpdated.emit(id);
-        }
-
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
         const element = this.pickById(id);
         assertExists(element);
 
@@ -289,7 +273,9 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
 
     _disposables.add(
-      this.edgeless.slots.elementSizeUpdated.on(id => {
+      this.edgeless.slots.elementUpdated.on(({ id, props }) => {
+        if (!('xywh' in props || 'rotate' in props)) return;
+
         const element = this.pickById(id);
         if (isConnectable(element)) {
           this.connector.syncConnectorPos([element]);
@@ -505,10 +491,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         }
       })
     );
+
     _disposables.add(
-      edgeless.slots.elementSizeUpdated.on(id => {
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
+        if (!('rotate' in props || 'xywh' in props)) return;
+
         const element = this.pickById(id);
         assertExists(element);
+
         if (
           element instanceof BrushElement ||
           edgeless.selectionManager.editing
@@ -519,7 +509,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
 
     _disposables.add(
-      this.slots.elementAdded.on(id => {
+      edgeless.slots.elementAdded.on(id => {
         const element = this.pickById(id);
         assertExists(element);
         if (element instanceof BrushElement) return;
@@ -588,15 +578,23 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _syncFromExistingContainer() {
     this.transact(() => {
       const yConnectors: Y.Map<unknown>[] = [];
+      const yGroups: Y.Map<unknown>[] = [];
       this._yContainer.forEach(yElement => {
         const type = yElement.get('type') as PhasorElementType;
         if (type === 'connector') {
           yConnectors.push(yElement);
           return;
         }
+        if (type === 'group') {
+          yGroups.push(yElement);
+          return;
+        }
         this._createElementFromYMap(yElement);
       });
       yConnectors.forEach(yElement => {
+        this._createElementFromYMap(yElement);
+      });
+      yGroups.forEach(yElement => {
         this._createElementFromYMap(yElement);
       });
     });
@@ -606,16 +604,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const type = yElement.get('type') as PhasorElementType;
     const id = yElement.get('id') as id;
     const ElementCtor = ElementCtors[type];
+    const { edgeless } = this;
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
       getLocalRecord: id => {
-        return this.getElementLocalRecord(id);
+        return edgeless.localRecord.get(id);
       },
       onElementUpdated: update => {
-        this.slots.elementUpdated.emit(update);
+        edgeless.slots.elementUpdated.emit(update);
       },
       updateElementLocalRecord: (id, record) => {
-        this.updateElementLocalRecord(id, record);
+        edgeless.localRecord.update(id, record);
       },
       pickById: id => this.pickById(id),
       getGroupParent: (element: string | EdgelessElement) => {
@@ -631,7 +630,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     element.mount(this._renderer);
     this._elements.set(element.id, element);
     this._addToBatch(element);
-    this.slots.elementAdded.emit(id);
+    this.edgeless.slots.elementAdded.emit(id);
   }
 
   private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
@@ -675,18 +674,19 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     if (type.action === 'add') {
       const yElement = this._yContainer.get(id) as Y.Map<unknown>;
       const type = yElement.get('type') as PhasorElementType;
+      const { edgeless } = this;
 
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, {
         getLocalRecord: id => {
-          return this.getElementLocalRecord(id);
+          return edgeless.localRecord.get(id);
         },
         onElementUpdated: update => {
-          this.slots.elementUpdated.emit(update);
+          edgeless.slots.elementUpdated.emit(update);
         },
         updateElementLocalRecord: (id, record) => {
-          this.updateElementLocalRecord(id, record);
+          edgeless.localRecord.update(id, record);
         },
         pickById: id => this.pickById(id),
         getGroupParent: (element: string | EdgelessElement) => {
@@ -703,7 +703,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       this._elements.set(element.id, element);
 
       this._addToBatch(element);
-      this.slots.elementAdded.emit(id);
+      this.edgeless.slots.elementAdded.emit(id);
     } else if (type.action === 'update') {
       console.error('update event on yElements is not supported', event);
     } else if (type.action === 'delete') {
@@ -715,9 +715,9 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       }
       element.unmount();
       this._elements.delete(id);
-      this.deleteElementLocalRecord(id);
+      this.edgeless.localRecord.delete(id);
       this._removeFromBatch(element);
-      this.slots.elementRemoved.emit({ id, element });
+      this.edgeless.slots.elementRemoved.emit({ id, element });
     }
   };
 
@@ -776,7 +776,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     if (this.page.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }
-
     if (isPhasorElementType(type)) {
       const attr = properties as IElementCreateProps<typeof type>;
       const id = generateElementId();
@@ -839,7 +838,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
     const element = this.pickById(id);
     if (isTopLevelBlock(element)) {
-      this.page.updateBlock(element, properties);
+      this.page.updateBlock(this.unwrap(element), properties);
     } else {
       this.transact(() => {
         const element = this._elements.get(id);
@@ -865,7 +864,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
     const element = this.pickById(id);
     if (isTopLevelBlock(element)) {
-      this.page.deleteBlock(element);
+      this.page.deleteBlock(this.unwrap(element));
     } else {
       this.transact(() => {
         this._yContainer.delete(id);
@@ -900,10 +899,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   pickById(id: string): EdgelessElement | null {
-    return (
-      this._elements.get(id) ??
-      (this.page.getBlockById(id) as TopLevelBlockModel)
-    );
+    if (this._elements.has(id))
+      return this._elements.get(id) as EdgelessElement;
+
+    const block = this.page.getBlockById(id);
+
+    return block
+      ? (this.edgeless.localRecord.wrap(block) as EdgelessElement)
+      : null;
   }
 
   pickByPoint(
@@ -982,6 +985,16 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return picked;
   }
 
+  /**
+   * Block model retrieved from the surface block will be wrapped with local record.
+   * You can use this function to unwrap them to get real model
+   * @param block
+   * @returns
+   */
+  unwrap<T extends BaseBlockModel>(block: T) {
+    return this.edgeless.localRecord.unwrap(block) as T;
+  }
+
   getSortedPhasorElementsWithViewportBounds() {
     return this.pickByBound(this.viewport.viewportBounds)
       .filter(e => !isTopLevelBlock(e))
@@ -1021,29 +1034,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this.getElements().filter(
       element => element.type === type
     ) as unknown as IPhasorElementType[T][];
-  }
-
-  updateElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(
-    id: id,
-    records: IPhasorElementLocalRecord[T]
-  ) {
-    const elementLocalRecord = this._elementLocalRecords.get(id);
-    if (elementLocalRecord) {
-      this._elementLocalRecords.set(id, { ...elementLocalRecord, ...records });
-    } else {
-      this._elementLocalRecords.set(id, records);
-    }
-    this.refresh();
-  }
-
-  getElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(id: id) {
-    return this._elementLocalRecords.get(id) as
-      | IPhasorElementLocalRecord[T]
-      | undefined;
-  }
-
-  deleteElementLocalRecord(id: id) {
-    this._elementLocalRecords.delete(id);
   }
 }
 
