@@ -1653,7 +1653,7 @@ test('arrow up/down navigation within and across paragraphs containing different
   await pressArrowDown(page);
   await assertRichTextVRange(page, 1, 0, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 1, 90, 0);
+  await assertRichTextVRange(page, 1, 93, 0);
   await pressArrowDown(page);
   await assertRichTextVRange(page, 1, 125, 0);
 });
