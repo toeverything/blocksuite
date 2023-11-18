@@ -6,6 +6,7 @@ import {
   Workspace,
 } from '@blocksuite/store';
 
+import { CanvasTextFontStyle, CanvasTextFontWeight } from './consts.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 
 export type SurfaceBlockProps = {
@@ -106,6 +107,37 @@ const migration = {
       data.elements = wrapper;
     }
   },
+  toV6: data => {
+    const { elements } = data;
+    const value = elements.getValue();
+    if (!value) {
+      return;
+    }
+
+    for (const [_, element] of value.entries()) {
+      const type = element.get('type') as string;
+      if (type === 'shape' || type === 'text') {
+        const bold = element.get('bold');
+        const italic = element.get('italic');
+
+        if (bold) {
+          element.set('fontWeight', CanvasTextFontWeight.SemiBold);
+          element.delete('bold');
+        } else {
+          element.set('fontWeight', CanvasTextFontWeight.Regular);
+          element.delete('bold');
+        }
+
+        if (italic) {
+          element.set('fontStyle', CanvasTextFontStyle.Italic);
+          element.delete('italic');
+        } else {
+          element.set('fontStyle', CanvasTextFontStyle.Normal);
+          element.delete('italic');
+        }
+      }
+    }
+  },
 } satisfies Record<string, MigrationRunner<typeof SurfaceBlockSchema>>;
 
 export const SurfaceBlockSchema = defineBlockSchema({
@@ -114,7 +146,7 @@ export const SurfaceBlockSchema = defineBlockSchema({
     elements: internalPrimitives.Native(new Workspace.Y.Map()),
   }),
   metadata: {
-    version: 5,
+    version: 6,
     role: 'hub',
     parent: ['affine:page'],
     children: ['affine:frame', 'affine:image'],
@@ -125,6 +157,9 @@ export const SurfaceBlockSchema = defineBlockSchema({
     }
     if (previousVersion < 5 && version >= 5) {
       migration.toV5(data);
+    }
+    if (previousVersion < 6 && version >= 6) {
+      migration.toV6(data);
     }
   },
   transformer: () => new SurfaceBlockTransformer(),
