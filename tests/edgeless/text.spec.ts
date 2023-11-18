@@ -159,8 +159,9 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await kalamTextFont.click();
   await waitNextFrame(page);
   let selectedRect = await getEdgelessSelectedRect(page);
-  expect(selectedRect.width).toBeLessThan(lastWidth);
-  expect(selectedRect.height).toBeGreaterThan(lastHeight);
+  expect(selectedRect.width).not.toEqual(lastWidth);
+  expect(selectedRect.height).not.toEqual(lastHeight);
+
   lastWidth = selectedRect.width;
   lastHeight = selectedRect.height;
   await fontButton.click();

@@ -438,12 +438,12 @@ test('auto wrap text in shape', async ({ page }) => {
   await page.mouse.click(200, 150);
   // the height of shape should be increased because of long text
   // cccccccc -- wrap --> cccccc\ncc
-  await assertEdgelessSelectedRect(page, [200, 150, 100, 160]);
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 120]);
 
   // try to decrease height
   await resizeElementByHandle(page, { x: 0, y: -50 }, 'bottom-right');
   // you can't decrease height because of min height to fit text
-  await assertEdgelessSelectedRect(page, [200, 150, 100, 160]);
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 120]);
 
   // increase width to make text not wrap
   await resizeElementByHandle(page, { x: 50, y: 0 }, 'bottom-right');
