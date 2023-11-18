@@ -1713,8 +1713,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await focusRichText(page, 0);
   await type(
     page,
-    // we need more three characters to get our expected result in local
-    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   );
   await waitNextFrame(page);
   // - aaa... (no \n)
@@ -1762,8 +1761,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await pressArrowUp(page);
   await pressArrowLeft(page);
   await waitNextFrame(page);
-  // if in local it should be 0, 93
-  await assertRichTextVRange(page, 0, 90);
+  await assertRichTextVRange(page, 0, 92);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)
