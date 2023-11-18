@@ -100,6 +100,7 @@ export class ClipboardController implements ReactiveController {
       this._std.command
         .pipe()
         .withRoot()
+        .getSelectedModels()
         .try(cmd => [
           cmd.getTextSelection().deleteText(),
           cmd.getBlockSelections().deleteSelectedModels(),
