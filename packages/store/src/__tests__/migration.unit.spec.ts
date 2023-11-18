@@ -99,14 +99,25 @@ describe('block migration', () => {
 
     assert.isUndefined(text.get('isBold'));
     assert.isUndefined(text.get('isItalic'));
-    assert.equal(text.get('bold'), true);
-    assert.equal(text.get('italic'), true);
+    // `bold` and `italic` are deprecated in v6
+    // assert.equal(text.get('bold'), true);
+    // assert.equal(text.get('italic'), true);
+    assert.isUndefined(text.get('bold'));
+    assert.isUndefined(text.get('italic'));
+    assert.equal(text.get('fontWeight'), '600');
+    assert.equal(text.get('fontStyle'), 'italic');
+
     assert.equal((text.get('text') as Y.Text).toJSON(), 'aaa');
 
     assert.isUndefined(shape.get('isBold'));
     assert.isUndefined(shape.get('isItalic'));
-    assert.equal(shape.get('bold'), true);
-    assert.equal(shape.get('italic'), true);
+    // `bold` and `italic` are deprecated in v6
+    // assert.equal(shape.get('bold'), true);
+    // assert.equal(shape.get('italic'), true);
+    assert.isUndefined(shape.get('bold'));
+    assert.isUndefined(shape.get('italic'));
+    assert.equal(shape.get('fontWeight'), '600');
+    assert.equal(shape.get('fontStyle'), 'italic');
   });
 
   test('fix wrong connector data', async () => {
