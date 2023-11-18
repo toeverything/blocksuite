@@ -33,8 +33,8 @@ export const deleteTextCommand: Command<
 
   const { from, to } = textSelection;
 
-  const fromElement = selectedElements.find(
-    el => PathFinder.id(from.path) === el.id
+  const fromElement = selectedElements.find(el =>
+    PathFinder.equals(from.path, el.path)
   );
   assertExists(fromElement);
 
@@ -55,8 +55,8 @@ export const deleteTextCommand: Command<
     return next();
   }
 
-  const toElement = selectedElements.find(
-    el => PathFinder.id(to.path) === el.id
+  const toElement = selectedElements.find(el =>
+    PathFinder.equals(to.path, el.path)
   );
   assertExists(toElement);
 

@@ -149,7 +149,7 @@ export class Gesture {
     }
 
     const editor = document
-      .elementFromPoint(state.x, state.y)
+      .elementFromPoint(state.raw.x, state.raw.y)
       ?.closest(`[${VIRGO_ROOT_ATTR}]`);
 
     if (!editor) return;
