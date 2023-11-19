@@ -13,7 +13,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
     .font-family-container {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: start;
       justify-content: center;
       background: var(--affine-background-overlay-panel-color);
       gap: 8px;
@@ -41,11 +41,11 @@ export class EdgelessFontFamilyPanel extends LitElement {
     }
 
     .bebas-neue {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'BebasNeue', sans-serif;
     }
 
     .orelega-one {
-      font-family: 'Orelega One', sans-serif;
+      font-family: 'OrelegaOne', sans-serif;
     }
   `;
 
