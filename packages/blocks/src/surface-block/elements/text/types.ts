@@ -18,8 +18,8 @@ export interface IText extends ISurfaceElement {
   color: string;
   fontSize: number;
   fontFamily: CanvasTextFontFamily;
-  fontWeight: CanvasTextFontWeight;
-  fontStyle: CanvasTextFontStyle;
+  fontWeight?: CanvasTextFontWeight;
+  fontStyle?: CanvasTextFontStyle;
   textAlign: 'left' | 'center' | 'right';
   hasMaxWidth?: boolean;
 }

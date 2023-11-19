@@ -99,25 +99,15 @@ describe('block migration', () => {
 
     assert.isUndefined(text.get('isBold'));
     assert.isUndefined(text.get('isItalic'));
-    // `bold` and `italic` are deprecated in v6
-    // assert.equal(text.get('bold'), true);
-    // assert.equal(text.get('italic'), true);
-    assert.isUndefined(text.get('bold'));
-    assert.isUndefined(text.get('italic'));
-    assert.equal(text.get('fontWeight'), '600');
-    assert.equal(text.get('fontStyle'), 'italic');
+    assert.equal(text.get('bold'), true);
+    assert.equal(text.get('italic'), true);
 
     assert.equal((text.get('text') as Y.Text).toJSON(), 'aaa');
 
     assert.isUndefined(shape.get('isBold'));
     assert.isUndefined(shape.get('isItalic'));
-    // `bold` and `italic` are deprecated in v6
-    // assert.equal(shape.get('bold'), true);
-    // assert.equal(shape.get('italic'), true);
-    assert.isUndefined(shape.get('bold'));
-    assert.isUndefined(shape.get('italic'));
-    assert.equal(shape.get('fontWeight'), '600');
-    assert.equal(shape.get('fontStyle'), 'italic');
+    assert.equal(shape.get('bold'), true);
+    assert.equal(shape.get('italic'), true);
   });
 
   test('fix wrong connector data', async () => {
@@ -222,57 +212,5 @@ describe('block migration', () => {
         ).toBe(200);
       }
     }
-  });
-
-  test('update shape and text element, `bold` -> `fontWeight`, `italic` -> `fontStyle`, surface v5 -> v6', async () => {
-    const doc = await loadBinary('page-surface-v5-v6');
-
-    // @ts-ignore
-    let surfaceElements = doc
-      .getMap('blocks')
-      .get('block:VdTncUFnqQ')
-      .get('prop:elements')
-      .get('value') as Y.Map<unknown>;
-    let boldText = surfaceElements.get('bsA2wbdtYQ') as Y.Map<unknown>;
-    let italicText = surfaceElements.get('L-mM2BFAti') as Y.Map<unknown>;
-    let boldShapeText = surfaceElements.get('Y650LhSLPO') as Y.Map<unknown>;
-    let italicShapeText = surfaceElements.get('XOXvN-nL6e') as Y.Map<unknown>;
-
-    assert.equal(boldText.get('bold'), true);
-    assert.equal(italicText.get('italic'), true);
-    assert.equal(boldShapeText.get('bold'), true);
-    assert.equal(italicShapeText.get('italic'), true);
-    assert.isUndefined(boldText.get('fontWeight'));
-    assert.isUndefined(italicText.get('fontStyle'));
-    assert.isUndefined(boldShapeText.get('fontWeight'));
-    assert.isUndefined(italicShapeText.get('fontStyle'));
-
-    schema.upgradePage(
-      0,
-      {
-        'affine:surface': 5,
-      },
-      doc
-    );
-
-    // @ts-ignore
-    surfaceElements = doc
-      .getMap('blocks')
-      .get('block:VdTncUFnqQ')
-      .get('prop:elements')
-      .get('value') as Y.Map<unknown>;
-    boldText = surfaceElements.get('bsA2wbdtYQ') as Y.Map<unknown>;
-    italicText = surfaceElements.get('L-mM2BFAti') as Y.Map<unknown>;
-    boldShapeText = surfaceElements.get('Y650LhSLPO') as Y.Map<unknown>;
-    italicShapeText = surfaceElements.get('XOXvN-nL6e') as Y.Map<unknown>;
-
-    assert.isUndefined(boldText.get('bold'));
-    assert.isUndefined(italicText.get('italic'));
-    assert.isUndefined(boldShapeText.get('bold'));
-    assert.isUndefined(italicShapeText.get('italic'));
-    assert.equal(boldText.get('fontWeight'), '600');
-    assert.equal(italicText.get('fontStyle'), 'italic');
-    assert.equal(boldShapeText.get('fontWeight'), '600');
-    assert.equal(italicShapeText.get('fontStyle'), 'italic');
   });
 });

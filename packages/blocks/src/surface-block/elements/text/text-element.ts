@@ -1,4 +1,8 @@
-import type { IModelCoord } from '../../consts.js';
+import {
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+  type IModelCoord,
+} from '../../consts.js';
 import { Bound } from '../../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
@@ -43,11 +47,17 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   get fontWeight() {
-    return this.yMap.get('fontWeight') as IText['fontWeight'];
+    return (
+      (this.yMap.get('fontWeight') as IText['fontWeight']) ??
+      CanvasTextFontWeight.Regular
+    );
   }
 
   get fontStyle() {
-    return this.yMap.get('fontStyle') as IText['fontStyle'];
+    return (
+      (this.yMap.get('fontStyle') as IText['fontStyle']) ??
+      CanvasTextFontStyle.Normal
+    );
   }
 
   get textAlign() {
