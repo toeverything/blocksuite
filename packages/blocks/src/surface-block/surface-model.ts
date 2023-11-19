@@ -6,7 +6,6 @@ import {
   Workspace,
 } from '@blocksuite/store';
 
-import { CanvasTextFontStyle, CanvasTextFontWeight } from './consts.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 
 export type SurfaceBlockProps = {
