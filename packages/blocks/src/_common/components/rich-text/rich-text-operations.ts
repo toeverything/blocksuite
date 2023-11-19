@@ -509,10 +509,14 @@ function handleEmbedDividerCodeSibling(
   previousSibling: ExtendedModel,
   parent: ExtendedModel
 ) {
+  if (matchFlavours(previousSibling, ['affine:divider'])) {
+    page.deleteBlock(previousSibling);
+    return true;
+  }
+
   if (
     !matchFlavours(previousSibling, [
       'affine:image',
-      'affine:divider',
       'affine:code',
       'affine:bookmark',
       'affine:attachment',
@@ -739,13 +743,14 @@ function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
       return true;
     }
     function handleEmbedDividerCodeSibling(nextSibling: ExtendedModel | null) {
+      if (matchFlavours(nextSibling, ['affine:divider'])) {
+        page.deleteBlock(nextSibling);
+        return true;
+      }
+
       if (
         !nextSibling ||
-        !matchFlavours(nextSibling, [
-          'affine:image',
-          'affine:divider',
-          'affine:code',
-        ])
+        !matchFlavours(nextSibling, ['affine:image', 'affine:code'])
       )
         return false;
       focusBlockByModel(nextSibling);
