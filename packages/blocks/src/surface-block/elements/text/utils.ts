@@ -1,5 +1,9 @@
 // something comes from https://github.com/excalidraw/excalidraw/blob/b1311a407a636c87ee0ca326fd20599d0ce4ba9b/src/utils.ts
 
+import type {
+  CanvasTextFontFamily,
+  CanvasTextFontWeight,
+} from '../../consts.js';
 import type { Bound } from '../../utils/bound.js';
 import type { TextElement } from './text-element.js';
 import type { ITextDelta } from './types.js';
@@ -383,4 +387,23 @@ export function normalizeTextBound(
   bound.h = lineHeightPx * lines.length;
 
   return bound;
+}
+
+export function isFontWeightSupported(
+  font: CanvasTextFontFamily,
+  weight: CanvasTextFontWeight
+) {
+  const fonts = document.fonts;
+  const fontFace = [...fonts.keys()].find(fontFace => {
+    return fontFace.family === font && fontFace.weight === weight;
+  });
+  return !!fontFace;
+}
+
+export function getSupportedFontWeight(font: CanvasTextFontFamily): string[] {
+  const fonts = document.fonts;
+  const fontFaces = [...fonts.keys()].filter(fontFace => {
+    return fontFace.family === font;
+  });
+  return fontFaces.map(fontFace => fontFace.weight);
 }

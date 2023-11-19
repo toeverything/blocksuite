@@ -5,6 +5,7 @@ import {
   CanvasTextFontFamily,
   CanvasTextFontWeight,
 } from '../../../../surface-block/consts.js';
+import { isFontWeightSupported } from '../../../../surface-block/elements/text/utils.js';
 
 @customElement('edgeless-font-weight-panel')
 export class EdgelessFontWeightPanel extends LitElement {
@@ -40,23 +41,12 @@ export class EdgelessFontWeightPanel extends LitElement {
     }
   }
 
-  private _isFontWeightSupported(
-    font: CanvasTextFontFamily,
-    weight: CanvasTextFontWeight
-  ) {
-    const fonts = document.fonts;
-    const fontFace = [...fonts.keys()].find(fontFace => {
-      return fontFace.family === font && fontFace.weight === weight;
-    });
-    return !!fontFace;
-  }
-
   override render() {
     return html`
       <div class="font-weight-container">
         <edgeless-tool-icon-button
           class="light"
-          .disabled=${!this._isFontWeightSupported(
+          .disabled=${!isFontWeightSupported(
             this.font,
             CanvasTextFontWeight.Light
           )}
@@ -72,7 +62,7 @@ export class EdgelessFontWeightPanel extends LitElement {
 
         <edgeless-tool-icon-button
           class="regular"
-          .disabled=${!this._isFontWeightSupported(
+          .disabled=${!isFontWeightSupported(
             this.font,
             CanvasTextFontWeight.Regular
           )}
@@ -88,7 +78,7 @@ export class EdgelessFontWeightPanel extends LitElement {
 
         <edgeless-tool-icon-button
           class="semi-bold"
-          .disabled=${!this._isFontWeightSupported(
+          .disabled=${!isFontWeightSupported(
             this.font,
             CanvasTextFontWeight.SemiBold
           )}

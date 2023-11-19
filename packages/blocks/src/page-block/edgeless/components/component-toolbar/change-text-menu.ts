@@ -22,6 +22,10 @@ import {
   CanvasTextFontWeight,
 } from '../../../../surface-block/consts.js';
 import {
+  getSupportedFontWeight,
+  isFontWeightSupported,
+} from '../../../../surface-block/elements/text/utils.js';
+import {
   Bound,
   normalizeShapeBound,
   normalizeTextBound,
@@ -313,9 +317,14 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   private _setFontFamily = (
     fontFamily: EdgelessCanvasTextElement['fontFamily']
   ) => {
+    const currentFontWeight = this._getMostCommonFontWeight(this.elements);
+    const fontWeight = isFontWeightSupported(fontFamily, currentFontWeight)
+      ? currentFontWeight
+      : CanvasTextFontWeight.Regular;
     this.elements.forEach(element => {
       this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
         fontFamily,
+        fontWeight,
       });
 
       this._updateElementBound(element);
@@ -516,6 +525,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="text-font-weight-button"
+        .disabled=${
+          getSupportedFontWeight(selectedFontFamily).length === 1 &&
+          getSupportedFontWeight(selectedFontFamily)[0] === selectedFontWeight
+        }
         .tooltip=${this._fontWeightPopperShow ? '' : 'Font Size'}
         .tipPosition=${'bottom'}
         .active=${false}
