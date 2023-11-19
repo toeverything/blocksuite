@@ -1355,10 +1355,14 @@ test('delete empty text paragraph block should keep children blocks when followi
 
   await pressEnter(page);
   await type(page, '456');
-  await assertRichTexts(page, ['123', '456']);
+
+  await pressEnter(page);
+  await type(page, '789');
+
+  await assertRichTexts(page, ['123', '456', '789']);
 
   // Indent the second paragraph block
-  await focusRichText(page, 1);
+  await focusRichText(page, 2);
   await pressTab(page);
 
   await assertStoreMatchJSX(
@@ -1373,9 +1377,13 @@ test('delete empty text paragraph block should keep children blocks when followi
   <affine:paragraph
     prop:text="123"
     prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
   >
     <affine:paragraph
-      prop:text="456"
+      prop:text="789"
       prop:type="text"
     />
   </affine:paragraph>
@@ -1384,10 +1392,10 @@ test('delete empty text paragraph block should keep children blocks when followi
   );
 
   // Delete the parent paragraph block
-  await focusRichText(page, 0);
+  await focusRichText(page, 1);
   await pressBackspace(page, 4);
 
-  await assertRichTexts(page, ['456']);
+  await assertRichTexts(page, ['123', '789']);
 
   await assertStoreMatchJSX(
     page,
@@ -1399,7 +1407,11 @@ test('delete empty text paragraph block should keep children blocks when followi
 >
   <affine:divider />
   <affine:paragraph
-    prop:text="456"
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="789"
     prop:type="text"
   />
 </affine:note>`,
