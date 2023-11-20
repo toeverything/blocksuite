@@ -504,7 +504,7 @@ test(scoped`automatic identify url text`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await type(page, 'abc https://google.com');
+  await type(page, 'abc https://google.com ');
 
   await assertStoreMatchJSX(
     page,
@@ -524,6 +524,9 @@ test(scoped`automatic identify url text`, async ({ page }) => {
           <text
             insert="https://google.com"
             link="https://google.com"
+          />
+          <text
+            insert=" "
           />
         </>
       }

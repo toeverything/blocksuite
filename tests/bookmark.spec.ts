@@ -143,7 +143,7 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await type(page, 'https://google.com');
+  await type(page, 'https://google.com ');
   await setVRangeInSelectedRichText(page, 0, 18);
   await copyByKeyboard(page);
   await focusRichText(page);
@@ -164,7 +164,10 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
         <>
           <text
             insert="https://google.com"
-            link="https://google.com/bookmark"
+            link="https://google.com"
+          />
+          <text
+            insert=" "
           />
         </>
       }
@@ -189,7 +192,7 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await focusRichText(page);
-  await type(page, 'https://google.com');
+  await type(page, 'https://google.com ');
 
   await switchEditorMode(page);
 
@@ -217,7 +220,10 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
         <>
           <text
             insert="https://google.com"
-            link="https://google.com/bookmark"
+            link="https://google.com"
+          />
+          <text
+            insert=" "
           />
         </>
       }
@@ -231,7 +237,7 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
       prop:icon=""
       prop:image=""
       prop:type="card"
-      prop:url="https://google.com"
+      prop:url="https://google.com "
     />
   </affine:note>
 </affine:page>`
