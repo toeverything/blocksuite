@@ -21,6 +21,7 @@ The major packages in BlockSuite include the following:
 - `@blocksuite/virgo`: Atomic rich text _component_ used in BlockSuite. Every editable block could hold its own virgo instances, leveraging the store to reconcile the block tree.
 - `@blocksuite/blocks`: Editable first-party blocks under the `affine` scope. The default AFFiNE editors are simply different implementations of the `affine:page` blocks.
 - `@blocksuite/editor`: The ready-to-use editors composed by blocks.
+- `@blocksuite/playground`: Default editor playground with local-first data persistence and real-time collaboration support.
 
 ## Why BlockSuite?
 

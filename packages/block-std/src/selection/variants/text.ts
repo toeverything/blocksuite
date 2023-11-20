@@ -28,7 +28,9 @@ const TextSelectionSchema = z.object({
       length: z.number(),
     })
     .nullable(),
-  isReverse: z.boolean().nullable(),
+  // The `optional()` is for backward compatibility,
+  // since `isReverse` may not exist in remote selection.
+  isReverse: z.boolean().optional(),
 });
 
 export class TextSelection extends BaseSelection {
