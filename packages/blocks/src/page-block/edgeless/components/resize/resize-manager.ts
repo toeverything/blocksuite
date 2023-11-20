@@ -1,4 +1,4 @@
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { IPoint } from '../../../../_common/utils/types.js';
 import {
@@ -28,10 +28,6 @@ type ResizeMoveHandler = (
 type RotateMoveHandler = (point: IPoint, rotate: number) => void;
 
 export class HandleResizeManager {
-  slots = {
-    resizeEnd: new Slot(),
-  };
-
   private _onDragStart: DragStartHandler;
   private _onResizeMove: ResizeMoveHandler;
   private _onRotateMove: RotateMoveHandler;
@@ -658,8 +654,6 @@ export class HandleResizeManager {
         start: { x: 0, y: 0 },
         end: { x: 0, y: 0 },
       };
-
-      this.slots.resizeEnd.emit();
 
       document.removeEventListener('pointermove', _onPointerMove);
       document.removeEventListener('pointerup', _onPointerUp);

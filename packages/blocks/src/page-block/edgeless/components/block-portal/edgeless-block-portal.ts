@@ -74,6 +74,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @state()
   private _toolbarVisible = false;
 
+  @state()
+  private _isResizing = false;
+
   private _cancelRestoreWillchange: (() => void) | null = null;
 
   private _noteResizeObserver = new NoteResizeObserver();
@@ -279,6 +282,18 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         this._updateAutoConnect();
       })
     );
+
+    _disposables.add(
+      edgeless.slots.elementResizeStart.on(() => {
+        this._isResizing = true;
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementResizeEnd.on(() => {
+        this._isResizing = false;
+      })
+    );
   }
 
   override render() {
@@ -336,7 +351,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             .frames=${frames}
           >
           </edgeless-frames-container>
-          ${readonly
+          ${readonly || this._isResizing
             ? nothing
             : html`<affine-note-slicer
                 .edgelessPage=${edgeless}

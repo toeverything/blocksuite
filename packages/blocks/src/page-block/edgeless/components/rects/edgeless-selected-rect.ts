@@ -308,6 +308,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     rotate: 0,
   };
 
+  @state()
+  private _isResizing = false;
+
   @property({ attribute: false })
   toolbarVisible = false;
 
@@ -393,6 +396,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   private _onDragStart = () => {
+    this.edgeless.slots.elementResizeStart.emit();
     this.setToolbarVisible(false);
     this._updateResizeManagerState(false);
   };
@@ -497,6 +501,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     this._updateCursor(false);
     this.setToolbarVisible(true);
+    this.edgeless.slots.elementResizeEnd.emit();
   };
 
   private _updateCursor = (
@@ -667,10 +672,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
     );
+
+    _disposables.add(
+      edgeless.slots.elementResizeStart.on(() => (this._isResizing = true))
+    );
+    _disposables.add(
+      edgeless.slots.elementResizeEnd.on(() => (this._isResizing = false))
+    );
   }
 
   private _canAutoComplete() {
     return (
+      !this._isResizing &&
       this.selection.elements.length === 1 &&
       (this.selection.elements[0] instanceof ShapeElement ||
         isNoteBlock(this.selection.elements[0]))
