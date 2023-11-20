@@ -22,6 +22,10 @@ export interface IText extends ISurfaceElement {
   fontStyle?: CanvasTextFontStyle;
   textAlign: 'left' | 'center' | 'right';
   hasMaxWidth?: boolean;
+
+  // outdated, use `fontWeight` and `fontStyle` instead
+  // bold: boolean;
+  // italic: boolean;
 }
 
 export interface ITextDelta {
