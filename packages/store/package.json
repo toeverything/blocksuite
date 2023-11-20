@@ -19,7 +19,6 @@
     "@blocksuite/virgo": "workspace:*",
     "@types/flexsearch": "^0.7.3",
     "@types/mdast": "^4.0.2",
-    "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.1",
     "lib0": "^0.2.87",

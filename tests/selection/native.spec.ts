@@ -1991,3 +1991,24 @@ test('scroll vertically when adding multiple blocks', async ({ page }) => {
 
   expect(viewportScrollTop).toBeGreaterThan(400);
 });
+
+test('click to select divided', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/4547',
+  });
+
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '--- ');
+  await assertDivider(page, 1);
+
+  await page.click('affine-divider');
+  const selectedBlocks = page.locator('.selected,affine-block-selection');
+  await expect(selectedBlocks).toHaveCount(1);
+
+  await pressForwardDelete(page);
+  await assertDivider(page, 0);
+});

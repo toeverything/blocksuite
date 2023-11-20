@@ -415,9 +415,6 @@ importers:
       '@types/mdast':
         specifier: ^4.0.2
         version: 4.0.2
-      buffer:
-        specifier: ^6.0.3
-        version: 6.0.3
       flexsearch:
         specifier: 0.7.21
         version: 0.7.21
