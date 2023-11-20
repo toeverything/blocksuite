@@ -20,6 +20,7 @@ import {
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import { LineWidth, type ShapeTool } from '../../../../_common/utils/types.js';
+import { CanvasTextFontFamily } from '../../../../surface-block/consts.js';
 import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type ShapeElement,
@@ -29,8 +30,6 @@ import {
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
-  GENERAL_CANVAS_FONT_FAMILY,
-  SCRIBBLED_CANVAS_FONT_FAMILY,
   SHAPE_FILL_COLOR_BLACK,
   SHAPE_TEXT_COLOR_PURE_BLACK,
   SHAPE_TEXT_COLOR_PURE_WHITE,
@@ -388,8 +387,8 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         shapeStyle: shapeStyle,
         fontFamily:
           shapeStyle === ShapeStyle.General
-            ? GENERAL_CANVAS_FONT_FAMILY
-            : SCRIBBLED_CANVAS_FONT_FAMILY,
+            ? CanvasTextFontFamily.Inter
+            : CanvasTextFontFamily.Kalam,
       });
     });
   }
@@ -585,7 +584,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           },
         })}
         ${doesAllShapesContainText(this.elements)
-          ? html` <component-toolbar-menu-divider></component-toolbar-menu-divider>
+          ? html`<component-toolbar-menu-divider></component-toolbar-menu-divider>
               <edgeless-change-text-menu
                 .elements=${this.elements}
                 .elementType=${'shape'}

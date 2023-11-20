@@ -5,7 +5,7 @@ import { stopPropagation } from '../../../../_common/utils/event.js';
 import { TEXT_FONT_SIZE } from '../text/types.js';
 
 const MIN_FONT_SIZE = 1;
-const MAX_FONT_SIZE = 200;
+const MAX_FONT_SIZE = 2000;
 @customElement('edgeless-font-size-panel')
 export class EdgelessFontSizePanel extends LitElement {
   static override styles = css`

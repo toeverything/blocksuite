@@ -101,6 +101,7 @@ describe('block migration', () => {
     assert.isUndefined(text.get('isItalic'));
     assert.equal(text.get('bold'), true);
     assert.equal(text.get('italic'), true);
+
     assert.equal((text.get('text') as Y.Text).toJSON(), 'aaa');
 
     assert.isUndefined(shape.get('isBold'));
