@@ -415,9 +415,6 @@ importers:
       '@types/mdast':
         specifier: ^4.0.2
         version: 4.0.2
-      buffer:
-        specifier: ^6.0.3
-        version: 6.0.3
       flexsearch:
         specifier: 0.7.21
         version: 0.7.21
@@ -1765,10 +1762,6 @@ packages:
 
   /@stitches/core@1.2.8:
     resolution: {integrity: sha512-Gfkvwk9o9kE9r9XNBmJRfV8zONvXThnm1tcuojL04Uy5uRyqg93DC83lDebl0rocZCfKSjUv+fWYtMQmEDJldg==}
-    dev: false
-
-  /@toeverything/theme@0.7.21:
-    resolution: {integrity: sha512-tCk7WXMrLp2qSVb/dXmbUsd68pvCWX1sT7N6iMmSJuF6AopqdeAoHJHmNYy93P7WgX4dX7saPxXCui3Gdq7QkQ==}
     dev: false
 
   /@toeverything/theme@0.7.24:
