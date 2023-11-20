@@ -1,5 +1,9 @@
 # Block Spec APIs
 
+::: warning
+This documentation is mostly written for BlockSuite maintainers. If you goal doesn't involve in contributing to the BlockSuite repository, here may not be the best place for getting started.
+:::
+
 In BlockSuite, blocks should be defined with certain kinds of shapes. Each shape is called a "block spec".
 The _spec_ means "specification", which includes a set of interfaces for defining blocks.
 
