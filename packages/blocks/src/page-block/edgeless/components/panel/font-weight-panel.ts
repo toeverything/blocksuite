@@ -5,7 +5,10 @@ import {
   CanvasTextFontFamily,
   CanvasTextFontWeight,
 } from '../../../../surface-block/consts.js';
-import { isFontWeightSupported } from '../../../../surface-block/elements/text/utils.js';
+import {
+  checkFontFamily,
+  isFontWeightSupported,
+} from '../../../../surface-block/elements/text/utils.js';
 
 @customElement('edgeless-font-weight-panel')
 export class EdgelessFontWeightPanel extends LitElement {
@@ -46,10 +49,8 @@ export class EdgelessFontWeightPanel extends LitElement {
       <div class="font-weight-container">
         <edgeless-tool-icon-button
           class="light"
-          .disabled=${!isFontWeightSupported(
-            this.font,
-            CanvasTextFontWeight.Light
-          )}
+          .disabled=${checkFontFamily(this.font) &&
+          !isFontWeightSupported(this.font, CanvasTextFontWeight.Light)}
           .active=${this.value === CanvasTextFontWeight.Light}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
@@ -62,10 +63,8 @@ export class EdgelessFontWeightPanel extends LitElement {
 
         <edgeless-tool-icon-button
           class="regular"
-          .disabled=${!isFontWeightSupported(
-            this.font,
-            CanvasTextFontWeight.Regular
-          )}
+          .disabled=${checkFontFamily(this.font) &&
+          !isFontWeightSupported(this.font, CanvasTextFontWeight.Regular)}
           .active=${this.value === CanvasTextFontWeight.Regular}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
@@ -78,10 +77,8 @@ export class EdgelessFontWeightPanel extends LitElement {
 
         <edgeless-tool-icon-button
           class="semi-bold"
-          .disabled=${!isFontWeightSupported(
-            this.font,
-            CanvasTextFontWeight.SemiBold
-          )}
+          .disabled=${checkFontFamily(this.font) &&
+          !isFontWeightSupported(this.font, CanvasTextFontWeight.SemiBold)}
           .active=${this.value === CanvasTextFontWeight.SemiBold}
           .activeMode=${'background'}
           .iconContainerPadding=${2}

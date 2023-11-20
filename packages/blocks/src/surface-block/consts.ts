@@ -34,6 +34,15 @@ export interface IModelCoord {
   y: number;
 }
 
+export const CANVAS_TEXT_FONT_FAMILY: string[] = [
+  CanvasTextFontFamily.Inter,
+  CanvasTextFontFamily.Kalam,
+  CanvasTextFontFamily.Satoshi,
+  CanvasTextFontFamily.Poppins,
+  CanvasTextFontFamily.Lora,
+  CanvasTextFontFamily.BebasNeue,
+  CanvasTextFontFamily.OrelegaOne,
+];
 export const enum CanvasTextFontFamily {
   Inter = 'Inter',
   Kalam = 'Kalam',

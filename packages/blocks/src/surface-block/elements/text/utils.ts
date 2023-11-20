@@ -1,8 +1,9 @@
 // something comes from https://github.com/excalidraw/excalidraw/blob/b1311a407a636c87ee0ca326fd20599d0ce4ba9b/src/utils.ts
 
-import type {
-  CanvasTextFontFamily,
-  CanvasTextFontWeight,
+import type { CanvasTextFontFamily } from '../../consts.js';
+import {
+  CANVAS_TEXT_FONT_FAMILY,
+  type CanvasTextFontWeight,
 } from '../../consts.js';
 import type { Bound } from '../../utils/bound.js';
 import type { TextElement } from './text-element.js';
@@ -406,4 +407,8 @@ export function getSupportedFontWeight(font: CanvasTextFontFamily): string[] {
     return fontFace.family === font;
   });
   return fontFaces.map(fontFace => fontFace.weight);
+}
+
+export function checkFontFamily(font: string): boolean {
+  return CANVAS_TEXT_FONT_FAMILY.includes(font);
 }
