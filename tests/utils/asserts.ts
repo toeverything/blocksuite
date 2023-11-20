@@ -114,7 +114,7 @@ export const defaultStore: SerializedStore = {
               borderRadius: 8,
               borderSize: 4,
               borderStyle: 'solid',
-              shadowStyle: '--affine-note-shadow-box',
+              shadowType: '--affine-note-shadow-box',
             },
           },
         },

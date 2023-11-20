@@ -53,7 +53,7 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -104,7 +104,7 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -145,7 +145,7 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -192,7 +192,7 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -255,7 +255,7 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -301,7 +301,7 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -354,7 +354,7 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -412,7 +412,7 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }

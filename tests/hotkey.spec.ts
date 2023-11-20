@@ -150,7 +150,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -213,7 +213,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -249,7 +249,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -350,7 +350,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -402,7 +402,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -458,7 +458,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -514,7 +514,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -585,7 +585,7 @@ test('should single line format hotkey work', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -638,7 +638,7 @@ test('should single line format hotkey work', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -684,7 +684,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -765,7 +765,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -810,7 +810,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -836,7 +836,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -863,7 +863,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -892,7 +892,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -920,7 +920,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -947,7 +947,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -1003,7 +1003,7 @@ test('should cut work single line', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -1031,7 +1031,7 @@ test('should cut work single line', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -1068,7 +1068,7 @@ test.skip('should cut work multiple line', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -1096,7 +1096,7 @@ test.skip('should cut work multiple line', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -1453,7 +1453,7 @@ test('Enter key should as expected after setting heading by shortkey', async ({
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }

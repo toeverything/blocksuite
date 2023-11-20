@@ -194,10 +194,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     null;
 
   @query('.shadow-style-button')
-  private _shadowStyleButton!: HTMLDivElement;
+  private _shadowTypeButton!: HTMLDivElement;
   @query('edgeless-note-shadow-panel')
-  private _shadowStylesPanel!: HTMLDivElement;
-  private _shadowStylePopper: ReturnType<typeof createButtonPopper> | null =
+  private _shadowTypesPanel!: HTMLDivElement;
+  private _shadowTypePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
   private _setBackground(color: CssVariableName) {
@@ -206,9 +206,9 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     });
   }
 
-  private _setShadowStyle(shadowStyle: string) {
+  private _setShadowType(shadowType: string) {
     this.notes.forEach(note => {
-      note.edgeless.style.shadowStyle = shadowStyle;
+      note.edgeless.style.shadowType = shadowType;
     });
   }
 
@@ -325,14 +325,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     );
     _disposables.add(this._borderRadiusPopper);
 
-    this._shadowStylePopper = createButtonPopper(
-      this._shadowStyleButton,
-      this._shadowStylesPanel,
+    this._shadowTypePopper = createButtonPopper(
+      this._shadowTypeButton,
+      this._shadowTypesPanel,
       ({ display }) => {
         this._popperShow = display === 'show';
       }
     );
-    _disposables.add(this._shadowStylePopper);
+    _disposables.add(this._shadowTypePopper);
   }
 
   override render() {
@@ -342,7 +342,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     const enableIndex =
       this.surface.page.awarenessStore.getFlag('enable_note_index');
     const { hidden, background, edgeless } = note;
-    const { shadowStyle, borderRadius, borderSize, borderStyle } =
+    const { shadowType, borderRadius, borderSize, borderStyle } =
       edgeless.style;
 
     const { collapse } = edgeless;
@@ -402,16 +402,16 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
           .tipPosition=${'bottom'}
           .iconContainerPadding=${0}
           .hover=${false}
-          @click=${() => this._shadowStylePopper?.toggle()}
+          @click=${() => this._shadowTypePopper?.toggle()}
         >
           ${NoteShadowIcon}${SmallArrowDownIcon}
         </edgeless-tool-icon-button>
       </div>
 
       <edgeless-note-shadow-panel
-        .value=${shadowStyle}
+        .value=${shadowType}
         .background=${background}
-        .onSelect=${(value: string) => this._setShadowStyle(value)}
+        .onSelect=${(value: string) => this._setShadowType(value)}
       >
       </edgeless-note-shadow-panel>
 

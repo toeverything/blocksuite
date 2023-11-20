@@ -140,7 +140,7 @@ test('can insert attachment from slash menu', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -180,7 +180,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -210,7 +210,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -235,7 +235,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -316,7 +316,7 @@ test('should turn attachment to image works', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -346,7 +346,7 @@ test('should turn attachment to image works', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -388,7 +388,7 @@ test('should attachment can be deleted', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -429,7 +429,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -478,7 +478,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -532,7 +532,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }

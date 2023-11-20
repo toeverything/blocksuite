@@ -518,7 +518,7 @@ test(scoped`automatic identify url text`, async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }

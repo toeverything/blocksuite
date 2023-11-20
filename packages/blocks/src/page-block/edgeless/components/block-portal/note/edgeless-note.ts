@@ -9,10 +9,8 @@ import {
   ACTIVE_NOTE_EXTRA_PADDING,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../../../../_common/consts.js';
-import {
-  DEFAULT_NOTE_COLOR,
-  type NoteBlockModel,
-} from '../../../../../note-block/note-model.js';
+import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
+import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
@@ -102,7 +100,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   override render() {
     const { model, surface, index } = this;
     const { xywh, background, hidden, edgeless } = model;
-    const { borderRadius, borderSize, borderStyle, shadowStyle } =
+    const { borderRadius, borderSize, borderStyle, shadowType } =
       edgeless.style;
     const { collapse } = edgeless;
     const bound = Bound.deserialize(xywh);
@@ -146,9 +144,9 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
           } var(--affine-black-10)`,
       boxShadow: editing
         ? 'var(--affine-active-shadow)'
-        : hidden || !shadowStyle
+        : hidden || !shadowType
         ? 'none'
-        : `var(${shadowStyle})`,
+        : `var(${shadowType})`,
     };
 
     return html`

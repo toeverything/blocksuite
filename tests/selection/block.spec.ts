@@ -267,7 +267,7 @@ test('should indent multi-selection block', async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -321,7 +321,7 @@ test('should unindent multi-selection block', async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -369,7 +369,7 @@ test('should unindent multi-selection block', async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -1194,7 +1194,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -1336,7 +1336,7 @@ test('click bottom of page and if the last is embed block, editor should insert 
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }

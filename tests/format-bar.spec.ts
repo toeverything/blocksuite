@@ -214,7 +214,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -271,7 +271,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -337,7 +337,7 @@ test.fixme(
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -384,7 +384,7 @@ test.fixme(
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -435,7 +435,7 @@ test.fixme(
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -492,7 +492,7 @@ test('should format quick bar be able to format text when select multiple line',
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -549,7 +549,7 @@ test('should format quick bar be able to format text when select multiple line',
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -601,7 +601,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -650,7 +650,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -700,7 +700,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -736,7 +736,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -775,7 +775,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -996,7 +996,7 @@ test('should format quick bar work in single block selection', async ({
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -1080,7 +1080,7 @@ test('should format quick bar work in multiple block selection', async ({
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -1166,7 +1166,7 @@ test('should format quick bar with block selection works when update block type'
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -1208,7 +1208,7 @@ test('should format quick bar with block selection works when update block type'
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -1266,7 +1266,7 @@ test('should format quick bar show after convert to code block', async ({
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }

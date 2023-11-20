@@ -147,7 +147,7 @@ test('move to the last block of each level in multi-level nesting', async ({
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -217,7 +217,7 @@ test('move to the last block of each level in multi-level nesting', async ({
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -293,7 +293,7 @@ test('move to the last block of each level in multi-level nesting', async ({
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -370,7 +370,7 @@ test('move to the last block of each level in multi-level nesting', async ({
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -516,7 +516,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -599,7 +599,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }

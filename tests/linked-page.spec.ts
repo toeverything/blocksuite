@@ -118,7 +118,7 @@ test.describe('multiple page', () => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -156,7 +156,7 @@ test.describe('multiple page', () => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -541,7 +541,7 @@ test.describe('reference node', () => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -574,7 +574,7 @@ test.describe('reference node', () => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -796,7 +796,7 @@ test.describe.skip('linked page with clipboard', () => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }

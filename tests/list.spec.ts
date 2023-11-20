@@ -215,7 +215,7 @@ test('nested list blocks', async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -261,7 +261,7 @@ test('nested list blocks', async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -339,7 +339,7 @@ test('basic indent and unindent', async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -371,7 +371,7 @@ test('basic indent and unindent', async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -405,7 +405,7 @@ test('basic indent and unindent', async ({ page }) => {
           "borderRadius": 8,
           "borderSize": 4,
           "borderStyle": "solid",
-          "shadowStyle": "--affine-note-shadow-box",
+          "shadowType": "--affine-note-shadow-box",
         },
       }
     }
@@ -448,7 +448,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -481,7 +481,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -741,7 +741,7 @@ test.describe('toggle list', () => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }
@@ -788,7 +788,7 @@ test.describe('toggle list', () => {
         "borderRadius": 8,
         "borderSize": 4,
         "borderStyle": "solid",
-        "shadowStyle": "--affine-note-shadow-box",
+        "shadowType": "--affine-note-shadow-box",
       },
     }
   }

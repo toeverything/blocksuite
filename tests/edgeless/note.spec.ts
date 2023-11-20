@@ -49,6 +49,7 @@ import {
   assertEdgelessNonSelectedRect,
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
+  assertExists,
   assertNativeSelectionRangeCount,
   assertNoteSequence,
   assertNoteXYWH,
@@ -102,7 +103,7 @@ test('resize note in edgeless mode', async ({ page }) => {
   const initRect = await getNoteRect(page, ids);
   const leftHandle = page.locator('.handle[aria-label="left"] .resize');
   const box = await leftHandle.boundingBox();
-  if (box === null) throw new Error();
+  assertExists(box);
 
   await dragBetweenCoords(
     page,
@@ -141,8 +142,7 @@ test('reszie note then auto size and custom size', async ({ page }) => {
     '.handle[aria-label="bottom-right"] .resize'
   );
   const box = await bottomRightResize.boundingBox();
-
-  if (box === null) throw new Error();
+  assertExists(box);
 
   await dragBetweenCoords(
     page,

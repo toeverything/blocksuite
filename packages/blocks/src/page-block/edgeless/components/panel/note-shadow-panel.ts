@@ -6,11 +6,11 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { NOTE_SHADOWS } from '../../../../_common/edgeless/note/consts.js';
 import {
   NoteNoShadowIcon,
   NoteShadowSampleIcon,
 } from '../../../../_common/icons/edgeless.js';
-import { NOTE_SHADOWS } from '../../../../note-block/note-model.js';
 
 const TOOLBAR_SHADOWS = [
   '',
@@ -21,7 +21,7 @@ const TOOLBAR_SHADOWS = [
   '0px 0px 0px 1.4px rgba(0, 0, 0, 1), 2.4px 2.4px 0px 1px rgba(0, 0, 0, 1)',
 ];
 
-const TOOTIPS = [
+const TOOLTIPS = [
   'No Shadow',
   'Box Shadow',
   'Sticker Shadow',
@@ -99,7 +99,7 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
           >
             <edgeless-tool-icon-button
               class="item-icon"
-              .tooltip=${TOOTIPS[index]}
+              .tooltip=${TOOLTIPS[index]}
               .tipPosition=${'bottom'}
               .iconContainerPadding=${0}
               style=${styleMap({

@@ -1,7 +1,10 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { NOTE_WIDTH } from '../_common/consts.js';
-import type { CssVariableName } from '../_common/theme/css-variables.js';
+import {
+  DEFAULT_NOTE_COLOR,
+  NOTE_SHADOWS,
+} from '../_common/edgeless/note/consts.js';
 import { BLOCK_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {
@@ -17,26 +20,6 @@ import {
   type SerializedXYWH,
 } from '../surface-block/index.js';
 
-export const NOTE_COLORS: CssVariableName[] = [
-  '--affine-background-secondary-color',
-  '--affine-tag-yellow',
-  '--affine-tag-red',
-  '--affine-tag-green',
-  '--affine-tag-blue',
-  '--affine-tag-purple',
-];
-
-export const NOTE_SHADOWS = [
-  '',
-  '--affine-note-shadow-box',
-  '--affine-note-shadow-sticker',
-  '--affine-note-shadow-paper',
-  '--affine-note-shadow-float',
-  `--affine-note-shadow-film`,
-];
-
-export const DEFAULT_NOTE_COLOR = NOTE_COLORS[0];
-
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
   props: () => ({
@@ -49,7 +32,7 @@ export const NoteBlockSchema = defineBlockSchema({
         borderRadius: 8,
         borderSize: 4,
         borderStyle: 'solid',
-        shadowStyle: NOTE_SHADOWS[1],
+        shadowType: NOTE_SHADOWS[1],
       },
     },
   }),
@@ -89,7 +72,7 @@ type NoteEdgelessProps = {
     borderRadius: number;
     borderSize: number;
     borderStyle: StrokeStyle;
-    shadowStyle: string;
+    shadowType: string;
   };
   collapse: boolean;
   collapsedHeight: number;
