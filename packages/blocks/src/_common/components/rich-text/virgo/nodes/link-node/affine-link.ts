@@ -117,7 +117,8 @@ export class AffineLink extends ShadowlessElement {
         resolve();
       }, 500);
     }).then(() => {
-      if (this._isLinkHover) return;
+      const model = getModelByElement(this);
+      if (this._isLinkHover && !model.page.readonly) return;
       if (!this._isLinkPopupHover) {
         if (this._popup) {
           this._popup.remove();
