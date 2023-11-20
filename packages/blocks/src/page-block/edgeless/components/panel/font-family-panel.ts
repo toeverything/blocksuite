@@ -20,6 +20,10 @@ export class EdgelessFontFamilyPanel extends LitElement {
       padding: 8px;
     }
 
+    .font-family-container edgeless-tool-icon-button {
+      width: 100%;
+    }
+
     .inter {
       font-family: 'Inter', sans-serif;
     }

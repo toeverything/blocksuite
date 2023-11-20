@@ -20,11 +20,15 @@ export class EdgelessFontWeightPanel extends LitElement {
     .font-weight-container {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: start;
       justify-content: center;
       background: var(--affine-background-overlay-panel-color);
       gap: 8px;
       padding: 8px;
+    }
+
+    .font-weight-container edgeless-tool-icon-button {
+      width: 100%;
     }
   `;
 
