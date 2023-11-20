@@ -19,6 +19,7 @@ import {
   type Selectable,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
+import { last } from '../_common/utils/iterable.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
@@ -31,7 +32,6 @@ import {
   isTopLevelBlock,
 } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
-import { Batch, BLOCK_BATCH, FRAME_BATCH } from './batch.js';
 import type { IBound } from './consts.js';
 import {
   type EdgelessBlockModelMap,
@@ -57,7 +57,7 @@ import {
   GroupElement,
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
-import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
+import type { IVec, PhasorElementType } from './index.js';
 import {
   compare,
   EdgelessGroupManager,
@@ -89,6 +89,7 @@ export enum EdgelessBlocksFlavour {
 
 @customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
+  static INITAL_INDEX = 'a1';
   static override styles = css`
     .affine-edgeless-surface-block-container {
       position: absolute;
@@ -162,7 +163,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   setGroupParent = setGroupParent;
 
   private _defaultBatch = 'a1';
-  private _batches = new Map<string, Batch<IEdgelessElement>>();
   private _lastTime = 0;
   private _cachedViewport = new Bound();
 
@@ -190,8 +190,15 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       ) as EdgelessBlockModelMap[T][];
   }
 
-  getSortedBlocks<T extends EdgelessBlockType>(flavour: T) {
-    return this.getBlocks(flavour).sort(this.compare);
+  getSortedBlocks<T extends EdgelessBlockType>(flavour: T | T[]) {
+    const flavours = typeof flavour === 'string' ? [flavour] : flavour;
+    let blocks: TopLevelBlockModel[] = [];
+
+    flavours.forEach(f => {
+      blocks = blocks.concat(this.getBlocks(f) ?? []);
+    });
+
+    return blocks.sort(this.compare);
   }
 
   get blocks() {
@@ -284,41 +291,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         const element = this.pickById(id);
         if (isConnectable(element)) {
           this.connector.syncConnectorPos([element]);
-        }
-      })
-    );
-
-    this._initBlocks();
-  }
-
-  private _initBlocks() {
-    const { page } = this;
-    this.blocks.forEach(block => {
-      this._addToBatch(block);
-    });
-    this._disposables.add(
-      page.slots.blockUpdated.on(e => {
-        if (e.type === 'add') {
-          const model = this.pickById(e.id) as TopLevelBlockModel;
-          assertExists(model);
-          if (isFrameBlock(model) || isNoteBlock(model)) {
-            this._addToBatch(model);
-          } else if (
-            isImageBlock(model) &&
-            (<Y.Array<string>>this.model.yBlock.get('sys:children'))
-              .toArray()
-              .includes(e.id)
-          ) {
-            this._addToBatch(model);
-          }
-        } else if (e.type === 'delete') {
-          if (e.flavour === NOTE || e.flavour === FRAME) {
-            const model = this.pickById(e.id) as TopLevelBlockModel;
-            this._removeFromBatch(model);
-          } else if (e.flavour === IMAGE && e.parent === this.model.id) {
-            const model = this.pickById(e.id) as TopLevelBlockModel;
-            this._removeFromBatch(model);
-          }
         }
       })
     );
@@ -562,24 +534,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this._defaultBatch;
   }
 
-  getBatch(id: string) {
-    const batch = this._batches.get(id);
-    if (batch) return batch;
-    const newBatch = new Batch<IEdgelessElement>(id);
-    this._batches.set(id, newBatch);
-    return newBatch;
-  }
-
-  private _addToBatch(element: IEdgelessElement) {
-    const batch = element.batch ?? this._defaultBatch;
-    this.getBatch(batch).addElement(element);
-  }
-
-  private _removeFromBatch(element: IEdgelessElement) {
-    const batch = element.batch ?? this._defaultBatch;
-    this.getBatch(batch).deleteElement(element);
-  }
-
   private _syncFromExistingContainer() {
     this.transact(() => {
       const yConnectors: Y.Map<unknown>[] = [];
@@ -626,7 +580,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     element.computedValue = this.getCSSPropertyValue;
     element.mount(this._renderer);
     this._elements.set(element.id, element);
-    this._addToBatch(element);
     this.edgeless.slots.elementAdded.emit(id);
   }
 
@@ -699,7 +652,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       element.mount(this._renderer);
       this._elements.set(element.id, element);
 
-      this._addToBatch(element);
       this.edgeless.slots.elementAdded.emit(id);
     } else if (type.action === 'update') {
       console.error('update event on yElements is not supported', event);
@@ -713,7 +665,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       element.unmount();
       this._elements.delete(id);
       this.edgeless.localRecord.delete(id);
-      this._removeFromBatch(element);
       this.edgeless.slots.elementRemoved.emit({ id, element });
     }
   };
@@ -775,18 +726,20 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
 
     if (isPhasorElementType(type)) {
-      const attr = properties as IElementCreateProps<typeof type>;
       const id = generateElementId();
 
       const yMap = new Workspace.Y.Map();
 
       const defaultProps = ElementDefaultProps[type];
-      const batch = this.getBatch(attr.batch ?? this._defaultBatch);
+      const sortedElements = Array.from(this._elements.values()).sort(compare);
       const props: IElementCreateProps<typeof type> = {
         ...defaultProps,
         ...properties,
         id,
-        index: generateKeyBetween(batch.max, null),
+        index: generateKeyBetween(
+          last(sortedElements)?.index ?? SurfaceBlockComponent.INITAL_INDEX,
+          null
+        ),
         seed: randomSeed(),
       };
 
@@ -807,12 +760,18 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
       return id;
     } else {
-      let batchId = BLOCK_BATCH;
-      if (type === EdgelessElementType.FRAME) {
-        batchId = FRAME_BATCH;
-      }
-      const batch = this.getBatch(batchId);
-      const index = generateKeyBetween(batch.max, null);
+      const blocks =
+        type === EdgelessElementType.FRAME
+          ? this.getSortedBlocks(EdgelessBlockType.FRAME)
+          : this.getSortedBlocks([
+              EdgelessBlockType.NOTE,
+              EdgelessBlockType.IMAGE,
+            ]);
+
+      const index = generateKeyBetween(
+        last(blocks)?.index ?? SurfaceBlockComponent.INITAL_INDEX,
+        null
+      );
       return this.page.addBlock(
         type,
         { ...properties, index },

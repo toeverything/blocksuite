@@ -180,3 +180,16 @@ export function isEmpty(obj: unknown) {
 export function keys<T>(obj: T): (keyof T)[] {
   return Object.keys(obj as object) as (keyof T)[];
 }
+
+export function last<T>(array: Iterable<T>): T | undefined {
+  if (Array.isArray(array)) {
+    return array[array.length - 1];
+  }
+
+  let last: T | undefined;
+  for (const item of array) {
+    last = item;
+  }
+
+  return last;
+}
