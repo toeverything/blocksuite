@@ -4,6 +4,7 @@ import './components/lang-list.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
+import { CodeBlockAdapter } from '@blocksuite/store';
 import {
   VIRGO_ROOT_ATTR,
   type VirgoRootElement,
@@ -219,6 +220,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
   }
 
+  private _codeBlockAdapter = new CodeBlockAdapter();
+
   private _vRangeProvider: VRangeProvider | null = null;
 
   get vEditor() {
@@ -280,6 +283,17 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         highlighter: this._highlighter,
       };
     });
+
+    this.std.clipboard.registerAdapter(
+      'text/plain',
+      this._codeBlockAdapter,
+      90
+    );
+
+    this._disposables.add(() =>
+      this.std.clipboard.unregisterAdapter('text/plain')
+    );
+
     this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );
