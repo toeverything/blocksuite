@@ -1,4 +1,8 @@
-import { type BaseBlockModel, Slice } from '@blocksuite/store';
+import {
+  type BaseBlockModel,
+  CodeBlockAdapter,
+  Slice,
+} from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
@@ -27,6 +31,11 @@ export function CodeOptionTemplate({
 }) {
   const page = model.page;
   const readonly = page.readonly;
+
+  const codeBlockAdapter = new CodeBlockAdapter();
+
+  anchor.std.clipboard.registerAdapter('text/plain', codeBlockAdapter, 90);
+  // TODO: unregister it & replace it to somewhere
 
   return html`
     <style>
