@@ -691,9 +691,7 @@ export class Page extends BlockTree {
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
-      yChildren.forEach((id: string) => {
-        const index = model.childMap.get(id);
-        assertExists(index);
+      yChildren.forEach((id: string, index) => {
         const hasChild = this._blocks.has(id);
 
         if (!hasChild) {

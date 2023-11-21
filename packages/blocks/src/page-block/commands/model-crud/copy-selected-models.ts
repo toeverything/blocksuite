@@ -22,9 +22,6 @@ export const copySelectedModelsCommand: Command<
       ? model.children
       : model.children.filter(child => {
           const idx = models.findIndex(m => m.id === child.id);
-          if (idx < 0) {
-            model.childMap.delete(child.id);
-          }
           return idx >= 0;
         });
 
