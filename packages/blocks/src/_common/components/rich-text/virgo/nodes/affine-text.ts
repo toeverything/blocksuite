@@ -32,7 +32,7 @@ export function affineTextStyles(
   }
 
   return styleMap({
-    'font-weight': props.bold ? 'bold' : 'inherit',
+    'font-weight': props.bold ? 'bolder' : 'inherit',
     'font-style': props.italic ? 'italic' : 'normal',
     'background-color': props.background ? props.background : undefined,
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
