@@ -1,5 +1,6 @@
 import '../panel/font-family-panel.js';
 import '../panel/size-panel.js';
+import '../panel/font-weight-panel.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
@@ -7,8 +8,6 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import {
-  BoldIcon,
-  FontFamilyIcon,
   ItalicIcon,
   SmallArrowDownIcon,
   TextAlignCenterIcon,
@@ -17,6 +16,15 @@ import {
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
+import {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+} from '../../../../surface-block/consts.js';
+import {
+  getSupportedFontWeight,
+  isFontWeightSupported,
+} from '../../../../surface-block/elements/text/utils.js';
 import {
   Bound,
   normalizeShapeBound,
@@ -27,7 +35,6 @@ import {
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';
 import {
   type ColorEvent,
@@ -36,6 +43,7 @@ import {
   LINE_COLORS,
 } from '../panel/color-panel.js';
 import type { EdgelessFontFamilyPanel } from '../panel/font-family-panel.js';
+import type { EdgelessFontWeightPanel } from '../panel/font-weight-panel.js';
 import type { EdgelessSizePanel } from '../panel/size-panel.js';
 import {
   type EdgelessCanvasTextElement,
@@ -69,7 +77,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     .color-panel-container,
     .align-panel-container.text-align,
     .font-size-panel-container,
-    .font-family-panel-container {
+    .font-family-panel-container,
+    .font-weight-panel-container {
       display: none;
       justify-content: center;
       align-items: center;
@@ -81,7 +90,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     .color-panel-container[data-show],
     .align-panel-container[data-show],
     .font-size-panel-container[data-show],
-    .font-family-panel-container[data-show] {
+    .font-family-panel-container[data-show],
+    .font-weight-panel-container[data-show] {
       display: block;
     }
 
@@ -131,6 +141,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       stroke: none;
     }
 
+    .text-font-family-button {
+      font-family: var(--selected-font-family);
+    }
+
     component-toolbar-menu-divider {
       margin: 0 12px;
     }
@@ -151,9 +165,11 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   @state()
   private _textColorPopperShow = false;
   @state()
-  private _fontFamilyPopperShow = false;
-  @state()
   private _fontSizePopperShow = false;
+  @state()
+  private _fontWeightPopperShow = false;
+  @state()
+  private _fontFamilyPopperShow = false;
   @state()
   private _textAlignPopperShow = false;
 
@@ -184,6 +200,13 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   private _textFontSizePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @query('.text-font-weight-button')
+  private _textFontWeightButton!: HTMLButtonElement;
+  @query('.font-weight-panel-container')
+  private _textFontWeightMenu!: HTMLDivElement;
+  private _textFontWeightPopper: ReturnType<typeof createButtonPopper> | null =
+    null;
+
   private _getMostCommonFontFamily = (
     elements: EdgelessCanvasTextElement[]
   ): EdgelessCanvasTextElement['fontFamily'] => {
@@ -194,7 +217,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const max = maxBy(Object.entries(fontFamilies), ([_k, count]) => count);
     return max
       ? (max[0] as EdgelessCanvasTextElement['fontFamily'])
-      : GENERAL_CANVAS_FONT_FAMILY;
+      : CanvasTextFontFamily.Inter;
   };
 
   private _getMostCommonFontSize = (
@@ -208,6 +231,19 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     return max
       ? (Number(max[0]) as EdgelessCanvasTextElement['fontSize'])
       : TEXT_FONT_SIZE.MEDIUM;
+  };
+
+  private _getMostCommonFontWeight = (
+    elements: EdgelessCanvasTextElement[]
+  ): EdgelessCanvasTextElement['fontWeight'] => {
+    const fontWeights = countBy(
+      elements,
+      (element: EdgelessCanvasTextElement) => element.fontWeight
+    );
+    const max = maxBy(Object.entries(fontWeights), ([_k, count]) => count);
+    return max
+      ? (max[0] as EdgelessCanvasTextElement['fontWeight'])
+      : CanvasTextFontWeight.Regular;
   };
 
   private _getMostCommonColor = (
@@ -234,16 +270,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     return max ? (max[0] as EdgelessCanvasTextElement['textAlign']) : 'left';
   };
 
-  private _areAllelementsBold = (
+  private _areAllElementsItalic = (
     elements: EdgelessCanvasTextElement[]
   ): boolean => {
-    return elements.every(element => element.bold);
-  };
-
-  private _areAllelementsItalic = (
-    elements: EdgelessCanvasTextElement[]
-  ): boolean => {
-    return elements.every(element => element.italic);
+    return elements.every(element => element.fontStyle === 'italic');
   };
 
   private _updateElementBound = (element: EdgelessCanvasTextElement) => {
@@ -287,9 +317,14 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   private _setFontFamily = (
     fontFamily: EdgelessCanvasTextElement['fontFamily']
   ) => {
+    const currentFontWeight = this._getMostCommonFontWeight(this.elements);
+    const fontWeight = isFontWeightSupported(fontFamily, currentFontWeight)
+      ? currentFontWeight
+      : CanvasTextFontWeight.Regular;
     this.elements.forEach(element => {
       this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
-        fontFamily: fontFamily,
+        fontFamily,
+        fontWeight,
       });
 
       this._updateElementBound(element);
@@ -306,10 +341,12 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     });
   };
 
-  private _setTextBold = (bold: boolean) => {
+  private _setFontWeight = (
+    fontWeight: EdgelessCanvasTextElement['fontWeight']
+  ) => {
     this.elements.forEach(element => {
       this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
-        bold,
+        fontWeight,
       });
 
       this._updateElementBound(element);
@@ -319,7 +356,9 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   private _setTextItalic = (italic: boolean) => {
     this.elements.forEach(element => {
       this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
-        italic,
+        fontStyle: italic
+          ? CanvasTextFontStyle.Normal
+          : CanvasTextFontStyle.Italic,
       });
 
       this._updateElementBound(element);
@@ -353,16 +392,16 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         }
       );
       _disposables.add(this._colorSelectorPopper);
-
-      this._textFontFamilyPopper = createButtonPopper(
-        this._textFontFamilyButton,
-        this._textFontFamilyMenu,
-        ({ display }) => {
-          this._fontFamilyPopperShow = display === 'show';
-        }
-      );
-      _disposables.add(this._textFontFamilyPopper);
     }
+
+    this._textFontFamilyPopper = createButtonPopper(
+      this._textFontFamilyButton,
+      this._textFontFamilyMenu,
+      ({ display }) => {
+        this._fontFamilyPopperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._textFontFamilyPopper);
 
     this._textAlignPopper = createButtonPopper(
       this._textAlignButton,
@@ -382,7 +421,21 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     );
     _disposables.add(this._textFontSizePopper);
 
+    this._textFontWeightPopper = createButtonPopper(
+      this._textFontWeightButton,
+      this._textFontWeightMenu,
+      ({ display }) => {
+        this._fontWeightPopperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._textFontWeightPopper);
+
     super.firstUpdated(changedProperties);
+  }
+
+  override updated() {
+    const selectedFontFamily = this._getMostCommonFontFamily(this.elements);
+    this.style.setProperty('--selected-font-family', selectedFontFamily);
   }
 
   override render() {
@@ -390,37 +443,59 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const selectedAlign = this._getMostCommonAlign(this.elements);
     const selectedFontFamily = this._getMostCommonFontFamily(this.elements);
     const selectedFontSize = this._getMostCommonFontSize(this.elements);
-    const bold = this._areAllelementsBold(this.elements);
-    const italic = this._areAllelementsItalic(this.elements);
+    const selectedFontWeight = this._getMostCommonFontWeight(this.elements);
+    const italic = this._areAllElementsItalic(this.elements);
 
     return html`
-      ${this.elementType === 'shape'
-        ? nothing
-        : html`
-            <edgeless-tool-icon-button
-              class="text-color-button"
-              .tooltip=${this._textColorPopperShow ? '' : 'Text Color'}
-              .tipPosition=${'bottom'}
-              .active=${false}
-              .activeMode=${'background'}
-              .iconContainerPadding=${2}
-              @click=${() => this._colorSelectorPopper?.toggle()}
-            >
-              <div class="text-color-unit-container">
-                ${ColorUnit(selectedColor)}
+      ${
+        this.elementType === 'shape'
+          ? nothing
+          : html`<edgeless-tool-icon-button
+                class="text-color-button"
+                .tooltip=${this._textColorPopperShow ? '' : 'Text Color'}
+                .tipPosition=${'bottom'}
+                .active=${false}
+                .activeMode=${'background'}
+                .iconContainerPadding=${2}
+                @click=${() => this._colorSelectorPopper?.toggle()}
+              >
+                <div class="text-color-unit-container">
+                  ${ColorUnit(selectedColor)}
+                </div>
+              </edgeless-tool-icon-button>
+              <div class="color-panel-container text-color">
+                <edgeless-color-panel
+                  .value=${selectedColor}
+                  .options=${LINE_COLORS}
+                  @select=${(event: ColorEvent) => {
+                    this._setTextColor(event.detail);
+                  }}
+                ></edgeless-color-panel>
               </div>
-            </edgeless-tool-icon-button>
-            <div class="color-panel-container text-color">
-              <edgeless-color-panel
-                .value=${selectedColor}
-                .options=${LINE_COLORS}
-                @select=${(event: ColorEvent) => {
-                  this._setTextColor(event.detail);
-                }}
-              ></edgeless-color-panel>
-            </div>
-            <component-toolbar-menu-divider></component-toolbar-menu-divider>
-          `}
+              <component-toolbar-menu-divider></component-toolbar-menu-divider>`
+      }
+
+      <edgeless-tool-icon-button
+        class="text-font-family-button"
+        .tooltip=${this._fontSizePopperShow ? '' : 'Font'}
+        .tipPosition=${'bottom'}
+        .active=${false}
+        .iconContainerPadding=${2}
+        @click=${() => this._textFontFamilyPopper?.toggle()}
+      >
+        <div class="button-with-arrow-group">
+          <span>Aa</span>${SmallArrowDownIcon}
+        </div>
+      </edgeless-tool-icon-button>
+      <div class="font-family-panel-container text-font-family">
+        <edgeless-font-family-panel
+          .value=${selectedFontFamily}
+          .onSelect=${(value: EdgelessFontFamilyPanel['value']) =>
+            this._setFontFamily(value)}
+        ></edgeless-font-family-panel>
+      </div>
+
+      <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
       <edgeless-tool-icon-button
         class="text-font-size-button"
@@ -455,51 +530,49 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
       <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
-      <div class="font-style-container">
-        ${this.elementType === 'shape'
-          ? nothing
-          : html`<edgeless-tool-icon-button
-                class="text-font-family-button"
-                .tooltip=${this._fontSizePopperShow ? '' : 'Font'}
-                .tipPosition=${'bottom'}
-                .active=${false}
-                .iconContainerPadding=${2}
-                @click=${() => this._textFontFamilyPopper?.toggle()}
-              >
-                <div class="button-with-arrow-group">
-                  ${FontFamilyIcon} ${SmallArrowDownIcon}
-                </div>
-              </edgeless-tool-icon-button>
-              <div class="font-family-panel-container text-font-family">
-                <edgeless-font-family-panel
-                  .value=${selectedFontFamily}
-                  .onSelect=${(value: EdgelessFontFamilyPanel['value']) => {
-                    this._setFontFamily(value);
-                  }}
-                ></edgeless-font-family-panel>
-              </div>`}
+      <edgeless-tool-icon-button
+        class="text-font-weight-button"
+        .disabled=${
+          getSupportedFontWeight(selectedFontFamily).length === 1 &&
+          getSupportedFontWeight(selectedFontFamily)[0] === selectedFontWeight
+        }
+        .tooltip=${this._fontWeightPopperShow ? '' : 'Font Size'}
+        .tipPosition=${'bottom'}
+        .active=${false}
+        .iconContainerPadding=${2}
+        @click=${() => this._textFontWeightPopper?.toggle()}
+      >
+        <div class="button-with-arrow-group">
+          <span>${
+            selectedFontWeight === CanvasTextFontWeight.Light
+              ? 'Light'
+              : selectedFontWeight === CanvasTextFontWeight.Regular
+              ? 'Regular'
+              : 'Semibold'
+          }</span>${SmallArrowDownIcon}
+        </div>
+      </edgeless-tool-icon-button>
+      <div class="font-weight-panel-container text-font-weight">
+        <edgeless-font-weight-panel
+          .font=${selectedFontFamily}
+          .value=${selectedFontWeight}
+          .onSelect=${(value: EdgelessFontWeightPanel['value']) =>
+            this._setFontWeight(value)}
+        ></edgeless-font-weight-panel>
+      </div>
 
-        <edgeless-tool-icon-button
-          class="text-bold-button"
-          .tooltip=${'Bold'}
-          .tipPosition=${'bottom'}
-          .active=${bold}
-          .iconContainerPadding=${2}
-          .activeMode=${'background'}
-          @click=${() => this._setTextBold(!bold)}
-        >
-          ${BoldIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .tooltip=${'Italic'}
-          .tipPosition=${'bottom'}
-          .active=${italic}
-          .iconContainerPadding=${2}
-          .activeMode=${'background'}
-          @click=${() => this._setTextItalic(!italic)}
-        >
-          ${ItalicIcon}
-        </edgeless-tool-icon-button>
+      <component-toolbar-menu-divider></component-toolbar-menu-divider>
+
+      <edgeless-tool-icon-button
+        .tooltip=${'Italic'}
+        .tipPosition=${'bottom'}
+        .active=${italic}
+        .iconContainerPadding=${2}
+        .activeMode=${'background'}
+        @click=${() => this._setTextItalic(italic)}
+      >
+        ${ItalicIcon}
+      </edgeless-tool-icon-button>
       </div>
 
       <component-toolbar-menu-divider></component-toolbar-menu-divider>
@@ -513,11 +586,13 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         @click=${() => this._textAlignPopper?.toggle()}
       >
         <div class="button-with-arrow-group">
-          ${selectedAlign === 'left'
-            ? TextAlignLeftIcon
-            : selectedAlign === 'center'
-            ? TextAlignCenterIcon
-            : TextAlignRightIcon}
+          ${
+            selectedAlign === 'left'
+              ? TextAlignLeftIcon
+              : selectedAlign === 'center'
+              ? TextAlignCenterIcon
+              : TextAlignRightIcon
+          }
           ${SmallArrowDownIcon}
         </div>
       </edgeless-tool-icon-button>

@@ -3,6 +3,11 @@ import { Workspace } from '@blocksuite/store';
 
 import type { NoteBlockModel } from '../../../../models.js';
 import {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+} from '../../../../surface-block/consts.js';
+import {
   Bound,
   type Connection,
   GroupElement,
@@ -18,7 +23,6 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
-import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 
@@ -337,10 +341,10 @@ export async function createTextElement(
     text: new Workspace.Y.Text(),
     textAlign: 'left',
     fontSize: 24,
-    fontFamily: GENERAL_CANVAS_FONT_FAMILY,
+    fontFamily: CanvasTextFontFamily.Inter,
     color: GET_DEFAULT_TEXT_COLOR(),
-    bold: false,
-    italic: false,
+    fontWeight: CanvasTextFontWeight.Regular,
+    fontStyle: CanvasTextFontStyle.Normal,
   });
   const group = surface.getGroupParent(current);
   if (group instanceof GroupElement) {

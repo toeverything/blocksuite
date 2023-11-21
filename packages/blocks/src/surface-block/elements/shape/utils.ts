@@ -21,12 +21,13 @@ export function normalizeShapeBound(shape: ShapeElement, bound: Bound): Bound {
   if (!shape.text) return bound;
 
   const yText = shape.text;
-  const { fontFamily, fontSize } = shape;
+  const { fontFamily, fontSize, fontStyle, fontWeight } = shape;
   const lineHeight = getLineHeight(fontFamily, fontSize);
   const font = getFontString({
-    fontSize: fontSize,
-    lineHeight: `${lineHeight}px`,
-    fontFamily: fontFamily,
+    fontStyle,
+    fontWeight,
+    fontSize,
+    fontFamily,
   });
   const widestCharWidth =
     [...yText.toString()]

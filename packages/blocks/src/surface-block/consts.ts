@@ -33,3 +33,33 @@ export interface IModelCoord {
   x: number;
   y: number;
 }
+
+export const CANVAS_TEXT_FONT_FAMILY: string[] = [
+  'Inter',
+  'Kalam',
+  'Satoshi',
+  'Poppins',
+  'Lora',
+  'BebasNeue',
+  'OrelegaOne',
+];
+export const enum CanvasTextFontFamily {
+  Inter = 'Inter',
+  Kalam = 'Kalam',
+  Satoshi = 'Satoshi',
+  Poppins = 'Poppins',
+  Lora = 'Lora',
+  BebasNeue = 'BebasNeue',
+  OrelegaOne = 'OrelegaOne',
+}
+
+export const enum CanvasTextFontWeight {
+  Light = '300',
+  Regular = '400',
+  SemiBold = '600',
+}
+
+export const enum CanvasTextFontStyle {
+  Normal = 'normal',
+  Italic = 'italic',
+}

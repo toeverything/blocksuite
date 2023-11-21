@@ -1,5 +1,10 @@
 // something comes from https://github.com/excalidraw/excalidraw/blob/b1311a407a636c87ee0ca326fd20599d0ce4ba9b/src/utils.ts
 
+import type { CanvasTextFontFamily } from '../../consts.js';
+import {
+  CANVAS_TEXT_FONT_FAMILY,
+  type CanvasTextFontWeight,
+} from '../../consts.js';
 import type { Bound } from '../../utils/bound.js';
 import type { TextElement } from './text-element.js';
 import type { ITextDelta } from './types.js';
@@ -21,6 +26,7 @@ export function getLineHeight(fontFamily: string, fontSize: number) {
   // Browser may have minimum font size setting
   // so we need to multiple the multiplier between the actual size and the expected size
   const actualFontSize = Math.max(fontSize, 12);
+  const div = document.createElement('div');
   const span = document.createElement('span');
 
   span.style.fontFamily = fontFamily;
@@ -28,29 +34,27 @@ export function getLineHeight(fontFamily: string, fontSize: number) {
   span.style.lineHeight = 'initial';
   span.textContent = 'M';
 
-  document.body.appendChild(span);
-  const { height } = span.getBoundingClientRect();
+  div.appendChild(span);
+  document.body.appendChild(div);
+  const { height } = div.getBoundingClientRect();
 
-  span.remove();
+  div.remove();
   return height * (fontSize / actualFontSize);
 }
 
 export function getFontString({
+  fontStyle,
+  fontWeight,
   fontSize,
   fontFamily,
-  lineHeight,
-  bold = false,
-  italic = false,
 }: {
-  bold?: boolean;
-  italic?: boolean;
+  fontStyle: string;
+  fontWeight: string;
   fontSize: number;
-  lineHeight: string;
   fontFamily: string;
 }): string {
-  return `${italic ? 'italic' : ''} ${
-    bold ? 'bold' : ''
-  } ${fontSize}px/${lineHeight} ${fontFamily}`.trim();
+  const lineHeight = getLineHeight(fontFamily, fontSize);
+  return `${fontStyle} ${fontWeight} ${fontSize}px/${lineHeight}px ${fontFamily}`.trim();
 }
 
 export function normalizeText(text: string): string {
@@ -344,14 +348,13 @@ export function normalizeTextBound(
   if (!text.text) return bound;
 
   const yText = text.text;
-  const { fontFamily, fontSize } = text;
+  const { fontStyle, fontWeight, fontSize, fontFamily } = text;
   const lineHeightPx = getLineHeight(fontFamily, fontSize);
   const font = getFontString({
-    fontSize: fontSize,
-    lineHeight: `${lineHeightPx}px`,
-    fontFamily: fontFamily,
-    bold: text.bold,
-    italic: text.italic,
+    fontStyle,
+    fontWeight,
+    fontSize,
+    fontFamily,
   });
 
   let lines: ITextDelta[][] = [];
@@ -385,4 +388,27 @@ export function normalizeTextBound(
   bound.h = lineHeightPx * lines.length;
 
   return bound;
+}
+
+export function isFontWeightSupported(
+  font: CanvasTextFontFamily,
+  weight: CanvasTextFontWeight
+) {
+  const fonts = document.fonts;
+  const fontFace = [...fonts.keys()].find(fontFace => {
+    return fontFace.family === font && fontFace.weight === weight;
+  });
+  return !!fontFace;
+}
+
+export function getSupportedFontWeight(font: CanvasTextFontFamily): string[] {
+  const fonts = document.fonts;
+  const fontFaces = [...fonts.keys()].filter(fontFace => {
+    return fontFace.family === font;
+  });
+  return fontFaces.map(fontFace => fontFace.weight);
+}
+
+export function checkFontFamily(font: string): boolean {
+  return CANVAS_TEXT_FONT_FAMILY.includes(font);
 }

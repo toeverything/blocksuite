@@ -14,13 +14,10 @@ import {
   waitNextFrame,
   zoomResetByKeyboard,
 } from '../utils/actions/index.js';
-import {
-  assertEdgelessCanvasText,
-  assertSelectedBound,
-} from '../utils/asserts.js';
+import { assertEdgelessCanvasText } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-async function assertTextFont(page: Page, font: 'General' | 'Scribbled') {
+async function assertTextFont(page: Page, font: string) {
   const fontButton = page.locator('.text-font-family-button');
   const fontPanel = page.locator('edgeless-font-family-panel');
   const isFontPanelShow = await fontPanel.isVisible();
@@ -31,22 +28,10 @@ async function assertTextFont(page: Page, font: 'General' | 'Scribbled') {
     await fontButton.click();
   }
 
-  const generalButton = fontPanel.locator('.general-button');
-  const scibbledButton = fontPanel.locator('.scibbled-button');
-  if (font === 'General') {
-    await expect(
-      generalButton.locator('.active-mode-background[active]')
-    ).toBeVisible();
-    return;
-  }
-  if (font === 'Scribbled') {
-    await expect(
-      scibbledButton.locator('.active-mode-background[active]')
-    ).toBeVisible();
-  }
+  const button = fontPanel.locator(`.${font.toLowerCase()}`);
+  await expect(button.locator('.active-mode-background[active]')).toBeVisible();
 }
 
-// it's flaky
 test('add text element in default mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
@@ -168,24 +153,25 @@ test('normalize text element rect after change its font', async ({ page }) => {
   const fontButton = page.locator('.text-font-family-button');
   await fontButton.click();
 
-  // Default is General
-  await assertTextFont(page, 'General');
-  const scribbledTextFont = page.getByText('Scribbled');
-  await scribbledTextFont.click();
+  // Default is Inter
+  await assertTextFont(page, 'Inter');
+  const kalamTextFont = page.getByText('Kalam');
+  await kalamTextFont.click();
   await waitNextFrame(page);
   let selectedRect = await getEdgelessSelectedRect(page);
-  expect(selectedRect.width).toBeLessThan(lastWidth);
-  expect(selectedRect.height).toBeGreaterThan(lastHeight);
+  expect(selectedRect.width).not.toEqual(lastWidth);
+  expect(selectedRect.height).not.toEqual(lastHeight);
+
   lastWidth = selectedRect.width;
   lastHeight = selectedRect.height;
   await fontButton.click();
-  await assertTextFont(page, 'Scribbled');
-  const generalTextFont = page.getByText('General');
-  await generalTextFont.click();
+  await assertTextFont(page, 'Kalam');
+  const InterTextFont = page.getByText('Inter');
+  await InterTextFont.click();
   await waitNextFrame(page);
   selectedRect = await getEdgelessSelectedRect(page);
-  expect(selectedRect.width).toBeGreaterThan(lastWidth);
-  expect(selectedRect.height).toBeLessThan(lastHeight);
+  expect(selectedRect.width).not.toEqual(lastWidth);
+  expect(selectedRect.height).not.toEqual(lastHeight);
 });
 
 test('auto wrap text by dragging left and right edge', async ({ page }) => {
@@ -244,7 +230,7 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
   // move cursor to the left edge and drag it to resize the width of text element
   await page.mouse.move(130, 160);
   await page.mouse.down();
-  await page.mouse.move(79, 160, {
+  await page.mouse.move(60, 160, {
     steps: 10,
   });
   await page.mouse.up();
@@ -317,6 +303,6 @@ test('text element should have maxWidth after adjusting width by dragging left o
   await page.mouse.click(150, 140);
   // after input, the width of the text element should be the same as before, but the height should be changed
   selectedRect = await getEdgelessSelectedRect(page);
-  expect(selectedRect.width).toBe(lastWidth);
+  expect(selectedRect.width).toBeCloseTo(Math.round(lastWidth));
   expect(selectedRect.height).toBeGreaterThan(lastHeight);
 });

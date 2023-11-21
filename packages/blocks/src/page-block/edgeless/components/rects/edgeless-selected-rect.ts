@@ -626,6 +626,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _updateOnSelectionChange = () => {
     this._updateSelectedRect();
     this._updateResizeManagerState(true);
+    // Reset the cursor
+    this._updateCursor(false);
   };
 
   private _updateOnElementChange = (

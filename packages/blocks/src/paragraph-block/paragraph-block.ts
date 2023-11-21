@@ -15,7 +15,11 @@ import { affineAttributeRenderer } from '../_common/components/rich-text/virgo/a
 import { affineTextAttributes } from '../_common/components/rich-text/virgo/types.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { BlockHubIcon20 } from '../_common/icons/index.js';
-import { isPageMode, matchFlavours } from '../_common/utils/index.js';
+import {
+  getThemeMode,
+  isPageMode,
+  matchFlavours,
+} from '../_common/utils/index.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {
@@ -325,6 +329,15 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       ${this.content}
     </div>`;
 
+    const fontWeightMap: { [key: string]: { [key: string]: number } } = {
+      h1: { light: 600, dark: 700 },
+      h2: { light: 500, dark: 600 },
+      h3: { light: 700, dark: 800 },
+      h4: { light: 700, dark: 800 },
+      h5: { light: 600, dark: 700 },
+      h6: { light: 500, dark: 600 },
+    };
+
     return html`
       <div class="affine-paragraph-block-container ${type}">
         <div class="affine-paragraph-rich-text-wrapper">
@@ -341,7 +354,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
             @focusin=${this._onFocusIn}
             @focusout=${this._onFocusOut}
             style=${styleMap({
-              fontWeight: /^h[1-6]$/.test(type) ? '600' : undefined,
+              fontWeight: fontWeightMap?.[type]?.[getThemeMode()],
             })}
           ></rich-text>
         </div>
