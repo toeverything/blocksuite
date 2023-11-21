@@ -265,6 +265,20 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerDblClick(e: PointerEventState) {
+    if (this._page.readonly) {
+      const viewport = this._surface.viewport;
+      if (viewport.zoom === 1) {
+        // Fit to Screen
+        const { centerX, centerY, zoom } = this._edgeless.getFitToScreenData();
+        viewport.setViewport(zoom, [centerX, centerY], true);
+      } else {
+        // Zoom to 100% and Center
+        const [x, y] = viewport.toModelCoord(e.x, e.y);
+        viewport.setViewport(1, [x, y], true);
+      }
+      return;
+    }
+
     const selected = this._pick(e.x, e.y, {
       pierce: true,
       expand: 10,
