@@ -14,8 +14,8 @@ import {
   HiddenIcon,
   LineStyleIcon,
   NoteCornerIcon,
-  NoteIcon,
   NoteShadowIcon,
+  NoteSmallIcon,
   ShrinkIcon,
   SmallArrowDownIcon,
 } from '../../../../_common/icons/index.js';
@@ -357,12 +357,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               ? html`<div class="unhover">
                     ${HiddenIcon} Hidden In Page Mode
                   </div>
-                  <div class="hover">${NoteIcon} Show In Page Mode</div>
+                  <div class="hover">${NoteSmallIcon} Show In Page Mode</div>
                   <affine-tooltip
                     >Allow this note show in both page and edgeless
                     mode</affine-tooltip
-                  > `
-              : html`<div class="unhover">${NoteIcon} Shown In Page Mode</div>
+                  >`
+              : html`<div class="unhover">
+                    ${NoteSmallIcon} Shown In Page Mode
+                  </div>
                   <div class="hover">${HiddenIcon} Hide In Page Mode</div>
                   <affine-tooltip
                     >By Clicking it, the note will only appear in this board,

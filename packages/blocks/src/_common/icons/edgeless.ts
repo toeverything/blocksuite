@@ -1011,7 +1011,7 @@ export const BanIcon = html`<svg
   />
 </svg>`;
 
-export const NoteIcon = html`<svg
+export const NoteSmallIcon = html`<svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -1031,6 +1031,20 @@ export const NoteIcon = html`<svg
       <rect width="16" height="16" fill="white" />
     </clipPath>
   </defs>
+</svg>`;
+
+export const NoteIcon = html` <svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    fill="currentColor"
+    d="M7 3.25C5.48122 3.25 4.25 4.48122 4.25 6V18C4.25 19.5188 5.48122 20.75 7 20.75H17C18.5188 20.75 19.75 19.5188 19.75 18V6C19.75 4.48122 18.5188 3.25 17 3.25H7ZM5.75 6C5.75 5.30964 6.30964 4.75 7 4.75H17C17.6904 4.75 18.25 5.30964 18.25 6V18C18.25 18.6904 17.6904 19.25 17 19.25H7C6.30964 19.25 5.75 18.6904 5.75 18V6ZM9 7.25C8.58579 7.25 8.25 7.58579 8.25 8C8.25 8.41421 8.58579 8.75 9 8.75H12.5C12.9142 8.75 13.25 8.41421 13.25 8C13.25 7.58579 12.9142 7.25 12.5 7.25H9ZM8.25 11.5C8.25 11.0858 8.58579 10.75 9 10.75H15C15.4142 10.75 15.75 11.0858 15.75 11.5C15.75 11.9142 15.4142 12.25 15 12.25H9C8.58579 12.25 8.25 11.9142 8.25 11.5ZM9 14.25C8.58579 14.25 8.25 14.5858 8.25 15C8.25 15.4142 8.58579 15.75 9 15.75H14C14.4142 15.75 14.75 15.4142 14.75 15C14.75 14.5858 14.4142 14.25 14 14.25H9Z"
+  />
 </svg>`;
 
 export const NoteCornerIcon = html`

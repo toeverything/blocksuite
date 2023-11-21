@@ -16,7 +16,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.25",
+    "@toeverything/theme": "^0.7.26",
     "lit": "^3.1.0"
   },
   "exports": {

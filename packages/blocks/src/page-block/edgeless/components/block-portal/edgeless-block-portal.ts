@@ -373,7 +373,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           )}
         </div>
       </div>
-      <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>
+      ${this._isResizing
+        ? nothing
+        : html`
+            <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>
+          `}
       <edgeless-dragging-area-rect
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>
