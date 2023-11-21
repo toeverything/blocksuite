@@ -1,10 +1,10 @@
 // something comes from https://github.com/excalidraw/excalidraw/blob/b1311a407a636c87ee0ca326fd20599d0ce4ba9b/src/utils.ts
 
-import type { CanvasTextFontFamily } from '../../consts.js';
-import {
-  CANVAS_TEXT_FONT_FAMILY,
-  type CanvasTextFontWeight,
+import type {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
 } from '../../consts.js';
+import { type CanvasTextFontWeight } from '../../consts.js';
 import type { Bound } from '../../utils/bound.js';
 import type { TextElement } from './text-element.js';
 import type { ITextDelta } from './types.js';
@@ -401,14 +401,27 @@ export function isFontWeightSupported(
   return !!fontFace;
 }
 
-export function getSupportedFontWeight(font: CanvasTextFontFamily): string[] {
+export function isFontStyleSupported(
+  font: CanvasTextFontFamily,
+  style: CanvasTextFontStyle
+) {
   const fonts = document.fonts;
-  const fontFaces = [...fonts.keys()].filter(fontFace => {
-    return fontFace.family === font;
+  const fontFace = [...fonts.keys()].find(fontFace => {
+    return fontFace.family === font && fontFace.style === style;
   });
-  return fontFaces.map(fontFace => fontFace.weight);
+  return !!fontFace;
 }
 
-export function checkFontFamily(font: string): boolean {
-  return CANVAS_TEXT_FONT_FAMILY.includes(font);
+export function getFontFacesByFontFamily(
+  fontFamily: CanvasTextFontFamily
+): FontFace[] {
+  const fonts = document.fonts;
+  return (
+    [...fonts.keys()]
+      .filter(fontFace => {
+        return fontFace.family === fontFamily;
+      })
+      // remove duplicate font faces
+      .filter((item, index, arr) => arr.indexOf(item) === index)
+  );
 }

@@ -256,6 +256,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
       component-toolbar-menu-divider {
         margin: 0 12px;
+        height: 24px;
       }
     `,
   ];
