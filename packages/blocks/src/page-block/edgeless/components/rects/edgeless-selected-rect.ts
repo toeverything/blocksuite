@@ -92,7 +92,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       pointer-events: none;
       box-sizing: border-box;
       z-index: 1;
-      border-color: var(--affine-blue);
+      border-top-color: var(--affine-blue);
+      border-left-color: var(--affine-blue);
       border-width: var(--affine-border-width);
       border-style: solid;
       transform: translate(0, 0) rotate(0);
@@ -200,6 +201,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label='right'] {
       border: 0;
       background: transparent;
+      border-color: var('--affine-blue');
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='left'],
@@ -250,7 +252,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       box-sizing: border-box;
       border-radius: 6px;
       z-index: 10;
-      border: 2px var(--affine-blue) solid;
+      /* border: 2px var(--affine-blue) solid; */
       content: '';
       background: white;
     }
@@ -310,6 +312,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   @state()
   private _isResizing = false;
+
+  @state()
+  private _isNoteWidthLimit = false;
+
+  @state()
+  private _isNoteHeightLimit = false;
 
   @property({ attribute: false })
   toolbarVisible = false;
@@ -425,6 +433,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
         bound.w = clamp(bound.w, NOTE_MIN_WIDTH, Infinity);
         bound.h = clamp(bound.h, NOTE_MIN_HEIGHT, Infinity);
+
+        this._isNoteWidthLimit = bound.w === NOTE_MIN_WIDTH ? true : false;
+        this._isNoteHeightLimit = bound.h === NOTE_MIN_HEIGHT ? true : false;
+
         props.xywh = bound.serialize();
         edgeless.updateElementInLocal(element.id, props);
       } else if (isFrameBlock(element)) {
@@ -498,6 +510,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _onDragEnd = () => {
     const selectedElements = this.edgeless.selectionManager.state.elements;
     this.edgeless.applyLocalRecord(selectedElements);
+
+    this._isNoteWidthLimit = false;
+    this._isNoteHeightLimit = false;
 
     this._updateCursor(false);
     this.setToolbarVisible(true);
@@ -774,7 +789,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const isSingleGroup =
       elements.length === 1 && elements[0] instanceof GroupElement;
     _selectedRect.borderStyle = isSingleGroup ? 'dashed' : 'solid';
+
     return html`
+      <style>
+        .affine-edgeless-selected-rect {
+          border-right-color: ${this._isNoteHeightLimit
+            ? 'var(--affine-error-color)'
+            : 'var(--affine-blue)'};
+          border-bottom-color: ${this._isNoteWidthLimit
+            ? 'var(--affine-error-color)'
+            : 'var(--affine-blue)'};
+        }
+      </style>
       ${!page.readonly && this._canAutoComplete()
         ? html`<edgeless-auto-complete
             .current=${this.selection.elements[0]}
