@@ -41,6 +41,7 @@ import {
   Bound,
   clamp,
   getCommonBound,
+  GroupElement,
   type IBound,
   intersects,
   type IVec,
@@ -546,6 +547,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
       if (!elementsSet.has(id) || !this.surface.pickById(id)) return;
 
       const element = this.surface.pickById(id) as EdgelessElement;
+
+      if (element instanceof GroupElement) {
+        this.applyLocalRecord(element.childElements.map(e => e.id));
+        return;
+      }
+
       const updateProps: Record<string, unknown> = {};
       let flag = false;
 
