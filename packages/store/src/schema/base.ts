@@ -5,7 +5,7 @@ import { z } from 'zod';
 import type { BaseBlockTransformer } from '../transformer/base.js';
 import type { Page } from '../workspace/index.js';
 import type { YBlock } from '../workspace/page.js';
-import { NativeWrapper } from '../yjs/native-wrapper.js';
+import { Boxed } from '../yjs/boxed.js';
 import { Text } from '../yjs/text-adapter.js';
 
 const FlavourSchema = z.string();
@@ -18,12 +18,12 @@ export type RoleType = (typeof role)[number];
 
 export interface InternalPrimitives {
   Text: (input?: Y.Text | string) => Text;
-  Native: <T>(input: T) => NativeWrapper<T>;
+  Native: <T>(input: T) => Boxed<T>;
 }
 
 export const internalPrimitives: InternalPrimitives = Object.freeze({
   Text: (input: Y.Text | string = '') => new Text(input),
-  Native: <T>(input: T) => new NativeWrapper(input),
+  Native: <T>(input: T) => new Boxed(input),
 });
 
 export const BlockSchema = z.object({
@@ -181,20 +181,37 @@ export class BaseBlockModel<
   id!: string;
   yBlock!: YBlock;
   keys!: string[];
+  byPassProxy!: (fn: () => void) => void;
 
   // text is optional
   text?: Text;
 
   created = new Slot();
   deleted = new Slot();
-  propsUpdated = new Slot<{
-    oldProps: unknown;
-    newProps: unknown;
-  }>();
+  propsUpdated = new Slot();
   childrenUpdated = new Slot();
 
-  childMap = new Map<string, number>();
-  children: BaseBlockModel[] = [];
+  get childMap() {
+    return this.children.reduce((map, child, index) => {
+      map.set(child.id, index);
+      return map;
+    }, new Map<string, number>());
+  }
+
+  get children() {
+    const block = this.yBlock.get('sys:children') as Y.Array<string>;
+
+    const children: BaseBlockModel[] = [];
+    block.forEach(id => {
+      const child = this.page.getBlock(id);
+      if (!child) {
+        return;
+      }
+      children.push(child.model);
+    });
+
+    return children;
+  }
 
   isEmpty() {
     return this.children.length === 0;

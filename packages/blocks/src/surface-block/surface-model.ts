@@ -1,7 +1,7 @@
 import type { MigrationRunner, Y } from '@blocksuite/store';
 import {
+  Boxed,
   defineBlockSchema,
-  NativeWrapper,
   type SchemaToModel,
   Workspace,
 } from '@blocksuite/store';
@@ -9,13 +9,13 @@ import {
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 
 export type SurfaceBlockProps = {
-  elements: NativeWrapper<Y.Map<unknown>>;
+  elements: Boxed<Y.Map<unknown>>;
 };
 
 const migration = {
   toV4: data => {
     const { elements } = data;
-    if ((elements as object | NativeWrapper) instanceof NativeWrapper) {
+    if ((elements as object | Boxed) instanceof Boxed) {
       const value = elements.getValue();
       if (!value) {
         return;
@@ -89,7 +89,7 @@ const migration = {
   },
   toV5: data => {
     const { elements } = data;
-    if (!((elements as object | NativeWrapper) instanceof NativeWrapper)) {
+    if (!((elements as object | Boxed) instanceof Boxed)) {
       const yMap = new Workspace.Y.Map();
 
       Object.entries(elements).forEach(([key, value]) => {
@@ -102,7 +102,7 @@ const migration = {
         });
         yMap.set(key, map);
       });
-      const wrapper = new NativeWrapper(yMap);
+      const wrapper = new Boxed(yMap);
       data.elements = wrapper;
     }
   },
