@@ -663,9 +663,8 @@ test.describe('slash menu with customize menu', () => {
       const pageBlockSpec = pagePreset.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
       // @ts-ignore
-      pageBlockSpec.view.widgets[
-        'affine-slash-menu-widget'
-      ] = fakeLiteral`affine-custom-slash-menu`;
+      pageBlockSpec.view.widgets['affine-slash-menu-widget'] =
+        fakeLiteral`affine-custom-slash-menu`;
       pagePreset.unshift(pageBlockSpec);
       editor.pagePreset = pagePreset;
     });
@@ -725,9 +724,8 @@ test.describe('slash menu with customize menu', () => {
       const pageBlockSpec = pagePreset.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
       // @ts-ignore
-      pageBlockSpec.view.widgets[
-        'affine-slash-menu-widget'
-      ] = fakeLiteral`affine-custom-slash-menu`;
+      pageBlockSpec.view.widgets['affine-slash-menu-widget'] =
+        fakeLiteral`affine-custom-slash-menu`;
       pagePreset.unshift(pageBlockSpec);
       editor.pagePreset = pagePreset;
     });

@@ -387,8 +387,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
       this.type === 'create'
         ? this._createTemplate()
         : this.type === 'view'
-        ? this._viewTemplate()
-        : this._editTemplate();
+          ? this._viewTemplate()
+          : this._editTemplate();
 
     return html`
       <div class="overlay-root">

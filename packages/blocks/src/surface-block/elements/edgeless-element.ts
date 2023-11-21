@@ -78,10 +78,13 @@ export type IElementDefaultProps<T extends keyof IPhasorElementType> =
         | 'batch'
       >
     : T extends 'frame'
-    ? Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'rotate' | 'batch'>
-    : T extends 'group'
-    ? Omit<
-        IPhasorElementType[T],
-        'id' | 'index' | 'seed' | 'rotate' | 'batch' | 'xywh'
-      >
-    : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'batch'>;
+      ? Omit<
+          IPhasorElementType[T],
+          'id' | 'index' | 'seed' | 'rotate' | 'batch'
+        >
+      : T extends 'group'
+        ? Omit<
+            IPhasorElementType[T],
+            'id' | 'index' | 'seed' | 'rotate' | 'batch' | 'xywh'
+          >
+        : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'batch'>;
