@@ -181,7 +181,6 @@ export class BaseBlockModel<
   id!: string;
   yBlock!: YBlock;
   keys!: string[];
-  byPassProxy!: (fn: () => void) => void;
 
   // text is optional
   text?: Text;
@@ -200,6 +199,9 @@ export class BaseBlockModel<
 
   get children() {
     const block = this.yBlock.get('sys:children') as Y.Array<string>;
+    if (!block) {
+      return [];
+    }
 
     const children: BaseBlockModel[] = [];
     block.forEach(id => {

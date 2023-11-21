@@ -66,9 +66,6 @@ export class BlockTree extends Space<FlatBlockMap> {
     const yBlock = new Y.Map();
     this._yBlocks.set(id, yBlock);
 
-    const yChildren = new Y.Array<string>();
-    yBlock.set('sys:children', yChildren);
-
     yBlock.set('sys:id', id);
     yBlock.set('sys:flavour', flavour);
 
@@ -77,6 +74,11 @@ export class BlockTree extends Space<FlatBlockMap> {
       ...defaultProps,
       ...initialProps,
     };
+
+    const yChildren = Y.Array.from(props.children ?? []);
+    yBlock.set('sys:children', yChildren);
+
+    delete props.children;
 
     Object.entries(props).forEach(([key, value]) => {
       if (value === undefined) return;
