@@ -1,22 +1,22 @@
+import type { AssetsManager } from '../transformer/assets.js';
 import type {
   BlockSnapshot,
   PageSnapshot,
   SliceSnapshot,
 } from '../transformer/type.js';
-import type { AdapterAssetsManager } from './assets.js';
 import { ASTWalkerContext } from './context.js';
 
 export type FromPageSnapshotPayload = {
   snapshot: PageSnapshot;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 export type FromBlockSnapshotPayload = {
   snapshot: BlockSnapshot;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 export type FromSliceSnapshotPayload = {
   snapshot: SliceSnapshot;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 export type FromPageSnapshotResult<Target> = {
   file: Target;
@@ -32,15 +32,15 @@ export type FromSliceSnapshotResult<Target> = {
 };
 export type ToPageSnapshotPayload<Target> = {
   file: Target;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 export type ToBlockSnapshotPayload<Target> = {
   file: Target;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 export type ToSliceSnapshotPayload<Target> = {
   file: Target;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 
 export abstract class BaseAdapter<AdapterTarget = unknown> {

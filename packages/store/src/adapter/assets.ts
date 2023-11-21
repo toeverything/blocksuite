@@ -1,7 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import { sha } from '../persistence/blob/utils.js';
-import { AssetsManager } from '../transformer/assets.js';
 
 export class MemoryBlobManager {
   private readonly _map = new Map<string, Blob>();
@@ -58,10 +57,4 @@ export function getAssetName(assets: Map<string, Blob>, blobId: string) {
         ? blob.type.split('/').at(-1)
         : 'blob';
   return `${blobId}.${ext}`;
-}
-
-export class AdapterAssetsManager extends AssetsManager {
-  constructor() {
-    super({ blob: new MemoryBlobManager() });
-  }
 }

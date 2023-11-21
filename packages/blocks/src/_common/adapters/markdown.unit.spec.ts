@@ -1,9 +1,9 @@
+import type { BlockSnapshot } from '@blocksuite/store';
+import { MemoryBlobManager } from '@blocksuite/store';
+import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
-import { MemoryBlobManager } from '../../adapter/assets';
-import { MarkdownAdapter } from '../../adapter/index';
-import { AssetsManager } from '../../transformer/assets';
-import type { BlockSnapshot } from '../../transformer/type';
+import { MarkdownAdapter } from './markdown.js';
 
 describe('snapshot to markdown', () => {
   test('code', async () => {
