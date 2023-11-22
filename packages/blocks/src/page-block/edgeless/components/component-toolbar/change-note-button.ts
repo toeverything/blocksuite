@@ -455,7 +455,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             </div>
             <edgeless-size-panel
               .size=${borderRadius}
-              .sizes=${[8, 16, 24, 32]}
+              .labels=${['None', 'Small', 'Medium', 'Large', 'Huge']}
+              .sizes=${[0, 8, 16, 24, 32]}
               .minSize=${0}
               .onSelect=${(size: number) => {
                 this._setBorderRadius(size);

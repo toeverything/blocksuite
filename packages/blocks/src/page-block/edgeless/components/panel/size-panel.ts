@@ -95,6 +95,9 @@ export class EdgelessSizePanel extends LitElement {
   sizes!: number[];
 
   @property({ attribute: false })
+  labels = ['Small', 'Medium', 'Large', 'Huge'];
+
+  @property({ attribute: false })
   onSelect?: (size: EdgelessSizePanel['size']) => void;
 
   @property({ attribute: false })
@@ -141,7 +144,6 @@ export class EdgelessSizePanel extends LitElement {
   };
 
   override render() {
-    const labels = ['Small', 'Medium', 'Large', 'Huge'];
     return html`
       <div class="size-container">
         <div class="size-content">
@@ -157,7 +159,7 @@ export class EdgelessSizePanel extends LitElement {
                   this._onSelect(size);
                 }}
               >
-                <div class="size-button-label">${labels[index]}</div>
+                <div class="size-button-label">${this.labels[index]}</div>
               </div>`
           )}
 
