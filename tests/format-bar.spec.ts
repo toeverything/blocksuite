@@ -902,8 +902,8 @@ test('should format quick bar work in single block selection', async ({
   );
 
   const noteEl = page.locator('affine-note');
-  const { x, y } = await getBoundingBox(noteEl);
-  await page.mouse.click(x, y);
+  const { x, y, width, height } = await getBoundingBox(noteEl);
+  await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBar).not.toBeVisible();
 });
 
@@ -993,8 +993,8 @@ test('should format quick bar work in multiple block selection', async ({
   );
 
   const noteEl = page.locator('affine-note');
-  const { x, y } = await getBoundingBox(noteEl);
-  await page.mouse.click(x, y);
+  const { x, y, width, height } = await getBoundingBox(noteEl);
+  await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBarController.formatBar).not.toBeVisible();
 });
 
@@ -1081,8 +1081,8 @@ test('should format quick bar with block selection works when update block type'
   await expect(blockSelections).toHaveCount(3);
 
   const noteEl = page.locator('affine-note');
-  const { x, y } = await getBoundingBox(noteEl);
-  await page.mouse.click(x, y);
+  const { x, y, width, height } = await getBoundingBox(noteEl);
+  await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBarController.formatBar).not.toBeVisible();
 });
 
