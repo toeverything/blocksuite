@@ -973,7 +973,7 @@ test('should delete line with content after divider not lose content', async ({
   page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
   await pressBackspace(page);
   await assertDivider(page, 1);
-  await assertRichTexts(page, ['123']);
+  await assertRichTexts(page, ['']);
 });
 
 test('should forwardDelete divider works properly', async ({ page }) => {

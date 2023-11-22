@@ -144,6 +144,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
       component-toolbar-menu-divider {
         width: 4px;
+        height: 24px;
       }
 
       .line-style-panel {
