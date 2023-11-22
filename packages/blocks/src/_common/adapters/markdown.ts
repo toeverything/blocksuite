@@ -539,7 +539,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               flavour: 'affine:list',
               props: {
                 type:
-                  o.node.checked !== undefined
+                  o.node.checked !== null
                     ? 'todo'
                     : context.getNodeContext('mdast:list:ordered')
                     ? 'numbered'
