@@ -18,20 +18,11 @@ import {
 } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 import type { DeltaInsert } from '@blocksuite/virgo';
-import type { Root, RootContentMap } from 'hast';
 
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
+import { hastGetTextContent, hastQuerySelector, type HtmlAST } from './hast.js';
 
 export type NotionHtml = string;
-
-type HastUnionType<
-  K extends keyof RootContentMap,
-  V extends RootContentMap[K],
-> = V;
-
-type HtmlAST =
-  | HastUnionType<keyof RootContentMap, RootContentMap[keyof RootContentMap]>
-  | Root;
 
 export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
   override fromPageSnapshot(
@@ -210,66 +201,143 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         }
         case 'figure': {
           // Notion page link
-          if (Array.isArray(o.node.properties?.className)) {
-            if (o.node.properties.className.includes('link-to-page')) {
-              context
-                .openNode(
-                  {
-                    type: 'block',
-                    id: nanoid('block'),
-                    flavour: 'affine:paragraph',
-                    props: {
-                      type: 'text',
-                      text: {
-                        '$blocksuite:internal:text$': true,
-                        delta: this._hastToDelta(o.node),
-                      },
+          if (hastQuerySelector(o.node, '.link-to-page')) {
+            context
+              .openNode(
+                {
+                  type: 'block',
+                  id: nanoid('block'),
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: this._hastToDelta(o.node),
                     },
-                    children: [],
                   },
-                  'children'
-                )
-                .closeNode();
-              break;
-            }
+                  children: [],
+                },
+                'children'
+              )
+              .closeNode();
+            break;
           }
           if (!assets) {
             break;
           }
-          // Notion embed
-          if (
-            o.node.children.length === 1 &&
-            o.node.children[0].type === 'element' &&
-            Array.isArray(o.node.children[0].properties?.className) &&
-            o.node.children[0].properties?.className?.includes('source') &&
-            o.node.children[0].children.length === 1 &&
-            o.node.children[0].children[0].type === 'element' &&
-            o.node.children[0].children[0].tagName === 'a' &&
-            typeof o.node.children[0].children[0].properties?.href === 'string'
-          ) {
-            const attachmentURL =
-              o.node.children[0].children[0].properties.href;
+          // Notion image
+          const imageFigureWrapper = hastQuerySelector(o.node, '.image');
+          let imageURL = '';
+          if (imageFigureWrapper) {
+            const image = hastQuerySelector(imageFigureWrapper, 'img');
+            imageURL =
+              typeof image?.properties.src === 'string'
+                ? image.properties.src
+                : '';
+          }
+          if (imageURL) {
+            let blobId = '';
+            if (!imageURL.startsWith('http')) {
+              assets.getAssets().forEach((_value, key) => {
+                const attachmentName = getAssetName(assets.getAssets(), key);
+                if (imageURL.includes(attachmentName)) {
+                  blobId = key;
+                }
+              });
+            } else {
+              const res = await fetch(imageURL);
+              const name =
+                getFilenameFromContentDisposition(
+                  res.headers.get('Content-Disposition') ?? ''
+                ) ??
+                imageURL.split('/').at(-1) ??
+                'image' + res.headers.get('Content-Type')?.split('/').at(-1) ??
+                '.png';
+              const file = new File([await res.blob()], name);
+              blobId = await sha(await res.arrayBuffer());
+              assets?.getAssets().set(blobId, file);
+              assets?.writeToBlob(blobId);
+            }
+            context
+              .openNode(
+                {
+                  type: 'block',
+                  id: nanoid('block'),
+                  flavour: 'affine:image',
+                  props: {
+                    sourceId: blobId,
+                  },
+                  children: [],
+                },
+                'children'
+              )
+              .closeNode();
+            break;
+          }
+          // Notion bookmark
+          const bookmark = hastQuerySelector(o.node, '.bookmark');
+          if (bookmark) {
+            const bookmarkURL = bookmark.properties?.href;
+            const bookmarkTitle = hastGetTextContent(
+              hastQuerySelector(bookmark, '.bookmark-title')
+            );
+            const bookmarkDescription = hastGetTextContent(
+              hastQuerySelector(bookmark, '.bookmark-description')
+            );
+            const bookmarkIcon = hastQuerySelector(bookmark, '.bookmark-icon');
+            const bookmarkIconURL =
+              typeof bookmarkIcon?.properties?.src === 'string'
+                ? bookmarkIcon.properties.src
+                : '';
+            context.openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:bookmark',
+                props: {
+                  type: 'card',
+                  url: bookmarkURL ?? '',
+                  bookmarkTitle,
+                  description: bookmarkDescription,
+                  icon: bookmarkIconURL,
+                },
+                children: [],
+              },
+              'children'
+            );
+          }
+          // Notion embeded
+          const embededFigureWrapper = hastQuerySelector(o.node, '.source');
+          let embededURL = '';
+          if (embededFigureWrapper) {
+            const embedA = hastQuerySelector(embededFigureWrapper, 'a');
+            embededURL =
+              typeof embedA?.properties.href === 'string'
+                ? embedA.properties.href
+                : '';
+          }
+          if (embededURL) {
             let blobId = '';
             let name = '';
             let type = '';
             let size = 0;
-            if (!attachmentURL.startsWith('http')) {
+            if (!embededURL.startsWith('http')) {
               assets.getAssets().forEach((value, key) => {
-                const attachmentName = getAssetName(assets.getAssets(), key);
-                if (attachmentURL.includes(attachmentName)) {
+                const embededName = getAssetName(assets.getAssets(), key);
+                if (embededURL.includes(embededName)) {
                   blobId = key;
-                  name = attachmentName;
+                  name = embededName;
                   size = value.size;
                   type = value.type;
                 }
               });
             } else {
-              const res = await fetch(attachmentURL);
+              const res = await fetch(embededURL);
               name =
                 getFilenameFromContentDisposition(
                   res.headers.get('Content-Disposition') ?? ''
                 ) ??
-                attachmentURL.split('/').at(-1) ??
+                embededURL.split('/').at(-1) ??
                 'file' + res.headers.get('Content-Type')?.split('/').at(-1) ??
                 '.blob';
               const file = new File([await res.blob()], name);
@@ -296,6 +364,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'children'
               )
               .closeNode();
+            break;
           }
           break;
         }
