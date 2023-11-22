@@ -79,6 +79,8 @@ export class BlockTree extends Space<FlatBlockMap> {
     yBlock.set('sys:children', yChildren);
 
     delete props.children;
+    delete props.id;
+    delete props.flavour;
 
     Object.entries(props).forEach(([key, value]) => {
       if (value === undefined) return;
