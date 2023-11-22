@@ -93,6 +93,9 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   override firstUpdated() {
     this._handleEditingTransition();
+    this.model.propsUpdated.on(() => {
+      this.requestUpdate();
+    });
   }
 
   override render() {

@@ -11,7 +11,6 @@ import {
   exitEditing,
   getNoteRect,
   hoverOnNote,
-  initThreeNotes,
   locatorComponentToolbar,
   locatorEdgelessZoomToolButton,
   selectNoteInEdgeless,
