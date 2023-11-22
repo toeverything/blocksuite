@@ -1,7 +1,8 @@
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { CanvasTextFontFamily } from '../../../../surface-block/consts.js';
+import { wrapFontFamily } from '../../../../surface-block/elements/text/utils.js';
 
 @customElement('edgeless-font-family-panel')
 export class EdgelessFontFamilyPanel extends LitElement {
@@ -25,31 +26,38 @@ export class EdgelessFontFamilyPanel extends LitElement {
     }
 
     .inter {
-      font-family: 'Inter', sans-serif;
+      font-family: ${unsafeCSS(wrapFontFamily(CanvasTextFontFamily.Inter))},
+        sans-serif;
     }
 
     .kalam {
-      font-family: 'Kalam', sans-serif;
+      font-family: ${unsafeCSS(wrapFontFamily(CanvasTextFontFamily.Kalam))},
+        sans-serif;
     }
 
     .satoshi {
-      font-family: 'Satoshi', sans-serif;
+      font-family: ${unsafeCSS(wrapFontFamily(CanvasTextFontFamily.Satoshi))},
+        sans-serif;
     }
 
     .poppins {
-      font-family: 'Poppins', sans-serif;
+      font-family: ${unsafeCSS(wrapFontFamily(CanvasTextFontFamily.Poppins))},
+        sans-serif;
     }
 
     .lora {
-      font-family: 'Lora', sans-serif;
+      font-family: ${unsafeCSS(wrapFontFamily(CanvasTextFontFamily.Lora))},
+        sans-serif;
     }
 
     .bebas-neue {
-      font-family: 'BebasNeue', sans-serif;
+      font-family: ${unsafeCSS(wrapFontFamily(CanvasTextFontFamily.BebasNeue))},
+        sans-serif;
     }
 
     .orelega-one {
-      font-family: 'OrelegaOne', sans-serif;
+      font-family: ${unsafeCSS(wrapFontFamily(CanvasTextFontFamily.OrelegaOne))},
+        sans-serif;
     }
   `;
 

@@ -22,14 +22,21 @@ export const isChrome =
 export const isSafari =
   !isChrome && globalThis.navigator?.userAgent.indexOf('Safari') !== -1;
 
-export function getLineHeight(fontFamily: string, fontSize: number) {
+export function wrapFontFamily(fontFamily: CanvasTextFontFamily): string {
+  return `"${fontFamily}"`;
+}
+
+export function getLineHeight(
+  fontFamily: CanvasTextFontFamily,
+  fontSize: number
+) {
   // Browser may have minimum font size setting
   // so we need to multiple the multiplier between the actual size and the expected size
   const actualFontSize = Math.max(fontSize, 12);
   const div = document.createElement('div');
   const span = document.createElement('span');
 
-  span.style.fontFamily = fontFamily;
+  span.style.fontFamily = wrapFontFamily(fontFamily);
   span.style.fontSize = actualFontSize + 'px';
   span.style.lineHeight = 'initial';
   span.textContent = 'M';
@@ -51,10 +58,12 @@ export function getFontString({
   fontStyle: string;
   fontWeight: string;
   fontSize: number;
-  fontFamily: string;
+  fontFamily: CanvasTextFontFamily;
 }): string {
   const lineHeight = getLineHeight(fontFamily, fontSize);
-  return `${fontStyle} ${fontWeight} ${fontSize}px/${lineHeight}px ${fontFamily}`.trim();
+  return `${fontStyle} ${fontWeight} ${fontSize}px/${lineHeight}px ${wrapFontFamily(
+    fontFamily
+  )}`.trim();
 }
 
 export function normalizeText(text: string): string {

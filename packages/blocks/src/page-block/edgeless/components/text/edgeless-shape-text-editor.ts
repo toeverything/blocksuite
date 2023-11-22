@@ -7,6 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { SHAPE_TEXT_PADDING } from '../../../../surface-block/elements/shape/consts.js';
+import { wrapFontFamily } from '../../../../surface-block/elements/text/utils.js';
 import type {
   PhasorElementType,
   ShapeElement,
@@ -162,7 +163,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       width: rect.width + 'px',
       minHeight: rect.height + 'px',
       fontSize: this.element.fontSize + 'px',
-      fontFamily: this.element.fontFamily,
+      fontFamily: wrapFontFamily(this.element.fontFamily),
       lineHeight: 'initial',
       outline: 'none',
       transform: `scale(${zoom}, ${zoom}) rotate(${rotate}deg)`,
