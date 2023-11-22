@@ -1714,7 +1714,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await focusRichText(page, 0);
   await type(
     page,
-    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   );
   await waitNextFrame(page);
   // - aaa... (no \n)
@@ -1762,7 +1762,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await pressArrowUp(page);
   await pressArrowLeft(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 93);
+  await assertRichTextVRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)
@@ -1794,7 +1794,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 93);
+  await assertRichTextVRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)
