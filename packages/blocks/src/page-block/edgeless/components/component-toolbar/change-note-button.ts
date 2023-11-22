@@ -119,6 +119,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         background-color: var(--affine-hover-color);
       }
 
+      edgeless-size-panel {
+        border-radius: 8px;
+      }
+
       edgeless-color-panel {
         width: 168px;
         display: none;
