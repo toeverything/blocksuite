@@ -7,8 +7,12 @@ export async function createPage(
   const page = workspace.createPage({ id: options.id });
 
   await page.load(() => {
+    const title = options.title ?? '';
     const pageBlockId = page.addBlock('affine:page', {
-      title: new page.Text(options.title ?? ''),
+      title: new page.Text(title),
+    });
+    workspace.setPageMeta(page.id, {
+      title,
     });
     page.addBlock('affine:surface', {}, pageBlockId);
     const noteId = page.addBlock('affine:note', {}, pageBlockId);
