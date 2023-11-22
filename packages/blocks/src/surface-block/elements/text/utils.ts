@@ -390,28 +390,6 @@ export function normalizeTextBound(
   return bound;
 }
 
-export function isFontWeightSupported(
-  font: CanvasTextFontFamily,
-  weight: CanvasTextFontWeight
-) {
-  const fonts = document.fonts;
-  const fontFace = [...fonts.keys()].find(fontFace => {
-    return fontFace.family === font && fontFace.weight === weight;
-  });
-  return !!fontFace;
-}
-
-export function isFontStyleSupported(
-  font: CanvasTextFontFamily,
-  style: CanvasTextFontStyle
-) {
-  const fonts = document.fonts;
-  const fontFace = [...fonts.keys()].find(fontFace => {
-    return fontFace.family === font && fontFace.style === style;
-  });
-  return !!fontFace;
-}
-
 export function getFontFacesByFontFamily(
   fontFamily: CanvasTextFontFamily
 ): FontFace[] {
@@ -422,6 +400,32 @@ export function getFontFacesByFontFamily(
         return fontFace.family === fontFamily;
       })
       // remove duplicate font faces
-      .filter((item, index, arr) => arr.indexOf(item) === index)
+      .filter(
+        (item, index, arr) =>
+          arr.findIndex(
+            fontFace =>
+              fontFace.family === item.family &&
+              fontFace.weight === item.weight &&
+              fontFace.style === item.style
+          ) === index
+      )
   );
+}
+
+export function isFontWeightSupported(
+  fontFamily: CanvasTextFontFamily,
+  weight: CanvasTextFontWeight
+) {
+  const fontFaces = getFontFacesByFontFamily(fontFamily);
+  const fontFace = fontFaces.find(fontFace => fontFace.weight === weight);
+  return !!fontFace;
+}
+
+export function isFontStyleSupported(
+  fontFamily: CanvasTextFontFamily,
+  style: CanvasTextFontStyle
+) {
+  const fontFaces = getFontFacesByFontFamily(fontFamily);
+  const fontFace = fontFaces.find(fontFace => fontFace.style === style);
+  return !!fontFace;
 }
