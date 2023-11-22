@@ -251,7 +251,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       box-sizing: border-box;
       border-radius: 6px;
       z-index: 10;
-      /* border: 2px var(--affine-blue) solid; */
       content: '';
       background: white;
     }
