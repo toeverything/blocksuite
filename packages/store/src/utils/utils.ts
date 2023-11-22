@@ -1,17 +1,13 @@
-import { fromBase64, toBase64 } from 'lib0/buffer.js';
+import { toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
 import { SYS_KEYS } from '../consts.js';
 import type { BlockSchema } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
+import type { YBlock } from '../workspace/block.js';
 import type { Workspace } from '../workspace/index.js';
-import type {
-  BlockProps,
-  BlockSysProps,
-  YBlock,
-  YBlocks,
-} from '../workspace/page.js';
+import type { BlockProps, YBlocks } from '../workspace/page.js';
 import type { ProxyManager, ProxyOptions } from '../yjs/index.js';
 import { canToProxy, canToY } from '../yjs/index.js';
 import { Boxed, native2Y, Text } from '../yjs/index.js';
@@ -27,17 +23,6 @@ export function assertValidChildren(
       throw new Error('Invalid child id: ' + child.id);
     }
   });
-}
-
-export function initSysProps(yBlock: YBlock, props: BlockSysProps) {
-  yBlock.set('sys:id', props.id);
-  yBlock.set('sys:flavour', props.flavour);
-
-  const yChildren = new Y.Array();
-  yBlock.set('sys:children', yChildren);
-  if (Array.isArray(props.children)) {
-    props.children.forEach(child => yChildren.push([child.id]));
-  }
 }
 
 export function syncBlockProps(
@@ -123,8 +108,4 @@ export function toBlockProps(
 
 export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {
   return toBase64(Y.encodeStateAsUpdateV2(workspace.doc));
-}
-
-export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
-  Y.applyUpdateV2(workspace.doc, fromBase64(update));
 }

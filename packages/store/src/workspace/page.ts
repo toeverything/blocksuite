@@ -9,11 +9,11 @@ import { assertValidChildren, syncBlockProps } from '../utils/utils.js';
 import type { AwarenessStore } from '../yjs/awareness.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { Text } from '../yjs/text-adapter.js';
+import type { YBlock } from './block.js';
 import { BlockTree } from './block-tree.js';
 import type { PageMeta } from './meta.js';
 import type { Workspace } from './workspace.js';
 
-export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
 /** JSON-serializable properties of a block */
@@ -602,7 +602,7 @@ export class Page extends BlockTree {
               dl(id);
             });
 
-            this._yBlocks.delete(id);
+            this._removeBlock(id);
           };
 
           yModelChildren.forEach(id => {
@@ -611,7 +611,7 @@ export class Page extends BlockTree {
         }
       }
 
-      this._yBlocks.delete(model.id);
+      this._removeBlock(model.id);
 
       parent.childrenUpdated.emit();
     });

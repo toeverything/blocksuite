@@ -3,8 +3,8 @@ import type * as Y from 'yjs';
 import { z } from 'zod';
 
 import type { BaseBlockTransformer } from '../transformer/base.js';
+import type { YBlock } from '../workspace/block.js';
 import type { Page } from '../workspace/index.js';
-import type { YBlock } from '../workspace/page.js';
 import { Boxed } from '../yjs/boxed.js';
 import { Text } from '../yjs/text-adapter.js';
 
