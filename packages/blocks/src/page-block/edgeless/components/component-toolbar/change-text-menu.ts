@@ -421,7 +421,9 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const selectedColor = this._getMostCommonColor(this.elements);
     const selectedAlign = this._getMostCommonAlign(this.elements);
     const selectedFontFamily = this._getMostCommonFontFamily(this.elements);
-    const selectedFontSize = this._getMostCommonFontSize(this.elements);
+    const selectedFontSize = Math.trunc(
+      this._getMostCommonFontSize(this.elements)
+    );
     const selectedFontWeight = this._getMostCommonFontWeight(this.elements);
     const selectedFontStyle = this._getMostCommonFontStyle(this.elements);
 
