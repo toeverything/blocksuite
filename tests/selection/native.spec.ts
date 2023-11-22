@@ -931,10 +931,12 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await type(page, '--- ');
   await assertDivider(page, 1);
 
+  await waitNextFrame(page);
   await pressEnter(page);
   await type(page, '--- ');
   await pressArrowUp(page, 2);
   await pressBackspace(page);
+  await waitNextFrame(page);
   await assertDivider(page, 2);
   await assertRichTexts(page, ['', '']);
 });

@@ -6,7 +6,7 @@ import '../panel/note-shadow-panel.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import {
@@ -171,6 +171,9 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   slots!: EdgelessSelectionSlots;
 
   @state()
+  private _queryCache = false;
+
+  @state()
   private _popperShow = false;
 
   @query('.fill-color-button')
@@ -233,7 +236,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         false
       );
     }
-    this.requestUpdate();
+    this._queryCache = !this._queryCache;
   }
 
   private _setStrokeWidth(borderSize: number) {
@@ -296,48 +299,48 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     });
   }
 
-  override firstUpdated() {
+  override updated(_changedProperties: PropertyValues) {
     const { _disposables } = this;
+    if (_changedProperties.has('_queryCache')) {
+      this._fillColorPopper = createButtonPopper(
+        this._fillColorButton,
+        this._fillColorMenu,
+        ({ display }) => (this._popperShow = display === 'show')
+      );
 
-    this._fillColorPopper = createButtonPopper(
-      this._fillColorButton,
-      this._fillColorMenu,
-      ({ display }) => (this._popperShow = display === 'show')
-    );
+      this._disposables.add(this._fillColorPopper);
 
-    this._disposables.add(this._fillColorPopper);
+      this._shadowTypePopper = createButtonPopper(
+        this._shadowTypeButton,
+        this._shadowTypesPanel,
+        ({ display }) => {
+          this._popperShow = display === 'show';
+        }
+      );
+      _disposables.add(this._shadowTypePopper);
 
-    this._borderStylePopper = createButtonPopper(
-      this._borderStyleButton,
-      this._borderStylesPanel,
-      ({ display }) => {
-        this._popperShow = display === 'show';
-      }
-    );
-    _disposables.add(this._borderStylePopper);
+      this._borderStylePopper = createButtonPopper(
+        this._borderStyleButton,
+        this._borderStylesPanel,
+        ({ display }) => {
+          this._popperShow = display === 'show';
+        }
+      );
+      _disposables.add(this._borderStylePopper);
 
-    this._borderRadiusPopper = createButtonPopper(
-      this._borderRadiusButton,
-      this._boderRadiusPanel,
-      ({ display }) => {
-        this._popperShow = display === 'show';
-      }
-    );
-    _disposables.add(this._borderRadiusPopper);
-
-    this._shadowTypePopper = createButtonPopper(
-      this._shadowTypeButton,
-      this._shadowTypesPanel,
-      ({ display }) => {
-        this._popperShow = display === 'show';
-      }
-    );
-    _disposables.add(this._shadowTypePopper);
+      this._borderRadiusPopper = createButtonPopper(
+        this._borderRadiusButton,
+        this._boderRadiusPanel,
+        ({ display }) => {
+          this._popperShow = display === 'show';
+        }
+      );
+      _disposables.add(this._borderRadiusPopper);
+    }
   }
 
   override render() {
     if (this.notes.length !== 1) return nothing;
-
     const note = this.notes[0];
     const enableIndex =
       this.surface.page.awarenessStore.getFlag('enable_note_index');
@@ -376,89 +379,91 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       <component-toolbar-menu-divider
         .vertical=${true}
       ></component-toolbar-menu-divider>
+      ${hidden
+        ? nothing
+        : html`
+            <edgeless-tool-icon-button
+              class="fill-color-button"
+              .tooltip=${this._popperShow ? '' : 'Background'}
+              .tipPosition=${'bottom'}
+              .iconContainerPadding=${2}
+              @click=${() => this._fillColorPopper?.toggle()}
+            >
+              <div class="fill-color-container">${ColorUnit(background)}</div>
+            </edgeless-tool-icon-button>
 
-      <edgeless-tool-icon-button
-        class="fill-color-button"
-        .tooltip=${this._popperShow ? '' : 'Background'}
-        .tipPosition=${'bottom'}
-        .iconContainerPadding=${2}
-        @click=${() => this._fillColorPopper?.toggle()}
-      >
-        <div class="fill-color-container">${ColorUnit(background)}</div>
-      </edgeless-tool-icon-button>
+            <edgeless-color-panel
+              .value=${background}
+              .options=${NOTE_BACKGROUND}
+              @select=${(e: ColorEvent) => this._setBackground(e.detail)}
+            >
+            </edgeless-color-panel>
 
-      <edgeless-color-panel
-        .value=${background}
-        .options=${NOTE_BACKGROUND}
-        @select=${(e: ColorEvent) => this._setBackground(e.detail)}
-      >
-      </edgeless-color-panel>
+            <component-toolbar-menu-divider
+              .vertical=${true}
+            ></component-toolbar-menu-divider>
 
-      <component-toolbar-menu-divider
-        .vertical=${true}
-      ></component-toolbar-menu-divider>
+            <div class="item shadow-style-button">
+              <edgeless-tool-icon-button
+                .tooltip=${'Shadow Style'}
+                .tipPosition=${'bottom'}
+                .iconContainerPadding=${0}
+                .hover=${false}
+                @click=${() => this._shadowTypePopper?.toggle()}
+              >
+                ${NoteShadowIcon}${SmallArrowDownIcon}
+              </edgeless-tool-icon-button>
+            </div>
 
-      <div class="item shadow-style-button">
-        <edgeless-tool-icon-button
-          .tooltip=${'Shadow Style'}
-          .tipPosition=${'bottom'}
-          .iconContainerPadding=${0}
-          .hover=${false}
-          @click=${() => this._shadowTypePopper?.toggle()}
-        >
-          ${NoteShadowIcon}${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>
-      </div>
+            <edgeless-note-shadow-panel
+              .value=${shadowType}
+              .background=${background}
+              .onSelect=${(value: string) => this._setShadowType(value)}
+            >
+            </edgeless-note-shadow-panel>
 
-      <edgeless-note-shadow-panel
-        .value=${shadowType}
-        .background=${background}
-        .onSelect=${(value: string) => this._setShadowType(value)}
-      >
-      </edgeless-note-shadow-panel>
+            <div class="item border-style-button">
+              <edgeless-tool-icon-button
+                .tooltip=${this._popperShow ? '' : 'Border Style'}
+                .tipPosition=${'bottom'}
+                .iconContainerPadding=${0}
+                .hover=${false}
+                @click=${() => this._borderStylePopper?.toggle()}
+              >
+                ${LineStyleIcon}${SmallArrowDownIcon}
+              </edgeless-tool-icon-button>
+            </div>
+            ${LineStylesPanel({
+              selectedLineSize: borderSize,
+              selectedLineStyle: borderStyle,
+              onClick: event => {
+                this._setStyles(event);
+              },
+            })}
 
-      <div class="item border-style-button">
-        <edgeless-tool-icon-button
-          .tooltip=${this._popperShow ? '' : 'Border Style'}
-          .tipPosition=${'bottom'}
-          .iconContainerPadding=${0}
-          .hover=${false}
-          @click=${() => this._borderStylePopper?.toggle()}
-        >
-          ${LineStyleIcon}${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>
-      </div>
-      ${LineStylesPanel({
-        selectedLineSize: borderSize,
-        selectedLineStyle: borderStyle,
-        onClick: event => {
-          this._setStyles(event);
-        },
-      })}
-
-      <div class="item border-radius-button">
-        <edgeless-tool-icon-button
-          .tooltip=${'Corners'}
-          .tipPosition=${'bottom'}
-          .iconContainerPadding=${0}
-          .hover=${false}
-          @click=${() => this._borderRadiusPopper?.toggle()}
-        >
-          ${NoteCornerIcon}${SmallArrowDownIcon}
-        </edgeless-tool-icon-button>
-      </div>
-      <edgeless-size-panel
-        .size=${borderRadius}
-        .sizes=${[8, 16, 24, 32]}
-        .onSelect=${(size: number) => {
-          this._setBorderRadius(size);
-        }}
-        .onPopperCose=${() => this._borderRadiusPopper?.hide()}
-      ></edgeless-size-panel>
-
-      <component-toolbar-menu-divider
-        .vertical=${true}
-      ></component-toolbar-menu-divider>
+            <div class="item border-radius-button">
+              <edgeless-tool-icon-button
+                .tooltip=${'Corners'}
+                .tipPosition=${'bottom'}
+                .iconContainerPadding=${0}
+                .hover=${false}
+                @click=${() => this._borderRadiusPopper?.toggle()}
+              >
+                ${NoteCornerIcon}${SmallArrowDownIcon}
+              </edgeless-tool-icon-button>
+            </div>
+            <edgeless-size-panel
+              .size=${borderRadius}
+              .sizes=${[8, 16, 24, 32]}
+              .onSelect=${(size: number) => {
+                this._setBorderRadius(size);
+              }}
+              .onPopperCose=${() => this._borderRadiusPopper?.hide()}
+            ></edgeless-size-panel>
+            <component-toolbar-menu-divider
+              .vertical=${true}
+            ></component-toolbar-menu-divider>
+          `}
 
       <edgeless-tool-icon-button
         class="edgeless-auto-height-button"
