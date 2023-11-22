@@ -511,6 +511,25 @@ export class DocPageBlockComponent extends BlockElement<
       ) {
         return;
       }
+
+      // Click on blank area
+      const { width: virewportWidth } =
+        this.viewportElement.getBoundingClientRect();
+      const { width: pageWidth } =
+        this.pageBlockContainer.getBoundingClientRect();
+
+      const pageStyle = window.getComputedStyle(this.pageBlockContainer);
+      const blankLeft =
+        virewportWidth - pageWidth + parseFloat(pageStyle.paddingLeft);
+      const blankRight =
+        (virewportWidth - pageWidth) / 2 +
+        pageWidth -
+        parseFloat(pageStyle.paddingRight);
+
+      if (state.raw.clientX < blankLeft || state.raw.clientX > blankRight) {
+        return;
+      }
+
       let noteId: string;
       let paragraphId: string;
       let index = 0;
