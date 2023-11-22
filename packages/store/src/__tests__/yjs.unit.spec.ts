@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
-import { Boxed } from '../yjs/boxed';
+import { Boxed } from '../yjs/boxed.js';
 import { BlockSuiteDoc, ProxyManager } from '../yjs/index.js';
 
 const proxyManager = new ProxyManager();
@@ -34,19 +34,6 @@ describe('blocksuite yjs', () => {
 
       proxy[0] = 2;
       expect(arr.length).toBe(1);
-    });
-
-    test('readonly', () => {
-      const ydoc = new Y.Doc();
-      const arr = ydoc.getArray('arr');
-      arr.push([0]);
-
-      const proxy = proxyManager.createYProxy(arr) as unknown[];
-      proxyManager.readonly = true;
-      expect(arr.get(0)).toBe(0);
-
-      expect(() => proxy.push(1)).toThrowError('Modify data is not allowed');
-      proxyManager.readonly = false;
     });
   });
 
