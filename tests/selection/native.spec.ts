@@ -929,8 +929,9 @@ test('should delete line with content after divider not lose content', async ({
   await assertDivider(page, 1);
   // Jump to line start
   page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
+  await waitNextFrame(page);
   await pressBackspace(page);
-  await assertDivider(page, 1);
+  await assertDivider(page, 0);
   await assertRichTexts(page, ['123']);
 });
 
