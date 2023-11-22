@@ -274,7 +274,6 @@ test('should turn attachment to image works', async ({ page }) => {
   prop:index="a0"
 >
   <affine:image
-    prop:caption=""
     prop:height={0}
     prop:index="a0"
     prop:rotate={0}
@@ -294,7 +293,6 @@ test('should turn attachment to image works', async ({ page }) => {
   prop:index="a0"
 >
   <affine:attachment
-    prop:caption=""
     prop:name="${FILE_NAME}"
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
