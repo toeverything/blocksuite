@@ -441,6 +441,7 @@ export class EdgelessToolsManager {
       editing: false,
     }
   ) => {
+    if (this.page.readonly && edgelessTool.type !== 'pan') return;
     if (this.edgelessTool === edgelessTool) return;
     const lastType = this.edgelessTool.type;
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
