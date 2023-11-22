@@ -1,7 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-// FIXME: horizontal
 @customElement('component-toolbar-menu-divider')
 export class ComponentToolbarMenuDivider extends LitElement {
   static override styles = css`
@@ -9,22 +8,40 @@ export class ComponentToolbarMenuDivider extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 4px;
-      height: 24px;
     }
 
     .divider {
+      background-color: var(--affine-border-color);
+    }
+
+    .vertical {
+      width: 4px;
+      height: 100%;
+    }
+
+    .vertical .divider {
       width: 1px;
       height: 100%;
-      background-color: var(--affine-border-color);
+    }
+
+    .horizontal {
+      width: 100%;
+      height: 4px;
+    }
+
+    .horizontal .divider {
+      width: 100%;
+      height: 1px;
     }
   `;
 
-  @property({ attribute: false })
-  vertical = false;
+  @property({ type: Boolean })
+  vertical = true;
 
   override render() {
-    return html` <div class="divider-container">
+    return html`<div
+      class="divider-container ${this.vertical ? 'vertical' : 'horizontal'}"
+    >
       <div class="divider"></div>
     </div>`;
   }

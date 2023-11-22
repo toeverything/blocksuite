@@ -74,6 +74,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     }
     component-toolbar-menu-divider {
       margin: 0 12px;
+      height: 24px;
     }
   `;
   @property({ attribute: false })
@@ -161,9 +162,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
               ${NoteIcon}
               <span style="margin-left: 2px;">Insert into Page</span>
             </edgeless-tool-icon-button>
-            <component-toolbar-menu-divider
-              .vertical=${true}
-            ></component-toolbar-menu-divider>
+            <component-toolbar-menu-divider></component-toolbar-menu-divider>
             <edgeless-tool-icon-button
               .tooltip=${'Rename'}
               .tipPosition=${'bottom'}
@@ -173,9 +172,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
             >
               ${RenameIcon}
             </edgeless-tool-icon-button>
-            <component-toolbar-menu-divider
-              .vertical=${true}
-            ></component-toolbar-menu-divider>
+            <component-toolbar-menu-divider></component-toolbar-menu-divider>
           `
         : nothing}
 
