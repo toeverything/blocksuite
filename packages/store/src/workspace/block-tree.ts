@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
-import type { Schema } from '../schema/index.js';
+import type { BaseBlockModel, Schema } from '../schema/index.js';
 import { internalPrimitives } from '../schema/index.js';
 import { propsToValue } from '../utils/utils.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
@@ -75,7 +75,9 @@ export class BlockTree extends Space<FlatBlockMap> {
       ...initialProps,
     };
 
-    const yChildren = Y.Array.from(props.children ?? []);
+    const yChildren = Y.Array.from(
+      (props.children ?? []).map((child: BaseBlockModel) => child.id)
+    );
     yBlock.set('sys:children', yChildren);
 
     delete props.children;
