@@ -39,7 +39,7 @@ export class Block {
         if (!type) {
           return;
         }
-        if (type.action === 'update') {
+        if (type.action === 'update' || type.action === 'add') {
           const value = this.yBlock.get(key);
           const keyName = key.replace('prop:', '');
           const proxy = valueToProps(value, this.tree.doc.proxy, {
@@ -53,7 +53,14 @@ export class Block {
           this._byPassProxy = false;
           return;
         }
-        console.error('Cannot add or delete props');
+        if (type.action === 'delete') {
+          const keyName = key.replace('prop:', '');
+          this._byPassProxy = true;
+          // @ts-ignore
+          delete this.model[keyName];
+          this._byPassProxy = false;
+          return;
+        }
       });
       this.model.propsUpdated.emit();
     });
