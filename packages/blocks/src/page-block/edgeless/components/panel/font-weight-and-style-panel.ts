@@ -86,7 +86,12 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
   }
 
   override render() {
-    const fontFaces = getFontFacesByFontFamily(this.fontFamily);
+    let fontFaces = getFontFacesByFontFamily(this.fontFamily);
+    // Compatible with old data
+    if (fontFaces.length === 0) {
+      fontFaces = getFontFacesByFontFamily(CanvasTextFontFamily.Inter);
+    }
+
     const fontFacesWithNormal = fontFaces.filter(fontFace => {
       return fontFace.style === CanvasTextFontStyle.Normal;
     });
@@ -96,8 +101,7 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
 
     return html`
       <div class="container">
-        ${fontFacesWithNormal.length > 0 ||
-        !CANVAS_TEXT_FONT_FAMILY.includes(this.fontFamily)
+        ${fontFacesWithNormal.length > 0
           ? html`${fontFacesWithNormal.map(
               fontFace => html`
                 <edgeless-tool-icon-button
@@ -125,8 +129,7 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
               `
             )}`
           : nothing}
-        ${fontFacesWithItalic.length > 0 ||
-        !CANVAS_TEXT_FONT_FAMILY.includes(this.fontFamily)
+        ${fontFacesWithItalic.length > 0
           ? html`<component-toolbar-menu-divider
                 .vertical=${false}
               ></component-toolbar-menu-divider>
