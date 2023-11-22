@@ -2,7 +2,6 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
-import { TEXT_FONT_SIZE } from '../text/types.js';
 
 const MIN_FONT_SIZE = 1;
 const MAX_FONT_SIZE = 2000;
@@ -137,46 +136,20 @@ export class EdgelessFontSizePanel extends LitElement {
     return html`
       <div class="font-size-container">
         <div class="font-size-content">
-          <div
-            class="font-size-button"
-            role="button"
-            ?active=${this.fontSize === TEXT_FONT_SIZE.SMALL}
-            @click=${() => {
-              this._onSelect(TEXT_FONT_SIZE.SMALL);
-            }}
-          >
-            <div class="font-size-button-label">Small</div>
-          </div>
-          <div
-            class="font-size-button"
-            role="button"
-            ?active=${this.fontSize === TEXT_FONT_SIZE.MEDIUM}
-            @click=${() => {
-              this._onSelect(TEXT_FONT_SIZE.MEDIUM);
-            }}
-          >
-            <div class="font-size-button-label">Middle</div>
-          </div>
-          <div
-            class="font-size-button"
-            role="button"
-            ?active=${this.fontSize === TEXT_FONT_SIZE.LARGE}
-            @click=${() => {
-              this._onSelect(TEXT_FONT_SIZE.LARGE);
-            }}
-          >
-            <div class="font-size-button-label">Large</div>
-          </div>
-          <div
-            class="font-size-button"
-            role="button"
-            ?active=${this.fontSize === TEXT_FONT_SIZE.XLARGE}
-            @click=${() => {
-              this._onSelect(TEXT_FONT_SIZE.XLARGE);
-            }}
-          >
-            <div class="font-size-button-label">Huge</div>
-          </div>
+          ${[16, 24, 32, 36, 40, 64, 128].map(
+            fontSize => html`
+              <div
+                class="font-size-button"
+                role="button"
+                ?active=${this.fontSize === fontSize}
+                @click=${() => {
+                  this._onSelect(fontSize);
+                }}
+              >
+                <div class="font-size-button-label">${fontSize}</div>
+              </div>
+            `
+          )}
 
           <div
             class="font-size-input-container"

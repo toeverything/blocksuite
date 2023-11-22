@@ -44,10 +44,9 @@ import {
 } from '../panel/color-panel.js';
 import type { EdgelessFontFamilyPanel } from '../panel/font-family-panel.js';
 import type { EdgelessFontSizePanel } from '../panel/font-size-panel.js';
-import {
-  type EdgelessCanvasTextElement,
-  type EdgelessCanvasTextElementType,
-  TEXT_FONT_SIZE,
+import type {
+  EdgelessCanvasTextElement,
+  EdgelessCanvasTextElementType,
 } from '../text/types.js';
 import { createButtonPopper } from '../utils.js';
 import { ShapeArrowDownSmallIcon } from './../../../../_common/icons/index.js';
@@ -222,9 +221,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       (element: EdgelessCanvasTextElement) => element.fontSize
     );
     const max = maxBy(Object.entries(fontSizes), ([_k, count]) => count);
-    return max
-      ? (Number(max[0]) as EdgelessCanvasTextElement['fontSize'])
-      : TEXT_FONT_SIZE.MEDIUM;
+    return max ? (Number(max[0]) as EdgelessCanvasTextElement['fontSize']) : 16;
   };
 
   private _getMostCommonFontWeight = (
@@ -362,21 +359,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     });
   };
 
-  private _getFontSizeLabel = (fontSize: number) => {
-    switch (fontSize) {
-      case TEXT_FONT_SIZE.SMALL:
-        return 'Small';
-      case TEXT_FONT_SIZE.MEDIUM:
-        return 'Middle';
-      case TEXT_FONT_SIZE.LARGE:
-        return 'Large';
-      case TEXT_FONT_SIZE.XLARGE:
-        return 'Huge';
-      default:
-        return Math.trunc(fontSize);
-    }
-  };
-
   override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
@@ -503,9 +485,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         @click=${() => this._textFontSizePopper?.toggle()}
       >
         <div class="font-size-button-group">
-          <div class="selected-font-size-label">
-            ${this._getFontSizeLabel(selectedFontSize)}
-          </div>
+          <div class="selected-font-size-label">${selectedFontSize}</div>
           <div class="arrow-down-icon">${ShapeArrowDownSmallIcon}</div>
         </div>
       </edgeless-tool-icon-button>

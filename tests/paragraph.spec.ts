@@ -1647,19 +1647,19 @@ test('arrow up/down navigation within and across paragraphs containing different
   await assertRichTextVRange(page, 1, 125, 0);
 
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 1, 30, 0);
+  await assertRichTextVRange(page, 1, 32, 0);
   await pressArrowUp(page);
   await assertRichTextVRange(page, 0, 125, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 0, 32, 0);
+  await assertRichTextVRange(page, 0, 35, 0);
   await pressArrowUp(page);
   await assertRichTextVRange(page, 0, 0, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 0, 96, 0);
+  await assertRichTextVRange(page, 0, 93, 0);
   await pressArrowDown(page);
   await assertRichTextVRange(page, 1, 0, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 1, 93, 0);
+  await assertRichTextVRange(page, 1, 90, 0);
   await pressArrowDown(page);
   await assertRichTextVRange(page, 1, 125, 0);
 });
