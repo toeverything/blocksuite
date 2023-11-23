@@ -106,3 +106,4 @@ Example:
 - Ayush, @AyushAgrawal-A2, 2023/11/07
 - KokomiCat, @xiazeyu, 2023/11/08
 - Yunfei He, @hyf0, 2023/11/12
+- Rachit Chawla, @rachit1313, 2023/11/22
