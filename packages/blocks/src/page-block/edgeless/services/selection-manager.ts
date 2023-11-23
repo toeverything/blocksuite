@@ -164,13 +164,17 @@ export class EdgelessSelectionManager {
               selection.elements.forEach(id => remoteSelectedElements.add(id));
             }
 
-            if (selection.is('cursor')) {
+            if (selection.is('cursor') && !hasTextSelection) {
               remoteCursors.set(id, selection);
             }
           });
 
           if (hasBlockSelection || hasTextSelection) {
             remoteSelection.delete(id);
+          }
+
+          if (hasTextSelection) {
+            remoteCursors.delete(id);
           }
         });
 
