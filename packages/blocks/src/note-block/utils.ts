@@ -60,16 +60,16 @@ export function horizontalGetNextCaret(
       point.x >= rect.left && point.x <= rect.right
         ? point.x
         : point.x < rect.left
-        ? rect.left
-        : rect.right,
+          ? rect.left
+          : rect.right,
     y:
       point.y >= rect.top && point.y <= rect.bottom
         ? point.y
         : forward && point.y > rect.bottom
-        ? rect.bottom - span
-        : !forward && point.y < rect.top
-        ? rect.top + span
-        : point.y,
+          ? rect.bottom - span
+          : !forward && point.y < rect.top
+            ? rect.top + span
+            : point.y,
   };
 
   let move = caretFromPoint(_point.x, _point.y);

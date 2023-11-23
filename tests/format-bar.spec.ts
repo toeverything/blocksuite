@@ -211,6 +211,16 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -258,6 +268,16 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -314,6 +334,16 @@ test.fixme(
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -351,6 +381,16 @@ test.fixme(
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -392,6 +432,16 @@ test.fixme(
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -439,6 +489,16 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -486,6 +546,16 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -528,6 +598,16 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -567,6 +647,16 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -607,6 +697,16 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -633,6 +733,16 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -662,6 +772,16 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -873,6 +993,16 @@ test('should format quick bar work in single block selection', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -949,6 +1079,16 @@ test('should format quick bar work in multiple block selection', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1027,6 +1167,16 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1059,6 +1209,16 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1110,6 +1270,16 @@ test('should format quick bar show after convert to code block', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >

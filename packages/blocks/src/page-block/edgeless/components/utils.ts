@@ -96,6 +96,7 @@ export function createButtonPopper(
   };
 
   const hide = () => {
+    if (!popperElement) return;
     popperElement.removeAttribute(ATTR_SHOW);
 
     compute();

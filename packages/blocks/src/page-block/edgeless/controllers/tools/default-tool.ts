@@ -373,7 +373,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       const noteService = _edgeless.getService(EdgelessBlockType.NOTE);
       const id = _surface.addElement(
         EdgelessBlockType.NOTE,
-        { xywh: selected.xywh },
+        {
+          xywh: selected.xywh,
+          edgeless: selected.edgeless,
+          background: selected.background,
+          hidden: selected.hidden,
+        },
         this._page.root?.id
       );
       const note = this._page.getBlockById(id);

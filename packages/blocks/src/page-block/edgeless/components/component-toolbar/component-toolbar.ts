@@ -73,7 +73,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     }
 
     component-toolbar-menu-divider {
-      margin: 0 8px;
+      width: 4px;
+      margin: 0 12px;
       height: 24px;
     }
   `;

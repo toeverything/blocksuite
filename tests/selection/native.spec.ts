@@ -140,6 +140,16 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -190,6 +200,16 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -213,6 +233,16 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -253,6 +283,16 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -891,10 +931,12 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await type(page, '--- ');
   await assertDivider(page, 1);
 
+  await waitNextFrame(page);
   await pressEnter(page);
   await type(page, '--- ');
   await pressArrowUp(page, 2);
   await pressBackspace(page);
+  await waitNextFrame(page);
   await assertDivider(page, 2);
   await assertRichTexts(page, ['', '']);
 });
@@ -1250,6 +1292,16 @@ test('should ndent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -1294,6 +1346,16 @@ test('should unindent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -1331,6 +1393,16 @@ test('should unindent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >

@@ -571,8 +571,8 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
             icon: html`${selectedMode === ConnectorMode.Straight
               ? StraightLineIcon
               : selectedMode === ConnectorMode.Orthogonal
-              ? ElbowedLineIcon
-              : CurveLineIcon}${SmallArrowDownIcon}`,
+                ? ElbowedLineIcon
+                : CurveLineIcon}${SmallArrowDownIcon}`,
             tooltip: 'Connector Shape',
           }}
           .menuChildren=${html`
