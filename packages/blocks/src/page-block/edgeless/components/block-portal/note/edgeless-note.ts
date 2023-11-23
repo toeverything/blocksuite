@@ -98,7 +98,13 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     const selection = this.surface.edgeless.selectionManager;
 
     this._handleEditingTransition();
+
     this.model.propsUpdated.on(() => {
+      this.requestUpdate();
+    });
+
+    console.log(this.model);
+    edgeless.model.propsUpdated.on(() => {
       this.requestUpdate();
     });
 
@@ -120,9 +126,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       edgeless.slots.hoverUpdated.on(() => {
         this._isHover =
           edgeless.tools.getHoverState()?.content === this.model &&
-          edgeless.selectionManager.elements.includes(this.model)
-            ? true
-            : false;
+          edgeless.selectionManager.elements.includes(this.model);
       })
     );
 

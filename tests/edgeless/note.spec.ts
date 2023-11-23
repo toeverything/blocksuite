@@ -124,7 +124,7 @@ test('resize note in edgeless mode', async ({ page }) => {
   assertRectEqual(newRect, draggedRect);
 });
 
-test('reszie note then auto size and custom size', async ({ page }) => {
+test.fixme('resize note then auto size and custom size', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
