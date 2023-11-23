@@ -29,8 +29,8 @@ import {
   FrameNavigatorIcon,
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
-  PresentationExitFullScreenIcon,
-  PresentationFullScreenIcon,
+  NavigatorExitFullScreenIcon,
+  NavigatorFullScreenIcon,
 } from '../../../../_common/icons/index.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
@@ -398,8 +398,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         }}
       >
         ${document.fullscreenElement
-          ? PresentationExitFullScreenIcon
-          : PresentationFullScreenIcon}
+          ? NavigatorExitFullScreenIcon
+          : NavigatorFullScreenIcon}
       </edgeless-tool-icon-button>
       <div class="short-divider"></div>
       <div

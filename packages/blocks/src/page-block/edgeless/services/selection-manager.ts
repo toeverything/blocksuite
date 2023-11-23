@@ -172,6 +172,10 @@ export class EdgelessSelectionManager {
           if (hasBlockSelection || hasTextSelection) {
             remoteSelection.delete(id);
           }
+
+          if (hasTextSelection) {
+            remoteCursors.delete(id);
+          }
         });
 
         this.remoteCursor = remoteCursors;

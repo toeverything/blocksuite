@@ -109,6 +109,14 @@ export const defaultStore: SerializedStore = {
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
           'prop:hidden': false,
+          'prop:edgeless': {
+            style: {
+              borderRadius: 8,
+              borderSize: 4,
+              borderStyle: 'solid',
+              shadowType: '--affine-note-shadow-box',
+            },
+          },
         },
         '2': {
           'sys:flavour': 'affine:paragraph',

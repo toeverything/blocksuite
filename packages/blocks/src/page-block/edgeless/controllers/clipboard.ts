@@ -383,10 +383,10 @@ export class EdgelessClipboardController implements ReactiveController {
       isNoteBlock(data as unknown as Selectable)
         ? 'notes'
         : isFrameBlock(data as unknown as Selectable)
-        ? 'frames'
-        : isImageBlock(data as unknown as Selectable)
-        ? 'images'
-        : 'elements'
+          ? 'frames'
+          : isImageBlock(data as unknown as Selectable)
+            ? 'images'
+            : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];

@@ -1,14 +1,19 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
 
-const MIN_FONT_SIZE = 1;
-const MAX_FONT_SIZE = 2000;
-@customElement('edgeless-font-size-panel')
-export class EdgelessFontSizePanel extends LitElement {
+const MIN_SIZE = 1;
+const MAX_SIZE = 200;
+@customElement('edgeless-size-panel')
+export class EdgelessSizePanel extends LitElement {
   static override styles = css`
-    .font-size-container {
+    :host {
+      box-shadow: var(--affine-menu-shadow);
+    }
+
+    .size-container {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -17,7 +22,7 @@ export class EdgelessFontSizePanel extends LitElement {
       border-radius: 8px;
     }
 
-    .font-size-content {
+    .size-content {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -25,7 +30,7 @@ export class EdgelessFontSizePanel extends LitElement {
       width: 64px;
     }
 
-    .font-size-button {
+    .size-button {
       display: flex;
       align-items: center;
       justify-content: start;
@@ -34,11 +39,11 @@ export class EdgelessFontSizePanel extends LitElement {
       padding: 0 8px;
     }
 
-    .font-size-button[active] .font-size-button-label {
+    .size-button[active] .size-button-label {
       background: var(--affine-hover-color);
     }
 
-    .font-size-button-label {
+    .size-button-label {
       text-align: justify;
       font-size: 15px;
       font-style: normal;
@@ -51,18 +56,18 @@ export class EdgelessFontSizePanel extends LitElement {
       border-radius: 4px;
     }
 
-    .font-size-button-label:hover {
+    .size-button-label:hover {
       cursor: pointer;
       background: var(--affine-hover-color);
     }
 
-    .font-size-input-container {
+    .size-input-container {
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .font-size-input {
+    .size-input {
       width: 48px;
       height: 18px;
       border: 1px solid var(--affine-border-color);
@@ -70,11 +75,11 @@ export class EdgelessFontSizePanel extends LitElement {
       padding: 4px 8px;
     }
 
-    .font-size-input::placeholder {
+    .size-input::placeholder {
       color: var(--affine-placeholder-color);
     }
 
-    .font-size-input:focus {
+    .size-input:focus {
       outline-color: var(--affine-primary-color);
     }
 
@@ -84,22 +89,28 @@ export class EdgelessFontSizePanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  fontSize!: number;
+  size!: number;
 
   @property({ attribute: false })
-  onSelect?: (fontSize: EdgelessFontSizePanel['fontSize']) => void;
+  sizes!: number[];
+
+  @property({ attribute: false })
+  labels = ['Small', 'Medium', 'Large', 'Huge'];
+
+  @property({ attribute: false })
+  onSelect?: (size: EdgelessSizePanel['size']) => void;
 
   @property({ attribute: false })
   onPopperCose?: () => void;
 
   @property({ attribute: false })
-  minFontSize: number = MIN_FONT_SIZE;
+  minSize: number = MIN_SIZE;
 
   @property({ attribute: false })
-  maxFontSize: number = MAX_FONT_SIZE;
+  maxSize: number = MAX_SIZE;
 
-  private _onSelect(fontSize: EdgelessFontSizePanel['fontSize']) {
-    if (this.onSelect) this.onSelect(fontSize);
+  private _onSelect(size: EdgelessSizePanel['size']) {
+    if (this.onSelect) this.onSelect(size);
   }
 
   private _onPopperClose() {
@@ -118,15 +129,15 @@ export class EdgelessFontSizePanel extends LitElement {
         return;
       }
 
-      let fontSize = parseInt(input.value);
+      let size = parseInt(input.value);
       // Handle edge case when user enters a number that is out of range
-      if (fontSize < this.minFontSize) {
-        fontSize = this.minFontSize;
-      } else if (fontSize > this.maxFontSize) {
-        fontSize = this.maxFontSize;
+      if (size < this.minSize) {
+        size = this.minSize;
+      } else if (size > this.maxSize) {
+        size = this.maxSize;
       }
 
-      this._onSelect(fontSize);
+      this._onSelect(size);
       input.value = '';
       this._onPopperClose();
     }
@@ -134,36 +145,37 @@ export class EdgelessFontSizePanel extends LitElement {
 
   override render() {
     return html`
-      <div class="font-size-container">
-        <div class="font-size-content">
-          ${[16, 24, 32, 36, 40, 64, 128].map(
-            fontSize => html`
-              <div
-                class="font-size-button"
+      <div class="size-container">
+        <div class="size-content">
+          ${repeat(
+            this.sizes,
+            size => size,
+            (size, index) =>
+              html` <div
+                class="size-button"
                 role="button"
-                ?active=${this.fontSize === fontSize}
+                ?active=${this.size === size}
                 @click=${() => {
-                  this._onSelect(fontSize);
+                  this._onSelect(size);
                 }}
               >
-                <div class="font-size-button-label">${fontSize}</div>
-              </div>
-            `
+                <div class="size-button-label">${this.labels[index]}</div>
+              </div>`
           )}
 
           <div
-            class="font-size-input-container"
+            class="size-input-container"
             @click=${(e: MouseEvent) => {
               e.preventDefault();
               e.stopPropagation();
             }}
           >
             <input
-              class="font-size-input"
+              class="size-input"
               type="text"
               inputmode="numeric"
               pattern="[0-9]*"
-              placeholder=${Math.trunc(this.fontSize)}
+              placeholder=${Math.trunc(this.size)}
               @keydown=${this._onKeydown}
               @input=${stopPropagation}
               @pointerdown=${stopPropagation}
@@ -177,6 +189,6 @@ export class EdgelessFontSizePanel extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-font-size-panel': EdgelessFontSizePanel;
+    'edgeless-size-panel': EdgelessSizePanel;
   }
 }

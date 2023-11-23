@@ -479,8 +479,8 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       this.currentShape.shapeType !== 'rect'
         ? this.currentShape.shapeType
         : this.currentShape.radius
-        ? 'roundedRect'
-        : 'rect';
+          ? 'roundedRect'
+          : 'rect';
 
     const shapeButtons = html`${ShapeComponentConfig.map(
       ({ name, generalIcon, scribbledIcon, tooltip }) => {

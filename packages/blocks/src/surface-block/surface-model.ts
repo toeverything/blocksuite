@@ -35,8 +35,8 @@ const migration = {
           }
         }
         if (type === 'connector') {
-          const source = element.get('source');
-          const target = element.get('target');
+          const source = element.get('source') as Record<string, string>;
+          const target = element.get('target') as Record<string, string>;
           const sourceId = source['id'];
           const targetId = target['id'];
           if (!source['position'] && (!sourceId || !value.get(sourceId))) {

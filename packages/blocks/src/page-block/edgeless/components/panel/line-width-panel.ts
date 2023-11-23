@@ -111,6 +111,9 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   hasTooltip = true;
 
+  @property({ attribute: false })
+  disable = false;
+
   @query('.line-width-panel')
   private _lineWidthPanel!: HTMLElement;
 
@@ -185,7 +188,6 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       const iconCenterX = iconRect.left + iconRect.width / 2;
       return iconCenterX > dragHandleCenterX;
     });
-
     leftIcons.forEach(
       icon => (icon.style.backgroundColor = 'var(--affine-icon-color)')
     );
@@ -253,6 +255,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
   private _onPointerDown = (e: PointerEvent) => {
     e.preventDefault();
+    if (this.disable) return;
     const { left, width } = this._lineWidthPanel.getBoundingClientRect();
     const bottomLineWidth = this._bottomLine.getBoundingClientRect().width;
     this._dragConfig = {
@@ -313,35 +316,40 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div
-      class="line-width-panel"
-      @mousedown="${(e: Event) => e.preventDefault()}"
-    >
-      <div class="line-width-button">
-        <div class="line-width-icon"></div>
-      </div>
-      <div class="line-width-button">
-        <div class="line-width-icon"></div>
-      </div>
-      <div class="line-width-button">
-        <div class="line-width-icon"></div>
-      </div>
-      <div class="line-width-button">
-        <div class="line-width-icon"></div>
-      </div>
-      <div class="line-width-button">
-        <div class="line-width-icon"></div>
-      </div>
-      <div class="line-width-button">
-        <div class="line-width-icon"></div>
-      </div>
-      <div class="drag-handle"></div>
-      <div class="bottom-line"></div>
-      <div class="line-width-overlay"></div>
-      ${this.hasTooltip
-        ? html`<affine-tooltip>Thickness</affine-tooltip>`
-        : nothing}
-    </div>`;
+    return html` <style>
+        .line-width-panel {
+          opacity: ${this.disable ? '0.5' : '1'};
+        }
+      </style>
+      <div
+        class="line-width-panel"
+        @mousedown="${(e: Event) => e.preventDefault()}"
+      >
+        <div class="line-width-button">
+          <div class="line-width-icon"></div>
+        </div>
+        <div class="line-width-button">
+          <div class="line-width-icon"></div>
+        </div>
+        <div class="line-width-button">
+          <div class="line-width-icon"></div>
+        </div>
+        <div class="line-width-button">
+          <div class="line-width-icon"></div>
+        </div>
+        <div class="line-width-button">
+          <div class="line-width-icon"></div>
+        </div>
+        <div class="line-width-button">
+          <div class="line-width-icon"></div>
+        </div>
+        <div class="drag-handle"></div>
+        <div class="bottom-line"></div>
+        <div class="line-width-overlay"></div>
+        ${this.hasTooltip
+          ? html`<affine-tooltip>Thickness</affine-tooltip>`
+          : nothing}
+      </div>`;
   }
 }
 

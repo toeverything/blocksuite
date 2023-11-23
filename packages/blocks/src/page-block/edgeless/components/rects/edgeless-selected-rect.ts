@@ -8,12 +8,15 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
+import { clamp } from '../../../../_common/utils/math.js';
 import type {
   EdgelessElement,
   IPoint,
   Selectable,
 } from '../../../../_common/utils/types.js';
+import type { NoteBlockModel } from '../../../../models.js';
 import {
+  deserializeXYWH,
   GroupElement,
   normalizeTextBound,
   PhasorElementType,
@@ -21,7 +24,6 @@ import {
 import {
   Bound,
   ConnectorElement,
-  deserializeXYWH,
   type IVec,
   normalizeDegAngle,
   normalizeShapeBound,
@@ -31,7 +33,11 @@ import {
 } from '../../../../surface-block/index.js';
 import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { NOTE_MIN_HEIGHT, SELECTED_RECT_PADDING } from '../../utils/consts.js';
+import {
+  NOTE_MIN_HEIGHT,
+  NOTE_MIN_WIDTH,
+  SELECTED_RECT_PADDING,
+} from '../../utils/consts.js';
 import {
   getSelectableBounds,
   getSelectedRect,
@@ -59,7 +65,6 @@ export type SelectedRect = {
   height: number;
   borderWidth: number;
   borderStyle: string;
-  borderRadius: number;
   rotate: number;
 };
 
@@ -195,6 +200,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label='right'] {
       border: 0;
       background: transparent;
+      border-color: var('--affine-blue');
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='left'],
@@ -245,7 +251,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       box-sizing: border-box;
       border-radius: 6px;
       z-index: 10;
-      border: 2px var(--affine-blue) solid;
       content: '';
       background: white;
     }
@@ -298,11 +303,19 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     height: 0,
     borderWidth: 0,
     borderStyle: 'solid',
-    borderRadius: 0,
     left: 0,
     top: 0,
     rotate: 0,
   };
+
+  @state()
+  private _isResizing = false;
+
+  @state()
+  private _isNoteWidthLimit = false;
+
+  @state()
+  private _isNoteHeightLimit = false;
 
   @property({ attribute: false })
   toolbarVisible = false;
@@ -354,18 +367,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     let areAllConnectors = true;
     let areAllShapes = true;
     let areAllTexts = true;
-    let hasNote = false;
 
     for (const element of elements) {
       if (isNoteBlock(element)) {
-        hasNote = true;
+        areAllConnectors = false;
       } else if (isFrameBlock(element)) {
         areAllConnectors = false;
       } else if (isImageBlock(element)) {
         areAllConnectors = false;
         areAllShapes = false;
         areAllTexts = false;
-        hasNote = false;
       } else {
         if (element.type !== PhasorElementType.CONNECTOR)
           areAllConnectors = false;
@@ -378,7 +389,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     }
 
-    if (hasNote) return 'edge';
     if (areAllConnectors) return 'none';
     if (areAllShapes) return 'all';
     if (areAllTexts) return 'edgeAndCorner';
@@ -392,6 +402,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   private _onDragStart = () => {
+    this.edgeless.slots.elementResizeStart.emit();
     this.setToolbarVisible(false);
     this._updateResizeManagerState(false);
   };
@@ -412,18 +423,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       if (!element) return;
 
       if (isNoteBlock(element)) {
-        let height = deserializeXYWH(element.xywh)[3];
-        // // Limit the width of the selected note
-        // if (noteW < NOTE_MIN_WIDTH) {
-        //   noteW = NOTE_MIN_WIDTH;
-        // }
-        // Limit the height of the selected note
-        if (height < NOTE_MIN_HEIGHT) {
-          height = NOTE_MIN_HEIGHT;
+        const curBound = Bound.deserialize(element.xywh);
+        const props: Partial<NoteBlockModel> = {};
+        if (curBound.h !== bound.h && !element.edgeless.collapse) {
+          element.edgeless.collapse = true;
         }
-        edgeless.updateElementInLocal(element.id, {
-          xywh: serializeXYWH(bound.x, bound.y, bound.w, height),
-        });
+
+        bound.w = clamp(bound.w, NOTE_MIN_WIDTH, Infinity);
+        bound.h = clamp(bound.h, NOTE_MIN_HEIGHT, Infinity);
+
+        this._isNoteWidthLimit = bound.w === NOTE_MIN_WIDTH ? true : false;
+        this._isNoteHeightLimit = bound.h === NOTE_MIN_HEIGHT ? true : false;
+
+        props.xywh = bound.serialize();
+        edgeless.updateElementInLocal(element.id, props);
       } else if (isFrameBlock(element)) {
         edgeless.updateElementInLocal(element.id, {
           xywh: bound.serialize(),
@@ -496,8 +509,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const selectedElements = this.edgeless.selectionManager.state.elements;
     this.edgeless.applyLocalRecord(selectedElements);
 
+    this._isNoteWidthLimit = false;
+    this._isNoteHeightLimit = false;
+
     this._updateCursor(false);
     this.setToolbarVisible(true);
+    this.edgeless.slots.elementResizeEnd.emit();
   };
 
   private _updateCursor = (
@@ -581,7 +598,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       height: height + padding * 2,
       borderWidth: selection.editing ? 2 : 1,
       borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
-      borderRadius: isSingleNote ? 8 * zoom : 0,
       left: left - padding,
       top: top - padding,
       rotate,
@@ -671,13 +687,27 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
     );
+
+    _disposables.add(
+      edgeless.slots.elementResizeStart.on(() => (this._isResizing = true))
+    );
+    _disposables.add(
+      edgeless.slots.elementResizeEnd.on(() => (this._isResizing = false))
+    );
   }
 
   private _canAutoComplete() {
     return (
+      !this._isResizing &&
       this.selection.elements.length === 1 &&
       (this.selection.elements[0] instanceof ShapeElement ||
         isNoteBlock(this.selection.elements[0]))
+    );
+  }
+
+  private _canRotate() {
+    return !this.selection.elements.every(
+      ele => isNoteBlock(ele) || isFrameBlock(ele)
     );
   }
 
@@ -697,10 +727,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     } = this;
 
     const hasResizeHandles = !selection.editing && !page.readonly;
+
     const resizeHandles = hasResizeHandles
       ? ResizeHandles(
           resizeMode,
           (e: PointerEvent, direction: HandleDirection) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains('rotate') && !this._canRotate()) {
+              return;
+            }
             const proportional = elements.some(el => el instanceof TextElement);
             _resizeManager.onPointerDown(e, direction, proportional);
           },
@@ -713,6 +748,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
               point?: IVec;
             }
           ) => {
+            if (!this._canRotate() && options?.type === 'rotate') return;
             _updateCursor(dragging, options);
           }
         )
@@ -751,7 +787,33 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const isSingleGroup =
       elements.length === 1 && elements[0] instanceof GroupElement;
     _selectedRect.borderStyle = isSingleGroup ? 'dashed' : 'solid';
+
     return html`
+      <style>
+        .affine-edgeless-selected-rect .handle[aria-label='right']::after {
+          content: '';
+          display: ${this._isNoteWidthLimit ? 'initial' : 'none'};
+          position: absolute;
+          top: 0;
+          left: 1.5px;
+          width: 2px;
+          height: 100%;
+          background: var(--affine-error-color);
+          filter: drop-shadow(-6px 0px 12px rgba(235, 67, 53, 0.35));
+        }
+
+        .affine-edgeless-selected-rect .handle[aria-label='bottom']::after {
+          content: '';
+          display: ${this._isNoteHeightLimit ? 'initial' : 'none'};
+          position: absolute;
+          top: 1.5px;
+          left: 0px;
+          width: 100%;
+          height: 2px;
+          background: var(--affine-error-color);
+          filter: drop-shadow(-6px 0px 12px rgba(235, 67, 53, 0.35));
+        }
+      </style>
       ${!page.readonly && this._canAutoComplete()
         ? html`<edgeless-auto-complete
             .current=${this.selection.elements[0]}
@@ -767,7 +829,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           height: `${_selectedRect.height}px`,
           borderWidth: `${_selectedRect.borderWidth}px`,
           borderStyle: _selectedRect.borderStyle,
-          borderRadius: `${_selectedRect.borderRadius}px`,
           transform: `translate(${_selectedRect.left}px, ${_selectedRect.top}px) rotate(${_selectedRect.rotate}deg)`,
         })}
         disabled="true"

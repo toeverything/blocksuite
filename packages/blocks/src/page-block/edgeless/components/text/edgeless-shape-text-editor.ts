@@ -179,8 +179,8 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         this.element.textVerticalAlign === 'center'
           ? 'center'
           : this.element.textVerticalAlign === 'bottom'
-          ? 'end'
-          : 'start',
+            ? 'end'
+            : 'start',
       alignContent: 'center',
       gap: '0',
       zIndex: '1',

@@ -11,65 +11,22 @@ const EDGE_IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
 const GLOBAL_IGNORED_ATTRIBUTES = ['reference'] as const;
 
 const autoIdentifyLink = (ctx: VHookContext<AffineTextAttributes>) => {
-  if (ctx.attributes?.link && ctx.data === ' ') {
-    delete ctx.attributes['link'];
+  // auto identify link only on pressing space
+  if (ctx.data !== ' ') {
     return;
   }
 
+  // space is typed at the end of link, remove the link attribute on typed space
   if (ctx.attributes?.link) {
-    const linkDeltaInfo = ctx.vEditor.deltaService
-      .getDeltasByVRange(ctx.vRange)
-      .filter(([delta]) => delta.attributes?.link)[0];
-    const [delta, { index, length }] = linkDeltaInfo;
-    const rangePositionInDelta = ctx.vRange.index - index;
-
-    //It means the link has been custom edited
-    if (delta.attributes?.link !== delta.insert) {
-      // If the cursor is at the end of the link, we should not auto identify it
-      if (rangePositionInDelta === length) {
-        delete ctx.attributes['link'];
-        return;
-      }
-      // If the cursor is not at the end of the link, we should only update the link text
-      return;
-    }
-    const newText =
-      delta.insert.slice(0, rangePositionInDelta) +
-      ctx.data +
-      delta.insert.slice(rangePositionInDelta);
-    const isUrl = isStrictUrl(newText);
-
-    // If the new text with original link text is not pattern matched, we should reset the text
-    if (!isUrl) {
-      ctx.vEditor.resetText({ index, length });
+    if (ctx.vRange.index === ctx.vEditor.yText.length) {
       delete ctx.attributes['link'];
-      return;
     }
-    // If the new text with original link text is pattern matched, we should update the link text
-    ctx.vEditor.formatText(
-      {
-        index,
-        length,
-      },
-      {
-        link: newText,
-      }
-    );
-    ctx.attributes = {
-      ...ctx.attributes,
-      link: newText,
-    };
     return;
   }
 
   const [line] = ctx.vEditor.getLine(ctx.vRange.index);
 
-  // In delete, context.data is null
-  const insertText = ctx.data || '';
-  const verifyData = `${line.textContent.slice(
-    0,
-    ctx.vRange.index
-  )}${insertText}`.split(' ');
+  const verifyData = line.textContent.slice(0, ctx.vRange.index).split(' ');
 
   const verifyStr = verifyData[verifyData.length - 1];
 
@@ -78,7 +35,8 @@ const autoIdentifyLink = (ctx: VHookContext<AffineTextAttributes>) => {
   if (!isUrl) {
     return;
   }
-  const startIndex = ctx.vRange.index + insertText.length - verifyStr.length;
+
+  const startIndex = ctx.vRange.index - verifyStr.length;
 
   ctx.vEditor.formatText(
     {
@@ -89,11 +47,6 @@ const autoIdentifyLink = (ctx: VHookContext<AffineTextAttributes>) => {
       link: verifyStr,
     }
   );
-
-  ctx.attributes = {
-    ...ctx.attributes,
-    link: verifyStr,
-  };
 };
 
 let ifPrefixSpace = false;

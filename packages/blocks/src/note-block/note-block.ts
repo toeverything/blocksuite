@@ -11,6 +11,7 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
   static override styles = css`
     .affine-note-block-container {
       display: flow-root;
+      position: relative;
     }
     .affine-note-block-container.selected {
       background-color: var(--affine-hover-color);

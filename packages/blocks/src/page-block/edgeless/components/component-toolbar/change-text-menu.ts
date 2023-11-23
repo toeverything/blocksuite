@@ -1,5 +1,5 @@
 import '../panel/font-family-panel.js';
-import '../panel/font-size-panel.js';
+import '../panel/size-panel.js';
 import '../panel/font-weight-and-style-panel.js';
 
 import { WithDisposable } from '@blocksuite/lit';
@@ -43,10 +43,10 @@ import {
   LINE_COLORS,
 } from '../panel/color-panel.js';
 import type { EdgelessFontFamilyPanel } from '../panel/font-family-panel.js';
-import type { EdgelessFontSizePanel } from '../panel/font-size-panel.js';
-import type {
-  EdgelessCanvasTextElement,
-  EdgelessCanvasTextElementType,
+import type { EdgelessSizePanel } from '../panel/size-panel.js';
+import {
+  type EdgelessCanvasTextElement,
+  type EdgelessCanvasTextElementType,
 } from '../text/types.js';
 import { createButtonPopper } from '../utils.js';
 import { ShapeArrowDownSmallIcon } from './../../../../_common/icons/index.js';
@@ -492,12 +492,15 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         </div>
       </edgeless-tool-icon-button>
       <div class="font-size-panel-container text-font-size">
-        <edgeless-font-size-panel
-          .fontSize=${selectedFontSize}
-          .onSelect=${(fontSize: EdgelessFontSizePanel['fontSize']) =>
-            this._setFontSize(fontSize)}
+        <edgeless-size-panel
+          .size=${selectedFontSize}
+          .labels=${['16', '24', '32', '36', '40', '64', '128']}
+          .sizes=${[16, 24, 32, 36, 40, 64, 128]}
+          .onSelect=${(fontSize: EdgelessSizePanel['size']) => {
+            this._setFontSize(fontSize);
+          }}
           .onPopperCose=${() => this._textFontSizePopper?.hide()}
-        ></edgeless-font-size-panel>
+        ></edgeless-size-panel>
       </div>
 
       <component-toolbar-menu-divider></component-toolbar-menu-divider>
@@ -519,8 +522,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
               selectedFontWeight === CanvasTextFontWeight.Light
                 ? 'Light'
                 : selectedFontWeight === CanvasTextFontWeight.Regular
-                ? 'Regular'
-                : 'Semibold'
+                  ? 'Regular'
+                  : 'Semibold'
             }${
               selectedFontStyle === CanvasTextFontStyle.Italic ? ' Italic' : ''
             }`}</span
@@ -553,8 +556,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
           ${selectedAlign === 'left'
             ? TextAlignLeftIcon
             : selectedAlign === 'center'
-            ? TextAlignCenterIcon
-            : TextAlignRightIcon}
+              ? TextAlignCenterIcon
+              : TextAlignRightIcon}
           ${SmallArrowDownIcon}
         </div>
       </edgeless-tool-icon-button>

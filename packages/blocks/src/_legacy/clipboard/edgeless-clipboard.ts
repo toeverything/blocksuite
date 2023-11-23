@@ -58,6 +58,7 @@ import {
 import { deleteModelsByTextSelection } from './utils/operation.js';
 
 const { GROUP } = PhasorElementType;
+const { NOTE, FRAME, IMAGE } = EdgelessBlockType;
 
 export function getCopyElements(
   surface: SurfaceBlockComponent,
@@ -340,14 +341,15 @@ export class EdgelessClipboard implements Clipboard {
   ) {
     const { surface } = this;
     const noteIds = await Promise.all(
-      notes.map(async ({ id, xywh, children, background }) => {
+      notes.map(async ({ id, xywh, children, background, edgeless }) => {
         assertExists(xywh);
 
         const noteId = this.surface.addElement(
-          EdgelessBlockType.NOTE,
+          NOTE,
           {
             xywh,
             background,
+            edgeless,
           },
           this._page.root?.id
         );
@@ -366,7 +368,7 @@ export class EdgelessClipboard implements Clipboard {
     const frameIds = await Promise.all(
       frames.map(async ({ xywh, title, background }) => {
         const frameId = this.surface.addElement(
-          EdgelessBlockType.FRAME,
+          FRAME,
           {
             xywh,
             background,
@@ -384,7 +386,7 @@ export class EdgelessClipboard implements Clipboard {
     const imageIds = await Promise.all(
       images.map(async ({ xywh, sourceId, rotate }) => {
         const imageId = this.surface.addElement(
-          EdgelessBlockType.IMAGE,
+          IMAGE,
           {
             xywh,
             sourceId,
@@ -448,10 +450,10 @@ export class EdgelessClipboard implements Clipboard {
       isNoteBlock(data as unknown as Selectable)
         ? 'notes'
         : isFrameBlock(data as unknown as Selectable)
-        ? 'frames'
-        : isImageBlock(data as unknown as Selectable)
-        ? 'images'
-        : 'elements'
+          ? 'frames'
+          : isImageBlock(data as unknown as Selectable)
+            ? 'images'
+            : 'elements'
     ) as unknown as {
       frames: SerializedBlock[];
       notes?: SerializedBlock[];

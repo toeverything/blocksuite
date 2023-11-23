@@ -1,20 +1,17 @@
 import '../../note-slicer/index.js';
 
-import { sleep } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   ACTIVE_NOTE_EXTRA_PADDING,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../../../../_common/consts.js';
-import {
-  DEFAULT_NOTE_COLOR,
-  type NoteBlockModel,
-} from '../../../../../note-block/note-model.js';
-import { deserializeXYWH } from '../../../../../surface-block/index.js';
+import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
+import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
+import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
@@ -67,87 +64,197 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   private _editing = false;
 
   @state()
-  private _transition = 'none';
+  private _isResizing = false;
+
+  @state()
+  private _isHover = false;
+
+  @query('affine-note')
+  private _affineNote!: HTMLDivElement;
 
   private _handleEditingTransition() {
     const selection = this.surface.edgeless.selectionManager;
     this._disposables.add(
       selection.slots.updated.on(async () => {
-        if (
-          selection.state.editing &&
-          selection.state.elements.includes(this.model.id)
-        ) {
+        if (this._isEditing) {
           this._editing = true;
-          this._transition = 'left 0.3s, top 0.3s, width 0.3s, height 0.3s';
         } else {
           this._editing = false;
-          if (this._transition !== 'none') {
-            // wait for animation done
-            await sleep(300);
-            this._transition = 'none';
-          }
         }
       })
     );
   }
 
+  private get _isEditing() {
+    const selection = this.surface.edgeless.selectionManager;
+    return (
+      selection.state.editing &&
+      selection.state.elements.includes(this.model.id)
+    );
+  }
+
   override firstUpdated() {
+    const { _disposables, edgeless } = this;
+    const selection = this.surface.edgeless.selectionManager;
+
     this._handleEditingTransition();
     this.model.propsUpdated.on(() => {
       this.requestUpdate();
     });
+
+    // FIXME: @Mirone
+    _disposables.add(
+      this.surface.page.slots.onYEvent.on(({ event }) => {
+        if (event.path.includes('prop:edgeless')) {
+          this.requestUpdate();
+        }
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementResizeStart.on(() => {
+        if (selection.elements.includes(this.model)) {
+          this._isResizing = true;
+        }
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementResizeEnd.on(() => {
+        this._isResizing = false;
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.hoverUpdated.on(() => {
+        this._isHover =
+          edgeless.tools.getHoverState()?.content === this.model &&
+          edgeless.selectionManager.elements.includes(this.model)
+            ? true
+            : false;
+      })
+    );
+
+    _disposables.add(
+      edgeless.selectionManager.slots.updated.on(() => {
+        if (edgeless.selectionManager.elements.includes(this.model)) {
+          this._isHover =
+            edgeless.tools.getHoverState()?.content === this.model;
+        }
+      })
+    );
+  }
+
+  private get _isShowCollapsedContent() {
+    return (
+      this.model.edgeless.collapse &&
+      (this._isResizing || this._isHover) &&
+      this.edgeless.selectionManager.elements.includes(this.model)
+    );
+  }
+
+  private _collapsedContent() {
+    const { model, surface } = this;
+    if (!this._isShowCollapsedContent || !this._affineNote) return nothing;
+
+    const rect = this._affineNote.getBoundingClientRect();
+    const bound = Bound.deserialize(model.xywh);
+    const zoom = surface.viewport.zoom;
+
+    if (bound.h >= (rect.height + EDGELESS_BLOCK_CHILD_PADDING) / zoom)
+      return nothing;
+
+    return html`
+      <div
+        style=${styleMap({
+          width: `${bound.w}px`,
+          height: `${
+            (rect.height + EDGELESS_BLOCK_CHILD_PADDING) / zoom - bound.h
+          }px`,
+          position: 'absolute',
+          left: '0px',
+          top: `${bound.h}px`,
+          background: 'var(--affine-white)',
+          opacity: 0.5,
+          pointerEvents: 'none',
+          borderLeft: '2px var(--affine-blue) solid',
+          borderBottom: '2px var(--affine-blue) solid',
+          borderRight: '2px var(--affine-blue) solid',
+          borderRadius: '0 0 8px 8px',
+        })}
+      ></div>
+    `;
   }
 
   override render() {
     const { model, surface, index } = this;
-    const { xywh, background } = model;
-    const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
-    const isHiddenNote = model.hidden;
+    const { xywh, background, hidden, edgeless } = model;
+    const { borderRadius, borderSize, borderStyle, shadowType } =
+      edgeless.style;
+    const { collapse } = edgeless;
+    const bound = Bound.deserialize(xywh);
 
     const style = {
       position: 'absolute',
       zIndex: `${index}`,
-      width: `${modelW}px`,
-      transform: `translate(${modelX}px, ${modelY}px)`,
+      width: `${bound.w}px`,
+      height: collapse ? `${bound.h}px` : 'inherit',
+      transform: `translate(${bound.x}px, ${bound.y}px)`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       boxSizing: 'border-box',
-      borderRadius: '8px',
+      borderRadius: borderRadius + 'px',
       pointerEvents: 'all',
       transformOrigin: '0 0',
     };
 
+    const editing = this._isEditing;
+    if (!this._editing) {
+      this._editing = editing;
+    }
     const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
+
     const backgroundStyle = {
       position: 'absolute',
       left: `${-extra}px`,
       top: `${-extra}px`,
-      width: `${modelW + extra * 2}px`,
+      width: `${bound.w + extra * 2}px`,
       height: `calc(100% + ${extra * 2}px)`,
-      borderRadius: '8px',
-      transition: this._transition,
-      background: isHiddenNote
+      borderRadius: borderRadius + 'px',
+      transition: this._editing
+        ? 'left 0.3s, top 0.3s, width 0.3s, height 0.3s'
+        : 'none',
+      background: hidden
         ? 'transparent'
         : `var(${background ?? DEFAULT_NOTE_COLOR})`,
-      border: this._editing
-        ? `1px solid var(--affine-blue-600)`
-        : isHiddenNote
+      border: hidden
         ? `2px dashed var(--affine-black-10)`
-        : 'none',
-      boxShadow: this._editing
+        : `${borderSize}px ${
+            borderStyle === StrokeStyle.Dashed ? 'dashed' : borderStyle
+          } var(--affine-black-10)`,
+      boxShadow: editing
         ? 'var(--affine-active-shadow)'
-        : isHiddenNote
-        ? 'none'
-        : 'var(--affine-note-shadow-box)',
+        : hidden || !shadowType
+          ? 'none'
+          : `var(${shadowType})`,
     };
 
     return html`
       <div
         class="edgeless-block-portal-note"
         style=${styleMap(style)}
-        data-model-height="${modelH}"
+        data-model-height="${bound.h}"
       >
         <div class="note-background" style=${styleMap(backgroundStyle)}></div>
-        ${this.renderModel(model)}
+        <div
+          style=${styleMap({
+            width: '100%',
+            height: '100%',
+            overflow: this._isShowCollapsedContent ? 'initial' : 'hidden',
+          })}
+        >
+          ${surface.edgeless.renderModel(model)}
+        </div>
+        ${this._collapsedContent()}
         <edgeless-note-mask
           .surface=${surface}
           .model=${this.model}

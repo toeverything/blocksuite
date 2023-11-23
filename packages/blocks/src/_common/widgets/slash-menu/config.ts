@@ -487,13 +487,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       )[0];
 
       if (!surfaceModel) return [];
-
-      const groupElements: Y.Map<string>[] = Array.from(
-        surfaceModel.elements.getValue()?.values() ?? []
-      ).filter(
-        (element: Y.Map<string>) =>
-          element.get('type') === PhasorElementType.GROUP
-      );
+      const groupElements = (<Array<Y.Map<string>>>(
+        Array.from(surfaceModel.elements.getValue()?.values() ?? [])
+      )).filter(element => element.get('type') === PhasorElementType.GROUP);
 
       return (
         groupElements.map(element => {
