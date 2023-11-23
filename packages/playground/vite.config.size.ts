@@ -1,6 +1,5 @@
 import { mkdir, writeFile } from 'fs/promises';
 import { resolve } from 'path';
-
 import type { UserConfig } from 'vite';
 import { defineConfig, mergeConfig } from 'vite';
 
