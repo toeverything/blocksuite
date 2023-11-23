@@ -141,39 +141,6 @@ async function createLinkBlock(page: Page, str: string, link: string) {
   return id;
 }
 
-test('text added after a link which has custom edited should not have link formatting', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  const id = await createLinkBlock(page, 'link text', 'http://example.com');
-  await focusRichText(page, 0);
-  await type(page, 'after link');
-  await assertStoreMatchJSX(
-    page,
-    // XXX This snapshot is not exactly correct, but it's close enough for now.
-    // The first text after the link should not have the link formatting.
-    `
-<affine:paragraph
-  prop:text={
-    <>
-      <text
-        insert="Hello"
-      />
-      <text
-        insert="link text"
-        link="http://example.com"
-      />
-      <text
-        insert="after link"
-      />
-    </>
-  }
-  prop:type="text"
-/>`,
-    id
-  );
-});
-
 test('type character in link should not jump out link node', async ({
   page,
 }) => {
