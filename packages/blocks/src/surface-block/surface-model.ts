@@ -15,12 +15,13 @@ export type SurfaceBlockProps = {
 const migration = {
   toV4: data => {
     const { elements } = data;
-    if ((elements as object | Boxed) instanceof Boxed) {
+    if (elements instanceof Boxed) {
       const value = elements.getValue();
       if (!value) {
         return;
       }
-      for (const [key, element] of value.entries()) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for (const [key, element] of (value as Record<string, any>).entries()) {
         const type = element.get('type') as string;
         if (type === 'shape' || type === 'text') {
           const isBold = element.get('isBold');
@@ -35,8 +36,8 @@ const migration = {
           }
         }
         if (type === 'connector') {
-          const source = element.get('source') as Record<string, string>;
-          const target = element.get('target') as Record<string, string>;
+          const source = element.get('source');
+          const target = element.get('target');
           const sourceId = source['id'];
           const targetId = target['id'];
           if (!source['position'] && (!sourceId || !value.get(sourceId))) {
@@ -51,8 +52,7 @@ const migration = {
       }
     } else {
       for (const key of Object.keys(elements)) {
-        // @ts-expect-error
-        const element = elements[key];
+        const element = elements[key] as Record<string, unknown>;
         const type = element['type'] as string;
         if (type === 'shape' || type === 'text') {
           const isBold = element['isBold'];
@@ -67,19 +67,17 @@ const migration = {
           }
         }
         if (type === 'connector') {
-          const source = element['source'];
-          const target = element['target'];
+          const source = element['source'] as Record<string, unknown>;
+          const target = element['target'] as Record<string, unknown>;
           const sourceId = source['id'];
           const targetId = target['id'];
           // @ts-expect-error
           if (!source['position'] && (!sourceId || !elements[sourceId])) {
-            // @ts-expect-error
             delete elements[key];
             return;
           }
           // @ts-expect-error
           if (!target['position'] && (!targetId || !elements[targetId])) {
-            // @ts-expect-error
             delete elements[key];
             return;
           }

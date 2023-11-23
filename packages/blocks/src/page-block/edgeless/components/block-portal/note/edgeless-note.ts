@@ -102,15 +102,6 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       this.requestUpdate();
     });
 
-    // FIXME: @Mirone
-    _disposables.add(
-      this.surface.page.slots.onYEvent.on(({ event }) => {
-        if (event.path.includes('prop:edgeless')) {
-          this.requestUpdate();
-        }
-      })
-    );
-
     _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
         if (selection.elements.includes(this.model)) {
