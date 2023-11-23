@@ -134,7 +134,6 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     }
     if (isNoteBlock(block)) {
       const editingState = this._getEditingState(e, block);
-
       if (editingState) {
         this._show(e, editingState);
       } else {
@@ -212,7 +211,10 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     }
 
     const shouldTransition = note === this._noteModel;
-    const noteContainer = noteElement.parentElement;
+    const noteContainer = noteElement.closest(
+      '.edgeless-block-portal-note'
+    ) as HTMLElement;
+    assertExists(noteContainer);
     const noteContainerRect = noteContainer.getBoundingClientRect();
     const [baseX, baseY, noteWidth] = deserializeXYWH(note.xywh);
     const transformX = baseX;

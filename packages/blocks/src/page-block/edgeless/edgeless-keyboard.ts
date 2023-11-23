@@ -1,3 +1,4 @@
+import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
 import {
   type EdgelessTool,
   LineWidth,
@@ -16,7 +17,6 @@ import {
   DEFAULT_SHAPE_STROKE_COLOR,
 } from './components/component-toolbar/change-shape-button.js';
 import { GET_DEFAULT_LINE_COLOR } from './components/panel/color-panel.js';
-import { DEFAULT_NOTE_COLOR } from './components/toolbar/note/note-tool-button.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,

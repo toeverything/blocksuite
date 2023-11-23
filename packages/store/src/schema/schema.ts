@@ -129,7 +129,7 @@ export class Schema {
     pageData: Y.Doc
   ) => {
     // block migrations
-    const blocks = pageData.getMap('blocks');
+    const blocks = pageData.getMap('blocks') as Y.Map<Y.Map<unknown>>;
     Array.from(blocks.values()).forEach(block => {
       const flavour = block.get('sys:flavour') as string;
       const currentVersion = oldBlockVersions[flavour] ?? 0;

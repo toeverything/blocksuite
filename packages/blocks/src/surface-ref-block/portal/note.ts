@@ -9,10 +9,8 @@ import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../_common/consts.js';
-import {
-  DEFAULT_NOTE_COLOR,
-  type NoteBlockModel,
-} from '../../note-block/index.js';
+import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
+import { type NoteBlockModel } from '../../note-block/index.js';
 import { deserializeXYWH } from '../../surface-block/index.js';
 
 @customElement('surface-ref-note-portal')

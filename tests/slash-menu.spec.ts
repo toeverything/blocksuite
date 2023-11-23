@@ -357,6 +357,16 @@ test.describe('slash search', () => {
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -653,9 +663,8 @@ test.describe('slash menu with customize menu', () => {
       const pageBlockSpec = pagePreset.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
       // @ts-ignore
-      pageBlockSpec.view.widgets[
-        'affine-slash-menu-widget'
-      ] = fakeLiteral`affine-custom-slash-menu`;
+      pageBlockSpec.view.widgets['affine-slash-menu-widget'] =
+        fakeLiteral`affine-custom-slash-menu`;
       pagePreset.unshift(pageBlockSpec);
       editor.pagePreset = pagePreset;
     });
@@ -715,9 +724,8 @@ test.describe('slash menu with customize menu', () => {
       const pageBlockSpec = pagePreset.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
       // @ts-ignore
-      pageBlockSpec.view.widgets[
-        'affine-slash-menu-widget'
-      ] = fakeLiteral`affine-custom-slash-menu`;
+      pageBlockSpec.view.widgets['affine-slash-menu-widget'] =
+        fakeLiteral`affine-custom-slash-menu`;
       pagePreset.unshift(pageBlockSpec);
       editor.pagePreset = pagePreset;
     });
@@ -779,6 +787,16 @@ test('delete block by slash menu should remove children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >

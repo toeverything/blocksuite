@@ -69,8 +69,8 @@ export function mountShapeTextEditor(
     const color = isTransparent(fillColor)
       ? GET_DEFAULT_LINE_COLOR()
       : fillColor === SHAPE_FILL_COLOR_BLACK
-      ? SHAPE_TEXT_COLOR_PURE_WHITE
-      : SHAPE_TEXT_COLOR_PURE_BLACK;
+        ? SHAPE_TEXT_COLOR_PURE_WHITE
+        : SHAPE_TEXT_COLOR_PURE_BLACK;
     edgeless.surface.updateElement<PhasorElementType.SHAPE>(shapeElement.id, {
       text,
       color,
