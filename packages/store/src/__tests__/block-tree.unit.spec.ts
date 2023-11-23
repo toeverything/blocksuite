@@ -1,4 +1,5 @@
 import { expect, test, vi } from 'vitest';
+import type * as Y from 'yjs';
 
 import type { SchemaToModel } from '../schema/index.js';
 import { defineBlockSchema, Schema } from '../schema/index.js';
@@ -42,18 +43,29 @@ test('trigger props updated', async () => {
   const onPropsUpdated = vi.fn();
   root.propsUpdated.on(onPropsUpdated);
 
+  const getColor = () =>
+    (root.yBlock.get('prop:style') as Y.Map<string>).get('color');
+  const getCount = () => root.yBlock.get('prop:count');
+
   root.count = 1;
   expect(onPropsUpdated).toBeCalledTimes(1);
+  expect(getCount()).toBe(1);
 
   root.count = 2;
   expect(onPropsUpdated).toBeCalledTimes(2);
+  expect(getCount()).toBe(2);
 
   root.style.color = 'blue';
   expect(onPropsUpdated).toBeCalledTimes(3);
 
+  expect(getColor()).toBe('blue');
+
   root.style = { color: 'red' };
   expect(onPropsUpdated).toBeCalledTimes(4);
 
+  expect(getColor()).toBe('red');
+
   root.style.color = 'green';
   expect(onPropsUpdated).toBeCalledTimes(5);
+  expect(getColor()).toBe('green');
 });
