@@ -234,9 +234,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     if (!this._isEdgeless) return;
-    Object.defineProperty(window, 'surface', {
-      value: this,
-    });
     const { edgeless } = this;
     this.layer = new LayerManager();
     this._renderer = new Renderer({ layerManager: this.layer });
