@@ -129,7 +129,14 @@ export class Block {
           typeof p === 'string' &&
           model.keys.includes(p)
         ) {
-          this.yBlock.set(`prop:${p}`, propsToValue(value));
+          const yValue = propsToValue(value);
+          this.yBlock.set(`prop:${p}`, yValue);
+          const proxy = valueToProps(yValue, this.tree.doc.proxy, {
+            onChange: () => {
+              this.model.propsUpdated.emit();
+            },
+          });
+          return Reflect.set(target, p, proxy, receiver);
         }
 
         return Reflect.set(target, p, value, receiver);
