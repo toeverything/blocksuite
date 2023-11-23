@@ -45,7 +45,6 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       width: 506.5px;
-      height: 104px;
       border-radius: 8px;
       padding: 8px;
       display: flex;

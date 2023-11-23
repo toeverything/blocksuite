@@ -66,6 +66,9 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   @state()
   private _isResizing = false;
 
+  @state()
+  private _isHover = true;
+
   @query('affine-note')
   private _affineNote!: HTMLDivElement;
 
@@ -91,7 +94,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   }
 
   override firstUpdated() {
-    const { _disposables } = this;
+    const { _disposables, edgeless } = this;
     const selection = this.surface.edgeless.selectionManager;
 
     this._handleEditingTransition();
@@ -106,7 +109,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     );
 
     _disposables.add(
-      this.edgeless.slots.elementResizeStart.on(() => {
+      edgeless.slots.elementResizeStart.on(() => {
         if (selection.elements.includes(this.model)) {
           this._isResizing = true;
         }
@@ -114,15 +117,42 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     );
 
     _disposables.add(
-      this.edgeless.slots.elementResizeEnd.on(() => {
+      edgeless.slots.elementResizeEnd.on(() => {
         this._isResizing = false;
       })
+    );
+
+    _disposables.add(
+      edgeless.slots.hoverUpdated.on(() => {
+        this._isHover =
+          edgeless.tools.getHoverState()?.content === this.model &&
+          edgeless.selectionManager.elements.includes(this.model)
+            ? true
+            : false;
+      })
+    );
+
+    _disposables.add(
+      edgeless.selectionManager.slots.updated.on(() => {
+        if (edgeless.selectionManager.elements.includes(this.model)) {
+          this._isHover =
+            edgeless.tools.getHoverState()?.content === this.model;
+        }
+      })
+    );
+  }
+
+  private get _isShowCollapsedContent() {
+    return (
+      this.model.edgeless.collapse &&
+      (this._isResizing || this._isHover) &&
+      this.edgeless.selectionManager.elements.includes(this.model)
     );
   }
 
   private _collapsedContent() {
     const { model, surface } = this;
-    if (!model.edgeless.collapse || !this._isResizing) return nothing;
+    if (!this._isShowCollapsedContent) return nothing;
 
     const rect = this._affineNote.getBoundingClientRect();
     const bound = Bound.deserialize(model.xywh);
@@ -216,7 +246,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
           style=${styleMap({
             width: '100%',
             height: '100%',
-            overflow: this._isResizing ? 'initial' : 'hidden',
+            overflow: this._isShowCollapsedContent ? 'initial' : 'hidden',
           })}
         >
           ${surface.edgeless.renderModel(model)}
