@@ -3,13 +3,14 @@ import { assertType, Slot } from '@blocksuite/global/utils';
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { PhasorElement } from '../../index.js';
-import { Bound, generateKeyBetween } from '../../index.js';
+import { Bound, generateKeyBetween, GroupElement } from '../../index.js';
 import { type EdgelessElement } from '../../index.js';
 import type { ImageBlockModel, NoteBlockModel } from '../../models.js';
 import { getElementsBound } from '../../page-block/edgeless/utils/query.js';
+import { GROUP_ROOT } from '../elements/group/consts.js';
 import { SurfaceElement } from '../elements/surface-element.js';
 import { GridManager } from '../grid.js';
-import { compare, getGroups } from './group-manager.js';
+import { compare, getGroupParent, getGroups } from './group-manager.js';
 
 type IndexableBlock = ImageBlockModel | NoteBlockModel;
 
@@ -557,6 +558,10 @@ export class LayerManager {
     if (element instanceof SurfaceElement) {
       insertType = 'canvas';
       this._insertToOrderedArray(this.phasors, element);
+
+      if (element instanceof GroupElement) {
+        element.childElements.forEach(child => this.update(child, false));
+      }
     } else if (element.flavour === 'affine:frame') {
       this._insertToOrderedArray(this.frames, element);
     } else {
@@ -591,13 +596,17 @@ export class LayerManager {
     }
   }
 
-  update(element: Indexable | FrameBlockModel) {
+  update(element: Indexable | FrameBlockModel, rebuildCanvasLayer = true) {
     let updateType: 'block' | 'canvas' | undefined = undefined;
 
     if (element instanceof SurfaceElement) {
       updateType = 'canvas';
       this._removeFromOrderedArray(this.phasors, element);
       this._insertToOrderedArray(this.phasors, element);
+
+      if (element instanceof GroupElement) {
+        element.childElements.forEach(child => this.update(child, false));
+      }
     } else if (element.flavour === 'affine:frame') {
       this._removeFromOrderedArray(this.frames, element);
       this._insertToOrderedArray(this.frames, element);
@@ -612,7 +621,10 @@ export class LayerManager {
     if (updateType) {
       this._removeFromLayer(element as Indexable, updateType);
       this._insertIntoLayer(element as Indexable, updateType);
-      this._buildCanvasLayers();
+
+      if (rebuildCanvasLayer) {
+        this._buildCanvasLayers();
+      }
     }
   }
 
@@ -668,5 +680,72 @@ export class LayerManager {
 
       return generateKeyBetween(lastLayerIndex, null);
     }
+  }
+
+  getReorderedIndex(
+    element: Indexable | FrameBlockModel,
+    direction: 'front' | 'forward' | 'back' | 'backward'
+  ): string {
+    const group = getGroupParent(element);
+    const isFrameBlock =
+      (element as FrameBlockModel).flavour === 'affine:frame';
+
+    let elements: (Indexable | FrameBlockModel)[];
+
+    if (group !== GROUP_ROOT) {
+      elements = group.childElements.filter(
+        element =>
+          ((element as FrameBlockModel)?.flavour === 'affine:frame') ===
+          isFrameBlock
+      );
+
+      elements.sort(compare);
+    } else if (isFrameBlock) {
+      elements = this.frames;
+    } else {
+      elements = this.layers.reduce(
+        (pre: Indexable[], current) =>
+          pre.concat(
+            current.elements.filter(
+              element => getGroupParent(element) == GROUP_ROOT
+            )
+          ),
+        []
+      );
+    }
+
+    const currentIdx = elements.indexOf(element);
+
+    switch (direction) {
+      case 'forward':
+      case 'front':
+        if (currentIdx === -1 || currentIdx === elements.length - 1)
+          return element.index;
+
+        {
+          const next =
+            direction === 'forward'
+              ? elements[currentIdx + 1]
+              : elements[elements.length - 1];
+          const next2 =
+            direction === 'forward' ? elements[currentIdx + 2] : null;
+
+          return generateKeyBetween(next.index, next2?.index ?? null);
+        }
+      case 'backward':
+      case 'back':
+        if (currentIdx === -1 || currentIdx === 0) return element.index;
+
+        {
+          const pre =
+            direction === 'backward' ? elements[currentIdx - 1] : elements[0];
+          const pre2 =
+            direction === 'backward' ? elements[currentIdx - 2] : null;
+
+          return generateKeyBetween(pre2?.index ?? null, pre.index);
+        }
+    }
+
+    return element.index;
   }
 }

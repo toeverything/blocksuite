@@ -98,8 +98,7 @@ export interface EdgelessSelectionSlots {
     dragging?: boolean;
   }>;
   edgelessToolUpdated: Slot<EdgelessTool>;
-  reorderingBlocksUpdated: Slot<ReorderingAction<Selectable>>;
-  reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
+  reorderingElements: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
   cursorUpdated: Slot<string>;
   copyAsPng: Slot<{
@@ -194,8 +193,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }>(),
     hoverUpdated: new Slot(),
     edgelessToolUpdated: new Slot<EdgelessTool>(),
-    reorderingBlocksUpdated: new Slot<ReorderingAction<TopLevelBlockModel>>(),
-    reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
+    reorderingElements: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
     cursorUpdated: new Slot<string>(),

@@ -1,6 +1,6 @@
 import '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 
-import { assertEquals, assertExists } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BlockProps } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -276,8 +276,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _initEvents() {
     const { _disposables, edgeless } = this;
 
-    _disposables.add(edgeless.slots.reorderingBlocksUpdated.on(this._reorder));
-    _disposables.add(edgeless.slots.reorderingShapesUpdated.on(this._reorder));
+    _disposables.add(edgeless.slots.reorderingElements.on(this._reorder));
 
     _disposables.add(
       edgeless.slots.elementAdded.on(id => {
@@ -304,7 +303,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
           }
         }
 
-        if ('index' in props) {
+        if (
+          'index' in props ||
+          (element instanceof GroupElement && 'children' in props)
+        ) {
           this.layer.update(element);
         }
       })
@@ -374,121 +376,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   private _reorder = ({ elements, type }: ReorderingAction<Selectable>) => {
-    if (!elements.length) return;
+    elements.forEach(element => {
+      const index = this.layer.getReorderedIndex(element, type);
 
-    if (
-      elements.some(
-        element =>
-          this.getGroupParent(element) !== this.getGroupParent(elements[0])
-      )
-    ) {
-      console.warn(`can't reorder shapes in different groups`);
-      return;
-    }
-
-    const levelElements = this._getSortedSameGroupElements(elements[0]);
-    elements = elements.sort(this.compare);
-    let indexes: string[] = [];
-
-    switch (type) {
-      case 'front':
-        indexes = generateNKeysBetween(
-          levelElements.at(-1)?.index,
-          null,
-          elements.length
-        );
-
-        break;
-      case 'forward': {
-        let start = -1;
-        let end = -1;
-        let index = -1;
-        for (let i = 0; i < elements.length; i++) {
-          const current = elements[i];
-          index = levelElements.findIndex(e => e.id === current.id);
-          if (start < 0) {
-            start = index;
-            end = index;
-            continue;
-          } else if (index - end === 1) {
-            end = index;
-            continue;
-          } else {
-            indexes.push(
-              ...generateNKeysBetween(
-                levelElements[end + 1]?.index ?? null,
-                levelElements[end + 2]?.index ?? null,
-                end - start + 1
-              )
-            );
-            start = index;
-            end = index;
-          }
-        }
-
-        indexes.push(
-          ...generateNKeysBetween(
-            levelElements[index + 1]?.index ?? null,
-            levelElements[index + 2]?.index ?? null,
-            end - start + 1
-          )
-        );
-
-        assertEquals(elements.length, indexes.length);
-
-        break;
-      }
-
-      case 'backward': {
-        let start = -1;
-        let end = -1;
-        let index = -1;
-        for (let i = elements.length - 1; i >= 0; i--) {
-          const current = elements[i];
-          index = levelElements.findIndex(e => e.id === current.id);
-          if (start < 0) {
-            start = index;
-            end = index;
-            continue;
-          } else if (index - end === -1) {
-            end = index;
-            continue;
-          } else {
-            indexes.unshift(
-              ...generateNKeysBetween(
-                levelElements[end - 2]?.index ?? null,
-                levelElements[end - 1]?.index ?? null,
-                Math.abs(end - start) + 1
-              )
-            );
-            start = index;
-            end = index;
-          }
-        }
-
-        indexes.unshift(
-          ...generateNKeysBetween(
-            levelElements[index - 2]?.index ?? null,
-            levelElements[index - 1]?.index ?? null,
-            Math.abs(end - start) + 1
-          )
-        );
-
-        assertEquals(elements.length, indexes.length);
-
-        break;
-      }
-      case 'back':
-        indexes = generateNKeysBetween(
-          null,
-          levelElements[0]?.index,
-          elements.length
-        );
-
-        break;
-    }
-
-    if (indexes) this.updateIndexes(indexes, elements);
+      if (index !== element.index)
+        this.updateElement(element.id, {
+          index,
+        });
+    });
   };
 
   private _initEffects() {
