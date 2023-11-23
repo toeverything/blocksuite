@@ -470,38 +470,55 @@ export class Page extends BlockTree {
     newParent.childrenUpdated.emit();
   }
 
-  updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
+  updateBlock<T extends Partial<BlockProps>>(
+    model: BaseBlockModel,
+    props: T
+  ): void;
+  updateBlock(model: BaseBlockModel, callback: () => void): void;
+  updateBlock(
+    model: BaseBlockModel,
+    callBackOrProps: (() => void) | Partial<BlockProps>
+  ): void {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
 
-    const parent = this.getParent(model);
-    this.schema.validate(
-      model.flavour,
-      parent?.flavour,
-      props.children?.map(child => child.flavour)
-    );
+    const isCallback = typeof callBackOrProps === 'function';
+
+    if (!isCallback) {
+      const parent = this.getParent(model);
+      this.schema.validate(
+        model.flavour,
+        parent?.flavour,
+        callBackOrProps.children?.map(child => child.flavour)
+      );
+    }
 
     const yBlock = this._yBlocks.get(model.id);
     assertExists(yBlock);
 
     this.transact(() => {
-      // TODO diff children changes
-      // All child nodes will be deleted in the current behavior, then added again.
-      // Through diff children changes, the experience can be improved.
-      if (props.children) {
-        const yChildren = new Y.Array<string>();
-        yChildren.insert(
-          0,
-          props.children.map(child => child.id)
-        );
-        yBlock.set('sys:children', yChildren);
+      if (!isCallback) {
+        // TODO diff children changes
+        // All child nodes will be deleted in the current behavior, then added again.
+        // Through diff children changes, the experience can be improved.
+        if (callBackOrProps.children) {
+          const yChildren = new Y.Array<string>();
+          yChildren.insert(
+            0,
+            callBackOrProps.children.map(child => child.id)
+          );
+          yBlock.set('sys:children', yChildren);
+        }
+
+        const schema = this.schema.flavourSchemaMap.get(model.flavour);
+        assertExists(schema);
+        syncBlockProps(schema, yBlock, callBackOrProps);
+        return;
       }
 
-      const schema = this.schema.flavourSchemaMap.get(model.flavour);
-      assertExists(schema);
-      syncBlockProps(schema, yBlock, props);
+      callBackOrProps();
     });
   }
 
