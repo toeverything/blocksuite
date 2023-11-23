@@ -164,7 +164,7 @@ export class EdgelessSelectionManager {
               selection.elements.forEach(id => remoteSelectedElements.add(id));
             }
 
-            if (selection.is('cursor') && !hasTextSelection) {
+            if (selection.is('cursor')) {
               remoteCursors.set(id, selection);
             }
           });
