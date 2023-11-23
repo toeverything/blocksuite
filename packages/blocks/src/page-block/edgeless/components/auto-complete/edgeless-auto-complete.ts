@@ -120,6 +120,9 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     }
   `;
 
+  @state()
+  private _isHover = true;
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -143,13 +146,27 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   override firstUpdated() {
-    this._disposables.add(
+    const { _disposables, edgeless } = this;
+
+    _disposables.add(
       this.edgeless.selectionManager.slots.updated.on(() => {
         this._autoCompleteOverlay.linePoints = [];
         this._autoCompleteOverlay.shapePoints = [];
       })
     );
-    this._disposables.add(() => this.removeOverlay());
+    _disposables.add(() => this.removeOverlay());
+
+    _disposables.add(
+      edgeless.slots.hoverUpdated.on(() => {
+        const state = edgeless.tools.getHoverState();
+        if (!state) {
+          this._isHover = false;
+          return;
+        }
+        const { content } = state;
+        this._isHover = content === this.current ? true : false;
+      })
+    );
   }
 
   private _createAutoCompletePanel(
@@ -356,12 +373,12 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (this._isMoving) {
+    const isShape = this.current instanceof ShapeElement;
+    if (this._isMoving || (this._isHover && !isShape)) {
       this.removeOverlay();
       return nothing;
     }
     const { selectedRect } = this;
-    const isShape = this._selected[0] instanceof ShapeElement;
     const width = 72;
     const height = 44;
     const Arrows = [

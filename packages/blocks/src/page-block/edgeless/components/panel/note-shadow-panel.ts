@@ -47,12 +47,11 @@ export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
     }
 
     .item {
-      width: 75.08px;
-      height: 88px;
+      padding: 8px;
+      border-radius: 4px;
       display: flex;
       justify-content: center;
       align-items: center;
-      border-radius: 8px;
       cursor: pointer;
     }
 
