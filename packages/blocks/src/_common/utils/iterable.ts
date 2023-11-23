@@ -181,15 +181,32 @@ export function keys<T>(obj: T): (keyof T)[] {
   return Object.keys(obj as object) as (keyof T)[];
 }
 
-export function last<T>(array: Iterable<T>): T | undefined {
-  if (Array.isArray(array)) {
-    return array[array.length - 1];
+type IterableType<T> = T extends Array<infer U> ? U : T;
+
+export function last<T extends Iterable<unknown>>(
+  iterable: T
+): IterableType<T> | undefined {
+  if (Array.isArray(iterable)) {
+    return iterable[iterable.length - 1];
   }
 
-  let last: T | undefined;
-  for (const item of array) {
+  let last: unknown | undefined;
+  for (const item of iterable) {
     last = item;
   }
 
-  return last;
+  return last as IterableType<T>;
+}
+
+export function nToLast<T extends Iterable<unknown>>(
+  iterable: T,
+  n: number
+): IterableType<T> | undefined {
+  if (Array.isArray(iterable)) {
+    return iterable[iterable.length - 1];
+  }
+
+  const arr = [...iterable];
+
+  return arr[arr.length - n] as IterableType<T>;
 }

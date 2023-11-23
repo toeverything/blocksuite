@@ -5,6 +5,8 @@ export function isPrimitive(
   return a !== Object(a);
 }
 
+export function assertType<T>(val: unknown): asserts val is T {}
+
 export function assertExists<T>(
   val: T | null | undefined,
   message: string | Error = 'val does not exist'

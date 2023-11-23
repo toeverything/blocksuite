@@ -545,7 +545,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.localRecord.each((id, record) => {
       if (!elementsSet.has(id) || !this.surface.pickById(id)) return;
 
-      const element = this.surface.pickById(id) as EdgelessElement;
+      const element =
+        this.page.getBlockById(id) ??
+        (this.surface.pickById(id) as EdgelessElement);
       const updateProps: Record<string, unknown> = {};
       let flag = false;
 
@@ -788,6 +790,21 @@ export class EdgelessPageBlockComponent extends BlockElement<
         if (![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType))
           return;
 
+        const model =
+          event.type === 'delete'
+            ? event.model
+            : (this.page.getBlockById(event.id) as TopLevelBlockModel);
+        const parent =
+          event.type === 'delete'
+            ? this.page.getBlockById(event.parent)
+            : this.page.getParent(model);
+
+        if (
+          event.flavour !== NOTE &&
+          (!parent || parent !== this.surface.model)
+        )
+          return;
+
         switch (event.type) {
           case 'update':
             this.slots.elementUpdated.emit({
@@ -864,8 +881,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     )}`;
 
     return html`${this.renderModel(this.surfaceBlockModel)}
-      <edgeless-block-portal-container .edgeless=${this}>
-      </edgeless-block-portal-container>
       <div class="widgets-container">${widgets}</div> `;
   }
 }

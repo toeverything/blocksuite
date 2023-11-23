@@ -39,11 +39,6 @@ function getGroups(element: EdgelessElement) {
 }
 
 export function compare(a: EdgelessElement, b: EdgelessElement) {
-  if (a.batch && b.batch) {
-    if (a.batch < b.batch) return -1;
-    else if (a.batch > b.batch) return 1;
-  }
-
   if (getGroupParent(a) === getGroupParent(b)) {
     if (a.index < b.index) return -1;
     else if (a.index > b.index) return 1;

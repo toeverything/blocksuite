@@ -7,6 +7,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { Workspace, type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   type CssVariableName,
@@ -19,7 +21,7 @@ import {
   type Selectable,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
-import { last } from '../_common/utils/iterable.js';
+import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
@@ -65,6 +67,7 @@ import {
   isDescendant,
   setGroupParent,
 } from './managers/group-manager.js';
+import { LayerManager } from './managers/layer-manager.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
@@ -72,7 +75,6 @@ import { Bound } from './utils/bound.js';
 import { getCommonBound } from './utils/bound.js';
 import {
   generateElementId,
-  generateKeyBetween,
   generateNKeysBetween,
   normalizeWheelDeltaY,
 } from './utils/index.js';
@@ -95,7 +97,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       position: absolute;
       width: 100%;
       height: 100%;
-      opacity: 0;
     }
 
     .affine-edgeless-surface-block-container canvas {
@@ -158,13 +159,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   connector!: EdgelessConnectorManager;
   frame!: EdgelessFrameManager;
   group!: EdgelessGroupManager;
+  layer!: LayerManager;
+
   compare = compare;
   getGroupParent = getGroupParent;
   setGroupParent = setGroupParent;
 
-  private _defaultBatch = 'a1';
   private _lastTime = 0;
   private _cachedViewport = new Bound();
+
+  @query('edgeless-block-portal-container')
+  portal!: EdgelessBlockPortalContainer;
 
   get renderer() {
     return this._renderer;
@@ -178,16 +183,23 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this.root.mode === 'edgeless';
   }
 
-  getBlocks<T extends EdgelessBlockType>(flavour: T) {
-    let parent: BaseBlockModel = this.model;
-    if (flavour === EdgelessBlockType.NOTE) {
-      parent = this.edgeless.model;
-    }
-    return parent.children
-      .filter(child => child.flavour === flavour)
-      .map(child =>
-        this.edgeless.localRecord.wrap(child)
-      ) as EdgelessBlockModelMap[T][];
+  getBlocks<T extends EdgelessBlockType>(
+    flavours: T[] | T
+  ): TopLevelBlockModel[] {
+    flavours = typeof flavours === 'string' ? [flavours] : flavours;
+
+    return flavours.reduce<TopLevelBlockModel[]>((pre, flavour) => {
+      const parent: BaseBlockModel =
+        flavour === EdgelessBlockType.NOTE ? this.edgeless.model : this.model;
+
+      return pre.concat(
+        parent.children
+          .filter(child => child.flavour === flavour)
+          .map(child =>
+            this.edgeless.localRecord.wrap(child)
+          ) as EdgelessBlockModelMap[T][]
+      );
+    }, []);
   }
 
   getSortedBlocks<T extends EdgelessBlockType>(flavour: T | T[]) {
@@ -222,18 +234,25 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     if (!this._isEdgeless) return;
+    Object.defineProperty(window, 'surface', {
+      value: this,
+    });
     const { edgeless } = this;
-    this._renderer = new Renderer();
+    this.layer = new LayerManager();
+    this._renderer = new Renderer({ layerManager: this.layer });
     this._yContainer = this.model.elements.getValue() as Y.Map<Y.Map<unknown>>;
     this._yContainer.observe(this._onYContainer);
 
-    this._initEvents();
     this.connector = new EdgelessConnectorManager(edgeless);
     this.frame = new EdgelessFrameManager(edgeless);
     this.snap = new EdgelessSnapManager(edgeless);
     this.group = new EdgelessGroupManager(this);
-
     this.init();
+
+    this.layer.init([...this._elements.values(), ...this.blocks]);
+
+    this._initEvents();
+    this._initEffects();
   }
 
   getCSSPropertyValue = (value: string) => {
@@ -268,6 +287,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
           if (!this.connector.hasRelatedElement(element)) return;
           this.connector.updatePath(element);
         }
+
+        this.layer.add(element);
       })
     );
 
@@ -281,17 +302,37 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
             this.connector.updatePath(element);
           }
         }
+
+        if ('index' in props) {
+          this.layer.update(element);
+        }
       })
     );
 
     _disposables.add(
-      this.edgeless.slots.elementUpdated.on(({ id, props }) => {
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
         if (!('xywh' in props || 'rotate' in props)) return;
 
         const element = this.pickById(id);
         if (isConnectable(element)) {
           this.connector.syncConnectorPos([element]);
         }
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementRemoved.on(({ element }) => {
+        this.layer.delete(
+          ('flavour' in element
+            ? this.edgeless.localRecord.wrap(element)
+            : element) as EdgelessElement
+        );
+      })
+    );
+
+    _disposables.add(
+      this.layer.slots.canvasLayerChanged.on(() => {
+        this.requestUpdate();
       })
     );
   }
@@ -495,12 +536,39 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
   }
 
+  renderCanvas() {
+    /**
+     * we already have a main canvas, so the last layer should be deleted
+     */
+    const canvasLayers = this.layer.getCanvasLayers().slice(0, -1);
+
+    return html`${repeat(
+      canvasLayers,
+      (_, idx) => idx,
+      layer =>
+        html`<canvas
+          class="indexable-canvas"
+          data-fractional-index="${layer.indexes[0]}-${layer.indexes[1]}"
+          style=${styleMap({
+            zIndex: layer.zIndexes,
+            position: 'absolute',
+          })}
+        ></canvas>`
+    )}`;
+  }
+
   override render() {
     if (!this._isEdgeless) return nothing;
+
     return html`
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in Phasor -->
       </div>
+      <edgeless-block-portal-container
+        .canvasContent=${this.renderCanvas()}
+        .edgeless=${this.edgeless}
+      >
+      </edgeless-block-portal-container>
     `;
   }
 
@@ -509,9 +577,32 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this.attach(this._surfaceContainer);
   }
 
+  override updated() {
+    if (!this._isEdgeless) return;
+
+    if (this.portal.isUpdatePending) {
+      this.portal.updateComplete.then(() => {
+        this._updateIndexedCanvas();
+      });
+    } else {
+      this._updateIndexedCanvas();
+    }
+  }
+
+  private _updateIndexedCanvas() {
+    if (
+      this._renderer.indexedCanvases.length !==
+      this.layer.canvasLayers.length - 1
+    ) {
+      this._renderer.setIndexedCanvas(
+        Array.from(this.querySelectorAll('canvas.indexable-canvas'))
+      );
+      this._renderer.refresh();
+    }
+  }
+
   init() {
     this._syncFromExistingContainer();
-    this._initEffects();
   }
 
   // query
@@ -528,10 +619,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   get viewport(): Renderer {
     return this._renderer;
-  }
-
-  get defaultBatch() {
-    return this._defaultBatch;
   }
 
   private _syncFromExistingContainer() {
@@ -731,15 +818,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       const yMap = new Workspace.Y.Map();
 
       const defaultProps = ElementDefaultProps[type];
-      const sortedElements = Array.from(this._elements.values()).sort(compare);
       const props: IElementCreateProps<typeof type> = {
         ...defaultProps,
         ...properties,
         id,
-        index: generateKeyBetween(
-          last(sortedElements)?.index ?? SurfaceBlockComponent.INITAL_INDEX,
-          null
-        ),
+        index: this.layer.generateIndex('common'),
         seed: randomSeed(),
       };
 
@@ -760,18 +843,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
       return id;
     } else {
-      const blocks =
+      const index =
         type === EdgelessElementType.FRAME
-          ? this.getSortedBlocks(EdgelessBlockType.FRAME)
-          : this.getSortedBlocks([
-              EdgelessBlockType.NOTE,
-              EdgelessBlockType.IMAGE,
-            ]);
-
-      const index = generateKeyBetween(
-        last(blocks)?.index ?? SurfaceBlockComponent.INITAL_INDEX,
-        null
-      );
+          ? this.layer.generateIndex('frame')
+          : this.layer.generateIndex('common', 'block');
       return this.page.addBlock(
         type,
         { ...properties, index },
@@ -809,10 +884,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this.updateElement(id, {
       xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
     });
-  }
-
-  setDefaultBatch(batch: string) {
-    this._defaultBatch = batch;
   }
 
   removeElement(id: string) {

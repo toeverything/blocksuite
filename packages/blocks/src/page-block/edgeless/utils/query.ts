@@ -173,6 +173,12 @@ export function getSelectedRect(selected: Selectable[]): DOMRect {
   );
 }
 
+export function getElementsBound(selected: Selectable[]): Bound {
+  const rect = getSelectedRect(selected);
+
+  return new Bound(rect.x, rect.y, rect.width, rect.height);
+}
+
 export function getSelectableBounds(selected: Selectable[]): Map<
   string,
   {

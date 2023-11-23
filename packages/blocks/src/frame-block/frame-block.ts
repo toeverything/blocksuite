@@ -37,7 +37,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   }
 
   get surface() {
-    return (<EdgelessPageBlockComponent>this.parentBlockElement).surface;
+    return this.closest('affine-edgeless-page')!.surface;
   }
 
   override connectedCallback() {

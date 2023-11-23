@@ -13,7 +13,7 @@ import '../component-toolbar/component-toolbar.js';
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, nothing } from 'lit';
+import { css, nothing, type TemplateResult } from 'lit';
 import {
   customElement,
   property,
@@ -21,8 +21,6 @@ import {
   queryAll,
   state,
 } from 'lit/decorators.js';
-import { map } from 'lit/directives/map.js';
-import { range } from 'lit/directives/range.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
@@ -33,10 +31,10 @@ import {
 } from '../../../../_common/consts.js';
 import { delayCallback } from '../../../../_common/utils/event.js';
 import {
-  type EdgelessElement,
   matchFlavours,
   type TopLevelBlockModel,
 } from '../../../../_common/utils/index.js';
+import type { SurfaceBlockComponent } from '../../../../index.js';
 import type { FrameBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
@@ -58,7 +56,7 @@ export type AutoConnectElement =
 
 const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
 
-const portalMap = {
+export const portalMap = {
   [FRAME]: 'edgeless-block-portal-frame',
   [NOTE]: 'edgeless-block-portal-note',
   [IMAGE]: 'edgeless-block-portal-image',
@@ -74,8 +72,34 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     }
   `;
 
+  static renderPortal(
+    block: TopLevelBlockModel,
+    zIndex: number,
+    surface: SurfaceBlockComponent,
+    edgeless: EdgelessPageBlockComponent
+  ) {
+    const tag = literal`${unsafeStatic(
+      portalMap[block.flavour as EdgelessBlockType]
+    )}`;
+    return html`<${tag}
+          slot="blocks"
+          data-index=${block.index}
+          .index=${zIndex}
+          .model=${block}
+          .surface=${surface}
+          .edgeless=${edgeless}
+          style=${styleMap({
+            zIndex,
+            position: 'relative',
+          })}
+        ></${tag}>`;
+  }
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
+
+  @property({ attribute: false })
+  canvasContent!: TemplateResult;
 
   @query('.affine-block-children-container.edgeless')
   container!: HTMLDivElement;
@@ -94,11 +118,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   @state()
   private _toolbarVisible = false;
-
-  private _cachedPhasorGroups: {
-    zIndex: number;
-    elements: Exclude<EdgelessElement, TopLevelBlockModel>[];
-  }[] = [];
 
   private _cancelRestoreWillchange: (() => void) | null = null;
 
@@ -153,7 +172,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
     this.layer.style.setProperty('transform', this._getLayerViewport());
-    this.rerenderPhasors(this._getLayerViewport(true));
   };
 
   private _getLayerViewport(negative = false) {
@@ -300,78 +318,17 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
   }
 
-  override updated() {
-    this.rerenderPhasors(this._getLayerViewport(true));
-  }
-
-  private rerenderPhasors(transformStyle: string) {
-    const canvases = Array.from(this.canvases);
-    const renderer = this.edgeless.surface.renderer;
-
-    this._cachedPhasorGroups.forEach((group, i) => {
-      canvases[i].style.setProperty('transform', transformStyle);
-      canvases[i].style.setProperty('z-index', group.zIndex.toString());
-      renderer.cloneCanvasContent(undefined, group.elements, canvases[i]);
-    });
-  }
-
-  private _sortElements(elements: EdgelessElement[]) {
-    return elements.sort(this.edgeless.surface.compare);
-  }
-
-  private _groupedPhasors(elements: EdgelessElement[]) {
-    const groups: {
-      zIndex: number;
-      elements: Exclude<EdgelessElement, TopLevelBlockModel>[];
-    }[] = [];
-    let lastGroupIdx = 0;
-    let zIndex = 0;
-    const zIndexMap: Record<string, number> = {};
-
-    this._cachedPhasorGroups = elements.reduce((_, current) => {
-      if ('flavour' in current) {
-        if (groups[0]?.elements.length) ++lastGroupIdx;
-        if ([IMAGE, NOTE].includes(current['flavour'])) {
-          zIndexMap[current.id] = zIndex;
-          ++zIndex;
-        }
-      } else {
-        if (groups[lastGroupIdx]) groups[lastGroupIdx].elements.push(current);
-        else
-          groups[lastGroupIdx] = {
-            zIndex,
-            elements: [current],
-          };
-      }
-
-      return groups;
-    }, groups);
-
-    return {
-      zIndexMap,
-      groups,
-    };
-  }
-
   override render() {
     const { edgeless } = this;
-
     const { surface, page } = edgeless;
+    const { readonly } = page;
+
     if (!surface) return nothing;
 
-    const { readonly } = this.edgeless.page;
-    const notes = surface.getBlocks(NOTE);
-    const images = surface.getBlocks(IMAGE);
     const frames = surface.getSortedBlocks(FRAME);
-    const phasors = surface.getElements();
-    const elements = this._sortElements([...phasors, ...notes, ...images]);
-    const blocks = elements.filter(
-      element => 'flavour' in element
-    ) as TopLevelBlockModel[];
-
+    const notes = surface.getBlocks([NOTE]);
+    const layers = surface.layer.layers;
     const autoConnectedBlocks = new Map<AutoConnectElement, number>();
-
-    const { zIndexMap } = this._groupedPhasors(elements);
 
     notes.forEach(note => {
       if (isNoteBlock(note) && !note.hidden) {
@@ -419,30 +376,34 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             : html`<affine-note-slicer
                 .edgelessPage=${edgeless}
               ></affine-note-slicer>`}
-          ${map(
-            range(this._cachedPhasorGroups.length),
-            i => html`<canvas class="surface-layer" data-layer="${i}"></canvas>`
-          )}
-          ${repeat(
-            blocks,
-            block => block.id,
-            (block, index) => {
-              const tag = literal`${unsafeStatic(
-                portalMap[block.flavour as EdgelessBlockType]
-              )}`;
-              return html`<${tag}
-                    data-index=${block.index}
-                    .index=${index}
-                    .model=${block}
-                    .surface=${surface}
-                    .edgeless=${edgeless}
-                    style=${styleMap({
-                      zIndex: zIndexMap[block.id],
-                      position: 'relative',
-                    })}
-                  ></${tag}>`;
-            }
-          )}
+          ${this.canvasContent}
+          ${layers
+            .filter(layer => layer.type === 'block')
+            .map(layer => {
+              return repeat(
+                layer.elements as TopLevelBlockModel[],
+                block => block.id,
+                (block, index) => {
+                  const tag = unsafeStatic(
+                    portalMap[block.flavour as EdgelessBlockType]
+                  );
+                  const zIndex =
+                    (layer.zIndexes as [number, number])[0] + index;
+
+                  return html`<${tag}
+                      data-index=${block.index}
+                      .index=${zIndex}
+                      .model=${block}
+                      .surface=${surface}
+                      .edgeless=${edgeless}
+                      style=${styleMap({
+                        zIndex,
+                        position: 'relative',
+                      })}
+                    ></${tag}>`;
+                }
+              );
+            })}
         </div>
       </div>
       <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>
