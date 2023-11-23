@@ -19,10 +19,40 @@ import {
 import { nanoid } from '@blocksuite/store';
 import type { DeltaInsert } from '@blocksuite/virgo';
 
+import { getTagColor } from '../components/tags/colors.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { hastGetTextContent, hastQuerySelector, type HtmlAST } from './hast.js';
 
 export type NotionHtml = string;
+
+const ColumnClassMap: Record<string, string> = {
+  typesSelect: 'select',
+  typesMultipleSelect: 'multi-select',
+  typesNumber: 'number',
+  typesCheckbox: 'checkbox',
+  typesText: 'rich-text',
+  typesTitle: 'title',
+};
+
+type BlocksuiteTableColumn = {
+  type: string;
+  name: string;
+  data: {
+    options?: {
+      id: string;
+      value: string;
+      color: string;
+    }[];
+  };
+  id: string;
+};
+
+type BlocksuiteTableRow = {
+  [key: string]: {
+    columnId: string;
+    value: unknown;
+  };
+};
 
 export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
   override fromPageSnapshot(
@@ -368,6 +398,115 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           }
           break;
         }
+        case 'th': {
+          const columnId = nanoid('block');
+          const columnTypeClass = hastQuerySelector(o.node, 'svg')?.properties
+            ?.className;
+          const columnType = Array.isArray(columnTypeClass)
+            ? ColumnClassMap[columnTypeClass[0]] ?? 'rich-text'
+            : 'rich-text';
+          context.pushGlobalContextStack<BlocksuiteTableColumn>(
+            'hast:table:column',
+            {
+              type: columnType,
+              name: hastGetTextContent(o.node),
+              data: Object.create(null),
+              id: columnId,
+            }
+          );
+          break;
+        }
+        case 'tr': {
+          if (o.parent?.type === 'element' && o.parent.tagName === 'tbody') {
+            const columns =
+              context.getGlobalContextStack<BlocksuiteTableColumn>(
+                'hast:table:column'
+              );
+            const row = Object.create(null);
+            o.node.children.forEach((child, index) => {
+              if (hastQuerySelector(child, '.cell-title')) {
+                context.pushGlobalContextStack<BlockSnapshot>(
+                  'hast:table:children',
+                  {
+                    type: 'block',
+                    id: nanoid('block'),
+                    flavour: 'affine:paragraph',
+                    props: {
+                      text: {
+                        '$blocksuite:internal:text$': true,
+                        delta: this._hastToDelta(child),
+                      },
+                      type: 'text',
+                    },
+                    children: [],
+                  }
+                );
+                columns[index].type = 'title';
+                return;
+              }
+              const optionIds: string[] = [];
+              if (hastQuerySelector(child, '.selected-value')) {
+                if (!('options' in columns[index].data)) {
+                  columns[index].data.options = [];
+                }
+                if (!['select', 'multi-select'].includes(columns[index].type)) {
+                  columns[index].type = 'select';
+                }
+                if (
+                  columns[index].type === 'select' &&
+                  child.type === 'element' &&
+                  child.children.length > 1
+                ) {
+                  columns[index].type = 'multi-select';
+                }
+                child.type === 'element' &&
+                  child.children.forEach(span => {
+                    const filteredArray = columns[index].data.options?.filter(
+                      option => option.value === hastGetTextContent(span)
+                    );
+                    const id = filteredArray?.length
+                      ? filteredArray[0].id
+                      : nanoid('unknown');
+                    if (!filteredArray?.length) {
+                      columns[index].data.options?.push({
+                        id,
+                        value: hastGetTextContent(span),
+                        color: getTagColor(),
+                      });
+                    }
+                    optionIds.push(id);
+                  });
+                // Expand will be done when leaving the table
+                row[columns[index].id] = {
+                  columnId: optionIds[0],
+                  value: optionIds,
+                };
+              } else if (hastQuerySelector(child, '.checkbox')) {
+                if (columns[index].type !== 'checkbox') {
+                  columns[index].type = 'checkbox';
+                }
+                row[columns[index].id] = {
+                  columnId: columns[index].id,
+                  value: hastQuerySelector(child, '.checkbox-on')
+                    ? true
+                    : false,
+                };
+              } else if (columns[index].type === 'number') {
+                row[columns[index].id] = {
+                  columnId: columns[index].id,
+                  value: Number(hastGetTextContent(child)),
+                };
+              } else {
+                row[columns[index].id] = {
+                  columnId: columns[index].id,
+                  value: hastGetTextContent(child),
+                };
+              }
+            });
+            context.setGlobalContextStack('hast:table:column', columns);
+            context.pushGlobalContextStack('hast:table:rows', row);
+          }
+        }
       }
     });
     walker.setLeave(async (o, context) => {
@@ -403,6 +542,73 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           break;
         }
         case 'li': {
+          context.closeNode();
+          break;
+        }
+        case 'table': {
+          const columns =
+            context.getGlobalContextStack<BlocksuiteTableColumn>(
+              'hast:table:column'
+            );
+          context.setGlobalContextStack('hast:table:column', []);
+          const cells = Object.create(null);
+          context
+            .getGlobalContextStack<BlocksuiteTableRow>('hast:table:rows')
+            .map(row => {
+              Object.keys(row).forEach(columnId => {
+                if (
+                  columns.find(column => column.id === columnId)?.type ===
+                  'select'
+                ) {
+                  row[columnId].value = (row[columnId].value as string[])[0];
+                }
+              });
+              cells[nanoid('unknown')] = row;
+            });
+          context.setGlobalContextStack('hast:table:cells', []);
+          context.openNode(
+            {
+              type: 'block',
+              id: nanoid('block'),
+              flavour: 'affine:database',
+              props: {
+                views: [
+                  {
+                    id: nanoid('block'),
+                    name: 'Table View',
+                    mode: 'table',
+                    columns: [],
+                    filter: {
+                      type: 'group',
+                      op: 'and',
+                      conditions: [],
+                    },
+                    header: {
+                      titleColumn:
+                        columns.find(column => column.type === 'title')?.id ??
+                        '',
+                      iconColumn: 'type',
+                    },
+                  },
+                ],
+                title: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [],
+                },
+                columns,
+                cells,
+              },
+              children: [],
+            },
+            'children'
+          );
+          const children = context.getGlobalContextStack<BlockSnapshot>(
+            'hast:table:children'
+          );
+          context.setGlobalContextStack('hast:table:children', []);
+          children.forEach(child => {
+            context.openNode(child, 'children').closeNode();
+          });
           context.closeNode();
           break;
         }

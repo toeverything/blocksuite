@@ -1317,30 +1317,14 @@ hhh
                 id: 'matchesReplaceMap[2]',
                 name: 'Table View',
                 mode: 'table',
-                columns: [
-                  {
-                    id: 'matchesReplaceMap[12]',
-                    hide: false,
-                    width: 180,
-                  },
-                  {
-                    id: 'matchesReplaceMap[13]',
-                    hide: false,
-                    width: 180,
-                  },
-                  {
-                    id: 'matchesReplaceMap[14]',
-                    hide: false,
-                    width: 180,
-                  },
-                ],
+                columns: [],
                 filter: {
                   type: 'group',
                   op: 'and',
                   conditions: [],
                 },
                 header: {
-                  titleColumn: 'matchesReplaceMap[12]',
+                  titleColumn: 'matchesReplaceMap[9]',
                   iconColumn: 'type',
                 },
               },
@@ -1350,13 +1334,13 @@ hhh
               delta: [],
             },
             cells: {
-              'matchesReplaceMap[15]': {
-                'matchesReplaceMap[13]': {
-                  columnId: 'matchesReplaceMap[13]',
+              'matchesReplaceMap[12]': {
+                'matchesReplaceMap[10]': {
+                  columnId: 'matchesReplaceMap[10]',
                   value: 'eee',
                 },
-                'matchesReplaceMap[14]': {
-                  columnId: 'matchesReplaceMap[14]',
+                'matchesReplaceMap[11]': {
+                  columnId: 'matchesReplaceMap[11]',
                   value: 'fff',
                 },
               },
@@ -1366,26 +1350,26 @@ hhh
                 type: 'title',
                 name: 'aaa',
                 data: {},
-                id: 'matchesReplaceMap[12]',
+                id: 'matchesReplaceMap[9]',
               },
               {
                 type: 'rich-text',
                 name: 'bbb',
                 data: {},
-                id: 'matchesReplaceMap[13]',
+                id: 'matchesReplaceMap[10]',
               },
               {
                 type: 'rich-text',
                 name: 'ccc',
                 data: {},
-                id: 'matchesReplaceMap[14]',
+                id: 'matchesReplaceMap[11]',
               },
             ],
           },
           children: [
             {
               type: 'block',
-              id: 'matchesReplaceMap[15]',
+              id: 'matchesReplaceMap[12]',
               flavour: 'affine:paragraph',
               props: {
                 text: {

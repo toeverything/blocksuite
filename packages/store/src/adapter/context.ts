@@ -52,6 +52,28 @@ export class ASTWalkerContext<TNode extends object> {
     return this._globalContext[key];
   }
 
+  pushGlobalContextStack<StackElement>(key: string, value: StackElement) {
+    const stack = this._globalContext[key];
+    if (stack instanceof Array) {
+      stack.push(value);
+    } else {
+      this._globalContext[key] = [value];
+    }
+  }
+
+  getGlobalContextStack<StackElement>(key: string) {
+    const stack = this._globalContext[key];
+    if (stack instanceof Array) {
+      return stack as StackElement[];
+    } else {
+      return [] as StackElement[];
+    }
+  }
+
+  setGlobalContextStack<StackElement>(key: string, value: StackElement[]) {
+    this._globalContext[key] = value;
+  }
+
   setGlobalContext(key: string, value: unknown) {
     this._globalContext[key] = value;
     return this;

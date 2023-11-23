@@ -664,7 +664,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                     id: nanoid('block'),
                     name: 'Table View',
                     mode: 'table',
-                    columns: viewsColumns,
+                    columns: [],
                     filter: {
                       type: 'group',
                       op: 'and',
