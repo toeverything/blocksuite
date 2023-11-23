@@ -68,7 +68,7 @@ export function getNextBlock(
     if (nextSibling) {
       // Assert nextSibling is not possible to be `affine:page`
       if (matchFlavours(nextSibling, ['affine:note'])) {
-        // in edgeless mode, limit search for the previous block within the same note
+        // in edgeless mode, limit search for the next block within the same note
         if (!isPage) {
           return null;
         }
