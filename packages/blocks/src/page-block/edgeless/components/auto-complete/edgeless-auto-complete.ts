@@ -137,10 +137,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private _timer: ReturnType<typeof setTimeout> | null = null;
   private _autoCompleteOverlay: AutoCompleteOverlay = new AutoCompleteOverlay();
 
-  private get _selected() {
-    return this.edgeless.selectionManager.elements;
-  }
-
   private get _surface() {
     return this.edgeless.surface;
   }

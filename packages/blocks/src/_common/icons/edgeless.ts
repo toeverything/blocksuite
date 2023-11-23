@@ -1148,7 +1148,7 @@ export const NoteNoShadowIcon = html`
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect width="59.0769" height="72" />
+    <rect width="60" height="72" />
     <rect
       x="0.5"
       y="0.5"

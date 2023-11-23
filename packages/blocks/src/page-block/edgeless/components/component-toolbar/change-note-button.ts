@@ -390,7 +390,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             <edgeless-tool-icon-button
               class="fill-color-button"
               .tooltip=${this._popperShow ? '' : 'Background'}
-              .tipPosition=${'bottom'}
               .iconContainerPadding=${2}
               @click=${() => this._fillColorPopper?.toggle()}
             >
@@ -411,7 +410,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             <div class="item shadow-style-button">
               <edgeless-tool-icon-button
                 .tooltip=${'Shadow Style'}
-                .tipPosition=${'bottom'}
                 .iconContainerPadding=${0}
                 .hover=${false}
                 @click=${() => this._shadowTypePopper?.toggle()}
@@ -430,7 +428,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             <div class="item border-style-button">
               <edgeless-tool-icon-button
                 .tooltip=${this._popperShow ? '' : 'Border Style'}
-                .tipPosition=${'bottom'}
                 .iconContainerPadding=${0}
                 .hover=${false}
                 @click=${() => this._borderStylePopper?.toggle()}
@@ -449,7 +446,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             <div class="item border-radius-button">
               <edgeless-tool-icon-button
                 .tooltip=${'Corners'}
-                .tipPosition=${'bottom'}
                 .iconContainerPadding=${0}
                 .hover=${false}
                 @click=${() => this._borderRadiusPopper?.toggle()}
@@ -475,7 +471,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         class="edgeless-auto-height-button"
         .tooltip=${collapse ? 'Auto Size' : 'Customized Size'}
-        .tipPosition=${'bottom'}
         .iconContainerPadding=${2}
         @click=${() => {
           this._setCollapse();
