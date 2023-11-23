@@ -103,11 +103,6 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       this.requestUpdate();
     });
 
-    console.log(this.model);
-    edgeless.model.propsUpdated.on(() => {
-      this.requestUpdate();
-    });
-
     _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
         if (selection.elements.includes(this.model)) {
