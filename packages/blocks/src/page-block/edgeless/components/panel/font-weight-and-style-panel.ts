@@ -86,7 +86,12 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
   }
 
   override render() {
-    const fontFaces = getFontFacesByFontFamily(this.fontFamily);
+    let fontFaces = getFontFacesByFontFamily(this.fontFamily);
+    // Compatible with old data
+    if (fontFaces.length === 0) {
+      fontFaces = getFontFacesByFontFamily(CanvasTextFontFamily.Inter);
+    }
+
     const fontFacesWithNormal = fontFaces.filter(fontFace => {
       return fontFace.style === CanvasTextFontStyle.Normal;
     });

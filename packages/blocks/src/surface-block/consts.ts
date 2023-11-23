@@ -34,24 +34,16 @@ export interface IModelCoord {
   y: number;
 }
 
-export const CANVAS_TEXT_FONT_FAMILY: string[] = [
-  'Inter',
-  'Kalam',
-  'Satoshi',
-  'Poppins',
-  'Lora',
-  'BebasNeue',
-  'OrelegaOne',
-];
-export const enum CanvasTextFontFamily {
-  Inter = 'Inter',
-  Kalam = 'Kalam',
-  Satoshi = 'Satoshi',
-  Poppins = 'Poppins',
-  Lora = 'Lora',
-  BebasNeue = 'BebasNeue',
-  OrelegaOne = 'OrelegaOne',
+export enum CanvasTextFontFamily {
+  Inter = 'blocksuite:surface:Inter',
+  Kalam = 'blocksuite:surface:Kalam',
+  Satoshi = 'blocksuite:surface:Satoshi',
+  Poppins = 'blocksuite:surface:Poppins',
+  Lora = 'blocksuite:surface:Lora',
+  BebasNeue = 'blocksuite:surface:BebasNeue',
+  OrelegaOne = 'blocksuite:surface:OrelegaOne',
 }
+export const CANVAS_TEXT_FONT_FAMILY = Object.values(CanvasTextFontFamily);
 
 export const enum CanvasTextFontWeight {
   Light = '300',

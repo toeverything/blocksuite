@@ -1,6 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { CanvasTextFontStyle, CanvasTextFontWeight } from '../../consts.js';
+import {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+} from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import { Bound } from '../../utils/bound.js';
 import { linePolygonIntersects } from '../../utils/math-utils.js';
@@ -22,7 +26,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   // unable to find the children and id.
   private _cachedChildren: string[] = [];
 
-  private _titleHeight = getLineHeight("'Kalam', cursive", 16);
+  private _titleHeight = getLineHeight(CanvasTextFontFamily.Kalam, 16);
   private _titleWidth = 0;
   private _padding = [0, 0];
   private _radius = 0;
@@ -157,7 +161,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     const zoom = this.renderer!.zoom;
     const bound = Bound.deserialize(this.xywh);
     const fontSize = 16 / zoom;
-    const fontFamily = 'sans-serif';
+    const fontFamily = CanvasTextFontFamily.Inter;
     const offset = Math.max(4 / zoom, 2);
     ctx.translate(0, -offset);
 

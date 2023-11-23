@@ -8,6 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
+import { wrapFontFamily } from '../../../../surface-block/elements/text/utils.js';
 import {
   Bound,
   type TextElement,
@@ -421,7 +422,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     return html`<div
       style=${styleMap({
         textAlign,
-        fontFamily,
+        fontFamily: wrapFontFamily(fontFamily),
         minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
         maxWidth: hasMaxWidth ? `${w}px` : 'none',
         fontSize: `${fontSize}px`,

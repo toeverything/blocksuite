@@ -47,7 +47,6 @@ import type { EdgelessSizePanel } from '../panel/size-panel.js';
 import {
   type EdgelessCanvasTextElement,
   type EdgelessCanvasTextElementType,
-  TEXT_FONT_SIZE,
 } from '../text/types.js';
 import { createButtonPopper } from '../utils.js';
 import { ShapeArrowDownSmallIcon } from './../../../../_common/icons/index.js';
@@ -222,9 +221,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       (element: EdgelessCanvasTextElement) => element.fontSize
     );
     const max = maxBy(Object.entries(fontSizes), ([_k, count]) => count);
-    return max
-      ? (Number(max[0]) as EdgelessCanvasTextElement['fontSize'])
-      : TEXT_FONT_SIZE.MEDIUM;
+    return max ? (Number(max[0]) as EdgelessCanvasTextElement['fontSize']) : 16;
   };
 
   private _getMostCommonFontWeight = (
@@ -362,21 +359,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     });
   };
 
-  private _getFontSizeLabel = (fontSize: number) => {
-    switch (fontSize) {
-      case TEXT_FONT_SIZE.SMALL:
-        return 'Small';
-      case TEXT_FONT_SIZE.MEDIUM:
-        return 'Middle';
-      case TEXT_FONT_SIZE.LARGE:
-        return 'Large';
-      case TEXT_FONT_SIZE.XLARGE:
-        return 'Huge';
-      default:
-        return Math.trunc(fontSize);
-    }
-  };
-
   override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
@@ -439,7 +421,9 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const selectedColor = this._getMostCommonColor(this.elements);
     const selectedAlign = this._getMostCommonAlign(this.elements);
     const selectedFontFamily = this._getMostCommonFontFamily(this.elements);
-    const selectedFontSize = this._getMostCommonFontSize(this.elements);
+    const selectedFontSize = Math.trunc(
+      this._getMostCommonFontSize(this.elements)
+    );
     const selectedFontWeight = this._getMostCommonFontWeight(this.elements);
     const selectedFontStyle = this._getMostCommonFontStyle(this.elements);
 
@@ -503,21 +487,15 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         @click=${() => this._textFontSizePopper?.toggle()}
       >
         <div class="font-size-button-group">
-          <div class="selected-font-size-label">
-            ${this._getFontSizeLabel(selectedFontSize)}
-          </div>
+          <div class="selected-font-size-label">${selectedFontSize}</div>
           <div class="arrow-down-icon">${ShapeArrowDownSmallIcon}</div>
         </div>
       </edgeless-tool-icon-button>
       <div class="font-size-panel-container text-font-size">
         <edgeless-size-panel
           .size=${selectedFontSize}
-          .sizes=${[
-            TEXT_FONT_SIZE.SMALL,
-            TEXT_FONT_SIZE.MEDIUM,
-            TEXT_FONT_SIZE.LARGE,
-            TEXT_FONT_SIZE.XLARGE,
-          ]}
+          .labels=${['16', '24', '32', '36', '40', '64', '128']}
+          .sizes=${[16, 24, 32, 36, 40, 64, 128]}
           .onSelect=${(fontSize: EdgelessSizePanel['size']) => {
             this._setFontSize(fontSize);
           }}

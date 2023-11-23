@@ -971,9 +971,10 @@ test('should delete line with content after divider not lose content', async ({
   await assertDivider(page, 1);
   // Jump to line start
   page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
+  await waitNextFrame(page);
   await pressBackspace(page);
-  await assertDivider(page, 1);
-  await assertRichTexts(page, ['']);
+  await assertDivider(page, 0);
+  await assertRichTexts(page, ['123']);
 });
 
 test('should forwardDelete divider works properly', async ({ page }) => {
@@ -1785,7 +1786,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await focusRichText(page, 0);
   await type(
     page,
-    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   );
   await waitNextFrame(page);
   // - aaa... (no \n)
@@ -1833,7 +1834,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await pressArrowUp(page);
   await pressArrowLeft(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 93);
+  await assertRichTextVRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)
@@ -1865,7 +1866,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 93);
+  await assertRichTextVRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)

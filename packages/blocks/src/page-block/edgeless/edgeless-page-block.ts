@@ -663,6 +663,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     this._initViewport();
 
+    if (this.page.readonly) {
+      this.tools.setEdgelessTool({ type: 'pan', panning: true });
+    }
+
     requestAnimationFrame(() => {
       this._handleToolbarFlag();
       this.requestUpdate();

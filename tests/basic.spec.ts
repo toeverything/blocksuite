@@ -492,7 +492,7 @@ test('when no note block, click editing area auto add a new note block', async (
     return document.querySelector('affine-note');
   });
   expect(note).toBeNull();
-  await click(page, { x: 100, y: 280 });
+  await click(page, { x: 200, y: 280 });
 
   note = await page.evaluate(() => {
     return document.querySelector('affine-note');
