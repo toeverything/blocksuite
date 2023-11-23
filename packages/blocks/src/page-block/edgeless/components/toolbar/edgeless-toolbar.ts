@@ -280,7 +280,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     );
     _disposables.add(
       page.slots.blockUpdated.on(e => {
-        if (e.type === 'update' && 'index' in e.props) {
+        if (e.type === 'update') {
           this._updateFrames();
         }
       })

@@ -27,7 +27,7 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(AffineSchemas);
-  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+  return { id: 'test-workspace', idGenerator, schema };
 }
 
 async function createTestPage(pageId = 'page0') {

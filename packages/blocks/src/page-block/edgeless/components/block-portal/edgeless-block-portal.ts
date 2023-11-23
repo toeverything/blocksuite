@@ -100,16 +100,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     this._disposables.add(
       page.root.childrenUpdated.on(resetNoteResizeObserver)
     );
-
-    // FIXME: @Mirone use blockUpdated slot
-    this._disposables.add(
-      page.slots.onYEvent.on(({ event }) => {
-        // @ts-ignore
-        if (event.keysChanged?.has?.('collapse')) {
-          resetNoteResizeObserver();
-        }
-      })
-    );
+    this.edgeless.surface.getBlocks(NOTE).forEach(note => {
+      this._disposables.add(note.propsUpdated.on(resetNoteResizeObserver));
+    });
   }
 
   get isDragging() {

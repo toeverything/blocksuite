@@ -1,21 +1,16 @@
-import { fromBase64, toBase64 } from 'lib0/buffer.js';
+import { toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
 import { SYS_KEYS } from '../consts.js';
-import type { BlockSchema, BlockSchemaType } from '../schema/base.js';
-import { BaseBlockModel, internalPrimitives } from '../schema/base.js';
+import type { BlockSchema } from '../schema/base.js';
+import { internalPrimitives } from '../schema/base.js';
+import type { YBlock } from '../workspace/block.js';
 import type { Workspace } from '../workspace/index.js';
-import type { Page } from '../workspace/index.js';
-import type {
-  BlockProps,
-  BlockSysProps,
-  YBlock,
-  YBlocks,
-} from '../workspace/page.js';
-import type { ProxyManager } from '../yjs/index.js';
+import type { BlockProps, YBlocks } from '../workspace/page.js';
+import type { ProxyManager, ProxyOptions } from '../yjs/index.js';
 import { canToProxy, canToY } from '../yjs/index.js';
-import { native2Y, NativeWrapper, Text } from '../yjs/index.js';
+import { Boxed, native2Y, Text } from '../yjs/index.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -28,17 +23,6 @@ export function assertValidChildren(
       throw new Error('Invalid child id: ' + child.id);
     }
   });
-}
-
-export function initSysProps(yBlock: YBlock, props: BlockSysProps) {
-  yBlock.set('sys:id', props.id);
-  yBlock.set('sys:flavour', props.flavour);
-
-  const yChildren = new Y.Array();
-  yBlock.set('sys:children', yChildren);
-  if (Array.isArray(props.children)) {
-    props.children.forEach(child => yChildren.push([child.id]));
-  }
 }
 
 export function syncBlockProps(
@@ -67,9 +51,13 @@ export function syncBlockProps(
   });
 }
 
-export function valueToProps(value: unknown, proxy: ProxyManager): unknown {
-  if (NativeWrapper.is(value)) {
-    return new NativeWrapper(value);
+export function valueToProps(
+  value: unknown,
+  proxy: ProxyManager,
+  options: ProxyOptions<never>
+): unknown {
+  if (Boxed.is(value)) {
+    return new Boxed(value);
   }
 
   if (value instanceof Y.Text) {
@@ -77,14 +65,14 @@ export function valueToProps(value: unknown, proxy: ProxyManager): unknown {
   }
 
   if (canToProxy(value)) {
-    return proxy.createYProxy(value);
+    return proxy.createYProxy(value, options);
   }
 
   return value;
 }
 
 export function propsToValue(value: unknown): unknown {
-  if (value instanceof NativeWrapper) {
+  if (value instanceof Boxed) {
     return value.yMap;
   }
 
@@ -101,7 +89,8 @@ export function propsToValue(value: unknown): unknown {
 
 export function toBlockProps(
   yBlock: YBlock,
-  proxy: ProxyManager
+  proxy: ProxyManager,
+  options: ProxyOptions<Record<string, unknown>> = {}
 ): Partial<BlockProps> {
   const prefixedProps = yBlock.toJSON();
   const props: Partial<BlockProps> = {};
@@ -110,41 +99,13 @@ export function toBlockProps(
     if (prefixedKey.startsWith('prop:')) {
       const key = prefixedKey.replace('prop:', '');
       const realValue = yBlock.get(prefixedKey);
-      props[key] = valueToProps(realValue, proxy);
+      props[key] = valueToProps(realValue, proxy, options);
     }
   });
 
   return props;
 }
 
-export function schemaToModel(
-  id: string,
-  schema: BlockSchemaType,
-  block: YBlock,
-  page: Page
-) {
-  const props = toBlockProps(block, page.doc.proxy);
-  const blockModel = schema.model.toModel
-    ? schema.model.toModel()
-    : new BaseBlockModel();
-
-  // Bind props to model
-  Object.assign(blockModel, props);
-
-  blockModel.id = id;
-  blockModel.keys = Object.keys(props);
-  blockModel.flavour = schema.model.flavour;
-  blockModel.role = schema.model.role;
-  blockModel.page = page;
-  blockModel.yBlock = block;
-
-  return blockModel;
-}
-
 export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {
   return toBase64(Y.encodeStateAsUpdateV2(workspace.doc));
-}
-
-export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
-  Y.applyUpdateV2(workspace.doc, fromBase64(update));
 }

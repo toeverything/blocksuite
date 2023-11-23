@@ -9,9 +9,9 @@ import {
   StrokeStyle,
 } from '@blocksuite/blocks';
 import {
+  Boxed,
   nanoid,
   native2Y,
-  NativeWrapper,
   Text,
   type Workspace,
 } from '@blocksuite/store';
@@ -76,7 +76,7 @@ export const heavyWhiteboard: InitFn = async (
 
     page.addBlock(
       'affine:surface',
-      { elements: new NativeWrapper(native2Y(surfaceBlockElements, false)) },
+      { elements: new Boxed(native2Y(surfaceBlockElements, false)) },
       pageBlockId
     );
 

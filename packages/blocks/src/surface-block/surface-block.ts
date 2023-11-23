@@ -260,22 +260,18 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
 
     _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id, props }) => {
+      edgeless.slots.elementUpdated.on(({ id }) => {
         const element = this.pickById(id);
         assertExists(element);
 
         if (element instanceof ConnectorElement) {
-          if ('target' in props || 'source' in props || 'mode' in props) {
-            this.connector.updatePath(element);
-          }
+          this.connector.updatePath(element);
         }
       })
     );
 
     _disposables.add(
-      this.edgeless.slots.elementUpdated.on(({ id, props }) => {
-        if (!('xywh' in props || 'rotate' in props)) return;
-
+      this.edgeless.slots.elementUpdated.on(({ id }) => {
         const element = this.pickById(id);
         if (isConnectable(element)) {
           this.connector.syncConnectorPos([element]);
@@ -493,9 +489,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
 
     _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id, props }) => {
-        if (!('rotate' in props || 'xywh' in props)) return;
-
+      edgeless.slots.elementUpdated.on(({ id }) => {
         const element = this.pickById(id);
         assertExists(element);
 

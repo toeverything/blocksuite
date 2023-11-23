@@ -61,29 +61,6 @@ export class AttachmentBlockModel extends BaseBlockModel<AttachmentBlockProps> {
       }
       this.page.blob.increaseRef(blobId);
     });
-    this.propsUpdated.on(({ oldProps, newProps }) => {
-      const oldBlobId = (oldProps as AttachmentBlockProps).sourceId;
-      const newBlobId = (newProps as AttachmentBlockProps).sourceId;
-      if (oldBlobId === newBlobId) return;
-
-      if (oldBlobId) {
-        const oldBlob = this.page.blob.get(oldBlobId);
-        if (!oldBlob) {
-          console.error(`Blob ${oldBlobId} not found in blob manager`);
-          return;
-        }
-        this.page.blob.decreaseRef(oldBlobId);
-      }
-
-      if (newBlobId) {
-        const newBlob = this.page.blob.get(newBlobId);
-        if (!newBlob) {
-          console.error(`Blob ${newBlobId} not found in blob manager`);
-          return;
-        }
-        this.page.blob.increaseRef(newBlobId);
-      }
-    });
     this.deleted.on(() => {
       const blobId = this.sourceId;
       if (!blobId) return;

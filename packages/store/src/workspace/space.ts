@@ -25,7 +25,6 @@ export class Space<
    * @internal Used for convenient access to the underlying Yjs map,
    * can be used interchangeably with ySpace
    */
-  protected readonly _proxy: State;
   protected readonly _ySpaceDoc: Y.Doc;
   protected readonly _yBlocks: Y.Map<State[keyof State]>;
 
@@ -37,7 +36,6 @@ export class Space<
     this._ySpaceDoc = this._initSubDoc();
 
     this._yBlocks = this._ySpaceDoc.getMap('blocks');
-    this._proxy = this.doc.proxy.createYProxy(this._yBlocks as Y.Map<unknown>);
   }
 
   get loaded() {

@@ -2,39 +2,109 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Transaction, YArrayEvent, YMapEvent } from 'yjs';
 import { Array as YArray, Map as YMap } from 'yjs';
 
-import { NativeWrapper } from './native-wrapper.js';
+import { Boxed } from './boxed.js';
 import type { UnRecord } from './utils.js';
 import { canToProxy, canToY, native2Y } from './utils.js';
 
 type ProxyTransaction = Transaction & { isLocalProxy?: boolean };
 
-export class ProxyManager {
-  readonly = false;
+export type ProxyOptions<T> = {
+  onChange?: (data: T) => void;
+};
 
+export class ProxyManager {
   private _proxies: WeakMap<YArray<unknown> | YMap<unknown>, unknown> =
     new WeakMap();
 
-  private _initialize(array: unknown[], yArray: YArray<unknown>): void;
-  private _initialize(object: UnRecord, yMap: YMap<unknown>): void;
+  createYProxy<Data>(
+    yAbstract: YArray<unknown> | YMap<unknown>,
+    options: ProxyOptions<Data> = {}
+  ): Data {
+    if (this._proxies.has(yAbstract)) {
+      return this._proxies.get(yAbstract) as Data;
+    }
+    if (Boxed.is(yAbstract)) {
+      const data = new Boxed(yAbstract);
+      this._proxies.set(yAbstract, data);
+      return data as Data;
+    }
+    if (yAbstract instanceof YArray) {
+      const data = this._createYArrayProxy(
+        yAbstract,
+        options as ProxyOptions<unknown[]>
+      ) as Data;
+      this._proxies.set(yAbstract, data);
+      return data;
+    }
+    if (yAbstract instanceof YMap) {
+      const data = this._createYMapProxy(
+        yAbstract,
+        options as ProxyOptions<unknown>
+      ) as Data;
+      this._proxies.set(yAbstract, data);
+      return data;
+    }
+
+    throw new TypeError();
+  }
+
+  transformData(
+    value: unknown,
+    onCreate: (p: unknown) => void,
+    options: ProxyOptions<never> = {}
+  ) {
+    if (value instanceof Boxed) {
+      onCreate(value.yMap);
+      return value;
+    }
+
+    if (canToY(value)) {
+      const y = native2Y(value as Record<string, unknown> | unknown[], true);
+      onCreate(y);
+      return this.createYProxy(y, options);
+    }
+
+    onCreate(value);
+    return value;
+  }
+
+  private _initialize(
+    array: unknown[],
+    yArray: YArray<unknown>,
+    options: ProxyOptions<unknown[]>
+  ): void;
+  private _initialize(
+    object: UnRecord,
+    yMap: YMap<unknown>,
+    options: ProxyOptions<UnRecord>
+  ): void;
   private _initialize(
     target: unknown[] | UnRecord,
-    yAbstract: YArray<unknown> | YMap<unknown>
+    yAbstract: YArray<unknown> | YMap<unknown>,
+    options: ProxyOptions<unknown[] | UnRecord>
   ): void {
     if (!canToProxy(yAbstract)) {
       return;
     }
     yAbstract.forEach((value, key) => {
-      const result = canToProxy(value) ? this.createYProxy(value) : value;
+      const result = canToProxy(value)
+        ? this.createYProxy(value, options)
+        : value;
 
       (target as Record<string, unknown>)[key] = result;
     });
   }
 
-  private _subscribeYArray(arr: unknown[], yArray: YArray<unknown>) {
+  private _subscribeYArray(
+    arr: unknown[],
+    yArray: YArray<unknown>,
+    options: ProxyOptions<unknown[]>
+  ) {
     const observer = (
       event: YArrayEvent<unknown> & { transaction: ProxyTransaction }
     ) => {
       if (event.transaction.isLocalProxy) {
+        options.onChange?.(arr);
         return;
       }
       let retain = 0;
@@ -63,16 +133,22 @@ export class ProxyManager {
           retain += change.insert.length;
         }
       });
+      options.onChange?.(arr);
     };
 
     yArray.observe(observer);
   }
 
-  private _subscribeYMap(object: UnRecord, yMap: YMap<unknown>) {
+  private _subscribeYMap(
+    object: UnRecord,
+    yMap: YMap<unknown>,
+    options: ProxyOptions<UnRecord>
+  ) {
     const observer = (
       event: YMapEvent<unknown> & { transaction: ProxyTransaction }
     ) => {
       if (event.transaction.isLocalProxy) {
+        options.onChange?.(object);
         return;
       }
       event.keysChanged.forEach(key => {
@@ -95,6 +171,7 @@ export class ProxyManager {
           }
         }
       });
+      options.onChange?.(object);
     };
     yMap.observe(observer);
   }
@@ -113,61 +190,19 @@ export class ProxyManager {
     return changes();
   };
 
-  createYProxy<Data>(yAbstract: YArray<unknown> | YMap<unknown>): Data {
-    if (this._proxies.has(yAbstract)) {
-      return this._proxies.get(yAbstract) as Data;
-    }
-    if (NativeWrapper.is(yAbstract)) {
-      const data = new NativeWrapper(yAbstract);
-      this._proxies.set(yAbstract, data);
-      return data as Data;
-    }
-    if (yAbstract instanceof YArray) {
-      const data = this._createYArrayProxy(yAbstract) as Data;
-      this._proxies.set(yAbstract, data);
-      return data;
-    }
-    if (yAbstract instanceof YMap) {
-      const data = this._createYMapProxy(yAbstract) as Data;
-      this._proxies.set(yAbstract, data);
-      return data;
-    }
-
-    throw new TypeError();
-  }
-
-  transformData(value: unknown, onCreate: (p: unknown) => void) {
-    if (value instanceof NativeWrapper) {
-      onCreate(value.yMap);
-      return value;
-    }
-
-    if (canToY(value)) {
-      const y = native2Y(value as Record<string, unknown> | unknown[], true);
-      onCreate(y);
-      return this.createYProxy(y);
-    }
-
-    onCreate(value);
-    return value;
-  }
-
-  private _createYArrayProxy<T = unknown>(yArray: YArray<unknown>): T[] {
+  private _createYArrayProxy<T = unknown>(
+    yArray: YArray<unknown>,
+    options: ProxyOptions<unknown[]>
+  ): T[] {
     const array: T[] = [];
-    if (!(yArray instanceof YArray)) {
-      throw new TypeError();
-    }
-    this._initialize(array, yArray as YArray<unknown>);
-    this._subscribeYArray(array, yArray);
+
+    this._initialize(array, yArray as YArray<unknown>, options);
+    this._subscribeYArray(array, yArray, options);
     return new Proxy(array, {
       has: (target, p) => {
         return Reflect.has(target, p);
       },
       set: (target, p, value, receiver) => {
-        if (this.readonly) {
-          throw new Error('Modify data is not allowed');
-        }
-
         if (typeof p !== 'string') {
           throw new Error('key cannot be a symbol');
         }
@@ -178,14 +213,16 @@ export class ProxyManager {
             return Reflect.set(target, p, value, receiver);
           }
 
-          const apply = (value: unknown) => {
-            if (index < yArray.length) {
-              yArray.delete(index, 1);
-            }
-            yArray.insert(index, [value]);
-          };
-
-          const data = this.transformData(value, apply);
+          const data = this.transformData(
+            value,
+            x => {
+              if (index < yArray.length) {
+                yArray.delete(index, 1);
+              }
+              yArray.insert(index, [x]);
+            },
+            options
+          );
           return Reflect.set(target, p, data, receiver);
         });
       },
@@ -193,10 +230,6 @@ export class ProxyManager {
         return Reflect.get(target, p, receiver);
       },
       deleteProperty: (target: T[], p: string | symbol): boolean => {
-        if (this.readonly) {
-          throw new Error('Modify data is not allowed');
-        }
-
         if (typeof p !== 'string') {
           throw new Error('key cannot be a symbol');
         }
@@ -213,29 +246,24 @@ export class ProxyManager {
   }
 
   private _createYMapProxy<Data extends Record<string, unknown>>(
-    yMap: YMap<unknown>
+    yMap: YMap<unknown>,
+    options: ProxyOptions<UnRecord>
   ): Data {
     const object = {} as Data;
-    if (!(yMap instanceof YMap)) {
-      throw new TypeError();
-    }
-    this._initialize(object, yMap);
-    this._subscribeYMap(object, yMap);
+
+    this._initialize(object, yMap, options);
+    this._subscribeYMap(object, yMap, options);
     return new Proxy(object, {
       has: (target, p) => {
         return Reflect.has(target, p);
       },
       set: (target, p, value, receiver) => {
-        if (this.readonly) {
-          throw new Error('Modify data is not allowed');
-        }
-
         if (typeof p !== 'string') {
           throw new Error('key cannot be a symbol');
         }
 
         return this._applyYChanges(yMap, () => {
-          const data = this.transformData(value, x => yMap.set(p, x));
+          const data = this.transformData(value, x => yMap.set(p, x), options);
           return Reflect.set(target, p, data, receiver);
         });
       },
@@ -243,10 +271,6 @@ export class ProxyManager {
         return Reflect.get(target, p, receiver);
       },
       deleteProperty: (target: Data, p: string | symbol): boolean => {
-        if (this.readonly) {
-          throw new Error('Modify data is not allowed');
-        }
-
         if (typeof p !== 'string') {
           throw new Error('key cannot be a symbol');
         }

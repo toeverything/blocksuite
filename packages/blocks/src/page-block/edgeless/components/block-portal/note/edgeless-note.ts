@@ -99,14 +99,9 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
     this._handleEditingTransition();
 
-    // FIXME: @Mirone
-    _disposables.add(
-      this.surface.page.slots.onYEvent.on(({ event }) => {
-        if (event.path.includes('prop:edgeless')) {
-          this.requestUpdate();
-        }
-      })
-    );
+    this.model.propsUpdated.on(() => {
+      this.requestUpdate();
+    });
 
     _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
@@ -126,9 +121,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       edgeless.slots.hoverUpdated.on(() => {
         this._isHover =
           edgeless.tools.getHoverState()?.content === this.model &&
-          edgeless.selectionManager.elements.includes(this.model)
-            ? true
-            : false;
+          edgeless.selectionManager.elements.includes(this.model);
       })
     );
 

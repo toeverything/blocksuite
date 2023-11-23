@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
+import { Boxed } from '../yjs/boxed.js';
 import { BlockSuiteDoc, ProxyManager } from '../yjs/index.js';
-import { NativeWrapper } from '../yjs/native-wrapper.js';
 
 const proxyManager = new ProxyManager();
 
@@ -34,19 +34,6 @@ describe('blocksuite yjs', () => {
 
       proxy[0] = 2;
       expect(arr.length).toBe(1);
-    });
-
-    test('readonly', () => {
-      const ydoc = new Y.Doc();
-      const arr = ydoc.getArray('arr');
-      arr.push([0]);
-
-      const proxy = proxyManager.createYProxy(arr) as unknown[];
-      proxyManager.readonly = true;
-      expect(arr.get(0)).toBe(0);
-
-      expect(() => proxy.push(1)).toThrowError('Modify data is not allowed');
-      proxyManager.readonly = false;
     });
   });
 
@@ -114,13 +101,13 @@ describe('blocksuite yjs', () => {
       const map = ydoc.getMap('map');
       const inner = new Y.Map();
       map.set('inner', inner);
-      const native = new NativeWrapper(['hello', 'world']);
+      const native = new Boxed(['hello', 'world']);
       inner.set('native', native.yMap);
 
       const proxy = proxyManager.createYProxy<{
         inner: {
-          native: NativeWrapper<string[]>;
-          native2: NativeWrapper<number>;
+          native: Boxed<string[]>;
+          native2: Boxed<number>;
         };
       }>(map);
 
@@ -134,7 +121,7 @@ describe('blocksuite yjs', () => {
         'foo',
       ]);
 
-      const native2 = new NativeWrapper(0);
+      const native2 = new Boxed(0);
       proxy.inner.native2 = native2;
       expect(map.get('inner').get('native2').get('value')).toBe(0);
       native2.setValue(1);
