@@ -7,7 +7,9 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../_common/consts.js';
 import {
+  buildPath,
   getBlockElementByModel,
+  getBlockElementByPath,
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
@@ -146,8 +148,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   private _getEditingState(e: PointerEventState, block: NoteBlockModel) {
-    const noteBlockElement = getBlockElementByModel(
-      block
+    const noteBlockElement = getBlockElementByPath(
+      buildPath(this.edgelessPage.surface.model).concat(block.id)
     ) as NoteBlockComponent;
     assertExists(noteBlockElement);
 
