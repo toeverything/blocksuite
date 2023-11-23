@@ -67,7 +67,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   private _isResizing = false;
 
   @state()
-  private _isHover = true;
+  private _isHover = false;
 
   @query('affine-note')
   private _affineNote!: HTMLDivElement;
@@ -152,7 +152,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   private _collapsedContent() {
     const { model, surface } = this;
-    if (!this._isShowCollapsedContent) return nothing;
+    if (!this._isShowCollapsedContent || !this._affineNote) return nothing;
 
     const rect = this._affineNote.getBoundingClientRect();
     const bound = Bound.deserialize(model.xywh);
