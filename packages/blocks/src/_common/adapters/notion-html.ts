@@ -7,7 +7,6 @@ import type {
   FromSliceSnapshotResult,
   ToBlockSnapshotPayload,
   ToPageSnapshotPayload,
-  ToSliceSnapshotPayload,
 } from '@blocksuite/store';
 import { type AssetsManager, getAssetName, sha } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
@@ -18,12 +17,24 @@ import {
 } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 import type { DeltaInsert } from '@blocksuite/virgo';
+import rehypeParse from 'rehype-parse';
+import { unified } from 'unified';
 
 import { getTagColor } from '../components/tags/colors.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { hastGetTextContent, hastQuerySelector, type HtmlAST } from './hast.js';
 
 export type NotionHtml = string;
+
+type NotionHtmlToSliceSnapshotPayload = {
+  file: NotionHtml;
+  assets?: AssetsManager;
+  blockVersions: Record<string, number>;
+  pageVersion: number;
+  workspaceVersion: number;
+  workspaceId: string;
+  pageId: string;
+};
 
 const ColumnClassMap: Record<string, string> = {
   typesSelect: 'select',
@@ -56,34 +67,96 @@ type BlocksuiteTableRow = {
 
 export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
   override fromPageSnapshot(
-    payload: FromPageSnapshotPayload
+    _payload: FromPageSnapshotPayload
   ): Promise<FromPageSnapshotResult<string>> {
     throw new Error('Method not implemented.');
   }
   override fromBlockSnapshot(
-    payload: FromBlockSnapshotPayload
+    _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<string>> {
     throw new Error('Method not implemented.');
   }
   override fromSliceSnapshot(
-    payload: FromSliceSnapshotPayload
+    _payload: FromSliceSnapshotPayload
   ): Promise<FromSliceSnapshotResult<string>> {
     throw new Error('Method not implemented.');
   }
-  override toPageSnapshot(
+  override async toPageSnapshot(
     payload: ToPageSnapshotPayload<string>
   ): Promise<PageSnapshot> {
-    throw new Error('Method not implemented.');
+    const notionHtmlAst = this._htmlToAst(payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid('block'),
+      flavour: 'affine:note',
+      props: {},
+      children: [],
+    };
+    return {
+      type: 'page',
+      meta: {
+        id: nanoid('page'),
+        title: hastGetTextContent(
+          hastQuerySelector(notionHtmlAst, 'title'),
+          'Untitled'
+        ),
+        createDate: +new Date(),
+        tags: [],
+      },
+      blocks: await this._traverseNotionHtml(
+        notionHtmlAst,
+        blockSnapshotRoot as BlockSnapshot,
+        payload.assets
+      ),
+    };
   }
   override toBlockSnapshot(
     payload: ToBlockSnapshotPayload<string>
   ): Promise<BlockSnapshot> {
-    throw new Error('Method not implemented.');
+    const notionHtmlAst = this._htmlToAst(payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid('block'),
+      flavour: 'affine:note',
+      props: {},
+      children: [],
+    };
+    return this._traverseNotionHtml(
+      notionHtmlAst,
+      blockSnapshotRoot as BlockSnapshot,
+      payload.assets
+    );
   }
-  override toSliceSnapshot(
-    payload: ToSliceSnapshotPayload<string>
+  override async toSliceSnapshot(
+    payload: NotionHtmlToSliceSnapshotPayload
   ): Promise<SliceSnapshot> {
-    throw new Error('Method not implemented.');
+    const notionHtmlAst = this._htmlToAst(payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid('block'),
+      flavour: 'affine:note',
+      props: {},
+      children: [],
+    };
+    return {
+      type: 'slice',
+      content: [
+        await this._traverseNotionHtml(
+          notionHtmlAst,
+          blockSnapshotRoot as BlockSnapshot,
+          payload.assets
+        ),
+      ],
+      blockVersions: payload.blockVersions,
+      pageVersion: payload.pageVersion,
+      workspaceVersion: payload.workspaceVersion,
+      workspaceId: payload.workspaceId,
+      pageId: payload.pageId,
+    };
+  }
+
+  private _htmlToAst(notionHtml: NotionHtml) {
+    return unified().use(rehypeParse).parse(notionHtml);
   }
 
   private _traverseNotionHtml = async (
@@ -124,7 +197,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   language: null,
                   text: {
                     '$blocksuite:internal:text$': true,
-                    delta: this._hastToDelta(codeText),
+                    delta: this._hastToDelta(codeText, false),
                   },
                 },
                 children: [],
@@ -136,6 +209,11 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           break;
         }
         case 'p': {
+          // Workaround for Notion's bug
+          // https://html.spec.whatwg.org/multipage/grouping-content.html#the-p-element
+          if (!o.node.properties.id) {
+            break;
+          }
           context.openNode(
             {
               type: 'block',
@@ -523,6 +601,9 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           break;
         }
         case 'p': {
+          if (!o.node.properties.id) {
+            break;
+          }
           if (
             o.parent!.type === 'element' &&
             o.parent!.children.length > o.index! + 1
@@ -614,12 +695,15 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         }
       }
     });
-    walker.walk(html, snapshot);
+    return walker.walk(html, snapshot);
   };
 
-  private _hastToDelta = (ast: HtmlAST): DeltaInsert<object>[] => {
+  private _hastToDelta = (ast: HtmlAST, trim = true): DeltaInsert<object>[] => {
     switch (ast.type) {
       case 'text': {
+        if (trim) {
+          return [{ insert: ast.value.trim() }];
+        }
         return [{ insert: ast.value }];
       }
       case 'element': {

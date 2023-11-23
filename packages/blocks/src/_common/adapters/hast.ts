@@ -9,9 +9,12 @@ export type HtmlAST =
   | HastUnionType<keyof RootContentMap, RootContentMap[keyof RootContentMap]>
   | Root;
 
-export const hastGetTextContent = (ast: HtmlAST | undefined): string => {
+export const hastGetTextContent = (
+  ast: HtmlAST | undefined,
+  defaultStr = ''
+): string => {
   if (!ast) {
-    return '';
+    return defaultStr;
   }
   switch (ast.type) {
     case 'text': {
@@ -21,7 +24,7 @@ export const hastGetTextContent = (ast: HtmlAST | undefined): string => {
       return ast.children.map(child => hastGetTextContent(child)).join('');
     }
   }
-  return '';
+  return defaultStr;
 };
 
 const querySelectorTag = (
