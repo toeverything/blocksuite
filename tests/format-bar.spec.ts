@@ -8,6 +8,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  getBoundingBox,
   getSelectionRect,
   initEmptyParagraphState,
   initImageState,
@@ -62,7 +63,9 @@ test('should format quick bar show when select text', async ({ page }) => {
   // Even not any button is clicked, the format quick bar should't be hidden
   await expect(formatBar).toBeVisible();
 
-  await page.mouse.click(0, 0);
+  const noteEl = page.locator('affine-note');
+  const { x, y } = await getBoundingBox(noteEl);
+  await page.mouse.click(x, y);
   await expect(formatBar).not.toBeVisible();
 });
 
@@ -898,7 +901,9 @@ test('should format quick bar work in single block selection', async ({
     noteId
   );
 
-  await page.mouse.click(0, 0);
+  const noteEl = page.locator('affine-note');
+  const { x, y, width, height } = await getBoundingBox(noteEl);
+  await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBar).not.toBeVisible();
 });
 
@@ -987,7 +992,9 @@ test('should format quick bar work in multiple block selection', async ({
     noteId
   );
 
-  await page.mouse.click(0, 0);
+  const noteEl = page.locator('affine-note');
+  const { x, y, width, height } = await getBoundingBox(noteEl);
+  await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBarController.formatBar).not.toBeVisible();
 });
 
@@ -1072,7 +1079,10 @@ test('should format quick bar with block selection works when update block type'
   );
   await expect(formatBarController.formatBar).toBeVisible();
   await expect(blockSelections).toHaveCount(3);
-  await page.mouse.click(0, 0);
+
+  const noteEl = page.locator('affine-note');
+  const { x, y, width, height } = await getBoundingBox(noteEl);
+  await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBarController.formatBar).not.toBeVisible();
 });
 
@@ -1255,7 +1265,9 @@ test('should show format-quick-bar and select all text of the block when triple 
 
   await assertRichTextVRange(page, 0, 0, 5);
 
-  await page.mouse.click(0, 0);
+  const noteEl = page.locator('affine-note');
+  const { x, y, width, height } = await getBoundingBox(noteEl);
+  await page.mouse.click(x + width / 2, y + height / 2);
 
   await expect(formatBar).toBeHidden();
 

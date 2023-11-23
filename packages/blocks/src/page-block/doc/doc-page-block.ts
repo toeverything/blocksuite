@@ -1,6 +1,6 @@
 import './meta-data/meta-data.js';
 
-import { type BlockService } from '@blocksuite/block-std';
+import type { BlockService, PointerEventState } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { VEditor } from '@blocksuite/virgo';
@@ -31,6 +31,26 @@ export interface PageViewport {
   scrollHeight: number;
   clientHeight: number;
   clientWidth: number;
+}
+
+function testClickOnBlankArea(
+  state: PointerEventState,
+  viewportWidth: number,
+  pageWidth: number,
+  pageStyle: CSSStyleDeclaration
+) {
+  const blankLeft =
+    viewportWidth - pageWidth + parseFloat(pageStyle.paddingLeft);
+  const blankRight =
+    (viewportWidth - pageWidth) / 2 +
+    pageWidth -
+    parseFloat(pageStyle.paddingRight);
+
+  if (state.raw.clientX < blankLeft || state.raw.clientX > blankRight) {
+    return true;
+  }
+
+  return false;
 }
 
 @customElement('affine-doc-page')
@@ -503,14 +523,23 @@ export class DocPageBlockComponent extends BlockElement<
     });
 
     this.handleEvent('click', ctx => {
-      const state = ctx.get('pointerState');
+      const event = ctx.get('pointerState');
       if (
-        state.raw.target !== this &&
-        state.raw.target !== this.viewportElement &&
-        state.raw.target !== this.pageBlockContainer
+        event.raw.target !== this &&
+        event.raw.target !== this.viewportElement &&
+        event.raw.target !== this.pageBlockContainer
       ) {
         return;
       }
+
+      const isClickOnBlankArea = testClickOnBlankArea(
+        event,
+        this.viewport.clientWidth,
+        this.pageBlockContainer.clientWidth,
+        window.getComputedStyle(this.pageBlockContainer)
+      );
+      if (isClickOnBlankArea) return;
+
       let noteId: string;
       let paragraphId: string;
       let index = 0;
