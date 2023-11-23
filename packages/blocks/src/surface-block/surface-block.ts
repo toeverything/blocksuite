@@ -148,6 +148,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       box-shadow: var(--affine-shadow-3);
       pointer-events: all;
     }
+
+    .indexable-canvas {
+      position: absolute;
+      pointer-events: none;
+    }
   `;
 
   private _renderer!: Renderer;
@@ -547,7 +552,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
           data-fractional-index="${layer.indexes[0]}-${layer.indexes[1]}"
           style=${styleMap({
             zIndex: layer.zIndexes,
-            position: 'absolute',
           })}
         ></canvas>`
     )}`;
