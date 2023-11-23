@@ -203,7 +203,7 @@ export function nToLast<T extends Iterable<unknown>>(
   n: number
 ): IterableType<T> | undefined {
   if (Array.isArray(iterable)) {
-    return iterable[iterable.length - 1];
+    return iterable[iterable.length - n];
   }
 
   const arr = [...iterable];

@@ -48,7 +48,8 @@ type CanvasLayer = BaseLayer<PhasorElement> & {
 };
 
 export class LayerManager {
-  static INITAL_INDEX = 'a0';
+  static INITAL_INDEX = 'b0';
+  static INITAL_BLOCK_INDEX = 'a0';
 
   slots = {
     canvasLayerChanged: new Slot(),
@@ -594,27 +595,33 @@ export class LayerManager {
 
       return lastFrame
         ? generateKeyBetween(lastFrame.index, null)
-        : LayerManager.INITAL_INDEX;
+        : LayerManager.INITAL_BLOCK_INDEX;
     } else {
       if (block === 'canvas') {
-        const lastElement = last(last(this.layers)?.elements ?? []);
-
-        return lastElement
-          ? generateKeyBetween(lastElement.index, null)
+        const lastIndex = last(this.layers)?.indexes[1];
+        return lastIndex
+          ? generateKeyBetween(lastIndex, null)
           : LayerManager.INITAL_INDEX;
       }
 
       const lastLayer = last(this.layers);
 
-      if (!lastLayer) return LayerManager.INITAL_INDEX;
+      if (!lastLayer) return LayerManager.INITAL_BLOCK_INDEX;
 
       if (lastLayer.type === 'canvas') {
         const secondLastLayer = nToLast(this.layers, 2);
+        const secondLastLayerIndex = secondLastLayer
+          ? secondLastLayer.indexes[1]
+          : null;
 
-        return generateKeyBetween(
-          secondLastLayer ? secondLastLayer.indexes[1] : null,
-          lastLayer.indexes[0]
-        );
+        if (
+          secondLastLayerIndex &&
+          secondLastLayerIndex >= lastLayer.indexes[0]
+        ) {
+          return generateKeyBetween(secondLastLayerIndex, null);
+        }
+
+        return generateKeyBetween(secondLastLayerIndex, lastLayer.indexes[0]);
       }
 
       return generateKeyBetween(last(lastLayer.elements)!.index, null);

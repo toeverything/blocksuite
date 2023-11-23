@@ -91,7 +91,6 @@ export enum EdgelessBlocksFlavour {
 
 @customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
-  static INITAL_INDEX = 'a1';
   static override styles = css`
     .affine-edgeless-surface-block-container {
       position: absolute;
@@ -819,7 +818,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         ...defaultProps,
         ...properties,
         id,
-        index: this.layer.generateIndex('common'),
+        index: this.layer.generateIndex('common', 'canvas'),
         seed: randomSeed(),
       };
 
