@@ -44,14 +44,13 @@ const TOOLTIPS = [
 export class EdgelessNoteShadowPanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      width: 506.5px;
       border-radius: 8px;
       padding: 8px;
+      gap: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: var(--affine-background-overlay-panel-color);
-      gap: 8px;
       box-shadow: var(--affine-shadow-2);
     }
 
