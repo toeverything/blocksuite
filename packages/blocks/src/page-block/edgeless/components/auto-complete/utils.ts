@@ -281,7 +281,8 @@ export function capitalizeFirstLetter(str: string) {
 
 export function createEdgelessElement(
   edgeless: EdgelessPageBlockComponent,
-  current: ShapeElement | NoteBlockModel
+  current: ShapeElement | NoteBlockModel,
+  bound: Bound
 ) {
   let id;
   const { surface } = edgeless;
@@ -289,6 +290,7 @@ export function createEdgelessElement(
     id = edgeless.surface.addElement(current.type, {
       ...current.serialize(),
       text: new Workspace.Y.Text(),
+      xywh: bound.serialize(),
     });
   } else {
     const { page } = edgeless;
@@ -298,6 +300,7 @@ export function createEdgelessElement(
         background: current.background,
         hidden: current.hidden,
         edgeless: current.edgeless,
+        xywh: bound.serialize(),
       },
       edgeless.model.id
     );

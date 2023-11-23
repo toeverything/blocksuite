@@ -254,9 +254,8 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private _generateElementOnClick(type: Direction) {
     const { surface, page } = this.edgeless;
     const bound = this._computeNextBound(type);
-    const id = createEdgelessElement(this.edgeless, this.current);
+    const id = createEdgelessElement(this.edgeless, this.current, bound);
     if (isShape(this.current)) {
-      surface.updateElement(id, { xywh: bound.serialize() });
       const { startPosition, endPosition } = getPosition(type);
       this._addConnector(
         {
@@ -273,7 +272,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     } else {
       const model = page.getBlockById(id);
       assertExists(model);
-      page.updateBlock(model, { xywh: bound.serialize() });
       const [x, y] = surface.viewport.toViewCoord(
         bound.center[0],
         bound.y + NOTE_INIT_HEIGHT / 2
