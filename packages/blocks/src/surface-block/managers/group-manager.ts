@@ -26,7 +26,7 @@ export function setGroupParent(
   GroupMap.set(id, group);
 }
 
-function getGroups(element: EdgelessElement) {
+export function getGroups(element: EdgelessElement) {
   let group = getGroupParent(element);
   const groups: { group: GroupElement; child: EdgelessElement }[] = [];
   groups.push({ group: group, child: element });
