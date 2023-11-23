@@ -26,11 +26,11 @@ import { toast } from '../../../../_common/components/toast.js';
 import {
   EdgelessImageIcon,
   EdgelessTextIcon,
-  ExpandIcon,
   FrameNavigatorIcon,
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
-  ShrinkIcon,
+  NavigatorExitFullScreenIcon,
+  NavigatorFullScreenIcon,
 } from '../../../../_common/icons/index.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
@@ -397,7 +397,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           this._toggleFullScreen();
         }}
       >
-        ${document.fullscreenElement ? ShrinkIcon : ExpandIcon}
+        ${document.fullscreenElement
+          ? NavigatorExitFullScreenIcon
+          : NavigatorFullScreenIcon}
       </edgeless-tool-icon-button>
       <div class="short-divider"></div>
       <div
