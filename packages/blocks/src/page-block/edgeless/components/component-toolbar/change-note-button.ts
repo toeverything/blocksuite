@@ -286,7 +286,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _setCollapse() {
     this.notes.forEach(element => {
       const { collapse, collapsedHeight } = element.edgeless;
-      // element.edgeless
 
       const bound = Bound.deserialize(element.xywh);
       if (collapse) {
@@ -302,6 +301,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         });
       }
     });
+    this.requestUpdate();
   }
 
   override updated(_changedProperties: PropertyValues) {
