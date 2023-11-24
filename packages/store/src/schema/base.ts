@@ -187,7 +187,7 @@ export class BaseBlockModel<
 
   created = new Slot();
   deleted = new Slot();
-  propsUpdated = new Slot<{ name: string }>();
+  propsUpdated = new Slot<{ key: string }>();
   childrenUpdated = new Slot();
 
   get childMap() {

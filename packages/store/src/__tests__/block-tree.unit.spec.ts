@@ -49,26 +49,26 @@ test('trigger props updated', async () => {
 
   root.count = 1;
   expect(onPropsUpdated).toBeCalledTimes(1);
-  expect(onPropsUpdated).toHaveBeenNthCalledWith(1, { name: 'count' });
+  expect(onPropsUpdated).toHaveBeenNthCalledWith(1, { key: 'count' });
   expect(getCount()).toBe(1);
 
   root.count = 2;
   expect(onPropsUpdated).toBeCalledTimes(2);
-  expect(onPropsUpdated).toHaveBeenNthCalledWith(2, { name: 'count' });
+  expect(onPropsUpdated).toHaveBeenNthCalledWith(2, { key: 'count' });
   expect(getCount()).toBe(2);
 
   root.style.color = 'blue';
   expect(onPropsUpdated).toBeCalledTimes(3);
-  expect(onPropsUpdated).toHaveBeenNthCalledWith(3, { name: 'style' });
+  expect(onPropsUpdated).toHaveBeenNthCalledWith(3, { key: 'style' });
   expect(getColor()).toBe('blue');
 
   root.style = { color: 'red' };
   expect(onPropsUpdated).toBeCalledTimes(4);
-  expect(onPropsUpdated).toHaveBeenNthCalledWith(4, { name: 'style' });
+  expect(onPropsUpdated).toHaveBeenNthCalledWith(4, { key: 'style' });
   expect(getColor()).toBe('red');
 
   root.style.color = 'green';
   expect(onPropsUpdated).toBeCalledTimes(5);
-  expect(onPropsUpdated).toHaveBeenNthCalledWith(5, { name: 'style' });
+  expect(onPropsUpdated).toHaveBeenNthCalledWith(5, { key: 'style' });
   expect(getColor()).toBe('green');
 });

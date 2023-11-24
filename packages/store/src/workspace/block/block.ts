@@ -45,7 +45,7 @@ export class Block {
             // @ts-ignore
             this.model[keyName] = proxy;
           });
-          this.model.propsUpdated.emit({ name: keyName });
+          this.model.propsUpdated.emit({ key: keyName });
           return;
         }
         if (type.action === 'delete') {
@@ -54,7 +54,7 @@ export class Block {
             // @ts-ignore
             delete this.model[keyName];
           });
-          this.model.propsUpdated.emit({ name: keyName });
+          this.model.propsUpdated.emit({ key: keyName });
           return;
         }
       });
@@ -70,7 +70,7 @@ export class Block {
   private _getPropsProxy = (name: string, value: unknown) => {
     return valueToProps(value, {
       onChange: () => {
-        this.model.propsUpdated.emit({ name });
+        this.model.propsUpdated.emit({ key: name });
       },
     });
   };
@@ -152,7 +152,7 @@ export class Block {
           model.keys.includes(p)
         ) {
           this.yBlock.delete(`prop:${p}`);
-          this.model.propsUpdated.emit({ name: p });
+          this.model.propsUpdated.emit({ key: p });
         }
 
         return Reflect.deleteProperty(target, p);
