@@ -3,28 +3,38 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 
+import type { AffineTextAttributes } from '../../../../components/rich-text/virgo/types.js';
 import {
   ArrowDownIcon,
   HighLightDuotoneIcon,
   TextBackgroundDuotoneIcon,
-} from '../../../../../_common/icons/index.js';
-import type { AffineTextAttributes } from '../../../../components/rich-text/virgo/types.js';
+  TextForegroundDuotoneIcon,
+} from '../../../../icons/index.js';
 import type { AffineFormatBarWidget } from '../../format-bar.js';
-import { backgroundConfig } from './consts.js';
+import { backgroundConfig, foregroundConfig } from './consts.js';
+
+enum HighlightType {
+  Foreground,
+  Background,
+}
 
 let lastUsedColor: string | null = null;
+let lastUsedHighlightType: HighlightType = HighlightType.Background;
 
-const updateBackground = (
+const updateHighlight = (
   root: BlockSuiteRoot,
-  color: string | null = null
+  color: string | null,
+  highlightType: HighlightType
 ) => {
   lastUsedColor = color;
+  lastUsedHighlightType = highlightType;
 
   const payload: {
     styles: AffineTextAttributes;
   } = {
     styles: {
-      background: color,
+      color: highlightType === HighlightType.Foreground ? color : null,
+      background: highlightType === HighlightType.Background ? color : null,
     },
   };
   root.std.command
@@ -38,8 +48,28 @@ const updateBackground = (
     .run();
 };
 
-const BackgroundPanel = (formatBar: AffineFormatBarWidget) => {
-  return html`<div class="background-highlight-panel">
+const HighlightPanel = (formatBar: AffineFormatBarWidget) => {
+  return html`<div class="highlight-panel">
+    <span class="highligh-panel-heading">Color</span>
+    ${foregroundConfig.map(
+      ({ name, color }) =>
+        html`<icon-button
+          width="100%"
+          height="32px"
+          style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
+          text="${name}"
+          data-testid="${color ? `foreground-${color}` : 'unset'}"
+          @click="${() => {
+            updateHighlight(formatBar.root, color, HighlightType.Foreground);
+            formatBar.requestUpdate();
+          }}"
+        >
+          <span style="color: ${color}; display: flex; align-items: center;">
+            ${TextForegroundDuotoneIcon}
+          </span>
+        </icon-button>`
+    )}
+    <span class="highligh-panel-heading">Background Color</span>
     ${backgroundConfig.map(
       ({ name, color }) =>
         html`<icon-button
@@ -47,9 +77,9 @@ const BackgroundPanel = (formatBar: AffineFormatBarWidget) => {
           height="32px"
           style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
           text="${name}"
-          data-testid="${color ?? 'unset'}"
+          data-testid="${color ? `background-${color}` : 'unset'}"
           @click="${() => {
-            updateBackground(formatBar.root, color);
+            updateHighlight(formatBar.root, color, HighlightType.Background);
             formatBar.requestUpdate();
           }}"
         >
@@ -64,17 +94,17 @@ const BackgroundPanel = (formatBar: AffineFormatBarWidget) => {
   </div>`;
 };
 
-export const BackgroundButton = (formatBar: AffineFormatBarWidget) => {
+export const HighlightButton = (formatBar: AffineFormatBarWidget) => {
   const root = formatBar.blockElement.root;
 
-  const backgroundHighlightPanel = BackgroundPanel(formatBar);
+  const highlightPanel = HighlightPanel(formatBar);
 
   const onHover = () => {
     const button = formatBar.shadowRoot?.querySelector(
-      '.background-button'
+      '.highlight-button'
     ) as HTMLElement | null;
     const panel = formatBar.shadowRoot?.querySelector(
-      '.background-highlight-panel'
+      '.highlight-panel'
     ) as HTMLElement | null;
     assertExists(button);
     assertExists(panel);
@@ -94,7 +124,7 @@ export const BackgroundButton = (formatBar: AffineFormatBarWidget) => {
   };
   const onHoverEnd = () => {
     const panel = formatBar.shadowRoot?.querySelector(
-      '.background-highlight-panel'
+      '.highlight-panel'
     ) as HTMLElement | null;
     assertExists(panel);
     panel.style.display = 'none';
@@ -103,18 +133,22 @@ export const BackgroundButton = (formatBar: AffineFormatBarWidget) => {
   return html`<div
     @mouseleave=${onHoverEnd}
     @mouseenter=${onHover}
-    class="background-button"
+    class="highlight-button"
   >
     <icon-button
-      class="background-highlight-icon"
-      style="color: ${lastUsedColor ?? 'rgba(0,0,0,0)'}"
+      class="highlight-icon"
       data-last-used="${lastUsedColor ?? 'unset'}"
       width="52px"
       height="32px"
-      @click="${() => updateBackground(root, lastUsedColor)}"
+      @click="${() =>
+        updateHighlight(root, lastUsedColor, lastUsedHighlightType)}"
     >
-      ${HighLightDuotoneIcon} ${ArrowDownIcon}</icon-button
+      <span
+        style="color: ${lastUsedColor}; display: flex; align-items: center; "
+        >${HighLightDuotoneIcon}</span
+      >
+      ${ArrowDownIcon}</icon-button
     >
-    ${backgroundHighlightPanel}
+    ${highlightPanel}
   </div>`;
 };

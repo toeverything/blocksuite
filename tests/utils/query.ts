@@ -12,7 +12,7 @@ export function getFormatBar(page: Page) {
   const linkBtn = formatBar.getByTestId('link');
   const copyBtn = formatBar.getByTestId('copy');
   // highlight
-  const backgroundBtn = formatBar.locator('.background-highlight-icon');
+  const backgroundBtn = formatBar.locator('.highlight-icon');
   const pinkBtn = formatBar.getByTestId('var(--affine-text-highlight-pink)');
   const defaultColorBtn = formatBar.getByTestId('unset');
   const highlight = {
