@@ -53,14 +53,6 @@ const paragraphButtonStyle = css`
     color: var(--affine-text-secondary-color);
     padding: 4px;
   }
-
-  .highlight-panel > icon-button {
-    width: 100%;
-    height: 32px;
-    padding-left: 4px;
-    justify-content: flex-start;
-    gap: 8px;
-  }
 `;
 
 export const formatBarStyle = css`
