@@ -431,7 +431,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           element.edgeless = DEFAULT_EDGELESS_PROP;
         }
 
-        if (curBound.h !== bound.h && element.edgeless.collapse) {
+        if (curBound.h !== bound.h && !element.edgeless.collapse) {
           element.edgeless.collapse = true;
         }
 
