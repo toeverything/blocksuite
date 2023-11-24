@@ -2,11 +2,11 @@ import { Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
+import { Boxed } from '../reactive/boxed.js';
+import { Text } from '../reactive/text.js';
 import type { BaseBlockTransformer } from '../transformer/base.js';
-import type { YBlock } from '../workspace/block.js';
+import type { YBlock } from '../workspace/block/block.js';
 import type { Page } from '../workspace/index.js';
-import { Boxed } from '../yjs/boxed.js';
-import { Text } from '../yjs/text-adapter.js';
 
 const FlavourSchema = z.string();
 const ParentSchema = z.array(z.string()).optional();

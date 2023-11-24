@@ -2,15 +2,14 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
+import { Text } from '../reactive/text.js';
 import type { BaseBlockModel } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import { assertValidChildren, syncBlockProps } from '../utils/utils.js';
-import type { AwarenessStore } from '../yjs/awareness.js';
-import type { BlockSuiteDoc } from '../yjs/index.js';
-import { Text } from '../yjs/text-adapter.js';
-import type { YBlock } from './block.js';
-import { BlockTree } from './block-tree.js';
+import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
+import type { YBlock } from './block/index.js';
+import { BlockTree } from './block/index.js';
 import type { PageMeta } from './meta.js';
 import type { Workspace } from './workspace.js';
 

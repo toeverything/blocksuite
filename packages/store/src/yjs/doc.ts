@@ -1,7 +1,7 @@
 import type { Transaction } from 'yjs';
 import * as Y from 'yjs';
 
-import { createYProxy } from './proxy.js';
+import { createYProxy } from '../reactive/proxy.js';
 
 export type BlockSuiteDocAllowedValue =
   | Record<string, unknown>
