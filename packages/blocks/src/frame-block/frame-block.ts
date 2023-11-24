@@ -16,6 +16,9 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   @state()
   showTitle = true;
 
+  @state()
+  private _isNavigator = false;
+
   @query('.affine-frame-title')
   private _titleElement?: HTMLElement;
 
@@ -63,8 +66,14 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     return this;
   }
 
+  override firstUpdated() {
+    this.surface.edgeless.slots.edgelessToolUpdated.on(tool => {
+      this._isNavigator = tool.type === 'frameNavigator' ? true : false;
+    });
+  }
+
   override render() {
-    const { model, showTitle, surface } = this;
+    const { model, showTitle, surface, _isNavigator } = this;
     const bound = Bound.deserialize(
       (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
     );
@@ -72,7 +81,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     const text = model.title.toString();
 
     return html`
-      ${showTitle
+      ${showTitle && !_isNavigator
         ? html` <div
             style=${styleMap({
               transformOrigin: 'top left',
@@ -105,7 +114,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
             ? `var(${model.background})`
             : '',
           borderRadius: '8px',
-          border: `2px solid var(--affine-black-30)`,
+          border: _isNavigator ? 'none' : `2px solid var(--affine-black-30)`,
         })}
       ></div>
     `;

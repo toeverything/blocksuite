@@ -32,6 +32,7 @@ import {
 import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+import { SurfaceService } from '../surface-block/surface-service.js';
 import { SurfaceRefBlockSchema } from '../surface-ref-block/index.js';
 
 const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
@@ -99,6 +100,7 @@ export const PagePreset: BlockSpec[] = [
     view: {
       component: literal`affine-surface`,
     },
+    service: SurfaceService,
   },
   {
     schema: ListBlockSchema,
@@ -185,6 +187,7 @@ export const EdgelessPreset: BlockSpec[] = [
     view: {
       component: literal`affine-surface`,
     },
+    service: SurfaceService,
   },
   {
     schema: ListBlockSchema,
