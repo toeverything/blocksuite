@@ -1,4 +1,3 @@
-import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { state } from 'lit/decorators.js';
 
@@ -53,7 +52,7 @@ const styles = css`
   }
 `;
 
-export class ToggleSwitch extends WithDisposable(LitElement) {
+export class ToggleSwitch extends LitElement {
   static override styles = styles;
 
   @state()
