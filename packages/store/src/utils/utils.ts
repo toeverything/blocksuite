@@ -3,14 +3,20 @@ import * as Y from 'yjs';
 import type { z } from 'zod';
 
 import { SYS_KEYS } from '../consts.js';
+import type { ProxyOptions } from '../reactive/index.js';
+import {
+  Boxed,
+  canToProxy,
+  canToY,
+  createYProxy,
+  native2Y,
+  Text,
+} from '../reactive/index.js';
 import type { BlockSchema } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
 import type { YBlock } from '../workspace/block.js';
 import type { Workspace } from '../workspace/index.js';
 import type { BlockProps, YBlocks } from '../workspace/page.js';
-import type { ProxyOptions } from '../yjs/index.js';
-import { canToProxy, canToY, createYProxy } from '../yjs/index.js';
-import { Boxed, native2Y, Text } from '../yjs/index.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,

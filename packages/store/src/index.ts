@@ -15,6 +15,7 @@ export type {
   BlobStorageCRUD,
 } from './persistence/blob/types.js';
 export * from './providers/type.js';
+export * from './reactive/index.js';
 export * from './schema/index.js';
 export * from './transformer/index.js';
 export {
