@@ -3,48 +3,46 @@ import * as Y from 'yjs';
 
 import type { BaseBlockModel, Schema } from '../schema/index.js';
 import { internalPrimitives } from '../schema/index.js';
-import { propsToValue } from '../utils/utils.js';
-import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
 import type { YBlock } from './block.js';
 import { Block } from './block.js';
-import { Space } from './space.js';
+import { propsToValue } from './utils.js';
 
-type FlatBlockMap = Record<string, YBlock>;
-type BlockTreeOptions = {
-  id: string;
-  doc: BlockSuiteDoc;
-  awarenessStore: AwarenessStore;
+export interface BlockCurd {
+  get(id: string): YBlock | undefined;
+  set(id: string, block: YBlock): void;
+  delete(id: string): void;
+}
+
+export type BlockMapOptions = {
+  blockCurd: BlockCurd;
   schema: Schema;
 };
 
-export class BlockTree extends Space<FlatBlockMap> {
+export class BlockMap {
   protected readonly _schema: Schema;
+  protected readonly _blockCurd: BlockCurd;
   protected _blocks: Map<string, Block> = new Map();
 
-  getBlock(id: string) {
-    return this._blocks.get(id);
-  }
-
-  constructor({ id, schema, doc, awarenessStore }: BlockTreeOptions) {
-    super(id, doc, awarenessStore);
+  constructor({ schema, blockCurd }: BlockMapOptions) {
+    this._blockCurd = blockCurd;
     this._schema = schema;
   }
 
-  protected _onBlockAdded(id: string) {
+  onBlockAdded(id: string) {
     if (this._blocks.has(id)) {
       return;
     }
-    const yBlock = this._yBlocks.get(id);
+    const yBlock = this._blockCurd.get(id);
     if (!yBlock) {
       console.warn(`Could not find block with id ${id}`);
       return;
     }
 
-    const block = new Block(this, this._schema, yBlock);
+    const block = new Block(this._schema, yBlock);
     this._blocks.set(id, block);
   }
 
-  protected _onBlockRemoved(id: string) {
+  onBlockRemoved(id: string) {
     if (!this._blocks.has(id)) {
       return;
     }
@@ -55,16 +53,12 @@ export class BlockTree extends Space<FlatBlockMap> {
     this._blocks.delete(id);
   }
 
-  protected _addBlock(
-    id: string,
-    flavour: string,
-    initialProps: Record<string, unknown>
-  ) {
+  addBlock(id: string, flavour: string, initialProps: Record<string, unknown>) {
     const schema = this._schema.flavourSchemaMap.get(flavour);
     assertExists(schema, `Could not find schema for flavour ${flavour}`);
 
     const yBlock = new Y.Map();
-    this._yBlocks.set(id, yBlock);
+    this._blockCurd.set(id, yBlock);
 
     yBlock.set('sys:id', id);
     yBlock.set('sys:flavour', flavour);
@@ -93,7 +87,24 @@ export class BlockTree extends Space<FlatBlockMap> {
     return yBlock;
   }
 
-  protected _removeBlock(id: string) {
-    this._yBlocks.delete(id);
+  removeBlock(id: string) {
+    this._blockCurd.delete(id);
+  }
+
+  getBlock(id: string) {
+    return this._blocks.get(id);
+  }
+
+  hasBlock(id: string) {
+    return this._blocks.has(id);
+  }
+
+  getBlocksByFlavour(blockFlavour: string | string[]): Block[] {
+    const flavours =
+      typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
+
+    return Array.from(this._blocks.values()).filter(({ flavour }) =>
+      flavours.includes(flavour)
+    );
   }
 }

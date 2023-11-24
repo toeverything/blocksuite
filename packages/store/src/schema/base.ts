@@ -2,11 +2,11 @@ import { Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
+import type { YBlock } from '../block/index.js';
+import { Boxed } from '../reactive/boxed.js';
+import { Text } from '../reactive/text.js';
 import type { BaseBlockTransformer } from '../transformer/base.js';
-import type { YBlock } from '../workspace/block.js';
 import type { Page } from '../workspace/index.js';
-import { Boxed } from '../yjs/boxed.js';
-import { Text } from '../yjs/text-adapter.js';
 
 const FlavourSchema = z.string();
 const ParentSchema = z.array(z.string()).optional();
@@ -205,11 +205,11 @@ export class BaseBlockModel<
 
     const children: BaseBlockModel[] = [];
     block.forEach(id => {
-      const child = this.page.getBlock(id);
+      const child = this.page.getBlockById(id);
       if (!child) {
         return;
       }
-      children.push(child.model);
+      children.push(child);
     });
 
     return children;

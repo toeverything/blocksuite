@@ -4,7 +4,7 @@ import FlexSearch from 'flexsearch';
 import type { Doc } from 'yjs';
 import { Text as YText } from 'yjs';
 
-import type { YBlock } from '../workspace/block.js';
+import type { YBlock } from '../block/block.js';
 import type { YBlocks } from '../workspace/page.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 

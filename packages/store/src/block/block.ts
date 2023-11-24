@@ -1,11 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
+import type { UnRecord } from '../reactive/utils.js';
 import type { Schema } from '../schema/index.js';
 import { BaseBlockModel } from '../schema/index.js';
-import { propsToValue, valueToProps } from '../utils/utils.js';
-import type { UnRecord } from '../yjs/index.js';
-import type { BlockTree } from './block-tree.js';
+import { propsToValue, valueToProps } from './utils.js';
 
 export type YBlock = Y.Map<unknown>;
 
@@ -17,7 +16,6 @@ export class Block {
   private _byPassProxy: boolean = false;
 
   constructor(
-    readonly tree: BlockTree,
     readonly schema: Schema,
     readonly yBlock: YBlock
   ) {
@@ -42,7 +40,7 @@ export class Block {
         if (type.action === 'update' || type.action === 'add') {
           const value = this.yBlock.get(key);
           const keyName = key.replace('prop:', '');
-          const proxy = valueToProps(value, this.tree.doc.proxy, {
+          const proxy = valueToProps(value, {
             onChange: () => {
               this.model.propsUpdated.emit();
             },
@@ -75,7 +73,7 @@ export class Block {
     this.yBlock.forEach((value, key) => {
       if (key.startsWith('prop:')) {
         const keyName = key.replace('prop:', '');
-        const proxy = valueToProps(value, this.tree.doc.proxy, {
+        const proxy = valueToProps(value, {
           onChange: () => {
             this.model.propsUpdated.emit();
           },
@@ -131,7 +129,7 @@ export class Block {
         ) {
           const yValue = propsToValue(value);
           this.yBlock.set(`prop:${p}`, yValue);
-          const proxy = valueToProps(yValue, this.tree.doc.proxy, {
+          const proxy = valueToProps(yValue, {
             onChange: () => {
               this.model.propsUpdated.emit();
             },
@@ -146,7 +144,7 @@ export class Block {
       },
       deleteProperty: (target, p) => {
         if (typeof p === 'string' && model.keys.includes(p)) {
-          throw new Error('Cannot delete props');
+          this.yBlock.delete(`prop:${p}`);
         }
 
         return Reflect.deleteProperty(target, p);

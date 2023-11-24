@@ -2,19 +2,22 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
+import type { YBlock } from '../block/block.js';
+import type { BlockCurd } from '../block/index.js';
+import { BlockMap } from '../block/index.js';
+import { Text } from '../reactive/index.js';
 import type { BaseBlockModel } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import { assertValidChildren, syncBlockProps } from '../utils/utils.js';
 import type { AwarenessStore } from '../yjs/awareness.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import { Text } from '../yjs/text-adapter.js';
-import type { YBlock } from './block.js';
-import { BlockTree } from './block-tree.js';
 import type { PageMeta } from './meta.js';
+import { Space } from './space.js';
 import type { Workspace } from './workspace.js';
 
 export type YBlocks = Y.Map<YBlock>;
+type FlatBlockMap = Record<string, YBlock>;
 
 /** JSON-serializable properties of a block */
 export type BlockSysProps = {
@@ -34,10 +37,12 @@ type PageOptions = {
   idGenerator?: IdGenerator;
 };
 
-export class Page extends BlockTree {
+export class Page extends Space<FlatBlockMap> {
   private readonly _workspace: Workspace;
   private readonly _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
+  private _blockCurd: BlockCurd;
+  private _blockMap: BlockMap;
   private _root: BaseBlockModel | null = null;
   /** Indicate whether the underlying subdoc has been loaded. */
   private _docLoaded = false;
@@ -92,9 +97,18 @@ export class Page extends BlockTree {
     awarenessStore,
     idGenerator = uuidv4,
   }: PageOptions) {
-    super({ id, doc, awarenessStore, schema: workspace.schema });
+    super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
+    this._blockCurd = {
+      get: id => this._yBlocks.get(id),
+      set: (id, yBlock) => this._yBlocks.set(id, yBlock),
+      delete: (id: string) => this._yBlocks.delete(id),
+    };
+    this._blockMap = new BlockMap({
+      schema: workspace.schema,
+      blockCurd: this._blockCurd,
+    });
   }
 
   get readonly() {
@@ -114,7 +128,7 @@ export class Page extends BlockTree {
   }
 
   get schema() {
-    return this._schema;
+    return this._workspace.schema;
   }
 
   get meta() {
@@ -194,16 +208,11 @@ export class Page extends BlockTree {
   }
 
   getBlockById(id: string) {
-    return this._blocks.get(id)?.model ?? null;
+    return this._blockMap.getBlock(id)?.model ?? null;
   }
 
   getBlockByFlavour(blockFlavour: string | string[]) {
-    const flavours =
-      typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
-
-    return Array.from(this._blocks.values())
-      .filter(({ flavour }) => flavours.includes(flavour))
-      .map(x => x.model);
+    return this._blockMap.getBlocksByFlavour(blockFlavour).map(x => x.model);
   }
 
   getParent(target: BaseBlockModel | string): BaseBlockModel | null {
@@ -349,7 +358,7 @@ export class Page extends BlockTree {
     };
 
     this.transact(() => {
-      this._addBlock(id, flavour, { ...blockProps });
+      this._blockMap.addBlock(id, flavour, { ...blockProps });
       // set the yBlock at the very beginning, otherwise yBlock will be always empty
 
       assertValidChildren(this._yBlocks, clonedProps);
@@ -619,7 +628,7 @@ export class Page extends BlockTree {
               dl(id);
             });
 
-            this._removeBlock(id);
+            this._blockMap.removeBlock(id);
           };
 
           yModelChildren.forEach(id => {
@@ -628,7 +637,7 @@ export class Page extends BlockTree {
         }
       }
 
-      this._removeBlock(model.id);
+      this._blockMap.removeBlock(model.id);
 
       parent.childrenUpdated.emit();
     });
@@ -700,8 +709,8 @@ export class Page extends BlockTree {
       );
       return;
     }
-    this._onBlockAdded(id);
-    const block = this._blocks.get(id);
+    this._blockMap.onBlockAdded(id);
+    const block = this._blockMap.getBlock(id);
     assertExists(block);
     const model = block.model;
     model.page = this;
@@ -709,7 +718,7 @@ export class Page extends BlockTree {
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
       yChildren.forEach((id: string, index) => {
-        const hasChild = this._blocks.has(id);
+        const hasChild = this._blockMap.hasBlock(id);
 
         if (!hasChild) {
           this._handleYBlockAdd(id);
@@ -744,7 +753,7 @@ export class Page extends BlockTree {
       parent: this.getParent(model)?.id ?? '',
       model,
     });
-    this._onBlockRemoved(id);
+    this._blockMap.removeBlock(id);
   }
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {

@@ -2,17 +2,15 @@ import { assertExists } from '@blocksuite/global/utils';
 import { minimatch } from 'minimatch';
 import type * as Y from 'yjs';
 
+import { Block } from '../block/index.js';
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
 import { pageMigrations, workspaceMigrations } from '../migration/index.js';
-import { ProxyManager } from '../yjs/index.js';
 import type { BlockSchemaType } from './base.js';
 import { BlockSchema } from './base.js';
 import { MigrationError, SchemaValidateError } from './error.js';
-import { toBlockMigrationData } from './utils.js';
 
 export class Schema {
   readonly flavourSchemaMap = new Map<string, BlockSchemaType>();
-  readonly proxy = new ProxyManager();
 
   get versions() {
     return Object.fromEntries(
@@ -166,9 +164,9 @@ export class Schema {
         return;
       }
 
-      const data = toBlockMigrationData(blockData, this.proxy);
+      const block = new Block(this, blockData);
 
-      return onUpgrade(data, oldVersion, version);
+      return onUpgrade(block.model, oldVersion, version);
     } catch (err) {
       throw new MigrationError(`upgrade block ${flavour} failed.
           ${err}`);
