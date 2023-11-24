@@ -46,7 +46,7 @@ export function createYProxy<Data>(
   throw new TypeError();
 }
 
-export function transformData(
+function transformData(
   value: unknown,
   onCreate: (p: unknown) => void,
   options: ProxyOptions<never> = {}

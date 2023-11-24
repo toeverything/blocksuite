@@ -4,10 +4,10 @@ import type * as Y from 'yjs';
 
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
 import { pageMigrations, workspaceMigrations } from '../migration/index.js';
+import { Block } from '../workspace/block.js';
 import type { BlockSchemaType } from './base.js';
 import { BlockSchema } from './base.js';
 import { MigrationError, SchemaValidateError } from './error.js';
-import { toBlockMigrationData } from './utils.js';
 
 export class Schema {
   readonly flavourSchemaMap = new Map<string, BlockSchemaType>();
@@ -164,9 +164,9 @@ export class Schema {
         return;
       }
 
-      const data = toBlockMigrationData(blockData);
+      const block = new Block(this, blockData);
 
-      return onUpgrade(data, oldVersion, version);
+      return onUpgrade(block.model, oldVersion, version);
     } catch (err) {
       throw new MigrationError(`upgrade block ${flavour} failed.
           ${err}`);
