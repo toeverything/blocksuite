@@ -49,12 +49,12 @@ export class MemoryBlobManager {
 export function getAssetName(assets: Map<string, Blob>, blobId: string) {
   const blob = assets.get(blobId);
   assertExists(blob);
-  const name = 'name' in blob ? (blob as File).name : undefined;
+  const name = (blob as File).name ?? undefined;
   const ext =
     name !== undefined && name.includes('.')
       ? name.split('.').at(-1)
       : blob.type !== ''
         ? blob.type.split('/').at(-1)
         : 'blob';
-  return `${blobId}.${ext}`;
+  return `${name?.split('.').at(0) ?? blobId}.${ext}`;
 }

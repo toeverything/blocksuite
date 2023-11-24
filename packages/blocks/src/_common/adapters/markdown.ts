@@ -595,6 +595,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             });
           } else {
             const res = await fetch(o.node.url);
+            const clonedRes = res.clone();
             const file = new File(
               [await res.blob()],
               getFilenameFromContentDisposition(
@@ -604,7 +605,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 'image' + res.headers.get('Content-Type')?.split('/').at(-1) ??
                 '.png'
             );
-            blobId = await sha(await res.arrayBuffer());
+            blobId = await sha(await clonedRes.arrayBuffer());
             assets?.getAssets().set(blobId, file);
             assets?.writeToBlob(blobId);
           }

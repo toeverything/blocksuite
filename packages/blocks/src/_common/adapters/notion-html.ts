@@ -346,6 +346,21 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           );
           break;
         }
+        case 'hr': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:divider',
+                props: {},
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
         case 'figure': {
           // Notion page link
           if (hastQuerySelector(o.node, '.link-to-page')) {
@@ -368,6 +383,62 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               )
               .closeNode();
             break;
+          }
+          // Notion callout
+          if (hastQuerySelector(o.node, '.callout')) {
+            context
+              .openNode(
+                {
+                  type: 'block',
+                  id: nanoid('block'),
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: this._hastToDelta(o.node),
+                    },
+                  },
+                  children: [],
+                },
+                'children'
+              )
+              .closeNode();
+            break;
+          }
+          // Notion bookmark
+          const bookmark = hastQuerySelector(o.node, '.bookmark');
+          if (bookmark) {
+            const bookmarkURL = bookmark.properties?.href;
+            const bookmarkTitle = hastGetTextContent(
+              hastQuerySelector(bookmark, '.bookmark-title')
+            );
+            const bookmarkDescription = hastGetTextContent(
+              hastQuerySelector(bookmark, '.bookmark-description')
+            );
+            const bookmarkIcon = hastQuerySelector(bookmark, '.bookmark-icon');
+            const bookmarkIconURL =
+              typeof bookmarkIcon?.properties?.src === 'string'
+                ? bookmarkIcon.properties.src
+                : '';
+            context
+              .openNode(
+                {
+                  type: 'block',
+                  id: nanoid('block'),
+                  flavour: 'affine:bookmark',
+                  props: {
+                    type: 'card',
+                    url: bookmarkURL ?? '',
+                    bookmarkTitle,
+                    description: bookmarkDescription,
+                    icon: bookmarkIconURL,
+                  },
+                  children: [],
+                },
+                'children'
+              )
+              .closeNode();
           }
           if (!assets) {
             break;
@@ -393,6 +464,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               });
             } else {
               const res = await fetch(imageURL);
+              const clonedRes = res.clone();
               const name =
                 getFilenameFromContentDisposition(
                   res.headers.get('Content-Disposition') ?? ''
@@ -401,7 +473,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'image' + res.headers.get('Content-Type')?.split('/').at(-1) ??
                 '.png';
               const file = new File([await res.blob()], name);
-              blobId = await sha(await res.arrayBuffer());
+              blobId = await sha(await clonedRes.arrayBuffer());
               assets?.getAssets().set(blobId, file);
               assets?.writeToBlob(blobId);
             }
@@ -420,38 +492,6 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               )
               .closeNode();
             break;
-          }
-          // Notion bookmark
-          const bookmark = hastQuerySelector(o.node, '.bookmark');
-          if (bookmark) {
-            const bookmarkURL = bookmark.properties?.href;
-            const bookmarkTitle = hastGetTextContent(
-              hastQuerySelector(bookmark, '.bookmark-title')
-            );
-            const bookmarkDescription = hastGetTextContent(
-              hastQuerySelector(bookmark, '.bookmark-description')
-            );
-            const bookmarkIcon = hastQuerySelector(bookmark, '.bookmark-icon');
-            const bookmarkIconURL =
-              typeof bookmarkIcon?.properties?.src === 'string'
-                ? bookmarkIcon.properties.src
-                : '';
-            context.openNode(
-              {
-                type: 'block',
-                id: nanoid('block'),
-                flavour: 'affine:bookmark',
-                props: {
-                  type: 'card',
-                  url: bookmarkURL ?? '',
-                  bookmarkTitle,
-                  description: bookmarkDescription,
-                  icon: bookmarkIconURL,
-                },
-                children: [],
-              },
-              'children'
-            );
           }
           // Notion embeded
           const embededFigureWrapper = hastQuerySelector(o.node, '.source');
@@ -480,6 +520,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               });
             } else {
               const res = await fetch(embededURL);
+              const resCloned = res.clone();
               name =
                 getFilenameFromContentDisposition(
                   res.headers.get('Content-Disposition') ?? ''
@@ -490,7 +531,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               const file = new File([await res.blob()], name);
               size = file.size;
               type = file.type;
-              blobId = await sha(await res.arrayBuffer());
+              blobId = await sha(await resCloned.arrayBuffer());
               assets?.getAssets().set(blobId, file);
               assets?.writeToBlob(blobId);
             }
@@ -516,7 +557,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           break;
         }
         case 'th': {
-          const columnId = nanoid('block');
+          const columnId = nanoid('unknown');
           const columnTypeClass = hastQuerySelector(o.node, 'svg')?.properties
             ?.className;
           const columnType = Array.isArray(columnTypeClass)
@@ -540,7 +581,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'hast:table:column'
               );
             const row = Object.create(null);
-            o.node.children.forEach((child, index) => {
+            hastGetElementChildren(o.node).forEach((child, index) => {
               if (hastQuerySelector(child, '.cell-title')) {
                 context.pushGlobalContextStack<BlockSnapshot>(
                   'hast:table:children',
@@ -595,7 +636,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   });
                 // Expand will be done when leaving the table
                 row[columns[index].id] = {
-                  columnId: optionIds[0],
+                  columnId: columns[index].id,
                   value: optionIds,
                 };
               } else if (hastQuerySelector(child, '.checkbox')) {
@@ -801,6 +842,14 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             return ast.children.flatMap(child =>
               this._hastToDelta(child).map(delta => {
                 delta.attributes = { ...delta.attributes, strike: true };
+                return delta;
+              })
+            );
+          }
+          case 'u': {
+            return ast.children.flatMap(child =>
+              this._hastToDelta(child).map(delta => {
+                delta.attributes = { ...delta.attributes, underline: true };
                 return delta;
               })
             );

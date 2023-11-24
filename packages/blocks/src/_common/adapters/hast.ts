@@ -18,9 +18,14 @@ export const hastGetTextContent = (
   }
   switch (ast.type) {
     case 'text': {
-      return ast.value;
+      return ast.value.replace(/\s+/g, ' ');
     }
     case 'element': {
+      switch (ast.tagName) {
+        case 'br': {
+          return '\n';
+        }
+      }
       return ast.children.map(child => hastGetTextContent(child)).join('');
     }
   }

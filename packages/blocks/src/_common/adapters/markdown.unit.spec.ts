@@ -3,8 +3,8 @@ import { MemoryBlobManager } from '@blocksuite/store';
 import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
+import { nanoidReplacement } from '../test-utils/test-utils.js';
 import { MarkdownAdapter } from './markdown.js';
-import { nanoidReplacement } from './utils.unit.spec.js';
 
 describe('snapshot to markdown', () => {
   test('code', async () => {
