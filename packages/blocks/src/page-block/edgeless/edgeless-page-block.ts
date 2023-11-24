@@ -210,6 +210,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     elementUpdated: new Slot<{
       id: string;
+      props?: Record<string, unknown>;
     }>(),
     elementAdded: new Slot<string>(),
     elementRemoved: new Slot<{ id: string; element: EdgelessElement }>(),
