@@ -15,9 +15,10 @@ import {
   roundedSvg,
   triangleSvg,
 } from '../../../../../_common/icons/index.js';
-import type {
-  EdgelessTool,
-  ShapeToolState,
+import {
+  type EdgelessTool,
+  type ShapeToolState,
+  storage,
 } from '../../../../../_common/utils/index.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
@@ -131,8 +132,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   }
 
   private _tryLoadShapeLocalState() {
-    const key = 'blocksuite:' + this.edgeless.page.id + ':edgelessShape';
-    const shapeData = sessionStorage.getItem(key);
+    const shapeData = storage.get(this.edgeless.page.id, 'edgelessShape');
     let shapeToolState = null;
     if (shapeData) {
       shapeToolState = JSON.parse(shapeData);
@@ -166,9 +166,10 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
         };
 
         // Save shape tool state to session storage
-        sessionStorage.setItem(
-          'blocksuite:' + this.edgeless.page.id + ':edgelessShape',
-          JSON.stringify(shapeToolState)
+        storage.set(
+          this.edgeless.page.id,
+          JSON.stringify(shapeToolState),
+          'edgelessShape'
         );
 
         this._shapeToolLocalState = shapeToolState;

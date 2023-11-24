@@ -1,9 +1,10 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
-import type {
-  EdgelessTool,
-  TextTool,
+import {
+  type EdgelessTool,
+  storage,
+  type TextTool,
 } from '../../../../_common/utils/index.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../components/panel/color-panel.js';
 import { addText } from '../../utils/text.js';
@@ -69,8 +70,8 @@ export class TextToolController extends EdgelessToolController<TextTool> {
 
   private _tryLoadTextStateLocalRecord(tool: EdgelessTool) {
     if (tool.type !== 'text') return;
-    const key = 'blocksuite:' + this._edgeless.page.id + ':edgelessText';
-    const textData = sessionStorage.getItem(key);
+
+    const textData = storage.get(this._edgeless.page.id, 'edgelessText');
     if (textData) {
       try {
         const { color } = JSON.parse(textData);

@@ -1,6 +1,4 @@
-function buildViewportKey(pageId: string) {
-  return 'blocksuite:' + pageId + ':edgelessViewport';
-}
+import { storage } from './storage.js';
 
 type ViewportData =
   | {
@@ -16,13 +14,15 @@ type ViewportData =
       padding?: [number, number, number, number];
     };
 
+const suffix = 'edgelessViewport';
+
 export function saveViewportToSession(pageId: string, viewport: ViewportData) {
-  sessionStorage.setItem(buildViewportKey(pageId), JSON.stringify(viewport));
+  storage.set(pageId, JSON.stringify(viewport), suffix);
 }
 
 export function getViewportFromSession(pageId: string): ViewportData | null {
   try {
-    const storedViewport = sessionStorage.getItem(buildViewportKey(pageId));
+    const storedViewport = storage.get(pageId, suffix);
     return storedViewport ? JSON.parse(storedViewport) : null;
   } catch {
     return null;

@@ -1,4 +1,5 @@
 import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
+import { storage } from '../../_common/utils/storage.js';
 import {
   type EdgelessTool,
   LineWidth,
@@ -270,8 +271,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   }
 
   private _tryLoadShapeLocalState(): ShapeToolState | null {
-    const key = 'blocksuite:' + this.pageElement.page.id + ':edgelessShape';
-    const shapeData = sessionStorage.getItem(key);
+    const shapeData = storage.get(this.pageElement.page.id, 'edgelessShape');
     let shapeToolState = null;
     if (shapeData) {
       shapeToolState = JSON.parse(shapeData);

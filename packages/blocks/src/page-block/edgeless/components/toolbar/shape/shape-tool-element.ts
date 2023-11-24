@@ -9,7 +9,10 @@ import {
 } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../../../_common/utils/index.js';
+import {
+  type EdgelessTool,
+  storage,
+} from '../../../../../_common/utils/index.js';
 import {
   Bound,
   PhasorElementType,
@@ -262,8 +265,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   }
 
   override firstUpdated() {
-    const key = 'blocksuite:' + this.edgeless.page.id + ':edgelessShape';
-    const shapeData = sessionStorage.getItem(key);
+    const shapeData = storage.get(this.edgeless.page.id, 'edgelessShape');
     if (shapeData) {
       const shapeToolState = JSON.parse(shapeData);
       this._fillColor = shapeToolState.fillColor;

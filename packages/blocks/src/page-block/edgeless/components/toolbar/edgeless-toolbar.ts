@@ -34,6 +34,7 @@ import {
 } from '../../../../_common/icons/index.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
+import { storage } from '../../../../_common/utils/storage.js';
 import type { EdgelessTool } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
@@ -298,12 +299,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const edgelessTool = this.edgeless.tools.edgelessTool;
     const { type } = edgelessTool;
     if (type === 'brush') {
-      sessionStorage.setItem(
-        'blocksuite:' + this.edgeless.page.id + ':edgelessBrush',
+      storage.set(
+        this.edgeless.page.id,
         JSON.stringify({
           color: edgelessTool.color,
           lineWidth: edgelessTool.lineWidth,
-        })
+        }),
+        'edgelessBrush'
       );
     }
   };
@@ -312,11 +314,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const edgelessTool = this.edgeless.tools.edgelessTool;
     const { type } = edgelessTool;
     if (type === 'text') {
-      sessionStorage.setItem(
-        'blocksuite:' + this.edgeless.page.id + ':edgelessText',
+      storage.set(
+        this.edgeless.page.id,
         JSON.stringify({
           color: edgelessTool.color,
-        })
+        }),
+        'edgelessText'
       );
     }
   };

@@ -7,7 +7,10 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessTextIcon } from '../../../../../_common/icons/index.js';
-import { type EdgelessTool } from '../../../../../_common/utils/index.js';
+import {
+  type EdgelessTool,
+  storage,
+} from '../../../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
@@ -57,8 +60,7 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
   }
 
   private _tryLoadTextStateLocalColor() {
-    const key = 'blocksuite:' + this.edgeless.page.id + ':edgelessText';
-    const textData = sessionStorage.getItem(key);
+    const textData = storage.get(this.edgeless.page.id, 'edgelessText');
     let color = null;
     if (textData) {
       color = JSON.parse(textData).color;
