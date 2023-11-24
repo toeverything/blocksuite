@@ -342,8 +342,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     if (!surface) return nothing;
 
-    const frames = surface.getSortedBlocks(FRAME);
     const notes = surface.getBlocks([NOTE]);
+    const frames = surface.layer.frames;
     const layers = surface.layer.layers;
     const autoConnectedBlocks = new Map<AutoConnectElement, number>();
 
