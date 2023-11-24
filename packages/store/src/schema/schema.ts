@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { minimatch } from 'minimatch';
 import type * as Y from 'yjs';
 
-import { Block } from '../block/index.js';
+import { Block } from '../block/block.js';
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
 import { pageMigrations, workspaceMigrations } from '../migration/index.js';
 import type { BlockSchemaType } from './base.js';
