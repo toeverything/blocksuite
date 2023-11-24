@@ -567,7 +567,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             'hast:table:column',
             {
               type: columnType,
-              name: hastGetTextContent(o.node),
+              name: hastGetTextContent(hastGetTextChildrenOnlyAst(o.node)),
               data: Object.create(null),
               id: columnId,
             }
