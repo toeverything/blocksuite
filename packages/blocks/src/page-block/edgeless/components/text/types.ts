@@ -11,10 +11,3 @@ export type EdgelessCanvasTextEditor =
 
 export type EdgelessCanvasTextElement = ShapeElement | TextElement;
 export type EdgelessCanvasTextElementType = 'shape' | 'text';
-
-export enum TEXT_FONT_SIZE {
-  SMALL = 12,
-  MEDIUM = 20,
-  LARGE = 28,
-  XLARGE = 36,
-}

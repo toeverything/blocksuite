@@ -1,7 +1,10 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { NOTE_WIDTH } from '../_common/consts.js';
-import type { CssVariableName } from '../_common/theme/css-variables.js';
+import {
+  DEFAULT_NOTE_COLOR,
+  NOTE_SHADOWS,
+} from '../_common/edgeless/note/consts.js';
 import { BLOCK_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {
@@ -9,23 +12,13 @@ import type {
   IEdgelessElement,
 } from '../surface-block/elements/edgeless-element.js';
 import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
+import type { StrokeStyle } from '../surface-block/index.js';
 import {
   Bound,
   type IVec,
   type PointLocation,
   type SerializedXYWH,
 } from '../surface-block/index.js';
-
-export const NOTE_COLORS: CssVariableName[] = [
-  '--affine-background-secondary-color',
-  '--affine-tag-yellow',
-  '--affine-tag-red',
-  '--affine-tag-green',
-  '--affine-tag-blue',
-  '--affine-tag-purple',
-];
-
-export const DEFAULT_NOTE_COLOR = NOTE_COLORS[0];
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
@@ -34,6 +27,14 @@ export const NoteBlockSchema = defineBlockSchema({
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
     hidden: false,
+    edgeless: {
+      style: {
+        borderRadius: 8,
+        borderSize: 4,
+        borderStyle: 'solid',
+        shadowType: NOTE_SHADOWS[1],
+      },
+    },
   }),
   metadata: {
     version: 1,
@@ -58,16 +59,28 @@ export const NoteBlockSchema = defineBlockSchema({
   },
 });
 
-type Props = {
+type NoteProps = {
   xywh: SerializedXYWH;
   background: string;
   index: string;
   hidden: boolean;
+  edgeless: NoteEdgelessProps;
+};
+
+type NoteEdgelessProps = {
+  style: {
+    borderRadius: number;
+    borderSize: number;
+    borderStyle: StrokeStyle;
+    shadowType: string;
+  };
+  collapse: boolean;
+  collapsedHeight: number;
 };
 
 @EdgelessSelectableMixin
 export class NoteBlockModel
-  extends BaseBlockModel<Props>
+  extends BaseBlockModel<NoteProps>
   implements IEdgelessElement
 {
   override flavour!: EdgelessBlockType.NOTE;

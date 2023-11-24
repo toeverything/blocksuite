@@ -33,3 +33,25 @@ export interface IModelCoord {
   x: number;
   y: number;
 }
+
+export enum CanvasTextFontFamily {
+  Inter = 'blocksuite:surface:Inter',
+  Kalam = 'blocksuite:surface:Kalam',
+  Satoshi = 'blocksuite:surface:Satoshi',
+  Poppins = 'blocksuite:surface:Poppins',
+  Lora = 'blocksuite:surface:Lora',
+  BebasNeue = 'blocksuite:surface:BebasNeue',
+  OrelegaOne = 'blocksuite:surface:OrelegaOne',
+}
+export const CANVAS_TEXT_FONT_FAMILY = Object.values(CanvasTextFontFamily);
+
+export const enum CanvasTextFontWeight {
+  Light = '300',
+  Regular = '400',
+  SemiBold = '600',
+}
+
+export const enum CanvasTextFontStyle {
+  Normal = 'normal',
+  Italic = 'italic',
+}

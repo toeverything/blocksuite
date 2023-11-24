@@ -158,6 +158,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
     const remoteCursors: EdgelessRemoteSelectionWidget['_remoteCursors'] =
       new Map();
     const status = this.page.awarenessStore.getStates();
+
     this.selection.remoteCursor.forEach((cursorSelection, clientId) => {
       remoteCursors.set(clientId, {
         x: cursorSelection.x,

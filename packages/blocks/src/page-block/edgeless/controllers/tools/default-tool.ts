@@ -265,6 +265,20 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerDblClick(e: PointerEventState) {
+    if (this._page.readonly) {
+      const viewport = this._surface.viewport;
+      if (viewport.zoom === 1) {
+        // Fit to Screen
+        const { centerX, centerY, zoom } = this._edgeless.getFitToScreenData();
+        viewport.setViewport(zoom, [centerX, centerY], true);
+      } else {
+        // Zoom to 100% and Center
+        const [x, y] = viewport.toModelCoord(e.x, e.y);
+        viewport.setViewport(1, [x, y], true);
+      }
+      return;
+    }
+
     const selected = this._pick(e.x, e.y, {
       pierce: true,
       expand: 10,
@@ -359,7 +373,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       const noteService = _edgeless.getService(EdgelessBlockType.NOTE);
       const id = _surface.addElement(
         EdgelessBlockType.NOTE,
-        { xywh: selected.xywh },
+        {
+          xywh: selected.xywh,
+          edgeless: selected.edgeless,
+          background: selected.background,
+          hidden: selected.hidden,
+        },
         this._page.root?.id
       );
       const note = this._page.getBlockById(id);
@@ -379,11 +398,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     } else if (isImageBlock(selected)) {
       const imageService = _edgeless.getService(EdgelessBlockType.IMAGE);
       const json = imageService.block2Json(selected, []);
-      const id = this._surface.addElement(EdgelessBlockType.IMAGE, {
-        xywh: json.xywh,
-        sourceId: json.sourceId,
-        rotate: json.rotate,
-      });
+      const id = this._surface.addElement(
+        EdgelessBlockType.IMAGE,
+        {
+          xywh: json.xywh,
+          sourceId: json.sourceId,
+          rotate: json.rotate,
+        },
+        this._surface.model
+      );
       return _surface.pickById(id);
     } else {
       const id = _surface.addElement(

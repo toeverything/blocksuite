@@ -112,6 +112,16 @@ test.describe('multiple page', () => {
 >
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -140,6 +150,16 @@ test.describe('multiple page', () => {
   <affine:surface />
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -515,6 +535,16 @@ test.describe('reference node', () => {
   <affine:surface />
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -538,6 +568,16 @@ test.describe('reference node', () => {
 >
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -750,6 +790,16 @@ test.describe.skip('linked page with clipboard', () => {
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >

@@ -1,6 +1,5 @@
 import { noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { Workspace } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -97,16 +96,16 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
 
-    this._disposables.add(
-      this.block.page.slots.onYEvent.on(({ event }) => {
-        if (
-          event instanceof Workspace.Y.YTextEvent &&
-          event.path[0] === this.block.id
-        ) {
-          this.requestUpdate();
-        }
-      })
-    );
+    // this._disposables.add(
+    //   this.block.page.slots.onYEvent.on(({ event }) => {
+    //     if (
+    //       event instanceof Workspace.Y.YTextEvent &&
+    //       event.path[0] === this.block.id
+    //     ) {
+    //       this.requestUpdate();
+    //     }
+    //   })
+    // );
 
     this._disposables.add(
       this.block.propsUpdated.on(() => this.requestUpdate())

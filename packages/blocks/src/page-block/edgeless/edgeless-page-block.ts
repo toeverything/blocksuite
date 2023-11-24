@@ -30,7 +30,6 @@ import {
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
-import { keys, pick } from '../../_common/utils/iterable.js';
 import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
@@ -41,6 +40,7 @@ import {
   Bound,
   clamp,
   getCommonBound,
+  GroupElement,
   type IBound,
   intersects,
   type IVec,
@@ -53,7 +53,7 @@ import {
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
-import { FontLoader } from '../font-loader/index.js';
+import type { FontLoader } from '../font-loader/font-loader.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
@@ -210,10 +210,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     elementUpdated: new Slot<{
       id: string;
-      props: Record<string, unknown>;
     }>(),
     elementAdded: new Slot<string>(),
     elementRemoved: new Slot<{ id: string; element: EdgelessElement }>(),
+    elementResizeStart: new Slot(),
+    elementResizeEnd: new Slot(),
   };
 
   @query('affine-surface')
@@ -546,6 +547,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
       const element =
         this.page.getBlockById(id) ??
         (this.surface.pickById(id) as EdgelessElement);
+
+      if (element instanceof GroupElement) {
+        this.applyLocalRecord(element.childElements.map(e => e.id));
+        return;
+      }
+
       const updateProps: Record<string, unknown> = {};
       let flag = false;
 
@@ -598,18 +605,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _initFontloader() {
-    if (!this.fontLoader) this.fontLoader = new FontLoader();
+    const fontLoader = this.service?.fontLoader;
+    assertExists(fontLoader);
 
-    this._disposables.add(
-      this.fontLoader.slots.loaded.on(font => {
-        if (font !== 'Kalam:n4,n7' || !this.surface) return;
-
-        if (this.surface.getElementsByType('text').length > 0) {
-          this.surface.refresh();
-        }
-      })
-    );
-    this.fontLoader.load(['Kalam:n4,n7']);
+    fontLoader.load.then(() => {
+      this.surface.refresh();
+    });
   }
 
   private _initReadonlyListener() {
@@ -659,6 +660,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }
 
     this._initViewport();
+
+    if (this.page.readonly) {
+      this.tools.setEdgelessTool({ type: 'pan', panning: true });
+    }
 
     requestAnimationFrame(() => {
       this._handleToolbarFlag();
@@ -759,21 +764,15 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   private _initLocalRecordManager() {
     this.localRecord = new LocalRecordManager<PhasorElementLocalRecordValues>();
-    this.localRecord.slots.updated.on(({ id, data }) => {
+    this.localRecord.slots.updated.on(({ id }) => {
       const element = this.surface.pickById(id);
 
       if (!element) return;
 
       this.surface.refresh();
 
-      const changedProps = pick(
-        data.new,
-        keys(data.new).filter(key => key in element)
-      );
-
       this.slots.elementUpdated.emit({
         id,
-        props: changedProps,
       });
     });
 
@@ -807,7 +806,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
           case 'update':
             this.slots.elementUpdated.emit({
               id: event.id,
-              props: event.props,
             });
             break;
           case 'add':

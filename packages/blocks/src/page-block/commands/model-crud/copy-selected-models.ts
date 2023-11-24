@@ -6,26 +6,22 @@ import { Slice } from '@blocksuite/store';
 import { matchFlavours } from '../../../_common/utils/index.js';
 
 export const copySelectedModelsCommand: Command<
-  'selectedModels',
+  'selectedModels' | 'onCopy',
   never,
   { event: ClipboardEvent }
 > = (ctx, next) => {
-  const selectedModels = ctx.selectedModels;
+  const models = ctx.selectedModels;
   assertExists(
-    selectedModels,
+    models,
     '`selectedModels` is required, you need to use `getSelectedModels` command before adding this command to the pipeline.'
   );
 
-  const models: BaseBlockModel[] = selectedModels.map(model => model.clone());
   const traverse = (model: BaseBlockModel) => {
     const isDatabase = matchFlavours(model, ['affine:database']);
     const children = isDatabase
       ? model.children
       : model.children.filter(child => {
           const idx = models.findIndex(m => m.id === child.id);
-          if (idx < 0) {
-            model.childMap.delete(child.id);
-          }
           return idx >= 0;
         });
 
@@ -36,18 +32,24 @@ export const copySelectedModelsCommand: Command<
       }
       traverse(child);
     });
-    model.children = children;
+    // model.children = children;
     return;
   };
   models.forEach(traverse);
 
   const slice = Slice.fromModels(ctx.std.page, models);
-  ctx.std.clipboard.copy(ctx.event, slice);
+
+  ctx.std.clipboard.copy(ctx.event, slice).then(() => {
+    ctx.onCopy?.();
+  });
   return next();
 };
 
 declare global {
   namespace BlockSuite {
+    interface CommandData {
+      onCopy?: () => void;
+    }
     interface Commands {
       copySelectedModels: typeof copySelectedModelsCommand;
     }

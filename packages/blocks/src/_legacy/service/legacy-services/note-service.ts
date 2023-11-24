@@ -32,6 +32,8 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
       xywh: block.xywh,
       background: block.background,
       children,
+      hidden: block.hidden,
+      edgeless: block.edgeless,
     };
   }
 }

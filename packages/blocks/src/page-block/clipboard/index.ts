@@ -34,9 +34,11 @@ export class ClipboardController implements ReactiveController {
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
     }
-    if (this._enabled) {
-      this._init();
-    }
+    this.host.updateComplete.then(() => {
+      if (this._enabled) {
+        this._init();
+      }
+    });
   }
 
   hostDisconnected() {
@@ -74,10 +76,11 @@ export class ClipboardController implements ReactiveController {
     });
   };
 
-  private _copySelected = (event: ClipboardEvent) => {
+  private _copySelected = (event: ClipboardEvent, onCopy?: () => void) => {
     return this._std.command
       .pipe()
       .withRoot()
+      .with({ onCopy })
       .getSelectedModels()
       .copySelectedModels({ event });
   };
@@ -93,9 +96,16 @@ export class ClipboardController implements ReactiveController {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
-    this._copySelected(e)
-      .try(cmd => [cmd.deleteText(), cmd.deleteSelectedModels()])
-      .run();
+    this._copySelected(e, () => {
+      this._std.command
+        .pipe()
+        .withRoot()
+        .try(cmd => [
+          cmd.getTextSelection().deleteText(),
+          cmd.getBlockSelections().deleteSelectedModels(),
+        ])
+        .run();
+    }).run();
   };
 
   public onPagePaste: UIEventHandler = ctx => {

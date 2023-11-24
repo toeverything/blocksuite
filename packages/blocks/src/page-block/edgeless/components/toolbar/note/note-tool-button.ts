@@ -6,24 +6,13 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
 import { ArrowUpIcon, NoteIcon } from '../../../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
 import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import type { EdgelessNoteMenu } from './note-menu.js';
-
-export const NOTE_COLORS: CssVariableName[] = [
-  '--affine-background-secondary-color',
-  '--affine-tag-yellow',
-  '--affine-tag-red',
-  '--affine-tag-green',
-  '--affine-tag-blue',
-  '--affine-tag-purple',
-];
-
-export const DEFAULT_NOTE_COLOR = NOTE_COLORS[0];
 
 @customElement('edgeless-note-tool-button')
 export class EdgelessNoteToolButton extends WithDisposable(LitElement) {

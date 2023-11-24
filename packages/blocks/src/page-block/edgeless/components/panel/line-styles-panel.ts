@@ -38,6 +38,7 @@ export function LineStylesPanel({
   const lineSizePanel = html`
     <edgeless-line-width-panel
       .selectedSize=${selectedLineSize as LineWidth}
+      .disable=${selectedLineStyle === 'none'}
       @select=${(e: LineWidthEvent) => {
         onClick?.({
           type: 'size',

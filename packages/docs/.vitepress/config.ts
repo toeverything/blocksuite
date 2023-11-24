@@ -58,6 +58,8 @@ export default defineConfig({
       {
         text: 'API Walkthrough',
         items: [
+          { text: 'Selection API', link: '/selection-api' },
+          { text: 'Event API', link: '/event-api' },
           {
             text: 'Block Spec APIs',
             link: '/block-spec-apis',
@@ -68,8 +70,6 @@ export default defineConfig({
               { text: 'Block Widgets', link: '/block-widgets' },
             ],
           },
-          { text: 'Selection API', link: '/selection-api' },
-          { text: 'Event API', link: '/event-api' },
           { text: 'Command API', link: '/command-api' },
         ],
       },

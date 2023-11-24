@@ -29,7 +29,11 @@ import {
   undoByKeyboard,
   updateBlockType,
 } from './utils/actions/index.js';
-import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
+import {
+  assertRichTexts,
+  assertRichTextVRange,
+  assertStoreMatchJSX,
+} from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
 /**
@@ -95,6 +99,16 @@ test('use markdown syntax can create code block', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -128,6 +142,16 @@ test('use markdown syntax can create code block', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -326,6 +350,8 @@ test('drag copy paste', async ({ page }) => {
 
   const content = await getVirgoSelectionText(page);
   expect(content).toBe('useuse');
+
+  await assertRichTextVRange(page, 0, 6, 0);
 });
 
 test('keyboard selection and copy paste', async ({ page }) => {
@@ -343,6 +369,8 @@ test('keyboard selection and copy paste', async ({ page }) => {
 
   const content = await getVirgoSelectionText(page);
   expect(content).toBe('useuse');
+
+  await assertRichTextVRange(page, 0, 3, 0);
 });
 
 // FIXME: this test failed in headless mode but passed in non-headless mode
@@ -368,6 +396,16 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -416,6 +454,16 @@ test('use code block copy menu of code block copy whole code block', async ({
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >

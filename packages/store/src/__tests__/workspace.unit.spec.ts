@@ -32,7 +32,7 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
-  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+  return { id: 'test-workspace', idGenerator, schema };
 }
 
 const defaultPageId = 'page:home';
@@ -314,6 +314,14 @@ describe('addBlock', () => {
         'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'sys:children': [],
@@ -489,6 +497,14 @@ describe('deleteBlock', () => {
         'sys:children': ['2', '3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'prop:text': '',
@@ -543,6 +559,14 @@ describe('deleteBlock', () => {
         'sys:children': ['2'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'prop:text': '',
@@ -588,6 +612,14 @@ describe('deleteBlock', () => {
         'sys:children': ['3', '4'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
       },
       '3': {
         'prop:text': '',
@@ -632,6 +664,14 @@ describe('deleteBlock', () => {
         'sys:children': ['2', '3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'prop:text': '',
@@ -691,6 +731,14 @@ describe('deleteBlock', () => {
         'sys:children': ['3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
       },
       '3': {
         'prop:text': '',
@@ -746,6 +794,14 @@ describe('deleteBlock', () => {
         'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'sys:children': [],
@@ -774,6 +830,14 @@ describe('deleteBlock', () => {
         'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
       },
     });
     assert.equal(root.children.length, 1);
@@ -873,6 +937,16 @@ describe('workspace.exportJSX works', () => {
       <affine:page>
         <affine:note
           prop:background="--affine-background-secondary-color"
+          prop:edgeless={
+            {
+              "style": {
+                "borderRadius": 8,
+                "borderSize": 4,
+                "borderStyle": "solid",
+                "shadowType": "--affine-note-shadow-box",
+              },
+            }
+          }
           prop:hidden={false}
           prop:index="a0"
         >

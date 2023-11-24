@@ -119,6 +119,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @state()
   private _toolbarVisible = false;
 
+  @state()
+  private _isResizing = false;
+
   private _cancelRestoreWillchange: (() => void) | null = null;
 
   private _noteResizeObserver = new NoteResizeObserver();
@@ -142,10 +145,13 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     this._disposables.add(
       page.root.childrenUpdated.on(resetNoteResizeObserver)
     );
+    this.edgeless.surface.getBlocks(NOTE).forEach(note => {
+      this._disposables.add(note.propsUpdated.on(resetNoteResizeObserver));
+    });
   }
 
   get isDragging() {
-    return this.selectedRect.dragging || this.edgeless.tools;
+    return this.selectedRect.dragging;
   }
 
   aboutToChangeViewport() {
@@ -316,6 +322,18 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         this._updateAutoConnect();
       })
     );
+
+    _disposables.add(
+      edgeless.slots.elementResizeStart.on(() => {
+        this._isResizing = true;
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementResizeEnd.on(() => {
+        this._isResizing = false;
+      })
+    );
   }
 
   override render() {
@@ -371,7 +389,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             .frames=${frames}
           >
           </edgeless-frames-container>
-          ${readonly
+          ${readonly || this._isResizing
             ? nothing
             : html`<affine-note-slicer
                 .edgelessPage=${edgeless}
@@ -406,7 +424,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             })}
         </div>
       </div>
-      <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>
+      ${this._isResizing
+        ? nothing
+        : html`
+            <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>
+          `}
       <edgeless-dragging-area-rect
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>

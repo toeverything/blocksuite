@@ -120,7 +120,7 @@ export function getPreviousBlock(model: BaseBlockModel): BaseBlockModel | null {
 
     const prev = getPrev(model);
     if (prev) {
-      if (prev.role === 'content') {
+      if (prev.role === 'content' && !matchFlavours(prev, ['affine:frame'])) {
         return prev;
       } else {
         return iterate(prev);

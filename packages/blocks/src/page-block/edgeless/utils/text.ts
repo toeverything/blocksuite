@@ -3,6 +3,11 @@ import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
 import type { FrameBlockModel, GroupElement } from '../../../index.js';
+import {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+} from '../../../surface-block/consts.js';
 import { ShapeElement, ShapeStyle } from '../../../surface-block/index.js';
 import {
   Bound,
@@ -21,16 +26,10 @@ import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
-  GENERAL_CANVAS_FONT_FAMILY,
-  SCRIBBLED_CANVAS_FONT_FAMILY,
   SHAPE_FILL_COLOR_BLACK,
   SHAPE_TEXT_COLOR_PURE_BLACK,
   SHAPE_TEXT_COLOR_PURE_WHITE,
 } from './consts.js';
-
-export type CANVAS_TEXT_FONT =
-  | typeof GENERAL_CANVAS_FONT_FAMILY
-  | typeof SCRIBBLED_CANVAS_FONT_FAMILY;
 
 export function mountTextElementEditor(
   textElement: TextElement,
@@ -77,8 +76,8 @@ export function mountShapeTextEditor(
       color,
       fontFamily:
         shapeElement.shapeStyle === ShapeStyle.General
-          ? GENERAL_CANVAS_FONT_FAMILY
-          : SCRIBBLED_CANVAS_FONT_FAMILY,
+          ? CanvasTextFontFamily.Inter
+          : CanvasTextFontFamily.Kalam,
     });
   }
   const updatedElement = edgeless.surface.pickById(shapeElement.id);
@@ -130,7 +129,7 @@ export function addText(
   edgeless: EdgelessPageBlockComponent,
   event: PointerEventState,
   color: string = GET_DEFAULT_TEXT_COLOR(),
-  fontFamily: CANVAS_TEXT_FONT = GENERAL_CANVAS_FONT_FAMILY
+  fontFamily: CanvasTextFontFamily = CanvasTextFontFamily.Inter
 ) {
   const [x, y] = edgeless.surface.viewport.toModelCoord(event.x, event.y);
   const selected = edgeless.surface.pickTop(x, y);
@@ -145,10 +144,10 @@ export function addText(
       text: new Workspace.Y.Text(),
       textAlign: 'left',
       fontFamily,
+      fontWeight: CanvasTextFontWeight.Regular,
+      fontStyle: CanvasTextFontStyle.Normal,
       fontSize: 24,
       color: color,
-      bold: false,
-      italic: false,
     });
     edgeless.page.captureSync();
     const textElement = edgeless.surface.pickById(id);

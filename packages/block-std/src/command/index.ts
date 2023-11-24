@@ -232,5 +232,8 @@ declare global {
 
     type CommandName = keyof Commands;
     type CommandDataName = keyof CommandData;
+
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    type CommandChain<In extends object = {}> = Chain<In>;
   }
 }

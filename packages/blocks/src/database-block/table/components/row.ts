@@ -58,9 +58,12 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     }
     .affine-database-block-row .show-on-hover-row {
       visibility: hidden;
+      opacity: 0;
+      transition: opacity 150ms cubic-bezier(0.42, 0, 1, 1);
     }
     .affine-database-block-row:hover .show-on-hover-row {
       visibility: visible;
+      opacity: 1;
     }
 
     .row-op {

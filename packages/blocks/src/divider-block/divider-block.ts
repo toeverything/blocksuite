@@ -28,6 +28,14 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.handleEvent('click', () => {
+      this.root.selection.set([
+        this.root.selection.getInstance('block', {
+          path: this.path,
+        }),
+      ]);
+    });
   }
 
   override firstUpdated() {

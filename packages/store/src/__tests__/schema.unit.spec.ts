@@ -9,17 +9,18 @@ import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import { Schema } from '../schema';
-import { defineBlockSchema } from '../schema/base';
+// import some blocks
+import { defineBlockSchema } from '../schema/base.js';
 import { SchemaValidateError } from '../schema/error.js';
-import { Workspace } from '../workspace';
-import { Generator } from '../workspace/store';
+import { Schema } from '../schema/index.js';
+import { Workspace } from '../workspace/index.js';
+import { Generator } from '../workspace/store.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
-  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+  return { id: 'test-workspace', idGenerator, schema };
 }
 
 const TestCustomNoteBlockSchema = defineBlockSchema({

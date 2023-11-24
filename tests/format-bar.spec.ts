@@ -8,6 +8,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  getBoundingBox,
   getSelectionRect,
   initEmptyParagraphState,
   initImageState,
@@ -62,7 +63,9 @@ test('should format quick bar show when select text', async ({ page }) => {
   // Even not any button is clicked, the format quick bar should't be hidden
   await expect(formatBar).toBeVisible();
 
-  await page.mouse.click(0, 0);
+  const noteEl = page.locator('affine-note');
+  const { x, y } = await getBoundingBox(noteEl);
+  await page.mouse.click(x, y);
   await expect(formatBar).not.toBeVisible();
 });
 
@@ -208,6 +211,16 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -255,6 +268,16 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -311,6 +334,16 @@ test.fixme(
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -348,6 +381,16 @@ test.fixme(
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -389,6 +432,16 @@ test.fixme(
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -436,6 +489,16 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -483,6 +546,16 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -525,6 +598,16 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -564,6 +647,16 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -604,6 +697,16 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -630,6 +733,16 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -659,6 +772,16 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -870,6 +993,16 @@ test('should format quick bar work in single block selection', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -898,7 +1031,9 @@ test('should format quick bar work in single block selection', async ({
     noteId
   );
 
-  await page.mouse.click(0, 0);
+  const noteEl = page.locator('affine-note');
+  const { x, y, width, height } = await getBoundingBox(noteEl);
+  await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBar).not.toBeVisible();
 });
 
@@ -944,6 +1079,16 @@ test('should format quick bar work in multiple block selection', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -987,7 +1132,9 @@ test('should format quick bar work in multiple block selection', async ({
     noteId
   );
 
-  await page.mouse.click(0, 0);
+  const noteEl = page.locator('affine-note');
+  const { x, y, width, height } = await getBoundingBox(noteEl);
+  await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBarController.formatBar).not.toBeVisible();
 });
 
@@ -1020,6 +1167,16 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1052,6 +1209,16 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1072,7 +1239,10 @@ test('should format quick bar with block selection works when update block type'
   );
   await expect(formatBarController.formatBar).toBeVisible();
   await expect(blockSelections).toHaveCount(3);
-  await page.mouse.click(0, 0);
+
+  const noteEl = page.locator('affine-note');
+  const { x, y, width, height } = await getBoundingBox(noteEl);
+  await page.mouse.click(x + width / 2, y + height / 2);
   await expect(formatBarController.formatBar).not.toBeVisible();
 });
 
@@ -1100,6 +1270,16 @@ test('should format quick bar show after convert to code block', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1255,7 +1435,9 @@ test('should show format-quick-bar and select all text of the block when triple 
 
   await assertRichTextVRange(page, 0, 0, 5);
 
-  await page.mouse.click(0, 0);
+  const noteEl = page.locator('affine-note');
+  const { x, y, width, height } = await getBoundingBox(noteEl);
+  await page.mouse.click(x + width / 2, y + height / 2);
 
   await expect(formatBar).toBeHidden();
 
@@ -1320,27 +1502,24 @@ test('should register custom elements in format quick bar', async ({
   await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
 });
 
-test.fixme(
-  'format quick bar should not break cursor jumping',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    await dragBetweenIndices(page, [1, 3], [1, 2]);
+test('format quick bar should not break cursor jumping', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [1, 3], [1, 2]);
 
-    const { formatBar } = getFormatBar(page);
-    await expect(formatBar).toBeVisible();
+  const { formatBar } = getFormatBar(page);
+  await expect(formatBar).toBeVisible();
 
-    await pressArrowUp(page);
-    await type(page, '0');
-    await assertRichTexts(page, ['1203', '456', '789']);
+  await pressArrowUp(page);
+  await type(page, '0');
+  await assertRichTexts(page, ['1203', '456', '789']);
 
-    await dragBetweenIndices(page, [1, 3], [1, 2]);
-    await pressArrowDown(page);
-    await type(page, '0');
-    await assertRichTexts(page, ['1203', '456', '7809']);
-  }
-);
+  await dragBetweenIndices(page, [1, 3], [1, 2]);
+  await pressArrowDown(page);
+  await type(page, '0');
+  await assertRichTexts(page, ['1203', '456', '7809']);
+});
 
 test('selecting image should not show format bar', async ({ page }) => {
   test.info().annotations.push({

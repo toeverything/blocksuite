@@ -1,5 +1,6 @@
 import { toBlockProps } from '../utils/utils.js';
-import type { BlockProps, YBlock } from '../workspace/page.js';
+import type { YBlock } from '../workspace/block.js';
+import type { BlockProps } from '../workspace/page.js';
 import type { ProxyManager } from '../yjs/index.js';
 
 export function toBlockMigrationData(

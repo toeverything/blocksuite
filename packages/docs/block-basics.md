@@ -29,7 +29,7 @@ const newBlockId = page.addBlock('affine:page', props);
 
 `page.addBlock` returns the auto-generated `id` of the added block, rather than the block instance. The block instance will be added synchronously to the page, and can be retrieved by calling `page.getBlockById(id)`. To access any block on the page's block tree, simply reference it using `page.root.children[0].children[1]`.
 
-Each block instance on a page is a plain JavaScript model, representing a node on the block tree [document](./editor-state#document). At a minimum, each block node contains three fields:
+Each block instance on a page is a plain JavaScript model, representing a node on the block tree document. At a minimum, each block node contains three fields:
 
 - `id` for the unique identifier of the block.
 - `flavour` for the block type.
