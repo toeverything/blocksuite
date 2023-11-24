@@ -59,12 +59,12 @@ export class ToggleSwitch extends LitElement {
   on = false;
 
   @property({ attribute: false })
-  onChange?: () => void;
+  onChange?: (on: boolean) => void;
 
   private _toggleSwitch() {
     this.on = !this.on;
     if (this.onChange) {
-      this.onChange();
+      this.onChange(this.on);
     }
   }
 
