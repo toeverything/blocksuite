@@ -40,29 +40,40 @@ export class Block {
         if (type.action === 'update' || type.action === 'add') {
           const value = this.yBlock.get(key);
           const keyName = key.replace('prop:', '');
-          const proxy = valueToProps(value, {
-            onChange: () => {
-              this.model.propsUpdated.emit();
-            },
+          const proxy = this._getPropsProxy(keyName, value);
+          this._byPassUpdate(() => {
+            // @ts-ignore
+            this.model[keyName] = proxy;
           });
-          this._byPassProxy = true;
-          // @ts-ignore
-          this.model[keyName] = proxy;
-          this._byPassProxy = false;
+          this.model.propsUpdated.emit({ name: keyName });
           return;
         }
         if (type.action === 'delete') {
           const keyName = key.replace('prop:', '');
-          this._byPassProxy = true;
-          // @ts-ignore
-          delete this.model[keyName];
-          this._byPassProxy = false;
+          this._byPassUpdate(() => {
+            // @ts-ignore
+            delete this.model[keyName];
+          });
+          this.model.propsUpdated.emit({ name: keyName });
           return;
         }
       });
-      this.model.propsUpdated.emit();
     });
   }
+
+  private _byPassUpdate = (fn: () => void) => {
+    this._byPassProxy = true;
+    fn();
+    this._byPassProxy = false;
+  };
+
+  private _getPropsProxy = (name: string, value: unknown) => {
+    return valueToProps(value, {
+      onChange: () => {
+        this.model.propsUpdated.emit({ name });
+      },
+    });
+  };
 
   private _parseYBlock() {
     let id: string | undefined;
@@ -73,11 +84,7 @@ export class Block {
     this.yBlock.forEach((value, key) => {
       if (key.startsWith('prop:')) {
         const keyName = key.replace('prop:', '');
-        const proxy = valueToProps(value, {
-          onChange: () => {
-            this.model.propsUpdated.emit();
-          },
-        });
+        const proxy = this._getPropsProxy(keyName, value);
         props[keyName] = proxy;
       }
 
@@ -129,11 +136,7 @@ export class Block {
         ) {
           const yValue = propsToValue(value);
           this.yBlock.set(`prop:${p}`, yValue);
-          const proxy = valueToProps(yValue, {
-            onChange: () => {
-              this.model.propsUpdated.emit();
-            },
-          });
+          const proxy = this._getPropsProxy(p, yValue);
           return Reflect.set(target, p, proxy, receiver);
         }
 
@@ -149,7 +152,7 @@ export class Block {
           model.keys.includes(p)
         ) {
           this.yBlock.delete(`prop:${p}`);
-          this.model.propsUpdated.emit();
+          this.model.propsUpdated.emit({ name: p });
         }
 
         return Reflect.deleteProperty(target, p);

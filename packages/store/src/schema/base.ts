@@ -187,7 +187,7 @@ export class BaseBlockModel<
 
   created = new Slot();
   deleted = new Slot();
-  propsUpdated = new Slot();
+  propsUpdated = new Slot<{ name: string }>();
   childrenUpdated = new Slot();
 
   get childMap() {
@@ -228,13 +228,6 @@ export class BaseBlockModel<
       return this;
     }
     return this.children[this.children.length - 1].lastChild();
-  }
-
-  firstItem(): BaseBlockModel | null {
-    if (!this.children.length) {
-      return this;
-    }
-    return this.children[0];
   }
 
   lastItem(): BaseBlockModel | null {
