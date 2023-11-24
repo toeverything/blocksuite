@@ -695,7 +695,15 @@ export class Page extends BlockTree {
       );
       return;
     }
-    this._onBlockAdded(id);
+    this._onBlockAdded(id, {
+      onYBlockUpdated: block => {
+        this.slots.blockUpdated.emit({
+          type: 'update',
+          id,
+          flavour: block.id,
+        });
+      },
+    });
     const block = this._blocks.get(id);
     assertExists(block);
     const model = block.model;

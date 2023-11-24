@@ -8,6 +8,10 @@ import { propsToValue, valueToProps } from './utils.js';
 
 export type YBlock = Y.Map<unknown>;
 
+export type BlockOptions = Partial<{
+  onYBlockUpdated: (block: Block) => void;
+}>;
+
 export class Block {
   readonly model: BaseBlockModel;
   readonly id: string;
@@ -17,7 +21,8 @@ export class Block {
 
   constructor(
     readonly schema: Schema,
-    readonly yBlock: YBlock
+    readonly yBlock: YBlock,
+    readonly options: BlockOptions = {}
   ) {
     const { id, flavour, yChildren, props } = this._parseYBlock();
 
@@ -58,6 +63,10 @@ export class Block {
           return;
         }
       });
+    });
+
+    this.yBlock.observeDeep(() => {
+      this.options.onYBlockUpdated?.(this);
     });
   }
 
