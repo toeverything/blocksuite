@@ -519,6 +519,12 @@ export class Page extends BlockTree {
 
       callBackOrProps();
     });
+
+    this.slots.blockUpdated.emit({
+      type: 'update',
+      id: model.id,
+      flavour: model.flavour,
+    });
   }
 
   addSiblingBlocks(
