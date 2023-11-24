@@ -434,7 +434,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     const walker = new ASTWalker<MarkdownAST, BlockSnapshot>();
     walker.setONodeTypeGuard(
       (node): node is MarkdownAST =>
-        'type' in (node as object) && (node as MarkdownAST).type !== undefined
+        !Array.isArray(node) &&
+        'type' in (node as object) &&
+        (node as MarkdownAST).type !== undefined
     );
     walker.setEnter(async (o, context) => {
       switch (o.node.type) {
@@ -542,8 +544,8 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   o.node.checked !== null
                     ? 'todo'
                     : context.getNodeContext('mdast:list:ordered')
-                    ? 'numbered'
-                    : 'bulleted',
+                      ? 'numbered'
+                      : 'bulleted',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta:

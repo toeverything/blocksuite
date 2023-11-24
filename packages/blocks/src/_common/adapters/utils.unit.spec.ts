@@ -1,5 +1,9 @@
 import type { BlockSnapshot } from '@blocksuite/store';
 
+export function logJson(ast: unknown) {
+  console.log(JSON.stringify(ast, null, 2));
+}
+
 export function nanoidReplacement(snapshot: BlockSnapshot) {
   return JSON.parse(nanoidReplacementString(JSON.stringify(snapshot)));
 }

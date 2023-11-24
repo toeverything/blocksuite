@@ -1,3 +1,5 @@
+import { assertEquals } from '@blocksuite/global/utils';
+
 import type { AssetsManager } from '../transformer/assets.js';
 import type {
   BlockSnapshot,
@@ -105,6 +107,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
   walk = async (oNode: ONode, tNode: TNode) => {
     this.context.openNode(tNode);
     await this._visit({ node: oNode, parent: null, prop: null, index: null });
+    assertEquals(this.context.stack.length, 1);
     return this.context.currentNode();
   };
 
@@ -132,7 +135,11 @@ export class ASTWalker<ONode extends object, TNode extends object> {
             i += 1
           ) {
             const item = value[i];
-            if (item !== null && this._isONode(item)) {
+            if (
+              item !== null &&
+              typeof item === 'object' &&
+              this._isONode(item)
+            ) {
               await this._visit({
                 node: item,
                 parent: o.node,
