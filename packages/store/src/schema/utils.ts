@@ -1,13 +1,10 @@
 import { toBlockProps } from '../utils/utils.js';
 import type { YBlock } from '../workspace/block.js';
 import type { BlockProps } from '../workspace/page.js';
-import type { ProxyManager } from '../yjs/index.js';
+import { transformData } from '../yjs/index.js';
 
-export function toBlockMigrationData(
-  yBlock: YBlock,
-  proxy: ProxyManager
-): Partial<BlockProps> {
-  const props = toBlockProps(yBlock, proxy);
+export function toBlockMigrationData(yBlock: YBlock): Partial<BlockProps> {
+  const props = toBlockProps(yBlock);
   props.id = yBlock.get('sys:id') as string;
   props.flavour = yBlock.get('sys:flavour') as string;
 
@@ -20,7 +17,7 @@ export function toBlockMigrationData(
         throw new Error('key cannot be a symbol');
       }
 
-      const data = proxy.transformData(value, x => yBlock.set(`prop:${p}`, x));
+      const data = transformData(value, x => yBlock.set(`prop:${p}`, x));
       return Reflect.set(target, p, data, receiver);
     },
     get: (target, p, receiver) => {

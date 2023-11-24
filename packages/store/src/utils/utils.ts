@@ -8,8 +8,8 @@ import { internalPrimitives } from '../schema/base.js';
 import type { YBlock } from '../workspace/block.js';
 import type { Workspace } from '../workspace/index.js';
 import type { BlockProps, YBlocks } from '../workspace/page.js';
-import type { ProxyManager, ProxyOptions } from '../yjs/index.js';
-import { canToProxy, canToY } from '../yjs/index.js';
+import type { ProxyOptions } from '../yjs/index.js';
+import { canToProxy, canToY, createYProxy } from '../yjs/index.js';
 import { Boxed, native2Y, Text } from '../yjs/index.js';
 
 export function assertValidChildren(
@@ -53,7 +53,6 @@ export function syncBlockProps(
 
 export function valueToProps(
   value: unknown,
-  proxy: ProxyManager,
   options: ProxyOptions<never>
 ): unknown {
   if (Boxed.is(value)) {
@@ -65,7 +64,7 @@ export function valueToProps(
   }
 
   if (canToProxy(value)) {
-    return proxy.createYProxy(value, options);
+    return createYProxy(value, options);
   }
 
   return value;
@@ -89,7 +88,6 @@ export function propsToValue(value: unknown): unknown {
 
 export function toBlockProps(
   yBlock: YBlock,
-  proxy: ProxyManager,
   options: ProxyOptions<Record<string, unknown>> = {}
 ): Partial<BlockProps> {
   const prefixedProps = yBlock.toJSON();
@@ -99,7 +97,7 @@ export function toBlockProps(
     if (prefixedKey.startsWith('prop:')) {
       const key = prefixedKey.replace('prop:', '');
       const realValue = yBlock.get(prefixedKey);
-      props[key] = valueToProps(realValue, proxy, options);
+      props[key] = valueToProps(realValue, options);
     }
   });
 
