@@ -9,6 +9,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { DEFAULT_EDGELESS_PROP } from '../../../../_common/edgeless/note/consts.js';
 import {
   ExpandIcon,
   HiddenIcon,
@@ -216,6 +217,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   private _setShadowType(shadowType: string) {
     this.notes.forEach(note => {
+      if (!note.edgeless) {
+        // FIXME: this is a temporary fix for the note without edgeless
+        note.edgeless = DEFAULT_EDGELESS_PROP;
+      }
       note.edgeless.style.shadowType = shadowType;
     });
   }
@@ -246,12 +251,18 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   private _setStrokeWidth(borderSize: number) {
     this.notes.forEach(note => {
+      if (!note.edgeless) {
+        note.edgeless = DEFAULT_EDGELESS_PROP;
+      }
       note.edgeless.style.borderSize = borderSize;
     });
   }
 
   private _setStrokeStyle(borderStyle: StrokeStyle) {
     this.notes.forEach(note => {
+      if (!note.edgeless) {
+        note.edgeless = DEFAULT_EDGELESS_PROP;
+      }
       note.edgeless.style.borderStyle = borderStyle;
     });
   }
@@ -279,15 +290,24 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   private _setBorderRadius = (size: number) => {
     this.notes.forEach(note => {
+      if (!note.edgeless) {
+        note.edgeless = DEFAULT_EDGELESS_PROP;
+      }
       note.edgeless.style.borderRadius = size;
     });
   };
 
   private _setCollapse() {
     this.notes.forEach(element => {
-      const { collapse, collapsedHeight } = element.edgeless;
+      const { edgeless } = element;
+      const collapse = edgeless ? element.edgeless.collapse : false;
+      const collapsedHeight = edgeless ? element.edgeless.collapsedHeight : 0;
 
       const bound = Bound.deserialize(element.xywh);
+      if (!edgeless) {
+        element.edgeless = DEFAULT_EDGELESS_PROP;
+      }
+
       if (collapse) {
         element.edgeless.collapsedHeight = bound.h;
         element.edgeless.collapse = false;
@@ -350,10 +370,11 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     const enableIndex =
       this.surface.page.awarenessStore.getFlag('enable_note_index');
     const { hidden, background, edgeless } = note;
-    const { shadowType, borderRadius, borderSize, borderStyle } =
-      edgeless.style;
-
-    const { collapse } = edgeless;
+    const borderRadius = edgeless ? edgeless.style.borderRadius : 8;
+    const borderSize = edgeless ? edgeless.style.borderSize : 4;
+    const borderStyle = edgeless ? edgeless.style.borderStyle : 'solid';
+    const shadowType = edgeless ? edgeless.style.shadowType : 'none';
+    const collapse = edgeless ? edgeless.collapse : false;
 
     return html`
       ${enableIndex

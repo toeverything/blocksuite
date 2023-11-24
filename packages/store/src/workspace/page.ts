@@ -695,6 +695,7 @@ export class Page extends BlockTree {
       );
       return;
     }
+
     this._onBlockAdded(id, {
       onChange: (block, key) => {
         block.model.propsUpdated.emit({ key });
