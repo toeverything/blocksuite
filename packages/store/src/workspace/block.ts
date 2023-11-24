@@ -1,8 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
+import { BaseBlockModel } from '../schema/base.js';
 import type { Schema } from '../schema/index.js';
-import { BaseBlockModel } from '../schema/index.js';
 import { propsToValue, valueToProps } from '../utils/utils.js';
 import type { UnRecord } from '../yjs/index.js';
 
