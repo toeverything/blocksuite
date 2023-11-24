@@ -1,13 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
-import type { BaseBlockModel, Schema } from '../schema/index.js';
-import { internalPrimitives } from '../schema/index.js';
-import { propsToValue } from '../utils/utils.js';
-import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
+import type { BaseBlockModel, Schema } from '../../schema/index.js';
+import { internalPrimitives } from '../../schema/index.js';
+import type { AwarenessStore, BlockSuiteDoc } from '../../yjs/index.js';
+import { Space } from '../space.js';
 import type { YBlock } from './block.js';
 import { Block } from './block.js';
-import { Space } from './space.js';
+import { propsToValue } from './utils.js';
 
 type FlatBlockMap = Record<string, YBlock>;
 type BlockTreeOptions = {

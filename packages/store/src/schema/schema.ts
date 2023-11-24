@@ -4,7 +4,7 @@ import type * as Y from 'yjs';
 
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
 import { pageMigrations, workspaceMigrations } from '../migration/index.js';
-import { Block } from '../workspace/block.js';
+import { Block } from '../workspace/block/block.js';
 import type { BlockSchemaType } from './base.js';
 import { BlockSchema } from './base.js';
 import { MigrationError, SchemaValidateError } from './error.js';

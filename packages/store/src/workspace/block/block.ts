@@ -1,10 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
-import type { UnRecord } from '../reactive/index.js';
-import { BaseBlockModel } from '../schema/base.js';
-import type { Schema } from '../schema/index.js';
-import { propsToValue, valueToProps } from '../utils/utils.js';
+import type { UnRecord } from '../../reactive/index.js';
+import { BaseBlockModel } from '../../schema/base.js';
+import type { Schema } from '../../schema/index.js';
+import { propsToValue, valueToProps } from './utils.js';
 
 export type YBlock = Y.Map<unknown>;
 
