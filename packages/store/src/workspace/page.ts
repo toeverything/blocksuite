@@ -78,10 +78,6 @@ export class Page extends BlockTree {
           flavour: string;
         }
     >(),
-    /** @deprecated */
-    copied: new Slot(),
-    /** @deprecated */
-    pasted: new Slot<Record<string, unknown>[]>(),
   };
 
   constructor({
@@ -699,7 +695,18 @@ export class Page extends BlockTree {
       );
       return;
     }
-    this._onBlockAdded(id);
+    this._onBlockAdded(id, {
+      onChange: (block, key) => {
+        block.model.propsUpdated.emit({ key });
+      },
+      onYBlockUpdated: block => {
+        this.slots.blockUpdated.emit({
+          type: 'update',
+          id,
+          flavour: block.id,
+        });
+      },
+    });
     const block = this._blocks.get(id);
     assertExists(block);
     const model = block.model;
