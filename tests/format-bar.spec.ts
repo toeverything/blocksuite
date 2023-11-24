@@ -318,15 +318,15 @@ test.fixme(
     const { highlight } = getFormatBar(page);
 
     await highlight.backgroundBtn.hover();
-    await expect(highlight.pinkBtn).toBeVisible();
+    await expect(highlight.redBtn).toBeVisible();
     await expect(highlight.backgroundBtn).toHaveAttribute(
       'data-last-used',
       'unset'
     );
-    await highlight.pinkBtn.click();
+    await highlight.redBtn.click();
     await expect(highlight.backgroundBtn).toHaveAttribute(
       'data-last-used',
-      'var(--affine-text-highlight-pink)'
+      'var(--affine-text-highlight-red)'
     );
 
     await assertStoreMatchJSX(
@@ -355,7 +355,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          background="var(--affine-text-highlight-red)"
           insert="456"
         />
       </>
@@ -398,7 +398,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          background="var(--affine-text-highlight-red)"
           insert="123"
         />
       </>
@@ -409,7 +409,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          background="var(--affine-text-highlight-red)"
           insert="456"
         />
       </>
@@ -453,7 +453,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          background="var(--affine-text-highlight-red)"
           insert="456"
         />
       </>

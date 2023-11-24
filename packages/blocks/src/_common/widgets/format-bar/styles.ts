@@ -40,6 +40,7 @@ const paragraphButtonStyle = css`
     position: absolute;
     min-width: 178px;
     padding: 8px 8px;
+    max-height: 380px;
     overflow-y: auto;
 
     background: var(--affine-background-overlay-panel-color);
@@ -50,7 +51,15 @@ const paragraphButtonStyle = css`
 
   .highligh-panel-heading {
     color: var(--affine-text-secondary-color);
-    padding: 8px 4px 8px 4px;
+    padding: 4px;
+  }
+
+  .highlight-panel > icon-button {
+    width: 100%;
+    height: 32px;
+    padding-left: 4px;
+    justify-content: flex-start;
+    gap: 8px;
   }
 `;
 

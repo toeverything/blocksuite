@@ -13,11 +13,11 @@ export function getFormatBar(page: Page) {
   const copyBtn = formatBar.getByTestId('copy');
   // highlight
   const backgroundBtn = formatBar.locator('.highlight-icon');
-  const pinkBtn = formatBar.getByTestId('var(--affine-text-highlight-pink)');
+  const redBtn = formatBar.getByTestId('var(--affine-text-highlight-red)');
   const defaultColorBtn = formatBar.getByTestId('unset');
   const highlight = {
     backgroundBtn,
-    pinkBtn,
+    redBtn,
     defaultColorBtn,
   };
 

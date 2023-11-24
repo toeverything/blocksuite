@@ -50,13 +50,10 @@ const updateHighlight = (
 
 const HighlightPanel = (formatBar: AffineFormatBarWidget) => {
   return html`<div class="highlight-panel">
-    <span class="highligh-panel-heading">Color</span>
+    <div class="highligh-panel-heading">Color</div>
     ${foregroundConfig.map(
       ({ name, color }) =>
         html`<icon-button
-          width="100%"
-          height="32px"
-          style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
           text="${name}"
           data-testid="${color ? `foreground-${color}` : 'unset'}"
           @click="${() => {
@@ -69,13 +66,10 @@ const HighlightPanel = (formatBar: AffineFormatBarWidget) => {
           </span>
         </icon-button>`
     )}
-    <span class="highligh-panel-heading">Background Color</span>
+    <div class="highligh-panel-heading">Background</div>
     ${backgroundConfig.map(
       ({ name, color }) =>
         html`<icon-button
-          width="100%"
-          height="32px"
-          style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
           text="${name}"
           data-testid="${color ? `background-${color}` : 'unset'}"
           @click="${() => {
