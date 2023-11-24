@@ -11,7 +11,7 @@ import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
 import type { YBlock } from './block/index.js';
 import { BlockTree } from './block/index.js';
 import type { PageMeta } from './meta.js';
-import type { Workspace } from './workspace.js';
+import { Workspace } from './workspace.js';
 
 export type YBlocks = Y.Map<YBlock>;
 
@@ -695,6 +695,22 @@ export class Page extends BlockTree {
       );
       return;
     }
+
+    // FIXME(RegisChen)
+    const flavour = yBlock.get('sys:flavour');
+    if (flavour === 'affine:note') {
+      if (!yBlock.get('prop:edgeless')) {
+        const edgeless = new Workspace.Y.Map();
+        const style = new Workspace.Y.Map();
+        style.set('borderRadius', 8);
+        style.set('borderSize', 4);
+        style.set('borderStyle', 'solid');
+        style.set('shadowType', '--affine-note-shadow-box');
+        edgeless.set('style', style);
+        yBlock.set('prop:edgeless', edgeless);
+      }
+    }
+
     this._onBlockAdded(id, {
       onChange: (block, key) => {
         block.model.propsUpdated.emit({ key });
