@@ -17,8 +17,8 @@ import {
 } from '../../../../../_common/icons/index.js';
 import {
   type EdgelessTool,
+  sessionStore,
   type ShapeToolState,
-  storage,
 } from '../../../../../_common/utils/index.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
@@ -132,7 +132,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   }
 
   private _tryLoadShapeLocalState() {
-    const shapeData = storage.get(this.edgeless.page.id, 'edgelessShape');
+    const shapeData = sessionStore.get(this.edgeless.page.id, 'edgelessShape');
     let shapeToolState = null;
     if (shapeData) {
       shapeToolState = JSON.parse(shapeData);
@@ -166,7 +166,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
         };
 
         // Save shape tool state to session storage
-        storage.set(
+        sessionStore.set(
           this.edgeless.page.id,
           JSON.stringify(shapeToolState),
           'edgelessShape'

@@ -1,4 +1,4 @@
-import { storage } from './storage.js';
+import { sessionStore } from './storage.js';
 
 type ViewportData =
   | {
@@ -17,12 +17,12 @@ type ViewportData =
 const suffix = 'edgelessViewport';
 
 export function saveViewportToSession(pageId: string, viewport: ViewportData) {
-  storage.set(pageId, JSON.stringify(viewport), suffix);
+  sessionStore.set(pageId, JSON.stringify(viewport), suffix);
 }
 
 export function getViewportFromSession(pageId: string): ViewportData | null {
   try {
-    const storedViewport = storage.get(pageId, suffix);
+    const storedViewport = sessionStore.get(pageId, suffix);
     return storedViewport ? JSON.parse(storedViewport) : null;
   } catch {
     return null;

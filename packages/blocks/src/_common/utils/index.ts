@@ -7,8 +7,8 @@ export * from './query.js';
 export * from './rect.js';
 export * from './reordering.js';
 export * from './selection.js';
-export * from './storage.js';
 // Compat with SSR
 export * from './event.js';
 export * from './model.js';
+export * from './storage.js';
 export * from './types.js';

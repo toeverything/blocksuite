@@ -3,7 +3,7 @@ import { noop } from '@blocksuite/global/utils';
 
 import {
   type EdgelessTool,
-  storage,
+  sessionStore,
   type TextTool,
 } from '../../../../_common/utils/index.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../components/panel/color-panel.js';
@@ -71,7 +71,7 @@ export class TextToolController extends EdgelessToolController<TextTool> {
   private _tryLoadTextStateLocalRecord(tool: EdgelessTool) {
     if (tool.type !== 'text') return;
 
-    const textData = storage.get(this._edgeless.page.id, 'edgelessText');
+    const textData = sessionStore.get(this._edgeless.page.id, 'edgelessText');
     if (textData) {
       try {
         const { color } = JSON.parse(textData);

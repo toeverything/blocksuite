@@ -11,7 +11,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import {
   type EdgelessTool,
-  storage,
+  sessionStore,
 } from '../../../../../_common/utils/index.js';
 import {
   Bound,
@@ -265,7 +265,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   }
 
   override firstUpdated() {
-    const shapeData = storage.get(this.edgeless.page.id, 'edgelessShape');
+    const shapeData = sessionStore.get(this.edgeless.page.id, 'edgelessShape');
     if (shapeData) {
       const shapeToolState = JSON.parse(shapeData);
       this._fillColor = shapeToolState.fillColor;

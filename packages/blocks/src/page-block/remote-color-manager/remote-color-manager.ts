@@ -1,13 +1,13 @@
 import type { AwarenessStore } from '@blocksuite/store';
 
-import { storage } from '../../_common/utils/storage.js';
+import { sessionStore } from '../../_common/utils/storage.js';
 import { multiPlayersColor } from './color-picker.js';
 
 const REMOTE_COLOR_KEY = 'remote-color';
 
 export class RemoteColorManager {
   constructor(public readonly awareness: AwarenessStore) {
-    const sessionColor = storage.get(REMOTE_COLOR_KEY);
+    const sessionColor = sessionStore.get(REMOTE_COLOR_KEY);
     if (sessionColor) {
       this.awareness.awareness.setLocalStateField('color', sessionColor);
       return;
@@ -15,7 +15,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awareness.awareness.setLocalStateField('color', pickColor);
-    storage.set(REMOTE_COLOR_KEY, pickColor);
+    sessionStore.set(REMOTE_COLOR_KEY, pickColor);
   }
 
   get(id: number) {
@@ -26,7 +26,7 @@ export class RemoteColorManager {
 
     if (id !== this.awareness.awareness.clientID) return null;
 
-    const sessionColor = storage.get(REMOTE_COLOR_KEY);
+    const sessionColor = sessionStore.get(REMOTE_COLOR_KEY);
     if (sessionColor) {
       this.awareness.awareness.setLocalStateField('color', sessionColor);
       return sessionColor;
@@ -34,7 +34,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awareness.awareness.setLocalStateField('color', pickColor);
-    storage.set(REMOTE_COLOR_KEY, pickColor);
+    sessionStore.set(REMOTE_COLOR_KEY, pickColor);
     return pickColor;
   }
 }

@@ -1,16 +1,16 @@
-class Storage {
-  private static _instance: Storage;
-  private _storage = sessionStorage;
+class SessionStore {
+  private static _instance: SessionStore;
+  private _storage = globalThis.sessionStorage;
   private readonly _prefix = 'blocksuite';
 
   private constructor() {}
 
-  public static getInstance(): Storage {
-    if (!Storage._instance) {
-      Storage._instance = new Storage();
+  public static getInstance(): SessionStore {
+    if (!SessionStore._instance) {
+      SessionStore._instance = new SessionStore();
     }
 
-    return Storage._instance;
+    return SessionStore._instance;
   }
 
   public get(key: string, suffix?: string): string | null {
@@ -46,6 +46,6 @@ class Storage {
   }
 }
 
-const storage = Storage.getInstance();
+const sessionStore = SessionStore.getInstance();
 
-export { storage };
+export { sessionStore };

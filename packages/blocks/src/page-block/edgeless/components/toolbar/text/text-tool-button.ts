@@ -9,7 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { EdgelessTextIcon } from '../../../../../_common/icons/index.js';
 import {
   type EdgelessTool,
-  storage,
+  sessionStore,
 } from '../../../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../panel/color-panel.js';
@@ -60,7 +60,7 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
   }
 
   private _tryLoadTextStateLocalColor() {
-    const textData = storage.get(this.edgeless.page.id, 'edgelessText');
+    const textData = sessionStore.get(this.edgeless.page.id, 'edgelessText');
     let color = null;
     if (textData) {
       color = JSON.parse(textData).color;

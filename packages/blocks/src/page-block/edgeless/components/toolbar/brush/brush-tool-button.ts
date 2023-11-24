@@ -10,7 +10,7 @@ import { EdgelessPenIcon } from '../../../../../_common/icons/index.js';
 import {
   type EdgelessTool,
   LineWidth,
-  storage,
+  sessionStore,
 } from '../../../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
@@ -80,7 +80,7 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
   }
 
   private _tryLoadBrushStateLocalColor() {
-    const brushData = storage.get(this.edgeless.page.id, 'edgelessBrush');
+    const brushData = sessionStore.get(this.edgeless.page.id, 'edgelessBrush');
     let color = null;
     if (brushData) {
       color = JSON.parse(brushData).color;

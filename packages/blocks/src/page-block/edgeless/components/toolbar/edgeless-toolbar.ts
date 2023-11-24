@@ -34,7 +34,7 @@ import {
 } from '../../../../_common/icons/index.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
-import { storage } from '../../../../_common/utils/storage.js';
+import { sessionStore } from '../../../../_common/utils/storage.js';
 import type { EdgelessTool } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
@@ -299,7 +299,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const edgelessTool = this.edgeless.tools.edgelessTool;
     const { type } = edgelessTool;
     if (type === 'brush') {
-      storage.set(
+      sessionStore.set(
         this.edgeless.page.id,
         JSON.stringify({
           color: edgelessTool.color,
@@ -314,7 +314,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const edgelessTool = this.edgeless.tools.edgelessTool;
     const { type } = edgelessTool;
     if (type === 'text') {
-      storage.set(
+      sessionStore.set(
         this.edgeless.page.id,
         JSON.stringify({
           color: edgelessTool.color,

@@ -7,7 +7,7 @@ import {
   handleNativeRangeAtPoint,
   resetNativeSelection,
   type Selectable,
-  storage,
+  sessionStore,
   type TopLevelBlockModel,
 } from '../../../../_common/utils/index.js';
 import { getBlockClipboardInfo } from '../../../../_legacy/clipboard/index.js';
@@ -285,7 +285,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       expand: 10,
     });
     if (!selected) {
-      const textData = storage.get(this._edgeless.page.id, 'edgelessText');
+      const textData = sessionStore.get(this._edgeless.page.id, 'edgelessText');
 
       const color =
         textData && JSON.parse(textData).color

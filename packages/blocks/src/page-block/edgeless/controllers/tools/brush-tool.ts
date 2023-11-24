@@ -5,7 +5,7 @@ import type {
   BrushTool,
   EdgelessTool,
 } from '../../../../_common/utils/index.js';
-import { LineWidth, storage } from '../../../../_common/utils/index.js';
+import { LineWidth, sessionStore } from '../../../../_common/utils/index.js';
 import {
   type IVec,
   PhasorElementType,
@@ -141,7 +141,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   private _tryLoadBrushStateLocalRecord(tool: EdgelessTool) {
     if (tool.type !== 'brush') return;
 
-    const brushData = storage.get(this._edgeless.page.id, 'edgelessBrush');
+    const brushData = sessionStore.get(this._edgeless.page.id, 'edgelessBrush');
     if (brushData) {
       try {
         const { color, lineWidth } = JSON.parse(brushData);
