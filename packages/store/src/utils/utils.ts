@@ -86,24 +86,6 @@ export function propsToValue(value: unknown): unknown {
   return value;
 }
 
-export function toBlockProps(
-  yBlock: YBlock,
-  options: ProxyOptions<Record<string, unknown>> = {}
-): Partial<BlockProps> {
-  const prefixedProps = yBlock.toJSON();
-  const props: Partial<BlockProps> = {};
-
-  Object.keys(prefixedProps).forEach(prefixedKey => {
-    if (prefixedKey.startsWith('prop:')) {
-      const key = prefixedKey.replace('prop:', '');
-      const realValue = yBlock.get(prefixedKey);
-      props[key] = valueToProps(realValue, options);
-    }
-  });
-
-  return props;
-}
-
 export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {
   return toBase64(Y.encodeStateAsUpdateV2(workspace.doc));
 }
