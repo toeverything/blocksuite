@@ -9,6 +9,7 @@ import { propsToValue, valueToProps } from './utils.js';
 export type YBlock = Y.Map<unknown>;
 
 export type BlockOptions = Partial<{
+  onChange: (block: Block, key: string, value: unknown) => void;
   onYBlockUpdated: (block: Block) => void;
 }>;
 
@@ -79,7 +80,7 @@ export class Block {
   private _getPropsProxy = (name: string, value: unknown) => {
     return valueToProps(value, {
       onChange: () => {
-        this.model.propsUpdated.emit({ key: name });
+        this.options.onChange?.(this, name, value);
       },
     });
   };
