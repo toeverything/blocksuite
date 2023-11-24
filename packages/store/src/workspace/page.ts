@@ -703,7 +703,7 @@ export class Page extends BlockTree {
         this.slots.blockUpdated.emit({
           type: 'update',
           id,
-          flavour: block.id,
+          flavour: block.flavour,
         });
       },
     });
