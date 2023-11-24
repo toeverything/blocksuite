@@ -5,7 +5,6 @@ import './frame/edgeless-frame.js';
 import '../rects/edgeless-selected-rect.js';
 import '../rects/edgeless-hover-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
-import '../note-status/index.js';
 import '../../components/auto-connect/edgeless-index-label.js';
 import '../../components/auto-connect/edgeless-auto-connect-line.js';
 import '../component-toolbar/component-toolbar.js';
