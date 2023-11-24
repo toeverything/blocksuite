@@ -42,7 +42,7 @@ export class Block {
         if (type.action === 'update' || type.action === 'add') {
           const value = this.yBlock.get(key);
           const keyName = key.replace('prop:', '');
-          const proxy = valueToProps(value, this.tree.doc.proxy, {
+          const proxy = valueToProps(value, {
             onChange: () => {
               this.model.propsUpdated.emit();
             },
@@ -75,7 +75,7 @@ export class Block {
     this.yBlock.forEach((value, key) => {
       if (key.startsWith('prop:')) {
         const keyName = key.replace('prop:', '');
-        const proxy = valueToProps(value, this.tree.doc.proxy, {
+        const proxy = valueToProps(value, {
           onChange: () => {
             this.model.propsUpdated.emit();
           },
@@ -131,7 +131,7 @@ export class Block {
         ) {
           const yValue = propsToValue(value);
           this.yBlock.set(`prop:${p}`, yValue);
-          const proxy = valueToProps(yValue, this.tree.doc.proxy, {
+          const proxy = valueToProps(yValue, {
             onChange: () => {
               this.model.propsUpdated.emit();
             },

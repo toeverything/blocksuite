@@ -4,7 +4,6 @@ import type * as Y from 'yjs';
 
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
 import { pageMigrations, workspaceMigrations } from '../migration/index.js';
-import { ProxyManager } from '../yjs/index.js';
 import type { BlockSchemaType } from './base.js';
 import { BlockSchema } from './base.js';
 import { MigrationError, SchemaValidateError } from './error.js';
@@ -12,7 +11,6 @@ import { toBlockMigrationData } from './utils.js';
 
 export class Schema {
   readonly flavourSchemaMap = new Map<string, BlockSchemaType>();
-  readonly proxy = new ProxyManager();
 
   get versions() {
     return Object.fromEntries(
@@ -166,7 +164,7 @@ export class Schema {
         return;
       }
 
-      const data = toBlockMigrationData(blockData, this.proxy);
+      const data = toBlockMigrationData(blockData);
 
       return onUpgrade(data, oldVersion, version);
     } catch (err) {
