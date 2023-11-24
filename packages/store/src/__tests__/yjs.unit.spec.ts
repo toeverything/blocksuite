@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
-import { Boxed } from '../yjs/boxed.js';
-import { BlockSuiteDoc, createYProxy } from '../yjs/index.js';
+import { Boxed, createYProxy } from '../reactive/index.js';
+import { BlockSuiteDoc } from '../yjs/index.js';
 
 describe('blocksuite yjs', () => {
   test('doc', () => {
