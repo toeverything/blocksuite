@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit';
-import { state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 const styles = css`
   :host {
@@ -56,10 +56,16 @@ export class ToggleSwitch extends LitElement {
   static override styles = styles;
 
   @state()
-  private on = false;
+  on = false;
 
-  private toggleSwitch() {
+  @property({ attribute: false })
+  onChange?: () => void;
+
+  private _toggleSwitch() {
     this.on = !this.on;
+    if (this.onChange) {
+      this.onChange();
+    }
   }
 
   override render() {
@@ -68,7 +74,7 @@ export class ToggleSwitch extends LitElement {
         type="checkbox"
         id="switch"
         ?checked=${this.on}
-        @change=${this.toggleSwitch}
+        @change=${this._toggleSwitch}
       />
       <label for="switch"></label>
     `;
