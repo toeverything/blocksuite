@@ -78,10 +78,6 @@ export class Page extends BlockTree {
           flavour: string;
         }
     >(),
-    /** @deprecated */
-    copied: new Slot(),
-    /** @deprecated */
-    pasted: new Slot<Record<string, unknown>[]>(),
   };
 
   constructor({
