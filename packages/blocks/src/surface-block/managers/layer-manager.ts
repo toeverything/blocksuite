@@ -6,7 +6,6 @@ import type { PhasorElement } from '../../index.js';
 import { Bound, generateKeyBetween, GroupElement } from '../../index.js';
 import { type EdgelessElement } from '../../index.js';
 import type { ImageBlockModel, NoteBlockModel } from '../../models.js';
-import { getElementsBound } from '../../page-block/edgeless/utils/query.js';
 import { GROUP_ROOT } from '../elements/group/consts.js';
 import { SurfaceElement } from '../elements/surface-element.js';
 import { GridManager } from '../grid.js';
@@ -41,11 +40,6 @@ type CanvasLayer = BaseLayer<PhasorElement> & {
    * z-index, used for actual rendering
    */
   zIndexes: number;
-
-  /**
-   * size for canvas
-   */
-  bound: Bound;
 };
 
 export class LayerManager {
@@ -531,7 +525,6 @@ export class LayerManager {
           elements: layer.elements,
           zIndexes: layer.zIndexes,
           indexes: layer.indexes,
-          bound: getElementsBound(layer.elements),
         };
       }) as LayerManager['canvasLayers'];
 
