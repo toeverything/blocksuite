@@ -66,17 +66,18 @@ export class NoteResizeObserver {
       const container = blockElement?.querySelector(
         '.affine-note-block-container'
       );
-
+      const { edgeless } = model;
+      const collapse = edgeless ? edgeless.collapse : false;
       const cachedElement = this._cachedElements.get(blockId);
       if (cachedElement) {
-        if (container === cachedElement && !model.edgeless.collapse) {
+        if (container === cachedElement && !collapse) {
           return;
         }
         this._observer.unobserve(cachedElement);
         this._cachedElements.delete(blockId);
       }
 
-      if (!container || model.edgeless.collapse) return;
+      if (!container || collapse) return;
       this._lastRects.set(blockId, container.getBoundingClientRect());
       this._observer.observe(container);
       this._cachedElements.set(blockId, container);
