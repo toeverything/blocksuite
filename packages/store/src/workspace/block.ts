@@ -5,7 +5,6 @@ import type { Schema } from '../schema/index.js';
 import { BaseBlockModel } from '../schema/index.js';
 import { propsToValue, valueToProps } from '../utils/utils.js';
 import type { UnRecord } from '../yjs/index.js';
-import type { BlockTree } from './block-tree.js';
 
 export type YBlock = Y.Map<unknown>;
 
@@ -17,7 +16,6 @@ export class Block {
   private _byPassProxy: boolean = false;
 
   constructor(
-    readonly tree: BlockTree,
     readonly schema: Schema,
     readonly yBlock: YBlock
   ) {
@@ -145,8 +143,13 @@ export class Block {
         return Reflect.get(target, p, receiver);
       },
       deleteProperty: (target, p) => {
-        if (typeof p === 'string' && model.keys.includes(p)) {
-          throw new Error('Cannot delete props');
+        if (
+          !this._byPassProxy &&
+          typeof p === 'string' &&
+          model.keys.includes(p)
+        ) {
+          this.yBlock.delete(`prop:${p}`);
+          this.model.propsUpdated.emit();
         }
 
         return Reflect.deleteProperty(target, p);

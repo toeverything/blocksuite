@@ -40,7 +40,7 @@ export class BlockTree extends Space<FlatBlockMap> {
       return;
     }
 
-    const block = new Block(this, this._schema, yBlock);
+    const block = new Block(this._schema, yBlock);
     this._blocks.set(id, block);
   }
 
