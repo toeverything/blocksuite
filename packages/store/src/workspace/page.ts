@@ -2,15 +2,14 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
+import { Text } from '../reactive/text.js';
 import type { BaseBlockModel } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import { assertValidChildren, syncBlockProps } from '../utils/utils.js';
-import type { AwarenessStore } from '../yjs/awareness.js';
-import type { BlockSuiteDoc } from '../yjs/index.js';
-import { Text } from '../yjs/text-adapter.js';
-import type { YBlock } from './block.js';
-import { BlockTree } from './block-tree.js';
+import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
+import type { YBlock } from './block/index.js';
+import { BlockTree } from './block/index.js';
 import type { PageMeta } from './meta.js';
 import type { Workspace } from './workspace.js';
 
@@ -79,10 +78,6 @@ export class Page extends BlockTree {
           flavour: string;
         }
     >(),
-    /** @deprecated */
-    copied: new Slot(),
-    /** @deprecated */
-    pasted: new Slot<Record<string, unknown>[]>(),
   };
 
   constructor({
@@ -700,7 +695,19 @@ export class Page extends BlockTree {
       );
       return;
     }
-    this._onBlockAdded(id);
+
+    this._onBlockAdded(id, {
+      onChange: (block, key) => {
+        block.model.propsUpdated.emit({ key });
+      },
+      onYBlockUpdated: block => {
+        this.slots.blockUpdated.emit({
+          type: 'update',
+          id,
+          flavour: block.flavour,
+        });
+      },
+    });
     const block = this._blocks.get(id);
     assertExists(block);
     const model = block.model;

@@ -1,13 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
-import type { BaseBlockModel, Schema } from '../schema/index.js';
-import { internalPrimitives } from '../schema/index.js';
-import { propsToValue } from '../utils/utils.js';
-import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
-import type { YBlock } from './block.js';
+import type { BaseBlockModel, Schema } from '../../schema/index.js';
+import { internalPrimitives } from '../../schema/index.js';
+import type { AwarenessStore, BlockSuiteDoc } from '../../yjs/index.js';
+import { Space } from '../space.js';
+import type { BlockOptions, YBlock } from './block.js';
 import { Block } from './block.js';
-import { Space } from './space.js';
+import { propsToValue } from './utils.js';
 
 type FlatBlockMap = Record<string, YBlock>;
 type BlockTreeOptions = {
@@ -30,7 +30,7 @@ export class BlockTree extends Space<FlatBlockMap> {
     this._schema = schema;
   }
 
-  protected _onBlockAdded(id: string) {
+  protected _onBlockAdded(id: string, options: BlockOptions = {}) {
     if (this._blocks.has(id)) {
       return;
     }
@@ -40,7 +40,7 @@ export class BlockTree extends Space<FlatBlockMap> {
       return;
     }
 
-    const block = new Block(this, this._schema, yBlock);
+    const block = new Block(this._schema, yBlock, options);
     this._blocks.set(id, block);
   }
 

@@ -56,15 +56,6 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
         }
       })
     );
-
-    this.surface.edgeless.slots.edgelessToolUpdated.on(tool => {
-      if (tool.type === 'frameNavigator') {
-        this.style.display = 'none';
-      } else {
-        this.style.display = 'block';
-        this.requestUpdate();
-      }
-    });
   }
 
   protected override render() {

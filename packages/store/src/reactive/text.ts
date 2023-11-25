@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/virgo';
 import * as Y from 'yjs';
 
 export interface OptionalAttributes {
   attributes?: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   };
 }
@@ -168,6 +168,7 @@ export class Text {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   format(index: number, length: number, format: any) {
     if (length === 0) {
       return;

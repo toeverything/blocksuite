@@ -1,10 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
-import { Boxed } from '../yjs/boxed.js';
-import { BlockSuiteDoc, ProxyManager } from '../yjs/index.js';
-
-const proxyManager = new ProxyManager();
+import { Boxed, createYProxy } from '../reactive/index.js';
+import { BlockSuiteDoc } from '../yjs/index.js';
 
 describe('blocksuite yjs', () => {
   test('doc', () => {
@@ -22,7 +20,7 @@ describe('blocksuite yjs', () => {
       const arr = ydoc.getArray('arr');
       arr.push([0]);
 
-      const proxy = proxyManager.createYProxy(arr) as unknown[];
+      const proxy = createYProxy(arr) as unknown[];
       expect(arr.get(0)).toBe(0);
 
       proxy.push(1);
@@ -50,7 +48,7 @@ describe('blocksuite yjs', () => {
       map2.set('foo', 40);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const proxy = proxyManager.createYProxy<Record<string, any>>(map);
+      const proxy = createYProxy<Record<string, any>>(map);
 
       expect(proxy.num).toBe(0);
       expect(proxy.obj.foo).toBe(1);
@@ -90,7 +88,7 @@ describe('blocksuite yjs', () => {
       const text = new Y.Text('hello');
       inner.set('text', text);
 
-      const proxy = proxyManager.createYProxy<{ inner: { text: Y.Text } }>(map);
+      const proxy = createYProxy<{ inner: { text: Y.Text } }>(map);
       proxy.inner = { ...proxy.inner };
       expect(proxy.inner.text).toBeInstanceOf(Y.Text);
       expect(proxy.inner.text.toJSON()).toBe('hello');
@@ -104,7 +102,7 @@ describe('blocksuite yjs', () => {
       const native = new Boxed(['hello', 'world']);
       inner.set('native', native.yMap);
 
-      const proxy = proxyManager.createYProxy<{
+      const proxy = createYProxy<{
         inner: {
           native: Boxed<string[]>;
           native2: Boxed<number>;

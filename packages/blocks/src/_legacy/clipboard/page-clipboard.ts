@@ -89,8 +89,6 @@ export class PageClipboard implements Clipboard {
     await service.json2Block(focusedBlockModel, blocks, textSelection.from);
 
     this._page.captureSync();
-
-    this._page.slots.pasted.emit(blocks);
   };
 
   private _onCopy = async (ctx: UIEventStateContext) => {
@@ -101,8 +99,6 @@ export class PageClipboard implements Clipboard {
     await this._copyBlocksInPage();
 
     this._page.captureSync();
-
-    this._page.slots.copied.emit();
   };
 
   private async _copyBlocksInPage() {
