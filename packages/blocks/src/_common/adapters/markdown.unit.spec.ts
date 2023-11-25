@@ -1,9 +1,10 @@
+import type { BlockSnapshot } from '@blocksuite/store';
+import { MemoryBlobManager } from '@blocksuite/store';
+import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
-import { MemoryBlobManager } from '../../adapter/assets';
-import { MarkdownAdapter } from '../../adapter/index';
-import { AssetsManager } from '../../transformer/assets';
-import type { BlockSnapshot } from '../../transformer/type';
+import { nanoidReplacement } from '../test-utils/test-utils.js';
+import { MarkdownAdapter } from './markdown.js';
 
 describe('snapshot to markdown', () => {
   test('code', async () => {
@@ -1317,30 +1318,14 @@ hhh
                 id: 'matchesReplaceMap[2]',
                 name: 'Table View',
                 mode: 'table',
-                columns: [
-                  {
-                    id: 'matchesReplaceMap[12]',
-                    hide: false,
-                    width: 180,
-                  },
-                  {
-                    id: 'matchesReplaceMap[13]',
-                    hide: false,
-                    width: 180,
-                  },
-                  {
-                    id: 'matchesReplaceMap[14]',
-                    hide: false,
-                    width: 180,
-                  },
-                ],
+                columns: [],
                 filter: {
                   type: 'group',
                   op: 'and',
                   conditions: [],
                 },
                 header: {
-                  titleColumn: 'matchesReplaceMap[12]',
+                  titleColumn: 'matchesReplaceMap[9]',
                   iconColumn: 'type',
                 },
               },
@@ -1350,13 +1335,13 @@ hhh
               delta: [],
             },
             cells: {
-              'matchesReplaceMap[15]': {
-                'matchesReplaceMap[13]': {
-                  columnId: 'matchesReplaceMap[13]',
+              'matchesReplaceMap[12]': {
+                'matchesReplaceMap[10]': {
+                  columnId: 'matchesReplaceMap[10]',
                   value: 'eee',
                 },
-                'matchesReplaceMap[14]': {
-                  columnId: 'matchesReplaceMap[14]',
+                'matchesReplaceMap[11]': {
+                  columnId: 'matchesReplaceMap[11]',
                   value: 'fff',
                 },
               },
@@ -1366,26 +1351,26 @@ hhh
                 type: 'title',
                 name: 'aaa',
                 data: {},
-                id: 'matchesReplaceMap[12]',
+                id: 'matchesReplaceMap[9]',
               },
               {
                 type: 'rich-text',
                 name: 'bbb',
                 data: {},
-                id: 'matchesReplaceMap[13]',
+                id: 'matchesReplaceMap[10]',
               },
               {
                 type: 'rich-text',
                 name: 'ccc',
                 data: {},
-                id: 'matchesReplaceMap[14]',
+                id: 'matchesReplaceMap[11]',
               },
             ],
           },
           children: [
             {
               type: 'block',
-              id: 'matchesReplaceMap[15]',
+              id: 'matchesReplaceMap[12]',
               flavour: 'affine:paragraph',
               props: {
                 text: {
@@ -1412,18 +1397,3 @@ hhh
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
 });
-
-function nanoidReplacement(snapshot: BlockSnapshot) {
-  return JSON.parse(nanoidReplacementString(JSON.stringify(snapshot)));
-}
-
-function nanoidReplacementString(snapshotString: string) {
-  const matches = snapshotString.matchAll(/"block:[A-Za-z0-9-_]{10}"/g);
-  const matchesReplaceMap = new Map();
-  Array.from(matches).map((match, index) =>
-    matchesReplaceMap.set(match[0], `"matchesReplaceMap[${index}]"`)
-  );
-  return snapshotString.replace(/"block:[A-Za-z0-9-_]{10}"/g, match =>
-    matchesReplaceMap.get(match)
-  );
-}
