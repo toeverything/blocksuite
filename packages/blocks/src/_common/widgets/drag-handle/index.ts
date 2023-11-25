@@ -641,6 +641,8 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   private _canEditing = (noteBlock: BlockElement) => {
+    if (noteBlock.page.id !== this.page.id) return false;
+
     if (isPageMode(this.page)) return true;
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
     const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
@@ -709,6 +711,10 @@ export class AffineDragHandleWidget extends WidgetElement<
   };
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
+    if (this.page.readonly) {
+      this.hide();
+      return;
+    }
     const state = ctx.get('pointerState');
 
     const { target } = state.raw;
@@ -980,7 +986,11 @@ export class AffineDragHandleWidget extends WidgetElement<
    */
   private _dragEndHandler: UIEventHandler = ctx => {
     this.clearRaf();
-    if (!this.dragging || this.draggingElements.length === 0) {
+    if (
+      !this.dragging ||
+      this.draggingElements.length === 0 ||
+      this.page.readonly
+    ) {
       this.hide(true);
       return false;
     }
