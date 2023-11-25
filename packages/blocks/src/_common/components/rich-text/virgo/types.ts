@@ -12,6 +12,7 @@ export const affineTextAttributes = baseTextAttributes.extend({
     .nullable()
     .catch(undefined),
   background: z.string().optional().nullable().catch(undefined),
+  katex: z.string().optional().nullable().catch(undefined),
 });
 
 export type AffineTextAttributes = z.infer<typeof affineTextAttributes>;

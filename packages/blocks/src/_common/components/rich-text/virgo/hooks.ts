@@ -7,8 +7,8 @@ import type {
 import { isStrictUrl } from '../../../../_common/utils/url.js';
 import type { AffineTextAttributes } from './types.js';
 
-const EDGE_IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
-const GLOBAL_IGNORED_ATTRIBUTES = ['reference'] as const;
+const EDGE_IGNORED_ATTRIBUTES = ['code', 'reference', 'katex'] as const;
+const GLOBAL_IGNORED_ATTRIBUTES = ['reference', 'katex'] as const;
 
 const autoIdentifyLink = (ctx: VHookContext<AffineTextAttributes>) => {
   // auto identify link only on pressing space

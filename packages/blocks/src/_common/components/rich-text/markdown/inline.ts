@@ -9,11 +9,13 @@ import {
   type VRange,
 } from '@blocksuite/virgo';
 
+import type { AffineTextAttributes } from '../virgo/types.js';
+
 interface InlineMarkdownMatch {
   name: string;
   pattern: RegExp;
   action: (props: {
-    vEditor: VEditor;
+    vEditor: VEditor<AffineTextAttributes>;
     prefixText: string;
     vRange: VRange;
     pattern: RegExp;
@@ -422,6 +424,74 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
 
       vEditor.setVRange({
         index: start + hrefText.length - 1,
+        length: 0,
+      });
+
+      return VKEYBOARD_PREVENT_DEFAULT;
+    },
+  },
+  {
+    name: 'code',
+    pattern: /(?:\$)([^\s\$](?:[^`]*?[^\s\$])?)(?:\$)$/g,
+    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+      const match = pattern.exec(prefixText);
+      if (!match) {
+        return VKEYBOARD_ALLOW_DEFAULT;
+      }
+      const annotatedText = match[0];
+      const startIndex = vRange.index - annotatedText.length;
+
+      if (prefixText.match(/^([* \n]+)$/g)) {
+        return VKEYBOARD_ALLOW_DEFAULT;
+      }
+
+      vEditor.insertText(
+        {
+          index: startIndex + annotatedText.length,
+          length: 0,
+        },
+        ' '
+      );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
+
+      undoManager.stopCapturing();
+
+      vEditor.formatText(
+        {
+          index: startIndex,
+          length: annotatedText.length,
+        },
+        {
+          katex: String.raw`${match[1]}`,
+        }
+      );
+
+      vEditor.deleteText({
+        index: startIndex,
+        length: annotatedText.length + 1,
+      });
+      vEditor.insertText(
+        {
+          index: startIndex,
+          length: 0,
+        },
+        ' '
+      );
+      vEditor.formatText(
+        {
+          index: startIndex,
+          length: 1,
+        },
+        {
+          katex: String.raw`${match[1]}`,
+        }
+      );
+
+      vEditor.setVRange({
+        index: startIndex + 1,
         length: 0,
       });
 

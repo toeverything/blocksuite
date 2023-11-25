@@ -31,6 +31,7 @@
     "fractional-indexing": "^3.2.0",
     "html2canvas": "^1.4.1",
     "jszip": "^3.10.1",
+    "katex": "^0.16.9",
     "lit": "^3.0.2",
     "marked": "^4.3.0",
     "nanoid": "^5.0.3",
@@ -83,6 +84,7 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@types/katex": "^0.16.7",
     "@types/marked": "^4.3.1",
     "@types/sortablejs": "^1.15.4"
   }

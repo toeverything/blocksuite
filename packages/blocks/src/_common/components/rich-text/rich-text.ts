@@ -104,7 +104,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
     // init vEditor
     this._vEditor = new VEditor<AffineTextAttributes>(this.yText, {
-      isEmbed: delta => !!delta.attributes?.reference,
+      isEmbed: delta =>
+        !!delta.attributes?.reference || !!delta.attributes?.katex,
       hooks: {
         beforeinput: onVBeforeinput,
         compositionEnd: onVCompositionEnd,

@@ -29,6 +29,12 @@ export const affineAttributeRenderer: AttributeRenderer<
       .selected=${selected}
     ></affine-reference>`;
   }
+  if (attributes.katex) {
+    return html`<affine-katex
+      .delta=${delta}
+      .selected=${selected}
+    ></affine-katex>`;
+  }
 
   return defaultTemplate;
 };
