@@ -1,22 +1,24 @@
+import { assertEquals } from '@blocksuite/global/utils';
+
+import type { AssetsManager } from '../transformer/assets.js';
 import type {
   BlockSnapshot,
   PageSnapshot,
   SliceSnapshot,
 } from '../transformer/type.js';
-import type { AdapterAssetsManager } from './assets.js';
 import { ASTWalkerContext } from './context.js';
 
 export type FromPageSnapshotPayload = {
   snapshot: PageSnapshot;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 export type FromBlockSnapshotPayload = {
   snapshot: BlockSnapshot;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 export type FromSliceSnapshotPayload = {
   snapshot: SliceSnapshot;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 export type FromPageSnapshotResult<Target> = {
   file: Target;
@@ -32,15 +34,15 @@ export type FromSliceSnapshotResult<Target> = {
 };
 export type ToPageSnapshotPayload<Target> = {
   file: Target;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 export type ToBlockSnapshotPayload<Target> = {
   file: Target;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 export type ToSliceSnapshotPayload<Target> = {
   file: Target;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
 };
 
 export abstract class BaseAdapter<AdapterTarget = unknown> {
@@ -105,6 +107,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
   walk = async (oNode: ONode, tNode: TNode) => {
     this.context.openNode(tNode);
     await this._visit({ node: oNode, parent: null, prop: null, index: null });
+    assertEquals(this.context.stack.length, 1);
     return this.context.currentNode();
   };
 
@@ -132,7 +135,11 @@ export class ASTWalker<ONode extends object, TNode extends object> {
             i += 1
           ) {
             const item = value[i];
-            if (item !== null && this._isONode(item)) {
+            if (
+              item !== null &&
+              typeof item === 'object' &&
+              this._isONode(item)
+            ) {
               await this._visit({
                 node: item,
                 parent: o.node,

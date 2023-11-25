@@ -1,20 +1,3 @@
-import type { DeltaInsert } from '@blocksuite/virgo/types';
-import type { Heading, Root, RootContentMap } from 'mdast';
-import remarkGfm from 'remark-gfm';
-import remarkParse from 'remark-parse';
-import remarkStringify from 'remark-stringify';
-import { unified } from 'unified';
-
-import { sha } from '../persistence/blob/utils.js';
-import {
-  type BlockSnapshot,
-  BlockSnapshotSchema,
-  type PageSnapshot,
-  type SliceSnapshot,
-} from '../transformer/type.js';
-import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
-import { nanoid } from '../utils/id-generator.js';
-import { type AdapterAssetsManager, getAssetName } from './assets.js';
 import type {
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
@@ -24,9 +7,25 @@ import type {
   FromSliceSnapshotResult,
   ToBlockSnapshotPayload,
   ToPageSnapshotPayload,
-} from './base.js';
-import { ASTWalker, BaseAdapter } from './base.js';
-import { StringBuilder } from './string-builder.js';
+} from '@blocksuite/store';
+import { type AssetsManager, getAssetName } from '@blocksuite/store';
+import {
+  type BlockSnapshot,
+  BlockSnapshotSchema,
+  type PageSnapshot,
+  type SliceSnapshot,
+} from '@blocksuite/store';
+import { nanoid } from '@blocksuite/store';
+import { ASTWalker, BaseAdapter } from '@blocksuite/store';
+import { sha } from '@blocksuite/store';
+import type { DeltaInsert } from '@blocksuite/virgo/types';
+import type { Heading, Root, RootContentMap } from 'mdast';
+import remarkGfm from 'remark-gfm';
+import remarkParse from 'remark-parse';
+import remarkStringify from 'remark-stringify';
+import { unified } from 'unified';
+
+import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 
 export type Markdown = string;
 
@@ -41,7 +40,7 @@ type MarkdownAST =
 
 type MarkdownToSliceSnapshotPayload = {
   file: Markdown;
-  assets?: AdapterAssetsManager;
+  assets?: AssetsManager;
   blockVersions: Record<string, number>;
   pageVersion: number;
   workspaceVersion: number;
@@ -54,17 +53,17 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     snapshot,
     assets,
   }: FromPageSnapshotPayload): Promise<FromPageSnapshotResult<Markdown>> {
-    const buffer = new StringBuilder();
+    let buffer = '';
     if (snapshot.meta.title) {
-      buffer.write(`# ${snapshot.meta.title}\n\n`);
+      buffer += `# ${snapshot.meta.title}\n\n`;
     }
     const { file, assetsIds } = await this.fromBlockSnapshot({
       snapshot: snapshot.blocks,
       assets,
     });
-    buffer.write(file);
+    buffer += file;
     return {
-      file: buffer.toString(),
+      file: buffer,
       assetsIds,
     };
   }
@@ -92,7 +91,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     snapshot,
     assets,
   }: FromSliceSnapshotPayload): Promise<FromSliceSnapshotResult<Markdown>> {
-    const buffer = new StringBuilder();
+    let buffer = '';
     const sliceAssetsIds: string[] = [];
     for (const contentSlice of snapshot.content) {
       const root: Root = {
@@ -105,10 +104,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         assets
       );
       sliceAssetsIds.push(...assetsIds);
-      buffer.write(this._astToMardown(ast));
-      buffer.write('\n\n');
+      buffer += this._astToMardown(ast);
+      buffer += '\n\n';
     }
-    const markdown = buffer.toString();
+    const markdown = buffer;
     return {
       file: markdown,
       assetsIds: sliceAssetsIds,
@@ -191,7 +190,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   private _traverseSnapshot = async (
     snapshot: BlockSnapshot,
     markdown: MarkdownAST,
-    assets?: AdapterAssetsManager
+    assets?: AssetsManager
   ) => {
     const assetsIds: string[] = [];
     const walker = new ASTWalker<BlockSnapshot, MarkdownAST>();
@@ -430,12 +429,14 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   private _traverseMarkdown = (
     markdown: MarkdownAST,
     snapshot: BlockSnapshot,
-    assets?: AdapterAssetsManager
+    assets?: AssetsManager
   ) => {
     const walker = new ASTWalker<MarkdownAST, BlockSnapshot>();
     walker.setONodeTypeGuard(
       (node): node is MarkdownAST =>
-        'type' in (node as object) && (node as MarkdownAST).type !== undefined
+        !Array.isArray(node) &&
+        'type' in (node as object) &&
+        (node as MarkdownAST).type !== undefined
     );
     walker.setEnter(async (o, context) => {
       switch (o.node.type) {
@@ -539,9 +540,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               id: nanoid('block'),
               flavour: 'affine:list',
               props: {
-                type: context.getNodeContext('mdast:list:ordered')
-                  ? 'numbered'
-                  : 'bulleted',
+                type:
+                  o.node.checked !== null
+                    ? 'todo'
+                    : context.getNodeContext('mdast:list:ordered')
+                      ? 'numbered'
+                      : 'bulleted',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta:
@@ -591,6 +595,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             });
           } else {
             const res = await fetch(o.node.url);
+            const clonedRes = res.clone();
             const file = new File(
               [await res.blob()],
               getFilenameFromContentDisposition(
@@ -600,7 +605,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 'image' + res.headers.get('Content-Type')?.split('/').at(-1) ??
                 '.png'
             );
-            blobId = await sha(await res.arrayBuffer());
+            blobId = await sha(await clonedRes.arrayBuffer());
             assets?.getAssets().set(blobId, file);
             assets?.writeToBlob(blobId);
           }
@@ -662,7 +667,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                     id: nanoid('block'),
                     name: 'Table View',
                     mode: 'table',
-                    columns: viewsColumns,
+                    columns: [],
                     filter: {
                       type: 'group',
                       op: 'and',
