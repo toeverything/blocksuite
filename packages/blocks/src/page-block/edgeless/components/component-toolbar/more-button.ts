@@ -166,6 +166,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   @state()
   private _popperShow = false;
 
+  @property({ attribute: false })
+  getPoppetShow!: () => void;
+
   @query('.more-actions-container')
   private _actionsMenu!: HTMLDivElement;
 
@@ -284,6 +287,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       this._actionsMenu,
       ({ display }) => {
         this._popperShow = display === 'show';
+        this.getPoppetShow(this._popperShow);
       }
     );
     _disposables.add(this._actionsMenuPopper);
