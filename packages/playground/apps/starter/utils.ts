@@ -168,7 +168,6 @@ export function createWorkspaceOptions(): WorkspaceOptions {
       enable_transformer_clipboard: featureArgs.includes('clipboard'),
       enable_set_remote_flag: true,
       enable_block_hub: true,
-      enable_bookmark_operation: true,
       enable_note_index: true,
       enable_bultin_ledits: true,
       readonly: {
