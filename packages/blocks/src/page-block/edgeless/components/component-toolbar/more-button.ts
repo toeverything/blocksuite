@@ -167,7 +167,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   private _popperShow = false;
 
   @property({ attribute: false })
-  getPoppetShow!: () => void;
+  getPoppetShow!: (poppetShow: boolean) => void;
 
   @query('.more-actions-container')
   private _actionsMenu!: HTMLDivElement;
