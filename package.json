@@ -44,7 +44,7 @@
     "size:generate": "./scripts/size-generate.sh",
     "clean": "./scripts/clean.sh",
     "release-note:draft": "node --loader ts-node/esm ./scripts/release-note/convert.ts",
-    "release-note:validate": "node --loader ts-node/esm ./scripts/release-note/validate.ts",
+    "release-note:notable": "node ./scripts/release-note/notable-prs.mjs",
     "preinstall": "npx only-allow pnpm",
     "postinstall": "husky install"
   },
