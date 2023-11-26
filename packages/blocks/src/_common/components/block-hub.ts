@@ -489,8 +489,7 @@ function BlockHubMenu(
   visibleCardType: CardListType | null,
   isCardListVisible: boolean,
   showTooltip: boolean,
-  maxHeight: number,
-  page: Page
+  maxHeight: number
 ) {
   const menuNum = 5;
   const height = menuNum * 44 + 10;
@@ -1055,8 +1054,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._visibleCardType,
       this._isCardListVisible,
       this._showTooltip,
-      this._maxHeight,
-      this._page
+      this._maxHeight
     );
 
     const blockHubCards = BlockHubCards(
