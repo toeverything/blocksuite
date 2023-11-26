@@ -203,9 +203,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  protected getPopperShow = (popperShow: boolean) => {
+  protected setPopperShow = (popperShow: boolean) => {
     this._popperShow = popperShow;
-    return this._popperShow;
   };
 
   private _updateOnSelectedChange = (element: string | { id: string }) => {
@@ -378,7 +377,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         <edgeless-more-button
           .edgeless=${edgeless}
           .vertical=${true}
-          .getPoppetShow=${this.getPopperShow}
+          .setPoppetShow=${this.setPopperShow}
         ></edgeless-more-button>
       </div>`;
   }
