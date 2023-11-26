@@ -61,7 +61,7 @@ function main() {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
   const inputPath = join(__dirname, 'input.md');
-  const outputPath = join(__dirname, 'release-note.md');
+  const outputPath = join(__dirname, 'release-note-draft.md');
 
   const result = analyzeReleaseNotes(inputPath);
   fs.writeFileSync(outputPath, result, 'utf8');
