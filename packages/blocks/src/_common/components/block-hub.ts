@@ -506,12 +506,7 @@ function BlockHubMenu(
   );
 
   const blockHubFileCards = BlockHubCards(
-    BLOCKHUB_FILE_ITEMS.filter(({ flavour }) => {
-      if (flavour === 'affine:bookmark') {
-        return page.awarenessStore.getFlag('enable_bookmark_operation');
-      }
-      return true;
-    }),
+    BLOCKHUB_FILE_ITEMS,
     'file',
     'Content & Media',
     maxHeight,
