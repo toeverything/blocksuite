@@ -188,12 +188,18 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     const currentCells = rows.map(rowId =>
       this.cellGetValue(rowId, propertyId)
     );
-    const result = columnManager
-      .getColumn(currentType)
-      ?.convertCell(toType, currentData, currentCells) ?? {
-      column: columnManager.getColumn(toType).defaultData(),
-      cells: currentCells.map(() => undefined),
-    };
+    const result =
+      toType === 'progress'
+        ? {
+            column: columnManager.getColumn(toType).defaultData(),
+            cells: currentCells.map(() => 0),
+          }
+        : columnManager
+            .getColumn(currentType)
+            ?.convertCell(toType, currentData, currentCells) ?? {
+            column: columnManager.getColumn(toType).defaultData(),
+            cells: currentCells.map(() => undefined),
+          };
     this.page.captureSync();
     this._model.updateColumn(propertyId, () => ({
       type: toType,
