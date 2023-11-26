@@ -257,7 +257,7 @@ export class KeymapController implements ReactiveController {
       .getPrevBlock({
         filter: block => !!block.model.text,
       })
-      .inline((ctx, next) => {
+      .inline<'focusBlock'>((ctx, next) => {
         return next({ focusBlock: ctx.prevBlock });
       })
       .selectBlockTextBySide({ tail: true })
@@ -281,7 +281,7 @@ export class KeymapController implements ReactiveController {
       .getNextBlock({
         filter: block => !!block.model.text,
       })
-      .inline((ctx, next) => {
+      .inline<'focusBlock'>((ctx, next) => {
         return next({ focusBlock: ctx.nextBlock });
       })
       .selectBlockTextBySide({ tail: false })
@@ -317,25 +317,49 @@ export class KeymapController implements ReactiveController {
         // text selection - case 1: change selection downwards within the same block
         cmd.changeTextSelectionVertically({ upward: false }),
 
-        // text selection - case 2: change selection downwards to the next block
+        // text selection - case 2: next block within same note
         cmd
           .getNextBlock({
             filter: block => !!block.model.text,
           })
-          .inline((ctx, next) => {
+          .inline<'focusBlock'>((ctx, next) => {
             return next({ focusBlock: ctx.nextBlock });
           })
-          .changeTextSelectionVertically({ upward: false }),
+          .try(cmd => [
+            cmd.changeTextSelectionVertically({ upward: false }),
 
-        // text selection - case 3: change selection downwards to the next block start
+            cmd.changeTextSelectionToBlockStartEnd({ tail: false }),
+          ]),
+
+        // text selection - case 3: first block in next note
         cmd
+          .withRoot()
+          .getEditorMode()
+          .inline((ctx, next) => {
+            // jump to next note only in page mode
+            if (ctx.currentEditorMode === 'page') {
+              next();
+            }
+          })
+          .getNextBlock({
+            filter: block => block.flavour === 'affine:note',
+          })
+          .inline((ctx, next) => {
+            const nextNote = ctx.nextBlock;
+            assertExists(nextNote);
+            return next({ path: nextNote.path });
+          })
           .getNextBlock({
             filter: block => !!block.model.text,
           })
-          .inline((ctx, next) => {
+          .inline<'focusBlock'>((ctx, next) => {
             return next({ focusBlock: ctx.nextBlock });
           })
-          .changeTextSelectionToBlockStartEnd({ tail: false }),
+          .try(cmd => [
+            cmd.changeTextSelectionVertically({ upward: false }),
+
+            cmd.changeTextSelectionToBlockStartEnd({ tail: false }),
+          ]),
 
         // text selection - case 4: change selection to the current block end
         cmd.changeTextSelectionToBlockStartEnd({ tail: true }),
@@ -414,24 +438,51 @@ export class KeymapController implements ReactiveController {
       .try(cmd => [
         // text selection - case 1: change selection upwards within the same block
         cmd.changeTextSelectionVertically({ upward: true }),
-        // text selection - case 2: change selection upwards to the previous block
+
+        // text selection - case 2: previous block within same note
         cmd
           .getPrevBlock({
             filter: block => !!block.model.text,
           })
-          .inline((ctx, next) => {
+          .inline<'focusBlock'>((ctx, next) => {
             return next({ focusBlock: ctx.prevBlock });
           })
-          .changeTextSelectionVertically({ upward: true }),
-        // text selection - case 3: change selection upwards to the previous block end
+          .try(cmd => [
+            cmd.changeTextSelectionVertically({ upward: true }),
+
+            cmd.changeTextSelectionToBlockStartEnd({ tail: true }),
+          ]),
+
+        // text selection - case 3: last block in previous note
         cmd
+          .withRoot()
+          .getEditorMode()
+          .inline((ctx, next) => {
+            // jump to next note only in page mode
+            if (ctx.currentEditorMode === 'page') {
+              next();
+            }
+          })
+          .getPrevBlock({
+            filter: block => block.flavour === 'affine:note',
+          })
+          .inline((ctx, next) => {
+            const previousNote = ctx.prevBlock;
+            assertExists(previousNote);
+            return next({ path: previousNote.path });
+          })
           .getPrevBlock({
             filter: block => !!block.model.text,
           })
-          .inline((ctx, next) => {
+          .inline<'focusBlock'>((ctx, next) => {
             return next({ focusBlock: ctx.prevBlock });
           })
-          .changeTextSelectionToBlockStartEnd({ tail: true }),
+          .try(cmd => [
+            cmd.changeTextSelectionVertically({ upward: true }),
+
+            cmd.changeTextSelectionToBlockStartEnd({ tail: true }),
+          ]),
+
         // text selection - case 4: change selection to the current block start
         cmd.changeTextSelectionToBlockStartEnd({ tail: false }),
       ])
@@ -466,8 +517,8 @@ export class KeymapController implements ReactiveController {
           currentSelectionPath: this._focusBlock?.path ?? anchorBlock?.path,
         });
       })
-      .getPrevBlock({})
-      .inline((ctx, next) => {
+      .getPrevBlock()
+      .inline<'focusBlock'>((ctx, next) => {
         assertExists(ctx.prevBlock);
         this._focusBlock = ctx.prevBlock;
         if (!ensureBlockInContainer(this._focusBlock, this.host)) {
@@ -497,7 +548,7 @@ export class KeymapController implements ReactiveController {
         // text selection - case 1: change selection towards right within the same block
         cmd.changeTextSelectionSideways({ left: false }),
 
-        // text selection - case 2: change selection towards right to the next block
+        // text selection - case 2: change selection towards right to the next block within same note
         cmd
           .getNextBlock({
             filter: block => !!block.model.text,
@@ -505,7 +556,33 @@ export class KeymapController implements ReactiveController {
           .inline<'focusBlock'>((ctx, next) => {
             return next({ focusBlock: ctx.nextBlock });
           })
-          .changeTextSelectionSidewaysToBlock({ left: false }),
+          .changeTextSelectionSidewaysToBlock({ tail: false }),
+
+        // text selection - case 3: change selection towards right to the first block in next note
+        cmd
+          .withRoot()
+          .getEditorMode()
+          .inline((ctx, next) => {
+            // jump to next note only in page mode
+            if (ctx.currentEditorMode === 'page') {
+              next();
+            }
+          })
+          .getNextBlock({
+            filter: block => block.flavour === 'affine:note',
+          })
+          .inline((ctx, next) => {
+            const nextNote = ctx.nextBlock;
+            assertExists(nextNote);
+            return next({ path: nextNote.path });
+          })
+          .getNextBlock({
+            filter: block => !!block.model.text,
+          })
+          .inline<'focusBlock'>((ctx, next) => {
+            return next({ focusBlock: ctx.nextBlock });
+          })
+          .changeTextSelectionSidewaysToBlock({ tail: false }),
       ])
       .inline((ctx, next) => {
         const { focusBlock } = ctx;
@@ -531,6 +608,7 @@ export class KeymapController implements ReactiveController {
       .try(cmd => [
         // text selection - case 1: change selection towards left within the same block
         cmd.changeTextSelectionSideways({ left: true }),
+
         // text selection - case 2: change selection towards left to the next block
         cmd
           .getPrevBlock({
@@ -539,7 +617,33 @@ export class KeymapController implements ReactiveController {
           .inline<'focusBlock'>((ctx, next) => {
             return next({ focusBlock: ctx.prevBlock });
           })
-          .changeTextSelectionSidewaysToBlock({ left: true }),
+          .changeTextSelectionSidewaysToBlock({ tail: true }),
+
+        // text selection - case 3: change selection towards left to the last block in previous note
+        cmd
+          .withRoot()
+          .getEditorMode()
+          .inline((ctx, next) => {
+            // jump to next note only in page mode
+            if (ctx.currentEditorMode === 'page') {
+              next();
+            }
+          })
+          .getPrevBlock({
+            filter: block => block.flavour === 'affine:note',
+          })
+          .inline((ctx, next) => {
+            const nextNote = ctx.prevBlock;
+            assertExists(nextNote);
+            return next({ path: nextNote.path });
+          })
+          .getPrevBlock({
+            filter: block => !!block.model.text,
+          })
+          .inline<'focusBlock'>((ctx, next) => {
+            return next({ focusBlock: ctx.prevBlock });
+          })
+          .changeTextSelectionSidewaysToBlock({ tail: true }),
       ])
       .inline((ctx, next) => {
         const { focusBlock } = ctx;

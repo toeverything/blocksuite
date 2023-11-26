@@ -6,9 +6,9 @@ import { applyCarets, getCurrentTextSelectionCarets } from '../utils.js';
 export const changeTextSelectionSidewaysToBlock: Command<
   'focusBlock',
   never,
-  { left: boolean }
+  { tail: boolean }
 > = (ctx, next) => {
-  const { left, focusBlock } = ctx;
+  const { tail, focusBlock } = ctx;
   const currentTextSelectionCarets = getCurrentTextSelectionCarets();
   if (!currentTextSelectionCarets || !focusBlock) {
     return;
@@ -20,11 +20,11 @@ export const changeTextSelectionSidewaysToBlock: Command<
     return;
   }
 
-  const nextTextIndex = left ? texts.length - 1 : 0;
+  const nextTextIndex = tail ? texts.length - 1 : 0;
 
   const nextEndCaret = {
     node: texts[nextTextIndex],
-    offset: left ? texts[nextTextIndex].length - 1 : 1,
+    offset: tail ? texts[nextTextIndex].length - 1 : 1,
   };
 
   if (

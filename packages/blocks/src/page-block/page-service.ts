@@ -14,6 +14,7 @@ import {
   formatTextCommand,
   getBlockIndexCommand,
   getBlockSelectionsCommand,
+  getEditorModeCommand,
   getImageSelectionsCommand,
   getNextBlockCommand,
   getPrevBlockCommand,
@@ -228,6 +229,7 @@ export class PageService extends BlockService<PageBlockModel> {
       .add('formatBlock', formatBlockCommand)
       .add('formatNative', formatNativeCommand)
       .add('formatText', formatTextCommand)
-      .add('withRoot', withRootCommand);
+      .add('withRoot', withRootCommand)
+      .add('getEditorMode', getEditorModeCommand);
   }
 }

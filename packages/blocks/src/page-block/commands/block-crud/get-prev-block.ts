@@ -5,10 +5,14 @@ import type { BlockElement } from '@blocksuite/lit';
 
 type Filter = (view: BlockElement) => boolean;
 
-function getPrevSibling(std: BlockSuite.Std, path: string[], filter?: Filter) {
+function getPrevSibling(
+  std: BlockSuite.Std,
+  blockElement: BlockElement,
+  filter?: Filter
+) {
   const view = std.view;
-  const nextView = view.findPrev(path, node => {
-    if (node.type !== 'block') {
+  const nextView = view.findPrev(blockElement.path, node => {
+    if (node.type !== 'block' || node.view.contains(blockElement)) {
       return;
     }
     if (filter && !filter(node.view as BlockElement)) {
@@ -42,8 +46,10 @@ function getPrevBlock(
   filter?: (block: BlockElement) => boolean
 ) {
   const view = std.view;
+  const focusBlock = view.viewFromPath('block', path);
+  if (!focusBlock) return null;
 
-  let prev: BlockElement | null = getPrevSibling(std, path, filter);
+  let prev: BlockElement | null = getPrevSibling(std, focusBlock, filter);
 
   if (!prev) {
     return null;
