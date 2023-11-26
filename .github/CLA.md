@@ -109,3 +109,5 @@ Example:
 - Rachit Chawla, @rachit1313, 2023/11/22
 - Alisallon, @yangvom, 2023/11/26
 - Jiu Song, @alpakaka0o0, 2023/11/26
+- Kimhyeonju, @kimhyeonju, 2023/11/26
+- minjuSong @mingjuu 2023/11/26
