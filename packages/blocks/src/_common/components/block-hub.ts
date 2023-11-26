@@ -489,8 +489,7 @@ function BlockHubMenu(
   visibleCardType: CardListType | null,
   isCardListVisible: boolean,
   showTooltip: boolean,
-  maxHeight: number,
-  page: Page
+  maxHeight: number
 ) {
   const menuNum = 5;
   const height = menuNum * 44 + 10;
@@ -506,12 +505,7 @@ function BlockHubMenu(
   );
 
   const blockHubFileCards = BlockHubCards(
-    BLOCKHUB_FILE_ITEMS.filter(({ flavour }) => {
-      if (flavour === 'affine:bookmark') {
-        return page.awarenessStore.getFlag('enable_bookmark_operation');
-      }
-      return true;
-    }),
+    BLOCKHUB_FILE_ITEMS,
     'file',
     'Content & Media',
     maxHeight,
@@ -1060,8 +1054,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._visibleCardType,
       this._isCardListVisible,
       this._showTooltip,
-      this._maxHeight,
-      this._page
+      this._maxHeight
     );
 
     const blockHubCards = BlockHubCards(

@@ -272,7 +272,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         name: 'Bookmark',
         icon: BookmarkIcon,
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_bookmark_operation')) {
+          if (!model.page.schema.flavourSchemaMap.has('affine:bookmark')) {
             return false;
           }
           return !insideDatabase(model);
