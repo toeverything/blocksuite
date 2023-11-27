@@ -426,7 +426,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         const curBound = Bound.deserialize(element.xywh);
         const props: Partial<NoteBlockModel> = {};
         if (curBound.h !== bound.h && !element.edgeless.collapse) {
-          element.edgeless.collapse = true;
+          edgeless.page.updateBlock(element, () => {
+            element.edgeless.collapse = true;
+          });
         }
 
         bound.w = clamp(bound.w, NOTE_MIN_WIDTH, Infinity);

@@ -306,7 +306,9 @@ export function createEdgelessElement(
     );
     const note = page.getBlockById(id) as NoteBlockModel;
     assertExists(note);
-    note.edgeless.collapse = true;
+    page.updateBlock(note, () => {
+      note.edgeless.collapse = true;
+    });
     page.addBlock('affine:paragraph', {}, note.id);
   }
   const group = surface.getGroupParent(current);
