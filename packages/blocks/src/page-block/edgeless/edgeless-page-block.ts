@@ -655,7 +655,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _initSurface() {
     this._disposables.add(
       on(this.surface, 'indexedcanvasupdate', e => {
-        console.log('shit');
         this.pageBlockContainer.setSlotContent(
           (e as IndexedCanvasUpdateEvent).detail.content
         );
