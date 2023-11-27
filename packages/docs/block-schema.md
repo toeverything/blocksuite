@@ -6,7 +6,7 @@ This documentation is mostly written for BlockSuite maintainers. If you goal doe
 
 In BlockSuite, all blocks should have a schema. The schema of the block describes the data structure of the block.
 
-You can use the `defineSchema` function to define the schema of the block.
+You can use the `defineBlockSchema` function to define the schema of the block.
 
 ```ts
 import { defineBlockSchema } from '@blocksuite/store';
