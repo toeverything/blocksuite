@@ -232,8 +232,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       boxShadow: editing
         ? 'var(--affine-active-shadow)'
         : hidden || !shadowType
-        ? 'none'
-        : `var(${shadowType})`,
+          ? 'none'
+          : `var(${shadowType})`,
     };
 
     return html`

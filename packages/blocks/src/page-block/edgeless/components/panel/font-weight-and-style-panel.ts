@@ -122,8 +122,8 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
                     ${fontFace.weight === CanvasTextFontWeight.Light
                       ? 'Light'
                       : fontFace.weight === CanvasTextFontWeight.Regular
-                      ? 'Regular'
-                      : 'Semibold'}
+                        ? 'Regular'
+                        : 'Semibold'}
                   </div>
                 </edgeless-tool-icon-button>
               `
@@ -159,8 +159,8 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
                       ${fontFace.weight === CanvasTextFontWeight.Light
                         ? 'Light Italic'
                         : fontFace.weight === CanvasTextFontWeight.Regular
-                        ? 'Regular Italic'
-                        : 'Semibold Italic'}
+                          ? 'Regular Italic'
+                          : 'Semibold Italic'}
                     </div>
                   </edgeless-tool-icon-button>
                 `

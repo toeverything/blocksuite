@@ -53,12 +53,12 @@ const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
     ? globalThis
     : typeof window !== 'undefined'
-    ? window
-    : // @ts-ignore
-    typeof global !== 'undefined'
-    ? // @ts-ignore
-      global
-    : {};
+      ? window
+      : // @ts-ignore
+        typeof global !== 'undefined'
+        ? // @ts-ignore
+          global
+        : {};
 const importIdentifier = '__ $BLOCKSUITE_BLOCKS$ __';
 
 if (env[importIdentifier] === true) {

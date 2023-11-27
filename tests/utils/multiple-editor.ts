@@ -8,8 +8,8 @@ export const scope =
   editorIndex == null
     ? undefined
     : editorIndex === 0
-    ? 'FIRST | '
-    : 'SECOND | ';
+      ? 'FIRST | '
+      : 'SECOND | ';
 export const multiEditor = scope != null;
 
 export const currentEditorIndex = editorIndex ?? 0;

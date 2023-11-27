@@ -90,8 +90,8 @@ export function getShapeTextIBound(shape: ShapeElement): IBound | null {
     textAlign === 'center'
       ? horizontalOffset - widestLineWidth / 2
       : textAlign === 'right'
-      ? horizontalOffset - widestLineWidth
-      : SHAPE_TEXT_PADDING;
+        ? horizontalOffset - widestLineWidth
+        : SHAPE_TEXT_PADDING;
 
   const iBound = new Bound(
     x + offsetX - 2,

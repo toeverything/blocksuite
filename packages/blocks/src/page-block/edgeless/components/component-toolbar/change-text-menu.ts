@@ -522,8 +522,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
               selectedFontWeight === CanvasTextFontWeight.Light
                 ? 'Light'
                 : selectedFontWeight === CanvasTextFontWeight.Regular
-                ? 'Regular'
-                : 'Semibold'
+                  ? 'Regular'
+                  : 'Semibold'
             }${
               selectedFontStyle === CanvasTextFontStyle.Italic ? ' Italic' : ''
             }`}</span
@@ -556,8 +556,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
           ${selectedAlign === 'left'
             ? TextAlignLeftIcon
             : selectedAlign === 'center'
-            ? TextAlignCenterIcon
-            : TextAlignRightIcon}
+              ? TextAlignCenterIcon
+              : TextAlignRightIcon}
           ${SmallArrowDownIcon}
         </div>
       </edgeless-tool-icon-button>

@@ -54,7 +54,7 @@ export function getAssetName(assets: Map<string, Blob>, blobId: string) {
     name !== undefined && name.includes('.')
       ? name.split('.').at(-1)
       : blob.type !== ''
-      ? blob.type.split('/').at(-1)
-      : 'blob';
+        ? blob.type.split('/').at(-1)
+        : 'blob';
   return `${name?.split('.').at(0) ?? blobId}.${ext}`;
 }

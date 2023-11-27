@@ -544,8 +544,8 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   o.node.checked !== null
                     ? 'todo'
                     : context.getNodeContext('mdast:list:ordered')
-                    ? 'numbered'
-                    : 'bulleted',
+                      ? 'numbered'
+                      : 'bulleted',
                 text: {
                   '$blocksuite:internal:text$': true,
                   delta:

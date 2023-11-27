@@ -3,8 +3,8 @@ import { Array as YArray, Map as YMap, Text as YText } from 'yjs';
 export type Native2Y<T> = T extends Record<string, infer U>
   ? YMap<U>
   : T extends Array<infer U>
-  ? YArray<U>
-  : T;
+    ? YArray<U>
+    : T;
 
 export function isPureObject(value: unknown): value is object {
   return (
