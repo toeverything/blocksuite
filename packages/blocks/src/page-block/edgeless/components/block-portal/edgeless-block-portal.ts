@@ -12,7 +12,7 @@ import '../component-toolbar/component-toolbar.js';
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, nothing, type TemplateResult } from 'lit';
+import { css, nothing } from 'lit';
 import {
   customElement,
   property,
