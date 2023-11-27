@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/editor",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Default BlockSuite-based editor built for AFFiNE.",
   "type": "module",
   "repository": "toeverything/blocksuite",
