@@ -830,6 +830,16 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   pickTop(
     x: number,
     y: number,
+    options: { all: true }
+  ): EdgelessElement[] | null;
+  pickTop(
+    x: number,
+    y: number,
+    options?: { all: false }
+  ): EdgelessElement | null;
+  pickTop(
+    x: number,
+    y: number,
     options: HitTestOptions = {
       expand: 10,
       all: false,
