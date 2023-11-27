@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
+import { DEFAULT_EDGELESS_PROP } from '../../../../_common/edgeless/note/consts.js';
 import type { NoteBlockModel } from '../../../../models.js';
 import {
   CanvasTextFontFamily,
@@ -306,6 +307,9 @@ export function createEdgelessElement(
     );
     const note = page.getBlockById(id) as NoteBlockModel;
     assertExists(note);
+    if (!note.edgeless) {
+      note.edgeless = DEFAULT_EDGELESS_PROP;
+    }
     note.edgeless.collapse = true;
     page.addBlock('affine:paragraph', {}, note.id);
   }

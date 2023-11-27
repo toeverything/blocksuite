@@ -20,6 +20,7 @@ import {
   type PhasorElement,
   type ShapeType,
 } from '../../surface-block/elements/index.js';
+import type { NavigatorMode } from '../edgeless/frame/consts.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
 
@@ -195,6 +196,7 @@ export type FrameTool = {
 
 export type FrameNavigatorTool = {
   type: 'frameNavigator';
+  mode?: NavigatorMode;
 };
 
 export type PanTool = {

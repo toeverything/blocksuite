@@ -2,9 +2,9 @@ import type { UIEventHandler } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSnapshot, Page } from '@blocksuite/store';
-import { MarkdownAdapter } from '@blocksuite/store';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
+import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
 import { replaceIdMiddleware } from '../../_common/transformers/utils.js';
 import { ClipboardAdapter } from './adapter.js';
 import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';

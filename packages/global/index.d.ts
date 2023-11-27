@@ -7,7 +7,6 @@ declare type BlockSuiteFlags = {
   enable_expand_database_block: boolean;
 
   enable_toggle_block: boolean;
-  enable_bookmark_operation: boolean;
   enable_note_index: boolean;
 
   enable_bultin_ledits: boolean;

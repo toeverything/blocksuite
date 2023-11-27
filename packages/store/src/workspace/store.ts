@@ -61,7 +61,6 @@ const flagsPreset = {
   enable_expand_database_block: false,
 
   enable_toggle_block: false,
-  enable_bookmark_operation: false,
   enable_note_index: false,
 
   enable_bultin_ledits: false,

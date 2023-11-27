@@ -12,6 +12,7 @@ import './surface-block/index.js';
 import './database-block/index.js';
 import './surface-ref-block/index.js';
 
+export * from './_common/adapters/index.js';
 export * from './_common/components/index.js';
 export * from './_common/consts.js';
 export * from './_common/test-utils/test-utils.js';

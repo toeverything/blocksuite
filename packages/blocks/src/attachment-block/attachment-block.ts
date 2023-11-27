@@ -58,7 +58,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
             this._captionInput.focus();
           });
         },
-        downloadAttachment: this._downloadAttachment,
+        downloadAttachment: this._downloadAttachment.bind(this),
         abortController,
       }),
       computePosition: {
