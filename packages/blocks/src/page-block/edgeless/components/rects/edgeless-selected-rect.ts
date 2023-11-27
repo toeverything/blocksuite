@@ -6,7 +6,6 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { DEFAULT_EDGELESS_PROP } from '../../../../_common/edgeless/note/consts.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
@@ -426,11 +425,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       if (isNoteBlock(element)) {
         const curBound = Bound.deserialize(element.xywh);
         const props: Partial<NoteBlockModel> = {};
-
-        if (!element.edgeless) {
-          element.edgeless = DEFAULT_EDGELESS_PROP;
-        }
-
         if (curBound.h !== bound.h && !element.edgeless.collapse) {
           element.edgeless.collapse = true;
         }
