@@ -220,7 +220,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   private _setShadowType(shadowType: string) {
     this.notes.forEach(note => {
-      this.surface.page.updateBlock(note, () => {
+      this.page.updateBlock(note, () => {
         note.edgeless.style.shadowType = shadowType;
       });
     });
@@ -230,7 +230,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     note = this.surface.unwrap(note);
     this.page.updateBlock(note, { hidden });
 
-    const noteParent = this.surface.page.getParent(note);
+    const noteParent = this.page.getParent(note);
     assertExists(noteParent);
     const noteParentChildNotes = noteParent.children.filter(block =>
       matchFlavours(block, ['affine:note'])
@@ -240,12 +240,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     if (!hidden && note !== noteParentLastNote) {
       // move to the end
-      this.surface.page.moveBlocks(
-        [note],
-        noteParent,
-        noteParentLastNote,
-        false
-      );
+      this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
     }
     this._queryCache = !this._queryCache;
   }
@@ -361,8 +356,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   override render() {
     if (this.notes.length !== 1) return nothing;
     const note = this.notes[0];
-    const enableIndex =
-      this.surface.page.awarenessStore.getFlag('enable_note_index');
+    const enableIndex = this.page.awarenessStore.getFlag('enable_note_index');
     const { hidden, background, edgeless } = note;
     const { shadowType, borderRadius, borderSize, borderStyle } =
       edgeless.style;
