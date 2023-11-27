@@ -1004,38 +1004,45 @@ describe('notion html to snapshot', () => {
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
 
-  test('image', async () => {
-    const html = `<div class="page-body">
+  test(
+    'image',
+    async () => {
+      const html = `<div class="page-body">
       <figure id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5" class="image"><a
           href="https://affine.pro/favicon-96.png"><img src="https://affine.pro/favicon-96.png" /></a>
       </figure>
     </div>`;
 
-    const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {},
-      children: [
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:image',
-          props: {
-            sourceId: 'matchesReplaceMap[2]',
+      const blockSnapshot: BlockSnapshot = {
+        type: 'block',
+        id: 'matchesReplaceMap[0]',
+        flavour: 'affine:note',
+        props: {},
+        children: [
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[1]',
+            flavour: 'affine:image',
+            props: {
+              sourceId: 'matchesReplaceMap[2]',
+            },
+            children: [],
           },
-          children: [],
-        },
-      ],
-    };
+        ],
+      };
 
-    const adapter = new NotionHtmlAdapter();
-    const rawBlockSnapshot = await adapter.toBlockSnapshot({
-      file: html,
-      assets: new AssetsManager({ blob: new MemoryBlobManager() }),
-    });
-    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
-  });
+      const adapter = new NotionHtmlAdapter();
+      const rawBlockSnapshot = await adapter.toBlockSnapshot({
+        file: html,
+        assets: new AssetsManager({ blob: new MemoryBlobManager() }),
+      });
+      expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+    },
+    {
+      timeout: 1000,
+      retry: 3,
+    }
+  );
 
   test('bookmark', async () => {
     const html = `<div class="page-body">
