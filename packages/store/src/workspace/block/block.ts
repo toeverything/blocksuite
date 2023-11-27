@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 import type { UnRecord } from '../../reactive/index.js';
-import { BaseBlockModel } from '../../schema/base.js';
+import { BaseBlockModel, internalPrimitives } from '../../schema/base.js';
 import type { Schema } from '../../schema/index.js';
 import { propsToValue, valueToProps } from './utils.js';
 
@@ -112,6 +112,22 @@ export class Block {
     assertExists(id, 'Block id is not found');
     assertExists(flavour, 'Block flavour is not found');
     assertExists(yChildren, 'Block children is not found');
+
+    const schema = this.schema.flavourSchemaMap.get(flavour);
+    assertExists(schema, `Cannot find schema for flavour ${flavour}`);
+    const defaultProps = schema.model.props?.(internalPrimitives);
+
+    // Set default props if not exists
+    if (defaultProps) {
+      Object.entries(defaultProps).forEach(([key, value]) => {
+        if (props[key] !== undefined) return;
+
+        const yValue = propsToValue(value);
+        this.yBlock.set(`prop:${key}`, yValue);
+        const proxy = this._getPropsProxy(key, yValue);
+        props[key] = proxy;
+      });
+    }
 
     return {
       id,
