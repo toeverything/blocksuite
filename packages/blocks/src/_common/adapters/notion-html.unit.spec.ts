@@ -1007,7 +1007,7 @@ describe('notion html to snapshot', () => {
   test('image', async () => {
     const html = `<div class="page-body">
       <figure id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5" class="image"><a
-          href="https://affine.pro/favicon-96.png"><img src="https://affine.pro/favicon-96.png" /></a>
+          href="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo.svg"><img src="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo.svg" /></a>
       </figure>
     </div>`;
 
