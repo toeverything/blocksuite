@@ -17,6 +17,13 @@ export const styles = css`
     cursor: pointer;
   }
 
+  .affine-attachment-embed-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-top: calc(var(--affine-paragraph-space) + 8px);
+  }
+
   .affine-attachment-title {
     display: flex;
     gap: 8px;

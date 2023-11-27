@@ -65,7 +65,8 @@ const embedConfig: EmbedConfig[] = [
     name: 'audio',
     check: model =>
       model.type.startsWith('audio/') && model.size <= MAX_EMBED_SIZE,
-    template: (_, blobUrl) => html`<audio controls src=${blobUrl}></audio>`,
+    template: (_, blobUrl) =>
+      html`<audio controls src=${blobUrl} style="margin: 4px;"></audio>`,
   },
 ];
 
@@ -86,6 +87,9 @@ export function turnIntoEmbedAction(model: AttachmentBlockModel) {
 
 export function renderEmbedView(model: AttachmentBlockModel, blobUrl: string) {
   const config = embedConfig.find(config => config.check(model));
-  if (!config || !config.template) return null;
+  if (!config || !config.template) {
+    console.error('No embed view template found!', model, embedConfig);
+    return null;
+  }
   return config.template(model, blobUrl);
 }
