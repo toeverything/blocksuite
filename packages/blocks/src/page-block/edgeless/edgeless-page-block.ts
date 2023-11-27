@@ -30,6 +30,7 @@ import {
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
+import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
 import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
@@ -765,16 +766,24 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   private _initLocalRecordManager() {
     this.localRecord = new LocalRecordManager<PhasorElementLocalRecordValues>();
-    this.localRecord.slots.updated.on(({ id }) => {
+    this.localRecord.slots.updated.on(({ id, data }) => {
       const element = this.surface.pickById(id);
 
       if (!element) return;
 
-      this.surface.refresh();
+      const changedProps = pick(
+        data.new,
+        keys(data.new).filter(key => key in element)
+      );
 
-      this.slots.elementUpdated.emit({
-        id,
-      });
+      if (!isEmpty(changedProps)) {
+        this.slots.elementUpdated.emit({
+          id,
+          props: changedProps,
+        });
+      }
+
+      this.surface.refresh();
     });
 
     this.disposables.add(() => {

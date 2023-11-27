@@ -274,7 +274,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      page.slots.historyUpdated.on(() => {
+      edgeless.surface.layer.slots.layerUpdated.on(() => {
         this.requestUpdate();
       })
     );

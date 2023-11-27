@@ -48,6 +48,7 @@ export class LayerManager {
 
   slots = {
     canvasLayerChanged: new Slot(),
+    layerUpdated: new Slot(),
   };
 
   phasors!: SurfaceElement[];
@@ -545,6 +546,41 @@ export class LayerManager {
     }
   }
 
+  /**
+   * @returns a boolean value to indicate whether the layers have been updated
+   */
+  private _updateLayer(element: Indexable | FrameBlockModel) {
+    let updateType: 'block' | 'canvas' | undefined = undefined;
+
+    if (element instanceof SurfaceElement) {
+      updateType = 'canvas';
+      this._removeFromOrderedArray(this.phasors, element);
+      this._insertToOrderedArray(this.phasors, element);
+
+      if (element instanceof GroupElement) {
+        element.childElements.forEach(child => this._updateLayer(child));
+      }
+    } else if (element.flavour === 'affine:frame') {
+      this._removeFromOrderedArray(this.frames, element);
+      this._insertToOrderedArray(this.frames, element);
+    } else {
+      updateType = 'block';
+      this._removeFromOrderedArray(this.blocks, element);
+      this._insertToOrderedArray(this.blocks, element);
+      this.blocksGrid.remove(element);
+      this.blocksGrid.add(element);
+    }
+
+    if (updateType) {
+      this._removeFromLayer(element as Indexable, updateType);
+      this._insertIntoLayer(element as Indexable, updateType);
+
+      return true;
+    }
+
+    return false;
+  }
+
   add(element: Indexable | FrameBlockModel) {
     let insertType: 'block' | 'canvas' | undefined = undefined;
 
@@ -553,7 +589,7 @@ export class LayerManager {
       this._insertToOrderedArray(this.phasors, element);
 
       if (element instanceof GroupElement) {
-        element.childElements.forEach(child => this.update(child, false));
+        element.childElements.forEach(child => this._updateLayer(child));
       }
     } else if (element.flavour === 'affine:frame') {
       this._insertToOrderedArray(this.frames, element);
@@ -565,6 +601,7 @@ export class LayerManager {
 
     if (insertType) {
       this._insertIntoLayer(element as Indexable, insertType);
+      this.slots.layerUpdated.emit();
       this._buildCanvasLayers();
     }
   }
@@ -585,39 +622,15 @@ export class LayerManager {
 
     if (deleteType) {
       this._removeFromLayer(element as Indexable, deleteType);
+      this.slots.layerUpdated.emit();
       this._buildCanvasLayers();
     }
   }
 
-  update(element: Indexable | FrameBlockModel, rebuildCanvasLayer = true) {
-    let updateType: 'block' | 'canvas' | undefined = undefined;
-
-    if (element instanceof SurfaceElement) {
-      updateType = 'canvas';
-      this._removeFromOrderedArray(this.phasors, element);
-      this._insertToOrderedArray(this.phasors, element);
-
-      if (element instanceof GroupElement) {
-        element.childElements.forEach(child => this.update(child, false));
-      }
-    } else if (element.flavour === 'affine:frame') {
-      this._removeFromOrderedArray(this.frames, element);
-      this._insertToOrderedArray(this.frames, element);
-    } else {
-      updateType = 'block';
-      this._removeFromOrderedArray(this.blocks, element);
-      this._insertToOrderedArray(this.blocks, element);
-      this.blocksGrid.remove(element);
-      this.blocksGrid.add(element);
-    }
-
-    if (updateType) {
-      this._removeFromLayer(element as Indexable, updateType);
-      this._insertIntoLayer(element as Indexable, updateType);
-
-      if (rebuildCanvasLayer) {
-        this._buildCanvasLayers();
-      }
+  update(element: Indexable | FrameBlockModel) {
+    if (this._updateLayer(element)) {
+      this.slots.layerUpdated.emit();
+      this._buildCanvasLayers();
     }
   }
 
@@ -723,7 +736,14 @@ export class LayerManager {
           const next2 =
             direction === 'forward' ? elements[currentIdx + 2] : null;
 
-          return generateKeyBetween(next.index, next2?.index ?? null);
+          return generateKeyBetween(
+            next.index,
+            next2?.index
+              ? next.index < next2.index
+                ? next2.index
+                : null
+              : null
+          );
         }
       case 'backward':
       case 'back':
