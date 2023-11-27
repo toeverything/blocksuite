@@ -180,7 +180,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _queryCache = false;
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
 
   @query('.fill-color-button')
   private _fillColorButton!: HTMLDivElement;
@@ -330,7 +330,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       this._fillColorPopper = createButtonPopper(
         this._fillColorButton,
         this._fillColorMenu,
-        ({ display }) => (this._popperShow = display === 'show')
+        ({ display }) => (this._showPopper = display === 'show')
       );
 
       this._disposables.add(this._fillColorPopper);
@@ -339,7 +339,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         this._shadowTypeButton,
         this._shadowTypesPanel,
         ({ display }) => {
-          this._popperShow = display === 'show';
+          this._showPopper = display === 'show';
         }
       );
       _disposables.add(this._shadowTypePopper);
@@ -348,7 +348,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         this._borderStyleButton,
         this._borderStylesPanel,
         ({ display }) => {
-          this._popperShow = display === 'show';
+          this._showPopper = display === 'show';
         }
       );
       _disposables.add(this._borderStylePopper);
@@ -357,7 +357,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         this._borderRadiusButton,
         this._boderRadiusPanel,
         ({ display }) => {
-          this._popperShow = display === 'show';
+          this._showPopper = display === 'show';
         }
       );
       _disposables.add(this._borderRadiusPopper);
@@ -410,7 +410,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         : html`
             <edgeless-tool-icon-button
               class="fill-color-button"
-              .tooltip=${this._popperShow ? '' : 'Background'}
+              .tooltip=${this._showPopper ? '' : 'Background'}
               .iconContainerPadding=${2}
               @click=${() => this._fillColorPopper?.toggle()}
             >
@@ -448,7 +448,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
             <div class="item border-style-button">
               <edgeless-tool-icon-button
-                .tooltip=${this._popperShow ? '' : 'Border Style'}
+                .tooltip=${this._showPopper ? '' : 'Border Style'}
                 .iconContainerPadding=${0}
                 .hover=${false}
                 @click=${() => this._borderStylePopper?.toggle()}

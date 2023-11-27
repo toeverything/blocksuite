@@ -84,7 +84,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   frames: FrameBlockModel[] = [];
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
 
   @query('.fill-color-button')
   private _fillColorButton!: EdgelessToolIconButton;
@@ -142,7 +142,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       this._fillColorButton,
       this._fillColorMenu,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     this._disposables.add(this._frameBackground);
@@ -178,7 +178,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="fill-color-button"
-        .tooltip=${this._popperShow ? '' : 'Background'}
+        .tooltip=${this._showPopper ? '' : 'Background'}
         .tipPosition=${'bottom'}
         .active=${false}
         .iconContainerPadding=${2}

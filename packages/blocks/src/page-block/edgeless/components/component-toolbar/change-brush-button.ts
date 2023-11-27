@@ -104,7 +104,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   slots!: EdgelessSelectionSlots;
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
 
   @state()
   private _selectedColor: string | null = null;
@@ -150,7 +150,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       this,
       this._colorPanel,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._colorPanelPopper);
@@ -173,7 +173,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       </edgeless-line-width-panel>
       <menu-divider .vertical=${true}></menu-divider>
       <edgeless-tool-icon-button
-        .tooltip=${this._popperShow ? '' : 'Color'}
+        .tooltip=${this._showPopper ? '' : 'Color'}
         .active=${false}
         .iconContainerPadding=${2}
         @click=${() => this._colorPanelPopper?.toggle()}
