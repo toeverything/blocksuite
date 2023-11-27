@@ -10,35 +10,26 @@ function handleInsertText<TextAttributes extends BaseTextAttributes>(
 ) {
   if (!data) return;
   editor.insertText(vRange, data, attributes);
-  editor.setVRange(
-    {
-      index: vRange.index + data.length,
-      length: 0,
-    },
-    false
-  );
+  editor.setVRange({
+    index: vRange.index + data.length,
+    length: 0,
+  });
 }
 
 function handleInsertParagraph(vRange: VRange, editor: VEditor) {
   editor.insertLineBreak(vRange);
-  editor.setVRange(
-    {
-      index: vRange.index + 1,
-      length: 0,
-    },
-    false
-  );
+  editor.setVRange({
+    index: vRange.index + 1,
+    length: 0,
+  });
 }
 
 function handleDelete(vRange: VRange, editor: VEditor) {
   editor.deleteText(vRange);
-  editor.setVRange(
-    {
-      index: vRange.index,
-      length: 0,
-    },
-    false
-  );
+  editor.setVRange({
+    index: vRange.index,
+    length: 0,
+  });
 }
 
 export function transformInput<TextAttributes extends BaseTextAttributes>(
