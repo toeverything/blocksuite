@@ -498,26 +498,41 @@ test.describe('note slicer', () => {
     await waitNextFrame(page);
     const zIndexPattern = /z-index:\s*(\d+)/;
 
+    let blockStyleText = zIndexPattern.exec(
+      (await page
+        .locator(`[data-portal-block-id="${lastNoteId}"]`)
+        .getAttribute('style')) ?? ''
+    )?.[1];
     let styleText =
       (await page.locator('affine-note-slicer').getAttribute('style')) ?? '';
     let result = zIndexPattern.exec(styleText);
-    expect(result?.[1]).toBe('3');
+    expect(result?.[1]).toBe(blockStyleText);
 
     await selectNoteInEdgeless(page, secondNoteId);
     await hoverOnNote(page, secondNoteId);
 
+    blockStyleText = zIndexPattern.exec(
+      (await page
+        .locator(`[data-portal-block-id="${secondNoteId}"]`)
+        .getAttribute('style')) ?? ''
+    )?.[1];
     styleText =
       (await page.locator('affine-note-slicer').getAttribute('style')) ?? '';
     result = zIndexPattern.exec(styleText);
-    expect(result?.[1]).toBe('2');
+    expect(result?.[1]).toBe(blockStyleText);
 
     await selectNoteInEdgeless(page, firstNoteId);
     await hoverOnNote(page, firstNoteId);
 
+    blockStyleText = zIndexPattern.exec(
+      (await page
+        .locator(`[data-portal-block-id="${firstNoteId}"]`)
+        .getAttribute('style')) ?? ''
+    )?.[1];
     styleText =
       (await page.locator('affine-note-slicer').getAttribute('style')) ?? '';
     result = zIndexPattern.exec(styleText);
-    expect(result?.[1]).toBe('1');
+    expect(result?.[1]).toBe(blockStyleText);
   });
 });
 

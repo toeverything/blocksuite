@@ -414,6 +414,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
                   return html`<${tag}
                       data-index=${block.index}
+                      data-portal-block-id=${block.id}
                       .index=${zIndex}
                       .model=${block}
                       .surface=${surface}
