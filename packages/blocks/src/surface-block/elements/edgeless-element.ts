@@ -26,6 +26,7 @@ export interface HitTestOptions {
   // we will select a shape without fill color by selecting its content area if
   // we set `pierce` to false, shape element used this options in `hitTest` method
   pierce?: boolean;
+  all?: boolean;
 }
 export interface IEdgelessElement {
   xywh: SerializedXYWH;

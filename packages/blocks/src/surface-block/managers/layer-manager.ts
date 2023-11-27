@@ -563,7 +563,6 @@ export class LayerManager {
       updateType = 'block';
       this._removeFromOrderedArray(this.blocks, element);
       this._insertToOrderedArray(this.blocks, element);
-      this.blocksGrid.remove(element);
       this.blocksGrid.add(element);
     }
 

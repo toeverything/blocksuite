@@ -19,6 +19,7 @@ import {
   type Selectable,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
+import { last } from '../_common/utils/iterable.js';
 import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
@@ -499,18 +500,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this._syncFromExistingContainer();
   }
 
-  // query
-  pickTopBlock(point: IVec) {
-    const models = this.sortedBlocks;
-    for (let i = models.length - 1; i >= 0; i--) {
-      const model = models[i];
-      if (model.hitTest(point[0], point[1], {})) {
-        return model;
-      }
-    }
-    return null;
-  }
-
   get viewport(): Renderer {
     return this._renderer;
   }
@@ -838,45 +827,62 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       : null;
   }
 
-  pickByPoint(
+  pickTop(
     x: number,
     y: number,
     options: HitTestOptions = {
       expand: 10,
+      all: false,
     }
-  ): SurfaceElement[] {
+  ): EdgelessElement[] | EdgelessElement | null {
     const size = options.expand ?? 10;
-    const candidates = this._renderer.gridManager.search({
+    const hitTestBound = {
       x: x - size / 2,
       y: y - size / 2,
       w: size,
       h: size,
-    });
-    const picked = candidates.filter(element => element.hitTest(x, y, options));
-    return picked;
-  }
+    };
+    const pickSurface = () => {
+      const candidates = this._renderer.gridManager.search(hitTestBound);
+      const picked = candidates.filter(element =>
+        element.hitTest(x, y, options)
+      );
+      return picked as EdgelessElement[];
+    };
+    const pickBlock = () => {
+      const candidates = this.layer.blocksGrid.search(hitTestBound);
+      const picked = candidates.filter(element =>
+        element.hitTest(x, y, options)
+      );
+      return picked as EdgelessElement[];
+    };
+    const pickFrames = () => {
+      return this.layer.frames.filter(frame =>
+        frame.hitTest(x, y, options)
+      ) as EdgelessElement[];
+    };
 
-  pickTop(
-    x: number,
-    y: number,
-    options?: HitTestOptions
-  ): EdgelessElement | null {
-    const results = this.pickByPoint(x, y, options);
-    return results[results.length - 1] ?? this.pickTopBlock([x, y]);
+    const frames = pickFrames();
+    const results = pickSurface().concat(pickBlock());
+
+    // FIXME: optimization on ordered element
+    results.sort(compare);
+
+    if (results.length === 0) {
+      return options.all ? frames : last(frames) ?? null;
+    }
+
+    return options.all ? frames.concat(results) : last(results) ?? null;
   }
 
   pickTopWithGroup(point: IVec, options?: HitTestOptions) {
     const selectionManager = this.edgeless.selectionManager;
-    const results: EdgelessElement[] = this.pickByPoint(
-      point[0],
-      point[1],
-      options
-    );
-    const block = this.pickTopBlock(point);
-    if (block) {
-      results.unshift(block);
-    }
-    let picked: null | EdgelessElement = results[results.length - 1];
+    const results = this.pickTop(point[0], point[1], {
+      ...options,
+      all: true,
+    }) as EdgelessElement[];
+
+    let picked = last(results) ?? null;
     const first = picked;
     if (selectionManager.activeGroup) {
       let index = results.length - 1;
