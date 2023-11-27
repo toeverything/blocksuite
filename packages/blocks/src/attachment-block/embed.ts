@@ -61,6 +61,12 @@ const embedConfig: EmbedConfig[] = [
         src=${blobUrl}
       ></video>`,
   },
+  {
+    name: 'audio',
+    check: model =>
+      model.type.startsWith('audio/') && model.size <= MAX_EMBED_SIZE,
+    template: (_, blobUrl) => html`<audio controls src=${blobUrl}></audio>`,
+  },
 ];
 
 export function allowEmbed(model: AttachmentBlockModel) {
