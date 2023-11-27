@@ -57,6 +57,9 @@ export class FileDropManager {
 
   onDragOver = (event: DragEvent) => {
     event.preventDefault();
+    if (this._editor.page.readonly) {
+      return;
+    }
 
     // allow only external drag-and-drop files
     const effectAllowed = event.dataTransfer?.effectAllowed ?? 'none';
@@ -83,6 +86,9 @@ export class FileDropManager {
 
   onDrop = async (event: DragEvent) => {
     event.preventDefault();
+    if (this._editor.page.readonly) {
+      return;
+    }
 
     const files = event.dataTransfer?.files;
     if (!files || !files.length) {
