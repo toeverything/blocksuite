@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "repository": "toeverything/blocksuite",

@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "//": "ALL_PACKAGES",
   "workspaces": [
     "packages/block-std",
