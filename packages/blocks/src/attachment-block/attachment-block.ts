@@ -256,8 +256,14 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     if (this.model.embed && this._blobUrl) {
       const embedView = renderEmbedView(this.model, this._blobUrl);
       if (embedView) {
-        return html`<div ${ref(this._hoverController.setReference)}>
+        return html`<div
+            ${ref(this._hoverController.setReference)}
+            class="affine-attachment-embed-container"
+          >
             ${embedView}
+            ${this.selected?.is('block')
+              ? html`<affine-block-selection></affine-block-selection>`
+              : null}
           </div>
           ${captionTemplate}`;
       }
