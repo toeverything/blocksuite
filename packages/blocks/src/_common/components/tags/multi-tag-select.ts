@@ -510,6 +510,9 @@ const middleware: Middleware = {
     if (overflow.right > 0) {
       x = left - overflow.right;
     }
+    if (y < 0) {
+      y = 240;
+    }
     return {
       y,
       x,
