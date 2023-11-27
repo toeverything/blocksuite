@@ -45,8 +45,7 @@ type CanvasLayer = BaseLayer<PhasorElement> & {
 };
 
 export class LayerManager {
-  static INITAL_INDEX = 'b0';
-  static INITAL_BLOCK_INDEX = 'a0';
+  static INITAL_INDEX = 'a0';
 
   slots = {
     layerUpdated: new Slot(),
@@ -361,7 +360,7 @@ export class LayerManager {
         ] as [string, string],
         zIndexes:
           type === 'block'
-            ? [curZIndex + 1, curZIndex + 1 + targets.length]
+            ? [curZIndex + 1, curZIndex + targets.length]
             : curZIndex + 1,
         elements: targets,
       };
@@ -649,7 +648,7 @@ export class LayerManager {
             this._ungroupIndex(this._getElementIndex(lastFrame)),
             null
           )
-        : LayerManager.INITAL_BLOCK_INDEX;
+        : LayerManager.INITAL_INDEX;
     } else {
       if (block === 'canvas') {
         const lastIndex = last(this.layers)?.indexes[1];
@@ -664,7 +663,7 @@ export class LayerManager {
         ? this._ungroupIndex(lastLayer.indexes[1])
         : undefined;
 
-      if (!lastLayer) return LayerManager.INITAL_BLOCK_INDEX;
+      if (!lastLayer) return LayerManager.INITAL_INDEX;
 
       assertType<string>(lastLayerIndex);
 
