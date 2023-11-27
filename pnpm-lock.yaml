@@ -181,8 +181,8 @@ importers:
         specifier: ^1.5.3
         version: 1.5.3
       '@toeverything/theme':
-        specifier: ^0.7.26
-        version: 0.7.26
+        specifier: ^0.7.27
+        version: 0.7.27
       '@types/hast':
         specifier: ^3.0.3
         version: 3.0.3
@@ -306,8 +306,8 @@ importers:
         specifier: workspace:*
         version: link:../store
       '@toeverything/theme':
-        specifier: ^0.7.26
-        version: 0.7.26
+        specifier: ^0.7.27
+        version: 0.7.27
       lit:
         specifier: ^3.0.2
         version: 3.1.0
@@ -1809,8 +1809,8 @@ packages:
     resolution: {integrity: sha512-Gfkvwk9o9kE9r9XNBmJRfV8zONvXThnm1tcuojL04Uy5uRyqg93DC83lDebl0rocZCfKSjUv+fWYtMQmEDJldg==}
     dev: false
 
-  /@toeverything/theme@0.7.26:
-    resolution: {integrity: sha512-WXzSvEpKMjKMl7ZpTFOzIM3pweEy1jabRduO3o98Nhn41y7NSDglNM6p8JaD74PEd2eVbKXPODwIgy3YQJ5Edw==}
+  /@toeverything/theme@0.7.27:
+    resolution: {integrity: sha512-0EJ0shh0lhgQVXzVcF7bOKfOBfZ37LcS3GUpJ/bgtMbV/nb8sY3uoUwiTUfZJSyZAfJRjP0wmOnqcBuypjmABQ==}
     dev: false
 
   /@toeverything/y-indexeddb@0.10.0-canary.9(yjs@13.6.10):
