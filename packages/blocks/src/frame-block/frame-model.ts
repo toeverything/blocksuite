@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { getBlockElementByPath } from '../_common/utils/query.js';
+import { buildPath, getBlockElementByPath } from '../_common/utils/query.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {
@@ -88,10 +88,7 @@ export class FrameBlockModel
     if (hit) return true;
 
     assertExists(this.page.root);
-    const block = getBlockElementByPath([
-      this.page.root?.id,
-      this.id,
-    ]) as FrameBlockComponent;
+    const block = getBlockElementByPath(buildPath(this)) as FrameBlockComponent;
     if (!block) return false;
     const titleBound = block.titleBound;
     return titleBound.isPointInBound([x, y], 0);
