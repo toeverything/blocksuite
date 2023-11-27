@@ -34,17 +34,18 @@ const embedConfig: EmbedConfig[] = [
     action: model => turnIntoImage(model),
   },
   {
-    name: 'pdf',
+    name: 'html/pdf/text',
     check: model =>
+      // Temporarily only allows pdf
       model.type === 'application/pdf' && model.size <= MAX_EMBED_SIZE,
     template: (_, blobUrl) =>
       html`<iframe
         style="width: 100%; color-scheme: auto;"
         height="480"
-        scrolling="no"
         src=${blobUrl}
-        frameborder="no"
         loading="lazy"
+        scrolling="no"
+        frameborder="no"
         allowTransparency
         allowfullscreen
       ></iframe>`,
@@ -54,12 +55,7 @@ const embedConfig: EmbedConfig[] = [
     check: model =>
       model.type.startsWith('video/') && model.size <= MAX_EMBED_SIZE,
     template: (_, blobUrl) =>
-      html`<video
-        style="width: 100%;"
-        height="480"
-        controls
-        src=${blobUrl}
-      ></video>`,
+      html`<video width="100%;" height="480" controls src=${blobUrl}></video>`,
   },
   {
     name: 'audio',

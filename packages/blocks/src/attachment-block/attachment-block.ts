@@ -143,6 +143,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     try {
       const blob = await getAttachment(this.model);
       if (!blob) throw new Error('Blob is missing!');
+      // TODO we no need to create blob url when the attachment is not embedded
       this._blobUrl = URL.createObjectURL(blob);
     } catch (error) {
       this._error = true;
@@ -175,6 +176,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
     toast(`Downloading ${shortName}`);
     this._isDownloading = true;
+    // TODO speed up download by using this._blobUrl
     try {
       await downloadAttachment(this.model);
     } catch (error) {
@@ -212,6 +214,19 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     `;
   }
 
+  private _captionTemplate() {
+    return html`<input
+      ?hidden=${!this._showCaption}
+      .disabled=${this.model.page.readonly}
+      class="affine-attachment-caption"
+      placeholder="Write a caption"
+      value=${this.model.caption ?? ''}
+      @input=${this._onInput}
+      @blur=${this._onBlur}
+      @pointerdown=${stopPropagation}
+    />`;
+  }
+
   override render() {
     const isLoading = isAttachmentLoading(this.model.id);
     const isError = this._error || (!isLoading && !this.model.sourceId);
@@ -237,21 +252,12 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
           ${AttachmentIcon16}
           <span class="affine-attachment-name">${this.model.name}</span>
         </div>
-        <div class="affine-attachment-desc">Unable to upload</div>
+        <div class="affine-attachment-desc">
+          Unable to upload or download attachment
+        </div>
         ${this._attachmentTail(isError)}
       </div>`;
     }
-
-    const captionTemplate = html`<input
-      ?hidden=${!this._showCaption}
-      .disabled=${this.model.page.readonly}
-      class="affine-attachment-caption"
-      placeholder="Write a caption"
-      value=${this.model.caption ?? ''}
-      @input=${this._onInput}
-      @blur=${this._onBlur}
-      @pointerdown=${stopPropagation}
-    />`;
 
     if (this.model.embed && this._blobUrl) {
       const embedView = renderEmbedView(this.model, this._blobUrl);
@@ -265,9 +271,11 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
               ? html`<affine-block-selection></affine-block-selection>`
               : null}
           </div>
-          ${captionTemplate}`;
+          ${this._captionTemplate()}`;
       }
     }
+    const isDownloadingOrLoadingBlob =
+      this._isDownloading || (this.model.embed && !this._blobUrl);
 
     return html`<div
         ${ref(this._hoverController.setReference)}
@@ -276,7 +284,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         @dblclick=${this._downloadAttachment}
       >
         <div class="affine-attachment-title">
-          ${this._isDownloading ? LoadingIcon : AttachmentIcon16}
+          ${isDownloadingOrLoadingBlob ? LoadingIcon : AttachmentIcon16}
           <span class="affine-attachment-name">${this.model.name}</span>
         </div>
         <div class="affine-attachment-desc">
@@ -284,7 +292,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         </div>
         ${this._attachmentTail(isError)}
       </div>
-      ${captionTemplate}`;
+      ${this._captionTemplate()}`;
   }
 }
 
