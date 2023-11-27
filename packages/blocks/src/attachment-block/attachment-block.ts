@@ -1,6 +1,6 @@
 import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
-import { html, type PropertyValues } from 'lit';
+import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
@@ -18,13 +18,18 @@ import {
   AttachmentBlockSchema,
 } from './attachment-model.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
+import { renderEmbedView } from './embed.js';
 import {
   AttachmentBanner,
   ErrorBanner,
   LoadingIcon,
   styles,
 } from './styles.js';
-import { downloadAttachment, hasBlob, isAttachmentLoading } from './utils.js';
+import {
+  downloadAttachment,
+  getAttachment,
+  isAttachmentLoading,
+} from './utils.js';
 
 @customElement('affine-attachment')
 export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel> {
@@ -43,6 +48,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   @state()
   private _isDownloading = false;
+
+  @state()
+  private _blobUrl?: string;
 
   private readonly _themeObserver = new ThemeObserver();
 
@@ -82,13 +90,24 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     this._themeObserver.observe(document.documentElement);
     this._themeObserver.on(() => this.requestUpdate());
     this.disposables.add(() => this._themeObserver.dispose());
+
+    this.model.propsUpdated.on(({ key }) => {
+      if (key === 'sourceId') {
+        // Reset the blob url when the sourceId is changed
+        if (this._blobUrl) {
+          URL.revokeObjectURL(this._blobUrl);
+          this._blobUrl = undefined;
+        }
+        this._checkBlob();
+      }
+    });
   }
 
-  override willUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('sourceId')) {
-      this._checkBlob();
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this._blobUrl) {
+      URL.revokeObjectURL(this._blobUrl);
     }
-    super.willUpdate(changedProperties);
   }
 
   private _registerDragHandleOption = () => {
@@ -119,15 +138,19 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
    * Check if the blob is available. It is necessary since the block may be copied from another workspace.
    */
   private async _checkBlob() {
-    const storage = this.page.blob;
     const sourceId = this.model.sourceId;
     if (!sourceId) return;
-    if (!(await hasBlob(storage, sourceId))) {
+    try {
+      const blob = await getAttachment(this.model);
+      if (!blob) throw new Error('Blob is missing!');
+      this._blobUrl = URL.createObjectURL(blob);
+    } catch (error) {
+      this._error = true;
       console.warn(
         'The attachment is unavailable since the blob is missing!',
-        this.model
+        this.model,
+        sourceId
       );
-      this._error = true;
     }
   }
 
@@ -219,6 +242,27 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       </div>`;
     }
 
+    const captionTemplate = html`<input
+      ?hidden=${!this._showCaption}
+      .disabled=${this.model.page.readonly}
+      class="affine-attachment-caption"
+      placeholder="Write a caption"
+      value=${this.model.caption ?? ''}
+      @input=${this._onInput}
+      @blur=${this._onBlur}
+      @pointerdown=${stopPropagation}
+    />`;
+
+    if (this.model.embed && this._blobUrl) {
+      const embedView = renderEmbedView(this.model, this._blobUrl);
+      if (embedView) {
+        return html`<div ${ref(this._hoverController.setReference)}>
+            ${embedView}
+          </div>
+          ${captionTemplate}`;
+      }
+    }
+
     return html`<div
         ${ref(this._hoverController.setReference)}
         class="affine-attachment-container"
@@ -234,16 +278,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         </div>
         ${this._attachmentTail(isError)}
       </div>
-      <input
-        ?hidden=${!this._showCaption}
-        .disabled=${this.model.page.readonly}
-        class="affine-attachment-caption"
-        placeholder="Write a caption"
-        value=${this.model.caption ?? ''}
-        @input=${this._onInput}
-        @blur=${this._onBlur}
-        @pointerdown=${stopPropagation}
-      />`;
+      ${captionTemplate}`;
   }
 }
 
