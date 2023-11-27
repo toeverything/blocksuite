@@ -25,15 +25,14 @@ const paragraphButtonStyle = css`
     z-index: var(--affine-z-index-popover);
   }
 
-  .background-highlight-icon > svg:nth-child(2) {
+  .highlight-icon > svg:nth-child(2) {
     transition-duration: 0.3s;
   }
-  .background-highlight-icon:is(:hover, :focus-visible, :active)
-    > svg:nth-child(2) {
+  .highlight-icon:is(:hover, :focus-visible, :active) > svg:nth-child(2) {
     transform: rotate(180deg);
   }
 
-  .background-highlight-panel {
+  .highlight-panel {
     display: none;
 
     font-size: var(--affine-font-sm);
@@ -41,12 +40,18 @@ const paragraphButtonStyle = css`
     position: absolute;
     min-width: 178px;
     padding: 8px 8px;
+    max-height: 380px;
     overflow-y: auto;
 
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);
     border-radius: 8px;
     z-index: var(--affine-z-index-popover);
+  }
+
+  .highligh-panel-heading {
+    color: var(--affine-text-secondary-color);
+    padding: 4px;
   }
 `;
 

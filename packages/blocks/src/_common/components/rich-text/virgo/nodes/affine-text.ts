@@ -35,6 +35,7 @@ export function affineTextStyles(
     'font-weight': props.bold ? 'bolder' : 'inherit',
     'font-style': props.italic ? 'italic' : 'normal',
     'background-color': props.background ? props.background : undefined,
+    color: props.color ? props.color : undefined,
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
     ...inlineCodeStyle,
     ...override,
