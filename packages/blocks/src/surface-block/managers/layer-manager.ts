@@ -1,11 +1,13 @@
 import { assertType, Slot } from '@blocksuite/global/utils';
+import { generateKeyBetween } from 'fractional-indexing';
 
 import { last, nToLast } from '../../_common/utils/iterable.js';
+import { type EdgelessElement } from '../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
-import type { PhasorElement } from '../../index.js';
-import { Bound, generateKeyBetween, GroupElement } from '../../index.js';
-import { type EdgelessElement } from '../../index.js';
 import type { ImageBlockModel, NoteBlockModel } from '../../models.js';
+import type { PhasorElement } from '../../surface-block/elements/index.js';
+import { GroupElement } from '../../surface-block/elements/index.js';
+import { Bound } from '../../surface-block/utils/bound.js';
 import { GROUP_ROOT } from '../elements/group/consts.js';
 import { SurfaceElement } from '../elements/surface-element.js';
 import { GridManager } from '../grid.js';

@@ -16,7 +16,6 @@ import {
   Bound,
   clamp,
   deserializeXYWH,
-  getBoundsWithRotation,
   getQuadBoundsWithRotation,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
@@ -172,26 +171,6 @@ export function getSelectedRect(selected: Selectable[]): DOMRect {
     },
     new DOMRect()
   );
-}
-
-export function getElementsBound(selected: Selectable[]): Bound {
-  let minX = Number.POSITIVE_INFINITY;
-  let minY = Number.POSITIVE_INFINITY;
-  let maxX = Number.NEGATIVE_INFINITY;
-  let maxY = Number.NEGATIVE_INFINITY;
-
-  selected.forEach(ele => {
-    const b = getBoundsWithRotation(
-      'flavour' in ele ? Bound.deserialize(ele.xywh) : ele
-    );
-
-    minX = Math.min(minX, b.x);
-    minY = Math.min(minY, b.y);
-    maxX = Math.max(maxX, b.x + b.w);
-    maxY = Math.max(maxY, b.y + b.h);
-  });
-
-  return new Bound(minX, minY, maxX - minX, maxY - minY);
 }
 
 export function getSelectableBounds(selected: Selectable[]): Map<

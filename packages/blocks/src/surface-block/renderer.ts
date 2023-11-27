@@ -1,12 +1,11 @@
 import { Slot } from '@blocksuite/global/utils';
 
-import { getElementsBound } from '../page-block/edgeless/utils/query.js';
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
 import type { LayerManager } from './managers/layer-manager.js';
 import { RoughCanvas } from './rough/canvas.js';
-import { Bound } from './utils/bound.js';
+import { Bound, getElementsBound } from './utils/bound.js';
 import { intersects } from './utils/math-utils.js';
 import { clamp, getBoundsWithRotation } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
