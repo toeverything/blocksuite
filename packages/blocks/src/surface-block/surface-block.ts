@@ -333,7 +333,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
 
     _disposables.add(
-      this.layer.slots.canvasLayerChanged.on(() => {
+      this.layer.slots.layerUpdated.on(() => {
+        this.refresh();
         this.requestUpdate();
       })
     );

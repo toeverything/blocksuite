@@ -813,11 +813,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
           return;
 
         switch (event.type) {
-          case 'update':
-            this.slots.elementUpdated.emit({
-              id: event.id,
-            });
-            break;
           case 'add':
             this.slots.elementAdded.emit(event.id);
             break;

@@ -47,7 +47,6 @@ export class LayerManager {
   static INITAL_BLOCK_INDEX = 'a0';
 
   slots = {
-    canvasLayerChanged: new Slot(),
     layerUpdated: new Slot(),
   };
 
@@ -391,11 +390,11 @@ export class LayerManager {
         const layerElements = layer.elements;
 
         if (isInRange([layerElements[0], last(layerElements)!], target)) {
-          const insertIdx = layerElements.findIndex((element, idx) => {
+          const insertIdx = layerElements.findIndex((_, idx) => {
+            const pre = layerElements[idx - 1];
             return (
-              compare(target, element) >= 0 &&
-              (!layerElements[idx + 1] ||
-                compare(target, layerElements[idx + 1]) <= 0)
+              compare(target, layerElements[idx]) < 0 &&
+              (!pre || compare(target, pre) >= 0)
             );
           });
 
@@ -404,6 +403,7 @@ export class LayerManager {
             updateLayersIndex(cur);
           } else {
             const splicedElements = layer.elements.splice(insertIdx);
+            layer.set = new Set(layer.elements as PhasorElement[]);
 
             layers.splice(
               cur + 1,
@@ -540,10 +540,6 @@ export class LayerManager {
 
     const old = this.canvasLayers;
     this.canvasLayers = canvasLayers;
-
-    if (old && old.length !== canvasLayers.length) {
-      this.slots.canvasLayerChanged.emit();
-    }
   }
 
   /**
