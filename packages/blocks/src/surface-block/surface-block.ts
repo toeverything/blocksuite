@@ -845,12 +845,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       all: false,
     }
   ): EdgelessElement[] | EdgelessElement | null {
-    const size = options.expand ?? 10;
+    options.expand ??= 10;
     const hitTestBound = {
-      x: x - size / 2,
-      y: y - size / 2,
-      w: size,
-      h: size,
+      x: x - options.expand / 2,
+      y: y - options.expand / 2,
+      w: options.expand,
+      h: options.expand,
     };
     const pickSurface = () => {
       const candidates = this._renderer.gridManager.search(hitTestBound);
