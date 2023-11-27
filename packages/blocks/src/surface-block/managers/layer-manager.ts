@@ -538,7 +538,6 @@ export class LayerManager {
       });
     }
 
-    const old = this.canvasLayers;
     this.canvasLayers = canvasLayers;
   }
 
