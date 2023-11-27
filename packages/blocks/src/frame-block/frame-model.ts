@@ -88,7 +88,10 @@ export class FrameBlockModel
     if (hit) return true;
 
     assertExists(this.page.root);
-    const block = getBlockElementByPath(buildPath(this)) as FrameBlockComponent;
+    const block = getBlockElementByPath([
+      this.page.root?.id,
+      this.id,
+    ]) as FrameBlockComponent;
     if (!block) return false;
     const titleBound = block.titleBound;
     return titleBound.isPointInBound([x, y], 0);
