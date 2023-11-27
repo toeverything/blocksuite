@@ -164,7 +164,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   vertical = false;
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
 
   @property({ attribute: false })
   setPoppetShow!: (poppetShow: boolean) => void;
@@ -286,8 +286,8 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       this,
       this._actionsMenu,
       ({ display }) => {
-        this._popperShow = display === 'show';
-        this.setPoppetShow(this._popperShow);
+        this._showPopper = display === 'show';
+        this.setPoppetShow(this._showPopper);
       }
     );
     _disposables.add(this._actionsMenuPopper);
@@ -305,7 +305,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     );
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${this._popperShow ? '' : 'More'}
+        .tooltip=${this._showPopper ? '' : 'More'}
         .active=${false}
         .iconContainerPadding=${2}
         @click=${() => this._actionsMenuPopper?.toggle()}

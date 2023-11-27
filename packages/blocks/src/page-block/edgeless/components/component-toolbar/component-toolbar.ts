@@ -89,7 +89,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   top = 0;
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
 
   get page() {
     return this.edgeless.page;
@@ -203,8 +203,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  protected setPopperShow = (popperShow: boolean) => {
-    this._popperShow = popperShow;
+  protected togglePopper = (showPopper: boolean) => {
+    this._showPopper = showPopper;
   };
 
   private _updateOnSelectedChange = (element: string | { id: string }) => {
@@ -303,7 +303,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     top < 0 && (top = y + bound.h * viewport.zoom + offset);
 
     left = clamp(x, 10, width - rect.width - 10);
-    if (this._popperShow) {
+    if (this._showPopper) {
       left = clamp(x, 10, width - rect.width - 80);
     }
     top = clamp(top, 10, height - rect.height - 100);
@@ -377,7 +377,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         <edgeless-more-button
           .edgeless=${edgeless}
           .vertical=${true}
-          .setPoppetShow=${this.setPopperShow}
+          .setPoppetShow=${this.togglePopper}
         ></edgeless-more-button>
       </div>`;
   }
