@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { buildPath, getBlockElementByPath } from '../_common/utils/query.js';
+import { getBlockElementByPath } from '../_common/utils/query.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {
