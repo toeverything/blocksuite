@@ -598,8 +598,8 @@ export class LayerManager {
 
     if (insertType) {
       this._insertIntoLayer(element as Indexable, insertType);
-      this.slots.layerUpdated.emit();
       this._buildCanvasLayers();
+      this.slots.layerUpdated.emit();
     }
   }
 
@@ -619,15 +619,15 @@ export class LayerManager {
 
     if (deleteType) {
       this._removeFromLayer(element as Indexable, deleteType);
-      this.slots.layerUpdated.emit();
       this._buildCanvasLayers();
+      this.slots.layerUpdated.emit();
     }
   }
 
   update(element: Indexable | FrameBlockModel) {
     if (this._updateLayer(element)) {
-      this.slots.layerUpdated.emit();
       this._buildCanvasLayers();
+      this.slots.layerUpdated.emit();
     }
   }
 

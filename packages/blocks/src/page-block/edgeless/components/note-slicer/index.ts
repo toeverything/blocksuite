@@ -147,7 +147,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
   private _getEditingState(e: PointerEventState, block: NoteBlockModel) {
     const noteBlockElement = getBlockElementByPath(
-      buildPath(this.edgelessPage.surface.model).concat(block.id)
+      buildPath(this.edgelessPage.surface.model)
     ) as NoteBlockComponent;
     assertExists(noteBlockElement);
 

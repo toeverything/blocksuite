@@ -7,8 +7,6 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { Workspace, type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   type CssVariableName,
@@ -89,6 +87,10 @@ export enum EdgelessBlocksFlavour {
   FRAME = 'affine:frame',
 }
 
+export type IndexedCanvasUpdateEvent = CustomEvent<{
+  content: HTMLCanvasElement[];
+}>;
+
 @customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   static override styles = css`
@@ -148,16 +150,13 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       box-shadow: var(--affine-shadow-3);
       pointer-events: all;
     }
-
-    .indexable-canvas {
-      position: absolute;
-      pointer-events: none;
-    }
   `;
 
   private _renderer!: Renderer;
   private _yContainer!: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<id, SurfaceElement>();
+
+  private _indexedCanvases: HTMLCanvasElement[] = [];
 
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
@@ -334,8 +333,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
     _disposables.add(
       this.layer.slots.layerUpdated.on(() => {
-        this.refresh();
-        this.requestUpdate();
+        this._updateIndexCanvases();
       })
     );
   }
@@ -430,24 +428,52 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
   }
 
+  private _updateIndexCanvases() {
+    const evt = new CustomEvent('indexedcanvasupdate', {
+      detail: {
+        content: this.renderCanvas(),
+      },
+    }) as IndexedCanvasUpdateEvent;
+
+    this.dispatchEvent(evt);
+  }
+
   renderCanvas() {
     /**
      * we already have a main canvas, so the last layer should be deleted
      */
     const canvasLayers = this.layer.getCanvasLayers().slice(0, -1);
+    const canvases = [];
+    const currentCanvases = this._indexedCanvases;
 
-    return html`${repeat(
-      canvasLayers,
-      (_, idx) => idx,
-      layer =>
-        html`<canvas
-          class="indexable-canvas"
-          data-fractional-index="${layer.indexes[0]}-${layer.indexes[1]}"
-          style=${styleMap({
-            zIndex: layer.zIndexes,
-          })}
-        ></canvas>`
-    )}`;
+    for (let i = 0; i < canvasLayers.length; ++i) {
+      const layer = canvasLayers[i];
+      const created = i < currentCanvases.length;
+      const canvas = created
+        ? currentCanvases[i]
+        : document.createElement('canvas');
+
+      if (!created) {
+        canvas.className = 'indexable-canvas';
+
+        canvas.style.setProperty('position', 'absolute');
+        canvas.style.setProperty('pointer-events', 'none');
+      }
+
+      canvas.setAttribute(
+        'data-fractional',
+        `${layer.indexes[0]}-${layer.indexes[1]}`
+      );
+      canvas.style.setProperty('z-index', layer.zIndexes.toString());
+
+      canvases.push(canvas);
+    }
+
+    this._indexedCanvases = canvases;
+    this._renderer.setIndexedCanvas(this._indexedCanvases);
+    this.refresh();
+
+    return this._indexedCanvases;
   }
 
   override render() {
@@ -457,11 +483,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in Phasor -->
       </div>
-      <edgeless-block-portal-container
-        .canvasContent=${this.renderCanvas()}
-        .edgeless=${this.edgeless}
-      >
-      </edgeless-block-portal-container>
     `;
   }
 
@@ -472,26 +493,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   override updated() {
     if (!this._isEdgeless) return;
-
-    if (this.portal.isUpdatePending) {
-      this.portal.updateComplete.then(() => {
-        this._updateIndexedCanvas();
-      });
-    } else {
-      this._updateIndexedCanvas();
-    }
-  }
-
-  private _updateIndexedCanvas() {
-    if (
-      this._renderer.indexedCanvases.length !==
-      this.layer.canvasLayers.length - 1
-    ) {
-      this._renderer.setIndexedCanvas(
-        Array.from(this.querySelectorAll('canvas.indexable-canvas'))
-      );
-      this._renderer.refresh();
-    }
   }
 
   init() {

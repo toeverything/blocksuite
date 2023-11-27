@@ -27,6 +27,7 @@ import type {
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
+  on,
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
@@ -51,7 +52,10 @@ import {
   Vec,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
+import type {
+  IndexedCanvasUpdateEvent,
+  SurfaceBlockComponent,
+} from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
@@ -648,6 +652,17 @@ export class EdgelessPageBlockComponent extends BlockElement<
     });
   }
 
+  private _initSurface() {
+    this._disposables.add(
+      on(this.surface, 'indexedcanvasupdate', e => {
+        console.log('shit');
+        this.pageBlockContainer.setSlotContent(
+          (e as IndexedCanvasUpdateEvent).detail.content
+        );
+      })
+    );
+  }
+
   override firstUpdated() {
     this._initElementSlot();
     this._initSlotEffects();
@@ -656,6 +671,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initFontloader();
     this._initReadonlyListener();
     this._initRemoteCursor();
+    this._initSurface();
 
     if (!this.clipboardController._enabled) {
       this.clipboard.init(this.page);
@@ -882,6 +898,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
     )}`;
 
     return html`${this.renderModel(this.surfaceBlockModel)}
+      <edgeless-block-portal-container .edgeless=${this}>
+      </edgeless-block-portal-container>
       <div class="widgets-container">${widgets}</div> `;
   }
 }
