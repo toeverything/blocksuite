@@ -1,4 +1,8 @@
-import type { IModelCoord } from '../../consts.js';
+import {
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+  type IModelCoord,
+} from '../../consts.js';
 import { Bound } from '../../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
@@ -10,7 +14,7 @@ import {
 import { type IVec } from '../../utils/vec.js';
 import { EdgelessSelectableMixin } from '../selectable.js';
 import { SurfaceElement } from '../surface-element.js';
-import type { IText, ITextDelta } from './types.js';
+import type { IText, ITextDelta, ITextLocalRecord } from './types.js';
 import {
   charWidth,
   deltaInsertsToChunks,
@@ -32,38 +36,48 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   get fontSize() {
-    return this.yMap.get('fontSize') as IText['fontSize'];
+    return (
+      (this.localRecord as ITextLocalRecord)?.fontSize ??
+      (this.yMap.get('fontSize') as IText['fontSize'])
+    );
   }
 
   get fontFamily() {
     return this.yMap.get('fontFamily') as IText['fontFamily'];
   }
 
+  get fontWeight() {
+    return (
+      (this.yMap.get('fontWeight') as IText['fontWeight']) ??
+      CanvasTextFontWeight.Regular
+    );
+  }
+
+  get fontStyle() {
+    return (
+      (this.yMap.get('fontStyle') as IText['fontStyle']) ??
+      CanvasTextFontStyle.Normal
+    );
+  }
+
   get textAlign() {
     return this.yMap.get('textAlign') as IText['textAlign'];
   }
 
-  get bold() {
-    return this.yMap.get('bold') as IText['bold'];
-  }
-
-  get italic() {
-    return this.yMap.get('italic') as IText['italic'];
-  }
-
   get hasMaxWidth() {
-    return this.yMap.get('hasMaxWidth') as IText['hasMaxWidth'];
+    return (
+      (this.localRecord as ITextLocalRecord)?.hasMaxWidth ??
+      (this.yMap.get('hasMaxWidth') as IText['hasMaxWidth'])
+    );
   }
 
   get font() {
-    const { bold, italic, fontSize, fontFamily } = this;
-    const lineHeight = getLineHeight(fontFamily, fontSize);
+    const { fontStyle, fontWeight, fontSize, fontFamily } = this;
     return getFontString({
-      bold,
-      italic,
+      fontStyle,
+      fontWeight,
       fontSize,
-      lineHeight: `${lineHeight}px`,
-      fontFamily: fontFamily,
+      fontFamily,
     });
   }
 

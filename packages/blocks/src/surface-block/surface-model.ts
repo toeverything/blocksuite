@@ -1,7 +1,7 @@
 import type { MigrationRunner, Y } from '@blocksuite/store';
 import {
+  Boxed,
   defineBlockSchema,
-  NativeWrapper,
   type SchemaToModel,
   Workspace,
 } from '@blocksuite/store';
@@ -9,18 +9,19 @@ import {
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 
 export type SurfaceBlockProps = {
-  elements: NativeWrapper<Y.Map<unknown>>;
+  elements: Boxed<Y.Map<unknown>>;
 };
 
 const migration = {
   toV4: data => {
     const { elements } = data;
-    if ((elements as object | NativeWrapper) instanceof NativeWrapper) {
+    if (elements instanceof Boxed) {
       const value = elements.getValue();
       if (!value) {
         return;
       }
-      for (const [key, element] of value.entries()) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for (const [key, element] of (value as Record<string, any>).entries()) {
         const type = element.get('type') as string;
         if (type === 'shape' || type === 'text') {
           const isBold = element.get('isBold');
@@ -51,8 +52,7 @@ const migration = {
       }
     } else {
       for (const key of Object.keys(elements)) {
-        // @ts-expect-error
-        const element = elements[key];
+        const element = elements[key] as Record<string, unknown>;
         const type = element['type'] as string;
         if (type === 'shape' || type === 'text') {
           const isBold = element['isBold'];
@@ -67,19 +67,17 @@ const migration = {
           }
         }
         if (type === 'connector') {
-          const source = element['source'];
-          const target = element['target'];
+          const source = element['source'] as Record<string, unknown>;
+          const target = element['target'] as Record<string, unknown>;
           const sourceId = source['id'];
           const targetId = target['id'];
           // @ts-expect-error
           if (!source['position'] && (!sourceId || !elements[sourceId])) {
-            // @ts-expect-error
             delete elements[key];
             return;
           }
           // @ts-expect-error
           if (!target['position'] && (!targetId || !elements[targetId])) {
-            // @ts-expect-error
             delete elements[key];
             return;
           }
@@ -89,7 +87,7 @@ const migration = {
   },
   toV5: data => {
     const { elements } = data;
-    if (!((elements as object | NativeWrapper) instanceof NativeWrapper)) {
+    if (!((elements as object | Boxed) instanceof Boxed)) {
       const yMap = new Workspace.Y.Map();
 
       Object.entries(elements).forEach(([key, value]) => {
@@ -102,7 +100,7 @@ const migration = {
         });
         yMap.set(key, map);
       });
-      const wrapper = new NativeWrapper(yMap);
+      const wrapper = new Boxed(yMap);
       data.elements = wrapper;
     }
   },

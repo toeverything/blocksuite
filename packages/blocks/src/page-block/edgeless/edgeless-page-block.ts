@@ -27,10 +27,11 @@ import type {
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
-  matchFlavours,
+  on,
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
+import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
 import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
@@ -39,21 +40,25 @@ import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
   Bound,
+  type CanvasElement,
+  type CanvasElementLocalRecordValues,
   clamp,
   getCommonBound,
+  GroupElement,
   type IBound,
   intersects,
   type IVec,
-  type PhasorElement,
-  type PhasorElementLocalRecordValues,
   serializeXYWH,
   Vec,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
+import type {
+  IndexedCanvasUpdateEvent,
+  SurfaceBlockComponent,
+} from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
-import { FontLoader } from '../font-loader/index.js';
+import type { FontLoader } from '../font-loader/font-loader.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
@@ -80,7 +85,7 @@ import {
   FIT_TO_SCREEN_PADDING,
 } from './utils/consts.js';
 import { xywhArrayToObject } from './utils/convert.js';
-import { getCursorMode, isFrameBlock, isPhasorElement } from './utils/query.js';
+import { getCursorMode, isCanvasElement, isFrameBlock } from './utils/query.js';
 
 type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
 
@@ -98,13 +103,12 @@ export interface EdgelessSelectionSlots {
     dragging?: boolean;
   }>;
   edgelessToolUpdated: Slot<EdgelessTool>;
-  reorderingBlocksUpdated: Slot<ReorderingAction<Selectable>>;
-  reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
+  reorderingElements: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
   cursorUpdated: Slot<string>;
   copyAsPng: Slot<{
     notes: NoteBlockModel[];
-    shapes: PhasorElement[];
+    shapes: CanvasElement[];
   }>;
   readonlyUpdated: Slot<boolean>;
 }
@@ -194,15 +198,13 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }>(),
     hoverUpdated: new Slot(),
     edgelessToolUpdated: new Slot<EdgelessTool>(),
-    reorderingBlocksUpdated: new Slot<ReorderingAction<TopLevelBlockModel>>(),
-    reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
+    reorderingElements: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
     cursorUpdated: new Slot<string>(),
-    elementSizeUpdated: new Slot<string>(),
     copyAsPng: new Slot<{
       blocks: TopLevelBlockModel[];
-      shapes: PhasorElement[];
+      shapes: CanvasElement[];
     }>(),
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -210,6 +212,15 @@ export class EdgelessPageBlockComponent extends BlockElement<
     tagClicked: new Slot<{ tagId: string }>(),
     readonlyUpdated: new Slot<boolean>(),
     draggingAreaUpdated: new Slot(),
+
+    elementUpdated: new Slot<{
+      id: string;
+      props?: Record<string, unknown>;
+    }>(),
+    elementAdded: new Slot<string>(),
+    elementRemoved: new Slot<{ id: string; element: EdgelessElement }>(),
+    elementResizeStart: new Slot(),
+    elementResizeEnd: new Slot(),
   };
 
   @query('affine-surface')
@@ -221,7 +232,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;
-  localRecord!: LocalRecordManager<PhasorElementLocalRecordValues>;
+  localRecord!: LocalRecordManager<CanvasElementLocalRecordValues>;
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
@@ -267,18 +278,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _initSlotEffects() {
-    const { _disposables, slots, page, surface } = this;
-    _disposables.add(
-      page.slots.yBlockUpdated.on(({ id, props }) => {
-        const block = page.getBlockById(id);
-        if (
-          matchFlavours(block, [NOTE, IMAGE, FRAME]) &&
-          ('prop:xywh' in props || 'prop:rotate' in props)
-        ) {
-          this.slots.elementSizeUpdated.emit(id);
-        }
-      })
-    );
+    const { _disposables, slots, surface } = this;
 
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(({ zoom, center }) => {
@@ -537,7 +537,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   updateElementInLocal(
     elementId: string,
-    record: Partial<PhasorElementLocalRecordValues>
+    record: Partial<CanvasElementLocalRecordValues>
   ) {
     this.localRecord.update(elementId, record);
   }
@@ -550,7 +550,15 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.localRecord.each((id, record) => {
       if (!elementsSet.has(id) || !this.surface.pickById(id)) return;
 
-      const element = this.surface.pickById(id) as EdgelessElement;
+      const element =
+        this.page.getBlockById(id) ??
+        (this.surface.pickById(id) as EdgelessElement);
+
+      if (element instanceof GroupElement) {
+        this.applyLocalRecord(element.childElements.map(e => e.id));
+        return;
+      }
+
       const updateProps: Record<string, unknown> = {};
       let flag = false;
 
@@ -603,18 +611,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _initFontloader() {
-    if (!this.fontLoader) this.fontLoader = new FontLoader();
+    const fontLoader = this.service?.fontLoader;
+    assertExists(fontLoader);
 
-    this._disposables.add(
-      this.fontLoader.slots.loaded.on(font => {
-        if (font !== 'Kalam:n4,n7' || !this.surface) return;
-
-        if (this.surface.getElementsByType('text').length > 0) {
-          this.surface.refresh();
-        }
-      })
-    );
-    this.fontLoader.load(['Kalam:n4,n7']);
+    fontLoader.load.then(() => {
+      this.surface.refresh();
+    });
   }
 
   private _initReadonlyListener() {
@@ -650,19 +652,35 @@ export class EdgelessPageBlockComponent extends BlockElement<
     });
   }
 
+  private _initSurface() {
+    this._disposables.add(
+      on(this.surface, 'indexedcanvasupdate', e => {
+        this.pageBlockContainer.setSlotContent(
+          (e as IndexedCanvasUpdateEvent).detail.content
+        );
+      })
+    );
+  }
+
   override firstUpdated() {
+    this._initElementSlot();
     this._initSlotEffects();
     this._initResizeEffect();
     this._initPixelRatioChangeEffect();
     this._initFontloader();
     this._initReadonlyListener();
     this._initRemoteCursor();
+    this._initSurface();
 
     if (!this.clipboardController._enabled) {
       this.clipboard.init(this.page);
     }
 
     this._initViewport();
+
+    if (this.page.readonly) {
+      this.tools.setEdgelessTool({ type: 'pan', panning: true });
+    }
 
     requestAnimationFrame(() => {
       this._handleToolbarFlag();
@@ -762,16 +780,65 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _initLocalRecordManager() {
-    this.localRecord = new LocalRecordManager<PhasorElementLocalRecordValues>();
+    this.localRecord = new LocalRecordManager<CanvasElementLocalRecordValues>();
     this.localRecord.slots.updated.on(({ id, data }) => {
-      if (this.page.getBlockById(id) && 'xywh' in data.new) {
-        if ('xywh' in data.new) this.slots.elementSizeUpdated.emit(id);
+      const element = this.surface.pickById(id);
+
+      if (!element) return;
+
+      const changedProps = pick(
+        data.new,
+        keys(data.new).filter(key => key in element)
+      );
+
+      if (!isEmpty(changedProps)) {
+        this.slots.elementUpdated.emit({
+          id,
+          props: changedProps,
+        });
       }
+
+      this.surface.refresh();
     });
 
     this.disposables.add(() => {
       this.localRecord.destroy();
     });
+  }
+
+  private _initElementSlot() {
+    this._disposables.add(
+      this.page.slots.blockUpdated.on(event => {
+        if (![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType))
+          return;
+
+        const model =
+          event.type === 'delete'
+            ? event.model
+            : (this.page.getBlockById(event.id) as TopLevelBlockModel);
+        const parent =
+          event.type === 'delete'
+            ? this.page.getBlockById(event.parent)
+            : this.page.getParent(model);
+
+        if (
+          event.flavour !== NOTE &&
+          (!parent || parent !== this.surface.model)
+        )
+          return;
+
+        switch (event.type) {
+          case 'add':
+            this.slots.elementAdded.emit(event.id);
+            break;
+          case 'delete':
+            this.slots.elementRemoved.emit({
+              id: event.id,
+              element: event.model as TopLevelBlockModel,
+            });
+        }
+      })
+    );
   }
 
   override connectedCallback() {
@@ -789,7 +856,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       if (!surface) return;
 
       const el = this.surface.pickById(surface.elements[0]);
-      if (isPhasorElement(el)) {
+      if (isCanvasElement(el)) {
         return true;
       }
 

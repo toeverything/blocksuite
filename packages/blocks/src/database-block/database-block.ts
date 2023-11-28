@@ -10,7 +10,7 @@ import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { Slice } from '@blocksuite/store';
-import { css, unsafeCSS } from 'lit';
+import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
@@ -152,6 +152,9 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     });
   };
   private renderDatabaseOps() {
+    if (this.page.readonly) {
+      return nothing;
+    }
     return html`<div class="database-ops" @click="${this._clickDatabaseOps}">
       ${MoreHorizontalIcon}
     </div>`;

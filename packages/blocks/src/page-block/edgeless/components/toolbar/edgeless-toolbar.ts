@@ -23,14 +23,15 @@ import {
 import { customElement, state } from 'lit/decorators.js';
 
 import { toast } from '../../../../_common/components/toast.js';
+import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
 import {
   EdgelessImageIcon,
   EdgelessTextIcon,
   FrameNavigatorIcon,
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
-  PresentationExitFullScreenIcon,
-  PresentationFullScreenIcon,
+  NavigatorExitFullScreenIcon,
+  NavigatorFullScreenIcon,
 } from '../../../../_common/icons/index.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
@@ -172,6 +173,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   @state()
   private _frames: FrameBlockModel[] = [];
 
+  @state()
+  private _navigatorMode: NavigatorMode = 'fit';
+
   @state({
     hasChanged() {
       return true;
@@ -179,12 +183,14 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   })
   private _currentFrameIndex = 0;
   private _timer: ReturnType<typeof setTimeout> | null = null;
-  private _index = -1;
+  private _cachedIndex = -1;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
     this.edgeless = edgeless;
-    this._frames = edgeless.surface.frame.frames.sort(edgeless.surface.compare);
+    this._frames = edgeless.surface.frame.frames.sort(
+      edgeless.surface.compare
+    ) as FrameBlockModel[];
   }
 
   get edgelessTool() {
@@ -215,7 +221,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private _updateFrames() {
     this._frames = this.edgeless.surface.frame.frames.sort(
       this.edgeless.surface.compare
-    );
+    ) as FrameBlockModel[];
   }
 
   private _nextFrame() {
@@ -263,7 +269,23 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     );
 
     _disposables.add(
-      slots.edgelessToolUpdated.on(() => {
+      slots.edgelessToolUpdated.on(tool => {
+        if (tool.type === 'frameNavigator') {
+          this._cachedIndex = this._currentFrameIndex;
+          this._navigatorMode = tool.mode ?? this._navigatorMode;
+          if (isFrameBlock(edgeless.selectionManager.elements[0])) {
+            this._cachedIndex = this._frames.findIndex(
+              frame => frame.id === edgeless.selectionManager.elements[0].id
+            );
+          }
+          if (this._frames.length === 0)
+            toast(
+              'The presentation requires at least 1 frame. You can firstly create a frame.',
+              5000
+            );
+          this._toggleFullScreen();
+        }
+
         this._trySaveBrushStateLocalRecord();
         this._trySaveTextStateLocalRecord();
         this.requestUpdate();
@@ -279,13 +301,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       })
     );
     _disposables.add(
-      page.slots.yBlockUpdated.on(e => {
-        if (e.type === 'update' && 'index' in e.props) {
+      page.slots.blockUpdated.on(e => {
+        if (e.type === 'update') {
           this._updateFrames();
         }
       })
     );
-    _disposables.add(page.slots.yBlockUpdated);
+    _disposables.add(page.slots.blockUpdated);
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => {
@@ -327,8 +349,22 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const frame = this._frames[current];
 
     if (frame) {
-      const bound = Bound.deserialize(frame.xywh);
-      viewport.setViewportByBound(bound, [20, 20, 20, 20], true);
+      let bound = Bound.deserialize(frame.xywh);
+
+      if (this._navigatorMode === 'fill') {
+        const vb = viewport.viewportBounds;
+        const center = bound.center;
+        let w, h;
+        if (vb.w / vb.h > bound.w / bound.h) {
+          w = bound.w;
+          h = (w * vb.h) / vb.w;
+        } else {
+          h = bound.h;
+          w = (h * vb.w) / vb.h;
+        }
+        bound = Bound.fromCenter(center, w, h);
+      }
+      viewport.setViewportByBound(bound, [0, 0, 0, 0], false);
     }
   }
 
@@ -349,7 +385,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     } else {
       launchIntoFullscreen(this.edgeless.editorContainer);
       this._timer = setTimeout(() => {
-        this._currentFrameIndex = this._index;
+        this._currentFrameIndex = this._cachedIndex;
       }, 400);
     }
   }
@@ -398,8 +434,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         }}
       >
         ${document.fullscreenElement
-          ? PresentationExitFullScreenIcon
-          : PresentationFullScreenIcon}
+          ? NavigatorExitFullScreenIcon
+          : NavigatorFullScreenIcon}
       </edgeless-tool-icon-button>
       <div class="short-divider"></div>
       <div
@@ -486,20 +522,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .tooltipOffset=${17}
           .iconContainerPadding=${8}
           @click=${() => {
-            this._index = this._currentFrameIndex;
-            if (isFrameBlock(this.edgeless.selectionManager.elements[0])) {
-              this._index = this._frames.findIndex(
-                frame =>
-                  frame.id === this.edgeless.selectionManager.elements[0].id
-              );
-            }
             this.setEdgelessTool({ type: 'frameNavigator' });
-            if (this._frames.length === 0)
-              toast(
-                'The presentation requires at least 1 frame. You can firstly create a frame.',
-                5000
-              );
-            this._toggleFullScreen();
           }}
         >
           ${FrameNavigatorIcon}

@@ -2,7 +2,7 @@ import '../buttons/tool-icon-button.js';
 import './component-toolbar-menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { toast } from '../../../../_common/components/toast.js';
@@ -22,6 +22,12 @@ import { mountGroupTitleEditor } from '../../utils/text.js';
 
 @customElement('edgeless-change-group-button')
 export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
+  static override styles = css`
+    component-toolbar-menu-divider {
+      height: 24px;
+    }
+  `;
+
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
@@ -79,9 +85,7 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
               ${NoteIcon}
               <span style="margin-left: 2px;">Insert into Page</span>
             </edgeless-tool-icon-button>
-            <component-toolbar-menu-divider
-              .vertical=${true}
-            ></component-toolbar-menu-divider>
+            <component-toolbar-menu-divider></component-toolbar-menu-divider>
             <edgeless-tool-icon-button
               class=${'edgeless-component-toolbar-group-rename-button'}
               @click=${() =>
@@ -94,7 +98,6 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
 
             <component-toolbar-menu-divider
               style=${'margin: 0 8px'}
-              .vertical=${true}
             ></component-toolbar-menu-divider>`
         : nothing}
       <edgeless-tool-icon-button

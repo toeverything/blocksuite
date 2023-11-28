@@ -59,23 +59,20 @@ In this example, as the parent of `ParagraphBlock 2`, the `model.childrenUpdated
 
 But the real power lies in the fact that if this block tree is being concurrently edited by multiple people, when user B performs a similar operation, the corresponding update will be encoded by Yjs and distributed by the provider. When User A receives and applies the update from User B, the same state update pipeline as local editing will be triggered. **This makes it unnecessary for the application to make any additional modifications or adaptations for collaboration scenarios, inherently gaining real-time collaboration capabilities**.
 
-## Not Only Blocks
+## Modeling Editor State
 
-In a typical editor, besides the block tree, this data flow also applies to:
+In a typical editor, besides the block tree mentioned above, this data flow also applies to:
 
-- Selection state
-- User metadata
-- 🚧 Local state (not synchronized with other users)
+- Per-user selection state and more user metadata.
+- Local state that are not synchronized with other users.
 
-These states are also stored in CRDT model (but may not be recorded in history), and the corresponding events will be triggered when they are updated. The blocks can subscribe to these events to update the UI components accordingly.
-
-For example, we store the selection state for every user. When a collaborator tries to move the cursor, the selection state will be updated. Then we can render the cursor of the collaborator in the UI.
+These states may not be recorded in history, but their
 
 A more comprehensive real-world data flow works in this manner:
 
 ![block-std-data-flow](./images/block-std-data-flow.png)
 
-For the new concepts involved, see [command](./command-api), [view](./block-view) and [event](./event-api) sections for more infomation.
+For the new concepts involved, see [command](./command-api), [view](./block-view) and [event](./event-api) sections for more information.
 
 ## Summary
 

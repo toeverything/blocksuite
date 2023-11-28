@@ -7,7 +7,7 @@ import '@blocksuite/editor/themes/affine.css';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
-import type { DocProviderCreator, Page } from '@blocksuite/store';
+import { type DocProviderCreator, type Page, Text } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
 
 import { QuickEdgelessMenu } from './components/quick-edgeless-menu.js';
@@ -20,7 +20,6 @@ import {
   params,
   testIDBExistence,
 } from './utils.js';
-import { loadPresets } from './utils/preset.js';
 import { getProviderCreators } from './utils/providers.js';
 
 const options = createWorkspaceOptions();
@@ -54,28 +53,10 @@ function subscribePage(workspace: Workspace) {
   });
 }
 
-export async function initContentByInitParam(
-  workspace: Workspace,
-  param: string,
-  pageId: string
-) {
-  const presetsMap = await loadPresets();
-
-  if (!presetsMap.has(param)) param = 'empty';
-
-  // Load built-in init function when `?init=heavy` param provided
-  if (presetsMap.has(param)) {
-    presetsMap.get(param)?.(workspace, pageId);
-    const page = workspace.getPage(pageId);
-    await page?.waitForLoaded();
-    page?.resetHistory();
-  }
-}
-
-const syncProviders = async (
+async function syncProviders(
   workspace: Workspace,
   providerCreators: DocProviderCreator[]
-) => {
+) {
   if (params.get('room')) {
     await initCollaborationSocket(workspace, params.get('room') as string);
   }
@@ -110,7 +91,7 @@ const syncProviders = async (
 
   workspace.slots.pageAdded.on(async pageId => {
     const page = workspace.getPage(pageId) as Page;
-    await page.waitForLoaded().catch(e => {
+    await page.load().catch(e => {
       const isValidateError =
         e instanceof Error && e.message.includes('outdated');
       if (isValidateError) {
@@ -131,7 +112,7 @@ const syncProviders = async (
       runWorkspaceMigration();
     });
   });
-};
+}
 
 async function initWorkspace(workspace: Workspace) {
   const databaseExists = await testIDBExistence();
@@ -150,11 +131,14 @@ async function initWorkspace(workspace: Workspace) {
     console.info('Delete database: ', deleteResult);
 
     await syncProviders(workspace, getProviderCreators());
-    await initContentByInitParam(
-      workspace,
-      params.get('init') ?? 'empty',
-      'page:home'
-    );
+    const page = workspace.createPage({ id: 'page:home' });
+    await page.load(() => {
+      const pageBlockId = page.addBlock('affine:page', {
+        title: new Text(),
+      });
+      page.addBlock('affine:surface', {}, pageBlockId);
+    });
+    page.resetHistory();
   } else {
     await syncProviders(workspace, getProviderCreators());
   }

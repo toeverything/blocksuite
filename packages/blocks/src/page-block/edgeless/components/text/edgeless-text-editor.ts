@@ -8,6 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
+import { wrapFontFamily } from '../../../../surface-block/elements/text/utils.js';
 import {
   Bound,
   type TextElement,
@@ -330,7 +331,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       });
 
       this.disposables.add(
-        edgeless.surface.slots.elementUpdated.on(({ id }) => {
+        edgeless.slots.elementUpdated.on(({ id }) => {
           if (id === element.id) this.requestUpdate();
         })
       );
@@ -391,7 +392,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const { zoom, translateX, translateY } = this.edgeless.surface.viewport;
-    const { fontFamily, fontSize, bold, textAlign, rotate } = this.element;
+    const { fontFamily, fontSize, textAlign, rotate, fontWeight } =
+      this.element;
     const transformOrigin = this.getTransformOrigin(textAlign);
     const offset = this.getTransformOffset(textAlign);
     const paddingOffset = this.getPaddingOffset(textAlign);
@@ -414,17 +416,17 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       textAlign === 'left'
         ? EdgelessTextEditor.HORIZONTAL_PADDING + 'px'
         : textAlign === 'center'
-        ? '50%'
-        : `calc(100% - ${EdgelessTextEditor.HORIZONTAL_PADDING}px)`;
+          ? '50%'
+          : `calc(100% - ${EdgelessTextEditor.HORIZONTAL_PADDING}px)`;
 
     return html`<div
       style=${styleMap({
         textAlign,
-        fontFamily,
+        fontFamily: wrapFontFamily(fontFamily),
         minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
         maxWidth: hasMaxWidth ? `${w}px` : 'none',
         fontSize: `${fontSize}px`,
-        fontWeight: bold ? 'bold' : 'normal',
+        fontWeight,
         transform: transformOperation.join(' '),
         transformOrigin,
         color: isCssVariable(this.element.color)

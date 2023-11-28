@@ -107,7 +107,7 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     const vEditor = getVirgoByModel(focusedBlockModel);
     assertExists(vEditor);
     vEditor.setVRange({
-      index: textRangePoint.index + textRangePoint.length,
+      index: textRangePoint.index + text.length,
       length: 0,
     });
   }

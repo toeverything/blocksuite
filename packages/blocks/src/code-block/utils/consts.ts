@@ -1,7 +1,7 @@
 import type { ILanguageRegistration } from 'shiki';
 
-export const DARK_THEME = 'gh/fisheva/Eva-Theme@master/themes/Eva-Dark';
-export const LIGHT_THEME = 'npm/shiki@0.14.1/themes/github-light';
+export const DARK_THEME = 'npm/shiki@0.14.1/themes/dark-plus';
+export const LIGHT_THEME = 'npm/shiki@0.14.1/themes/light-plus';
 export const FALLBACK_LANG = 'Plain Text';
 
 /**

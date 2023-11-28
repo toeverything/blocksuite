@@ -5,7 +5,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isCssVariable } from '../_common/theme/css-variables.js';
-import type { EdgelessPageBlockComponent } from '../page-block/index.js';
 import { Bound } from '../surface-block/index.js';
 import type { FrameBlockModel } from './frame-model.js';
 
@@ -16,12 +15,15 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   @state()
   showTitle = true;
 
+  @state()
+  private _isNavigator = false;
+
   @query('.affine-frame-title')
   private _titleElement?: HTMLElement;
 
   get titleBound() {
     if (!this._titleElement) return new Bound();
-    const { viewport } = this._surface;
+    const { viewport } = this.surface;
     const { zoom } = viewport;
     const rect = viewport.boundingClientRect;
     const bound = Bound.fromDOMRect(this._titleElement.getBoundingClientRect());
@@ -36,19 +38,25 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     return bound;
   }
 
-  private get _surface() {
-    return (<EdgelessPageBlockComponent>this.parentBlockElement).surface;
+  get surface() {
+    return this.closest('affine-edgeless-page')!.surface;
   }
 
   override connectedCallback() {
     super.connectedCallback();
     let lastZoom = 0;
     this._disposables.add(
-      this._surface.viewport.slots.viewportUpdated.on(({ zoom }) => {
+      this.surface.viewport.slots.viewportUpdated.on(({ zoom }) => {
         if (zoom !== lastZoom) {
           this.requestUpdate();
           lastZoom = zoom;
         }
+      })
+    );
+
+    this._disposables.add(
+      this.surface.edgeless.slots.elementUpdated.on(() => {
+        this.requestUpdate();
       })
     );
   }
@@ -57,14 +65,22 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     return this;
   }
 
+  override firstUpdated() {
+    this.surface.edgeless.slots.edgelessToolUpdated.on(tool => {
+      this._isNavigator = tool.type === 'frameNavigator' ? true : false;
+    });
+  }
+
   override render() {
-    const { model, showTitle, _surface } = this;
-    const bound = Bound.deserialize(model.xywh);
-    const { zoom } = _surface.viewport;
+    const { model, showTitle, surface, _isNavigator } = this;
+    const bound = Bound.deserialize(
+      (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
+    );
+    const { zoom } = surface.viewport;
     const text = model.title.toString();
 
     return html`
-      ${showTitle
+      ${showTitle && !_isNavigator
         ? html` <div
             style=${styleMap({
               transformOrigin: 'top left',
@@ -97,7 +113,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
             ? `var(${model.background})`
             : '',
           borderRadius: '8px',
-          border: `2px solid var(--affine-black-30)`,
+          border: _isNavigator ? 'none' : `2px solid var(--affine-black-30)`,
         })}
       ></div>
     `;

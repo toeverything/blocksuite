@@ -5,7 +5,7 @@ import {
   type EdgelessElement,
   type Selectable,
 } from '../../_common/utils/types.js';
-import type { PhasorElementType } from '../../surface-block/index.js';
+import type { CanvasElementType } from '../../surface-block/index.js';
 import {
   almostEqual,
   AStarRunner,
@@ -1147,7 +1147,12 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
       _connectionOverlay.points = anchors.map(a => a.point);
       for (let j = 0; j < anchors.length; j++) {
         const anchor = anchors[j];
-        if (Vec.dist(anchor.point, point) < 4) {
+        const anchorViewCoord = surface.toViewCoord(
+          anchor.point[0],
+          anchor.point[1]
+        );
+        const pointerViewCoord = surface.toViewCoord(point[0], point[1]);
+        if (Vec.dist(anchorViewCoord, pointerViewCoord) < 20) {
           _connectionOverlay.highlightPoint = anchor.point;
           result = {
             id: connectable.id,
@@ -1212,7 +1217,7 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
     const anotherConnection = connection === 'source' ? 'target' : 'source';
     const anotherId = connector[anotherConnection]?.id;
     const result = this.searchConnection(point, anotherId ? [anotherId] : []);
-    surface.updateElement<PhasorElementType.CONNECTOR>(id, {
+    surface.updateElement<CanvasElementType.CONNECTOR>(id, {
       [connection]: result,
     });
   }
@@ -1230,7 +1235,7 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
     if (!target.id && target.position)
       updates.target = { position: Vec.add(target.position, offset) };
     updates.xywh = bound.serialize();
-    surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, updates);
+    surface.updateElement<CanvasElementType.CONNECTOR>(connector.id, updates);
   }
 
   syncConnectorPos(connected: Connectable[]) {
@@ -1244,11 +1249,11 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
       this.getConnecttedConnectors([ele]).forEach(connector => {
         const absolutePath = connector.absolutePath;
         if (connector.source.id === ele.id) {
-          surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, {
+          surface.updateElement<CanvasElementType.CONNECTOR>(connector.id, {
             source: { position: absolutePath[0] },
           });
         } else if (connector.target.id === ele.id) {
-          surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, {
+          surface.updateElement<CanvasElementType.CONNECTOR>(connector.id, {
             target: { position: absolutePath[absolutePath.length - 1] },
           });
         }

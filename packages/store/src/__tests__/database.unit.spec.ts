@@ -27,14 +27,14 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(AffineSchemas);
-  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+  return { id: 'test-workspace', idGenerator, schema };
 }
 
 async function createTestPage(pageId = 'page0') {
   const options = createTestOptions();
   const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
-  await page.waitForLoaded();
+  await page.load();
   return page;
 }
 

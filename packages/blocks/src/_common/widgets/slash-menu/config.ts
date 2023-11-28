@@ -44,7 +44,7 @@ import { copyBlock } from '../../../page-block/doc/utils.js';
 import { onModelTextUpdated } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
-import { PhasorElementType } from '../../../surface-block/index.js';
+import { CanvasElementType } from '../../../surface-block/index.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { textConversionConfigs } from '../../configs/text-conversion.js';
@@ -272,7 +272,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         name: 'Bookmark',
         icon: BookmarkIcon,
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_bookmark_operation')) {
+          if (!model.page.schema.flavourSchemaMap.has('affine:bookmark')) {
             return false;
           }
           return !insideDatabase(model);
@@ -487,13 +487,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       )[0];
 
       if (!surfaceModel) return [];
-
-      const groupElements: Y.Map<string>[] = Array.from(
-        surfaceModel.elements.getValue()?.values() ?? []
-      ).filter(
-        (element: Y.Map<string>) =>
-          element.get('type') === PhasorElementType.GROUP
-      );
+      const groupElements = (<Array<Y.Map<string>>>(
+        Array.from(surfaceModel.elements.getValue()?.values() ?? [])
+      )).filter(element => element.get('type') === CanvasElementType.GROUP);
 
       return (
         groupElements.map(element => {

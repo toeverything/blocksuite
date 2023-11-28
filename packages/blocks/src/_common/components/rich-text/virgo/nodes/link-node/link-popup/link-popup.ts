@@ -81,6 +81,20 @@ export class LinkPopup extends WithDisposable(LitElement) {
     );
   }
 
+  protected override firstUpdated() {
+    if (!this.linkInput) return;
+
+    this._disposables.addFromEvent(this.linkInput, 'copy', e => {
+      e.stopPropagation();
+    });
+    this._disposables.addFromEvent(this.linkInput, 'cut', e => {
+      e.stopPropagation();
+    });
+    this._disposables.addFromEvent(this.linkInput, 'paste', e => {
+      e.stopPropagation();
+    });
+  }
+
   override updated() {
     assertExists(this.popupContainer);
     const range = this.vEditor.toDomRange(this.goalVRange);
@@ -373,8 +387,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
       this.type === 'create'
         ? this._createTemplate()
         : this.type === 'view'
-        ? this._viewTemplate()
-        : this._editTemplate();
+          ? this._viewTemplate()
+          : this._editTemplate();
 
     return html`
       <div class="overlay-root">

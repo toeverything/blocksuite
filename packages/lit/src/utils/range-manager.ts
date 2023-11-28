@@ -32,9 +32,11 @@ export class RangeManager {
   }
 
   private _range: Range | null = null;
+  private _isRangeReversed: boolean = false;
 
   clearRange(sync = true) {
     this._range = null;
+    this._isRangeReversed = false;
     window.getSelection()?.removeAllRanges();
     if (sync) {
       this.root.selection.clear(['text']);
@@ -47,7 +49,10 @@ export class RangeManager {
       ranges.push(end);
     }
 
-    this._range = this._mergeRanges(ranges);
+    const mergedRangeResult = this._mergeRanges(ranges);
+    this._range = mergedRangeResult?.range ?? null;
+    this._isRangeReversed = mergedRangeResult?.reversed ?? false;
+
     this._renderRange();
   }
 
@@ -74,7 +79,7 @@ export class RangeManager {
     this.renderRange(startRange, endRange);
   }
 
-  syncRangeToTextSelection(range: Range | null) {
+  syncRangeToTextSelection(range: Range | null, isRangeReversed: boolean) {
     if (!range) {
       this.clearRange();
       return null;
@@ -82,6 +87,7 @@ export class RangeManager {
 
     const selectionManager = this.root.selection;
     this._range = range;
+    this._isRangeReversed = isRangeReversed;
 
     const { startContainer, endContainer } = range;
     const from = this._nodeToPoint(startContainer);
@@ -96,6 +102,7 @@ export class RangeManager {
     const selection = selectionManager.getInstance('text', {
       from,
       to,
+      isReverse: isRangeReversed,
     });
 
     selectionManager.setGroup('note', [selection]);
@@ -188,7 +195,8 @@ export class RangeManager {
       ranges.push(endRange);
     }
 
-    return this._mergeRanges(ranges);
+    const mergedRangeResult = this._mergeRanges(ranges);
+    return mergedRangeResult?.range ?? null;
   }
 
   pointToRange(point: TextRangePoint): Range | null {
@@ -259,7 +267,9 @@ export class RangeManager {
     return range;
   }
 
-  private _mergeRanges(ranges: RangeSnapshot[]) {
+  private _mergeRanges(
+    ranges: RangeSnapshot[]
+  ): { range: Range; reversed: boolean } | null {
     if (ranges.length === 0) {
       return null;
     }
@@ -268,7 +278,7 @@ export class RangeManager {
       const range = document.createRange();
       range.setStart(current.startContainer, current.startOffset);
       range.setEnd(current.endContainer, current.endOffset);
-      return range;
+      return { range, reversed: false };
     }
 
     const [leftRangeSnapshot, rightRangeSnapshot] = ranges;
@@ -307,7 +317,7 @@ export class RangeManager {
     leftRange.detach();
     rightRange.detach();
 
-    return range;
+    return { range, reversed: result > 0 };
   }
 
   private _renderRange() {
@@ -318,7 +328,15 @@ export class RangeManager {
     }
 
     selection.removeAllRanges();
-    selection.addRange(this._range);
+
+    if (this._isRangeReversed) {
+      const nextRange = document.createRange();
+      nextRange.setStart(this._range.endContainer, this._range.endOffset);
+      selection.addRange(nextRange);
+      selection.extend(this._range.startContainer, this._range.startOffset);
+    } else {
+      selection.addRange(this._range);
+    }
   }
 
   private _getNearestVirgo(node: Node) {

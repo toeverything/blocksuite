@@ -113,46 +113,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
   blockElement.bindHotKey({
     ArrowUp: ctx => {
-      if (!blockElement.selected?.is('text')) {
-        return;
-      }
-
-      const vEditor = _getVirgo();
-      const vRange = vEditor.getVRange();
-      if (!vRange) {
-        return;
-      }
-
-      if (vRange.length !== 0) {
-        vEditor.setVRange({
-          index: vRange.index,
-          length: 0,
-        });
-      }
-
       _preventDefault(ctx);
-      return;
     },
     ArrowDown: ctx => {
-      if (!blockElement.selected?.is('text')) {
-        return;
-      }
-
-      const vEditor = _getVirgo();
-      const vRange = vEditor.getVRange();
-      if (!vRange) {
-        return;
-      }
-
-      if (vRange.length !== 0) {
-        vEditor.setVRange({
-          index: vRange.index,
-          length: 0,
-        });
-      }
-
       _preventDefault(ctx);
-      return;
     },
     ArrowRight: ctx => {
       if (blockElement.selected?.is('block')) {
@@ -190,6 +154,18 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
 
       return true;
+    },
+    'Shift-ArrowUp': ctx => {
+      _preventDefault(ctx);
+    },
+    'Shift-ArrowDown': ctx => {
+      _preventDefault(ctx);
+    },
+    'Shift-ArrowRight': ctx => {
+      _preventDefault(ctx);
+    },
+    'Shift-ArrowLeft': ctx => {
+      _preventDefault(ctx);
     },
     Escape: () => {
       if (blockElement.selected?.is('text')) {

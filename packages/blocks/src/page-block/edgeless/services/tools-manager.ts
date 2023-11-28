@@ -90,6 +90,12 @@ export class EdgelessToolsManager {
   // pressed shift key
   private _shiftKey = false;
 
+  private _dragging = false;
+
+  get dragging() {
+    return this._dragging;
+  }
+
   get selection() {
     return this.container.selectionManager;
   }
@@ -176,6 +182,7 @@ export class EdgelessToolsManager {
     }
 
     this._add('dragStart', ctx => {
+      this._dragging = true;
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
@@ -200,6 +207,7 @@ export class EdgelessToolsManager {
       this._onContainerDragMove(event);
     });
     this._add('dragEnd', ctx => {
+      this._dragging = false;
       const event = ctx.get('pointerState');
       if (
         !isInsidePageTitle(event.raw.target) &&
@@ -433,6 +441,7 @@ export class EdgelessToolsManager {
       editing: false,
     }
   ) => {
+    if (this.page.readonly && edgelessTool.type !== 'pan') return;
     if (this.edgelessTool === edgelessTool) return;
     const lastType = this.edgelessTool.type;
     this._controllers[lastType].beforeModeSwitch(edgelessTool);

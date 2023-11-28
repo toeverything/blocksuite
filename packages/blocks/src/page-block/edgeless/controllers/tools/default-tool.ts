@@ -15,10 +15,10 @@ import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import type { HitTestOptions } from '../../../../surface-block/elements/edgeless-element.js';
 import {
   Bound,
+  type CanvasElement,
   ConnectorElement,
   GroupElement,
   type IVec,
-  type PhasorElement,
   ShapeElement,
   TextElement,
   Vec,
@@ -29,10 +29,10 @@ import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
 import {
+  isCanvasElement,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
-  isPhasorElement,
 } from '../../utils/query.js';
 import {
   addText,
@@ -174,7 +174,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _handleSurfaceDragMove(
-    selected: PhasorElement,
+    selected: CanvasElement,
     initialBound: Bound,
     delta: IVec
   ) {
@@ -265,6 +265,20 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerDblClick(e: PointerEventState) {
+    if (this._page.readonly) {
+      const viewport = this._surface.viewport;
+      if (viewport.zoom === 1) {
+        // Fit to Screen
+        const { centerX, centerY, zoom } = this._edgeless.getFitToScreenData();
+        viewport.setViewport(zoom, [centerX, centerY], true);
+      } else {
+        // Zoom to 100% and Center
+        const [x, y] = viewport.toModelCoord(e.x, e.y);
+        viewport.setViewport(1, [x, y], true);
+      }
+      return;
+    }
+
     const selected = this._pick(e.x, e.y, {
       pierce: true,
       expand: 10,
@@ -359,7 +373,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       const noteService = _edgeless.getService(EdgelessBlockType.NOTE);
       const id = _surface.addElement(
         EdgelessBlockType.NOTE,
-        { xywh: selected.xywh },
+        {
+          xywh: selected.xywh,
+          edgeless: selected.edgeless,
+          background: selected.background,
+          hidden: selected.hidden,
+        },
         this._page.root?.id
       );
       const note = this._page.getBlockById(id);
@@ -379,11 +398,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     } else if (isImageBlock(selected)) {
       const imageService = _edgeless.getService(EdgelessBlockType.IMAGE);
       const json = imageService.block2Json(selected, []);
-      const id = this._surface.addElement(EdgelessBlockType.IMAGE, {
-        xywh: json.xywh,
-        sourceId: json.sourceId,
-        rotate: json.rotate,
-      });
+      const id = this._surface.addElement(
+        EdgelessBlockType.IMAGE,
+        {
+          xywh: json.xywh,
+          sourceId: json.sourceId,
+          rotate: json.rotate,
+        },
+        this._surface.model
+      );
       return _surface.pickById(id);
     } else {
       const id = _surface.addElement(
@@ -401,7 +424,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       } else {
         const frame = this._edgeless.surface.frame.selectFrame([ele]);
         if (frame) {
-          this._frames.add(frame);
+          this._frames.add(frame as FrameBlockModel);
         }
       }
     });
@@ -576,7 +599,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         const delta = [dx + alignRst.dx, dy + alignRst.dy];
 
         this._toBeMoved.forEach((element, index) => {
-          if (isPhasorElement(element)) {
+          if (isCanvasElement(element)) {
             if (!this._isDraggable(element)) return;
             this._handleSurfaceDragMove(
               element,
@@ -593,7 +616,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         });
         const frame = surface.frame.selectFrame(this._toBeMoved);
         frame
-          ? surface.frame.setHighlight(frame)
+          ? surface.frame.setHighlight(frame as FrameBlockModel)
           : surface.frame.clearHighlight();
 
         this._forceUpdateSelection(

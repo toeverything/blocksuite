@@ -1,5 +1,18 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
+/**
+ * When the attachment is uploading, the `sourceId` is `undefined`.
+ * And we can query the upload status by the `isAttachmentLoading` function.
+ *
+ * Other collaborators will see an error attachment block when the blob has not finished uploading.
+ * This issue can be resolve by sync the upload status through the awareness system in the future.
+ *
+ * When the attachment is uploaded, the `sourceId` is the id of the blob.
+ *
+ * If there are no `sourceId` and the `isAttachmentLoading` function returns `false`,
+ * it means that the attachment is failed to upload.
+ */
+
 export type AttachmentBlockProps = {
   name: string;
   size: number;
@@ -8,13 +21,10 @@ export type AttachmentBlockProps = {
    */
   type: string;
   caption?: string;
-
-  // `loadingKey` is used to indicate whether the attachment is loading
-  // You can query the loading state by `isAttachmentLoading(loadingKey)`
-  // We can not use `loading: true` directly because the state will be stored in the model
-  //
-  // The `loadingKey` and `sourceId` should not be existed at the same time
-  loadingKey?: string | null;
+  // `loadingKey` was used to indicate whether the attachment is loading,
+  // which is currently unused but no breaking change is needed.
+  // The `loadingKey` and `sourceId` should not be existed at the same time.
+  // loadingKey?: string | null;
   sourceId?: string;
 };
 
@@ -23,7 +33,6 @@ export const defaultAttachmentProps: AttachmentBlockProps = {
   size: 0,
   type: 'application/octet-stream',
   sourceId: undefined,
-  loadingKey: undefined,
   caption: undefined,
 };
 
@@ -51,29 +60,6 @@ export class AttachmentBlockModel extends BaseBlockModel<AttachmentBlockProps> {
         return;
       }
       this.page.blob.increaseRef(blobId);
-    });
-    this.propsUpdated.on(({ oldProps, newProps }) => {
-      const oldBlobId = (oldProps as AttachmentBlockProps).sourceId;
-      const newBlobId = (newProps as AttachmentBlockProps).sourceId;
-      if (oldBlobId === newBlobId) return;
-
-      if (oldBlobId) {
-        const oldBlob = this.page.blob.get(oldBlobId);
-        if (!oldBlob) {
-          console.error(`Blob ${oldBlobId} not found in blob manager`);
-          return;
-        }
-        this.page.blob.decreaseRef(oldBlobId);
-      }
-
-      if (newBlobId) {
-        const newBlob = this.page.blob.get(newBlobId);
-        if (!newBlob) {
-          console.error(`Blob ${newBlobId} not found in blob manager`);
-          return;
-        }
-        this.page.blob.increaseRef(newBlobId);
-      }
     });
     this.deleted.on(() => {
       const blobId = this.sourceId;

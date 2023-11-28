@@ -73,7 +73,9 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     }
 
     component-toolbar-menu-divider {
-      margin: 0 8px;
+      width: 4px;
+      margin: 0 12px;
+      height: 24px;
     }
   `;
 
@@ -85,6 +87,9 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   @state()
   top = 0;
+
+  @state()
+  private _showPopper = false;
 
   get page() {
     return this.edgeless.page;
@@ -198,6 +203,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
+  protected togglePopper = (showPopper: boolean) => {
+    this._showPopper = showPopper;
+  };
+
   private _updateOnSelectedChange = (element: string | { id: string }) => {
     const id = typeof element === 'string' ? element : element.id;
     if (this.selection.isSelected(id)) {
@@ -221,14 +230,14 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       })
     );
 
-    pickValues(this.edgeless.surface.slots, [
+    pickValues(this.edgeless.slots, [
       'elementAdded',
       'elementRemoved',
       'elementUpdated',
     ]).forEach(slot => _disposables.add(slot.on(this._updateOnSelectedChange)));
 
     _disposables.add(
-      edgeless.page.slots.yBlockUpdated.on(this._updateOnSelectedChange)
+      edgeless.page.slots.blockUpdated.on(this._updateOnSelectedChange)
     );
   }
 
@@ -294,6 +303,9 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     top < 0 && (top = y + bound.h * viewport.zoom + offset);
 
     left = clamp(x, 10, width - rect.width - 10);
+    if (this._showPopper) {
+      left = clamp(x, 10, width - rect.width - 80);
+    }
     top = clamp(top, 10, height - rect.height - 100);
     return [left, top];
   }
@@ -365,6 +377,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         <edgeless-more-button
           .edgeless=${edgeless}
           .vertical=${true}
+          .setPoppetShow=${this.togglePopper}
         ></edgeless-more-button>
       </div>`;
   }

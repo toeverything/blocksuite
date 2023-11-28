@@ -2,9 +2,9 @@ import type { UIEventHandler } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSnapshot, Page } from '@blocksuite/store';
-import { MarkdownAdapter } from '@blocksuite/store';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
+import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
 import { replaceIdMiddleware } from '../../_common/transformers/utils.js';
 import { ClipboardAdapter } from './adapter.js';
 import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
@@ -34,9 +34,11 @@ export class ClipboardController implements ReactiveController {
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
     }
-    if (this._enabled) {
-      this._init();
-    }
+    this.host.updateComplete.then(() => {
+      if (this._enabled) {
+        this._init();
+      }
+    });
   }
 
   hostDisconnected() {
@@ -74,10 +76,11 @@ export class ClipboardController implements ReactiveController {
     });
   };
 
-  private _copySelected = (event: ClipboardEvent) => {
+  private _copySelected = (event: ClipboardEvent, onCopy?: () => void) => {
     return this._std.command
       .pipe()
       .withRoot()
+      .with({ onCopy })
       .getSelectedModels()
       .copySelectedModels({ event });
   };
@@ -93,9 +96,16 @@ export class ClipboardController implements ReactiveController {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
-    this._copySelected(e)
-      .try(cmd => [cmd.deleteText(), cmd.deleteSelectedModels()])
-      .run();
+    this._copySelected(e, () => {
+      this._std.command
+        .pipe()
+        .withRoot()
+        .try(cmd => [
+          cmd.getTextSelection().deleteText(),
+          cmd.getBlockSelections().deleteSelectedModels(),
+        ])
+        .run();
+    }).run();
   };
 
   public onPagePaste: UIEventHandler = ctx => {

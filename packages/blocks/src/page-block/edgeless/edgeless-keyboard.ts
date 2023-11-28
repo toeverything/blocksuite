@@ -1,5 +1,6 @@
 import { IS_MAC } from '@blocksuite/global/env';
 
+import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
 import {
   type EdgelessTool,
   LineWidth,
@@ -18,7 +19,6 @@ import {
   DEFAULT_SHAPE_STROKE_COLOR,
 } from './components/component-toolbar/change-shape-button.js';
 import { GET_DEFAULT_LINE_COLOR } from './components/panel/color-panel.js';
-import { DEFAULT_NOTE_COLOR } from './components/toolbar/note/note-tool-button.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
@@ -26,7 +26,7 @@ import {
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
-import { isPhasorElement } from './utils/query.js';
+import { isCanvasElement } from './utils/query.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override pageElement: EdgelessPageBlockComponent) {
@@ -178,9 +178,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._delete();
         },
         'Control-d': () => {
-          if (IS_MAC) {
-            this._delete();
-          }
+          if (!IS_MAC) return;
+          this._delete();
         },
         ArrowUp: () => {
           this._move('ArrowUp');
@@ -322,7 +321,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           break;
       }
 
-      if (isPhasorElement(element)) {
+      if (isCanvasElement(element)) {
         if (element instanceof ConnectorElement) {
           surface.connector.updateXYWH(element, bound);
         }

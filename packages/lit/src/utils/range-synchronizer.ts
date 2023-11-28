@@ -65,6 +65,14 @@ export class RangeSynchronizer {
           return;
         }
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+        const isRangeReversed =
+          !!selection.anchorNode &&
+          !!selection.focusNode &&
+          (selection.anchorNode === selection.focusNode
+            ? selection.anchorOffset > selection.focusOffset
+            : selection.anchorNode.compareDocumentPosition(
+                selection.focusNode
+              ) === Node.DOCUMENT_POSITION_PRECEDING);
 
         if (
           this.filter.rangeToTextSelection &&
@@ -78,8 +86,10 @@ export class RangeSynchronizer {
         }
 
         if (range === null || range.intersectsNode(this.root)) {
-          this._prevSelection =
-            this._rangeManager.syncRangeToTextSelection(range);
+          this._prevSelection = this._rangeManager.syncRangeToTextSelection(
+            range,
+            isRangeReversed
+          );
         } else {
           this._prevSelection = null;
           this._selectionManager.clear(['text']);

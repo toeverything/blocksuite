@@ -12,6 +12,7 @@ import './surface-block/index.js';
 import './database-block/index.js';
 import './surface-ref-block/index.js';
 
+export * from './_common/adapters/index.js';
 export * from './_common/components/index.js';
 export * from './_common/consts.js';
 export * from './_common/test-utils/test-utils.js';
@@ -52,12 +53,12 @@ const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
     ? globalThis
     : typeof window !== 'undefined'
-    ? window
-    : // @ts-ignore
-    typeof global !== 'undefined'
-    ? // @ts-ignore
-      global
-    : {};
+      ? window
+      : // @ts-ignore
+        typeof global !== 'undefined'
+        ? // @ts-ignore
+          global
+        : {};
 const importIdentifier = '__ $BLOCKSUITE_BLOCKS$ __';
 
 if (env[importIdentifier] === true) {

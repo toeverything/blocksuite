@@ -19,14 +19,14 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
-  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+  return { id: 'test-workspace', idGenerator, schema };
 }
 
 async function createTestPage(pageId = 'page:home', workspace?: Workspace) {
   const options = createTestOptions();
   const _workspace = workspace || new Workspace(options);
   const page = _workspace.createPage({ id: pageId });
-  await page.waitForLoaded();
+  await page.load();
   return page;
 }
 

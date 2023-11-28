@@ -20,20 +20,39 @@ export class EdgelessPortalBase<
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  protected renderModel(model: T) {
+    return this.surface.root.renderModel(this.surface.unwrap(model));
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
 
-    this.edgeless.slots.elementSizeUpdated.on(id => {
-      if (this.model.id === id) {
-        this.requestUpdate();
-      }
-    });
-  }
-
-  override firstUpdated() {
     this._disposables.add(
-      this.surface.page.slots.yBlockUpdated.on(e => {
-        if (e.id === this.model.id) {
+      this.edgeless.slots.viewportUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    this._disposables.add(
+      this.model.childrenUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    this._disposables.add(
+      this.model.propsUpdated.on(event => {
+        this.edgeless.slots.elementUpdated.emit({
+          id: this.model.id,
+          props: {
+            [event.key]: this.model[event.key as keyof typeof this.model],
+          },
+        });
+      })
+    );
+
+    this._disposables.add(
+      this.edgeless.slots.elementUpdated.on(({ id }) => {
+        if (id === this.model.id) {
           this.requestUpdate();
         }
       })

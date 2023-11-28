@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "//": "ALL_PACKAGES",
   "workspaces": [
     "packages/block-std",
@@ -44,7 +44,7 @@
     "size:generate": "./scripts/size-generate.sh",
     "clean": "./scripts/clean.sh",
     "release-note:draft": "node --loader ts-node/esm ./scripts/release-note/convert.ts",
-    "release-note:validate": "node --loader ts-node/esm ./scripts/release-note/validate.ts",
+    "release-note:notable": "node ./scripts/release-note/notable-prs.mjs",
     "preinstall": "npx only-allow pnpm",
     "postinstall": "husky install"
   },
@@ -59,7 +59,7 @@
     "@commitlint/cli": "^18.2.0",
     "@commitlint/config-conventional": "^18.1.0",
     "@open-wc/dev-server-hmr": "^0.2.0",
-    "@playwright/test": "^1.39.0",
+    "@playwright/test": "^1.40.0",
     "@types/node": "^20.8.10",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
@@ -74,6 +74,7 @@
     "eslint-plugin-wc": "^2.0.4",
     "happy-dom": "^12.10.3",
     "husky": "^8.0.3",
+    "inquirer": "^9.2.12",
     "lint-staged": "^15.0.2",
     "lit-analyzer": "2.0.1",
     "madge": "^6.1.0",
@@ -84,11 +85,12 @@
     "pretty-bytes": "^6.1.1",
     "pretty-format": "^29.7.0",
     "rollup": "^4.3.0",
+    "simple-git": "^3.21.0",
     "terser": "^5.24.0",
     "ts-lit-plugin": "^2.0.1",
     "ts-node": "^10.9.1",
-    "typescript": "^5.2.2",
-    "vite": "^4.5.0",
+    "typescript": "5.2.2",
+    "vite": "4.5.0",
     "vite-plugin-istanbul": "^5.0.0",
     "vite-plugin-web-components-hmr": "^0.1.3",
     "vitest": "^0.34.6"
@@ -100,7 +102,7 @@
       ]
     },
     "overrides": {
-      "typescript": "^5.2.2",
+      "typescript": "5.2.2",
       "array-includes": "npm:@nolyfill/array-includes@latest",
       "array.prototype.flat": "npm:@nolyfill/array.prototype.flat@latest",
       "array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@latest",

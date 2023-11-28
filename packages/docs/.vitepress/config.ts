@@ -22,7 +22,6 @@ export default defineConfig({
         link: 'https://blocksuite-toeverything.vercel.app/starter/?init',
       },
       { text: 'Docs', link: '/blocksuite-overview' },
-      // { text: 'API', link: '' },
       {
         text: 'Releases',
         link: 'https://github.com/toeverything/blocksuite/releases',
@@ -31,31 +30,36 @@ export default defineConfig({
 
     sidebar: [
       {
-        text: 'Introduction',
-        items: [{ text: 'BlockSuite Overview', link: '/blocksuite-overview' }],
-      },
-      {
-        text: 'Using Prebuilt Editor',
+        text: 'Getting Started',
         items: [
-          { text: 'Getting Started', link: '/getting-started' },
-          { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
-          { text: 'Block Basics', link: '/block-basics' },
+          { text: 'Introduction', link: '/blocksuite-overview' },
+          { text: 'Quick Start', link: '/quick-start' },
         ],
       },
       {
-        text: 'BlockSuite Architecture',
+        text: 'Essentials',
+        items: [
+          { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
+          { text: 'Block Basics', link: '/block-basics' },
+          { text: 'Data Persistence', link: '/data-persistence' },
+          { text: '🚧 Customize Blocks' },
+        ],
+      },
+      {
+        text: 'Editor In-Depth',
         items: [
           {
             text: 'Unidirectional Data Flow',
             link: '/unidirectional-data-flow',
           },
-          { text: 'Modeling Editor State', link: '/editor-state' },
-          { text: 'Data Persistence', link: '/data-persistence' },
+          { text: '🚧 Hybrid Graphics Rendering' },
         ],
       },
       {
         text: 'API Walkthrough',
         items: [
+          { text: 'Selection API', link: '/selection-api' },
+          { text: 'Event API', link: '/event-api' },
           {
             text: 'Block Spec APIs',
             link: '/block-spec-apis',
@@ -66,13 +70,11 @@ export default defineConfig({
               { text: 'Block Widgets', link: '/block-widgets' },
             ],
           },
-          { text: 'Selection API', link: '/selection-api' },
-          { text: 'Event API', link: '/event-api' },
           { text: 'Command API', link: '/command-api' },
         ],
       },
       {
-        text: '🚧 API Reference',
+        text: 'API Reference',
         items: [
           { text: '@blocksuite/store', link: '/api/@blocksuite/store/index' },
           {

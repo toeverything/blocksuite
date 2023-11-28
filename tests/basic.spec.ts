@@ -492,7 +492,7 @@ test('when no note block, click editing area auto add a new note block', async (
     return document.querySelector('affine-note');
   });
   expect(note).toBeNull();
-  await click(page, { x: 100, y: 280 });
+  await click(page, { x: 200, y: 280 });
 
   note = await page.evaluate(() => {
     return document.querySelector('affine-note');
@@ -504,7 +504,7 @@ test(scoped`automatic identify url text`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await type(page, 'abc https://google.com');
+  await type(page, 'abc https://google.com ');
 
   await assertStoreMatchJSX(
     page,
@@ -512,6 +512,16 @@ test(scoped`automatic identify url text`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -524,6 +534,9 @@ test(scoped`automatic identify url text`, async ({ page }) => {
           <text
             insert="https://google.com"
             link="https://google.com"
+          />
+          <text
+            insert=" "
           />
         </>
       }

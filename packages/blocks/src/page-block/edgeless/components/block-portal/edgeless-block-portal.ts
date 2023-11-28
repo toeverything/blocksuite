@@ -5,15 +5,21 @@ import './frame/edgeless-frame.js';
 import '../rects/edgeless-selected-rect.js';
 import '../rects/edgeless-hover-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
-import '../note-status/index.js';
 import '../../components/auto-connect/edgeless-index-label.js';
 import '../../components/auto-connect/edgeless-auto-connect-line.js';
 import '../component-toolbar/component-toolbar.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { css, nothing } from 'lit';
+import {
+  customElement,
+  property,
+  query,
+  queryAll,
+  state,
+} from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
@@ -23,15 +29,24 @@ import {
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../../../_common/consts.js';
 import { delayCallback } from '../../../../_common/utils/event.js';
-import { matchFlavours } from '../../../../_common/utils/index.js';
+import {
+  matchFlavours,
+  type TopLevelBlockModel,
+} from '../../../../_common/utils/index.js';
+import type { SurfaceBlockComponent } from '../../../../index.js';
 import type { FrameBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import type { GroupElement } from '../../../../surface-block/index.js';
-import { almostEqual, Bound } from '../../../../surface-block/index.js';
+import {
+  almostEqual,
+  Bound,
+  serializeXYWH,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { NoteResizeObserver } from '../../utils/note-resize-observer.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
+import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect.js';
 
 export type AutoConnectElement =
   | NoteBlockModel
@@ -40,7 +55,7 @@ export type AutoConnectElement =
 
 const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
 
-const portalMap = {
+export const portalMap = {
   [FRAME]: 'edgeless-block-portal-frame',
   [NOTE]: 'edgeless-block-portal-note',
   [IMAGE]: 'edgeless-block-portal-image',
@@ -50,20 +65,61 @@ const portalMap = {
 export class EdgelessBlockPortalContainer extends WithDisposable(
   ShadowlessElement
 ) {
+  static override styles = css`
+    .surface-layer {
+      position: absolute;
+    }
+  `;
+
+  static renderPortal(
+    block: TopLevelBlockModel,
+    zIndex: number,
+    surface: SurfaceBlockComponent,
+    edgeless: EdgelessPageBlockComponent
+  ) {
+    const tag = literal`${unsafeStatic(
+      portalMap[block.flavour as EdgelessBlockType]
+    )}`;
+    return html`<${tag}
+          slot="blocks"
+          data-index=${block.index}
+          .index=${zIndex}
+          .model=${block}
+          .surface=${surface}
+          .edgeless=${edgeless}
+          style=${styleMap({
+            zIndex,
+            position: 'relative',
+          })}
+        ></${tag}>`;
+  }
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   @query('.affine-block-children-container.edgeless')
   container!: HTMLDivElement;
 
+  @query('edgeless-selected-rect')
+  selectedRect!: EdgelessSelectedRect;
+
   @query('.affine-edgeless-layer')
   layer!: HTMLDivElement;
+
+  @queryAll('.surface-layer')
+  canvases!: HTMLCanvasElement[];
+
+  @query('.portal-slot')
+  portalSlot!: HTMLDivElement;
 
   @state()
   private _showAutoConnect = false;
 
   @state()
   private _toolbarVisible = false;
+
+  @state()
+  private _isResizing = false;
 
   private _cancelRestoreWillchange: (() => void) | null = null;
 
@@ -88,6 +144,13 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     this._disposables.add(
       page.root.childrenUpdated.on(resetNoteResizeObserver)
     );
+    this.edgeless.surface.getBlocks(NOTE).forEach(note => {
+      this._disposables.add(note.propsUpdated.on(resetNoteResizeObserver));
+    });
+  }
+
+  get isDragging() {
+    return this.selectedRect.dragging;
   }
 
   aboutToChangeViewport() {
@@ -116,11 +179,18 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     this.layer.style.setProperty('transform', this._getLayerViewport());
   };
 
-  private _getLayerViewport() {
-    const { surface } = this.edgeless;
-    const { zoom, translateX, translateY } = surface.viewport;
+  setSlotContent(children: HTMLElement[]) {
+    if (this.portalSlot.children.length !== children.length)
+      this.portalSlot.replaceChildren(...children);
+  }
 
-    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
+  private _getLayerViewport(negative = false) {
+    const { surface } = this.edgeless;
+    const { translateX, translateY } = surface.viewport;
+
+    return `translate(${negative ? -translateX : translateX}px, ${
+      negative ? -translateY : translateY
+    }px)`;
   }
 
   private _updateReference() {
@@ -164,9 +234,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     _disposables.add(
       this._noteResizeObserver.slots.resize.on(resizedNotes => {
-        resizedNotes.forEach(([domRect, prevDomRect], id) => {
+        resizedNotes.forEach(([domRect], id) => {
           if (page.readonly) return;
-          const model = page.getBlockById(id) as NoteBlockModel;
+
+          const model = edgeless.surface.pickById(id) as NoteBlockModel;
           const { xywh } = model;
           const { x, y, w, h } = Bound.deserialize(xywh);
 
@@ -177,21 +248,14 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             (model.hidden ? EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2 : 0);
 
           if (!almostEqual(newModelHeight, h)) {
-            const updateBlock = () => {
-              page.updateBlock(model, {
-                xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
+            if (this.isDragging && edgeless.selectionManager.isSelected(id)) {
+              edgeless.updateElementInLocal(model.id, {
+                xywh: serializeXYWH(x, y, w, Math.round(newModelHeight)),
               });
-            };
-
-            // Assume it's user-triggered resizing if both width and height change,
-            // otherwise we don't add the size updating into history.
-            // See https://github.com/toeverything/blocksuite/issues/3671
-            const isResize =
-              prevDomRect && !almostEqual(domRect.width, prevDomRect.width);
-            if (isResize) {
-              updateBlock();
             } else {
-              page.withoutTransact(updateBlock);
+              page.updateBlock(model, {
+                xywh: serializeXYWH(x, y, w, Math.round(newModelHeight)),
+              });
             }
           }
         });
@@ -215,7 +279,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      page.slots.historyUpdated.on(() => {
+      edgeless.surface.layer.slots.layerUpdated.on(() => {
         this.requestUpdate();
       })
     );
@@ -228,6 +292,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     _disposables.add(
       edgeless.surface.model.childrenUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    _disposables.add(
+      (page.root as BaseBlockModel).childrenUpdated.on(() => {
         this.requestUpdate();
       })
     );
@@ -256,20 +326,30 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         this._updateAutoConnect();
       })
     );
+
+    _disposables.add(
+      edgeless.slots.elementResizeStart.on(() => {
+        this._isResizing = true;
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementResizeEnd.on(() => {
+        this._isResizing = false;
+      })
+    );
   }
 
   override render() {
     const { edgeless } = this;
-
     const { surface, page } = edgeless;
+    const { readonly } = page;
+
     if (!surface) return nothing;
 
-    const { readonly } = this.edgeless.page;
-    const notes = surface.getBlocks(NOTE);
-    const images = surface.getBlocks(IMAGE);
-    const frames = surface.getSortedBlocks(FRAME);
-    const blocks = [...notes, ...images].sort(surface.compare);
-
+    const notes = surface.getBlocks([NOTE]);
+    const frames = surface.layer.frames;
+    const layers = surface.layer.layers;
     const autoConnectedBlocks = new Map<AutoConnectElement, number>();
 
     notes.forEach(note => {
@@ -313,29 +393,47 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             .frames=${frames}
           >
           </edgeless-frames-container>
-          ${readonly
+          ${readonly || this._isResizing
             ? nothing
             : html`<affine-note-slicer
                 .edgelessPage=${edgeless}
               ></affine-note-slicer>`}
-          ${repeat(
-            blocks,
-            block => block.id,
-            (block, index) => {
-              const tag = literal`${unsafeStatic(
-                portalMap[block.flavour as EdgelessBlockType]
-              )}`;
-              return html`<${tag}
-                    .index=${index}
-                    .model=${block}
-                    .surface=${surface}
-                    .edgeless=${edgeless}
-                  ></${tag}>`;
-            }
-          )}
+          <div class="portal-slot"></div>
+          ${layers
+            .filter(layer => layer.type === 'block')
+            .map(layer => {
+              return repeat(
+                layer.elements as TopLevelBlockModel[],
+                block => block.id,
+                (block, index) => {
+                  const tag = unsafeStatic(
+                    portalMap[block.flavour as EdgelessBlockType]
+                  );
+                  const zIndex =
+                    (layer.zIndexes as [number, number])[0] + index;
+
+                  return html`<${tag}
+                      data-index=${block.index}
+                      data-portal-block-id=${block.id}
+                      .index=${zIndex}
+                      .model=${block}
+                      .surface=${surface}
+                      .edgeless=${edgeless}
+                      style=${styleMap({
+                        zIndex,
+                        position: 'relative',
+                      })}
+                    ></${tag}>`;
+                }
+              );
+            })}
         </div>
       </div>
-      <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>
+      ${this._isResizing
+        ? nothing
+        : html`
+            <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>
+          `}
       <edgeless-dragging-area-rect
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>

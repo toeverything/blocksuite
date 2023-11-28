@@ -1,11 +1,18 @@
 import type { Y } from '@blocksuite/store';
 
-import type { IBound, ShapeStyle, StrokeStyle } from '../../consts.js';
+import type {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+  IBound,
+  ShapeStyle,
+  StrokeStyle,
+} from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
-import type { HitTestOptions, PhasorElementType } from '../edgeless-element.js';
+import type { CanvasElementType, HitTestOptions } from '../edgeless-element.js';
 import type {
   ISurfaceElement,
   ISurfaceElementLocalRecord,
@@ -16,7 +23,7 @@ import type { ShapeElement } from './shape-element.js';
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 
 export interface IShape extends ISurfaceElement {
-  type: PhasorElementType.SHAPE;
+  type: CanvasElementType.SHAPE;
   shapeType: ShapeType;
   radius: number;
   filled: boolean;
@@ -31,12 +38,16 @@ export interface IShape extends ISurfaceElement {
   text?: Y.Text;
   color?: string;
   fontSize?: SHAPE_TEXT_FONT_SIZE;
-  fontFamily?: string;
+  fontFamily?: CanvasTextFontFamily;
+  fontWeight?: CanvasTextFontWeight;
+  fontStyle?: CanvasTextFontStyle;
   textAlign?: 'left' | 'center' | 'right';
   textHorizontalAlign?: 'left' | 'center' | 'right';
   textVerticalAlign?: 'top' | 'center' | 'bottom';
-  bold?: boolean;
-  italic?: boolean;
+
+  // outdated, use `fontWeight` and `fontStyle` instead
+  // bold?: boolean;
+  // italic?: boolean;
 }
 
 export interface IShapeLocalRecord extends ISurfaceElementLocalRecord {

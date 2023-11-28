@@ -33,9 +33,6 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   preset!: BlockSpec[];
 
   @property({ attribute: false })
-  mode!: 'page' | 'edgeless';
-
-  @property({ attribute: false })
   page!: Page;
 
   @property({ attribute: false })
@@ -196,14 +193,13 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
     this.std.view.register<'block'>({
       type: 'block',
-      fromDOM: node => {
-        return fromDOM<BlockElement>(
+      fromDOM: node =>
+        fromDOM<BlockElement>(
           node,
           this.blockIdAttr,
           this.widgetIdAttr,
           'block'
-        );
-      },
+        ),
       toDOM: ({ view }) => view,
       getChildren: node =>
         getChildren(node, blockSelector, widgetSelector, 'block'),
@@ -211,14 +207,13 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
     this.std.view.register<'widget'>({
       type: 'widget',
-      fromDOM: node => {
-        return fromDOM<WidgetElement>(
+      fromDOM: node =>
+        fromDOM<WidgetElement>(
           node,
           this.widgetIdAttr,
           this.blockIdAttr,
           'widget'
-        );
-      },
+        ),
       toDOM: ({ view }) => view,
       getChildren: node =>
         getChildren(node, blockSelector, widgetSelector, 'widget'),

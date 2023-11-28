@@ -16,18 +16,20 @@ const { FRAME } = EdgelessBlockType;
 @customElement('edgeless-block-portal-frame')
 class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
   override render() {
-    const { model, index } = this;
+    const { model, index, surface } = this;
     const { xywh } = model;
     const bound = Bound.deserialize(xywh);
+    const { zoom } = surface.viewport;
     const style = styleMap({
       position: 'absolute',
       zIndex: `${index}`,
-      transform: `translate(${bound.x}px, ${bound.y}px)`,
+      transform: `translate(${bound.x * zoom}px, ${
+        bound.y * zoom
+      }px) scale(${zoom})`,
+      transformOrigin: '0px 0px',
     });
 
-    return html`
-      <div style=${style}>${this.surface.root.renderModel(model)}</div>
-    `;
+    return html` <div style=${style}>${this.renderModel(model)}</div> `;
   }
 }
 
@@ -58,15 +60,6 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
         }
       })
     );
-
-    this.surface.edgeless.slots.edgelessToolUpdated.on(tool => {
-      if (tool.type === 'frameNavigator') {
-        this.style.display = 'none';
-      } else {
-        this.style.display = 'block';
-        this.requestUpdate();
-      }
-    });
   }
 
   protected override render() {

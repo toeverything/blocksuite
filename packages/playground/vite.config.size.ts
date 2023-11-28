@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from 'fs/promises';
 import { resolve } from 'path';
+import type { UserConfig } from 'vite';
 import { defineConfig, mergeConfig } from 'vite';
 
 import { brotliAsync, gzipAsync } from '../../scripts/utils.js';
@@ -7,8 +8,10 @@ import base from './vite.config';
 
 const sizeDir = resolve(__dirname, '../../temp/size');
 
+const baseConfig: UserConfig = base({ mode: process.env.NODE_ENV });
+
 const config = mergeConfig(
-  base,
+  baseConfig,
   defineConfig({
     plugins: [
       {

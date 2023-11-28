@@ -1,9 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
+import { Boxed, native2Y, Text } from '../../reactive/index.js';
 import type { JSXElement } from '../../utils/jsx.js';
 import { serializeYDoc, yDocToJSXNode } from '../../utils/jsx.js';
-import { native2Y, NativeWrapper, Text } from '../../yjs/index.js';
 import type { Page } from '../page.js';
 import { addOnFactory } from './shared.js';
 
@@ -68,7 +68,7 @@ export const test = addOnFactory<keyof TestAddon>(
               wrapper.set(key, native2Y(_element, false));
             });
 
-            props['prop:elements'] = new NativeWrapper(wrapper);
+            props['prop:elements'] = new Boxed(wrapper);
           }
 
           // setup embed source

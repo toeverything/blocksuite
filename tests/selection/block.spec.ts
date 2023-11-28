@@ -261,6 +261,16 @@ test('should indent multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -305,6 +315,16 @@ test('should unindent multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -343,6 +363,16 @@ test('should unindent multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -1158,6 +1188,16 @@ test('should not draw rect for sub selected blocks when entering tab key', async
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -1287,9 +1327,19 @@ test('click bottom of page and if the last is embed block, editor should insert 
   await assertStoreMatchJSX(
     page,
     `
-    <affine:page>
+<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >

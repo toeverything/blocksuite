@@ -25,7 +25,8 @@ import { groupBy } from '../../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
-import { type PhasorElement } from '../../../../surface-block/index.js';
+import { type CanvasElement } from '../../../../surface-block/index.js';
+import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { duplicate } from '../../utils/clipboard-utils.js';
 import { deleteElements } from '../../utils/crud.js';
@@ -163,7 +164,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   vertical = false;
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
+
+  @property({ attribute: false })
+  setPoppetShow!: (poppetShow: boolean) => void;
 
   @query('.more-actions-container')
   private _actionsMenu!: HTMLDivElement;
@@ -189,7 +193,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _splitElements() {
     const { notes, frames, shapes, images } = groupBy(
-      this.selection.elements,
+      getElementsWithoutGroup(this.selection.elements),
       element => {
         if (isNoteBlock(element)) {
           return 'notes';
@@ -202,7 +206,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       }
     ) as {
       notes: NoteBlockModel[];
-      shapes: PhasorElement[];
+      shapes: CanvasElement[];
       frames: FrameBlockModel[];
       images: ImageBlockModel[];
     };
@@ -256,19 +260,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'forward':
       case 'backward':
       case 'back': {
-        const { notes, shapes, images } = this._splitElements();
-        if (notes.length + images.length > 0) {
-          this.slots.reorderingBlocksUpdated.emit({
-            elements: [...notes, ...images],
-            type,
-          });
-        }
-        if (shapes.length) {
-          this.slots.reorderingShapesUpdated.emit({
-            elements: shapes,
-            type,
-          });
-        }
+        this.edgeless.slots.reorderingElements.emit({
+          elements: this.selection.elements,
+          type,
+        });
         break;
       }
     }
@@ -282,7 +277,8 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       this,
       this._actionsMenu,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
+        this.setPoppetShow(this._showPopper);
       }
     );
     _disposables.add(this._actionsMenuPopper);
@@ -300,7 +296,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     );
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${this._popperShow ? '' : 'More'}
+        .tooltip=${this._showPopper ? '' : 'More'}
         .active=${false}
         .iconContainerPadding=${2}
         @click=${() => this._actionsMenuPopper?.toggle()}
