@@ -11,12 +11,20 @@ import { Bound } from '../../surface-block/utils/bound.js';
 import { GROUP_ROOT } from '../elements/group/consts.js';
 import { SurfaceElement } from '../elements/surface-element.js';
 import { GridManager } from '../grid.js';
-import { compare, getGroupParent, getGroups } from './group-manager.js';
-import { getLayerZIndex, isInRange, updateLayersIndex } from './layer-utils.js';
+import { compare, getGroupParent } from './group-manager.js';
+import {
+  getElementIndex,
+  getLayerZIndex,
+  insertToOrderedArray,
+  isInRange,
+  removeFromOrderedArray,
+  ungroupIndex,
+  updateLayersIndex,
+} from './layer-utils.js';
 
 export type IndexableBlock = ImageBlockModel | NoteBlockModel;
 
-type Indexable = PhasorElement | IndexableBlock;
+export type Indexable = PhasorElement | IndexableBlock;
 
 type BaseLayer<T> = {
   set: Set<T>;
@@ -105,26 +113,6 @@ export class LayerManager {
     this._buildCanvasLayers();
   }
 
-  private _getElementIndex(indexable: Indexable | FrameBlockModel) {
-    const groups = getGroups(indexable);
-
-    if (groups.length > 1) {
-      return (
-        groups
-          .map(group => group.group.index)
-          .reverse()
-          .slice(1)
-          .join('-') + `-${indexable.index}`
-      );
-    }
-
-    return indexable.index;
-  }
-
-  private _ungroupIndex(index: string) {
-    return index.split('-')[0];
-  }
-
   private _initLayers() {
     let blockIdx = 0;
     let phasorIdx = 0;
@@ -135,8 +123,8 @@ export class LayerManager {
     const pushCurLayer = () => {
       if (curLayer) {
         curLayer.indexes = [
-          this._getElementIndex(curLayer.elements[0]),
-          this._getElementIndex(last(curLayer.elements)!),
+          getElementIndex(curLayer.elements[0]),
+          getElementIndex(last(curLayer.elements)!),
         ];
         curLayer.zIndexes =
           curLayer.type === 'block'
@@ -262,29 +250,6 @@ export class LayerManager {
     this.layers = layers;
   }
 
-  private _insertToOrderedArray(
-    array: EdgelessElement[],
-    element: EdgelessElement
-  ) {
-    let idx = 0;
-    while (idx < array.length && compare(array[idx], element) < 0) {
-      ++idx;
-    }
-
-    array.splice(idx, 0, element);
-  }
-
-  private _removeFromOrderedArray(
-    array: EdgelessElement[],
-    element: EdgelessElement
-  ) {
-    const idx = array.indexOf(element);
-
-    if (idx !== -1) {
-      array.splice(idx, 1);
-    }
-  }
-
   private _insertIntoLayer(target: Indexable, type: 'block' | 'canvas') {
     if (this.layers.length === 0) {
       this._initLayers();
@@ -295,7 +260,7 @@ export class LayerManager {
     let cur = layers.length - 1;
 
     const addToLayer = (
-      layer: CanvasLayer | BlockLayer,
+      layer: Layer,
       element: Indexable,
       position: number | 'tail'
     ) => {
@@ -316,8 +281,8 @@ export class LayerManager {
         position === layer.elements.length - 1
       ) {
         layer.indexes = [
-          this._getElementIndex(layer.elements[0]),
-          this._getElementIndex(last(layer.elements)!),
+          getElementIndex(layer.elements[0]),
+          getElementIndex(last(layer.elements)!),
         ];
       }
     };
@@ -325,13 +290,13 @@ export class LayerManager {
       type: 'block' | 'canvas',
       targets: Indexable[],
       curZIndex: number
-    ): CanvasLayer | BlockLayer => {
+    ): Layer => {
       const newLayer = {
         type,
         set: new Set(targets),
         indexes: [
-          this._getElementIndex(targets[0]),
-          this._getElementIndex(last(targets)!),
+          getElementIndex(targets[0]),
+          getElementIndex(last(targets)!),
         ] as [string, string],
         zIndexes:
           type === 'block'
@@ -340,7 +305,7 @@ export class LayerManager {
         elements: targets,
       };
 
-      return newLayer as unknown as CanvasLayer | BlockLayer;
+      return newLayer as unknown as Layer;
     };
 
     if (compare(target, last(last(this.layers)!.elements)!) > 0) {
@@ -426,8 +391,8 @@ export class LayerManager {
 
           if (layer.elements.length) {
             layer.indexes = [
-              this._getElementIndex(layer.elements[0]),
-              this._getElementIndex(last(layer.elements)!),
+              getElementIndex(layer.elements[0]),
+              getElementIndex(last(layer.elements)!),
             ];
           }
         }
@@ -499,19 +464,19 @@ export class LayerManager {
 
     if (element instanceof SurfaceElement) {
       updateType = 'canvas';
-      this._removeFromOrderedArray(this.phasors, element);
-      this._insertToOrderedArray(this.phasors, element);
+      removeFromOrderedArray(this.phasors, element);
+      insertToOrderedArray(this.phasors, element);
 
       if (element instanceof GroupElement) {
         element.childElements.forEach(child => this._updateLayer(child));
       }
     } else if (element.flavour === 'affine:frame') {
-      this._removeFromOrderedArray(this.frames, element);
-      this._insertToOrderedArray(this.frames, element);
+      removeFromOrderedArray(this.frames, element);
+      insertToOrderedArray(this.frames, element);
     } else {
       updateType = 'block';
-      this._removeFromOrderedArray(this.blocks, element);
-      this._insertToOrderedArray(this.blocks, element);
+      removeFromOrderedArray(this.blocks, element);
+      insertToOrderedArray(this.blocks, element);
       this.blocksGrid.add(element);
     }
 
@@ -530,16 +495,16 @@ export class LayerManager {
 
     if (element instanceof SurfaceElement) {
       insertType = 'canvas';
-      this._insertToOrderedArray(this.phasors, element);
+      insertToOrderedArray(this.phasors, element);
 
       if (element instanceof GroupElement) {
         element.childElements.forEach(child => this._updateLayer(child));
       }
     } else if (element.flavour === 'affine:frame') {
-      this._insertToOrderedArray(this.frames, element);
+      insertToOrderedArray(this.frames, element);
     } else {
       insertType = 'block';
-      this._insertToOrderedArray(this.blocks, element);
+      insertToOrderedArray(this.blocks, element);
       this.blocksGrid.add(element);
     }
 
@@ -555,12 +520,12 @@ export class LayerManager {
 
     if (element instanceof SurfaceElement) {
       deleteType = 'canvas';
-      this._removeFromOrderedArray(this.phasors, element);
+      removeFromOrderedArray(this.phasors, element);
     } else if (element.flavour === 'affine:frame') {
-      this._removeFromOrderedArray(this.frames, element);
+      removeFromOrderedArray(this.frames, element);
     } else {
       deleteType = 'block';
-      this._removeFromOrderedArray(this.blocks, element);
+      removeFromOrderedArray(this.blocks, element);
       this.blocksGrid.remove(element);
     }
 
@@ -592,23 +557,20 @@ export class LayerManager {
       const lastFrame = last(this.frames);
 
       return lastFrame
-        ? generateKeyBetween(
-            this._ungroupIndex(this._getElementIndex(lastFrame)),
-            null
-          )
+        ? generateKeyBetween(ungroupIndex(getElementIndex(lastFrame)), null)
         : LayerManager.INITAL_INDEX;
     } else {
       if (block === 'canvas') {
         const lastIndex = last(this.layers)?.indexes[1];
 
         return lastIndex
-          ? generateKeyBetween(this._ungroupIndex(lastIndex), null)
+          ? generateKeyBetween(ungroupIndex(lastIndex), null)
           : LayerManager.INITAL_INDEX;
       }
 
       const lastLayer = last(this.layers);
       const lastLayerIndex = lastLayer
-        ? this._ungroupIndex(lastLayer.indexes[1])
+        ? ungroupIndex(lastLayer.indexes[1])
         : undefined;
 
       if (!lastLayer) return LayerManager.INITAL_INDEX;
@@ -618,7 +580,7 @@ export class LayerManager {
       if (lastLayer.type === 'canvas') {
         const secondLastLayer = nToLast(this.layers, 2);
         const secondLastLayerIndex = secondLastLayer
-          ? this._ungroupIndex(secondLastLayer.indexes[1])
+          ? ungroupIndex(secondLastLayer.indexes[1])
           : null;
 
         if (secondLastLayerIndex && secondLastLayerIndex >= lastLayerIndex) {
