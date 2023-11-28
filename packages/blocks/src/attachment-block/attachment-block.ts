@@ -18,7 +18,7 @@ import {
   AttachmentBlockSchema,
 } from './attachment-model.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
-import { renderEmbedView } from './embed.js';
+import { allowEmbed, renderEmbedView } from './embed.js';
 import {
   AttachmentBanner,
   ErrorBanner,
@@ -144,7 +144,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       const blob = await getAttachmentBlob(this.model);
       if (!blob) throw new Error('Blob is missing!');
       // TODO we no need to create blob url when the attachment is not embedded
-      this._blobUrl = URL.createObjectURL(blob);
+      if (allowEmbed(this.model)) {
+        this._blobUrl = URL.createObjectURL(blob);
+      }
     } catch (error) {
       this._error = true;
       console.warn(
