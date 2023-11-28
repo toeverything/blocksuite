@@ -576,22 +576,11 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._shareSelection}>
                 Share Selection
               </sl-menu-item>
+              <sl-menu-item @click=${this._registerFormatBarCustomElements}>
+                Register Format Bar Custom Elements
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
-
-          <sl-tooltip
-            content="Register FormatBar Custom Elements"
-            placement="bottom"
-            hoist
-          >
-            <sl-button
-              size="small"
-              content="Register FormatBar Custom Elements"
-              @click=${this._registerFormatBarCustomElements}
-            >
-              <sl-icon name="plug"></sl-icon>
-            </sl-button>
-          </sl-tooltip>
 
           <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
             <sl-button
