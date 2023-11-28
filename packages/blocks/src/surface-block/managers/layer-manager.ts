@@ -12,8 +12,9 @@ import { GROUP_ROOT } from '../elements/group/consts.js';
 import { SurfaceElement } from '../elements/surface-element.js';
 import { GridManager } from '../grid.js';
 import { compare, getGroupParent, getGroups } from './group-manager.js';
+import { getLayerZIndex, isInRange, updateLayersIndex } from './layer-utils.js';
 
-type IndexableBlock = ImageBlockModel | NoteBlockModel;
+export type IndexableBlock = ImageBlockModel | NoteBlockModel;
 
 type Indexable = PhasorElement | IndexableBlock;
 
@@ -44,6 +45,8 @@ type CanvasLayer = BaseLayer<PhasorElement> & {
   zIndexes: number;
 };
 
+export type Layer = BlockLayer | CanvasLayer;
+
 export class LayerManager {
   static INITAL_INDEX = 'a0';
 
@@ -55,7 +58,7 @@ export class LayerManager {
   blocks!: IndexableBlock[];
   frames!: FrameBlockModel[];
 
-  layers!: Array<BlockLayer | CanvasLayer>;
+  layers!: Layer[];
 
   canvasLayers!: {
     set: Set<PhasorElement>;
@@ -291,34 +294,6 @@ export class LayerManager {
     const layers = this.layers;
     let cur = layers.length - 1;
 
-    const getLayerZIndex = (layerIndex: number) => {
-      const layer = layers[layerIndex];
-
-      return layer
-        ? layer.type === 'block'
-          ? layer.zIndexes[1]
-          : layer.zIndexes
-        : 1;
-    };
-    const updateLayersIndex = (startIdx: number) => {
-      const startLayer = layers[startIdx];
-      let curIndex =
-        startLayer.type === 'block'
-          ? startLayer.zIndexes[1]
-          : startLayer.zIndexes;
-
-      for (let i = startIdx; i < layers.length; ++i) {
-        const curLayer = layers[i];
-
-        if (curLayer.type === 'block') {
-          curLayer.zIndexes = [curIndex, curIndex + curLayer.elements.length];
-          curIndex += curLayer.elements.length;
-        } else {
-          curLayer.zIndexes = curIndex;
-          curIndex += 1;
-        }
-      }
-    };
     const addToLayer = (
       layer: CanvasLayer | BlockLayer,
       element: Indexable,
@@ -367,22 +342,16 @@ export class LayerManager {
 
       return newLayer as unknown as CanvasLayer | BlockLayer;
     };
-    const isInRange = (
-      edges: [IndexableBlock | PhasorElement, IndexableBlock | PhasorElement],
-      target: IndexableBlock | PhasorElement
-    ) => {
-      return compare(target, edges[0]) >= 0 && compare(target, edges[1]) < 0;
-    };
 
     if (compare(target, last(last(this.layers)!.elements)!) > 0) {
       const layer = last(this.layers);
 
       if (layer?.type === type) {
         addToLayer(layer, target, 'tail');
-        updateLayersIndex(cur);
+        updateLayersIndex(layers, cur);
       } else {
         this.layers.push(
-          createLayer(type, [target], getLayerZIndex(layers.length - 1))
+          createLayer(type, [target], getLayerZIndex(layers, layers.length - 1))
         );
       }
     } else {
@@ -401,7 +370,7 @@ export class LayerManager {
 
           if (layer.type === type) {
             addToLayer(layer, target, insertIdx);
-            updateLayersIndex(cur);
+            updateLayersIndex(layers, cur);
           } else {
             const splicedElements = layer.elements.splice(insertIdx);
             layer.set = new Set(layer.elements as PhasorElement[]);
@@ -412,7 +381,7 @@ export class LayerManager {
               createLayer(layer.type, splicedElements, 1)
             );
             layers.splice(cur + 1, 0, createLayer(type, [target], 1));
-            updateLayersIndex(cur);
+            updateLayersIndex(layers, cur);
           }
           break;
         } else {
@@ -421,14 +390,14 @@ export class LayerManager {
           if (!nextLayer || compare(target, last(nextLayer.elements)!) >= 0) {
             if (layer.type === type) {
               addToLayer(layer, target, 0);
-              updateLayersIndex(cur);
+              updateLayersIndex(layers, cur);
             } else {
               if (nextLayer) {
                 addToLayer(nextLayer, target, 'tail');
-                updateLayersIndex(cur - 1);
+                updateLayersIndex(layers, cur - 1);
               } else {
                 layers.unshift(createLayer(type, [target], 1));
-                updateLayersIndex(0);
+                updateLayersIndex(layers, 0);
               }
             }
 
@@ -473,32 +442,12 @@ export class LayerManager {
 
     const isDeletedAtEdge = index === 0 || index === layers.length - 1;
 
-    const updateLayersIndex = (startIdx: number) => {
-      const startLayer = layers[startIdx];
-      let curIndex =
-        startLayer.type === 'block'
-          ? startLayer.zIndexes[1]
-          : startLayer.zIndexes;
-
-      for (let i = startIdx; i < layers.length; ++i) {
-        const curLayer = layers[i];
-
-        if (curLayer.type === 'block') {
-          curLayer.zIndexes = [curIndex, curIndex + curLayer.elements.length];
-          curIndex += curLayer.elements.length;
-        } else {
-          curLayer.zIndexes = curIndex;
-          curIndex += 1;
-        }
-      }
-    };
-
     if (layers[index].set.size === 0) {
       if (isDeletedAtEdge) {
         layers.splice(index, 1);
 
         if (layers[index]) {
-          updateLayersIndex(index);
+          updateLayersIndex(layers, index);
         }
       } else {
         const lastLayer = layers[index - 1] as CanvasLayer;
@@ -508,12 +457,12 @@ export class LayerManager {
         lastLayer.set = new Set(lastLayer.elements);
 
         layers.splice(index, 2);
-        updateLayersIndex(index - 1);
+        updateLayersIndex(layers, index - 1);
       }
       return;
     }
 
-    updateLayersIndex(index);
+    updateLayersIndex(layers, index);
   }
 
   private _buildCanvasLayers() {
