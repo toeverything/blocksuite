@@ -144,9 +144,14 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     this._disposables.add(
       page.root.childrenUpdated.on(resetNoteResizeObserver)
     );
-    this.edgeless.surface.getBlocks(NOTE).forEach(note => {
-      this._disposables.add(note.propsUpdated.on(resetNoteResizeObserver));
-    });
+
+    this._disposables.add(
+      page.slots.blockUpdated.on(({ flavour }) => {
+        if (flavour === NOTE) {
+          resetNoteResizeObserver();
+        }
+      })
+    );
   }
 
   get isDragging() {
