@@ -7,8 +7,8 @@ import type {
 } from '../../../../_common/utils/index.js';
 import { LineWidth } from '../../../../_common/utils/index.js';
 import {
+  CanvasElementType,
   type IVec,
-  PhasorElementType,
 } from '../../../../surface-block/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../components/panel/color-panel.js';
 import { EdgelessToolController } from './index.js';
@@ -54,7 +54,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     const { color, lineWidth } = this.tool;
     const points = [[modelX, modelY]];
 
-    const id = this._surface.addElement(PhasorElementType.BRUSH, {
+    const id = this._surface.addElement(CanvasElementType.BRUSH, {
       points,
       color,
       lineWidth,

@@ -5,7 +5,7 @@ import { last, nToLast } from '../../_common/utils/iterable.js';
 import { type EdgelessElement } from '../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { ImageBlockModel, NoteBlockModel } from '../../models.js';
-import type { PhasorElement } from '../../surface-block/elements/index.js';
+import type { CanvasElement } from '../../surface-block/elements/index.js';
 import { GroupElement } from '../../surface-block/elements/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { GROUP_ROOT } from '../elements/group/consts.js';
@@ -24,7 +24,7 @@ import {
 
 export type IndexableBlock = ImageBlockModel | NoteBlockModel;
 
-export type Indexable = PhasorElement | IndexableBlock;
+export type Indexable = CanvasElement | IndexableBlock;
 
 type BaseLayer<T> = {
   set: Set<T>;
@@ -47,7 +47,7 @@ type BlockLayer = BaseLayer<IndexableBlock> & {
   zIndexes: [number, number];
 };
 
-type CanvasLayer = BaseLayer<PhasorElement> & {
+type CanvasLayer = BaseLayer<CanvasElement> & {
   type: 'canvas';
   /**
    * The computed DOM z-index used for rendering this canvas layer.
@@ -66,14 +66,14 @@ export class LayerManager {
     layerUpdated: new Slot(),
   };
 
-  phasors!: SurfaceElement[];
+  canvasElements!: SurfaceElement[];
   blocks!: IndexableBlock[];
   frames!: FrameBlockModel[];
 
   layers!: Layer[];
 
   canvasLayers!: {
-    set: Set<PhasorElement>;
+    set: Set<CanvasElement>;
     /**
      * fractional index
      */
@@ -82,7 +82,7 @@ export class LayerManager {
      * z-index, used for actual rendering
      */
     zIndexes: number;
-    elements: Array<PhasorElement>;
+    elements: Array<CanvasElement>;
   }[];
 
   blocksGrid = new GridManager<IndexableBlock>();
@@ -94,13 +94,13 @@ export class LayerManager {
   }
 
   init(elements: EdgelessElement[]) {
-    this.phasors = [];
+    this.canvasElements = [];
     this.blocks = [];
     this.frames = [];
 
     elements.forEach(element => {
       if (element instanceof SurfaceElement) {
-        this.phasors.push(element);
+        this.canvasElements.push(element);
       } else if (element.flavour === 'affine:frame') {
         this.frames.push(element);
       } else {
@@ -109,7 +109,7 @@ export class LayerManager {
       }
     });
 
-    this.phasors.sort();
+    this.canvasElements.sort();
     this.frames.sort();
     this.blocks.sort();
 
@@ -119,7 +119,7 @@ export class LayerManager {
 
   private _initLayers() {
     let blockIdx = 0;
-    let phasorIdx = 0;
+    let canvasIdx = 0;
     const layers: LayerManager['layers'] = [];
     let curLayer: LayerManager['layers'][number] | undefined;
     let currentCSSZindex = 1;
@@ -161,11 +161,14 @@ export class LayerManager {
             } as BlockLayer);
     };
 
-    while (blockIdx < this.blocks.length || phasorIdx < this.phasors.length) {
+    while (
+      blockIdx < this.blocks.length ||
+      canvasIdx < this.canvasElements.length
+    ) {
       const curBlock = this.blocks[blockIdx];
-      const curPhasor = this.phasors[phasorIdx];
+      const curCanvas = this.canvasElements[canvasIdx];
 
-      if (!curBlock && !curPhasor) {
+      if (!curBlock && !curCanvas) {
         break;
       }
 
@@ -175,15 +178,15 @@ export class LayerManager {
         }
         assertType<CanvasLayer>(curLayer);
 
-        const remains = this.phasors.slice(phasorIdx);
+        const remains = this.canvasElements.slice(canvasIdx);
 
         curLayer!.elements = curLayer.elements.concat(remains);
-        remains.forEach(phasor => (curLayer as CanvasLayer).set.add(phasor));
+        remains.forEach(element => (curLayer as CanvasLayer).set.add(element));
 
         break;
       }
 
-      if (!curPhasor) {
+      if (!curCanvas) {
         if (curLayer?.type !== 'block') {
           addLayer('block');
         }
@@ -198,7 +201,7 @@ export class LayerManager {
         break;
       }
 
-      const order = compare(curBlock, curPhasor);
+      const order = compare(curBlock, curCanvas);
 
       switch (order) {
         case -1:
@@ -221,10 +224,10 @@ export class LayerManager {
 
           assertType<CanvasLayer>(curLayer);
 
-          curLayer!.set.add(curPhasor);
-          curLayer!.elements.push(curPhasor);
+          curLayer!.set.add(curCanvas);
+          curLayer!.elements.push(curCanvas);
 
-          ++phasorIdx;
+          ++canvasIdx;
 
           break;
         case 0:
@@ -238,10 +241,10 @@ export class LayerManager {
 
             ++blockIdx;
           } else {
-            curLayer!.set.add(curPhasor);
-            curLayer!.elements.push(curPhasor);
+            curLayer!.set.add(curCanvas);
+            curLayer!.elements.push(curCanvas);
 
-            ++phasorIdx;
+            ++canvasIdx;
           }
           break;
       }
@@ -269,7 +272,7 @@ export class LayerManager {
       position: number | 'tail'
     ) => {
       assertType<CanvasLayer>(layer);
-      assertType<PhasorElement>(element);
+      assertType<CanvasElement>(element);
 
       if (position === 'tail') {
         layer.elements.push(element);
@@ -342,7 +345,7 @@ export class LayerManager {
             updateLayersIndex(layers, cur);
           } else {
             const splicedElements = layer.elements.splice(insertIdx);
-            layer.set = new Set(layer.elements as PhasorElement[]);
+            layer.set = new Set(layer.elements as CanvasElement[]);
 
             layers.splice(
               cur + 1,
@@ -385,7 +388,7 @@ export class LayerManager {
       if (layer.type !== type) return false;
 
       assertType<CanvasLayer>(layer);
-      assertType<PhasorElement>(target);
+      assertType<CanvasElement>(target);
 
       if (layer.set.has(target)) {
         layer.set.delete(target);
@@ -468,8 +471,8 @@ export class LayerManager {
 
     if (element instanceof SurfaceElement) {
       updateType = 'canvas';
-      removeFromOrderedArray(this.phasors, element);
-      insertToOrderedArray(this.phasors, element);
+      removeFromOrderedArray(this.canvasElements, element);
+      insertToOrderedArray(this.canvasElements, element);
 
       if (element instanceof GroupElement) {
         element.childElements.forEach(child => this._updateLayer(child));
@@ -499,7 +502,7 @@ export class LayerManager {
 
     if (element instanceof SurfaceElement) {
       insertType = 'canvas';
-      insertToOrderedArray(this.phasors, element);
+      insertToOrderedArray(this.canvasElements, element);
 
       if (element instanceof GroupElement) {
         element.childElements.forEach(child => this._updateLayer(child));
@@ -524,7 +527,7 @@ export class LayerManager {
 
     if (element instanceof SurfaceElement) {
       deleteType = 'canvas';
-      removeFromOrderedArray(this.phasors, element);
+      removeFromOrderedArray(this.canvasElements, element);
     } else if (element.flavour === 'affine:frame') {
       removeFromOrderedArray(this.frames, element);
     } else {

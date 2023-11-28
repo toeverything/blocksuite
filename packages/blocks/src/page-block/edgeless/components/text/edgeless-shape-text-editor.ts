@@ -9,7 +9,7 @@ import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { SHAPE_TEXT_PADDING } from '../../../../surface-block/elements/shape/consts.js';
 import { wrapFontFamily } from '../../../../surface-block/elements/text/utils.js';
 import type {
-  PhasorElementType,
+  CanvasElementType,
   ShapeElement,
 } from '../../../../surface-block/index.js';
 import { Bound, toRadian, Vec } from '../../../../surface-block/index.js';
@@ -58,7 +58,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         leftTopY
       );
 
-      this.edgeless.surface.updateElement<PhasorElementType.SHAPE>(
+      this.edgeless.surface.updateElement<CanvasElementType.SHAPE>(
         this.element.id,
         {
           xywh: new Bound(

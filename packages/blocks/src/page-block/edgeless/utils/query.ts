@@ -14,13 +14,13 @@ import type { NoteBlockModel } from '../../../note-block/index.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import {
   Bound,
+  type CanvasElement,
+  type CanvasElementWithText,
   clamp,
   deserializeXYWH,
   getQuadBoundsWithRotation,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
-  type PhasorElement,
-  type PhasorElementWithText,
   ShapeElement,
   type SurfaceViewport,
   TextElement,
@@ -64,15 +64,15 @@ export function isImageBlock(
   );
 }
 
-export function isPhasorElement(
+export function isCanvasElement(
   selectable: Selectable | null
-): selectable is PhasorElement {
+): selectable is CanvasElement {
   return !isTopLevelBlock(selectable);
 }
 
-export function isPhasorElementWithText(
+export function isCanvasElementWithText(
   element: Selectable
-): element is PhasorElementWithText {
+): element is CanvasElementWithText {
   return element instanceof TextElement || element instanceof ShapeElement;
 }
 

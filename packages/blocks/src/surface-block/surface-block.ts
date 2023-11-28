@@ -44,10 +44,10 @@ import {
 } from './edgeless-types.js';
 import {
   type HitTestOptions,
+  type ICanvasElementType,
   type IElementCreateProps,
   type IElementUpdateProps,
-  type IPhasorElementType,
-  isPhasorElementType,
+  isCanvasElementType,
 } from './elements/edgeless-element.js';
 import { GROUP_ROOT } from './elements/group/consts.js';
 import {
@@ -58,7 +58,7 @@ import {
   GroupElement,
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
-import type { IVec, PhasorElementType } from './index.js';
+import type { CanvasElementType, IVec } from './index.js';
 import {
   compare,
   EdgelessGroupManager,
@@ -482,7 +482,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
     return html`
       <div class="affine-edgeless-surface-block-container">
-        <!-- attach canvas later in Phasor -->
+        <!-- attach canvas later in renderer -->
       </div>
     `;
   }
@@ -509,7 +509,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       const yConnectors: Y.Map<unknown>[] = [];
       const yGroups: Y.Map<unknown>[] = [];
       this._yContainer.forEach(yElement => {
-        const type = yElement.get('type') as PhasorElementType;
+        const type = yElement.get('type') as CanvasElementType;
         if (type === 'connector') {
           yConnectors.push(yElement);
           return;
@@ -530,7 +530,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   private _createElementFromYMap(yElement: Y.Map<unknown>) {
-    const type = yElement.get('type') as PhasorElementType;
+    const type = yElement.get('type') as CanvasElementType;
     const id = yElement.get('id') as id;
     const ElementCtor = ElementCtors[type];
     const { edgeless } = this;
@@ -601,7 +601,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   ) => {
     if (type.action === 'add') {
       const yElement = this._yContainer.get(id) as Y.Map<unknown>;
-      const type = yElement.get('type') as PhasorElementType;
+      const type = yElement.get('type') as CanvasElementType;
       const { edgeless } = this;
 
       const ElementCtor = ElementCtors[type];
@@ -683,7 +683,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return getCommonBound(Array.from(this._elements.values()));
   }
 
-  addElement<T extends PhasorElementType>(
+  addElement<T extends CanvasElementType>(
     type: T,
     properties: IElementCreateProps<T>
   ): id;
@@ -702,7 +702,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     if (this.page.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }
-    if (isPhasorElementType(type)) {
+    if (isCanvasElementType(type)) {
       const id = generateElementId();
 
       const yMap = new Workspace.Y.Map();
@@ -746,12 +746,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
   }
 
-  updateElement<T extends PhasorElementType>(
+  updateElement<T extends CanvasElementType>(
     id: id,
     properties: IElementUpdateProps<T>
   ): void;
   updateElement(id: id, properties: Partial<BlockProps>): void;
-  updateElement<T extends PhasorElementType>(
+  updateElement<T extends CanvasElementType>(
     id: id,
     properties: IElementUpdateProps<T> | Partial<BlockProps>
   ) {
@@ -940,7 +940,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this.edgeless.localRecord.unwrap(block) as T;
   }
 
-  getSortedPhasorElementsWithViewportBounds() {
+  getSortedCanvasElementsWithViewportBounds() {
     return this.pickByBound(this.viewport.viewportBounds)
       .filter(e => !isTopLevelBlock(e))
       .sort(this.compare);
@@ -973,12 +973,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return Array.from(this._elements.values());
   }
 
-  getElementsByType<T extends keyof IPhasorElementType>(
+  getElementsByType<T extends keyof ICanvasElementType>(
     type: T
-  ): IPhasorElementType[T][] {
+  ): ICanvasElementType[T][] {
     return this.getElements().filter(
       element => element.type === type
-    ) as unknown as IPhasorElementType[T][];
+    ) as unknown as ICanvasElementType[T][];
   }
 }
 

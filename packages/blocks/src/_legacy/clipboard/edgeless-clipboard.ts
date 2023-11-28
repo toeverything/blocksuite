@@ -15,24 +15,24 @@ import type { NoteBlockModel } from '../../note-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {
+  isCanvasElementWithText,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
-  isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
-import { PhasorElementType } from '../../surface-block/index.js';
+import { CanvasElementType } from '../../surface-block/index.js';
 import {
   Bound,
+  type CanvasElement,
   type Connection,
   ConnectorElement,
   deserializeXYWH,
   getCommonBound,
   GroupElement,
   type IBound,
-  type PhasorElement,
   serializeXYWH,
 } from '../../surface-block/index.js';
 import { compare } from '../../surface-block/managers/group-manager.js';
@@ -57,7 +57,7 @@ import {
 } from './utils/index.js';
 import { deleteModelsByTextSelection } from './utils/operation.js';
 
-const { GROUP } = PhasorElementType;
+const { GROUP } = CanvasElementType;
 const { NOTE, FRAME, IMAGE } = EdgelessBlockType;
 
 export function getCopyElements(
@@ -170,7 +170,7 @@ export class EdgelessClipboard implements Clipboard {
     const { state, elements } = this.selection;
     if (state.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(elements[0])) return;
       deleteModelsByTextSelection(this._edgeless.root);
       return;
     }
@@ -196,7 +196,7 @@ export class EdgelessClipboard implements Clipboard {
     // when note active, handle copy like page mode
     if (state.editing) {
       // use build-in copy handler in rich-text when copy in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(elements[0])) return;
       await copyBlocksInPage(this._edgeless.root);
       return;
     }
@@ -217,7 +217,7 @@ export class EdgelessClipboard implements Clipboard {
     const { state, elements } = this.selection;
     if (state.editing) {
       // use build-in paste handler in rich-text when paste in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(elements[0])) return;
       await this._pasteInTextNote(e);
       return;
     }
@@ -277,7 +277,7 @@ export class EdgelessClipboard implements Clipboard {
     await service.json2Block(focusedBlockModel, blocks, textSelection.from);
   }
 
-  private _createPhasorElement(
+  private _createCanvasElement(
     clipboardData: Record<string, unknown>,
     idMap: Map<string, string>
   ) {
@@ -292,15 +292,15 @@ export class EdgelessClipboard implements Clipboard {
       clipboardData.children = yMap;
     }
     const id = this.surface.addElement(
-      clipboardData.type as PhasorElementType,
+      clipboardData.type as CanvasElementType,
       clipboardData
     );
-    const element = this.surface.pickById(id) as PhasorElement;
+    const element = this.surface.pickById(id) as CanvasElement;
     assertExists(element);
     return element;
   }
 
-  private _createPhasorElements(
+  private _createCanvasElements(
     elements: Record<string, unknown>[],
     idMap: Map<string, string>
   ) {
@@ -313,7 +313,7 @@ export class EdgelessClipboard implements Clipboard {
         ?.map(d => {
           const oldId = d.id as string;
           assertExists(oldId);
-          const element = this._createPhasorElement(d, idMap);
+          const element = this._createCanvasElement(d, idMap);
           idMap.set(oldId, element.id);
           return element;
         })
@@ -330,7 +330,7 @@ export class EdgelessClipboard implements Clipboard {
           (<Connection>connector.target).id =
             idMap.get(targetId) ?? (targetId as string);
         }
-        return this._createPhasorElement(connector, idMap);
+        return this._createCanvasElement(connector, idMap);
       }) ?? []),
     ];
   }
@@ -401,11 +401,11 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   private _getOldCommonBound(
-    phasorElements: PhasorElement[],
+    canvasElements: CanvasElement[],
     blocks: TopLevelBlockModel[]
   ) {
     const commonBound = getCommonBound(
-      [...phasorElements, ...blocks]
+      [...canvasElements, ...blocks]
         .map(({ xywh }) => {
           if (!xywh) {
             return;
@@ -427,11 +427,11 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   private _emitSelectionChangeAfterPaste(
-    phasorElementIds: string[],
+    canvasElementIds: string[],
     blockIds: string[]
   ) {
     const newSelected = [
-      ...phasorElementIds,
+      ...canvasElementIds,
       ...blockIds.filter(id => {
         return isTopLevelBlock(this._page.getBlockById(id));
       }),
@@ -458,7 +458,7 @@ export class EdgelessClipboard implements Clipboard {
       frames: SerializedBlock[];
       notes?: SerializedBlock[];
       images?: SerializedBlock[];
-      elements?: { type: PhasorElement['type'] }[];
+      elements?: { type: CanvasElement['type'] }[];
     };
 
     // map old id to new id to rebuild connector's source and target
@@ -484,7 +484,7 @@ export class EdgelessClipboard implements Clipboard {
       this.surface.pickById(id)
     ) as ImageBlockModel[];
 
-    const elements = this._createPhasorElements(
+    const elements = this._createCanvasElements(
       groupedByType.elements || [],
       oldIdToNewIdMap
     );
@@ -502,7 +502,7 @@ export class EdgelessClipboard implements Clipboard {
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
 
-    // update phasor elements' position to mouse position
+    // update canvas elements' position to mouse position
     elements.forEach(ele => {
       const newBound = new Bound(
         pasteX + ele.x - oldCommonBound.x,
@@ -538,7 +538,7 @@ export class EdgelessClipboard implements Clipboard {
     );
   }
 
-  async copyAsPng(blocks: TopLevelBlockModel[], shapes: PhasorElement[]) {
+  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
     const blocksLen = blocks.length;
     const shapesLen = shapes.length;
 

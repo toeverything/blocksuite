@@ -44,7 +44,7 @@ import { copyBlock } from '../../../page-block/doc/utils.js';
 import { onModelTextUpdated } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
-import { PhasorElementType } from '../../../surface-block/index.js';
+import { CanvasElementType } from '../../../surface-block/index.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { textConversionConfigs } from '../../configs/text-conversion.js';
@@ -489,7 +489,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       if (!surfaceModel) return [];
       const groupElements = (<Array<Y.Map<string>>>(
         Array.from(surfaceModel.elements.getValue()?.values() ?? [])
-      )).filter(element => element.get('type') === PhasorElementType.GROUP);
+      )).filter(element => element.get('type') === CanvasElementType.GROUP);
 
       return (
         groupElements.map(element => {

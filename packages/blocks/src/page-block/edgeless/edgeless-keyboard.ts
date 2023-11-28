@@ -24,7 +24,7 @@ import {
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
-import { isPhasorElement } from './utils/query.js';
+import { isCanvasElement } from './utils/query.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override pageElement: EdgelessPageBlockComponent) {
@@ -315,7 +315,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           break;
       }
 
-      if (isPhasorElement(element)) {
+      if (isCanvasElement(element)) {
         if (element instanceof ConnectorElement) {
           surface.connector.updateXYWH(element, bound);
         }

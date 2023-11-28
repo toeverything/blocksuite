@@ -25,10 +25,10 @@ import type { IBound } from '../../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
-import type { PhasorElementType } from '../../../surface-block/elements/edgeless-element.js';
+import type { CanvasElementType } from '../../../surface-block/elements/edgeless-element.js';
 import {
+  type CanvasElement,
   GroupElement,
-  type PhasorElement,
 } from '../../../surface-block/elements/index.js';
 import type { SurfaceElement } from '../../../surface-block/elements/surface-element.js';
 import { compare } from '../../../surface-block/managers/group-manager.js';
@@ -43,10 +43,10 @@ import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { xywhArrayToObject } from '../utils/convert.js';
 import { deleteElements } from '../utils/crud.js';
 import {
+  isCanvasElementWithText,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
-  isPhasorElementWithText,
   isTopLevelBlock,
 } from '../utils/query.js';
 
@@ -132,7 +132,7 @@ export class EdgelessClipboardController implements ReactiveController {
     // when note active, handle copy like page mode
     if (surfaceSelection.editing) {
       // use build-in copy handler in rich-text when copy in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(elements[0])) return;
       this.pageClipboardController.onPageCopy(_context);
       return;
     }
@@ -159,7 +159,7 @@ export class EdgelessClipboardController implements ReactiveController {
     const { state, elements } = this.selectionManager;
     if (state.editing) {
       // use build-in paste handler in rich-text when paste in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(elements[0])) return;
       this.pageClipboardController.onPagePaste(_context);
       return;
     }
@@ -199,7 +199,7 @@ export class EdgelessClipboardController implements ReactiveController {
     this._onCopy(_context, state);
     if (state.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(elements[0])) return;
       this.pageClipboardController.onPageCut(_context);
       return;
     }
@@ -214,17 +214,17 @@ export class EdgelessClipboardController implements ReactiveController {
     });
   };
 
-  private _createPhasorElement(clipboardData: Record<string, unknown>) {
+  private _createCanvasElement(clipboardData: Record<string, unknown>) {
     const id = this.surface.addElement(
-      clipboardData.type as PhasorElementType,
+      clipboardData.type as CanvasElementType,
       clipboardData
     );
-    const element = this.surface.pickById(id) as PhasorElement;
+    const element = this.surface.pickById(id) as CanvasElement;
     assertExists(element);
     return element;
   }
 
-  private _createPhasorElements(
+  private _createCanvasElements(
     elements: Record<string, unknown>[],
     idMap: Map<string, string>
   ) {
@@ -237,7 +237,7 @@ export class EdgelessClipboardController implements ReactiveController {
         ?.map(d => {
           const oldId = d.id as string;
           assertExists(oldId);
-          const element = this._createPhasorElement(d);
+          const element = this._createCanvasElement(d);
           idMap.set(oldId, element.id);
           return element;
         })
@@ -254,7 +254,7 @@ export class EdgelessClipboardController implements ReactiveController {
           (<Connection>connector.target).id =
             idMap.get(targetId) ?? (targetId as string);
         }
-        return this._createPhasorElement(connector);
+        return this._createCanvasElement(connector);
       }) ?? []),
     ];
   }
@@ -334,11 +334,11 @@ export class EdgelessClipboardController implements ReactiveController {
   }
 
   private _getOldCommonBound(
-    phasorElements: PhasorElement[],
+    canvasElements: CanvasElement[],
     blocks: TopLevelBlockModel[]
   ) {
     const commonBound = getCommonBound(
-      [...phasorElements, ...blocks]
+      [...canvasElements, ...blocks]
         .map(({ xywh }) => {
           if (!xywh) {
             return;
@@ -360,11 +360,11 @@ export class EdgelessClipboardController implements ReactiveController {
   }
 
   private _emitSelectionChangeAfterPaste(
-    phasorElementIds: string[],
+    canvasElementIds: string[],
     blockIds: string[]
   ) {
     const newSelected = [
-      ...phasorElementIds,
+      ...canvasElementIds,
       ...blockIds.filter(id => {
         return isTopLevelBlock(this.page.getBlockById(id));
       }),
@@ -391,7 +391,7 @@ export class EdgelessClipboardController implements ReactiveController {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];
       images?: BlockSnapshot[];
-      elements?: { type: PhasorElement['type'] }[];
+      elements?: { type: CanvasElement['type'] }[];
     };
 
     // map old id to new id to rebuild connector's source and target
@@ -417,7 +417,7 @@ export class EdgelessClipboardController implements ReactiveController {
       this.surface.pickById(id)
     ) as ImageBlockModel[];
 
-    const elements = this._createPhasorElements(
+    const elements = this._createCanvasElements(
       groupedByType.elements || [],
       oldIdToNewIdMap
     );
@@ -435,7 +435,7 @@ export class EdgelessClipboardController implements ReactiveController {
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
 
-    // update phasor elements' position to mouse position
+    // update canvas elements' position to mouse position
     elements.forEach(ele => {
       const newBound = new Bound(
         pasteX + ele.x - oldCommonBound.x,
@@ -471,7 +471,7 @@ export class EdgelessClipboardController implements ReactiveController {
     );
   }
 
-  async copyAsPng(blocks: TopLevelBlockModel[], shapes: PhasorElement[]) {
+  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
     const blocksLen = blocks.length;
     const shapesLen = shapes.length;
 

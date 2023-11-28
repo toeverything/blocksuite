@@ -25,7 +25,7 @@ import { groupBy } from '../../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
-import { type PhasorElement } from '../../../../surface-block/index.js';
+import { type CanvasElement } from '../../../../surface-block/index.js';
 import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { duplicate } from '../../utils/clipboard-utils.js';
@@ -206,7 +206,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       }
     ) as {
       notes: NoteBlockModel[];
-      shapes: PhasorElement[];
+      shapes: CanvasElement[];
       frames: FrameBlockModel[];
       images: ImageBlockModel[];
     };
