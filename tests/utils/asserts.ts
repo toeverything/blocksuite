@@ -38,6 +38,7 @@ import {
   getEdgelessSelectedRectModel,
   getGroupChildrenIds,
   getGroupIds,
+  getNoteRect,
   getPhasorElementsCount,
   getSelectedBound,
   getSortedIdsInViewport,
@@ -773,6 +774,15 @@ export function assertSameColor(c1?: `#${string}`, c2?: `#${string}`) {
 }
 
 type Rect = { x: number; y: number; w: number; h: number };
+
+export async function assertNoteRectEqual(
+  page: Page,
+  noteId: string,
+  expected: Rect
+) {
+  const rect = await getNoteRect(page, noteId);
+  assertRectEqual(rect, expected);
+}
 
 export function assertRectEqual(a: Rect, b: Rect) {
   expect(a.x).toBeCloseTo(b.x, 0);

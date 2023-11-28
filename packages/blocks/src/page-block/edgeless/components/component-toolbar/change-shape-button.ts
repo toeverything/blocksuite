@@ -274,7 +274,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   slots!: EdgelessSelectionSlots;
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
 
   @query('.change-shape-button')
   private _changeShapeButton!: EdgelessToolIconButton;
@@ -401,7 +401,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._changeShapeButton,
       this._shapePanel,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._shapePanelPopper);
@@ -426,7 +426,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._fillColorButton,
       this._fillColorMenu,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._fillColorMenuPopper);
@@ -435,7 +435,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._strokeColorButton,
       this._strokeColorMenu,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._strokeColorMenuPopper);
@@ -444,7 +444,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._lineStylesButton,
       this._lineStylesPanel,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._lineStylesPanelPopper);
@@ -453,7 +453,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._shapeStyleButton,
       this._shapeStyleMenu,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._shapeStyleMenuPopper);
@@ -477,7 +477,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     return html`
       <div class="change-shape-toolbar-container">
         <edgeless-tool-icon-button
-          .tooltip=${this._popperShow ? '' : 'Switch Type'}
+          .tooltip=${this._showPopper ? '' : 'Switch Type'}
           .tipPosition=${'bottom'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
@@ -496,7 +496,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
         <edgeless-tool-icon-button
-          .tooltip=${this._popperShow ? '' : 'Style'}
+          .tooltip=${this._showPopper ? '' : 'Style'}
           .tipPosition=${'bottom'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
@@ -523,7 +523,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           class="fill-color-button"
-          .tooltip=${this._popperShow ? '' : 'Fill color'}
+          .tooltip=${this._showPopper ? '' : 'Fill color'}
           .tipPosition=${'bottom'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
@@ -544,7 +544,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           class="stroke-color-button"
-          .tooltip=${this._popperShow ? '' : 'Border color'}
+          .tooltip=${this._showPopper ? '' : 'Border color'}
           .tipPosition=${'bottom'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
@@ -567,7 +567,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
         <edgeless-tool-icon-button
-          .tooltip=${this._popperShow ? '' : 'Border style'}
+          .tooltip=${this._showPopper ? '' : 'Border style'}
           .tipPosition=${'bottom'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}

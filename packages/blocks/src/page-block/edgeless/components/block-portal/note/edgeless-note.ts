@@ -136,10 +136,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   }
 
   private get _isShowCollapsedContent() {
-    const edgeless = this.model.edgeless;
-    const collapse = edgeless ? edgeless.collapse : false;
     return (
-      collapse &&
+      this.model.edgeless.collapse &&
       (this._isResizing || this._isHover) &&
       this.edgeless.selectionManager.elements.includes(this.model)
     );
@@ -181,12 +179,9 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   override render() {
     const { model, surface, index } = this;
     const { xywh, background, hidden, edgeless } = model;
-    const borderRadius = edgeless ? edgeless.style.borderRadius : 8;
-    const borderSize = edgeless ? edgeless.style.borderSize : 4;
-    const borderStyle = edgeless ? edgeless.style.borderStyle : 'solid';
-    const shadowType = edgeless ? edgeless.style.shadowType : 'none';
-    const collapse = edgeless ? edgeless.collapse : false;
-
+    const { borderRadius, borderSize, borderStyle, shadowType } =
+      edgeless.style;
+    const { collapse } = edgeless;
     const bound = Bound.deserialize(xywh);
 
     const style = {
