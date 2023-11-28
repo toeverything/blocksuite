@@ -5,7 +5,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isCssVariable } from '../_common/theme/css-variables.js';
-import type { EdgelessPageBlockComponent } from '../page-block/index.js';
 import { Bound } from '../surface-block/index.js';
 import type { FrameBlockModel } from './frame-model.js';
 
@@ -40,7 +39,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   }
 
   get surface() {
-    return (<EdgelessPageBlockComponent>this.parentBlockElement).surface;
+    return this.closest('affine-edgeless-page')!.surface;
   }
 
   override connectedCallback() {

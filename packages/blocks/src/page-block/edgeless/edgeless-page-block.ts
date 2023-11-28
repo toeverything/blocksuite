@@ -27,9 +27,11 @@ import type {
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
+  on,
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
+import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
 import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
@@ -50,7 +52,10 @@ import {
   Vec,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
+import type {
+  IndexedCanvasUpdateEvent,
+  SurfaceBlockComponent,
+} from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
@@ -98,8 +103,7 @@ export interface EdgelessSelectionSlots {
     dragging?: boolean;
   }>;
   edgelessToolUpdated: Slot<EdgelessTool>;
-  reorderingBlocksUpdated: Slot<ReorderingAction<Selectable>>;
-  reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
+  reorderingElements: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
   cursorUpdated: Slot<string>;
   copyAsPng: Slot<{
@@ -194,8 +198,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }>(),
     hoverUpdated: new Slot(),
     edgelessToolUpdated: new Slot<EdgelessTool>(),
-    reorderingBlocksUpdated: new Slot<ReorderingAction<TopLevelBlockModel>>(),
-    reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
+    reorderingElements: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
     cursorUpdated: new Slot<string>(),
@@ -212,6 +215,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     elementUpdated: new Slot<{
       id: string;
+      props?: Record<string, unknown>;
     }>(),
     elementAdded: new Slot<string>(),
     elementRemoved: new Slot<{ id: string; element: EdgelessElement }>(),
@@ -546,7 +550,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.localRecord.each((id, record) => {
       if (!elementsSet.has(id) || !this.surface.pickById(id)) return;
 
-      const element = this.surface.pickById(id) as EdgelessElement;
+      const element =
+        this.page.getBlockById(id) ??
+        (this.surface.pickById(id) as EdgelessElement);
 
       if (element instanceof GroupElement) {
         this.applyLocalRecord(element.childElements.map(e => e.id));
@@ -646,6 +652,16 @@ export class EdgelessPageBlockComponent extends BlockElement<
     });
   }
 
+  private _initSurface() {
+    this._disposables.add(
+      on(this.surface, 'indexedcanvasupdate', e => {
+        this.pageBlockContainer.setSlotContent(
+          (e as IndexedCanvasUpdateEvent).detail.content
+        );
+      })
+    );
+  }
+
   override firstUpdated() {
     this._initElementSlot();
     this._initSlotEffects();
@@ -654,6 +670,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initFontloader();
     this._initReadonlyListener();
     this._initRemoteCursor();
+    this._initSurface();
 
     if (!this.clipboardController._enabled) {
       this.clipboard.init(this.page);
@@ -764,16 +781,24 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   private _initLocalRecordManager() {
     this.localRecord = new LocalRecordManager<PhasorElementLocalRecordValues>();
-    this.localRecord.slots.updated.on(({ id }) => {
+    this.localRecord.slots.updated.on(({ id, data }) => {
       const element = this.surface.pickById(id);
 
       if (!element) return;
 
-      this.surface.refresh();
+      const changedProps = pick(
+        data.new,
+        keys(data.new).filter(key => key in element)
+      );
 
-      this.slots.elementUpdated.emit({
-        id,
-      });
+      if (!isEmpty(changedProps)) {
+        this.slots.elementUpdated.emit({
+          id,
+          props: changedProps,
+        });
+      }
+
+      this.surface.refresh();
     });
 
     this.disposables.add(() => {
@@ -787,12 +812,22 @@ export class EdgelessPageBlockComponent extends BlockElement<
         if (![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType))
           return;
 
+        const model =
+          event.type === 'delete'
+            ? event.model
+            : (this.page.getBlockById(event.id) as TopLevelBlockModel);
+        const parent =
+          event.type === 'delete'
+            ? this.page.getBlockById(event.parent)
+            : this.page.getParent(model);
+
+        if (
+          event.flavour !== NOTE &&
+          (!parent || parent !== this.surface.model)
+        )
+          return;
+
         switch (event.type) {
-          case 'update':
-            this.slots.elementUpdated.emit({
-              id: event.id,
-            });
-            break;
           case 'add':
             this.slots.elementAdded.emit(event.id);
             break;

@@ -16,13 +16,17 @@ const { FRAME } = EdgelessBlockType;
 @customElement('edgeless-block-portal-frame')
 class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
   override render() {
-    const { model, index } = this;
+    const { model, index, surface } = this;
     const { xywh } = model;
     const bound = Bound.deserialize(xywh);
+    const { zoom } = surface.viewport;
     const style = styleMap({
       position: 'absolute',
       zIndex: `${index}`,
-      transform: `translate(${bound.x}px, ${bound.y}px)`,
+      transform: `translate(${bound.x * zoom}px, ${
+        bound.y * zoom
+      }px) scale(${zoom})`,
+      transformOrigin: '0px 0px',
     });
 
     return html` <div style=${style}>${this.renderModel(model)}</div> `;

@@ -424,7 +424,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       } else {
         const frame = this._edgeless.surface.frame.selectFrame([ele]);
         if (frame) {
-          this._frames.add(frame);
+          this._frames.add(frame as FrameBlockModel);
         }
       }
     });
@@ -616,7 +616,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         });
         const frame = surface.frame.selectFrame(this._toBeMoved);
         frame
-          ? surface.frame.setHighlight(frame)
+          ? surface.frame.setHighlight(frame as FrameBlockModel)
           : surface.frame.clearHighlight();
 
         this._forceUpdateSelection(

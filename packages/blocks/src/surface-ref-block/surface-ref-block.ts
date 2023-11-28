@@ -35,6 +35,7 @@ import {
   getGroupParent,
   setGroupParent,
 } from '../surface-block/managers/group-manager.js';
+import { LayerManager } from '../surface-block/managers/layer-manager.js';
 import { Renderer } from '../surface-block/renderer.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
@@ -261,7 +262,9 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   private _showCaption: boolean = false;
 
   private _referencedModel: RefElement | null = null;
-  private _surfaceRenderer = new Renderer();
+  private _surfaceRenderer = new Renderer({
+    layerManager: new LayerManager(),
+  });
   private _connectorManager = new ConnectorPathGenerator({
     pickById: id => this.getModel(id),
     refresh: () => this._surfaceRenderer.refresh(),
