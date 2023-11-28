@@ -1,5 +1,6 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
+import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import {
@@ -355,14 +356,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
       return true;
     },
-    Delete: ctx => {
-      if (!blockElement.selected?.is('text')) return;
-      const state = ctx.get('keyboardState');
-      const vEditor = _getVirgo();
-      if (!onForwardDelete(model, state.raw, vEditor)) {
-        _preventDefault(ctx);
-      }
-      return true;
+    Delete: ctx => handleDelete(ctx),
+    'Control-d': ctx => {
+      if (IS_MAC) handleDelete(ctx);
     },
   });
 
@@ -383,6 +379,16 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       },
     });
   });
+
+  function handleDelete(ctx: UIEventStateContext) {
+    if (!blockElement.selected?.is('text')) return;
+    const state = ctx.get('keyboardState');
+    const vEditor = _getVirgo();
+    if (!onForwardDelete(model, state.raw, vEditor)) {
+      _preventDefault(ctx);
+    }
+    return true;
+  }
 
   function tryConvertToLinkedPage() {
     const pageBlock = blockElement.root.view.viewFromPath(
