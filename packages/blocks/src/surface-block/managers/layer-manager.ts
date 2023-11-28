@@ -40,7 +40,9 @@ type BaseLayer<T> = {
 type BlockLayer = BaseLayer<IndexableBlock> & {
   type: 'block';
   /**
-   * z-index, used for actual rendering
+   * The computed DOM z-index used for rendering blocks.
+   * One layer contains multiple blocks,
+   * so we need the array to mark the start and end of the z-index range.
    */
   zIndexes: [number, number];
 };
@@ -48,7 +50,9 @@ type BlockLayer = BaseLayer<IndexableBlock> & {
 type CanvasLayer = BaseLayer<PhasorElement> & {
   type: 'canvas';
   /**
-   * z-index, used for actual rendering
+   * The computed DOM z-index used for rendering this canvas layer.
+   * The canvas layer only contains one DOM element of the canvas,
+   * so we only need one number to mark the z-index.
    */
   zIndexes: number;
 };
