@@ -23,6 +23,16 @@ import { isFrameBlock } from './utils/query.js';
 const MIN_FRAME_WIDTH = 800;
 const MIN_FRAME_HEIGHT = 640;
 const FRAME_PADDING = 40;
+
+export function removeContainedFrames(frames: FrameBlockModel[]) {
+  return frames.filter(frame => {
+    const bound = Bound.deserialize(frame.xywh);
+    return frames.some(
+      f => f.id !== frame.id && Bound.deserialize(f.xywh).contains(bound)
+    );
+  });
+}
+
 class FrameOverlay extends Overlay {
   bound: Bound | null = null;
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas): void {
@@ -157,7 +167,8 @@ export function getBlocksInFrame(
     getNotesInFrame(page, model, fullyContained) as TopLevelBlockModel[]
   ).concat(
     surfaceModel[0].children.filter(ele => {
-      if (matchFlavours(ele, ['affine:image'])) {
+      if (ele.id === model.id) return;
+      if (matchFlavours(ele, ['affine:image', 'affine:frame'])) {
         const blockBound = Bound.deserialize(ele.xywh);
         return fullyContained
           ? bound.contains(blockBound)
