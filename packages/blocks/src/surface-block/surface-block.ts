@@ -301,13 +301,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
           this.connector.updatePath(element);
         }
 
-        if (
-          !props ||
-          'index' in props ||
-          (element instanceof GroupElement && 'children' in props)
-        ) {
-          this.layer.update(element);
-        }
+        this.layer.update(element, props);
       })
     );
 

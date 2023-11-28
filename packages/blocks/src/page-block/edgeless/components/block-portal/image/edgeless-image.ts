@@ -20,6 +20,7 @@ export class EdgelessBlockPortalImage extends EdgelessPortalBase<ImageBlockModel
       transform: `translate(${bound.x * zoom}px, ${
         bound.y * zoom
       }px) scale(${zoom})`,
+      transformOrigin: '0 0',
     };
 
     return html`

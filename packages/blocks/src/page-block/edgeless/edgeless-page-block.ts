@@ -812,20 +812,16 @@ export class EdgelessPageBlockComponent extends BlockElement<
         if (![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType))
           return;
 
-        const model =
-          event.type === 'delete'
-            ? event.model
-            : (this.page.getBlockById(event.id) as TopLevelBlockModel);
-        const parent =
-          event.type === 'delete'
-            ? this.page.getBlockById(event.parent)
-            : this.page.getParent(model);
+        if (event.flavour === IMAGE) {
+          const parent =
+            event.type === 'delete'
+              ? this.page.getParent(event.model)
+              : this.page.getParent(this.page.getBlockById(event.id)!);
 
-        if (
-          event.flavour !== NOTE &&
-          (!parent || parent !== this.surface.model)
-        )
-          return;
+          if (parent && parent.id !== this.surfaceBlockModel.id) {
+            return;
+          }
+        }
 
         switch (event.type) {
           case 'add':

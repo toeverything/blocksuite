@@ -466,28 +466,38 @@ export class LayerManager {
   /**
    * @returns a boolean value to indicate whether the layers have been updated
    */
-  private _updateLayer(element: Indexable | FrameBlockModel) {
+  private _updateLayer(
+    element: Indexable | FrameBlockModel,
+    props?: Record<string, unknown>
+  ) {
     let updateType: 'block' | 'canvas' | undefined = undefined;
+
+    const indexChanged = !props || 'index' in props;
+    const updateArray = (
+      array: EdgelessElement[],
+      element: EdgelessElement
+    ) => {
+      if (!indexChanged) return;
+      removeFromOrderedArray(array, element);
+      insertToOrderedArray(array, element);
+    };
 
     if (element instanceof SurfaceElement) {
       updateType = 'canvas';
-      removeFromOrderedArray(this.canvasElements, element);
-      insertToOrderedArray(this.canvasElements, element);
+      updateArray(this.canvasElements, element);
 
-      if (element instanceof GroupElement) {
+      if (element instanceof GroupElement && indexChanged) {
         element.childElements.forEach(child => this._updateLayer(child));
       }
     } else if (element.flavour === 'affine:frame') {
-      removeFromOrderedArray(this.frames, element);
-      insertToOrderedArray(this.frames, element);
+      updateArray(this.frames, element);
     } else {
       updateType = 'block';
-      removeFromOrderedArray(this.blocks, element);
-      insertToOrderedArray(this.blocks, element);
+      updateArray(this.blocks, element);
       this.blocksGrid.add(element);
     }
 
-    if (updateType) {
+    if (updateType && indexChanged) {
       this._removeFromLayer(element as Indexable, updateType);
       this._insertIntoLayer(element as Indexable, updateType);
 
@@ -543,8 +553,11 @@ export class LayerManager {
     }
   }
 
-  update(element: Indexable | FrameBlockModel) {
-    if (this._updateLayer(element)) {
+  update(
+    element: Indexable | FrameBlockModel,
+    props?: Record<string, unknown>
+  ) {
+    if (this._updateLayer(element, props)) {
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit();
     }

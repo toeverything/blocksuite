@@ -143,12 +143,7 @@ class ImageBlock extends BlockElement<ImageBlockModel> {
 @customElement('affine-edgeless-image')
 class ImageBlockEdgelessComponent extends ImageBlock {
   get surface() {
-    const surface = this.model.page.getParent(this.model.id);
-
-    return this.root.view.viewFromPath(
-      'block',
-      buildPath(surface)
-    ) as SurfaceBlockComponent;
+    return this.closest('affine-surface');
   }
 
   override render() {
@@ -156,6 +151,7 @@ class ImageBlockEdgelessComponent extends ImageBlock {
       ((this.surface?.pickById(this.model.id) as ImageBlockModel) ?? this.model)
         .xywh
     );
+
     return html`<img
       style=${styleMap({
         transform: `rotate(${this.model.rotate}deg)`,
