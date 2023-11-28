@@ -73,7 +73,7 @@ class ImageBlock extends BlockElement<ImageBlockModel> {
   @state()
   protected _source!: string;
 
-  blob!: Blob;
+  blob?: Blob;
 
   @state()
   protected _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
