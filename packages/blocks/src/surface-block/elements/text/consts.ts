@@ -6,12 +6,12 @@ import {
   CanvasTextFontWeight,
 } from '../../consts.js';
 import {
+  CanvasElementType,
   type IElementDefaultProps,
-  PhasorElementType,
 } from '../edgeless-element.js';
 
 export const TextElementDefaultProps: IElementDefaultProps<'text'> = {
-  type: PhasorElementType.TEXT,
+  type: CanvasElementType.TEXT,
   xywh: '[0,0,0,0]',
 
   rotate: 0,

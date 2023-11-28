@@ -16,10 +16,10 @@ import type {
 } from '../../../../_common/utils/types.js';
 import type { NoteBlockModel } from '../../../../models.js';
 import {
+  CanvasElementType,
   deserializeXYWH,
   GroupElement,
   normalizeTextBound,
-  PhasorElementType,
 } from '../../../../surface-block/index.js';
 import {
   Bound,
@@ -41,10 +41,10 @@ import {
 import {
   getSelectableBounds,
   getSelectedRect,
+  isCanvasElement,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
-  isPhasorElement,
 } from '../../utils/query.js';
 import { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
@@ -378,14 +378,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         areAllShapes = false;
         areAllTexts = false;
       } else {
-        if (element.type !== PhasorElementType.CONNECTOR)
+        if (element.type !== CanvasElementType.CONNECTOR)
           areAllConnectors = false;
         if (
-          element.type !== PhasorElementType.SHAPE &&
-          element.type !== PhasorElementType.GROUP
+          element.type !== CanvasElementType.SHAPE &&
+          element.type !== CanvasElementType.GROUP
         )
           areAllShapes = false;
-        if (element.type !== PhasorElementType.TEXT) areAllTexts = false;
+        if (element.type !== CanvasElementType.TEXT) areAllTexts = false;
       }
     }
 
@@ -489,8 +489,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const elements = selection.elements.filter(
       element =>
         isImageBlock(element) ||
-        (isPhasorElement(element) &&
-          element.type !== PhasorElementType.CONNECTOR)
+        (isCanvasElement(element) &&
+          element.type !== CanvasElementType.CONNECTOR)
     ) as EdgelessElement[];
 
     getElementsWithoutGroup(elements).forEach(element => {

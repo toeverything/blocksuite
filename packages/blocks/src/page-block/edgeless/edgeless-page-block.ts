@@ -40,14 +40,14 @@ import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
   Bound,
+  type CanvasElement,
+  type CanvasElementLocalRecordValues,
   clamp,
   getCommonBound,
   GroupElement,
   type IBound,
   intersects,
   type IVec,
-  type PhasorElement,
-  type PhasorElementLocalRecordValues,
   serializeXYWH,
   Vec,
   ZOOM_MIN,
@@ -85,7 +85,7 @@ import {
   FIT_TO_SCREEN_PADDING,
 } from './utils/consts.js';
 import { xywhArrayToObject } from './utils/convert.js';
-import { getCursorMode, isFrameBlock, isPhasorElement } from './utils/query.js';
+import { getCursorMode, isCanvasElement, isFrameBlock } from './utils/query.js';
 
 type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
 
@@ -108,7 +108,7 @@ export interface EdgelessSelectionSlots {
   cursorUpdated: Slot<string>;
   copyAsPng: Slot<{
     notes: NoteBlockModel[];
-    shapes: PhasorElement[];
+    shapes: CanvasElement[];
   }>;
   readonlyUpdated: Slot<boolean>;
 }
@@ -204,7 +204,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     cursorUpdated: new Slot<string>(),
     copyAsPng: new Slot<{
       blocks: TopLevelBlockModel[];
-      shapes: PhasorElement[];
+      shapes: CanvasElement[];
     }>(),
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -232,7 +232,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;
-  localRecord!: LocalRecordManager<PhasorElementLocalRecordValues>;
+  localRecord!: LocalRecordManager<CanvasElementLocalRecordValues>;
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
@@ -537,7 +537,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   updateElementInLocal(
     elementId: string,
-    record: Partial<PhasorElementLocalRecordValues>
+    record: Partial<CanvasElementLocalRecordValues>
   ) {
     this.localRecord.update(elementId, record);
   }
@@ -780,7 +780,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _initLocalRecordManager() {
-    this.localRecord = new LocalRecordManager<PhasorElementLocalRecordValues>();
+    this.localRecord = new LocalRecordManager<CanvasElementLocalRecordValues>();
     this.localRecord.slots.updated.on(({ id, data }) => {
       const element = this.surface.pickById(id);
 
@@ -856,7 +856,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       if (!surface) return;
 
       const el = this.surface.pickById(surface.elements[0]);
-      if (isPhasorElement(el)) {
+      if (isCanvasElement(el)) {
         return true;
       }
 

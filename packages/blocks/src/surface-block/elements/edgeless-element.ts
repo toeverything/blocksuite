@@ -6,7 +6,7 @@ import type { IGroup } from './group/types.js';
 import type { IShape } from './shape/types.js';
 import type { IText } from './text/types.js';
 
-export enum PhasorElementType {
+export enum CanvasElementType {
   SHAPE = 'shape',
   BRUSH = 'brush',
   CONNECTOR = 'connector',
@@ -14,11 +14,9 @@ export enum PhasorElementType {
   GROUP = 'group',
 }
 
-export const isPhasorElementType = (
-  type: string
-): type is PhasorElementType => {
-  return type.toLocaleUpperCase() in PhasorElementType;
-};
+export function isCanvasElementType(type: string): type is CanvasElementType {
+  return type.toLocaleUpperCase() in CanvasElementType;
+}
 
 export interface HitTestOptions {
   expand?: number;
@@ -48,7 +46,7 @@ export interface IEdgelessElement {
   boxSelect(bound: Bound): boolean;
 }
 
-export type IPhasorElementType = {
+export type ICanvasElementType = {
   shape: IShape;
   brush: IBrush;
   connector: IConnector;
@@ -56,18 +54,18 @@ export type IPhasorElementType = {
   group: IGroup;
 };
 
-export type IElementCreateProps<T extends keyof IPhasorElementType> = Partial<
-  Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>
+export type IElementCreateProps<T extends keyof ICanvasElementType> = Partial<
+  Omit<ICanvasElementType[T], 'id' | 'index' | 'seed'>
 >;
 
-export type IElementUpdateProps<T extends keyof IPhasorElementType> = Partial<
-  Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | PhasorElementType>
+export type IElementUpdateProps<T extends keyof ICanvasElementType> = Partial<
+  Omit<ICanvasElementType[T], 'id' | 'index' | 'seed' | CanvasElementType>
 >;
 
-export type IElementDefaultProps<T extends keyof IPhasorElementType> =
+export type IElementDefaultProps<T extends keyof ICanvasElementType> =
   T extends 'connector'
     ? Omit<
-        IPhasorElementType['connector'],
+        ICanvasElementType['connector'],
         | 'xywh'
         | 'id'
         | 'index'
@@ -80,12 +78,12 @@ export type IElementDefaultProps<T extends keyof IPhasorElementType> =
       >
     : T extends 'frame'
       ? Omit<
-          IPhasorElementType[T],
+          ICanvasElementType[T],
           'id' | 'index' | 'seed' | 'rotate' | 'batch'
         >
       : T extends 'group'
         ? Omit<
-            IPhasorElementType[T],
+            ICanvasElementType[T],
             'id' | 'index' | 'seed' | 'rotate' | 'batch' | 'xywh'
           >
-        : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'batch'>;
+        : Omit<ICanvasElementType[T], 'id' | 'index' | 'seed' | 'batch'>;

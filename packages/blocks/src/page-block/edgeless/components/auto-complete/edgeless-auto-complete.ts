@@ -14,12 +14,12 @@ import { handleNativeRangeAtPoint } from '../../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import {
   type Bound,
+  CanvasElementType,
   type Connection,
   type ConnectorElement,
   ConnectorMode,
   type IVec,
   Overlay,
-  PhasorElementType,
   rotatePoints,
   type RoughCanvas,
   ShapeElement,
@@ -237,7 +237,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   private _addConnector(source: Connection, target: Connection) {
     const { surface } = this.edgeless;
-    const id = surface.addElement(PhasorElementType.CONNECTOR, {
+    const id = surface.addElement(CanvasElementType.CONNECTOR, {
       mode: ConnectorMode.Orthogonal,
       strokeWidth: 2,
       stroke: (<ShapeElement>this.current).strokeColor,

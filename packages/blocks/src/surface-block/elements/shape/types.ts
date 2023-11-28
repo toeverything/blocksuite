@@ -12,7 +12,7 @@ import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
-import type { HitTestOptions, PhasorElementType } from '../edgeless-element.js';
+import type { CanvasElementType, HitTestOptions } from '../edgeless-element.js';
 import type {
   ISurfaceElement,
   ISurfaceElementLocalRecord,
@@ -23,7 +23,7 @@ import type { ShapeElement } from './shape-element.js';
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 
 export interface IShape extends ISurfaceElement {
-  type: PhasorElementType.SHAPE;
+  type: CanvasElementType.SHAPE;
   shapeType: ShapeType;
   radius: number;
   filled: boolean;

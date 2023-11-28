@@ -12,7 +12,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import {
   Bound,
-  PhasorElementType,
+  CanvasElementType,
   ShapeStyle,
   type ShapeType,
   StrokeStyle,
@@ -240,7 +240,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
       coord.y - edgelessY - height * padding.y * zoom
     );
     const xywh = new Bound(modelX, modelY, width, height).serialize();
-    this.edgeless.surface.addElement(PhasorElementType.SHAPE, {
+    this.edgeless.surface.addElement(CanvasElementType.SHAPE, {
       shapeType: this.shape.name === 'roundedRect' ? 'rect' : this.shape.name,
       xywh: xywh,
       strokeColor: this._strokeColor,

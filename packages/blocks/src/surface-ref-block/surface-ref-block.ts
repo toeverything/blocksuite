@@ -28,7 +28,7 @@ import type {
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
-import { type PhasorElementType } from '../surface-block/elements/edgeless-element.js';
+import { type CanvasElementType } from '../surface-block/elements/edgeless-element.js';
 import type { SurfaceElement } from '../surface-block/elements/surface-element.js';
 import { ConnectorElement, ElementCtors } from '../surface-block/index.js';
 import {
@@ -490,7 +490,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       const yConnectors: Y.Map<unknown>[] = [];
       const yGroups: Y.Map<unknown>[] = [];
       elementsMap.forEach(yElement => {
-        const type = yElement.get('type') as PhasorElementType;
+        const type = yElement.get('type') as CanvasElementType;
         if (type === 'connector') {
           yConnectors.push(yElement);
           return;
@@ -511,7 +511,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   }
 
   private _createElementFromYMap(yElement: Y.Map<unknown>) {
-    const type = yElement.get('type') as PhasorElementType;
+    const type = yElement.get('type') as CanvasElementType;
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
@@ -583,7 +583,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   ) => {
     if (type.action === 'add') {
       const yElement = elementsMap.get(id) as Y.Map<unknown>;
-      const type = yElement.get('type') as PhasorElementType;
+      const type = yElement.get('type') as CanvasElementType;
 
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);

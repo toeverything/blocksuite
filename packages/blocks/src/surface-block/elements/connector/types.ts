@@ -1,6 +1,6 @@
 import type { StrokeStyle } from '../../consts.js';
 import type { IVec } from '../../utils/vec.js';
-import type { PhasorElementType } from '../edgeless-element.js';
+import type { CanvasElementType } from '../edgeless-element.js';
 import type { ISurfaceElement } from '../surface-element.js';
 
 export enum ConnectorMode {
@@ -40,7 +40,7 @@ export interface Controller {
 }
 
 export interface IConnector extends ISurfaceElement {
-  type: PhasorElementType.CONNECTOR;
+  type: CanvasElementType.CONNECTOR;
 
   mode: ConnectorMode;
   stroke: string;

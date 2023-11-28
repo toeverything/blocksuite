@@ -1,6 +1,6 @@
 import type { EdgelessElement } from '../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../models.js';
-import type { PhasorElement } from '../index.js';
+import type { CanvasElement } from '../index.js';
 import { compare, getGroups } from './group-manager.js';
 import type { Indexable, IndexableBlock, Layer } from './layer-manager.js';
 
@@ -75,8 +75,8 @@ export function removeFromOrderedArray(
 }
 
 export function isInRange(
-  edges: [IndexableBlock | PhasorElement, IndexableBlock | PhasorElement],
-  target: IndexableBlock | PhasorElement
+  edges: [IndexableBlock | CanvasElement, IndexableBlock | CanvasElement],
+  target: IndexableBlock | CanvasElement
 ) {
   return compare(target, edges[0]) >= 0 && compare(target, edges[1]) < 0;
 }
