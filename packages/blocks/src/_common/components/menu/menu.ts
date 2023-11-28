@@ -127,9 +127,6 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       z-index: 999;
     }
 
-    .affine-menu-header {
-    }
-
     .affine-menu-body {
       display: flex;
       flex-direction: column;
@@ -663,6 +660,7 @@ declare global {
     'affine-menu': MenuComponent<unknown>;
   }
 }
+
 export const createModal = (container: HTMLElement) => {
   const div = document.createElement('div');
   div.style.position = 'fixed';
@@ -674,6 +672,7 @@ export const createModal = (container: HTMLElement) => {
   container.append(div);
   return div;
 };
+
 export const positionToVRect = (x: number, y: number): VirtualElement => {
   return {
     getBoundingClientRect(): ClientRectObject {
@@ -693,11 +692,8 @@ export const positionToVRect = (x: number, y: number): VirtualElement => {
 export const eventToVRect = (e: MouseEvent): VirtualElement => {
   return positionToVRect(e.x, e.y);
 };
-const autoUpdate = (
-  target: HTMLElement,
-  content: HTMLElement,
-  updateFunction: () => void
-) => {
+
+const autoUpdate = (target: HTMLElement, updateFunction: () => void) => {
   const observer = new MutationObserver(() => {
     updateFunction();
   });
@@ -717,7 +713,7 @@ const autoUpdate = (
 };
 
 export const createPopup = (
-  target: HTMLElement,
+  target: ReferenceElement,
   content: HTMLElement,
   options?: {
     onClose?: () => void;
@@ -740,7 +736,7 @@ export const createPopup = (
     });
   };
 
-  const unsub = autoUpdate(target, content, updatePosition);
+  const unsub = autoUpdate(target as HTMLElement, updatePosition);
 
   const removeModal = () => {
     modal.remove();
@@ -770,6 +766,7 @@ export const createPopup = (
 export type MenuHandler = {
   close: () => void;
 };
+
 export const popMenu = <T>(
   target: ReferenceElement,
   props: {
@@ -793,6 +790,7 @@ export const popMenu = <T>(
     close,
   };
 };
+
 export const popFilterableSimpleMenu = (
   target: ReferenceElement,
   options: Menu[],
