@@ -614,7 +614,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     const fontLoader = this.service?.fontLoader;
     assertExists(fontLoader);
 
-    fontLoader.load.then(() => {
+    fontLoader.ready.then(() => {
       this.surface.refresh();
     });
   }
