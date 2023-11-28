@@ -34,21 +34,24 @@ const embedConfig: EmbedConfig[] = [
     action: model => turnIntoImage(model),
   },
   {
-    name: 'html/pdf/text',
+    name: 'pdf',
     check: model =>
-      // Temporarily only allows pdf
       model.type === 'application/pdf' && model.size <= MAX_EMBED_SIZE,
-    template: (_, blobUrl) =>
-      html`<iframe
+    template: (_, blobUrl) => {
+      // More options: https://tinytip.co/tips/html-pdf-params/
+      // https://chromium.googlesource.com/chromium/src/+/refs/tags/121.0.6153.1/chrome/browser/resources/pdf/open_pdf_params_parser.ts
+      const parameters = '#toolbar=0';
+      return html`<iframe
         style="width: 100%; color-scheme: auto;"
         height="480"
-        src=${blobUrl}
+        src=${blobUrl + parameters}
         loading="lazy"
         scrolling="no"
         frameborder="no"
         allowTransparency
         allowfullscreen
-      ></iframe>`,
+      ></iframe>`;
+    },
   },
   {
     name: 'video',
