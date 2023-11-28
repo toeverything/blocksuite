@@ -9,12 +9,12 @@ import {
 } from '../../../../surface-block/consts.js';
 import {
   Bound,
+  CanvasElementType,
   type Connection,
   GroupElement,
   normalizeDegAngle,
   type Options,
   Overlay,
-  PhasorElementType,
   type RoughCanvas,
   ShapeElement,
   type ShapeStyle,
@@ -342,7 +342,7 @@ export async function createTextElement(
   current: ShapeElement
 ) {
   const { surface } = edgeless;
-  const id = edgeless.surface.addElement(PhasorElementType.TEXT, {
+  const id = edgeless.surface.addElement(CanvasElementType.TEXT, {
     text: new Workspace.Y.Text(),
     textAlign: 'left',
     fontSize: 24,

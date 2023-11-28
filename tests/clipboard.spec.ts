@@ -1063,7 +1063,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
   );
 });
 
-test(`copy phasor element and text note in edgeless mode`, async ({ page }) => {
+test(`copy canvas element and text note in edgeless mode`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);

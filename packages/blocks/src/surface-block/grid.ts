@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import type { EdgelessElement } from '../index.js';
 import { GRID_SIZE, type IBound } from './consts.js';
-import type { SurfaceElement } from './elements/surface-element.js';
 import { compare } from './managers/group-manager.js';
 import { Bound } from './utils/bound.js';
 import {
@@ -23,7 +23,7 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElement(ele: SurfaceElement): number[] {
+function rangeFromElement<T extends EdgelessElement>(ele: T): number[] {
   const bound = ele.gridBound;
   const minRow = getGridIndex(bound.x);
   const maxRow = getGridIndex(bound.maxX);
@@ -32,14 +32,13 @@ function rangeFromElement(ele: SurfaceElement): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-export class GridManager {
-  private _grids: Map<string, Set<SurfaceElement>> = new Map();
-  private _elementToGrids: Map<SurfaceElement, Set<Set<SurfaceElement>>> =
-    new Map();
+export class GridManager<T extends EdgelessElement> {
+  private _grids: Map<string, Set<T>> = new Map();
+  private _elementToGrids: Map<T, Set<Set<T>>> = new Map();
 
   private _createGrid(row: number, col: number) {
     const id = row + '|' + col;
-    const elements: Set<SurfaceElement> = new Set();
+    const elements: Set<T> = new Set();
     this._grids.set(id, elements);
     return elements;
   }
@@ -53,9 +52,9 @@ export class GridManager {
     return this._grids.size === 0;
   }
 
-  add(element: SurfaceElement) {
+  add(element: T) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromElement(element);
-    const grids = new Set<Set<SurfaceElement>>();
+    const grids = new Set<Set<T>>();
     this._elementToGrids.set(element, grids);
 
     for (let i = minRow; i <= maxRow; i++) {
@@ -70,7 +69,7 @@ export class GridManager {
     }
   }
 
-  remove(element: SurfaceElement) {
+  remove(element: T) {
     const grids = this._elementToGrids.get(element);
     assertExists(grids);
 
@@ -90,9 +89,9 @@ export class GridManager {
     );
   }
 
-  search(bound: IBound, strict = false): SurfaceElement[] {
+  search(bound: IBound, strict = false): T[] {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
-    const results: Set<SurfaceElement> = new Set();
+    const results: Set<T> = new Set();
     const b = Bound.from(bound);
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
@@ -116,15 +115,17 @@ export class GridManager {
     return sorted;
   }
 
-  pick(x: number, y: number): SurfaceElement[] {
+  pick(x: number, y: number): T[] {
     const row = getGridIndex(x);
     const col = getGridIndex(y);
     const gridElements = this._getGrid(row, col);
     if (!gridElements) return [];
 
-    const results: SurfaceElement[] = [];
+    const results: T[] = [];
     for (const element of gridElements) {
-      if (isPointIn(getBoundsWithRotation(element), x, y)) {
+      if (
+        isPointIn(getBoundsWithRotation(Bound.deserialize(element.xywh)), x, y)
+      ) {
         results.push(element);
       }
     }

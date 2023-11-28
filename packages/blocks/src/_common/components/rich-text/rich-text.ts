@@ -136,8 +136,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
     // init auto scroll
     vEditor.disposables.add(
-      vEditor.slots.vRangeUpdated.on(([vRange]) => {
-        if (!vRange) return;
+      vEditor.slots.vRangeUpdated.on(([vRange, sync]) => {
+        if (!vRange || !sync) return;
 
         vEditor.waitForUpdate().then(() => {
           if (!vEditor.mounted) return;

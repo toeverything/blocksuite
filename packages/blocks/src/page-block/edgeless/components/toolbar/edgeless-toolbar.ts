@@ -188,7 +188,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
     this.edgeless = edgeless;
-    this._frames = edgeless.surface.frame.frames.sort(edgeless.surface.compare);
+    this._frames = edgeless.surface.frame.frames.sort(
+      edgeless.surface.compare
+    ) as FrameBlockModel[];
   }
 
   get edgelessTool() {
@@ -219,7 +221,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private _updateFrames() {
     this._frames = this.edgeless.surface.frame.frames.sort(
       this.edgeless.surface.compare
-    );
+    ) as FrameBlockModel[];
   }
 
   private _nextFrame() {

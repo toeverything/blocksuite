@@ -1,9 +1,9 @@
 import type { Y } from '@blocksuite/store';
 
 import type {
+  CanvasElementLocalRecordValues,
   EdgelessElement,
   GroupElement,
-  PhasorElementLocalRecordValues,
 } from '../../index.js';
 import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
 import type { Renderer } from '../renderer.js';
@@ -18,14 +18,14 @@ import {
   type XYWH,
 } from '../utils/xywh.js';
 import type {
+  CanvasElementType,
   HitTestOptions,
   IEdgelessElement,
-  PhasorElementType,
 } from './edgeless-element.js';
 
 export interface ISurfaceElement {
   id: string;
-  type: PhasorElementType;
+  type: CanvasElementType;
   xywh: SerializedXYWH;
   index: string;
   seed: number;
@@ -72,7 +72,7 @@ export abstract class SurfaceElement<
   yMap: Y.Map<unknown>;
 
   protected options: {
-    getLocalRecord: (id: string) => PhasorElementLocalRecordValues | undefined;
+    getLocalRecord: (id: string) => CanvasElementLocalRecordValues | undefined;
     onElementUpdated: (update: {
       id: string;
       props: Record<string, unknown>;

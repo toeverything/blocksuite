@@ -13,7 +13,7 @@ import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import { LineWidth } from '../../../../_common/utils/types.js';
 import type {
   BrushElement,
-  PhasorElementType,
+  CanvasElementType,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -122,7 +122,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.lineWidth !== size) {
-        this.surface.updateElement<PhasorElementType.BRUSH>(element.id, {
+        this.surface.updateElement<CanvasElementType.BRUSH>(element.id, {
           lineWidth: size,
         });
       }
@@ -133,7 +133,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
-        this.surface.updateElement<PhasorElementType.BRUSH>(element.id, {
+        this.surface.updateElement<CanvasElementType.BRUSH>(element.id, {
           color,
         });
       }

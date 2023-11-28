@@ -252,7 +252,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     }
 
     if (this.vRangeProvider) {
-      this.vRangeProvider.setVRange(vRange);
+      this.vRangeProvider.setVRange(vRange, sync);
       return;
     }
 

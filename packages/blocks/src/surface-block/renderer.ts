@@ -3,8 +3,9 @@ import { Slot } from '@blocksuite/global/utils';
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
+import type { LayerManager } from './managers/layer-manager.js';
 import { RoughCanvas } from './rough/canvas.js';
-import { Bound } from './utils/bound.js';
+import { Bound, getElementsBound } from './utils/bound.js';
 import { intersects } from './utils/math-utils.js';
 import { clamp, getBoundsWithRotation } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
@@ -61,7 +62,9 @@ export class Renderer implements SurfaceViewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   rc: RoughCanvas;
-  gridManager = new GridManager();
+  gridManager = new GridManager<SurfaceElement>();
+  indexedCanvases: HTMLCanvasElement[] = [];
+  layerManager: LayerManager;
 
   slots = {
     viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
@@ -79,11 +82,12 @@ export class Renderer implements SurfaceViewport {
   private _shouldUpdate = false;
   private _rafId: number | null = null;
 
-  constructor() {
+  constructor(options: { layerManager: LayerManager }) {
     const canvas = document.createElement('canvas');
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     this.rc = new RoughCanvas(canvas);
+    this.layerManager = options.layerManager;
   }
 
   private _emitViewportUpdatedSlot() {
@@ -329,12 +333,15 @@ export class Renderer implements SurfaceViewport {
     this._shouldUpdate = true;
   }
 
+  /**
+   * Used to attach main canvas, main canvas will always exist
+   * @param container
+   */
   attach(container: HTMLElement) {
     this._container = container;
     container.appendChild(this.canvas);
 
     this._resetSize();
-
     this._loop();
   }
 
@@ -356,6 +363,26 @@ export class Renderer implements SurfaceViewport {
     this._shouldUpdate = false;
   }
 
+  setIndexedCanvas(canvas: HTMLCanvasElement[]) {
+    this.indexedCanvases = canvas;
+  }
+
+  private _setIndexCanvasSize(canvas: HTMLCanvasElement, bound: IBound) {
+    const dpr = window.devicePixelRatio;
+    const width = bound.w;
+    const height = bound.h;
+
+    if (canvas.width !== width * dpr) canvas.width = width * dpr;
+    if (canvas.height !== height * dpr) canvas.height = height * dpr;
+
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    canvas.style.transform = `translate(${bound.x * this.zoom}px, ${
+      bound.y * this.zoom
+    }px) scale(${this.zoom})`;
+    canvas.style.transformOrigin = '0 0';
+  }
+
   private _resetSize() {
     const { canvas } = this;
     const dpr = window.devicePixelRatio;
@@ -364,8 +391,10 @@ export class Renderer implements SurfaceViewport {
     canvas.style.height = '100%';
 
     const bbox = canvas.getBoundingClientRect();
+
     canvas.width = Math.ceil(bbox.width * dpr);
     canvas.height = Math.ceil(bbox.height * dpr);
+
     this._left = bbox.left;
     this._top = bbox.top;
     this._width = bbox.width;
@@ -389,13 +418,40 @@ export class Renderer implements SurfaceViewport {
     const dpr = window.devicePixelRatio;
     const scale = zoom * dpr;
     const matrix = new DOMMatrix().scaleSelf(scale);
+    /**
+     * if a layer does not have a corresponding canvas
+     * its element will be add to this array and drawing on the
+     * main canvas
+     */
+    let fallbackElement: SurfaceElement[] = [];
+
+    this.layerManager.getCanvasLayers().forEach((layer, idx) => {
+      if (!this.indexedCanvases[idx]) {
+        fallbackElement = fallbackElement.concat(layer.elements);
+        return;
+      }
+
+      const canvas = this.indexedCanvases[idx];
+      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+      const bound = getElementsBound(layer.elements);
+      const layerTransform = new DOMMatrix().scaleSelf(dpr);
+
+      this._setIndexCanvasSize(canvas, bound);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+
+      if (intersects(viewportBounds, bound)) {
+        this._renderByBound(ctx, layerTransform, rc, bound, layer.elements);
+      }
+    });
 
     ctx.clearRect(0, 0, width * dpr, height * dpr);
     ctx.save();
 
     ctx.setTransform(matrix);
 
-    this._renderByBound(ctx, matrix, rc, viewportBounds);
+    this._renderByBound(ctx, matrix, rc, viewportBounds, fallbackElement, true);
   }
 
   private _renderByBound(
@@ -403,7 +459,8 @@ export class Renderer implements SurfaceViewport {
     matrix: DOMMatrix,
     rc: RoughCanvas,
     bound: IBound,
-    surfaceElements?: SurfaceElement[]
+    surfaceElements?: SurfaceElement[],
+    overLay: boolean = false
   ) {
     if (!ctx) return;
 
@@ -425,29 +482,39 @@ export class Renderer implements SurfaceViewport {
       ctx.restore();
     }
 
-    for (const overlay of this._overlays) {
-      ctx.save();
-      ctx.translate(-bound.x, -bound.y);
-      overlay.render(ctx, rc);
-      ctx.restore();
+    if (overLay) {
+      for (const overlay of this._overlays) {
+        ctx.save();
+        ctx.translate(-bound.x, -bound.y);
+        overlay.render(ctx, rc);
+        ctx.restore();
+      }
     }
 
     ctx.restore();
   }
 
   public getCanvasByBound(
-    bound: IBound,
-    surfaceElements?: SurfaceElement[]
+    bound: IBound = this.viewportBounds,
+    surfaceElements?: SurfaceElement[],
+    canvas?: HTMLCanvasElement,
+    clearBeforeDrawing?: boolean,
+    withZoom?: boolean
   ): HTMLCanvasElement {
+    canvas = canvas || document.createElement('canvas');
+
     const dpr = window.devicePixelRatio || 1;
-    const canvas = document.createElement('canvas');
-    canvas.width = bound.w * dpr;
-    canvas.height = bound.h * dpr;
+    if (canvas.width !== bound.w * dpr) canvas.width = bound.w * dpr;
+    if (canvas.height !== bound.h * dpr) canvas.height = bound.h * dpr;
+
+    canvas.style.width = `${bound.w}px`;
+    canvas.style.height = `${bound.h}px`;
 
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    const matrix = new DOMMatrix().scaleSelf(dpr);
+    const matrix = new DOMMatrix().scaleSelf(withZoom ? dpr * this.zoom : dpr);
     const rc = new RoughCanvas(canvas);
 
+    if (clearBeforeDrawing) ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.setTransform(matrix);
 
     this._renderByBound(ctx, matrix, rc, bound, surfaceElements);

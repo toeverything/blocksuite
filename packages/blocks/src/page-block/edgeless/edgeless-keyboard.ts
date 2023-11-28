@@ -1,3 +1,5 @@
+import { IS_MAC } from '@blocksuite/global/env';
+
 import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
 import {
   type EdgelessTool,
@@ -24,7 +26,7 @@ import {
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
-import { isPhasorElement } from './utils/query.js';
+import { isCanvasElement } from './utils/query.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override pageElement: EdgelessPageBlockComponent) {
@@ -175,6 +177,10 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         Delete: () => {
           this._delete();
         },
+        'Control-d': () => {
+          if (!IS_MAC) return;
+          this._delete();
+        },
         ArrowUp: () => {
           this._move('ArrowUp');
         },
@@ -315,7 +321,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           break;
       }
 
-      if (isPhasorElement(element)) {
+      if (isCanvasElement(element)) {
         if (element instanceof ConnectorElement) {
           surface.connector.updateXYWH(element, bound);
         }

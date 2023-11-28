@@ -34,12 +34,12 @@ import type {
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { VirgoRootElement } from '../../packages/virgo/src/index.js';
 import {
+  getCanvasElementsCount,
   getConnectorPath,
   getEdgelessSelectedRectModel,
   getGroupChildrenIds,
   getGroupIds,
   getNoteRect,
-  getPhasorElementsCount,
   getSelectedBound,
   getSortedIdsInViewport,
   getZoomLevel,
@@ -957,8 +957,8 @@ export async function assertGroupChildrenIds(
   expect(ids).toEqual(expected);
 }
 
-export async function assertPhasorElementsCount(page: Page, expected: number) {
-  const number = await getPhasorElementsCount(page);
+export async function assertCanvasElementsCount(page: Page, expected: number) {
+  const number = await getCanvasElementsCount(page);
   expect(number).toEqual(expected);
 }
 

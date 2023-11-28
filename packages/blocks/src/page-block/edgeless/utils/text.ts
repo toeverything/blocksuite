@@ -11,8 +11,8 @@ import {
 import { ShapeElement, ShapeStyle } from '../../../surface-block/index.js';
 import {
   Bound,
+  CanvasElementType,
   type IModelCoord,
-  PhasorElementType,
   TextElement,
 } from '../../../surface-block/index.js';
 import {
@@ -71,7 +71,7 @@ export function mountShapeTextEditor(
       : fillColor === SHAPE_FILL_COLOR_BLACK
         ? SHAPE_TEXT_COLOR_PURE_WHITE
         : SHAPE_TEXT_COLOR_PURE_BLACK;
-    edgeless.surface.updateElement<PhasorElementType.SHAPE>(shapeElement.id, {
+    edgeless.surface.updateElement<CanvasElementType.SHAPE>(shapeElement.id, {
       text,
       color,
       fontFamily:
@@ -139,7 +139,7 @@ export function addText(
       event.x,
       event.y
     );
-    const id = edgeless.surface.addElement(PhasorElementType.TEXT, {
+    const id = edgeless.surface.addElement(CanvasElementType.TEXT, {
       xywh: new Bound(modelX, modelY, 32, 32).serialize(),
       text: new Workspace.Y.Text(),
       textAlign: 'left',
