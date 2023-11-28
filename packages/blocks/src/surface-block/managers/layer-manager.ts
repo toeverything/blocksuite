@@ -23,7 +23,7 @@ type BaseLayer<T> = {
   elements: Array<T>;
 
   /**
-   * fraction indexing range
+   * fractional indexing range
    */
   indexes: [string, string];
 };
@@ -60,7 +60,7 @@ export class LayerManager {
   canvasLayers!: {
     set: Set<PhasorElement>;
     /**
-     * fraction index
+     * fractional index
      */
     indexes: [string, string];
     /**

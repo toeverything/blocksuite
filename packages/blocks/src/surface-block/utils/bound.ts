@@ -341,15 +341,6 @@ export function getElementsBound(bounds: IBound[]): Bound {
   return new Bound(minX, minY, maxX - minX, maxY - minY);
 }
 
-// /**
-//  * Get whether A contains B
-//  */
-// export function contains(a: IBound, b: IBound): boolean {
-//   return (
-//     a.x <= b.x && a.x + a.w >= b.x + b.w && a.y <= b.y && a.y + a.h >= b.y + b.h
-//   );
-// }
-
 export function getBoundFromPoints(points: number[][]) {
   const { minX, minY, width, height } = getBoundsFromPoints(points);
   return new Bound(minX, minY, width, height);
