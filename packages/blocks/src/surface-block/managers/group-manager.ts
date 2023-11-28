@@ -26,7 +26,7 @@ export function setGroupParent(
   GroupMap.set(id, group);
 }
 
-function getGroups(element: EdgelessElement) {
+export function getGroups(element: EdgelessElement) {
   let group = getGroupParent(element);
   const groups: { group: GroupElement; child: EdgelessElement }[] = [];
   groups.push({ group: group, child: element });
@@ -39,11 +39,6 @@ function getGroups(element: EdgelessElement) {
 }
 
 export function compare(a: EdgelessElement, b: EdgelessElement) {
-  if (a.batch && b.batch) {
-    if (a.batch < b.batch) return -1;
-    else if (a.batch > b.batch) return 1;
-  }
-
   if (getGroupParent(a) === getGroupParent(b)) {
     if (a.index < b.index) return -1;
     else if (a.index > b.index) return 1;

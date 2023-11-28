@@ -1,5 +1,10 @@
 import type { IBound } from '../consts.js';
-import { EPSILON, getBoundsFromPoints, lineIntersects } from './math-utils.js';
+import {
+  EPSILON,
+  getBoundsFromPoints,
+  getBoundsWithRotation,
+  lineIntersects,
+} from './math-utils.js';
 import type { IVec } from './vec.js';
 import {
   deserializeXYWH,
@@ -318,14 +323,23 @@ export function getCommonBound(bounds: IBound[]): Bound | null {
   return new Bound(result.x, result.y, result.w, result.h);
 }
 
-// /**
-//  * Get whether A contains B
-//  */
-// export function contains(a: IBound, b: IBound): boolean {
-//   return (
-//     a.x <= b.x && a.x + a.w >= b.x + b.w && a.y <= b.y && a.y + a.h >= b.y + b.h
-//   );
-// }
+export function getElementsBound(bounds: IBound[]): Bound {
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+
+  bounds.forEach(ele => {
+    const b = getBoundsWithRotation(ele);
+
+    minX = Math.min(minX, b.x);
+    minY = Math.min(minY, b.y);
+    maxX = Math.max(maxX, b.x + b.w);
+    maxY = Math.max(maxY, b.y + b.h);
+  });
+
+  return new Bound(minX, minY, maxX - minX, maxY - minY);
+}
 
 export function getBoundFromPoints(points: number[][]) {
   const { minX, minY, width, height } = getBoundsFromPoints(points);
