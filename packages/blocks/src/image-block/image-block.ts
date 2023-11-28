@@ -9,12 +9,10 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../_common/utils/event.js';
-import { buildPath } from '../_common/utils/query.js';
 import { asyncFocusRichText } from '../_common/utils/selection.js';
 import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
 import { captureEventTarget } from '../_common/widgets/drag-handle/utils.js';
 import { Bound } from '../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../surface-block/surface-block.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import { shouldResizeImage } from './image/utils.js';
@@ -143,12 +141,7 @@ class ImageBlock extends BlockElement<ImageBlockModel> {
 @customElement('affine-edgeless-image')
 class ImageBlockEdgelessComponent extends ImageBlock {
   get surface() {
-    const surface = this.model.page.getParent(this.model.id);
-
-    return this.root.view.viewFromPath(
-      'block',
-      buildPath(surface)
-    ) as SurfaceBlockComponent;
+    return this.closest('affine-surface');
   }
 
   override render() {
@@ -156,6 +149,7 @@ class ImageBlockEdgelessComponent extends ImageBlock {
       ((this.surface?.pickById(this.model.id) as ImageBlockModel) ?? this.model)
         .xywh
     );
+
     return html`<img
       style=${styleMap({
         transform: `rotate(${this.model.rotate}deg)`,

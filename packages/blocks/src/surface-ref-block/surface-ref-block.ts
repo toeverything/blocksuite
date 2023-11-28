@@ -346,6 +346,11 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   private _initSurfaceRenderer() {
     let lastWidth = 0;
+    this.surfaceRenderer.layerManager.init([
+      ...this._elements.values(),
+      ...((this._surfaceModel?.children || []) as EdgelessElement[]),
+      ...(this.page.getBlockByFlavour('affine:note') as EdgelessElement[]),
+    ]);
     const observer = new ResizeObserver(entries => {
       if (entries[0].contentRect.width !== lastWidth) {
         lastWidth = entries[0].contentRect.width;
