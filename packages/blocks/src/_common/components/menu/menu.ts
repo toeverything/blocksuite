@@ -693,8 +693,31 @@ export const positionToVRect = (x: number, y: number): VirtualElement => {
 export const eventToVRect = (e: MouseEvent): VirtualElement => {
   return positionToVRect(e.x, e.y);
 };
+const autoUpdate = (
+  target: HTMLElement,
+  content: HTMLElement,
+  updateFunction: () => void
+) => {
+  const observer = new MutationObserver(() => {
+    updateFunction();
+  });
+
+  observer.observe(target, {
+    attributes: true,
+    childList: true,
+    subtree: true,
+  });
+
+  window.addEventListener('resize', updateFunction);
+
+  return () => {
+    observer.disconnect();
+    window.removeEventListener('resize', updateFunction);
+  };
+};
+
 export const createPopup = (
-  target: ReferenceElement,
+  target: HTMLElement,
   content: HTMLElement,
   options?: {
     onClose?: () => void;
@@ -705,31 +728,45 @@ export const createPopup = (
   assertExists(root);
   const modal = createModal(root);
   modal.append(content);
-  computePosition(target, content, {
-    middleware: options?.middleware ?? [shift({ crossAxis: true })],
-  }).then(({ x, y }) => {
-    Object.assign(content.style, {
-      left: `${x}px`,
-      top: `${y}px`,
+
+  const updatePosition = () => {
+    computePosition(target, content, {
+      middleware: options?.middleware ?? [shift({ crossAxis: true })],
+    }).then(({ x, y }) => {
+      Object.assign(content.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
     });
-  });
+  };
+
+  const unsub = autoUpdate(target, content, updatePosition);
+
+  const removeModal = () => {
+    modal.remove();
+    options?.onClose?.();
+    unsub(); // Unsubscribe on close
+  };
+
   modal.onmousedown = ev => {
     if (ev.target === modal) {
-      modal.remove();
-      options?.onClose?.();
+      removeModal();
     }
   };
+
   modal.oncontextmenu = ev => {
     ev.preventDefault();
     if (ev.target === modal) {
-      modal.remove();
-      options?.onClose?.();
+      removeModal();
     }
   };
-  return () => {
-    modal.remove();
-  };
+
+  // Call the initial position update
+  updatePosition();
+
+  return removeModal;
 };
+
 export type MenuHandler = {
   close: () => void;
 };
