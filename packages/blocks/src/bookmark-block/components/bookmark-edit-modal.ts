@@ -2,7 +2,6 @@ import '../../_common/components/button.js';
 import '../../_common/components/button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -118,7 +117,7 @@ export const bookmarkModalStyles = html`
 @customElement('bookmark-edit-modal')
 export class BookmarkEditModal extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  model!: BaseBlockModel<BookmarkBlockModel>;
+  model!: BookmarkBlockModel;
   @property({ attribute: false })
   onCancel?: () => void;
   @property({ attribute: false })

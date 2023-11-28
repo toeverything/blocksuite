@@ -1,11 +1,11 @@
-import type { BaseBlockModel } from '@blocksuite/store';
-
 import type { BookmarkBlockComponent } from './bookmark-block.js';
-import type { BookmarkBlockModel, BookmarkProps } from './bookmark-model.js';
-import { defaultBookmarkProps } from './bookmark-model.js';
+import type {
+  BookmarkBlockModel,
+  BookmarkBlockProps,
+} from './bookmark-model.js';
 
 export function tryGetBookmarkAPI():
-  | ((url: string) => Promise<BookmarkProps>)
+  | ((url: string) => Promise<BookmarkBlockProps>)
   | null {
   // This method is get website's metaData by link
   // And only exists in the AFFiNE client
@@ -19,7 +19,7 @@ export function tryGetBookmarkAPI():
 
 // Result is boolean used to record whether the meta data is crawled
 export async function reloadBookmarkBlock(
-  model: BaseBlockModel<BookmarkBlockModel>,
+  model: BookmarkBlockModel,
   bookmarkElement: BookmarkBlockComponent,
   force = false
 ) {
@@ -52,16 +52,4 @@ export async function reloadBookmarkBlock(
   });
 
   bookmarkElement.loading = false;
-}
-
-export function cloneBookmarkProperties(
-  model: BaseBlockModel<BookmarkBlockModel>
-) {
-  return Object.keys(defaultBookmarkProps).reduce<BookmarkProps>(
-    (props, key) => {
-      props[key] = model[key];
-      return props;
-    },
-    {} as BookmarkProps
-  );
 }

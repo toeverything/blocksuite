@@ -2,7 +2,6 @@ import { WebIcon16 } from '../../../_common/icons/text.js';
 import type { SerializedBlock } from '../../../_common/utils/types.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import { DefaultBanner } from '../../../bookmark-block/images/banners.js';
-import { cloneBookmarkProperties } from '../../../bookmark-block/utils.js';
 import { BaseService } from '../service.js';
 
 export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
@@ -53,7 +52,14 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
     block: BookmarkBlockModel,
     children: SerializedBlock[]
   ): SerializedBlock {
-    const clonedProps = cloneBookmarkProperties(block);
+    const clonedProps = block.keys.reduce(
+      (acc, key) => {
+        // @ts-ignore
+        acc[key] = block[key];
+        return acc;
+      },
+      {} as Record<string, unknown>
+    );
 
     return {
       flavour: block.flavour,
