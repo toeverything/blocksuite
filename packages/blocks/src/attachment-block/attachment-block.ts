@@ -26,8 +26,8 @@ import {
   styles,
 } from './styles.js';
 import {
-  downloadAttachment,
-  getAttachment,
+  downloadAttachmentBlob,
+  getAttachmentBlob,
   isAttachmentLoading,
 } from './utils.js';
 
@@ -141,7 +141,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     const sourceId = this.model.sourceId;
     if (!sourceId) return;
     try {
-      const blob = await getAttachment(this.model);
+      const blob = await getAttachmentBlob(this.model);
       if (!blob) throw new Error('Blob is missing!');
       // TODO we no need to create blob url when the attachment is not embedded
       this._blobUrl = URL.createObjectURL(blob);
@@ -178,7 +178,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     this._isDownloading = true;
     // TODO speed up download by using this._blobUrl
     try {
-      await downloadAttachment(this.model);
+      await downloadAttachmentBlob(this.model);
     } catch (error) {
       console.error(error);
       toast(`Failed to download ${shortName}!`);

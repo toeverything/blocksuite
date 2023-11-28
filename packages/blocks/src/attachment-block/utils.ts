@@ -32,7 +32,7 @@ export function cloneAttachmentProperties(
   return clonedProps;
 }
 
-export async function getAttachment(model: AttachmentBlockModel) {
+export async function getAttachmentBlob(model: AttachmentBlockModel) {
   const blobManager = model.page.blob;
   const sourceId = model.sourceId;
   if (!sourceId) return null;
@@ -46,10 +46,10 @@ export async function getAttachment(model: AttachmentBlockModel) {
  * Since the size of the attachment may be very large,
  * the download process may take a long time!
  */
-export async function downloadAttachment(
+export async function downloadAttachmentBlob(
   attachmentModel: AttachmentBlockModel
 ) {
-  const attachment = await getAttachment(attachmentModel);
+  const attachment = await getAttachmentBlob(attachmentModel);
   if (!attachment) {
     toast('Failed to download attachment!');
     console.error(
@@ -215,7 +215,7 @@ export function isAttachmentLoading(modelId: string) {
 /**
  * Use it with caution! This function may take a long time!
  *
- * @deprecated
+ * @deprecated Use {@link getAttachmentBlob} instead.
  */
 export async function hasBlob(storage: BlobManager, sourceId: string) {
   return !!(await storage.get(sourceId));
