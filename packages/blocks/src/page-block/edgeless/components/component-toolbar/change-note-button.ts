@@ -9,7 +9,6 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { DEFAULT_EDGELESS_PROP } from '../../../../_common/edgeless/note/consts.js';
 import {
   ExpandIcon,
   HiddenIcon,
@@ -180,7 +179,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _queryCache = false;
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
 
   @query('.fill-color-button')
   private _fillColorButton!: HTMLDivElement;
@@ -209,27 +208,29 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _shadowTypePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  private get page() {
+    return this.surface.page;
+  }
+
   private _setBackground(color: CssVariableName) {
     this.notes.forEach(note => {
-      this.surface.page.updateBlock(note, { background: color });
+      this.page.updateBlock(note, { background: color });
     });
   }
 
   private _setShadowType(shadowType: string) {
     this.notes.forEach(note => {
-      if (!note.edgeless) {
-        // FIXME: this is a temporary fix for the note without edgeless
-        note.edgeless = DEFAULT_EDGELESS_PROP;
-      }
-      note.edgeless.style.shadowType = shadowType;
+      this.page.updateBlock(note, () => {
+        note.edgeless.style.shadowType = shadowType;
+      });
     });
   }
 
   private _setNoteHidden(note: NoteBlockModel, hidden: boolean) {
     note = this.surface.unwrap(note);
-    this.surface.page.updateBlock(note, { hidden });
+    this.page.updateBlock(note, { hidden });
 
-    const noteParent = this.surface.page.getParent(note);
+    const noteParent = this.page.getParent(note);
     assertExists(noteParent);
     const noteParentChildNotes = noteParent.children.filter(block =>
       matchFlavours(block, ['affine:note'])
@@ -239,31 +240,24 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     if (!hidden && note !== noteParentLastNote) {
       // move to the end
-      this.surface.page.moveBlocks(
-        [note],
-        noteParent,
-        noteParentLastNote,
-        false
-      );
+      this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
     }
     this._queryCache = !this._queryCache;
   }
 
   private _setStrokeWidth(borderSize: number) {
     this.notes.forEach(note => {
-      if (!note.edgeless) {
-        note.edgeless = DEFAULT_EDGELESS_PROP;
-      }
-      note.edgeless.style.borderSize = borderSize;
+      this.page.updateBlock(note, () => {
+        note.edgeless.style.borderSize = borderSize;
+      });
     });
   }
 
   private _setStrokeStyle(borderStyle: StrokeStyle) {
     this.notes.forEach(note => {
-      if (!note.edgeless) {
-        note.edgeless = DEFAULT_EDGELESS_PROP;
-      }
-      note.edgeless.style.borderStyle = borderStyle;
+      this.page.updateBlock(note, () => {
+        note.edgeless.style.borderStyle = borderStyle;
+      });
     });
   }
 
@@ -290,34 +284,29 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   private _setBorderRadius = (size: number) => {
     this.notes.forEach(note => {
-      if (!note.edgeless) {
-        note.edgeless = DEFAULT_EDGELESS_PROP;
-      }
-      note.edgeless.style.borderRadius = size;
+      this.page.updateBlock(note, () => {
+        note.edgeless.style.borderRadius = size;
+      });
     });
   };
 
   private _setCollapse() {
-    this.notes.forEach(element => {
-      const { edgeless } = element;
-      const collapse = edgeless ? element.edgeless.collapse : false;
-      const collapsedHeight = edgeless ? element.edgeless.collapsedHeight : 0;
+    this.notes.forEach(note => {
+      const { collapse, collapsedHeight } = note.edgeless;
 
-      const bound = Bound.deserialize(element.xywh);
-      if (!edgeless) {
-        element.edgeless = DEFAULT_EDGELESS_PROP;
-      }
-
+      const bound = Bound.deserialize(note.xywh);
       if (collapse) {
-        element.edgeless.collapsedHeight = bound.h;
-        element.edgeless.collapse = false;
+        this.page.updateBlock(note, () => {
+          note.edgeless.collapsedHeight = bound.h;
+          note.edgeless.collapse = false;
+        });
       } else {
         if (collapsedHeight) {
           bound.h = collapsedHeight;
         }
-        element.edgeless.collapse = true;
-        this.surface.updateElement(element.id, {
-          xywh: bound.serialize(),
+        this.page.updateBlock(note, () => {
+          note.edgeless.collapse = true;
+          note.xywh = bound.serialize();
         });
       }
     });
@@ -330,7 +319,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       this._fillColorPopper = createButtonPopper(
         this._fillColorButton,
         this._fillColorMenu,
-        ({ display }) => (this._popperShow = display === 'show')
+        ({ display }) => (this._showPopper = display === 'show')
       );
 
       this._disposables.add(this._fillColorPopper);
@@ -339,7 +328,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         this._shadowTypeButton,
         this._shadowTypesPanel,
         ({ display }) => {
-          this._popperShow = display === 'show';
+          this._showPopper = display === 'show';
         }
       );
       _disposables.add(this._shadowTypePopper);
@@ -348,7 +337,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         this._borderStyleButton,
         this._borderStylesPanel,
         ({ display }) => {
-          this._popperShow = display === 'show';
+          this._showPopper = display === 'show';
         }
       );
       _disposables.add(this._borderStylePopper);
@@ -357,7 +346,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         this._borderRadiusButton,
         this._boderRadiusPanel,
         ({ display }) => {
-          this._popperShow = display === 'show';
+          this._showPopper = display === 'show';
         }
       );
       _disposables.add(this._borderRadiusPopper);
@@ -367,14 +356,12 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   override render() {
     if (this.notes.length !== 1) return nothing;
     const note = this.notes[0];
-    const enableIndex =
-      this.surface.page.awarenessStore.getFlag('enable_note_index');
+    const enableIndex = this.page.awarenessStore.getFlag('enable_note_index');
     const { hidden, background, edgeless } = note;
-    const borderRadius = edgeless ? edgeless.style.borderRadius : 8;
-    const borderSize = edgeless ? edgeless.style.borderSize : 4;
-    const borderStyle = edgeless ? edgeless.style.borderStyle : 'solid';
-    const shadowType = edgeless ? edgeless.style.shadowType : 'none';
-    const collapse = edgeless ? edgeless.collapse : false;
+    const { shadowType, borderRadius, borderSize, borderStyle } =
+      edgeless.style;
+
+    const { collapse } = edgeless;
 
     return html`
       ${enableIndex
@@ -410,7 +397,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         : html`
             <edgeless-tool-icon-button
               class="fill-color-button"
-              .tooltip=${this._popperShow ? '' : 'Background'}
+              .tooltip=${this._showPopper ? '' : 'Background'}
               .iconContainerPadding=${2}
               @click=${() => this._fillColorPopper?.toggle()}
             >
@@ -448,7 +435,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
             <div class="item border-style-button">
               <edgeless-tool-icon-button
-                .tooltip=${this._popperShow ? '' : 'Border Style'}
+                .tooltip=${this._showPopper ? '' : 'Border Style'}
                 .iconContainerPadding=${0}
                 .hover=${false}
                 @click=${() => this._borderStylePopper?.toggle()}

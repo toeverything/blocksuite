@@ -62,7 +62,7 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
       this.rect.style.width = `${rect.width}px`;
       this.rect.style.height = `${rect.height}px`;
       this.rect.style.borderRadius = isNote
-        ? `${(element?.edgeless?.style?.borderRadius ?? 8) * zoom}px`
+        ? `${element.edgeless.style.borderRadius * zoom}px`
         : '';
       this.rect.style.backgroundColor = isNote
         ? 'var(--affine-hover-color)'

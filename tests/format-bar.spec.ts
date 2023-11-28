@@ -306,32 +306,32 @@ test('should format quick bar be able to format text', async ({ page }) => {
   );
 });
 
-test.fixme(
-  'should format quick bar be able to change background color',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    const { noteId } = await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    // select `456` paragraph by dragging
-    await dragBetweenIndices(page, [1, 0], [1, 3]);
+test('should format quick bar be able to change background color', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  // select `456` paragraph by dragging
+  await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-    const { highlight } = getFormatBar(page);
+  const { highlight } = getFormatBar(page);
 
-    await highlight.backgroundBtn.hover();
-    await expect(highlight.pinkBtn).toBeVisible();
-    await expect(highlight.backgroundBtn).toHaveAttribute(
-      'data-last-used',
-      'unset'
-    );
-    await highlight.pinkBtn.click();
-    await expect(highlight.backgroundBtn).toHaveAttribute(
-      'data-last-used',
-      'var(--affine-text-highlight-pink)'
-    );
+  await highlight.highlightBtn.hover();
+  await expect(highlight.redForegroundBtn).toBeVisible();
+  await expect(highlight.highlightBtn).toHaveAttribute(
+    'data-last-used',
+    'unset'
+  );
+  await highlight.redForegroundBtn.click();
+  await expect(highlight.highlightBtn).toHaveAttribute(
+    'data-last-used',
+    'var(--affine-text-highlight-foreground-red)'
+  );
 
-    await assertStoreMatchJSX(
-      page,
-      `
+  await assertStoreMatchJSX(
+    page,
+    `
 <affine:note
   prop:background="--affine-background-secondary-color"
   prop:edgeless={
@@ -355,7 +355,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          color="var(--affine-text-highlight-foreground-red)"
           insert="456"
         />
       </>
@@ -367,18 +367,18 @@ test.fixme(
     prop:type="text"
   />
 </affine:note>`,
-      noteId
-    );
+    noteId
+  );
 
-    // select `123` paragraph by ctrl + a
-    await focusRichText(page);
-    await selectAllByKeyboard(page);
-    // use last used color
-    await highlight.backgroundBtn.click();
+  // select `123` paragraph by ctrl + a
+  await focusRichText(page);
+  await selectAllByKeyboard(page);
+  // use last used color
+  await highlight.highlightBtn.click();
 
-    await assertStoreMatchJSX(
-      page,
-      `
+  await assertStoreMatchJSX(
+    page,
+    `
 <affine:note
   prop:background="--affine-background-secondary-color"
   prop:edgeless={
@@ -398,7 +398,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          color="var(--affine-text-highlight-foreground-red)"
           insert="123"
         />
       </>
@@ -409,7 +409,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          color="var(--affine-text-highlight-foreground-red)"
           insert="456"
         />
       </>
@@ -421,15 +421,15 @@ test.fixme(
     prop:type="text"
   />
 </affine:note>`,
-      noteId
-    );
+    noteId
+  );
 
-    await expect(highlight.defaultColorBtn).toBeVisible();
-    await highlight.defaultColorBtn.click();
+  await expect(highlight.defaultColorBtn).toBeVisible();
+  await highlight.defaultColorBtn.click();
 
-    await assertStoreMatchJSX(
-      page,
-      `
+  await assertStoreMatchJSX(
+    page,
+    `
 <affine:note
   prop:background="--affine-background-secondary-color"
   prop:edgeless={
@@ -453,7 +453,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          color="var(--affine-text-highlight-foreground-red)"
           insert="456"
         />
       </>
@@ -465,10 +465,9 @@ test.fixme(
     prop:type="text"
   />
 </affine:note>`,
-      noteId
-    );
-  }
-);
+    noteId
+  );
+});
 
 test('should format quick bar be able to format text when select multiple line', async ({
   page,

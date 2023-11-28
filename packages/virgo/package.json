@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/virgo",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "A micro editor.",
   "type": "module",
   "repository": "toeverything/blocksuite",
