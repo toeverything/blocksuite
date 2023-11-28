@@ -357,7 +357,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       return true;
     },
     Delete: ctx => handleDelete(ctx),
-    'Control-d': ctx => (IS_MAC ? handleDelete(ctx) : true),
+    'Control-d': ctx => {
+      if (IS_MAC) handleDelete(ctx);
+    },
   });
 
   textFormatConfigs.forEach(config => {
