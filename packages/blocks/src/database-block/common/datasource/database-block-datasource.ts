@@ -189,8 +189,8 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       this.cellGetValue(rowId, propertyId)
     );
     const result = columnManager
-        .getColumn(currentType)
-        ?.convertCell(toType, currentData, currentCells) ?? {
+      .getColumn(currentType)
+      ?.convertCell(toType, currentData, currentCells) ?? {
       column: columnManager.getColumn(toType).defaultData(),
       cells: currentCells.map(() => undefined),
     };
