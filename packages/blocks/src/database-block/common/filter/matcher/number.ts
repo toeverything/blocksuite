@@ -24,6 +24,7 @@ export const numberFilter = {
     }),
     label: '>=',
     impl: (value, target) => {
+      value = value ?? 0;
       if (typeof value !== 'number' || typeof target !== 'number') {
         return true;
       }
@@ -37,6 +38,7 @@ export const numberFilter = {
     }),
     label: '<',
     impl: (value, target) => {
+      value = value ?? 0;
       if (typeof value !== 'number' || typeof target !== 'number') {
         return true;
       }
@@ -50,6 +52,7 @@ export const numberFilter = {
     }),
     label: '<=',
     impl: (value, target) => {
+      value = value ?? 0;
       if (typeof value !== 'number' || typeof target !== 'number') {
         return true;
       }
@@ -63,6 +66,7 @@ export const numberFilter = {
     }),
     label: '==',
     impl: (value, target) => {
+      value = value ?? 0;
       if (typeof value !== 'number' || typeof target !== 'number') {
         return true;
       }
@@ -76,6 +80,7 @@ export const numberFilter = {
     }),
     label: '!=',
     impl: (value, target) => {
+      value = value ?? 0;
       if (typeof value !== 'number' || typeof target !== 'number') {
         return true;
       }
