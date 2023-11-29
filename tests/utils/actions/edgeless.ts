@@ -1182,7 +1182,7 @@ export async function getGroupChildrenIds(page: Page, index = 0) {
   );
 }
 
-export async function getPhasorElementsCount(page: Page) {
+export async function getCanvasElementsCount(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');

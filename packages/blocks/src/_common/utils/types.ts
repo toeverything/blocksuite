@@ -14,10 +14,10 @@ import type { NoteBlockModel } from '../../note-block/index.js';
 import { type ShapeStyle } from '../../surface-block/consts.js';
 import {
   type BrushElement,
+  type CanvasElement,
   type ConnectorElement,
   type ConnectorMode,
   type GroupElement,
-  type PhasorElement,
   type ShapeType,
 } from '../../surface-block/elements/index.js';
 import type { NavigatorMode } from '../edgeless/frame/consts.js';
@@ -131,7 +131,7 @@ export type TopLevelBlockModel =
   | FrameBlockModel
   | ImageBlockModel;
 
-export type EdgelessElement = TopLevelBlockModel | PhasorElement;
+export type EdgelessElement = TopLevelBlockModel | CanvasElement;
 
 export type Alignable = EdgelessElement;
 
@@ -141,7 +141,7 @@ export type Erasable = EdgelessElement;
 
 export type Connectable =
   | TopLevelBlockModel
-  | Exclude<PhasorElement, ConnectorElement | BrushElement | GroupElement>;
+  | Exclude<CanvasElement, ConnectorElement | BrushElement | GroupElement>;
 
 export type DefaultTool = {
   type: 'default';

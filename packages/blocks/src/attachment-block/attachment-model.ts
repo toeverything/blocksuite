@@ -13,6 +13,11 @@ import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
  * it means that the attachment is failed to upload.
  */
 
+/**
+ * @deprecated
+ */
+type BackwardCompatibleUndefined = undefined;
+
 export type AttachmentBlockProps = {
   name: string;
   size: number;
@@ -26,6 +31,10 @@ export type AttachmentBlockProps = {
   // The `loadingKey` and `sourceId` should not be existed at the same time.
   // loadingKey?: string | null;
   sourceId?: string;
+  /**
+   * Whether to show the attachment as an embed view.
+   */
+  embed: boolean | BackwardCompatibleUndefined;
 };
 
 export const defaultAttachmentProps: AttachmentBlockProps = {
@@ -34,6 +43,7 @@ export const defaultAttachmentProps: AttachmentBlockProps = {
   type: 'application/octet-stream',
   sourceId: undefined,
   caption: undefined,
+  embed: false,
 };
 
 export const AttachmentBlockSchema = defineBlockSchema({

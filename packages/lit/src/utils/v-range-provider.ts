@@ -15,6 +15,7 @@ export const getVRangeProvider: (
   const root = element.root;
   const selectionManager = root.selection;
   const rangeManager = root.rangeManager;
+  const vRangeUpdatedSlot = new Slot<VRangeUpdatedProp>();
 
   assertExists(selectionManager);
   assertExists(rangeManager);
@@ -68,7 +69,8 @@ export const getVRangeProvider: (
       length: element.model.text.length,
     };
   };
-  const setVRange = (vRange: VRange | null) => {
+
+  const setVRange = (vRange: VRange | null, sync = true) => {
     if (!vRange) {
       selectionManager.clear(['text']);
     } else {
@@ -82,7 +84,9 @@ export const getVRangeProvider: (
       });
       selectionManager.setGroup('note', [textSelection]);
     }
+    vRangeUpdatedSlot.emit([vRange, sync]);
   };
+
   const getVRange = (): VRange | null => {
     const sl = document.getSelection();
     if (!sl || sl.rangeCount === 0) {
@@ -101,7 +105,6 @@ export const getVRangeProvider: (
     return calculateVRange(range, textSelection);
   };
 
-  const vRangeUpdatedSlot = new Slot<VRangeUpdatedProp>();
   selectionManager.slots.changed.on(() => {
     const textSelection = selectionManager.find('text');
     if (!textSelection) return;

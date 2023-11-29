@@ -5,14 +5,14 @@ import type {
   CanvasTextFontStyle,
   CanvasTextFontWeight,
 } from '../../consts.js';
-import type { PhasorElementType } from '../edgeless-element.js';
+import type { CanvasElementType } from '../edgeless-element.js';
 import {
   type ISurfaceElement,
   type ISurfaceElementLocalRecord,
 } from '../surface-element.js';
 
 export interface IText extends ISurfaceElement {
-  type: PhasorElementType.TEXT;
+  type: CanvasElementType.TEXT;
 
   text: Y.Text;
   color: string;

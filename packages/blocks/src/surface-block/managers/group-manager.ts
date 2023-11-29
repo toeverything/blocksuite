@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
 import type { EdgelessElement } from '../../_common/utils/index.js';
-import { PhasorElementType } from '../elements/edgeless-element.js';
+import { CanvasElementType } from '../elements/edgeless-element.js';
 import { GROUP_ROOT } from '../elements/group/consts.js';
 import { GroupElement } from '../elements/group/group-element.js';
 import type { SurfaceBlockComponent } from '../surface-block.js';
@@ -26,7 +26,7 @@ export function setGroupParent(
   GroupMap.set(id, group);
 }
 
-function getGroups(element: EdgelessElement) {
+export function getGroups(element: EdgelessElement) {
   let group = getGroupParent(element);
   const groups: { group: GroupElement; child: EdgelessElement }[] = [];
   groups.push({ group: group, child: element });
@@ -39,11 +39,6 @@ function getGroups(element: EdgelessElement) {
 }
 
 export function compare(a: EdgelessElement, b: EdgelessElement) {
-  if (a.batch && b.batch) {
-    if (a.batch < b.batch) return -1;
-    else if (a.batch > b.batch) return 1;
-  }
-
   if (getGroupParent(a) === getGroupParent(b)) {
     if (a.index < b.index) return -1;
     else if (a.index > b.index) return 1;
@@ -155,8 +150,8 @@ export class EdgelessGroupManager {
         this.removeChild(parent, element.id);
       });
     }
-    const groups = surface.getElementsByType(PhasorElementType.GROUP);
-    const groupId = surface.addElement(PhasorElementType.GROUP, {
+    const groups = surface.getElementsByType(CanvasElementType.GROUP);
+    const groupId = surface.addElement(CanvasElementType.GROUP, {
       children: map,
       title: new Workspace.Y.Text(`Group ${groups.length + 1}`),
     });

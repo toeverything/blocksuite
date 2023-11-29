@@ -3,12 +3,12 @@ import { assertExists, noop } from '@blocksuite/global/utils';
 
 import type { ConnectorTool } from '../../../../_common/utils/index.js';
 import {
+  CanvasElementType,
   type Connection,
   type ConnectorElement,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
   type IVec,
-  PhasorElementType,
   StrokeStyle,
 } from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
@@ -49,7 +49,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     this._page.captureSync();
     const { mode, color, strokeWidth } = this.tool;
     const { _surface } = this;
-    const id = _surface.addElement(PhasorElementType.CONNECTOR, {
+    const id = _surface.addElement(CanvasElementType.CONNECTOR, {
       stroke: color,
       mode,
       controllers: [],
@@ -72,7 +72,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       point,
       this._connector.source.id ? [this._connector.source.id] : []
     ) as Connection;
-    this._surface.updateElement<PhasorElementType.CONNECTOR>(
+    this._surface.updateElement<CanvasElementType.CONNECTOR>(
       this._connector.id,
       { target }
     );

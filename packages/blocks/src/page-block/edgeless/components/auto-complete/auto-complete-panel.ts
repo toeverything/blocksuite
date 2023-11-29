@@ -17,12 +17,12 @@ import { captureEventTarget } from '../../../../_common/widgets/drag-handle/util
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import {
   Bound,
+  type CanvasElementType,
   clamp,
   type Connection,
   type ConnectorElement,
   GroupElement,
   normalizeDegAngle,
-  type PhasorElementType,
   serializeXYWH,
   type ShapeElement,
   ShapeStyle,
@@ -291,7 +291,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const id = await createShapeElement(edgeless, currentShape, targetType);
 
     surface.updateElement(id, { xywh: nextBound.serialize() });
-    surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
+    surface.updateElement<CanvasElementType.CONNECTOR>(this.connector.id, {
       target: { id, position },
     });
 
@@ -329,7 +329,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     if (group instanceof GroupElement) {
       surface.group.addChild(group, id);
     }
-    surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
+    surface.updateElement<CanvasElementType.CONNECTOR>(this.connector.id, {
       target: { id, position },
     });
     this.edgeless.selectionManager.setSelection({
@@ -364,7 +364,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const frame = edgeless.surface.pickById(id);
     assertExists(frame);
 
-    surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
+    surface.updateElement<CanvasElementType.CONNECTOR>(this.connector.id, {
       target: { id, position },
     });
     edgeless.selectionManager.setSelection({
@@ -382,7 +382,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     const { surface } = this.edgeless;
     surface.updateElement(id, { xywh: serializeXYWH(...xywh) });
-    surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
+    surface.updateElement<CanvasElementType.CONNECTOR>(this.connector.id, {
       target: { id, position },
     });
     this.edgeless.selectionManager.setSelection({

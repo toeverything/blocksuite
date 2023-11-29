@@ -1,8 +1,8 @@
 import type { SurfaceBlockComponent } from '@blocksuite/blocks';
 import {
+  CanvasElementType,
   ConnectorEndpointStyle,
   ConnectorMode,
-  PhasorElementType,
   ShapeStyle,
   type ShapeType,
   StrokeStyle,
@@ -81,7 +81,7 @@ export function createMindMapOnEdgeless(
   const shapeIds: string[] = [];
   const originalIdMap = new Map<string, string>();
   mindMap?.nodes.forEach(node => {
-    const id = surfaceElement.addElement(PhasorElementType.SHAPE, {
+    const id = surfaceElement.addElement(CanvasElementType.SHAPE, {
       ...DEFAULT_SHAPE_PROPS,
       xywh: `[${node.position.x},${node.position.y},${node.width},${node.height}]`,
       text: new Workspace.Y.Text(node.content),
@@ -99,7 +99,7 @@ export function createMindMapOnEdgeless(
   // add connectors based on the edges
   const connectorIds: string[] = [];
   edges.forEach(edge => {
-    const id = surfaceElement.addElement(PhasorElementType.CONNECTOR, {
+    const id = surfaceElement.addElement(CanvasElementType.CONNECTOR, {
       ...DEFAULT_CONNECTOR_PROPS,
       source: {
         id: edge.source,

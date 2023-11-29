@@ -5,8 +5,8 @@ import { ConnectorElement } from './connector/connector-element.js';
 import { ConnectorElementDefaultProps } from './connector/consts.js';
 import { type IConnector } from './connector/types.js';
 import type {
+  ICanvasElementType,
   IElementDefaultProps,
-  IPhasorElementType,
 } from './edgeless-element.js';
 import { GroupElementDefaultProps } from './group/consts.js';
 import { GroupElement } from './group/group-element.js';
@@ -40,22 +40,14 @@ export {
   normalizeTextBound,
 } from './text/utils.js';
 
-export type PhasorElement =
+export type CanvasElement =
   | ShapeElement
   | BrushElement
   | ConnectorElement
   | SurfaceElement
   | GroupElement;
 
-export type PhasorTypeToElement = {
-  shape: ShapeElement;
-  brush: BrushElement;
-  connector: ConnectorElement;
-  text: TextElement;
-  group: GroupElement;
-};
-
-export type IPhasorElementLocalRecord = {
+export type ICanvasElementLocalRecord = {
   shape: IShapeLocalRecord;
   brush: IBrushLocalRecord;
   connector: ISurfaceElementLocalRecord;
@@ -63,8 +55,8 @@ export type IPhasorElementLocalRecord = {
   group: IGroupLocalRecord;
 };
 
-export type PhasorElementLocalRecordValues =
-  IPhasorElementLocalRecord[keyof IPhasorElementLocalRecord];
+export type CanvasElementLocalRecordValues =
+  ICanvasElementLocalRecord[keyof ICanvasElementLocalRecord];
 
 export const ElementCtors = {
   brush: BrushElement,
@@ -75,8 +67,8 @@ export const ElementCtors = {
 } as const;
 
 export const ElementDefaultProps: Record<
-  keyof IPhasorElementType,
-  IElementDefaultProps<keyof IPhasorElementType>
+  keyof ICanvasElementType,
+  IElementDefaultProps<keyof ICanvasElementType>
 > = {
   brush: BrushElementDefaultProps,
   shape: ShapeElementDefaultProps,
@@ -85,6 +77,6 @@ export const ElementDefaultProps: Record<
   group: GroupElementDefaultProps,
 } as const;
 
-export type PhasorElementWithText = ShapeElement | TextElement;
+export type CanvasElementWithText = ShapeElement | TextElement;
 
 export type { IBrush, IConnector, IShape, IText };

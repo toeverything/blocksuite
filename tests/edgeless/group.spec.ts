@@ -25,11 +25,11 @@ import {
   undoByKeyboard,
 } from '../utils/actions/keyboard.js';
 import {
+  assertCanvasElementsCount,
   assertEdgelessCanvasText,
   assertEdgelessNonSelectedRect,
   assertGroupChildrenIds,
   assertGroupIds,
-  assertPhasorElementsCount,
   assertSelectedBound,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -330,15 +330,15 @@ test.describe('group', () => {
       const ids = await getIds(page);
       await captureHistory(page);
       await pressBackspace(page);
-      await assertPhasorElementsCount(page, 0);
+      await assertCanvasElementsCount(page, 0);
 
       await undoByKeyboard(page);
-      await assertPhasorElementsCount(page, 3);
+      await assertCanvasElementsCount(page, 3);
       await assertGroupIds(page, [ids[2], ids[2], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]]);
 
       await redoByKeyboard(page);
-      await assertPhasorElementsCount(page, 0);
+      await assertCanvasElementsCount(page, 0);
     });
 
     test('delete sub-element in group', async ({ page }) => {
@@ -348,17 +348,17 @@ test.describe('group', () => {
       await captureHistory(page);
       await clickView(page, [50, 50]);
       await pressBackspace(page);
-      await assertPhasorElementsCount(page, 2);
+      await assertCanvasElementsCount(page, 2);
       await assertGroupIds(page, [ids[2], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[1]]);
 
       await undoByKeyboard(page);
-      await assertPhasorElementsCount(page, 3);
+      await assertCanvasElementsCount(page, 3);
       await assertGroupIds(page, [ids[2], GROUP_ROOT_ID, ids[2]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]]);
 
       await redoByKeyboard(page);
-      await assertPhasorElementsCount(page, 2);
+      await assertCanvasElementsCount(page, 2);
       await assertGroupIds(page, [ids[2], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[1]]);
     });
@@ -374,12 +374,12 @@ test.describe('group', () => {
 
       const ids = await getIds(page);
       await pressBackspace(page);
-      await assertPhasorElementsCount(page, 2);
+      await assertCanvasElementsCount(page, 2);
       await assertGroupIds(page, [ids[3], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[2]]);
 
       await undoByKeyboard(page);
-      await assertPhasorElementsCount(page, 5);
+      await assertCanvasElementsCount(page, 5);
       await assertGroupIds(page, [
         ids[3],
         GROUP_ROOT_ID,
@@ -391,7 +391,7 @@ test.describe('group', () => {
       await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
 
       await redoByKeyboard(page);
-      await assertPhasorElementsCount(page, 2);
+      await assertCanvasElementsCount(page, 2);
       await assertGroupIds(page, [ids[3], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[2]]);
     });

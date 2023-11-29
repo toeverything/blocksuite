@@ -25,9 +25,10 @@ import { groupBy } from '../../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
-import { type PhasorElement } from '../../../../surface-block/index.js';
+import { type CanvasElement } from '../../../../surface-block/index.js';
 import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { removeContainedFrames } from '../../frame-manager.js';
 import { duplicate } from '../../utils/clipboard-utils.js';
 import { deleteElements } from '../../utils/crud.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from '../../utils/query.js';
@@ -206,7 +207,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       }
     ) as {
       notes: NoteBlockModel[];
-      shapes: PhasorElement[];
+      shapes: CanvasElement[];
       frames: FrameBlockModel[];
       images: ImageBlockModel[];
     };
@@ -246,8 +247,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       }
       case 'copy-as-png': {
         const { notes, frames, shapes, images } = this._splitElements();
+
         this.slots.copyAsPng.emit({
-          blocks: [...notes, ...frames, ...images],
+          blocks: [...notes, ...removeContainedFrames(frames), ...images],
           shapes,
         });
         break;
@@ -260,19 +262,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'forward':
       case 'backward':
       case 'back': {
-        const { notes, shapes, images } = this._splitElements();
-        if (notes.length + images.length > 0) {
-          this.slots.reorderingBlocksUpdated.emit({
-            elements: [...notes, ...images],
-            type,
-          });
-        }
-        if (shapes.length) {
-          this.slots.reorderingShapesUpdated.emit({
-            elements: shapes,
-            type,
-          });
-        }
+        this.edgeless.slots.reorderingElements.emit({
+          elements: this.selection.elements,
+          type,
+        });
         break;
       }
     }

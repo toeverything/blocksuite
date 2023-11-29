@@ -15,10 +15,10 @@ import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import type { HitTestOptions } from '../../../../surface-block/elements/edgeless-element.js';
 import {
   Bound,
+  type CanvasElement,
   ConnectorElement,
   GroupElement,
   type IVec,
-  type PhasorElement,
   ShapeElement,
   TextElement,
   Vec,
@@ -29,10 +29,10 @@ import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
 import {
+  isCanvasElement,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
-  isPhasorElement,
 } from '../../utils/query.js';
 import {
   addText,
@@ -174,7 +174,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _handleSurfaceDragMove(
-    selected: PhasorElement,
+    selected: CanvasElement,
     initialBound: Bound,
     delta: IVec
   ) {
@@ -424,7 +424,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       } else {
         const frame = this._edgeless.surface.frame.selectFrame([ele]);
         if (frame) {
-          this._frames.add(frame);
+          this._frames.add(frame as FrameBlockModel);
         }
       }
     });
@@ -599,7 +599,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         const delta = [dx + alignRst.dx, dy + alignRst.dy];
 
         this._toBeMoved.forEach((element, index) => {
-          if (isPhasorElement(element)) {
+          if (isCanvasElement(element)) {
             if (!this._isDraggable(element)) return;
             this._handleSurfaceDragMove(
               element,
@@ -616,7 +616,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         });
         const frame = surface.frame.selectFrame(this._toBeMoved);
         frame
-          ? surface.frame.setHighlight(frame)
+          ? surface.frame.setHighlight(frame as FrameBlockModel)
           : surface.frame.clearHighlight();
 
         this._forceUpdateSelection(
