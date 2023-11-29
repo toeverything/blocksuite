@@ -82,11 +82,6 @@ type id = string;
 
 const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
 
-export enum EdgelessBlocksFlavour {
-  NOTE = 'affine:note',
-  FRAME = 'affine:frame',
-}
-
 export type IndexedCanvasUpdateEvent = CustomEvent<{
   content: HTMLCanvasElement[];
 }>;
