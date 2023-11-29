@@ -29,7 +29,7 @@ export function ImageOptionsTemplate({
 }: {
   ref?: RefOrCallback;
   model: ImageBlockModel;
-  blob: Blob;
+  blob?: Blob;
   abortController: AbortController;
   /**
    * @deprecated
@@ -76,8 +76,9 @@ export function ImageOptionsTemplate({
         ${supportAttachment
           ? html`<icon-button
               size="32px"
-              ?hidden=${readonly}
+              ?hidden=${readonly || !blob}
               @click=${() => {
+                if (!blob) return;
                 abortController.abort();
                 turnImageIntoCardView(model, blob);
               }}
@@ -119,8 +120,10 @@ export function ImageOptionsTemplate({
         <icon-button
           size="32px"
           ?hidden=${readonly ||
+          !blob ||
           !model.page.awarenessStore.getFlag('enable_bultin_ledits')}
           @click="${() => {
+            if (!blob) return;
             abortController.abort();
             openLeditsEditor(model, blob, root);
           }}"
