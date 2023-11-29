@@ -137,8 +137,12 @@ export class BlockElement<
     this._disposables.add(this.root.event.bindHotkey(keymap, config));
   }
 
-  renderModel = (model: BaseBlockModel): TemplateResult | null => {
+  renderModel = (model: BaseBlockModel): TemplateResult => {
     return this.root.renderModel(model);
+  };
+
+  renderModelChildren = (model: BaseBlockModel): TemplateResult => {
+    return this.root.renderModelChildren(model);
   };
 
   protected override async getUpdateComplete(): Promise<boolean> {

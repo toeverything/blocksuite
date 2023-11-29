@@ -71,7 +71,6 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
   override firstUpdated() {
     this._updateFollowingListSiblings();
-    this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => {
       this._updateFollowingListSiblings();
     });
@@ -150,7 +149,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
     >
-      ${this.content}
+      ${this.renderModelChildren(this.model)}
     </div>`;
 
     return html`

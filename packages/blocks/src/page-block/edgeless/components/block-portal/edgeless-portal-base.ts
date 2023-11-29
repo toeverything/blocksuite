@@ -34,12 +34,6 @@ export class EdgelessPortalBase<
     );
 
     this._disposables.add(
-      this.model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-
-    this._disposables.add(
       this.model.propsUpdated.on(event => {
         this.edgeless.slots.elementUpdated.emit({
           id: this.model.id,
