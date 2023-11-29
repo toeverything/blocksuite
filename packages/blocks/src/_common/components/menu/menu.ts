@@ -6,7 +6,13 @@ import type {
   ReferenceElement,
   VirtualElement,
 } from '@floating-ui/dom';
-import { computePosition, flip, offset, shift } from '@floating-ui/dom';
+import {
+  autoUpdate,
+  computePosition,
+  flip,
+  offset,
+  shift,
+} from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -693,31 +699,8 @@ export const positionToVRect = (x: number, y: number): VirtualElement => {
 export const eventToVRect = (e: MouseEvent): VirtualElement => {
   return positionToVRect(e.x, e.y);
 };
-const autoUpdate = (
-  target: HTMLElement,
-  content: HTMLElement,
-  updateFunction: () => void
-) => {
-  const observer = new MutationObserver(() => {
-    updateFunction();
-  });
-
-  observer.observe(target, {
-    attributes: true,
-    childList: true,
-    subtree: true,
-  });
-
-  window.addEventListener('resize', updateFunction);
-
-  return () => {
-    observer.disconnect();
-    window.removeEventListener('resize', updateFunction);
-  };
-};
-
 export const createPopup = (
-  target: HTMLElement,
+  target: ReferenceElement,
   content: HTMLElement,
   options?: {
     onClose?: () => void;
@@ -727,9 +710,7 @@ export const createPopup = (
   const root = document.querySelector('block-suite-root');
   assertExists(root);
   const modal = createModal(root);
-  modal.append(content);
-
-  const updatePosition = () => {
+  const unsub = autoUpdate(target, content, () => {
     computePosition(target, content, {
       middleware: options?.middleware ?? [shift({ crossAxis: true })],
     }).then(({ x, y }) => {
@@ -738,35 +719,33 @@ export const createPopup = (
         top: `${y}px`,
       });
     });
-  };
-
-  const unsub = autoUpdate(target, content, updatePosition);
-
-  const removeModal = () => {
-    modal.remove();
-    options?.onClose?.();
-    unsub(); // Unsubscribe on close
-  };
-
+  });
+  modal.append(content);
+  computePosition(target, content, {
+    middleware: options?.middleware ?? [shift({ crossAxis: true })],
+  }).then(({ x, y }) => {
+    Object.assign(content.style, {
+      left: `${x}px`,
+      top: `${y}px`,
+    });
+  });
   modal.onmousedown = ev => {
     if (ev.target === modal) {
-      removeModal();
+      modal.remove();
+      options?.onClose?.();
     }
   };
-
   modal.oncontextmenu = ev => {
     ev.preventDefault();
     if (ev.target === modal) {
-      removeModal();
+      modal.remove();
+      options?.onClose?.();
     }
   };
-
-  // Call the initial position update
-  updatePosition();
-
-  return removeModal;
+  return () => {
+    modal.remove();
+  };
 };
-
 export type MenuHandler = {
   close: () => void;
 };
