@@ -256,6 +256,7 @@ export class EditorContainer
             name: file.name,
             size: file.size,
             type: file.type,
+            embed: false,
           };
         },
       });

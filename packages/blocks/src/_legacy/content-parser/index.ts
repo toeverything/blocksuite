@@ -614,6 +614,7 @@ export class ContentParser {
         sourceId,
         size: file.size,
         type: file.type,
+        embed: false,
         children: [],
       };
       return [attachmentProps];

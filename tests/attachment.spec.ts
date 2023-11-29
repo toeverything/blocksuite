@@ -132,7 +132,8 @@ test('can insert attachment from slash menu', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `  <affine:note
+    `
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:edgeless={
     Object {
@@ -148,6 +149,7 @@ test('can insert attachment from slash menu', async ({ page }) => {
   prop:index="a0"
 >
   <affine:attachment
+    prop:embed={false}
     prop:name="${FILE_NAME}"
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -188,6 +190,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
   prop:index="a0"
 >
   <affine:attachment
+    prop:embed={false}
     prop:name="${FILE_NAME}"
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -227,7 +230,8 @@ test('should undo/redo works for attachment', async ({ page }) => {
   await redoByKeyboard(page);
   await assertStoreMatchJSX(
     page,
-    `  <affine:note
+    `
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:edgeless={
     Object {
@@ -243,6 +247,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
   prop:index="a0"
 >
   <affine:attachment
+    prop:embed={false}
     prop:name="${FILE_NAME}"
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -308,7 +313,7 @@ test('should turn attachment to image works', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-    <affine:note
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:edgeless={
     Object {
@@ -355,6 +360,7 @@ test('should turn attachment to image works', async ({ page }) => {
 >
   <affine:attachment
     prop:caption=""
+    prop:embed={false}
     prop:name="${FILE_NAME}"
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -437,6 +443,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
   prop:index="a0"
 >
   <affine:attachment
+    prop:embed={false}
     prop:name="${FILE_NAME}"
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -486,6 +493,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:attachment
+      prop:embed={false}
       prop:name="${FILE_NAME}"
       prop:size={${FILE_SIZE}}
       prop:sourceId="${FILE_ID}"
@@ -548,6 +556,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
       prop:type="text"
     />
     <affine:attachment
+      prop:embed={false}
       prop:name="${FILE_NAME}"
       prop:size={${FILE_SIZE}}
       prop:sourceId="${FILE_ID}"
