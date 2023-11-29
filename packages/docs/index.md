@@ -19,9 +19,9 @@ hero:
 
 features:
   - title: 📝 Document Editor
-    details: TODO
-  - title: 🎨 Whiteboard Editor
-    details: TODO
-  - title: 🧩 Common Framework
-    details: TODO
+    details: The <code>DocEditor</code> is the default editor BlockSuite ships. It's created from our own rich text editing infra, and is open for customizations.
+  - title: 🎨 Edgeless Editor
+    details: BlockSuite also provides <code>EdgelessEditor</code> with limitless logical canvas size, ideal for virtual whiteboarding and graphic editing.
+  - title: 🧩 Common Collaborative Framework
+    details: BlockSuite editors are all based on a collaborative block editing framework. Battery included. Framework agnostic.
 ---

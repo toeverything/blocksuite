@@ -18,7 +18,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       {
-        text: 'Editors',
+        text: '🚧 Editors',
         link: '#',
       },
       {
