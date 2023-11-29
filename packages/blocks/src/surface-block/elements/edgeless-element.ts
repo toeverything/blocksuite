@@ -32,7 +32,7 @@ export interface IEdgelessElement {
   connectable: boolean;
   index: string;
   batch: string | null;
-  gridBound: Bound;
+  elementBound: Bound;
   containedByBounds(bounds: Bound): boolean;
   getNearestPoint(point: IVec): IVec;
   intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;

@@ -84,7 +84,7 @@ export class NoteBlockModel
   implements IEdgelessElement
 {
   override flavour!: EdgelessBlockType.NOTE;
-  gridBound!: Bound;
+  elementBound!: Bound;
 
   get connectable() {
     return true;

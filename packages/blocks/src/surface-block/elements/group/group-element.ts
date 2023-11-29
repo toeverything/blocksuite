@@ -80,8 +80,8 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     const bound: Bound = children.reduce((prev, cur) => {
       const ele = options.pickById(cur);
       assertExists(ele);
-      return prev.unite(ele.gridBound);
-    }, options.pickById(children[0])!.gridBound);
+      return prev.unite(ele.elementBound);
+    }, options.pickById(children[0])!.elementBound);
     return bound.serialize();
   }
 
@@ -127,7 +127,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     );
   }
 
-  override get gridBound() {
+  override get elementBound() {
     const bound = Bound.deserialize(this.xywh);
     bound.y -= this._titleHeight;
     bound.h += this._titleHeight;
