@@ -37,8 +37,7 @@ import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
 import type { CustomCopilotPanel } from './copilot/custom-copilot-panel';
-// @ts-ignore
-import { extendFormatBar } from './custom-format-bar';
+import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
