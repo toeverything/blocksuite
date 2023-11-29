@@ -26,7 +26,6 @@ import rehypeStringify from 'rehype-stringify';
 import { getHighlighter, type IThemedToken, type Lang } from 'shiki';
 import { unified } from 'unified';
 
-import { LIGHT_THEME } from '../../code-block/utils/consts.js';
 import {
   highlightCache,
   type highlightCacheKey,
@@ -54,7 +53,10 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       assets: payload.assets,
     });
     return {
-      file,
+      file: file.replace(
+        '<!--BlockSuitePageTitlePlaceholder-->',
+        `<h1>${payload.snapshot.meta.title}</h1>`
+      ),
       assetsIds,
     };
   }
@@ -63,7 +65,11 @@ export class HtmlAdapter extends BaseAdapter<Html> {
   ): Promise<FromBlockSnapshotResult<string>> {
     const root: Root = {
       type: 'root',
-      children: [],
+      children: [
+        {
+          type: 'doctype',
+        },
+      ],
     };
     const { ast, assetsIds } = await this._traverseSnapshot(
       payload.snapshot,
@@ -140,6 +146,15 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             .openNode(
               {
                 type: 'element',
+                tagName: 'html',
+                properties: {},
+                children: [],
+              },
+              'children'
+            )
+            .openNode(
+              {
+                type: 'element',
                 tagName: 'head',
                 properties: {},
                 children: [],
@@ -181,12 +196,37 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                 input[type='checkbox']:checked + label:before {
                   content: '✓';
                 }
-                `,
+                `.replace(/\s\s+/g, ''),
               },
               'children'
             )
             .closeNode()
             .closeNode()
+            .closeNode()
+            .openNode(
+              {
+                type: 'element',
+                tagName: 'body',
+                properties: {},
+                children: [],
+              },
+              'children'
+            )
+            .openNode(
+              {
+                type: 'element',
+                tagName: 'div',
+                properties: {
+                  style: 'width: 70vw; margin: 60px auto;',
+                },
+                children: [],
+              },
+              'children'
+            )
+            .openNode({
+              type: 'comment',
+              value: 'BlockSuitePageTitlePlaceholder',
+            })
             .closeNode();
           break;
         }
@@ -472,6 +512,10 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     });
     walker.setLeave(async (o, context) => {
       switch (o.node.flavour) {
+        case 'affine:page': {
+          context.closeNode().closeNode().closeNode();
+          break;
+        }
         case 'affine:paragraph': {
           context.closeNode().closeNode();
           break;
@@ -504,15 +548,8 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     }
     const lang = rawLang as Lang;
     const highlighter = await getHighlighter({
-      theme: LIGHT_THEME,
-      themes: [LIGHT_THEME],
+      theme: 'light-plus',
       langs: [lang],
-      paths: {
-        // TODO: use local path
-        wasm: 'https://cdn.jsdelivr.net/npm/shiki/dist',
-        themes: 'https://cdn.jsdelivr.net/',
-        languages: 'https://cdn.jsdelivr.net/npm/shiki/languages',
-      },
     });
     const cacheKey: highlightCacheKey = `${delta.insert}-${rawLang}-light`;
     const cache = highlightCache.get(cacheKey);
@@ -528,7 +565,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       tokens = highlighter.codeToThemedTokens(
         delta.insert,
         lang,
-        LIGHT_THEME
+        'light-plus'
       )[0];
       highlightCache.set(cacheKey, tokens);
     }
@@ -538,7 +575,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         type: 'element',
         tagName: 'span',
         properties: {
-          styles: `word-wrap: break-word; color: ${token.color};`,
+          style: `word-wrap: break-word; color: ${token.color};`,
         },
         children: [
           {
