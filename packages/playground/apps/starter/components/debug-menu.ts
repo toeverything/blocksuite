@@ -402,13 +402,6 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   override firstUpdated() {
-    this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
-    this.workspace.slots.pageAdded.on(() => {
-      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
-    });
-    this.workspace.slots.pageRemoved.on(() => {
-      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
-    });
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
