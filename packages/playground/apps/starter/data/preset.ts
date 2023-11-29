@@ -27,7 +27,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
   await page.load(async () => {
     // Add page block and surface block at root level
     const pageBlockId = page.addBlock('affine:page', {
-      title: new Text('Welcome to BlockSuite Playground'),
+      title: new Text('BlockSuite Playground'),
     });
     page.addBlock('affine:surface', {}, pageBlockId);
 
