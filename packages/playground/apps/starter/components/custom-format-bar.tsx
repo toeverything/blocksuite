@@ -1,30 +1,17 @@
 import { AffineFormatBarWidget } from '@blocksuite/blocks';
-import { createRoot } from 'react-dom/client';
 
 export function extendFormatBar() {
   AffineFormatBarWidget.customElements.add(
     (formatBar: AffineFormatBarWidget) => {
+      // If you are using react,
+      // you can use `createRoot` to mount the component here.
       const element = document.createElement('div');
-      createRoot(element).render(
-        <div
-          style={{
-            height: '32px',
-            width: '32px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-          }}
-          data-testid="custom-format-bar-element"
-          onClick={() => {
-            const root = formatBar.root;
-            const selectionManager = root.selection;
-            console.log('selections', selectionManager.value);
-          }}
-        >
-          <div>X</div>
-        </div>
-      );
+      element.textContent = '❤️';
+      element.addEventListener('click', () => {
+        const root = formatBar.root;
+        const selectionManager = root.selection;
+        console.log('selections', selectionManager.value);
+      });
 
       return element;
     }
