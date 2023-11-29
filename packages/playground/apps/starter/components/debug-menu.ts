@@ -20,6 +20,7 @@ import {
   createPage,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
+  NOTE_WIDTH,
   SIZE_VARIABLES,
   VARIABLES,
   ZipTransformer,
@@ -263,20 +264,34 @@ export class DebugMenu extends ShadowlessElement {
     this._hasOffset = !this._hasOffset;
   }
 
+  private _addNote() {
+    const root = this.page.root;
+    if (!root) return;
+    const pageId = root.id;
+
+    this.page.captureSync();
+
+    const count = root.children.length;
+    const xywh = `[0,${count * 60},${NOTE_WIDTH},95]`;
+
+    const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
+    this.page.addBlock('affine:paragraph', {}, noteId);
+  }
+
   private _exportPdf() {
-    void this.contentParser.exportPdf();
+    this.contentParser.exportPdf();
   }
 
   private _exportHtml() {
-    void this.contentParser.exportHtml();
+    this.contentParser.exportHtml();
   }
 
   private _exportMarkDown() {
-    void this.contentParser.exportMarkdown();
+    this.contentParser.exportMarkdown();
   }
 
   private _exportPng() {
-    void this.contentParser.exportPng();
+    this.contentParser.exportPng();
   }
 
   private async _exportSnapshot() {
@@ -488,7 +503,6 @@ export class DebugMenu extends ShadowlessElement {
             <sl-tooltip content="Undo" placement="bottom" hoist>
               <sl-button
                 size="small"
-                content="Undo"
                 .disabled=${!this._canUndo}
                 @click=${() => this.page.undo()}
               >
@@ -499,7 +513,6 @@ export class DebugMenu extends ShadowlessElement {
             <sl-tooltip content="Redo" placement="bottom" hoist>
               <sl-button
                 size="small"
-                content="Redo"
                 .disabled=${!this._canRedo}
                 @click=${() => this.page.redo()}
               >
@@ -554,15 +567,12 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._extendFormatBar}>
                 Extend Format Bar
               </sl-menu-item>
+              <sl-menu-item @click=${this._addNote}>Add Note</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
           <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Switch Editor Mode"
-              @click=${this._switchEditorMode}
-            >
+            <sl-button size="small" @click=${this._switchEditorMode}>
               <sl-icon name="repeat"></sl-icon>
             </sl-button>
           </sl-tooltip>
@@ -578,7 +588,6 @@ export class DebugMenu extends ShadowlessElement {
           <sl-tooltip content="Add New Page" placement="bottom" hoist>
             <sl-button
               size="small"
-              content="Add New Page"
               @click=${() => createPageBlock(this.workspace)}
             >
               <sl-icon name="file-earmark-plus"></sl-icon>
@@ -592,11 +601,7 @@ export class DebugMenu extends ShadowlessElement {
             placement="bottom"
             hoist
           >
-            <sl-button
-              size="small"
-              content=""
-              @click=${this._toggleCopilotPanel}
-            >
+            <sl-button size="small" @click=${this._toggleCopilotPanel}>
               <sl-icon name="stars"></sl-icon>
             </sl-button>
           </sl-tooltip>

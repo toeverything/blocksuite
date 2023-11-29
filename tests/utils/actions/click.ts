@@ -9,15 +9,15 @@ function getDebugMenu(page: Page) {
   const debugMenu = page.locator('debug-menu');
   return {
     debugMenu,
-    undoBtn: debugMenu.locator('sl-button[content="Undo"]'),
-    redoBtn: debugMenu.locator('sl-button[content="Redo"]'),
+    undoBtn: debugMenu.locator('sl-button:text("Undo")'),
+    redoBtn: debugMenu.locator('sl-button:text("Redo")'),
 
     blockTypeButton: debugMenu.getByRole('button', { name: 'Block Type' }),
     testOperationsButton: debugMenu.getByRole('button', {
       name: 'Test Operations',
     }),
 
-    addNewPageBtn: debugMenu.locator('sl-button[content="Add New Page"]'),
+    addNewPageBtn: debugMenu.locator('sl-button:text("Add New Page")'),
   };
 }
 
