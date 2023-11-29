@@ -263,9 +263,12 @@ export class AffineFormatBarWidget extends WidgetElement {
       if (!range) {
         return;
       }
+
+      const rangeRect = range.getClientRects();
+
       const visualElement = {
         getBoundingClientRect: () => range.getBoundingClientRect(),
-        getClientRects: () => range.getClientRects(),
+        getClientRects: () => rangeRect,
       };
 
       this._floatDisposables.add(
