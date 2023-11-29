@@ -110,16 +110,16 @@ export async function switchEditorEmbedMode(page: Page) {
   await page.click('sl-button[content="Add container offset"]');
 }
 
-type BasicEdgelessTool = 'default' | 'pan' | 'note';
-type SpecialEdgelessTool =
+type EdgelessTool =
+  | 'default'
+  | 'pan'
+  | 'note'
   | 'shape'
   | 'brush'
   | 'eraser'
   | 'text'
   | 'connector'
   | 'frame';
-
-type EdgelessTool = BasicEdgelessTool | SpecialEdgelessTool;
 type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
