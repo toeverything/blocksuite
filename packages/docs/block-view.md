@@ -41,7 +41,7 @@ class MyBlockView extends BlockElement<MyBlockModel> {
 
 ## Render Children
 
-A block can have children, and we can render them by using `content` property.
+A block can have children, and we can render them by using `renderModelChildren`.
 
 ```ts
 @customElements('my-block')
@@ -50,7 +50,7 @@ class MyBlockView extends BlockElement<MyBlockModel> {
     return html`
       <div>
         <h3>My Block</h3>
-        ${this.content}
+        ${this.renderModelChildren(this.model)}
       </div>
     `;
   }

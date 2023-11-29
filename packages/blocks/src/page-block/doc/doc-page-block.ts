@@ -343,12 +343,6 @@ export class DocPageBlockComponent extends BlockElement<
     }
   }
 
-  private _initSlotEffects() {
-    this._disposables.add(
-      this.model.childrenUpdated.on(() => this.requestUpdate())
-    );
-  }
-
   private _initViewportResizeEffect() {
     // when observe viewportElement resize, emit viewport update event
     const resizeObserver = new ResizeObserver(
@@ -379,7 +373,6 @@ export class DocPageBlockComponent extends BlockElement<
   }
 
   override firstUpdated() {
-    this._initSlotEffects();
     this._initReadonlyListener();
     this._initViewportResizeEffect();
   }
