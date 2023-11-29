@@ -66,14 +66,17 @@ export function createButtonPopper(
   popperElement: HTMLElement,
   stateUpdated: (state: { display: 'show' | 'hidden' }) => void = () => {
     /** DEFAULT EMPTY FUNCTION */
-  }
+  },
+  mainAxis?: number,
+  crossAxis?: number
 ) {
   function compute() {
     computePosition(reference, popperElement, {
       placement: 'top',
       middleware: [
         offset({
-          mainAxis: 14,
+          mainAxis: mainAxis ?? 14,
+          crossAxis: crossAxis ?? 0,
         }),
         flip({
           fallbackPlacements: ['bottom'],

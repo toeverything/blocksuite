@@ -15,10 +15,10 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
       border: 1px solid var(--affine-border-color, #e3e2e4);
       background: var(--affine-background-overlay-panel-color);
       height: 100vh;
-      width: 289px;
+      width: 316px;
       box-sizing: border-box;
-      overflow-y: scroll;
-      overflow-x: visible;
+      /* overflow-y: scroll;
+      overflow-x: visible; */
       z-index: 1;
     }
   `;

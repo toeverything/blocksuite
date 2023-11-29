@@ -1,16 +1,11 @@
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type Page } from '@blocksuite/store';
-import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import {
-  CardIcon,
-  DualLinkIcon,
-  HiddenCardIcon,
-} from '../../../../_common/icons/index.js';
+import { ToggleSwitch } from '../../../../_common/components/toggle-switch.js';
 import { matchFlavours } from '../../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { Bound } from '../../../../surface-block/index.js';
@@ -21,7 +16,9 @@ import {
   type SelectEvent,
   TOCNoteCard,
 } from './toc-card.js';
+import { TOCNotesHeader } from './toc-header.js';
 import { TOCBlockPreview } from './toc-preview.js';
+import { TOCNotesSettingMenu } from './toc-setting-menu.js';
 import { startDragging } from './utils/drag.js';
 
 type TOCNoteItem = {
@@ -49,7 +46,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     }
 
     .navigation-panel-container {
-      background-color: var(--affine-background-overlay-panel-color);
+      background-color: var(--affine-background-primary-color);
       padding: 17.5px 16px;
       box-sizing: border-box;
 
@@ -61,61 +58,13 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       height: 100%;
     }
 
-    .panel-header {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
-    .panel-info {
-      font-size: 12px;
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      color: var(--affine-text-secondary-color);
-
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      align-self: stretch;
-      height: 20px;
-    }
-
-    .panel-info .content {
-      flex: 1 0 0;
-    }
-
-    .panel-info .icon {
-      height: 16px;
-      color: var(--affine-icon-color);
-      fill: currentColor;
-    }
-
-    .panel-info .icon > svg {
-      height: 16px;
-    }
-
-    .panel-info .action {
-      display: flex;
-      align-items: center;
-    }
-
-    .panel-info .action .icon,
-    .panel-info .action .icon > svg {
-      height: 12px;
-    }
-
-    .panel-info .count {
-      font-family: var(--affine-number-font-family);
-      font-weight: 600;
-    }
-
     .panel-list {
       position: relative;
-      left: -8px;
+      left: -16px;
 
       flex-grow: 1;
       width: calc(100% + 4px);
-      padding-left: 8px;
+      padding: 0 8px;
 
       overflow-y: scroll;
     }
@@ -138,6 +87,27 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       contain: layout size;
       width: 235px;
       left: 16px;
+    }
+
+    .no-notes-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .notes-placeholder {
+      margin-top: 240px;
+      align-self: center;
+      width: 190px;
+      height: 48px;
+      color: var(--affine-text-secondary-color, #8e8d91);
+      text-align: center;
+      /* light/base */
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 24px;
     }
   `;
 
@@ -451,100 +421,87 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     });
   }
 
-  override render() {
+  private _renderPanelList() {
     const selectedNotesSet = new Set(this._selected);
 
+    return html`<div class="panel-list">
+      ${this.insertIndex !== undefined
+        ? html`<div
+            class="insert-indicator"
+            style="transform: translateY(${this.insertIndex *
+              this._noteElementHeight +
+            10}px)"
+          ></div>`
+        : nothing}
+      ${this._notes.length
+        ? repeat(
+            this._notes,
+            note => note.note.id,
+            (note, idx) => html`
+              <edgeless-note-toc-card
+                data-note-id=${note.note.id}
+                .note=${note.note}
+                .number=${idx + 1}
+                .index=${note.index}
+                .page=${this.page}
+                .status=${selectedNotesSet.has(note.note.id)
+                  ? this._dragging
+                    ? 'placeholder'
+                    : 'selected'
+                  : undefined}
+                .showCardNumber=${this._notes.length > 1}
+                style=${this.insertIndex !== undefined &&
+                idx >= this.insertIndex
+                  ? 'transform: translateY(20px)'
+                  : ''}
+                @reorder=${this._reorder}
+                @select=${this._selectNote}
+                @drag=${this._drag}
+                @fitview=${this._fitToElement}
+              ></edgeless-note-toc-card>
+            `
+          )
+        : html`${nothing}`}
+      ${this._hiddenNotes.length > 0
+        ? html`<div class="title">Hidden on Page</div>`
+        : nothing}
+      ${this._hiddenNotes.length
+        ? repeat(
+            this._hiddenNotes,
+            note => note.note.id,
+            (note, idx) =>
+              html`<edgeless-note-toc-card
+                data-note-id=${note.note.id}
+                .note=${note.note}
+                .number=${idx + 1}
+                .index=${note.index}
+                .page=${this.page}
+                .invisible=${true}
+                style=${this.insertIndex !== undefined
+                  ? 'transform: translateY(20px)'
+                  : ''}
+                @fitview=${this._fitToElement}
+              ></edgeless-note-toc-card>`
+          )
+        : nothing}
+    </div>`;
+  }
+
+  private _renderEmptyPanel() {
+    return html`<div class="no-notes-container">
+      <div class="notes-placeholder">
+        Use headings to create a table of contents.
+      </div>
+    </div>`;
+  }
+
+  override render() {
     return html`
       <div class="navigation-panel-container">
-        <div class="panel-header">
-          <div class="panel-info">
-            <span class="icon">${CardIcon}</span>
-            <span class="content">
-              <span class="count">${this._notes.length}</span> cards show on
-              page
-            </span>
-          </div>
-          <div
-            class="panel-info"
-            style="cursor: pointer;"
-            @click=${this._jumpToHidden}
-          >
-            <span class="icon">${HiddenCardIcon}</span>
-            <span class="content">
-              <span class="count">${this._hiddenNotes.length}</span> cards
-              hidden
-            </span>
-            <span class="action">
-              <span
-                class="icon"
-                role="button"
-                style="position: relative; top: 1px;"
-              >
-                ${DualLinkIcon}
-              </span>
-            </span>
-          </div>
-        </div>
-        <div class="panel-list">
-          ${this.insertIndex !== undefined
-            ? html`<div
-                class="insert-indicator"
-                style="transform: translateY(${this.insertIndex *
-                  this._noteElementHeight +
-                10}px)"
-              ></div>`
-            : nothing}
-          ${this._notes.length
-            ? repeat(
-                this._notes,
-                note => note.note.id,
-                (note, idx) => html`
-                  <edgeless-note-toc-card
-                    data-note-id=${note.note.id}
-                    .note=${note.note}
-                    .number=${idx + 1}
-                    .index=${note.index}
-                    .page=${this.page}
-                    .status=${selectedNotesSet.has(note.note.id)
-                      ? this._dragging
-                        ? 'placeholder'
-                        : 'selected'
-                      : undefined}
-                    style=${this.insertIndex !== undefined &&
-                    idx >= this.insertIndex
-                      ? 'transform: translateY(20px)'
-                      : ''}
-                    @reorder=${this._reorder}
-                    @select=${this._selectNote}
-                    @drag=${this._drag}
-                    @fitview=${this._fitToElement}
-                  ></edgeless-note-toc-card>
-                `
-              )
-            : html`${nothing}`}
-          ${this._hiddenNotes.length > 0
-            ? html`<div class="title">Hidden on Page</div>`
-            : nothing}
-          ${this._hiddenNotes.length
-            ? repeat(
-                this._hiddenNotes,
-                note => note.note.id,
-                (note, idx) =>
-                  html`<edgeless-note-toc-card
-                    data-note-id=${note.note.id}
-                    .note=${note.note}
-                    .number=${idx + 1}
-                    .index=${note.index}
-                    .page=${this.page}
-                    .invisible=${true}
-                    style=${this.insertIndex !== undefined
-                      ? 'transform: translateY(20px)'
-                      : ''}
-                    @fitview=${this._fitToElement}
-                  ></edgeless-note-toc-card>`
-              )
-            : nothing}
-        </div>
+        <edgeless-toc-notes-header></edgeless-toc-notes-header>
+        ${this._notes.length
+          ? this._renderPanelList()
+          : this._renderEmptyPanel()}
       </div>
     `;
   }
@@ -560,6 +517,9 @@ const componentsMap = {
   'edgeless-note-toc-card': TOCNoteCard,
   'edgeless-toc-block-preview': TOCBlockPreview,
   'edgeless-toc-notes-panel': TOCNotesPanel,
+  'edgeless-toc-notes-setting-menu': TOCNotesSettingMenu,
+  'edgeless-toc-notes-header': TOCNotesHeader,
+  'toggle-switch': ToggleSwitch,
 };
 
 export function registerTOCComponents(
