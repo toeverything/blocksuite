@@ -101,7 +101,7 @@ export async function extendFormatBar(page: Page) {
 }
 
 export async function switchEditorMode(page: Page) {
-  await page.click('sl-button:text("Switch Editor Mode")');
+  await page.click('sl-tooltip[content="Switch Editor Mode"]');
   // FIXME: listen to editor loaded event
   await waitNextFrame(page);
 }
