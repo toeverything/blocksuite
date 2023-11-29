@@ -18,6 +18,10 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       {
+        text: '🚧 Editors',
+        link: '#',
+      },
+      {
         text: 'Playground',
         link: 'https://blocksuite-toeverything.vercel.app/starter/?init',
       },

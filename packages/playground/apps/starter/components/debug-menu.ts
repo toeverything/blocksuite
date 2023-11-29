@@ -38,7 +38,7 @@ import type { Pane } from 'tweakpane';
 
 import type { CustomCopilotPanel } from './copilot/custom-copilot-panel';
 // @ts-ignore
-import { registerFormatBarCustomElement } from './custom-format-bar';
+import { extendFormatBar } from './custom-format-bar';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
@@ -416,8 +416,8 @@ export class DebugMenu extends ShadowlessElement {
     this._setThemeMode(!!e.matches);
   };
 
-  private _registerFormatBarCustomElements() {
-    registerFormatBarCustomElement();
+  private _extendFormatBar() {
+    extendFormatBar();
   }
 
   override firstUpdated() {
@@ -547,7 +547,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._toggleConnection}>
                 ${this._connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
-              <sl-menu-item @click=${this._addNote}> Add Note</sl-menu-item>
+              <sl-menu-item @click=${this._addNote}>Add Note</sl-menu-item>
               <sl-menu-item @click=${this._exportMarkDown}>
                 Export Markdown
               </sl-menu-item>
@@ -576,22 +576,11 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._shareSelection}>
                 Share Selection
               </sl-menu-item>
+              <sl-menu-item @click=${this._extendFormatBar}>
+                Extend Format Bar
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
-
-          <sl-tooltip
-            content="Register FormatBar Custom Elements"
-            placement="bottom"
-            hoist
-          >
-            <sl-button
-              size="small"
-              content="Register FormatBar Custom Elements"
-              @click=${this._registerFormatBarCustomElements}
-            >
-              <sl-icon name="plug"></sl-icon>
-            </sl-button>
-          </sl-tooltip>
 
           <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
             <sl-button

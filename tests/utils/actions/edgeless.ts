@@ -94,8 +94,10 @@ export async function getNoteProps(page: Page, noteId: string) {
   return props;
 }
 
-export async function registerFormatBarCustomElements(page: Page) {
-  await page.click('sl-button[content="Register FormatBar Custom Elements"]');
+export async function extendFormatBar(page: Page) {
+  await page.click('sl-button:text("Test Operations")');
+  await page.click('sl-menu-item:text("Extend Format Bar")');
+  await waitNextFrame(page);
 }
 
 export async function switchEditorMode(page: Page) {
@@ -108,16 +110,16 @@ export async function switchEditorEmbedMode(page: Page) {
   await page.click('sl-button[content="Add container offset"]');
 }
 
-type BasicEdgelessTool = 'default' | 'pan' | 'note';
-type SpecialEdgelessTool =
+type EdgelessTool =
+  | 'default'
+  | 'pan'
+  | 'note'
   | 'shape'
   | 'brush'
   | 'eraser'
   | 'text'
   | 'connector'
   | 'frame';
-
-type EdgelessTool = BasicEdgelessTool | SpecialEdgelessTool;
 type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
