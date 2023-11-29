@@ -73,7 +73,9 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   editor!: EditorContainer;
 
-  private _lastPayload: { [key: string]: string } | null = null;
+  private _lastPayload: {
+    [key: string]: string;
+  } | null = null;
   private _langPopupTimer: ReturnType<typeof setTimeout> | null = null;
   private _tonePopupTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -120,7 +122,9 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
 
   private async _handleActionClick(
     action: string,
-    options?: { [key: string]: string }
+    options?: {
+      [key: string]: string;
+    }
   ) {
     const payload = {
       action,
@@ -216,11 +220,11 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
 
     return html`
       <div class="result-area">${this._result}</div>
-      <sl-button size="small" @click=${this._replace}> Replace </sl-button>
-      <sl-button size="small" @click=${this._insertBelow}>
+      <sl-button size="small" @click="${this._replace}"> Replace</sl-button>
+      <sl-button size="small" @click="${this._insertBelow}">
         Insert below
       </sl-button>
-      <sl-button size="small" @click=${this._retry}> Retry </sl-button>
+      <sl-button size="small" @click="${this._retry}"> Retry</sl-button>
     `;
   }
 
@@ -269,44 +273,46 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
       placement="bottom"
       hoist
     >
-      <sl-button size="small" slot="trigger" caret> Ask AI </sl-button>
+      <sl-button size="small" slot="trigger" caret> Ask AI</sl-button>
       <sl-menu id="copilot-actions-menu">
-        <sl-menu-item @click=${() => this._handleActionClick('refine')}>
+        <sl-menu-item @click="${() => this._handleActionClick('refine')}">
           Refine
         </sl-menu-item>
         <sl-menu-item
-          @mouseenter=${this._activeLanguagePopup}
-          @mouseleave=${() => this._disactiveLanguagePopup(200)}
+          @mouseenter="${this._activeLanguagePopup}"
+          @mouseleave="${() => this._disactiveLanguagePopup(200)}"
         >
           Translate
         </sl-menu-item>
-        <sl-menu-item @click=${() => this._handleActionClick('summary')}>
+        <sl-menu-item @click="${() => this._handleActionClick('summary')}">
           Summarize
         </sl-menu-item>
-        <sl-menu-item @click=${() => this._handleActionClick('makeLonger')}>
+        <sl-menu-item @click="${() => this._handleActionClick('makeLonger')}">
           Make Longer
         </sl-menu-item>
-        <sl-menu-item @click=${() => this._handleActionClick('makeShorter')}>
+        <sl-menu-item @click="${() => this._handleActionClick('makeShorter')}">
           Make Shorter
         </sl-menu-item>
         <sl-menu-item
-          @mouseenter=${this._activeTonePopup}
-          @mouseleave=${() => this._disactiveTonePopup(200)}
+          @mouseenter="${this._activeTonePopup}"
+          @mouseleave="${() => this._disactiveTonePopup(200)}"
         >
           Change Tone
         </sl-menu-item>
-        <sl-menu-item @click=${() => this._handleActionClick('improveWriting')}>
+        <sl-menu-item
+          @click="${() => this._handleActionClick('improveWriting')}"
+        >
           Improve Writing
         </sl-menu-item>
         <sl-menu-item
-          @click=${() => this._handleActionClick('simplifyLanguage')}
+          @click="${() => this._handleActionClick('simplifyLanguage')}"
         >
           Simplify Language
         </sl-menu-item>
-        <sl-menu-item @click=${() => this._handleActionClick('fixSpelling')}>
+        <sl-menu-item @click="${() => this._handleActionClick('fixSpelling')}">
           Fix Spelling and Grammar
         </sl-menu-item>
-        <sl-menu-item @click=${() => this._createMindMap()}>
+        <sl-menu-item @click="${() => this._createMindMap()}">
           Create Mind Map
         </sl-menu-item>
       </sl-menu>
@@ -314,7 +320,7 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
         id="language-popup"
         anchor="copilot-actions-menu"
         placement="right"
-        @mouseleave=${() => this._disactiveLanguagePopup(100)}
+        @mouseleave="${() => this._disactiveLanguagePopup(100)}"
       >
         <sl-menu>
           ${LANGUAGE.map(
@@ -333,7 +339,7 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
         id="tone-popup"
         anchor="copilot-actions-menu"
         placement="right"
-        @mouseleave=${() => this._disactiveTonePopup(100)}
+        @mouseleave="${() => this._disactiveTonePopup(100)}"
       >
         <sl-menu>
           ${TONE.map(

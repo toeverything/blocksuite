@@ -18,6 +18,8 @@ import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
+import { HtmlBlockSchema } from '../html-block/html-model.js';
+import { HtmlService } from '../html-block/html-service.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
@@ -170,6 +172,13 @@ export const PagePreset: BlockSpec[] = [
     service: AttachmentService,
   },
   {
+    schema: HtmlBlockSchema,
+    view: {
+      component: literal`affine-html`,
+    },
+    service: HtmlService,
+  },
+  {
     schema: SurfaceRefBlockSchema,
     view: {
       component: literal`affine-surface-ref`,
@@ -260,6 +269,13 @@ export const EdgelessPreset: BlockSpec[] = [
     service: AttachmentService,
     view: {
       component: literal`affine-attachment`,
+    },
+  },
+  {
+    schema: HtmlBlockSchema,
+    service: HtmlService,
+    view: {
+      component: literal`affine-html`,
     },
   },
   {

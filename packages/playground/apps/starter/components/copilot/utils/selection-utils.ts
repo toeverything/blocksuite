@@ -1,8 +1,11 @@
 import { matchFlavours } from '@blocksuite/blocks/_common/utils';
+import { splitElements } from '@blocksuite/blocks/page-block/edgeless/utils/clipboard-utils';
+import type { EditorContainer } from '@blocksuite/editor';
 import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
 import { type BaseBlockModel, Slice } from '@blocksuite/store';
 
 import { getMarkdownFromSlice } from './markdown-utils';
+import { getEdgelessPageBlockFromEditor } from './mind-map-utils';
 
 export function hasSelectedTextContent(root: BlockSuiteRoot) {
   let result = false;
@@ -92,6 +95,25 @@ export async function getSelectedBlocks(root: BlockSuiteRoot) {
     .run();
 
   return blocks;
+}
+
+export async function selectedToCanvas(editor: EditorContainer) {
+  const edgelessPage = getEdgelessPageBlockFromEditor(editor);
+  const { notes, frames, shapes, images } = splitElements(
+    edgelessPage.selectionManager.elements
+  );
+  const canvas = await edgelessPage.clipboard.toCanvas(
+    [...notes, ...frames, ...images],
+    shapes
+  );
+  if (!canvas) {
+    return;
+  }
+  return canvas;
+}
+
+export async function selectedToPng(editor: EditorContainer) {
+  return (await selectedToCanvas(editor))?.toDataURL('image/png');
 }
 
 export async function getSelectedTextContent(root: BlockSuiteRoot) {

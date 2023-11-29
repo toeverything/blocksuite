@@ -68,6 +68,11 @@ export function getSurfaceElementFromEditor(editor: EditorContainer) {
 
   return surfaceElement;
 }
+export function getEdgelessPageBlockFromEditor(editor: EditorContainer) {
+  const edgelessPage = editor.getElementsByTagName('affine-edgeless-page')[0];
+  assertExists(edgelessPage);
+  return edgelessPage;
+}
 
 export function createMindMapOnEdgeless(
   editor: EditorContainer,

@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/global": "workspace:*",
@@ -30,6 +31,7 @@
     "lit": "^3.0.2",
     "lz-string": "^1.5.0",
     "merge": "^2.1.1",
+    "openai": "^4.19.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "ses": "^0.18.8",

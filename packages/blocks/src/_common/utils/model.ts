@@ -1,6 +1,6 @@
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { Page } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 
+import type { HtmlBlockSchema } from '../../html-block/html-model.js';
 import type {
   AttachmentBlockModel,
   AttachmentBlockSchema,
@@ -62,6 +62,7 @@ export type BlockSchemas = {
   'affine:data-view': typeof DataViewBlockSchema;
   'affine:bookmark': typeof BookmarkBlockSchema;
   'affine:attachment': typeof AttachmentBlockSchema;
+  'affine:html': typeof HtmlBlockSchema;
 };
 
 export type BlockModelProps = {

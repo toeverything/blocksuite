@@ -20,12 +20,16 @@ import {
   createPage,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
+  HtmlBlockModel,
+  loadImages,
+  NOTE_WIDTH,
+  Point,
   SIZE_VARIABLES,
   VARIABLES,
   ZipTransformer,
 } from '@blocksuite/blocks';
-import { NOTE_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
+import { splitElements } from '@blocksuite/blocks/page-block/edgeless/utils/clipboard-utils';
 import { EditorContainer } from '@blocksuite/editor';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { Utils, type Workspace } from '@blocksuite/store';
@@ -37,9 +41,21 @@ import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
 import type { CustomCopilotPanel } from './copilot/custom-copilot-panel';
+import {
+  editImage,
+  jpegBase64ToFile,
+  pngBase64ToFile,
+} from './copilot/utils/edit-image';
+import { genHtml } from './copilot/utils/gen-html';
+import { getEdgelessPageBlockFromEditor } from './copilot/utils/mind-map-utils';
+import {
+  selectedToCanvas,
+  selectedToPng,
+} from './copilot/utils/selection-utils';
 // @ts-ignore
 import { registerFormatBarCustomElement } from './custom-format-bar';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
+import { demoScript } from './demo-script';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -262,6 +278,87 @@ export class DebugMenu extends ShadowlessElement {
 
   private _toggleCopilotPanel() {
     this.copilotPanel.toggleDisplay();
+  }
+
+  private async _makeItReal() {
+    const png = await selectedToPng(this.editor);
+    if (!png) {
+      return;
+    }
+    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
+    const { notes } = splitElements(edgelessPage.selectionManager.elements);
+    // @ts-ignore
+    const htmlBlock: {
+      html: string;
+      design: string;
+    } = notes.flatMap(v =>
+      v.children.filter(v => {
+        if (v instanceof HtmlBlockModel) {
+          return v.html && v.design;
+        } else {
+          return false;
+        }
+      })
+    )[0];
+    const html = await genHtml(png, htmlBlock);
+    if (!html) {
+      return;
+    }
+    const noteId = edgelessPage.addNoteWithPoint(new Point(0, 0));
+    edgelessPage.page.addBlock('affine:html', { html, design: png }, noteId);
+  }
+
+  private async _htmlBlockDemo() {
+    const html = `
+    <html>
+    <header>
+    <script type='importmap'>
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+    }
+  }
+</script>
+</header>
+    <body>
+    <script  type='module'>${demoScript}</script>
+</body>
+</html>`;
+    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
+    const noteId = edgelessPage.addNoteWithPoint(new Point(0, 0));
+    edgelessPage.page.addBlock('affine:html', { html }, noteId);
+  }
+
+  private async _showMeImage() {
+    const canvas = await selectedToCanvas(this.editor);
+    canvas?.toBlob(async blob => {
+      if (blob) {
+        const pmt = prompt('How would you like it changed?');
+        const b64 = await editImage(pmt || 'Make it pretty', canvas);
+        if (!b64) {
+          return;
+        }
+        const imgFile = jpegBase64ToFile(b64, 'img');
+        const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
+        const imgs = await loadImages([imgFile], this.workspace.blob);
+        edgelessPage.addImages(imgs);
+      }
+    });
+  }
+
+  private async _createImage() {
+    const pmt = prompt('What image would you like to create?');
+    if (!pmt) {
+      return;
+    }
+    const b64 = await editImage(pmt);
+    if (b64) {
+      const imgFile = pngBase64ToFile(b64, 'img');
+      const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
+      const imgs = await loadImages([imgFile], this.workspace.blob);
+      await edgelessPage.addImages(imgs);
+    }
   }
 
   private _switchOffsetMode() {
@@ -515,10 +612,10 @@ export class DebugMenu extends ShadowlessElement {
               <sl-button
                 size="small"
                 content="Undo"
-                .disabled=${!this._canUndo}
-                @click=${() => {
+                .disabled="${!this._canUndo}"
+                @click="${() => {
                   this.page.undo();
-                }}
+                }}"
               >
                 <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
               </sl-button>
@@ -528,10 +625,10 @@ export class DebugMenu extends ShadowlessElement {
               <sl-button
                 size="small"
                 content="Redo"
-                .disabled=${!this._canRedo}
-                @click=${() => {
+                .disabled="${!this._canRedo}"
+                @click="${() => {
                   this.page.redo();
-                }}
+                }}"
               >
                 <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
               </sl-button>
@@ -544,36 +641,36 @@ export class DebugMenu extends ShadowlessElement {
               Test Operations
             </sl-button>
             <sl-menu>
-              <sl-menu-item @click=${this._toggleConnection}>
+              <sl-menu-item @click="${this._toggleConnection}">
                 ${this._connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
-              <sl-menu-item @click=${this._addNote}> Add Note</sl-menu-item>
-              <sl-menu-item @click=${this._exportMarkDown}>
+              <sl-menu-item @click="${this._addNote}"> Add Note</sl-menu-item>
+              <sl-menu-item @click="${this._exportMarkDown}">
                 Export Markdown
               </sl-menu-item>
-              <sl-menu-item @click=${this._exportHtml}>
+              <sl-menu-item @click="${this._exportHtml}">
                 Export HTML
               </sl-menu-item>
-              <sl-menu-item @click=${this._exportPdf}>
+              <sl-menu-item @click="${this._exportPdf}">
                 Export PDF
               </sl-menu-item>
-              <sl-menu-item @click=${this._exportPng}>
+              <sl-menu-item @click="${this._exportPng}">
                 Export PNG
               </sl-menu-item>
-              <sl-menu-item @click=${this._exportSnapshot}>
+              <sl-menu-item @click="${this._exportSnapshot}">
                 Export Snapshot
               </sl-menu-item>
-              <sl-menu-item @click=${this._importSnapshot}>
+              <sl-menu-item @click="${this._importSnapshot}">
                 Import Snapshot
               </sl-menu-item>
-              <sl-menu-item @click=${this._shareUrl}>Share URL</sl-menu-item>
-              <sl-menu-item @click=${this._toggleStyleDebugMenu}>
+              <sl-menu-item @click="${this._shareUrl}">Share URL</sl-menu-item>
+              <sl-menu-item @click="${this._toggleStyleDebugMenu}">
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._toggleReadonly}>
+              <sl-menu-item @click="${this._toggleReadonly}">
                 Toggle Readonly
               </sl-menu-item>
-              <sl-menu-item @click=${this._shareSelection}>
+              <sl-menu-item @click="${this._shareSelection}">
                 Share Selection
               </sl-menu-item>
             </sl-menu>
@@ -587,7 +684,7 @@ export class DebugMenu extends ShadowlessElement {
             <sl-button
               size="small"
               content="Register FormatBar Custom Elements"
-              @click=${this._registerFormatBarCustomElements}
+              @click="${this._registerFormatBarCustomElements}"
             >
               <sl-icon name="plug"></sl-icon>
             </sl-button>
@@ -597,7 +694,7 @@ export class DebugMenu extends ShadowlessElement {
             <sl-button
               size="small"
               content="Switch Editor Mode"
-              @click=${this._switchEditorMode}
+              @click="${this._switchEditorMode}"
             >
               <sl-icon name="phone-flip"></sl-icon>
             </sl-button>
@@ -607,16 +704,16 @@ export class DebugMenu extends ShadowlessElement {
             <sl-button
               size="small"
               content="Add container offset"
-              @click=${this._switchOffsetMode}
+              @click="${this._switchOffsetMode}"
             >
               <sl-icon name="aspect-ratio"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
           <sl-tooltip content="Toggle Dark Mode" placement="bottom" hoist>
-            <sl-button size="small" @click=${this._toggleDarkMode}>
+            <sl-button size="small" @click="${this._toggleDarkMode}">
               <sl-icon
-                name=${this._dark ? 'moon' : 'brightness-high'}
+                name="${this._dark ? 'moon' : 'brightness-high'}"
               ></sl-icon>
             </sl-button>
           </sl-tooltip>
@@ -625,7 +722,7 @@ export class DebugMenu extends ShadowlessElement {
             <sl-button
               size="small"
               content="Add New Page"
-              @click=${() => createPageBlock(this.workspace)}
+              @click="${() => createPageBlock(this.workspace)}"
             >
               <sl-icon name="file-earmark-plus"></sl-icon>
             </sl-button>
@@ -639,7 +736,7 @@ export class DebugMenu extends ShadowlessElement {
             <sl-button
               size="small"
               content=""
-              @click=${this._toggleNavigationPanel}
+              @click="${this._toggleNavigationPanel}"
             >
               <sl-icon name="list"></sl-icon>
             </sl-button>
@@ -653,12 +750,45 @@ export class DebugMenu extends ShadowlessElement {
             <sl-button
               size="small"
               content=""
-              @click=${this._toggleCopilotPanel}
+              @click="${this._toggleCopilotPanel}"
             >
               <sl-icon name="list"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
+          <input
+            id="temp-gpt-api-key-input"
+            value=""
+            placeholder="gpt-api-key"
+          />
+          <input
+            id="temp-fal-api-key-input"
+            value=""
+            placeholder="fal-api-key"
+          />
+          <sl-button size="small" content="" @click="${this._htmlBlockDemo}">
+            html block
+          </sl-button>
+          <sl-tooltip
+            content="select some shapes in edgeless, then click this button to make it real"
+            placement="bottom"
+            hoist
+          >
+            <sl-button size="small" content="" @click="${this._makeItReal}">
+              make it real
+            </sl-button>
+          </sl-tooltip>
+          <sl-dropdown id="test-operations-dropdown" placement="bottom" hoist>
+            <sl-button size="small" slot="trigger" caret> image</sl-button>
+            <sl-menu>
+              <sl-menu-item @click="${this._showMeImage}">
+                edit image
+              </sl-menu-item>
+              <sl-menu-item @click="${this._createImage}"
+                >create new image
+              </sl-menu-item>
+            </sl-menu>
+          </sl-dropdown>
           ${this._showTabMenu
             ? getTabGroupTemplate({
                 workspace: this.workspace,
@@ -694,24 +824,28 @@ function getTabGroupTemplate({
     tabGroup.show(pageId);
   });
 
-  return html`<sl-tab-group
+  return html` <sl-tab-group
     class="tabs-closable"
     style="display: flex; overflow: hidden;"
-    @sl-tab-show=${(e: CustomEvent<{ name: string }>) => {
+    @sl-tab-show="${(
+      e: CustomEvent<{
+        name: string;
+      }>
+    ) => {
       const otherPage = workspace.getPage(e.detail.name);
       if (otherPage) {
         editor.page = otherPage;
       }
-    }}
+    }}"
   >
     ${pageList.map(
       page =>
-        html`<sl-tab
+        html` <sl-tab
           slot="nav"
           panel="${page.id}"
-          ?active=${page.id === editor.page.id}
-          ?closable=${pageList.length > 1}
-          @sl-close=${(e: CustomEvent) => {
+          ?active="${page.id === editor.page.id}"
+          ?closable="${pageList.length > 1}"
+          @sl-close="${(e: CustomEvent) => {
             const tab = e.target;
             // Show other tab if the tab is currently active
             if (tab && (tab as SlTab).active) {
@@ -725,7 +859,7 @@ function getTabGroupTemplate({
               tabGroup.show(otherPage.id);
             }
             workspace.removePage(page.id);
-          }}
+          }}"
         >
           <div>
             <div>${page.title || 'Untitled'}</div>
