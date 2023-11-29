@@ -24,7 +24,6 @@ import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/compon
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
-import { getElementBound } from '../page-block/edgeless/utils/bound-utils.js';
 import {
   isConnectable,
   isFrameBlock,
@@ -786,8 +785,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   fitElementToViewport(ele: EdgelessElement) {
     const { viewport } = this;
-    let bound = getElementBound(ele);
-    bound = bound.expand(30);
+    const bound = ele.elementBound.expand(30);
     if (Date.now() - this._lastTime > 200)
       this._cachedViewport = viewport.viewportBounds;
     this._lastTime = Date.now();
