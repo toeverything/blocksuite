@@ -7,6 +7,7 @@ export function extendFormatBar() {
       // you can use `createRoot` to mount the component here.
       const element = document.createElement('div');
       element.textContent = '❤️';
+      element.setAttribute('data-testid', 'custom-format-bar-element');
       element.addEventListener('click', () => {
         const root = formatBar.root;
         const selectionManager = root.selection;
