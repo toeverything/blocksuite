@@ -7,8 +7,10 @@ import { getTagColor } from '../../_common/components/tags/colors.js';
 import { toast } from '../../_common/components/toast.js';
 import {
   getBlockElementByModel,
+  getBlockElementByPath,
   getEditorContainer,
   isPageMode,
+  matchFlavours,
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
@@ -267,13 +269,35 @@ export class ContentParser {
     return { canvas, ctx };
   }
 
+  /*
+   * This is a workaround for the issue that top level image cannot be copy as png
+   * This should be removed after the new clipboard is implemented
+   */
+  private _blockQuery(model: BaseBlockModel) {
+    if (matchFlavours(model, ['affine:image'])) {
+      let current: BaseBlockModel | null = model;
+      const path: string[] = [];
+      while (current) {
+        // Top level image render under page block not surface block
+        if (!matchFlavours(current, ['affine:surface'])) {
+          path.unshift(current.id);
+        }
+        current = current.page.getParent(current);
+      }
+
+      return getBlockElementByPath(path);
+    } else {
+      return getBlockElementByModel(model);
+    }
+  }
+
   public async edgelessToCanvas(
     surfaceRenderer: Renderer,
     bound: IBound,
     edgeless?: EdgelessPageBlockComponent,
     nodes?: TopLevelBlockModel[],
     surfaces?: SurfaceElement[],
-    blockQuery: (id: BaseBlockModel) => Element | null = getBlockElementByModel,
+    blockQuery: (model: BaseBlockModel) => Element | null = this._blockQuery,
     edgelessBackground?: { zoom: number }
   ): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
