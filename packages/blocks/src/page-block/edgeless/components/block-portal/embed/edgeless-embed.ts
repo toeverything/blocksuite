@@ -20,6 +20,7 @@ export class EdgelessBlockPortalEmbed extends EdgelessPortalBase<BaseEmbedBlockM
       transform: `translate(${bound.x * zoom}px, ${
         bound.y * zoom
       }px) scale(${zoom})`,
+      transformOrigin: '0px 0px',
     };
 
     return html`
