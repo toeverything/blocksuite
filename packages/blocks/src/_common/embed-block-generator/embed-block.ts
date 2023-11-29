@@ -5,13 +5,12 @@ import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { ImageBlockModel } from '../../image-block/index.js';
 import { BLOCK_BATCH } from '../../surface-block/batch.js';
 import type { IEdgelessElement } from '../../surface-block/index.js';
 import type { SerializedXYWH } from '../../surface-block/index.js';
 import type { IVec, PointLocation } from '../../surface-block/index.js';
 import { Bound } from '../../surface-block/index.js';
-import type { EmbedProps } from './index.js';
+import type { EmbedProps } from './types.js';
 
 export class EmbedBlock<
   Model extends BaseBlockModel<EmbedProps> = BaseBlockModel<EmbedProps>,
@@ -31,8 +30,7 @@ export class EmbedBlock<
 
   get bound() {
     return Bound.deserialize(
-      ((this.surface?.pickById(this.model.id) as ImageBlockModel) ?? this.model)
-        .xywh
+      (this.surface?.pickById(this.model.id) ?? this.model).xywh
     );
   }
 
@@ -55,7 +53,7 @@ export class EmbedBlock<
   };
 }
 
-export class EmbedModel<Props>
+export class EmbedModel<Props = object>
   extends BaseBlockModel<EmbedProps<Props>>
   implements IEdgelessElement
 {
