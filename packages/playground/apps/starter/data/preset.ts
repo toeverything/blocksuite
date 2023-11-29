@@ -29,7 +29,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
     const pageBlockId = page.addBlock('affine:page', {
       title: new Text('Welcome to BlockSuite Playground'),
     });
-    const surfaceId = page.addBlock('affine:surface', {}, pageBlockId);
+    page.addBlock('affine:surface', {}, pageBlockId);
 
     // Add note block inside page block
     const noteId = page.addBlock(
