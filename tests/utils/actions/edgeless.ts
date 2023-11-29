@@ -94,8 +94,10 @@ export async function getNoteProps(page: Page, noteId: string) {
   return props;
 }
 
-export async function registerFormatBarCustomElements(page: Page) {
-  await page.click('sl-button[content="Register FormatBar Custom Elements"]');
+export async function extendFormatBar(page: Page) {
+  await page.click('sl-button:text("Test Operations")');
+  await page.click('sl-menu-item:text("Extend Format Bar")');
+  await waitNextFrame(page);
 }
 
 export async function switchEditorMode(page: Page) {

@@ -1,7 +1,7 @@
 import { AffineFormatBarWidget } from '@blocksuite/blocks';
 import { createRoot } from 'react-dom/client';
 
-export function registerFormatBarCustomElement() {
+export function extendFormatBar() {
   AffineFormatBarWidget.customElements.add(
     (formatBar: AffineFormatBarWidget) => {
       const element = document.createElement('div');
