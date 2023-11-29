@@ -82,11 +82,6 @@ type id = string;
 
 const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
 
-export enum EdgelessBlocksFlavour {
-  NOTE = 'affine:note',
-  FRAME = 'affine:frame',
-}
-
 export type IndexedCanvasUpdateEvent = CustomEvent<{
   content: HTMLCanvasElement[];
 }>;
@@ -187,8 +182,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   getBlocks<T extends EdgelessBlockType>(
-    flavours: T[] | T
+    flavours: T[] | T | RegExp
   ): TopLevelBlockModel[] {
+    if (flavours instanceof RegExp) {
+      const regexp = flavours;
+      const models = this.model.children
+        .filter(child => regexp.test(child.flavour))
+        .map(x => this.edgeless.localRecord.wrap(x));
+
+      return models as TopLevelBlockModel[];
+    }
+
     flavours = typeof flavours === 'string' ? [flavours] : flavours;
 
     return flavours.reduce<TopLevelBlockModel[]>((pre, flavour) => {
@@ -218,6 +222,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   get blocks() {
     return [
+      ...this.getBlocks(/affine:embed:*/),
       ...this.getBlocks(FRAME),
       ...this.getBlocks(NOTE),
       ...this.getBlocks(IMAGE),
