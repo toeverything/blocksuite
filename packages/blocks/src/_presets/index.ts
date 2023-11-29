@@ -18,6 +18,7 @@ import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
+import { embedBlocks } from '../generator/embed-blocks/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
@@ -178,6 +179,7 @@ export const PagePreset: BlockSpec[] = [
       },
     },
   },
+  ...embedBlocks,
 ];
 
 export const EdgelessPreset: BlockSpec[] = [
@@ -268,4 +270,5 @@ export const EdgelessPreset: BlockSpec[] = [
       component: literal`affine-surface-ref`,
     },
   },
+  ...embedBlocks,
 ];

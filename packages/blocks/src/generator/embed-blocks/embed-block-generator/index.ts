@@ -1,4 +1,4 @@
-import type { BlockSpec } from '@blocksuite/block-std';
+import type { BlockServiceConstructor, BlockSpec } from '@blocksuite/block-std';
 import type {
   BaseBlockModel,
   BaseBlockTransformer,
@@ -6,34 +6,50 @@ import type {
 } from '@blocksuite/store';
 import { defineBlockSchema } from '@blocksuite/store';
 
+import type { EmbedModel } from './embed-block.js';
+
 type Options<
   Props extends object,
-  Model extends BaseBlockModel<Props> = BaseBlockModel<Props>,
+  Model extends EmbedModel<Props>,
+  WidgetName extends string = string,
   Transformer extends BaseBlockTransformer<Props> = BaseBlockTransformer<Props>,
 > = {
   schema: {
     name: string;
     version: number;
+    toModel: () => Model;
     props?: (internalPrimitives: InternalPrimitives) => Props;
-    toModel?: () => Model;
     transformer?: () => Transformer;
+  };
+  service?: BlockServiceConstructor;
+  view: {
+    component: BlockSuite.Component;
+    widgets?: Record<WidgetName, BlockSuite.Component>;
   };
 };
 
-type EmbedProps<Props> = Props & {
+export type EmbedProps<Props = object> = Props & {
+  rotate: number;
   xywh: string;
   index: string;
 };
 
+export type BaseEmbedBlockModel<Props extends object = object> = BaseBlockModel<
+  EmbedProps<Props>
+>;
+
 export function embedBlockGenerator<
   Props extends object,
-  Model extends BaseBlockModel<EmbedProps<Props>> = BaseBlockModel<
-    EmbedProps<Props>
-  >,
+  Model extends EmbedModel<Props>,
+  WidgetName extends string = string,
   Transformer extends BaseBlockTransformer<
     EmbedProps<Props>
   > = BaseBlockTransformer<EmbedProps<Props>>,
->({ schema }: Options<Props, Model, Transformer>): BlockSpec {
+>({
+  schema,
+  service,
+  view,
+}: Options<Props, Model, WidgetName, Transformer>): BlockSpec {
   const blockSchema = defineBlockSchema({
     flavour: `affine:embed:${schema.name}`,
     props: internalPrimitives => {
@@ -42,6 +58,7 @@ export function embedBlockGenerator<
       return {
         xywh: '[0,0,0,0]',
         index: 'a0',
+        rotate: 0,
         ...(userProps || {}),
       } as EmbedProps<Props>;
     },
@@ -53,7 +70,11 @@ export function embedBlockGenerator<
     transformer: schema.transformer,
   });
 
-  return {
+  const spec: BlockSpec = {
     schema: blockSchema,
+    service,
+    view,
   };
+
+  return spec;
 }

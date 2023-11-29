@@ -2,6 +2,7 @@
 import './note/edgeless-note.js';
 import './image/edgeless-image.js';
 import './frame/edgeless-frame.js';
+import './embed/edgeless-embed.js';
 import '../rects/edgeless-selected-rect.js';
 import '../rects/edgeless-hover-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
@@ -412,7 +413,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                 block => block.id,
                 (block, index) => {
                   const tag = unsafeStatic(
-                    portalMap[block.flavour as EdgelessBlockType]
+                    block.flavour.startsWith('affine:embed')
+                      ? 'edgeless-block-portal-embed'
+                      : portalMap[block.flavour as EdgelessBlockType]
                   );
                   const zIndex =
                     (layer.zIndexes as [number, number])[0] + index;

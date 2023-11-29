@@ -12,11 +12,28 @@ export const empty: InitFn = async (workspace: Workspace, id: string) => {
       title: new Text(),
     });
 
-    page.addBlock('affine:surface', {}, pageBlockId);
+    const surfaceId = page.addBlock('affine:surface', {}, pageBlockId);
 
     // Add note block inside page block
     const noteId = page.addBlock('affine:note', {}, pageBlockId);
     // Add paragraph block inside note block
+    page.addBlock('affine:paragraph', {}, noteId);
+
+    page.addBlock(
+      'affine:embed:github',
+      { owner: 'toeverything', repo: 'blocksuite' },
+      noteId
+    );
+    page.addBlock(
+      'affine:embed:github',
+      { owner: 'toeverything', repo: 'affine', xywh: '[0, 400, 400, 200]' },
+      surfaceId
+    );
+    page.addBlock(
+      'affine:embed:github',
+      { owner: 'toeverything', repo: 'affine', xywh: '[0, 700, 400, 200]' },
+      surfaceId
+    );
     page.addBlock('affine:paragraph', {}, noteId);
   });
 
