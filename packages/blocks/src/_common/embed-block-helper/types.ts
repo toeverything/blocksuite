@@ -5,11 +5,11 @@ import type {
   InternalPrimitives,
 } from '@blocksuite/store';
 
-import type { EmbedModel } from './embed-model.js';
+import type { EmbedBlockModel } from './embed-block-model.js';
 
 export type EmbedBlockGeneratorOptions<
   Props extends object,
-  Model extends EmbedModel<Props>,
+  Model extends EmbedBlockModel<Props>,
   WidgetName extends string = string,
   Transformer extends BaseBlockTransformer<Props> = BaseBlockTransformer<Props>,
 > = {

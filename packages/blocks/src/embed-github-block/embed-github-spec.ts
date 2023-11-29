@@ -1,9 +1,9 @@
 import { literal } from 'lit/static-html.js';
 
-import { embedBlockGenerator } from '../_common/embed-block-generator/index.js';
+import { createEmbedBlock } from '../_common/embed-block-helper/index.js';
 import { EmbedGithubBlockModel } from './embed-github-model.js';
 
-export const embedGithubBlockSpec = embedBlockGenerator({
+export const embedGithubBlockSpec = createEmbedBlock({
   schema: {
     name: 'github',
     version: 1,

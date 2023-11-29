@@ -2,12 +2,12 @@ import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { EmbedModel } from '../../../../../_common/embed-block-generator/index.js';
+import type { EmbedBlockModel } from '../../../../../_common/embed-block-helper/index.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 @customElement('edgeless-block-portal-embed')
-export class EdgelessBlockPortalEmbed extends EdgelessPortalBase<EmbedModel> {
+export class EdgelessBlockPortalEmbed extends EdgelessPortalBase<EmbedBlockModel> {
   override render() {
     const { model, index, surface } = this;
     const bound = Bound.deserialize(model.xywh);

@@ -2,12 +2,12 @@ import type { BlockSpec } from '@blocksuite/block-std';
 import type { BaseBlockTransformer } from '@blocksuite/store';
 import { defineBlockSchema } from '@blocksuite/store';
 
-import type { EmbedModel } from './embed-model.js';
+import type { EmbedBlockModel } from './embed-block-model.js';
 import type { EmbedBlockGeneratorOptions, EmbedProps } from './types.js';
 
-export function embedBlockGenerator<
+export function createEmbedBlock<
   Props extends object,
-  Model extends EmbedModel<Props>,
+  Model extends EmbedBlockModel<Props>,
   WidgetName extends string = string,
   Transformer extends BaseBlockTransformer<
     EmbedProps<Props>

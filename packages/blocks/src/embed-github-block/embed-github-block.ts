@@ -1,11 +1,11 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { EmbedBlock } from '../_common/embed-block-generator/index.js';
+import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import type { EmbedGithubBlockModel } from './embed-github-model.js';
 
 @customElement('affine-embed-github-block')
-export class EmbedGithubBlock extends EmbedBlock<EmbedGithubBlockModel> {
+export class EmbedGithubBlock extends EmbedBlockElement<EmbedGithubBlockModel> {
   static override styles = css`
     affine-embed-github-block {
       display: block;

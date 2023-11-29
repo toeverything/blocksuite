@@ -10,7 +10,7 @@ import type {
 import { Bound } from '../../surface-block/index.js';
 import type { EmbedProps } from './types.js';
 
-export class EmbedModel<Props = object>
+export class EmbedBlockModel<Props = object>
   extends BaseBlockModel<EmbedProps<Props>>
   implements IEdgelessElement
 {

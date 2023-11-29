@@ -8,7 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { Bound } from '../../surface-block/index.js';
 import type { EmbedProps } from './types.js';
 
-export class EmbedBlock<
+export class EmbedBlockElement<
   Model extends BaseBlockModel<EmbedProps> = BaseBlockModel<EmbedProps>,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
