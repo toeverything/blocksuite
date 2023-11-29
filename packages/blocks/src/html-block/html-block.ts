@@ -38,13 +38,11 @@ export class HtmlBlockComponent extends BlockElement<HtmlBlockModel> {
   );
 
   load = () => {
+    this._hoverController;
     const iframe = this.querySelector('iframe');
-    console.log(iframe);
     if (!iframe) return;
     const doc = iframe.contentDocument;
-    console.log(doc);
     if (!doc) return;
-    console.log(doc.body.scrollHeight);
     iframe.style.height = `${doc.body.scrollHeight}px`;
   };
 

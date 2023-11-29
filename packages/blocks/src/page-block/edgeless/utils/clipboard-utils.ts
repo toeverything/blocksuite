@@ -12,9 +12,9 @@ import type { NoteBlockModel } from '../../../note-block/index.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import {
   Bound,
+  type CanvasElement,
   ConnectorElement,
   GroupElement,
-  type PhasorElement,
 } from '../../../surface-block/index.js';
 import { getElementsWithoutGroup } from '../../../surface-block/managers/group-manager.js';
 import { getCopyElements } from '../controllers/clipboard.js';
@@ -129,7 +129,7 @@ export const splitElements = (elements: EdgelessElement[]) => {
     }
   ) as {
     notes: NoteBlockModel[];
-    shapes: PhasorElement[];
+    shapes: CanvasElement[];
     frames: FrameBlockModel[];
     images: ImageBlockModel[];
   };
