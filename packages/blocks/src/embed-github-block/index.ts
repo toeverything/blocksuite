@@ -2,19 +2,19 @@ import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
-import { EdgelessSelectableMixin } from '../../../surface-block/elements/selectable.js';
 import {
   EmbedBlock,
   EmbedModel,
-} from '../embed-block-generator/embed-block.js';
-import { embedBlockGenerator } from '../embed-block-generator/index.js';
+} from '../_common/embed-block-generator/embed-block.js';
+import { embedBlockGenerator } from '../_common/embed-block-generator/index.js';
+import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
 
 type GithubBlockProps = {
   owner: string;
   repo: string;
 };
 
-export const githubBlockSpec = embedBlockGenerator({
+export const embedGithubBlockSpec = embedBlockGenerator({
   schema: {
     name: 'github',
     version: 1,
@@ -33,7 +33,7 @@ export const githubBlockSpec = embedBlockGenerator({
 export class GithubBlockModel extends EmbedModel<GithubBlockProps> {}
 
 @customElement('affine-embed-github-block')
-export class GithubBlock extends EmbedBlock<GithubBlockModel> {
+export class EmbedGithubBlock extends EmbedBlock<GithubBlockModel> {
   static override styles = css`
     affine-embed-github-block {
       display: block;
@@ -57,6 +57,6 @@ export class GithubBlock extends EmbedBlock<GithubBlockModel> {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-embed-github-block': GithubBlock;
+    'affine-embed-github-block': EmbedGithubBlock;
   }
 }

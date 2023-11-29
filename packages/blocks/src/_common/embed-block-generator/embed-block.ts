@@ -5,12 +5,12 @@ import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { ImageBlockModel } from '../../../image-block/index.js';
-import { BLOCK_BATCH } from '../../../surface-block/batch.js';
-import type { IEdgelessElement } from '../../../surface-block/index.js';
-import type { SerializedXYWH } from '../../../surface-block/index.js';
-import type { IVec, PointLocation } from '../../../surface-block/index.js';
-import { Bound } from '../../../surface-block/index.js';
+import type { ImageBlockModel } from '../../image-block/index.js';
+import { BLOCK_BATCH } from '../../surface-block/batch.js';
+import type { IEdgelessElement } from '../../surface-block/index.js';
+import type { SerializedXYWH } from '../../surface-block/index.js';
+import type { IVec, PointLocation } from '../../surface-block/index.js';
+import { Bound } from '../../surface-block/index.js';
 import type { EmbedProps } from './index.js';
 
 export class EmbedBlock<
