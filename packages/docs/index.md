@@ -18,10 +18,10 @@ hero:
       link: https://blocksuite-toeverything.vercel.app/starter/?init
 
 features:
-  - title: 🎨 Interoperable Block-Based Editors
-    details: BlockSuite provides multiple editors with shared block schema and infra, including rich text, whiteboard and more!
-  - title: 🧬 Intrinsically Collaborative
-    details: Powered by CRDT, BlockSuite built conflict resolution and time travel into its core. Collaboration ready from day one.
-  - title: 🚧 Extensible Suite
-    details: Experience extensibility through comprehensive APIs and reusable packages. Battery included. Framework agnostic.
+  - title: 📝 Document Editor
+    details: TODO
+  - title: 🎨 Whiteboard Editor
+    details: TODO
+  - title: 🧩 Common Framework
+    details: TODO
 ---
