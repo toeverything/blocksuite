@@ -232,9 +232,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   override firstUpdated() {
     this.model.propsUpdated.on(() => {
       this._updatePlaceholder();
-      this.requestUpdate();
     });
-    this.model.childrenUpdated.on(() => this.requestUpdate());
 
     this.page.awarenessStore.slots.update.on(v => {
       const remoteSelections = this.std.selection.remoteSelections.get(v.id);
@@ -326,7 +324,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
     >
-      ${this.content}
+      ${this.renderModelChildren(this.model)}
     </div>`;
 
     const fontWeightMap: { [key: string]: { [key: string]: number } } = {
