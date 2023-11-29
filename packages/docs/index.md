@@ -18,10 +18,10 @@ hero:
       link: https://blocksuite-toeverything.vercel.app/starter/?init
 
 features:
-  - title: 🎨 Interoperable Block-Based Editors
-    details: BlockSuite provides multiple editors with shared block schema and infra, including rich text, whiteboard and more!
-  - title: 🧬 Intrinsically Collaborative
-    details: Powered by CRDT, BlockSuite built conflict resolution and time travel into its core. Collaboration ready from day one.
-  - title: 🚧 Extensible Suite
-    details: Experience extensibility through comprehensive APIs and reusable packages. Battery included. Framework agnostic.
+  - title: 📝 Document Editor
+    details: The <code>DocEditor</code> is the default editor BlockSuite ships. It's created from our own rich text editing infra, and is open for customizations.
+  - title: 🎨 Edgeless Editor
+    details: BlockSuite also provides <code>EdgelessEditor</code> with limitless logical canvas size, ideal for virtual whiteboarding and graphic editing.
+  - title: 🧩 Common Collaborative Framework
+    details: BlockSuite editors are all based on a collaborative block editing framework. Battery included. Framework agnostic.
 ---
