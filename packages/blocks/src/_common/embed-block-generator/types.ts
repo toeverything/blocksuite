@@ -5,7 +5,7 @@ import type {
   InternalPrimitives,
 } from '@blocksuite/store';
 
-import type { EmbedModel } from './embed-block.js';
+import type { EmbedModel } from './embed-model.js';
 
 export type EmbedBlockGeneratorOptions<
   Props extends object,

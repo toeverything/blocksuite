@@ -2,7 +2,7 @@ import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { EmbedModel } from '../../../../../_common/embed-block-generator/embed-block.js';
+import type { EmbedModel } from '../../../../../_common/embed-block-generator/index.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
