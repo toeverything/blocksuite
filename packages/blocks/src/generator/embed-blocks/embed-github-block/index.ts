@@ -14,9 +14,6 @@ type GithubBlockProps = {
   repo: string;
 };
 
-@EdgelessSelectableMixin
-export class GithubBlockModel extends EmbedModel<GithubBlockProps> {}
-
 export const githubBlockSpec = embedBlockGenerator({
   schema: {
     name: 'github',
@@ -32,6 +29,9 @@ export const githubBlockSpec = embedBlockGenerator({
   },
 });
 
+@EdgelessSelectableMixin
+export class GithubBlockModel extends EmbedModel<GithubBlockProps> {}
+
 @customElement('affine-embed-github-block')
 export class GithubBlock extends EmbedBlock<GithubBlockModel> {
   static override styles = css`
@@ -39,6 +39,7 @@ export class GithubBlock extends EmbedBlock<GithubBlockModel> {
       display: block;
       height: 100%;
       width: 100%;
+      background: var(--affine-background-primary-color);
       border: 1px solid var(--affine-border-color);
       padding: 12px;
       margin: 0;

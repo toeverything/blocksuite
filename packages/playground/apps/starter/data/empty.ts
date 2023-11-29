@@ -31,7 +31,7 @@ export const empty: InitFn = async (workspace: Workspace, id: string) => {
     );
     page.addBlock(
       'affine:embed:github',
-      { owner: 'toeverything', repo: 'affine', xywh: '[0, 700, 400, 200]' },
+      { owner: 'milkdown', repo: 'milkdown', xywh: '[0, 700, 400, 200]' },
       surfaceId
     );
     page.addBlock('affine:paragraph', {}, noteId);
