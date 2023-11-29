@@ -107,7 +107,8 @@ export async function switchEditorMode(page: Page) {
 }
 
 export async function switchEditorEmbedMode(page: Page) {
-  await page.click('sl-button[content="Add container offset"]');
+  await page.click('sl-button:text("Test Operations")');
+  await page.click('sl-menu-item:text("Switch Offset Mode")');
 }
 
 type EdgelessTool =

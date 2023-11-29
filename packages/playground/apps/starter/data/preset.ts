@@ -29,7 +29,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
     const pageBlockId = page.addBlock('affine:page', {
       title: new Text('Welcome to BlockSuite Playground'),
     });
-    const surfaceId = page.addBlock('affine:surface', {}, pageBlockId);
+    page.addBlock('affine:surface', {}, pageBlockId);
 
     // Add note block inside page block
     const noteId = page.addBlock(
@@ -38,11 +38,6 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
       pageBlockId
     );
 
-    page.addBlock(
-      'affine:frame',
-      { xywh: '[-40,-40,880,817]', title: new Text('Frame 1') },
-      surfaceId
-    );
     // Import preset markdown content inside note block
     const contentParser = new window.ContentParser(page);
 

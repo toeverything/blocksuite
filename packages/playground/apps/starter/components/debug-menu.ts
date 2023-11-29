@@ -575,6 +575,9 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._shareSelection}>
                 Share Selection
               </sl-menu-item>
+              <sl-menu-item @click=${this._switchOffsetMode}>
+                Switch Offset Mode
+              </sl-menu-item>
               <sl-menu-item @click=${this._extendFormatBar}>
                 Extend Format Bar
               </sl-menu-item>
@@ -588,16 +591,6 @@ export class DebugMenu extends ShadowlessElement {
               @click=${this._switchEditorMode}
             >
               <sl-icon name="phone-flip"></sl-icon>
-            </sl-button>
-          </sl-tooltip>
-
-          <sl-tooltip content="Add container offset" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Add container offset"
-              @click=${this._switchOffsetMode}
-            >
-              <sl-icon name="aspect-ratio"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
@@ -620,7 +613,7 @@ export class DebugMenu extends ShadowlessElement {
           </sl-tooltip>
 
           <sl-tooltip
-            content="Toggle navigation panel"
+            content="Toggle Navigation Panel"
             placement="bottom"
             hoist
           >
@@ -634,7 +627,7 @@ export class DebugMenu extends ShadowlessElement {
           </sl-tooltip>
 
           <sl-tooltip
-            content="🚧 Toggle copilot panel"
+            content="🚧 Toggle Copilot Panel"
             placement="bottom"
             hoist
           >
