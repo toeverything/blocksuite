@@ -65,8 +65,13 @@ function diffArray<T>(
 }
 
 export class BacklinkIndexer {
-  private _linkIndexMap: Record<PageId, Record<BlockId, LinkedNode[]>> = {};
   private _disposables = new DisposableGroup();
+
+  private _linkIndexMap: Record<PageId, Record<BlockId, LinkedNode[]>> = {};
+  get linkIndexMap() {
+    return this._linkIndexMap;
+  }
+
   public slots = {
     /**
      * Note: sys:children update will not trigger event
