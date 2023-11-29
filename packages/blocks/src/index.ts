@@ -47,6 +47,7 @@ export * from './paragraph-block/index.js';
 export * from './surface-block/index.js';
 export * from './surface-block/surface-block.js';
 export * from './surface-block/surface-model.js';
+export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
 
 const env: Record<string, unknown> =
