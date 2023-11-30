@@ -53,16 +53,8 @@ export interface StoreOptions<
 }
 
 const flagsPreset = {
-  enable_set_remote_flag: true,
-  enable_block_hub: true,
-
-  enable_transformer_clipboard: false,
-
+  enable_transformer_clipboard: true,
   enable_expand_database_block: false,
-
-  enable_toggle_block: false,
-  enable_note_index: false,
-
   enable_bultin_ledits: false,
   readonly: {},
 } satisfies BlockSuiteFlags;

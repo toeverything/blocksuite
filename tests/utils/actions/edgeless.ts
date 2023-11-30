@@ -101,13 +101,14 @@ export async function extendFormatBar(page: Page) {
 }
 
 export async function switchEditorMode(page: Page) {
-  await page.click('sl-button[content="Switch Editor Mode"]');
+  await page.click('sl-tooltip[content="Switch Editor Mode"]');
   // FIXME: listen to editor loaded event
   await waitNextFrame(page);
 }
 
 export async function switchEditorEmbedMode(page: Page) {
-  await page.click('sl-button[content="Add container offset"]');
+  await page.click('sl-button:text("Test Operations")');
+  await page.click('sl-menu-item:text("Switch Offset Mode")');
 }
 
 type EdgelessTool =
