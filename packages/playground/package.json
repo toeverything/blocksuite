@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite --host",
     "dev:hmr": "WC_HMR=1 vite",
+    "test": "vitest",
     "build": "tsc && vite build",
     "build:size": "vite build -c vite.config.size.ts",
     "preview": "vite preview"
