@@ -229,11 +229,11 @@ test(scoped`markdown format parse`, async ({ page }) => {
 
 ###### h6
 
-[] todo
+- [ ] todo
 
-[ ] todo
+- [ ] todo
 
-[x] todo
+- [x] todo
 
 * bulleted
 
