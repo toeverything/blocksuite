@@ -1,8 +1,8 @@
 import '../../../components/loader.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type Workspace } from '@blocksuite/store';
+import { Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -23,7 +23,8 @@ import {
 import { ContentParser } from '../../../../_legacy/content-parser/index.js';
 import { columnManager } from '../../../../database-block/common/columns/manager.js';
 import { richTextPureColumnConfig } from '../../../../database-block/common/columns/rich-text/define.js';
-import type { Cell, Column } from '../../../../index.js';
+import { type Cell, type Column } from '../../../../index.js';
+import { MarkdownAdapter, NotionHtmlAdapter } from '../../../adapters/index.js';
 import { REFERENCE_NODE } from '../../../components/rich-text/consts.js';
 import { styles } from './styles.js';
 
@@ -35,26 +36,22 @@ export type OnSuccessHandler = (
 const SHOW_LOADING_SIZE = 1024 * 200;
 
 export async function importMarkDown(workspace: Workspace, text: string) {
-  const page = await createPage(workspace);
-  const rootId = page.root?.id;
-  assertExists(
-    rootId,
-    `Failed to import markdown, page root not found! pageId: ${page.id}`
-  );
-  const contentParser = new ContentParser(page);
-  await contentParser.importMarkdown(text, rootId);
+  const job = new Job({
+    workspace: workspace,
+  });
+  const mdAdapter = new MarkdownAdapter();
+  const snapshot = await mdAdapter.toPageSnapshot({ file: text });
+  const page = await job.snapshotToPage(snapshot);
   return [page.id];
 }
 
 export async function importHtml(workspace: Workspace, text: string) {
-  const page = await createPage(workspace);
-  const rootId = page.root?.id;
-  assertExists(
-    rootId,
-    `Failed to import HTML, page root not found! pageId: ${page.id}`
-  );
-  const contentParser = new ContentParser(page);
-  await contentParser.importHtml(text, rootId);
+  const job = new Job({
+    workspace: workspace,
+  });
+  const htmlAdapter = new NotionHtmlAdapter();
+  const snapshot = await htmlAdapter.toPageSnapshot({ file: text });
+  const page = await job.snapshotToPage(snapshot);
   return [page.id];
 }
 
