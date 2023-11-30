@@ -14,8 +14,6 @@ import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
 export const params = new URLSearchParams(location.search);
 export const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
 
-const featureArgs = (params.get('features') ?? '').split(',');
-
 export function getOptions(
   fn: (params: URLSearchParams) => Record<string, string | number>
 ) {
