@@ -49,9 +49,6 @@ export class FileDropManager {
       document.body.appendChild(this._indicator);
     }
 
-    this.onDragOver = this.onDragOver.bind(this);
-    this.onDrop = this.onDrop.bind(this);
-
     this._blockService.disposables.addFromEvent(
       this._blockService.std.root,
       'drop',
@@ -92,7 +89,7 @@ export class FileDropManager {
     return this._fileDropRule.maxFileSize ?? 10 * 1000 * 1000; // default to 10MB
   }
 
-  onDragOver(event: DragEvent) {
+  onDragOver = (event: DragEvent) => {
     event.preventDefault();
 
     // allow only external drag-and-drop files
@@ -115,9 +112,9 @@ export class FileDropManager {
 
     this._indicator.dropResult = result;
     this._indicator.rect = rect;
-  }
+  };
 
-  async onDrop(event: DragEvent) {
+  onDrop = async (event: DragEvent) => {
     event.preventDefault();
 
     // allow only external drag-and-drop files
@@ -163,5 +160,5 @@ export class FileDropManager {
 
     this._point = null;
     this._indicator.reset();
-  }
+  };
 }
