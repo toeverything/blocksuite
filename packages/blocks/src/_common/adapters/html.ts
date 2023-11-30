@@ -31,6 +31,7 @@ import {
   type highlightCacheKey,
 } from '../../code-block/utils/highlight-cache.js';
 import { type HtmlAST } from './hast.js';
+import { NotionHtmlAdapter } from './notion-html.js';
 
 export type Html = string;
 
@@ -45,6 +46,8 @@ type HtmlToSliceSnapshotPayload = {
 };
 
 export class HtmlAdapter extends BaseAdapter<Html> {
+  private _notion = new NotionHtmlAdapter();
+
   override async fromPageSnapshot(
     payload: FromPageSnapshotPayload
   ): Promise<FromPageSnapshotResult<string>> {
@@ -108,17 +111,17 @@ export class HtmlAdapter extends BaseAdapter<Html> {
   override async toPageSnapshot(
     _payload: ToPageSnapshotPayload<string>
   ): Promise<PageSnapshot> {
-    throw new Error('Method not implemented.');
+    return this._notion.toPageSnapshot(_payload);
   }
   override toBlockSnapshot(
     _payload: ToBlockSnapshotPayload<string>
   ): Promise<BlockSnapshot> {
-    throw new Error('Method not implemented.');
+    return this._notion.toBlockSnapshot(_payload);
   }
   override async toSliceSnapshot(
     _payload: HtmlToSliceSnapshotPayload
   ): Promise<SliceSnapshot> {
-    throw new Error('Method not implemented.');
+    return this._notion.toSliceSnapshot(_payload);
   }
 
   private _astToHtml = (ast: Root) => {
