@@ -3,9 +3,10 @@
   "compilerOptions": {
     "rootDir": "./src/",
     "outDir": "./dist/",
-    "noEmit": true
+    "noEmit": false
   },
   "include": ["./src"],
+  "exclude": ["src/tests"],
   "references": [
     {
       "path": "../global"

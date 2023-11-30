@@ -5,7 +5,7 @@
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
-    "build": "tsc -b --verbose",
+    "build": "tsc --project tsconfig.build.json",
     "test": "vitest --run"
   },
   "keywords": [],
