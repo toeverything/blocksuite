@@ -1,6 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 
-import { __unstableSchemas } from '@blocksuite/blocks/models';
 import { afterEach, beforeEach, expect, test } from 'vitest';
 
 import { cleanup, setupEditor } from '../utils/setup';
