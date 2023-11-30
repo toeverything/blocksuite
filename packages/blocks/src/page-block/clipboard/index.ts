@@ -4,6 +4,7 @@ import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSnapshot, Page } from '@blocksuite/store';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
+import { HtmlAdapter } from '../../_common/adapters/index.js';
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
 import { replaceIdMiddleware } from '../../_common/transformers/utils.js';
 import { ClipboardAdapter } from './adapter.js';
@@ -25,6 +26,7 @@ export class ClipboardController implements ReactiveController {
 
   private _clipboardAdapter = new ClipboardAdapter();
   private _markdownAdapter = new MarkdownAdapter();
+  private _htmlAdapter = new HtmlAdapter();
 
   constructor(host: ReactiveControllerHost & BlockElement) {
     (this.host = host).addController(this);
@@ -60,6 +62,7 @@ export class ClipboardController implements ReactiveController {
       this._markdownAdapter,
       90
     );
+    this._std.clipboard.registerAdapter('text/html', this._htmlAdapter, 80);
     const copy = copyMiddleware(this._std);
     const paste = pasteMiddleware(this._std);
     this._std.clipboard.use(copy);
@@ -69,6 +72,8 @@ export class ClipboardController implements ReactiveController {
     this._disposables.add({
       dispose: () => {
         this._std.clipboard.unregisterAdapter(ClipboardAdapter.MIME);
+        this._std.clipboard.unregisterAdapter('text/plain');
+        this._std.clipboard.unregisterAdapter('text/html');
         this._std.clipboard.unuse(copy);
         this._std.clipboard.unuse(paste);
         this._std.clipboard.unuse(replaceIdMiddleware);
