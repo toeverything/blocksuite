@@ -421,6 +421,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
                 .page=${this.page}
                 .invisible=${true}
                 .showCardNumber=${false}
+                .hidePreviewIcon=${this.hidePreviewIcon}
                 .showBottomDivider=${idx !== this._hiddenNotes.length - 1}
                 @fitview=${this._fitToElement}
               ></edgeless-note-toc-card>`
