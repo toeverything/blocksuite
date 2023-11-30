@@ -23,7 +23,7 @@ import {
 import { ContentParser } from '../../../../_legacy/content-parser/index.js';
 import { columnManager } from '../../../../database-block/common/columns/manager.js';
 import { richTextPureColumnConfig } from '../../../../database-block/common/columns/rich-text/define.js';
-import { type Cell, type Column } from '../../../../index.js';
+import type { Cell, Column } from '../../../../index.js';
 import { MarkdownAdapter, NotionHtmlAdapter } from '../../../adapters/index.js';
 import { REFERENCE_NODE } from '../../../components/rich-text/consts.js';
 import { styles } from './styles.js';
