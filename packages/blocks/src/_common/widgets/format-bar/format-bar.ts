@@ -264,7 +264,7 @@ export class AffineFormatBarWidget extends WidgetElement {
         return;
       }
 
-      let rangeRect = range.getClientRects();
+      const rangeRect = range.getClientRects();
 
       const visualElement = {
         getBoundingClientRect: () => range.getBoundingClientRect(),
@@ -289,9 +289,6 @@ export class AffineFormatBarWidget extends WidgetElement {
               formatQuickBarElement.style.display = 'flex';
               formatQuickBarElement.style.top = `${y}px`;
               formatQuickBarElement.style.left = `${x}px`;
-              this.root.event.add('wheel', () => {
-                rangeRect = range.getClientRects();
-              });
             });
           },
           {
