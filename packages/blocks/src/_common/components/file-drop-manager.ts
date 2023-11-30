@@ -1,5 +1,5 @@
+import type { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
@@ -20,18 +20,23 @@ export type FileDropRule = {
   maxFileSize?: number;
   embed: boolean;
   matcher: (file: File) => boolean;
+  handleDropInPage?: (
+    targetModel: BaseBlockModel,
+    files: File[],
+    place: 'before' | 'after'
+  ) => void;
   handleDropInEdgeless?: (point: Point, files: File[]) => void;
 };
 
 export class FileDropManager {
-  private _root: BlockSuiteRoot;
+  private _blockService: BlockService;
   private _fileDropRule: FileDropRule;
 
   private _indicator!: DragIndicator;
   private _point: Point | null = null;
 
-  constructor(root: BlockSuiteRoot, fileDropRule: FileDropRule) {
-    this._root = root;
+  constructor(blockService: BlockService, fileDropRule: FileDropRule) {
+    this._blockService = blockService;
     this._fileDropRule = fileDropRule;
 
     this._indicator = <DragIndicator>(
@@ -46,10 +51,16 @@ export class FileDropManager {
 
     this.onDragOver = this.onDragOver.bind(this);
     this.onDrop = this.onDrop.bind(this);
+
+    this._blockService.disposables.addFromEvent(
+      this._blockService.std.root,
+      'drop',
+      this.onDrop
+    );
   }
 
   get isPageMode(): boolean {
-    const editor = getEditorContainer(this._root.page);
+    const editor = getEditorContainer(this._blockService.page);
     return editor.mode === 'page';
   }
 
@@ -61,7 +72,7 @@ export class FileDropManager {
   }
 
   get targetModel(): BaseBlockModel | null {
-    const pageBlock = this._root.page.root;
+    const pageBlock = this._blockService.page.root;
     assertExists(pageBlock);
 
     let targetModel = this._indicator.dropResult?.modelState.model || null;
@@ -113,17 +124,17 @@ export class FileDropManager {
     const effectAllowed = event.dataTransfer?.effectAllowed ?? 'none';
     if (effectAllowed !== 'all') return;
 
-    const droppedFiles = event.dataTransfer?.files ?? [];
-    const matchedFiles = [...droppedFiles].filter(this._fileDropRule.matcher);
-    if (!matchedFiles.length) return;
+    const { page } = this._blockService;
+    const { embed, handleDropInEdgeless, matcher } = this._fileDropRule;
+    const targetModel = this.targetModel;
+    const place = this.type;
 
     const { clientX, clientY } = event;
     this._point = new Point(clientX, clientY);
 
-    const targetModel = this.targetModel;
-    const place = this.type;
-    const { page } = this._root;
-    const { embed, handleDropInEdgeless } = this._fileDropRule;
+    const droppedFiles = event.dataTransfer?.files ?? [];
+    const matchedFiles = [...droppedFiles].filter(matcher);
+    if (!matchedFiles.length) return;
 
     if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
       page.captureSync();
