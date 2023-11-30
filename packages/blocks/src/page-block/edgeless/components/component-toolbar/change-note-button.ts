@@ -363,7 +363,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     const { collapse } = edgeless;
 
     return html`
-      ${html`<div
+      <div
         class="hidden-status"
         @click=${() => this._setNoteHidden(note, !hidden)}
       >
@@ -378,7 +378,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               <affine-tooltip
                 >Only show this note here, but not in page mode</affine-tooltip
               > `}
-      </div>`}
+      </div>
 
       <component-toolbar-menu-divider
         .vertical=${true}
