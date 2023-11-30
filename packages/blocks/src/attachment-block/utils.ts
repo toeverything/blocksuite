@@ -160,16 +160,18 @@ export async function uploadBlobForAttachment(
   } finally {
     setAttachmentLoading(attachmentModelId, false);
   }
+  return attachmentModelId;
 }
 
 /**
- * Append a new attachment block after the specified block.
+ * Add a new attachment block before / after the specified block.
  */
-export async function appendAttachmentBlock(
+export async function addSiblingAttachmentBlock(
   file: File,
   model: BaseBlockModel,
-  maxFileSize: number
-): Promise<void> {
+  maxFileSize: number,
+  place: 'before' | 'after' = 'after'
+): Promise<string | null> {
   if (file.size > maxFileSize) {
     toast(
       `You can only upload files less than ${humanFileSize(
@@ -178,7 +180,7 @@ export async function appendAttachmentBlock(
         0
       )}`
     );
-    return;
+    return null;
   }
 
   const page = model.page;
@@ -194,9 +196,9 @@ export async function appendAttachmentBlock(
     type: file.type,
     embed: false,
   };
-  const [newBlockId] = page.addSiblingBlocks(model, [props]);
+  const [newBlockId] = page.addSiblingBlocks(model, [props], place);
   // Do not add await here, because upload may take a long time, we want to do it in the background.
-  uploadBlobForAttachment(page, newBlockId, file);
+  return uploadBlobForAttachment(page, newBlockId, file);
 }
 
 const attachmentLoadingMap = new Set<string>();

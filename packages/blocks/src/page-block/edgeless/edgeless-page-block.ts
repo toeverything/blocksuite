@@ -456,7 +456,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
     fileInfos: {
       file: File;
       sourceId: string;
-    }[]
+    }[],
+    point?: Point
   ) {
     const models: Partial<ImageBlockModel>[] = [];
     for (const { file, sourceId } of fileInfos) {
@@ -468,7 +469,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       });
     }
 
-    const center = Vec.toVec(this.surface.viewport.center);
+    const center = Vec.toVec(point ?? this.surface.viewport.center);
 
     const ids = models.map(model => {
       const bound = Bound.fromCenter(
