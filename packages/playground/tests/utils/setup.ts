@@ -8,7 +8,7 @@ import {
 } from '@blocksuite/store';
 import { createMemoryStorage, Generator, Job, Schema } from '@blocksuite/store';
 
-const createWorkspaceOptions = () => {
+function createWorkspaceOptions() {
   const providerCreators: DocProviderCreator[] = [];
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   const schema = new Schema();
@@ -34,9 +34,9 @@ const createWorkspaceOptions = () => {
       },
     },
   };
-};
+}
 
-const initWorkspace = async (workspace: Workspace) => {
+async function initWorkspace(workspace: Workspace) {
   const page = workspace.createPage({ id: 'page:home' });
 
   await page.load(() => {
@@ -46,20 +46,20 @@ const initWorkspace = async (workspace: Workspace) => {
     page.addBlock('affine:surface', {}, pageBlockId);
   });
   page.resetHistory();
-};
+}
 
-const createEditor = (page: Page, element: HTMLElement) => {
+function createEditor(page: Page, element: HTMLElement) {
   const editor = new EditorContainer();
   editor.page = page;
   element.append(editor);
 
   return editor;
-};
+}
 
-const createEditorWhenLoaded = (
+function createEditorWhenLoaded(
   workspace: Workspace,
   mode: 'edgeless' | 'page' = 'page'
-) => {
+) {
   return new Promise<void>(resolve => {
     workspace.slots.pageAdded.once(pageId => {
       resolve();
@@ -75,7 +75,7 @@ const createEditorWhenLoaded = (
       window.page = page;
     });
   });
-};
+}
 
 export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
   const workspace = new Workspace(createWorkspaceOptions());
