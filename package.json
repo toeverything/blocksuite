@@ -33,6 +33,7 @@
     "test:headed": "playwright test --debug",
     "test:store": "pnpm --filter @blocksuite/store test",
     "test:virgo": "pnpm --filter @blocksuite/virgo test",
+    "test:integration": "pnpm --filter @blocksuite/playground test",
     "test:node": "node --experimental-specifier-resolution=node --loader ts-node/esm ./scripts/node-import-test.ts",
     "format": "prettier --write --cache packages tests",
     "build": "pnpm build:editor && pnpm build:playground && pnpm build:docs",
