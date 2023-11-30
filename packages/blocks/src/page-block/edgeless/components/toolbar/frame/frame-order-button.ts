@@ -53,9 +53,17 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
   }
 
   protected override render() {
+    const { readonly } = this.edgeless.page;
     return html`
+      <style>
+        .edgeless-frame-order-button svg {
+          color: ${readonly ? 'var(--affine-text-disable-color)' : 'inherit'};
+        }
+      </style>
       <edgeless-tool-icon-button
+        class="edgeless-frame-order-button"
         @click=${() => {
+          if (readonly) return;
           this._toggleMenu();
         }}
       >

@@ -41,8 +41,6 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   widgetIdAttr = 'data-widget-id';
 
-  modelSubscribed = new Set<string>();
-
   std!: BlockSuite.Std;
 
   rangeManager: RangeManager | null = null;
@@ -109,7 +107,6 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
     super.disconnectedCallback();
 
     this.std.unmount();
-    this.modelSubscribed.clear();
     this.rangeManager = null;
   }
 
@@ -123,7 +120,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   }
 
   renderModel = (model: BaseBlockModel): TemplateResult => {
-    const { flavour, children } = model;
+    const { flavour } = model;
     const schema = this.page.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
       console.warn(`Cannot find schema for ${flavour}.`);
@@ -150,41 +147,21 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
         }, {})
       : {};
 
-    const content = children.length
-      ? html`${repeat(
-          children,
-          child => child.id,
-          child => this.renderModel(child)
-        )}`
-      : null;
-
-    this._onLoadModel(model);
-
     return html`<${tag}
       ${unsafeStatic(this.blockIdAttr)}=${model.id}
       .root=${this}
       .page=${this.page}
       .model=${model}
       .widgets=${widgets}
-      .content=${content}
     ></${tag}>`;
   };
 
-  private _onLoadModel = (model: BaseBlockModel) => {
-    const { id } = model;
-    if (!this.modelSubscribed.has(id)) {
-      this._disposables.add(
-        model.propsUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
-      this._disposables.add(
-        model.childrenUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
-      this.modelSubscribed.add(id);
-    }
+  renderModelChildren = (model: BaseBlockModel): TemplateResult => {
+    return html`${repeat(
+      model.children,
+      child => child.id,
+      child => this.renderModel(child)
+    )}`;
   };
 
   private _registerView = () => {

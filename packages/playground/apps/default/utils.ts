@@ -14,8 +14,6 @@ import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
 export const params = new URLSearchParams(location.search);
 export const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
 
-const featureArgs = (params.get('features') ?? '').split(',');
-
 export function getOptions(
   fn: (params: URLSearchParams) => Record<string, string | number>
 ) {
@@ -48,10 +46,6 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     idGenerator,
     blobStorages,
     defaultFlags: {
-      enable_toggle_block: featureArgs.includes('toggle'),
-      enable_set_remote_flag: true,
-      enable_block_hub: true,
-      enable_note_index: true,
       enable_bultin_ledits: true,
       readonly: {
         'page:home': false,

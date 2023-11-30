@@ -27,7 +27,7 @@ BlockSuite is an open-source project for block-based collaborative editing. This
 
 By using BlockSuite, you can:
 
-- Reuse and extend block-based editors, like [document editor](https://blocksuite-toeverything.vercel.app/starter/?init) and [whiteboard editor](https://blocksuite-toeverything.vercel.app/).
+- Reuse and extend block-based editors, like [document editor](https://try-blocksuite.vercel.app/starter/?init) and [whiteboard editor](https://try-blocksuite.vercel.app/).
 - Define custom blocks that could be shared across these editors.
 - Synchronize editor states over different providers (`IndexedDB`, `WebSocket`, `BroadcastChannel`, etc.) while automatically resolving merge conflicts.
 - Support document snapshot, clipboard, and interoperability with third-party formats through a universal data transforming model.
@@ -59,8 +59,8 @@ To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://bl
 ## Resources
 
 - 🎁 Examples
-  - [Nightly Playground](https://blocksuite-toeverything.vercel.app/starter/?init)
-  - [The `SimpleAffineEditor` Example](https://blocksuite-toeverything.vercel.app/examples/basic/)
+  - [Nightly Playground](https://try-blocksuite.vercel.app/starter/?init)
+  - [The `SimpleAffineEditor` Example](https://try-blocksuite.vercel.app/examples/basic/)
   - [BlockSuite Monorepo in StackBlitz](https://stackblitz.com/github/toeverything/blocksuite)
   - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
 - 📝 [Documentation](https://blocksuite.affine.pro/quick-start.html)

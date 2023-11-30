@@ -24,7 +24,6 @@ import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/compon
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
-import { getGridBound } from '../page-block/edgeless/utils/bound-utils.js';
 import {
   isConnectable,
   isFrameBlock,
@@ -82,11 +81,6 @@ import { serializeXYWH } from './utils/xywh.js';
 type id = string;
 
 const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
-
-export enum EdgelessBlocksFlavour {
-  NOTE = 'affine:note',
-  FRAME = 'affine:frame',
-}
 
 export type IndexedCanvasUpdateEvent = CustomEvent<{
   content: HTMLCanvasElement[];
@@ -188,8 +182,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   getBlocks<T extends EdgelessBlockType>(
-    flavours: T[] | T
+    flavours: T[] | T | RegExp
   ): TopLevelBlockModel[] {
+    if (flavours instanceof RegExp) {
+      const regexp = flavours;
+      const models = this.model.children
+        .filter(child => regexp.test(child.flavour))
+        .map(x => this.edgeless.localRecord.wrap(x));
+
+      return models as TopLevelBlockModel[];
+    }
+
     flavours = typeof flavours === 'string' ? [flavours] : flavours;
 
     return flavours.reduce<TopLevelBlockModel[]>((pre, flavour) => {
@@ -219,6 +222,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   get blocks() {
     return [
+      ...this.getBlocks(/affine:embed:*/),
       ...this.getBlocks(FRAME),
       ...this.getBlocks(NOTE),
       ...this.getBlocks(IMAGE),
@@ -786,8 +790,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   fitElementToViewport(ele: EdgelessElement) {
     const { viewport } = this;
-    let bound = getGridBound(ele);
-    bound = bound.expand(30);
+    const bound = ele.elementBound.expand(30);
     if (Date.now() - this._lastTime > 200)
       this._cachedViewport = viewport.viewportBounds;
     this._lastTime = Date.now();

@@ -147,7 +147,7 @@ export abstract class SurfaceElement<
     return (this.yMap.get('batch') as T['batch']) ?? null;
   }
 
-  get gridBound() {
+  get elementBound() {
     if (this.rotate) {
       return Bound.from(getBoundsWithRotation(this));
     }

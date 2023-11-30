@@ -55,7 +55,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         .page=${this.page}
         .root=${this.root}
         .widgets=${this.widgets}
-        .content=${this.content}
       ></affine-edgeless-image>`;
     } else {
       return html`<affine-page-image
@@ -63,7 +62,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         .page=${this.page}
         .root=${this.root}
         .widgets=${this.widgets}
-        .content=${this.content}
       ></affine-page-image>`;
     }
   }

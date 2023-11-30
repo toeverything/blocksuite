@@ -133,11 +133,37 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         createDate: +new Date(),
         tags: [],
       },
-      blocks: await this._traverseMarkdown(
-        markdownAst,
-        blockSnapshotRoot as BlockSnapshot,
-        payload.assets
-      ),
+      blocks: {
+        type: 'block',
+        id: nanoid('block'),
+        flavour: 'affine:page',
+        props: {
+          title: {
+            '$blocksuite:internal:text$': true,
+            delta: [
+              {
+                insert: 'Untitled',
+              },
+            ],
+          },
+        },
+        children: [
+          {
+            type: 'block',
+            id: nanoid('block'),
+            flavour: 'affine:surface',
+            props: {
+              elements: {},
+            },
+            children: [],
+          },
+          await this._traverseMarkdown(
+            markdownAst,
+            blockSnapshotRoot as BlockSnapshot,
+            payload.assets
+          ),
+        ],
+      },
     };
   }
 
