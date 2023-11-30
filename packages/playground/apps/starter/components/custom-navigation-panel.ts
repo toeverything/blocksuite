@@ -15,7 +15,7 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
       border: 1px solid var(--affine-border-color, #e3e2e4);
       background: var(--affine-background-overlay-panel-color);
       height: 100vh;
-      width: 316px;
+      width: 345px;
       box-sizing: border-box;
       /* overflow-y: scroll;
       overflow-x: visible; */
@@ -34,7 +34,7 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
   private _renderPanel() {
     return html`<edgeless-toc-notes-panel
       .page=${this.page}
-      .fitPadding=${[50, 300, 50, 50]}
+      .fitPadding=${[50, 360, 50, 50]}
     ></edgeless-toc-notes-panel>`;
   }
 

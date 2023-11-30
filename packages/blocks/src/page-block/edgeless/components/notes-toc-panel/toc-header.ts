@@ -2,7 +2,7 @@ import './toc-setting-menu.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
-import { query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 
 import { SettingsIcon } from '../../../../_common/icons/edgeless.js';
 import { createButtonPopper } from '../utils.js';
@@ -14,7 +14,6 @@ const styles = css`
     height: 40px;
     align-items: center;
     justify-content: space-between;
-    font-family: sans-serif;
     box-sizing: border-box;
     padding: 8px 0;
   }
@@ -52,6 +51,12 @@ const styles = css`
 
 export class TOCNotesHeader extends WithDisposable(LitElement) {
   static override styles = styles;
+
+  @property({ attribute: false })
+  hidePreviewIcon!: boolean;
+
+  @property({ attribute: false })
+  toggleHidePreviewIcon!: (on: boolean) => void;
 
   @state()
   private _settingPopperShow = false;
@@ -97,7 +102,10 @@ export class TOCNotesHeader extends WithDisposable(LitElement) {
         </edgeless-tool-icon-button>
       </div>
       <div class="notes-setting-container">
-        <edgeless-toc-notes-setting-menu></edgeless-toc-notes-setting-menu>
+        <edgeless-toc-notes-setting-menu
+          .hideIcon=${this.hidePreviewIcon}
+          .toggleHideIcon=${this.toggleHidePreviewIcon}
+        ></edgeless-toc-notes-setting-menu>
       </div>`;
   }
 }

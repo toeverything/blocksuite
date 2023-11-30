@@ -1,6 +1,7 @@
-import { assertExists, noop } from '@blocksuite/global/utils';
+import { noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type Page } from '@blocksuite/store';
+import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -12,7 +13,6 @@ import { Bound } from '../../../../surface-block/index.js';
 import {
   type DragEvent,
   type FitViewEvent,
-  type ReorderEvent,
   type SelectEvent,
   TOCNoteCard,
 } from './toc-card.js';
@@ -53,9 +53,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 8px;
 
       height: 100%;
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
 
     .panel-list {
@@ -72,21 +72,20 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     .panel-list .title {
       font-size: 12px;
       line-height: 14.5px;
-      font-weight: bolder;
+      font-weight: 400;
       color: var(--affine-text-secondary-color);
-      font-family: var(--affine-font-sans-family);
-      padding-left: 16px;
+      padding-left: 8px;
       margin: 21px 0 9px 0;
     }
 
     .insert-indicator {
       height: 2px;
       border-radius: 1px;
-      background-color: var(--affine-blue-600);
+      background-color: var(--affine-blue-500);
       position: absolute;
       contain: layout size;
-      width: 235px;
-      left: 16px;
+      width: 300px;
+      left: 8px;
     }
 
     .no-notes-container {
@@ -104,7 +103,6 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       text-align: center;
       /* light/base */
       font-size: 15px;
-      font-family: 'Inter', sans-serif;
       font-style: normal;
       font-weight: 400;
       line-height: 24px;
@@ -126,6 +124,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   insertIndex?: number;
 
+  @property({ attribute: false })
+  hidePreviewIcon = false;
+
   /**
    * store the id of selected notes
    */
@@ -141,7 +142,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   fitPadding!: number[];
 
-  private _noteElementHeight = 0;
+  private _indicatorTranslateY = 0;
   private _changedFlag = false;
   private _oldViewport?: {
     zoom: number;
@@ -162,6 +163,10 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
         ) as [number, number, number, number])
       : [0, 0, 0, 0];
   }
+
+  private _toggleHidePreviewIcon = (on: boolean) => {
+    this.hidePreviewIcon = on;
+  };
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -240,28 +245,6 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     this._selected = newSelected;
   }
 
-  private _reorder(e: ReorderEvent) {
-    if (e.detail.targetNumber > this._notes.length) {
-      return;
-    }
-
-    const { currentNumber, targetNumber } = e.detail;
-
-    const note = this._notes[currentNumber - 1];
-    const siblingNote = this._notes[targetNumber - 1];
-    const root = this.page.root;
-
-    assertExists(root);
-
-    this._changedFlag = true;
-    this.page.moveBlocks(
-      [note.note],
-      root,
-      siblingNote.note,
-      targetNumber < currentNumber
-    );
-  }
-
   private _moveBlocks(
     index: number,
     selected: string[],
@@ -296,8 +279,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     if (!selected) {
       this._selected = this._selected.filter(noteId => noteId !== id);
     } else if (multiselect) {
-      this._selected.push(id);
-      this.requestUpdate('_selected');
+      this._selected = [...this._selected, id];
     } else {
       this._selected = [id];
     }
@@ -325,32 +307,11 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     }, new Map<string, TOCNoteItem>());
     const selected = this._selected.slice();
 
-    const draggedNotesInfo = selected.map(id => {
-      const note = notesMap.get(id) as TOCNoteItem;
-
-      return {
-        note: note.note,
-        element: this.renderRoot.querySelector(
-          `[data-note-id="${note.note.id}"]`
-        ) as TOCNoteCard,
-        index: note.index,
-        number: note.number,
-      };
-    });
-    const width = draggedNotesInfo[0].element.clientWidth;
-
-    this._noteElementHeight = draggedNotesInfo[0].element.offsetHeight;
-
-    startDragging(draggedNotesInfo, {
-      width,
+    startDragging({
       container: this,
       doc: this.ownerDocument,
       host: this.host ?? this.ownerDocument,
       page: this.page,
-      start: {
-        x: e.detail.clientX,
-        y: e.detail.clientY,
-      },
       tocListContainer: this.panelListElement,
       onDragEnd: insertIdx => {
         this._dragging = false;
@@ -360,8 +321,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
         this._moveBlocks(insertIdx, selected, notesMap, notes, children);
       },
-      onDragMove: idx => {
+      onDragMove: (idx, indicatorTranslateY) => {
         this.insertIndex = idx;
+        this._indicatorTranslateY = indicatorTranslateY ?? 0;
       },
     });
   }
@@ -409,28 +371,15 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     );
   }
 
-  private _jumpToHidden() {
-    if (!this._hiddenNotes.length) return;
-
-    const id = this._hiddenNotes[0].note.id;
-    const element = this.renderRoot.querySelector(`[data-note-id="${id}"]`);
-
-    element?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-  }
-
   private _renderPanelList() {
     const selectedNotesSet = new Set(this._selected);
+    const totalNotesNumber = this._notes.length + this._hiddenNotes.length;
 
     return html`<div class="panel-list">
       ${this.insertIndex !== undefined
         ? html`<div
             class="insert-indicator"
-            style="transform: translateY(${this.insertIndex *
-              this._noteElementHeight +
-            10}px)"
+            style=${`transform: translateY(${this._indicatorTranslateY}px)`}
           ></div>`
         : nothing}
       ${this._notes.length
@@ -449,12 +398,8 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
                     ? 'placeholder'
                     : 'selected'
                   : undefined}
-                .showCardNumber=${this._notes.length > 1}
-                style=${this.insertIndex !== undefined &&
-                idx >= this.insertIndex
-                  ? 'transform: translateY(20px)'
-                  : ''}
-                @reorder=${this._reorder}
+                .showCardNumber=${totalNotesNumber > 1}
+                .hidePreviewIcon=${this.hidePreviewIcon}
                 @select=${this._selectNote}
                 @drag=${this._drag}
                 @fitview=${this._fitToElement}
@@ -463,7 +408,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
           )
         : html`${nothing}`}
       ${this._hiddenNotes.length > 0
-        ? html`<div class="title">Hidden on Page</div>`
+        ? html`<div class="title">Hidden</div>`
         : nothing}
       ${this._hiddenNotes.length
         ? repeat(
@@ -477,9 +422,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
                 .index=${note.index}
                 .page=${this.page}
                 .invisible=${true}
-                style=${this.insertIndex !== undefined
-                  ? 'transform: translateY(20px)'
-                  : ''}
+                .showCardNumber=${totalNotesNumber > 1}
                 @fitview=${this._fitToElement}
               ></edgeless-note-toc-card>`
           )
@@ -498,7 +441,10 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   override render() {
     return html`
       <div class="navigation-panel-container">
-        <edgeless-toc-notes-header></edgeless-toc-notes-header>
+        <edgeless-toc-notes-header
+          .hidePreviewIcon=${this.hidePreviewIcon}
+          .toggleHidePreviewIcon=${this._toggleHidePreviewIcon}
+        ></edgeless-toc-notes-header>
         ${this._notes.length
           ? this._renderPanelList()
           : this._renderEmptyPanel()}

@@ -4,10 +4,8 @@ import type { Page } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import { getThemeMode, on, once } from '../../../../_common/utils/index.js';
-import { pickArray } from '../../../../_common/utils/iterable.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { TOCBlockPreview } from './toc-preview.js';
 
@@ -42,7 +40,6 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     :host {
       display: block;
       position: relative;
-      margin-top: 4px;
     }
 
     .card-container {
@@ -52,17 +49,15 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
       box-sizing: border-box;
+      padding: 2px 0;
     }
 
     .card-preview {
-      overflow: hidden;
       position: relative;
 
       width: 100%;
-      height: 120px;
-      padding: 0 8px;
 
-      border-radius: 8px;
+      border-radius: 4px;
       background-color: var(--affine-background-primary-color);
 
       cursor: pointer;
@@ -72,16 +67,17 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     }
 
     .card-preview:hover {
-      outline: 2px solid var(--affine-blue-500);
       background: var(--affine-hover-color);
     }
 
     .card-number-container {
+      padding: 0 8px;
       width: 100%;
       height: 20px;
       display: flex;
       align-items: center;
       gap: 8px;
+      box-sizing: border-box;
     }
 
     .card-number-container .card-number {
@@ -96,55 +92,15 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
     .card-number-container .card-divider {
       height: 1px;
-      width: calc(100% - 24px);
+      flex: 1;
       border-top: 1px dashed var(--affine-border-color);
+      transform: translateY(50%);
     }
 
     .card-content {
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       user-select: none;
-    }
-
-    .card-ellipsis {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 16px;
-      gap: 10px;
-      padding: 0 10px;
-    }
-
-    .card-ellipsis .dash {
-      width: 60px;
-      height: 1px;
-      background-color: var(--affine-black-30);
-      flex-grow: 1;
-    }
-
-    .card-ellipsis .dots {
-      display: flex;
-      padding: 5px 10px;
-      border-radius: 8px;
-      background: var(--affine-white, #fff);
-      box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.15);
-      gap: 2.5px;
-    }
-
-    .card-ellipsis .dots .dot {
-      height: 3.5px;
-      width: 3.5px;
-      border-radius: 50%;
-      background-color: var(--affine-icon-secondary);
-    }
-
-    .card-container.dragging {
-      pointer-events: none;
-      transform-origin: 16px 9px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      contain: size layout paint;
-      z-index: calc(var(--affine-z-index-popover, 0) + 3);
+      color: var(--affine-text-primary-color);
     }
 
     .card-container.placeholder {
@@ -156,37 +112,26 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       background: var(--affine-hover-color);
     }
 
-    .card-container.dragging .card-preview,
     .card-container.placeholder .card-preview {
-      outline: 2px solid var(--affine-blue-500);
-      background: linear-gradient(
-          180deg,
-          rgba(218, 233, 255, 0.2) 0%,
-          rgba(255, 255, 255, 0) 100%
-        ),
-        #fff;
-    }
-
-    .dark.card-container.dragging .card-preview,
-    .dark.card-container.placeholder .card-preview,
-    .dark.card-container .card-preview:hover {
-      background: linear-gradient(
-          180deg,
-          rgba(147, 146, 139, 0.2) 0%,
-          rgba(255, 255, 255, 0) 100%
-        ),
-        #000;
+      background: var(--affine-hover-color);
+      opacity: 0.9;
     }
 
     .card-container[data-invisible='true'] .card-preview:hover,
     .card-container[data-invisible='true'] .card-preview {
       background: none;
       outline: none;
-      box-shadow: none;
-      border: 1px dashed var(--affine-border-color);
     }
-    .card-container[data-invisible='true'] .card-wrapper {
-      background: none;
+
+    .card-container[data-invisible='true'] .card-number-container .card-number,
+    .card-container[data-invisible='true'] .card-preview .card-content {
+      color: var(--affine-text-disable-color);
+    }
+
+    .card-container[data-invisible='true']
+      .card-number-container
+      .card-divider {
+      border-top: 1px dashed var(--affine-text-disable-color);
     }
   `;
 
@@ -203,16 +148,10 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
   number!: number;
 
   @property({ attribute: false })
-  stackOrder!: number;
+  hidePreviewIcon!: boolean;
 
   @property({ attribute: false })
-  pos!: { x: number; y: number };
-
-  @property({ attribute: false })
-  width?: number;
-
-  @property({ attribute: false })
-  status?: 'dragging' | 'selected' | 'placeholder';
+  status?: 'selected' | 'placeholder';
 
   @property({ attribute: false })
   invisible = false;
@@ -305,28 +244,12 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     if (this.note.isEmpty()) return nothing;
 
     const mode = getThemeMode();
-    const { pos, stackOrder, width } = this;
     const { children } = this.note;
-    const showEllipsis = children.length > 4;
-    const [first, second] = pickArray(children, [0, 1]);
-    const [secondToLast, last] = showEllipsis
-      ? pickArray(children, [children.length - 2, children.length - 1])
-      : [children[2], children[3]];
 
     return html`
       <div
         data-invisible="${this.invisible ? 'true' : 'false'}"
         class="card-container ${this.status ?? ''} ${mode}"
-        style=${
-          this.status === 'dragging'
-            ? styleMap({
-                transform: `translate(${pos.x - 16}px, ${pos.y - 9}px) rotate(${
-                  stackOrder === 0 ? 3 : 1
-                }deg)`,
-                width: width ? `${width}px` : undefined,
-              })
-            : nothing
-        }
       >
         <div
           class="card-preview"
@@ -337,53 +260,18 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
         ${
           this.showCardNumber
             ? html`<div class="card-number-container">
-                <span class="card-number">${this.number}</span>
+                <span class="card-number">${this.index}</span>
                 <span class="card-divider"></span>
               </div>`
             : nothing
         }
           <div class="card-content">
-            ${
-              first
-                ? html`<edgeless-toc-block-preview
-                    .block=${first}
-                  ></edgeless-toc-block-preview>`
-                : nothing
-            }
-            ${
-              second
-                ? html`<edgeless-toc-block-preview
-                    .block=${second}
-                  ></edgeless-toc-block-preview>`
-                : nothing
-            }
-            ${
-              showEllipsis
-                ? html`<div class="card-ellipsis">
-                    <div class="dash"></div>
-                    <div class="dots">
-                      <div class="dot"></div>
-                      <div class="dot"></div>
-                      <div class="dot"></div>
-                    </div>
-                    <div class="dash"></div>
-                  </div>`
-                : null
-            }
-            ${
-              secondToLast
-                ? html`<edgeless-toc-block-preview
-                    .block=${secondToLast}
-                  ></edgeless-toc-block-preview>`
-                : nothing
-            }
-            ${
-              last
-                ? html`<edgeless-toc-block-preview
-                    .block=${last}
-                  ></edgeless-toc-block-preview>`
-                : nothing
-            }
+            ${children.map(block => {
+              return html`<edgeless-toc-block-preview
+                .block=${block}
+                .hidePreviewIcon=${this.hidePreviewIcon}
+              ></edgeless-toc-block-preview>`;
+            })}
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@ import '../../../../_common/components/toggle-switch.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
+import { property } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
 
@@ -46,7 +47,6 @@ const styles = css`
     width: 138px;
     height: 20px;
     padding: 0 4px;
-    font-family: sans-serif;
     font-size: 12px;
     font-weight: 500;
     line-height: 20px;
@@ -61,6 +61,12 @@ const styles = css`
 export class TOCNotesSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
+  @property({ attribute: false })
+  hideIcon = false;
+
+  @property({ attribute: false })
+  toggleHideIcon!: (on: boolean) => void;
+
   override render() {
     return html`<div
       class="notes-setting-menu-container"
@@ -71,7 +77,12 @@ export class TOCNotesSettingMenu extends WithDisposable(LitElement) {
       </div>
       <div class="notes-setting-menu-item action">
         <div class="action-label">Hide Type Icon</div>
-        <div class="toggle-button"><toggle-switch></toggle-switch></div>
+        <div class="toggle-button">
+          <toggle-switch
+            .on=${this.hideIcon}
+            .onChange=${this.toggleHideIcon}
+          ></toggle-switch>
+        </div>
       </div>
     </div>`;
   }
