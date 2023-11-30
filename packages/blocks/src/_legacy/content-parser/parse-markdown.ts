@@ -109,6 +109,11 @@ export class MarkdownParser extends BaseParser {
     ) {
       type = 'todo';
       checked = inputEl?.getAttribute('checked') !== null;
+      if (element.firstChild) {
+        element.firstChild.textContent = (
+          element.firstChild.textContent ?? ' '
+        ).slice(1);
+      }
     }
     if (element.firstChild instanceof Text) {
       if (element.firstChild.textContent?.startsWith('[] ')) {

@@ -703,6 +703,7 @@ export class Page extends BlockTree {
     assertExists(block);
     const model = block.model;
     model.page = this;
+    model.created.emit();
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
