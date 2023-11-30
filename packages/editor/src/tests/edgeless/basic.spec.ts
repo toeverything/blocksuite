@@ -1,8 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-
 import { afterEach, beforeEach, expect, test } from 'vitest';
 
-import { cleanup, setupEditor } from '../utils/setup';
+import { cleanup, setupEditor } from '../utils/setup.js';
 
 beforeEach(async () => {
   await setupEditor('edgeless');

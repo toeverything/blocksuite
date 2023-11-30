@@ -1,5 +1,4 @@
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
-import { EditorContainer } from '@blocksuite/editor';
 import {
   type BlobStorage,
   type DocProviderCreator,
@@ -7,6 +6,8 @@ import {
   Workspace,
 } from '@blocksuite/store';
 import { createMemoryStorage, Generator, Job, Schema } from '@blocksuite/store';
+
+import { EditorContainer } from '../../index.js';
 
 function createWorkspaceOptions() {
   const providerCreators: DocProviderCreator[] = [];

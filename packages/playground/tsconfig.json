@@ -27,6 +27,6 @@
       "@blocksuite/virgo/*": ["../virgo/src/*"]
     }
   },
-  "include": ["./tests", "./apps", "./examples"],
+  "include": ["./apps", "./examples"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
