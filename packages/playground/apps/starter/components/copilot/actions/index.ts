@@ -1,6 +1,7 @@
 import { runAnswerAction } from './answer';
 import { runChangeToneAction } from './change-tone';
 import { runFixSpellingAction } from './fix-spelling';
+import { runGenerateAction } from './generate';
 import { runImproveWritingAction } from './improve-writing';
 import { runMakeLongerAction } from './make-longer';
 import { runMakeShorterAction } from './make-shorter';
@@ -12,7 +13,7 @@ import { runTranslateAction } from './translate';
 export const GPTAPI = {
   answer: runAnswerAction,
   refine: runRefineAction,
-  generate: runRefineAction,
+  generate: runGenerateAction,
   summary: runSummaryAction,
   translate: runTranslateAction,
   improveWriting: runImproveWritingAction,
