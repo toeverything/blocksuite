@@ -76,7 +76,7 @@ export class TOCNotesSettingMenu extends WithDisposable(LitElement) {
         <div class="setting-label">SETTINGS</div>
       </div>
       <div class="notes-setting-menu-item action">
-        <div class="action-label">Hide Type Icon</div>
+        <div class="action-label">Hide type icon</div>
         <div class="toggle-button">
           <toggle-switch
             .on=${this.hideIcon}
