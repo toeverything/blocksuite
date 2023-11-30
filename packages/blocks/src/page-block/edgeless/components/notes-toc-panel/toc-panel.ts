@@ -11,7 +11,6 @@ import { matchFlavours } from '../../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { Bound } from '../../../../surface-block/index.js';
 import {
-  type DragEvent,
   type FitViewEvent,
   type SelectEvent,
   TOCNoteCard,
@@ -290,7 +289,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     });
   }
 
-  private _drag(e: DragEvent) {
+  private _drag() {
     if (!this._selected.length || !this.page.root) return;
 
     this._dragging = true;

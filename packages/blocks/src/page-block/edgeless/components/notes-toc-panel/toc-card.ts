@@ -24,13 +24,6 @@ export type SelectEvent = CustomEvent<{
   multiselect: boolean;
 }>;
 
-export type DragEvent = CustomEvent<{
-  clientX: number;
-  clientY: number;
-  pageX: number;
-  pageY: number;
-}>;
-
 export type FitViewEvent = CustomEvent<{
   block: NoteBlockModel;
 }>;
@@ -210,14 +203,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
         this._dispatchSelectEvent(e);
       }
 
-      const event = new CustomEvent('drag', {
-        detail: {
-          clientX: e.clientX,
-          clientY: e.clientY,
-          pageX: e.pageX,
-          pageY: e.pageY,
-        },
-      });
+      const event = new CustomEvent('drag');
 
       this.dispatchEvent(event);
       disposeDragStart();
