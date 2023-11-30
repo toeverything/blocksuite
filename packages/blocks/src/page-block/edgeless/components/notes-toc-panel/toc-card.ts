@@ -110,21 +110,18 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       opacity: 0.9;
     }
 
-    .card-container[data-invisible='true'] .card-preview:hover,
-    .card-container[data-invisible='true'] .card-preview {
-      background: none;
-      outline: none;
+    .card-bottom-divider {
+      position: absolute;
+      bottom: 0;
+      left: 8px;
+      width: calc(100% - 16px);
+      height: 1px;
+      border-bottom: 1px solid var(--affine-border-color);
     }
 
     .card-container[data-invisible='true'] .card-number-container .card-number,
     .card-container[data-invisible='true'] .card-preview .card-content {
       color: var(--affine-text-disable-color);
-    }
-
-    .card-container[data-invisible='true']
-      .card-number-container
-      .card-divider {
-      border-top: 1px dashed var(--affine-text-disable-color);
     }
   `;
 
@@ -151,6 +148,9 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   showCardNumber = true;
+
+  @property({ attribute: false })
+  showBottomDivider = false;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -246,7 +246,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
         ${
           this.showCardNumber
             ? html`<div class="card-number-container">
-                <span class="card-number">${this.index}</span>
+                <span class="card-number">${this.number}</span>
                 <span class="card-divider"></span>
               </div>`
             : nothing
@@ -256,10 +256,16 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
               return html`<edgeless-toc-block-preview
                 .block=${block}
                 .hidePreviewIcon=${this.hidePreviewIcon}
+                .disabledIcon=${this.invisible}
               ></edgeless-toc-block-preview>`;
             })}
             </div>
           </div>
+        ${
+          this.showBottomDivider
+            ? html`<div class="card-bottom-divider"></div>`
+            : nothing
+        }
         </div>
       </div>
     `;

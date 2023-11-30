@@ -372,7 +372,6 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
   private _renderPanelList() {
     const selectedNotesSet = new Set(this._selected);
-    const totalNotesNumber = this._notes.length + this._hiddenNotes.length;
 
     return html`<div class="panel-list">
       ${this.insertIndex !== undefined
@@ -397,7 +396,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
                     ? 'placeholder'
                     : 'selected'
                   : undefined}
-                .showCardNumber=${totalNotesNumber > 1}
+                .showCardNumber=${this._notes.length > 1}
                 .hidePreviewIcon=${this.hidePreviewIcon}
                 @select=${this._selectNote}
                 @drag=${this._drag}
@@ -407,7 +406,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
           )
         : html`${nothing}`}
       ${this._hiddenNotes.length > 0
-        ? html`<div class="title">Hidden</div>`
+        ? html`<div class="title">Hidden Contents</div>`
         : nothing}
       ${this._hiddenNotes.length
         ? repeat(
@@ -421,7 +420,8 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
                 .index=${note.index}
                 .page=${this.page}
                 .invisible=${true}
-                .showCardNumber=${totalNotesNumber > 1}
+                .showCardNumber=${false}
+                .showBottomDivider=${idx !== this._hiddenNotes.length - 1}
                 @fitview=${this._fitToElement}
               ></edgeless-note-toc-card>`
           )

@@ -5,13 +5,13 @@ import { property } from 'lit/decorators.js';
 
 import {
   BlockPreviewIcon,
-  Heading1Icon,
-  Heading2Icon,
-  Heading3Icon,
-  Heading4Icon,
-  Heading5Icon,
-  Heading6Icon,
-  TextIcon,
+  SmallHeading1Icon,
+  SmallHeading2Icon,
+  SmallHeading3Icon,
+  SmallHeading4Icon,
+  SmallHeading5Icon,
+  SmallHeading6Icon,
+  SmallTextIcon,
 } from '../../../../_common/icons/index.js';
 import type { BlockModels } from '../../../../_common/utils/model.js';
 import type { SurfaceRefBlockModel } from '../../../../index.js';
@@ -37,13 +37,13 @@ const paragraphIconMap: {
   [key in ParagraphBlockModel['type']]: TemplateResult<1>;
 } = {
   quote: BlockPreviewIcon,
-  text: TextIcon,
-  h1: Heading1Icon,
-  h2: Heading2Icon,
-  h3: Heading3Icon,
-  h4: Heading4Icon,
-  h5: Heading5Icon,
-  h6: Heading6Icon,
+  text: SmallTextIcon,
+  h1: SmallHeading1Icon,
+  h2: SmallHeading2Icon,
+  h3: SmallHeading3Icon,
+  h4: SmallHeading4Icon,
+  h5: SmallHeading5Icon,
+  h6: SmallHeading6Icon,
 };
 
 export class TOCBlockPreview extends WithDisposable(LitElement) {
@@ -72,13 +72,13 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       height: 24px;
       box-sizing: border-box;
       padding: 4px;
-      background: var(--affine-hover-color);
+      background: var(--affine-background-secondary-color);
       border-radius: 4px;
+      color: var(--affine-icon-color);
     }
 
-    .icon > svg {
-      transform: scale(0.8);
-      fill: currentColor;
+    .icon.disabled {
+      color: var(--affine-disabled-icon-color);
     }
 
     .text {
@@ -133,6 +133,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   @property({ attribute: false })
   hidePreviewIcon!: boolean;
 
+  @property({ attribute: false })
+  disabledIcon = false;
+
   override connectedCallback(): void {
     super.connectedCallback();
 
@@ -143,6 +146,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
 
   renderBlockByFlavour() {
     const { block } = this;
+    const iconClass = this.disabledIcon ? 'icon disabled' : 'icon';
 
     switch (block.flavour as keyof BlockModels) {
       case 'affine:paragraph':
@@ -154,7 +158,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
               : 'placeholder'}</span
           >
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${paragraphIconMap[block.type]}</span>`
+            ? html`<span class=${iconClass}
+                >${paragraphIconMap[block.type]}</span
+              >`
             : nothing}
         `;
       case 'affine:list':
@@ -162,7 +168,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">${block.text.toString()}</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:bookmark':
@@ -172,7 +178,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
             >${block.bookmarkTitle || block.url || 'Bookmark'}</span
           >
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:code':
@@ -180,7 +186,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">${block.language}</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:database':
@@ -188,7 +194,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">${block.title || 'Database'}</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:image':
@@ -196,7 +202,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">${block.caption || 'Image'}</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:attachment':
@@ -204,7 +210,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">${block.name}</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:data-view':
@@ -212,7 +218,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">Database View</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:divider':
@@ -220,7 +226,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">Divider</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:surface-ref':
@@ -230,7 +236,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
             >${block.caption ? block.caption : 'Surface-Ref'}</span
           >
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
         `;
       default:
