@@ -78,7 +78,7 @@ export class FileDropManager {
   }
 
   get maxFileSize(): number {
-    return this._fileDropRule.maxFileSize ?? Infinity;
+    return this._fileDropRule.maxFileSize ?? 10 * 1000 * 1000; // default to 10MB
   }
 
   onDragOver(event: DragEvent) {
@@ -135,13 +135,15 @@ export class FileDropManager {
           this.maxFileSize,
           place
         ).then(blockId => {
-          if (!blockId || !embed) return;
+          if (!blockId) return;
 
-          const attachmentModel: BaseBlockModel<AttachmentBlockProps> | null =
-            page.getBlockById(blockId);
-          assertExists(attachmentModel);
+          if (embed) {
+            const attachmentModel: BaseBlockModel<AttachmentBlockProps> | null =
+              page.getBlockById(blockId);
+            assertExists(attachmentModel);
 
-          turnIntoEmbedAction(attachmentModel);
+            turnIntoEmbedAction(attachmentModel);
+          }
         })
       );
     } else if (!this.isPageMode && handleDropInEdgeless) {

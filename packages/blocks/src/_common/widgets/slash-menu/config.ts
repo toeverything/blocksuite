@@ -310,7 +310,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           assertExists(service);
           assertInstanceOf(service, AttachmentService);
           const maxFileSize = service.maxFileSize;
-          await addSiblingAttachmentBlock(file, model, maxFileSize);
+          addSiblingAttachmentBlock(file, model, maxFileSize);
         }),
       },
     ],

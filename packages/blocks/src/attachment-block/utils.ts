@@ -120,7 +120,7 @@ export async function uploadBlobForAttachment(
   page: Page,
   attachmentModelId: string,
   blob: Blob
-) {
+): Promise<string> {
   const isLoading = isAttachmentLoading(attachmentModelId);
   if (isLoading) {
     throw new Error('the attachment is already uploading!');
