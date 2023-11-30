@@ -8,10 +8,9 @@ import { isCssVariable } from '../_common/theme/css-variables.js';
 import { Bound } from '../surface-block/index.js';
 import type { FrameBlockModel } from './frame-model.js';
 
+const FRAME_OFFSET = 8;
 @customElement('affine-frame')
 export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
-  static offset = 12;
-
   @state()
   showTitle = true;
 
@@ -21,6 +20,8 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   @query('.affine-frame-title')
   private _titleElement?: HTMLElement;
 
+  isInner = false;
+
   get titleBound() {
     if (!this._titleElement) return new Bound();
     const { viewport } = this.surface;
@@ -29,7 +30,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     const bound = Bound.fromDOMRect(this._titleElement.getBoundingClientRect());
     bound.x -= rect.x;
     bound.y -= rect.y;
-    bound.h += FrameBlockComponent.offset;
+    bound.h += FRAME_OFFSET;
     bound.h /= zoom;
     bound.w /= zoom;
     const [x, y] = viewport.toModelCoord(bound.x, bound.y);
@@ -77,10 +78,20 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
       (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
     );
     const { zoom } = surface.viewport;
-    const text = model.title.toString();
 
+    this.isInner = surface.frame.frames.some(frame => {
+      if (frame.id === model.id) return false;
+      if (Bound.deserialize(frame.xywh).contains(bound)) {
+        return true;
+      }
+      return false;
+    });
+
+    const { isInner } = this;
+    const text = model.title.toString();
+    const top = isInner ? FRAME_OFFSET / zoom : -(31 + FRAME_OFFSET) / zoom;
     return html`
-      ${showTitle && !_isNavigator
+      ${showTitle && text && !_isNavigator
         ? html` <div
             style=${styleMap({
               transformOrigin: 'top left',
@@ -91,13 +102,19 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
               padding: '4px 10px',
               fontSize: '14px',
               position: 'absolute',
-              background: 'var(--affine-text-primary-color)',
-              color: 'var(--affine-white)',
+              background: isInner
+                ? 'var(--affine-white)'
+                : 'var(--affine-text-primary-color)',
+              color: isInner
+                ? 'var(--affine-text-secondary-color)'
+                : 'var(--affine-white)',
               cursor: 'default',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              top: -(24.36 + FrameBlockComponent.offset) / zoom + 'px',
+              left: isInner ? FRAME_OFFSET / zoom + 'px' : '0px',
+              top: top + 'px',
+              border: isInner ? '1px solid var(--affine-border-color)' : 'none',
             })}
             class="affine-frame-title"
           >

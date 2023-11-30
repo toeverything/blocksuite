@@ -101,8 +101,11 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
   override render() {
     const viewport = this.edgeless.surface.viewport;
+    const frameBlock = this.frameBlock;
     const bound = Bound.deserialize(this.frameModel.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+    const { isInner } = frameBlock;
+
     const virgoStyle = styleMap({
       transformOrigin: 'top left',
       borderRadius: '4px',
@@ -110,12 +113,16 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       padding: '4px 10px',
       fontSize: '14px',
       position: 'absolute',
-      left: x + 'px',
-      top: y - 36 + 'px',
+      left: (isInner ? x + 8 : x) + 'px',
+      top: (isInner ? y + 8 : y - 38) + 'px',
       minWidth: '8px',
       fontFamily: 'var(--affine-font-family)',
-      background: 'var(--affine-text-primary-color)',
-      color: 'var(--affine-white)',
+      background: isInner
+        ? 'var(--affine-white)'
+        : 'var(--affine-text-primary-color)',
+      color: isInner
+        ? 'var(--affine-text-secondary-color)'
+        : 'var(--affine-white)',
       outline: 'none',
       zIndex: '1',
       border: `1px solid

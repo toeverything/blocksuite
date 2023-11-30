@@ -538,12 +538,7 @@ export class EdgelessClipboard implements Clipboard {
     );
   }
 
-  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
-    const blocksLen = blocks.length;
-    const shapesLen = shapes.length;
-
-    if (blocksLen + shapesLen === 0) return;
-
+  async toPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
     // sort by `index`
     blocks.sort(compare);
     shapes.sort(compare);
@@ -556,11 +551,10 @@ export class EdgelessClipboard implements Clipboard {
       bounds.push(Bound.deserialize(shape.xywh));
     });
     const bound = getCommonBound(bounds);
-    if (!bound) {
-      return;
-    }
+    assertExists(bound);
 
     const parser = new ContentParser(this._page);
+
     const canvas = await parser.edgelessToCanvas(
       this._edgeless.surface.viewport,
       bound,
@@ -570,6 +564,17 @@ export class EdgelessClipboard implements Clipboard {
     );
 
     assertExists(canvas);
+
+    return canvas;
+  }
+
+  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+    const blocksLen = blocks.length;
+    const shapesLen = shapes.length;
+
+    if (blocksLen + shapesLen === 0) return;
+
+    const canvas = await this.toPng(blocks, shapes);
 
     // @ts-ignore
     if (window.apis?.clipboard?.copyAsImageFromString) {

@@ -93,6 +93,7 @@ export class Page extends BlockTree {
   }
 
   get readonly() {
+    return true;
     return this.awarenessStore.isReadonly(this);
   }
 

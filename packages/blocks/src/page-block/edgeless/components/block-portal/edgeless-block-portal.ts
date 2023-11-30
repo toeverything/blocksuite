@@ -9,6 +9,7 @@ import '../rects/edgeless-dragging-area-rect.js';
 import '../../components/auto-connect/edgeless-index-label.js';
 import '../../components/auto-connect/edgeless-auto-connect-line.js';
 import '../component-toolbar/component-toolbar.js';
+import '../presentation/edgeless-navigator-black-background.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -486,6 +487,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         ? html`<edgeless-component-toolbar .edgeless=${edgeless}>
           </edgeless-component-toolbar>`
         : nothing}
+      <edgeless-navigator-black-background
+        .edgeless=${edgeless}
+      ></edgeless-navigator-black-background>
     `;
   }
 }

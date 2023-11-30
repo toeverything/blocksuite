@@ -35,6 +35,7 @@ import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
 import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
+import type { FrameBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
@@ -212,6 +213,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
     tagClicked: new Slot<{ tagId: string }>(),
     readonlyUpdated: new Slot<boolean>(),
     draggingAreaUpdated: new Slot(),
+    navigatorSettingUpdated: new Slot<{
+      hideToolbar?: boolean;
+      blackBackground?: boolean;
+    }>(),
+    navigatorFrameChanged: new Slot<FrameBlockModel>(),
+    fullScrennToggled: new Slot(),
 
     elementUpdated: new Slot<{
       id: string;
@@ -673,9 +680,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initRemoteCursor();
     this._initSurface();
 
-    if (!this.clipboardController._enabled) {
-      this.clipboard.init(this.page);
-    }
+    // FIXME
+    // if (!this.clipboardController._enabled) {
+    this.clipboard.init(this.page);
+    // }
 
     this._initViewport();
 

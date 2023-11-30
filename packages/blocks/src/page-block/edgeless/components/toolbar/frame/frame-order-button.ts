@@ -2,17 +2,27 @@ import './frame-order-menu.js';
 import '../../buttons/tool-icon-button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { computePosition, offset } from '@floating-ui/dom';
-import { html, LitElement } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { FrameOrderAdjustmentIcon } from '../../../../../_common/icons/index.js';
 import type { FrameBlockModel } from '../../../../../frame-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import { createButtonPopper } from '../../utils.js';
 import type { EdgelessFrameOrderMenu } from './frame-order-menu.js';
 
 @customElement('edgeless-frame-order-button')
 export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
+  static override styles = css`
+    edgeless-frame-order-menu {
+      display: none;
+    }
+
+    edgeless-frame-order-menu[data-show] {
+      display: initial;
+    }
+  `;
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -22,34 +32,24 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   updateFrames!: () => void;
 
+  @query('.edgeless-frame-order-button')
+  private _edgelessFrameOrderButton!: HTMLElement;
+
   @query('edgeless-frame-order-menu')
   private _edgelessFrameOrderMenu!: EdgelessFrameOrderMenu;
+  private _edgelessFrameOrderPopper: ReturnType<
+    typeof createButtonPopper
+  > | null = null;
 
   @state()
-  private _menuShow = false;
+  private _popperShow = false;
 
   override firstUpdated() {
-    this._edgelessFrameOrderMenu.hidden = !this._menuShow;
-  }
-
-  private _toggleMenu() {
-    this._menuShow = !this._menuShow;
-    this._edgelessFrameOrderMenu.hidden = !this._menuShow;
-    if (this._menuShow) {
-      computePosition(this, this._edgelessFrameOrderMenu, {
-        placement: 'top',
-        middleware: [
-          offset({
-            mainAxis: 10,
-          }),
-        ],
-      }).then(({ x, y }) => {
-        Object.assign(this._edgelessFrameOrderMenu.style, {
-          left: `${x}px`,
-          top: `${y}px`,
-        });
-      });
-    }
+    this._edgelessFrameOrderPopper = createButtonPopper(
+      this._edgelessFrameOrderButton,
+      this._edgelessFrameOrderMenu,
+      ({ display }) => (this._popperShow = display === 'show')
+    );
   }
 
   protected override render() {
@@ -62,9 +62,10 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
       </style>
       <edgeless-tool-icon-button
         class="edgeless-frame-order-button"
+        .tooltip=${this._popperShow ? '' : 'Frame Order'}
         @click=${() => {
           if (readonly) return;
-          this._toggleMenu();
+          this._edgelessFrameOrderPopper?.toggle();
         }}
       >
         ${FrameOrderAdjustmentIcon}

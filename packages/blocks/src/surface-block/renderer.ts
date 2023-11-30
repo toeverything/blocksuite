@@ -268,9 +268,9 @@ export class Renderer implements SurfaceViewport {
 
   smoothZoom(zoom: number, focusPoint?: IPoint) {
     const delta = zoom - this.zoom;
+    if (this._rafId) cancelAnimationFrame(this._rafId);
 
     const innerSmoothZoom = () => {
-      if (this._rafId) cancelAnimationFrame(this._rafId);
       this._rafId = requestAnimationFrame(() => {
         const sign = delta > 0 ? 1 : -1;
         const total = 10;

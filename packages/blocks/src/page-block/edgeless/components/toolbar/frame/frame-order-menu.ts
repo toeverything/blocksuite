@@ -1,7 +1,7 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { css, html, LitElement, nothing } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { FrameBlockModel } from '../../../../../frame-block/index.js';
@@ -11,64 +11,89 @@ import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js
 @customElement('edgeless-frame-order-menu')
 export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
   static override styles = css`
-    :host {
-      position: absolute;
-      z-index: 1;
-    }
-    .container {
-      width: 237px;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
-      padding: 8px;
-    }
-
-    .edgeless-frame-order-title {
-      color: #8e8d91;
-      border-bottom: 1px solid var(--affine-divider-color);
-      font-size: 12px;
-      padding-bottom: 6px;
-      margin-bottom: 10px;
-    }
-
     .edgeelss-frame-order-items-container {
+      max-height: 281px;
+      border-radius: 8px;
+      padding: 8px 0px 8px 8px;
+      background: var(--affine-background-overlay-panel-color);
+      box-shadow: var(--affine-menu-shadow);
+      overflow: auto;
       display: flex;
       flex-direction: column;
+      gap: 10px;
     }
 
-    .draggable {
-      cursor: pointer;
+    .item {
+      width: 256px;
       border-radius: 4px;
+      padding: 4px;
       display: flex;
-      align-items: baseline;
-      padding: 5px 8px;
+      align-items: center;
+      cursor: pointer;
     }
 
     .draggable:hover {
-      background: #f5f5f5;
-      .draggable-bar {
-        background: #c0bfc1;
-      }
+      background-color: var(--affine-hover-color);
     }
 
-    .draggable-bar {
+    .item:hover .drag-indicator {
+      opacity: 1;
+    }
+
+    .drag-indicator {
+      cursor: pointer;
       width: 4px;
       height: 12px;
-      background: rgba(192, 191, 193, 0.2);
-      margin-right: 8px;
-    }
-    .draggable-title {
-      width: 100%;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+      border-radius: 1px;
+      opacity: 0.2;
+      background: var(--affine-placeholder-color);
+      margin-right: 2px;
     }
 
-    .draggable-index {
-      color: #8e8d91;
-      width: 26px;
+    .index {
+      width: 20px;
+      height: 24px;
+      text-align: center;
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 24px;
+      color: var(--affine-text-secondary-color);
+      margin-right: 4px;
+    }
+
+    .image {
+      width: 70px;
+      height: 45px;
+      border-radius: 4px;
+      box-shadow: 0px 1px 6px 0px rgba(0, 0, 0, 0.16);
+      margin-right: 8px;
+    }
+
+    .title {
+      font-size: 14px;
+      font-weight: 400;
+      height: 22px;
+      line-height: 22px;
+      color: var(--affine-text-primary-color);
+    }
+
+    .clone {
+      visibility: hidden;
+      position: absolute;
+      z-index: 1;
+      left: 8px;
+      height: 53px;
+      border: 1px solid var(--affine-border-color);
+      box-shadow: var(--affine-menu-shadow);
+      background-color: var(--affine-white);
+      pointer-events: none;
     }
   `;
+  @state()
+  canvas: HTMLCanvasElement[] = [];
+
+  @state()
+  private _curIndex = -1;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -82,84 +107,107 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
   @query('.edgeelss-frame-order-items-container')
   private _container!: HTMLDivElement;
 
+  @query('.clone')
+  private _clone!: HTMLDivElement;
+
   override firstUpdated() {
     this._bindEvent();
+
+    Promise.all(
+      this.frames.map(frame => this.edgeless.clipboard.toPng([frame], []))
+    ).then(canvas => {
+      this.canvas = canvas.map(canva => this._createScaledCanva(canva));
+    });
+  }
+
+  private _createScaledCanva(canva: HTMLCanvasElement) {
+    const scaledCanvas = document.createElement('canvas');
+    scaledCanvas.width = 70;
+    scaledCanvas.height = 45;
+
+    const ctx = scaledCanvas.getContext('2d');
+    assertExists(ctx);
+    ctx.drawImage(canva, 0, 0, scaledCanvas.width, scaledCanvas.height);
+    return scaledCanvas;
   }
 
   private _bindEvent() {
-    this._disposables.addFromEvent(this._container, 'pointerdown', e => {
+    const { _disposables } = this;
+
+    _disposables.addFromEvent(this._container, 'wheel', e => {
+      e.stopPropagation();
+    });
+
+    _disposables.addFromEvent(this._container, 'pointerdown', e => {
       const ele = e.target as HTMLElement;
       const draggable = ele.closest('.draggable');
       if (!draggable) return;
-      const clone = draggable
-        .querySelector('.draggable-title')
-        ?.cloneNode(true) as HTMLDivElement;
-      clone.style.fontFamily = 'sans-serif';
-      clone.style.position = 'absolute';
-      clone.style.zIndex = '1000';
-      clone.style.fontFamily = 'sans-serif';
-      this.edgeless.editorContainer.appendChild(clone);
-      const rect = draggable.getBoundingClientRect();
-      const indicator = document.createElement('div');
-      indicator.style.position = 'absolute';
-      indicator.style.zIndex = '1000';
-      indicator.style.width = rect.width + 'px';
-      indicator.style.height = '1px';
-      indicator.style.backgroundColor = 'blue';
-      indicator.hidden = true;
-      this.edgeless.editorContainer.appendChild(indicator);
-      const shiftX = e.clientX - rect.left;
-      const shiftY = e.clientY - rect.top;
-      moveAt(e.clientX, e.clientY);
+      const clone = this._clone;
+      clone.style.visibility = 'visible';
 
-      function moveAt(x: number, y: number) {
-        clone.style.left = x - shiftX + 'px';
-        clone.style.top = y - shiftY + 'px';
-      }
+      const rect = draggable.getBoundingClientRect();
 
       const index = Number(draggable.getAttribute('index'));
+      this._curIndex = index;
       let newIndex = -1;
-      const start = rect.top - rect.height * index - rect.height / 2;
-      const end = start + rect.height * this.frames.length;
+
+      const containerRect = this._container.getBoundingClientRect();
+      const start = containerRect.top + 8;
+      const end = containerRect.bottom;
+
+      const shiftX = e.clientX - rect.left;
+      const shiftY = e.clientY - rect.top;
+      function moveAt(x: number, y: number) {
+        clone.style.left = x - containerRect.left - shiftX + 'px';
+        clone.style.top = y - containerRect.top - shiftY + 'px';
+      }
 
       function isInsideContainer(e: PointerEvent) {
         return e.clientY >= start && e.clientY <= end;
       }
+      moveAt(e.clientX, e.clientY);
 
       this._disposables.addFromEvent(document, 'pointermove', e => {
         moveAt(e.clientX, e.clientY);
         if (isInsideContainer(e)) {
-          newIndex = parseInt((e.pageY - start) / rect.height + '');
-          if (newIndex !== index && newIndex !== index + 1) {
-            indicator.hidden = false;
-            indicator.style.left = rect.left + 'px';
-            indicator.style.top =
-              start + rect.height / 2 + newIndex * rect.height + 'px';
-            return;
-          }
+          newIndex = parseInt(
+            (e.pageY + this._container.scrollTop - start) / (rect.height + 10) +
+              ''
+          );
+          return;
         }
         newIndex = -1;
-        indicator.hidden = true;
       });
 
       this._disposables.addFromEvent(document, 'pointerup', () => {
+        clone.style.visibility = 'hidden';
         if (
           newIndex !== -1 &&
           newIndex >= 0 &&
-          newIndex <= this.frames.length - 1
+          newIndex <= this.frames.length - 1 &&
+          newIndex !== index
         ) {
           const before = this.frames[newIndex - 1]?.index || null;
-          const after = this.frames[newIndex].index || null;
+          const middle = this.frames[newIndex].index || null;
+          const after = this.frames[newIndex + 1]?.index || null;
+
           const frame = this.frames[index];
+
           this.edgeless.surface.updateElement(frame.id, {
-            index: generateKeyBetween(before, after),
+            index:
+              newIndex < index
+                ? generateKeyBetween(before, middle)
+                : generateKeyBetween(middle, after),
           });
           this.edgeless.page.captureSync();
+
+          const canvas = this.canvas;
+          const canva = canvas.splice(index, 1);
+          canvas.splice(newIndex, 0, canva[0]);
+          this.canvas = canvas;
           this.updateFrames();
           this.requestUpdate();
         }
-        clone.remove();
-        indicator.remove();
         this._disposables.dispose();
         this._disposables = new DisposableGroup();
         this._bindEvent();
@@ -168,21 +216,36 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const items = repeat(
-      this.frames,
-      frame => frame.id,
-      (frame, index) =>
-        html` <div class="draggable" id=${frame.id} index=${index}>
-          <div class="draggable-bar"></div>
-          <div class="draggable-title">${frame.title}</div>
-          <div class="draggable-index">${index + 1}</div>
-          <div></div>
-        </div>`
-    );
+    const frame = this.frames[this._curIndex];
+    const canva = frame
+      ? this._createScaledCanva(this.canvas[this._curIndex])
+      : nothing;
+
     return html`
-      <div class="container">
-        <div class="edgeless-frame-order-title">Frame Order</div>
-        <div class="edgeelss-frame-order-items-container">${items}</div>
+      <div
+        class="edgeelss-frame-order-items-container"
+        @click=${(e: MouseEvent) => e.stopPropagation()}
+      >
+        ${repeat(
+          this.frames,
+          frame => frame.id,
+          (frame, index) => html`
+            <div class="item draggable" id=${frame.id} index=${index}>
+              <div class="drag-indicator"></div>
+              <div class="index">${index + 1}</div>
+              <div class="image">${this.canvas[index]}</div>
+              <div class="title">${frame.title.toString()}</div>
+            </div>
+          `
+        )}
+        <div class="clone item">
+          ${frame
+            ? html`<div class="drag-indicator"></div>
+                <div class="index">${this._curIndex + 1}</div>
+                <div class="image">${canva}</div>
+                <div class="title">${frame.title.toString()}</div>`
+            : nothing}
+        </div>
       </div>
     `;
   }

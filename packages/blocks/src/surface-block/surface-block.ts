@@ -403,13 +403,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
 
     _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id }) => {
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
         const element = this.pickById(id);
         assertExists(element);
 
         if (
           element instanceof BrushElement ||
-          edgeless.selectionManager.editing
+          edgeless.selectionManager.editing ||
+          (props && !('xywh' in props && 'rotate' in props))
         )
           return;
         this.fitElementToViewport(element);
