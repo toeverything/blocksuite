@@ -28,7 +28,7 @@ export function removeContainedFrames(frames: FrameBlockModel[]) {
   return frames.filter(frame => {
     const bound = Bound.deserialize(frame.xywh);
     return frames.some(
-      f => f.id !== frame.id && Bound.deserialize(f.xywh).contains(bound)
+      f => f.id === frame.id || !Bound.deserialize(f.xywh).contains(bound)
     );
   });
 }

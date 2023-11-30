@@ -441,14 +441,17 @@ export class EdgelessToolsManager {
       editing: false,
     }
   ) => {
-    if (this.page.readonly && edgelessTool.type !== 'pan') return;
+    const { type } = edgelessTool;
+    if (this.page.readonly && type !== 'pan' && type !== 'frameNavigator') {
+      return;
+    }
     if (this.edgelessTool === edgelessTool) return;
     const lastType = this.edgelessTool.type;
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].beforeModeSwitch(edgelessTool);
 
     if (
-      edgelessTool.type === 'default' &&
+      type === 'default' &&
       !state['elements'].length &&
       this.selection.lastState
     ) {

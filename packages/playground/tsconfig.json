@@ -13,7 +13,6 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
-    "jsx": "react-jsx",
     "experimentalDecorators": true,
     "composite": false,
     "paths": {

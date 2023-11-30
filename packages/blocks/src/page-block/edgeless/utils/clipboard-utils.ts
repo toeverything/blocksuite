@@ -13,7 +13,7 @@ import {
 } from '../../../surface-block/index.js';
 import { getCopyElements } from '../controllers/clipboard.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { edgelessElementsBound, getGridBound } from './bound-utils.js';
+import { edgelessElementsBound } from './bound-utils.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
 
 const offset = 10;
@@ -31,7 +31,7 @@ export async function duplicate(
     copyElements.map(async element => {
       const bound = isFrameBlock(element)
         ? Bound.deserialize(element.xywh)
-        : getGridBound(element);
+        : element.elementBound;
       bound.x += totalBound.w + offset;
       let id;
       if (isNoteBlock(element)) {

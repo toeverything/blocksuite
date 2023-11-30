@@ -17,6 +17,7 @@ import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
+import { embedGithubBlockSpec } from '../embed-github-block/index.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
@@ -178,6 +179,7 @@ export const PagePreset: BlockSpec[] = [
       },
     },
   },
+  embedGithubBlockSpec,
 ];
 
 export const EdgelessPreset: BlockSpec[] = [
@@ -268,4 +270,5 @@ export const EdgelessPreset: BlockSpec[] = [
       component: literal`affine-surface-ref`,
     },
   },
+  embedGithubBlockSpec,
 ];
