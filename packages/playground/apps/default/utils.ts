@@ -48,10 +48,6 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     idGenerator,
     blobStorages,
     defaultFlags: {
-      enable_toggle_block: featureArgs.includes('toggle'),
-      enable_set_remote_flag: true,
-      enable_block_hub: true,
-      enable_note_index: true,
       enable_bultin_ledits: true,
       readonly: {
         'page:home': false,
