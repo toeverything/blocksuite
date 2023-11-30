@@ -273,7 +273,17 @@ export class AffineFormatBarWidget extends WidgetElement {
           visualElement,
           formatQuickBarElement,
           () => {
-            computePosition(visualElement, formatQuickBarElement, {
+            // Why not use `range` and `visualElement` directly:
+            // https://github.com/toeverything/blocksuite/issues/5144
+            const latestRange = this.nativeRange;
+            if (!latestRange) {
+              return;
+            }
+            const latestVisualElement = {
+              getBoundingClientRect: () => latestRange.getBoundingClientRect(),
+              getClientRects: () => latestRange.getClientRects(),
+            };
+            computePosition(latestVisualElement, formatQuickBarElement, {
               placement: this._placement,
               middleware: [
                 offset(10),
