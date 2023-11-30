@@ -18,12 +18,6 @@ export class ClipboardController implements ReactiveController {
     return this.host.std;
   }
 
-  private get _enabled() {
-    return this._std.page.awarenessStore.getFlag(
-      'enable_transformer_clipboard'
-    );
-  }
-
   private _clipboardAdapter = new ClipboardAdapter();
   private _markdownAdapter = new MarkdownAdapter();
   private _htmlAdapter = new HtmlAdapter();
@@ -37,9 +31,7 @@ export class ClipboardController implements ReactiveController {
       this._disposables = new DisposableGroup();
     }
     this.host.updateComplete.then(() => {
-      if (this._enabled) {
-        this._init();
-      }
+      this._init();
     });
   }
 
