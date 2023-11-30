@@ -29,7 +29,6 @@ const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
 const providerArgs = (params.get('providers') ?? 'bc').split(',');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
-const featureArgs = (params.get('features') ?? '').split(',');
 
 class IndexedDBProviderWrapper implements PassiveDocProvider {
   public readonly flavour = 'blocksuite-indexeddb';
@@ -164,7 +163,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     idGenerator,
     blobStorages,
     defaultFlags: {
-      enable_transformer_clipboard: featureArgs.includes('clipboard'),
+      enable_transformer_clipboard: true,
       enable_bultin_ledits: true,
       readonly: {
         'page:home': false,
