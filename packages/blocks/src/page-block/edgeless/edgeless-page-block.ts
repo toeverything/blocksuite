@@ -32,7 +32,6 @@ import {
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
-import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
@@ -177,8 +176,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   @query('.affine-edgeless-layer')
   edgelessLayer!: HTMLDivElement;
-
-  clipboard = new EdgelessClipboard(this.page, this);
 
   pageClipboardController = new PageClipboardController(this);
   clipboardController = new EdgelessClipboardController(
@@ -327,10 +324,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
 
-        (this.clipboardController._enabled
-          ? this.clipboardController
-          : this.clipboard
-        )
+        this.clipboardController
           .copyAsPng(blocks, shapes)
           .then(() => toast('Copied to clipboard'))
           .catch(() => toast('Failed to copy as PNG'))
@@ -673,10 +667,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initRemoteCursor();
     this._initSurface();
 
-    if (!this.clipboardController._enabled) {
-      this.clipboard.init(this.page);
-    }
-
     this._initViewport();
 
     if (this.page.readonly) {
@@ -869,7 +859,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.clipboard.dispose();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
