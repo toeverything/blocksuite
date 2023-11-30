@@ -5,7 +5,7 @@ import {
   type Page,
   Workspace,
 } from '@blocksuite/store';
-import { createMemoryStorage, Generator, Job, Schema } from '@blocksuite/store';
+import { createMemoryStorage, Generator, Schema } from '@blocksuite/store';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { EditorContainer } from '../../src/index.js';
@@ -83,7 +83,6 @@ export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
   const workspace = new Workspace(createWorkspaceOptions());
 
   window.workspace = workspace;
-  window.job = new Job({ workspace });
 
   const loaded = createEditorWhenLoaded(workspace, mode);
   await initWorkspace(workspace);
@@ -97,8 +96,6 @@ export function cleanup() {
   delete (window as any).workspace;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (window as any).editor;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete (window as any).job;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (window as any).page;
 }
