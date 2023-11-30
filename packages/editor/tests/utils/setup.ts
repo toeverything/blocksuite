@@ -7,7 +7,8 @@ import {
 } from '@blocksuite/store';
 import { createMemoryStorage, Generator, Job, Schema } from '@blocksuite/store';
 
-import { EditorContainer } from '../../index.js';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { EditorContainer } from '../../src/index.js';
 
 function createWorkspaceOptions() {
   const providerCreators: DocProviderCreator[] = [];
