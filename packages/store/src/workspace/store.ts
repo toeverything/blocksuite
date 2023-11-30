@@ -53,7 +53,7 @@ export interface StoreOptions<
 }
 
 const flagsPreset = {
-  enable_transformer_clipboard: false,
+  enable_transformer_clipboard: true,
   enable_expand_database_block: false,
   enable_bultin_ledits: false,
   readonly: {},
