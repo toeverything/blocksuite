@@ -110,15 +110,6 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       opacity: 0.9;
     }
 
-    .card-bottom-divider {
-      position: absolute;
-      bottom: 0;
-      left: 8px;
-      width: calc(100% - 16px);
-      height: 1px;
-      border-bottom: 1px solid var(--affine-border-color);
-    }
-
     .card-container[data-invisible='true'] .card-number-container .card-number,
     .card-container[data-invisible='true'] .card-preview .card-content {
       color: var(--affine-text-disable-color);
@@ -148,9 +139,6 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   showCardNumber = true;
-
-  @property({ attribute: false })
-  showBottomDivider = false;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -261,11 +249,6 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
             })}
             </div>
           </div>
-        ${
-          this.showBottomDivider
-            ? html`<div class="card-bottom-divider"></div>`
-            : nothing
-        }
         </div>
       </div>
     `;

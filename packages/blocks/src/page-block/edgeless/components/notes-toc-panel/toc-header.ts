@@ -10,7 +10,7 @@ import { createButtonPopper } from '../utils.js';
 const styles = css`
   :host {
     display: flex;
-    width: 100%;
+    width: calc(100% - 16px);
     height: 40px;
     align-items: center;
     justify-content: space-between;
@@ -33,6 +33,15 @@ const styles = css`
     font-weight: 500;
     line-height: 22px;
     color: var(--light-text-color-text-secondary-color, #8e8d91);
+  }
+
+  .notes-setting-button svg {
+    color: var(--affine-icon-secondary);
+  }
+
+  .notes-setting-button:hover svg,
+  .notes-setting-button.active svg {
+    color: var(--affine-icon-color);
   }
 
   .notes-setting-container {
@@ -90,7 +99,9 @@ export class TOCNotesHeader extends WithDisposable(LitElement) {
     return html`<div class="toc-notes-header-container">
         <span class="toc-notes-header-label">Table of Contents</span>
         <edgeless-tool-icon-button
-          class="notes-setting-button"
+          class="notes-setting-button ${this._settingPopperShow
+            ? 'active'
+            : ''}"
           .tooltip=${this._settingPopperShow ? '' : 'Settings'}
           .tipPosition=${'top'}
           .iconContainerPadding=${2}

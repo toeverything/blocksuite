@@ -69,12 +69,15 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     }
 
     .panel-list .title {
-      font-size: 12px;
-      line-height: 14.5px;
-      font-weight: 400;
+      width: 100%;
+      font-size: 14px;
+      line-height: 24px;
+      font-weight: 500;
       color: var(--affine-text-secondary-color);
       padding-left: 8px;
-      margin: 21px 0 9px 0;
+      height: 40px;
+      box-sizing: border-box;
+      padding: 8px 8px;
     }
 
     .insert-indicator {
@@ -106,6 +109,17 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       font-weight: 400;
       line-height: 24px;
     }
+
+    .hidden-note-divider {
+      width: 100%;
+      padding: 10px 8px;
+      box-sizing: border-box;
+    }
+
+    .hidden-note-divider div {
+      height: 0.5px;
+      background-color: var(--affine-border-color);
+    }
   `;
 
   @state()
@@ -134,6 +148,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
   @query('.panel-list')
   panelListElement!: HTMLElement;
+
+  @query('.navigation-panel-container')
+  navigationPanelContainer!: HTMLElement;
 
   @property({ attribute: false })
   host!: Document | HTMLElement;
@@ -327,8 +344,34 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     });
   }
 
+  /*
+   * click at blank area to clear selection
+   */
+  private _clickBlank = (e: MouseEvent) => {
+    e.stopPropagation();
+    // check if click at toc-card, if not, set this._selected to empty
+    if (
+      (e.target as HTMLElement).closest('edgeless-note-toc-card') ||
+      this._selected.length === 0
+    ) {
+      return;
+    }
+
+    this._selected = [];
+    this.edgeless?.selectionManager.setSelection({
+      elements: this._selected,
+      editing: false,
+    });
+  };
+
   override firstUpdated(): void {
     this._zoomToFit();
+
+    this._disposables.addFromEvent(
+      this.navigationPanelContainer,
+      'click',
+      this._clickBlank
+    );
   }
 
   private _zoomToFit() {
@@ -414,17 +457,19 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
             note => note.note.id,
             (note, idx) =>
               html`<edgeless-note-toc-card
-                data-note-id=${note.note.id}
-                .note=${note.note}
-                .number=${idx + 1}
-                .index=${note.index}
-                .page=${this.page}
-                .invisible=${true}
-                .showCardNumber=${false}
-                .hidePreviewIcon=${this.hidePreviewIcon}
-                .showBottomDivider=${idx !== this._hiddenNotes.length - 1}
-                @fitview=${this._fitToElement}
-              ></edgeless-note-toc-card>`
+                  data-note-id=${note.note.id}
+                  .note=${note.note}
+                  .number=${idx + 1}
+                  .index=${note.index}
+                  .page=${this.page}
+                  .invisible=${true}
+                  .showCardNumber=${false}
+                  .hidePreviewIcon=${this.hidePreviewIcon}
+                  @fitview=${this._fitToElement}
+                ></edgeless-note-toc-card>
+                ${idx !== this._hiddenNotes.length - 1
+                  ? html`<div class="hidden-note-divider"><div></div></div>`
+                  : nothing} `
           )
         : nothing}
     </div>`;
