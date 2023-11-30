@@ -8,9 +8,7 @@ import type {
   BlobStorage,
   DocProviderCreator,
   Page,
-  PassiveDocProvider,
   Workspace,
-  Y,
 } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
@@ -22,35 +20,14 @@ import {
   type WorkspaceOptions,
 } from '@blocksuite/store';
 import { createBroadcastChannelProvider } from '@blocksuite/store/providers/broadcast-channel';
-import type { IndexedDBProvider } from '@toeverything/y-indexeddb';
-import { createIndexedDBProvider } from '@toeverything/y-indexeddb';
+
+import { IndexedDBProviderWrapper, withDebugDelayStorage } from './storage.js';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
 const providerArgs = (params.get('providers') ?? 'bc').split(',');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
-
-class IndexedDBProviderWrapper implements PassiveDocProvider {
-  public readonly flavour = 'blocksuite-indexeddb';
-  public readonly passive = true as const;
-  private _connected = false;
-  private _provider: IndexedDBProvider;
-  constructor(doc: Y.Doc) {
-    this._provider = createIndexedDBProvider(doc);
-  }
-  connect() {
-    this._provider.connect();
-    this._connected = true;
-  }
-  disconnect() {
-    this._provider.disconnect();
-    this._connected = false;
-  }
-  get connected() {
-    return this._connected;
-  }
-}
 
 export const defaultMode =
   params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
@@ -139,7 +116,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
   }
 
   if (blobStorageArgs.includes('memory')) {
-    blobStorages.push(createMemoryStorage);
+    blobStorages.push(withDebugDelayStorage(createMemoryStorage));
   }
 
   if (blobStorageArgs.includes('idb')) {
