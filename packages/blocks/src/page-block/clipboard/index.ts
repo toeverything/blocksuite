@@ -72,6 +72,8 @@ export class ClipboardController implements ReactiveController {
     this._disposables.add({
       dispose: () => {
         this._std.clipboard.unregisterAdapter(ClipboardAdapter.MIME);
+        this._std.clipboard.unregisterAdapter('text/plain');
+        this._std.clipboard.unregisterAdapter('text/html');
         this._std.clipboard.unuse(copy);
         this._std.clipboard.unuse(paste);
         this._std.clipboard.unuse(replaceIdMiddleware);
