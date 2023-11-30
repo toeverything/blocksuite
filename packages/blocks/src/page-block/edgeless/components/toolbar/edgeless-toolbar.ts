@@ -548,8 +548,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   override render() {
     const { type } = this.edgelessTool;
-    if (this.edgeless.page.readonly && type !== 'frameNavigator')
+    if (this.edgeless.page.readonly && type !== 'frameNavigator') {
       return nothing;
+    }
 
     const Content =
       type === 'frameNavigator'

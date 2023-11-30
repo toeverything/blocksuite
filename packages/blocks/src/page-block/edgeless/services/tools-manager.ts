@@ -442,8 +442,9 @@ export class EdgelessToolsManager {
     }
   ) => {
     const { type } = edgelessTool;
-    if (this.page.readonly && type !== 'pan' && type !== 'frameNavigator')
+    if (this.page.readonly && type !== 'pan' && type !== 'frameNavigator') {
       return;
+    }
     if (this.edgelessTool === edgelessTool) return;
     const lastType = this.edgelessTool.type;
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
