@@ -9,13 +9,10 @@ import type { SlPopup } from '@shoelace-style/shoelace';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import { GPTAPI } from './actions';
 import { sendRequest } from './api.js';
 import { LANGUAGE, TONE } from './config.js';
 import { insertFromMarkdown } from './utils/markdown-utils.js';
-import {
-  createMindMapOnEdgeless,
-  getSurfaceElementFromEditor,
-} from './utils/mind-map-utils.js';
 import {
   getSelectedBlocks,
   getSelectedTextContent,
@@ -100,40 +97,15 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
   }
 
   private async _createMindMap() {
-    const { viewport } = getSurfaceElementFromEditor(this.editor);
-    const { center, width, height } = viewport;
-    const payload = {
-      action: 'createMindMap',
-      input: await this._selectedTextContent,
-      center: `[${center.x},${center.y}]`,
-      wh: `[${width},${height}]`,
-    };
-
-    const response = await (await sendRequest(payload)).text();
-    const mindMap = JSON.parse(response);
-    if (!mindMap) return;
-
-    if (this.editor.mode === 'page') {
-      console.log('page mode, mind map: ', mindMap);
-    } else {
-      createMindMapOnEdgeless(this.editor, mindMap);
-    }
-  }
-
-  private async _handleActionClick(
-    action: string,
-    options?: {
-      [key: string]: string;
-    }
-  ) {
-    const payload = {
-      action,
-      input: await this._selectedTextContent,
-      ...options,
-    };
-
-    this._lastPayload = payload;
-    this._result = await (await sendRequest(payload)).text();
+    // const { viewport } = getSurfaceElementFromEditor(this.editor);
+    // const { center, width, height } = viewport;
+    // const payload = {
+    //   action: 'createMindMap',
+    //   input: await this._selectedTextContent,
+    //   center: `[${center.x},${center.y}]`,
+    //   wh: `[${width},${height}]`,
+    // };
+    throw new Error('TODO: implement createMindMap');
   }
 
   private _clearState() {
@@ -275,7 +247,10 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
     >
       <sl-button size="small" slot="trigger" caret> Ask AI</sl-button>
       <sl-menu id="copilot-actions-menu">
-        <sl-menu-item @click="${() => this._handleActionClick('refine')}">
+        <sl-menu-item
+          @click="${async () =>
+            GPTAPI.refine({ input: await this._selectedTextContent })}"
+        >
           Refine
         </sl-menu-item>
         <sl-menu-item
@@ -284,13 +259,22 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
         >
           Translate
         </sl-menu-item>
-        <sl-menu-item @click="${() => this._handleActionClick('summary')}">
+        <sl-menu-item
+          @click="${async () =>
+            GPTAPI.summary({ input: await this._selectedTextContent })}"
+        >
           Summarize
         </sl-menu-item>
-        <sl-menu-item @click="${() => this._handleActionClick('makeLonger')}">
+        <sl-menu-item
+          @click="${async () =>
+            GPTAPI.makeLonger({ input: await this._selectedTextContent })}"
+        >
           Make Longer
         </sl-menu-item>
-        <sl-menu-item @click="${() => this._handleActionClick('makeShorter')}">
+        <sl-menu-item
+          @click="${() => async () =>
+            GPTAPI.makeShorter({ input: await this._selectedTextContent })}"
+        >
           Make Shorter
         </sl-menu-item>
         <sl-menu-item
@@ -300,16 +284,23 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
           Change Tone
         </sl-menu-item>
         <sl-menu-item
-          @click="${() => this._handleActionClick('improveWriting')}"
+          @click="${() => async () =>
+            GPTAPI.improveWriting({ input: await this._selectedTextContent })}"
         >
           Improve Writing
         </sl-menu-item>
         <sl-menu-item
-          @click="${() => this._handleActionClick('simplifyLanguage')}"
+          @click="${async () =>
+            GPTAPI.simplifyLanguage({
+              input: await this._selectedTextContent,
+            })}"
         >
           Simplify Language
         </sl-menu-item>
-        <sl-menu-item @click="${() => this._handleActionClick('fixSpelling')}">
+        <sl-menu-item
+          @click="${async () =>
+            GPTAPI.fixSpelling({ input: await this._selectedTextContent })}"
+        >
           Fix Spelling and Grammar
         </sl-menu-item>
         <sl-menu-item @click="${() => this._createMindMap()}">
@@ -326,8 +317,11 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
           ${LANGUAGE.map(
             language => html`
               <sl-menu-item
-                @click=${() =>
-                  this._handleActionClick('translate', { language })}
+                @click="${async () =>
+                  GPTAPI.translate({
+                    input: await this._selectedTextContent,
+                    language,
+                  })}"
               >
                 ${language}
               </sl-menu-item>
@@ -345,7 +339,11 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
           ${TONE.map(
             tone => html`
               <sl-menu-item
-                @click=${() => this._handleActionClick('changeTone', { tone })}
+                @click="${async () =>
+                  GPTAPI.changeTone({
+                    input: await this._selectedTextContent,
+                    tone,
+                  })}"
               >
                 ${tone}
               </sl-menu-item>

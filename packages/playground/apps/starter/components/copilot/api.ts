@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { OpenAI } from 'openai';
 
 const USE_LOCAL = false;
@@ -27,10 +28,6 @@ export const askDallE3 = async (
   mask?: Uploadable
 ) => {
   const apiKey = getGPTAPIKey();
-  if (!apiKey) {
-    alert('Please enter your API key first.');
-    return;
-  }
   const openai = new OpenAI({
     apiKey: apiKey,
     dangerouslyAllowBrowser: true,
@@ -55,10 +52,6 @@ export const ask110602490_lcm_sd15_i2i = async (
   img: string
 ) => {
   const apiKey = getFalAPIKey();
-  if (!apiKey) {
-    alert('Please enter your API key first.');
-    return;
-  }
   const data = await fetch(
     'https://110602490-lcm-sd15-i2i.gateway.alpha.fal.ai/',
     {
@@ -81,10 +74,6 @@ export const askGPT4V = async (
   messages: Array<OpenAI.ChatCompletionMessageParam>
 ) => {
   const apiKey = getGPTAPIKey();
-  if (!apiKey) {
-    alert('Please enter your API key first.');
-    return;
-  }
   const openai = new OpenAI({
     apiKey: apiKey,
     dangerouslyAllowBrowser: true,
@@ -98,10 +87,37 @@ export const askGPT4V = async (
   return result.choices[0].message.content;
 };
 const getGPTAPIKey = () => {
-  return (document.getElementById('temp-gpt-api-key-input') as HTMLInputElement)
-    .value;
+  const apiKey = (
+    document.getElementById('temp-gpt-api-key-input') as HTMLInputElement
+  ).value;
+  if (!apiKey) {
+    assertExists(apiKey, 'Please enter your API key first.');
+  }
+  return apiKey;
 };
 const getFalAPIKey = () => {
-  return (document.getElementById('temp-fal-api-key-input') as HTMLInputElement)
-    .value;
+  const apiKey = (
+    document.getElementById('temp-fal-api-key-input') as HTMLInputElement
+  ).value;
+
+  if (!apiKey) {
+    assertExists(apiKey, 'Please enter your API key first.');
+  }
+  return apiKey;
+};
+export const askGPT3_5turbo = async (
+  messages: Array<OpenAI.ChatCompletionMessageParam>
+) => {
+  const apiKey = getGPTAPIKey();
+  const openai = new OpenAI({
+    apiKey: apiKey,
+    dangerouslyAllowBrowser: true,
+  });
+  const result = await openai.chat.completions.create({
+    messages,
+    model: 'gpt-3.5-turbo-1106',
+    temperature: 0,
+    max_tokens: 4096,
+  });
+  return result.choices[0].message;
 };
