@@ -73,6 +73,8 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
     const zoom = edgeless.surface.viewport.zoom;
     const width = bound.w * zoom;
     const height = bound.h * zoom;
+
+    // FIXME offset
     const [x, y] = edgeless.surface.viewport.toViewCoord(bound.x, bound.y);
 
     return html` <style>
