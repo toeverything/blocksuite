@@ -157,7 +157,7 @@ jobs:
           fail_ci_if_error: false
 
   integration-test:
-    name: Unit test
+    name: Integration test
     runs-on: ubuntu-latest
 
     steps:
