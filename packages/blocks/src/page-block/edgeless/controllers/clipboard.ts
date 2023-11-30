@@ -61,10 +61,6 @@ export class EdgelessClipboardController implements ReactiveController {
     host.addController(this);
   }
 
-  get _enabled() {
-    return this.std.page.awarenessStore.getFlag('enable_transformer_clipboard');
-  }
-
   private get std() {
     return this.host.std;
   }
@@ -91,9 +87,7 @@ export class EdgelessClipboardController implements ReactiveController {
 
   hostConnected() {
     this.host.updateComplete.then(() => {
-      if (this._enabled) {
-        this._init();
-      }
+      this._init();
     });
   }
 

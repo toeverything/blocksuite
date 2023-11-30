@@ -164,8 +164,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     idGenerator,
     blobStorages,
     defaultFlags: {
-      enable_transformer_clipboard: featureArgs.includes('clipboard'),
-      enable_bultin_ledits: true,
+      enable_bultin_ledits: featureArgs.includes('ledits'),
       readonly: {
         'page:home': false,
       },
