@@ -4,13 +4,13 @@ import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import {
+  BlockPreviewIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
   Heading4Icon,
   Heading5Icon,
   Heading6Icon,
-  OtherBlockPreviewIcon,
   TextIcon,
 } from '../../../../_common/icons/index.js';
 import type { BlockModels } from '../../../../_common/utils/model.js';
@@ -36,7 +36,7 @@ function assertType<T>(value: unknown): asserts value is T {
 const paragraphIconMap: {
   [key in ParagraphBlockModel['type']]: TemplateResult<1>;
 } = {
-  quote: OtherBlockPreviewIcon,
+  quote: BlockPreviewIcon,
   text: TextIcon,
   h1: Heading1Icon,
   h2: Heading2Icon,
@@ -162,7 +162,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">${block.text.toString()}</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${OtherBlockPreviewIcon}</span>`
+            ? html`<span class="icon">${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:bookmark':
@@ -172,7 +172,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
             >${block.bookmarkTitle || block.url || 'Bookmark'}</span
           >
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${OtherBlockPreviewIcon}</span>`
+            ? html`<span class="icon">${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:code':
@@ -180,7 +180,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">${block.language}</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${OtherBlockPreviewIcon}</span>`
+            ? html`<span class="icon">${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:database':
@@ -188,7 +188,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">${block.title || 'Database'}</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${OtherBlockPreviewIcon}</span>`
+            ? html`<span class="icon">${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:image':
@@ -196,7 +196,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">${block.caption || 'Image'}</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${OtherBlockPreviewIcon}</span>`
+            ? html`<span class="icon">${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:attachment':
@@ -204,7 +204,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">${block.name}</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${OtherBlockPreviewIcon}</span>`
+            ? html`<span class="icon">${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:data-view':
@@ -212,7 +212,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">Database View</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${OtherBlockPreviewIcon}</span>`
+            ? html`<span class="icon">${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:divider':
@@ -220,7 +220,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="text general">Divider</span>
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${OtherBlockPreviewIcon}</span>`
+            ? html`<span class="icon">${BlockPreviewIcon}</span>`
             : nothing}
         `;
       case 'affine:surface-ref':
@@ -230,7 +230,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
             >${block.caption ? block.caption : 'Surface-Ref'}</span
           >
           ${!this.hidePreviewIcon
-            ? html`<span class="icon">${OtherBlockPreviewIcon}</span>`
+            ? html`<span class="icon">${BlockPreviewIcon}</span>`
             : nothing}
         `;
       default:
