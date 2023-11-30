@@ -101,4 +101,6 @@ export function cleanup() {
   delete (window as any).editor;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (window as any).job;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  delete (window as any).page;
 }
