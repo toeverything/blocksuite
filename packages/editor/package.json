@@ -5,8 +5,8 @@
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
-    "build": "tsc -b --verbose",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc --build tsconfig.build.json",
+    "test": "vitest --run"
   },
   "keywords": [],
   "author": "toeverything",

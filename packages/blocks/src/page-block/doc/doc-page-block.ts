@@ -1,6 +1,6 @@
 import './meta-data/meta-data.js';
 
-import type { BlockService, PointerEventState } from '@blocksuite/block-std';
+import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { VEditor } from '@blocksuite/virgo';
@@ -22,6 +22,7 @@ import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
+import type { DocPageService } from './doc-page-service.js';
 
 export interface PageViewport {
   left: number;
@@ -56,7 +57,7 @@ function testClickOnBlankArea(
 @customElement('affine-doc-page')
 export class DocPageBlockComponent extends BlockElement<
   PageBlockModel,
-  BlockService,
+  DocPageService,
   DocPageBlockWidgetName
 > {
   static override styles = css`
@@ -343,12 +344,6 @@ export class DocPageBlockComponent extends BlockElement<
     }
   }
 
-  private _initSlotEffects() {
-    this._disposables.add(
-      this.model.childrenUpdated.on(() => this.requestUpdate())
-    );
-  }
-
   private _initViewportResizeEffect() {
     // when observe viewportElement resize, emit viewport update event
     const resizeObserver = new ResizeObserver(
@@ -379,7 +374,6 @@ export class DocPageBlockComponent extends BlockElement<
   }
 
   override firstUpdated() {
-    this._initSlotEffects();
     this._initReadonlyListener();
     this._initViewportResizeEffect();
   }

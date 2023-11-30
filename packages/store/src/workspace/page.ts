@@ -456,13 +456,6 @@ export class Page extends BlockTree {
         targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
       }
     });
-
-    // Emit event to indicate that the children of these blocks have been updated
-    Array.from(childBlocksPerParent.keys()).forEach(parent =>
-      parent.childrenUpdated.emit()
-    );
-
-    newParent.childrenUpdated.emit();
   }
 
   updateBlock<T extends Partial<BlockProps>>(
@@ -624,8 +617,6 @@ export class Page extends BlockTree {
       }
 
       this._removeBlock(model.id);
-
-      parent.childrenUpdated.emit();
     });
   }
 
@@ -712,6 +703,7 @@ export class Page extends BlockTree {
     assertExists(block);
     const model = block.model;
     model.page = this;
+    model.created.emit();
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {

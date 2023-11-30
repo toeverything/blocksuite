@@ -9,15 +9,15 @@ function getDebugMenu(page: Page) {
   const debugMenu = page.locator('debug-menu');
   return {
     debugMenu,
-    undoBtn: debugMenu.locator('sl-button[content="Undo"]'),
-    redoBtn: debugMenu.locator('sl-button[content="Redo"]'),
+    undoBtn: debugMenu.locator('sl-tooltip[content="Undo"]'),
+    redoBtn: debugMenu.locator('sl-tooltip[content="Redo"]'),
 
     blockTypeButton: debugMenu.getByRole('button', { name: 'Block Type' }),
     testOperationsButton: debugMenu.getByRole('button', {
       name: 'Test Operations',
     }),
 
-    addNewPageBtn: debugMenu.locator('sl-button[content="Add New Page"]'),
+    addNewPageBtn: debugMenu.locator('sl-tooltip[content="Add New Page"]'),
   };
 }
 
@@ -75,22 +75,19 @@ export async function addNewPage(page: Page) {
 }
 
 export async function switchToPage(page: Page, pageId?: string) {
-  if (!pageId) {
-    const pageMetas = await page.evaluate(() => {
-      const { workspace } = window;
-      return workspace.meta.pageMetas;
-    });
-    if (!pageMetas.length) throw new Error("There's no page to switch to");
+  await page.evaluate(pageId => {
+    const { workspace, editor } = window;
 
-    pageId = pageMetas[0].id;
-  }
+    if (!pageId) {
+      const pageMetas = workspace.meta.pageMetas;
+      if (!pageMetas.length) return;
+      pageId = pageMetas[0].id;
+    }
 
-  const { debugMenu, addNewPageBtn } = getDebugMenu(page);
-  if (!(await addNewPageBtn.isVisible())) {
-    await clickTestOperationsMenuItem(page, 'Toggle Tab Menu');
-  }
-  const targetTab = debugMenu.locator(`sl-tab[panel="${pageId}"]`);
-  await targetTab.click();
+    const page = workspace.getPage(pageId);
+    if (!page) return;
+    editor.page = page;
+  }, pageId);
 }
 
 export async function clickTestOperationsMenuItem(page: Page, name: string) {

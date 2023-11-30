@@ -25,19 +25,12 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
     this.keymapController.bind();
   }
 
-  override firstUpdated() {
-    this._disposables.add(
-      this.model.propsUpdated.on(() => this.requestUpdate())
-    );
-    this._disposables.add(
-      this.model.childrenUpdated.on(() => this.requestUpdate())
-    );
-  }
-
   override render() {
     return html`
       <div class="affine-note-block-container">
-        <div class="affine-block-children-container">${this.content}</div>
+        <div class="affine-block-children-container">
+          ${this.renderModelChildren(this.model)}
+        </div>
       </div>
     `;
   }

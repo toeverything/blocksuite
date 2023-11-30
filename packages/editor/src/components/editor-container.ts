@@ -1,36 +1,25 @@
+import type {
+  AbstractEditor,
+  DocPageBlockComponent,
+  EdgelessPageBlockComponent,
+  PageBlockModel,
+} from '@blocksuite/blocks';
 import {
-  type AbstractEditor,
-  type AttachmentBlockProps,
-  AttachmentService,
-  type DocPageBlockComponent,
-  type EdgelessPageBlockComponent,
   EdgelessPreset,
-  FileDropManager,
   getServiceOrRegister,
-  type ImageBlockProps,
-  type PageBlockModel,
   PagePreset,
-  readImageSize,
   saveViewportToSession,
   ThemeObserver,
-  uploadBlobForAttachment,
 } from '@blocksuite/blocks';
-import { withTempBlobData } from '@blocksuite/blocks';
-import { toast } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { IS_FIREFOX } from '@blocksuite/global/env';
-import {
-  assertExists,
-  assertInstanceOf,
-  noop,
-  Slot,
-} from '@blocksuite/global/utils';
+import { noop, Slot } from '@blocksuite/global/utils';
 import {
   BlockSuiteRoot,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import { type Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -89,8 +78,6 @@ export class EditorContainer
   root: Ref<BlockSuiteRoot> = createRef<BlockSuiteRoot>();
 
   readonly themeObserver = new ThemeObserver();
-
-  fileDropManager = new FileDropManager(this);
 
   get model(): PageBlockModel | null {
     return this.page.root as PageBlockModel | null;
@@ -158,13 +145,6 @@ export class EditorContainer
       })
     );
 
-    this._disposables.addFromEvent(
-      this,
-      'dragover',
-      this.fileDropManager.onDragOver
-    );
-    this._disposables.addFromEvent(this, 'drop', this.fileDropManager.onDrop);
-
     this.themeObserver.observe(document.documentElement);
     this._disposables.add(this.themeObserver);
   }
@@ -191,75 +171,6 @@ export class EditorContainer
       if (this.mode === 'page') {
         this._saveViewportLocalRecord();
       }
-    }
-
-    if (
-      changedProperties.has('pagePreset') ||
-      changedProperties.has('edgelessPreset') ||
-      changedProperties.has('page')
-    ) {
-      const root = this.root.value;
-      if (!root) return;
-
-      const service = root.spec.getService('affine:attachment');
-      assertExists(service);
-      assertInstanceOf(service, AttachmentService);
-      const maxFileSize = service.maxFileSize;
-
-      this.fileDropManager.clear();
-
-      this.fileDropManager.register({
-        name: 'Image',
-        matcher: file => file.type.startsWith('image'),
-        handler: async (
-          file: File
-        ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
-          const storage = this.page.blob;
-          const { saveAttachmentData } = withTempBlobData();
-          const sourceId = await storage.set(
-            new Blob([file], { type: file.type })
-          );
-          saveAttachmentData(sourceId, { name: file.name });
-          const size =
-            this.mode === 'edgeless' ? await readImageSize(file) : {};
-          return {
-            flavour: 'affine:image',
-            sourceId,
-            ...size,
-          };
-        },
-      });
-
-      this.fileDropManager.register({
-        name: 'Attachment',
-        matcher: (file: File) => {
-          if (file.size > maxFileSize) {
-            toast(
-              `You can only upload files less than ${
-                maxFileSize / (1000 * 1000)
-              }M.`
-            );
-            return false;
-          }
-          return true;
-        },
-        handler: async (
-          file: File
-        ): Promise<
-          AttachmentBlockProps & { id: string; flavour: 'affine:attachment' }
-        > => {
-          const blockId = this.page.generateBlockId();
-          uploadBlobForAttachment(this.page, blockId, file);
-          return {
-            id: blockId,
-            flavour: 'affine:attachment',
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            embed: false,
-          };
-        },
-      });
     }
 
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {

@@ -28,7 +28,6 @@ import {
   Vec,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { getGridBound } from '../../utils/bound-utils.js';
 import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
 import { mountShapeTextEditor } from '../../utils/text.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
@@ -64,8 +63,6 @@ class AutoCompleteOverlay extends Overlay {
     }
   }
 }
-
-// const autoCompleteOverlay = new AutoCompleteOverlay();
 
 @customElement('edgeless-auto-complete')
 export class EdgelessAutoComplete extends WithDisposable(LitElement) {
@@ -312,7 +309,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         .filter(e => e instanceof ShapeElement) as ShapeElement[];
       return nextBound(type, this.current, connectedShapes);
     } else {
-      const bound = this.current.gridBound;
+      const bound = this.current.elementBound;
       switch (type) {
         case Direction.Right: {
           bound.x += bound.w + MAIN_GAP;
@@ -340,7 +337,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     curShape: ShapeElement,
     nextBound: Bound
   ) {
-    const startBound = getGridBound(this.current);
+    const startBound = this.current.elementBound;
     const { startPosition, endPosition } = getPosition(type);
     const nextShape = {
       xywh: nextBound.serialize(),

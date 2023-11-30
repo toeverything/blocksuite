@@ -280,12 +280,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         highlighter: this._highlighter,
       };
     });
-    this._disposables.add(
-      this.model.propsUpdated.on(() => this.requestUpdate())
-    );
-    this._disposables.add(
-      this.model.childrenUpdated.on(() => this.requestUpdate())
-    );
 
     this._disposables.add(
       listenToThemeChange(this, async () => {
@@ -603,7 +597,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         >
         </rich-text>
       </div>
-      ${this.content}
+      ${this.renderModelChildren(this.model)}
       ${this.selected?.is('block')
         ? html`<affine-block-selection></affine-block-selection>`
         : null}

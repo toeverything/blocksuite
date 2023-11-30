@@ -394,6 +394,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const current = this._currentFrameIndex;
     const frames = this._frames;
     const frame = frames[current];
+    const { readonly } = this.edgeless.page;
+
     return html`
       <edgeless-tool-icon-button
         .tooltip=${'Previous'}
@@ -437,17 +439,19 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           ? NavigatorExitFullScreenIcon
           : NavigatorFullScreenIcon}
       </edgeless-tool-icon-button>
-      <div class="short-divider"></div>
-      <div
-        class="edgeless-frame-navigator-stop"
-        @click=${() => {
-          this.setEdgelessTool({ type: 'default' });
-          document.fullscreenElement && this._toggleFullScreen();
-          setTimeout(() => this._moveToCurrentFrame(), 400);
-        }}
-      >
-        Stop
-      </div>
+      ${readonly
+        ? nothing
+        : html` <div class="short-divider"></div>
+            <div
+              class="edgeless-frame-navigator-stop"
+              @click=${() => {
+                this.setEdgelessTool({ type: 'default' });
+                document.fullscreenElement && this._toggleFullScreen();
+                setTimeout(() => this._moveToCurrentFrame(), 400);
+              }}
+            >
+              Stop
+            </div>`}
     `;
   }
 
@@ -543,9 +547,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (this.edgeless.page.readonly) return nothing;
-
     const { type } = this.edgelessTool;
+    if (this.edgeless.page.readonly && type !== 'frameNavigator') {
+      return nothing;
+    }
 
     const Content =
       type === 'frameNavigator'

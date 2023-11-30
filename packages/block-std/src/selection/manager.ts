@@ -171,9 +171,9 @@ export class SelectionManager {
   unmount() {
     this.std.page.history.off('stack-item-added', this._itemAdded);
     this.std.page.history.off('stack-item-popped', this._itemPopped);
-    this.clear();
     this.slots.changed.dispose();
     this.disposables.dispose();
+    this.clear();
   }
 
   dispose() {

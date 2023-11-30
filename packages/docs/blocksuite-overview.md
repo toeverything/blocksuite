@@ -7,7 +7,7 @@ BlockSuite is an open-source project for block-based collaborative editing. It c
 
 By using BlockSuite, you can:
 
-- Reuse and extend block-based editors, like [document editor](https://blocksuite-toeverything.vercel.app/starter/?init) and [whiteboard editor](https://blocksuite-toeverything.vercel.app/).
+- Reuse and extend block-based editors, like [document editor](https://try-blocksuite.vercel.app/starter/?init) and [whiteboard editor](https://try-blocksuite.vercel.app/).
 - Define custom blocks that could be shared across these editors.
 - Synchronize editor states over different providers (`IndexedDB`, `WebSocket`, `BroadcastChannel`, etc.) while automatically resolving merge conflicts.
 - Support document snapshot, clipboard, and interoperability with third-party formats through a universal data transforming model.

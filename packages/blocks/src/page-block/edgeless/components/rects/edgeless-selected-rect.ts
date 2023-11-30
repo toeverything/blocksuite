@@ -439,7 +439,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
         props.xywh = bound.serialize();
         edgeless.updateElementInLocal(element.id, props);
-      } else if (isFrameBlock(element)) {
+      } else if (isImageBlock(element)) {
+        const curBound = Bound.deserialize(element.xywh);
+        if (
+          direction === HandleDirection.Left ||
+          direction === HandleDirection.Right
+        ) {
+          bound.h = (curBound.h / curBound.w) * bound.w;
+        } else if (
+          direction === HandleDirection.Top ||
+          direction === HandleDirection.Bottom
+        ) {
+          bound.w = (curBound.w / curBound.h) * bound.h;
+        }
+
         edgeless.updateElementInLocal(element.id, {
           xywh: bound.serialize(),
         });

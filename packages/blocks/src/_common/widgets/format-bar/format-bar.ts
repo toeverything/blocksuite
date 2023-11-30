@@ -153,7 +153,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     // listen to selection change
     this.disposables.add(
       this._selectionManager.slots.changed.on(async () => {
-        await this.updateComplete;
+        await this.root.updateComplete;
         const textSelection = pageElement.selection.find('text');
         const blockSelections = pageElement.selection.filter('block');
 
