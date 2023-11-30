@@ -40,9 +40,7 @@ export const ImageBlockSchema = defineBlockSchema({
     role: 'content',
   },
   transformer: () => new ImageBlockTransformer(),
-  toModel: () => {
-    return new ImageBlockModel();
-  },
+  toModel: () => new ImageBlockModel(),
 });
 
 @EdgelessSelectableMixin
