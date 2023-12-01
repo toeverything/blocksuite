@@ -2,15 +2,8 @@ import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
 import { html } from 'lit';
-import {
-  customElement,
-  property,
-  query,
-  queryAll,
-  state,
-} from 'lit/decorators.js';
+import { customElement, query, queryAll, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { BlockHubIcon, CrossIcon } from '../../../../_common/icons/index.js';
@@ -33,7 +26,6 @@ import {
 import {
   asyncFocusRichText,
   buildPath,
-  getAllowSelectedBlocks,
   getBookmarkInitialProps,
   getHoveringNote,
   getServiceOrRegister,
@@ -41,6 +33,7 @@ import {
 import { DocPageBlockComponent } from '../../../../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../../../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../../../page-block/text-selection/utils.js';
+import { getClosestNoteBlock } from '../../drag-handle/utils.js';
 import { type DragIndicator } from './../../../components/drag-indicator.js';
 import {
   BlockHubMenu,
@@ -59,39 +52,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   /**
    * A function that returns all blocks that are allowed to be moved to
    */
-  @property({ attribute: false })
-  public getAllowedBlocks = (): BaseBlockModel[] => {
-    const pageBlockModel = this._pageBlockElement.model;
-    return getAllowSelectedBlocks(pageBlockModel);
-  };
-
-  @property({ attribute: false })
-  public getHoveringNoteState = (point: Point) => {
-    const state = {
-      scale: 1,
-    } as {
-      container?: Element;
-      rect?: Rect;
-      scale: number;
-    };
-
-    if (this._isPageMode) {
-      const noteBlock = this._pageBlockElement.querySelector('affine-note');
-      assertExists(noteBlock);
-      state.rect = Rect.fromDOMRect(noteBlock.getBoundingClientRect());
-    } else {
-      state.scale = (
-        this._pageBlockElement as EdgelessPageBlockComponent
-      ).surface.viewport.zoom;
-      const container = getHoveringNote(point);
-      if (container) {
-        state.rect = Rect.fromDOM(container);
-        state.container = container;
-      }
-    }
-    return state;
-  };
-
   @state()
   private _expanded = false;
 
@@ -247,6 +207,37 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     return pageElement;
   }
 
+  private _getHoveringNoteState = (point: Point) => {
+    const state = {
+      scale: 1,
+    } as {
+      container?: Element;
+      rect?: Rect;
+      scale: number;
+    };
+
+    if (this._isPageMode) {
+      const closestNoteBlock = getClosestNoteBlock(
+        this._root.page,
+        this._pageBlockElement,
+        point
+      );
+      if (closestNoteBlock) {
+        state.rect = Rect.fromDOMRect(closestNoteBlock.getBoundingClientRect());
+      }
+    } else {
+      state.scale = (
+        this._pageBlockElement as EdgelessPageBlockComponent
+      ).surface.viewport.zoom;
+      const container = getHoveringNote(point);
+      if (container) {
+        state.rect = Rect.fromDOM(container);
+        state.container = container;
+      }
+    }
+    return state;
+  };
+
   /**
    * This is currently a workaround, as the height of the _blockHubIconsContainer is determined by the height of its
    * content, and if its child's opacity is set to 0 during a transition, its height won't change, causing the background
@@ -341,17 +332,20 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       container,
       rect: noteRect,
       scale,
-    } = this.getHoveringNoteState(point.clone());
+    } = this._getHoveringNoteState(point.clone());
+
     if (!noteRect) {
       this._resetDropState();
       return;
     }
+
     let element: Element | null = null;
     element = getClosestBlockElementByPoint(
       point,
       { container, rect: noteRect, snapToEdge: { x: false, y: true } },
       scale
     );
+
     if (!element) {
       const { min, max } = noteRect;
       if (x >= min.x && x <= max.x && y >= min.y) {
@@ -364,6 +358,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         }
       }
     }
+
     if (!element) {
       // if (this._mouseRoot.mode === 'page') {
       //   return;
@@ -390,6 +385,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       rect = result.rect;
       lastModelState = result.modelState;
     }
+
     const runner = () => {
       // only support auto scroll in page mode now
       if (this._pageBlockElement instanceof DocPageBlockComponent) {
@@ -408,7 +404,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     };
 
     this._rafID = requestAnimationFrame(runner);
-
     this._lastDroppingType = type;
     this._indicator.rect = rect;
     this._lastDroppingTarget = lastModelState;
@@ -671,11 +666,5 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         </div>
       </div>
     `;
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-block-hub': BlockHub;
   }
 }

@@ -1,4 +1,3 @@
-import './doc/meta-data/backlink/backlink-popover.js';
 export * from './doc/doc-page-block.js';
 export { getAllowSelectedBlocks } from './doc/utils.js';
 export {

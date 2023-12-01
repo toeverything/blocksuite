@@ -1,5 +1,6 @@
 import type { AFFINE_BLOCK_HUB_WIDGET } from '../_common/widgets/block-hub/index.js';
 import type { AFFINE_DOC_DRAGGING_AREA_WIDGET } from '../_common/widgets/doc-dragging-area/index.js';
+import type { AFFINE_DOC_PAGE_META_DATA } from '../_common/widgets/doc-page-meta-data/index.js';
 import type { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../_common/widgets/doc-remote-selection/doc-remote-selection.js';
 import type { AFFINE_DRAG_HANDLE_WIDGET } from '../_common/widgets/drag-handle/index.js';
 import type { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../_common/widgets/edgeless-remote-selection/index.js';
@@ -12,6 +13,7 @@ import type { EdgelessPageBlockComponent } from './edgeless/edgeless-page-block.
 
 export type DocPageBlockWidgetName =
   | typeof AFFINE_BLOCK_HUB_WIDGET
+  | typeof AFFINE_DOC_PAGE_META_DATA
   | typeof AFFINE_MODAL_WIDGET
   | typeof AFFINE_SLASH_MENU_WIDGET
   | typeof AFFINE_LINKED_PAGE_WIDGET
