@@ -1,11 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Transaction, YArrayEvent, YMapEvent } from 'yjs';
-import { Array as YArray, Map as YMap, Text as YText } from 'yjs';
+import { Array as YArray, Map as YMap } from 'yjs';
 
 import { Boxed } from './boxed.js';
-import { Text } from './text.js';
 import type { UnRecord } from './utils.js';
-import { canToProxy, canToY, native2Y } from './utils.js';
+import { native2Y, y2Native } from './utils.js';
 
 type ProxyTransaction = Transaction & { isLocalProxy?: boolean };
 
@@ -23,34 +22,45 @@ export function createYProxy<Data>(
   if (proxies.has(yAbstract)) {
     return proxies.get(yAbstract) as Data;
   }
-  if (Boxed.is(yAbstract)) {
-    const data = new Boxed(yAbstract);
-    proxies.set(yAbstract, data);
-    return data as Data;
-  }
-  if (yAbstract instanceof YText) {
-    const data = new Text(yAbstract) as Data;
-    proxies.set(yAbstract, data);
-    return data as Data;
-  }
-  if (yAbstract instanceof YArray) {
-    const data = createYArrayProxy(
-      yAbstract,
-      options as ProxyOptions<unknown[]>
-    ) as Data;
-    proxies.set(yAbstract, data);
-    return data;
-  }
-  if (yAbstract instanceof YMap) {
-    const data = createYMapProxy(
-      yAbstract,
-      options as ProxyOptions<unknown>
-    ) as Data;
-    proxies.set(yAbstract, data);
-    return data;
-  }
 
-  return yAbstract as Data;
+  return y2Native(yAbstract, {
+    transform: (value, origin) => {
+      if (Boxed.is(origin)) {
+        proxies.set(origin, value);
+        return value;
+      }
+      if (origin instanceof YArray) {
+        subscribeYArray(
+          value as unknown[],
+          origin,
+          options as ProxyOptions<unknown[]>
+        );
+        const proxy = getYArrayProxy(
+          value as unknown[],
+          origin,
+          options as ProxyOptions<unknown[]>
+        );
+        proxies.set(origin, proxy);
+        return proxy;
+      }
+      if (origin instanceof YMap) {
+        subscribeYMap(
+          value as UnRecord,
+          origin,
+          options as ProxyOptions<UnRecord>
+        );
+        const proxy = getYMapProxy(
+          value as UnRecord,
+          origin,
+          options as ProxyOptions<UnRecord>
+        );
+        proxies.set(origin, proxy);
+        return proxy;
+      }
+
+      return value;
+    },
+  }) as Data;
 }
 
 function transformData(
@@ -58,44 +68,9 @@ function transformData(
   onCreate: (p: unknown) => void,
   options: ProxyOptions<never> = {}
 ) {
-  if (value instanceof Boxed) {
-    onCreate(value.yMap);
-    return value;
-  }
-
-  if (canToY(value)) {
-    const y = native2Y(value as Record<string, unknown> | unknown[], true);
-    onCreate(y);
-    return createYProxy(y, options);
-  }
-
-  onCreate(value);
-  return value;
-}
-
-function initialize(
-  array: unknown[],
-  yArray: YArray<unknown>,
-  options: ProxyOptions<unknown[]>
-): void;
-function initialize(
-  object: UnRecord,
-  yMap: YMap<unknown>,
-  options: ProxyOptions<UnRecord>
-): void;
-function initialize(
-  target: unknown[] | UnRecord,
-  yAbstract: YArray<unknown> | YMap<unknown>,
-  options: ProxyOptions<never>
-): void {
-  if (!canToProxy(yAbstract)) {
-    return;
-  }
-  yAbstract.forEach((value, key) => {
-    const result = createYProxy(value, options);
-
-    (target as Record<string, unknown>)[key] = result;
-  });
+  const y = native2Y(value as Record<string, unknown> | unknown[], true);
+  onCreate(y);
+  return createYProxy(y, options);
 }
 
 function subscribeYArray(
@@ -126,10 +101,7 @@ function subscribeYArray(
             return !proxies.has(value);
           })
           .map(value => {
-            if (canToProxy(value)) {
-              return createYProxy(value);
-            }
-            return value;
+            return createYProxy(value);
           });
         arr.splice(retain, 0, ...proxyList);
 
@@ -163,14 +135,10 @@ function subscribeYMap(
         delete object[key];
       } else if (type.action === 'add' || type.action === 'update') {
         const current = yMap.get(key);
-        if (canToProxy(current)) {
-          if (proxies.has(current)) {
-            object[key] = proxies.get(current);
-          } else {
-            object[key] = createYProxy(current);
-          }
+        if (proxies.has(current)) {
+          object[key] = proxies.get(current);
         } else {
-          object[key] = current;
+          object[key] = createYProxy(current);
         }
       }
     });
@@ -193,14 +161,11 @@ function applyYChanges<T = unknown>(
   return changes();
 }
 
-function createYArrayProxy<T = unknown>(
+function getYArrayProxy<T = unknown>(
+  array: T[],
   yArray: YArray<unknown>,
   options: ProxyOptions<unknown[]>
-): T[] {
-  const array: T[] = [];
-
-  initialize(array, yArray as YArray<unknown>, options);
-  subscribeYArray(array, yArray, options);
+) {
   return new Proxy(array, {
     has: (target, p) => {
       return Reflect.has(target, p);
@@ -248,14 +213,11 @@ function createYArrayProxy<T = unknown>(
   });
 }
 
-function createYMapProxy<Data extends Record<string, unknown>>(
+function getYMapProxy<Data extends Record<string, unknown>>(
+  object: Data,
   yMap: YMap<unknown>,
   options: ProxyOptions<UnRecord>
-): Data {
-  const object = {} as Data;
-
-  initialize(object, yMap, options);
-  subscribeYMap(object, yMap, options);
+) {
   return new Proxy(object, {
     has: (target, p) => {
       return Reflect.has(target, p);

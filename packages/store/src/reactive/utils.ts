@@ -1,4 +1,4 @@
-import { Array as YArray, Map as YMap } from 'yjs';
+import { Array as YArray, Map as YMap, Text as YText } from 'yjs';
 
 import { Boxed } from './boxed.js';
 import { Text } from './text.js';
@@ -16,18 +16,6 @@ export function isPureObject(value: unknown): value is object {
     Object.prototype.toString.call(value) === '[object Object]' &&
     [Object, undefined, null].some(x => x === value.constructor)
   );
-}
-
-export function canToProxy(
-  value: unknown
-): value is YMap<unknown> | YArray<unknown> {
-  return value instanceof YArray || value instanceof YMap;
-}
-
-export function canToY(
-  value: unknown
-): value is unknown | Record<string, unknown> {
-  return isPureObject(value) || Array.isArray(value);
 }
 
 export function native2Y<T>(value: T, deep = true): Native2Y<T> {
@@ -59,6 +47,43 @@ export function native2Y<T>(value: T, deep = true): Native2Y<T> {
   }
 
   return value as Native2Y<T>;
+}
+
+export function y2Native(
+  yAbstract: unknown,
+  {
+    deep = true,
+    transform = x => x,
+  }: { deep?: boolean; transform: (value: unknown, origin: unknown) => unknown }
+) {
+  if (Boxed.is(yAbstract)) {
+    const data = new Boxed(yAbstract);
+    return transform(data, yAbstract);
+  }
+  if (yAbstract instanceof YText) {
+    const data = new Text(yAbstract);
+    return transform(data, yAbstract);
+  }
+  if (yAbstract instanceof YArray) {
+    const data: unknown[] = yAbstract
+      .toArray()
+      .map(item => (deep ? y2Native(item, { deep, transform }) : item));
+
+    return transform(data, yAbstract);
+  }
+  if (yAbstract instanceof YMap) {
+    const data: Record<string, unknown> = Object.fromEntries(
+      Array.from(yAbstract.entries()).map(([key, value]) => {
+        return [key, deep ? y2Native(value, { deep, transform }) : value] as [
+          string,
+          unknown,
+        ];
+      })
+    );
+    return transform(data, yAbstract);
+  }
+
+  return transform(yAbstract, yAbstract);
 }
 
 export type UnRecord = Record<string, unknown>;
