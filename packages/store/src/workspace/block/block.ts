@@ -2,9 +2,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 import type { UnRecord } from '../../reactive/index.js';
+import { createYProxy, native2Y } from '../../reactive/index.js';
 import { BaseBlockModel, internalPrimitives } from '../../schema/base.js';
 import type { Schema } from '../../schema/index.js';
-import { propsToValue, valueToProps } from './utils.js';
 
 export type YBlock = Y.Map<unknown>;
 
@@ -78,7 +78,7 @@ export class Block {
   };
 
   private _getPropsProxy = (name: string, value: unknown) => {
-    return valueToProps(value, {
+    return createYProxy(value, {
       onChange: () => {
         this.options.onChange?.(this, name, value);
       },
@@ -122,7 +122,7 @@ export class Block {
       Object.entries(defaultProps).forEach(([key, value]) => {
         if (props[key] !== undefined) return;
 
-        const yValue = propsToValue(value);
+        const yValue = native2Y(value);
         this.yBlock.set(`prop:${key}`, yValue);
         const proxy = this._getPropsProxy(key, yValue);
         props[key] = proxy;
@@ -160,7 +160,7 @@ export class Block {
           typeof p === 'string' &&
           model.keys.includes(p)
         ) {
-          const yValue = propsToValue(value);
+          const yValue = native2Y(value);
           this.yBlock.set(`prop:${p}`, yValue);
           const proxy = this._getPropsProxy(p, yValue);
           return Reflect.set(target, p, proxy, receiver);

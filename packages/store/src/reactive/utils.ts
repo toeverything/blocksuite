@@ -30,7 +30,7 @@ export function canToY(
   return isPureObject(value) || Array.isArray(value);
 }
 
-export function native2Y<T>(value: T, deep: boolean): Native2Y<T> {
+export function native2Y<T>(value: T, deep = true): Native2Y<T> {
   if (value instanceof Boxed) {
     return value.yMap as Native2Y<T>;
   }
