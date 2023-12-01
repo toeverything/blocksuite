@@ -7,10 +7,8 @@ import { getTagColor } from '../../_common/components/tags/colors.js';
 import { toast } from '../../_common/components/toast.js';
 import {
   getBlockElementByModel,
-  getBlockElementByPath,
   getEditorContainer,
   isPageMode,
-  matchFlavours,
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
@@ -269,35 +267,13 @@ export class ContentParser {
     return { canvas, ctx };
   }
 
-  /*
-   * This is a workaround for the issue that top level image cannot be copy as png
-   * This should be removed after the new clipboard is implemented
-   */
-  private _blockQuery(model: BaseBlockModel) {
-    if (matchFlavours(model, ['affine:image'])) {
-      let current: BaseBlockModel | null = model;
-      const path: string[] = [];
-      while (current) {
-        // Top level image render under page block not surface block
-        if (!matchFlavours(current, ['affine:surface'])) {
-          path.unshift(current.id);
-        }
-        current = current.page.getParent(current);
-      }
-
-      return getBlockElementByPath(path);
-    } else {
-      return getBlockElementByModel(model);
-    }
-  }
-
   public async edgelessToCanvas(
     surfaceRenderer: Renderer,
     bound: IBound,
     edgeless?: EdgelessPageBlockComponent,
     nodes?: TopLevelBlockModel[],
     surfaces?: SurfaceElement[],
-    blockQuery: (model: BaseBlockModel) => Element | null = this._blockQuery,
+    blockElementGetter: (model: BaseBlockModel) => Element | null = () => null,
     edgelessBackground?: { zoom: number }
   ): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
@@ -338,7 +314,7 @@ export class ContentParser {
     // TODO: refactor of this part
     const blocks = nodes ?? edgeless?.getSortedElementsByBound(bound) ?? [];
     for (const block of blocks) {
-      const blockElement = blockQuery(block)?.parentElement;
+      const blockElement = blockElementGetter(block)?.parentElement;
 
       if (blockElement) {
         const blockBound = xywhArrayToObject(block);
@@ -358,7 +334,7 @@ export class ContentParser {
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
           const element = blocksInsideFrame[i];
-          const htmlElement = blockQuery(element)?.parentElement;
+          const htmlElement = blockElementGetter(element)?.parentElement;
           const blockBound = xywhArrayToObject(element);
           const canvasData = await html2canvas(htmlElement as HTMLElement);
 

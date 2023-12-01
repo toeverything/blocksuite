@@ -119,7 +119,7 @@ export class EdgelessClipboardController implements ReactiveController {
     });
   };
 
-  private _blockQuery(model: BaseBlockModel) {
+  private _blockElmentGetter(model: BaseBlockModel) {
     if (matchFlavours(model, ['affine:image', 'affine:frame'])) {
       let current: BaseBlockModel | null = model;
       const path: string[] = [];
@@ -669,7 +669,7 @@ export class EdgelessClipboardController implements ReactiveController {
       block: TopLevelBlockModel,
       isInFrame = false
     ) => {
-      const blockElement = this._blockQuery(block)?.parentElement;
+      const blockElement = this._blockElmentGetter(block)?.parentElement;
       const blockBound = Bound.deserialize(block.xywh);
       const canvasData = await html2canvas(
         blockElement as HTMLElement,
