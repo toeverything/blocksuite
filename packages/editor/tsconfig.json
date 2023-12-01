@@ -1,12 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./src/",
     "outDir": "./dist/",
-    "noEmit": false
+    "noEmit": true
   },
-  "include": ["./src"],
-  "exclude": [""],
+  "include": ["./src", "./tests"],
   "references": [
     {
       "path": "../global"
