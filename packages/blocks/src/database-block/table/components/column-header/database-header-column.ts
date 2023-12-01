@@ -312,6 +312,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                     .uni="${this.tableViewManager.getIcon(config.type)}"
                   ></uni-lit>`,
                   select: () => {
+                    if (this.column.type === config.type) {
+                      return;
+                    }
                     this.column.updateType?.(config.type);
                   },
                 };
