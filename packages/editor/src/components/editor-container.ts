@@ -26,7 +26,7 @@ import { keyed } from 'lit/directives/keyed.js';
 import type { Ref } from 'lit/directives/ref.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
-import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
+import { checkEditorElementActive } from '../utils/editor.js';
 
 noop(BlockSuiteRoot);
 
@@ -185,14 +185,6 @@ export class EditorContainer
         forwardSlot(this._edgelessPageBlock.slots, this.slots);
       }
     });
-  }
-
-  async createBlockHub() {
-    await this.updateComplete;
-    if (!this.page.root) {
-      await new Promise(res => this.page.slots.rootAdded.once(res));
-    }
-    return createBlockHub(this, this.page);
   }
 
   private _saveViewportLocalRecord() {

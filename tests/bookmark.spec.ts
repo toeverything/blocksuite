@@ -84,7 +84,7 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
   const listMenu = page.locator('.block-hub-icon-container:nth-child(4)');
   await listMenu.hover();
   const blockHubListContainer = page.locator(
-    '.affine-block-hub-container[type="file"]'
+    '.block-hub-cards-container[type="file"]'
   );
   await expect(blockHubListContainer).toBeVisible();
   await page.click(

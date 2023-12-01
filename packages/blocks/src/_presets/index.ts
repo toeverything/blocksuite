@@ -1,6 +1,7 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
+import { AFFINE_BLOCK_HUB_WIDGET } from '../_common/widgets/block-hub/index.js';
 import { AFFINE_DOC_DRAGGING_AREA_WIDGET } from '../_common/widgets/doc-dragging-area/index.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../_common/widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../_common/widgets/drag-handle/index.js';
@@ -42,6 +43,9 @@ const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
   view: {
     component: literal`affine-doc-page`,
     widgets: {
+      [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
+        AFFINE_BLOCK_HUB_WIDGET
+      )}`,
       [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
       [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
         AFFINE_SLASH_MENU_WIDGET
@@ -71,6 +75,9 @@ const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
   view: {
     component: literal`affine-edgeless-page`,
     widgets: {
+      [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
+        AFFINE_BLOCK_HUB_WIDGET
+      )}`,
       [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
       [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
         AFFINE_SLASH_MENU_WIDGET
