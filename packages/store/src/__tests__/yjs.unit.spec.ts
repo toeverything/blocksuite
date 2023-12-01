@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
+import type { Text } from '../reactive/index.js';
 import { Boxed, createYProxy } from '../reactive/index.js';
 import { BlockSuiteDoc } from '../yjs/index.js';
 
@@ -88,10 +89,10 @@ describe('blocksuite yjs', () => {
       const text = new Y.Text('hello');
       inner.set('text', text);
 
-      const proxy = createYProxy<{ inner: { text: Y.Text } }>(map);
+      const proxy = createYProxy<{ inner: { text: Text } }>(map);
       proxy.inner = { ...proxy.inner };
-      expect(proxy.inner.text).toBeInstanceOf(Y.Text);
-      expect(proxy.inner.text.toJSON()).toBe('hello');
+      expect(proxy.inner.text.yText).toBeInstanceOf(Y.Text);
+      expect(proxy.inner.text.yText.toJSON()).toBe('hello');
     });
 
     test('with native wrapper', () => {
