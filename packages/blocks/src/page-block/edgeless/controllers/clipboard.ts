@@ -665,10 +665,12 @@ export class EdgelessClipboardController implements ReactiveController {
       proxy: _imageProxyEndpoint,
     };
 
-    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
-    for (const nodeElement of nodeElements) {
-      const blockElement = this._blockQuery(nodeElement)?.parentElement;
-      const blockBound = Bound.deserialize(nodeElement.xywh);
+    const _drawTopLevelBlock = async (
+      block: TopLevelBlockModel,
+      isInFrame = false
+    ) => {
+      const blockElement = this._blockQuery(block)?.parentElement;
+      const blockBound = Bound.deserialize(block.xywh);
       const canvasData = await html2canvas(
         blockElement as HTMLElement,
         html2canvasOption
@@ -678,8 +680,15 @@ export class EdgelessClipboardController implements ReactiveController {
         blockBound.x - bound.x + 50,
         blockBound.y - bound.y + 50,
         blockBound.w,
-        blockBound.h
+        isInFrame
+          ? (blockBound.w / canvasData.width) * canvasData.height
+          : blockBound.h
       );
+    };
+
+    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
+    for (const nodeElement of nodeElements) {
+      await _drawTopLevelBlock(nodeElement);
 
       if (nodeElement.flavour === EdgelessBlockType.FRAME) {
         const blocksInsideFrame: TopLevelBlockModel[] = [];
@@ -695,20 +704,7 @@ export class EdgelessClipboardController implements ReactiveController {
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
           const element = blocksInsideFrame[i];
-          const htmlElement = this._blockQuery(element)?.parentElement;
-          const blockBound = Bound.deserialize(element.xywh);
-          const canvasData = await html2canvas(
-            htmlElement as HTMLElement,
-            html2canvasOption
-          );
-
-          ctx.drawImage(
-            canvasData,
-            blockBound.x - bound.x + 50,
-            blockBound.y - bound.y + 50,
-            blockBound.w,
-            (blockBound.w / canvasData.width) * canvasData.height
-          );
+          await _drawTopLevelBlock(element, true);
         }
       }
 
