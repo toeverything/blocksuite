@@ -121,7 +121,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       type: 'block',
       id: nanoid('block'),
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [],
     };
     return {
@@ -174,7 +179,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       type: 'block',
       id: nanoid('block'),
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [],
     };
     return this._traverseMarkdown(
@@ -192,7 +202,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       type: 'block',
       id: nanoid('block'),
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [],
     };
     return {
