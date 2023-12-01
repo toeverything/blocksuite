@@ -3,6 +3,7 @@ import {
   type BlobStorage,
   type DocProviderCreator,
   type Page,
+  Text,
   Workspace,
 } from '@blocksuite/store';
 import { createMemoryStorage, Generator, Schema } from '@blocksuite/store';

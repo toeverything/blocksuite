@@ -8,12 +8,10 @@ export type Native2Y<T> = T extends Record<string, infer U>
 
 export function isPureObject(value: unknown): value is object {
   return (
-    typeof value === 'object' &&
     value !== null &&
-    !Array.isArray(value) &&
-    !(value instanceof YMap) &&
-    !(value instanceof YArray) &&
-    !(value instanceof YText)
+    typeof value === 'object' &&
+    Object.prototype.toString.call(value) === '[object Object]' &&
+    [Object, undefined, null].some(x => x === value.constructor)
   );
 }
 
