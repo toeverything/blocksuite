@@ -1,13 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
+import { native2Y } from '../../reactive/index.js';
 import type { BaseBlockModel, Schema } from '../../schema/index.js';
 import { internalPrimitives } from '../../schema/index.js';
 import type { AwarenessStore, BlockSuiteDoc } from '../../yjs/index.js';
 import { Space } from '../space.js';
 import type { BlockOptions, YBlock } from './block.js';
 import { Block } from './block.js';
-import { propsToValue } from './utils.js';
 
 type FlatBlockMap = Record<string, YBlock>;
 type BlockTreeOptions = {
@@ -87,7 +87,7 @@ export class BlockTree extends Space<FlatBlockMap> {
     Object.entries(props).forEach(([key, value]) => {
       if (value === undefined) return;
 
-      yBlock.set(`prop:${key}`, propsToValue(value));
+      yBlock.set(`prop:${key}`, native2Y(value));
     });
 
     return yBlock;

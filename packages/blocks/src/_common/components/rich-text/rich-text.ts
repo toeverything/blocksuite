@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Y } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { Text, Workspace } from '@blocksuite/store';
 import {
   type AttributeRenderer,
   createVirgoKeyDownHandler,
@@ -49,7 +49,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  yText!: Y.Text;
+  yText!: Y.Text | Text;
 
   @property({ attribute: false })
   attributesSchema?: z.ZodSchema;
@@ -103,7 +103,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     }
 
     // init vEditor
-    this._vEditor = new VEditor<AffineTextAttributes>(this.yText, {
+    this._vEditor = new VEditor<AffineTextAttributes>(this._yText, {
       isEmbed: delta => !!delta.attributes?.reference,
       hooks: {
         beforeinput: onVBeforeinput,
@@ -241,6 +241,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     e.stopPropagation();
   };
 
+  private get _yText() {
+    return this.yText instanceof Text ? this.yText.yText : this.yText;
+  }
+
   private _onPaste = (e: ClipboardEvent) => {
     const vEditor = this.vEditor;
     assertExists(vEditor);
@@ -277,12 +281,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    assertExists(this.yText, 'rich-text need yText to init.');
-    assertExists(this.yText.doc, 'yText should be bind to yDoc.');
+    assertExists(this._yText, 'rich-text need yText to init.');
+    assertExists(this._yText.doc, 'yText should be bind to yDoc.');
 
     if (!this.undoManager) {
-      this.undoManager = new Workspace.Y.UndoManager(this.yText, {
-        trackedOrigins: new Set([this.yText.doc.clientID]),
+      this.undoManager = new Workspace.Y.UndoManager(this._yText, {
+        trackedOrigins: new Set([this._yText.doc.clientID]),
       });
     }
 
