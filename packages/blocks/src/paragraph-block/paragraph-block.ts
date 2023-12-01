@@ -44,7 +44,9 @@ function TipsPlaceholder(model: BaseBlockModel, tipsPos: Style) {
       </div> `;
     }
 
-    const blockHub = document.querySelector('affine-block-hub') as BlockHub;
+    const blockHub = document.querySelector(
+      'affine-block-hub'
+    ) as BlockHub | null;
     if (!blockHub) {
       // Fall back
       return html`<div class="tips-placeholder" style=${styleMap(tipsPos)}>
