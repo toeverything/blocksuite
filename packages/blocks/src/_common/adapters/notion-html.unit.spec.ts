@@ -22,7 +22,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -71,7 +76,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -180,7 +190,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -342,7 +357,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -772,7 +792,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -866,7 +891,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -909,7 +939,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -972,7 +1007,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1015,7 +1055,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1056,7 +1101,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1094,7 +1144,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1205,7 +1260,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
