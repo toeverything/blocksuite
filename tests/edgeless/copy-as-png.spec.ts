@@ -13,7 +13,7 @@ import { assertBlockCount } from 'utils/asserts.js';
 
 import { test } from '../utils/playwright.js';
 
-test.describe.only('copy as png', () => {
+test.describe('copy as png', () => {
   test.beforeEach(async ({ page, context }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
     await edgelessCommonSetup(page);
