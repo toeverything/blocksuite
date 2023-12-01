@@ -302,6 +302,8 @@ export class DocPageBlockComponent extends BlockElement<
   };
 
   private _onTitleCopy = (event: ClipboardEvent) => {
+    event.stopPropagation();
+
     const vEditor = this._titleVEditor;
     if (!vEditor) return;
     const vRange = vEditor.getVRange();
