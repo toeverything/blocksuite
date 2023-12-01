@@ -757,10 +757,10 @@ hhh
                       insert: 'aaa ',
                     },
                     {
-                      insert: 'https://affine.pro/',
-                    },
-                    {
-                      insert: ' ccc',
+                      insert: 'https://affine.pro/  ',
+                      attributes: {
+                        link: 'https://affine.pro/  ',
+                      },
                     },
                   ],
                 },
@@ -771,7 +771,7 @@ hhh
         },
       ],
     };
-    const markdown = 'aaa https://affine.pro/ ccc\n';
+    const markdown = 'aaa https://affine.pro/  \n';
 
     const mdAdapter = new MarkdownAdapter();
     const target = await mdAdapter.fromBlockSnapshot({

@@ -774,7 +774,13 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   };
 
   private _astToMardown(ast: Root) {
-    return unified().use(remarkGfm).use(remarkStringify).stringify(ast);
+    return unified()
+      .use(remarkGfm)
+      .use(remarkStringify, {
+        resourceLink: true,
+      })
+      .stringify(ast)
+      .replace(/&#x20;\n/g, ' \n');
   }
 
   private _markdownToAst(markdown: Markdown) {
@@ -817,11 +823,18 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         };
       }
       if (delta.attributes?.link) {
-        mdast = {
-          type: 'link',
-          url: delta.attributes.link,
-          children: [mdast],
-        };
+        if (delta.insert === '') {
+          mdast = {
+            type: 'text',
+            value: delta.attributes.link,
+          };
+        } else if (delta.insert !== delta.attributes.link) {
+          mdast = {
+            type: 'link',
+            url: delta.attributes.link,
+            children: [mdast],
+          };
+        }
       }
       return mdast;
     });
