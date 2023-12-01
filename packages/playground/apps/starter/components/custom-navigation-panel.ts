@@ -17,8 +17,6 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
       height: 100vh;
       width: 345px;
       box-sizing: border-box;
-      /* overflow-y: scroll;
-      overflow-x: visible; */
       z-index: 1;
     }
   `;
