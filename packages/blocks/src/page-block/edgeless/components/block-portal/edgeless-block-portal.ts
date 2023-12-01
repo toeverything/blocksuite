@@ -2,6 +2,7 @@
 import './note/edgeless-note.js';
 import './image/edgeless-image.js';
 import './frame/edgeless-frame.js';
+import './embed/edgeless-embed.js';
 import '../rects/edgeless-selected-rect.js';
 import '../rects/edgeless-hover-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
@@ -55,11 +56,12 @@ export type AutoConnectElement =
 
 const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
 
-export const portalMap = {
-  [FRAME]: 'edgeless-block-portal-frame',
-  [NOTE]: 'edgeless-block-portal-note',
-  [IMAGE]: 'edgeless-block-portal-image',
-};
+const portalMap = new Map<EdgelessBlockType | RegExp, string>([
+  [FRAME, 'edgeless-block-portal-frame'],
+  [NOTE, 'edgeless-block-portal-note'],
+  [IMAGE, 'edgeless-block-portal-image'],
+  [/affine:embed:*/, 'edgeless-block-portal-embed'],
+]);
 
 @customElement('edgeless-block-portal-container')
 export class EdgelessBlockPortalContainer extends WithDisposable(
@@ -77,9 +79,20 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     surface: SurfaceBlockComponent,
     edgeless: EdgelessPageBlockComponent
   ) {
-    const tag = literal`${unsafeStatic(
-      portalMap[block.flavour as EdgelessBlockType]
-    )}`;
+    const target = Array.from(portalMap.entries()).find(([key]) => {
+      if (typeof key === 'string') {
+        return key === block.flavour;
+      }
+      return key.test(block.flavour);
+    });
+    assertExists(
+      target,
+      `Unknown block flavour for edgeless portal: ${block.flavour}`
+    );
+
+    const [_, tagName] = target;
+
+    const tag = literal`${unsafeStatic(tagName)}`;
     return html`<${tag}
           slot="blocks"
           data-index=${block.index}
@@ -144,9 +157,14 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     this._disposables.add(
       page.root.childrenUpdated.on(resetNoteResizeObserver)
     );
-    this.edgeless.surface.getBlocks(NOTE).forEach(note => {
-      this._disposables.add(note.propsUpdated.on(resetNoteResizeObserver));
-    });
+
+    this._disposables.add(
+      page.slots.blockUpdated.on(({ flavour }) => {
+        if (flavour === NOTE) {
+          resetNoteResizeObserver();
+        }
+      })
+    );
   }
 
   get isDragging() {
@@ -406,9 +424,22 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                 layer.elements as TopLevelBlockModel[],
                 block => block.id,
                 (block, index) => {
-                  const tag = unsafeStatic(
-                    portalMap[block.flavour as EdgelessBlockType]
+                  const target = Array.from(portalMap.entries()).find(
+                    ([key]) => {
+                      if (typeof key === 'string') {
+                        return key === block.flavour;
+                      }
+                      return key.test(block.flavour);
+                    }
                   );
+                  assertExists(
+                    target,
+                    `Unknown block flavour for edgeless portal: ${block.flavour}`
+                  );
+
+                  const [_, tagName] = target;
+
+                  const tag = unsafeStatic(tagName);
                   const zIndex =
                     (layer.zIndexes as [number, number])[0] + index;
 

@@ -178,7 +178,6 @@ export class Block {
           model.keys.includes(p)
         ) {
           this.yBlock.delete(`prop:${p}`);
-          this.model.propsUpdated.emit({ key: p });
         }
 
         return Reflect.deleteProperty(target, p);

@@ -22,7 +22,7 @@ const newPage = await job.snapshotToPage(json);
 When it comes to integrating with third-party formats like markdown or HTML, the snapshot API should also be the go-to solution. It allows for adaptive transformations of the block tree (documentation WIP).
 
 ::: tip
-In BlockSuite [playgroud](https://blocksuite-toeverything.vercel.app/starter/?init), You can try the "Import/Export Snapshot" feature inside the "Test Operations" menu entry. You can also use the `job` variable in browser console for quick testing.
+In BlockSuite [playgroud](https://try-blocksuite.vercel.app/starter/?init), You can try the "Import/Export Snapshot" feature inside the "Test Operations" menu entry. You can also use the `job` variable in browser console for quick testing.
 :::
 
 ## Realtime Provider-Based Persistence

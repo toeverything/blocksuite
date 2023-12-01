@@ -456,7 +456,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
     fileInfos: {
       file: File;
       sourceId: string;
-    }[]
+    }[],
+    point?: Point
   ) {
     const models: Partial<ImageBlockModel>[] = [];
     for (const { file, sourceId } of fileInfos) {
@@ -468,7 +469,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       });
     }
 
-    const center = Vec.toVec(this.surface.viewport.center);
+    const center = Vec.toVec(point ?? this.surface.viewport.center);
 
     const ids = models.map(model => {
       const bound = Bound.fromCenter(
@@ -614,7 +615,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     const fontLoader = this.service?.fontLoader;
     assertExists(fontLoader);
 
-    fontLoader.load.then(() => {
+    fontLoader.ready.then(() => {
       this.surface.refresh();
     });
   }
@@ -812,20 +813,16 @@ export class EdgelessPageBlockComponent extends BlockElement<
         if (![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType))
           return;
 
-        const model =
-          event.type === 'delete'
-            ? event.model
-            : (this.page.getBlockById(event.id) as TopLevelBlockModel);
-        const parent =
-          event.type === 'delete'
-            ? this.page.getBlockById(event.parent)
-            : this.page.getParent(model);
+        if (event.flavour === IMAGE) {
+          const parent =
+            event.type === 'delete'
+              ? this.page.getParent(event.model)
+              : this.page.getParent(this.page.getBlockById(event.id)!);
 
-        if (
-          event.flavour !== NOTE &&
-          (!parent || parent !== this.surface.model)
-        )
-          return;
+          if (parent && parent.id !== this.surfaceBlockModel.id) {
+            return;
+          }
+        }
 
         switch (event.type) {
           case 'add':

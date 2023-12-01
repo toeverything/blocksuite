@@ -40,9 +40,7 @@ export const ImageBlockSchema = defineBlockSchema({
     role: 'content',
   },
   transformer: () => new ImageBlockTransformer(),
-  toModel: () => {
-    return new ImageBlockModel();
-  },
+  toModel: () => new ImageBlockModel(),
 });
 
 @EdgelessSelectableMixin
@@ -50,7 +48,7 @@ export class ImageBlockModel
   extends BaseBlockModel<ImageBlockProps>
   implements IEdgelessElement
 {
-  gridBound!: Bound;
+  elementBound!: Bound;
   override xywh!: SerializedXYWH;
   override flavour!: EdgelessBlockType.IMAGE;
 

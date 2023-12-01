@@ -28,6 +28,7 @@ import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { type CanvasElement } from '../../../../surface-block/index.js';
 import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { removeContainedFrames } from '../../frame-manager.js';
 import { duplicate } from '../../utils/clipboard-utils.js';
 import { deleteElements } from '../../utils/crud.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from '../../utils/query.js';
@@ -246,8 +247,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       }
       case 'copy-as-png': {
         const { notes, frames, shapes, images } = this._splitElements();
+
         this.slots.copyAsPng.emit({
-          blocks: [...notes, ...frames, ...images],
+          blocks: [...notes, ...removeContainedFrames(frames), ...images],
           shapes,
         });
         break;

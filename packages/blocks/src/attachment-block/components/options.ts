@@ -5,6 +5,7 @@ import { createRef, ref, type RefOrCallback } from 'lit/directives/ref.js';
 
 import { createLitPortal } from '../../_common/components/portal.js';
 import {
+  BookmarkIcon,
   CaptionIcon,
   EditIcon,
   EmbedWebIcon,
@@ -14,7 +15,7 @@ import {
 } from '../../_common/icons/index.js';
 import { stopPropagation } from '../../_common/utils/event.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
-import { turnIntoEmbedView } from '../utils.js';
+import { allowEmbed, turnIntoEmbedAction } from '../embed.js';
 import { MoreMenu } from './more-menu.js';
 import { RenameModal } from './rename-model.js';
 import { styles } from './styles.js';
@@ -50,7 +51,7 @@ export function AttachmentOptionsTemplate({
         ).value = el);
   };
 
-  const disableEmbed = !model.type?.startsWith('image/');
+  const disableEmbed = !allowEmbed(model);
   const readonly = model.page.readonly;
   let moreMenuAbortController: AbortController | null = null;
   return html`<style>
@@ -72,11 +73,26 @@ export function AttachmentOptionsTemplate({
         ${LinkIcon}
         <affine-tooltip .offset=${12}>Turn into Link view</affine-tooltip>
       </icon-button>
+
       <icon-button
         size="32px"
+        ?hidden=${!model.embed}
+        ?disabled=${readonly}
+        @click="${() => {
+          model.page.updateBlock(model, { embed: false });
+          abortController.abort();
+        }}"
+      >
+        ${BookmarkIcon}
+        <affine-tooltip .offset=${12}>Turn into Card view</affine-tooltip>
+      </icon-button>
+
+      <icon-button
+        size="32px"
+        ?hidden=${model.embed}
         ?disabled=${readonly || disableEmbed}
         @click="${() => {
-          turnIntoEmbedView(model);
+          turnIntoEmbedAction(model);
           abortController.abort();
         }}"
       >

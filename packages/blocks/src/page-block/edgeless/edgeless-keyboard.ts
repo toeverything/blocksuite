@@ -1,3 +1,5 @@
+import { IS_MAC } from '@blocksuite/global/env';
+
 import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
 import {
   type EdgelessTool,
@@ -173,6 +175,10 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._delete();
         },
         Delete: () => {
+          this._delete();
+        },
+        'Control-d': () => {
+          if (!IS_MAC) return;
           this._delete();
         },
         ArrowUp: () => {

@@ -32,7 +32,7 @@ export function cloneAttachmentProperties(
   return clonedProps;
 }
 
-async function getAttachment(model: AttachmentBlockModel) {
+export async function getAttachmentBlob(model: AttachmentBlockModel) {
   const blobManager = model.page.blob;
   const sourceId = model.sourceId;
   if (!sourceId) return null;
@@ -46,10 +46,10 @@ async function getAttachment(model: AttachmentBlockModel) {
  * Since the size of the attachment may be very large,
  * the download process may take a long time!
  */
-export async function downloadAttachment(
+export async function downloadAttachmentBlob(
   attachmentModel: AttachmentBlockModel
 ) {
-  const attachment = await getAttachment(attachmentModel);
+  const attachment = await getAttachmentBlob(attachmentModel);
   if (!attachment) {
     toast('Failed to download attachment!');
     console.error(
@@ -66,7 +66,7 @@ export async function downloadAttachment(
 /**
  * Turn the attachment block into an image block.
  */
-export async function turnIntoEmbedView(model: AttachmentBlockModel) {
+export async function turnIntoImage(model: AttachmentBlockModel) {
   if (!model.page.schema.flavourSchemaMap.has('affine:image'))
     throw new Error('The image flavour is not supported!');
 
@@ -103,6 +103,7 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
     size: blob.size,
     type: blob.type,
     caption: model.caption,
+    embed: false,
     ...attachmentConvertData,
   };
   transformModel(model, 'affine:attachment', attachmentProp);
@@ -119,7 +120,7 @@ export async function uploadBlobForAttachment(
   page: Page,
   attachmentModelId: string,
   blob: Blob
-) {
+): Promise<string> {
   const isLoading = isAttachmentLoading(attachmentModelId);
   if (isLoading) {
     throw new Error('the attachment is already uploading!');
@@ -159,16 +160,18 @@ export async function uploadBlobForAttachment(
   } finally {
     setAttachmentLoading(attachmentModelId, false);
   }
+  return attachmentModelId;
 }
 
 /**
- * Append a new attachment block after the specified block.
+ * Add a new attachment block before / after the specified block.
  */
-export async function appendAttachmentBlock(
+export async function addSiblingAttachmentBlock(
   file: File,
   model: BaseBlockModel,
-  maxFileSize: number
-): Promise<void> {
+  maxFileSize: number,
+  place: 'before' | 'after' = 'after'
+): Promise<string | null> {
   if (file.size > maxFileSize) {
     toast(
       `You can only upload files less than ${humanFileSize(
@@ -177,7 +180,7 @@ export async function appendAttachmentBlock(
         0
       )}`
     );
-    return;
+    return null;
   }
 
   const page = model.page;
@@ -191,10 +194,11 @@ export async function appendAttachmentBlock(
     name: file.name,
     size: file.size,
     type: file.type,
+    embed: false,
   };
-  const [newBlockId] = page.addSiblingBlocks(model, [props]);
+  const [newBlockId] = page.addSiblingBlocks(model, [props], place);
   // Do not add await here, because upload may take a long time, we want to do it in the background.
-  uploadBlobForAttachment(page, newBlockId, file);
+  return uploadBlobForAttachment(page, newBlockId, file);
 }
 
 const attachmentLoadingMap = new Set<string>();
@@ -212,6 +216,8 @@ export function isAttachmentLoading(modelId: string) {
 
 /**
  * Use it with caution! This function may take a long time!
+ *
+ * @deprecated Use {@link getAttachmentBlob} instead.
  */
 export async function hasBlob(storage: BlobManager, sourceId: string) {
   return !!(await storage.get(sourceId));

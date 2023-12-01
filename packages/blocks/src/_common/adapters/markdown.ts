@@ -20,12 +20,12 @@ import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import { sha } from '@blocksuite/store';
 import type { DeltaInsert } from '@blocksuite/virgo/types';
 import type { Heading, Root, RootContentMap } from 'mdast';
-import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
+import { remarkGfm } from './gfm.js';
 
 export type Markdown = string;
 
@@ -105,7 +105,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       );
       sliceAssetsIds.push(...assetsIds);
       buffer += this._astToMardown(ast);
-      buffer += '\n\n';
     }
     const markdown = buffer;
     return {
@@ -133,11 +132,37 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         createDate: +new Date(),
         tags: [],
       },
-      blocks: await this._traverseMarkdown(
-        markdownAst,
-        blockSnapshotRoot as BlockSnapshot,
-        payload.assets
-      ),
+      blocks: {
+        type: 'block',
+        id: nanoid('block'),
+        flavour: 'affine:page',
+        props: {
+          title: {
+            '$blocksuite:internal:text$': true,
+            delta: [
+              {
+                insert: 'Untitled',
+              },
+            ],
+          },
+        },
+        children: [
+          {
+            type: 'block',
+            id: nanoid('block'),
+            flavour: 'affine:surface',
+            props: {
+              elements: {},
+            },
+            children: [],
+          },
+          await this._traverseMarkdown(
+            markdownAst,
+            blockSnapshotRoot as BlockSnapshot,
+            payload.assets
+          ),
+        ],
+      },
     };
   }
 
