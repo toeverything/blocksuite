@@ -1,8 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Transaction, YArrayEvent, YMapEvent } from 'yjs';
-import { Array as YArray, Map as YMap } from 'yjs';
+import { Array as YArray, Map as YMap, Text as YText } from 'yjs';
 
 import { Boxed } from './boxed.js';
+import { Text } from './text.js';
 import type { UnRecord } from './utils.js';
 import { canToProxy, canToY, native2Y } from './utils.js';
 
@@ -12,10 +13,11 @@ export type ProxyOptions<T> = {
   onChange?: (data: T) => void;
 };
 
-const proxies = new WeakMap<YArray<unknown> | YMap<unknown>, unknown>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const proxies = new WeakMap<any, unknown>();
 
 export function createYProxy<Data>(
-  yAbstract: YArray<unknown> | YMap<unknown>,
+  yAbstract: unknown,
   options: ProxyOptions<Data> = {}
 ): Data {
   if (proxies.has(yAbstract)) {
@@ -23,6 +25,11 @@ export function createYProxy<Data>(
   }
   if (Boxed.is(yAbstract)) {
     const data = new Boxed(yAbstract);
+    proxies.set(yAbstract, data);
+    return data as Data;
+  }
+  if (yAbstract instanceof YText) {
+    const data = new Text(yAbstract) as Data;
     proxies.set(yAbstract, data);
     return data as Data;
   }
@@ -43,7 +50,7 @@ export function createYProxy<Data>(
     return data;
   }
 
-  throw new TypeError();
+  return yAbstract as Data;
 }
 
 function transformData(
@@ -85,7 +92,7 @@ function initialize(
     return;
   }
   yAbstract.forEach((value, key) => {
-    const result = canToProxy(value) ? createYProxy(value, options) : value;
+    const result = createYProxy(value, options);
 
     (target as Record<string, unknown>)[key] = result;
   });

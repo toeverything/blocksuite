@@ -1,4 +1,7 @@
-import { Array as YArray, Map as YMap, Text as YText } from 'yjs';
+import { Array as YArray, Map as YMap } from 'yjs';
+
+import { Boxed } from './boxed.js';
+import { Text } from './text.js';
 
 export type Native2Y<T> = T extends Record<string, infer U>
   ? YMap<U>
@@ -8,12 +11,10 @@ export type Native2Y<T> = T extends Record<string, infer U>
 
 export function isPureObject(value: unknown): value is object {
   return (
-    typeof value === 'object' &&
     value !== null &&
-    !Array.isArray(value) &&
-    !(value instanceof YMap) &&
-    !(value instanceof YArray) &&
-    !(value instanceof YText)
+    typeof value === 'object' &&
+    Object.prototype.toString.call(value) === '[object Object]' &&
+    [Object, undefined, null].some(x => x === value.constructor)
   );
 }
 
@@ -29,12 +30,15 @@ export function canToY(
   return isPureObject(value) || Array.isArray(value);
 }
 
-export function native2Y<T>(value: T, deep: boolean): Native2Y<T> {
-  if (value instanceof YText) {
-    if (value.doc) {
-      return value.clone() as Native2Y<T>;
+export function native2Y<T>(value: T, deep = true): Native2Y<T> {
+  if (value instanceof Boxed) {
+    return value.yMap as Native2Y<T>;
+  }
+  if (value instanceof Text) {
+    if (value.yText.doc) {
+      return value.yText.clone() as Native2Y<T>;
     }
-    return value as Native2Y<T>;
+    return value.yText as Native2Y<T>;
   }
   if (Array.isArray(value)) {
     const yArray: YArray<unknown> = new YArray<unknown>();
