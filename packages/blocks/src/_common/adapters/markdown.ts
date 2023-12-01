@@ -20,12 +20,12 @@ import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import { sha } from '@blocksuite/store';
 import type { DeltaInsert } from '@blocksuite/virgo/types';
 import type { Heading, Root, RootContentMap } from 'mdast';
-import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
+import { remarkGfm } from './gfm.js';
 
 export type Markdown = string;
 
@@ -105,7 +105,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       );
       sliceAssetsIds.push(...assetsIds);
       buffer += this._astToMardown(ast);
-      buffer += '\n\n';
     }
     const markdown = buffer;
     return {

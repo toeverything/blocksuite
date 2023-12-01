@@ -712,6 +712,74 @@ hhh
     expect(target.file).toBe(markdown);
   });
 
+  test('inline link', async () => {
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'block:vu6SK6WJpW',
+      flavour: 'affine:page',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'block:Tk4gSPocAt',
+          flavour: 'affine:surface',
+          props: {
+            elements: {},
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'block:WfnS5ZDCJT',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: '--affine-background-secondary-color',
+            index: 'a0',
+            hidden: false,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'block:Bdn8Yvqcny',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa ',
+                    },
+                    {
+                      insert: 'https://affine.pro/',
+                    },
+                    {
+                      insert: ' ccc',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+    const markdown = 'aaa https://affine.pro/ ccc\n';
+
+    const mdAdapter = new MarkdownAdapter();
+    const target = await mdAdapter.fromBlockSnapshot({
+      snapshot: blockSnapshot,
+    });
+    expect(target.file).toBe(markdown);
+  });
+
   test('bold', async () => {
     const blockSnapshot: BlockSnapshot = {
       type: 'block',
@@ -1460,6 +1528,50 @@ hhh
                 },
                 {
                   insert: 'bbb',
+                  attributes: {
+                    link: 'https://affine.pro/',
+                  },
+                },
+                {
+                  insert: ' ccc',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const mdAdapter = new MarkdownAdapter();
+    const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+      file: markdown,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
+  test('inline link', async () => {
+    const markdown = 'aaa https://affine.pro/ ccc\n';
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {},
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa ',
+                },
+                {
+                  insert: 'https://affine.pro/',
                   attributes: {
                     link: 'https://affine.pro/',
                   },
