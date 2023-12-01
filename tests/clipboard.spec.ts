@@ -289,8 +289,6 @@ test(scoped`markdown format parse`, async ({ page }) => {
 
 ~~strikethrough~~
 
-~underthrough~
-
 [link](linktest)
 
 \`code\`
@@ -303,7 +301,6 @@ test(scoped`markdown format parse`, async ({ page }) => {
     { bold: true },
     { italic: true },
     { strike: true },
-    { underline: true },
     { link: 'linktest' },
     { code: true },
   ]);
