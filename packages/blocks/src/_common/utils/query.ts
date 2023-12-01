@@ -696,15 +696,7 @@ function findBlockElement(elements: Element[], parent?: Element) {
 }
 
 export function getThemeMode(): 'light' | 'dark' {
-  const mode = getComputedStyle(document.documentElement).getPropertyValue(
-    '--affine-theme-mode'
-  );
-
-  if (mode.trim() === 'dark') {
-    return 'dark';
-  } else {
-    return 'light';
-  }
+  return document.documentElement.dataset.theme as 'light' | 'dark';
 }
 
 /**
