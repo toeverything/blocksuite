@@ -23,7 +23,7 @@ export function createEmbedBlock<
   Transformer
 >): BlockSpec {
   const blockSchema = defineBlockSchema({
-    flavour: `affine:embed:${schema.name}`,
+    flavour: `affine:embed-${schema.name}`,
     props: internalPrimitives => {
       const userProps = schema.props?.(internalPrimitives);
 

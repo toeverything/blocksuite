@@ -20,17 +20,17 @@ export const embed: InitFn = async (workspace: Workspace, id: string) => {
     page.addBlock('affine:paragraph', {}, noteId);
 
     page.addBlock(
-      'affine:embed:github',
+      'affine:embed-github',
       { owner: 'toeverything', repo: 'blocksuite' },
       noteId
     );
     page.addBlock(
-      'affine:embed:github',
+      'affine:embed-github',
       { owner: 'toeverything', repo: 'affine', xywh: '[0, 400, 400, 200]' },
       surfaceId
     );
     page.addBlock(
-      'affine:embed:github',
+      'affine:embed-github',
       { owner: 'milkdown', repo: 'milkdown', xywh: '[0, 700, 400, 200]' },
       surfaceId
     );
