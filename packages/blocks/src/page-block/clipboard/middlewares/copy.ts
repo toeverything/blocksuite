@@ -8,12 +8,21 @@ import type {
   JobSlots,
 } from '@blocksuite/store';
 
+import { matchFlavours } from '../../../_common/utils/index.js';
+
 const handlePoint = (
   point: TextRangePoint,
   snapshot: BlockSnapshot,
   model: BaseBlockModel
 ) => {
   const { index, length } = point;
+  if (matchFlavours(model, ['affine:page'])) {
+    if (length === 0) return;
+    (snapshot.props.title as Record<string, unknown>).delta =
+      model.title.sliceToDelta(index, length + index);
+    return;
+  }
+
   if (!snapshot.props.text || length === 0) {
     return;
   }

@@ -218,7 +218,11 @@ export class DocPageBlockComponent extends BlockElement<
       'paste',
       this._onTitlePaste
     );
-    this.addEventListener('copy', this._onTitleCopy);
+    this._titleVEditor.disposables.addFromEvent(
+      this._titleContainer,
+      'copy',
+      this._onTitleCopy
+    );
 
     // Workaround for virgo skips composition event
     this._disposables.addFromEvent(
