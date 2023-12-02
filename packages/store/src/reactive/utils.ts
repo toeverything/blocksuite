@@ -18,7 +18,15 @@ export function isPureObject(value: unknown): value is object {
   );
 }
 
-export function native2Y<T>(value: T, deep = true): Native2Y<T> {
+type TransformOptions = {
+  deep?: boolean;
+  transform?: (value: unknown, origin: unknown) => unknown;
+};
+
+export function native2Y<T>(
+  value: T,
+  { deep = true, transform = x => x }: TransformOptions = {}
+): Native2Y<T> {
   if (value instanceof Boxed) {
     return value.yMap as Native2Y<T>;
   }
@@ -31,7 +39,7 @@ export function native2Y<T>(value: T, deep = true): Native2Y<T> {
   if (Array.isArray(value)) {
     const yArray: YArray<unknown> = new YArray<unknown>();
     const result = value.map(item => {
-      return deep ? native2Y(item, deep) : item;
+      return deep ? native2Y(item, { deep, transform }) : item;
     });
     yArray.insert(0, result);
 
@@ -40,7 +48,7 @@ export function native2Y<T>(value: T, deep = true): Native2Y<T> {
   if (isPureObject(value)) {
     const yMap = new YMap<unknown>();
     Object.entries(value).forEach(([key, value]) => {
-      yMap.set(key, deep ? native2Y(value, deep) : value);
+      yMap.set(key, deep ? native2Y(value, { deep, transform }) : value);
     });
 
     return yMap as Native2Y<T>;
@@ -51,10 +59,7 @@ export function native2Y<T>(value: T, deep = true): Native2Y<T> {
 
 export function y2Native(
   yAbstract: unknown,
-  {
-    deep = true,
-    transform = x => x,
-  }: { deep?: boolean; transform: (value: unknown, origin: unknown) => unknown }
+  { deep = true, transform = x => x }: TransformOptions = {}
 ) {
   if (Boxed.is(yAbstract)) {
     const data = new Boxed(yAbstract);
