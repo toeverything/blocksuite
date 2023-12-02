@@ -26,7 +26,6 @@ export function createYProxy<Data>(
   return y2Native(yAbstract, {
     transform: (value, origin) => {
       if (Boxed.is(origin)) {
-        proxies.set(origin, value);
         return value;
       }
       if (origin instanceof YArray) {
@@ -63,12 +62,12 @@ export function createYProxy<Data>(
   }) as Data;
 }
 
-function transformData(
+function transformNative(
   value: unknown,
   onCreate: (p: unknown) => void,
   options: ProxyOptions<never> = {}
 ) {
-  const y = native2Y(value as Record<string, unknown> | unknown[], true);
+  const y = native2Y(value);
   onCreate(y);
   return createYProxy(y, options);
 }
@@ -181,7 +180,7 @@ function getYArrayProxy<T = unknown>(
           return Reflect.set(target, p, value, receiver);
         }
 
-        const data = transformData(
+        const data = transformNative(
           value,
           x => {
             if (index < yArray.length) {
@@ -228,7 +227,7 @@ function getYMapProxy<Data extends Record<string, unknown>>(
       }
 
       return applyYChanges(yMap, () => {
-        const data = transformData(value, x => yMap.set(p, x), options);
+        const data = transformNative(value, x => yMap.set(p, x), options);
         return Reflect.set(target, p, data, receiver);
       });
     },
