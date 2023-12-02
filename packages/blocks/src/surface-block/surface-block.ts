@@ -254,8 +254,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this.group = new EdgelessGroupManager(this);
 
     this._initEvents();
-    this.init();
     this.layer.init([...this._elements.values(), ...this.blocks]);
+    this.init();
     this._initEffects();
   }
 
