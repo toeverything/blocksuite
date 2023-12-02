@@ -430,6 +430,20 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .closeNode();
           break;
         }
+        case 'affine:page': {
+          const title = (o.node.props.title ?? { delta: [] }) as {
+            delta: DeltaInsert[];
+          };
+          context
+            .openNode(
+              {
+                type: 'paragraph',
+                children: this._deltaToMdAST(title.delta, 0),
+              },
+              'children'
+            )
+            .closeNode();
+        }
       }
     });
     walker.setLeave(async (o, context) => {
