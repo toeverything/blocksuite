@@ -252,11 +252,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this.frame = new EdgelessFrameManager(edgeless);
     this.snap = new EdgelessSnapManager(edgeless);
     this.group = new EdgelessGroupManager(this);
-    this.init();
-
-    this.layer.init([...this._elements.values(), ...this.blocks]);
 
     this._initEvents();
+    this.init();
+    this.layer.init([...this._elements.values(), ...this.blocks]);
     this._initEffects();
   }
 

@@ -87,10 +87,8 @@ export class LayerManager {
 
   blocksGrid = new GridManager<IndexableBlock>();
 
-  constructor(elements?: EdgelessElement[]) {
-    if (elements) {
-      this.init(elements);
-    }
+  constructor(elements: EdgelessElement[] = []) {
+    this.init(elements);
   }
 
   init(elements: EdgelessElement[]) {
