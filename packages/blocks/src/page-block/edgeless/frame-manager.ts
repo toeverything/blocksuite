@@ -79,14 +79,16 @@ export class EdgelessFrameManager {
     this._frameOverlay.bound = null;
   }
 
-  getElementsInFrame(frame: FrameBlockModel) {
+  getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
     const elements: EdgelessElement[] =
       this._edgeless.surface.viewport.gridManager
         .search(bound, true)
         .filter(ele => !isFrameBlock(ele));
 
-    return elements.concat(getBlocksInFrame(this._edgeless.page, frame));
+    return elements.concat(
+      getBlocksInFrame(this._edgeless.page, frame, fullyContained)
+    );
   }
 
   createFrameOnSelected() {

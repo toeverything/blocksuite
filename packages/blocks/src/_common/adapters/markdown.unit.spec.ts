@@ -757,10 +757,10 @@ hhh
                       insert: 'aaa ',
                     },
                     {
-                      insert: 'https://affine.pro/',
-                    },
-                    {
-                      insert: ' ccc',
+                      insert: 'https://affine.pro/  ',
+                      attributes: {
+                        link: 'https://affine.pro/  ',
+                      },
                     },
                   ],
                 },
@@ -771,7 +771,7 @@ hhh
         },
       ],
     };
-    const markdown = 'aaa https://affine.pro/ ccc\n';
+    const markdown = 'aaa https://affine.pro/  \n';
 
     const mdAdapter = new MarkdownAdapter();
     const target = await mdAdapter.fromBlockSnapshot({
@@ -1013,7 +1013,12 @@ describe('markdown to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1064,7 +1069,12 @@ hhh
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1228,7 +1238,12 @@ hhh
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1353,7 +1368,12 @@ hhh
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1468,7 +1488,12 @@ hhh
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1512,7 +1537,12 @@ hhh
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1556,7 +1586,12 @@ hhh
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1601,7 +1636,12 @@ hhh
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1646,7 +1686,12 @@ hhh
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1694,7 +1739,12 @@ hhh
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',

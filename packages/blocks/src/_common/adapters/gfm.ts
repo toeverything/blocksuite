@@ -21,6 +21,7 @@ import { gfmStrikethrough } from 'micromark-extension-gfm-strikethrough';
 import { gfmTable } from 'micromark-extension-gfm-table';
 import { gfmTaskListItem } from 'micromark-extension-gfm-task-list-item';
 import { combineExtensions } from 'micromark-util-combine-extensions';
+import type { Processor } from 'unified';
 
 export function gfm() {
   return combineExtensions([
@@ -50,10 +51,9 @@ function gfmToMarkdown() {
   };
 }
 
-export function remarkGfm() {
-  // @ts-expect-error: TS is wrong about `this`.
+export function remarkGfm(this: Processor) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const self = /** @type {Processor} */ this;
+  const self = this;
   const data = self.data();
 
   const micromarkExtensions =
