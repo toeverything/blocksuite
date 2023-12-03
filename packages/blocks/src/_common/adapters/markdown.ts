@@ -434,6 +434,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           const title = (o.node.props.title ?? { delta: [] }) as {
             delta: DeltaInsert[];
           };
+          if (title.delta.length === 0) break;
           context
             .openNode(
               {
