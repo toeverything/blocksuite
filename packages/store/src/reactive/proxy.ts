@@ -43,7 +43,9 @@ export class ReactiveYArray {
         }
 
         const proxied = proxies.get(this.yArray);
+        const doc = this.yArray.doc;
         assertExists(proxied, 'YData is not subscribed before changes');
+        assertExists(doc, 'YData is not bound to a Y.Doc');
 
         const index = Number(p);
         if (this._skipNext || Number.isNaN(index)) {
@@ -51,10 +53,13 @@ export class ReactiveYArray {
         }
 
         const yData = native2Y(value);
-        if (index < this.yArray.length) {
-          this.yArray.delete(index, 1);
-        }
-        this.yArray.insert(index, [yData]);
+
+        doc.transact(() => {
+          if (index < this.yArray.length) {
+            this.yArray.delete(index, 1);
+          }
+          this.yArray.insert(index, [yData]);
+        });
 
         const data = createYProxy(yData, this.options);
         return Reflect.set(target, p, data, receiver);
@@ -83,35 +88,37 @@ export class ReactiveYArray {
 
   private _observer = (event: YArrayEvent<unknown>) => {
     let retain = 0;
-    event.changes.delta.forEach(change => {
-      if (change.retain) {
-        retain += change.retain;
-        return;
-      }
-      if (change.delete) {
-        this._skipNext = true;
-        this.array.splice(retain, change.delete);
-        this._skipNext = false;
-        return;
-      }
-      if (change.insert) {
-        const _arr = [change.insert].flat();
+    if (!event.transaction.local) {
+      event.changes.delta.forEach(change => {
+        if (change.retain) {
+          retain += change.retain;
+          return;
+        }
+        if (change.delete) {
+          this._skipNext = true;
+          this.array.splice(retain, change.delete);
+          this._skipNext = false;
+          return;
+        }
+        if (change.insert) {
+          const _arr = [change.insert].flat();
 
-        const proxyList = _arr
-          .filter(value => {
-            return !proxies.has(value);
-          })
-          .map(value => {
-            return createYProxy(value);
-          });
+          const proxyList = _arr
+            .filter(value => {
+              return !proxies.has(value);
+            })
+            .map(value => {
+              return createYProxy(value);
+            });
 
-        this._skipNext = true;
-        this.array.splice(retain, 0, ...proxyList);
-        this._skipNext = false;
+          this._skipNext = true;
+          this.array.splice(retain, 0, ...proxyList);
+          this._skipNext = false;
 
-        retain += change.insert.length;
-      }
-    });
+          retain += change.insert.length;
+        }
+      });
+    }
     this.options.onChange?.(this._proxy);
   };
 }
@@ -149,7 +156,9 @@ export class ReactiveYMap {
         }
 
         const proxied = proxies.get(this.yMap);
+        const doc = this.yMap.doc;
         assertExists(proxied, 'YData is not subscribed before changes');
+        assertExists(doc, 'YData is not bound to a Y.Doc');
 
         const yData = native2Y(value);
         this.yMap.set(p, yData);
@@ -177,22 +186,24 @@ export class ReactiveYMap {
   };
 
   private _observer = (event: YMapEvent<unknown>) => {
-    event.keysChanged.forEach(key => {
-      const type = event.changes.keys.get(key);
-      if (!type) {
-        return;
-      }
-      if (type.action === 'delete') {
-        delete this.map[key];
-      } else if (type.action === 'add' || type.action === 'update') {
-        const current = this.yMap.get(key);
-        this._skipNext = true;
-        this.map[key] = proxies.has(current)
-          ? proxies.get(current)
-          : createYProxy(current, this.options);
-        this._skipNext = false;
-      }
-    });
+    if (!event.transaction.local) {
+      event.keysChanged.forEach(key => {
+        const type = event.changes.keys.get(key);
+        if (!type) {
+          return;
+        }
+        if (type.action === 'delete') {
+          delete this.map[key];
+        } else if (type.action === 'add' || type.action === 'update') {
+          const current = this.yMap.get(key);
+          this._skipNext = true;
+          this.map[key] = proxies.has(current)
+            ? proxies.get(current)
+            : createYProxy(current, this.options);
+          this._skipNext = false;
+        }
+      });
+    }
     this.options.onChange?.(this._proxy);
   };
 }
