@@ -6,7 +6,6 @@ import type {
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
-import { matchFlavours } from '../../../_common/utils/index.js';
 import type { ImageSelection } from '../../../image-block/image-selection.js';
 
 export const getSelectedBlocksCommand: Command<
