@@ -17,7 +17,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   BlockHubIcon,
   BlockHubRoundedRectangleIcon,
-  BookmarkIcon,
   BulletedListIcon,
   CheckBoxIcon,
   CodeBlockIcon,
@@ -177,14 +176,6 @@ export const BLOCKHUB_FILE_ITEMS = [
     description: 'Upload images.',
     icon: ImageIcon,
     tooltip: 'Drag/Click to insert Image',
-  },
-  {
-    flavour: 'affine:bookmark',
-    type: 'bookmark',
-    name: 'Bookmark',
-    description: 'Insert a link in card view.',
-    icon: BookmarkIcon,
-    tooltip: 'Drag/Click to insert Bookmark',
   },
 ];
 

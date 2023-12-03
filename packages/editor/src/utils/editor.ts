@@ -4,7 +4,6 @@ import {
   BlockHub,
   buildPath,
   getAllowSelectedBlocks,
-  getBookmarkInitialProps,
   getEdgelessPage,
   getHoveringNote,
   getServiceOrRegister,
@@ -37,13 +36,6 @@ export const createBlockHub: (
             sourceId,
           }))
         );
-      } else if (data.flavour === 'affine:bookmark') {
-        const url = await getBookmarkInitialProps();
-        url &&
-          models.push({
-            flavour: 'affine:bookmark',
-            url,
-          });
       } else {
         models.push(data);
       }
@@ -80,13 +72,6 @@ export const createBlockHub: (
             sourceId,
           }))
         );
-      } else if (props.flavour === 'affine:bookmark') {
-        const url = await getBookmarkInitialProps();
-        url &&
-          models.push({
-            flavour: 'affine:bookmark',
-            url,
-          });
       } else {
         models.push(props);
       }

@@ -35,7 +35,7 @@ import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js'
 import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
-import { getBookmarkInitialProps } from '../../../bookmark-block/components/bookmark-create-modal.js';
+import { toggleBookmarkCreateModal } from '../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockProps } from '../../../image-block/image-model.js';
 import type { SurfaceBlockModel } from '../../../models.js';
@@ -282,7 +282,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const url = await getBookmarkInitialProps();
+          const url = await toggleBookmarkCreateModal();
           if (!url) return;
           const props = {
             flavour: 'affine:bookmark',

@@ -1,12 +1,6 @@
-import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
-export interface BookmarkBlockProps {
-  /**
-   * The embed mode will embed the url into the block
-   */
-  type: 'card' | 'embed';
-  url: string;
-  caption?: string;
+export interface BookmarkBlockUrlData {
   description?: string;
   icon?: string;
   image?: string;
@@ -24,6 +18,15 @@ export interface BookmarkBlockProps {
   crawled?: boolean;
 }
 
+export type BookmarkBlockProps = {
+  /**
+   * The embed mode will embed the url into the block
+   */
+  type: 'card' | 'embed';
+  url: string;
+  caption?: string;
+} & BookmarkBlockUrlData;
+
 export const defaultBookmarkProps: BookmarkBlockProps = {
   type: 'card',
   url: '',
@@ -37,12 +40,6 @@ export const BookmarkBlockSchema = defineBlockSchema({
     role: 'content',
     parent: ['affine:note'],
   },
-  toModel: () => new BookmarkBlockModel(),
 });
 
-export class BookmarkBlockModel extends BaseBlockModel<BookmarkBlockProps> {
-  // we need it to make TypeScript distinguish the BaseBlockModel and BookmarkBlockModel
-  constructor() {
-    super();
-  }
-}
+export type BookmarkBlockModel = SchemaToModel<typeof BookmarkBlockSchema>;

@@ -13,14 +13,11 @@ import {
   LinkIcon,
   RefreshIcon,
 } from '../../_common/icons/index.js';
-import { getBlockElementByModel } from '../../_common/utils/index.js';
-import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import {
   type BookmarkBlockModel,
   type BookmarkBlockProps,
 } from '../bookmark-model.js';
 import { allowEmbed } from '../embed.js';
-import { reloadBookmarkBlock, tryGetBookmarkAPI } from '../utils.js';
 import type { BookmarkOperationMenu } from './bookmark-operation-popper.js';
 
 export type ConfigItem = {
@@ -177,13 +174,7 @@ export const moreOperations: MoreOperation[] = [
     icon: RefreshIcon,
     label: 'Reload',
     showWhen: model => !model.page.readonly,
-    disableWhen: () => !tryGetBookmarkAPI(),
-    action: (model, callback) => {
-      reloadBookmarkBlock(
-        model,
-        getBlockElementByModel(model) as BookmarkBlockComponent,
-        true
-      );
+    action: (_, callback) => {
       callback?.('reload');
     },
   },
