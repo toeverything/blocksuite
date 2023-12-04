@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { YArrayEvent, YMapEvent } from 'yjs';
-import { Array as YArray, Map as YMap } from 'yjs';
+import { Array as YArray, Map as YMap, UndoManager } from 'yjs';
 
 import { Boxed } from './boxed.js';
 import type { UnRecord } from './utils.js';
@@ -87,8 +87,11 @@ export class ReactiveYArray {
   };
 
   private _observer = (event: YArrayEvent<unknown>) => {
-    let retain = 0;
-    if (!event.transaction.local) {
+    if (
+      !event.transaction.local ||
+      event.transaction.origin instanceof UndoManager
+    ) {
+      let retain = 0;
       event.changes.delta.forEach(change => {
         if (change.retain) {
           retain += change.retain;
@@ -186,7 +189,10 @@ export class ReactiveYMap {
   };
 
   private _observer = (event: YMapEvent<unknown>) => {
-    if (!event.transaction.local) {
+    if (
+      !event.transaction.local ||
+      event.transaction.origin instanceof UndoManager
+    ) {
       event.keysChanged.forEach(key => {
         const type = event.changes.keys.get(key);
         if (!type) {
