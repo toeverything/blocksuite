@@ -69,7 +69,7 @@ export function launchIntoFullscreen(element: Element) {
   }
 }
 
-const hideToolbarKey = 'blocksuite:presentation:hideToolbar';
+const HIDE_TOOLBAR_KEY = 'blocksuite:presentation:hideToolbar';
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {
@@ -283,7 +283,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { _disposables, edgeless } = this;
     const { slots, page } = edgeless;
 
-    const hideToolbar = sessionStorage.getItem(hideToolbarKey);
+    const hideToolbar = sessionStorage.getItem(HIDE_TOOLBAR_KEY);
     this._hideToolbar = hideToolbar === 'true';
 
     edgeless.bindHotKey(
@@ -420,7 +420,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this.edgeless.slots.navigatorSettingUpdated.emit({
         hideToolbar: this._hideToolbar,
       });
-      sessionStorage.setItem(hideToolbarKey, this._hideToolbar.toString());
+      sessionStorage.setItem(HIDE_TOOLBAR_KEY, this._hideToolbar.toString());
     }
   }
 

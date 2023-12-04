@@ -30,7 +30,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
 
   get isInner() {
     const title = this.titleElement;
-    if (!title) return new Bound();
+    if (!title) return false;
     return title.isInner;
   }
 
