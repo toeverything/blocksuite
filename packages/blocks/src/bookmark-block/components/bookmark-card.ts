@@ -5,7 +5,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { WebIcon16 } from '../../_common/icons/text.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import { embedIframeTemplate } from '../embed.js';
-import { DefaultBanner } from '../images/banners.js';
+import { BookmarkDefaultBanner } from './bookmark-default-banner.js';
 
 @customElement('bookmark-card')
 export class BookmarkCard extends ShadowlessElement {
@@ -172,7 +172,7 @@ export class BookmarkCard extends ShadowlessElement {
       ${isEmbed
         ? nothing
         : html`<div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
-            ${image ? html`<img src=${image} />` : DefaultBanner}
+            ${image ? html`<img src=${image} />` : BookmarkDefaultBanner()}
           </div>`}
     </div>`;
   }
