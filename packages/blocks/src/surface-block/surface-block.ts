@@ -282,7 +282,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     _disposables.add(edgeless.slots.reorderingElements.on(this._reorder));
 
     _disposables.add(
-      edgeless.slots.elementAdded.on(id => {
+      edgeless.slots.elementAdded.on(({ id }) => {
         const element = this.pickById(id);
         assertExists(element);
         if (element instanceof ConnectorElement) {
@@ -403,13 +403,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
 
     _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id }) => {
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
         const element = this.pickById(id);
         assertExists(element);
 
         if (
           element instanceof BrushElement ||
-          edgeless.selectionManager.editing
+          edgeless.selectionManager.editing ||
+          (props && !('xywh' in props && 'rotate' in props))
         )
           return;
         this.fitElementToViewport(element);
@@ -417,7 +418,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
 
     _disposables.add(
-      edgeless.slots.elementAdded.on(id => {
+      edgeless.slots.elementAdded.on(({ id }) => {
         const element = this.pickById(id);
         assertExists(element);
         if (element instanceof BrushElement) return;
@@ -555,7 +556,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     element.computedValue = this.getCSSPropertyValue;
     element.mount(this._renderer);
     this._elements.set(element.id, element);
-    this.edgeless.slots.elementAdded.emit(id);
+    this.edgeless.slots.elementAdded.emit({ id });
   }
 
   private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
@@ -627,7 +628,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       element.mount(this._renderer);
       this._elements.set(element.id, element);
 
-      this.edgeless.slots.elementAdded.emit(id);
+      this.edgeless.slots.elementAdded.emit({ id });
     } else if (type.action === 'update') {
       console.error('update event on yElements is not supported', event);
     } else if (type.action === 'delete') {

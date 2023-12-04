@@ -9,6 +9,7 @@ import '../rects/edgeless-dragging-area-rect.js';
 import '../../components/auto-connect/edgeless-index-label.js';
 import '../../components/auto-connect/edgeless-auto-connect-line.js';
 import '../component-toolbar/component-toolbar.js';
+import '../presentation/edgeless-navigator-black-background.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -109,6 +110,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
+
+  @property({ attribute: false })
+  frames!: FrameBlockModel[];
 
   @query('.affine-block-children-container.edgeless')
   container!: HTMLDivElement;
@@ -366,7 +370,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     if (!surface) return nothing;
 
     const notes = surface.getBlocks([NOTE]);
-    const frames = surface.layer.frames;
     const layers = surface.layer.layers;
     const autoConnectedBlocks = new Map<AutoConnectElement, number>();
 
@@ -408,7 +411,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           <edgeless-frames-container
             .surface=${surface}
             .edgeless=${edgeless}
-            .frames=${frames}
+            .frames=${this.frames}
           >
           </edgeless-frames-container>
           ${readonly || this._isResizing
@@ -486,6 +489,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         ? html`<edgeless-component-toolbar .edgeless=${edgeless}>
           </edgeless-component-toolbar>`
         : nothing}
+      <edgeless-navigator-black-background
+        .edgeless=${edgeless}
+      ></edgeless-navigator-black-background>
     `;
   }
 }
