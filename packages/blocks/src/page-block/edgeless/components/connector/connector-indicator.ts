@@ -72,10 +72,10 @@ export class EdgelessConnectorIndicator extends WithDisposable(LitElement) {
       // const { edgeless, connector, _disposables } = this;
       // const { surface } = edgeless;
       // e.stopPropagation();
-      const { clientX: startX, clientY: startY } = event;
+      const { clientX: startX } = event;
       this._disposables.addFromEvent(document, 'pointermove', event => {
         console.log('move');
-        const { clientX: currentX, clientY: currentY } = event;
+        const { clientX: currentX } = event;
         const direction =
           this._startPoint[0] === this._endPoint[0] ? 'vertical' : 'horizontal';
         if (direction === 'vertical') {
@@ -94,7 +94,7 @@ export class EdgelessConnectorIndicator extends WithDisposable(LitElement) {
         }
       });
 
-      this._disposables.addFromEvent(document, 'pointerup', event => {
+      this._disposables.addFromEvent(document, 'pointerup', () => {
         this._disposables.dispose();
         this._disposables = new DisposableGroup();
         this._bindEvent();
