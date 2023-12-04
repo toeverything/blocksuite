@@ -1,5 +1,5 @@
-import { WithDisposable } from '@blocksuite/lit';
-import { html, LitElement } from 'lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -9,7 +9,7 @@ import type { BookmarkBlockModel } from '../../bookmark-model.js';
 import { bookmarkModalStyles } from './styles.js';
 
 @customElement('bookmark-edit-modal')
-export class BookmarkEditModal extends WithDisposable(LitElement) {
+export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
   static override styles = bookmarkModalStyles;
 
   @property({ attribute: false })

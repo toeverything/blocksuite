@@ -209,8 +209,7 @@ export class EdgelessClipboard implements Clipboard {
   private _onPaste: (e: ClipboardEvent) => void = async (e: ClipboardEvent) => {
     if (
       document.activeElement instanceof HTMLInputElement ||
-      document.activeElement instanceof HTMLTextAreaElement ||
-      (e.target instanceof Node && !this._edgeless.contains(e.target))
+      document.activeElement instanceof HTMLTextAreaElement
     ) {
       return;
     }

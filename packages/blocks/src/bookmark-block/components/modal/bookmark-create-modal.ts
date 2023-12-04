@@ -1,6 +1,6 @@
 import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { WithDisposable } from '@blocksuite/lit';
-import { html, LitElement } from 'lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { toast } from '../../../_common/components/toast.js';
@@ -8,7 +8,7 @@ import { CloseIcon } from '../../../_common/icons/index.js';
 import { bookmarkModalStyles } from './styles.js';
 
 @customElement('bookmark-create-modal')
-export class BookmarkCreateModal extends WithDisposable(LitElement) {
+export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
   static override styles = bookmarkModalStyles;
 
   @property({ attribute: false })

@@ -23,7 +23,7 @@ import {
 import { assertStoreMatchJSX } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
-const inputUrl = 'http://localhost:5173/';
+const inputUrl = 'localhost';
 
 const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await enterPlaygroundRoom(page);
