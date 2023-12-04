@@ -29,7 +29,10 @@ import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../../../_common/consts.js';
-import { delayCallback } from '../../../../_common/utils/event.js';
+import {
+  delayCallback,
+  requestFrame,
+} from '../../../../_common/utils/event.js';
 import {
   matchFlavours,
   type TopLevelBlockModel,
@@ -146,9 +149,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     const resetNoteResizeObserver = throttle(
       () => {
-        requestAnimationFrame(() => {
+        requestFrame(() => {
           this._noteResizeObserver.resetListener(page);
-        });
+        }, this);
       },
       16,
       { leading: true }
@@ -244,9 +247,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     this._initNoteHeightUpdate();
 
-    requestAnimationFrame(() => {
+    requestFrame(() => {
       this._noteResizeObserver.resetListener(page);
-    });
+    }, this);
 
     _disposables.add(this._noteResizeObserver);
 
@@ -289,10 +292,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
         if (rAqId) return;
 
-        rAqId = requestAnimationFrame(() => {
+        rAqId = requestFrame(() => {
           this.refreshLayerViewport();
           rAqId = null;
-        });
+        }, this);
       })
     );
 
@@ -326,10 +329,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           (type === 'add' || type === 'delete') &&
           (flavour === 'affine:surface-ref' || flavour === NOTE)
         ) {
-          requestAnimationFrame(() => {
+          requestFrame(() => {
             this._updateReference();
             this._updateAutoConnect();
-          });
+          }, this);
         }
       })
     );

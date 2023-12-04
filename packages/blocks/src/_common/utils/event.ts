@@ -126,3 +126,9 @@ export function delayCallback(callback: () => void, delay: number = 0) {
 
   return () => clearTimeout(timeoutId);
 }
+
+export function requestFrame(callback: () => void, element?: HTMLElement) {
+  return requestAnimationFrame(() => {
+    if (!element || element.isConnected) callback();
+  });
+}
