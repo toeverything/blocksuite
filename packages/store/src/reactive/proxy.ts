@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Doc as YDoc, YArrayEvent, YMapEvent } from 'yjs';
-import { Array as YArray, Map as YMap, UndoManager } from 'yjs';
+import { Array as YArray, Map as YMap } from 'yjs';
 
 import { Boxed } from './boxed.js';
 import type { UnRecord } from './utils.js';
