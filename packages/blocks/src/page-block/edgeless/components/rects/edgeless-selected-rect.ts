@@ -611,7 +611,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._selectedRect = {
       width: width + padding * 2,
       height: height + padding * 2,
-      borderWidth: selection.editing ? 2 : 1,
+      borderWidth: this._isConnector ? 0 : selection.editing ? 2 : 1,
       borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
       left: left - padding,
       top: top - padding,
@@ -726,6 +726,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
   }
 
+  private get _isConnector() {
+    const elements = this.selection.elements;
+    return elements.length === 1 && elements[0] instanceof ConnectorElement;
+  }
+
   override render() {
     const { selection } = this;
     const elements = selection.elements;
@@ -769,13 +774,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         )
       : nothing;
 
-    const connectorHandle =
-      elements.length === 1 && elements[0] instanceof ConnectorElement
-        ? html`<edgeless-connector-handle
-            .connector=${elements[0]}
-            .edgeless=${edgeless}
-          ></edgeless-connector-handle>`
-        : nothing;
+    const connectorHandle = this._isConnector
+      ? html`<edgeless-connector-handle
+          .connector=${elements[0]}
+          .edgeless=${edgeless}
+        ></edgeless-connector-handle>`
+      : nothing;
 
     const elementHandle =
       elements.length > 1

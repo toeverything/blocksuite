@@ -1,7 +1,10 @@
+import './connector-indicator';
+
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { ConnectorElement } from '../../../../surface-block/index.js';
@@ -12,8 +15,8 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
   static override styles = css`
     .line-controller {
       position: absolute;
-      width: 9px;
-      height: 9px;
+      width: 12px;
+      height: 12px;
       box-sizing: border-box;
       border-radius: 50%;
       border: 2px solid var(--affine-text-emphasis-color);
@@ -113,6 +116,16 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
     return html`
       <div class="line-controller line-start" style=${styleMap(start)}></div>
       <div class="line-controller line-end" style=${styleMap(end)}></div>
+      ${repeat(path, (point, index) => {
+        if (index === path.length - 1) {
+          return nothing;
+        }
+        return html`<edgeless-connector-indicator
+          .edgeless=${this.edgeless}
+          .connector=${this.connector}
+          .pathIndex=${index}
+        ></edgeless-connector-indicator>`;
+      })}
     `;
   }
 }
