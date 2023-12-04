@@ -69,7 +69,8 @@ export function launchIntoFullscreen(element: Element) {
   }
 }
 
-const hideToolbarKey = 'blocksuite:' + 'presentation' + ':hideToolbar';
+const hideToolbarKey = 'blocksuite:presentation:hideToolbar';
+
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {
   static override styles = css`

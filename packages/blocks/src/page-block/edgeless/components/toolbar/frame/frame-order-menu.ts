@@ -137,14 +137,14 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       )
     ).then(canvas => {
       this.canvas = canvas.map(canva =>
-        this._createScaledCanva(
+        this._createScaledCanvas(
           canva ? canva : document.createElement('canvas')
         )
       );
     });
   }
 
-  private _createScaledCanva(canva: HTMLCanvasElement) {
+  private _createScaledCanvas(canva: HTMLCanvasElement) {
     const scaledCanvas = document.createElement('canvas');
     scaledCanvas.width = 70;
     scaledCanvas.height = 45;
@@ -250,7 +250,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
   override render() {
     const frame = this.frames[this._curIndex];
     const canva = frame
-      ? this._createScaledCanva(this.canvas[this._curIndex])
+      ? this._createScaledCanvas(this.canvas[this._curIndex])
       : nothing;
 
     return html`

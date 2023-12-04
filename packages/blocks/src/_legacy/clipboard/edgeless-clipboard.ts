@@ -538,7 +538,12 @@ export class EdgelessClipboard implements Clipboard {
     );
   }
 
-  async toPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+    const blocksLen = blocks.length;
+    const shapesLen = shapes.length;
+
+    if (blocksLen + shapesLen === 0) return;
+
     // sort by `index`
     blocks.sort(compare);
     shapes.sort(compare);
@@ -564,17 +569,6 @@ export class EdgelessClipboard implements Clipboard {
     );
 
     assertExists(canvas);
-
-    return canvas;
-  }
-
-  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
-    const blocksLen = blocks.length;
-    const shapesLen = shapes.length;
-
-    if (blocksLen + shapesLen === 0) return;
-
-    const canvas = await this.toPng(blocks, shapes);
 
     // @ts-ignore
     if (window.apis?.clipboard?.copyAsImageFromString) {

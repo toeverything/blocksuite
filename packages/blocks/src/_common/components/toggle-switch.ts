@@ -51,6 +51,7 @@ const styles = css`
     width: 24px;
   }
 `;
+
 @customElement('toggle-switch')
 export class ToggleSwitch extends LitElement {
   static override styles = styles;

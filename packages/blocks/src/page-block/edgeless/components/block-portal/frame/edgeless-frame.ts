@@ -13,6 +13,7 @@ import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const { FRAME } = EdgelessBlockType;
 const FRAME_OFFSET = 8;
+
 @customElement('edgeless-frame-title')
 export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
   isInner = false;
@@ -63,6 +64,14 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
       edgeless.slots.elementUpdated.on(({ id }) => {
         if (id === this.frame.id) {
           this.requestUpdate();
+        }
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementRemoved.on(({ id }) => {
+        if (id === this.frame.id) {
+          this.remove();
         }
       })
     );
