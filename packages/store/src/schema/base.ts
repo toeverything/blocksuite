@@ -205,11 +205,11 @@ export class BaseBlockModel<
 
     const children: BaseBlockModel[] = [];
     block.forEach(id => {
-      const child = this.page.getBlock(id);
+      const child = this.page.getBlockById(id);
       if (!child) {
         return;
       }
-      children.push(child.model);
+      children.push(child);
     });
 
     return children;

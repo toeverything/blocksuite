@@ -86,8 +86,5 @@ export function createEditor(page: Page, element: HTMLElement) {
 
   element.append(editor);
 
-  editor.createBlockHub().then(blockHub => {
-    document.body.appendChild(blockHub);
-  });
   return editor;
 }

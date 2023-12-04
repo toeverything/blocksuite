@@ -20,6 +20,7 @@ import {
   isPageMode,
   matchFlavours,
 } from '../_common/utils/index.js';
+import type { BlockHub } from '../_common/widgets/block-hub/components/block-hub.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {
@@ -43,7 +44,9 @@ function TipsPlaceholder(model: BaseBlockModel, tipsPos: Style) {
       </div> `;
     }
 
-    const blockHub = document.querySelector('affine-block-hub');
+    const blockHub = document.querySelector(
+      'affine-block-hub'
+    ) as BlockHub | null;
     if (!blockHub) {
       // Fall back
       return html`<div class="tips-placeholder" style=${styleMap(tipsPos)}>

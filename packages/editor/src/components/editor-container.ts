@@ -26,8 +26,6 @@ import { keyed } from 'lit/directives/keyed.js';
 import type { Ref } from 'lit/directives/ref.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
-import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
-
 noop(BlockSuiteRoot);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,6 +81,10 @@ export class EditorContainer
     return this.page.root as PageBlockModel | null;
   }
 
+  get isEditorElementActive(): boolean {
+    return document.activeElement?.closest('editor-container') !== null;
+  }
+
   slots: AbstractEditor['slots'] = {
     pageLinkClicked: new Slot(),
     pageModeSwitched: new Slot(),
@@ -119,7 +121,7 @@ export class EditorContainer
       }
 
       const selection = getSelection();
-      if (!selection || selection.isCollapsed || !checkEditorElementActive()) {
+      if (!selection || selection.isCollapsed || !this.isEditorElementActive) {
         return;
       }
       selection.removeAllRanges();
@@ -185,14 +187,6 @@ export class EditorContainer
         forwardSlot(this._edgelessPageBlock.slots, this.slots);
       }
     });
-  }
-
-  async createBlockHub() {
-    await this.updateComplete;
-    if (!this.page.root) {
-      await new Promise(res => this.page.slots.rootAdded.once(res));
-    }
-    return createBlockHub(this, this.page);
   }
 
   private _saveViewportLocalRecord() {

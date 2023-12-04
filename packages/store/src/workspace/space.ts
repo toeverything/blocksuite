@@ -38,6 +38,10 @@ export class Space<
     this._yBlocks = this._ySpaceDoc.getMap('blocks');
   }
 
+  get yBlocks() {
+    return this._yBlocks;
+  }
+
   get loaded() {
     return this._loaded;
   }

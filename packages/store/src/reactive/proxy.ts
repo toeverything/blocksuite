@@ -1,12 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { Transaction, YArrayEvent, YMapEvent } from 'yjs';
+import type { YArrayEvent, YMapEvent } from 'yjs';
 import { Array as YArray, Map as YMap } from 'yjs';
 
 import { Boxed } from './boxed.js';
 import type { UnRecord } from './utils.js';
-import { native2Y, y2Native } from './utils.js';
-
-type ProxyTransaction = Transaction & { isLocalProxy?: boolean };
+import { BaseReactiveYData, native2Y, y2Native } from './utils.js';
 
 export type ProxyOptions<T> = {
   onChange?: (data: T) => void;
@@ -14,6 +12,197 @@ export type ProxyOptions<T> = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const proxies = new WeakMap<any, unknown>();
+
+export class ReactiveYArray extends BaseReactiveYData<
+  unknown[],
+  YArray<unknown>
+> {
+  protected readonly _proxy: unknown[];
+  constructor(
+    protected readonly _source: unknown[],
+    protected readonly _ySource: YArray<unknown>,
+    protected readonly _options: ProxyOptions<unknown[]>
+  ) {
+    super();
+    this._proxy = this._getProxy();
+    proxies.set(_ySource, this._proxy);
+    _ySource.observe(this._observer);
+  }
+
+  protected _getProxy = () => {
+    return new Proxy(this._source, {
+      has: (target, p) => {
+        return Reflect.has(target, p);
+      },
+      set: (target, p, value, receiver) => {
+        if (typeof p !== 'string') {
+          throw new Error('key cannot be a symbol');
+        }
+
+        const proxied = proxies.get(this._ySource);
+        assertExists(proxied, 'YData is not subscribed before changes');
+        const doc = this._ySource.doc;
+        assertExists(doc, 'YData is not bound to a Y.Doc');
+
+        const index = Number(p);
+        if (this._skipNext || Number.isNaN(index)) {
+          return Reflect.set(target, p, value, receiver);
+        }
+
+        const yData = native2Y(value);
+
+        this._transact(doc, () => {
+          if (index < this._ySource.length) {
+            this._ySource.delete(index, 1);
+          }
+          this._ySource.insert(index, [yData]);
+        });
+
+        const data = createYProxy(yData, this._options);
+        return Reflect.set(target, p, data, receiver);
+      },
+      get: (target, p, receiver) => {
+        return Reflect.get(target, p, receiver);
+      },
+      deleteProperty: (target, p): boolean => {
+        if (typeof p !== 'string') {
+          throw new Error('key cannot be a symbol');
+        }
+
+        const proxied = proxies.get(this._ySource);
+        assertExists(proxied, 'YData is not subscribed before changes');
+        const doc = this._ySource.doc;
+        assertExists(doc, 'YData is not bound to a Y.Doc');
+
+        const index = Number(p);
+        if (this._skipNext || Number.isNaN(index)) {
+          return Reflect.deleteProperty(target, p);
+        }
+
+        this._transact(doc, () => {
+          this._ySource.delete(index, 1);
+        });
+        return Reflect.deleteProperty(target, p);
+      },
+    });
+  };
+
+  private _observer = (event: YArrayEvent<unknown>) => {
+    this._onObserve(event, () => {
+      let retain = 0;
+      event.changes.delta.forEach(change => {
+        if (change.retain) {
+          retain += change.retain;
+          return;
+        }
+        if (change.delete) {
+          this._updateWithSkip(() => {
+            this._source.splice(retain, change.delete);
+          });
+          return;
+        }
+        if (change.insert) {
+          const _arr = [change.insert].flat();
+
+          const proxyList = _arr.map(value => createYProxy(value));
+
+          this._updateWithSkip(() => {
+            this._source.splice(retain, 0, ...proxyList);
+          });
+
+          retain += change.insert.length;
+        }
+      });
+    });
+  };
+}
+
+export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
+  protected readonly _proxy: UnRecord;
+  constructor(
+    protected readonly _source: UnRecord,
+    protected readonly _ySource: YMap<unknown>,
+    protected readonly _options: ProxyOptions<UnRecord>
+  ) {
+    super();
+    this._proxy = this._getProxy();
+    proxies.set(_ySource, this._proxy);
+    _ySource.observe(this._observer);
+  }
+
+  protected _getProxy = () => {
+    return new Proxy(this._source, {
+      has: (target, p) => {
+        return Reflect.has(target, p);
+      },
+      set: (target, p, value, receiver) => {
+        if (typeof p !== 'string') {
+          throw new Error('key cannot be a symbol');
+        }
+        if (this._skipNext) {
+          return Reflect.set(target, p, value, receiver);
+        }
+
+        const proxied = proxies.get(this._ySource);
+        assertExists(proxied, 'YData is not subscribed before changes');
+        const doc = this._ySource.doc;
+        assertExists(doc, 'YData is not bound to a Y.Doc');
+
+        const yData = native2Y(value);
+        this._transact(doc, () => {
+          this._ySource.set(p, yData);
+        });
+        const data = createYProxy(yData, this._options);
+        return Reflect.set(target, p, data, receiver);
+      },
+      get: (target, p, receiver) => {
+        return Reflect.get(target, p, receiver);
+      },
+      deleteProperty: (target, p) => {
+        if (typeof p !== 'string') {
+          throw new Error('key cannot be a symbol');
+        }
+        if (this._skipNext) {
+          return Reflect.deleteProperty(target, p);
+        }
+
+        const proxied = proxies.get(this._ySource);
+        assertExists(proxied, 'YData is not subscribed before changes');
+        const doc = this._ySource.doc;
+        assertExists(doc, 'YData is not bound to a Y.Doc');
+
+        this._transact(doc, () => {
+          this._ySource.delete(p);
+        });
+
+        return Reflect.deleteProperty(target, p);
+      },
+    });
+  };
+
+  private _observer = (event: YMapEvent<unknown>) => {
+    this._onObserve(event, () => {
+      event.keysChanged.forEach(key => {
+        const type = event.changes.keys.get(key);
+        if (!type) {
+          return;
+        }
+        if (type.action === 'delete') {
+          this._updateWithSkip(() => {
+            delete this._source[key];
+          });
+        } else if (type.action === 'add' || type.action === 'update') {
+          const current = this._ySource.get(key);
+          this._updateWithSkip(() => {
+            this._source[key] = proxies.has(current)
+              ? proxies.get(current)
+              : createYProxy(current, this._options);
+          });
+        }
+      });
+    });
+  };
+}
 
 export function createYProxy<Data>(
   yAbstract: unknown,
@@ -29,220 +218,23 @@ export function createYProxy<Data>(
         return value;
       }
       if (origin instanceof YArray) {
-        subscribeYArray(
+        const data = new ReactiveYArray(
           value as unknown[],
           origin,
           options as ProxyOptions<unknown[]>
         );
-        const proxy = getYArrayProxy(
-          value as unknown[],
-          origin,
-          options as ProxyOptions<unknown[]>
-        );
-        proxies.set(origin, proxy);
-        return proxy;
+        return data.proxy;
       }
       if (origin instanceof YMap) {
-        subscribeYMap(
+        const data = new ReactiveYMap(
           value as UnRecord,
           origin,
           options as ProxyOptions<UnRecord>
         );
-        const proxy = getYMapProxy(
-          value as UnRecord,
-          origin,
-          options as ProxyOptions<UnRecord>
-        );
-        proxies.set(origin, proxy);
-        return proxy;
+        return data.proxy;
       }
 
       return value;
     },
   }) as Data;
-}
-
-function transformNative(
-  value: unknown,
-  onCreate: (p: unknown) => void,
-  options: ProxyOptions<never> = {}
-) {
-  const y = native2Y(value);
-  onCreate(y);
-  return createYProxy(y, options);
-}
-
-function subscribeYArray(
-  arr: unknown[],
-  yArray: YArray<unknown>,
-  options: ProxyOptions<unknown[]>
-) {
-  const observer = (
-    event: YArrayEvent<unknown> & { transaction: ProxyTransaction }
-  ) => {
-    if (event.transaction.isLocalProxy) {
-      options.onChange?.(arr);
-      return;
-    }
-    let retain = 0;
-    event.changes.delta.forEach(change => {
-      if (change.retain) {
-        retain += change.retain;
-      }
-      if (change.delete) {
-        arr.splice(retain, change.delete);
-      }
-      if (change.insert) {
-        const _arr = [change.insert].flat();
-
-        const proxyList = _arr
-          .filter(value => {
-            return !proxies.has(value);
-          })
-          .map(value => {
-            return createYProxy(value);
-          });
-        arr.splice(retain, 0, ...proxyList);
-
-        retain += change.insert.length;
-      }
-    });
-    options.onChange?.(arr);
-  };
-
-  yArray.observe(observer);
-}
-
-function subscribeYMap(
-  object: UnRecord,
-  yMap: YMap<unknown>,
-  options: ProxyOptions<UnRecord>
-) {
-  const observer = (
-    event: YMapEvent<unknown> & { transaction: ProxyTransaction }
-  ) => {
-    if (event.transaction.isLocalProxy) {
-      options.onChange?.(object);
-      return;
-    }
-    event.keysChanged.forEach(key => {
-      const type = event.changes.keys.get(key);
-      if (!type) {
-        return;
-      }
-      if (type.action === 'delete') {
-        delete object[key];
-      } else if (type.action === 'add' || type.action === 'update') {
-        const current = yMap.get(key);
-        if (proxies.has(current)) {
-          object[key] = proxies.get(current);
-        } else {
-          object[key] = createYProxy(current);
-        }
-      }
-    });
-    options.onChange?.(object);
-  };
-  yMap.observe(observer);
-}
-
-function applyYChanges<T = unknown>(
-  yData: YArray<unknown> | YMap<unknown>,
-  changes: () => T
-): T {
-  const data = proxies.get(yData);
-  assertExists(data, 'YData is not subscribed before changes');
-  const doc = yData.doc;
-  assertExists(doc, 'YData is not attached to a document');
-  doc.once('beforeObserverCalls', (transaction: ProxyTransaction) => {
-    transaction.isLocalProxy = true;
-  });
-  return changes();
-}
-
-function getYArrayProxy<T = unknown>(
-  array: T[],
-  yArray: YArray<unknown>,
-  options: ProxyOptions<unknown[]>
-) {
-  return new Proxy(array, {
-    has: (target, p) => {
-      return Reflect.has(target, p);
-    },
-    set: (target, p, value, receiver) => {
-      if (typeof p !== 'string') {
-        throw new Error('key cannot be a symbol');
-      }
-
-      return applyYChanges(yArray, () => {
-        const index = Number(p);
-        if (Number.isNaN(index)) {
-          return Reflect.set(target, p, value, receiver);
-        }
-
-        const data = transformNative(
-          value,
-          x => {
-            if (index < yArray.length) {
-              yArray.delete(index, 1);
-            }
-            yArray.insert(index, [x]);
-          },
-          options
-        );
-        return Reflect.set(target, p, data, receiver);
-      });
-    },
-    get: (target, p, receiver) => {
-      return Reflect.get(target, p, receiver);
-    },
-    deleteProperty: (target: T[], p: string | symbol): boolean => {
-      if (typeof p !== 'string') {
-        throw new Error('key cannot be a symbol');
-      }
-
-      return applyYChanges(yArray, () => {
-        const index = Number(p);
-        if (!Number.isNaN(index)) {
-          yArray.delete(index, 1);
-        }
-        return Reflect.deleteProperty(target, p);
-      });
-    },
-  });
-}
-
-function getYMapProxy<Data extends Record<string, unknown>>(
-  object: Data,
-  yMap: YMap<unknown>,
-  options: ProxyOptions<UnRecord>
-) {
-  return new Proxy(object, {
-    has: (target, p) => {
-      return Reflect.has(target, p);
-    },
-    set: (target, p, value, receiver) => {
-      if (typeof p !== 'string') {
-        throw new Error('key cannot be a symbol');
-      }
-
-      return applyYChanges(yMap, () => {
-        const data = transformNative(value, x => yMap.set(p, x), options);
-        return Reflect.set(target, p, data, receiver);
-      });
-    },
-    get: (target, p, receiver) => {
-      return Reflect.get(target, p, receiver);
-    },
-    deleteProperty: (target: Data, p: string | symbol): boolean => {
-      if (typeof p !== 'string') {
-        throw new Error('key cannot be a symbol');
-      }
-
-      return applyYChanges(yMap, () => {
-        yMap.delete(p);
-        return Reflect.deleteProperty(target, p);
-      });
-    },
-  });
 }
