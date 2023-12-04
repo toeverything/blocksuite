@@ -1,10 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { Doc as YDoc, YArrayEvent, YMapEvent } from 'yjs';
-import { Array as YArray, Map as YMap, UndoManager } from 'yjs';
+import type { YArrayEvent, YMapEvent } from 'yjs';
+import { Array as YArray, Map as YMap } from 'yjs';
 
 import { Boxed } from './boxed.js';
 import type { UnRecord } from './utils.js';
-import { native2Y, y2Native } from './utils.js';
+import { BaseReactiveYData, native2Y, y2Native } from './utils.js';
 
 export type ProxyOptions<T> = {
   onChange?: (data: T) => void;
@@ -13,35 +13,23 @@ export type ProxyOptions<T> = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const proxies = new WeakMap<any, unknown>();
 
-export class ReactiveYArray {
-  private readonly _proxy: unknown[];
-  private _skipNext = false;
+export class ReactiveYArray extends BaseReactiveYData<
+  unknown[],
+  YArray<unknown>
+> {
+  protected readonly _proxy: unknown[];
   constructor(
-    readonly array: unknown[],
-    readonly yArray: YArray<unknown>,
-    readonly options: ProxyOptions<unknown[]>
+    protected readonly _source: unknown[],
+    protected readonly _ySource: YArray<unknown>,
+    protected readonly _options: ProxyOptions<unknown[]>
   ) {
-    this.array = array;
-    this.yArray = yArray;
-    this.options = options;
+    super();
     this._proxy = this._getProxy();
-    yArray.observe(this._observer);
+    _ySource.observe(this._observer);
   }
 
-  get proxy() {
-    return this._proxy;
-  }
-
-  private getOrigin = (doc: YDoc) => {
-    return {
-      doc,
-      proxy: true,
-      target: this,
-    };
-  };
-
-  private _getProxy = () => {
-    return new Proxy(this.array, {
+  protected _getProxy = () => {
+    return new Proxy(this._source, {
       has: (target, p) => {
         return Reflect.has(target, p);
       },
@@ -50,9 +38,9 @@ export class ReactiveYArray {
           throw new Error('key cannot be a symbol');
         }
 
-        const proxied = proxies.get(this.yArray);
+        const proxied = proxies.get(this._ySource);
         assertExists(proxied, 'YData is not subscribed before changes');
-        const doc = this.yArray.doc;
+        const doc = this._ySource.doc;
         assertExists(doc, 'YData is not bound to a Y.Doc');
 
         const index = Number(p);
@@ -62,14 +50,14 @@ export class ReactiveYArray {
 
         const yData = native2Y(value);
 
-        doc.transact(() => {
-          if (index < this.yArray.length) {
-            this.yArray.delete(index, 1);
+        this._transact(doc, () => {
+          if (index < this._ySource.length) {
+            this._ySource.delete(index, 1);
           }
-          this.yArray.insert(index, [yData]);
-        }, this.getOrigin(doc));
+          this._ySource.insert(index, [yData]);
+        });
 
-        const data = createYProxy(yData, this.options);
+        const data = createYProxy(yData, this._options);
         return Reflect.set(target, p, data, receiver);
       },
       get: (target, p, receiver) => {
@@ -80,9 +68,9 @@ export class ReactiveYArray {
           throw new Error('key cannot be a symbol');
         }
 
-        const proxied = proxies.get(this.yArray);
+        const proxied = proxies.get(this._ySource);
         assertExists(proxied, 'YData is not subscribed before changes');
-        const doc = this.yArray.doc;
+        const doc = this._ySource.doc;
         assertExists(doc, 'YData is not bound to a Y.Doc');
 
         const index = Number(p);
@@ -90,20 +78,16 @@ export class ReactiveYArray {
           return Reflect.deleteProperty(target, p);
         }
 
-        doc.transact(() => {
-          this.yArray.delete(index, 1);
-        }, this.getOrigin(doc));
+        this._transact(doc, () => {
+          this._ySource.delete(index, 1);
+        });
         return Reflect.deleteProperty(target, p);
       },
     });
   };
 
   private _observer = (event: YArrayEvent<unknown>) => {
-    if (
-      event.transaction.origin?.proxy !== true &&
-      (!event.transaction.local ||
-        event.transaction.origin instanceof UndoManager)
-    ) {
+    this._onObserve(event, () => {
       let retain = 0;
       event.changes.delta.forEach(change => {
         if (change.retain) {
@@ -111,9 +95,9 @@ export class ReactiveYArray {
           return;
         }
         if (change.delete) {
-          this._skipNext = true;
-          this.array.splice(retain, change.delete);
-          this._skipNext = false;
+          this._updateWithSkip(() => {
+            this._source.splice(retain, change.delete);
+          });
           return;
         }
         if (change.insert) {
@@ -121,47 +105,31 @@ export class ReactiveYArray {
 
           const proxyList = _arr.map(value => createYProxy(value));
 
-          this._skipNext = true;
-          this.array.splice(retain, 0, ...proxyList);
-          this._skipNext = false;
+          this._updateWithSkip(() => {
+            this._source.splice(retain, 0, ...proxyList);
+          });
 
           retain += change.insert.length;
         }
       });
-    }
-    this.options.onChange?.(this._proxy);
+    });
   };
 }
 
-export class ReactiveYMap {
-  private readonly _proxy: UnRecord;
-  private _skipNext = false;
+export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
+  protected readonly _proxy: UnRecord;
   constructor(
-    readonly map: UnRecord,
-    readonly yMap: YMap<unknown>,
-    readonly options: ProxyOptions<UnRecord>
+    protected readonly _source: UnRecord,
+    protected readonly _ySource: YMap<unknown>,
+    protected readonly _options: ProxyOptions<UnRecord>
   ) {
-    this.map = map;
-    this.yMap = yMap;
-    this.options = options;
+    super();
     this._proxy = this._getProxy();
-    yMap.observe(this._observer);
+    _ySource.observe(this._observer);
   }
 
-  get proxy() {
-    return this._proxy;
-  }
-
-  private getOrigin = (doc: YDoc) => {
-    return {
-      doc,
-      proxy: true,
-      target: this,
-    };
-  };
-
-  private _getProxy = () => {
-    return new Proxy(this.map, {
+  protected _getProxy = () => {
+    return new Proxy(this._source, {
       has: (target, p) => {
         return Reflect.has(target, p);
       },
@@ -173,16 +141,16 @@ export class ReactiveYMap {
           return Reflect.set(target, p, value, receiver);
         }
 
-        const proxied = proxies.get(this.yMap);
+        const proxied = proxies.get(this._ySource);
         assertExists(proxied, 'YData is not subscribed before changes');
-        const doc = this.yMap.doc;
+        const doc = this._ySource.doc;
         assertExists(doc, 'YData is not bound to a Y.Doc');
 
         const yData = native2Y(value);
-        doc.transact(() => {
-          this.yMap.set(p, yData);
-        }, this.getOrigin(doc));
-        const data = createYProxy(yData, this.options);
+        this._transact(doc, () => {
+          this._ySource.set(p, yData);
+        });
+        const data = createYProxy(yData, this._options);
         return Reflect.set(target, p, data, receiver);
       },
       get: (target, p, receiver) => {
@@ -196,14 +164,14 @@ export class ReactiveYMap {
           return Reflect.deleteProperty(target, p);
         }
 
-        const proxied = proxies.get(this.yMap);
+        const proxied = proxies.get(this._ySource);
         assertExists(proxied, 'YData is not subscribed before changes');
-        const doc = this.yMap.doc;
+        const doc = this._ySource.doc;
         assertExists(doc, 'YData is not bound to a Y.Doc');
 
-        doc.transact(() => {
-          this.yMap.delete(p);
-        }, this.getOrigin(doc));
+        this._transact(doc, () => {
+          this._ySource.delete(p);
+        });
 
         return Reflect.deleteProperty(target, p);
       },
@@ -211,29 +179,26 @@ export class ReactiveYMap {
   };
 
   private _observer = (event: YMapEvent<unknown>) => {
-    if (
-      event.transaction.origin?.proxy !== true &&
-      (!event.transaction.local ||
-        event.transaction.origin instanceof UndoManager)
-    ) {
+    this._onObserve(event, () => {
       event.keysChanged.forEach(key => {
         const type = event.changes.keys.get(key);
         if (!type) {
           return;
         }
         if (type.action === 'delete') {
-          delete this.map[key];
+          this._updateWithSkip(() => {
+            delete this._source[key];
+          });
         } else if (type.action === 'add' || type.action === 'update') {
-          const current = this.yMap.get(key);
-          this._skipNext = true;
-          this.map[key] = proxies.has(current)
-            ? proxies.get(current)
-            : createYProxy(current, this.options);
-          this._skipNext = false;
+          const current = this._ySource.get(key);
+          this._updateWithSkip(() => {
+            this._source[key] = proxies.has(current)
+              ? proxies.get(current)
+              : createYProxy(current, this._options);
+          });
         }
       });
-    }
-    this.options.onChange?.(this._proxy);
+    });
   };
 }
 
