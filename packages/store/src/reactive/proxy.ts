@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { YArrayEvent, YMapEvent } from 'yjs';
+import type { Doc as YDoc, YArrayEvent, YMapEvent } from 'yjs';
 import { Array as YArray, Map as YMap, UndoManager } from 'yjs';
 
 import { Boxed } from './boxed.js';
@@ -32,6 +32,14 @@ export class ReactiveYArray {
     return this._proxy;
   }
 
+  private getOrigin = (doc: YDoc) => {
+    return {
+      doc,
+      proxy: true,
+      target: this,
+    };
+  };
+
   private _getProxy = () => {
     return new Proxy(this.array, {
       has: (target, p) => {
@@ -43,8 +51,8 @@ export class ReactiveYArray {
         }
 
         const proxied = proxies.get(this.yArray);
-        const doc = this.yArray.doc;
         assertExists(proxied, 'YData is not subscribed before changes');
+        const doc = this.yArray.doc;
         assertExists(doc, 'YData is not bound to a Y.Doc');
 
         const index = Number(p);
@@ -59,7 +67,7 @@ export class ReactiveYArray {
             this.yArray.delete(index, 1);
           }
           this.yArray.insert(index, [yData]);
-        });
+        }, this.getOrigin(doc));
 
         const data = createYProxy(yData, this.options);
         return Reflect.set(target, p, data, receiver);
@@ -74,23 +82,24 @@ export class ReactiveYArray {
 
         const proxied = proxies.get(this.yArray);
         assertExists(proxied, 'YData is not subscribed before changes');
+        const doc = this.yArray.doc;
+        assertExists(doc, 'YData is not bound to a Y.Doc');
 
         const index = Number(p);
         if (this._skipNext || Number.isNaN(index)) {
           return Reflect.deleteProperty(target, p);
         }
 
-        this.yArray.delete(index, 1);
+        doc.transact(() => {
+          this.yArray.delete(index, 1);
+        }, this.getOrigin(doc));
         return Reflect.deleteProperty(target, p);
       },
     });
   };
 
   private _observer = (event: YArrayEvent<unknown>) => {
-    if (
-      !event.transaction.local ||
-      event.transaction.origin instanceof UndoManager
-    ) {
+    if (event.transaction.origin !== this) {
       let retain = 0;
       event.changes.delta.forEach(change => {
         if (change.retain) {
@@ -145,6 +154,14 @@ export class ReactiveYMap {
     return this._proxy;
   }
 
+  private getOrigin = (doc: YDoc) => {
+    return {
+      doc,
+      proxy: true,
+      target: this,
+    };
+  };
+
   private _getProxy = () => {
     return new Proxy(this.map, {
       has: (target, p) => {
@@ -159,12 +176,14 @@ export class ReactiveYMap {
         }
 
         const proxied = proxies.get(this.yMap);
-        const doc = this.yMap.doc;
         assertExists(proxied, 'YData is not subscribed before changes');
+        const doc = this.yMap.doc;
         assertExists(doc, 'YData is not bound to a Y.Doc');
 
         const yData = native2Y(value);
-        this.yMap.set(p, yData);
+        doc.transact(() => {
+          this.yMap.set(p, yData);
+        }, this.getOrigin(doc));
         const data = createYProxy(yData, this.options);
         return Reflect.set(target, p, data, receiver);
       },
@@ -181,18 +200,20 @@ export class ReactiveYMap {
 
         const proxied = proxies.get(this.yMap);
         assertExists(proxied, 'YData is not subscribed before changes');
+        const doc = this.yMap.doc;
+        assertExists(doc, 'YData is not bound to a Y.Doc');
 
-        this.yMap.delete(p);
+        doc.transact(() => {
+          this.yMap.delete(p);
+        }, this.getOrigin(doc));
+
         return Reflect.deleteProperty(target, p);
       },
     });
   };
 
   private _observer = (event: YMapEvent<unknown>) => {
-    if (
-      !event.transaction.local ||
-      event.transaction.origin instanceof UndoManager
-    ) {
+    if (event.transaction.origin !== this) {
       event.keysChanged.forEach(key => {
         const type = event.changes.keys.get(key);
         if (!type) {
