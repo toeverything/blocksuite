@@ -2,7 +2,7 @@ import { html } from 'lit';
 
 import { getThemeMode } from '../../_common/utils/query.js';
 
-export function BookmarkDefaultBanner() {
+export function BookmarkDefaultImage() {
   const theme = getThemeMode();
   return theme === 'light' ? lightBanner : darkBanner;
 }

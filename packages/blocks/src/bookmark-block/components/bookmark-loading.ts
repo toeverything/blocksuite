@@ -3,7 +3,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { getThemeMode } from '../../_common/utils/query.js';
-import { BookmarkDefaultBanner } from './bookmark-default-banner.js';
+import { BookmarkDefaultImage } from './bookmark-default-image.js';
 
 @customElement('bookmark-loading')
 export class BookmarkLoading extends ShadowlessElement {
@@ -34,7 +34,7 @@ export class BookmarkLoading extends ShadowlessElement {
         ></bookmark-loading-circle>
         <div class="affine-bookmark-title-content">Loading...</div>
       </div>
-      <div class="affine-bookmark-banner">${BookmarkDefaultBanner()}</div>
+      <div class="affine-bookmark-banner">${BookmarkDefaultImage()}</div>
     </div>`;
   }
 }

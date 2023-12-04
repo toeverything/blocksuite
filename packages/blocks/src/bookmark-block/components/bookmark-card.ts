@@ -5,7 +5,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { WebIcon16 } from '../../_common/icons/text.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import { embedIframeTemplate } from '../embed.js';
-import { BookmarkDefaultBanner } from './bookmark-default-banner.js';
+import { BookmarkDefaultImage } from './bookmark-default-image.js';
 
 @customElement('bookmark-card')
 export class BookmarkCard extends WithDisposable(ShadowlessElement) {
@@ -45,6 +45,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-bookmark-banner img,
+    .affine-bookmark-banner object,
     .affine-bookmark-banner svg {
       width: 140px;
       height: 93px;
@@ -79,6 +80,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       flex-shrink: 0;
     }
     .affine-bookmark-icon img,
+    .affine-bookmark-icon object,
     .affine-bookmark-icon svg {
       width: 100%;
       height: 100%;
@@ -171,7 +173,11 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       >
         <div class="affine-bookmark-title">
           <div class="affine-bookmark-icon">
-            ${icon ? html`<img src=${icon} />` : WebIcon16}
+            ${icon
+              ? html`<object type="image/svg+xml" data=${icon}>
+                  ${WebIcon16}
+                </object>`
+              : WebIcon16}
           </div>
           <div class="affine-bookmark-title-content">${title}</div>
         </div>
@@ -181,7 +187,11 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       ${isEmbed
         ? nothing
         : html`<div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
-            ${image ? html`<img src=${image} />` : BookmarkDefaultBanner()}
+            ${image
+              ? html`<object type="image/webp" data=${image}>
+                  ${BookmarkDefaultImage()}
+                </object>`
+              : BookmarkDefaultImage()}
           </div>`}
     </div>`;
   }
