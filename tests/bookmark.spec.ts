@@ -162,7 +162,7 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
   await focusRichText(page);
 
   await type(page, inputUrl);
-  await setVRangeInSelectedRichText(page, 0, 18);
+  await setVRangeInSelectedRichText(page, 0, inputUrl.length);
   await copyByKeyboard(page);
   await focusRichText(page);
   await type(page, '/bookmark');
@@ -188,17 +188,7 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:paragraph
-      prop:text={
-        <>
-          <text
-            insert="${inputUrl}"
-            link="${inputUrl}"
-          />
-          <text
-            insert=" "
-          />
-        </>
-      }
+      prop:text="${inputUrl}"
       prop:type="text"
     />
     <affine:bookmark
@@ -248,22 +238,12 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:paragraph
-      prop:text={
-        <>
-          <text
-            insert="${inputUrl}"
-            link="${inputUrl}"
-          />
-          <text
-            insert=" "
-          />
-        </>
-      }
+      prop:text="${inputUrl}"
       prop:type="text"
     />
     <affine:bookmark
       prop:type="card"
-      prop:url="${inputUrl} "
+      prop:url="${inputUrl}"
     />
   </affine:note>
 </affine:page>`
