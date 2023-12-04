@@ -38,6 +38,7 @@ async function queryUrlData(url: string): Promise<BookmarkBlockUrlData> {
     }
   } else {
     const response = await fetch(
+      // https://github.com/toeverything/link-preview
       'https://link-preview.toeverything.workers.dev',
       {
         method: 'POST',
