@@ -94,18 +94,20 @@ export class Block {
     this.yBlock.forEach((value, key) => {
       if (key.startsWith('prop:')) {
         const keyName = key.replace('prop:', '');
-        const proxy = this._getPropsProxy(keyName, value);
-        props[keyName] = proxy;
+        props[keyName] = this._getPropsProxy(keyName, value);
+        return;
       }
-
       if (key === 'sys:id' && typeof value === 'string') {
         id = value;
+        return;
       }
       if (key === 'sys:flavour' && typeof value === 'string') {
         flavour = value;
+        return;
       }
       if (key === 'sys:children' && value instanceof Y.Array) {
         yChildren = value;
+        return;
       }
     });
 
@@ -124,8 +126,7 @@ export class Block {
 
         const yValue = native2Y(value);
         this.yBlock.set(`prop:${key}`, yValue);
-        const proxy = this._getPropsProxy(key, yValue);
-        props[key] = proxy;
+        props[key] = this._getPropsProxy(key, yValue);
       });
     }
 
