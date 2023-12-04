@@ -1,6 +1,19 @@
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 import type { BookmarkBlockUrlData } from './bookmark-model.js';
 
+interface LinkPreviewResponseData {
+  url: string;
+  title?: string;
+  siteName?: string;
+  description?: string;
+  images?: string[];
+  mediaType?: string;
+  contentType?: string;
+  charset?: string;
+  videos?: string[];
+  favicons?: string[];
+}
+
 async function queryUrlData(url: string): Promise<BookmarkBlockUrlData> {
   if (
     (url.startsWith('https://x.com/') ||
@@ -24,25 +37,27 @@ async function queryUrlData(url: string): Promise<BookmarkBlockUrlData> {
       return {};
     }
   } else {
-    return {};
+    const response = await fetch(
+      //TODO: use AFFiNE worker
+      'https://link-preview.flrande-ch.workers.dev',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url,
+        }),
+      }
+    );
+    const data: LinkPreviewResponseData = await response.json();
 
-    //TODO: use cloudflare worker to get link preview
-    // const previewData = await getLinkPreview(url, {
-    //   timeout: 6000,
-    //   headers: {
-    //     'User-Agent':
-    //       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-    //   },
-    //   followRedirects: 'follow',
-    // });
-
-    // return {
-    //   title: 'title' in previewData ? previewData.title : undefined,
-    //   description:
-    //     'description' in previewData ? previewData.description : undefined,
-    //   icon: previewData.favicons[0],
-    //   image: 'images' in previewData ? previewData.images[0] : undefined,
-    // };
+    return {
+      title: data.title,
+      description: data.description,
+      icon: data.favicons?.[0],
+      image: data.images?.[0],
+    };
   }
 }
 
