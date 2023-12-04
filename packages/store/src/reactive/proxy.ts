@@ -25,6 +25,7 @@ export class ReactiveYArray extends BaseReactiveYData<
   ) {
     super();
     this._proxy = this._getProxy();
+    proxies.set(_ySource, this._proxy);
     _ySource.observe(this._observer);
   }
 
@@ -125,6 +126,7 @@ export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
   ) {
     super();
     this._proxy = this._getProxy();
+    proxies.set(_ySource, this._proxy);
     _ySource.observe(this._observer);
   }
 
@@ -221,9 +223,7 @@ export function createYProxy<Data>(
           origin,
           options as ProxyOptions<unknown[]>
         );
-        const proxy = data.proxy;
-        proxies.set(origin, proxy);
-        return proxy;
+        return data.proxy;
       }
       if (origin instanceof YMap) {
         const data = new ReactiveYMap(
@@ -231,9 +231,7 @@ export function createYProxy<Data>(
           origin,
           options as ProxyOptions<UnRecord>
         );
-        const proxy = data.proxy;
-        proxies.set(origin, proxy);
-        return proxy;
+        return data.proxy;
       }
 
       return value;
