@@ -694,7 +694,7 @@ export class Page extends Space<FlatBlockMap> {
       return;
     }
 
-    this._blockTree.onBlockAdded(id, {
+    this._blockTree.onBlockAdded(id, this, {
       onChange: (block, key) => {
         block.model.propsUpdated.emit({ key });
       },
@@ -709,8 +709,6 @@ export class Page extends Space<FlatBlockMap> {
     const block = this._blockTree.getBlock(id);
     assertExists(block);
     const model = block.model;
-    model.page = this;
-    model.created.emit();
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
