@@ -132,9 +132,15 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
     this._bindEvent();
 
     Promise.all(
-      this.frames.map(frame => this.edgeless.clipboard.toPng([frame], []))
+      this.frames.map(frame =>
+        this.edgeless.clipboardController.toCanvas([frame], [])
+      )
     ).then(canvas => {
-      this.canvas = canvas.map(canva => this._createScaledCanva(canva));
+      this.canvas = canvas.map(canva =>
+        this._createScaledCanva(
+          canva ? canva : document.createElement('canvas')
+        )
+      );
     });
   }
 
