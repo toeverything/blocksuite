@@ -1,4 +1,4 @@
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
@@ -8,7 +8,7 @@ import { embedIframeTemplate } from '../embed.js';
 import { BookmarkDefaultBanner } from './bookmark-default-banner.js';
 
 @customElement('bookmark-card')
-export class BookmarkCard extends ShadowlessElement {
+export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .affine-bookmark-block-container {
       width: 100%;
@@ -117,6 +117,15 @@ export class BookmarkCard extends ShadowlessElement {
 
   @state()
   bookmark!: BookmarkBlockComponent;
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.disposables.add(
+      this.bookmark.model.propsUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
 
   private _onCardClick() {
     const selectionManager = this.bookmark.root.selection;

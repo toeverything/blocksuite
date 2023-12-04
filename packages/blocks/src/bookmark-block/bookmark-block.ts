@@ -40,7 +40,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         });
       }
       if (type === 'edit') {
-        toggleBookmarkEditModal(this.model);
+        toggleBookmarkEditModal(this);
       }
       if (type === 'reload') {
         refreshBookmarkUrlData(this);

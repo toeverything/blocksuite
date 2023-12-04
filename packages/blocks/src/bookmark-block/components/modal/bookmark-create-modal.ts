@@ -75,14 +75,14 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
         <input
           tabindex="1"
           type="text"
-          class="bookmark-input link"
+          class="bookmark-modal-input link"
           placeholder="Input in https://..."
         />
 
         <div class="bookmark-modal-footer">
           <div
             tabindex="2"
-            class="bookmark-confirm-button"
+            class="bookmark-modal-confirm-button"
             @click=${this._onConfirm}
           >
             Confirm

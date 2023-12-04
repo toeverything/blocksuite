@@ -51,17 +51,17 @@ export const bookmarkModalStyles = css`
     caret-color: var(--affine-primary-color);
     margin-bottom: 15px;
   }
-  .bookmark-input-wrapper {
+  .bookmark-modal-input-wrapper {
     margin-top: 20px;
     display: flex;
     align-items: center;
   }
-  .bookmark-input-wrapper label {
+  .bookmark-modal-input-wrapper label {
     font-size: var(--affine-font-base);
     color: var(--affine-text-secondary-color);
     margin-right: 15px;
   }
-  .bookmark-input {
+  .bookmark-modal-input {
     width: 100%;
     height: 32px;
     font-size: var(--affine-font-base);
@@ -76,11 +76,11 @@ export const bookmarkModalStyles = css`
     border-radius: 10px;
     outline: medium;
   }
-  .bookmark-input:focus {
+  .bookmark-modal-input:focus {
     border-color: var(--affine-primary-color);
   }
 
-  .bookmark-input::placeholder {
+  .bookmark-modal-input::placeholder {
     color: var(--affine-placeholder-color);
     font-size: var(--affine-font-base);
   }
@@ -90,7 +90,7 @@ export const bookmarkModalStyles = css`
     justify-content: flex-end;
     margin-top: 40px;
   }
-  .bookmark-confirm-button {
+  .bookmark-modal-confirm-button {
     padding: 4px 20px;
     height: 32px;
     display: flex;

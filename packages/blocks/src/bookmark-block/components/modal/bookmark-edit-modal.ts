@@ -1,8 +1,10 @@
 import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { CloseIcon } from '../../../_common/icons/index.js';
+import type { BookmarkBlockComponent } from '../../bookmark-block.js';
 import type { BookmarkBlockModel } from '../../bookmark-model.js';
 import { bookmarkModalStyles } from './styles.js';
 
@@ -11,16 +13,20 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
   static override styles = bookmarkModalStyles;
 
   @property({ attribute: false })
-  model!: BookmarkBlockModel;
+  bookmark!: BookmarkBlockComponent;
+  get bookmarkModel(): BookmarkBlockModel {
+    return this.bookmark.model;
+  }
 
-  @query('input.title')
+  @query('.title')
   titleInput!: HTMLInputElement;
-  @query('input.description')
+  @query('.description')
   descInput!: HTMLInputElement;
 
   override connectedCallback() {
     super.connectedCallback();
 
+    this.bookmark.root.selection.clear();
     this.updateComplete.then(() => {
       this.titleInput.focus();
       this.titleInput.setSelectionRange(0, this.titleInput.value.length);
@@ -39,7 +45,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
   };
 
   private _onConfirm = () => {
-    this.model.page.updateBlock(this.model, {
+    this.bookmark.page.updateBlock(this.bookmarkModel, {
       title: this.titleInput.value,
       description: this.descInput.value,
     });
@@ -47,11 +53,19 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
   };
 
   override render() {
-    const title = this.model.title ?? this.model.bookmarkTitle ?? 'Bookmark';
+    const title =
+      this.bookmarkModel.title ??
+      this.bookmarkModel.bookmarkTitle ??
+      'Bookmark';
 
     return html`<div class="bookmark-modal">
       <div class="bookmark-modal-mask" @click=${() => this.remove()}></div>
-      <div class="bookmark-modal-wrapper">
+      <div
+        class="bookmark-modal-wrapper"
+        style=${styleMap({
+          height: '320px',
+        })}
+      >
         <icon-button
           width="32px"
           height="32px"
@@ -61,29 +75,30 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
         >
 
         <div class="bookmark-modal-title">Edit</div>
-        <div class="bookmark-input-wrapper">
-          <label>Title</label>
+        <div class="bookmark-modal-input-wrapper">
           <input
             type="text"
-            class="bookmark-input title"
+            class="bookmark-modal-input title"
             placeholder="Title"
             value=${title}
             tabindex="0"
           />
         </div>
-        <div class="bookmark-input-wrapper">
-          <label>URL</label>
-          <input
+        <div class="bookmark-modal-input-wrapper">
+          <textarea
             type="text"
-            class="bookmark-input description"
+            class="bookmark-modal-input description"
             placeholder="Description"
-            value=${this.model.description ?? this.model.url}
+            .value=${this.bookmarkModel.description ?? ''}
             tabindex="0"
-          />
+            style=${styleMap({
+              height: '104px',
+            })}
+          ></textarea>
         </div>
         <div class="bookmark-modal-footer">
           <div
-            class="bookmark-confirm-button"
+            class="bookmark-modal-confirm-button"
             tabindex="0"
             @click=${this._onConfirm}
           >
@@ -95,9 +110,9 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
   }
 }
 
-export function toggleBookmarkEditModal(model: BookmarkBlockModel) {
+export function toggleBookmarkEditModal(bookmark: BookmarkBlockComponent) {
   const modal = new BookmarkEditModal();
-  modal.model = model;
+  modal.bookmark = bookmark;
   document.body.appendChild(modal);
 }
 
