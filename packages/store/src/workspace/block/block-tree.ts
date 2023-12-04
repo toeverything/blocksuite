@@ -4,6 +4,7 @@ import * as Y from 'yjs';
 import { native2Y } from '../../reactive/index.js';
 import type { BaseBlockModel, Schema } from '../../schema/index.js';
 import { internalPrimitives } from '../../schema/index.js';
+import type { Page } from '../page.js';
 import type { BlockOptions, YBlock } from './block.js';
 import { Block } from './block.js';
 
@@ -30,7 +31,7 @@ export class BlockTree {
     this._schema = schema;
   }
 
-  onBlockAdded(id: string, options: BlockOptions = {}) {
+  onBlockAdded(id: string, page: Page, options: BlockOptions = {}) {
     if (this._blocks.has(id)) {
       return;
     }
@@ -42,6 +43,8 @@ export class BlockTree {
 
     const block = new Block(this._schema, yBlock, options);
     this._blocks.set(id, block);
+    block.model.page = page;
+    block.model.created.emit();
   }
 
   onBlockRemoved(id: string) {
