@@ -23,7 +23,9 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
     super.connectedCallback();
 
     this.updateComplete.then(() => {
-      this.input.focus();
+      requestAnimationFrame(() => {
+        this.input.focus();
+      });
     });
     this.disposables.addFromEvent(document, 'keydown', this._onDocumentKeydown);
   }
