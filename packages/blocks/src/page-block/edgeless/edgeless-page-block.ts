@@ -681,10 +681,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initRemoteCursor();
     this._initSurface();
 
-    // FIXME
-    // if (!this.clipboardController._enabled) {
-    this.clipboard.init(this.page);
-    // }
+    if (!this.clipboardController._enabled) {
+      this.clipboard.init(this.page);
+    }
 
     this._initViewport();
 
