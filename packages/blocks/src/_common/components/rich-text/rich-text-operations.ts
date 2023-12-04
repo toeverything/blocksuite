@@ -521,7 +521,7 @@ function handleEmbedDividerCodeSibling(
       'affine:bookmark',
       'affine:attachment',
       'affine:surface-ref',
-    ] as const)
+    ])
   )
     return false;
 

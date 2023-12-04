@@ -23,10 +23,10 @@ import {
   Rect,
   stopPropagation,
 } from '../../../../_common/utils/index.js';
+import { toggleBookmarkCreateModal } from '../../../../bookmark-block/components/index.js';
 import {
   asyncFocusRichText,
   buildPath,
-  getBookmarkInitialProps,
   getHoveringNote,
   getServiceOrRegister,
 } from '../../../../index.js';
@@ -459,7 +459,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         }))
       );
     } else if (props.flavour === 'affine:bookmark') {
-      const url = await getBookmarkInitialProps();
+      const url = await toggleBookmarkCreateModal(this._root);
       url &&
         models.push({
           flavour: 'affine:bookmark',
@@ -564,7 +564,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         }))
       );
     } else if (data.flavour === 'affine:bookmark') {
-      const url = await getBookmarkInitialProps();
+      const url = await toggleBookmarkCreateModal(this._root);
       url &&
         models.push({
           flavour: 'affine:bookmark',
