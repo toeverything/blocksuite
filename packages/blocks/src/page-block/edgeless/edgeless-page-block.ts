@@ -352,7 +352,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
       })
     );
 
-    this._updateFrames();
     _disposables.add(
       slots.elementAdded.on(({ id }) => {
         if (isFrameBlock(this.surface.pickById(id))) {
@@ -874,7 +873,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-
+    this._updateFrames();
     this.root.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
     this.gesture = new Gesture(this);
