@@ -116,10 +116,9 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
     return html`
       <div class="line-controller line-start" style=${styleMap(start)}></div>
       <div class="line-controller line-end" style=${styleMap(end)}></div>
-      ${repeat(path, (point, index) => {
-        if (index === path.length - 1) {
-          return nothing;
-        }
+      ${repeat(path, (_, index) => {
+        if (index === path.length - 1) return nothing;
+
         return html`<edgeless-connector-indicator
           .edgeless=${this.edgeless}
           .connector=${this.connector}
