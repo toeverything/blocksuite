@@ -119,13 +119,7 @@ export class ReactiveYArray {
         if (change.insert) {
           const _arr = [change.insert].flat();
 
-          const proxyList = _arr
-            .filter(value => {
-              return !proxies.has(value);
-            })
-            .map(value => {
-              return createYProxy(value);
-            });
+          const proxyList = _arr.map(value => createYProxy(value));
 
           this._skipNext = true;
           this.array.splice(retain, 0, ...proxyList);
