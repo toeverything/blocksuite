@@ -1,3 +1,4 @@
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -93,7 +94,10 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
   }
 }
 
-export async function toggleBookmarkCreateModal(): Promise<null | string> {
+export async function toggleBookmarkCreateModal(
+  root: BlockSuiteRoot
+): Promise<null | string> {
+  root.selection.clear();
   const bookmarkCreateModal = new BookmarkCreateModal();
   return new Promise(resolve => {
     bookmarkCreateModal.onConfirm = url => {

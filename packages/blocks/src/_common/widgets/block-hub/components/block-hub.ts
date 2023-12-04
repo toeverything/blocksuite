@@ -459,7 +459,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         }))
       );
     } else if (props.flavour === 'affine:bookmark') {
-      const url = await toggleBookmarkCreateModal();
+      const url = await toggleBookmarkCreateModal(this._root);
       url &&
         models.push({
           flavour: 'affine:bookmark',
@@ -564,7 +564,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         }))
       );
     } else if (data.flavour === 'affine:bookmark') {
-      const url = await toggleBookmarkCreateModal();
+      const url = await toggleBookmarkCreateModal(this._root);
       url &&
         models.push({
           flavour: 'affine:bookmark',

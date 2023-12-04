@@ -26,7 +26,6 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.bookmark.root.selection.clear();
     this.updateComplete.then(() => {
       this.titleInput.focus();
       this.titleInput.setSelectionRange(0, this.titleInput.value.length);
@@ -111,6 +110,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
 }
 
 export function toggleBookmarkEditModal(bookmark: BookmarkBlockComponent) {
+  bookmark.root.selection.clear();
   const modal = new BookmarkEditModal();
   modal.bookmark = bookmark;
   document.body.appendChild(modal);

@@ -282,7 +282,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const url = await toggleBookmarkCreateModal();
+          const url = await toggleBookmarkCreateModal(pageElement.root);
           if (!url) return;
           const props = {
             flavour: 'affine:bookmark',

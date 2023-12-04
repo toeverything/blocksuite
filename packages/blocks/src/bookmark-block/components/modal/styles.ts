@@ -30,7 +30,7 @@ export const bookmarkModalStyles = css`
     z-index: 2;
 
     width: 360px;
-    height: 260px;
+    height: 230px;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-menu-shadow);
     border-radius: var(--affine-popover-radius);
