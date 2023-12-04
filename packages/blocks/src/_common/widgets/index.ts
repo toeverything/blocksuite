@@ -1,3 +1,4 @@
+export { BlockHubWidget } from './block-hub/index.js';
 export { AffineDocDraggingAreaWidget } from './doc-dragging-area/index.js';
 export { AffineDocRemoteSelectionWidget } from './doc-remote-selection/index.js';
 export { AffineDragHandleWidget } from './drag-handle/index.js';

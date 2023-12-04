@@ -2,9 +2,11 @@ import type { Disposable } from '@blocksuite/global/utils';
 import type { PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import type { AffineTextAttributes } from '../../../../_common/components/rich-text/virgo/types.js';
-import { LinkedPageIcon, PageIcon } from '../../../../_common/icons/index.js';
-import type { PageBlockComponent } from '../../../../page-block/types.js';
+import type { PageBlockComponent } from '../../../index.js';
+import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
+import { LinkedPageIcon, PageIcon } from '../../icons/index.js';
+
+export const DEFAULT_PAGE_NAME = 'Untitled';
 
 export type BackLink = {
   pageId: string;
@@ -12,14 +14,21 @@ export type BackLink = {
   type: NonNullable<AffineTextAttributes['reference']>['type'];
 };
 
-export const listenBacklinkList = (
+export type BacklinkData = BackLink &
+  PageMeta & {
+    jump: () => void;
+    icon: TemplateResult;
+  };
+
+export function listenBacklinkList(
   pageElement: PageBlockComponent,
   cb: (list: BacklinkData[]) => void
-): Disposable => {
+): Disposable {
   const metaMap = Object.fromEntries(
     pageElement.page.workspace.meta.pageMetas.map(v => [v.id, v])
   );
   const page = pageElement.page;
+
   const toData = (backlink: BackLink): BacklinkData => {
     const pageMeta = metaMap[backlink.pageId];
     if (!pageMeta) {
@@ -42,21 +51,19 @@ export const listenBacklinkList = (
       },
     };
   };
+
   const backlinkIndexer = page.workspace.indexer.backlink;
+
   const getList = () => {
     return backlinkIndexer
       .getBacklink(page.id)
       .filter(v => v.type === 'LinkedPage')
       .map(toData);
   };
+
   cb(getList());
+
   return backlinkIndexer.slots.indexUpdated.on(() => {
     cb(getList());
   });
-};
-export type BacklinkData = BackLink &
-  PageMeta & {
-    jump: () => void;
-    icon: TemplateResult;
-  };
-export const DEFAULT_PAGE_NAME = 'Untitled';
+}

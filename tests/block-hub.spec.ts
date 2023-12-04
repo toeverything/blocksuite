@@ -201,13 +201,13 @@ test('block hub card items should appear and disappear properly with correspondi
 
   await textMenu.hover();
   const blockHubTextContainer = page.locator(
-    '.affine-block-hub-container[type="text"]'
+    '.block-hub-cards-container[type="text"]'
   );
   await expect(blockHubTextContainer).toBeVisible();
 
   await listMenu.hover();
   const blockHubListContainer = page.locator(
-    '.affine-block-hub-container[type="list"]'
+    '.block-hub-cards-container[type="list"]'
   );
   await expect(blockHubListContainer).toBeVisible();
   await page.waitForTimeout(300);
@@ -230,7 +230,7 @@ test('block hub card items can disappear when clicking blank area', async ({
 
   await textMenu.hover();
   const blockHubTextContainer = page.locator(
-    '.affine-block-hub-container[type="text"]'
+    '.block-hub-cards-container[type="text"]'
   );
   await expect(blockHubTextContainer).toBeVisible();
 
@@ -238,7 +238,7 @@ test('block hub card items can disappear when clicking blank area', async ({
     const codeBlock = document.querySelector(selector);
     const bbox = codeBlock?.getBoundingClientRect() as DOMRect;
     return bbox;
-  }, '.affine-block-hub-container[type="text"]');
+  }, '.block-hub-cards-container[type="text"]');
 
   await page.mouse.click(bbox.left - 10, bbox.top - 10);
   await waitNextFrame(page);
@@ -319,7 +319,7 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
   const textMenuRect = await getCenterPosition(page, textMenu);
   await page.mouse.move(textMenuRect.x, textMenuRect.y);
   const blockHubTextContainer = page.locator(
-    '.affine-block-hub-container[type="text"]'
+    '.block-hub-cards-container[type="text"]'
   );
   await expect(blockHubTextContainer).toBeVisible();
 
@@ -389,7 +389,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
   const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
   await listMenu.hover();
   const blockHubListContainer = page.locator(
-    '.affine-block-hub-container[type="list"]'
+    '.block-hub-cards-container[type="list"]'
   );
   await expect(blockHubListContainer).toBeVisible();
 
@@ -459,7 +459,7 @@ test('should auto hide card list when dragging a card', async ({ page }) => {
   const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
   await listMenu.hover();
   const blockHubListContainer = page.locator(
-    '.affine-block-hub-container[type="list"]'
+    '.block-hub-cards-container[type="list"]'
   );
   await expect(blockHubListContainer).toBeVisible();
 
