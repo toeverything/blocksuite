@@ -38,8 +38,7 @@ async function queryUrlData(url: string): Promise<BookmarkBlockUrlData> {
     }
   } else {
     const response = await fetch(
-      //TODO: use AFFiNE worker
-      'https://link-preview.flrande-ch.workers.dev',
+      'https://link-preview.toeverything.workers.dev',
       {
         method: 'POST',
         headers: {
@@ -51,7 +50,6 @@ async function queryUrlData(url: string): Promise<BookmarkBlockUrlData> {
       }
     );
     const data: LinkPreviewResponseData = await response.json();
-
     return {
       title: data.title,
       description: data.description,

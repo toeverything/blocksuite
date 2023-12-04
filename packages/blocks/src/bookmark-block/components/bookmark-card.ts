@@ -44,7 +44,7 @@ export class BookmarkCard extends ShadowlessElement {
       box-shadow: var(--affine-shadow-1);
     }
 
-    .affine-bookmark-banner object,
+    .affine-bookmark-banner img,
     .affine-bookmark-banner svg {
       width: 140px;
       height: 93px;
@@ -78,7 +78,7 @@ export class BookmarkCard extends ShadowlessElement {
       fill: var(--affine-text-secondary-color);
       flex-shrink: 0;
     }
-    .affine-bookmark-icon object,
+    .affine-bookmark-icon img,
     .affine-bookmark-icon svg {
       width: 100%;
       height: 100%;
@@ -136,13 +136,7 @@ export class BookmarkCard extends ShadowlessElement {
   }
 
   override render() {
-    const {
-      url,
-      description = url,
-      icon = '',
-      image = '',
-      type,
-    } = this.bookmark.model;
+    const { url, description = url, icon, image, type } = this.bookmark.model;
     const title =
       this.bookmark.model.title ??
       this.bookmark.model.bookmarkTitle ??
@@ -168,7 +162,7 @@ export class BookmarkCard extends ShadowlessElement {
       >
         <div class="affine-bookmark-title">
           <div class="affine-bookmark-icon">
-            <object data=${icon}>${WebIcon16}</object>
+            ${icon ? html`<img src=${icon} />` : WebIcon16}
           </div>
           <div class="affine-bookmark-title-content">${title}</div>
         </div>
@@ -178,7 +172,7 @@ export class BookmarkCard extends ShadowlessElement {
       ${isEmbed
         ? nothing
         : html`<div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
-            <object data=${image}>${DefaultBanner}</object>
+            ${image ? html`<img src=${image} />` : DefaultBanner}
           </div>`}
     </div>`;
   }
