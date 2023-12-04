@@ -111,6 +111,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  @property({ attribute: false })
+  frames!: FrameBlockModel[];
+
   @query('.affine-block-children-container.edgeless')
   container!: HTMLDivElement;
 
@@ -367,7 +370,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     if (!surface) return nothing;
 
     const notes = surface.getBlocks([NOTE]);
-    const frames = surface.layer.frames;
     const layers = surface.layer.layers;
     const autoConnectedBlocks = new Map<AutoConnectElement, number>();
 
@@ -409,7 +411,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           <edgeless-frames-container
             .surface=${surface}
             .edgeless=${edgeless}
-            .frames=${frames}
+            .frames=${this.frames}
           >
           </edgeless-frames-container>
           ${readonly || this._isResizing
