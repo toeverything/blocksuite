@@ -5,7 +5,11 @@ import { z } from 'zod';
 export const affineTextAttributes = baseTextAttributes.extend({
   reference: z
     .object({
-      type: z.enum(['Subpage', 'LinkedPage']),
+      type: z.enum([
+        // @deprecated Subpage is deprecated, use LinkedPage instead
+        'Subpage',
+        'LinkedPage',
+      ]),
       pageId: z.string(),
     })
     .optional()
