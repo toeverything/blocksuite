@@ -195,6 +195,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   @state()
   private _mouseOnToolbar = true;
 
+  @state()
+  settingMenuShow = false;
+
   @state({
     hasChanged() {
       return true;
@@ -268,7 +271,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private _canHideToolbar() {
     const { type } = this.edgelessTool;
     return (
-      type === 'frameNavigator' && this._hideToolbar && !this._mouseOnToolbar
+      type === 'frameNavigator' &&
+      this._hideToolbar &&
+      !this._mouseOnToolbar &&
+      !this.settingMenuShow
     );
   }
 
@@ -486,6 +492,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         .hideToolbar=${this._hideToolbar}
         .onHideToolbarChange=${(hideToolbar: boolean) => {
           this._hideToolbar = hideToolbar;
+        }}
+        .popperShow=${this.settingMenuShow}
+        .setPopperShow=${(show: boolean) => {
+          this.settingMenuShow = show;
         }}
       >
       </edgeless-navigator-setting-button>

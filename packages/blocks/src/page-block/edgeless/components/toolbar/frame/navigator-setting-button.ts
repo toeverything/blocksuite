@@ -49,10 +49,13 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   `;
 
   @state()
-  private _popperShow = false;
-
-  @state()
   blackBackground = true;
+
+  @property({ attribute: false })
+  popperShow = false;
+
+  @property({ attribute: false })
+  setPopperShow: (show: boolean) => void = () => {};
 
   @property({ attribute: false })
   hideToolbar = false;
@@ -75,7 +78,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
     this._navigatorSettingPopper = createButtonPopper(
       this._navigatorSettingButton,
       this._navigatorSettingMenu,
-      ({ display }) => (this._popperShow = display === 'show')
+      ({ display }) => this.setPopperShow(display === 'show')
     );
 
     this._tryRestoreSettings();
@@ -102,7 +105,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-tool-icon-button
         class="navigator-setting-button"
-        .tooltip=${this._popperShow ? '' : 'Settings'}
+        .tooltip=${this.popperShow ? '' : 'Settings'}
         @click=${() => {
           this._navigatorSettingPopper?.toggle();
         }}
@@ -124,9 +127,6 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
             .on=${this.hideToolbar}
             .onChange=${(checked: boolean) => {
               this.onHideToolbarChange && this.onHideToolbarChange(checked);
-              if (checked) {
-                this._navigatorSettingPopper?.hide();
-              }
             }}
           >
           </toggle-switch>

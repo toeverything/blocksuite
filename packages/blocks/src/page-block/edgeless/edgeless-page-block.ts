@@ -1,5 +1,6 @@
 import './components/toolbar/edgeless-toolbar.js';
 import '../../surface-block/surface-block.js';
+import './components/block-portal/frame/edgeless-frame.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
@@ -904,6 +905,13 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return html`${this.renderModel(this.surfaceBlockModel)}
       <edgeless-block-portal-container .edgeless=${this}>
       </edgeless-block-portal-container>
+      <edgeless-frames-container
+        .surface=${this.surface}
+        .edgeless=${this}
+        .frames=${this.page.getBlockByFlavour(FRAME)}
+        .onlyTitle=${true}
+      >
+      </edgeless-frames-container>
       <div class="widgets-container">${widgets}</div> `;
   }
 }

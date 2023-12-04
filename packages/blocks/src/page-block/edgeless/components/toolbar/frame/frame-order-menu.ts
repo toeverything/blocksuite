@@ -52,6 +52,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
 
     .index {
       width: 20px;
+      min-width: 20px;
       height: 24px;
       text-align: center;
       font-weight: 400;
@@ -63,6 +64,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
 
     .image {
       width: 70px;
+      min-width: 70px;
       height: 45px;
       border-radius: 4px;
       box-shadow: 0px 1px 6px 0px rgba(0, 0, 0, 0.16);
@@ -75,6 +77,9 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       height: 22px;
       line-height: 22px;
       color: var(--affine-text-primary-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .clone {
@@ -87,6 +92,16 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       box-shadow: var(--affine-menu-shadow);
       background-color: var(--affine-white);
       pointer-events: none;
+    }
+
+    .indicator-line {
+      visibility: hidden;
+      position: absolute;
+      z-index: 1;
+      left: 8px;
+      background-color: var(--affine-primary-color);
+      height: 1px;
+      width: 90%;
     }
   `;
   @state()
@@ -106,6 +121,9 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
 
   @query('.edgeelss-frame-order-items-container')
   private _container!: HTMLDivElement;
+
+  @query('.indicator-line')
+  private _indicatorLine!: HTMLDivElement;
 
   @query('.clone')
   private _clone!: HTMLDivElement;
@@ -143,6 +161,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       const draggable = ele.closest('.draggable');
       if (!draggable) return;
       const clone = this._clone;
+      const indicatorLine = this._indicatorLine;
       clone.style.visibility = 'visible';
 
       const rect = draggable.getBoundingClientRect();
@@ -168,12 +187,22 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       moveAt(e.clientX, e.clientY);
 
       this._disposables.addFromEvent(document, 'pointermove', e => {
+        indicatorLine.style.visibility = 'visible';
         moveAt(e.clientX, e.clientY);
         if (isInsideContainer(e)) {
-          newIndex = parseInt(
-            (e.pageY + this._container.scrollTop - start) / (rect.height + 10) +
-              ''
-          );
+          const relativeY = e.pageY + this._container.scrollTop - start;
+          let top = 0;
+          if (relativeY < rect.height / 2) {
+            newIndex = 0;
+            top = 4;
+          } else {
+            newIndex = Math.ceil(
+              (relativeY - rect.height / 2) / (rect.height + 10)
+            );
+            top = 8 + newIndex * rect.height + (newIndex - 0.5) * 10;
+          }
+
+          indicatorLine.style.top = top - this._container.scrollTop + 'px';
           return;
         }
         newIndex = -1;
@@ -181,23 +210,20 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
 
       this._disposables.addFromEvent(document, 'pointerup', () => {
         clone.style.visibility = 'hidden';
+        indicatorLine.style.visibility = 'hidden';
         if (
-          newIndex !== -1 &&
           newIndex >= 0 &&
-          newIndex <= this.frames.length - 1 &&
-          newIndex !== index
+          newIndex <= this.frames.length &&
+          newIndex !== index &&
+          newIndex !== index + 1
         ) {
           const before = this.frames[newIndex - 1]?.index || null;
-          const middle = this.frames[newIndex].index || null;
-          const after = this.frames[newIndex + 1]?.index || null;
+          const after = this.frames[newIndex]?.index || null;
 
           const frame = this.frames[index];
 
           this.edgeless.surface.updateElement(frame.id, {
-            index:
-              newIndex < index
-                ? generateKeyBetween(before, middle)
-                : generateKeyBetween(middle, after),
+            index: generateKeyBetween(before, after),
           });
           this.edgeless.page.captureSync();
 
@@ -238,6 +264,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
             </div>
           `
         )}
+        <div class="indicator-line"></div>
         <div class="clone item">
           ${frame
             ? html`<div class="drag-indicator"></div>
