@@ -42,32 +42,9 @@ import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import { Bound, clamp } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isFrameBlock } from '../../utils/query.js';
+import { launchIntoFullscreen } from '../utils.js';
 
 const { FRAME } = EdgelessBlockType;
-
-export function launchIntoFullscreen(element: Element) {
-  if (element.requestFullscreen) {
-    element.requestFullscreen();
-  } else if (
-    'mozRequestFullScreen' in element &&
-    element.mozRequestFullScreen instanceof Function
-  ) {
-    // Firefox
-    element.mozRequestFullScreen();
-  } else if (
-    'webkitRequestFullscreen' in element &&
-    element.webkitRequestFullscreen instanceof Function
-  ) {
-    // Chrome, Safari and Opera
-    element.webkitRequestFullscreen();
-  } else if (
-    'msRequestFullscreen' in element &&
-    element.msRequestFullscreen instanceof Function
-  ) {
-    // IE/Edge
-    element.msRequestFullscreen();
-  }
-}
 
 const HIDE_TOOLBAR_KEY = 'blocksuite:presentation:hideToolbar';
 

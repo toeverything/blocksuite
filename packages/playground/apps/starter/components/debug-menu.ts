@@ -38,6 +38,7 @@ import type { Pane } from 'tweakpane';
 
 import type { CustomCopilotPanel } from './copilot/custom-copilot-panel.js';
 import { extendFormatBar } from './custom-format-bar.js';
+import type { CustomFramesPanel } from './custom-frames-panel.js';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
@@ -150,6 +151,9 @@ export class DebugMenu extends ShadowlessElement {
   navigationPanel!: CustomNavigationPanel;
 
   @property({ attribute: false })
+  framesPanel!: CustomFramesPanel;
+
+  @property({ attribute: false })
   copilotPanel!: CustomCopilotPanel;
 
   @state()
@@ -254,6 +258,10 @@ export class DebugMenu extends ShadowlessElement {
 
   private _toggleNavigationPanel() {
     this.navigationPanel.toggleDisplay();
+  }
+
+  private _toggleFramesPanel() {
+    this.framesPanel.toggleDisplay();
   }
 
   private _toggleCopilotPanel() {
@@ -563,6 +571,9 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleNavigationPanel}>
                 Toggle Navigation Panel
+              </sl-menu-item>
+              <sl-menu-item @click=${this._toggleFramesPanel}>
+                Toggle Frames Panel
               </sl-menu-item>
               <sl-menu-item @click=${this._extendFormatBar}>
                 Extend Format Bar

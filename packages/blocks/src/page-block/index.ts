@@ -5,6 +5,10 @@ export {
   DEFAULT_SHAPE_STROKE_COLOR,
 } from './edgeless/components/component-toolbar/change-shape-button.js';
 export {
+  FramesPanel,
+  registerFramesSidebarComponents,
+} from './edgeless/components/frames-sidebar/frames-panel.js';
+export {
   registerTOCComponents,
   TOCNotesPanel,
 } from './edgeless/components/notes-toc-panel/toc-panel.js';
