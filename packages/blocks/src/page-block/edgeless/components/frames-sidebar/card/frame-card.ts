@@ -1,3 +1,5 @@
+import './frame-preview.js';
+
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
@@ -47,7 +49,7 @@ const styles = css`
     position: relative;
   }
 
-  .frame-card-title {
+  .frame-card-title-container {
     display: flex;
     width: 100%;
     height: 20px;
@@ -58,7 +60,7 @@ const styles = css`
     cursor: default;
   }
 
-  .frame-card-title .card-index {
+  .frame-card-title-container .card-index {
     display: flex;
     align-self: center;
     align-items: center;
@@ -76,7 +78,7 @@ const styles = css`
     line-height: 16px;
   }
 
-  .frame-card-title .card-content {
+  .frame-card-title-container .card-title {
     flex: 1 0 0;
     height: 20px;
     color: var(--affine-text-primary-color);
@@ -177,13 +179,13 @@ export class FrameCard extends WithDisposable(LitElement) {
   @query('.frame-card-container')
   containerElement!: HTMLElement;
 
-  @query('.frame-card-title')
+  @query('.frame-card-title-container')
   titleContainer!: HTMLElement;
 
-  @query('.frame-card-title .card-index')
+  @query('.frame-card-title-container .card-index')
   titleIndexElement!: HTMLElement;
 
-  @query('.frame-card-title .card-content')
+  @query('.frame-card-title-container .card-title')
   titleContentElement!: HTMLElement;
 
   private _dispatchSelectEvent(e: MouseEvent) {
@@ -258,11 +260,11 @@ export class FrameCard extends WithDisposable(LitElement) {
     super.connectedCallback();
     const { disposables } = this;
 
-    disposables.add(
-      this.frame.propsUpdated.on(({ key }) => {
-        console.log('frame updated! Key is : ', key);
-      })
-    );
+    // disposables.add(
+    //   this.frame.propsUpdated.on(({ key }) => {
+    //     this.requestUpdate();
+    //   })
+    // );
   }
 
   override firstUpdated() {
@@ -296,9 +298,9 @@ export class FrameCard extends WithDisposable(LitElement) {
       class="frame-card-container ${this.status ?? ''}"
       style=${containerStyle}
     >
-      <div class="frame-card-title">
+      <div class="frame-card-title-container">
         <div class="card-index">${this.cardIndex + 1}</div>
-        <div class="card-content">${this.frame.title}</div>
+        <div class="card-title">${this.frame.title}</div>
       </div>
       <div
         class="frame-card-body"
@@ -306,6 +308,10 @@ export class FrameCard extends WithDisposable(LitElement) {
         @dblclick=${this._dispatchFitViewEvent}
         @mousedown=${this._dispatchDragEvent}
       >
+        <frame-preview
+          .edgeless=${this.edgeless}
+          .frame=${this.frame}
+        ></frame-preview>
         ${this._renderDraggingCardNumber()}
       </div>
     </div>`;

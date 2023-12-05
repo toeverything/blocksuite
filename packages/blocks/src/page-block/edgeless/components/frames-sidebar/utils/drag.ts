@@ -1,6 +1,7 @@
 import { on, once } from '../../../../../_common/utils/index.js';
 import { lastN } from '../../../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../../../models.js';
+import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { FramesSidebarBody } from '../body/frames-sidebar-body.js';
 import { FrameCard } from '../card/frame-card.js';
 
@@ -27,6 +28,7 @@ export function startDragging(
       x: number;
       y: number;
     };
+    edgeless: EdgelessPageBlockComponent;
   }
 ) {
   const {
@@ -41,6 +43,7 @@ export function startDragging(
   const cardElements = lastN(frames, 2).map((frame, idx, arr) => {
     const el = new FrameCard();
 
+    el.edgeless = options.edgeless;
     el.frame = frame.frame;
     el.cardIndex = frame.cardIndex;
     el.frameIndex = frame.frameIndex;

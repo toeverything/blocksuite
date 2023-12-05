@@ -9,6 +9,7 @@ import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { FramesSidebarBody } from './body/frames-sidebar-body.js';
 import { FrameCard } from './card/frame-card.js';
 import { FrameCardTitleEditor } from './card/frame-card-title-editor.js';
+import { FramePreview } from './card/frame-preview.js';
 import { FramesSettingMenu } from './header/frames-setting-menu.js';
 import { FramesSidebarHeader } from './header/frames-sidebar-header.js';
 
@@ -53,6 +54,7 @@ const componentsMap = {
   'frames-setting-menu': FramesSettingMenu,
   'frame-card': FrameCard,
   'frame-card-title-editor': FrameCardTitleEditor,
+  'frame-preview': FramePreview,
 };
 
 export function registerFramesSidebarComponents(

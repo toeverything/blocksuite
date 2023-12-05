@@ -93,7 +93,6 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless.slots.navigatorSettingUpdated.emit({
       blackBackground: this.blackBackground,
     });
-    console.log('sidebar');
   };
 
   override connectedCallback() {
@@ -103,7 +102,6 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
-    console.log('disconnectedCallback');
   }
 
   override firstUpdated() {

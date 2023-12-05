@@ -252,6 +252,7 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
         y: e.detail.clientY,
       },
       frameListContainer: this.frameListContainer,
+      edgeless: this.edgeless,
       onDragEnd: insertIdx => {
         this._dragging = false;
         this.insertIndex = undefined;
