@@ -14,11 +14,8 @@ export class CustomFramesPanel extends WithDisposable(LitElement) {
       border: 1px solid var(--affine-border-color, #e3e2e4);
       background: var(--affine-background-overlay-panel-color);
       height: 100vh;
-      width: 316px;
-      display: flex;
-      justify-content: center;
+      width: 350px;
       box-sizing: border-box;
-      padding-top: 12px;
       z-index: 1;
     }
   `;

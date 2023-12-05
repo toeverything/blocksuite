@@ -6,7 +6,7 @@ const styles = css`
     display: flex;
   }
 
-  input[type='checkbox'] {
+  .switch {
     height: 0;
     width: 0;
     visibility: hidden;
@@ -71,13 +71,14 @@ export class ToggleSwitch extends LitElement {
 
   override render() {
     return html`
-      <input
-        type="checkbox"
-        id="switch"
-        ?checked=${this.on}
-        @change=${this._toggleSwitch}
-      />
-      <label for="switch" class=${this.on ? 'on' : ''}></label>
+      <label class=${this.on ? 'on' : ''}>
+        <input
+          type="checkbox"
+          class="switch"
+          ?checked=${this.on}
+          @change=${this._toggleSwitch}
+        />
+      </label>
     `;
   }
 }

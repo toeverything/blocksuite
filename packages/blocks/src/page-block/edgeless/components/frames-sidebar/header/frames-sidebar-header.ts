@@ -21,6 +21,9 @@ const styles = css`
     align-items: center;
     justify-content: space-between;
     font-family: sans-serif;
+
+    box-sizing: border-box;
+    padding: 0 8px;
   }
 
   .all-frames-setting {
@@ -30,6 +33,15 @@ const styles = css`
     width: 100px;
     height: 24px;
     margin: 6px 0;
+  }
+
+  .all-frames-setting-button svg {
+    color: var(--affine-icon-secondary);
+  }
+
+  .all-frames-setting-button:hover svg,
+  .all-frames-setting-button.active svg {
+    color: var(--affine-icon-color);
   }
 
   .all-frames-setting-label {
@@ -130,7 +142,9 @@ export class FramesSidebarHeader extends WithDisposable(LitElement) {
       <div class="all-frames-setting">
         <span class="all-frames-setting-label">All frames</span>
         <edgeless-tool-icon-button
-          class="all-frames-setting-button"
+          class="all-frames-setting-button ${this._settingPopperShow
+            ? 'active'
+            : ''}"
           .tooltip=${this._settingPopperShow ? '' : 'All Frames Settings'}
           .tipPosition=${'top'}
           .iconContainerPadding=${2}

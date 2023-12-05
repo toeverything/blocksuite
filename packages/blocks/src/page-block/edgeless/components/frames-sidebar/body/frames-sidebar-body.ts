@@ -30,25 +30,15 @@ type FrameListItem = {
 const { FRAME } = EdgelessBlockType;
 
 const styles = css`
-  :host {
-    display: flex;
+  .frame-list-container {
+    display: block;
+    box-sizing: border-box;
+    flex-direction: column;
+    flex-grow: 1;
     width: 100%;
     height: 100%;
-  }
 
-  .frames-sidebar-body {
-    display: flex;
-    width: 100%;
-  }
-
-  .frame-list-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    gap: 12px;
     position: relative;
-
-    /* overflow-y: scroll; */
   }
 
   .no-frames-container {
@@ -308,7 +298,7 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
         ? html`<div
             class="insert-indicator"
             style="transform: translateY(${this.insertIndex *
-              (this._frameElementHeight + 10) +
+              this._frameElementHeight +
             10}px)"
           ></div>`
         : nothing}
@@ -351,11 +341,9 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="frames-sidebar-body">
-      ${this._frameItems.length
-        ? this._renderFrameList()
-        : this._renderEmptyContent()}
-    </div>`;
+    return html` ${this._frameItems.length
+      ? this._renderFrameList()
+      : this._renderEmptyContent()}`;
   }
 }
 

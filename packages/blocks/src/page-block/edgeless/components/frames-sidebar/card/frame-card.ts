@@ -47,6 +47,7 @@ const styles = css`
     gap: 8px;
 
     position: relative;
+    padding: 12px 0;
   }
 
   .frame-card-title-container {

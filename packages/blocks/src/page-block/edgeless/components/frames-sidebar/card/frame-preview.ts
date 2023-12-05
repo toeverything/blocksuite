@@ -11,11 +11,8 @@ const styles = css`
     display: flex;
     width: 100%;
     height: 100%;
-  }
-
-  .frame-preview-container canvas {
-    width: 100%;
-    height: 100%;
+    align-items: center;
+    justify-content: center;
   }
 `;
 export class FramePreview extends WithDisposable(LitElement) {
@@ -33,6 +30,8 @@ export class FramePreview extends WithDisposable(LitElement) {
   private _createScaledCanvas(canva: HTMLCanvasElement) {
     const scaledCanvas = document.createElement('canvas');
 
+    scaledCanvas.width = 240;
+    scaledCanvas.height = 160;
     const ctx = scaledCanvas.getContext('2d');
     assertExists(ctx);
     ctx.drawImage(canva, 0, 0, scaledCanvas.width, scaledCanvas.height);
@@ -51,6 +50,10 @@ export class FramePreview extends WithDisposable(LitElement) {
 
   override firstUpdated() {
     this._createFramePreview();
+
+    this.disposables.add(
+      this.frame.propsUpdated.on(() => this.requestUpdate())
+    );
   }
 
   override render() {
