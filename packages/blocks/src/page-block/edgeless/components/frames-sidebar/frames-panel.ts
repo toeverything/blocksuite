@@ -5,7 +5,6 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import { ToggleSwitch } from '../../../../_common/components/toggle-switch.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { FramesSidebarBody } from './body/frames-sidebar-body.js';
 import { FrameCard } from './card/frame-card.js';

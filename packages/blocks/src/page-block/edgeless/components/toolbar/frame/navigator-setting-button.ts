@@ -6,11 +6,10 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { blackBackgroundKey } from '../../../../../_common/edgeless/frame/consts.js';
 import { NavigatorSettingsIcon } from '../../../../../_common/icons/edgeless.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { createButtonPopper } from '../../utils.js';
-
-const blackBackgroundKey = 'blocksuite:' + 'presentation' + ':blackBackground';
 
 @customElement('edgeless-navigator-setting-button')
 export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
