@@ -1277,7 +1277,7 @@ test('should not show option menu of image on block selection', async ({
   await expect(page.locator('.selected,affine-block-selection')).toHaveCount(1);
 });
 
-test('should be cleared when dragging block card from BlockHub', async ({
+test.skip('should be cleared when dragging block card from BlockHub', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);

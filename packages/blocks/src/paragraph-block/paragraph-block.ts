@@ -14,7 +14,6 @@ import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { affineAttributeRenderer } from '../_common/components/rich-text/virgo/attribute-renderer.js';
 import { affineTextAttributes } from '../_common/components/rich-text/virgo/types.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
-import { BlockHubIcon20 } from '../_common/icons/index.js';
 import {
   getThemeMode,
   isPageMode,
@@ -66,7 +65,7 @@ function TipsPlaceholder(model: BaseBlockModel, tipsPos: Style) {
         @pointerdown=${tipsPlaceholderPreventDefault}
         style=${styleMap(tipsPos)}
       >
-        Click ${BlockHubIcon20} to insert blocks, type '/' for commands
+        Type '/' for commands
       </div>
     `;
   }
