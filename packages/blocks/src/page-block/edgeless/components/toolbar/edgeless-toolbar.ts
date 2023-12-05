@@ -439,11 +439,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     this.edgeless.slots.fullScrennToggled.emit();
   }
 
-  private get frameNavigatorContent() {
+  private get _FrameNavigator() {
     const current = this._currentFrameIndex;
     const frames = this._frames;
     const frame = frames[current];
-    const { readonly } = this.edgeless.page;
 
     return html`
       <edgeless-tool-icon-button
@@ -500,25 +499,21 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         }}
       >
       </edgeless-navigator-setting-button>
-      ${readonly
-        ? nothing
-        : html`
-            <div class="short-divider"></div>
-            <div
-              class="edgeless-frame-navigator-stop"
-              @click=${() => {
-                this.setEdgelessTool({ type: 'default' });
-                document.fullscreenElement && this._toggleFullScreen();
-                setTimeout(() => this._moveToCurrentFrame(), 400);
-              }}
-            >
-              Stop
-            </div>
-          `}
+      <div class="short-divider"></div>
+      <div
+        class="edgeless-frame-navigator-stop"
+        @click=${() => {
+          this.setEdgelessTool({ type: 'pan', panning: false });
+          document.fullscreenElement && this._toggleFullScreen();
+          setTimeout(() => this._moveToCurrentFrame(), 400);
+        }}
+      >
+        Stop
+      </div>
     `;
   }
 
-  private _renderTools() {
+  private _Tools() {
     return html`
       <div class="full-divider"></div>
       <div class="brush-and-eraser">
@@ -560,7 +555,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     `;
   }
 
-  private get defaultContent() {
+  private get _DefaultContent() {
     const { page } = this.edgeless;
 
     return html`<div class="edgeless-toolbar-left-part">
@@ -606,7 +601,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
               .setEdgelessTool=${this.setEdgelessTool}
             ></edgeless-note-tool-button>
           `}
-      ${this._renderTools()} `;
+      ${this._Tools()} `;
   }
 
   override render() {
@@ -616,9 +611,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
 
     const Content =
-      type === 'frameNavigator'
-        ? this.frameNavigatorContent
-        : this.defaultContent;
+      type === 'frameNavigator' ? this._FrameNavigator : this._DefaultContent;
     return html`
       <style>
         .edgeless-toolbar-container {
