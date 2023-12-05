@@ -16,7 +16,7 @@
     "vue": "^3.3.8"
   },
   "scripts": {
-    "typedoc": "pnpm -C $(git rev-parse --show-toplevel) build:presets && typedoc --options $(git rev-parse --show-toplevel)/typedoc.json",
+    "typedoc": "pnpm -C ../.. build:packages && typedoc --options ../../typedoc.json",
     "dev": "pnpm run typedoc && vitepress dev --port 5200",
     "build": "pnpm run typedoc && vitepress build",
     "build:vercel": "pnpm run typedoc && vitepress build",

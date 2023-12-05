@@ -17,7 +17,7 @@ packages=(
 
 npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
 
-pnpm build:presets
+pnpm build:packages
 
 for package in "${packages[@]}"
 do
