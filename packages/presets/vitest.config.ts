@@ -15,6 +15,7 @@ export default defineConfig(configEnv =>
         headless: true,
         name: 'chromium',
         provider: 'playwright',
+        isolate: false,
         providerOptions: {},
       },
       deps: {
