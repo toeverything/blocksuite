@@ -274,7 +274,7 @@ export class ContentParser {
     edgeless?: EdgelessPageBlockComponent,
     nodes?: TopLevelBlockModel[],
     surfaces?: SurfaceElement[],
-    blockQuery: (id: BaseBlockModel) => Element | null = getBlockElementByModel,
+    blockElementGetter: (model: BaseBlockModel) => Element | null = () => null,
     edgelessBackground?: {
       zoom: number;
     }
@@ -338,7 +338,7 @@ export class ContentParser {
           blockBound.h
         );
       }
-      const blockElement = blockQuery(block)?.parentElement;
+      const blockElement = blockElementGetter(block)?.parentElement;
 
       if (blockElement) {
         const blockBound = xywhArrayToObject(block);
@@ -358,7 +358,7 @@ export class ContentParser {
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
           const element = blocksInsideFrame[i];
-          const htmlElement = blockQuery(element)?.parentElement;
+          const htmlElement = blockElementGetter(element)?.parentElement;
           const blockBound = xywhArrayToObject(element);
           const canvasData = await html2canvas(htmlElement as HTMLElement);
 

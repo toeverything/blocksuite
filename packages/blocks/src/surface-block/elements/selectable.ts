@@ -18,7 +18,7 @@ export const EdgelessSelectableMixin = <
   originalClass: T
 ) =>
   class extends originalClass {
-    override get gridBound() {
+    override get elementBound() {
       const bound = Bound.deserialize(this.xywh);
       return Bound.from(
         getBoundsWithRotation({ ...bound, rotate: this.rotate })

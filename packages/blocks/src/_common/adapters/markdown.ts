@@ -20,12 +20,12 @@ import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import { sha } from '@blocksuite/store';
 import type { DeltaInsert } from '@blocksuite/virgo/types';
 import type { Heading, Root, RootContentMap } from 'mdast';
-import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
+import { remarkGfm } from './gfm.js';
 
 export type Markdown = string;
 
@@ -105,7 +105,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       );
       sliceAssetsIds.push(...assetsIds);
       buffer += this._astToMardown(ast);
-      buffer += '\n\n';
     }
     const markdown = buffer;
     return {
@@ -122,7 +121,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       type: 'block',
       id: nanoid('block'),
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [],
     };
     return {
@@ -133,11 +137,37 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         createDate: +new Date(),
         tags: [],
       },
-      blocks: await this._traverseMarkdown(
-        markdownAst,
-        blockSnapshotRoot as BlockSnapshot,
-        payload.assets
-      ),
+      blocks: {
+        type: 'block',
+        id: nanoid('block'),
+        flavour: 'affine:page',
+        props: {
+          title: {
+            '$blocksuite:internal:text$': true,
+            delta: [
+              {
+                insert: 'Untitled',
+              },
+            ],
+          },
+        },
+        children: [
+          {
+            type: 'block',
+            id: nanoid('block'),
+            flavour: 'affine:surface',
+            props: {
+              elements: {},
+            },
+            children: [],
+          },
+          await this._traverseMarkdown(
+            markdownAst,
+            blockSnapshotRoot as BlockSnapshot,
+            payload.assets
+          ),
+        ],
+      },
     };
   }
 
@@ -149,7 +179,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       type: 'block',
       id: nanoid('block'),
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [],
     };
     return this._traverseMarkdown(
@@ -167,7 +202,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       type: 'block',
       id: nanoid('block'),
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [],
     };
     return {
@@ -734,7 +774,13 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   };
 
   private _astToMardown(ast: Root) {
-    return unified().use(remarkGfm).use(remarkStringify).stringify(ast);
+    return unified()
+      .use(remarkGfm)
+      .use(remarkStringify, {
+        resourceLink: true,
+      })
+      .stringify(ast)
+      .replace(/&#x20;\n/g, ' \n');
   }
 
   private _markdownToAst(markdown: Markdown) {
@@ -777,11 +823,18 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         };
       }
       if (delta.attributes?.link) {
-        mdast = {
-          type: 'link',
-          url: delta.attributes.link,
-          children: [mdast],
-        };
+        if (delta.insert === '') {
+          mdast = {
+            type: 'text',
+            value: delta.attributes.link,
+          };
+        } else if (delta.insert !== delta.attributes.link) {
+          mdast = {
+            type: 'link',
+            url: delta.attributes.link,
+            children: [mdast],
+          };
+        }
       }
       return mdast;
     });

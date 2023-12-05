@@ -31,8 +31,8 @@ export function calcDropTarget(
   point: Point,
   model: BaseBlockModel,
   element: Element,
-  draggingElements: BlockComponentElement[],
-  scale: number,
+  draggingElements: BlockComponentElement[] = [],
+  scale: number = 1,
   flavour: string | null = null // for block-hub
 ): DropResult | null {
   const schema = model.page.getSchemaByFlavour('affine:database');

@@ -1,6 +1,5 @@
 import type { BlockStdProvider } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -8,6 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { createLitPortal } from '../../_common/components/portal.js';
 import { MoreIcon } from '../../_common/icons/index.js';
+import type { BookmarkBlockModel } from '../bookmark-model.js';
 import { BookmarkOperationMenu } from './bookmark-operation-popper.js';
 import {
   config,
@@ -39,7 +39,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!: BaseBlockModel;
+  model!: BookmarkBlockModel;
 
   @property({ attribute: false })
   onSelected?: ToolbarActionCallback & MenuActionCallback;

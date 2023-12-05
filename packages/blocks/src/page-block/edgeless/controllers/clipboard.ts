@@ -4,12 +4,15 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { type BlockSnapshot, fromJSON, Job } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
+import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
   getBlockElementByModel,
+  getBlockElementByPath,
   getEditorContainer,
   isPageMode,
 } from '../../../_common/utils/query.js';
@@ -30,7 +33,6 @@ import {
   type CanvasElement,
   GroupElement,
 } from '../../../surface-block/elements/index.js';
-import type { SurfaceElement } from '../../../surface-block/elements/surface-element.js';
 import { compare } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
@@ -40,7 +42,6 @@ import {
 } from '../../../surface-block/utils/xywh.js';
 import type { ClipboardController } from '../../clipboard/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { xywhArrayToObject } from '../utils/convert.js';
 import { deleteElements } from '../utils/crud.js';
 import {
   isCanvasElementWithText,
@@ -117,6 +118,24 @@ export class EdgelessClipboardController implements ReactiveController {
       return true;
     });
   };
+
+  private _blockElmentGetter(model: BaseBlockModel) {
+    if (matchFlavours(model, ['affine:image', 'affine:frame'])) {
+      let current: BaseBlockModel | null = model;
+      const path: string[] = [];
+      while (current) {
+        // Top level image render under page block not surface block
+        if (!matchFlavours(current, ['affine:surface'])) {
+          path.unshift(current.id);
+        }
+        current = current.page.getParent(current);
+      }
+
+      return getBlockElementByPath(path);
+    } else {
+      return getBlockElementByModel(model);
+    }
+  }
 
   private _onCopy = async (
     _context: UIEventStateContext,
@@ -471,13 +490,7 @@ export class EdgelessClipboardController implements ReactiveController {
     );
   }
 
-  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
-    const blocksLen = blocks.length;
-    const shapesLen = shapes.length;
-
-    if (blocksLen + shapesLen === 0) return;
-
-    // sort by `index`
+  async toCanvas(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
     blocks.sort(compare);
     shapes.sort(compare);
 
@@ -489,9 +502,7 @@ export class EdgelessClipboardController implements ReactiveController {
       bounds.push(Bound.deserialize(shape.xywh));
     });
     const bound = getCommonBound(bounds);
-    if (!bound) {
-      return;
-    }
+    assertExists(bound, 'bound not exist');
 
     const canvas = await this._edgelessToCanvas(
       this.host,
@@ -499,9 +510,16 @@ export class EdgelessClipboardController implements ReactiveController {
       blocks,
       shapes
     );
+    return canvas;
+  }
 
+  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+    const blocksLen = blocks.length;
+    const shapesLen = shapes.length;
+
+    if (blocksLen + shapesLen === 0) return;
+    const canvas = await this.toCanvas(blocks, shapes);
     assertExists(canvas);
-
     // @ts-ignore
     if (window.apis?.clipboard?.copyAsImageFromString) {
       // @ts-ignore
@@ -569,7 +587,7 @@ export class EdgelessClipboardController implements ReactiveController {
     edgeless: EdgelessPageBlockComponent,
     bound: IBound,
     nodes?: TopLevelBlockModel[],
-    surfaces?: SurfaceElement[]
+    canvasElements: CanvasElement[] = []
   ): Promise<HTMLCanvasElement | undefined> {
     const root = this.page.root;
     if (!root) return;
@@ -646,10 +664,12 @@ export class EdgelessClipboardController implements ReactiveController {
       proxy: _imageProxyEndpoint,
     };
 
-    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
-    for (const nodeElement of nodeElements) {
-      const blockElement = getBlockElementByModel(nodeElement)?.parentElement;
-      const blockBound = xywhArrayToObject(nodeElement);
+    const _drawTopLevelBlock = async (
+      block: TopLevelBlockModel,
+      isInFrame = false
+    ) => {
+      const blockElement = this._blockElmentGetter(block)?.parentElement;
+      const blockBound = Bound.deserialize(block.xywh);
       const canvasData = await html2canvas(
         blockElement as HTMLElement,
         html2canvasOption
@@ -659,14 +679,40 @@ export class EdgelessClipboardController implements ReactiveController {
         blockBound.x - bound.x + 50,
         blockBound.y - bound.y + 50,
         blockBound.w,
-        blockBound.h
+        isInFrame
+          ? (blockBound.w / canvasData.width) * canvasData.height
+          : blockBound.h
       );
+    };
+
+    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
+    for (const nodeElement of nodeElements) {
+      await _drawTopLevelBlock(nodeElement);
+
+      if (nodeElement.flavour === EdgelessBlockType.FRAME) {
+        const blocksInsideFrame: TopLevelBlockModel[] = [];
+        this.surface.frame
+          .getElementsInFrame(nodeElement, false)
+          .forEach(ele => {
+            if (isTopLevelBlock(ele)) {
+              blocksInsideFrame.push(ele);
+            } else {
+              canvasElements.push(ele);
+            }
+          });
+
+        for (let i = 0; i < blocksInsideFrame.length; i++) {
+          const element = blocksInsideFrame[i];
+          await _drawTopLevelBlock(element, true);
+        }
+      }
+
       this._checkCanContinueToCanvas(pathname, pageMode);
     }
 
     const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(
       bound,
-      surfaces
+      canvasElements
     );
     ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
 

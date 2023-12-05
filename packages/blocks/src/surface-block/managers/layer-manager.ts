@@ -568,10 +568,10 @@ export class LayerManager {
   }
 
   generateIndex(batch: 'frame'): string;
-  generateIndex(batch: 'common', block?: 'canvas' | 'block'): string;
+  generateIndex(batch: 'common', type?: 'canvas' | 'block'): string;
   generateIndex(
     batch: 'common' | 'frame',
-    block: 'canvas' | 'block' = 'canvas'
+    type: 'canvas' | 'block' = 'canvas'
   ): string {
     if (batch === 'frame') {
       const lastFrame = last(this.frames);
@@ -580,7 +580,7 @@ export class LayerManager {
         ? generateKeyBetween(ungroupIndex(getElementIndex(lastFrame)), null)
         : LayerManager.INITAL_INDEX;
     } else {
-      if (block === 'canvas') {
+      if (type === 'canvas') {
         const lastIndex = last(this.layers)?.indexes[1];
 
         return lastIndex
@@ -589,13 +589,10 @@ export class LayerManager {
       }
 
       const lastLayer = last(this.layers);
-      const lastLayerIndex = lastLayer
-        ? ungroupIndex(lastLayer.indexes[1])
-        : undefined;
 
       if (!lastLayer) return LayerManager.INITAL_INDEX;
 
-      assertType<string>(lastLayerIndex);
+      assertType<string>(lastLayer);
 
       if (lastLayer.type === 'canvas') {
         const secondLastLayer = nToLast(this.layers, 2);
@@ -603,14 +600,15 @@ export class LayerManager {
           ? ungroupIndex(secondLastLayer.indexes[1])
           : null;
 
-        if (secondLastLayerIndex && secondLastLayerIndex >= lastLayerIndex) {
-          return generateKeyBetween(secondLastLayerIndex, null);
-        }
-
-        return generateKeyBetween(secondLastLayerIndex, lastLayerIndex);
+        return generateKeyBetween(
+          secondLastLayerIndex,
+          secondLastLayerIndex && secondLastLayerIndex >= lastLayer.indexes[0]
+            ? null
+            : lastLayer.indexes[0]
+        );
       }
 
-      return generateKeyBetween(lastLayerIndex, null);
+      return generateKeyBetween(lastLayer.indexes[1], null);
     }
   }
 

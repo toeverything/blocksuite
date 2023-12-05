@@ -280,12 +280,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         highlighter: this._highlighter,
       };
     });
-    this._disposables.add(
-      this.model.propsUpdated.on(() => this.requestUpdate())
-    );
-    this._disposables.add(
-      this.model.childrenUpdated.on(() => this.requestUpdate())
-    );
 
     this._disposables.add(
       listenToThemeChange(this, async () => {
@@ -327,15 +321,18 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     };
 
     this.bindHotKey({
-      Backspace: () => {
+      Backspace: ctx => {
+        const state = ctx.get('keyboardState');
         const textSelection = selectionManager.find('text');
         if (!textSelection) {
+          state.raw.preventDefault();
           return;
         }
 
         const from = textSelection.from;
 
         if (from.index === 0 && from.length === 0) {
+          state.raw.preventDefault();
           selectionManager.setGroup('note', [
             selectionManager.getInstance('block', { path: this.path }),
           ]);
@@ -603,7 +600,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         >
         </rich-text>
       </div>
-      ${this.content}
+      ${this.renderModelChildren(this.model)}
       ${this.selected?.is('block')
         ? html`<affine-block-selection></affine-block-selection>`
         : null}

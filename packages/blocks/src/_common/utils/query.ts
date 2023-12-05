@@ -763,7 +763,7 @@ export function getDropRectByPoint(
     flag: DropFlags.Normal,
   };
 
-  const isDatabase = matchFlavours(model, ['affine:database'] as const);
+  const isDatabase = matchFlavours(model, ['affine:database']);
 
   if (isDatabase) {
     const table = getDatabaseBlockTableElement(element);

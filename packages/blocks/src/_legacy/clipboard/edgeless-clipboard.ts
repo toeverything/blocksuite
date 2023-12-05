@@ -561,11 +561,10 @@ export class EdgelessClipboard implements Clipboard {
       bounds.push(Bound.deserialize(shape.xywh));
     });
     const bound = getCommonBound(bounds);
-    if (!bound) {
-      return;
-    }
+    assertExists(bound);
 
     const parser = new ContentParser(this._page);
+
     const canvas = await parser.edgelessToCanvas(
       this._edgeless.surface.viewport,
       bound,

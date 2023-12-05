@@ -1,5 +1,6 @@
 import './components/toolbar/edgeless-toolbar.js';
 import '../../surface-block/surface-block.js';
+import './components/block-portal/frame/edgeless-frame.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
@@ -35,6 +36,7 @@ import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
 import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
+import type { FrameBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
@@ -52,6 +54,7 @@ import {
   Vec,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
+import { compare } from '../../surface-block/managers/group-manager.js';
 import type {
   IndexedCanvasUpdateEvent,
   SurfaceBlockComponent,
@@ -172,6 +175,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     type: localStorage.defaultTool ?? 'default',
   };
 
+  @state()
+  frames: FrameBlockModel[] = [];
+
   @query('edgeless-block-portal-container')
   pageBlockContainer!: EdgelessBlockPortalContainer;
 
@@ -212,12 +218,18 @@ export class EdgelessPageBlockComponent extends BlockElement<
     tagClicked: new Slot<{ tagId: string }>(),
     readonlyUpdated: new Slot<boolean>(),
     draggingAreaUpdated: new Slot(),
+    navigatorSettingUpdated: new Slot<{
+      hideToolbar?: boolean;
+      blackBackground?: boolean;
+    }>(),
+    navigatorFrameChanged: new Slot<FrameBlockModel>(),
+    fullScrennToggled: new Slot(),
 
     elementUpdated: new Slot<{
       id: string;
       props?: Record<string, unknown>;
     }>(),
-    elementAdded: new Slot<string>(),
+    elementAdded: new Slot<{ id: string }>(),
     elementRemoved: new Slot<{ id: string; element: EdgelessElement }>(),
     elementResizeStart: new Slot(),
     elementResizeEnd: new Slot(),
@@ -339,6 +351,27 @@ export class EdgelessPageBlockComponent extends BlockElement<
           });
       })
     );
+
+    _disposables.add(
+      slots.elementAdded.on(({ id }) => {
+        if (isFrameBlock(this.surface.pickById(id))) {
+          this._updateFrames();
+        }
+      })
+    );
+
+    _disposables.add(
+      slots.elementRemoved.on(({ element }) => {
+        if (isFrameBlock(element)) {
+          this._updateFrames();
+        }
+      })
+    );
+  }
+
+  private _updateFrames() {
+    const frames = this.page.getBlockByFlavour(FRAME) as FrameBlockModel[];
+    this.frames = frames.sort(compare);
   }
 
   getSortedElementsWithViewportBounds(elements: Selectable[]) {
@@ -456,7 +489,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
     fileInfos: {
       file: File;
       sourceId: string;
-    }[]
+    }[],
+    point?: Point
   ) {
     const models: Partial<ImageBlockModel>[] = [];
     for (const { file, sourceId } of fileInfos) {
@@ -468,7 +502,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       });
     }
 
-    const center = Vec.toVec(this.surface.viewport.center);
+    const center = Vec.toVec(point ?? this.surface.viewport.center);
 
     const ids = models.map(model => {
       const bound = Bound.fromCenter(
@@ -825,7 +859,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
         switch (event.type) {
           case 'add':
-            this.slots.elementAdded.emit(event.id);
+            this.slots.elementAdded.emit({ id: event.id });
             break;
           case 'delete':
             this.slots.elementRemoved.emit({
@@ -839,7 +873,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-
+    this._updateFrames();
     this.root.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
     this.gesture = new Gesture(this);
@@ -893,8 +927,15 @@ export class EdgelessPageBlockComponent extends BlockElement<
     )}`;
 
     return html`${this.renderModel(this.surfaceBlockModel)}
-      <edgeless-block-portal-container .edgeless=${this}>
+      <edgeless-block-portal-container .edgeless=${this} .frames=${this.frames}>
       </edgeless-block-portal-container>
+      <edgeless-frames-container
+        .surface=${this.surface}
+        .edgeless=${this}
+        .frames=${this.frames}
+        .onlyTitle=${true}
+      >
+      </edgeless-frames-container>
       <div class="widgets-container">${widgets}</div> `;
   }
 }

@@ -9,6 +9,7 @@ import {
   PageIcon,
 } from '../../../_common/icons/index.js';
 import { getVirgoByModel } from '../../../_common/utils/query.js';
+import type { Flavour } from '../../../models.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { createPage } from '../../utils/init.js';
@@ -17,7 +18,7 @@ import { showImportModal } from './import-page/index.js';
 
 export type LinkedPageOptions = {
   triggerKeys: string[];
-  ignoreBlockTypes: string[];
+  ignoreBlockTypes: Flavour[];
   convertTriggerKey: boolean;
   getMenus: (ctx: {
     query: string;

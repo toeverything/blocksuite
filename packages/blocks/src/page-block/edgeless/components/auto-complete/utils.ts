@@ -22,7 +22,6 @@ import {
   type XYWH,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { getGridBound } from '../../utils/bound-utils.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 
@@ -214,7 +213,7 @@ export function nextBound(
   }
 
   function isValidBound(bound: Bound) {
-    return !elements.some(e => bound.isOverlapWithBound(getGridBound(e)));
+    return !elements.some(a => bound.isOverlapWithBound(a.elementBound));
   }
 
   let count = 0;

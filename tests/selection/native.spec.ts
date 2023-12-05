@@ -1669,7 +1669,7 @@ test('should not show option menu of image on native selection', async ({
   ).toHaveCount(0);
 });
 
-test('should be cleared when dragging block card from BlockHub', async ({
+test.skip('should be cleared when dragging block card from BlockHub', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);

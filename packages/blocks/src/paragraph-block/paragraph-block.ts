@@ -14,12 +14,12 @@ import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { affineAttributeRenderer } from '../_common/components/rich-text/virgo/attribute-renderer.js';
 import { affineTextAttributes } from '../_common/components/rich-text/virgo/types.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
-import { BlockHubIcon20 } from '../_common/icons/index.js';
 import {
   getThemeMode,
   isPageMode,
   matchFlavours,
 } from '../_common/utils/index.js';
+import type { BlockHub } from '../_common/widgets/block-hub/components/block-hub.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {
@@ -43,7 +43,9 @@ function TipsPlaceholder(model: BaseBlockModel, tipsPos: Style) {
       </div> `;
     }
 
-    const blockHub = document.querySelector('affine-block-hub');
+    const blockHub = document.querySelector(
+      'affine-block-hub'
+    ) as BlockHub | null;
     if (!blockHub) {
       // Fall back
       return html`<div class="tips-placeholder" style=${styleMap(tipsPos)}>
@@ -63,7 +65,7 @@ function TipsPlaceholder(model: BaseBlockModel, tipsPos: Style) {
         @pointerdown=${tipsPlaceholderPreventDefault}
         style=${styleMap(tipsPos)}
       >
-        Click ${BlockHubIcon20} to insert blocks, type '/' for commands
+        Type '/' for commands
       </div>
     `;
   }
@@ -232,9 +234,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   override firstUpdated() {
     this.model.propsUpdated.on(() => {
       this._updatePlaceholder();
-      this.requestUpdate();
     });
-    this.model.childrenUpdated.on(() => this.requestUpdate());
 
     this.page.awarenessStore.slots.update.on(v => {
       const remoteSelections = this.std.selection.remoteSelections.get(v.id);
@@ -326,7 +326,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
     >
-      ${this.content}
+      ${this.renderModelChildren(this.model)}
     </div>`;
 
     const fontWeightMap: { [key: string]: { [key: string]: number } } = {

@@ -1,7 +1,7 @@
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   MinusIcon,
@@ -88,6 +88,9 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
     }
   `;
 
+  @state()
+  private _hide = false;
+
   @property({ attribute: false })
   layout: 'horizontal' | 'vertical' = 'horizontal';
 
@@ -147,13 +150,28 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       _disposables,
       edgeless: { slots },
     } = this;
-    _disposables.add(slots.edgelessToolUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      slots.edgelessToolUpdated.on(tool => {
+        if (tool.type !== 'frameNavigator') {
+          this._hide = false;
+        }
+        this.requestUpdate();
+      })
+    );
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      slots.navigatorSettingUpdated.on(({ hideToolbar }) => {
+        if (hideToolbar !== undefined) {
+          this._hide = hideToolbar;
+        }
+      })
+    );
   }
 
   override render() {
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
     const classes = `edgeless-zoom-toolbar-container ${this.layout}`;
+    if (this._hide) return nothing;
 
     return html`
       <div

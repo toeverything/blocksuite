@@ -7,7 +7,7 @@ packages=(
   "blocks-std"
   "blocks"
   "docs"
-  "editor"
+  "presets"
   "global"
   "lit"
   "playground"

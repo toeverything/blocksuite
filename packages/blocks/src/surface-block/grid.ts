@@ -24,7 +24,7 @@ function rangeFromBound(a: IBound): number[] {
 }
 
 function rangeFromElement<T extends EdgelessElement>(ele: T): number[] {
-  const bound = ele.gridBound;
+  const bound = ele.elementBound;
   const minRow = getGridIndex(bound.x);
   const maxRow = getGridIndex(bound.maxX);
   const minCol = getGridIndex(bound.y);
@@ -100,8 +100,8 @@ export class GridManager<T extends EdgelessElement> {
         for (const element of gridElements) {
           if (
             strict
-              ? b.contains(element.gridBound)
-              : intersects(element.gridBound, bound)
+              ? b.contains(element.elementBound)
+              : intersects(element.elementBound, bound)
           ) {
             results.add(element);
           }

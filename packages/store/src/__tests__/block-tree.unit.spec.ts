@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest';
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
 
 import type { SchemaToModel } from '../schema/index.js';
 import { defineBlockSchema, Schema } from '../schema/index.js';
@@ -11,6 +11,7 @@ const pageSchema = defineBlockSchema({
     title: internal.Text(),
     count: 0,
     style: {} as Record<string, unknown>,
+    items: [] as unknown[],
   }),
   metadata: {
     role: 'root',
@@ -45,6 +46,8 @@ test('trigger props updated', async () => {
 
   const getColor = () =>
     (root.yBlock.get('prop:style') as Y.Map<string>).get('color');
+
+  const getItems = () => root.yBlock.get('prop:items') as Y.Array<unknown>;
   const getCount = () => root.yBlock.get('prop:count');
 
   root.count = 1;
@@ -71,4 +74,15 @@ test('trigger props updated', async () => {
   expect(onPropsUpdated).toBeCalledTimes(5);
   expect(onPropsUpdated).toHaveBeenNthCalledWith(5, { key: 'style' });
   expect(getColor()).toBe('green');
+
+  root.items.push(1);
+  expect(onPropsUpdated).toBeCalledTimes(6);
+  expect(onPropsUpdated).toHaveBeenNthCalledWith(6, { key: 'items' });
+  expect(getItems().get(0)).toBe(1);
+
+  root.items[0] = { id: '1' };
+  expect(onPropsUpdated).toBeCalledTimes(7);
+  expect(onPropsUpdated).toHaveBeenNthCalledWith(7, { key: 'items' });
+  expect(getItems().get(0)).toBeInstanceOf(Y.Map);
+  expect((getItems().get(0) as Y.Map<unknown>).get('id')).toBe('1');
 });

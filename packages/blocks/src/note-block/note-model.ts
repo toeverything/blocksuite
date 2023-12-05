@@ -53,6 +53,7 @@ export const NoteBlockSchema = defineBlockSchema({
       'affine:attachment',
       'affine:html',
       'affine:surface-ref',
+      'affine:embed-*',
     ],
   },
   toModel: () => {
@@ -85,7 +86,7 @@ export class NoteBlockModel
   implements IEdgelessElement
 {
   override flavour!: EdgelessBlockType.NOTE;
-  gridBound!: Bound;
+  elementBound!: Bound;
 
   get connectable() {
     return true;

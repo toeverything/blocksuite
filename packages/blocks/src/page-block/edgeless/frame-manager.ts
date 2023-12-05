@@ -28,7 +28,7 @@ export function removeContainedFrames(frames: FrameBlockModel[]) {
   return frames.filter(frame => {
     const bound = Bound.deserialize(frame.xywh);
     return frames.some(
-      f => f.id !== frame.id && Bound.deserialize(f.xywh).contains(bound)
+      f => f.id === frame.id || !Bound.deserialize(f.xywh).contains(bound)
     );
   });
 }
@@ -39,9 +39,10 @@ class FrameOverlay extends Overlay {
     if (!this.bound) return;
     const { x, y, w, h } = this.bound;
     ctx.beginPath();
-    ctx.fillStyle = '#3AB5F70A';
+    ctx.strokeStyle = '#1E96EB';
+    ctx.lineWidth = 2;
     ctx.roundRect(x, y, w, h, 8);
-    ctx.fill();
+    ctx.stroke();
   }
 }
 
@@ -57,13 +58,15 @@ export class EdgelessFrameManager {
 
   selectFrame(eles: Selectable[]) {
     const frames = this._edgeless.surface.frame.frames;
-    if (!eles.some(ele => isFrameBlock(ele)) && frames.length !== 0) {
-      const bound = edgelessElementsBound(eles);
-      for (let i = frames.length - 1; i >= 0; i--) {
-        const frame = frames[i];
-        if (Bound.deserialize(frame.xywh).contains(bound)) {
-          return frame;
-        }
+    if (frames.length === 0) return null;
+
+    const selectedFrames = eles.filter(ele => isFrameBlock(ele));
+    const bound = edgelessElementsBound(eles);
+    for (let i = frames.length - 1; i >= 0; i--) {
+      const frame = frames[i];
+      if (selectedFrames.includes(frame)) continue;
+      if (Bound.deserialize(frame.xywh).contains(bound)) {
+        return frame;
       }
     }
     return null;
@@ -79,14 +82,16 @@ export class EdgelessFrameManager {
     this._frameOverlay.bound = null;
   }
 
-  getElementsInFrame(frame: FrameBlockModel) {
+  getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
     const elements: EdgelessElement[] =
       this._edgeless.surface.viewport.gridManager
         .search(bound, true)
         .filter(ele => !isFrameBlock(ele));
 
-    return elements.concat(getBlocksInFrame(this._edgeless.page, frame));
+    return elements.concat(
+      getBlocksInFrame(this._edgeless.page, frame, fullyContained)
+    );
   }
 
   createFrameOnSelected() {

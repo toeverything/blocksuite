@@ -190,7 +190,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     let targetElement = null;
     const model = closestBlockElement.model;
 
-    const isDatabase = matchFlavours(model, ['affine:database'] as const);
+    const isDatabase = matchFlavours(model, ['affine:database']);
     if (isDatabase) {
       return dropIndicator;
     }

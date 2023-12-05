@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 const styles = css`
   :host {
@@ -35,7 +35,7 @@ const styles = css`
     background: var(--affine-white);
     border: 1px solid var(--affine-black-10);
     border-radius: 16px;
-    transition: 0.4s;
+    transition: 0.2s;
   }
 
   input:checked + label {
@@ -52,10 +52,11 @@ const styles = css`
   }
 `;
 
+@customElement('toggle-switch')
 export class ToggleSwitch extends LitElement {
   static override styles = styles;
 
-  @state()
+  @property({ attribute: false })
   on = false;
 
   @property({ attribute: false })

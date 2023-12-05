@@ -30,10 +30,10 @@ import {
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { splitElements } from '@blocksuite/blocks/page-block/edgeless/utils/clipboard-utils';
-import { EditorContainer } from '@blocksuite/editor';
 import { ShadowlessElement } from '@blocksuite/lit';
+import { EditorContainer } from '@blocksuite/presets';
 import { Utils, type Workspace } from '@blocksuite/store';
-import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
+import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -41,6 +41,7 @@ import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
 import type { CustomCopilotPanel } from './copilot/custom-copilot-panel';
+import type { CustomCopilotPanel } from './copilot/custom-copilot-panel.js';
 import {
   editImage,
   jpegBase64ToFile,
@@ -54,6 +55,7 @@ import {
 } from './copilot/utils/selection-utils';
 // @ts-ignore
 import { registerFormatBarCustomElement } from './custom-format-bar';
+import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
 import { demoScript } from './demo-script';
 
@@ -192,9 +194,6 @@ export class DebugMenu extends ShadowlessElement {
 
   private _styleMenu!: Pane;
   private _showStyleDebugMenu = false;
-
-  @state()
-  private _showTabMenu = false;
 
   @state()
   private _dark = localStorage.getItem('blocksuite:dark') === 'true';
@@ -380,19 +379,19 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    void this.contentParser.exportPdf();
+    this.contentParser.exportPdf();
   }
 
   private _exportHtml() {
-    void this.contentParser.exportHtml();
+    this.contentParser.exportHtml();
   }
 
   private _exportMarkDown() {
-    void this.contentParser.exportMarkdown();
+    this.contentParser.exportMarkdown();
   }
 
   private _exportPng() {
-    void this.contentParser.exportPng();
+    this.contentParser.exportPng();
   }
 
   private async _exportSnapshot() {
@@ -513,18 +512,11 @@ export class DebugMenu extends ShadowlessElement {
     this._setThemeMode(!!e.matches);
   };
 
-  private _registerFormatBarCustomElements() {
-    registerFormatBarCustomElement();
+  private _extendFormatBar() {
+    extendFormatBar();
   }
 
   override firstUpdated() {
-    this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
-    this.workspace.slots.pageAdded.on(() => {
-      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
-    });
-    this.workspace.slots.pageRemoved.on(() => {
-      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
-    });
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
@@ -611,11 +603,8 @@ export class DebugMenu extends ShadowlessElement {
             <sl-tooltip content="Undo" placement="bottom" hoist>
               <sl-button
                 size="small"
-                content="Undo"
                 .disabled="${!this._canUndo}"
-                @click="${() => {
-                  this.page.undo();
-                }}"
+                @click="${() => this.page.undo()}"
               >
                 <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
               </sl-button>
@@ -624,11 +613,8 @@ export class DebugMenu extends ShadowlessElement {
             <sl-tooltip content="Redo" placement="bottom" hoist>
               <sl-button
                 size="small"
-                content="Redo"
                 .disabled="${!this._canRedo}"
-                @click="${() => {
-                  this.page.redo();
-                }}"
+                @click="${() => this.page.redo()}"
               >
                 <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
               </sl-button>
@@ -673,6 +659,16 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._shareSelection}">
                 Share Selection
               </sl-menu-item>
+              <sl-menu-item @click=${this._switchOffsetMode}>
+                Switch Offset Mode
+              </sl-menu-item>
+              <sl-menu-item @click=${this._toggleNavigationPanel}>
+                Toggle Navigation Panel
+              </sl-menu-item>
+              <sl-menu-item @click=${this._extendFormatBar}>
+                Extend Format Bar
+              </sl-menu-item>
+              <sl-menu-item @click=${this._addNote}>Add Note</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
@@ -691,22 +687,8 @@ export class DebugMenu extends ShadowlessElement {
           </sl-tooltip>
 
           <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Switch Editor Mode"
-              @click="${this._switchEditorMode}"
-            >
-              <sl-icon name="phone-flip"></sl-icon>
-            </sl-button>
-          </sl-tooltip>
-
-          <sl-tooltip content="Add container offset" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Add container offset"
-              @click="${this._switchOffsetMode}"
-            >
-              <sl-icon name="aspect-ratio"></sl-icon>
+            <sl-button size="small" @click=${this._switchEditorMode}>
+              <sl-icon name="repeat"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
@@ -718,41 +700,24 @@ export class DebugMenu extends ShadowlessElement {
             </sl-button>
           </sl-tooltip>
 
-          <sl-tooltip content="Add new page" placement="bottom" hoist>
+          <sl-tooltip content="Add New Page" placement="bottom" hoist>
             <sl-button
               size="small"
-              content="Add New Page"
               @click="${() => createPageBlock(this.workspace)}"
             >
               <sl-icon name="file-earmark-plus"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
-          <sl-tooltip
-            content="Toggle navigation panel"
-            placement="bottom"
-            hoist
-          >
-            <sl-button
-              size="small"
-              content=""
-              @click="${this._toggleNavigationPanel}"
-            >
-              <sl-icon name="list"></sl-icon>
-            </sl-button>
-          </sl-tooltip>
+          ${PageList(this.workspace, this.editor, () => this.requestUpdate())}
 
           <sl-tooltip
             content="🚧 Toggle copilot panel"
             placement="bottom"
             hoist
           >
-            <sl-button
-              size="small"
-              content=""
-              @click="${this._toggleCopilotPanel}"
-            >
-              <sl-icon name="list"></sl-icon>
+            <sl-button size="small" @click=${this._toggleCopilotPanel}>
+              <sl-icon name="stars"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
@@ -789,13 +754,6 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
-          ${this._showTabMenu
-            ? getTabGroupTemplate({
-                workspace: this.workspace,
-                editor: this.editor,
-                requestUpdate: () => this.requestUpdate(),
-              })
-            : null}
         </div>
       </div>
     `;
@@ -807,66 +765,54 @@ function createPageBlock(workspace: Workspace) {
   createPage(workspace, { id }).catch(console.error);
 }
 
-function getTabGroupTemplate({
-  workspace,
-  editor,
-  requestUpdate,
-}: {
-  workspace: Workspace;
-  editor: EditorContainer;
-  requestUpdate: () => void;
-}) {
+function PageList(
+  workspace: Workspace,
+  editor: EditorContainer,
+  requestUpdate: () => void
+) {
   workspace.meta.pageMetasUpdated.on(requestUpdate);
-  const pageList = workspace.meta.pageMetas;
-  editor.slots.pageLinkClicked.on(({ pageId }) => {
-    const tabGroup = document.querySelector<SlTabGroup>('.tabs-closable');
-    if (!tabGroup) throw new Error('tab group not found');
-    tabGroup.show(pageId);
-  });
 
-  return html` <sl-tab-group
-    class="tabs-closable"
-    style="display: flex; overflow: hidden;"
-    @sl-tab-show="${(
-      e: CustomEvent<{
-        name: string;
-      }>
-    ) => {
-      const otherPage = workspace.getPage(e.detail.name);
-      if (otherPage) {
-        editor.page = otherPage;
-      }
-    }}"
-  >
-    ${pageList.map(
-      page =>
-        html` <sl-tab
-          slot="nav"
-          panel="${page.id}"
-          ?active="${page.id === editor.page.id}"
-          ?closable="${pageList.length > 1}"
-          @sl-close="${(e: CustomEvent) => {
-            const tab = e.target;
-            // Show other tab if the tab is currently active
-            if (tab && (tab as SlTab).active) {
-              const tabGroup =
-                document.querySelector<SlTabGroup>('.tabs-closable');
-              if (!tabGroup) throw new Error('tab group not found');
-              const otherPage = pageList.find(
-                metaPage => page.id !== metaPage.id
-              );
-              if (!otherPage) throw new Error('no other page found');
-              tabGroup.show(otherPage.id);
-            }
-            workspace.removePage(page.id);
-          }}"
-        >
-          <div>
-            <div>${page.title || 'Untitled'}</div>
-          </div>
-        </sl-tab>`
-    )}
-  </sl-tab-group>`;
+  // This function is called when a delete option is clicked
+  const handleDeletePage = (pageId: string) => {
+    workspace.removePage(pageId);
+    requestUpdate();
+  };
+
+  // Create a dropdown menu for each page with a delete option
+  return html`
+    <sl-dropdown hoist>
+      <sl-button size="small" slot="trigger" caret>Pages</sl-button>
+      <sl-menu>
+        ${workspace.meta.pageMetas.map(
+          pageMeta => html`
+            <sl-menu-item>
+              ${pageMeta.title || 'Untitled'}
+              <sl-menu slot="submenu">
+                <sl-menu-item
+                  @click=${() => {
+                    const newPage = workspace.getPage(pageMeta.id);
+                    if (!newPage) return;
+                    editor.page = newPage;
+                  }}
+                >
+                  Open
+                </sl-menu-item>
+                <sl-menu-item
+                  .disabled=${workspace.pages.size <= 1}
+                  @click=${() => {
+                    if (workspace.pages.size <= 1) return;
+                    handleDeletePage(pageMeta.id);
+                  }}
+                >
+                  Delete
+                </sl-menu-item>
+              </sl-menu>
+            </sl-menu-item>
+          `
+        )}
+      </sl-menu>
+    </sl-dropdown>
+  `;
 }
 
 declare global {

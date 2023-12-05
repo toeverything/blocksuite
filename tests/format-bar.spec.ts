@@ -6,6 +6,7 @@ import {
   dragBetweenCoords,
   dragBetweenIndices,
   enterPlaygroundRoom,
+  extendFormatBar,
   focusRichText,
   focusTitle,
   getBoundingBox,
@@ -18,7 +19,6 @@ import {
   pressArrowRight,
   pressArrowUp,
   pressEnter,
-  registerFormatBarCustomElements,
   scrollToBottom,
   scrollToTop,
   selectAllByKeyboard,
@@ -1490,13 +1490,11 @@ test('should update the format quick bar state when there is a change in keyboar
   });
 });
 
-test('should register custom elements in format quick bar', async ({
-  page,
-}) => {
+test('can extend format bar', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-  await registerFormatBarCustomElements(page);
+  await extendFormatBar(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
 });

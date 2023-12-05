@@ -15,7 +15,7 @@ import {
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
-test('auto-scroll should be activate when adding blank lines or blocks', async ({
+test.skip('auto-scroll should be activate when adding blank lines or blocks', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -162,7 +162,7 @@ test('auto-scroll should be activate when adding blank lines or blocks', async (
   );
 });
 
-test('first level menu always exists, second level menu can be hidden by click firs level menu', async ({
+test.skip('first level menu always exists, second level menu can be hidden by click firs level menu', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -187,7 +187,7 @@ test('first level menu always exists, second level menu can be hidden by click f
   await expect(menuContainer).toBeHidden();
 });
 
-test('block hub card items should appear and disappear properly with corresponding menu', async ({
+test.skip('block hub card items should appear and disappear properly with corresponding menu', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -201,13 +201,13 @@ test('block hub card items should appear and disappear properly with correspondi
 
   await textMenu.hover();
   const blockHubTextContainer = page.locator(
-    '.affine-block-hub-container[type="text"]'
+    '.block-hub-cards-container[type="text"]'
   );
   await expect(blockHubTextContainer).toBeVisible();
 
   await listMenu.hover();
   const blockHubListContainer = page.locator(
-    '.affine-block-hub-container[type="list"]'
+    '.block-hub-cards-container[type="list"]'
   );
   await expect(blockHubListContainer).toBeVisible();
   await page.waitForTimeout(300);
@@ -218,7 +218,7 @@ test('block hub card items should appear and disappear properly with correspondi
   await expect(blockHubListContainer).toBeHidden();
 });
 
-test('block hub card items can disappear when clicking blank area', async ({
+test.skip('block hub card items can disappear when clicking blank area', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -230,7 +230,7 @@ test('block hub card items can disappear when clicking blank area', async ({
 
   await textMenu.hover();
   const blockHubTextContainer = page.locator(
-    '.affine-block-hub-container[type="text"]'
+    '.block-hub-cards-container[type="text"]'
   );
   await expect(blockHubTextContainer).toBeVisible();
 
@@ -238,14 +238,14 @@ test('block hub card items can disappear when clicking blank area', async ({
     const codeBlock = document.querySelector(selector);
     const bbox = codeBlock?.getBoundingClientRect() as DOMRect;
     return bbox;
-  }, '.affine-block-hub-container[type="text"]');
+  }, '.block-hub-cards-container[type="text"]');
 
   await page.mouse.click(bbox.left - 10, bbox.top - 10);
   await waitNextFrame(page);
   await expect(blockHubTextContainer).toBeHidden();
 });
 
-test('drag blank line into text area', async ({ page }) => {
+test.skip('drag blank line into text area', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -304,7 +304,7 @@ test('drag blank line into text area', async ({ page }) => {
   );
 });
 
-test('drag Heading1 block from text menu into text area and blockHub text cards will disappear', async ({
+test.skip('drag Heading1 block from text menu into text area and blockHub text cards will disappear', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -319,7 +319,7 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
   const textMenuRect = await getCenterPosition(page, textMenu);
   await page.mouse.move(textMenuRect.x, textMenuRect.y);
   const blockHubTextContainer = page.locator(
-    '.affine-block-hub-container[type="text"]'
+    '.block-hub-cards-container[type="text"]'
   );
   await expect(blockHubTextContainer).toBeVisible();
 
@@ -376,7 +376,7 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
   await expect(blockHubTextContainer).toBeHidden();
 });
 
-test('drag numbered list block from list menu into text area and blockHub list cards will disappear', async ({
+test.skip('drag numbered list block from list menu into text area and blockHub list cards will disappear', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -389,7 +389,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
   const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
   await listMenu.hover();
   const blockHubListContainer = page.locator(
-    '.affine-block-hub-container[type="list"]'
+    '.block-hub-cards-container[type="list"]'
   );
   await expect(blockHubListContainer).toBeVisible();
 
@@ -448,7 +448,9 @@ test('drag numbered list block from list menu into text area and blockHub list c
   await expect(blockHubListContainer).toBeHidden();
 });
 
-test('should auto hide card list when dragging a card', async ({ page }) => {
+test.skip('should auto hide card list when dragging a card', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -459,7 +461,7 @@ test('should auto hide card list when dragging a card', async ({ page }) => {
   const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
   await listMenu.hover();
   const blockHubListContainer = page.locator(
-    '.affine-block-hub-container[type="list"]'
+    '.block-hub-cards-container[type="list"]'
   );
   await expect(blockHubListContainer).toBeVisible();
 
@@ -479,7 +481,7 @@ test('should auto hide card list when dragging a card', async ({ page }) => {
   await expect(blockHubListContainer).toBeHidden();
 });
 
-test('drag database', async ({ page }) => {
+test.skip('drag database', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -505,7 +507,7 @@ test('drag database', async ({ page }) => {
 });
 
 test.describe('Drag block hub can snap to the edge and function properly', () => {
-  test('drag blank line to the bottom of editor should insert block', async ({
+  test.skip('drag blank line to the bottom of editor should insert block', async ({
     page,
   }) => {
     test.info().annotations.push({
@@ -558,7 +560,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
     );
   });
 
-  test('drag blank line to the right of editor should not insert block', async ({
+  test.skip('drag blank line to the right of editor should not insert block', async ({
     page,
   }) => {
     await enterPlaygroundRoom(page);

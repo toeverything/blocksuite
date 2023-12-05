@@ -2,9 +2,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 import type { UnRecord } from '../../reactive/index.js';
+import { createYProxy, native2Y } from '../../reactive/index.js';
 import { BaseBlockModel, internalPrimitives } from '../../schema/base.js';
 import type { Schema } from '../../schema/index.js';
-import { propsToValue, valueToProps } from './utils.js';
 
 export type YBlock = Y.Map<unknown>;
 
@@ -78,7 +78,7 @@ export class Block {
   };
 
   private _getPropsProxy = (name: string, value: unknown) => {
-    return valueToProps(value, {
+    return createYProxy(value, {
       onChange: () => {
         this.options.onChange?.(this, name, value);
       },
@@ -94,18 +94,20 @@ export class Block {
     this.yBlock.forEach((value, key) => {
       if (key.startsWith('prop:')) {
         const keyName = key.replace('prop:', '');
-        const proxy = this._getPropsProxy(keyName, value);
-        props[keyName] = proxy;
+        props[keyName] = this._getPropsProxy(keyName, value);
+        return;
       }
-
       if (key === 'sys:id' && typeof value === 'string') {
         id = value;
+        return;
       }
       if (key === 'sys:flavour' && typeof value === 'string') {
         flavour = value;
+        return;
       }
       if (key === 'sys:children' && value instanceof Y.Array) {
         yChildren = value;
+        return;
       }
     });
 
@@ -122,10 +124,9 @@ export class Block {
       Object.entries(defaultProps).forEach(([key, value]) => {
         if (props[key] !== undefined) return;
 
-        const yValue = propsToValue(value);
+        const yValue = native2Y(value);
         this.yBlock.set(`prop:${key}`, yValue);
-        const proxy = this._getPropsProxy(key, yValue);
-        props[key] = proxy;
+        props[key] = this._getPropsProxy(key, yValue);
       });
     }
 
@@ -160,7 +161,7 @@ export class Block {
           typeof p === 'string' &&
           model.keys.includes(p)
         ) {
-          const yValue = propsToValue(value);
+          const yValue = native2Y(value);
           this.yBlock.set(`prop:${p}`, yValue);
           const proxy = this._getPropsProxy(p, yValue);
           return Reflect.set(target, p, proxy, receiver);
@@ -178,7 +179,6 @@ export class Block {
           model.keys.includes(p)
         ) {
           this.yBlock.delete(`prop:${p}`);
-          this.model.propsUpdated.emit({ key: p });
         }
 
         return Reflect.deleteProperty(target, p);
