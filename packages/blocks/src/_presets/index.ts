@@ -1,7 +1,6 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
-import { AFFINE_BLOCK_HUB_WIDGET } from '../_common/widgets/block-hub/index.js';
 import { AFFINE_DOC_DRAGGING_AREA_WIDGET } from '../_common/widgets/doc-dragging-area/index.js';
 import { AFFINE_DOC_PAGE_META_DATA } from '../_common/widgets/doc-page-meta-data/index.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../_common/widgets/doc-remote-selection/doc-remote-selection.js';
