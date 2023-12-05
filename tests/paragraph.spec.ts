@@ -1374,7 +1374,7 @@ test('should placeholder works', async ({ page }) => {
   const placeholder = page.locator('.tips-placeholder');
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toHaveCount(1);
-  await expect(placeholder).toContainText('type');
+  await expect(placeholder).toContainText("Type '/' for commands");
 
   await type(page, '1');
   await expect(placeholder).not.toBeVisible();
