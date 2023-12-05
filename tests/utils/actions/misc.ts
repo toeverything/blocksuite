@@ -1084,21 +1084,33 @@ export async function waitForVirgoStateUpdated(page: Page) {
 export async function initImageState(page: Page) {
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.evaluate(() => {
-    const clipData = {
-      'text/html': `<img src='${location.origin}/test-card-1.png' />`,
-    };
-    const e = new ClipboardEvent('paste', {
-      clipboardData: new DataTransfer(),
+
+  await page.evaluate(async () => {
+    const { page } = window;
+    const pageId = page.addBlock('affine:page', {
+      title: new page.Text(),
     });
-    Object.defineProperty(e, 'target', {
-      writable: false,
-      value: document.body,
-    });
-    Object.entries(clipData).forEach(([key, value]) => {
-      e.clipboardData?.setData(key, value);
-    });
-    document.dispatchEvent(e);
+    page.addBlock('affine:surface', {}, pageId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
+
+    const docPage = document.querySelector('affine-doc-page');
+    if (!docPage) throw new Error('Cannot find doc page');
+    const imageBlob = await fetch(`${location.origin}/test-card-1.png`).then(
+      response => response.blob()
+    );
+    const storage = docPage.page.blob;
+    const sourceId = await storage.set(imageBlob);
+    const imageId = page.addBlock(
+      'affine:image',
+      {
+        sourceId,
+      },
+      noteId
+    );
+
+    page.resetHistory();
+
+    return { pageId, noteId, imageId };
   });
 
   // due to pasting img calls fetch, so we need timeout for downloading finished.

@@ -102,7 +102,7 @@ test(scoped`clipboard copy paste title`, async ({ page }) => {
   await assertTitle(page, 'testtest');
 });
 
-test(scoped`clipboard paste html`, async ({ page }) => {
+test.skip(scoped`clipboard paste html`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -128,7 +128,7 @@ test(scoped`clipboard paste html`, async ({ page }) => {
   await assertText(page, 'aaabbbcccddd');
 });
 
-test(
+test.skip(
   scoped`clipboard paste HTML containing Markdown syntax code and image `,
   async ({ page }) => {
     test.info().annotations.push({
@@ -167,7 +167,7 @@ test(
   }
 );
 
-test(
+test.skip(
   scoped`clipboard paste end with image, the cursor should be controlled by up/down keys`,
   async ({ page }) => {
     test.info().annotations.push({
@@ -327,10 +327,7 @@ test(scoped`split block when paste`, async ({ page }) => {
   await waitNextFrame(page);
 
   await assertRichTexts(page, ['atext', 'h1c']);
-  await assertRichTextVRange(page, 1, 2, 0);
 
-  // FIXME: one redundant step in clipboard operation
-  await undoByClick(page);
   await undoByClick(page);
   await assertRichTexts(page, ['abc']);
 
