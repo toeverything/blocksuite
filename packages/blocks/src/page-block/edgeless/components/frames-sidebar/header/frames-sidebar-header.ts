@@ -142,7 +142,7 @@ export class FramesSidebarHeader extends WithDisposable(LitElement) {
         </edgeless-tool-icon-button>
       </div>
       <div class="frames-setting-container">
-        <frames-setting-menu></frames-setting-menu>
+        <frames-setting-menu .edgeless=${this.edgeless}></frames-setting-menu>
       </div>
       <div class="presentation-button" @click=${this._enterPresentationMode}>
         ${SmallFrameNavigatorIcon}<span class="presentation-button-label"

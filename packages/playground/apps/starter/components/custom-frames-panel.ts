@@ -1,6 +1,6 @@
 import { registerFramesSidebarComponents } from '@blocksuite/blocks';
-import type { EditorContainer } from '@blocksuite/editor';
 import { WithDisposable } from '@blocksuite/lit';
+import type { EditorContainer } from '@blocksuite/presets';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 

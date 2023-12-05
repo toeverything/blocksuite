@@ -1,11 +1,13 @@
 import '../../../../../_common/components/menu-divider.js';
 import '../../../../../_common/components/toggle-switch.js';
 
-// import '../../../../_common/components/toggle-switch.js';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
+import { property, state } from 'lit/decorators.js';
 
+import { BLACK_BACKGROUND_KEY } from '../../../../../_common/edgeless/frame/consts.js';
 import { stopPropagation } from '../../../../../_common/utils/event.js';
+import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 
 const styles = css`
   :host {
@@ -75,6 +77,48 @@ const styles = css`
 export class FramesSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+
+  @state()
+  blackBackground = false;
+
+  private _tryRestoreSettings() {
+    const blackBackground = sessionStorage.getItem(BLACK_BACKGROUND_KEY);
+    this.blackBackground = blackBackground !== 'false';
+  }
+
+  private _onBlackBackgroundChange = (checked: boolean) => {
+    this.blackBackground = !checked;
+    this.edgeless.slots.navigatorSettingUpdated.emit({
+      blackBackground: this.blackBackground,
+    });
+    console.log('sidebar');
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._tryRestoreSettings();
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    console.log('disconnectedCallback');
+  }
+
+  override firstUpdated() {
+    this.disposables.add(
+      this.edgeless.slots.navigatorSettingUpdated.on(({ blackBackground }) => {
+        if (
+          blackBackground !== undefined &&
+          blackBackground !== this.blackBackground
+        ) {
+          this.blackBackground = blackBackground;
+        }
+      })
+    );
+  }
+
   override render() {
     return html`<div
       class="frames-setting-menu-container"
@@ -99,7 +143,12 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
       </div>
       <div class="frames-setting-menu-item action">
         <div class="action-label">Hide background while presenting</div>
-        <div class="toggle-button"><toggle-switch></toggle-switch></div>
+        <div class="toggle-button">
+          <toggle-switch
+            .on=${!this.blackBackground}
+            .onChange=${this._onBlackBackgroundChange}
+          ></toggle-switch>
+        </div>
       </div>
     </div>`;
   }

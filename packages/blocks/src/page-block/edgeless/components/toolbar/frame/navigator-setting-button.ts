@@ -6,7 +6,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { blackBackgroundKey } from '../../../../../_common/edgeless/frame/consts.js';
+import { BLACK_BACKGROUND_KEY } from '../../../../../_common/edgeless/frame/consts.js';
 import { NavigatorSettingsIcon } from '../../../../../_common/icons/edgeless.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { createButtonPopper } from '../../utils.js';
@@ -73,31 +73,29 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
     typeof createButtonPopper
   > | null = null;
 
+  private _tryRestoreSettings() {
+    const blackBackground = sessionStorage.getItem(BLACK_BACKGROUND_KEY);
+    this.blackBackground = blackBackground !== 'false';
+  }
+
+  private _onBlackBackgroundChange = (checked: boolean) => {
+    this.blackBackground = !checked;
+    this.edgeless.slots.navigatorSettingUpdated.emit({
+      blackBackground: this.blackBackground,
+    });
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._tryRestoreSettings();
+  }
+
   override firstUpdated() {
     this._navigatorSettingPopper = createButtonPopper(
       this._navigatorSettingButton,
       this._navigatorSettingMenu,
       ({ display }) => this.setPopperShow(display === 'show')
     );
-
-    this._tryRestoreSettings();
-  }
-
-  private _tryRestoreSettings() {
-    const blackBackground = sessionStorage.getItem(blackBackgroundKey);
-    this.blackBackground = blackBackground !== 'false';
-  }
-
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('blackBackground')) {
-      this.edgeless.slots.navigatorSettingUpdated.emit({
-        blackBackground: this.blackBackground,
-      });
-      sessionStorage.setItem(
-        blackBackgroundKey,
-        this.blackBackground.toString()
-      );
-    }
   }
 
   override render() {
@@ -134,9 +132,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
           <div class="text">Hide background while presenting</div>
           <toggle-switch
             .on=${!this.blackBackground}
-            .onChange=${(checked: boolean) => {
-              this.blackBackground = !checked;
-            }}
+            .onChange=${this._onBlackBackgroundChange}
           >
           </toggle-switch>
         </div>

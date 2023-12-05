@@ -38,11 +38,11 @@ const styles = css`
     transition: 0.2s;
   }
 
-  input:checked + label {
+  label.on {
     background: var(--affine-primary-color);
   }
 
-  input:checked + label:after {
+  label.on:after {
     left: calc(100% - 1px);
     transform: translateX(-100%);
   }
@@ -77,7 +77,7 @@ export class ToggleSwitch extends LitElement {
         ?checked=${this.on}
         @change=${this._toggleSwitch}
       />
-      <label for="switch"></label>
+      <label for="switch" class=${this.on ? 'on' : ''}></label>
     `;
   }
 }
