@@ -8,8 +8,9 @@ import {
   StrokeStyle,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorContainer } from '@blocksuite/presets';
 import { Workspace } from '@blocksuite/store';
+
+import type { EditorContainer } from '../../../components/index.js';
 
 interface Position {
   x: number;
