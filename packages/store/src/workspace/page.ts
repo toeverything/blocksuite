@@ -2,25 +2,20 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
-import { BaseBlockModel, internalPrimitives } from '../schema/base.js';
+import { Text } from '../reactive/text.js';
+import type { BaseBlockModel } from '../schema/base.js';
+import { internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
-import {
-  assertValidChildren,
-  initSysProps,
-  schemaToModel,
-  syncBlockProps,
-  toBlockProps,
-  valueToProps,
-} from '../utils/utils.js';
-import type { AwarenessStore } from '../yjs/awareness.js';
-import type { BlockSuiteDoc } from '../yjs/index.js';
-import { Text } from '../yjs/text-adapter.js';
+import { assertValidChildren, syncBlockProps } from '../utils/utils.js';
+import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
+import type { YBlock } from './block/index.js';
+import { BlockTree } from './block/index.js';
 import type { PageMeta } from './meta.js';
 import { Space } from './space.js';
 import type { Workspace } from './workspace.js';
 
-export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
+type FlatBlockMap = Record<string, YBlock>;
 
 /** JSON-serializable properties of a block */
 export type BlockSysProps = {
@@ -30,14 +25,6 @@ export type BlockSysProps = {
 };
 export type BlockProps = BlockSysProps & {
   [index: string]: unknown;
-};
-
-function createChildMap(yChildIds: Y.Array<string>) {
-  return new Map(yChildIds.map((child, index) => [child, index]));
-}
-
-type FlatBlockMap = {
-  [key: string]: YBlock;
 };
 
 type PageOptions = {
@@ -51,21 +38,30 @@ type PageOptions = {
 export class Page extends Space<FlatBlockMap> {
   private readonly _workspace: Workspace;
   private readonly _idGenerator: IdGenerator;
+  private readonly _blockTree: BlockTree;
   private _history!: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
-  private _blockMap = new Map<string, BaseBlockModel>();
-  private _synced = false;
+  /** Indicate whether the underlying subdoc has been loaded. */
+  private _docLoaded = false;
+  /** Indicate whether the block tree is ready */
+  private _ready = false;
   private _shouldTransact = true;
 
   readonly slots = {
+    /**
+     * This fires when the block tree is initialized via API call or underlying existing ydoc binary.
+     * Note that this is different with the `doc.loaded` field,
+     * since `loaded` only indicates that the ydoc is loaded, not the block tree.
+     */
+    ready: new Slot(),
     historyUpdated: new Slot(),
+    /**
+     * This fires when the root block is added via API call or has just been initialized from existing ydoc.
+     * useful for internal block UI components to start subscribing following up events.
+     * Note that at this moment, the whole block tree may not be fully initialized yet.
+     */
     rootAdded: new Slot<BaseBlockModel>(),
     rootDeleted: new Slot<string | string[]>(),
-    textUpdated: new Slot<Y.YTextEvent>(),
-    yUpdated: new Slot(),
-    onYEvent: new Slot<{
-      event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>;
-    }>(),
     blockUpdated: new Slot<
       | {
           type: 'add';
@@ -77,21 +73,14 @@ export class Page extends Space<FlatBlockMap> {
           id: string;
           flavour: string;
           parent: string;
+          model: BaseBlockModel;
         }
       | {
           type: 'update';
           id: string;
           flavour: string;
-          props: Partial<BlockProps>;
         }
     >(),
-    yBlockUpdated: new Slot<{
-      id: string;
-      type: 'add' | 'update' | 'delete';
-      props: { [key: string]: { old: unknown; new: unknown } };
-    }>(),
-    copied: new Slot(),
-    pasted: new Slot<Record<string, unknown>[]>(),
   };
 
   constructor({
@@ -104,10 +93,18 @@ export class Page extends Space<FlatBlockMap> {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
+    this._blockTree = new BlockTree({
+      schema: workspace.schema,
+      yBlocks: this.yBlocks,
+    });
   }
 
   get readonly() {
     return this.awarenessStore.isReadonly(this);
+  }
+
+  get ready() {
+    return this._ready;
   }
 
   get history() {
@@ -119,7 +116,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   get schema() {
-    return this._workspace.schema;
+    return this.workspace.schema;
   }
 
   get meta() {
@@ -199,16 +196,16 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   getBlockById(id: string) {
-    return this._blockMap.get(id) ?? null;
+    return this._blockTree.getBlock(id)?.model ?? null;
   }
 
   getBlockByFlavour(blockFlavour: string | string[]) {
     const flavours =
       typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
 
-    return Array.from(this._blockMap.values()).filter(({ flavour }) =>
-      flavours.includes(flavour)
-    );
+    return Array.from(this._blockTree.blocks.values())
+      .filter(({ flavour }) => flavours.includes(flavour))
+      .map(x => x.model);
   }
 
   getParent(target: BaseBlockModel | string): BaseBlockModel | null {
@@ -217,7 +214,7 @@ export class Page extends Space<FlatBlockMap> {
     if (!root || root.id === targetId) return null;
 
     const findParent = (parentId: string): BaseBlockModel | null => {
-      const parentModel = this._blockMap.get(parentId);
+      const parentModel = this.getBlockById(parentId);
       if (!parentModel) return null;
 
       for (const [childId] of parentModel.childMap) {
@@ -354,16 +351,12 @@ export class Page extends Space<FlatBlockMap> {
     };
 
     this.transact(() => {
-      const yBlock = new Y.Map() as YBlock;
+      this._blockTree.addBlock(id, flavour, { ...blockProps });
       // set the yBlock at the very beginning, otherwise yBlock will be always empty
-      this._yBlocks.set(id, yBlock);
 
       assertValidChildren(this._yBlocks, clonedProps);
       const schema = this.getSchemaByFlavour(flavour);
       assertExists(schema);
-
-      initSysProps(yBlock, clonedProps);
-      syncBlockProps(schema, yBlock, clonedProps);
 
       const parentId =
         parentModel?.id ??
@@ -470,69 +463,63 @@ export class Page extends Space<FlatBlockMap> {
         targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
       }
     });
-
-    // Emit event to indicate that the children of these blocks have been updated
-    Array.from(childBlocksPerParent.keys()).forEach(parent =>
-      parent.childrenUpdated.emit()
-    );
-
-    newParent.childrenUpdated.emit();
   }
 
-  updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
+  updateBlock<T extends Partial<BlockProps>>(
+    model: BaseBlockModel,
+    props: T
+  ): void;
+  updateBlock(model: BaseBlockModel, callback: () => void): void;
+  updateBlock(
+    model: BaseBlockModel,
+    callBackOrProps: (() => void) | Partial<BlockProps>
+  ): void {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
 
-    const parent = this.getParent(model);
-    this.schema.validate(
-      model.flavour,
-      parent?.flavour,
-      props.children?.map(child => child.flavour)
-    );
+    const isCallback = typeof callBackOrProps === 'function';
+
+    if (!isCallback) {
+      const parent = this.getParent(model);
+      this.schema.validate(
+        model.flavour,
+        parent?.flavour,
+        callBackOrProps.children?.map(child => child.flavour)
+      );
+    }
 
     const yBlock = this._yBlocks.get(model.id);
     assertExists(yBlock);
 
-    const oldProps = toBlockProps(yBlock, this.doc.proxy);
-
     this.transact(() => {
-      // TODO diff children changes
-      // All child nodes will be deleted in the current behavior, then added again.
-      // Through diff children changes, the experience can be improved.
-      if (props.children) {
-        const yChildren = new Y.Array<string>();
-        yChildren.insert(
-          0,
-          props.children.map(child => child.id)
-        );
-        yBlock.set('sys:children', yChildren);
+      if (!isCallback) {
+        // TODO diff children changes
+        // All child nodes will be deleted in the current behavior, then added again.
+        // Through diff children changes, the experience can be improved.
+        if (callBackOrProps.children) {
+          const yChildren = new Y.Array<string>();
+          yChildren.insert(
+            0,
+            callBackOrProps.children.map(child => child.id)
+          );
+          yBlock.set('sys:children', yChildren);
+        }
+
+        const schema = this.schema.flavourSchemaMap.get(model.flavour);
+        assertExists(schema);
+        syncBlockProps(schema, yBlock, callBackOrProps);
+        return;
       }
 
-      const schema = this.schema.flavourSchemaMap.get(model.flavour);
-      assertExists(schema);
-      syncBlockProps(schema, yBlock, props);
-    });
-
-    const newProps = toBlockProps(yBlock, this.doc.proxy);
-
-    model.propsUpdated.emit({
-      oldProps,
-      newProps,
-    });
-
-    this.slots.blockUpdated.emit({
-      type: 'update',
-      flavour: model.flavour,
-      id: model.id,
-      props,
+      callBackOrProps();
     });
   }
 
   addSiblingBlocks(
     targetModel: BaseBlockModel,
-    props: Array<Partial<BaseBlockModel>>,
+    props: Array<Partial<BlockProps>>,
     place: 'after' | 'before' = 'after'
   ): string[] {
     if (!props.length) return [];
@@ -565,56 +552,83 @@ export class Page extends Space<FlatBlockMap> {
   deleteBlock(
     model: BaseBlockModel,
     options: {
-      bringChildrenTo: 'parent' | BaseBlockModel | false;
+      bringChildrenTo?: BaseBlockModel;
+      deleteChildren?: boolean;
     } = {
-      bringChildrenTo: false,
+      deleteChildren: true,
     }
   ) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
+
+    const { bringChildrenTo, deleteChildren } = options;
+    if (bringChildrenTo && deleteChildren) {
+      console.error(
+        'Cannot bring children to another block and delete them at the same time'
+      );
+      return;
+    }
+
+    const yModel = this._yBlocks.get(model.id) as YBlock;
+    const yModelChildren = yModel.get('sys:children') as Y.Array<string>;
+
     const parent = this.getParent(model);
-    const index = parent?.children.indexOf(model) ?? -1;
-    const { bringChildrenTo } = options;
-    if (index > -1) {
-      parent?.children.splice(parent.children.indexOf(model), 1);
-    }
-    if (bringChildrenTo instanceof BaseBlockModel) {
-      model.children.forEach(child => {
-        this.schema.validate(child.flavour, bringChildrenTo.flavour);
-      });
-      // When bring children to parent, insert children to the original position of model
-      if (bringChildrenTo === parent && index > -1) {
-        parent.children.splice(index, 0, ...model.children);
-      } else {
-        bringChildrenTo.children.push(...model.children);
-      }
-    }
+    assertExists(parent);
+    const yParent = this._yBlocks.get(parent.id) as YBlock;
+    const yParentChildren = yParent.get('sys:children') as Y.Array<string>;
+    const modelIndex = yParentChildren.toArray().indexOf(model.id);
 
     this.transact(() => {
-      this._yBlocks.delete(model.id);
+      if (modelIndex > -1) {
+        yParentChildren.delete(modelIndex, 1);
+      }
 
-      if (parent) {
-        const yParent = this._yBlocks.get(parent.id) as YBlock;
-        const yChildren = yParent.get('sys:children') as Y.Array<string>;
+      if (bringChildrenTo) {
+        // validate children flavour
+        model.children.forEach(child => {
+          this.schema.validate(child.flavour, bringChildrenTo.flavour);
+        });
 
-        if (index > -1) {
-          yChildren.delete(index, 1);
+        if (bringChildrenTo.id === parent.id) {
+          // When bring children to parent, insert children to the original position of model
+          yParentChildren.insert(modelIndex, yModelChildren.toArray());
+        } else {
+          const yBringChildrenTo = this._yBlocks.get(
+            bringChildrenTo.id
+          ) as YBlock;
+          const yBringChildrenToChildren = yBringChildrenTo.get(
+            'sys:children'
+          ) as Y.Array<string>;
+          yBringChildrenToChildren.push(yModelChildren.toArray());
         }
-        if (bringChildrenTo instanceof BaseBlockModel) {
-          this.updateBlock(bringChildrenTo, {
-            children: bringChildrenTo.children,
+      } else {
+        if (deleteChildren) {
+          // delete children recursively
+          const dl = (id: string) => {
+            const yBlock = this._yBlocks.get(id) as YBlock;
+
+            const yChildren = yBlock.get('sys:children') as Y.Array<string>;
+            yChildren.forEach(id => {
+              dl(id);
+            });
+
+            this._blockTree.removeBlock(id);
+          };
+
+          yModelChildren.forEach(id => {
+            dl(id);
           });
         }
-
-        parent.childrenUpdated.emit();
       }
+
+      this._blockTree.removeBlock(model.id);
     });
   }
 
   trySyncFromExistingDoc() {
-    if (this._synced) {
+    if (this._docLoaded) {
       throw new Error('Cannot sync from existing doc more than once');
     }
 
@@ -624,27 +638,25 @@ export class Page extends Space<FlatBlockMap> {
 
     this._initYBlocks();
 
-    const visited = new Set<string>();
-
     this._yBlocks.forEach((_, id) => {
-      if (visited.has(id)) return;
-      visited.add(id);
-      this._handleYBlockAdd(visited, id);
+      this._handleYBlockAdd(id);
     });
 
-    this._synced = true;
+    this._docLoaded = true;
+
+    if (this._yBlocks.size > 0) {
+      this._ready = true;
+      this.slots.ready.emit();
+    }
   }
 
   dispose() {
     this.slots.historyUpdated.dispose();
     this.slots.rootAdded.dispose();
     this.slots.rootDeleted.dispose();
-    this.slots.textUpdated.dispose();
-    this.slots.yUpdated.dispose();
     this.slots.blockUpdated.dispose();
-    this.slots.onYEvent.dispose();
 
-    if (this._synced) {
+    if (this._docLoaded) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
       this._yBlocks.clear();
     }
@@ -652,13 +664,6 @@ export class Page extends Space<FlatBlockMap> {
 
   private _initYBlocks() {
     const { _yBlocks } = this;
-    // Consider if we need to expose the ability to temporarily unobserve this._yBlocks.
-    // "unobserve" is potentially necessary to make sure we don't create
-    // an infinite loop when sync to remote then back to client.
-    // `action(a) -> YDoc' -> YEvents(a) -> YRemoteDoc' -> YEvents(a) -> YDoc'' -> ...`
-    // We could unobserve in order to short circuit by ignoring the sync of remote
-    // events we actually generated locally.
-    // _yBlocks.unobserveDeep(this._handleYEvents);
     _yBlocks.observeDeep(this._handleYEvents);
     this._history = new Y.UndoManager([_yBlocks], {
       trackedOrigins: new Set([this._ySpaceDoc.clientID]),
@@ -670,11 +675,9 @@ export class Page extends Space<FlatBlockMap> {
     this._history.on('stack-item-updated', this._historyObserver);
   }
 
-  private _getYBlock(id: string): YBlock {
+  private _getYBlock(id: string): YBlock | null {
     const yBlock = this._yBlocks.get(id) as YBlock | undefined;
-    if (!yBlock) {
-      throw new Error(`Block with id ${id} does not exist`);
-    }
+    if (!yBlock) return null;
     return yBlock;
   }
 
@@ -682,42 +685,43 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.historyUpdated.emit();
   };
 
-  private _createBlockModel(id: string, flavour: string, block: YBlock) {
-    const schema = this.schema.flavourSchemaMap.get(flavour);
-    assertExists(schema, `Block flavour ${flavour} is not registered`);
-    assertExists(id, 'Block id is not defined');
-
-    const model = schemaToModel(id, schema, block, this);
-    model.created.emit();
-
-    return model;
-  }
-
-  private _handleYBlockAdd(visited: Set<string>, id: string) {
+  private _handleYBlockAdd(id: string) {
     const yBlock = this._getYBlock(id);
+    if (!yBlock) {
+      console.warn(
+        `Failed to handle yBlock add, yBlock with id-${id} not found`
+      );
+      return;
+    }
 
-    const flavour = yBlock.get('sys:flavour') as string;
-    const model = this._createBlockModel(id, flavour, yBlock);
-    this._blockMap.set(id, model);
+    this._blockTree.onBlockAdded(id, this, {
+      onChange: (block, key) => {
+        block.model.propsUpdated.emit({ key });
+      },
+      onYBlockUpdated: block => {
+        this.slots.blockUpdated.emit({
+          type: 'update',
+          id,
+          flavour: block.flavour,
+        });
+      },
+    });
+    const block = this._blockTree.getBlock(id);
+    assertExists(block);
+    const model = block.model;
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
-      model.childMap = createChildMap(yChildren);
+      yChildren.forEach((id: string, index) => {
+        const hasChild = this._blockTree.blocks.has(id);
 
-      yChildren.forEach((id: string) => {
-        const index = model.childMap.get(id);
-        if (Number.isInteger(index)) {
-          const hasChild = this._blockMap.has(id);
-
-          if (!hasChild) {
-            visited.add(id);
-            this._handleYBlockAdd(visited, id);
-          }
-
-          model.children[index as number] = this._blockMap.get(
-            id
-          ) as BaseBlockModel;
+        if (!hasChild) {
+          this._handleYBlockAdd(id);
         }
+
+        model.children[index as number] = this.getBlockById(
+          id
+        ) as BaseBlockModel;
       });
     }
 
@@ -731,7 +735,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   private _handleYBlockDelete(id: string) {
-    const model = this._blockMap.get(id);
+    const model = this.getBlockById(id);
 
     if (model === this._root) {
       this.slots.rootDeleted.emit(id);
@@ -742,87 +746,17 @@ export class Page extends Space<FlatBlockMap> {
       id,
       flavour: model.flavour,
       parent: this.getParent(model)?.id ?? '',
+      model,
     });
-    model.deleted.emit();
-    model.dispose();
-    this._blockMap.delete(id);
-  }
-
-  private _handleYBlockUpdate(event: Y.YMapEvent<unknown>) {
-    const yMap = event.target;
-    const id = yMap.get('sys:id') as string;
-    const model = this.getBlockById(id);
-    if (!model) return;
-
-    const oldProps = toBlockProps(yMap, this.doc.proxy);
-
-    const props: Partial<BlockProps> = {};
-    const yProps: { [key: string]: { old: unknown; new: unknown } } = {};
-    let hasPropsUpdate = false;
-    let hasChildrenUpdate = false;
-    event.keysChanged.forEach(prefixedKey => {
-      // Update children
-      if (prefixedKey === 'sys:children') {
-        hasChildrenUpdate = true;
-        const yChildren = event.target.get('sys:children');
-        if (!(yChildren instanceof Y.Array)) {
-          console.error(
-            'Failed to update block children!, sys:children is not an Y array',
-            event,
-            yChildren
-          );
-          return;
-        }
-        model.childMap = createChildMap(yChildren);
-        model.children = yChildren.map(
-          id => this._blockMap.get(id) as BaseBlockModel
-        );
-        return;
-      }
-
-      const key = prefixedKey.replace('prop:', '');
-      const value = yMap.get(prefixedKey);
-      const newVal = valueToProps(value, this.doc.proxy);
-      const oldVal = event.changes.keys.get(prefixedKey)?.oldValue;
-      yProps[prefixedKey] = { old: oldVal, new: newVal };
-      hasPropsUpdate = true;
-      props[key] = newVal;
-    });
-
-    if (hasPropsUpdate) {
-      Object.assign(model, props);
-      model.propsUpdated.emit({
-        oldProps: oldProps,
-        newProps: toBlockProps(yMap, this.doc.proxy),
-      });
-      this.slots.yBlockUpdated.emit({
-        id: model.id,
-        props: yProps,
-        type: 'update',
-      });
-    }
-    hasChildrenUpdate && model.childrenUpdated.emit();
+    this._blockTree.onBlockRemoved(id);
   }
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
     // event on top-level block store
     if (event.target === this._yBlocks) {
-      const visited = new Set<string>();
-
       event.keys.forEach((value, id) => {
         if (value.action === 'add') {
-          // Here the key is the id of the blocks.
-          // Generally, the key that appears earlier corresponds to the block added earlier,
-          // and it won't refer to subsequent keys.
-          // However, when redo the operation that adds multiple blocks at once,
-          // the earlier block may have children pointing to subsequent blocks.
-          // In this case, although the yjs-side state is correct, the BlockModel instance may not exist yet.
-          // Therefore, at this point we synchronize the referenced block first,
-          // then mark it in `visited` so that they can be skipped.
-          if (visited.has(id)) return;
-          visited.add(id);
-
-          this._handleYBlockAdd(visited, id);
+          this._handleYBlockAdd(id);
         } else if (value.action === 'delete') {
           this._handleYBlockDelete(id);
         } else {
@@ -831,39 +765,6 @@ export class Page extends Space<FlatBlockMap> {
         }
       });
     }
-    // event on single block
-    else if (event.target.parent === this._yBlocks) {
-      if (event instanceof Y.YTextEvent) {
-        this.slots.textUpdated.emit(event);
-      } else if (event instanceof Y.YMapEvent) {
-        this._handleYBlockUpdate(event);
-      }
-    }
-    // event on block field
-    else if (
-      event.target.parent instanceof Y.Map &&
-      event.target.parent.has('sys:id')
-    ) {
-      if (event instanceof Y.YArrayEvent) {
-        const id = event.target.parent.get('sys:id') as string;
-        const model = this._blockMap.get(id);
-        if (!model) {
-          throw new Error(`Block with id ${id} does not exist`);
-        }
-
-        const key = event.path[event.path.length - 1];
-        if (key === 'sys:children') {
-          const childIds = event.target.toArray();
-          model.children = childIds.map(
-            id => this._blockMap.get(id) as BaseBlockModel
-          );
-          model.childMap = createChildMap(event.target);
-          model.childrenUpdated.emit();
-        }
-      }
-    }
-
-    this.slots.onYEvent.emit({ event });
   }
 
   // Handle all the events that happen at _any_ level (potentially deep inside the structure).
@@ -873,7 +774,6 @@ export class Page extends Space<FlatBlockMap> {
     for (const event of events) {
       this._handleYEvent(event);
     }
-    this.slots.yUpdated.emit();
   };
 
   validateVersion() {
@@ -890,12 +790,23 @@ export class Page extends Space<FlatBlockMap> {
     }
   }
 
-  override async waitForLoaded() {
-    await super.waitForLoaded();
-    if (!this._synced) {
+  override async load(initFn?: () => void) {
+    await super.load();
+    if (!this._docLoaded) {
       this.trySyncFromExistingDoc();
     }
 
+    if (initFn) {
+      await initFn();
+      this._ready = true;
+      this.slots.ready.emit();
+    }
+
     return this;
+  }
+
+  /** @deprecated use page.load() instead */
+  async waitForLoaded() {
+    await this.load();
   }
 }

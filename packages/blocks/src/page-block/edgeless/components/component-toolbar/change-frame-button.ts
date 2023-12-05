@@ -50,10 +50,6 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       width: 168px;
     }
 
-    .fill-color-button {
-      /* margin-right: 8px; */
-    }
-
     .fill-color-container {
       display: flex;
       justify-content: center;
@@ -78,6 +74,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     }
     component-toolbar-menu-divider {
       margin: 0 12px;
+      height: 24px;
     }
   `;
   @property({ attribute: false })
@@ -87,19 +84,13 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   frames: FrameBlockModel[] = [];
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
 
   @query('.fill-color-button')
   private _fillColorButton!: EdgelessToolIconButton;
   @query('.color-panel-container.fill-color')
   private _fillColorMenu!: HTMLDivElement;
   private _frameBackground: ReturnType<typeof createButtonPopper> | null = null;
-
-  // @query('.image-background-button')
-  // private _imageBackgroundButton!: EdgelessToolIconButton;
-  // @query('.image-background-container')
-  // private _imageBackgroundMenu!: HTMLDivElement;
-  // private _imageBackground: ReturnType<typeof createButtonPopper> | null = null;
 
   private _setFrameBackground(color: CssVariableName) {
     this.frames.forEach(frame => {
@@ -151,20 +142,10 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       this._fillColorButton,
       this._fillColorMenu,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     this._disposables.add(this._frameBackground);
-
-    // this._imageBackground = createButtonPopper(
-    //   this._imageBackgroundButton,
-    //   this._imageBackgroundMenu,
-    //   ({ display }) => {
-    //     this._popperShow = display === 'show';
-    //   }
-    // );
-
-    // this._disposables.add(this._imageBackground);
   }
 
   protected override render() {
@@ -181,9 +162,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
               ${NoteIcon}
               <span style="margin-left: 2px;">Insert into Page</span>
             </edgeless-tool-icon-button>
-            <component-toolbar-menu-divider
-              .vertical=${true}
-            ></component-toolbar-menu-divider>
+            <component-toolbar-menu-divider></component-toolbar-menu-divider>
             <edgeless-tool-icon-button
               .tooltip=${'Rename'}
               .tipPosition=${'bottom'}
@@ -193,15 +172,13 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
             >
               ${RenameIcon}
             </edgeless-tool-icon-button>
-            <component-toolbar-menu-divider
-              .vertical=${true}
-            ></component-toolbar-menu-divider>
+            <component-toolbar-menu-divider></component-toolbar-menu-divider>
           `
         : nothing}
 
       <edgeless-tool-icon-button
         class="fill-color-button"
-        .tooltip=${this._popperShow ? '' : 'Background'}
+        .tooltip=${this._showPopper ? '' : 'Background'}
         .tipPosition=${'bottom'}
         .active=${false}
         .iconContainerPadding=${2}
@@ -219,16 +196,3 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       </div> `;
   }
 }
-// <!-- <edgeless-tool-icon-button
-//                 class='image-background-button'
-//         .tooltip=${this._popperShow ? '' : 'Image Background'}
-//         .tipPosition=${'bottom'}
-//         .active=${false}
-//         .iconContainerPadding=${2}
-//         @click=${() => this._imageBackground?.toggle()}
-//       >
-//         ${ImageUploadIcon}
-//       </edgeless-tool-icon-button>
-//       <div class='image-background-container'>
-//                 <div>123</div>
-//       </div> -->

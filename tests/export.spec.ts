@@ -77,7 +77,7 @@ test('export html contain <code></code>', async ({ page }) => {
   // because style from "shiki" may be change in the future, so we just check the structure
   expect(htmlText).toContain('<span class="line"><span style="');
   expect(htmlText).toContain('<span class="line"></span>');
-  expect(htmlText).toContain('>console.</span>');
+  expect(htmlText).toContain('>console</span>');
   expect(htmlText).toContain('><code><span');
   expect(htmlText).toContain('<span class="line"></span></code></pre>');
 });

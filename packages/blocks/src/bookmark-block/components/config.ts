@@ -1,4 +1,3 @@
-import type { BaseBlockModel } from '@blocksuite/store';
 import { Slice, Workspace } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
@@ -14,25 +13,21 @@ import {
   LinkIcon,
   RefreshIcon,
 } from '../../_common/icons/index.js';
-import { getBlockElementByModel } from '../../_common/utils/index.js';
-import type { BookmarkBlockComponent } from '../bookmark-block.js';
-import type { BookmarkBlockModel, BookmarkProps } from '../bookmark-model.js';
-import { allowEmbed } from '../embed.js';
 import {
-  cloneBookmarkProperties,
-  reloadBookmarkBlock,
-  tryGetBookmarkAPI,
-} from '../utils.js';
+  type BookmarkBlockModel,
+  type BookmarkBlockProps,
+} from '../bookmark-model.js';
+import { allowEmbed } from '../embed.js';
 import type { BookmarkOperationMenu } from './bookmark-operation-popper.js';
 
 export type ConfigItem = {
   type: 'link' | 'card' | 'embed' | 'edit' | 'caption';
   icon: TemplateResult;
   tooltip: string;
-  showWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
-  disableWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
+  showWhen?: (model: BookmarkBlockModel) => boolean;
+  disableWhen?: (model: BookmarkBlockModel) => boolean;
   action: (
-    model: BaseBlockModel<BookmarkBlockModel>,
+    model: BookmarkBlockModel,
     /**
      * @deprecated
      */
@@ -80,7 +75,7 @@ export const config: ConfigItem[] = [
     showWhen: model =>
       !model.page.readonly && model.type && model.type !== 'card',
     action: (model, callback) => {
-      model.page.updateBlock<Partial<BookmarkProps>>(model, {
+      model.page.updateBlock<Partial<BookmarkBlockProps>>(model, {
         type: 'card',
       });
       callback?.('card');
@@ -94,7 +89,7 @@ export const config: ConfigItem[] = [
     showWhen: model =>
       !model.page.readonly && model.type !== 'embed' && allowEmbed(model.url),
     action: (model, callback) => {
-      model.page.updateBlock<Partial<BookmarkProps>>(model, {
+      model.page.updateBlock<Partial<BookmarkBlockProps>>(model, {
         type: 'embed',
       });
       callback?.('embed');
@@ -129,12 +124,12 @@ type MoreOperation = {
   icon: TemplateResult;
   label: string;
   action: (
-    model: BaseBlockModel<BookmarkBlockModel>,
+    model: BookmarkBlockModel,
     callback?: MenuActionCallback,
     element?: BookmarkOperationMenu
   ) => void;
-  showWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
-  disableWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
+  showWhen?: (model: BookmarkBlockModel) => boolean;
+  disableWhen?: (model: BookmarkBlockModel) => boolean;
   divider?: boolean;
 };
 
@@ -156,14 +151,20 @@ export const moreOperations: MoreOperation[] = [
     label: 'Duplicate',
     showWhen: model => !model.page.readonly,
     action: (model, callback) => {
-      const { page } = model;
+      const { page, url, type } = model;
 
       const parent = page.getParent(model);
       const index = parent?.children.indexOf(model);
 
-      const clonedProps = cloneBookmarkProperties(model);
-
-      page.addBlock('affine:bookmark', clonedProps, parent, index);
+      page.addBlock(
+        'affine:bookmark',
+        {
+          url,
+          type,
+        },
+        parent,
+        index
+      );
 
       callback?.('duplicate');
     },
@@ -173,13 +174,7 @@ export const moreOperations: MoreOperation[] = [
     icon: RefreshIcon,
     label: 'Reload',
     showWhen: model => !model.page.readonly,
-    disableWhen: () => !tryGetBookmarkAPI(),
-    action: (model, callback) => {
-      reloadBookmarkBlock(
-        model,
-        getBlockElementByModel(model) as BookmarkBlockComponent,
-        true
-      );
+    action: (_, callback) => {
       callback?.('reload');
     },
   },

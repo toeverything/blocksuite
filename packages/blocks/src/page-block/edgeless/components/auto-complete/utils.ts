@@ -1,16 +1,20 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import { getBlockClipboardInfo } from '../../../../_legacy/clipboard/index.js';
 import type { NoteBlockModel } from '../../../../models.js';
 import {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+} from '../../../../surface-block/consts.js';
+import {
   Bound,
+  CanvasElementType,
   type Connection,
   GroupElement,
   normalizeDegAngle,
   type Options,
   Overlay,
-  PhasorElementType,
   type RoughCanvas,
   ShapeElement,
   type ShapeStyle,
@@ -18,8 +22,6 @@ import {
   type XYWH,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { getGridBound } from '../../utils/bound-utils.js';
-import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 
@@ -211,7 +213,7 @@ export function nextBound(
   }
 
   function isValidBound(bound: Bound) {
-    return !elements.some(e => bound.isOverlapWithBound(getGridBound(e)));
+    return !elements.some(a => bound.isOverlapWithBound(a.elementBound));
   }
 
   let count = 0;
@@ -276,9 +278,10 @@ export function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export async function createEdgelessElement(
+export function createEdgelessElement(
   edgeless: EdgelessPageBlockComponent,
-  current: ShapeElement | NoteBlockModel
+  current: ShapeElement | NoteBlockModel,
+  bound: Bound
 ) {
   let id;
   const { surface } = edgeless;
@@ -286,19 +289,26 @@ export async function createEdgelessElement(
     id = edgeless.surface.addElement(current.type, {
       ...current.serialize(),
       text: new Workspace.Y.Text(),
+      xywh: bound.serialize(),
     });
   } else {
     const { page } = edgeless;
     id = page.addBlock(
       'affine:note',
-      { background: current.background },
+      {
+        background: current.background,
+        hidden: current.hidden,
+        edgeless: current.edgeless,
+        xywh: bound.serialize(),
+      },
       edgeless.model.id
     );
-    const noteService = edgeless.getService('affine:note');
     const note = page.getBlockById(id) as NoteBlockModel;
     assertExists(note);
-    const serializedBlock = (await getBlockClipboardInfo(current)).json;
-    await noteService.json2Block(note, serializedBlock.children);
+    page.updateBlock(note, () => {
+      note.edgeless.collapse = true;
+    });
+    page.addBlock('affine:paragraph', {}, note.id);
   }
   const group = surface.getGroupParent(current);
   if (group instanceof GroupElement) {
@@ -331,14 +341,14 @@ export async function createTextElement(
   current: ShapeElement
 ) {
   const { surface } = edgeless;
-  const id = edgeless.surface.addElement(PhasorElementType.TEXT, {
+  const id = edgeless.surface.addElement(CanvasElementType.TEXT, {
     text: new Workspace.Y.Text(),
     textAlign: 'left',
     fontSize: 24,
-    fontFamily: GENERAL_CANVAS_FONT_FAMILY,
+    fontFamily: CanvasTextFontFamily.Inter,
     color: GET_DEFAULT_TEXT_COLOR(),
-    bold: false,
-    italic: false,
+    fontWeight: CanvasTextFontWeight.Regular,
+    fontStyle: CanvasTextFontStyle.Normal,
   });
   const group = surface.getGroupParent(current);
   if (group instanceof GroupElement) {

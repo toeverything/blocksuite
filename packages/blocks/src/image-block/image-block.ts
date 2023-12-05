@@ -55,7 +55,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         .page=${this.page}
         .root=${this.root}
         .widgets=${this.widgets}
-        .content=${this.content}
       ></affine-edgeless-image>`;
     } else {
       return html`<affine-page-image
@@ -63,7 +62,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         .page=${this.page}
         .root=${this.root}
         .widgets=${this.widgets}
-        .content=${this.content}
       ></affine-page-image>`;
     }
   }
@@ -73,7 +71,7 @@ class ImageBlock extends BlockElement<ImageBlockModel> {
   @state()
   protected _source!: string;
 
-  blob!: Blob;
+  blob?: Blob;
 
   @state()
   protected _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
@@ -140,8 +138,16 @@ class ImageBlock extends BlockElement<ImageBlockModel> {
 
 @customElement('affine-edgeless-image')
 class ImageBlockEdgelessComponent extends ImageBlock {
+  get surface() {
+    return this.closest('affine-edgeless-page')?.surface;
+  }
+
   override render() {
-    const bound = Bound.deserialize(this.model.xywh);
+    const bound = Bound.deserialize(
+      ((this.surface?.pickById(this.model.id) as ImageBlockModel) ?? this.model)
+        .xywh
+    );
+
     return html`<img
       style=${styleMap({
         transform: `rotate(${this.model.rotate}deg)`,

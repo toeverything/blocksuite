@@ -1,5 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import {
+  CanvasTextFontFamily,
+  CanvasTextFontStyle,
+  CanvasTextFontWeight,
+} from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import { Bound } from '../../utils/bound.js';
 import { linePolygonIntersects } from '../../utils/math-utils.js';
@@ -21,7 +26,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   // unable to find the children and id.
   private _cachedChildren: string[] = [];
 
-  private _titleHeight = getLineHeight("'Kalam', cursive", 16);
+  private _titleHeight = getLineHeight(CanvasTextFontFamily.Kalam, 16);
   private _titleWidth = 0;
   private _padding = [0, 0];
   private _radius = 0;
@@ -75,8 +80,8 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     const bound: Bound = children.reduce((prev, cur) => {
       const ele = options.pickById(cur);
       assertExists(ele);
-      return prev.unite(ele.gridBound);
-    }, options.pickById(children[0])!.gridBound);
+      return prev.unite(ele.elementBound);
+    }, options.pickById(children[0])!.elementBound);
     return bound.serialize();
   }
 
@@ -112,7 +117,17 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     return this._radius;
   }
 
-  override get gridBound() {
+  get titleBound() {
+    const bound = Bound.deserialize(this.xywh);
+    return new Bound(
+      bound.x,
+      bound.y - this._titleHeight,
+      this._titleWidth,
+      this._titleHeight
+    );
+  }
+
+  override get elementBound() {
     const bound = Bound.deserialize(this.xywh);
     bound.y -= this._titleHeight;
     bound.h += this._titleHeight;
@@ -146,7 +161,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     const zoom = this.renderer!.zoom;
     const bound = Bound.deserialize(this.xywh);
     const fontSize = 16 / zoom;
-    const fontFamily = 'sans-serif';
+    const fontFamily = CanvasTextFontFamily.Inter;
     const offset = Math.max(4 / zoom, 2);
     ctx.translate(0, -offset);
 
@@ -154,7 +169,8 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     const font = getFontString({
       fontSize,
       fontFamily,
-      lineHeight: `${lineHeight}px`,
+      fontWeight: CanvasTextFontWeight.Regular,
+      fontStyle: CanvasTextFontStyle.Normal,
     });
     const lineWidth = getLineWidth(text, font);
 

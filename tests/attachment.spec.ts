@@ -5,10 +5,13 @@ import {
   pressBackspace,
   pressEnter,
   pressEscape,
+  redoByKeyboard,
   SHORT_KEY,
   type,
+  undoByKeyboard,
 } from './utils/actions/keyboard.js';
 import {
+  captureHistory,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyParagraphState,
@@ -55,6 +58,8 @@ function getAttachment(page: Page) {
 
     await pressEnter(page);
     await page.setInputFiles("input[type='file']", FILE_PATH);
+    // Try to break the undo redo test
+    await captureHistory(page);
 
     await expect(attachment).toBeVisible();
   };
@@ -127,13 +132,122 @@ test('can insert attachment from slash menu', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:note
+    `
+<affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
   <affine:attachment
-    prop:loadingKey={null}
+    prop:embed={false}
+    prop:name="${FILE_NAME}"
+    prop:size={${FILE_SIZE}}
+    prop:sourceId="${FILE_ID}"
+    prop:type="image/png"
+  />
+</affine:note>`,
+    noteId
+  );
+});
+
+test('should undo/redo works for attachment', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+
+  const { insertAttachment, waitLoading } = getAttachment(page);
+
+  await focusRichText(page);
+  await insertAttachment();
+
+  // Wait for the attachment to be uploaded
+  await waitLoading();
+
+  await assertStoreMatchJSX(
+    page,
+    `  <affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:attachment
+    prop:embed={false}
+    prop:name="${FILE_NAME}"
+    prop:size={${FILE_SIZE}}
+    prop:sourceId="${FILE_ID}"
+    prop:type="image/png"
+  />
+</affine:note>`,
+    noteId
+  );
+
+  await undoByKeyboard(page);
+  // The loading/error state should not be restored after undo
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
+
+  await redoByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:attachment
+    prop:embed={false}
     prop:name="${FILE_NAME}"
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -199,8 +313,18 @@ test('should turn attachment to image works', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-    <affine:note
+<affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -221,11 +345,22 @@ test('should turn attachment to image works', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
   <affine:attachment
     prop:caption=""
+    prop:embed={false}
     prop:name="${FILE_NAME}"
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -236,7 +371,7 @@ test('should turn attachment to image works', async ({ page }) => {
   );
 });
 
-test('should attachment can be deleted works', async ({ page }) => {
+test('should attachment can be deleted', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   const { attachment, insertAttachment, waitLoading } = getAttachment(page);
@@ -253,6 +388,16 @@ test('should attachment can be deleted works', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -282,13 +427,23 @@ test(`support dragging attachment block directly`, async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:note
+    `  <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
   <affine:attachment
-    prop:loadingKey={null}
+    prop:embed={false}
     prop:name="${FILE_NAME}"
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -324,11 +479,21 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
     <affine:attachment
-      prop:loadingKey={null}
+      prop:embed={false}
       prop:name="${FILE_NAME}"
       prop:size={${FILE_SIZE}}
       prop:sourceId="${FILE_ID}"
@@ -369,6 +534,16 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -381,7 +556,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
       prop:type="text"
     />
     <affine:attachment
-      prop:loadingKey={null}
+      prop:embed={false}
       prop:name="${FILE_NAME}"
       prop:size={${FILE_SIZE}}
       prop:sourceId="${FILE_ID}"

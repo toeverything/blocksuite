@@ -141,7 +141,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 }
 
 @customElement('affine-database-rich-text-cell-editing')
-export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
+export class RichTextCellEditing extends BaseCellRenderer<Text> {
   static override styles = css`
     affine-database-rich-text-cell-editing {
       display: flex;
@@ -206,7 +206,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   }
 
   private _initYText = (text?: string) => {
-    const yText = new Workspace.Y.Text(text);
+    const yText = new Text(text);
     this.onChange(yText);
   };
 
@@ -217,8 +217,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
         return;
       }
       event.stopPropagation();
-    } else {
-      this.selectCurrentCell(false);
     }
 
     if (event.key === 'Enter' && !event.isComposing) {

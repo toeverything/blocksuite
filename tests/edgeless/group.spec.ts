@@ -10,9 +10,12 @@ import {
   getSelectedBound,
   Shape,
   shiftClickView,
+  toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
+  copyByKeyboard,
+  pasteByKeyboard,
   pressBackspace,
   pressEnter,
   redoByKeyboard,
@@ -22,16 +25,16 @@ import {
   undoByKeyboard,
 } from '../utils/actions/keyboard.js';
 import {
+  assertCanvasElementsCount,
   assertEdgelessCanvasText,
   assertEdgelessNonSelectedRect,
   assertGroupChildrenIds,
   assertGroupIds,
-  assertPhasorElementsCount,
   assertSelectedBound,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-const GROUP_ROOT_ID = 'GROUP_ROOT';
+export const GROUP_ROOT_ID = 'GROUP_ROOT';
 
 test.describe('group', () => {
   async function init(page: Page) {
@@ -327,15 +330,15 @@ test.describe('group', () => {
       const ids = await getIds(page);
       await captureHistory(page);
       await pressBackspace(page);
-      await assertPhasorElementsCount(page, 0);
+      await assertCanvasElementsCount(page, 0);
 
       await undoByKeyboard(page);
-      await assertPhasorElementsCount(page, 3);
+      await assertCanvasElementsCount(page, 3);
       await assertGroupIds(page, [ids[2], ids[2], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]]);
 
       await redoByKeyboard(page);
-      await assertPhasorElementsCount(page, 0);
+      await assertCanvasElementsCount(page, 0);
     });
 
     test('delete sub-element in group', async ({ page }) => {
@@ -345,17 +348,17 @@ test.describe('group', () => {
       await captureHistory(page);
       await clickView(page, [50, 50]);
       await pressBackspace(page);
-      await assertPhasorElementsCount(page, 2);
+      await assertCanvasElementsCount(page, 2);
       await assertGroupIds(page, [ids[2], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[1]]);
 
       await undoByKeyboard(page);
-      await assertPhasorElementsCount(page, 3);
+      await assertCanvasElementsCount(page, 3);
       await assertGroupIds(page, [ids[2], GROUP_ROOT_ID, ids[2]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]]);
 
       await redoByKeyboard(page);
-      await assertPhasorElementsCount(page, 2);
+      await assertCanvasElementsCount(page, 2);
       await assertGroupIds(page, [ids[2], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[1]]);
     });
@@ -371,12 +374,12 @@ test.describe('group', () => {
 
       const ids = await getIds(page);
       await pressBackspace(page);
-      await assertPhasorElementsCount(page, 2);
+      await assertCanvasElementsCount(page, 2);
       await assertGroupIds(page, [ids[3], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[2]]);
 
       await undoByKeyboard(page);
-      await assertPhasorElementsCount(page, 5);
+      await assertCanvasElementsCount(page, 5);
       await assertGroupIds(page, [
         ids[3],
         GROUP_ROOT_ID,
@@ -388,7 +391,7 @@ test.describe('group', () => {
       await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
 
       await redoByKeyboard(page);
-      await assertPhasorElementsCount(page, 2);
+      await assertCanvasElementsCount(page, 2);
       await assertGroupIds(page, [ids[3], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[2]]);
     });
@@ -442,6 +445,33 @@ test.describe('group', () => {
       });
       await pressEnter(page);
       expect(await page.locator('edgeless-group-title-editor').count()).toBe(0);
+    });
+  });
+
+  test.describe('clipboard', () => {
+    test('copy and paste group', async ({ page }) => {
+      await edgelessCommonSetup(page);
+      await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+      await createShapeElement(page, [100, 0], [200, 100], Shape.Square);
+      await selectAllByKeyboard(page);
+      await triggerComponentToolbarAction(page, 'addGroup');
+
+      await copyByKeyboard(page);
+      const move = await toViewCoord(page, [100, -50]);
+      await page.mouse.click(move[0], move[1]);
+      await pasteByKeyboard(page, false);
+
+      const ids = await getIds(page);
+      await assertGroupIds(page, [
+        ids[2],
+        ids[2],
+        GROUP_ROOT_ID,
+        ids[5],
+        ids[5],
+        GROUP_ROOT_ID,
+      ]);
+      await assertGroupChildrenIds(page, [ids[0], ids[1]]);
+      await assertGroupChildrenIds(page, [ids[3], ids[4]], 1);
     });
   });
 });

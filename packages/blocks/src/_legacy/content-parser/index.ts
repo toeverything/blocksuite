@@ -273,7 +273,7 @@ export class ContentParser {
     edgeless?: EdgelessPageBlockComponent,
     nodes?: TopLevelBlockModel[],
     surfaces?: SurfaceElement[],
-    blockQuery: (id: BaseBlockModel) => Element | null = getBlockElementByModel,
+    blockElementGetter: (model: BaseBlockModel) => Element | null = () => null,
     edgelessBackground?: { zoom: number }
   ): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
@@ -314,7 +314,7 @@ export class ContentParser {
     // TODO: refactor of this part
     const blocks = nodes ?? edgeless?.getSortedElementsByBound(bound) ?? [];
     for (const block of blocks) {
-      const blockElement = blockQuery(block)?.parentElement;
+      const blockElement = blockElementGetter(block)?.parentElement;
 
       if (blockElement) {
         const blockBound = xywhArrayToObject(block);
@@ -334,7 +334,7 @@ export class ContentParser {
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
           const element = blocksInsideFrame[i];
-          const htmlElement = blockQuery(element)?.parentElement;
+          const htmlElement = blockElementGetter(element)?.parentElement;
           const blockBound = xywhArrayToObject(element);
           const canvasData = await html2canvas(htmlElement as HTMLElement);
 
@@ -614,6 +614,7 @@ export class ContentParser {
         sourceId,
         size: file.size,
         type: file.type,
+        embed: false,
         children: [],
       };
       return [attachmentProps];
@@ -996,6 +997,15 @@ export class ContentParser {
         options: tags,
       },
     });
+
+    // Make sure the title is synced with the model
+    const pageMetaTitle = this._page.meta.title;
+    const pageModelTitle = (this._page.root as PageBlockModel).title.toString();
+    if (pageMetaTitle !== pageModelTitle) {
+      this._page.workspace.setPageMeta(this._page.id, {
+        title: pageModelTitle,
+      });
+    }
   }
 
   private _getMetaDataFromhtmlText(html: string) {

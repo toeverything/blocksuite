@@ -2,7 +2,7 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import type { Slot } from '@blocksuite/global/utils';
-import { assert, describe, expect, it, vi } from 'vitest';
+import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness.js';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
@@ -32,7 +32,7 @@ function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
-  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+  return { id: 'test-workspace', idGenerator, schema };
 }
 
 const defaultPageId = 'page:home';
@@ -68,9 +68,13 @@ async function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
-  await page.waitForLoaded();
+  await page.load();
   return page;
 }
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['requestIdleCallback'] });
+});
 
 describe('basic', () => {
   it('can init workspace', async () => {
@@ -79,7 +83,7 @@ describe('basic', () => {
     assert.equal(workspace.isEmpty, true);
 
     const page = workspace.createPage({ id: 'page:home' });
-    await page.waitForLoaded();
+    await page.load();
     const actual = serializeWorkspace(workspace.doc);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
 
@@ -162,6 +166,33 @@ describe('basic', () => {
     }
   });
 
+  it('page ready lifecycle', async () => {
+    const options = createTestOptions();
+    const workspace = new Workspace(options);
+    const page = workspace.createPage({
+      id: 'space:0',
+    });
+
+    const readyCallback = vi.fn();
+    const rootAddedCallback = vi.fn();
+    page.slots.ready.on(readyCallback);
+    page.slots.rootAdded.on(rootAddedCallback);
+
+    await page.load(() => {
+      expect(page.ready).toBe(false);
+      const rootId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+      expect(rootAddedCallback).toBeCalledTimes(1);
+      expect(page.ready).toBe(false);
+
+      page.addBlock('affine:note', {}, rootId);
+    });
+
+    expect(page.ready).toBe(true);
+    expect(readyCallback).toBeCalledTimes(1);
+  });
+
   it('workspace pages with yjs applyUpdate', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
@@ -169,17 +200,18 @@ describe('basic', () => {
     const page = workspace.createPage({
       id: 'space:0',
     });
-    await page.waitForLoaded();
-    page.addBlock('affine:page', {
-      title: new page.Text(),
+    await page.load(() => {
+      page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
     });
     {
-      const fn = vi.fn(({ added }) => {
+      const subdocsTester = vi.fn(({ added }) => {
         expect(added.size).toBe(1);
       });
       // only apply root update
-      workspace2.doc.once('subdocs', fn);
-      expect(fn).toBeCalledTimes(0);
+      workspace2.doc.once('subdocs', subdocsTester);
+      expect(subdocsTester).toBeCalledTimes(0);
       expect(workspace2.pages.size).toBe(0);
       const update = encodeStateAsUpdate(workspace.doc);
       applyUpdate(workspace2.doc, update);
@@ -189,7 +221,7 @@ describe('basic', () => {
         },
       });
       expect(workspace2.pages.size).toBe(1);
-      expect(fn).toBeCalledTimes(1);
+      expect(subdocsTester).toBeCalledTimes(1);
     }
     {
       // apply page update
@@ -215,7 +247,7 @@ describe('basic', () => {
       });
       workspace2.doc.once('subdocs', fn);
       expect(fn).toBeCalledTimes(0);
-      await page2.waitForLoaded();
+      await page2.load();
       expect(fn).toBeCalledTimes(1);
     }
   });
@@ -282,6 +314,14 @@ describe('addBlock', () => {
         'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'sys:children': [],
@@ -352,7 +392,7 @@ describe('addBlock', () => {
 
     const page0 = workspace.createPage({ id: 'page:home' });
     const page1 = workspace.createPage({ id: 'space:page1' });
-    await Promise.all([page0.waitForLoaded(), page1.waitForLoaded()]);
+    await Promise.all([page0.load(), page1.load()]);
     assert.equal(workspace.pages.size, 2);
 
     page0.addBlock('affine:page', {
@@ -435,23 +475,300 @@ describe('addBlock', () => {
 });
 
 describe('deleteBlock', () => {
-  it('can delete single model', async () => {
+  it('delete children recursively by default', async () => {
     const page = await createTestPage();
 
-    page.addBlock('affine:page', {
-      title: new page.Text(),
-    });
+    const pageId = page.addBlock('affine:page', {});
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    page.addBlock('affine:paragraph', {}, noteId);
+    page.addBlock('affine:paragraph', {}, noteId);
     assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
       '0': {
-        'sys:children': [],
+        'prop:title': '',
+        'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
-        'prop:title': '',
+      },
+      '1': {
+        'prop:background': '--affine-background-secondary-color',
+        'prop:hidden': false,
+        'prop:index': 'a0',
+        'prop:xywh': '[0,0,800,95]',
+        'sys:children': ['2', '3'],
+        'sys:flavour': 'affine:note',
+        'sys:id': '1',
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
+      },
+      '2': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '2',
+      },
+      '3': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '3',
       },
     });
 
-    page.deleteBlock(page.root as BaseBlockModel);
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {});
+    const deletedModel = page.getBlockById('1') as BaseBlockModel;
+    page.deleteBlock(deletedModel);
+
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+      '0': {
+        'prop:title': '',
+        'sys:children': [],
+        'sys:flavour': 'affine:page',
+        'sys:id': '0',
+      },
+    });
+  });
+
+  it('bring children to parent', async () => {
+    const page = await createTestPage();
+
+    const pageId = page.addBlock('affine:page', {});
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const p1 = page.addBlock('affine:paragraph', {}, noteId);
+    page.addBlock('affine:paragraph', {}, p1);
+    page.addBlock('affine:paragraph', {}, p1);
+
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+      '0': {
+        'prop:title': '',
+        'sys:children': ['1'],
+        'sys:flavour': 'affine:page',
+        'sys:id': '0',
+      },
+      '1': {
+        'prop:background': '--affine-background-secondary-color',
+        'prop:hidden': false,
+        'prop:index': 'a0',
+        'prop:xywh': '[0,0,800,95]',
+        'sys:children': ['2'],
+        'sys:flavour': 'affine:note',
+        'sys:id': '1',
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
+      },
+      '2': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': ['3', '4'],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '2',
+      },
+      '3': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '3',
+      },
+      '4': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '4',
+      },
+    });
+
+    const deletedModel = page.getBlockById('2') as BaseBlockModel;
+    const deletedModelParent = page.getBlockById('1') as BaseBlockModel;
+    page.deleteBlock(deletedModel, {
+      bringChildrenTo: deletedModelParent,
+    });
+
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+      '0': {
+        'prop:title': '',
+        'sys:children': ['1'],
+        'sys:flavour': 'affine:page',
+        'sys:id': '0',
+      },
+      '1': {
+        'prop:background': '--affine-background-secondary-color',
+        'prop:hidden': false,
+        'prop:index': 'a0',
+        'prop:xywh': '[0,0,800,95]',
+        'sys:children': ['3', '4'],
+        'sys:flavour': 'affine:note',
+        'sys:id': '1',
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
+      },
+      '3': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '3',
+      },
+      '4': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '4',
+      },
+    });
+  });
+
+  it('bring children to other block', async () => {
+    const page = await createTestPage();
+
+    const pageId = page.addBlock('affine:page', {});
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const p1 = page.addBlock('affine:paragraph', {}, noteId);
+    const p2 = page.addBlock('affine:paragraph', {}, noteId);
+    page.addBlock('affine:paragraph', {}, p1);
+    page.addBlock('affine:paragraph', {}, p1);
+    page.addBlock('affine:paragraph', {}, p2);
+
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+      '0': {
+        'prop:title': '',
+        'sys:children': ['1'],
+        'sys:flavour': 'affine:page',
+        'sys:id': '0',
+      },
+      '1': {
+        'prop:background': '--affine-background-secondary-color',
+        'prop:hidden': false,
+        'prop:index': 'a0',
+        'prop:xywh': '[0,0,800,95]',
+        'sys:children': ['2', '3'],
+        'sys:flavour': 'affine:note',
+        'sys:id': '1',
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
+      },
+      '2': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': ['4', '5'],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '2',
+      },
+      '3': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': ['6'],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '3',
+      },
+      '4': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '4',
+      },
+      '5': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '5',
+      },
+      '6': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '6',
+      },
+    });
+
+    const deletedModel = page.getBlockById('2') as BaseBlockModel;
+    const moveToModel = page.getBlockById('3') as BaseBlockModel;
+    page.deleteBlock(deletedModel, {
+      bringChildrenTo: moveToModel,
+    });
+
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+      '0': {
+        'prop:title': '',
+        'sys:children': ['1'],
+        'sys:flavour': 'affine:page',
+        'sys:id': '0',
+      },
+      '1': {
+        'prop:background': '--affine-background-secondary-color',
+        'prop:hidden': false,
+        'prop:index': 'a0',
+        'prop:xywh': '[0,0,800,95]',
+        'sys:children': ['3'],
+        'sys:flavour': 'affine:note',
+        'sys:id': '1',
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
+      },
+      '3': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': ['6', '4', '5'],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '3',
+      },
+      '4': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '4',
+      },
+      '5': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '5',
+      },
+      '6': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '6',
+      },
+    });
   });
 
   it('can delete model with parent', async () => {
@@ -477,6 +794,14 @@ describe('deleteBlock', () => {
         'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
       },
       '2': {
         'sys:children': [],
@@ -505,6 +830,14 @@ describe('deleteBlock', () => {
         'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
+        'prop:edgeless': {
+          style: {
+            borderRadius: 8,
+            borderSize: 4,
+            borderStyle: 'solid',
+            shadowType: '--affine-note-shadow-box',
+          },
+        },
       },
     });
     assert.equal(root.children.length, 1);
@@ -591,19 +924,29 @@ describe('workspace.exportJSX works', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const page = workspace.createPage({ id: 'page:home' });
-    await page.waitForLoaded();
-
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    await page.load(() => {
+      const pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+      const noteId = page.addBlock('affine:note', {}, pageId);
+      page.addBlock('affine:paragraph', {}, noteId);
+      page.addBlock('affine:paragraph', {}, noteId);
     });
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, noteId);
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
       <affine:page>
         <affine:note
           prop:background="--affine-background-secondary-color"
+          prop:edgeless={
+            {
+              "style": {
+                "borderRadius": 8,
+                "borderSize": 4,
+                "borderStyle": "solid",
+                "shadowType": "--affine-note-shadow-box",
+              },
+            }
+          }
           prop:hidden={false}
           prop:index="a0"
         >
@@ -624,14 +967,17 @@ describe('workspace search', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const page = workspace.createPage({ id: 'page:home' });
-    await page.waitForLoaded();
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text('test123'),
+    await page.load(() => {
+      const pageId = page.addBlock('affine:page', {
+        title: new page.Text('test123'),
+      });
+      const noteId = page.addBlock('affine:note', {}, pageId);
+      page.addBlock('affine:paragraph', {}, noteId);
     });
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    page.addBlock('affine:paragraph', {}, noteId);
-    const result = workspace.search('test');
-    expect(result).toMatchInlineSnapshot(`
+
+    requestIdleCallback(() => {
+      const result = workspace.search('test');
+      expect(result).toMatchInlineSnapshot(`
       Map {
         "0" => {
           "content": "test123",
@@ -639,5 +985,6 @@ describe('workspace search', () => {
         },
       }
     `);
+    });
   });
 });

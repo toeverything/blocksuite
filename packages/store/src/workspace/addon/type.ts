@@ -9,7 +9,5 @@ export class WorkspaceAddonType implements BlobAddon, IndexerAddon, TestAddon {
   search!: IndexerAddon['search'];
 
   importPageSnapshot!: TestAddon['importPageSnapshot'];
-  exportPageSnapshot!: TestAddon['exportPageSnapshot'];
-  exportPageYDoc!: TestAddon['exportPageYDoc'];
   exportJSX!: TestAddon['exportJSX'];
 }

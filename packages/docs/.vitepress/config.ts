@@ -18,11 +18,14 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       {
+        text: '🚧 Editors',
+        link: '#',
+      },
+      {
         text: 'Playground',
-        link: 'https://blocksuite-toeverything.vercel.app/starter/?init',
+        link: 'https://try-blocksuite.vercel.app/starter/?init',
       },
       { text: 'Docs', link: '/blocksuite-overview' },
-      // { text: 'API', link: '' },
       {
         text: 'Releases',
         link: 'https://github.com/toeverything/blocksuite/releases',
@@ -31,32 +34,36 @@ export default defineConfig({
 
     sidebar: [
       {
-        text: 'Introduction',
-        items: [{ text: 'BlockSuite Overview', link: '/blocksuite-overview' }],
-      },
-      {
-        text: 'Using Prebuilt Editor',
+        text: 'Getting Started',
         items: [
-          { text: 'Getting Started', link: '/getting-started' },
-          { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
-          { text: 'Block Basics', link: '/block-basics' },
+          { text: 'Introduction', link: '/blocksuite-overview' },
+          { text: 'Quick Start', link: '/quick-start' },
         ],
       },
       {
-        text: 'BlockSuite Architecture',
+        text: 'Essentials',
         items: [
-          { text: 'Core Packages', link: '/core-packages' },
-          { text: 'Modeling Editor State', link: '/editor-state' },
+          { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
+          { text: 'Block Basics', link: '/block-basics' },
+          { text: 'Data Persistence', link: '/data-persistence' },
+          { text: '🚧 Customize Blocks' },
+        ],
+      },
+      {
+        text: 'Editor In-Depth',
+        items: [
           {
             text: 'Unidirectional Data Flow',
             link: '/unidirectional-data-flow',
           },
-          { text: 'Data Persistence', link: '/data-persistence' },
+          { text: '🚧 Hybrid Graphics Rendering' },
         ],
       },
       {
         text: 'API Walkthrough',
         items: [
+          { text: 'Selection API', link: '/selection-api' },
+          { text: 'Event API', link: '/event-api' },
           {
             text: 'Block Spec APIs',
             link: '/block-spec-apis',
@@ -67,21 +74,23 @@ export default defineConfig({
               { text: 'Block Widgets', link: '/block-widgets' },
             ],
           },
-          { text: 'Selection API', link: '/selection-api' },
-          { text: 'Event API', link: '/event-api' },
+          { text: 'Command API', link: '/command-api' },
         ],
       },
       {
-        text: '🚧 API Reference',
-        items: [],
-      },
-      {
-        text: 'Packages',
+        text: 'API Reference',
         items: [
-          { text: '🚧 <code>@blocksuite/store</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/block-std</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/lit</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/virgo</code>', link: '' },
+          { text: '@blocksuite/store', link: '/api/@blocksuite/store/index' },
+          {
+            text: '@blocksuite/block-std',
+            link: '/api/@blocksuite/block-std/index',
+          },
+          { text: '@blocksuite/lit', link: '/api/@blocksuite/lit/index' },
+          { text: '@blocksuite/virgo', link: '/api/@blocksuite/virgo/index' },
+          {
+            text: '@blocksuite/presets',
+            link: '/api/@blocksuite/presets/index',
+          },
         ],
       },
       {

@@ -14,12 +14,13 @@ import type { NoteBlockModel } from '../../note-block/index.js';
 import { type ShapeStyle } from '../../surface-block/consts.js';
 import {
   type BrushElement,
+  type CanvasElement,
   type ConnectorElement,
   type ConnectorMode,
   type GroupElement,
-  type PhasorElement,
   type ShapeType,
 } from '../../surface-block/elements/index.js';
+import type { NavigatorMode } from '../edgeless/frame/consts.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
 
@@ -130,7 +131,7 @@ export type TopLevelBlockModel =
   | FrameBlockModel
   | ImageBlockModel;
 
-export type EdgelessElement = TopLevelBlockModel | PhasorElement;
+export type EdgelessElement = TopLevelBlockModel | CanvasElement;
 
 export type Alignable = EdgelessElement;
 
@@ -140,7 +141,7 @@ export type Erasable = EdgelessElement;
 
 export type Connectable =
   | TopLevelBlockModel
-  | Exclude<PhasorElement, ConnectorElement | BrushElement | GroupElement>;
+  | Exclude<CanvasElement, ConnectorElement | BrushElement | GroupElement>;
 
 export type DefaultTool = {
   type: 'default';
@@ -195,6 +196,7 @@ export type FrameTool = {
 
 export type FrameNavigatorTool = {
   type: 'frameNavigator';
+  mode?: NavigatorMode;
 };
 
 export type PanTool = {
@@ -276,6 +278,8 @@ export type SerializedBlock = {
   background?: string;
   bookmarkTitle?: string;
   rotate?: number;
+  hidden?: boolean;
+  edgeless?: Record<string, Record<string, unknown> | unknown>;
 };
 
 export type EmbedBlockDoubleClickData = {

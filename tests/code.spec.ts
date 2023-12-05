@@ -22,13 +22,18 @@ import {
   pressTab,
   redoByKeyboard,
   selectAllByKeyboard,
+  setSelection,
   SHORT_KEY,
   switchReadonly,
   type,
   undoByKeyboard,
   updateBlockType,
 } from './utils/actions/index.js';
-import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
+import {
+  assertRichTexts,
+  assertRichTextVRange,
+  assertStoreMatchJSX,
+} from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
 /**
@@ -78,14 +83,97 @@ test('use debug menu can create code block', async ({ page }) => {
 
 test('use markdown syntax can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await type(page, '```');
-  await type(page, ' ');
+  await type(page, 'aaa');
+  await pressEnter(page);
+  await type(page, 'bbb');
+  await pressTab(page);
+  await pressEnter(page);
+  await type(page, 'ccc');
+  await pressTab(page);
 
-  const locator = page.locator('affine-code');
-  await expect(locator).toBeVisible();
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="aaa"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="bbb"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="ccc"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  await setSelection(page, 2, 0, 2, 0);
+  // |aaa
+  //   bbb
+  //     ccc
+
+  await type(page, '``` ');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:code
+    prop:language="Plain Text"
+  />
+  <affine:paragraph
+    prop:text="aaa"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="bbb"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="ccc"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
 });
 
 test('use markdown syntax with trailing characters can create code block', async ({
@@ -262,6 +350,8 @@ test('drag copy paste', async ({ page }) => {
 
   const content = await getVirgoSelectionText(page);
   expect(content).toBe('useuse');
+
+  await assertRichTextVRange(page, 0, 6, 0);
 });
 
 test('keyboard selection and copy paste', async ({ page }) => {
@@ -279,6 +369,8 @@ test('keyboard selection and copy paste', async ({ page }) => {
 
   const content = await getVirgoSelectionText(page);
   expect(content).toBe('useuse');
+
+  await assertRichTextVRange(page, 0, 3, 0);
 });
 
 // FIXME: this test failed in headless mode but passed in non-headless mode
@@ -304,6 +396,16 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -320,38 +422,48 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
   );
 });
 
-test('use code block copy menu of code block copy whole code block', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page, {
-    flags: {
-      enable_transformer_clipboard: true,
-    },
-  });
-  await initEmptyCodeBlockState(page, { language: 'javascript' });
-  await focusRichText(page);
+test.fixme(
+  'use code block copy menu of code block copy whole code block',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page, {
+      flags: {
+        enable_transformer_clipboard: true,
+      },
+    });
+    await initEmptyCodeBlockState(page, { language: 'javascript' });
+    await focusRichText(page);
 
-  await page.keyboard.type('use');
-  await pressEnterWithShortkey(page);
+    await page.keyboard.type('use');
+    await pressEnterWithShortkey(page);
 
-  const codeBlockPosition = await getCenterPosition(page, 'affine-code');
-  await page.mouse.move(codeBlockPosition.x, codeBlockPosition.y);
+    const codeBlockPosition = await getCenterPosition(page, 'affine-code');
+    await page.mouse.move(codeBlockPosition.x, codeBlockPosition.y);
 
-  const position = await getCenterPosition(
-    page,
-    '.affine-codeblock-option > icon-button:nth-child(1)'
-  );
+    const position = await getCenterPosition(
+      page,
+      '.affine-codeblock-option > icon-button:nth-child(1)'
+    );
 
-  await page.mouse.click(position.x, position.y);
+    await page.mouse.click(position.x, position.y);
 
-  await focusRichText(page, 1);
-  await pasteByKeyboard(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
+    await focusRichText(page, 1);
+    await pasteByKeyboard(page);
+    await assertStoreMatchJSX(
+      page,
+      /*xml*/ `
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -365,8 +477,9 @@ test('use code block copy menu of code block copy whole code block', async ({
     />
   </affine:note>
 </affine:page>`
-  );
-});
+    );
+  }
+);
 
 test('code block copy button can work', async ({ page }) => {
   await enterPlaygroundRoom(page, {
@@ -703,4 +816,40 @@ test('should bracket complete works in code block', async ({ page }) => {
   await assertRichTexts(page, ['const a = "str()"']);
   await type(page, ']');
   await assertRichTexts(page, ['const a = "str(])"']);
+});
+
+test('auto scroll horizontally when typing', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '``` ');
+
+  for (let i = 0; i < 60; i++) {
+    await type(page, String(i));
+  }
+
+  const richTextScrollLeft1 = await page.evaluate(() => {
+    const richText = document.querySelector('affine-code rich-text');
+    if (!richText) {
+      throw new Error('Failed to get rich text');
+    }
+
+    return richText.scrollLeft;
+  });
+  expect(richTextScrollLeft1).toBeGreaterThan(200);
+
+  await pressArrowLeft(page, 5);
+  await type(page, 'aa');
+
+  const richTextScrollLeft2 = await page.evaluate(() => {
+    const richText = document.querySelector('affine-code rich-text');
+    if (!richText) {
+      throw new Error('Failed to get rich text');
+    }
+
+    return richText.scrollLeft;
+  });
+
+  expect(richTextScrollLeft2).toEqual(richTextScrollLeft1);
 });

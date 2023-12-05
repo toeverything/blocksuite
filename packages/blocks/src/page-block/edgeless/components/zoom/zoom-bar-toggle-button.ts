@@ -62,14 +62,14 @@ export class ZoomBarToggleButton extends LitElement {
   edgeless!: EdgelessPageBlockComponent;
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
 
   private _zoomBar: ZoomBarPopper | null = null;
 
   private _closeZoomMenu() {
     this._zoomBar?.dispose();
     this._zoomBar = null;
-    this._popperShow = false;
+    this._showPopper = false;
   }
 
   private _toggleNoteMenu() {
@@ -79,7 +79,7 @@ export class ZoomBarToggleButton extends LitElement {
       this._zoomBar = createZoomMenuPopper(this, this.edgeless);
       this._zoomBar.element.edgeless = this.edgeless;
       this._zoomBar.element.edgeless = this.edgeless;
-      this._popperShow = true;
+      this._showPopper = true;
     }
   }
 
@@ -91,7 +91,7 @@ export class ZoomBarToggleButton extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
     this.edgeless.handleEvent('click', () => {
-      if (this._zoomBar && this._popperShow) {
+      if (this._zoomBar && this._showPopper) {
         this._closeZoomMenu();
       }
     });
@@ -100,7 +100,7 @@ export class ZoomBarToggleButton extends LitElement {
   override disconnectedCallback() {
     this._zoomBar?.dispose();
     this._zoomBar = null;
-    this._popperShow = false;
+    this._showPopper = false;
     super.disconnectedCallback();
   }
 
@@ -108,10 +108,10 @@ export class ZoomBarToggleButton extends LitElement {
     return html`
       <div class="toggle-button" @pointerdown=${stopPropagation}>
         <edgeless-tool-icon-button
-          class=${this._popperShow ? 'actived' : 'non-actived'}
+          class=${this._showPopper ? 'actived' : 'non-actived'}
           .tooltip=${'Toggle Zoom Tool Bar'}
           .tipPosition=${'right'}
-          .active=${this._popperShow}
+          .active=${this._showPopper}
           .arrow=${false}
           .activeMode=${'background'}
           @click=${() => this._toggleNoteMenu()}

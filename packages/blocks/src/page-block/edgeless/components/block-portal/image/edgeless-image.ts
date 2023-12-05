@@ -1,48 +1,30 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { ImageBlockModel } from '../../../../../image-block/index.js';
 import { Bound } from '../../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
+import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 @customElement('edgeless-block-portal-image')
-export class EdgelessBlockPortalImage extends WithDisposable(
-  ShadowlessElement
-) {
-  @property({ attribute: false })
-  index!: number;
-
-  @property({ attribute: false })
-  model!: ImageBlockModel;
-
-  @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
-
-  override firstUpdated() {
-    this._disposables.add(
-      this.surface.page.slots.yBlockUpdated.on(e => {
-        if (e.id === this.model.id) {
-          this.requestUpdate();
-        }
-      })
-    );
-  }
-
+export class EdgelessBlockPortalImage extends EdgelessPortalBase<ImageBlockModel> {
   override render() {
-    const { model, surface, index } = this;
+    const { model, index, surface } = this;
     const bound = Bound.deserialize(model.xywh);
+    const { zoom } = surface.viewport;
     const style = {
       position: 'absolute',
       zIndex: `${index}`,
       width: `${bound.w}px`,
       height: `${bound.h}px`,
-      transform: `translate(${bound.x}px, ${bound.y}px)`,
+      transform: `translate(${bound.x * zoom}px, ${
+        bound.y * zoom
+      }px) scale(${zoom})`,
+      transformOrigin: '0 0',
     };
 
     return html`
-      <div style=${styleMap(style)}>${surface.edgeless.renderModel(model)}</div>
+      <div style=${styleMap(style)}>${this.renderModel(model)}</div>
     `;
   }
 }

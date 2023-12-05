@@ -4,8 +4,8 @@ import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/image-model.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
 import type {
+  CanvasElementType,
   IElementCreateProps,
-  PhasorElementType,
 } from './elements/edgeless-element.js';
 
 export enum EdgelessBlockType {
@@ -31,6 +31,6 @@ export enum EdgelessElementType {
 }
 
 export type IEdgelessElementCreateProps<T extends EdgelessElementType> =
-  T extends PhasorElementType
+  T extends CanvasElementType
     ? IElementCreateProps<T>
     : Partial<BlockProps & Omit<BlockProps, 'flavour'>>;

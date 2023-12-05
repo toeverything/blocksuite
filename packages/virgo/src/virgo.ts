@@ -27,7 +27,7 @@ export type VirgoRootElement<
 
 export interface VRangeProvider {
   getVRange(): VRange | null;
-  setVRange(vRange: VRange | null): void;
+  setVRange(vRange: VRange | null, sync: boolean): void;
   vRangeUpdatedSlot: Slot<VRangeUpdatedProp>;
 }
 

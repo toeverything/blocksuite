@@ -36,7 +36,7 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
     await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
 
     await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
-    await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
+    await assertEdgelessSelectedRect(page, [86, 86, 236, 136]);
 
     // const x = 100;
     // const y = 100;
@@ -48,13 +48,13 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
     // [x + dx - 2, y + dy - 2, w - dx + 2, h - dy + 2];
 
     await resizeElementByHandle(page, { x: 50, y: 50 });
-    await assertEdgelessSelectedRect(page, [148, 124.19, 162, 85.81]);
+    await assertEdgelessSelectedRect(page, [136, 112, 186, 109.5]);
 
     await page.mouse.move(160, 160);
-    await assertEdgelessSelectedRect(page, [148, 124.19, 162, 85.81]);
+    await assertEdgelessSelectedRect(page, [136, 112, 186, 109.5]);
 
     await page.mouse.move(260, 160);
-    await assertEdgelessSelectedRect(page, [148, 124.19, 162, 85.81]);
+    await assertEdgelessSelectedRect(page, [136, 112, 186, 109.5]);
   });
 
   test('negative adjustment', async ({ page }) => {
@@ -76,7 +76,7 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
     await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
 
     await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
-    await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
+    await assertEdgelessSelectedRect(page, [86, 86, 236, 136]);
 
     // const x = 100;
     // const y = 100;
@@ -91,12 +91,12 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
     // const nw = 188 * p = 358 - 2 = 356
 
     await resizeElementByHandle(page, { x: 400, y: 300 }, 'top-left', 30);
-    await assertEdgelessSelectedRect(page, [310, 210, 356, 188]);
+    await assertEdgelessSelectedRect(page, [298, 198, 380, 212]);
 
     await page.mouse.move(450, 300);
-    await assertEdgelessSelectedRect(page, [310, 210, 356, 188]);
+    await assertEdgelessSelectedRect(page, [298, 198, 380, 212]);
 
     await page.mouse.move(320, 220);
-    await assertEdgelessSelectedRect(page, [310, 210, 356, 188]);
+    await assertEdgelessSelectedRect(page, [298, 198, 380, 212]);
   });
 });

@@ -1,10 +1,12 @@
 #!/bin/bash
 
+# Never set eux here otherwise it will break the CI
+
 # ALL_PACKAGES
 packages=(
   "blocks"
   # "docs" # NOT PUBLISHED
-  "editor"
+  "presets"
   "global"
   # "playground" # NOT PUBLISHED
   "store"

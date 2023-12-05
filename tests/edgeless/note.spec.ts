@@ -11,7 +11,6 @@ import {
   exitEditing,
   getNoteRect,
   hoverOnNote,
-  initThreeNotes,
   locatorComponentToolbar,
   locatorEdgelessZoomToolButton,
   selectNoteInEdgeless,
@@ -50,7 +49,9 @@ import {
   assertEdgelessNonSelectedRect,
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
+  assertExists,
   assertNativeSelectionRangeCount,
+  assertNoteRectEqual,
   assertNoteSequence,
   assertNoteXYWH,
   assertRectEqual,
@@ -72,7 +73,7 @@ test('can drag selected non-active note', async ({ page }) => {
 
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
-  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 95]);
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 91]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -81,15 +82,15 @@ test('can drag selected non-active note', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertNoteXYWH(page, [0, 100, NOTE_WIDTH, 95]);
+  await assertNoteXYWH(page, [0, 100, NOTE_WIDTH, 91]);
 });
 
 test('resize note in edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const ids = await initEmptyEdgelessState(page);
+  const { noteId } = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
-  await activeNoteInEdgeless(page, ids.noteId);
+  await activeNoteInEdgeless(page, noteId);
   await waitNextFrame(page, 400);
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
@@ -97,20 +98,20 @@ test('resize note in edgeless mode', async ({ page }) => {
   // unselect note
   await page.mouse.click(50, 50);
 
-  expect(ids.noteId).toBe('2'); // 0 for page, 1 for surface
-  await selectNoteInEdgeless(page, ids.noteId);
+  expect(noteId).toBe('2'); // 0 for page, 1 for surface
+  await selectNoteInEdgeless(page, noteId);
 
-  const initRect = await getNoteRect(page, ids);
+  const initRect = await getNoteRect(page, noteId);
   const leftHandle = page.locator('.handle[aria-label="left"] .resize');
   const box = await leftHandle.boundingBox();
-  if (box === null) throw new Error();
+  assertExists(box);
 
   await dragBetweenCoords(
     page,
     { x: box.x + 5, y: box.y + 5 },
     { x: box.x + 105, y: box.y + 5 }
   );
-  const draggedRect = await getNoteRect(page, ids);
+  const draggedRect = await getNoteRect(page, noteId);
   assertRectEqual(draggedRect, {
     x: initRect.x + 100,
     y: initRect.y,
@@ -120,8 +121,60 @@ test('resize note in edgeless mode', async ({ page }) => {
 
   await switchEditorMode(page);
   await switchEditorMode(page);
-  const newRect = await getNoteRect(page, ids);
+  const newRect = await getNoteRect(page, noteId);
   assertRectEqual(newRect, draggedRect);
+});
+
+test('resize note then auto size and custom size', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+  await activeNoteInEdgeless(page, noteId);
+  await waitNextFrame(page, 400);
+  await type(page, 'hello');
+  await assertRichTexts(page, ['hello']);
+  // unselect note
+  await page.mouse.click(50, 50);
+  await selectNoteInEdgeless(page, noteId);
+
+  const initRect = await getNoteRect(page, noteId);
+  const bottomRightResize = page.locator(
+    '.handle[aria-label="bottom-right"] .resize'
+  );
+  const box = await bottomRightResize.boundingBox();
+  assertExists(box);
+
+  await dragBetweenCoords(
+    page,
+    { x: box.x + 5, y: box.y + 5 },
+    { x: box.x + 5, y: box.y + 105 }
+  );
+
+  const draggedRect = await getNoteRect(page, noteId);
+  assertRectEqual(draggedRect, {
+    x: initRect.x,
+    y: initRect.y,
+    w: initRect.w,
+    h: initRect.h + 100,
+  });
+
+  await triggerComponentToolbarAction(page, 'autoSize');
+  await waitNextFrame(page);
+  const autoSizeRect = await getNoteRect(page, noteId);
+  assertRectEqual(autoSizeRect, initRect);
+
+  await triggerComponentToolbarAction(page, 'autoSize');
+  await waitNextFrame(page);
+  await assertNoteRectEqual(page, noteId, draggedRect);
+
+  await undoByClick(page);
+  await waitNextFrame(page);
+  await assertNoteRectEqual(page, noteId, initRect);
+
+  await redoByClick(page);
+  await waitNextFrame(page);
+  await assertNoteRectEqual(page, noteId, draggedRect);
 });
 
 test('add Note', async ({ page }) => {
@@ -136,7 +189,7 @@ test('add Note', async ({ page }) => {
   await assertRichTexts(page, ['', 'hello']);
   await page.mouse.click(300, 200);
   await page.mouse.click(350, 320);
-  await assertEdgelessSelectedRect(page, [270, 260, 448, 95]);
+  await assertEdgelessSelectedRect(page, [270, 260, 448, 91]);
 });
 
 test('add empty Note', async ({ page }) => {
@@ -158,9 +211,9 @@ test('add empty Note', async ({ page }) => {
   // click out of note
   await page.mouse.click(250, 200);
 
-  // assert empty note is removed
+  // assert empty note is note removed
   await page.mouse.move(320, 320);
-  await assertBlockCount(page, 'note', 1);
+  await assertBlockCount(page, 'note', 2);
 });
 
 test('always keep at least 1 note block', async ({ page }) => {
@@ -179,31 +232,31 @@ test('always keep at least 1 note block', async ({ page }) => {
 
 test('edgeless arrow up/down', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const ids = await initEmptyEdgelessState(page);
+  const { paragraphId, noteId } = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
-  await activeNoteInEdgeless(page, ids.noteId);
+  await activeNoteInEdgeless(page, noteId);
   await waitNextFrame(page, 400);
 
-  await type(page, 'hello');
+  await type(page, 'aaaaa');
   await pressEnter(page);
-  await type(page, 'world');
+  await type(page, 'aaaaa');
   await pressEnter(page);
-  await type(page, 'foo');
+  await type(page, 'aaa');
 
-  await activeNoteInEdgeless(page, ids.noteId);
+  await activeNoteInEdgeless(page, noteId);
   await waitForVirgoStateUpdated(page);
   // 0 for page, 1 for surface, 2 for note, 3 for paragraph
-  expect(ids.paragraphId).toBe('3');
-  await clickBlockById(page, ids.paragraphId);
+  expect(paragraphId).toBe('3');
+  await clickBlockById(page, paragraphId);
   await assertRichTextVRange(page, 0, 5, 0);
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 0, 0);
+  await assertRichTextVRange(page, 1, 5, 0);
 
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 0, 0);
+  await assertRichTextVRange(page, 0, 5, 0);
 
   await pressArrowUp(page);
   await waitNextFrame(page);
@@ -336,13 +389,13 @@ test('drag handle should work across multiple notes', async ({ page }) => {
 test.describe('note slicer', () => {
   test('note slicer will add new note', async ({ page }) => {
     await enterPlaygroundRoom(page);
-    const ids = await initEmptyEdgelessState(page);
+    const { noteId } = await initEmptyEdgelessState(page);
     await initSixParagraphs(page);
 
     await switchEditorMode(page);
-    await selectNoteInEdgeless(page, ids.noteId);
+    await selectNoteInEdgeless(page, noteId);
 
-    await hoverOnNote(page, ids.noteId, [0, 60]);
+    await hoverOnNote(page, noteId, [0, 60]);
     await waitNextFrame(page);
     await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
 
@@ -370,15 +423,15 @@ test.describe('note slicer', () => {
     page,
   }) => {
     await enterPlaygroundRoom(page);
-    const ids = await initEmptyEdgelessState(page);
+    const { noteId } = await initEmptyEdgelessState(page);
     await initThreeParagraphs(page);
     await assertRichTexts(page, ['123', '456', '789']);
 
     await switchEditorMode(page);
-    await selectNoteInEdgeless(page, ids.noteId);
+    await selectNoteInEdgeless(page, noteId);
 
     const blockes = await page
-      .locator(`[data-block-id="${ids.noteId}"] [data-block-id]`)
+      .locator(`[data-block-id="${noteId}"] [data-block-id]`)
       .all();
     expect(blockes.length).toBe(3);
 
@@ -408,14 +461,14 @@ test.describe('note slicer', () => {
     page,
   }) => {
     await enterPlaygroundRoom(page);
-    const ids = await initEmptyEdgelessState(page);
+    const { noteId } = await initEmptyEdgelessState(page);
     await initSixParagraphs(page);
 
     await switchEditorMode(page);
 
-    await selectNoteInEdgeless(page, ids.noteId);
+    await selectNoteInEdgeless(page, noteId);
 
-    await hoverOnNote(page, ids.noteId, [0, 60]);
+    await hoverOnNote(page, noteId, [0, 60]);
     await waitNextFrame(page);
     await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
 
@@ -453,39 +506,54 @@ test.describe('note slicer', () => {
     await waitNextFrame(page);
     const zIndexPattern = /z-index:\s*(\d+)/;
 
+    let blockStyleText = zIndexPattern.exec(
+      (await page
+        .locator(`[data-portal-block-id="${lastNoteId}"]`)
+        .getAttribute('style')) ?? ''
+    )?.[1];
     let styleText =
       (await page.locator('affine-note-slicer').getAttribute('style')) ?? '';
     let result = zIndexPattern.exec(styleText);
-    expect(result?.[1]).toBe('3');
+    expect(result?.[1]).toBe(blockStyleText);
 
     await selectNoteInEdgeless(page, secondNoteId);
     await hoverOnNote(page, secondNoteId);
 
+    blockStyleText = zIndexPattern.exec(
+      (await page
+        .locator(`[data-portal-block-id="${secondNoteId}"]`)
+        .getAttribute('style')) ?? ''
+    )?.[1];
     styleText =
       (await page.locator('affine-note-slicer').getAttribute('style')) ?? '';
     result = zIndexPattern.exec(styleText);
-    expect(result?.[1]).toBe('2');
+    expect(result?.[1]).toBe(blockStyleText);
 
     await selectNoteInEdgeless(page, firstNoteId);
     await hoverOnNote(page, firstNoteId);
 
+    blockStyleText = zIndexPattern.exec(
+      (await page
+        .locator(`[data-portal-block-id="${firstNoteId}"]`)
+        .getAttribute('style')) ?? ''
+    )?.[1];
     styleText =
       (await page.locator('affine-note-slicer').getAttribute('style')) ?? '';
     result = zIndexPattern.exec(styleText);
-    expect(result?.[1]).toBe('1');
+    expect(result?.[1]).toBe(blockStyleText);
   });
 });
 
 test('undo/redo should work correctly after clipping', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const ids = await initEmptyEdgelessState(page);
+  const { noteId } = await initEmptyEdgelessState(page);
   await initSixParagraphs(page);
 
   await switchEditorMode(page);
 
-  await selectNoteInEdgeless(page, ids.noteId);
+  await selectNoteInEdgeless(page, noteId);
 
-  await hoverOnNote(page, ids.noteId, [0, 60]);
+  await hoverOnNote(page, noteId, [0, 60]);
   await waitNextFrame(page, 500);
 
   const buttonRect = await page
@@ -509,19 +577,19 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
 
 test('undo/redo should work correctly after resizing', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const ids = await initEmptyEdgelessState(page);
+  const { noteId } = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
-  await activeNoteInEdgeless(page, ids.noteId);
+  await activeNoteInEdgeless(page, noteId);
   await waitNextFrame(page, 400);
   // current implementation may be a little inefficient
   await fillLine(page, true);
-
+  await page.pause();
   await page.mouse.click(0, 0);
   await waitNextFrame(page, 400);
-  await selectNoteInEdgeless(page, ids.noteId);
+  await selectNoteInEdgeless(page, noteId);
 
-  const initRect = await getNoteRect(page, ids);
+  const initRect = await getNoteRect(page, noteId);
   const rightHandle = page.locator('.handle[aria-label="right"] .resize');
   const box = await rightHandle.boundingBox();
   if (box === null) throw new Error();
@@ -529,25 +597,25 @@ test('undo/redo should work correctly after resizing', async ({ page }) => {
   await dragBetweenCoords(
     page,
     { x: box.x + 5, y: box.y + 5 },
-    { x: box.x + 105, y: box.y + 5 }
+    { x: box.x - 45, y: box.y + 5 }
   );
-  const draggedRect = await getNoteRect(page, ids);
+  const draggedRect = await getNoteRect(page, noteId);
   assertRectEqual(draggedRect, {
     x: initRect.x,
     y: initRect.y,
-    w: initRect.w + 100,
+    w: initRect.w - 50,
     h: draggedRect.h, // not assert `h` here
   });
-  expect(draggedRect.h).toBeLessThan(initRect.h);
+  expect(draggedRect.h).toBe(initRect.h);
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
-  const undoRect = await getNoteRect(page, ids);
+  const undoRect = await getNoteRect(page, noteId);
   assertRectEqual(undoRect, initRect);
 
   await redoByKeyboard(page);
   await waitNextFrame(page);
-  const redoRect = await getNoteRect(page, ids);
+  const redoRect = await getNoteRect(page, noteId);
   assertRectEqual(redoRect, draggedRect);
 });
 
@@ -578,29 +646,29 @@ test('when editing text in edgeless, should hide component toolbar', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  const ids = await initEmptyEdgelessState(page);
+  const { noteId } = await initEmptyEdgelessState(page);
   await initThreeParagraphs(page);
   await switchEditorMode(page);
 
-  await selectNoteInEdgeless(page, ids.noteId);
+  await selectNoteInEdgeless(page, noteId);
 
   const toolbar = locatorComponentToolbar(page);
   await expect(toolbar).toBeVisible();
 
   await page.mouse.click(0, 0);
-  await activeNoteInEdgeless(page, ids.noteId);
+  await activeNoteInEdgeless(page, noteId);
   await expect(toolbar).toBeHidden();
 });
 
 test('duplicate note should work correctly', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const ids = await initEmptyEdgelessState(page);
+  const { noteId } = await initEmptyEdgelessState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
 
-  await selectNoteInEdgeless(page, ids.noteId);
+  await selectNoteInEdgeless(page, noteId);
 
   await triggerComponentToolbarAction(page, 'duplicate');
   const moreActionsContainer = page.locator('.more-actions-container');
@@ -640,21 +708,21 @@ test('double click toolbar zoom button, should not add text', async ({
 
 test('change note color', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const ids = await initEmptyEdgelessState(page);
+  const { noteId } = await initEmptyEdgelessState(page);
   await initThreeParagraphs(page);
   await switchEditorMode(page);
 
   await assertEdgelessNoteBackground(
     page,
-    ids.noteId,
+    noteId,
     '--affine-background-secondary-color'
   );
 
-  await selectNoteInEdgeless(page, ids.noteId);
+  await selectNoteInEdgeless(page, noteId);
   await triggerComponentToolbarAction(page, 'changeNoteColor');
   const color = '--affine-tag-blue';
   await changeEdgelessNoteBackground(page, color);
-  await assertEdgelessNoteBackground(page, ids.noteId, color);
+  await assertEdgelessNoteBackground(page, noteId, color);
 });
 
 test('cursor for active and inactive state', async ({ page }) => {
@@ -743,14 +811,14 @@ test('when no visible note block, clicking in page mode will auto add a new note
   await assertNoteSequence(page, '1');
   await assertBlockCount(page, 'note', 1);
   // hide note
-  await page.locator('edgeless-change-note-button').click();
+  await page.locator('edgeless-change-note-button .hidden-status').click();
 
   await switchEditorMode(page);
   let note = await page.evaluate(() => {
     return document.querySelector('affine-note');
   });
   expect(note).toBeNull();
-  await click(page, { x: 100, y: 280 });
+  await click(page, { x: 200, y: 280 });
 
   note = await page.evaluate(() => {
     return document.querySelector('affine-note');

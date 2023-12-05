@@ -1,9 +1,9 @@
 /// <reference types="./env.d.ts" />
 import '@blocksuite/blocks';
-import '@blocksuite/editor';
+import '@blocksuite/presets';
 import './components/start-panel';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import '@blocksuite/editor/themes/affine.css';
+import '@blocksuite/presets/themes/affine.css';
 
 import { TestUtils } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
@@ -87,7 +87,7 @@ export async function initPageContentByParam(
   if (functionMap.has(param)) {
     functionMap.get(param)?.(workspace, pageId);
     const page = workspace.getPage(pageId);
-    await page?.waitForLoaded();
+    await page?.load();
     page?.resetHistory();
     return;
   }
@@ -126,7 +126,7 @@ async function main() {
 
   workspace.slots.pageAdded.on(async pageId => {
     const page = workspace.getPage(pageId) as Page;
-    await page.waitForLoaded();
+    await page.load();
   });
 
   window.testUtils = new TestUtils();

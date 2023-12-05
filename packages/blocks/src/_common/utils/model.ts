@@ -28,6 +28,7 @@ import type {
   ParagraphBlockSchema,
   SurfaceBlockModel,
   SurfaceBlockSchema,
+  SurfaceRefBlockModel,
 } from '../../index.js';
 
 export type BlockModels = {
@@ -44,6 +45,7 @@ export type BlockModels = {
   'affine:data-view': DataViewBlockModel;
   'affine:bookmark': BookmarkBlockModel;
   'affine:attachment': AttachmentBlockModel;
+  'affine:surface-ref': SurfaceRefBlockModel;
 };
 
 export type BlockSchemas = {
@@ -72,15 +74,11 @@ export function assertFlavours(model: { flavour: string }, allowed: string[]) {
   }
 }
 
-type BlockModelKey = keyof BlockModels;
-type Flavours<T> = T extends BlockModelKey[] ? BlockModels[T[number]] : never;
-type Writeable<T> = { -readonly [P in keyof T]: T[P] };
-
-export function matchFlavours<const Key extends readonly string[]>(
+export function matchFlavours<Key extends (keyof BlockModels)[]>(
   model: BaseBlockModel | null,
   expected: Key
-): model is Flavours<Writeable<Key>> {
-  return !!model && expected.includes(model.flavour);
+): model is BlockModels[Key[number]] {
+  return !!model && expected.includes(model.flavour as keyof BlockModels);
 }
 
 export function isInsideBlockByFlavour(

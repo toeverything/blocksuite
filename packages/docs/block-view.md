@@ -1,5 +1,9 @@
 # Block View
 
+::: warning
+This documentation is mostly written for BlockSuite maintainers. If you goal doesn't involve in contributing to the BlockSuite repository, here may not be the best place for getting started.
+:::
+
 In BlockSuite, blocks can be rendered by any UI framework. A block should be rendered to a DOM element, and we use `view` to represent the renderer.
 
 By default, we provide a [lit](https://lit.dev/) renderer called `@blocksuite/lit`. But it's still possible to use other UI frameworks. We'll introduce later about how to write custom block renderers.
@@ -37,7 +41,7 @@ class MyBlockView extends BlockElement<MyBlockModel> {
 
 ## Render Children
 
-A block can have children, and we can render them by using `content` property.
+A block can have children, and we can render them by using `renderModelChildren`.
 
 ```ts
 @customElements('my-block')
@@ -46,7 +50,7 @@ class MyBlockView extends BlockElement<MyBlockModel> {
     return html`
       <div>
         <h3>My Block</h3>
-        ${this.content}
+        ${this.renderModelChildren(this.model)}
       </div>
     `;
   }

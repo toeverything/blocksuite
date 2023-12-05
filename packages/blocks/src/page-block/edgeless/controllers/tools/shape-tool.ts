@@ -8,7 +8,7 @@ import type {
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
 import {
   Bound,
-  PhasorElementType,
+  CanvasElementType,
   ShapeStyle,
   StrokeStyle,
 } from '../../../../surface-block/index.js';
@@ -57,7 +57,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const shapeType = shape === 'roundedRect' ? 'rect' : shape;
 
-    const id = this._surface.addElement(PhasorElementType.SHAPE, {
+    const id = this._surface.addElement(CanvasElementType.SHAPE, {
       shapeType,
       xywh: bound.serialize(),
       strokeColor,
@@ -133,6 +133,10 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerDragEnd() {
+    if (this._draggingElementId) {
+      this._edgeless.applyLocalRecord([this._draggingElementId as string]);
+    }
+
     const id = this._draggingElementId;
     assertExists(id);
 
@@ -199,7 +203,10 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const h = Math.abs(startY - endY) / zoom;
 
     const bound = new Bound(x, y, w, h);
-    surface.setElementBound(id, bound);
+
+    this._edgeless.updateElementInLocal(id, {
+      xywh: bound.serialize(),
+    });
   }
 
   private _updateOverlayPosition(x: number, y: number) {

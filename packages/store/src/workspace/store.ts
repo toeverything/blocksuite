@@ -41,19 +41,9 @@ export enum Generator {
   AutoIncrement = 'autoIncrement',
 }
 
-/**
- * @example
- *  const workspace = new Workspace({
- *    isSSR: typeof window === 'undefined'
- *  })
- */
-export interface SSROptions {
-  isSSR?: boolean;
-}
-
 export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
-> extends SSROptions {
+> {
   id: string;
   providerCreators?: DocProviderCreator[];
   awareness?: Awareness<RawAwarenessState<Flags>>;
@@ -63,17 +53,8 @@ export interface StoreOptions<
 }
 
 const flagsPreset = {
-  enable_set_remote_flag: true,
-  enable_block_hub: true,
-
-  enable_transformer_clipboard: false,
-
+  enable_transformer_clipboard: true,
   enable_expand_database_block: false,
-
-  enable_toggle_block: false,
-  enable_bookmark_operation: false,
-  enable_note_index: false,
-
   enable_bultin_ledits: false,
   readonly: {},
 } satisfies BlockSuiteFlags;

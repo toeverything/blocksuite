@@ -47,7 +47,9 @@ export function convertToList(
       children: model.children,
       ...otherProperties,
     };
-    page.deleteBlock(model);
+    page.deleteBlock(model, {
+      deleteChildren: false,
+    });
 
     const id = page.addBlock('affine:list', blockProps, parent, index);
     asyncFocusRichText(page, id);
@@ -78,7 +80,9 @@ export function convertToParagraph(
       text: model.text?.clone(),
       children: model.children,
     };
-    page.deleteBlock(model);
+    page.deleteBlock(model, {
+      deleteChildren: false,
+    });
 
     const id = page.addBlock('affine:paragraph', blockProps, parent, index);
     asyncFocusRichText(page, id);

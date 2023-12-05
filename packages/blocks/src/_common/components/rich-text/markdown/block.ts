@@ -58,10 +58,10 @@ export function tryConvertBlock(
 
     const page = model.page;
     page.captureSync();
+
     const parent = page.getParent(model);
     assertExists(parent);
     const index = parent.children.indexOf(model);
-    page.deleteBlock(model);
 
     const codeId = page.addBlock(
       'affine:code',
@@ -72,6 +72,14 @@ export function tryConvertBlock(
       parent,
       index
     );
+    if (model.text && model.text.length > prefixText.length) {
+      const text = model.text.clone();
+      page.addBlock('affine:paragraph', { text }, parent, index + 1);
+      text.delete(0, prefixText.length);
+    }
+    page.deleteBlock(model, {
+      bringChildrenTo: parent,
+    });
 
     const codeBlock = page.getBlockById(codeId);
     assertExists(codeBlock);

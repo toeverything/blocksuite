@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Y } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { Text, Workspace } from '@blocksuite/store';
 import {
   type AttributeRenderer,
   createVirgoKeyDownHandler,
@@ -49,7 +49,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  yText!: Y.Text;
+  yText!: Y.Text | Text;
 
   @property({ attribute: false })
   attributesSchema?: z.ZodSchema;
@@ -103,7 +103,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     }
 
     // init vEditor
-    this._vEditor = new VEditor<AffineTextAttributes>(this.yText, {
+    this._vEditor = new VEditor<AffineTextAttributes>(this._yText, {
       isEmbed: delta => !!delta.attributes?.reference,
       hooks: {
         beforeinput: onVBeforeinput,
@@ -134,46 +134,33 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       );
     }
 
-    // User can clicks more than one button at the same time.
-    // See https://stackoverflow.com/questions/322378/javascript-check-if-mouse-button-down
-    let mouseDown = 0;
-    let needScroll = false;
-    this.disposables.addFromEvent(window, 'mousedown', () => {
-      mouseDown++;
-    });
-    this.disposables.addFromEvent(window, 'mouseup', () => {
-      mouseDown--;
-      if (!mouseDown && needScroll) {
-        needScroll = false;
-        this.scrollIntoView({
-          block: 'nearest',
-        });
-      }
-    });
-
     // init auto scroll
     vEditor.disposables.add(
-      vEditor.slots.vRangeUpdated.on(([vRange]) => {
-        if (!vRange) return;
+      vEditor.slots.vRangeUpdated.on(([vRange, sync]) => {
+        if (!vRange || !sync) return;
 
         vEditor.waitForUpdate().then(() => {
           if (!vEditor.mounted) return;
 
+          // get newest vRange
+          const vRange = vEditor.getVRange();
+          if (!vRange) return;
+
           const range = vEditor.toDomRange(vRange);
           if (!range) return;
 
+          // scroll container is window
           if (this.enableAutoScrollVertically) {
-            if (mouseDown) {
-              // We should not scroll when mouse is down
-              // See https://github.com/toeverything/blocksuite/issues/5034
-              needScroll = true;
-            } else {
-              this.scrollIntoView({
-                block: 'nearest',
-              });
+            const rangeRect = range.getBoundingClientRect();
+
+            if (rangeRect.top < 0) {
+              this.scrollIntoView({ block: 'start' });
+            } else if (rangeRect.bottom > window.innerHeight) {
+              this.scrollIntoView({ block: 'end' });
             }
           }
 
+          // scroll container is rich-text
           if (this.enableAutoScrollHorizontally) {
             // make sure the result of moveX is expected
             this.scrollLeft = 0;
@@ -254,6 +241,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     e.stopPropagation();
   };
 
+  private get _yText() {
+    return this.yText instanceof Text ? this.yText.yText : this.yText;
+  }
+
   private _onPaste = (e: ClipboardEvent) => {
     const vEditor = this.vEditor;
     assertExists(vEditor);
@@ -290,12 +281,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    assertExists(this.yText, 'rich-text need yText to init.');
-    assertExists(this.yText.doc, 'yText should be bind to yDoc.');
+    assertExists(this._yText, 'rich-text need yText to init.');
+    assertExists(this._yText.doc, 'yText should be bind to yDoc.');
 
     if (!this.undoManager) {
-      this.undoManager = new Workspace.Y.UndoManager(this.yText, {
-        trackedOrigins: new Set([this.yText.doc.clientID]),
+      this.undoManager = new Workspace.Y.UndoManager(this._yText, {
+        trackedOrigins: new Set([this._yText.doc.clientID]),
       });
     }
 

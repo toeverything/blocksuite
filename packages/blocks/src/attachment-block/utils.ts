@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel, type BlobManager } from '@blocksuite/store';
 
 import { toast } from '../_common/components/toast.js';
@@ -9,9 +10,9 @@ import type {
   ImageBlockProps,
 } from '../image-block/image-model.js';
 import { transformModel } from '../page-block/utils/operations/model.js';
-import type {
+import {
   AttachmentBlockModel,
-  AttachmentBlockProps,
+  type AttachmentBlockProps,
 } from './attachment-model.js';
 import { defaultAttachmentProps } from './attachment-model.js';
 
@@ -31,7 +32,7 @@ export function cloneAttachmentProperties(
   return clonedProps;
 }
 
-async function getAttachment(model: AttachmentBlockModel) {
+export async function getAttachmentBlob(model: AttachmentBlockModel) {
   const blobManager = model.page.blob;
   const sourceId = model.sourceId;
   if (!sourceId) return null;
@@ -41,10 +42,14 @@ async function getAttachment(model: AttachmentBlockModel) {
   return blob;
 }
 
-export async function downloadAttachment(
+/**
+ * Since the size of the attachment may be very large,
+ * the download process may take a long time!
+ */
+export async function downloadAttachmentBlob(
   attachmentModel: AttachmentBlockModel
 ) {
-  const attachment = await getAttachment(attachmentModel);
+  const attachment = await getAttachmentBlob(attachmentModel);
   if (!attachment) {
     toast('Failed to download attachment!');
     console.error(
@@ -61,7 +66,7 @@ export async function downloadAttachment(
 /**
  * Turn the attachment block into an image block.
  */
-export async function turnIntoEmbedView(model: AttachmentBlockModel) {
+export async function turnIntoImage(model: AttachmentBlockModel) {
   if (!model.page.schema.flavourSchemaMap.has('affine:image'))
     throw new Error('The image flavour is not supported!');
 
@@ -98,24 +103,29 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
     size: blob.size,
     type: blob.type,
     caption: model.caption,
+    embed: false,
     ...attachmentConvertData,
   };
   transformModel(model, 'affine:attachment', attachmentProp);
 }
 
-async function uploadFileForAttachment(
-  attachmentModel: AttachmentBlockModel,
-  file: File
-) {
-  const loadingKey = attachmentModel.loadingKey;
-  const isLoading = loadingKey ? isAttachmentLoading(loadingKey) : false;
-  if (!isLoading) {
-    console.warn(
-      'uploadAttachment: the attachment is not loading!',
-      attachmentModel
-    );
+/**
+ * This function will not verify the size of the file.
+ *
+ * NOTE: This function may take a long time!
+ *
+ * @internal
+ */
+export async function uploadBlobForAttachment(
+  page: Page,
+  attachmentModelId: string,
+  blob: Blob
+): Promise<string> {
+  const isLoading = isAttachmentLoading(attachmentModelId);
+  if (isLoading) {
+    throw new Error('the attachment is already uploading!');
   }
-  const page = attachmentModel.page;
+  setAttachmentLoading(attachmentModelId, true);
   const storage = page.blob;
   // The original file name can not be modified after the file is uploaded to the storage,
   // so we create a new file with a fixed name to prevent privacy leaks.
@@ -123,14 +133,23 @@ async function uploadFileForAttachment(
   //   type: file.type,
   // });
   try {
-    const sourceId = await storage.set(file);
+    // the uploading process may take a long time!
+    const sourceId = await storage.set(blob);
     // await new Promise(resolve => setTimeout(resolve, 1000));
-    setAttachmentLoading(attachmentModel.loadingKey ?? '', false);
-    page.updateBlock(attachmentModel, {
-      sourceId,
-      loadingKey: null,
-    } satisfies Partial<AttachmentBlockProps>);
-    return attachmentModel;
+    const attachmentModel = page.getBlockById(attachmentModelId);
+    if (!attachmentModel) {
+      // It occurs when the block is deleted before the uploading process is finished.
+      throw new Error('the attachment model is not found!');
+    }
+    if (!(attachmentModel instanceof AttachmentBlockModel)) {
+      console.error(attachmentModel);
+      throw new Error('the model is not an attachment model!');
+    }
+    page.withoutTransact(() => {
+      page.updateBlock(attachmentModel, {
+        sourceId,
+      } satisfies Partial<AttachmentBlockProps>);
+    });
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -138,18 +157,21 @@ async function uploadFileForAttachment(
         `Failed to upload attachment! ${error.message || error.toString()}`
       );
     }
-    page.updateBlock(attachmentModel, {
-      loadingKey: null,
-    } satisfies Partial<AttachmentBlockProps>);
-    return null;
+  } finally {
+    setAttachmentLoading(attachmentModelId, false);
   }
+  return attachmentModelId;
 }
 
-export async function appendAttachmentBlock(
+/**
+ * Add a new attachment block before / after the specified block.
+ */
+export async function addSiblingAttachmentBlock(
   file: File,
   model: BaseBlockModel,
-  maxFileSize: number
-): Promise<void> {
+  maxFileSize: number,
+  place: 'before' | 'after' = 'after'
+): Promise<string | null> {
   if (file.size > maxFileSize) {
     toast(
       `You can only upload files less than ${humanFileSize(
@@ -158,43 +180,45 @@ export async function appendAttachmentBlock(
         0
       )}`
     );
-    return;
+    return null;
   }
 
   const page = model.page;
-  const loadingKey = page.generateBlockId();
-  setAttachmentLoading(loadingKey, true);
-  const props: AttachmentBlockProps & { flavour: 'affine:attachment' } = {
+  const blockId = page.generateBlockId();
+  const props: AttachmentBlockProps & {
+    id: string;
+    flavour: 'affine:attachment';
+  } = {
+    id: blockId,
     flavour: 'affine:attachment',
     name: file.name,
     size: file.size,
     type: file.type,
-    loadingKey,
+    embed: false,
   };
-  const [newBlockId] = page.addSiblingBlocks(model, [props]);
-
-  // Upload the file to the storage
-  const attachmentModel = page.getBlockById(
-    newBlockId
-  ) as AttachmentBlockModel | null;
-  assertExists(attachmentModel);
+  const [newBlockId] = page.addSiblingBlocks(model, [props], place);
   // Do not add await here, because upload may take a long time, we want to do it in the background.
-  uploadFileForAttachment(attachmentModel, file);
+  return uploadBlobForAttachment(page, newBlockId, file);
 }
 
 const attachmentLoadingMap = new Set<string>();
-export function setAttachmentLoading(loadingKey: string, loading: boolean) {
+export function setAttachmentLoading(modelId: string, loading: boolean) {
   if (loading) {
-    attachmentLoadingMap.add(loadingKey);
+    attachmentLoadingMap.add(modelId);
   } else {
-    attachmentLoadingMap.delete(loadingKey);
+    attachmentLoadingMap.delete(modelId);
   }
 }
 
-export function isAttachmentLoading(loadingKey: string) {
-  return attachmentLoadingMap.has(loadingKey);
+export function isAttachmentLoading(modelId: string) {
+  return attachmentLoadingMap.has(modelId);
 }
 
+/**
+ * Use it with caution! This function may take a long time!
+ *
+ * @deprecated Use {@link getAttachmentBlob} instead.
+ */
 export async function hasBlob(storage: BlobManager, sourceId: string) {
   return !!(await storage.get(sourceId));
 }

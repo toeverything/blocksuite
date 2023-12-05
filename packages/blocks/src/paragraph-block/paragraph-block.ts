@@ -15,7 +15,12 @@ import { affineAttributeRenderer } from '../_common/components/rich-text/virgo/a
 import { affineTextAttributes } from '../_common/components/rich-text/virgo/types.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { BlockHubIcon20 } from '../_common/icons/index.js';
-import { isPageMode, matchFlavours } from '../_common/utils/index.js';
+import {
+  getThemeMode,
+  isPageMode,
+  matchFlavours,
+} from '../_common/utils/index.js';
+import type { BlockHub } from '../_common/widgets/block-hub/components/block-hub.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {
@@ -39,7 +44,9 @@ function TipsPlaceholder(model: BaseBlockModel, tipsPos: Style) {
       </div> `;
     }
 
-    const blockHub = document.querySelector('affine-block-hub');
+    const blockHub = document.querySelector(
+      'affine-block-hub'
+    ) as BlockHub | null;
     if (!blockHub) {
       // Fall back
       return html`<div class="tips-placeholder" style=${styleMap(tipsPos)}>
@@ -228,9 +235,17 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   override firstUpdated() {
     this.model.propsUpdated.on(() => {
       this._updatePlaceholder();
-      this.requestUpdate();
     });
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+
+    this.page.awarenessStore.slots.update.on(v => {
+      const remoteSelections = this.std.selection.remoteSelections.get(v.id);
+      const textSelection = remoteSelections?.find(
+        selection => selection.type === 'text'
+      );
+      if (textSelection) {
+        this._updatePlaceholder();
+      }
+    });
   }
 
   private _updatePlaceholder = () => {
@@ -312,8 +327,17 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
     >
-      ${this.content}
+      ${this.renderModelChildren(this.model)}
     </div>`;
+
+    const fontWeightMap: { [key: string]: { [key: string]: number } } = {
+      h1: { light: 600, dark: 700 },
+      h2: { light: 500, dark: 600 },
+      h3: { light: 700, dark: 800 },
+      h4: { light: 700, dark: 800 },
+      h5: { light: 600, dark: 700 },
+      h6: { light: 500, dark: 600 },
+    };
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
@@ -331,7 +355,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
             @focusin=${this._onFocusIn}
             @focusout=${this._onFocusOut}
             style=${styleMap({
-              fontWeight: /^h[1-6]$/.test(type) ? '600' : undefined,
+              fontWeight: fontWeightMap?.[type]?.[getThemeMode()],
             })}
           ></rich-text>
         </div>

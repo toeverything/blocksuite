@@ -10,15 +10,16 @@ import {
   AutoCompleteArrowIcon,
   NoteAutoCompleteIcon,
 } from '../../../../_common/icons/index.js';
+import { handleNativeRangeAtPoint } from '../../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import {
   type Bound,
+  CanvasElementType,
   type Connection,
   type ConnectorElement,
   ConnectorMode,
   type IVec,
   Overlay,
-  PhasorElementType,
   rotatePoints,
   type RoughCanvas,
   ShapeElement,
@@ -27,7 +28,7 @@ import {
   Vec,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { getGridBound } from '../../utils/bound-utils.js';
+import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
 import { mountShapeTextEditor } from '../../utils/text.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 import { EdgelessAutoCompletePanel } from './auto-complete-panel.js';
@@ -62,8 +63,6 @@ class AutoCompleteOverlay extends Overlay {
     }
   }
 }
-
-// const autoCompleteOverlay = new AutoCompleteOverlay();
 
 @customElement('edgeless-auto-complete')
 export class EdgelessAutoComplete extends WithDisposable(LitElement) {
@@ -118,6 +117,9 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     }
   `;
 
+  @state()
+  private _isHover = true;
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -132,19 +134,30 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private _timer: ReturnType<typeof setTimeout> | null = null;
   private _autoCompleteOverlay: AutoCompleteOverlay = new AutoCompleteOverlay();
 
-  private get _selected() {
-    return this.edgeless.selectionManager.elements;
-  }
-
   private get _surface() {
     return this.edgeless.surface;
   }
 
   override firstUpdated() {
-    this._disposables.add(
+    const { _disposables, edgeless } = this;
+
+    _disposables.add(
       this.edgeless.selectionManager.slots.updated.on(() => {
         this._autoCompleteOverlay.linePoints = [];
         this._autoCompleteOverlay.shapePoints = [];
+      })
+    );
+    _disposables.add(() => this.removeOverlay());
+
+    _disposables.add(
+      edgeless.slots.hoverUpdated.on(() => {
+        const state = edgeless.tools.getHoverState();
+        if (!state) {
+          this._isHover = false;
+          return;
+        }
+        const { content } = state;
+        this._isHover = content === this.current ? true : false;
       })
     );
   }
@@ -221,7 +234,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   private _addConnector(source: Connection, target: Connection) {
     const { surface } = this.edgeless;
-    const id = surface.addElement(PhasorElementType.CONNECTOR, {
+    const id = surface.addElement(CanvasElementType.CONNECTOR, {
       mode: ConnectorMode.Orthogonal,
       strokeWidth: 2,
       stroke: (<ShapeElement>this.current).strokeColor,
@@ -231,12 +244,11 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return surface.pickById(id) as ConnectorElement;
   }
 
-  private async _generateElementOnClick(type: Direction) {
+  private _generateElementOnClick(type: Direction) {
     const { surface, page } = this.edgeless;
     const bound = this._computeNextBound(type);
-    const id = await createEdgelessElement(this.edgeless, this.current);
+    const id = createEdgelessElement(this.edgeless, this.current, bound);
     if (isShape(this.current)) {
-      surface.updateElement(id, { xywh: bound.serialize() });
       const { startPosition, endPosition } = getPosition(type);
       this._addConnector(
         {
@@ -253,7 +265,13 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     } else {
       const model = page.getBlockById(id);
       assertExists(model);
-      page.updateBlock(model, { xywh: bound.serialize() });
+      const [x, y] = surface.viewport.toViewCoord(
+        bound.center[0],
+        bound.y + NOTE_INIT_HEIGHT / 2
+      );
+      requestAnimationFrame(() => {
+        handleNativeRangeAtPoint(x, y);
+      });
     }
 
     this.edgeless.selectionManager.setSelection({
@@ -291,7 +309,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         .filter(e => e instanceof ShapeElement) as ShapeElement[];
       return nextBound(type, this.current, connectedShapes);
     } else {
-      const bound = getGridBound(this.current);
+      const bound = this.current.elementBound;
       switch (type) {
         case Direction.Right: {
           bound.x += bound.w + MAIN_GAP;
@@ -319,7 +337,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     curShape: ShapeElement,
     nextBound: Bound
   ) {
-    const startBound = getGridBound(this.current);
+    const startBound = this.current.elementBound;
     const { startPosition, endPosition } = getPosition(type);
     const nextShape = {
       xywh: nextBound.serialize(),
@@ -346,12 +364,12 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (this._isMoving) {
+    const isShape = this.current instanceof ShapeElement;
+    if (this._isMoving || (this._isHover && !isShape)) {
       this.removeOverlay();
       return nothing;
     }
     const { selectedRect } = this;
-    const isShape = this._selected[0] instanceof ShapeElement;
     const width = 72;
     const height = 44;
     const Arrows = [

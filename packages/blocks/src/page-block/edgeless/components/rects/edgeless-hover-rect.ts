@@ -39,7 +39,7 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
 
   rAfId: number | null = null;
 
-  refreshHoverRect = () => {
+  private _refreshHoverRect = () => {
     if (this.rAfId) cancelAnimationFrame(this.rAfId);
 
     const hoverState = this.edgeless.tools.getHoverState();
@@ -51,17 +51,19 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
 
       return;
     }
-
     const { zoom } = this.edgeless.surface.viewport;
     const { rect } = hoverState;
-    const isNote = isNoteBlock(hoverState.content);
+    const element = hoverState.content;
+    const isNote = isNoteBlock(element);
 
     this.rAfId = requestAnimationFrame(() => {
       this.rect.style.visibility = 'visible';
       this.rect.style.transform = `translate(${rect.x}px, ${rect.y}px)`;
       this.rect.style.width = `${rect.width}px`;
       this.rect.style.height = `${rect.height}px`;
-      this.rect.style.borderRadius = isNote ? `${8 * zoom}px` : '';
+      this.rect.style.borderRadius = isNote
+        ? `${element.edgeless.style.borderRadius * zoom}px`
+        : '';
       this.rect.style.backgroundColor = isNote
         ? 'var(--affine-hover-color)'
         : '';
@@ -71,14 +73,14 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
 
   protected override firstUpdated() {
     this._disposables.add(
-      this.edgeless.slots.hoverUpdated.on(() => this.refreshHoverRect())
+      this.edgeless.slots.hoverUpdated.on(() => this._refreshHoverRect())
     );
     this._disposables.add(
-      this.edgeless.slots.viewportUpdated.on(() => this.refreshHoverRect())
+      this.edgeless.slots.viewportUpdated.on(() => this._refreshHoverRect())
     );
     this._disposables.add(
       this.edgeless.selectionManager.slots.updated.on(() =>
-        this.refreshHoverRect()
+        this._refreshHoverRect()
       )
     );
   }

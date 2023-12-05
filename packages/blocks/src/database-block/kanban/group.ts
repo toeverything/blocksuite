@@ -41,6 +41,7 @@ const styles = css`
 
   affine-data-view-kanban-group:hover .group-header-op {
     visibility: visible;
+    opacity: 1;
   }
 
   .group-body {
@@ -61,15 +62,22 @@ const styles = css`
     font-size: var(--data-view-cell-text-size);
     line-height: var(--data-view-cell-text-line-height);
     visibility: hidden;
-    transition: visibility 100ms ease-in-out;
+    opacity: 0;
+    transition: all 150ms cubic-bezier(0.42, 0, 1, 1);
     color: var(--affine-text-secondary-color);
   }
 
   affine-data-view-kanban-group:hover .add-card {
     visibility: visible;
+    opacity: 1;
   }
 
-  .add-card:hover {
+  affine-data-view-kanban-group .add-card:hover {
+    background-color: var(--affine-hover-color);
+    color: var(--affine-text-primary-color);
+  }
+
+  affine-data-view-kanban-group:has(.add-card:hover) .add-card {
     background-color: var(--affine-hover-color);
     color: var(--affine-text-primary-color);
   }

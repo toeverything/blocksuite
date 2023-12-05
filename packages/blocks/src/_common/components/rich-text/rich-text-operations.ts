@@ -389,6 +389,7 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
   if (!parent) return false;
 
+  const nextSiblings = page.getNextSiblings(model);
   const index = parent.children.indexOf(model);
   const blockProps = {
     type: 'text' as const,
@@ -396,7 +397,16 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
     children: model.children,
   };
   page.captureSync();
-  page.deleteBlock(model);
+  page.deleteBlock(model, {
+    deleteChildren: false,
+  });
+  nextSiblings
+    .filter(
+      sibling =>
+        matchFlavours(sibling, ['affine:list']) && sibling.type === 'numbered'
+    )
+    .forEach(sibling => page.updateBlock(sibling, {}));
+
   const id = page.addBlock('affine:paragraph', blockProps, parent, index);
   asyncFocusRichText(page, id);
   return true;
@@ -499,15 +509,19 @@ function handleEmbedDividerCodeSibling(
   previousSibling: ExtendedModel,
   parent: ExtendedModel
 ) {
+  if (matchFlavours(previousSibling, ['affine:divider'])) {
+    page.deleteBlock(previousSibling);
+    return true;
+  }
+
   if (
     !matchFlavours(previousSibling, [
       'affine:image',
-      'affine:divider',
       'affine:code',
       'affine:bookmark',
       'affine:attachment',
       'affine:surface-ref',
-    ] as const)
+    ])
   )
     return false;
 
@@ -729,13 +743,14 @@ function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
       return true;
     }
     function handleEmbedDividerCodeSibling(nextSibling: ExtendedModel | null) {
+      if (matchFlavours(nextSibling, ['affine:divider'])) {
+        page.deleteBlock(nextSibling);
+        return true;
+      }
+
       if (
         !nextSibling ||
-        !matchFlavours(nextSibling, [
-          'affine:image',
-          'affine:divider',
-          'affine:code',
-        ])
+        !matchFlavours(nextSibling, ['affine:image', 'affine:code'])
       )
         return false;
       focusBlockByModel(nextSibling);

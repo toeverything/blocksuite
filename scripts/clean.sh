@@ -1,11 +1,13 @@
 #!/bin/bash
 
+set -eu -o pipefail
+
 # ALL_PACKAGES
 packages=(
   "blocks-std"
   "blocks"
   "docs"
-  "editor"
+  "presets"
   "global"
   "lit"
   "playground"

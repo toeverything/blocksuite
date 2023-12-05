@@ -161,13 +161,9 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
               {}
             ),
             select: () => {
-              const element = this.closest(
-                'affine-data-view-native'
-              )?.querySelector('data-view-header-tools-view-options')
-                ?.firstElementChild;
-              if (element instanceof HTMLElement) {
-                element?.click();
-              }
+              this.closest('affine-data-view-native')
+                ?.querySelector('data-view-header-tools-view-options')
+                ?.clickMoreAction(event);
             },
           },
           {

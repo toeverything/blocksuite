@@ -2,11 +2,8 @@ import { expect } from '@playwright/test';
 
 import * as actions from '../utils/actions/edgeless.js';
 import {
-  createShapeElement,
-  edgelessCommonSetup,
   getNoteBoundBoxInEdgeless,
   setEdgelessTool,
-  Shape,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
 import {
@@ -18,10 +15,7 @@ import {
   getBoundingRect,
   initEmptyEdgelessState,
   initThreeParagraphs,
-  pasteByKeyboard,
   pressEnter,
-  selectAllByKeyboard,
-  triggerComponentToolbarAction,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
@@ -95,10 +89,10 @@ test('select multiple shapes and translate', async ({ page }) => {
   await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
 
   await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
-  await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
+  await assertEdgelessSelectedRect(page, [86, 86, 236, 136]);
 
   await dragBetweenCoords(page, { x: 120, y: 120 }, { x: 150, y: 150 });
-  await assertEdgelessSelectedRect(page, [128, 128, 212, 112]);
+  await assertEdgelessSelectedRect(page, [116, 116, 236, 136]);
 
   await page.mouse.move(160, 160);
   await assertEdgelessHoverRect(page, [128, 128, 104, 104]);
@@ -125,7 +119,7 @@ test('selection box of shape element sync on fast dragging', async ({
     { click: true }
   );
 
-  await assertEdgelessSelectedRect(page, [650, 447.5, 100, 100]);
+  await assertEdgelessSelectedRect(page, [650, 450, 100, 100]);
 });
 
 test('when the selection is always a note, it should remain in an active state', async ({
@@ -156,26 +150,6 @@ test('when the selection is always a note, it should remain in an active state',
   await clickInCenter(page, bound);
   await waitNextFrame(page);
   await assertSelectionInNote(page, ids.noteId);
-});
-
-test('copy to clipboard as PNG', async ({ page, context }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-
-  await edgelessCommonSetup(page);
-  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
-
-  await selectAllByKeyboard(page);
-
-  await triggerComponentToolbarAction(page, 'copyAsPng');
-
-  await waitNextFrame(page);
-
-  await assertBlockCount(page, 'note', 0);
-  await assertBlockCount(page, 'image', 0);
-  await pasteByKeyboard(page);
-  await waitNextFrame(page);
-  await assertBlockCount(page, 'note', 0);
-  await assertBlockCount(page, 'image', 1);
 });
 
 test('should auto panning when selection rectangle reaches viewport edges', async ({

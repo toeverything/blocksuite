@@ -1,24 +1,18 @@
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
-import { EditorContainer } from '@blocksuite/editor';
-import { assertExists } from '@blocksuite/global/utils';
-import type { BlobStorage, Page, Y } from '@blocksuite/store';
+import { EditorContainer } from '@blocksuite/presets';
+import type { BlobStorage, Page, Workspace } from '@blocksuite/store';
 import {
   createIndexeddbStorage,
   Generator,
   Schema,
-  Utils,
-  Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
-import { fileOpen } from 'browser-fs-access';
 
 import { getPlaygroundPresets } from './preset.js';
 import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
 
 export const params = new URLSearchParams(location.search);
 export const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
-
-const featureArgs = (params.get('features') ?? '').split(',');
 
 export function getOptions(
   fn: (params: URLSearchParams) => Record<string, string | number>
@@ -31,90 +25,6 @@ declare global {
   var targetPageId: string | undefined;
   // eslint-disable-next-line no-var
   var debugWorkspace: Workspace | undefined;
-}
-
-Object.defineProperty(globalThis, 'openFromFile', {
-  value: async function importFromFile(pageId?: string) {
-    const file = await fileOpen({
-      extensions: ['.ydoc'],
-    });
-    const buffer = await file.arrayBuffer();
-    if (pageId) {
-      globalThis.targetPageId = pageId;
-    }
-    Workspace.Y.applyUpdate(window.workspace.doc, new Uint8Array(buffer));
-  },
-});
-
-Object.defineProperty(globalThis, 'rebuildPageTree', {
-  value: async function rebuildPageTree(doc: Y.Doc, pages: string[]) {
-    const pageTree = doc
-      .getMap<Y.Array<Y.Map<unknown>>>('space:meta')
-      .get('pages');
-    if (pageTree) {
-      const pageIds = pageTree.map(p => p.get('id') as string).filter(v => v);
-      for (const page of pages) {
-        if (!pageIds.includes(page)) {
-          const map = new Workspace.Y.Map([
-            ['id', page],
-            ['title', ''],
-            ['createDate', +new Date()],
-            ['subpageIds', []],
-          ]);
-          pageTree.push([map]);
-        }
-      }
-    }
-  },
-});
-
-Object.defineProperty(globalThis, 'debugFromFile', {
-  value: async function debuggerFromFile() {
-    const file = await fileOpen({
-      extensions: ['.ydoc'],
-    });
-    const buffer = await file.arrayBuffer();
-    const schema = new Schema();
-    schema.register(AffineSchemas).register(__unstableSchemas);
-    const workspace = new Workspace({
-      schema,
-      id: 'temporary',
-    });
-    Workspace.Y.applyUpdate(workspace.doc, new Uint8Array(buffer));
-    globalThis.debugWorkspace = workspace;
-  },
-});
-
-export const isBase64 =
-  /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
-
-async function initWithMarkdownContent(
-  workspace: Workspace,
-  url: URL,
-  pageId: string
-) {
-  const { edgelessEmpty: emptyInit } = await import('./presets/index.js');
-
-  emptyInit(workspace, pageId);
-  const page = workspace.getPage(pageId);
-  assertExists(page);
-  assertExists(page.root);
-  const content = await fetch(url).then(res => res.text());
-  const contentParser = new window.ContentParser(page);
-  return contentParser.importMarkdown(content, page.root.id);
-}
-
-export async function tryInitExternalContent(
-  workspace: Workspace,
-  initParam: string,
-  pageId: string
-) {
-  if (isValidUrl(initParam)) {
-    const url = new URL(initParam);
-    await initWithMarkdownContent(workspace, url, pageId);
-  } else if (isBase64.test(initParam)) {
-    Utils.applyYjsUpdateV2(workspace, initParam);
-  }
 }
 
 /**
@@ -136,27 +46,12 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     idGenerator,
     blobStorages,
     defaultFlags: {
-      enable_toggle_block: featureArgs.includes('toggle'),
-      enable_set_remote_flag: true,
-      enable_block_hub: true,
-      enable_bookmark_operation: true,
-      enable_note_index: true,
       enable_bultin_ledits: true,
       readonly: {
         'page:home': false,
       },
     },
   };
-}
-
-export function isValidUrl(urlLike: string) {
-  let url;
-  try {
-    url = new URL(urlLike);
-  } catch (_) {
-    return false;
-  }
-  return url.protocol === 'http:' || url.protocol === 'https:';
 }
 
 export async function testIDBExistence() {
@@ -174,7 +69,7 @@ export async function testIDBExistence() {
   });
 }
 
-export const createEditor = (page: Page, element: HTMLElement) => {
+export function createEditor(page: Page, element: HTMLElement) {
   const presets = getPlaygroundPresets();
 
   const editor = new EditorContainer();
@@ -191,8 +86,5 @@ export const createEditor = (page: Page, element: HTMLElement) => {
 
   element.append(editor);
 
-  editor.createBlockHub().then(blockHub => {
-    document.body.appendChild(blockHub);
-  });
   return editor;
-};
+}

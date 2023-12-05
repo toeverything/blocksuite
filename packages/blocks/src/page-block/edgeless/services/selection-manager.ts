@@ -9,7 +9,7 @@ import { edgelessElementsBound } from '../utils/bound-utils.js';
 
 export interface EdgelessSelectionState {
   /**
-   * The selected elements. Could be note or phasor element
+   * The selected elements. Could be note or canvas element
    */
   elements: string[];
 
@@ -171,6 +171,10 @@ export class EdgelessSelectionManager {
 
           if (hasBlockSelection || hasTextSelection) {
             remoteSelection.delete(id);
+          }
+
+          if (hasTextSelection) {
+            remoteCursors.delete(id);
           }
         });
 

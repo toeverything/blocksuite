@@ -1,12 +1,12 @@
 import { DEFAULT_ROUGHNESS, StrokeStyle } from '../../consts.js';
 import {
+  CanvasElementType,
   type IElementDefaultProps,
-  PhasorElementType,
 } from '../edgeless-element.js';
 import { ConnectorMode } from './types.js';
 
 export const ConnectorElementDefaultProps: IElementDefaultProps<'connector'> = {
-  type: PhasorElementType.CONNECTOR,
+  type: CanvasElementType.CONNECTOR,
   mode: ConnectorMode.Orthogonal,
   strokeWidth: 4,
   stroke: '#000000',

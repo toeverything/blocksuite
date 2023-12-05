@@ -6,10 +6,14 @@ import { getBlockClipboardInfo } from '../../../_legacy/clipboard/index.js';
 import type { FrameBlockService } from '../../../_legacy/service/legacy-services/frame-service.js';
 import type { ImageBlockService } from '../../../_legacy/service/legacy-services/image-service.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
-import { Bound, ConnectorElement } from '../../../surface-block/index.js';
+import {
+  Bound,
+  ConnectorElement,
+  GroupElement,
+} from '../../../surface-block/index.js';
 import { getCopyElements } from '../controllers/clipboard.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { edgelessElementsBound, getGridBound } from './bound-utils.js';
+import { edgelessElementsBound } from './bound-utils.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
 
 const offset = 10;
@@ -20,14 +24,18 @@ export async function duplicate(
 ) {
   const { surface, page } = edgeless;
   const totalBound = edgelessElementsBound(elements);
+  const copyElements = getCopyElements(surface, elements);
+  const idMap = new Map<string, string>();
+
   const newElements = await Promise.all(
-    getCopyElements(surface, elements).map(async element => {
+    copyElements.map(async element => {
       const bound = isFrameBlock(element)
         ? Bound.deserialize(element.xywh)
-        : getGridBound(element);
+        : element.elementBound;
       bound.x += totalBound.w + offset;
+      let id;
       if (isNoteBlock(element)) {
-        const id = surface.addElement(
+        id = surface.addElement(
           element.flavour,
           { xywh: bound.serialize() },
           page.root?.id
@@ -39,14 +47,12 @@ export async function duplicate(
 
         const service = edgeless.getService(element.flavour);
         await service.json2Block(block, serializedBlock.children);
-
-        return id;
       } else if (isFrameBlock(element)) {
         const service = edgeless.getService(
           element.flavour
         ) as FrameBlockService;
         const json = service.block2Json(element);
-        return surface.addElement(
+        id = surface.addElement(
           EdgelessBlockType.FRAME,
           {
             xywh: bound.serialize(),
@@ -60,7 +66,7 @@ export async function duplicate(
           element.flavour
         ) as ImageBlockService;
         const json = service.block2Json(element, []);
-        return surface.addElement(
+        id = surface.addElement(
           EdgelessBlockType.IMAGE,
           {
             xywh: bound.serialize(),
@@ -68,8 +74,19 @@ export async function duplicate(
           },
           surface.model.id
         );
+      } else if (element instanceof GroupElement) {
+        const props = element.serialize();
+        const yMap = new Workspace.Y.Map<boolean>();
+        const children = props.children ?? {};
+        for (const [key, value] of Object.entries(children)) {
+          const newKey = idMap.get(key);
+          assertExists(newKey);
+          yMap.set(newKey, value);
+        }
+        props.children = yMap;
+        id = surface.addElement(element.type, props);
       } else {
-        const id = surface.addElement(element.type, {
+        id = surface.addElement(element.type, {
           ...element.serialize(),
           xywh: bound.serialize(),
         } as unknown as Record<string, unknown>);
@@ -78,8 +95,9 @@ export async function duplicate(
         if (newElement instanceof ConnectorElement) {
           surface.connector.updateXYWH(newElement, bound);
         }
-        return id;
       }
+      idMap.set(element.id, id);
+      return id;
     })
   );
 

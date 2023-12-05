@@ -34,20 +34,17 @@ import {
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
 import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
-import { appendAttachmentBlock } from '../../../attachment-block/utils.js';
-import { getBookmarkInitialProps } from '../../../bookmark-block/components/bookmark-create-modal.js';
+import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
+import { toggleBookmarkCreateModal } from '../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockProps } from '../../../image-block/image-model.js';
 import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { copyBlock } from '../../../page-block/doc/utils.js';
-import {
-  getSelectedContentBlockElements,
-  onModelTextUpdated,
-} from '../../../page-block/utils/index.js';
+import { onModelTextUpdated } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
-import { PhasorElementType } from '../../../surface-block/index.js';
+import { CanvasElementType } from '../../../surface-block/index.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { textConversionConfigs } from '../../configs/text-conversion.js';
@@ -82,29 +79,42 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             return true;
           },
           action: ({ pageElement }) => {
-            const selectedBlockElements = getSelectedContentBlockElements(
-              pageElement.root,
-              ['text', 'block']
-            );
-            const newModels = updateBlockElementType(
-              selectedBlockElements,
-              flavour,
-              type
-            );
-            // Reset selection if the target is code block
-            if (flavour === 'affine:code') {
-              if (newModels.length !== 1) {
-                throw new Error(
-                  "Failed to reset selection! New model length isn't 1"
+            pageElement.root.std.command
+              .pipe()
+              .withRoot()
+              .tryAll(chain => [
+                chain.getTextSelection(),
+                chain.getBlockSelections(),
+              ])
+              .getSelectedBlocks({
+                types: ['text', 'block'],
+              })
+              .inline(ctx => {
+                const { selectedBlocks } = ctx;
+                assertExists(selectedBlocks);
+
+                const newModels = updateBlockElementType(
+                  selectedBlocks,
+                  flavour,
+                  type
                 );
-              }
-              const codeModel = newModels[0];
-              onModelTextUpdated(codeModel, richText => {
-                const vEditor = richText.vEditor;
-                assertExists(vEditor);
-                vEditor.focusEnd();
-              });
-            }
+
+                // Reset selection if the target is code block
+                if (flavour === 'affine:code') {
+                  if (newModels.length !== 1) {
+                    throw new Error(
+                      "Failed to reset selection! New model length isn't 1"
+                    );
+                  }
+                  const codeModel = newModels[0];
+                  onModelTextUpdated(codeModel, richText => {
+                    const vEditor = richText.vEditor;
+                    assertExists(vEditor);
+                    vEditor.focusEnd();
+                  });
+                }
+              })
+              .run();
           },
         })),
     ],
@@ -150,11 +160,23 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return true;
         },
         action: ({ pageElement }) => {
-          const selectedBlockElements = getSelectedContentBlockElements(
-            pageElement.root,
-            ['text', 'block']
-          );
-          updateBlockElementType(selectedBlockElements, flavour, type);
+          pageElement.root.std.command
+            .pipe()
+            .withRoot()
+            .tryAll(chain => [
+              chain.getTextSelection(),
+              chain.getBlockSelections(),
+            ])
+            .getSelectedBlocks({
+              types: ['text', 'block'],
+            })
+            .inline(ctx => {
+              const { selectedBlocks } = ctx;
+              assertExists(selectedBlocks);
+
+              updateBlockElementType(selectedBlocks, flavour, type);
+            })
+            .run();
         },
       })),
   },
@@ -198,7 +220,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const triggerKey = '@';
           insertContent(model, triggerKey);
           assertExists(model.page.root);
-          const pageBlock = getBlockElementByModel(model);
+          const pageBlock = getBlockElementByModel(model.page.root);
           const widgetEle =
             pageBlock?.widgetElements['affine-linked-page-widget'];
           assertExists(widgetEle);
@@ -250,7 +272,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         name: 'Bookmark',
         icon: BookmarkIcon,
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_bookmark_operation')) {
+          if (!model.page.schema.flavourSchemaMap.has('affine:bookmark')) {
             return false;
           }
           return !insideDatabase(model);
@@ -260,7 +282,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const url = await getBookmarkInitialProps();
+          const url = await toggleBookmarkCreateModal(pageElement.root);
           if (!url) return;
           const props = {
             flavour: 'affine:bookmark',
@@ -288,7 +310,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           assertExists(service);
           assertInstanceOf(service, AttachmentService);
           const maxFileSize = service.maxFileSize;
-          await appendAttachmentBlock(file, model, maxFileSize);
+          addSiblingAttachmentBlock(file, model, maxFileSize);
         }),
       },
     ],
@@ -465,13 +487,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       )[0];
 
       if (!surfaceModel) return [];
-
-      const groupElements: Y.Map<string>[] = Array.from(
-        surfaceModel.elements.getValue()?.values() ?? []
-      ).filter(
-        (element: Y.Map<string>) =>
-          element.get('type') === PhasorElementType.GROUP
-      );
+      const groupElements = (<Array<Y.Map<string>>>(
+        Array.from(surfaceModel.elements.getValue()?.values() ?? [])
+      )).filter(element => element.get('type') === CanvasElementType.GROUP);
 
       return (
         groupElements.map(element => {

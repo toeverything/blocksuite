@@ -13,7 +13,10 @@ export function calPanDelta(
   // Get viewport edge
   const { left, top, width, height } = viewport;
   // Get pointer position
-  const { x, y } = e;
+  let { x, y } = e;
+  const { containerOffset } = e;
+  x += containerOffset.x;
+  y += containerOffset.y;
   // Check if pointer is near viewport edge
   const nearLeft = x < left + edgeDistance;
   const nearRight = x > left + width - edgeDistance;

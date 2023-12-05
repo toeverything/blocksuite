@@ -1,6 +1,4 @@
-import './meta-data/meta-data.js';
-
-import { type BlockService } from '@blocksuite/block-std';
+import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { VEditor } from '@blocksuite/virgo';
@@ -22,6 +20,7 @@ import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
+import type { DocPageService } from './doc-page-service.js';
 
 export interface PageViewport {
   left: number;
@@ -33,10 +32,30 @@ export interface PageViewport {
   clientWidth: number;
 }
 
+function testClickOnBlankArea(
+  state: PointerEventState,
+  viewportWidth: number,
+  pageWidth: number,
+  pageStyle: CSSStyleDeclaration
+) {
+  const blankLeft =
+    viewportWidth - pageWidth + parseFloat(pageStyle.paddingLeft);
+  const blankRight =
+    (viewportWidth - pageWidth) / 2 +
+    pageWidth -
+    parseFloat(pageStyle.paddingRight);
+
+  if (state.raw.clientX < blankLeft || state.raw.clientX > blankRight) {
+    return true;
+  }
+
+  return false;
+}
+
 @customElement('affine-doc-page')
 export class DocPageBlockComponent extends BlockElement<
   PageBlockModel,
-  BlockService,
+  DocPageService,
   DocPageBlockWidgetName
 > {
   static override styles = css`
@@ -323,12 +342,6 @@ export class DocPageBlockComponent extends BlockElement<
     }
   }
 
-  private _initSlotEffects() {
-    this._disposables.add(
-      this.model.childrenUpdated.on(() => this.requestUpdate())
-    );
-  }
-
   private _initViewportResizeEffect() {
     // when observe viewportElement resize, emit viewport update event
     const resizeObserver = new ResizeObserver(
@@ -359,7 +372,6 @@ export class DocPageBlockComponent extends BlockElement<
   }
 
   override firstUpdated() {
-    this._initSlotEffects();
     this._initReadonlyListener();
     this._initViewportResizeEffect();
   }
@@ -379,8 +391,8 @@ export class DocPageBlockComponent extends BlockElement<
         event.target instanceof HTMLElement
           ? event.target
           : event.target instanceof Node
-          ? event.target.parentElement
-          : null;
+            ? event.target.parentElement
+            : null;
       if (!element) {
         return;
       }
@@ -503,14 +515,23 @@ export class DocPageBlockComponent extends BlockElement<
     });
 
     this.handleEvent('click', ctx => {
-      const state = ctx.get('pointerState');
+      const event = ctx.get('pointerState');
       if (
-        state.raw.target !== this &&
-        state.raw.target !== this.viewportElement &&
-        state.raw.target !== this.pageBlockContainer
+        event.raw.target !== this &&
+        event.raw.target !== this.viewportElement &&
+        event.raw.target !== this.pageBlockContainer
       ) {
         return;
       }
+
+      const isClickOnBlankArea = testClickOnBlankArea(
+        event,
+        this.viewport.clientWidth,
+        this.pageBlockContainer.clientWidth,
+        window.getComputedStyle(this.pageBlockContainer)
+      );
+      if (isClickOnBlankArea) return;
+
       let noteId: string;
       let paragraphId: string;
       let index = 0;
@@ -598,19 +619,10 @@ export class DocPageBlockComponent extends BlockElement<
       ([_, widget]) => widget
     )}`;
 
-    const meta = html`
-      <affine-page-meta-data
-        .pageElement="${this}"
-        .page="${this.page}"
-      ></affine-page-meta-data>
-    `;
-
     return html`
       <div class="affine-doc-viewport">
         <div class="affine-doc-page-block-container">
-          <div class="affine-doc-page-block-title-container">
-            ${title} ${meta}
-          </div>
+          <div class="affine-doc-page-block-title-container">${title}</div>
           ${content} ${widgets}
         </div>
       </div>

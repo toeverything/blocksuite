@@ -1,10 +1,11 @@
 import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
-import { html, type PropertyValues } from 'lit';
+import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
 import { HoverController } from '../_common/components/index.js';
+import { toast } from '../_common/components/toast.js';
 import { AttachmentIcon16 } from '../_common/icons/index.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { stopPropagation } from '../_common/utils/event.js';
@@ -17,13 +18,18 @@ import {
   AttachmentBlockSchema,
 } from './attachment-model.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
+import { allowEmbed, renderEmbedView } from './embed.js';
 import {
   AttachmentBanner,
   ErrorBanner,
   LoadingIcon,
   styles,
 } from './styles.js';
-import { downloadAttachment, hasBlob, isAttachmentLoading } from './utils.js';
+import {
+  downloadAttachmentBlob,
+  getAttachmentBlob,
+  isAttachmentLoading,
+} from './utils.js';
 
 @customElement('affine-attachment')
 export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel> {
@@ -40,6 +46,12 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _error = false;
 
+  @state()
+  private _isDownloading = false;
+
+  @state()
+  private _blobUrl?: string;
+
   private readonly _themeObserver = new ThemeObserver();
 
   private _hoverController = new HoverController(
@@ -54,6 +66,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
             this._captionInput.focus();
           });
         },
+        downloadAttachment: this._downloadAttachment.bind(this),
         abortController,
       }),
       computePosition: {
@@ -70,29 +83,77 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     if (this.model.caption) {
       this._showCaption = true;
     }
-    this._checkAttachment();
+    this._checkBlob();
     this._registerDragHandleOption();
 
     // Workaround for https://github.com/toeverything/blocksuite/issues/4724
     this._themeObserver.observe(document.documentElement);
     this._themeObserver.on(() => this.requestUpdate());
     this.disposables.add(() => this._themeObserver.dispose());
+
+    this.model.propsUpdated.on(({ key }) => {
+      if (key === 'sourceId') {
+        // Reset the blob url when the sourceId is changed
+        if (this._blobUrl) {
+          URL.revokeObjectURL(this._blobUrl);
+          this._blobUrl = undefined;
+        }
+        this._checkBlob();
+      }
+    });
   }
 
-  override willUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('sourceId')) {
-      this._checkAttachment();
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this._blobUrl) {
+      URL.revokeObjectURL(this._blobUrl);
     }
-    super.willUpdate(changedProperties);
   }
 
-  // Check if the attachment is available
-  private async _checkAttachment() {
-    const storage = this.page.blob;
+  private _registerDragHandleOption = () => {
+    this._disposables.add(
+      AffineDragHandleWidget.registerOption({
+        flavour: AttachmentBlockSchema.model.flavour,
+        onDragStart: (state, startDragging) => {
+          // Check if start dragging from the image block
+          const target = captureEventTarget(state.raw.target);
+          const attachmentBlock = target?.closest('affine-attachment');
+          if (!attachmentBlock) return false;
+
+          // If start dragging from the attachment element
+          // Set selection and take over dragStart event to start dragging
+          this.root.selection.set([
+            this.root.selection.getInstance('block', {
+              path: attachmentBlock.path,
+            }),
+          ]);
+          startDragging([attachmentBlock], state);
+          return true;
+        },
+      })
+    );
+  };
+
+  /**
+   * Check if the blob is available. It is necessary since the block may be copied from another workspace.
+   */
+  private async _checkBlob() {
     const sourceId = this.model.sourceId;
     if (!sourceId) return;
-    if (!(await hasBlob(storage, sourceId))) {
+    try {
+      const blob = await getAttachmentBlob(this.model);
+      if (!blob) throw new Error('Blob is missing!');
+      // TODO we no need to create blob url when the attachment is not embedded
+      if (allowEmbed(this.model)) {
+        this._blobUrl = URL.createObjectURL(blob);
+      }
+    } catch (error) {
       this._error = true;
+      console.warn(
+        'The attachment is unavailable since the blob is missing!',
+        this.model,
+        sourceId
+      );
     }
   }
 
@@ -105,7 +166,27 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   }
 
   private async _downloadAttachment() {
-    downloadAttachment(this.model);
+    if (this._isDownloading) {
+      toast('Download in progress...');
+      return;
+    }
+
+    const shortName =
+      this.model.name.length < 20
+        ? this.model.name
+        : this.model.name.slice(0, 20) + '...';
+
+    toast(`Downloading ${shortName}`);
+    this._isDownloading = true;
+    // TODO speed up download by using this._blobUrl
+    try {
+      await downloadAttachmentBlob(this.model);
+    } catch (error) {
+      console.error(error);
+      toast(`Failed to download ${shortName}!`);
+    } finally {
+      this._isDownloading = false;
+    }
   }
 
   private _onBlur() {
@@ -135,34 +216,23 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     `;
   }
 
-  private _registerDragHandleOption = () => {
-    this._disposables.add(
-      AffineDragHandleWidget.registerOption({
-        flavour: AttachmentBlockSchema.model.flavour,
-        onDragStart: (state, startDragging) => {
-          // Check if start dragging from the image block
-          const target = captureEventTarget(state.raw.target);
-          const attachmentBlock = target?.closest('affine-attachment');
-          if (!attachmentBlock) return false;
-
-          // If start dragging from the attachment element
-          // Set selection and take over dragStart event to start dragging
-          this.root.selection.set([
-            this.root.selection.getInstance('block', {
-              path: attachmentBlock.path,
-            }),
-          ]);
-          startDragging([attachmentBlock], state);
-          return true;
-        },
-      })
-    );
-  };
+  private _captionTemplate() {
+    return html`<input
+      ?hidden=${!this._showCaption}
+      .disabled=${this.model.page.readonly}
+      class="affine-attachment-caption"
+      placeholder="Write a caption"
+      value=${this.model.caption ?? ''}
+      @input=${this._onInput}
+      @blur=${this._onBlur}
+      @pointerdown=${stopPropagation}
+    />`;
+  }
 
   override render() {
-    const isLoading =
-      this.model.loadingKey && isAttachmentLoading(this.model.loadingKey);
-    const isError = !isLoading && (this._error || !this.model.sourceId);
+    const isLoading = isAttachmentLoading(this.model.id);
+    const isError = this._error || (!isLoading && !this.model.sourceId);
+
     if (isLoading) {
       return html`<div
         class="affine-attachment-container"
@@ -180,13 +250,34 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         class="affine-attachment-container"
         @click=${this._focusAttachment}
       >
-        <div class="affine-attachment-name">
-          ${AttachmentIcon16}${this.model.name}
+        <div class="affine-attachment-title">
+          ${AttachmentIcon16}
+          <span class="affine-attachment-name">${this.model.name}</span>
         </div>
-        <div class="affine-attachment-desc">Unable to upload</div>
+        <div class="affine-attachment-desc">
+          Unable to upload or download attachment
+        </div>
         ${this._attachmentTail(isError)}
       </div>`;
     }
+
+    if (this.model.embed && this._blobUrl) {
+      const embedView = renderEmbedView(this.model, this._blobUrl);
+      if (embedView) {
+        return html`<div
+            ${ref(this._hoverController.setReference)}
+            class="affine-attachment-embed-container"
+          >
+            ${embedView}
+            ${this.selected?.is('block')
+              ? html`<affine-block-selection></affine-block-selection>`
+              : null}
+          </div>
+          ${this._captionTemplate()}`;
+      }
+    }
+    const isDownloadingOrLoadingBlob =
+      this._isDownloading || (this.model.embed && !this._blobUrl);
 
     return html`<div
         ${ref(this._hoverController.setReference)}
@@ -194,24 +285,16 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         @click=${this._focusAttachment}
         @dblclick=${this._downloadAttachment}
       >
-        <div class="affine-attachment-name">
-          ${AttachmentIcon16}${this.model.name}
+        <div class="affine-attachment-title">
+          ${isDownloadingOrLoadingBlob ? LoadingIcon : AttachmentIcon16}
+          <span class="affine-attachment-name">${this.model.name}</span>
         </div>
         <div class="affine-attachment-desc">
           ${humanFileSize(this.model.size)}
         </div>
         ${this._attachmentTail(isError)}
       </div>
-      <input
-        ?hidden=${!this._showCaption}
-        .disabled=${this.model.page.readonly}
-        class="affine-attachment-caption"
-        placeholder="Write a caption"
-        value=${this.model.caption ?? ''}
-        @input=${this._onInput}
-        @blur=${this._onBlur}
-        @pointerdown=${stopPropagation}
-      />`;
+      ${this._captionTemplate()}`;
   }
 }
 

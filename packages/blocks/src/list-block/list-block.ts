@@ -70,8 +70,22 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   }
 
   override firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+    this._updateFollowingListSiblings();
+    this.model.childrenUpdated.on(() => {
+      this._updateFollowingListSiblings();
+    });
+  }
+
+  private _updateFollowingListSiblings() {
+    this.updateComplete.then(() => {
+      let current: BlockElement | undefined = this as BlockElement;
+      while (current && current.tagName == 'AFFINE-LIST') {
+        current.requestUpdate();
+        current = this.std.view.findNext(current.path, () => {
+          return true;
+        })?.view as BlockElement;
+      }
+    });
   }
 
   override connectedCallback() {
@@ -135,7 +149,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
     >
-      ${this.content}
+      ${this.renderModelChildren(this.model)}
     </div>`;
 
     return html`

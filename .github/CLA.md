@@ -104,3 +104,12 @@ Example:
 - wuchao, @jerrywu001, 2023/10/24
 - EYHN @EYHN, 2023/11/06
 - Ayush, @AyushAgrawal-A2, 2023/11/07
+- KokomiCat, @xiazeyu, 2023/11/08
+- Yunfei He, @hyf0, 2023/11/12
+- Rachit Chawla, @rachit1313, 2023/11/22
+- Alisallon, @yangvom, 2023/11/26
+- Jiu Song, @alpakaka0o0, 2023/11/26
+- Kimhyeonju, @kimhyeonju, 2023/11/26
+- minjuSong @mingjuu 2023/11/26
+- Seohyun Park, @sseooh, 2023/11/26
+- Eunseo Seo, @ddeonseo, 2023/11/29

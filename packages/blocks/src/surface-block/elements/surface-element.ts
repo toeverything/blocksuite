@@ -1,6 +1,10 @@
 import type { Y } from '@blocksuite/store';
 
-import type { EdgelessElement, GroupElement } from '../../index.js';
+import type {
+  CanvasElementLocalRecordValues,
+  EdgelessElement,
+  GroupElement,
+} from '../../index.js';
 import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
@@ -14,15 +18,14 @@ import {
   type XYWH,
 } from '../utils/xywh.js';
 import type {
+  CanvasElementType,
   HitTestOptions,
   IEdgelessElement,
-  PhasorElementType,
 } from './edgeless-element.js';
-import type { IShapeLocalRecord } from './shape/types.js';
 
 export interface ISurfaceElement {
   id: string;
-  type: PhasorElementType;
+  type: CanvasElementType;
   xywh: SerializedXYWH;
   index: string;
   seed: number;
@@ -35,6 +38,7 @@ export interface ISurfaceElement {
 export interface ISurfaceElementLocalRecord {
   display?: boolean;
   opacity?: number;
+  xywh?: SerializedXYWH;
 }
 
 export type ComputedValue = (value: string) => string;
@@ -68,12 +72,10 @@ export abstract class SurfaceElement<
   yMap: Y.Map<unknown>;
 
   protected options: {
-    getLocalRecord: (
-      id: string
-    ) => ISurfaceElementLocalRecord | IShapeLocalRecord | undefined;
+    getLocalRecord: (id: string) => CanvasElementLocalRecordValues | undefined;
     onElementUpdated: (update: {
       id: string;
-      props: { [index: string]: { old: unknown; new: unknown } };
+      props: Record<string, unknown>;
     }) => void;
     updateElementLocalRecord: (
       id: string,
@@ -127,7 +129,7 @@ export abstract class SurfaceElement<
   }
 
   get xywh() {
-    const xywh = this.yMap.get('xywh') as T['xywh'];
+    const xywh = this.localRecord?.xywh ?? (this.yMap.get('xywh') as T['xywh']);
     return xywh;
   }
 
@@ -145,7 +147,7 @@ export abstract class SurfaceElement<
     return (this.yMap.get('batch') as T['batch']) ?? null;
   }
 
-  get gridBound() {
+  get elementBound() {
     if (this.rotate) {
       return Bound.from(getBoundsWithRotation(this));
     }
@@ -206,9 +208,9 @@ export abstract class SurfaceElement<
     this.renderer?.removeElement(this);
     this.renderer?.addElement(this);
     const e = events[0] as Y.YMapEvent<Y.Map<unknown>>;
-    const props: { [index: string]: { old: unknown; new: unknown } } = {};
-    e.changes.keys.forEach((change, key) => {
-      props[key] = { old: change.oldValue, new: this.yMap.get(key) };
+    const props: Record<string, unknown> = {};
+    e.changes.keys.forEach((_, key) => {
+      props[key] = this.yMap.get(key);
     });
     this.options.onElementUpdated({
       id: this.id,

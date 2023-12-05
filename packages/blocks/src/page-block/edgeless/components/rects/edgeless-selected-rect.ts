@@ -1,29 +1,29 @@
-import '../component-toolbar/component-toolbar.js';
 import '../connector/connector-handle.js';
 import '../auto-complete/edgeless-auto-complete.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
-import { pick } from '../../../../_common/utils/iterable.js';
+import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
 import type {
   EdgelessElement,
   IPoint,
   Selectable,
 } from '../../../../_common/utils/types.js';
+import type { NoteBlockModel } from '../../../../models.js';
 import {
+  CanvasElementType,
+  deserializeXYWH,
   GroupElement,
   normalizeTextBound,
-  PhasorElementType,
 } from '../../../../surface-block/index.js';
 import {
   Bound,
   ConnectorElement,
-  deserializeXYWH,
   type IVec,
   normalizeDegAngle,
   normalizeShapeBound,
@@ -33,17 +33,19 @@ import {
 } from '../../../../surface-block/index.js';
 import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { edgelessElementsBound } from '../../utils/bound-utils.js';
-import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
+import {
+  NOTE_MIN_HEIGHT,
+  NOTE_MIN_WIDTH,
+  SELECTED_RECT_PADDING,
+} from '../../utils/consts.js';
 import {
   getSelectableBounds,
   getSelectedRect,
+  isCanvasElement,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
-  isPhasorElement,
 } from '../../utils/query.js';
-import type { EdgelessComponentToolbar } from '../component-toolbar/component-toolbar.js';
 import { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
@@ -63,7 +65,6 @@ export type SelectedRect = {
   height: number;
   borderWidth: number;
   borderStyle: string;
-  borderRadius: number;
   rotate: number;
 };
 
@@ -199,6 +200,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label='right'] {
       border: 0;
       background: transparent;
+      border-color: var('--affine-blue');
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='left'],
@@ -249,7 +251,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       box-sizing: border-box;
       border-radius: 6px;
       z-index: 10;
-      border: 2px var(--affine-blue) solid;
       content: '';
       background: white;
     }
@@ -296,35 +297,31 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @query('edgeless-component-toolbar')
-  private _componentToolbar!: EdgelessComponentToolbar;
-
-  @query('.affine-edgeless-selected-rect')
-  private _selectedRectEl!: HTMLDivElement;
-
   @state()
   private _selectedRect: SelectedRect = {
     width: 0,
     height: 0,
     borderWidth: 0,
     borderStyle: 'solid',
-    borderRadius: 0,
     left: 0,
     top: 0,
     rotate: 0,
   };
 
   @state()
-  private _toolbarVisible = false;
+  private _isResizing = false;
 
   @state()
-  private _toolbarPosition: {
-    x: number;
-    y: number;
-  } = {
-    x: 0,
-    y: 0,
-  };
+  private _isNoteWidthLimit = false;
+
+  @state()
+  private _isNoteHeightLimit = false;
+
+  @property({ attribute: false })
+  toolbarVisible = false;
+
+  @property({ attribute: false })
+  setToolbarVisible!: (visible: boolean) => void;
 
   private _resizeManager: HandleResizeManager;
   private _cursorRotate = 0;
@@ -338,6 +335,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._onDragEnd
     );
     this.addEventListener('pointerdown', stopPropagation);
+  }
+
+  get dragging() {
+    return this._resizeManager.dragging || this.edgeless.tools.dragging;
   }
 
   get selection() {
@@ -366,31 +367,28 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     let areAllConnectors = true;
     let areAllShapes = true;
     let areAllTexts = true;
-    let hasNote = false;
 
     for (const element of elements) {
       if (isNoteBlock(element)) {
-        hasNote = true;
+        areAllConnectors = false;
       } else if (isFrameBlock(element)) {
         areAllConnectors = false;
       } else if (isImageBlock(element)) {
         areAllConnectors = false;
         areAllShapes = false;
         areAllTexts = false;
-        hasNote = false;
       } else {
-        if (element.type !== PhasorElementType.CONNECTOR)
+        if (element.type !== CanvasElementType.CONNECTOR)
           areAllConnectors = false;
         if (
-          element.type !== PhasorElementType.SHAPE &&
-          element.type !== PhasorElementType.GROUP
+          element.type !== CanvasElementType.SHAPE &&
+          element.type !== CanvasElementType.GROUP
         )
           areAllShapes = false;
-        if (element.type !== PhasorElementType.TEXT) areAllTexts = false;
+        if (element.type !== CanvasElementType.TEXT) areAllTexts = false;
       }
     }
 
-    if (hasNote) return 'edge';
     if (areAllConnectors) return 'none';
     if (areAllShapes) return 'all';
     if (areAllTexts) return 'edgeAndCorner';
@@ -404,7 +402,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   private _onDragStart = () => {
-    this._toolbarVisible = false;
+    this.edgeless.slots.elementResizeStart.emit();
+    this.setToolbarVisible(false);
     this._updateResizeManagerState(false);
   };
 
@@ -417,27 +416,44 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     >,
     direction: HandleDirection
   ) => {
-    const { page, surface } = this;
+    const { surface, edgeless } = this;
 
     newBounds.forEach(({ bound }, id) => {
       const element = surface.pickById(id);
       if (!element) return;
 
       if (isNoteBlock(element)) {
-        let height = deserializeXYWH(element.xywh)[3];
-        // // Limit the width of the selected note
-        // if (noteW < NOTE_MIN_WIDTH) {
-        //   noteW = NOTE_MIN_WIDTH;
-        // }
-        // Limit the height of the selected note
-        if (height < NOTE_MIN_HEIGHT) {
-          height = NOTE_MIN_HEIGHT;
+        const curBound = Bound.deserialize(element.xywh);
+        const props: Partial<NoteBlockModel> = {};
+        if (curBound.h !== bound.h && !element.edgeless.collapse) {
+          edgeless.page.updateBlock(element, () => {
+            element.edgeless.collapse = true;
+          });
         }
-        page.updateBlock(element, {
-          xywh: serializeXYWH(bound.x, bound.y, bound.w, height),
-        });
-      } else if (isFrameBlock(element)) {
-        page.updateBlock(element, {
+
+        bound.w = clamp(bound.w, NOTE_MIN_WIDTH, Infinity);
+        bound.h = clamp(bound.h, NOTE_MIN_HEIGHT, Infinity);
+
+        this._isNoteWidthLimit = bound.w === NOTE_MIN_WIDTH ? true : false;
+        this._isNoteHeightLimit = bound.h === NOTE_MIN_HEIGHT ? true : false;
+
+        props.xywh = bound.serialize();
+        edgeless.updateElementInLocal(element.id, props);
+      } else if (isImageBlock(element)) {
+        const curBound = Bound.deserialize(element.xywh);
+        if (
+          direction === HandleDirection.Left ||
+          direction === HandleDirection.Right
+        ) {
+          bound.h = (curBound.h / curBound.w) * bound.w;
+        } else if (
+          direction === HandleDirection.Top ||
+          direction === HandleDirection.Bottom
+        ) {
+          bound.w = (curBound.w / curBound.h) * bound.h;
+        }
+
+        edgeless.updateElementInLocal(element.id, {
           xywh: bound.serialize(),
         });
       } else {
@@ -450,7 +466,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             bound = normalizeTextBound(element, bound, true);
             // If the width of the text element has been changed by dragging,
             // We need to set hasMaxWidth to true for wrapping the text
-            surface.updateElement(id, {
+            edgeless.updateElementInLocal(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
               hasMaxWidth: true,
@@ -459,7 +475,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             p = bound.h / element.h;
             // const newFontsize = element.fontSize * p;
             // bound = normalizeTextBound(element, bound, false, newFontsize);
-            surface.updateElement(id, {
+            edgeless.updateElementInLocal(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
             });
@@ -468,7 +484,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           if (element instanceof ShapeElement) {
             bound = normalizeShapeBound(element, bound);
           }
-          surface.updateElement(id, {
+          edgeless.updateElementInLocal(id, {
             xywh: bound.serialize(),
           });
         }
@@ -486,8 +502,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const elements = selection.elements.filter(
       element =>
         isImageBlock(element) ||
-        (isPhasorElement(element) &&
-          element.type !== PhasorElementType.CONNECTOR)
+        (isCanvasElement(element) &&
+          element.type !== CanvasElementType.CONNECTOR)
     ) as EdgelessElement[];
 
     getElementsWithoutGroup(elements).forEach(element => {
@@ -505,8 +521,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _onDragEnd = () => {
+    const selectedElements = this.edgeless.selectionManager.state.elements;
+    this.edgeless.applyLocalRecord(selectedElements);
+
+    this._isNoteWidthLimit = false;
+    this._isNoteHeightLimit = false;
+
     this._updateCursor(false);
-    this._toolbarVisible = true;
+    this.setToolbarVisible(true);
+    this.edgeless.slots.elementResizeEnd.emit();
   };
 
   private _updateCursor = (
@@ -563,53 +586,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.slots.cursorUpdated.emit(cursor);
   };
 
-  private async _updateToolbarPosition() {
-    if (
-      !this._toolbarVisible ||
-      !this._shouldRenderSelection() ||
-      this.page.readonly
-    )
-      return;
-
-    if (!this._selectedRectEl || !this._componentToolbar) {
-      await this.updateComplete;
-    }
-
-    if (this._componentToolbar.isUpdatePending)
-      await this._componentToolbar.updateComplete;
-
-    const componentToolbar = this._componentToolbar;
-    const bound = edgelessElementsBound(this.selection.elements);
-
-    const { viewport } = this.edgeless.surface;
-    const { width, height } = viewport;
-    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
-    const rect = componentToolbar.getBoundingClientRect();
-    if (x >= width || right <= 0 || y >= height || bottom <= 0) {
-      this._toolbarPosition = {
-        x: right <= 0 ? x - rect.width : x,
-        y: y >= height ? bottom : y,
-      };
-      return;
-    }
-
-    let offset = 34;
-    if (this.selection.elements.find(ele => isFrameBlock(ele))) {
-      offset += 10;
-    }
-    let top = y - rect.height - offset;
-    top < 0 && (top = y + bound.h * viewport.zoom + offset);
-
-    const left = clamp(x, 10, width - rect.width - 10);
-    top = clamp(top, 10, height - rect.height - 100);
-
-    this._toolbarPosition = {
-      x: left,
-      y: top,
-    };
-  }
-
   private _updateSelectedRect() {
     const { surface, zoom, selection } = this;
 
@@ -630,14 +606,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const isSingleHiddenNote =
       isSingleNote && isNoteBlock(elements[0]) && elements[0].hidden;
 
+    const padding = elements.length > 1 ? SELECTED_RECT_PADDING : 0;
+
     this._selectedRect = {
-      width,
-      height,
+      width: width + padding * 2,
+      height: height + padding * 2,
       borderWidth: selection.editing ? 2 : 1,
       borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
-      borderRadius: isSingleNote ? 8 * zoom : 0,
-      left,
-      top,
+      left: left - padding,
+      top: top - padding,
       rotate,
     };
   }
@@ -677,12 +654,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _updateOnSelectionChange = () => {
     this._updateSelectedRect();
     this._updateResizeManagerState(true);
-
-    if (this.selection.editing) {
-      this._toolbarVisible = false;
-    } else {
-      this._toolbarVisible = true;
-    }
+    // Reset the cursor
+    this._updateCursor(false);
   };
 
   private _updateOnElementChange = (
@@ -698,16 +671,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   override firstUpdated() {
-    const { _disposables, page, slots, selection, surface, edgeless } = this;
+    const { _disposables, page, slots, selection, edgeless } = this;
 
     _disposables.add(
       // viewport zooming / scrolling
       slots.viewportUpdated.on(this._updateOnViewportChange)
     );
 
-    Object.values(
-      pick(surface.slots, ['elementAdded', 'elementRemoved', 'elementUpdated'])
-    ).forEach(slot => {
+    pickValues(edgeless.slots, [
+      'elementAdded',
+      'elementRemoved',
+      'elementUpdated',
+    ]).forEach(slot => {
       _disposables.add(slot.on(this._updateOnElementChange));
     });
 
@@ -720,31 +695,34 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
     _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
     _disposables.add(
-      page.slots.yBlockUpdated.on(data => {
+      page.slots.blockUpdated.on(data => {
         this._updateOnElementChange(data, true);
       })
     );
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
     );
-  }
 
-  protected override updated(
-    _changedProperties: Map<PropertyKey, unknown>
-  ): void {
-    if (
-      _changedProperties.has('_selectedRect') ||
-      (_changedProperties.has('_toolbarVisible') && this._toolbarVisible)
-    ) {
-      this._updateToolbarPosition();
-    }
+    _disposables.add(
+      edgeless.slots.elementResizeStart.on(() => (this._isResizing = true))
+    );
+    _disposables.add(
+      edgeless.slots.elementResizeEnd.on(() => (this._isResizing = false))
+    );
   }
 
   private _canAutoComplete() {
     return (
+      !this._isResizing &&
       this.selection.elements.length === 1 &&
       (this.selection.elements[0] instanceof ShapeElement ||
         isNoteBlock(this.selection.elements[0]))
+    );
+  }
+
+  private _canRotate() {
+    return !this.selection.elements.every(
+      ele => isNoteBlock(ele) || isFrameBlock(ele)
     );
   }
 
@@ -760,15 +738,19 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       resizeMode,
       _resizeManager,
       _selectedRect,
-      _toolbarPosition,
       _updateCursor,
     } = this;
 
     const hasResizeHandles = !selection.editing && !page.readonly;
+
     const resizeHandles = hasResizeHandles
       ? ResizeHandles(
           resizeMode,
           (e: PointerEvent, direction: HandleDirection) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains('rotate') && !this._canRotate()) {
+              return;
+            }
             const proportional = elements.some(el => el instanceof TextElement);
             _resizeManager.onPointerDown(e, direction, proportional);
           },
@@ -781,6 +763,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
               point?: IVec;
             }
           ) => {
+            if (!this._canRotate() && options?.type === 'rotate') return;
             _updateCursor(dragging, options);
           }
         )
@@ -794,10 +777,58 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           ></edgeless-connector-handle>`
         : nothing;
 
+    const elementHandle =
+      elements.length > 1
+        ? elements.map(element => {
+            const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
+            const [x, y] = this.surface.toViewCoord(modelX, modelY);
+            const { left, top, borderWidth } = this._selectedRect;
+            const style = {
+              position: 'absolute',
+              boxSizing: 'border-box',
+              left: `${x - left - borderWidth}px`,
+              top: `${y - top - borderWidth}px`,
+              width: `${w * this.zoom}px`,
+              height: `${h * this.zoom}px`,
+              border: `1px solid var(--affine-primary-color)`,
+            };
+            return html`<div
+              class="element-handle"
+              style=${styleMap(style)}
+            ></div>`;
+          })
+        : nothing;
+
     const isSingleGroup =
       elements.length === 1 && elements[0] instanceof GroupElement;
     _selectedRect.borderStyle = isSingleGroup ? 'dashed' : 'solid';
+
     return html`
+      <style>
+        .affine-edgeless-selected-rect .handle[aria-label='right']::after {
+          content: '';
+          display: ${this._isNoteWidthLimit ? 'initial' : 'none'};
+          position: absolute;
+          top: 0;
+          left: 1.5px;
+          width: 2px;
+          height: 100%;
+          background: var(--affine-error-color);
+          filter: drop-shadow(-6px 0px 12px rgba(235, 67, 53, 0.35));
+        }
+
+        .affine-edgeless-selected-rect .handle[aria-label='bottom']::after {
+          content: '';
+          display: ${this._isNoteHeightLimit ? 'initial' : 'none'};
+          position: absolute;
+          top: 1.5px;
+          left: 0px;
+          width: 100%;
+          height: 2px;
+          background: var(--affine-error-color);
+          filter: drop-shadow(-6px 0px 12px rgba(235, 67, 53, 0.35));
+        }
+      </style>
       ${!page.readonly && this._canAutoComplete()
         ? html`<edgeless-auto-complete
             .current=${this.selection.elements[0]}
@@ -813,23 +844,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           height: `${_selectedRect.height}px`,
           borderWidth: `${_selectedRect.borderWidth}px`,
           borderStyle: _selectedRect.borderStyle,
-          borderRadius: `${_selectedRect.borderRadius}px`,
           transform: `translate(${_selectedRect.left}px, ${_selectedRect.top}px) rotate(${_selectedRect.rotate}deg)`,
         })}
         disabled="true"
       >
-        ${resizeHandles} ${connectorHandle}
+        ${resizeHandles} ${connectorHandle} ${elementHandle}
       </div>
-      ${this._toolbarVisible && !page.readonly
-        ? html`<edgeless-component-toolbar
-            style=${styleMap({
-              left: `${_toolbarPosition.x}px`,
-              top: `${_toolbarPosition.y}px`,
-            })}
-            .edgeless=${edgeless}
-          >
-          </edgeless-component-toolbar>`
-        : nothing}
     `;
   }
 }

@@ -1,54 +1,58 @@
 /// <reference types="vite/client" />
 import { BlockElement } from '@blocksuite/lit';
-import { html, nothing } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { html } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isCssVariable } from '../_common/theme/css-variables.js';
-import type { EdgelessPageBlockComponent } from '../page-block/index.js';
+import type { EdgeelssFrameTitle } from '../page-block/edgeless/components/block-portal/frame/edgeless-frame.js';
 import { Bound } from '../surface-block/index.js';
 import type { FrameBlockModel } from './frame-model.js';
 
 @customElement('affine-frame')
 export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
-  static offset = 12;
-
   @state()
-  showTitle = true;
+  private _isNavigator = false;
 
-  @query('.affine-frame-title')
-  private _titleElement?: HTMLElement;
-
-  get titleBound() {
-    if (!this._titleElement) return new Bound();
-    const { viewport } = this._surface;
-    const { zoom } = viewport;
-    const rect = viewport.boundingClientRect;
-    const bound = Bound.fromDOMRect(this._titleElement.getBoundingClientRect());
-    bound.x -= rect.x;
-    bound.y -= rect.y;
-    bound.h += FrameBlockComponent.offset;
-    bound.h /= zoom;
-    bound.w /= zoom;
-    const [x, y] = viewport.toModelCoord(bound.x, bound.y);
-    bound.x = x;
-    bound.y = y;
-    return bound;
+  get titleElement(): EdgeelssFrameTitle | null {
+    return (
+      this.closest('affine-edgeless-page')?.querySelector?.(
+        `[data-frame-title-id="${this.model.id}"]`
+      ) ?? null
+    );
   }
 
-  private get _surface() {
-    return (<EdgelessPageBlockComponent>this.parentBlockElement).surface;
+  get titleBound() {
+    const title = this.titleElement;
+    if (!title) return new Bound();
+    return title.titleBound;
+  }
+
+  get isInner() {
+    const title = this.titleElement;
+    if (!title) return false;
+    return title.isInner;
+  }
+
+  get surface() {
+    return this.closest('affine-edgeless-page')!.surface;
   }
 
   override connectedCallback() {
     super.connectedCallback();
     let lastZoom = 0;
     this._disposables.add(
-      this._surface.viewport.slots.viewportUpdated.on(({ zoom }) => {
+      this.surface.viewport.slots.viewportUpdated.on(({ zoom }) => {
         if (zoom !== lastZoom) {
           this.requestUpdate();
           lastZoom = zoom;
         }
+      })
+    );
+
+    this._disposables.add(
+      this.surface.edgeless.slots.elementUpdated.on(() => {
+        this.requestUpdate();
       })
     );
   }
@@ -57,37 +61,19 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     return this;
   }
 
+  override firstUpdated() {
+    this.surface.edgeless.slots.edgelessToolUpdated.on(tool => {
+      this._isNavigator = tool.type === 'frameNavigator' ? true : false;
+    });
+  }
+
   override render() {
-    const { model, showTitle, _surface } = this;
-    const bound = Bound.deserialize(model.xywh);
-    const { zoom } = _surface.viewport;
-    const text = model.title.toString();
+    const { model, surface, _isNavigator } = this;
+    const bound = Bound.deserialize(
+      (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
+    );
 
     return html`
-      ${showTitle
-        ? html` <div
-            style=${styleMap({
-              transformOrigin: 'top left',
-              transform: `scale(${1 / zoom})`,
-              borderRadius: '4px',
-              width: 'fit-content',
-              maxWidth: bound.w * zoom + 'px',
-              padding: '4px 10px',
-              fontSize: '14px',
-              position: 'absolute',
-              background: 'var(--affine-text-primary-color)',
-              color: 'var(--affine-white)',
-              cursor: 'default',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              top: -(24.36 + FrameBlockComponent.offset) / zoom + 'px',
-            })}
-            class="affine-frame-title"
-          >
-            ${text}
-          </div>`
-        : nothing}
       <div
         class="affine-frame-container"
         style=${styleMap({
@@ -97,7 +83,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
             ? `var(${model.background})`
             : '',
           borderRadius: '8px',
-          border: `2px solid var(--affine-black-30)`,
+          border: _isNavigator ? 'none' : `2px solid var(--affine-black-30)`,
         })}
       ></div>
     `;

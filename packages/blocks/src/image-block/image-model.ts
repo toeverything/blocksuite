@@ -40,9 +40,7 @@ export const ImageBlockSchema = defineBlockSchema({
     role: 'content',
   },
   transformer: () => new ImageBlockTransformer(),
-  toModel: () => {
-    return new ImageBlockModel();
-  },
+  toModel: () => new ImageBlockModel(),
 });
 
 @EdgelessSelectableMixin
@@ -50,7 +48,7 @@ export class ImageBlockModel
   extends BaseBlockModel<ImageBlockProps>
   implements IEdgelessElement
 {
-  gridBound!: Bound;
+  elementBound!: Bound;
   override xywh!: SerializedXYWH;
   override flavour!: EdgelessBlockType.IMAGE;
 
@@ -65,25 +63,6 @@ export class ImageBlockModel
         return;
       }
       this.page.blob.increaseRef(blobId);
-    });
-    this.propsUpdated.on(({ oldProps, newProps }) => {
-      const oldBlobId = (oldProps as ImageBlockProps).sourceId;
-      const newBlobId = (newProps as ImageBlockProps).sourceId;
-      if (oldBlobId === newBlobId) return;
-
-      const oldBlob = this.page.blob.get(oldBlobId);
-      if (!oldBlob) {
-        console.error(`Blob ${oldBlobId} not found in blob manager`);
-        return;
-      }
-      const newBlob = this.page.blob.get(newBlobId);
-      if (!newBlob) {
-        console.error(`Blob ${newBlobId} not found in blob manager`);
-        return;
-      }
-
-      this.page.blob.decreaseRef(oldBlobId);
-      this.page.blob.increaseRef(newBlobId);
     });
     this.deleted.on(() => {
       const blobId = this.sourceId;

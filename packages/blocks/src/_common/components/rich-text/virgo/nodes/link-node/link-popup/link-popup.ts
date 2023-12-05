@@ -10,7 +10,7 @@ import {
   isValidUrl,
   normalizeUrl,
 } from '../../../../../../../_common/utils/url.js';
-import type { BookmarkProps } from '../../../../../../../bookmark-block/bookmark-model.js';
+import type { BookmarkBlockProps } from '../../../../../../../bookmark-block/bookmark-model.js';
 import { allowEmbed } from '../../../../../../../bookmark-block/embed.js';
 import { BLOCK_ID_ATTR } from '../../../../../../consts.js';
 import { BookmarkIcon } from '../../../../../../icons/edgeless.js';
@@ -79,6 +79,20 @@ export class LinkPopup extends WithDisposable(LitElement) {
         this.remove();
       })
     );
+  }
+
+  protected override firstUpdated() {
+    if (!this.linkInput) return;
+
+    this._disposables.addFromEvent(this.linkInput, 'copy', e => {
+      e.stopPropagation();
+    });
+    this._disposables.addFromEvent(this.linkInput, 'cut', e => {
+      e.stopPropagation();
+    });
+    this._disposables.addFromEvent(this.linkInput, 'paste', e => {
+      e.stopPropagation();
+    });
   }
 
   override updated() {
@@ -195,11 +209,11 @@ export class LinkPopup extends WithDisposable(LitElement) {
     this.remove();
   }
 
-  private _linkToBookmark(type: BookmarkProps['type']) {
+  private _linkToBookmark(type: BookmarkBlockProps['type']) {
     if (!this.vEditor.isVRangeValid(this.goalVRange)) return;
 
     const blockElement = this.blockElement;
-    const props: BookmarkProps = {
+    const props = {
       type,
       url: this.currentLink,
       title: this.currentText,
@@ -373,8 +387,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
       this.type === 'create'
         ? this._createTemplate()
         : this.type === 'view'
-        ? this._viewTemplate()
-        : this._editTemplate();
+          ? this._viewTemplate()
+          : this._editTemplate();
 
     return html`
       <div class="overlay-root">

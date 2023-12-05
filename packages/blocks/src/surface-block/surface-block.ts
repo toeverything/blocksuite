@@ -1,6 +1,6 @@
 import '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 
-import { assertEquals, assertExists, Slot } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BlockProps } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -19,10 +19,11 @@ import {
   type Selectable,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
+import { last } from '../_common/utils/iterable.js';
+import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
-import { getGridBound } from '../page-block/edgeless/utils/bound-utils.js';
 import {
   isConnectable,
   isFrameBlock,
@@ -31,7 +32,6 @@ import {
   isTopLevelBlock,
 } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
-import { Batch, BLOCK_BATCH, FRAME_BATCH } from './batch.js';
 import type { IBound } from './consts.js';
 import {
   type EdgelessBlockModelMap,
@@ -43,10 +43,10 @@ import {
 } from './edgeless-types.js';
 import {
   type HitTestOptions,
+  type ICanvasElementType,
   type IElementCreateProps,
   type IElementUpdateProps,
-  type IPhasorElementType,
-  isPhasorElementType,
+  isCanvasElementType,
 } from './elements/edgeless-element.js';
 import { GROUP_ROOT } from './elements/group/consts.js';
 import {
@@ -55,10 +55,9 @@ import {
   ElementCtors,
   ElementDefaultProps,
   GroupElement,
-  type IPhasorElementLocalRecord,
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
-import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
+import type { CanvasElementType, IVec } from './index.js';
 import {
   compare,
   EdgelessGroupManager,
@@ -66,6 +65,7 @@ import {
   isDescendant,
   setGroupParent,
 } from './managers/group-manager.js';
+import { LayerManager } from './managers/layer-manager.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
@@ -73,7 +73,6 @@ import { Bound } from './utils/bound.js';
 import { getCommonBound } from './utils/bound.js';
 import {
   generateElementId,
-  generateKeyBetween,
   generateNKeysBetween,
   normalizeWheelDeltaY,
 } from './utils/index.js';
@@ -83,10 +82,9 @@ type id = string;
 
 const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
 
-export enum EdgelessBlocksFlavour {
-  NOTE = 'affine:note',
-  FRAME = 'affine:frame',
-}
+export type IndexedCanvasUpdateEvent = CustomEvent<{
+  content: HTMLCanvasElement[];
+}>;
 
 @customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
@@ -152,57 +150,79 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _renderer!: Renderer;
   private _yContainer!: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<id, SurfaceElement>();
-  private _elementLocalRecords = new Map<
-    id,
-    IPhasorElementLocalRecord[keyof IPhasorElementLocalRecord]
-  >();
+
+  private _indexedCanvases: HTMLCanvasElement[] = [];
 
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
   frame!: EdgelessFrameManager;
   group!: EdgelessGroupManager;
+  layer!: LayerManager;
+
   compare = compare;
   getGroupParent = getGroupParent;
   setGroupParent = setGroupParent;
 
-  private _defaultBatch = 'a1';
-  private _batches = new Map<string, Batch<IEdgelessElement>>();
   private _lastTime = 0;
   private _cachedViewport = new Bound();
 
-  slots = {
-    elementUpdated: new Slot<{
-      id: id;
-      props: { [index: string]: { old: unknown; new: unknown } };
-    }>(),
-    elementAdded: new Slot<id>(),
-    elementRemoved: new Slot<{ id: id; element: SurfaceElement }>(),
-  };
+  @query('edgeless-block-portal-container')
+  portal!: EdgelessBlockPortalContainer;
+
+  get renderer() {
+    return this._renderer;
+  }
 
   get edgeless() {
     return this.parentBlockElement as EdgelessPageBlockComponent;
   }
 
   private get _isEdgeless() {
-    return this.root.mode === 'edgeless';
+    return !!this.root.querySelector('affine-edgeless-page');
   }
 
-  getBlocks<T extends EdgelessBlockType>(flavour: T) {
-    let parent: BaseBlockModel = this.model;
-    if (flavour === EdgelessBlockType.NOTE) {
-      parent = this.edgeless.model;
+  getBlocks<T extends EdgelessBlockType>(
+    flavours: T[] | T | RegExp
+  ): TopLevelBlockModel[] {
+    if (flavours instanceof RegExp) {
+      const regexp = flavours;
+      const models = this.model.children
+        .filter(child => regexp.test(child.flavour))
+        .map(x => this.edgeless.localRecord.wrap(x));
+
+      return models as TopLevelBlockModel[];
     }
-    return parent.children.filter(
-      child => child.flavour === flavour
-    ) as EdgelessBlockModelMap[T][];
+
+    flavours = typeof flavours === 'string' ? [flavours] : flavours;
+
+    return flavours.reduce<TopLevelBlockModel[]>((pre, flavour) => {
+      const parent: BaseBlockModel =
+        flavour === EdgelessBlockType.NOTE ? this.edgeless.model : this.model;
+
+      return pre.concat(
+        parent.children
+          .filter(child => child.flavour === flavour)
+          .map(child =>
+            this.edgeless.localRecord.wrap(child)
+          ) as EdgelessBlockModelMap[T][]
+      );
+    }, []);
   }
 
-  getSortedBlocks<T extends EdgelessBlockType>(flavour: T) {
-    return this.getBlocks(flavour).sort(this.compare);
+  getSortedBlocks<T extends EdgelessBlockType>(flavour: T | T[]) {
+    const flavours = typeof flavour === 'string' ? [flavour] : flavour;
+    let blocks: TopLevelBlockModel[] = [];
+
+    flavours.forEach(f => {
+      blocks = blocks.concat(this.getBlocks(f) ?? []);
+    });
+
+    return blocks.sort(this.compare);
   }
 
   get blocks() {
     return [
+      ...this.getBlocks(/affine:embed:*/),
       ...this.getBlocks(FRAME),
       ...this.getBlocks(NOTE),
       ...this.getBlocks(IMAGE),
@@ -223,17 +243,20 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     super.connectedCallback();
     if (!this._isEdgeless) return;
     const { edgeless } = this;
-    this._renderer = new Renderer();
+    this.layer = new LayerManager();
+    this._renderer = new Renderer({ layerManager: this.layer });
     this._yContainer = this.model.elements.getValue() as Y.Map<Y.Map<unknown>>;
     this._yContainer.observe(this._onYContainer);
 
-    this._initEvents();
     this.connector = new EdgelessConnectorManager(edgeless);
     this.frame = new EdgelessFrameManager(edgeless);
     this.snap = new EdgelessSnapManager(edgeless);
     this.group = new EdgelessGroupManager(this);
 
+    this._initEvents();
+    this.layer.init([...this._elements.values(), ...this.blocks]);
     this.init();
+    this._initEffects();
   }
 
   getCSSPropertyValue = (value: string) => {
@@ -256,11 +279,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _initEvents() {
     const { _disposables, edgeless } = this;
 
-    _disposables.add(edgeless.slots.reorderingBlocksUpdated.on(this._reorder));
-    _disposables.add(edgeless.slots.reorderingShapesUpdated.on(this._reorder));
+    _disposables.add(edgeless.slots.reorderingElements.on(this._reorder));
 
     _disposables.add(
-      this.slots.elementAdded.on(id => {
+      edgeless.slots.elementAdded.on(({ id }) => {
         const element = this.pickById(id);
         assertExists(element);
         if (element instanceof ConnectorElement) {
@@ -268,67 +290,48 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
           if (!this.connector.hasRelatedElement(element)) return;
           this.connector.updatePath(element);
         }
+
+        this.layer.add(element);
       })
     );
 
     _disposables.add(
-      this.slots.elementUpdated.on(({ id, props }) => {
-        if ('xywh' in props || 'rotate' in props) {
-          this.edgeless.slots.elementSizeUpdated.emit(id);
-        }
-
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
         const element = this.pickById(id);
         assertExists(element);
 
         if (element instanceof ConnectorElement) {
-          if ('target' in props || 'source' in props || 'mode' in props) {
-            this.connector.updatePath(element);
+          this.connector.updatePath(element);
+        }
+
+        this.layer.update(element, props);
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
+        if (!props || 'xywh' in props || 'rotate' in props) {
+          const element = this.pickById(id);
+          if (isConnectable(element)) {
+            this.connector.syncConnectorPos([element]);
           }
         }
       })
     );
 
     _disposables.add(
-      this.edgeless.slots.elementSizeUpdated.on(id => {
-        const element = this.pickById(id);
-        if (isConnectable(element)) {
-          this.connector.syncConnectorPos([element]);
-        }
+      edgeless.slots.elementRemoved.on(({ element }) => {
+        this.layer.delete(
+          ('flavour' in element
+            ? this.edgeless.localRecord.wrap(element)
+            : element) as EdgelessElement
+        );
       })
     );
 
-    this._initBlocks();
-  }
-
-  private _initBlocks() {
-    const { page } = this;
-    this.blocks.forEach(block => {
-      this._addToBatch(block);
-    });
-    this._disposables.add(
-      page.slots.blockUpdated.on(e => {
-        if (e.type === 'add') {
-          const model = this.pickById(e.id) as TopLevelBlockModel;
-          assertExists(model);
-          if (isFrameBlock(model) || isNoteBlock(model)) {
-            this._addToBatch(model);
-          } else if (
-            isImageBlock(model) &&
-            (<Y.Array<string>>this.model.yBlock.get('sys:children'))
-              .toArray()
-              .includes(e.id)
-          ) {
-            this._addToBatch(model);
-          }
-        } else if (e.type === 'delete') {
-          if (e.flavour === NOTE || e.flavour === FRAME) {
-            const model = this.pickById(e.id) as TopLevelBlockModel;
-            this._removeFromBatch(model);
-          } else if (e.flavour === IMAGE && e.parent === this.model.id) {
-            const model = this.pickById(e.id) as TopLevelBlockModel;
-            this._removeFromBatch(model);
-          }
-        }
+    _disposables.add(
+      this.layer.slots.layerUpdated.on(() => {
+        this._updateIndexCanvases();
       })
     );
   }
@@ -369,121 +372,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   private _reorder = ({ elements, type }: ReorderingAction<Selectable>) => {
-    if (!elements.length) return;
+    elements.forEach(element => {
+      const index = this.layer.getReorderedIndex(element, type);
 
-    if (
-      elements.some(
-        element =>
-          this.getGroupParent(element) !== this.getGroupParent(elements[0])
-      )
-    ) {
-      console.warn(`can't reorder shapes in different groups`);
-      return;
-    }
-
-    const levelElements = this._getSortedSameGroupElements(elements[0]);
-    elements = elements.sort(this.compare);
-    let indexes: string[] = [];
-
-    switch (type) {
-      case 'front':
-        indexes = generateNKeysBetween(
-          levelElements.at(-1)?.index,
-          null,
-          elements.length
-        );
-
-        break;
-      case 'forward': {
-        let start = -1;
-        let end = -1;
-        let index = -1;
-        for (let i = 0; i < elements.length; i++) {
-          const current = elements[i];
-          index = levelElements.findIndex(e => e.id === current.id);
-          if (start < 0) {
-            start = index;
-            end = index;
-            continue;
-          } else if (index - end === 1) {
-            end = index;
-            continue;
-          } else {
-            indexes.push(
-              ...generateNKeysBetween(
-                levelElements[end + 1]?.index ?? null,
-                levelElements[end + 2]?.index ?? null,
-                end - start + 1
-              )
-            );
-            start = index;
-            end = index;
-          }
-        }
-
-        indexes.push(
-          ...generateNKeysBetween(
-            levelElements[index + 1]?.index ?? null,
-            levelElements[index + 2]?.index ?? null,
-            end - start + 1
-          )
-        );
-
-        assertEquals(elements.length, indexes.length);
-
-        break;
-      }
-
-      case 'backward': {
-        let start = -1;
-        let end = -1;
-        let index = -1;
-        for (let i = elements.length - 1; i >= 0; i--) {
-          const current = elements[i];
-          index = levelElements.findIndex(e => e.id === current.id);
-          if (start < 0) {
-            start = index;
-            end = index;
-            continue;
-          } else if (index - end === -1) {
-            end = index;
-            continue;
-          } else {
-            indexes.unshift(
-              ...generateNKeysBetween(
-                levelElements[end - 2]?.index ?? null,
-                levelElements[end - 1]?.index ?? null,
-                Math.abs(end - start) + 1
-              )
-            );
-            start = index;
-            end = index;
-          }
-        }
-
-        indexes.unshift(
-          ...generateNKeysBetween(
-            levelElements[index - 2]?.index ?? null,
-            levelElements[index - 1]?.index ?? null,
-            Math.abs(end - start) + 1
-          )
-        );
-
-        assertEquals(elements.length, indexes.length);
-
-        break;
-      }
-      case 'back':
-        indexes = generateNKeysBetween(
-          null,
-          levelElements[0]?.index,
-          elements.length
-        );
-
-        break;
-    }
-
-    if (indexes) this.updateIndexes(indexes, elements);
+      if (index !== element.index)
+        this.updateElement(element.id, {
+          index,
+        });
+    });
   };
 
   private _initEffects() {
@@ -505,13 +401,16 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         }
       })
     );
+
     _disposables.add(
-      edgeless.slots.elementSizeUpdated.on(id => {
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
         const element = this.pickById(id);
         assertExists(element);
+
         if (
           element instanceof BrushElement ||
-          edgeless.selectionManager.editing
+          edgeless.selectionManager.editing ||
+          (props && !('xywh' in props && 'rotate' in props))
         )
           return;
         this.fitElementToViewport(element);
@@ -519,7 +418,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
 
     _disposables.add(
-      this.slots.elementAdded.on(id => {
+      edgeless.slots.elementAdded.on(({ id }) => {
         const element = this.pickById(id);
         assertExists(element);
         if (element instanceof BrushElement) return;
@@ -528,11 +427,60 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
   }
 
+  private _updateIndexCanvases() {
+    const evt = new CustomEvent('indexedcanvasupdate', {
+      detail: {
+        content: this.renderCanvas(),
+      },
+    }) as IndexedCanvasUpdateEvent;
+
+    this.dispatchEvent(evt);
+  }
+
+  renderCanvas() {
+    /**
+     * we already have a main canvas, so the last layer should be deleted
+     */
+    const canvasLayers = this.layer.getCanvasLayers().slice(0, -1);
+    const canvases = [];
+    const currentCanvases = this._indexedCanvases;
+
+    for (let i = 0; i < canvasLayers.length; ++i) {
+      const layer = canvasLayers[i];
+      const created = i < currentCanvases.length;
+      const canvas = created
+        ? currentCanvases[i]
+        : document.createElement('canvas');
+
+      if (!created) {
+        canvas.className = 'indexable-canvas';
+
+        canvas.style.setProperty('position', 'absolute');
+        canvas.style.setProperty('pointer-events', 'none');
+      }
+
+      canvas.setAttribute(
+        'data-fractional',
+        `${layer.indexes[0]}-${layer.indexes[1]}`
+      );
+      canvas.style.setProperty('z-index', layer.zIndexes.toString());
+
+      canvases.push(canvas);
+    }
+
+    this._indexedCanvases = canvases;
+    this._renderer.setIndexedCanvas(this._indexedCanvases);
+    this.refresh();
+
+    return this._indexedCanvases;
+  }
+
   override render() {
     if (!this._isEdgeless) return nothing;
+
     return html`
       <div class="affine-edgeless-surface-block-container">
-        <!-- attach canvas later in Phasor -->
+        <!-- attach canvas later in renderer -->
       </div>
     `;
   }
@@ -542,56 +490,30 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this.attach(this._surfaceContainer);
   }
 
-  init() {
-    this._syncFromExistingContainer();
-    this._initEffects();
+  override updated() {
+    if (!this._isEdgeless) return;
   }
 
-  // query
-  pickTopBlock(point: IVec) {
-    const models = this.sortedBlocks;
-    for (let i = models.length - 1; i >= 0; i--) {
-      const model = models[i];
-      if (model.hitTest(point[0], point[1], {})) {
-        return model;
-      }
-    }
-    return null;
+  init() {
+    this._syncFromExistingContainer();
   }
 
   get viewport(): Renderer {
     return this._renderer;
   }
 
-  get defaultBatch() {
-    return this._defaultBatch;
-  }
-
-  getBatch(id: string) {
-    const batch = this._batches.get(id);
-    if (batch) return batch;
-    const newBatch = new Batch<IEdgelessElement>(id);
-    this._batches.set(id, newBatch);
-    return newBatch;
-  }
-
-  private _addToBatch(element: IEdgelessElement) {
-    const batch = element.batch ?? this._defaultBatch;
-    this.getBatch(batch).addElement(element);
-  }
-
-  private _removeFromBatch(element: IEdgelessElement) {
-    const batch = element.batch ?? this._defaultBatch;
-    this.getBatch(batch).deleteElement(element);
-  }
-
   private _syncFromExistingContainer() {
     this.transact(() => {
       const yConnectors: Y.Map<unknown>[] = [];
+      const yGroups: Y.Map<unknown>[] = [];
       this._yContainer.forEach(yElement => {
-        const type = yElement.get('type') as PhasorElementType;
+        const type = yElement.get('type') as CanvasElementType;
         if (type === 'connector') {
           yConnectors.push(yElement);
+          return;
+        }
+        if (type === 'group') {
+          yGroups.push(yElement);
           return;
         }
         this._createElementFromYMap(yElement);
@@ -599,23 +521,27 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       yConnectors.forEach(yElement => {
         this._createElementFromYMap(yElement);
       });
+      yGroups.forEach(yElement => {
+        this._createElementFromYMap(yElement);
+      });
     });
   }
 
   private _createElementFromYMap(yElement: Y.Map<unknown>) {
-    const type = yElement.get('type') as PhasorElementType;
+    const type = yElement.get('type') as CanvasElementType;
     const id = yElement.get('id') as id;
     const ElementCtor = ElementCtors[type];
+    const { edgeless } = this;
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
       getLocalRecord: id => {
-        return this.getElementLocalRecord(id);
+        return edgeless.localRecord.get(id);
       },
       onElementUpdated: update => {
-        this.slots.elementUpdated.emit(update);
+        edgeless.slots.elementUpdated.emit(update);
       },
       updateElementLocalRecord: (id, record) => {
-        this.updateElementLocalRecord(id, record);
+        edgeless.localRecord.update(id, record);
       },
       pickById: id => this.pickById(id),
       getGroupParent: (element: string | EdgelessElement) => {
@@ -630,8 +556,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     element.computedValue = this.getCSSPropertyValue;
     element.mount(this._renderer);
     this._elements.set(element.id, element);
-    this._addToBatch(element);
-    this.slots.elementAdded.emit(id);
+    this.edgeless.slots.elementAdded.emit({ id });
   }
 
   private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
@@ -674,19 +599,20 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   ) => {
     if (type.action === 'add') {
       const yElement = this._yContainer.get(id) as Y.Map<unknown>;
-      const type = yElement.get('type') as PhasorElementType;
+      const type = yElement.get('type') as CanvasElementType;
+      const { edgeless } = this;
 
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, {
         getLocalRecord: id => {
-          return this.getElementLocalRecord(id);
+          return edgeless.localRecord.get(id);
         },
         onElementUpdated: update => {
-          this.slots.elementUpdated.emit(update);
+          edgeless.slots.elementUpdated.emit(update);
         },
         updateElementLocalRecord: (id, record) => {
-          this.updateElementLocalRecord(id, record);
+          edgeless.localRecord.update(id, record);
         },
         pickById: id => this.pickById(id),
         getGroupParent: (element: string | EdgelessElement) => {
@@ -702,8 +628,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       element.mount(this._renderer);
       this._elements.set(element.id, element);
 
-      this._addToBatch(element);
-      this.slots.elementAdded.emit(id);
+      this.edgeless.slots.elementAdded.emit({ id });
     } else if (type.action === 'update') {
       console.error('update event on yElements is not supported', event);
     } else if (type.action === 'delete') {
@@ -715,9 +640,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       }
       element.unmount();
       this._elements.delete(id);
-      this.deleteElementLocalRecord(id);
-      this._removeFromBatch(element);
-      this.slots.elementRemoved.emit({ id, element });
+      this.edgeless.localRecord.delete(id);
+      this.edgeless.slots.elementRemoved.emit({ id, element });
     }
   };
 
@@ -757,7 +681,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return getCommonBound(Array.from(this._elements.values()));
   }
 
-  addElement<T extends PhasorElementType>(
+  addElement<T extends CanvasElementType>(
     type: T,
     properties: IElementCreateProps<T>
   ): id;
@@ -776,20 +700,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     if (this.page.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }
-
-    if (isPhasorElementType(type)) {
-      const attr = properties as IElementCreateProps<typeof type>;
+    if (isCanvasElementType(type)) {
       const id = generateElementId();
 
       const yMap = new Workspace.Y.Map();
 
       const defaultProps = ElementDefaultProps[type];
-      const batch = this.getBatch(attr.batch ?? this._defaultBatch);
       const props: IElementCreateProps<typeof type> = {
         ...defaultProps,
         ...properties,
         id,
-        index: generateKeyBetween(batch.max, null),
+        index: this.layer.generateIndex('common', 'canvas'),
         seed: randomSeed(),
       };
 
@@ -810,12 +731,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
       return id;
     } else {
-      let batchId = BLOCK_BATCH;
-      if (type === EdgelessElementType.FRAME) {
-        batchId = FRAME_BATCH;
-      }
-      const batch = this.getBatch(batchId);
-      const index = generateKeyBetween(batch.max, null);
+      const index =
+        type === EdgelessElementType.FRAME
+          ? this.layer.generateIndex('frame')
+          : this.layer.generateIndex('common', 'block');
       return this.page.addBlock(
         type,
         { ...properties, index },
@@ -825,12 +744,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
   }
 
-  updateElement<T extends PhasorElementType>(
+  updateElement<T extends CanvasElementType>(
     id: id,
     properties: IElementUpdateProps<T>
   ): void;
   updateElement(id: id, properties: Partial<BlockProps>): void;
-  updateElement<T extends PhasorElementType>(
+  updateElement<T extends CanvasElementType>(
     id: id,
     properties: IElementUpdateProps<T> | Partial<BlockProps>
   ) {
@@ -839,7 +758,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
     const element = this.pickById(id);
     if (isTopLevelBlock(element)) {
-      this.page.updateBlock(element, properties);
+      this.page.updateBlock(this.unwrap(element), properties);
     } else {
       this.transact(() => {
         const element = this._elements.get(id);
@@ -855,17 +774,13 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     });
   }
 
-  setDefaultBatch(batch: string) {
-    this._defaultBatch = batch;
-  }
-
   removeElement(id: string) {
     if (this.page.readonly) {
       throw new Error('Cannot remove element in readonly mode');
     }
     const element = this.pickById(id);
     if (isTopLevelBlock(element)) {
-      this.page.deleteBlock(element);
+      this.page.deleteBlock(this.unwrap(element));
     } else {
       this.transact(() => {
         this._yContainer.delete(id);
@@ -875,8 +790,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   fitElementToViewport(ele: EdgelessElement) {
     const { viewport } = this;
-    let bound = getGridBound(ele);
-    bound = bound.expand(30);
+    const bound = ele.elementBound.expand(30);
     if (Date.now() - this._lastTime > 200)
       this._cachedViewport = viewport.viewportBounds;
     this._lastTime = Date.now();
@@ -900,51 +814,82 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   pickById(id: string): EdgelessElement | null {
-    return (
-      this._elements.get(id) ??
-      (this.page.getBlockById(id) as TopLevelBlockModel)
-    );
-  }
+    if (this._elements.has(id))
+      return this._elements.get(id) as EdgelessElement;
 
-  pickByPoint(
-    x: number,
-    y: number,
-    options: HitTestOptions = {
-      expand: 10,
-    }
-  ): SurfaceElement[] {
-    const size = options.expand ?? 10;
-    const candidates = this._renderer.gridManager.search({
-      x: x - size / 2,
-      y: y - size / 2,
-      w: size,
-      h: size,
-    });
-    const picked = candidates.filter(element => element.hitTest(x, y, options));
-    return picked;
+    const block = this.page.getBlockById(id);
+
+    return block
+      ? (this.edgeless.localRecord.wrap(block) as EdgelessElement)
+      : null;
   }
 
   pickTop(
     x: number,
     y: number,
-    options?: HitTestOptions
-  ): EdgelessElement | null {
-    const results = this.pickByPoint(x, y, options);
-    return results[results.length - 1] ?? this.pickTopBlock([x, y]);
+    options: { all: true }
+  ): EdgelessElement[] | null;
+  pickTop(
+    x: number,
+    y: number,
+    options?: { all: false }
+  ): EdgelessElement | null;
+  pickTop(
+    x: number,
+    y: number,
+    options: HitTestOptions = {
+      expand: 10,
+      all: false,
+    }
+  ): EdgelessElement[] | EdgelessElement | null {
+    options.expand ??= 10;
+    const hitTestBound = {
+      x: x - options.expand / 2,
+      y: y - options.expand / 2,
+      w: options.expand,
+      h: options.expand,
+    };
+    const pickSurface = () => {
+      const candidates = this._renderer.gridManager.search(hitTestBound);
+      const picked = candidates.filter(element =>
+        element.hitTest(x, y, options)
+      );
+      return picked as EdgelessElement[];
+    };
+    const pickBlock = () => {
+      const candidates = this.layer.blocksGrid.search(hitTestBound);
+      const picked = candidates.filter(element =>
+        element.hitTest(x, y, options)
+      );
+      return picked as EdgelessElement[];
+    };
+    const pickFrames = () => {
+      return this.layer.frames.filter(frame =>
+        frame.hitTest(x, y, options)
+      ) as EdgelessElement[];
+    };
+
+    const frames = pickFrames();
+    const results = pickSurface().concat(pickBlock());
+
+    // FIXME: optimization on ordered element
+    results.sort(compare);
+
+    if (results.length === 0) {
+      return options.all ? frames : last(frames) ?? null;
+    }
+
+    return options.all ? frames.concat(results) : last(results) ?? null;
   }
 
   pickTopWithGroup(point: IVec, options?: HitTestOptions) {
     const selectionManager = this.edgeless.selectionManager;
-    const results: EdgelessElement[] = this.pickByPoint(
-      point[0],
-      point[1],
-      options
-    );
-    const block = this.pickTopBlock(point);
-    if (block) {
-      results.unshift(block);
-    }
-    let picked: null | EdgelessElement = results[results.length - 1];
+    const results = this.pickTop(point[0], point[1], {
+      ...options,
+      all: true,
+    }) as EdgelessElement[];
+
+    let picked = last(results) ?? null;
     const first = picked;
     if (selectionManager.activeGroup) {
       let index = results.length - 1;
@@ -982,7 +927,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return picked;
   }
 
-  getSortedPhasorElementsWithViewportBounds() {
+  /**
+   * Block model retrieved from the surface block will be wrapped with local record.
+   * You can use this function to unwrap them to get real model
+   * @param block
+   * @returns
+   */
+  unwrap<T extends BaseBlockModel>(block: T) {
+    return this.edgeless.localRecord.unwrap(block) as T;
+  }
+
+  getSortedCanvasElementsWithViewportBounds() {
     return this.pickByBound(this.viewport.viewportBounds)
       .filter(e => !isTopLevelBlock(e))
       .sort(this.compare);
@@ -1015,35 +970,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return Array.from(this._elements.values());
   }
 
-  getElementsByType<T extends keyof IPhasorElementType>(
+  getElementsByType<T extends keyof ICanvasElementType>(
     type: T
-  ): IPhasorElementType[T][] {
+  ): ICanvasElementType[T][] {
     return this.getElements().filter(
       element => element.type === type
-    ) as unknown as IPhasorElementType[T][];
-  }
-
-  updateElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(
-    id: id,
-    records: IPhasorElementLocalRecord[T]
-  ) {
-    const elementLocalRecord = this._elementLocalRecords.get(id);
-    if (elementLocalRecord) {
-      this._elementLocalRecords.set(id, { ...elementLocalRecord, ...records });
-    } else {
-      this._elementLocalRecords.set(id, records);
-    }
-    this.refresh();
-  }
-
-  getElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(id: id) {
-    return this._elementLocalRecords.get(id) as
-      | IPhasorElementLocalRecord[T]
-      | undefined;
-  }
-
-  deleteElementLocalRecord(id: id) {
-    this._elementLocalRecords.delete(id);
+    ) as unknown as ICanvasElementType[T][];
   }
 }
 

@@ -21,7 +21,7 @@ const editorContainer = document.getElementById('editor');
 vEditor.mount(editorContainer);
 ```
 
-You can go to [virgo playground](https://blocksuite-toeverything.vercel.app/examples/virgo/)
+You can go to [virgo playground](https://try-blocksuite.vercel.app/examples/virgo/)
 for online testing and check out the code in its [repository](https://github.com/toeverything/blocksuite/tree/master/packages/playground/examples/virgo).
 
 ### Attributes
@@ -45,13 +45,18 @@ Virgo use zod to validate attributes, you can use `setAttributesSchema` to set t
 const customSchema = baseTextAttributes.extend({
   reference: z
     .object({
-      type: z.enum(['Subpage', 'LinkedPage']),
+      type: type: z.enum([
+        // @deprecated Subpage is deprecated, use LinkedPage instead
+        'Subpage',
+        'LinkedPage',
+      ]),
       pageId: z.string(),
     })
     .optional()
     .nullable()
     .catch(undefined),
   background: z.string().optional().nullable().catch(undefined),
+  color: z.string().optional().nullable().catch(undefined),
 });
 
 const doc = new Y.Doc();

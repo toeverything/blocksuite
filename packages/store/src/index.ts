@@ -14,7 +14,9 @@ export type {
   BlobStorage,
   BlobStorageCRUD,
 } from './persistence/blob/types.js';
+export { sha } from './persistence/blob/utils.js';
 export * from './providers/type.js';
+export * from './reactive/index.js';
 export * from './schema/index.js';
 export * from './transformer/index.js';
 export {
@@ -36,12 +38,12 @@ const env =
   typeof globalThis !== 'undefined'
     ? globalThis
     : typeof window !== 'undefined'
-    ? window
-    : // @ts-ignore
-    typeof global !== 'undefined'
-    ? // @ts-ignore
-      global
-    : {};
+      ? window
+      : // @ts-ignore
+        typeof global !== 'undefined'
+        ? // @ts-ignore
+          global
+        : {};
 const importIdentifier = '__ $BLOCKSUITE_STORE$ __';
 
 // @ts-ignore

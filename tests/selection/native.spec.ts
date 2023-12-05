@@ -39,8 +39,10 @@ import {
   pressShiftTab,
   pressTab,
   redoByKeyboard,
+  resetHistory,
   scrollToTop,
   selectAllByKeyboard,
+  setVRangeInVEditor,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -101,27 +103,210 @@ test('native range delete', async ({ page }) => {
 
 test('native range delete with indent', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+  const { noteId } = await initEmptyParagraphState(page);
 
-  // test indent case
+  await focusRichText(page);
+  await type(page, '123');
+  await pressEnter(page);
+  await type(page, '456');
+  await pressEnter(page);
+  await type(page, '789');
+  await pressEnter(page);
+  await type(page, 'abc');
+  await pressEnter(page);
+  await type(page, 'def');
+  await pressEnter(page);
+  await type(page, 'ghi');
+  await resetHistory(page);
+
   await focusRichText(page, 1);
   await pressTab(page);
   await focusRichText(page, 2);
+  await pressTab(page, 2);
+  await focusRichText(page, 4);
   await pressTab(page);
-  await pressTab(page);
+  await focusRichText(page, 5);
+  await pressTab(page, 2);
 
-  await dragBetweenIndices(page, [0, 2], [2, 1]);
+  // 123
+  //   456
+  //     789
+  // abc
+  //   def
+  //     ghi
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:paragraph>
+  <affine:paragraph
+    prop:text="abc"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="def"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="ghi"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  await dragBetweenIndices(page, [0, 2], [4, 1]);
+
+  // 12|3
+  //   456
+  //     789
+  // abc
+  //   d|ef
+  //     ghi
+
   await pressBackspace(page);
-  await assertBlockCount(page, 'paragraph', 1);
-  await assertRichTexts(page, ['1289']);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="12ef"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="ghi"
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
 
   await waitNextFrame(page);
   await undoByKeyboard(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:paragraph>
+  <affine:paragraph
+    prop:text="abc"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="def"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="ghi"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
   await redoByKeyboard(page);
-  await assertRichTexts(page, ['1289']);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="12ef"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="ghi"
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
 });
 
 test('native range delete by forwardDelete', async ({ page }) => {
@@ -746,10 +931,12 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await type(page, '--- ');
   await assertDivider(page, 1);
 
+  await waitNextFrame(page);
   await pressEnter(page);
   await type(page, '--- ');
   await pressArrowUp(page, 2);
   await pressBackspace(page);
+  await waitNextFrame(page);
   await assertDivider(page, 2);
   await assertRichTexts(page, ['', '']);
 });
@@ -784,8 +971,9 @@ test('should delete line with content after divider not lose content', async ({
   await assertDivider(page, 1);
   // Jump to line start
   page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
+  await waitNextFrame(page);
   await pressBackspace(page);
-  await assertDivider(page, 1);
+  await assertDivider(page, 0);
   await assertRichTexts(page, ['123']);
 });
 
@@ -949,7 +1137,14 @@ test('should select texts on cross-note dragging', async ({ page }) => {
   await initEmptyParagraphState(page, pageId);
 
   // focus last block in first note
-  await focusRichText(page, 2);
+  await setVRangeInVEditor(
+    page,
+    {
+      index: 3,
+      length: 0,
+    },
+    3
+  );
   // goto next note
   await pressArrowDown(page);
   await waitNextFrame(page);
@@ -1097,6 +1292,16 @@ test('should ndent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -1141,6 +1346,16 @@ test('should unindent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -1178,6 +1393,16 @@ test('should unindent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:edgeless={
+      Object {
+        "style": Object {
+          "borderRadius": 8,
+          "borderSize": 4,
+          "borderStyle": "solid",
+          "shadowType": "--affine-note-shadow-box",
+        },
+      }
+    }
     prop:hidden={false}
     prop:index="a0"
   >
@@ -1561,7 +1786,6 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await focusRichText(page, 0);
   await type(
     page,
-    // we need more three characters to get our expected result in local
     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   );
   await waitNextFrame(page);
@@ -1610,7 +1834,6 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await pressArrowUp(page);
   await pressArrowLeft(page);
   await waitNextFrame(page);
-  // if in local it should be 0, 93
   await assertRichTextVRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
@@ -1643,7 +1866,6 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  // if in local it should be 0, 93
   await assertRichTextVRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
@@ -1724,4 +1946,69 @@ test('should not scroll page when mouse is click down', async ({ page }) => {
   await waitNextFrame(page, 500);
   await page.mouse.up();
   await assertRichTextVRange(page, 10, 22);
+});
+
+test('scroll vertically when inputting long text in a block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  for (let i = 0; i < 40; i++) {
+    await type(page, String(i));
+    await pressShiftEnter(page);
+  }
+
+  const viewportScrollTop = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-doc-viewport');
+    if (!viewport) {
+      throw new Error('viewport not found');
+    }
+    return viewport.scrollTop;
+  });
+
+  expect(viewportScrollTop).toBeGreaterThan(100);
+});
+
+test('scroll vertically when adding multiple blocks', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  for (let i = 0; i < 40; i++) {
+    await type(page, String(i));
+    await pressEnter(page);
+  }
+
+  const viewportScrollTop = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-doc-viewport');
+    if (!viewport) {
+      throw new Error('viewport not found');
+    }
+    return viewport.scrollTop;
+  });
+
+  expect(viewportScrollTop).toBeGreaterThan(400);
+});
+
+test('click to select divided', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/4547',
+  });
+
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '--- ');
+  await assertDivider(page, 1);
+
+  await page.click('affine-divider');
+  const selectedBlocks = page.locator('.selected,affine-block-selection');
+  await expect(selectedBlocks).toHaveCount(1);
+
+  await pressForwardDelete(page);
+  await assertDivider(page, 0);
 });

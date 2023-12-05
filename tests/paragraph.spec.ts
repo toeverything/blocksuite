@@ -8,6 +8,7 @@ import {
   focusTitle,
   initEmptyEdgelessState,
   initEmptyParagraphState,
+  initThreeDividers,
   initThreeParagraphs,
   pressArrowDown,
   pressArrowLeft,
@@ -17,8 +18,10 @@ import {
   pressBackspaceWithShortKey,
   pressEnter,
   pressEscape,
+  pressForwardDelete,
   pressShiftEnter,
   pressShiftTab,
+  pressSpace,
   pressTab,
   redoByClick,
   redoByKeyboard,
@@ -436,6 +439,16 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -479,6 +492,16 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -521,6 +544,16 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -563,6 +596,16 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -606,6 +649,16 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -652,6 +705,16 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -695,6 +758,16 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -747,6 +820,16 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -790,6 +873,16 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -813,6 +906,16 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -850,6 +953,16 @@ test('should delete paragraph block child can hold cursor in correct position', 
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -875,6 +988,16 @@ test('should delete paragraph block child can hold cursor in correct position', 
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1349,15 +1472,11 @@ test('delete empty text paragraph block should keep children blocks when followi
   await page.waitForTimeout(200);
 
   // Add to paragraph blocks
-  await focusRichText(page);
-  await type(page, '123');
-
-  await pressEnter(page);
-  await type(page, '456');
-  await assertRichTexts(page, ['123', '456']);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
 
   // Indent the second paragraph block
-  await focusRichText(page, 1);
+  await focusRichText(page, 2);
   await pressTab(page);
 
   await assertStoreMatchJSX(
@@ -1365,6 +1484,16 @@ test('delete empty text paragraph block should keep children blocks when followi
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1372,9 +1501,13 @@ test('delete empty text paragraph block should keep children blocks when followi
   <affine:paragraph
     prop:text="123"
     prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
   >
     <affine:paragraph
-      prop:text="456"
+      prop:text="789"
       prop:type="text"
     />
   </affine:paragraph>
@@ -1383,22 +1516,36 @@ test('delete empty text paragraph block should keep children blocks when followi
   );
 
   // Delete the parent paragraph block
-  await focusRichText(page, 0);
+  await focusRichText(page, 1);
   await pressBackspace(page, 4);
 
-  await assertRichTexts(page, ['456']);
+  await assertRichTexts(page, ['123', '789']);
 
   await assertStoreMatchJSX(
     page,
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
   <affine:divider />
   <affine:paragraph
-    prop:text="456"
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="789"
     prop:type="text"
   />
 </affine:note>`,
@@ -1451,6 +1598,16 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1491,6 +1648,16 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1525,6 +1692,16 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1554,6 +1731,16 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:edgeless={
+    Object {
+      "style": Object {
+        "borderRadius": 8,
+        "borderSize": 4,
+        "borderStyle": "solid",
+        "shadowType": "--affine-note-shadow-box",
+      },
+    }
+  }
   prop:hidden={false}
   prop:index="a0"
 >
@@ -1605,4 +1792,81 @@ test('delete at the start of paragraph (multiple notes)', async ({ page }) => {
   await setSelection(page, 5, 0, 5, 0);
   await pressBackspace(page);
   await assertRichTexts(page, ['123456']);
+});
+
+test('arrow up/down navigation within and across paragraphs containing different types of text', async ({
+  page,
+}) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/5155',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'a'.repeat(20));
+  await assertRichTextVRange(page, 0, 20, 0);
+  await type(page, '*');
+  await type(page, 'i'.repeat(5));
+  await type(page, '*');
+  await pressSpace(page);
+  await assertRichTextVRange(page, 0, 25, 0);
+  await type(page, 'a'.repeat(100));
+  await assertRichTextVRange(page, 0, 125, 0);
+  await pressEnter(page);
+
+  await type(page, 'a'.repeat(100));
+  await assertRichTextVRange(page, 1, 100, 0);
+  await type(page, '*');
+  await type(page, 'i'.repeat(5));
+  await type(page, '*');
+  await pressSpace(page);
+  await assertRichTextVRange(page, 1, 105, 0);
+  await type(page, 'a'.repeat(20));
+  await assertRichTextVRange(page, 1, 125, 0);
+
+  await pressArrowUp(page);
+  await assertRichTextVRange(page, 1, 32, 0);
+  await pressArrowUp(page);
+  await assertRichTextVRange(page, 0, 125, 0);
+  await pressArrowUp(page);
+  await assertRichTextVRange(page, 0, 35, 0);
+  await pressArrowUp(page);
+  await assertRichTextVRange(page, 0, 0, 0);
+  await pressArrowDown(page);
+  await assertRichTextVRange(page, 0, 93, 0);
+  await pressArrowDown(page);
+  await assertRichTextVRange(page, 1, 0, 0);
+  await pressArrowDown(page);
+  await assertRichTextVRange(page, 1, 90, 0);
+  await pressArrowDown(page);
+  await assertRichTextVRange(page, 1, 125, 0);
+});
+
+test('delete divider using keyboard from prev/next paragraph', async ({
+  page,
+}) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/4547',
+  });
+
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await initThreeDividers(page);
+  await assertDivider(page, 3);
+  await assertRichTexts(page, ['123', '123']);
+
+  await focusRichText(page, 0);
+  await pressForwardDelete(page);
+  await assertDivider(page, 2);
+
+  await focusRichText(page, 1);
+  await pressArrowLeft(page, 3);
+  await pressBackspace(page);
+  await assertDivider(page, 1);
+
+  await assertRichTexts(page, ['123', '123']);
 });
