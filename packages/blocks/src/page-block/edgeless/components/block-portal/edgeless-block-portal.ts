@@ -60,7 +60,7 @@ const portalMap = new Map<EdgelessBlockType | RegExp, string>([
   [FRAME, 'edgeless-block-portal-frame'],
   [NOTE, 'edgeless-block-portal-note'],
   [IMAGE, 'edgeless-block-portal-image'],
-  [/affine:embed:*/, 'edgeless-block-portal-embed'],
+  [/affine:embed-*/, 'edgeless-block-portal-embed'],
 ]);
 
 @customElement('edgeless-block-portal-container')

@@ -222,7 +222,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   get blocks() {
     return [
-      ...this.getBlocks(/affine:embed:*/),
+      ...this.getBlocks(/affine:embed-*/),
       ...this.getBlocks(FRAME),
       ...this.getBlocks(NOTE),
       ...this.getBlocks(IMAGE),
