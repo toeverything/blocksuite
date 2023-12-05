@@ -6,7 +6,7 @@
 packages=(
   "blocks"
   # "docs" # NOT PUBLISHED
-  "editor"
+  "presets"
   "global"
   # "playground" # NOT PUBLISHED
   "store"

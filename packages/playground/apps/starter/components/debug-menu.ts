@@ -28,8 +28,8 @@ import {
   ZipTransformer,
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
-import { EditorContainer } from '@blocksuite/editor';
 import { ShadowlessElement } from '@blocksuite/lit';
+import { EditorContainer } from '@blocksuite/presets';
 import { Job, Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';

@@ -9,6 +9,7 @@ import './frame/frame-tool-button.js';
 import './default/default-tool-button.js';
 import './text/text-tool-button.js';
 import './eraser/eraser-tool-button.js';
+import './frame/navigator-setting-button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
@@ -68,21 +69,34 @@ export function launchIntoFullscreen(element: Element) {
   }
 }
 
+const HIDE_TOOLBAR_KEY = 'blocksuite:presentation:hideToolbar';
+
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      position: absolute;
-      z-index: 3;
-      bottom: 28px;
-      left: calc(50%);
-      display: flex;
-      justify-content: center;
-      transform: translateX(-50%);
       user-select: none;
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
+
+    .edgeless-toolbar-container-placeholder {
+      width: 463px;
+      height: 92px;
+      border-radius: 40px;
+      background-color: transparent;
+      position: absolute;
+      z-index: 3;
+      left: calc(50%);
+      transform: translateX(-50%);
+      bottom: 0px;
+    }
+
     .edgeless-toolbar-container {
+      position: absolute;
+      z-index: 3;
+      left: calc(50%);
+      transform: translateX(-50%);
+      transition: 0.5s ease-in-out;
       display: flex;
       align-items: center;
       flex-direction: row;
@@ -176,6 +190,15 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   @state()
   private _navigatorMode: NavigatorMode = 'fit';
 
+  @state()
+  private _hideToolbar = false;
+
+  @state()
+  private _mouseOnToolbar = true;
+
+  @state()
+  settingMenuShow = false;
+
   @state({
     hasChanged() {
       return true;
@@ -246,9 +269,22 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
   }
 
+  private _canHideToolbar() {
+    const { type } = this.edgelessTool;
+    return (
+      type === 'frameNavigator' &&
+      this._hideToolbar &&
+      !this._mouseOnToolbar &&
+      !this.settingMenuShow
+    );
+  }
+
   override firstUpdated() {
     const { _disposables, edgeless } = this;
     const { slots, page } = edgeless;
+
+    const hideToolbar = sessionStorage.getItem(HIDE_TOOLBAR_KEY);
+    this._hideToolbar = hideToolbar === 'true';
 
     edgeless.bindHotKey(
       {
@@ -364,7 +400,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         }
         bound = Bound.fromCenter(center, w, h);
       }
+
       viewport.setViewportByBound(bound, [0, 0, 0, 0], false);
+      this.edgeless.slots.navigatorFrameChanged.emit(
+        this._frames[this._currentFrameIndex]
+      );
     }
   }
 
@@ -375,6 +415,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       type === 'frameNavigator'
     ) {
       this._moveToCurrentFrame();
+    }
+    if (changedProperties.has('_hideToolbar')) {
+      this.edgeless.slots.navigatorSettingUpdated.emit({
+        hideToolbar: this._hideToolbar,
+      });
+      sessionStorage.setItem(HIDE_TOOLBAR_KEY, this._hideToolbar.toString());
     }
   }
 
@@ -388,13 +434,15 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         this._currentFrameIndex = this._cachedIndex;
       }, 400);
     }
+
+    setTimeout(() => this._moveToCurrentFrame(), 400);
+    this.edgeless.slots.fullScrennToggled.emit();
   }
 
-  private get frameNavigatorContent() {
+  private get _FrameNavigator() {
     const current = this._currentFrameIndex;
     const frames = this._frames;
     const frame = frames[current];
-    const { readonly } = this.edgeless.page;
 
     return html`
       <edgeless-tool-icon-button
@@ -439,23 +487,33 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           ? NavigatorExitFullScreenIcon
           : NavigatorFullScreenIcon}
       </edgeless-tool-icon-button>
-      ${readonly
-        ? nothing
-        : html` <div class="short-divider"></div>
-            <div
-              class="edgeless-frame-navigator-stop"
-              @click=${() => {
-                this.setEdgelessTool({ type: 'default' });
-                document.fullscreenElement && this._toggleFullScreen();
-                setTimeout(() => this._moveToCurrentFrame(), 400);
-              }}
-            >
-              Stop
-            </div>`}
+      <edgeless-navigator-setting-button
+        .edgeless=${this.edgeless}
+        .hideToolbar=${this._hideToolbar}
+        .onHideToolbarChange=${(hideToolbar: boolean) => {
+          this._hideToolbar = hideToolbar;
+        }}
+        .popperShow=${this.settingMenuShow}
+        .setPopperShow=${(show: boolean) => {
+          this.settingMenuShow = show;
+        }}
+      >
+      </edgeless-navigator-setting-button>
+      <div class="short-divider"></div>
+      <div
+        class="edgeless-frame-navigator-stop"
+        @click=${() => {
+          this.setEdgelessTool({ type: 'pan', panning: false });
+          document.fullscreenElement && this._toggleFullScreen();
+          setTimeout(() => this._moveToCurrentFrame(), 400);
+        }}
+      >
+        Stop
+      </div>
     `;
   }
 
-  private _renderTools() {
+  private _Tools() {
     return html`
       <div class="full-divider"></div>
       <div class="brush-and-eraser">
@@ -497,7 +555,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     `;
   }
 
-  private get defaultContent() {
+  private get _DefaultContent() {
     const { page } = this.edgeless;
 
     return html`<div class="edgeless-toolbar-left-part">
@@ -543,7 +601,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
               .setEdgelessTool=${this.setEdgelessTool}
             ></edgeless-note-tool-button>
           `}
-      ${this._renderTools()} `;
+      ${this._Tools()} `;
   }
 
   override render() {
@@ -553,15 +611,26 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
 
     const Content =
-      type === 'frameNavigator'
-        ? this.frameNavigatorContent
-        : this.defaultContent;
+      type === 'frameNavigator' ? this._FrameNavigator : this._DefaultContent;
     return html`
+      <style>
+        .edgeless-toolbar-container {
+          bottom: ${this._canHideToolbar() ? '-70px' : '28px'};
+        }
+      </style>
+      ${this.edgeless.edgelessTool.type === 'frameNavigator' &&
+      this._hideToolbar
+        ? html`<div
+            class="edgeless-toolbar-container-placeholder"
+            @mouseenter=${() => (this._mouseOnToolbar = true)}
+          ></div>`
+        : nothing}
       <div
         class="edgeless-toolbar-container"
         @dblclick=${stopPropagation}
         @mousedown=${stopPropagation}
         @pointerdown=${stopPropagation}
+        @mouseleave=${() => (this._mouseOnToolbar = false)}
       >
         ${Content}
       </div>

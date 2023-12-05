@@ -18,7 +18,7 @@
         '@toeverything/theme': 'latest',
         '@blocksuite/block-std': 'nightly',
         '@blocksuite/blocks': 'nightly',
-        '@blocksuite/editor': 'nightly',
+        '@blocksuite/presets': 'nightly',
         '@blocksuite/global': 'nightly',
         '@blocksuite/lit': 'nightly',
         '@blocksuite/store': 'nightly',

@@ -12,7 +12,7 @@
 [![Checks Status](https://img.shields.io/github/checks-status/toeverything/blocksuite/master)](https://github.com/toeverything/blocksuite/actions?query=branch%3Amaster)
 [![Issues Closed](https://img.shields.io/github/issues-closed/toeverything/blocksuite?color=6880ff)](https://github.com/toeverything/blocksuite/issues?q=is%3Aissue+is%3Aclosed)
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/store/package.json)
-[![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/editor/nightly?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
+[![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/presets/nightly?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
 [![Open in StackBlitz](https://img.shields.io/badge/open%20in-StackBlitz-black)](https://stackblitz.com/github/toeverything/blocksuite)
 [![Join Discord](https://img.shields.io/discord/959027316334407691)](https://discord.gg/9vwSWmYYcZ)
 
@@ -40,7 +40,7 @@ The major packages in BlockSuite include the following:
 - `@blocksuite/lit`: The default view layer for rendering blocks and widgets as [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). It's built on top of [lit](https://lit.dev/) and the headless `block-std`, and could be replaced by alternative frameworks.
 - `@blocksuite/virgo`: Atomic rich text _component_ used in BlockSuite. Every editable block could hold its own virgo instances, leveraging the store to reconcile the block tree.
 - `@blocksuite/blocks`: Editable first-party blocks under the `affine` scope. The default AFFiNE editors are simply different implementations of the `affine:page` blocks.
-- `@blocksuite/editor`: The ready-to-use editors composed by blocks.
+- `@blocksuite/presets`: The ready-to-use editors composed by blocks.
 - `@blocksuite/playground`: Default editor playground with local-first data persistence and real-time collaboration support.
 
 ## Why BlockSuite?

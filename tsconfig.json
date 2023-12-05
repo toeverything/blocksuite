@@ -41,7 +41,7 @@
       "path": "./packages/blocks"
     },
     {
-      "path": "./packages/editor"
+      "path": "./packages/presets"
     },
     {
       "path": "./packages/playground"

@@ -25,8 +25,8 @@ import {
 import { NOTE_WIDTH } from '@blocksuite/blocks';
 import { MarkdownAdapter } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
-import type { EditorContainer } from '@blocksuite/editor';
 import { ShadowlessElement } from '@blocksuite/lit';
+import type { EditorContainer } from '@blocksuite/presets';
 import { Job, Utils, type Workspace } from '@blocksuite/store';
 import type { SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';

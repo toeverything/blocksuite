@@ -1,6 +1,6 @@
 import { registerTOCComponents } from '@blocksuite/blocks';
-import type { EditorContainer } from '@blocksuite/editor';
 import { WithDisposable } from '@blocksuite/lit';
+import type { EditorContainer } from '@blocksuite/presets';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';

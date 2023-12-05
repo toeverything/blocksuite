@@ -484,13 +484,7 @@ export class EdgelessClipboardController implements ReactiveController {
     );
   }
 
-  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
-    const blocksLen = blocks.length;
-    const shapesLen = shapes.length;
-
-    if (blocksLen + shapesLen === 0) return;
-
-    // sort by `index`
+  async toCanvas(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
     blocks.sort(compare);
     shapes.sort(compare);
 
@@ -502,9 +496,7 @@ export class EdgelessClipboardController implements ReactiveController {
       bounds.push(Bound.deserialize(shape.xywh));
     });
     const bound = getCommonBound(bounds);
-    if (!bound) {
-      return;
-    }
+    assertExists(bound, 'bound not exist');
 
     const canvas = await this._edgelessToCanvas(
       this.host,
@@ -512,9 +504,16 @@ export class EdgelessClipboardController implements ReactiveController {
       blocks,
       shapes
     );
+    return canvas;
+  }
 
+  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+    const blocksLen = blocks.length;
+    const shapesLen = shapes.length;
+
+    if (blocksLen + shapesLen === 0) return;
+    const canvas = await this.toCanvas(blocks, shapes);
     assertExists(canvas);
-
     // @ts-ignore
     if (window.apis?.clipboard?.copyAsImageFromString) {
       // @ts-ignore

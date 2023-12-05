@@ -96,9 +96,6 @@ async function initEmptyEditor({
             editor.page = newPage;
           });
           appRoot.append(editor);
-          editor.createBlockHub().then(blockHub => {
-            document.body.appendChild(blockHub);
-          });
           return editor;
         };
         const editor = createEditor();

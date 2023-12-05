@@ -16,6 +16,7 @@ import { getThemePropertyValue } from '../_common/theme/utils.js';
 import {
   type EdgelessElement,
   type ReorderingAction,
+  requestConnectedFrame,
   type Selectable,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
@@ -222,7 +223,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   get blocks() {
     return [
-      ...this.getBlocks(/affine:embed:*/),
+      ...this.getBlocks(/affine:embed-*/),
       ...this.getBlocks(FRAME),
       ...this.getBlocks(NOTE),
       ...this.getBlocks(IMAGE),
@@ -252,11 +253,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this.frame = new EdgelessFrameManager(edgeless);
     this.snap = new EdgelessSnapManager(edgeless);
     this.group = new EdgelessGroupManager(this);
-    this.init();
-
-    this.layer.init([...this._elements.values(), ...this.blocks]);
 
     this._initEvents();
+    this.layer.init([...this._elements.values(), ...this.blocks]);
+    this.init();
     this._initEffects();
   }
 
@@ -283,7 +283,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     _disposables.add(edgeless.slots.reorderingElements.on(this._reorder));
 
     _disposables.add(
-      edgeless.slots.elementAdded.on(id => {
+      edgeless.slots.elementAdded.on(({ id }) => {
         const element = this.pickById(id);
         assertExists(element);
         if (element instanceof ConnectorElement) {
@@ -395,22 +395,23 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
             isFrameBlock(model) ||
             isImageBlock(model)
           ) {
-            requestAnimationFrame(() => {
+            requestConnectedFrame(() => {
               this.fitElementToViewport(model);
-            });
+            }, this);
           }
         }
       })
     );
 
     _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id }) => {
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
         const element = this.pickById(id);
         assertExists(element);
 
         if (
           element instanceof BrushElement ||
-          edgeless.selectionManager.editing
+          edgeless.selectionManager.editing ||
+          (props && !('xywh' in props && 'rotate' in props))
         )
           return;
         this.fitElementToViewport(element);
@@ -418,7 +419,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
 
     _disposables.add(
-      edgeless.slots.elementAdded.on(id => {
+      edgeless.slots.elementAdded.on(({ id }) => {
         const element = this.pickById(id);
         assertExists(element);
         if (element instanceof BrushElement) return;
@@ -556,7 +557,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     element.computedValue = this.getCSSPropertyValue;
     element.mount(this._renderer);
     this._elements.set(element.id, element);
-    this.edgeless.slots.elementAdded.emit(id);
+    this.edgeless.slots.elementAdded.emit({ id });
   }
 
   private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
@@ -628,7 +629,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       element.mount(this._renderer);
       this._elements.set(element.id, element);
 
-      this.edgeless.slots.elementAdded.emit(id);
+      this.edgeless.slots.elementAdded.emit({ id });
     } else if (type.action === 'update') {
       console.error('update event on yElements is not supported', event);
     } else if (type.action === 'delete') {

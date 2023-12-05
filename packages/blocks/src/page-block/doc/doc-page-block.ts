@@ -1,5 +1,3 @@
-import './meta-data/meta-data.js';
-
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
@@ -622,19 +620,10 @@ export class DocPageBlockComponent extends BlockElement<
       ([_, widget]) => widget
     )}`;
 
-    const meta = html`
-      <affine-page-meta-data
-        .pageElement="${this}"
-        .page="${this.page}"
-      ></affine-page-meta-data>
-    `;
-
     return html`
       <div class="affine-doc-viewport">
         <div class="affine-doc-page-block-container">
-          <div class="affine-doc-page-block-title-container">
-            ${title} ${meta}
-          </div>
+          <div class="affine-doc-page-block-title-container">${title}</div>
           ${content} ${widgets}
         </div>
       </div>
