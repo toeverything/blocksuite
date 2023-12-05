@@ -1,6 +1,6 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import type { HtmlBlockSchema } from '../../html-block/html-model.js';
+import type { HtmlBlockSchema } from '../../embed-html-block/embed-html-model.js';
 import type {
   AttachmentBlockModel,
   AttachmentBlockSchema,

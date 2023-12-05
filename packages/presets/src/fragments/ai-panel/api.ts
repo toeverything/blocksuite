@@ -1,6 +1,7 @@
 import {
   BlocksUtils,
-  HtmlBlockModel,
+  EmbedHtmlBlockModel,
+  EmbedHtmlBlockSpec,
   loadImages,
   Point,
 } from '@blocksuite/blocks';
@@ -51,7 +52,7 @@ export class EditorWithAI {
       design: string;
     } = notes.flatMap(v =>
       v.children.filter(v => {
-        if (v instanceof HtmlBlockModel) {
+        if (v instanceof EmbedHtmlBlockModel) {
           return v.html && v.design;
         } else {
           return false;
@@ -63,13 +64,20 @@ export class EditorWithAI {
       return;
     }
     const noteId = edgelessPage.addNoteWithPoint(new Point(0, 0));
-    edgelessPage.page.addBlock('affine:html', { html, design: png }, noteId);
+    edgelessPage.page.addBlock(
+      EmbedHtmlBlockSpec.schema.model.flavour,
+      { html, design: png },
+      noteId
+    );
   }
 
   async htmlBlockDemo() {
     const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
-    const noteId = edgelessPage.addNoteWithPoint(new Point(0, 0));
-    edgelessPage.page.addBlock('affine:html', { html: demoScript }, noteId);
+    edgelessPage.page.addBlock(
+      EmbedHtmlBlockSpec.schema.model.flavour,
+      { html: demoScript, xywh: '[0, 400, 400, 200]' },
+      edgelessPage.surface.model.id
+    );
   }
 
   async showMeImage() {

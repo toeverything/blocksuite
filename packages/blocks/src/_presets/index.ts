@@ -19,9 +19,8 @@ import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
+import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
-import { HtmlBlockSchema } from '../html-block/html-model.js';
-import { HtmlService } from '../html-block/html-service.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
@@ -183,13 +182,6 @@ export const PagePreset: BlockSpec[] = [
     service: AttachmentService,
   },
   {
-    schema: HtmlBlockSchema,
-    view: {
-      component: literal`affine-html`,
-    },
-    service: HtmlService,
-  },
-  {
     schema: SurfaceRefBlockSchema,
     view: {
       component: literal`affine-surface-ref`,
@@ -199,6 +191,7 @@ export const PagePreset: BlockSpec[] = [
     },
   },
   EmbedGithubBlockSpec,
+  EmbedHtmlBlockSpec,
 ];
 
 export const EdgelessPreset: BlockSpec[] = [
@@ -284,17 +277,11 @@ export const EdgelessPreset: BlockSpec[] = [
     },
   },
   {
-    schema: HtmlBlockSchema,
-    service: HtmlService,
-    view: {
-      component: literal`affine-html`,
-    },
-  },
-  {
     schema: SurfaceRefBlockSchema,
     view: {
       component: literal`affine-surface-ref`,
     },
   },
   EmbedGithubBlockSpec,
+  EmbedHtmlBlockSpec,
 ];

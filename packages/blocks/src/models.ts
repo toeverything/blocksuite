@@ -21,10 +21,9 @@ import { DatabaseBlockSchema } from './database-block/database-model.js';
 import type { DividerBlockModel } from './divider-block/divider-model.js';
 import { DividerBlockSchema } from './divider-block/divider-model.js';
 import { EmbedGithubBlockSpec } from './embed-github-block/index.js';
+import { EmbedHtmlBlockSpec } from './embed-html-block/embed-html-spec.js';
 import type { FrameBlockModel } from './frame-block/frame-model.js';
 import { FrameBlockSchema } from './frame-block/frame-model.js';
-import type { HtmlBlockModel } from './html-block/html-model.js';
-import { HtmlBlockSchema } from './html-block/html-model.js';
 import type { ImageBlockModel } from './image-block/image-model.js';
 import { ImageBlockSchema } from './image-block/image-model.js';
 import type { ListBlockModel } from './list-block/list-model.js';
@@ -75,8 +74,8 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
 export const __unstableSchemas = [
   DataViewBlockSchema,
   AttachmentBlockSchema,
-  HtmlBlockSchema,
   EmbedGithubBlockSpec.schema,
+  EmbedHtmlBlockSpec.schema,
 ] satisfies z.infer<typeof BlockSchema>[];
 
 // TODO support dynamic register
@@ -94,7 +93,6 @@ export type BlockSchemas = {
   'affine:data-view': DataViewBlockModel;
   'affine:bookmark': BookmarkBlockModel;
   'affine:attachment': AttachmentBlockModel;
-  'affine:html': HtmlBlockModel;
   'affine:surface-ref': SurfaceRefBlockModel;
 };
 
