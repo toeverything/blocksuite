@@ -1,4 +1,4 @@
-# `@blocksuite/editor`
+# `@blocksuite/presets`
 
 Default BlockSuite-based editor built for [AFFiNE](https://affine.pro).
 

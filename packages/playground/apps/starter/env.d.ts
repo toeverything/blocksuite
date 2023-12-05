@@ -1,6 +1,6 @@
 import type { TestUtils } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
-import type { EditorContainer } from '@blocksuite/editor';
+import type { EditorContainer } from '@blocksuite/presets';
 import type {
   BlockSchema,
   DocProvider,

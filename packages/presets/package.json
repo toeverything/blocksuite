@@ -1,7 +1,7 @@
 {
-  "name": "@blocksuite/editor",
+  "name": "@blocksuite/presets",
   "version": "0.10.0",
-  "description": "Default BlockSuite-based editor built for AFFiNE.",
+  "description": "First-party BlockSuite component presets.",
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {

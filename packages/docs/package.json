@@ -16,7 +16,7 @@
     "vue": "^3.3.8"
   },
   "scripts": {
-    "typedoc": "pnpm -C $(git rev-parse --show-toplevel) build:editor && typedoc --options $(git rev-parse --show-toplevel)/typedoc.json",
+    "typedoc": "pnpm -C $(git rev-parse --show-toplevel) build:presets && typedoc --options $(git rev-parse --show-toplevel)/typedoc.json",
     "dev": "pnpm run typedoc && vitepress dev --port 5200",
     "build": "pnpm run typedoc && vitepress build",
     "build:vercel": "pnpm run typedoc && vitepress build",
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
-    "@blocksuite/editor": "workspace:*",
+    "@blocksuite/presets": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "markdown-it-container": "^3.0.0",
     "vitepress-plugin-sandpack": "^1.1.4"

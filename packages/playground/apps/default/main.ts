@@ -1,8 +1,8 @@
 /// <reference types="../starter/env" />
 import '@blocksuite/blocks';
-import '@blocksuite/editor';
+import '@blocksuite/presets';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import '@blocksuite/editor/themes/affine.css';
+import '@blocksuite/presets/themes/affine.css';
 
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';

@@ -1,4 +1,4 @@
-import { EditorContainer } from '@blocksuite/editor';
+import { EditorContainer } from '@blocksuite/presets';
 import { Text, type Workspace } from '@blocksuite/store';
 
 import { createEditor } from '../utils';
