@@ -39,7 +39,7 @@ test('new added frame should not affect layer', async () => {
   expect(surface.layer.canvasLayers.length).toBe(1);
 });
 
-test('add new edgeless blocks or chanvas elements should update layer automatically', async () => {
+test('add new edgeless blocks or canvas elements should update layer automatically', async () => {
   const surface = getSurface(window.page, window.editor);
 
   addNote(page);
