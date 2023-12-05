@@ -1,4 +1,4 @@
-import { askGPT4V } from '../api';
+import { askGPT4V } from './request.js';
 
 export const genHtml = async (
   img: string,

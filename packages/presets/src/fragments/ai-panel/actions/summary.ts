@@ -1,4 +1,4 @@
-import { askGPT3_5turbo } from '../api';
+import { askGPT3_5turbo } from '../utils/request.js';
 
 export async function runSummaryAction(payload: { input: string }) {
   const { input } = payload;

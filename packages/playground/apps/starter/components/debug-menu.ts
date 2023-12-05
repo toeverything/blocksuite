@@ -20,17 +20,14 @@ import {
   createPage,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
-  HtmlBlockModel,
-  loadImages,
   NOTE_WIDTH,
-  Point,
   SIZE_VARIABLES,
   VARIABLES,
   ZipTransformer,
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
-import { splitElements } from '@blocksuite/blocks/page-block/edgeless/utils/clipboard-utils';
 import { ShadowlessElement } from '@blocksuite/lit';
+import type { AiPanel } from '@blocksuite/presets';
 import { EditorContainer } from '@blocksuite/presets';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
@@ -40,24 +37,9 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
-import type { CustomCopilotPanel } from './copilot/custom-copilot-panel';
-import type { CustomCopilotPanel } from './copilot/custom-copilot-panel.js';
-import {
-  editImage,
-  jpegBase64ToFile,
-  pngBase64ToFile,
-} from './copilot/utils/edit-image';
-import { genHtml } from './copilot/utils/gen-html';
-import { getEdgelessPageBlockFromEditor } from './copilot/utils/mind-map-utils';
-import {
-  selectedToCanvas,
-  selectedToPng,
-} from './copilot/utils/selection-utils';
-// @ts-ignore
-import { registerFormatBarCustomElement } from './custom-format-bar';
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
-import { demoScript } from './demo-script';
+import type { SidePanel } from './side-panel';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -169,7 +151,9 @@ export class DebugMenu extends ShadowlessElement {
   navigationPanel!: CustomNavigationPanel;
 
   @property({ attribute: false })
-  copilotPanel!: CustomCopilotPanel;
+  aiPanel!: AiPanel;
+  @property({ attribute: false })
+  sidePanel!: SidePanel;
 
   @state()
   private _connected = true;
@@ -276,87 +260,10 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _toggleCopilotPanel() {
-    this.copilotPanel.toggleDisplay();
-  }
-
-  private async _makeItReal() {
-    const png = await selectedToPng(this.editor);
-    if (!png) {
-      return;
-    }
-    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
-    const { notes } = splitElements(edgelessPage.selectionManager.elements);
-    // @ts-ignore
-    const htmlBlock: {
-      html: string;
-      design: string;
-    } = notes.flatMap(v =>
-      v.children.filter(v => {
-        if (v instanceof HtmlBlockModel) {
-          return v.html && v.design;
-        } else {
-          return false;
-        }
-      })
-    )[0];
-    const html = await genHtml(png, htmlBlock);
-    if (!html) {
-      return;
-    }
-    const noteId = edgelessPage.addNoteWithPoint(new Point(0, 0));
-    edgelessPage.page.addBlock('affine:html', { html, design: png }, noteId);
-  }
-
-  private async _htmlBlockDemo() {
-    const html = `
-    <html>
-    <header>
-    <script type='importmap'>
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
-    }
-  }
-</script>
-</header>
-    <body>
-    <script  type='module'>${demoScript}</script>
-</body>
-</html>`;
-    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
-    const noteId = edgelessPage.addNoteWithPoint(new Point(0, 0));
-    edgelessPage.page.addBlock('affine:html', { html }, noteId);
-  }
-
-  private async _showMeImage() {
-    const canvas = await selectedToCanvas(this.editor);
-    canvas?.toBlob(async blob => {
-      if (blob) {
-        const pmt = prompt('How would you like it changed?');
-        const b64 = await editImage(pmt || 'Make it pretty', canvas);
-        if (!b64) {
-          return;
-        }
-        const imgFile = jpegBase64ToFile(b64, 'img');
-        const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
-        const imgs = await loadImages([imgFile], this.workspace.blob);
-        edgelessPage.addImages(imgs);
-      }
-    });
-  }
-
-  private async _createImage() {
-    const pmt = prompt('What image would you like to create?');
-    if (!pmt) {
-      return;
-    }
-    const b64 = await editImage(pmt);
-    if (b64) {
-      const imgFile = pngBase64ToFile(b64, 'img');
-      const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
-      const imgs = await loadImages([imgFile], this.workspace.blob);
-      await edgelessPage.addImages(imgs);
+    if (this.sidePanel.currentContent === this.aiPanel) {
+      this.sidePanel.hideContent();
+    } else {
+      this.sidePanel.showContent(this.aiPanel);
     }
   }
 
@@ -659,16 +566,16 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._shareSelection}">
                 Share Selection
               </sl-menu-item>
-              <sl-menu-item @click=${this._switchOffsetMode}>
+              <sl-menu-item @click="${this._switchOffsetMode}">
                 Switch Offset Mode
               </sl-menu-item>
-              <sl-menu-item @click=${this._toggleNavigationPanel}>
+              <sl-menu-item @click="${this._toggleNavigationPanel}">
                 Toggle Navigation Panel
               </sl-menu-item>
-              <sl-menu-item @click=${this._extendFormatBar}>
+              <sl-menu-item @click="${this._extendFormatBar}">
                 Extend Format Bar
               </sl-menu-item>
-              <sl-menu-item @click=${this._addNote}>Add Note</sl-menu-item>
+              <sl-menu-item @click="${this._addNote}">Add Note</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
@@ -680,14 +587,14 @@ export class DebugMenu extends ShadowlessElement {
             <sl-button
               size="small"
               content="Register FormatBar Custom Elements"
-              @click="${this._registerFormatBarCustomElements}"
+              @click="${this._extendFormatBar}"
             >
               <sl-icon name="plug"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
           <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
-            <sl-button size="small" @click=${this._switchEditorMode}>
+            <sl-button size="small" @click="${this._switchEditorMode}">
               <sl-icon name="repeat"></sl-icon>
             </sl-button>
           </sl-tooltip>
@@ -716,44 +623,10 @@ export class DebugMenu extends ShadowlessElement {
             placement="bottom"
             hoist
           >
-            <sl-button size="small" @click=${this._toggleCopilotPanel}>
+            <sl-button size="small" @click="${this._toggleCopilotPanel}">
               <sl-icon name="stars"></sl-icon>
             </sl-button>
           </sl-tooltip>
-
-          <input
-            id="temp-gpt-api-key-input"
-            value=""
-            placeholder="gpt-api-key"
-          />
-          <input
-            id="temp-fal-api-key-input"
-            value=""
-            placeholder="fal-api-key"
-          />
-          <sl-button size="small" content="" @click="${this._htmlBlockDemo}">
-            html block
-          </sl-button>
-          <sl-tooltip
-            content="select some shapes in edgeless, then click this button to make it real"
-            placement="bottom"
-            hoist
-          >
-            <sl-button size="small" content="" @click="${this._makeItReal}">
-              make it real
-            </sl-button>
-          </sl-tooltip>
-          <sl-dropdown id="test-operations-dropdown" placement="bottom" hoist>
-            <sl-button size="small" slot="trigger" caret> image</sl-button>
-            <sl-menu>
-              <sl-menu-item @click="${this._showMeImage}">
-                edit image
-              </sl-menu-item>
-              <sl-menu-item @click="${this._createImage}"
-                >create new image
-              </sl-menu-item>
-            </sl-menu>
-          </sl-dropdown>
         </div>
       </div>
     `;

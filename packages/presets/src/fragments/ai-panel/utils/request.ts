@@ -1,25 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { OpenAI } from 'openai';
 
-const USE_LOCAL = false;
-// const USE_LOCAL = true; // for local debug toggling
-
-const ENDPOINT = USE_LOCAL
-  ? 'http://localhost:8787/api/copilot'
-  : 'https://copilot-poc.toeverything.workers.dev/api/copilot';
-
-export async function sendRequest(inputData: unknown) {
-  const response = await fetch(ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(inputData),
-  });
-
-  if (!response.ok) throw new Error('Invalid network response');
-  return response;
-}
+import { EditorWithAI } from '../api.js';
 
 export type Uploadable = OpenAI.Images.ImageEditParams['image'];
 export const askDallE3 = async (
@@ -87,20 +69,18 @@ export const askGPT4V = async (
   return result.choices[0].message.content;
 };
 const getGPTAPIKey = () => {
-  const apiKey = (
-    document.getElementById('temp-gpt-api-key-input') as HTMLInputElement
-  ).value;
+  const apiKey = EditorWithAI.GPTAPIKey;
   if (!apiKey) {
+    alert('Please enter your API key first.');
     assertExists(apiKey, 'Please enter your API key first.');
   }
   return apiKey;
 };
 const getFalAPIKey = () => {
-  const apiKey = (
-    document.getElementById('temp-fal-api-key-input') as HTMLInputElement
-  ).value;
+  const apiKey = EditorWithAI.FalAPIKey;
 
   if (!apiKey) {
+    alert('Please enter your API key first.');
     assertExists(apiKey, 'Please enter your API key first.');
   }
   return apiKey;

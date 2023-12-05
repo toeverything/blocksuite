@@ -1,0 +1,38 @@
+import { ShadowlessElement } from '@blocksuite/lit';
+import { css, html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+
+@customElement('side-panel')
+export class SidePanel extends ShadowlessElement {
+  static override styles = css`
+    side-panel {
+      width: 300px;
+      background-color: var(--affine-background-secondary-color);
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+      display: none;
+    }
+  `;
+  currentContent: HTMLElement | null = null;
+  showContent(ele: HTMLElement) {
+    if (this.currentContent) {
+      this.currentContent.remove();
+    }
+    this.style.display = 'block';
+    this.currentContent = ele;
+    this.append(ele);
+  }
+  hideContent() {
+    if (this.currentContent) {
+      this.style.display = 'none';
+      this.currentContent.remove();
+      this.currentContent = null;
+    }
+  }
+
+  protected override render(): unknown {
+    return html``;
+  }
+}

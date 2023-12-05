@@ -1,4 +1,4 @@
-import { ask110602490_lcm_sd15_i2i } from '../api';
+import { ask110602490_lcm_sd15_i2i } from './request.js';
 
 export const editImage = (prompt: string, canvas?: HTMLCanvasElement) => {
   if (!canvas) {

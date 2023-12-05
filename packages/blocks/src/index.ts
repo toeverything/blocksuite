@@ -12,6 +12,9 @@ import './surface-block/index.js';
 import './database-block/index.js';
 import './surface-ref-block/index.js';
 
+import { matchFlavours } from './_common/utils/index.js';
+import { splitElements } from './page-block/edgeless/utils/clipboard-utils.js';
+
 export * from './_common/adapters/index.js';
 export * from './_common/components/index.js';
 export * from './_common/consts.js';
@@ -52,7 +55,10 @@ export * from './surface-block/surface-block.js';
 export * from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
-
+export const BlocksUtils = {
+  splitElements,
+  matchFlavours,
+};
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
     ? globalThis

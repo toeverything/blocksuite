@@ -1,11 +1,10 @@
-import { matchFlavours } from '@blocksuite/blocks/_common/utils';
-import { splitElements } from '@blocksuite/blocks/page-block/edgeless/utils/clipboard-utils';
-import type { EditorContainer } from '@blocksuite/editor';
+import { BlocksUtils } from '@blocksuite/blocks';
 import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
 import { type BaseBlockModel, Slice } from '@blocksuite/store';
 
-import { getMarkdownFromSlice } from './markdown-utils';
-import { getEdgelessPageBlockFromEditor } from './mind-map-utils';
+import type { EditorContainer } from '../../../components/index.js';
+import { getMarkdownFromSlice } from './markdown-utils.js';
+import { getEdgelessPageBlockFromEditor } from './mind-map-utils.js';
 
 export function hasSelectedTextContent(root: BlockSuiteRoot) {
   let result = false;
@@ -24,7 +23,7 @@ export function hasSelectedTextContent(root: BlockSuiteRoot) {
         .some(
           model =>
             model &&
-            matchFlavours(model, [
+            BlocksUtils.matchFlavours(model, [
               'affine:paragraph',
               'affine:list',
               'affine:code',
@@ -54,7 +53,7 @@ export async function getSelectedTextSlice(root: BlockSuiteRoot) {
         .filter(
           (model): model is BaseBlockModel<object> =>
             model !== undefined &&
-            matchFlavours(model, [
+            BlocksUtils.matchFlavours(model, [
               'affine:paragraph',
               'affine:list',
               'affine:code',
@@ -83,7 +82,7 @@ export async function getSelectedBlocks(root: BlockSuiteRoot) {
         .filter(
           (block): block is BlockElement =>
             block !== null &&
-            matchFlavours(block.model, [
+            BlocksUtils.matchFlavours(block.model, [
               'affine:paragraph',
               'affine:list',
               'affine:code',
@@ -99,7 +98,7 @@ export async function getSelectedBlocks(root: BlockSuiteRoot) {
 
 export async function selectedToCanvas(editor: EditorContainer) {
   const edgelessPage = getEdgelessPageBlockFromEditor(editor);
-  const { notes, frames, shapes, images } = splitElements(
+  const { notes, frames, shapes, images } = BlocksUtils.splitElements(
     edgelessPage.selectionManager.elements
   );
   const canvas = await edgelessPage.clipboard.toCanvas(

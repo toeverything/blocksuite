@@ -1,6 +1,6 @@
-import { askGPT3_5turbo } from '../api';
+import { askGPT3_5turbo } from '../utils/request.js';
 
-export async function runSimplifyWritingAction(payload: { input: string }) {
+export async function runMakeShorterAction(payload: { input: string }) {
   const { input } = payload;
   const completion = await askGPT3_5turbo([
     {
@@ -11,7 +11,7 @@ export async function runSimplifyWritingAction(payload: { input: string }) {
     {
       role: 'user',
       content:
-        'Simplify the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. To make sure do your best',
+        'Make the input text shorter, preserving the markdown formatting, like bold, italic, link, highlight. To make sure do your best',
     },
   ]);
 
