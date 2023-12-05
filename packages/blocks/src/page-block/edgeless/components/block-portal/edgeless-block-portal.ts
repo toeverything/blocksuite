@@ -30,7 +30,10 @@ import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../../../_common/consts.js';
-import { delayCallback } from '../../../../_common/utils/event.js';
+import {
+  delayCallback,
+  requestConnectedFrame,
+} from '../../../../_common/utils/event.js';
 import {
   matchFlavours,
   type TopLevelBlockModel,
@@ -61,7 +64,7 @@ const portalMap = new Map<EdgelessBlockType | RegExp, string>([
   [FRAME, 'edgeless-block-portal-frame'],
   [NOTE, 'edgeless-block-portal-note'],
   [IMAGE, 'edgeless-block-portal-image'],
-  [/affine:embed:*/, 'edgeless-block-portal-embed'],
+  [/affine:embed-*/, 'edgeless-block-portal-embed'],
 ]);
 
 @customElement('edgeless-block-portal-container')
@@ -150,9 +153,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     const resetNoteResizeObserver = throttle(
       () => {
-        requestAnimationFrame(() => {
+        requestConnectedFrame(() => {
           this._noteResizeObserver.resetListener(page);
-        });
+        }, this);
       },
       16,
       { leading: true }
@@ -248,9 +251,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     this._initNoteHeightUpdate();
 
-    requestAnimationFrame(() => {
+    requestConnectedFrame(() => {
       this._noteResizeObserver.resetListener(page);
-    });
+    }, this);
 
     _disposables.add(this._noteResizeObserver);
 
@@ -293,10 +296,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
         if (rAqId) return;
 
-        rAqId = requestAnimationFrame(() => {
+        rAqId = requestConnectedFrame(() => {
           this.refreshLayerViewport();
           rAqId = null;
-        });
+        }, this);
       })
     );
 
@@ -330,10 +333,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           (type === 'add' || type === 'delete') &&
           (flavour === 'affine:surface-ref' || flavour === NOTE)
         ) {
-          requestAnimationFrame(() => {
+          requestConnectedFrame(() => {
             this._updateReference();
             this._updateAutoConnect();
-          });
+          }, this);
         }
       })
     );

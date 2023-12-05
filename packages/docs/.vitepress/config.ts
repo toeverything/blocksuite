@@ -87,7 +87,10 @@ export default defineConfig({
           },
           { text: '@blocksuite/lit', link: '/api/@blocksuite/lit/index' },
           { text: '@blocksuite/virgo', link: '/api/@blocksuite/virgo/index' },
-          { text: '@blocksuite/editor', link: '/api/@blocksuite/editor/index' },
+          {
+            text: '@blocksuite/presets',
+            link: '/api/@blocksuite/presets/index',
+          },
         ],
       },
       {

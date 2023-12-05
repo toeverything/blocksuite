@@ -16,6 +16,7 @@ import { getThemePropertyValue } from '../_common/theme/utils.js';
 import {
   type EdgelessElement,
   type ReorderingAction,
+  requestConnectedFrame,
   type Selectable,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
@@ -222,7 +223,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   get blocks() {
     return [
-      ...this.getBlocks(/affine:embed:*/),
+      ...this.getBlocks(/affine:embed-*/),
       ...this.getBlocks(FRAME),
       ...this.getBlocks(NOTE),
       ...this.getBlocks(IMAGE),
@@ -394,9 +395,9 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
             isFrameBlock(model) ||
             isImageBlock(model)
           ) {
-            requestAnimationFrame(() => {
+            requestConnectedFrame(() => {
               this.fitElementToViewport(model);
-            });
+            }, this);
           }
         }
       })

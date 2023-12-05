@@ -2,9 +2,9 @@
 import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 
-import type { EditorContainer } from '@blocksuite/editor';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
+import type { EditorContainer } from '@blocksuite/presets';
 import type { SlPopup } from '@shoelace-style/shoelace';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';

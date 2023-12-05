@@ -8,28 +8,24 @@ import { classMap } from 'lit/directives/class-map.js';
 
 import { BlockHubIcon, CrossIcon } from '../../../../_common/icons/index.js';
 import {
+  asyncFocusRichText,
+  buildPath,
   calcDropTarget,
   type DroppingType,
+  type EditingState,
   getClosestBlockElementByPoint,
   getDocPage,
   getEdgelessPage,
+  getHoveringNote,
   getModelByBlockElement,
   isPageMode,
   Point,
-  uploadImageFromLocal,
-} from '../../../../_common/utils/index.js';
-import {
-  type EditingState,
   Rect,
   stopPropagation,
+  uploadImageFromLocal,
 } from '../../../../_common/utils/index.js';
+import { getServiceOrRegister } from '../../../../_legacy/service/index.js';
 import { toggleBookmarkCreateModal } from '../../../../bookmark-block/components/index.js';
-import {
-  asyncFocusRichText,
-  buildPath,
-  getHoveringNote,
-  getServiceOrRegister,
-} from '../../../../index.js';
 import { DocPageBlockComponent } from '../../../../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../../../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../../../page-block/text-selection/utils.js';

@@ -18,7 +18,7 @@ import {
 import { assertRichTexts } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('block hub should drag and drop a card into existing note', async ({
+test.skip('block hub should drag and drop a card into existing note', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -51,7 +51,7 @@ test('block hub should drag and drop a card into existing note', async ({
   await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(1);
 });
 
-test('block hub should add new note when dragged to blank area', async ({
+test.skip('block hub should add new note when dragged to blank area', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -83,7 +83,7 @@ test('block hub should add new note when dragged to blank area', async ({
   await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(2);
 });
 
-test('click blank area do not remvoe database in edgeless', async ({
+test.skip('click blank area do not remvoe database in edgeless', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);

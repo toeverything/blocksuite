@@ -1,7 +1,6 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
-import { AFFINE_BLOCK_HUB_WIDGET } from '../_common/widgets/block-hub/index.js';
 import { AFFINE_DOC_DRAGGING_AREA_WIDGET } from '../_common/widgets/doc-dragging-area/index.js';
 import { AFFINE_DOC_PAGE_META_DATA } from '../_common/widgets/doc-page-meta-data/index.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../_common/widgets/doc-remote-selection/doc-remote-selection.js';
@@ -19,7 +18,7 @@ import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
-import { embedGithubBlockSpec } from '../embed-github-block/index.js';
+import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
@@ -44,9 +43,9 @@ const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
   view: {
     component: literal`affine-doc-page`,
     widgets: {
-      [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
-        AFFINE_BLOCK_HUB_WIDGET
-      )}`,
+      // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
+      //   AFFINE_BLOCK_HUB_WIDGET
+      // )}`,
       [AFFINE_DOC_PAGE_META_DATA]: literal`${unsafeStatic(
         AFFINE_DOC_PAGE_META_DATA
       )}`,
@@ -79,9 +78,9 @@ const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
   view: {
     component: literal`affine-edgeless-page`,
     widgets: {
-      [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
-        AFFINE_BLOCK_HUB_WIDGET
-      )}`,
+      // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
+      //   AFFINE_BLOCK_HUB_WIDGET
+      // )}`,
       [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
       [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
         AFFINE_SLASH_MENU_WIDGET
@@ -190,7 +189,7 @@ export const PagePreset: BlockSpec[] = [
       },
     },
   },
-  embedGithubBlockSpec,
+  EmbedGithubBlockSpec,
 ];
 
 export const EdgelessPreset: BlockSpec[] = [
@@ -281,5 +280,5 @@ export const EdgelessPreset: BlockSpec[] = [
       component: literal`affine-surface-ref`,
     },
   },
-  embedGithubBlockSpec,
+  EmbedGithubBlockSpec,
 ];

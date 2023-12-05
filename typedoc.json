@@ -1,7 +1,7 @@
 {
   "entryPoints": [
     "packages/block-std",
-    "packages/editor",
+    "packages/presets",
     "packages/lit",
     "packages/store",
     "packages/virgo"
