@@ -38,6 +38,8 @@ export class AffineFormatBarWidget extends WidgetElement {
   @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
   private _formatBarElement?: HTMLElement;
 
+  private _customElements: HTMLDivElement[] = [];
+
   private get _selectionManager() {
     return this.root.selection;
   }
@@ -89,17 +91,20 @@ export class AffineFormatBarWidget extends WidgetElement {
   private _appendCustomElement() {
     if (
       !this.customItemsContainer ||
-      this.customItemsContainer.children.length ===
-        AffineFormatBarWidget.customElements.size
+      this.customItemsContainer.children.length === this._customElements.length
     )
       return;
 
-    const customElements = Array.from(AffineFormatBarWidget.customElements).map(
-      element => element(this)
+    this.customItemsContainer.replaceChildren(...this._customElements);
+  }
+
+  private _initCustomElement() {
+    this._customElements = Array.from(AffineFormatBarWidget.customElements).map(
+      elementCtr => elementCtr(this)
     );
-    this.customItemsContainer.replaceChildren(...customElements);
+
     this._disposables.add(() => {
-      this.customItemsContainer?.replaceChildren();
+      this._customElements = [];
     });
   }
 
@@ -122,6 +127,8 @@ export class AffineFormatBarWidget extends WidgetElement {
         `format bar not support pageElement: ${pageElement.constructor.name} but its widgets has format bar`
       );
     }
+
+    this._initCustomElement();
 
     this.disposables.add(
       this.root.event.add('dragStart', () => {
