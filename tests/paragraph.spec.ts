@@ -1388,7 +1388,7 @@ test('should placeholder works', async ({ page }) => {
   await updateBlockType(page, 'affine:paragraph', 'text');
   await focusRichText(page, 0);
   await expect(placeholder).toBeVisible();
-  await expect(placeholder).toContainText('type');
+  await expect(placeholder).toContainText("Type '/' for commands");
 
   await pressEnter(page);
   await expect(placeholder).toHaveCount(1);
