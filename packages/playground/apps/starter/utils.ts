@@ -1,9 +1,9 @@
 import * as blocks from '@blocksuite/blocks';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
-import * as editor from '@blocksuite/editor';
-import { EditorContainer } from '@blocksuite/editor';
 import * as globalUtils from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
+import * as editor from '@blocksuite/presets';
+import { EditorContainer } from '@blocksuite/presets';
 import type {
   BlobStorage,
   DocProviderCreator,

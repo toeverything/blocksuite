@@ -3,7 +3,7 @@
 const allPackages = [
   'blocks',
   'docs',
-  'editor',
+  'presets',
   'global',
   'playground',
   'store',
@@ -60,7 +60,7 @@ module.exports = {
     'packages/store/dist/*',
     'packages/lit/dist/*',
     'packages/blocks/dist/*',
-    'packages/editor/dist/*',
+    'packages/presets/dist/*',
     'packages/global/dist/*',
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',

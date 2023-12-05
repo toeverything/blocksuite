@@ -16,13 +16,13 @@ const importIdentifier = '__ $BLOCKSUITE_EDITOR$ __';
 if (env[importIdentifier] === true) {
   // https://github.com/yjs/yjs/issues/438
   console.error(
-    '@blocksuite/editor was already imported. This breaks constructor checks and will lead to issues!'
+    '@blocksuite/presets was already imported. This breaks constructor checks and will lead to issues!'
   );
 }
 
 if (typeof window === 'undefined') {
   throw new Error(
-    'Seems like you are importing @blocksuite/editor in SSR mode. Which is not supported for now.'
+    'Seems like you are importing @blocksuite/presets in SSR mode. Which is not supported for now.'
   );
 }
 
