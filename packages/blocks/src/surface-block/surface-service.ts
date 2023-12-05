@@ -15,12 +15,12 @@ export class SurfaceService extends BlockService<SurfaceBlockModel> {
     return view;
   }
 
-  get isNavigatorMode() {
+  get currentTool() {
     const view = this._getSurfaceView();
-    if (!view) return false;
+    if (!view) return null;
 
     const { edgeless } = view;
-    return edgeless.edgelessTool.type === 'frameNavigator';
+    return edgeless.edgelessTool;
   }
 
   setNavigatorMode(on: boolean, mode?: NavigatorMode) {

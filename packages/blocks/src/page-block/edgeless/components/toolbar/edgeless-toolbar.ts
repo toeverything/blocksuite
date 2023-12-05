@@ -500,21 +500,17 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         }}
       >
       </edgeless-navigator-setting-button>
-      ${readonly
-        ? nothing
-        : html`
-            <div class="short-divider"></div>
-            <div
-              class="edgeless-frame-navigator-stop"
-              @click=${() => {
-                this.setEdgelessTool({ type: 'default' });
-                document.fullscreenElement && this._toggleFullScreen();
-                setTimeout(() => this._moveToCurrentFrame(), 400);
-              }}
-            >
-              Stop
-            </div>
-          `}
+      <div class="short-divider"></div>
+      <div
+        class="edgeless-frame-navigator-stop"
+        @click=${() => {
+          this.setEdgelessTool({ type: 'pan', panning: false });
+          document.fullscreenElement && this._toggleFullScreen();
+          setTimeout(() => this._moveToCurrentFrame(), 400);
+        }}
+      >
+        Stop
+      </div>
     `;
   }
 
