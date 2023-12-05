@@ -44,9 +44,9 @@ const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
   view: {
     component: literal`affine-doc-page`,
     widgets: {
-      [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
-        AFFINE_BLOCK_HUB_WIDGET
-      )}`,
+      // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
+      //   AFFINE_BLOCK_HUB_WIDGET
+      // )}`,
       [AFFINE_DOC_PAGE_META_DATA]: literal`${unsafeStatic(
         AFFINE_DOC_PAGE_META_DATA
       )}`,
@@ -79,9 +79,9 @@ const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
   view: {
     component: literal`affine-edgeless-page`,
     widgets: {
-      [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
-        AFFINE_BLOCK_HUB_WIDGET
-      )}`,
+      // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
+      //   AFFINE_BLOCK_HUB_WIDGET
+      // )}`,
       [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
       [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
         AFFINE_SLASH_MENU_WIDGET
