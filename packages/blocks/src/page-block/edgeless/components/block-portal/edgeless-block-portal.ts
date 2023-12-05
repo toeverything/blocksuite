@@ -31,7 +31,7 @@ import {
 } from '../../../../_common/consts.js';
 import {
   delayCallback,
-  requestFrame,
+  requestConnectedFrame,
 } from '../../../../_common/utils/event.js';
 import {
   matchFlavours,
@@ -149,7 +149,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     const resetNoteResizeObserver = throttle(
       () => {
-        requestFrame(() => {
+        requestConnectedFrame(() => {
           this._noteResizeObserver.resetListener(page);
         }, this);
       },
@@ -247,7 +247,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     this._initNoteHeightUpdate();
 
-    requestFrame(() => {
+    requestConnectedFrame(() => {
       this._noteResizeObserver.resetListener(page);
     }, this);
 
@@ -292,7 +292,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
         if (rAqId) return;
 
-        rAqId = requestFrame(() => {
+        rAqId = requestConnectedFrame(() => {
           this.refreshLayerViewport();
           rAqId = null;
         }, this);
@@ -329,7 +329,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           (type === 'add' || type === 'delete') &&
           (flavour === 'affine:surface-ref' || flavour === NOTE)
         ) {
-          requestFrame(() => {
+          requestConnectedFrame(() => {
             this._updateReference();
             this._updateAutoConnect();
           }, this);

@@ -127,8 +127,22 @@ export function delayCallback(callback: () => void, delay: number = 0) {
   return () => clearTimeout(timeoutId);
 }
 
-export function requestFrame(callback: () => void, element?: HTMLElement) {
+/**
+ * A wrapper around `requestAnimationFrame` that only calls the callback if the
+ * element is still connected to the DOM.
+ */
+export function requestConnectedFrame(
+  callback: () => void,
+  element?: HTMLElement
+) {
   return requestAnimationFrame(() => {
-    if (!element || element.isConnected) callback();
+    // If element is not provided, fallback to `requestAnimationFrame`
+    if (element === undefined) {
+      callback();
+      return;
+    }
+
+    // Only calls callback if element is still connected to the DOM
+    if (element.isConnected) callback();
   });
 }

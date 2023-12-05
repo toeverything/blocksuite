@@ -16,7 +16,7 @@ import { getThemePropertyValue } from '../_common/theme/utils.js';
 import {
   type EdgelessElement,
   type ReorderingAction,
-  requestFrame,
+  requestConnectedFrame,
   type Selectable,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
@@ -396,7 +396,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
             isFrameBlock(model) ||
             isImageBlock(model)
           ) {
-            requestFrame(() => {
+            requestConnectedFrame(() => {
               this.fitElementToViewport(model);
             }, this);
           }
