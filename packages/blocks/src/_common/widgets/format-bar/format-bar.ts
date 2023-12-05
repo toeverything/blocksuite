@@ -90,9 +90,15 @@ export class AffineFormatBarWidget extends WidgetElement {
   private _appendCustomElement() {
     if (
       !this.customItemsContainer ||
-      this.customItemsContainer.children.length === this._customElements.length
+      this.customItemsContainer.children.length ===
+        AffineFormatBarWidget.customElements.size
     )
       return;
+
+    if (
+      this._customElements.length !== AffineFormatBarWidget.customElements.size
+    )
+      this._initCustomElement();
 
     this.customItemsContainer.replaceChildren(...this._customElements);
   }
@@ -101,10 +107,6 @@ export class AffineFormatBarWidget extends WidgetElement {
     this._customElements = Array.from(AffineFormatBarWidget.customElements).map(
       elementCtr => elementCtr(this)
     );
-
-    this._disposables.add(() => {
-      this._customElements = [];
-    });
   }
 
   override connectedCallback() {
@@ -127,7 +129,9 @@ export class AffineFormatBarWidget extends WidgetElement {
       );
     }
 
-    this._initCustomElement();
+    this._disposables.add(() => {
+      this._customElements = [];
+    });
 
     this.disposables.add(
       this.root.event.add('dragStart', () => {
