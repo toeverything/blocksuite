@@ -297,9 +297,9 @@ importers:
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
-      '@blocksuite/editor':
+      '@blocksuite/presets':
         specifier: workspace:*
-        version: link:../editor
+        version: link:../presets
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store
@@ -325,27 +325,6 @@ importers:
       vue:
         specifier: ^3.3.8
         version: 3.3.8(typescript@5.2.2)
-
-  packages/editor:
-    dependencies:
-      '@blocksuite/blocks':
-        specifier: workspace:*
-        version: link:../blocks
-      '@blocksuite/global':
-        specifier: workspace:*
-        version: link:../global
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../lit
-      '@blocksuite/store':
-        specifier: workspace:*
-        version: link:../store
-      '@toeverything/theme':
-        specifier: ^0.7.27
-        version: 0.7.27
-      lit:
-        specifier: ^3.0.2
-        version: 3.1.0
 
   packages/global:
     dependencies:
@@ -377,15 +356,15 @@ importers:
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
-      '@blocksuite/editor':
-        specifier: workspace:*
-        version: link:../editor
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
       '@blocksuite/lit':
         specifier: workspace:*
         version: link:../lit
+      '@blocksuite/presets':
+        specifier: workspace:*
+        version: link:../presets
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store
@@ -447,6 +426,27 @@ importers:
       vite-plugin-wasm:
         specifier: ^3.2.2
         version: 3.2.2(vite@4.5.0)
+
+  packages/presets:
+    dependencies:
+      '@blocksuite/blocks':
+        specifier: workspace:*
+        version: link:../blocks
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../global
+      '@blocksuite/lit':
+        specifier: workspace:*
+        version: link:../lit
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../store
+      '@toeverything/theme':
+        specifier: ^0.7.27
+        version: 0.7.27
+      lit:
+        specifier: ^3.0.2
+        version: 3.1.0
 
   packages/store:
     dependencies:
@@ -3589,7 +3589,7 @@ packages:
     peerDependencies:
       '@types/node': '*'
       cosmiconfig: '>=8.2'
-      typescript: '>=4'
+      typescript: 5.2.2
     dependencies:
       '@types/node': 18.18.12
       cosmiconfig: 8.3.6(typescript@5.2.2)
@@ -3601,7 +3601,7 @@ packages:
     resolution: {integrity: sha512-kcZ6+W5QzcJ3P1Mt+83OUv/oHFqZHIx8DuxG6eZ5RGMERoLqp4BuGjhHLYGK+Kf5XVkQvqBSmAy/nGWN3qDgEA==}
     engines: {node: '>=14'}
     peerDependencies:
-      typescript: '>=4.9.5'
+      typescript: 5.2.2
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -5718,7 +5718,7 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
     peerDependencies:
-      typescript: ^3.9.5 || ^4.9.5 || ^5
+      typescript: 5.2.2
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -7673,7 +7673,7 @@ packages:
     resolution: {integrity: sha512-wNMeqtMz5NtwpT/UZGY5alT+VoKdSsOOP/kqHFcUW1P/VRhH2wJ48+DN2WwUliNbQ976ETwDL0Ifd2VVvgonvg==}
     engines: {node: '>=16.13.0'}
     peerDependencies:
-      typescript: '>=4.2.0'
+      typescript: 5.2.2
     dependencies:
       typescript: 5.2.2
     dev: true
@@ -7697,7 +7697,7 @@ packages:
       '@swc/core': '>=1.2.50'
       '@swc/wasm': '>=1.2.50'
       '@types/node': '*'
-      typescript: '>=2.7'
+      typescript: 5.2.2
     peerDependenciesMeta:
       '@swc/core':
         optional: true
@@ -7750,7 +7750,7 @@ packages:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
     engines: {node: '>= 6'}
     peerDependencies:
-      typescript: '>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta'
+      typescript: 5.2.2
     dependencies:
       tslib: 1.14.1
       typescript: 5.2.2
@@ -7829,7 +7829,7 @@ packages:
     engines: {node: '>= 16'}
     hasBin: true
     peerDependencies:
-      typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x || 5.2.x
+      typescript: 5.2.2
     dependencies:
       lunr: 2.3.9
       marked: 4.3.0
@@ -8305,7 +8305,7 @@ packages:
   /vue@3.3.8(typescript@5.2.2):
     resolution: {integrity: sha512-5VSX/3DabBikOXMsxzlW8JyfeLKlG9mzqnWgLQLty88vdZL7ZJgrdgBOmrArwxiLtmS+lNNpPcBYqrhE6TQW5w==}
     peerDependencies:
-      typescript: '*'
+      typescript: 5.2.2
     peerDependenciesMeta:
       typescript:
         optional: true

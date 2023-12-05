@@ -7,8 +7,8 @@ import {
   type ShapeType,
   StrokeStyle,
 } from '@blocksuite/blocks';
-import type { EditorContainer } from '@blocksuite/editor';
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorContainer } from '@blocksuite/presets';
 import { Workspace } from '@blocksuite/store';
 
 interface Position {

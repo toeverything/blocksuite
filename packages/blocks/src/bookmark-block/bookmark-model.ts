@@ -1,37 +1,40 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
-// This type is declared in Affine, this block will move to Affine
-type MetaData = {
-  bookmarkTitle?: string;
+export interface BookmarkBlockUrlData {
   description?: string;
   icon?: string;
   image?: string;
-  [x: string]: string | string[] | undefined | boolean;
-};
-export type BookmarkProps = {
+  title?: string;
+
+  /**
+   * @deprecated
+   * use `title` instead
+   */
+  bookmarkTitle?: string;
+  /**
+   * @deprecated
+   * we don't need this anymore
+   */
+  crawled?: boolean;
+}
+
+export type BookmarkBlockProps = {
   /**
    * The embed mode will embed the url into the block
    */
   type: 'card' | 'embed';
   url: string;
   caption?: string;
-  crawled?: boolean;
-} & MetaData;
+} & BookmarkBlockUrlData;
 
-export const defaultBookmarkProps: BookmarkProps = {
+export const defaultBookmarkProps: BookmarkBlockProps = {
   type: 'card',
   url: '',
-  bookmarkTitle: '',
-  description: '',
-  icon: '',
-  image: '',
-  caption: '',
-  crawled: false,
 };
 
 export const BookmarkBlockSchema = defineBlockSchema({
   flavour: 'affine:bookmark',
-  props: (): BookmarkProps => defaultBookmarkProps,
+  props: (): BookmarkBlockProps => defaultBookmarkProps,
   metadata: {
     version: 1,
     role: 'content',

@@ -1,8 +1,46 @@
+import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('bookmark-loader')
-export class Loader extends LitElement {
+import { getThemeMode } from '../../_common/utils/query.js';
+import { BookmarkDefaultImage } from './bookmark-default-image.js';
+
+@customElement('bookmark-loading')
+export class BookmarkLoading extends ShadowlessElement {
+  static override styles = css`
+    .affine-bookmark-loading {
+      width: 100%;
+      height: 112px;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      box-shadow: var(--affine-shadow-1);
+      background: var(--affine-hover-color);
+      border: 3px solid var(--affine-background-secondary-color);
+      color: var(--affine-placeholder-color);
+      border-radius: 12px;
+    }
+  `;
+
+  override render() {
+    const theme = getThemeMode();
+    return html`<div
+      class="affine-bookmark-loading ${theme === 'light' ? '' : 'dark'}"
+    >
+      <div class="affine-bookmark-title">
+        <bookmark-loading-circle
+          .size=${'15px'}
+          .color=${'var(--affine-primary-color)'}
+        ></bookmark-loading-circle>
+        <div class="affine-bookmark-title-content">Loading...</div>
+      </div>
+      <div class="affine-bookmark-banner">${BookmarkDefaultImage()}</div>
+    </div>`;
+  }
+}
+
+@customElement('bookmark-loading-circle')
+class BookmarkLoadingCircle extends LitElement {
   static override styles = css`
     .bookmark-loader-wrapper {
       display: flex;
@@ -71,6 +109,7 @@ export class Loader extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'bookmark-loader': Loader;
+    'bookmark-loading': BookmarkLoading;
+    'bookmark-loading-circle': BookmarkLoadingCircle;
   }
 }

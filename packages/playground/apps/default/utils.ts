@@ -1,5 +1,5 @@
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
-import { EditorContainer } from '@blocksuite/editor';
+import { EditorContainer } from '@blocksuite/presets';
 import type { BlobStorage, Page, Workspace } from '@blocksuite/store';
 import {
   createIndexeddbStorage,
@@ -86,8 +86,5 @@ export function createEditor(page: Page, element: HTMLElement) {
 
   element.append(editor);
 
-  editor.createBlockHub().then(blockHub => {
-    document.body.appendChild(blockHub);
-  });
   return editor;
 }

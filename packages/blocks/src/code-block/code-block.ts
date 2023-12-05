@@ -321,15 +321,18 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     };
 
     this.bindHotKey({
-      Backspace: () => {
+      Backspace: ctx => {
+        const state = ctx.get('keyboardState');
         const textSelection = selectionManager.find('text');
         if (!textSelection) {
+          state.raw.preventDefault();
           return;
         }
 
         const from = textSelection.from;
 
         if (from.index === 0 && from.length === 0) {
+          state.raw.preventDefault();
           selectionManager.setGroup('note', [
             selectionManager.getInstance('block', { path: this.path }),
           ]);

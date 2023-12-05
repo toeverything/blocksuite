@@ -924,7 +924,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                     delta.attributes = {
                       ...delta.attributes,
                       reference: {
-                        type: 'Subpage',
+                        type: 'LinkedPage',
                         pageId,
                       },
                     };

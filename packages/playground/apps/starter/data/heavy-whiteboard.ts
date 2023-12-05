@@ -70,13 +70,13 @@ export const heavyWhiteboard: InitFn = async (
           strokeStyle: StrokeStyle.Solid,
           roughness: DEFAULT_ROUGHNESS,
         },
-        false
+        { deep: false }
       );
     }
 
     page.addBlock(
       'affine:surface',
-      { elements: new Boxed(native2Y(surfaceBlockElements, false)) },
+      { elements: new Boxed(native2Y(surfaceBlockElements, { deep: false })) },
       pageBlockId
     );
 

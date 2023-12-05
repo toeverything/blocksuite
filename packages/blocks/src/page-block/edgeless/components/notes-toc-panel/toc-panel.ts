@@ -6,7 +6,6 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { ToggleSwitch } from '../../../../_common/components/toggle-switch.js';
 import { matchFlavours } from '../../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { Bound } from '../../../../surface-block/index.js';
@@ -510,7 +509,6 @@ const componentsMap = {
   'edgeless-toc-notes-panel': TOCNotesPanel,
   'edgeless-toc-notes-setting-menu': TOCNotesSettingMenu,
   'edgeless-toc-notes-header': TOCNotesHeader,
-  'toggle-switch': ToggleSwitch,
 };
 
 export function registerTOCComponents(
