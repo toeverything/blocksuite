@@ -9,11 +9,11 @@
   "license": "MPL-2.0",
   "type": "module",
   "devDependencies": {
-    "typedoc": "^0.25.3",
-    "typedoc-plugin-markdown": "4.0.0-next.19",
+    "typedoc": "^0.25.4",
+    "typedoc-plugin-markdown": "4.0.0-next.36",
     "vite-plugin-wasm": "^3.2.2",
-    "vitepress": "1.0.0-rc.25",
-    "vue": "^3.3.8"
+    "vitepress": "1.0.0-rc.31",
+    "vue": "^3.3.10"
   },
   "scripts": {
     "typedoc": "pnpm -C ../.. build:packages && typedoc --options ../../typedoc.json",
@@ -26,7 +26,7 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/presets": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "markdown-it-container": "^3.0.0",
+    "markdown-it-container": "^4.0.0",
     "vitepress-plugin-sandpack": "^1.1.4"
   }
 }
