@@ -38,8 +38,8 @@ import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js
 
 type RefElement = Exclude<EdgelessElement, NoteBlockModel>;
 
-const PREVIEW_CONTAINER_WIDTH = 268;
-const PREVIEW_CONTAINER_HEIGHT = 150;
+const DEFAULT_PREVIEW_CONTAINER_WIDTH = 284;
+const DEFAULT_PREVIEW_CONTAINER_HEIGHT = 170;
 
 const styles = css`
   .frame-preview-container {
@@ -79,6 +79,12 @@ export class FramePreview extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   frame!: FrameBlockModel;
+
+  @property({ attribute: false })
+  surfaceWidth: number = DEFAULT_PREVIEW_CONTAINER_WIDTH;
+
+  @property({ attribute: false })
+  surfaceHeight: number = DEFAULT_PREVIEW_CONTAINER_HEIGHT;
 
   @state()
   private _surfaceModel: SurfaceBlockModel | null = null;
@@ -389,27 +395,24 @@ export class FramePreview extends WithDisposable(LitElement) {
     return value;
   };
 
-  private _getSurfaceWH(referencedModel: RefElement) {
+  private _getViewportWH = (referencedModel: RefElement) => {
     const [, , w, h] = deserializeXYWH(referencedModel.xywh);
 
-    const scale = Math.min(
-      PREVIEW_CONTAINER_WIDTH / w,
-      PREVIEW_CONTAINER_HEIGHT / h
-    );
+    const scale = Math.min(this.surfaceWidth / w, this.surfaceHeight / h);
 
     return {
       width: w * scale,
       height: h * scale,
     };
-  }
+  };
 
   private _renderSurfaceContent(referencedModel: RefElement) {
-    const { width, height } = this._getSurfaceWH(referencedModel);
+    const { width, height } = this._getViewportWH(referencedModel);
     return html`<div
       class="surface-container"
       style=${styleMap({
-        width: `${PREVIEW_CONTAINER_WIDTH}px`,
-        height: `${PREVIEW_CONTAINER_HEIGHT}px`,
+        width: `${this.surfaceWidth}px`,
+        height: `${this.surfaceHeight}px`,
       })}
     >
       <div
@@ -448,12 +451,10 @@ export class FramePreview extends WithDisposable(LitElement) {
   }
 
   override render() {
-    console.log('render frame preview');
     const { _surfaceModel, _referencedModel } = this;
     const noContent =
       !_surfaceModel || !_referencedModel || !_referencedModel.xywh;
 
-    console.log('render frame preview');
     return html`<div class="frame-preview-container">
       ${noContent ? nothing : this._renderSurfaceContent(_referencedModel)}
     </div>`;

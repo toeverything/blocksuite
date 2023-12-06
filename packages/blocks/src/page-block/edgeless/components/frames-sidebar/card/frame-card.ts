@@ -93,7 +93,6 @@ const styles = css`
     width: 100%;
     height: 170px;
     box-sizing: border-box;
-    padding: 8px;
     justify-content: center;
     align-items: center;
     border-radius: 8px;

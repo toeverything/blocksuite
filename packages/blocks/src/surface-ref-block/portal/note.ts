@@ -28,6 +28,12 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
   }
 
+  override firstUpdated() {
+    this.disposables.add(
+      this.model.propsUpdated.on(() => this.requestUpdate())
+    );
+  }
+
   override updated() {
     setTimeout(() => {
       const editiableElements = Array.from<HTMLDivElement>(
