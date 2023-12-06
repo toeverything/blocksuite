@@ -6,6 +6,7 @@ import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
+import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { FramesSidebarBody } from './body/frames-sidebar-body.js';
 import { FrameCard } from './card/frame-card.js';

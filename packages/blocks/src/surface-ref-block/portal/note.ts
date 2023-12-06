@@ -62,6 +62,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
     const style = {
       zIndex: `${index}`,
       width: modelW + 'px',
+      height: modelH + 'px',
       transform: `translate(${modelX}px, ${modelY}px)`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       border: `${EDGELESS_BLOCK_CHILD_BORDER_WIDTH}px ${

@@ -313,6 +313,7 @@ export class FrameCard extends WithDisposable(LitElement) {
           : html`<frame-preview
               .edgeless=${this.edgeless}
               .frame=${this.frame}
+              .navigatorMode=${'fill'}
             ></frame-preview>`}
         ${this._renderDraggingCardNumber()}
       </div>

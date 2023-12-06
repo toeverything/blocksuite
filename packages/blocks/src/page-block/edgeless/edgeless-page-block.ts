@@ -222,6 +222,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     navigatorSettingUpdated: new Slot<{
       hideToolbar?: boolean;
       blackBackground?: boolean;
+      fillScreen?: boolean;
     }>(),
     navigatorFrameChanged: new Slot<FrameBlockModel>(),
     fullScrennToggled: new Slot(),

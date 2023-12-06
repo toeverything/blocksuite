@@ -5,7 +5,10 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
-import { BLACK_BACKGROUND_KEY } from '../../../../../_common/edgeless/frame/consts.js';
+import {
+  BLACK_BACKGROUND_KEY,
+  FILL_SCREEN_KEY,
+} from '../../../../../_common/edgeless/frame/consts.js';
 import { stopPropagation } from '../../../../../_common/utils/event.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 
@@ -83,9 +86,14 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   @state()
   blackBackground = false;
 
+  @state()
+  fillScreen = false;
+
   private _tryRestoreSettings() {
     const blackBackground = sessionStorage.getItem(BLACK_BACKGROUND_KEY);
+    const fillScreen = sessionStorage.getItem(FILL_SCREEN_KEY);
     this.blackBackground = blackBackground !== 'false';
+    this.fillScreen = fillScreen === 'true';
   }
 
   private _onBlackBackgroundChange = (checked: boolean) => {
@@ -93,6 +101,14 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless.slots.navigatorSettingUpdated.emit({
       blackBackground: this.blackBackground,
     });
+  };
+
+  private _onFillScreenChange = (checked: boolean) => {
+    this.fillScreen = checked;
+    this.edgeless.slots.navigatorSettingUpdated.emit({
+      fillScreen: this.fillScreen,
+    });
+    sessionStorage.setItem(FILL_SCREEN_KEY, this.fillScreen.toString());
   };
 
   override connectedCallback() {
@@ -127,7 +143,12 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
       </div>
       <div class="frames-setting-menu-item action">
         <div class="action-label">Fill Screen</div>
-        <div class="toggle-button"><toggle-switch></toggle-switch></div>
+        <div class="toggle-button">
+          <toggle-switch
+            .on=${this.fillScreen}
+            .onChange=${this._onFillScreenChange}
+          ></toggle-switch>
+        </div>
       </div>
 
       <menu-divider></menu-divider>

@@ -5,6 +5,7 @@ import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { FILL_SCREEN_KEY } from '../../../../../_common/edgeless/frame/consts.js';
 import {
   type CssVariableName,
   isCssVariable,
@@ -87,9 +88,11 @@ export class FramePreview extends WithDisposable(LitElement) {
   surfaceHeight: number = DEFAULT_PREVIEW_CONTAINER_HEIGHT;
 
   @state()
+  fillScreen = false;
+
+  @state()
   private _surfaceModel: SurfaceBlockModel | null = null;
 
-  private _referencedModel: RefElement | null = null;
   private _surfaceRenderer = new Renderer({
     layerManager: new LayerManager(),
   });
@@ -147,8 +150,6 @@ export class FramePreview extends WithDisposable(LitElement) {
       refWathcer?.dispose();
 
       const referencedModel = this.frame;
-      this._referencedModel =
-        referencedModel && 'xywh' in referencedModel ? referencedModel : null;
 
       if (!referencedModel) return;
 
@@ -217,11 +218,11 @@ export class FramePreview extends WithDisposable(LitElement) {
   }
 
   private _refreshViewport() {
-    if (!this._referencedModel) {
+    if (!this.frame) {
       return;
     }
 
-    const referencedModel = this._referencedModel;
+    const referencedModel = this.frame;
 
     // trigger a rerender to update element's size
     // and set viewport after element's size has been updated
@@ -288,6 +289,7 @@ export class FramePreview extends WithDisposable(LitElement) {
           this._connectorManager.updatePath(element);
         }
       },
+      removeElement: () => {},
       updateElementLocalRecord: () => {},
       pickById: id => this.getModel(id),
       getGroupParent: getGroupParent,
@@ -356,6 +358,7 @@ export class FramePreview extends WithDisposable(LitElement) {
         pickById: id => this.getModel(id),
         getGroupParent: getGroupParent,
         setGroupParent: setGroupParent,
+        removeElement: () => {},
       });
       element.computedValue = this._getCSSPropertyValue;
       element.mount(this._surfaceRenderer);
@@ -375,6 +378,11 @@ export class FramePreview extends WithDisposable(LitElement) {
     this._surfaceRenderer.refresh();
     this.requestUpdate();
   };
+
+  private _tryLoadFillScreen() {
+    const fillScreen = sessionStorage.getItem(FILL_SCREEN_KEY);
+    this.fillScreen = fillScreen === 'true';
+  }
 
   private _getCSSPropertyValue = (value: string) => {
     if (isCssVariable(value)) {
@@ -398,7 +406,12 @@ export class FramePreview extends WithDisposable(LitElement) {
   private _getViewportWH = (referencedModel: RefElement) => {
     const [, , w, h] = deserializeXYWH(referencedModel.xywh);
 
-    const scale = Math.min(this.surfaceWidth / w, this.surfaceHeight / h);
+    let scale = 1;
+    if (this.fillScreen) {
+      scale = Math.max(this.surfaceWidth / w, this.surfaceHeight / h);
+    } else {
+      scale = Math.min(this.surfaceWidth / w, this.surfaceHeight / h);
+    }
 
     return {
       width: w * scale,
@@ -438,25 +451,34 @@ export class FramePreview extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    this._tryLoadFillScreen();
     this._initSurfaceModel();
     this._initReferencedModel();
     this._initSurfaceRenderer();
+
+    this.disposables.add(
+      this.edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
+        if (fillScreen !== undefined) {
+          this.fillScreen = fillScreen;
+          this._refreshViewport();
+        }
+      })
+    );
   }
 
   override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('frame')) {
-      this.requestUpdate();
+      this._refreshViewport();
     }
     this._attachRenderer();
   }
 
   override render() {
-    const { _surfaceModel, _referencedModel } = this;
-    const noContent =
-      !_surfaceModel || !_referencedModel || !_referencedModel.xywh;
+    const { _surfaceModel, frame } = this;
+    const noContent = !_surfaceModel || !frame || !frame.xywh;
 
     return html`<div class="frame-preview-container">
-      ${noContent ? nothing : this._renderSurfaceContent(_referencedModel)}
+      ${noContent ? nothing : this._renderSurfaceContent(frame)}
     </div>`;
   }
 }
