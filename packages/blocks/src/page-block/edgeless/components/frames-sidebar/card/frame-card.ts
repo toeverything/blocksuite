@@ -117,7 +117,7 @@ const styles = css`
     z-index: calc(var(--affine-z-index-popover, 0) + 3);
   }
 
-  .frame-card-container.dragging .frame-card-title {
+  .frame-card-container.dragging .frame-card-title-container {
     display: none;
   }
 
@@ -269,16 +269,16 @@ export class FrameCard extends WithDisposable(LitElement) {
   }
 
   override firstUpdated() {
-    // this.disposables.addFromEvent(this.titleContentElement, 'dblclick', () => {
-    //   const titleEditor = new FrameCardTitleEditor();
-    //   titleEditor.edgeless = this.edgeless;
-    //   titleEditor.frameModel = this.frame;
-    //   titleEditor.titleContentElement = this.titleContentElement;
-    //   const left = this.titleIndexElement.offsetWidth + 6;
-    //   titleEditor.left = left;
-    //   titleEditor.maxWidth = this.titleContainer.offsetWidth - left - 6;
-    //   this.titleContainer.appendChild(titleEditor);
-    // });
+    this.disposables.addFromEvent(this.titleContentElement, 'dblclick', () => {
+      const titleEditor = new FrameCardTitleEditor();
+      titleEditor.edgeless = this.edgeless;
+      titleEditor.frameModel = this.frame;
+      titleEditor.titleContentElement = this.titleContentElement;
+      const left = this.titleIndexElement.offsetWidth + 6;
+      titleEditor.left = left;
+      titleEditor.maxWidth = this.titleContainer.offsetWidth - left - 6;
+      this.titleContainer.appendChild(titleEditor);
+    });
   }
 
   override render() {
@@ -309,10 +309,12 @@ export class FrameCard extends WithDisposable(LitElement) {
         @dblclick=${this._dispatchFitViewEvent}
         @mousedown=${this._dispatchDragEvent}
       >
-        <frame-preview
-          .edgeless=${this.edgeless}
-          .frame=${this.frame}
-        ></frame-preview>
+        ${this.status === 'dragging' && stackOrder !== 0
+          ? nothing
+          : html`<frame-preview
+              .edgeless=${this.edgeless}
+              .frame=${this.frame}
+            ></frame-preview>`}
         ${this._renderDraggingCardNumber()}
       </div>
     </div>`;

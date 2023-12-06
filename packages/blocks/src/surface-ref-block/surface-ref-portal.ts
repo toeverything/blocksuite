@@ -97,6 +97,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
       'transform',
       `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
     );
+    this.portal?.style.setProperty('transform-origin', '0 0');
   };
 
   override render() {
