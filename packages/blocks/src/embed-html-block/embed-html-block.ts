@@ -35,13 +35,6 @@ export class EmbedHtmlBlock extends EmbedBlockElement<EmbedHtmlBlockModel> {
     this.updateWH();
   }
 
-  load = () => {
-    const iframe = this.querySelector('iframe');
-    if (!iframe) return;
-    const doc = iframe.contentDocument;
-    if (!doc) return;
-    iframe.style.height = `${doc.body.scrollHeight}px`;
-  };
   override render(): unknown {
     return this.renderEmbed(() => {
       if (!this.model.html) {
@@ -49,7 +42,6 @@ export class EmbedHtmlBlock extends EmbedBlockElement<EmbedHtmlBlockModel> {
       }
       return html`<iframe
         class="embed-html-block-iframe"
-        .onload="${this.load}"
         scrolling="false"
         .srcdoc="${this.model.html}"
       ></iframe>`;
