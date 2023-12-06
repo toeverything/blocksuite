@@ -6,25 +6,25 @@ import { MoreHorizontalIcon, PlusIcon } from '../../../_common/icons/index.js';
 import type { GroupData } from './helper.js';
 import type { GroupRenderProps } from './matcher.js';
 
-const renderCount = (group: GroupData) => {
+function GroupHeaderCount(group: GroupData) {
   const cards = group.rows;
   if (!cards.length) {
     return;
   }
   return html` <div class="group-header-count">${cards.length}</div>`;
-};
-export const renderGroupTitle = (
+}
+
+export function GroupTitle(
   groupData: GroupData,
   ops: {
     readonly: boolean;
     clickAdd: (evt: MouseEvent) => void;
     clickOps: (evt: MouseEvent) => void;
   }
-) => {
+) {
   const data = groupData.helper.groupConfig();
-  if (!data) {
-    return;
-  }
+  if (!data) return nothing;
+
   const icon =
     groupData.value == null
       ? ''
@@ -39,6 +39,7 @@ export const renderGroupTitle = (
     updateValue: value => groupData.helper.updateValue(groupData.rows, value),
     readonly: ops.readonly,
   };
+
   return html`
     <style>
       .group-header-count {
@@ -102,7 +103,7 @@ export const renderGroupTitle = (
     <div
       style="display:flex;align-items:center;gap: 8px;overflow: hidden;height: 22px;"
     >
-      ${icon} ${renderUniLit(data.view, props)} ${renderCount(groupData)}
+      ${icon} ${renderUniLit(data.view, props)} ${GroupHeaderCount(groupData)}
     </div>
     ${ops.readonly
       ? nothing
@@ -115,4 +116,4 @@ export const renderGroupTitle = (
           </div>
         </div>`}
   `;
-};
+}

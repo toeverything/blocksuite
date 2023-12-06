@@ -8,8 +8,8 @@ import { html } from 'lit/static-html.js';
 
 import { popFilterableSimpleMenu } from '../../_common/components/menu/index.js';
 import { AddCursorIcon } from '../../_common/icons/index.js';
+import { GroupTitle } from '../common/group-by/group-title.js';
 import type { GroupData } from '../common/group-by/helper.js';
-import { renderGroupTitle } from '../common/group-by/renderGroupTitle.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
 
 const styles = css`
@@ -156,7 +156,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
     const cards = this.group.rows;
     return html`
       <div class="group-header">
-        ${renderGroupTitle(this.group, {
+        ${GroupTitle(this.group, {
           readonly: this.view.readonly,
           clickAdd: this.clickAddCardInStart,
           clickOps: this.clickGroupOptions,
