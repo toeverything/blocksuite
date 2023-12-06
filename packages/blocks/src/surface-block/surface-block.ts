@@ -16,7 +16,6 @@ import { getThemePropertyValue } from '../_common/theme/utils.js';
 import {
   type EdgelessElement,
   type ReorderingAction,
-  requestConnectedFrame,
   type Selectable,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
@@ -27,9 +26,6 @@ import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
 import {
   isConnectable,
-  isFrameBlock,
-  isImageBlock,
-  isNoteBlock,
   isTopLevelBlock,
 } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
