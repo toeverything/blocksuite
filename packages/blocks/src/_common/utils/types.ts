@@ -204,6 +204,10 @@ export type PanTool = {
   panning: boolean;
 };
 
+export type TemplateTool = {
+  type: 'template';
+};
+
 export type NoteChildrenFlavour = ServiceFlavour;
 
 export type NoteTool = {
@@ -231,7 +235,8 @@ export type EdgelessTool =
   | ConnectorTool
   | EraserTool
   | FrameTool
-  | FrameNavigatorTool;
+  | FrameNavigatorTool
+  | TemplateTool;
 
 /** @deprecated */
 export type SerializedBlock = {
