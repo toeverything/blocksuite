@@ -119,6 +119,8 @@ export class ClipboardController implements ReactiveController {
 
     this._std.command
       .pipe()
+      .withRoot()
+      .try(cmd => [cmd.getTextSelection().deleteText()])
       .try(cmd => [
         cmd.getTextSelection().inline<'currentSelectionPath'>((ctx, next) => {
           const textSelection = ctx.currentTextSelection;
