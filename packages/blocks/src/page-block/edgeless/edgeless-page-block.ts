@@ -363,7 +363,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
     _disposables.add(
       slots.elementRemoved.on(({ element }) => {
         if (isFrameBlock(element)) {
-          this._updateFrames();
+          const frames = this.page.getBlockByFlavour(
+            FRAME
+          ) as FrameBlockModel[];
+          this.frames = frames
+            .filter(frame => frame.id !== element.id)
+            .sort(compare);
         }
       })
     );
