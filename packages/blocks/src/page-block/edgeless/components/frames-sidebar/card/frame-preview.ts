@@ -1,7 +1,7 @@
 import { assertExists, type Disposable } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Y } from '@blocksuite/store';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -101,10 +101,6 @@ export class FramePreview extends WithDisposable(LitElement) {
 
   get surfaceRenderer() {
     return this._surfaceRenderer;
-  }
-
-  get referenceModel() {
-    return this._referencedModel;
   }
 
   get root() {
@@ -444,15 +440,20 @@ export class FramePreview extends WithDisposable(LitElement) {
     this._initSurfaceRenderer();
   }
 
-  override updated() {
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('frame')) {
+      this.requestUpdate();
+    }
     this._attachRenderer();
   }
 
   override render() {
+    console.log('render frame preview');
     const { _surfaceModel, _referencedModel } = this;
     const noContent =
       !_surfaceModel || !_referencedModel || !_referencedModel.xywh;
 
+    console.log('render frame preview');
     return html`<div class="frame-preview-container">
       ${noContent ? nothing : this._renderSurfaceContent(_referencedModel)}
     </div>`;

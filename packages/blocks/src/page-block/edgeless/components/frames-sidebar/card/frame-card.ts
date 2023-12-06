@@ -261,11 +261,11 @@ export class FrameCard extends WithDisposable(LitElement) {
     super.connectedCallback();
     const { disposables } = this;
 
-    // disposables.add(
-    //   this.frame.propsUpdated.on(({ key }) => {
-    //     this.requestUpdate();
-    //   })
-    // );
+    disposables.add(
+      this.frame.propsUpdated.on(({ key }) => {
+        this.requestUpdate();
+      })
+    );
   }
 
   override firstUpdated() {

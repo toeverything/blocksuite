@@ -322,23 +322,23 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
       cardIndex: idx,
     }));
 
-    // const { disposables } = this;
-    // disposables.add(
-    //   page.slots.blockUpdated.on(({ flavour, type }) => {
-    //     if (flavour === FRAME && type !== 'update') {
-    //       requestAnimationFrame(() => {
-    //         this._updateFrames();
-    //       });
-    //     }
-    //   })
-    // );
-    // disposables.add(
-    //   page.slots.blockUpdated.on(e => {
-    //     if (e.type === 'update') {
-    //       this._updateFrames();
-    //     }
-    //   })
-    // );
+    const { disposables } = this;
+    disposables.add(
+      page.slots.blockUpdated.on(({ flavour, type }) => {
+        if (flavour === FRAME && type !== 'update') {
+          requestAnimationFrame(() => {
+            this._updateFrames();
+          });
+        }
+      })
+    );
+    disposables.add(
+      page.slots.blockUpdated.on(e => {
+        if (e.type === 'update') {
+          this._updateFrames();
+        }
+      })
+    );
   }
 
   override render() {
