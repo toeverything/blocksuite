@@ -257,7 +257,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this._initEvents();
     this.layer.init([...this._elements.values(), ...this.blocks]);
     this.init();
-    this._initEffects();
   }
 
   getCSSPropertyValue = (value: string) => {
@@ -382,51 +381,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         });
     });
   };
-
-  private _initEffects() {
-    const { _disposables, page, edgeless } = this;
-    _disposables.add(
-      page.slots.blockUpdated.on(({ id, type }) => {
-        if (type === 'add') {
-          const model = page.getBlockById(id) as TopLevelBlockModel;
-          assertExists(model);
-          if (
-            isNoteBlock(model) ||
-            isFrameBlock(model) ||
-            isImageBlock(model)
-          ) {
-            requestConnectedFrame(() => {
-              this.fitElementToViewport(model);
-            }, this);
-          }
-        }
-      })
-    );
-
-    _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id, props }) => {
-        const element = this.pickById(id);
-        assertExists(element);
-
-        if (
-          element instanceof BrushElement ||
-          edgeless.selectionManager.editing ||
-          (props && !('xywh' in props && 'rotate' in props))
-        )
-          return;
-        this.fitElementToViewport(element);
-      })
-    );
-
-    _disposables.add(
-      edgeless.slots.elementAdded.on(({ id }) => {
-        const element = this.pickById(id);
-        assertExists(element);
-        if (element instanceof BrushElement) return;
-        this.fitElementToViewport(element);
-      })
-    );
-  }
 
   private _updateIndexCanvases() {
     const evt = new CustomEvent('indexedcanvasupdate', {
@@ -789,9 +743,9 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
   }
 
-  fitElementToViewport(ele: EdgelessElement) {
+  fitToViewport(bound: Bound) {
     const { viewport } = this;
-    const bound = ele.elementBound.expand(30);
+    bound = bound.expand(30);
     if (Date.now() - this._lastTime > 200)
       this._cachedViewport = viewport.viewportBounds;
     this._lastTime = Date.now();
