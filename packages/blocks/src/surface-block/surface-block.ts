@@ -500,6 +500,9 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       setGroupParent: (element, group) => {
         return this.setGroupParent(element, group);
       },
+      removeElement: id => {
+        return this.removeElement(id);
+      },
       selectionManager: this.edgeless.selectionManager,
     });
     element.init();
@@ -570,6 +573,9 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         },
         setGroupParent: (element, groupId) => {
           return this.setGroupParent(element, groupId);
+        },
+        removeElement: id => {
+          return this.removeElement(id);
         },
         selectionManager: this.edgeless.selectionManager,
       });
