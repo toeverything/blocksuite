@@ -1,5 +1,5 @@
-import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { css, html, type PropertyValues } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
 
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import type { EmbedHtmlBlockModel } from './embed-html-model.js';
@@ -11,11 +11,30 @@ export class EmbedHtmlBlock extends EmbedBlockElement<EmbedHtmlBlockModel> {
     //  display: block;
     //}
     //
-    //affine-html iframe {
-    //  border: none;
-    //  width: 100%;
-    //}
+    .embed-html-block-iframe {
+      border: none;
+      width: 100%;
+    }
   `;
+  @query('.embed-html-block-iframe')
+  iframe!: HTMLIFrameElement;
+
+  updateWH = () => {
+    const [, , w, h] = JSON.parse(this.model.xywh);
+    this.iframe.style.width = `${w}px`;
+    this.iframe.style.height = `${h}px`;
+  };
+
+  public override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(this.model.propsUpdated.on(this.updateWH));
+  }
+
+  protected override firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+    this.updateWH();
+  }
+
   load = () => {
     const iframe = this.querySelector('iframe');
     if (!iframe) return;
@@ -25,13 +44,11 @@ export class EmbedHtmlBlock extends EmbedBlockElement<EmbedHtmlBlockModel> {
   };
   override render(): unknown {
     return this.renderEmbed(() => {
-      return html`<div
-        style="width: 100px;height: 100px;background-color: red"
-      ></div>`;
       if (!this.model.html) {
         return html` <div class="affine-html-empty">Empty</div>`;
       }
-      return html` <iframe
+      return html`<iframe
+        class="embed-html-block-iframe"
         .onload="${this.load}"
         scrolling="false"
         .srcdoc="${this.model.html}"

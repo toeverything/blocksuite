@@ -3,7 +3,6 @@ import {
   EmbedHtmlBlockModel,
   EmbedHtmlBlockSpec,
   loadImages,
-  Point,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
@@ -63,11 +62,10 @@ export class EditorWithAI {
     if (!html) {
       return;
     }
-    const noteId = edgelessPage.addNoteWithPoint(new Point(0, 0));
     edgelessPage.page.addBlock(
       EmbedHtmlBlockSpec.schema.model.flavour,
-      { html, design: png },
-      noteId
+      { html, design: png, xywh: '[0, 400, 400, 200]' },
+      edgelessPage.surface.model.id
     );
   }
 
