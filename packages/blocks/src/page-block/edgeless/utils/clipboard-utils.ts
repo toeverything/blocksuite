@@ -43,7 +43,12 @@ export async function duplicate(
       if (isNoteBlock(element)) {
         id = surface.addElement(
           element.flavour,
-          { xywh: bound.serialize() },
+          {
+            xywh: bound.serialize(),
+            hidden: element.hidden,
+            background: element.background,
+            edgeless: element.edgeless,
+          },
           page.root?.id
         );
         const block = page.getBlockById(id);
@@ -105,6 +110,12 @@ export async function duplicate(
       idMap.set(element.id, id);
       return id;
     })
+  );
+
+  edgeless.surface.fitToViewport(
+    edgelessElementsBound(
+      newElements.map(id => surface.pickById(id)) as EdgelessElement[]
+    )
   );
 
   if (select) {

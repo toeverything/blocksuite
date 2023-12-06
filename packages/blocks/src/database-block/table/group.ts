@@ -6,8 +6,8 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { popFilterableSimpleMenu } from '../../_common/components/menu/index.js';
 import { PlusIcon } from '../../_common/icons/index.js';
+import { GroupTitle } from '../common/group-by/group-title.js';
 import type { GroupData } from '../common/group-by/helper.js';
-import { renderGroupTitle } from '../common/group-by/renderGroupTitle.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import type { DataViewTable } from './table-view.js';
 import type { DataViewTableManager } from './table-view-manager.js';
@@ -168,7 +168,7 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
       <div
         style="position: sticky;left: 0;width: max-content;padding: 6px 0;margin-bottom: 4px;display:flex;align-items:center;gap: 12px;max-width: 400px"
       >
-        ${renderGroupTitle(this.group, {
+        ${GroupTitle(this.group, {
           readonly: this.view.readonly,
           clickAdd: this.clickAddRowInStart,
           clickOps: this.clickGroupOptions,

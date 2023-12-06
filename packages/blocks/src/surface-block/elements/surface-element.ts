@@ -87,6 +87,7 @@ export abstract class SurfaceElement<
       element: string | EdgelessElement,
       group: GroupElement
     ) => void;
+    removeElement: (id: string) => void;
     selectionManager?: EdgelessSelectionManager;
   };
   protected renderer: Renderer | null = null;
