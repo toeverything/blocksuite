@@ -304,12 +304,19 @@ export class EdgelessClipboard implements Clipboard {
     elements: Record<string, unknown>[],
     idMap: Map<string, string>
   ) {
-    const result = groupBy(elements, item =>
-      item.type === 'connector' ? 'connectors' : 'nonConnectors'
-    );
+    const result = groupBy(elements, item => {
+      switch (item.type) {
+        case 'connector':
+          return 'connectors';
+        case 'group':
+          return 'groups';
+        default:
+          return 'others';
+      }
+    });
 
     return [
-      ...(result.nonConnectors
+      ...(result.others
         ?.map(d => {
           const oldId = d.id as string;
           assertExists(oldId);
@@ -330,7 +337,17 @@ export class EdgelessClipboard implements Clipboard {
           (<Connection>connector.target).id =
             idMap.get(targetId) ?? (targetId as string);
         }
-        return this._createCanvasElement(connector, idMap);
+        const element = this._createCanvasElement(connector, idMap);
+        idMap.set(connector.id as string, element.id);
+        return element;
+      }) ?? []),
+
+      ...(result.groups?.map(group => {
+        const oldId = group.id as string;
+        assertExists(oldId);
+        const element = this._createCanvasElement(group, idMap);
+        idMap.set(oldId, element.id);
+        return element;
       }) ?? []),
     ];
   }
