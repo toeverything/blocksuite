@@ -52,6 +52,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _blobUrl?: string;
 
+  @state()
+  private _pointerPressed = false;
+
   private readonly _themeObserver = new ThemeObserver();
 
   private _hoverController = new HoverController(
@@ -101,6 +104,24 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         this._checkBlob();
       }
     });
+
+    this.disposables.add(
+      this.std.event.add('pointerDown', e => {
+        const event = e.get('pointerState');
+        // 0: Main button pressed, usually the left button or the un-initialized state
+        // See https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
+        if (event.button !== 0) return;
+        this._pointerPressed = true;
+      })
+    );
+    this.disposables.add(
+      this.std.event.add('pointerUp', e => {
+        const event = e.get('pointerState');
+        // 0: Main button pressed, usually the left button or the un-initialized state
+        if (event.button !== 0) return;
+        this._pointerPressed = false;
+      })
+    );
   }
 
   override disconnectedCallback() {
@@ -264,11 +285,15 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     if (this.model.embed && this._blobUrl) {
       const embedView = renderEmbedView(this.model, this._blobUrl);
       if (embedView) {
+        // See https://github.com/toeverything/blocksuite/issues/5579
+        const selectionMask = this._pointerPressed
+          ? html`<div class="overlay-mask"></div>`
+          : null;
         return html`<div
             ${ref(this._hoverController.setReference)}
             class="affine-attachment-embed-container"
           >
-            ${embedView}
+            ${selectionMask} ${embedView}
             ${this.selected?.is('block')
               ? html`<affine-block-selection></affine-block-selection>`
               : null}

@@ -500,6 +500,9 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       setGroupParent: (element, group) => {
         return this.setGroupParent(element, group);
       },
+      removeElement: id => {
+        return this.removeElement(id);
+      },
       selectionManager: this.edgeless.selectionManager,
     });
     element.init();
@@ -570,6 +573,9 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         },
         setGroupParent: (element, groupId) => {
           return this.setGroupParent(element, groupId);
+        },
+        removeElement: id => {
+          return this.removeElement(id);
         },
         selectionManager: this.edgeless.selectionManager,
       });
@@ -840,13 +846,13 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }) as EdgelessElement[];
 
     let picked = last(results) ?? null;
+    const { activeGroup } = selectionManager;
     const first = picked;
-    if (selectionManager.activeGroup) {
+    if (activeGroup && picked && isDescendant(picked, activeGroup)) {
       let index = results.length - 1;
       while (
-        picked === selectionManager.activeGroup ||
-        (picked instanceof GroupElement &&
-          isDescendant(selectionManager.activeGroup, picked))
+        picked === activeGroup ||
+        (picked instanceof GroupElement && isDescendant(activeGroup, picked))
       ) {
         picked = results[--index];
       }

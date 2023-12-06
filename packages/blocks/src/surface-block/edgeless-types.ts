@@ -23,10 +23,12 @@ export type EdgelessBlockModelMap = {
 export enum EdgelessElementType {
   FRAME = 'affine:frame',
   NOTE = 'affine:note',
+  IMAGE = 'affine:image',
   SHAPE = 'shape',
   BRUSH = 'brush',
   CONNECTOR = 'connector',
   TEXT = 'text',
+  GROUP = 'group',
   DEBUG = 'debug',
 }
 
