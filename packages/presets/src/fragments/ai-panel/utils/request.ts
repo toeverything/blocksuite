@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { OpenAI } from 'openai';
 
-import { EditorWithAI } from '../api.js';
+import { APIKeys } from './api-keys.js';
 
 export type Uploadable = OpenAI.Images.ImageEditParams['image'];
 export const askDallE3 = async (
@@ -69,7 +69,7 @@ export const askGPT4V = async (
   return result.choices[0].message.content;
 };
 const getGPTAPIKey = () => {
-  const apiKey = EditorWithAI.GPTAPIKey;
+  const apiKey = APIKeys.GPTAPIKey;
   if (!apiKey) {
     alert('Please enter your API key first.');
     assertExists(apiKey, 'Please enter your API key first.');
@@ -77,7 +77,7 @@ const getGPTAPIKey = () => {
   return apiKey;
 };
 const getFalAPIKey = () => {
-  const apiKey = EditorWithAI.FalAPIKey;
+  const apiKey = APIKeys.FalAPIKey;
 
   if (!apiKey) {
     alert('Please enter your API key first.');

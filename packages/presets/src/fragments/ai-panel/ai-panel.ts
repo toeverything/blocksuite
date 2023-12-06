@@ -9,6 +9,7 @@ import type { EditorContainer } from '../../index.js';
 import { GPTAPI, type GPTAPIPayloadMap } from './actions/index.js';
 import { EditorWithAI } from './api.js';
 import { LANGUAGE, TONE } from './config.js';
+import { APIKeys } from './utils/api-keys.js';
 import { insertFromMarkdown } from './utils/markdown-utils.js';
 import { getSelectedBlocks } from './utils/selection-utils.js';
 
@@ -182,12 +183,12 @@ export class AiPanel extends WithDisposable(LitElement) {
   config = () => {
     const changeGPTAPIKey = (e: Event) => {
       if (e.target instanceof HTMLInputElement) {
-        EditorWithAI.GPTAPIKey = e.target.value;
+        APIKeys.GPTAPIKey = e.target.value;
       }
     };
     const changeFalAPIKey = (e: Event) => {
       if (e.target instanceof HTMLInputElement) {
-        EditorWithAI.FalAPIKey = e.target.value;
+        APIKeys.FalAPIKey = e.target.value;
       }
     };
     return html`
@@ -196,14 +197,14 @@ export class AiPanel extends WithDisposable(LitElement) {
         <input
           class="ai-panel-key-input"
           type="text"
-          .value="${EditorWithAI.GPTAPIKey}"
+          .value="${APIKeys.GPTAPIKey}"
           @input="${changeGPTAPIKey}"
         />
         <div class="ai-panel-setting-title">Fal API Key</div>
         <input
           class="ai-panel-key-input"
           type="text"
-          .value="${EditorWithAI.FalAPIKey}"
+          .value="${APIKeys.FalAPIKey}"
           @input="${changeFalAPIKey}"
         />
       </div>

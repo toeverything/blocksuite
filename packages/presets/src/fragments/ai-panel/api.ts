@@ -25,8 +25,6 @@ import {
 } from './utils/selection-utils.js';
 
 export class EditorWithAI {
-  static GPTAPIKey = '';
-  static FalAPIKey = '';
   workspace: Workspace;
   root: BlockSuiteRoot;
 
