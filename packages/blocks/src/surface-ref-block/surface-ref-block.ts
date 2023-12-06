@@ -531,6 +531,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
           this._connectorManager.updatePath(element);
         }
       },
+      removeElement: () => {},
       updateElementLocalRecord: () => {},
       pickById: id => this.getModel(id),
       getGroupParent: getGroupParent,
@@ -599,6 +600,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         pickById: id => this.getModel(id),
         getGroupParent: getGroupParent,
         setGroupParent: setGroupParent,
+        removeElement: () => {},
       });
       element.computedValue = this._getCSSPropertyValue;
       element.mount(this._surfaceRenderer);
