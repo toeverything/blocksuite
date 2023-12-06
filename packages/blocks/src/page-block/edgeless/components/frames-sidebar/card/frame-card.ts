@@ -269,16 +269,16 @@ export class FrameCard extends WithDisposable(LitElement) {
   }
 
   override firstUpdated() {
-    this.disposables.addFromEvent(this.titleContentElement, 'dblclick', () => {
-      const titleEditor = new FrameCardTitleEditor();
-      titleEditor.edgeless = this.edgeless;
-      titleEditor.frameModel = this.frame;
-      titleEditor.titleContentElement = this.titleContentElement;
-      const left = this.titleIndexElement.offsetWidth + 6;
-      titleEditor.left = left;
-      titleEditor.maxWidth = this.titleContainer.offsetWidth - left - 6;
-      this.titleContainer.appendChild(titleEditor);
-    });
+    // this.disposables.addFromEvent(this.titleContentElement, 'dblclick', () => {
+    //   const titleEditor = new FrameCardTitleEditor();
+    //   titleEditor.edgeless = this.edgeless;
+    //   titleEditor.frameModel = this.frame;
+    //   titleEditor.titleContentElement = this.titleContentElement;
+    //   const left = this.titleIndexElement.offsetWidth + 6;
+    //   titleEditor.left = left;
+    //   titleEditor.maxWidth = this.titleContainer.offsetWidth - left - 6;
+    //   this.titleContainer.appendChild(titleEditor);
+    // });
   }
 
   override render() {
