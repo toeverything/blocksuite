@@ -47,7 +47,6 @@ import {
 } from './elements/edgeless-element.js';
 import { GROUP_ROOT } from './elements/group/consts.js';
 import {
-  BrushElement,
   ConnectorElement,
   ElementCtors,
   ElementDefaultProps,
