@@ -60,6 +60,7 @@ import type {
   SurfaceBlockComponent,
 } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import type { SurfaceService } from '../../surface-block/surface-service.js';
 import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -304,9 +305,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
       })
     );
 
+    const surfaceService = this.surface.service as SurfaceService;
     _disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         this.edgelessTool = edgelessTool;
+        surfaceService.slots.edgelessToolUpdated.emit(edgelessTool);
         slots.cursorUpdated.emit(getCursorMode(edgelessTool));
       })
     );
