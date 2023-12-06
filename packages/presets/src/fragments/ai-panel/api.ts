@@ -82,8 +82,13 @@ export class EditorWithAI {
     const canvas = await selectedToCanvas(this.editor);
     canvas?.toBlob(async blob => {
       if (blob) {
-        const pmt = prompt('How would you like it changed?');
-        const b64 = await editImage(pmt || 'Make it pretty', canvas);
+        const prompt =
+          (
+            document.getElementById(
+              'ai-panel-edit-image-prompt'
+            ) as HTMLInputElement
+          )?.value ?? '';
+        const b64 = await editImage(prompt, canvas);
         if (!b64) {
           return;
         }

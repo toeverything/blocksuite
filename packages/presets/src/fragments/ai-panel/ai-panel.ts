@@ -317,7 +317,12 @@ export class AiPanel extends WithDisposable(LitElement) {
       <div class="ai-panel-action-button" @click="${this.api.showMeImage}">
         Edit Image
       </div>
-      <input class="ai-panel-action-prompt" type="text" placeholder="Prompt" />
+      <input
+        id="ai-panel-edit-image-prompt"
+        class="ai-panel-action-prompt"
+        type="text"
+        placeholder="Prompt"
+      />
       <div class="ai-panel-action-description">
         Select some shapes and type prompt to edit them.
       </div>
