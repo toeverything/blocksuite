@@ -21,7 +21,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       width: 467px;
       height: 568px;
       border-radius: 12px;
-      background-color: #fff;
+      background-color: var(--affine-background-overlay-panel-color);
       box-shadow: 0px 10px 80px 0px rgba(0, 0, 0, 0.2);
     }
 
@@ -35,6 +35,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     .search-input {
       border: 0;
       color: var(--affine-text-primary-color);
+      background-color: inherit;
       outline: none;
       width: 100%;
     }
@@ -97,6 +98,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       bottom: 0;
       position: absolute;
       transform: translateY(20px);
+      color: var(--affine-background-overlay-panel-color);
     }
   `;
 

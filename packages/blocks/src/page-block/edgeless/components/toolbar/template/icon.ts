@@ -12,7 +12,7 @@ export const ArrowIcon = html`
     <path
       id="Polygon 19"
       d="M12.6809 16.8585C12.2821 17.4176 11.4514 17.4176 11.0526 16.8585L0.754394 2.41961C0.282281 1.75767 0.755483 0.838941 1.56853 0.838941L22.165 0.838943C22.978 0.838943 23.4512 1.75767 22.9791 2.41961L12.6809 16.8585Z"
-      fill="#FBFBFC"
+      fill="currentColor"
     />
   </svg>
 `;
@@ -42,7 +42,7 @@ export const CardThree = (expanded: boolean) => html`
         : {
             width: '86px',
             height: '56.6px',
-            top: '26px',
+            top: '36px',
             left: '8px',
             transform: 'rotate(0deg)',
           }),
@@ -52,7 +52,7 @@ export const CardThree = (expanded: boolean) => html`
   >
     ${svg`
     <g clip-path="url(#clip0_13696_17641)">
-      <rect width="85" height="50" fill="white" />
+      <rect width="85" height="50" fill="currentColor" />
       <rect x="4" y="7" width="7" height="2" rx="1" fill="#FFEACA" />
       <rect x="4" y="11" width="24" height="40" rx="1" fill="#FFEACA" />
       <g filter="url(#filter0_d_13696_17641)">
@@ -981,14 +981,14 @@ export const CardTwo = (expanded: boolean) => html`
             width: '41.5px',
             height: '24.4px',
             left: '11px',
-            top: '9px',
+            top: '19px',
             transform: 'rotate(-7.2deg)',
           }),
       ...baseStyle,
     })}
     xmlns="http://www.w3.org/2000/svg"
   >
-    ${svg`<rect width="85" height="50" fill="white" />
+    ${svg`<rect width="85" height="50" fill="currentColor" />
     <line
       x1="16"
       y1="31.8907"
@@ -1138,7 +1138,7 @@ export const CardOne = (expanded: boolean) => html`
             width: '56.7px',
             height: '33.3px',
             left: '31px',
-            top: '5.7px',
+            top: '15.7px',
             transform: 'rotate(9.259deg)',
           }),
       ...baseStyle,
@@ -1146,7 +1146,7 @@ export const CardOne = (expanded: boolean) => html`
     xmlns="http://www.w3.org/2000/svg"
   >
     ${svg`<g clip-path="url(#clip0_13703_17928)">
-      <rect width="85" height="50" fill="white" />
+      <rect width="85" height="50" fill="currentColor" />
       <rect
         x="4.17871"
         y="4.62036"

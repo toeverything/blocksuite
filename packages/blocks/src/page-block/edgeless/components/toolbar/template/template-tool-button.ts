@@ -26,6 +26,7 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
       height: 64px;
       overflow: hidden;
       position: relative;
+      color: var(--affine-background-primary-color);
     }
   `;
 
