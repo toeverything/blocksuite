@@ -211,21 +211,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       return true;
     },
-    Space: ctx => {
-      if (!blockElement.selected?.is('text')) return;
-
-      const vEditor = _getVirgo();
-      const vRange = vEditor.getVRange();
-      assertExists(vRange);
-
-      const prefixText = _getPrefixText(vEditor);
-
-      if (!tryConvertBlock(blockElement, vEditor, prefixText, vRange)) {
-        _preventDefault(ctx);
-      }
-
-      return true;
-    },
+    Space: ctx => handleMarkdown(ctx),
+    'Shift-Space': ctx => handleMarkdown(ctx),
     'Mod-a': ctx => {
       _preventDefault(ctx);
       if (!blockElement.selected?.is('text')) return;
@@ -379,6 +366,22 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       },
     });
   });
+
+  function handleMarkdown(ctx: UIEventStateContext) {
+    if (!blockElement.selected?.is('text')) return;
+
+    const vEditor = _getVirgo();
+    const vRange = vEditor.getVRange();
+    assertExists(vRange);
+
+    const prefixText = _getPrefixText(vEditor);
+
+    if (!tryConvertBlock(blockElement, vEditor, prefixText, vRange)) {
+      _preventDefault(ctx);
+    }
+
+    return true;
+  }
 
   function handleDelete(ctx: UIEventStateContext) {
     if (!blockElement.selected?.is('text')) return;
