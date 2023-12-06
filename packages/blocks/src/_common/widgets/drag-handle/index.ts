@@ -13,7 +13,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  calcDropTarget,
   getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getCurrentNativeRange,
@@ -37,11 +36,13 @@ import {
   type DragHandleOption,
   DragHandleOptionsRunner,
   type DropResult,
+  type DropType,
   HOVER_DRAG_HANDLE_GRABBER_WIDTH,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
 import {
+  calcDropTarget,
   captureEventTarget,
   containBlock,
   containChildBlock,
@@ -79,7 +80,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   draggingElements: BlockElement[] = [];
   dropBlockId = '';
-  dropBefore = false;
+  dropType: DropType | null = null;
   dragging = false;
   dragPreview: DragPreview | null = null;
   dropIndicator: DropIndicator | null = null;
@@ -187,7 +188,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.dropBlockId = blockId;
 
     let rect = null;
-    let targetElement = null;
     const model = closestBlockElement.model;
 
     const isDatabase = matchFlavours(model, ['affine:database']);
@@ -203,6 +203,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       this.scale
     );
 
+    let dropType: DropType = 'before';
     if (result) {
       rect = result.rect;
       if (rect) {
@@ -211,19 +212,13 @@ export class AffineDragHandleWidget extends WidgetElement<
         rect.right = rect.right - state.containerOffset.x;
         rect.bottom = rect.bottom - state.containerOffset.y;
       }
-      targetElement = result.modelState.element;
-      this.dropBefore = result.type === 'before' ? true : false;
-    }
-
-    if (targetElement) {
-      const targetBlockId = targetElement.getAttribute(this.root.blockIdAttr);
-      if (targetBlockId) this.dropBlockId = targetBlockId;
+      dropType = result.dropType;
     }
 
     dropIndicator = {
       rect,
       dropBlockId: this.dropBlockId,
-      dropBefore: this.dropBefore,
+      dropType,
     };
 
     return dropIndicator;
@@ -236,7 +231,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   updateDropIndicator = (indicator: DropResult | null) => {
     this.dropBlockId = indicator?.dropBlockId ?? '';
-    this.dropBefore = indicator?.dropBefore ?? false;
+    this.dropType = indicator?.dropType ?? null;
     if (this.dropIndicator) {
       this.dropIndicator.rect = indicator?.rect ?? null;
     }
@@ -251,7 +246,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   resetDropResult = () => {
     this.dropBlockId = '';
-    this.dropBefore = false;
+    this.dropType = null;
     if (this.dropIndicator) this.dropIndicator.rect = null;
   };
 
@@ -417,7 +412,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   private _reset() {
     this.draggingElements = [];
     this.dropBlockId = '';
-    this.dropBefore = false;
+    this.dropType = null;
     this.lastDragPointerState = null;
     this.rafID = 0;
     this.dragging = false;
@@ -880,7 +875,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   private _onDragEnd = () => {
     const targetBlockId = this.dropBlockId;
-    const shouldInsertBefore = this.dropBefore;
+    const dropType = this.dropType;
     const draggingElements = this.draggingElements;
 
     this.hide(true);
@@ -900,15 +895,23 @@ export class AffineDragHandleWidget extends WidgetElement<
       .map(element => getModelByBlockElement(element))
       .filter((x): x is BaseBlockModel => !!x);
     const targetBlock = this.page.getBlockById(targetBlockId);
-    const parent = this.page.getParent(targetBlockId);
+
+    const shouldInsertIn = dropType === 'in';
+    const parent = shouldInsertIn
+      ? targetBlock
+      : this.page.getParent(targetBlockId);
 
     if (targetBlock && parent && selectedBlocks.length > 0) {
-      this.page.moveBlocks(
-        selectedBlocks,
-        parent,
-        targetBlock,
-        shouldInsertBefore
-      );
+      if (shouldInsertIn) {
+        this.page.moveBlocks(selectedBlocks, targetBlock);
+      } else {
+        this.page.moveBlocks(
+          selectedBlocks,
+          parent,
+          targetBlock,
+          dropType === 'before'
+        );
+      }
     }
 
     // TODO: need a better way to update selection
