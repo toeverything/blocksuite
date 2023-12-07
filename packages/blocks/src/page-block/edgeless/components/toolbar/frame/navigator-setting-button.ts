@@ -3,7 +3,7 @@ import '../../buttons/tool-icon-button.js';
 import '../../../../../_common/components/toggle-switch.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, type PropertyValues } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { BLACK_BACKGROUND_KEY } from '../../../../../_common/edgeless/frame/consts.js';

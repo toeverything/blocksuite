@@ -262,7 +262,7 @@ export class FrameCard extends WithDisposable(LitElement) {
     const { disposables } = this;
 
     disposables.add(
-      this.frame.propsUpdated.on(({ key }) => {
+      this.frame.propsUpdated.on(() => {
         this.requestUpdate();
       })
     );
