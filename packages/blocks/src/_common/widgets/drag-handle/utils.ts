@@ -152,6 +152,11 @@ export const getClosestBlockByPoint = (
           blockSelector
         )
   ) as BlockElement;
+  if (
+    !closestBlockElement ||
+    !!closestBlockElement.closest('.surface-ref-note-portal')
+  )
+    return null;
   return closestBlockElement;
 };
 

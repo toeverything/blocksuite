@@ -33,7 +33,7 @@ export * from './_common/utils/types.js';
 export * from './_common/widgets/index.js';
 export { getServiceOrRegister } from './_legacy/service/index.js';
 export type { BaseService } from './_legacy/service/service.js';
-export * from './_presets/index.js';
+export * from './_specs/index.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
