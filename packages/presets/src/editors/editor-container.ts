@@ -58,19 +58,13 @@ export class EditorContainer
   @property({ attribute: false })
   override autofocus = false;
 
-  /**
-   * @deprecated This property is unreliable since pagePreset can be overridden.
-   */
+  /** @deprecated This property is unreliable since pagePreset can be overridden. */
   @query('affine-doc-page')
   private _defaultPageBlock?: DocPageBlockComponent;
 
-  /**
-   * @deprecated This property is unreliable since edgelessPreset can be overridden.
-   */
+  /** @deprecated This property is unreliable since edgelessPreset can be overridden. */
   @query('affine-edgeless-page')
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
-
-  // root: Ref<BlockSuiteRoot> = createRef<BlockSuiteRoot>();
 
   get root() {
     return this.mode === 'page'
