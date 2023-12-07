@@ -195,8 +195,8 @@ export class DebugMenu extends ShadowlessElement {
     super.connectedCallback();
 
     const readSelectionFromURL = async () => {
-      const editor = this.editor.root.value;
-      if (!editor) {
+      const root = this.editor.root;
+      if (!root) {
         await new Promise(resolve => {
           setTimeout(resolve, 500);
         });
@@ -208,7 +208,7 @@ export class DebugMenu extends ShadowlessElement {
       if (!sel) return;
       try {
         const json = JSON.parse(lz.decompressFromEncodedURIComponent(sel));
-        editor.std.selection.fromJSON(json);
+        root.std.selection.fromJSON(json);
       } catch {
         return;
       }
@@ -357,7 +357,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _shareSelection() {
-    const selection = this.editor.root.value?.selection.value;
+    const selection = this.editor.root?.selection.value;
     if (!selection || selection.length === 0) {
       return;
     }

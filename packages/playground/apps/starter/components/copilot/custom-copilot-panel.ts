@@ -82,7 +82,7 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
   }
 
   get root() {
-    return this.editor.root.value as BlockSuiteRoot;
+    return this.editor.root as BlockSuiteRoot;
   }
 
   public toggleDisplay() {
