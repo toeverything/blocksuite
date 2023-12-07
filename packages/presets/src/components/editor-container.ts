@@ -5,9 +5,9 @@ import type {
   PageBlockModel,
 } from '@blocksuite/blocks';
 import {
-  EdgelessPreset,
+  EdgelessEditorBlockSpecs,
   getServiceOrRegister,
-  PagePreset,
+  PageEditorBlockSpecs,
   saveViewportToSession,
   ThemeObserver,
 } from '@blocksuite/blocks';
@@ -52,10 +52,10 @@ export class EditorContainer
   mode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
-  pagePreset = PagePreset;
+  pagePreset = PageEditorBlockSpecs;
 
   @property({ attribute: false })
-  edgelessPreset = EdgelessPreset;
+  edgelessPreset = EdgelessEditorBlockSpecs;
 
   @property({ attribute: false })
   override autofocus = false;
@@ -76,7 +76,7 @@ export class EditorContainer
 
   readonly themeObserver = new ThemeObserver();
 
-  get model(): PageBlockModel | null {
+  get model() {
     return this.page.root as PageBlockModel | null;
   }
 
