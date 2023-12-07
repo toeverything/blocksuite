@@ -776,17 +776,15 @@ export class Page extends Space<FlatBlockMap> {
     }
   };
 
-  validateVersion() {
-    this.workspace.meta.validateVersion(this.workspace);
-  }
-
   private _handleVersion() {
     // Initialization from empty yDoc, indicating that the document is new.
     if (!this.workspace.meta.hasVersion) {
       this.workspace.meta.writeVersion(this.workspace);
     } else {
       // Initialization from existing yDoc, indicating that the document is loaded from storage.
-      this.validateVersion();
+      if (this.awarenessStore.getFlag('enable_legacy_validation')) {
+        this.workspace.meta.validateVersion(this.workspace);
+      }
     }
   }
 
