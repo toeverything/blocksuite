@@ -537,8 +537,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._toggleConnection}">
                 ${this._connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
-              <sl-menu-item @click="${this._addNote}"> Add Note</sl-menu-item>
-              <sl-menu-item @click="${this._exportMarkDown}">
+              <sl-menu-item @click=${this._exportMarkDown}>
                 Export Markdown
               </sl-menu-item>
               <sl-menu-item @click="${this._exportHtml}">
