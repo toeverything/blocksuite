@@ -93,11 +93,14 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
     translateY: number;
     zoom: number;
   }) => {
-    this.portal?.style.setProperty(
-      'transform',
-      `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
-    );
-    this.portal?.style.setProperty('transform-origin', '0 0');
+    this.requestUpdate();
+    this.updateComplete.then(() => {
+      this.portal?.style.setProperty(
+        'transform',
+        `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
+      );
+      this.portal?.style.setProperty('transform-origin', '0 0');
+    });
   };
 
   override render() {

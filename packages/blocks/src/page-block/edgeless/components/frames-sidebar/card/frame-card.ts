@@ -101,6 +101,7 @@ const styles = css`
     box-shadow: 0px 0px 12px 0px rgba(66, 65, 73, 0.18);
     cursor: pointer;
     position: relative;
+    overflow: hidden;
   }
 
   .frame-card-container.selected .frame-card-body {

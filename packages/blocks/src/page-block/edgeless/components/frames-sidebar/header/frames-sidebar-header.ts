@@ -132,7 +132,9 @@ export class FramesSidebarHeader extends WithDisposable(LitElement) {
       this._frameSettingMenu,
       ({ display }) => {
         this._settingPopperShow = display === 'show';
-      }
+      },
+      14,
+      -120
     );
     _disposables.add(this._framesSettingMenuPopper);
   }

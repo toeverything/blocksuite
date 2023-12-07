@@ -52,7 +52,9 @@ const styles = css`
 
   .surface-container {
     position: relative;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     box-sizing: border-box;
     overflow: hidden;
   }
@@ -419,7 +421,7 @@ export class FramePreview extends WithDisposable(LitElement) {
     };
   };
 
-  private _renderSurfaceContent(referencedModel: RefElement) {
+  private _renderSurfaceContent(referencedModel: FrameBlockModel) {
     const { width, height } = this._getViewportWH(referencedModel);
     return html`<div
       class="surface-container"
@@ -469,6 +471,7 @@ export class FramePreview extends WithDisposable(LitElement) {
   override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('frame')) {
       this._refreshViewport();
+      this.requestUpdate();
     }
     this._attachRenderer();
   }
