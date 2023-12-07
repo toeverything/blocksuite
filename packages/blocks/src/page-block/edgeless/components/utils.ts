@@ -170,7 +170,6 @@ export function readImageSize(file: File) {
     reader.addEventListener('load', _ => {
       const img = new Image();
       img.onload = () => {
-        console.log(img.width, img.height);
         size.width = img.width;
         size.height = img.height;
         resolve(size);
