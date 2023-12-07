@@ -60,7 +60,7 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
       this.disposables.addFromEvent(this.vEditorContainer, 'click', e => {
         e.stopPropagation();
       });
-      this.disposables.addFromEvent(this.vEditorContainer, 'doubleClick', e => {
+      this.disposables.addFromEvent(this.vEditorContainer, 'dblclick', e => {
         e.stopPropagation();
       });
 
