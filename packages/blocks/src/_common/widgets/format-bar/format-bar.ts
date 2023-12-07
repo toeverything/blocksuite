@@ -87,6 +87,28 @@ export class AffineFormatBarWidget extends WidgetElement {
     return !readonly && this.displayType !== 'none' && !this._dragging;
   }
 
+  private _appendCustomElement() {
+    if (
+      !this.customItemsContainer ||
+      this.customItemsContainer.children.length ===
+        AffineFormatBarWidget.customElements.size
+    )
+      return;
+
+    if (
+      this._customElements.length !== AffineFormatBarWidget.customElements.size
+    )
+      this._initCustomElement();
+
+    this.customItemsContainer.replaceChildren(...this._customElements);
+  }
+
+  private _initCustomElement() {
+    this._customElements = Array.from(AffineFormatBarWidget.customElements).map(
+      elementCtr => elementCtr(this)
+    );
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this._abortController = new AbortController();
@@ -106,6 +128,10 @@ export class AffineFormatBarWidget extends WidgetElement {
         `format bar not support pageElement: ${pageElement.constructor.name} but its widgets has format bar`
       );
     }
+
+    this._disposables.add(() => {
+      this._customElements = [];
+    });
 
     this.disposables.add(
       this.root.event.add('dragStart', () => {
@@ -237,23 +263,8 @@ export class AffineFormatBarWidget extends WidgetElement {
       }
       return;
     }
-    if (
-      this._customElements.length === 0 &&
-      AffineFormatBarWidget.customElements.size !== 0
-    ) {
-      this._customElements = Array.from(
-        AffineFormatBarWidget.customElements
-      ).map(element => element(this));
-      this.customItemsContainer.append(...this._customElements);
-      this._disposables.add(() => {
-        this._customElements.forEach(element => {
-          element.remove();
-        });
-        this._customElements = [];
-        this.customItemsContainer.replaceChildren();
-      });
-    }
 
+    this._appendCustomElement();
     this._floatDisposables = new DisposableGroup();
 
     const formatQuickBarElement = this._formatBarElement;

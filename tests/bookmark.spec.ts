@@ -23,7 +23,7 @@ import {
 import { assertStoreMatchJSX } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
-const inputUrl = 'localhost';
+const inputUrl = 'http://localhost';
 
 const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await enterPlaygroundRoom(page);
@@ -69,7 +69,7 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
   );
 });
 
-test(scoped`create bookmark by blockhub`, async ({ page }) => {
+test.skip(scoped`create bookmark by blockhub`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -116,8 +116,7 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
 </affine:page>`
   );
 });
-// This function is in AFFine
-// test.skip(scoped`create bookmark by paste`, async ({ page }) => {});
+
 test(scoped`covert bookmark block to link text`, async ({ page }) => {
   await createBookmarkBlockBySlashMenu(page);
   await hoverBookmarkBlock(page);

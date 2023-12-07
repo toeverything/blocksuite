@@ -75,8 +75,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   private _handleEditingTransition() {
     const selection = this.surface.edgeless.selectionManager;
     this._disposables.add(
-      selection.slots.updated.on(async () => {
-        if (this._isEditing) {
+      selection.slots.updated.on(({ elements, editing }) => {
+        if (elements.includes(this.model.id) && editing) {
           this._editing = true;
         } else {
           this._editing = false;
@@ -85,23 +85,11 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     );
   }
 
-  private get _isEditing() {
-    const selection = this.surface.edgeless.selectionManager;
-    return (
-      selection.state.editing &&
-      selection.state.elements.includes(this.model.id)
-    );
-  }
-
   override firstUpdated() {
     const { _disposables, edgeless } = this;
     const selection = this.surface.edgeless.selectionManager;
 
     this._handleEditingTransition();
-
-    this.model.propsUpdated.on(() => {
-      this.requestUpdate();
-    });
 
     _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
@@ -200,10 +188,6 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       transformOrigin: '0 0',
     };
 
-    const editing = this._isEditing;
-    if (!this._editing) {
-      this._editing = editing;
-    }
     const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
 
     const backgroundStyle = {
@@ -224,7 +208,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         : `${borderSize}px ${
             borderStyle === StrokeStyle.Dashed ? 'dashed' : borderStyle
           } var(--affine-black-10)`,
-      boxShadow: editing
+      boxShadow: this._editing
         ? 'var(--affine-active-shadow)'
         : hidden || !shadowType
           ? 'none'

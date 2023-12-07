@@ -157,8 +157,9 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
 class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
   override render() {
     const { model, index, surface } = this;
-    const { xywh } = model;
-    const bound = Bound.deserialize(xywh);
+    const bound = Bound.deserialize(
+      (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
+    );
     const { zoom } = surface.viewport;
     const style = styleMap({
       position: 'absolute',
