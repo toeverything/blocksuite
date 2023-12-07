@@ -203,7 +203,7 @@ export class WorkspaceMeta {
   }
 
   /**
-   * @internal Only for page initialization
+   * @deprecated Only used for legacy page version validation
    */
   validateVersion(workspace: Workspace) {
     const workspaceVersion = this._proxy.workspaceVersion;
