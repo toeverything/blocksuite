@@ -44,18 +44,18 @@ test('export html bookmark', async ({ page }) => {
   await focusRichText(page);
   await type(page, '/bookmark');
   await pressEnter(page);
-  await type(page, 'https://github.com/toeverything/AFFiNE');
+  await type(page, 'http://localhost:5173');
   await pressEnter(page);
 
   const htmlText = await export2Html(page);
   expect(htmlText).toContain(
-    '<a href="https://github.com/toeverything/AFFiNE" class="affine-bookmark-link bookmark source">'
+    '<a href="http://localhost:5173" class="affine-bookmark-link bookmark source">'
   );
   expect(htmlText).toContain(
     '<div class="affine-bookmark-title-content bookmark-title">Bookmark</div>'
   );
   expect(htmlText).toContain(
-    '<div class="affine-bookmark-description bookmark-description">https://github.com/toeverything/AFFiNE</div>'
+    '<div class="affine-bookmark-description bookmark-description">http://localhost:5173</div>'
   );
 });
 

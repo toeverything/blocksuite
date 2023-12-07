@@ -58,8 +58,13 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
       for (const [key, { action }] of Array.from(event.changes.keys)) {
         if (action === 'delete') {
           const child = options.pickById(key);
-          if (child && options.getGroupParent(child) === this)
+          if (child && options.getGroupParent(child) === this) {
             options.setGroupParent(child, options.getGroupParent(this));
+          }
+          if (this.children.size === 0) {
+            options.removeElement(this.id);
+            return;
+          }
         } else if (action === 'add') {
           const child = options.pickById(key);
           assertExists(child);
