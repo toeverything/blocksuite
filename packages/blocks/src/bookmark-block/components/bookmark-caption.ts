@@ -17,7 +17,7 @@ export class BookmarkCaption extends WithDisposable(ShadowlessElement) {
       text-align: center;
       color: var(--affine-icon-color);
       display: inline-block;
-      background: var(--affine-background-primary-color);
+      background: transparent;
     }
     .affine-bookmark-caption::placeholder {
       color: var(--affine-placeholder-color);
