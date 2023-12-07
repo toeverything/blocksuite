@@ -8,10 +8,8 @@ import {
   EdgelessEditorBlockSpecs,
   getServiceOrRegister,
   PageEditorBlockSpecs,
-  saveViewportToSession,
   ThemeObserver,
 } from '@blocksuite/blocks';
-import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { noop, Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
@@ -132,9 +130,6 @@ export class EditorContainer
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mode')) {
       this.slots.pageModeSwitched.emit(this.mode);
-      if (this.mode === 'page') {
-        this._saveViewportLocalRecord();
-      }
     }
 
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
@@ -149,23 +144,6 @@ export class EditorContainer
         forwardSlot(this._edgelessPageBlock.slots, this.slots);
       }
     });
-  }
-
-  private _saveViewportLocalRecord() {
-    const edgelessPage = this.querySelector('affine-edgeless-page');
-    if (edgelessPage) {
-      const { viewport } = edgelessPage.surface;
-      saveViewportToSession(this.page.id, {
-        x: viewport.center.x,
-        y: viewport.center.y,
-        zoom: viewport.zoom,
-      });
-    }
-  }
-
-  /** @deprecated for testing only */
-  createContentParser() {
-    return new ContentParser(this.page);
   }
 
   override render() {
