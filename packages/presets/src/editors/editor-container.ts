@@ -13,19 +13,17 @@ import {
 } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { noop, Slot } from '@blocksuite/global/utils';
-import {
-  BlockSuiteRoot,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
-import type { Ref } from 'lit/directives/ref.js';
-import { createRef, ref } from 'lit/directives/ref.js';
 
-noop(BlockSuiteRoot);
+import { DocEditor } from './doc-editor.js';
+import { EdgelessEditor } from './edgeless-editor.js';
+
+noop(DocEditor);
+noop(EdgelessEditor);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function forwardSlot<T extends Record<string, Slot<any>>>(
@@ -72,7 +70,13 @@ export class EditorContainer
   @query('affine-edgeless-page')
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
-  root: Ref<BlockSuiteRoot> = createRef<BlockSuiteRoot>();
+  // root: Ref<BlockSuiteRoot> = createRef<BlockSuiteRoot>();
+
+  get root() {
+    return this.mode === 'page'
+      ? this._defaultPageBlock?.root
+      : this._edgelessPageBlock?.root;
+  }
 
   readonly themeObserver = new ThemeObserver();
 
@@ -88,7 +92,7 @@ export class EditorContainer
 
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
-    const root = this.root.value;
+    const root = this.root;
     if (root) {
       await root.updateComplete;
     }
@@ -173,38 +177,13 @@ export class EditorContainer
   override render() {
     if (!this.model) return null;
 
-    const rootContainer = keyed(
+    console.log('render', this.mode);
+    return html`${keyed(
       this.model.id,
-      html`<block-suite-root
-        ${ref(this.root)}
-        .page=${this.page}
-        .preset=${this.mode === 'page' ? this.pagePreset : this.edgelessPreset}
-      ></block-suite-root>`
-    );
-
-    return html`
-      <style>
-        editor-container * {
-          box-sizing: border-box;
-        }
-        editor-container,
-        .affine-editor-container {
-          display: block;
-          height: 100%;
-          position: relative;
-          overflow: hidden;
-          font-family: var(--affine-font-family);
-          background: var(--affine-background-primary-color);
-        }
-        @media print {
-          editor-container,
-          .affine-editor-container {
-            height: auto;
-          }
-        }
-      </style>
-      ${rootContainer}
-    `;
+      this.mode === 'page'
+        ? html`<doc-editor .page=${this.page}></doc-editor>`
+        : html`<edgeless-editor .page=${this.page}></edgeless-editor>`
+    )}`;
   }
 }
 
