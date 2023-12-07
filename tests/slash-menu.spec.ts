@@ -659,7 +659,7 @@ test.describe('slash menu with customize menu', () => {
       // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
       customElements.define('affine-custom-slash-menu', CustomSlashMenu);
 
-      const pagePreset = window.$blocksuite.blocks.PagePreset;
+      const pagePreset = window.$blocksuite.blocks.PageEditorBlockSpecs;
       const pageBlockSpec = pagePreset.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
       // @ts-ignore
@@ -720,7 +720,7 @@ test.describe('slash menu with customize menu', () => {
       // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
       customElements.define('affine-custom-slash-menu', CustomSlashMenu);
 
-      const pagePreset = window.$blocksuite.blocks.PagePreset;
+      const pagePreset = window.$blocksuite.blocks.PageEditorBlockSpecs;
       const pageBlockSpec = pagePreset.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
       // @ts-ignore
