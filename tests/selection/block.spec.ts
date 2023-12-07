@@ -150,7 +150,12 @@ test('click the list icon can select and copy', async ({ page }) => {
   await clickListIcon(page, 2);
   await copyByKeyboard(page);
 
-  await focusRichText(page, 0);
+  await focusRichText(page, 0, {
+    clickPosition: {
+      x: 0,
+      y: 0,
+    },
+  });
   await pasteByKeyboard(page);
   await assertRichTexts(page, ['123789123', '456', '789123']);
 });

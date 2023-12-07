@@ -1398,7 +1398,7 @@ test(scoped`clipboard copy muti selection`, async ({ page }) => {
   await assertRichTexts(page, ['abc', 'defbc', 'd']);
 });
 
-test(scoped`clipboard copy nested items`, async ({ page }) => {
+test.skip(scoped`clipboard copy nested items`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);

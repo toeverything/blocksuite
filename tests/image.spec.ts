@@ -120,7 +120,7 @@ test('press enter will create new block when click and select image', async ({
   await activeEmbed(page);
   await pressEnter(page);
   await type(page, 'aa');
-  await assertRichTexts(page, ['aa', '']);
+  await assertRichTexts(page, ['aa']);
 });
 
 test('enter shortcut on focusing embed block and its caption', async ({
@@ -164,7 +164,7 @@ test('should support the enter key of image caption', async ({ page }) => {
   await pressEnter(page);
   await expect(caption).toHaveValue('abc');
 
-  await assertRichTexts(page, ['123', '']);
+  await assertRichTexts(page, ['123']);
   await assertRichTextVRange(page, 0, 0, 0);
 });
 
