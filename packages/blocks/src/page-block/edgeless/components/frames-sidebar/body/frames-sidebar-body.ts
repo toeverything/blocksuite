@@ -101,6 +101,9 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
   @query('.frame-list-container')
   frameListContainer!: HTMLElement;
 
+  @query('frames-sidebar-body')
+  framesSidebarBody!: HTMLElement;
+
   private _frameElementHeight = 0;
 
   get viewportPadding(): [number, number, number, number] {
@@ -258,6 +261,26 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
     });
   }
 
+  /**
+   * click at blank area to clear selection
+   */
+  private _clickBlank = (e: MouseEvent) => {
+    e.stopPropagation();
+    // check if click at toc-card, if not, set this._selected to empty
+    if (
+      (e.target as HTMLElement).closest('frame-card') ||
+      this._selected.length === 0
+    ) {
+      return;
+    }
+
+    this._selected = [];
+    this.edgeless?.selectionManager.setSelection({
+      elements: this._selected,
+      editing: false,
+    });
+  };
+
   private _renderEmptyContent() {
     const emptyContent = html` <div class="no-frames-container">
       <div class="no-frames-placeholder">
@@ -330,6 +353,10 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
         }
       })
     );
+  }
+
+  override firstUpdated() {
+    this._disposables.addFromEvent(this, 'click', this._clickBlank);
   }
 
   override render() {

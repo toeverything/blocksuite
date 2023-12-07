@@ -57,7 +57,7 @@ export class FramesPanel extends WithDisposable(LitElement) {
       <frames-sidebar-body
         class="frames-sidebar-body"
         .edgeless=${this.edgeless}
-        .fitPadding=${[50, 300, 50, 50]}
+        .fitPadding=${[50, 380, 50, 50]}
       ></frames-sidebar-body>
     </div>`;
   }

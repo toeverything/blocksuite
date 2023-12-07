@@ -5,7 +5,11 @@ import { css, html, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { on, once } from '../../../../../_common/utils/event.js';
+import {
+  on,
+  once,
+  stopPropagation,
+} from '../../../../../_common/utils/event.js';
 import type { FrameBlockModel } from '../../../../../frame-block/frame-model.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { FrameCardTitleEditor } from './frame-card-title-editor.js';
@@ -257,6 +261,19 @@ export class FrameCard extends WithDisposable(LitElement) {
     });
   }
 
+  private _mountTitleEditor = (e: MouseEvent) => {
+    e.stopPropagation();
+
+    const titleEditor = new FrameCardTitleEditor();
+    titleEditor.edgeless = this.edgeless;
+    titleEditor.frameModel = this.frame;
+    titleEditor.titleContentElement = this.titleContentElement;
+    const left = this.titleIndexElement.offsetWidth + 6;
+    titleEditor.left = left;
+    titleEditor.maxWidth = this.titleContainer.offsetWidth - left - 6;
+    this.titleContainer.appendChild(titleEditor);
+  };
+
   private _renderDraggingCardNumber() {
     if (this.draggingCardNumber === undefined) return nothing;
 
@@ -272,19 +289,6 @@ export class FrameCard extends WithDisposable(LitElement) {
         this.requestUpdate();
       })
     );
-  }
-
-  override firstUpdated() {
-    this.disposables.addFromEvent(this.titleContentElement, 'dblclick', () => {
-      const titleEditor = new FrameCardTitleEditor();
-      titleEditor.edgeless = this.edgeless;
-      titleEditor.frameModel = this.frame;
-      titleEditor.titleContentElement = this.titleContentElement;
-      const left = this.titleIndexElement.offsetWidth + 6;
-      titleEditor.left = left;
-      titleEditor.maxWidth = this.titleContainer.offsetWidth - left - 6;
-      this.titleContainer.appendChild(titleEditor);
-    });
   }
 
   override render() {
@@ -306,8 +310,18 @@ export class FrameCard extends WithDisposable(LitElement) {
       style=${containerStyle}
     >
       <div class="frame-card-title-container">
-        <div class="card-index">${this.cardIndex + 1}</div>
-        <div class="card-title">${this.frame.title}</div>
+        <div
+          class="card-index"
+          @click=${stopPropagation}
+          @dblclick=${stopPropagation}
+        >
+          ${this.cardIndex + 1}
+        </div>
+        <div class="card-title">
+          <span @click=${stopPropagation} @dblclick=${this._mountTitleEditor}
+            >${this.frame.title}</span
+          >
+        </div>
       </div>
       <div
         class="frame-card-body"
