@@ -39,14 +39,16 @@ import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js
 
 type RefElement = Exclude<EdgelessElement, NoteBlockModel>;
 
-const DEFAULT_PREVIEW_CONTAINER_WIDTH = 284;
-const DEFAULT_PREVIEW_CONTAINER_HEIGHT = 170;
+const DEFAULT_PREVIEW_CONTAINER_WIDTH = 280;
+const DEFAULT_PREVIEW_CONTAINER_HEIGHT = 166;
 
 const styles = css`
   .frame-preview-container {
     display: block;
-    width: var(100% - 16px);
-    height: var(100% - 16px);
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    box-sizing: border-box;
+    overflow: hidden;
     position: relative;
   }
 
@@ -56,7 +58,6 @@ const styles = css`
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    overflow: hidden;
   }
 
   .surface-viewport {
@@ -129,21 +130,11 @@ export class FramePreview extends WithDisposable(LitElement) {
   }
 
   private _initSurfaceRenderer() {
-    let lastWidth = 0;
     this.surfaceRenderer.layerManager.init([
       ...this._elements.values(),
       ...((this._surfaceModel?.children || []) as EdgelessElement[]),
       ...(this.page.getBlockByFlavour('affine:note') as EdgelessElement[]),
     ]);
-    const observer = new ResizeObserver(entries => {
-      if (entries[0].contentRect.width !== lastWidth) {
-        lastWidth = entries[0].contentRect.width;
-        this._refreshViewport();
-      }
-    });
-    observer.observe(this);
-
-    this._disposables.add(() => observer.disconnect());
   }
 
   private _initReferencedModel() {
@@ -348,6 +339,7 @@ export class FramePreview extends WithDisposable(LitElement) {
     elementsMap: Y.Map<Y.Map<unknown>>
   ) => {
     if (type.action === 'add') {
+      console.log('add event on yElements: ', id);
       const yElement = elementsMap.get(id) as Y.Map<unknown>;
       const type = yElement.get('type') as CanvasElementType;
 
@@ -458,7 +450,7 @@ export class FramePreview extends WithDisposable(LitElement) {
     this._initReferencedModel();
     this._initSurfaceRenderer();
 
-    this.disposables.add(
+    this._disposables.add(
       this.edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
         if (fillScreen !== undefined) {
           this.fillScreen = fillScreen;
@@ -470,14 +462,53 @@ export class FramePreview extends WithDisposable(LitElement) {
 
   override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('frame')) {
-      this._refreshViewport();
       this.requestUpdate();
+      this._refreshViewport();
     }
     this._attachRenderer();
   }
 
+  override firstUpdated() {
+    // When top level blocks are added, deleted or moved inside the frame
+    // we need to refresh the viewport
+    this._disposables.add(
+      this.page.slots.blockUpdated.on(event => {
+        const { type, flavour } = event;
+        const isTopLevelBlock = ['affine:image', 'affine:note'].includes(
+          flavour
+        );
+        if (!isTopLevelBlock) return;
+
+        const frameBound = Bound.deserialize(this.frame.xywh);
+        if (type === 'delete') {
+          const deleteModel = event.model as TopLevelBlockModel;
+          const deleteBound = Bound.deserialize(deleteModel.xywh);
+          if (frameBound.containsPoint([deleteBound.x, deleteBound.y])) {
+            this._refreshViewport();
+          }
+        } else {
+          const topLevelBlock = this.page.getBlockById(event.id);
+          if (!topLevelBlock) return;
+          const newBound = Bound.deserialize(
+            (topLevelBlock as TopLevelBlockModel).xywh
+          );
+          if (frameBound.containsPoint([newBound.x, newBound.y])) {
+            this._refreshViewport();
+          }
+        }
+      })
+    );
+
+    // When canvas elements are added, deleted or moved inside the frame
+    // we also need to refresh the viewport
+    if (!this._surfaceModel) return;
+    console.log('surface model', this._surfaceModel);
+  }
+
   override render() {
+    console.log('element render: ', this._elements);
     const { _surfaceModel, frame } = this;
+    console.log('renderer: ', this._surfaceRenderer);
     const noContent = !_surfaceModel || !frame || !frame.xywh;
 
     return html`<div class="frame-preview-container">

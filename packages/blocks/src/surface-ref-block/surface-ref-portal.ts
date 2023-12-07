@@ -58,7 +58,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
 
   private _renderTopLevelBlocks() {
     const containerModel = this.containerModel;
-    const topLevelBlocks =
+    let topLevelBlocks =
       'flavour' in containerModel
         ? getBlocksInFrame(
             this.page,
@@ -67,7 +67,12 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
           )
         : this._getBlocksInChildren(containerModel);
 
-    topLevelBlocks.sort(compare);
+    topLevelBlocks = topLevelBlocks
+      .sort(compare)
+      .filter(
+        model =>
+          (model.flavour as EdgelessBlockType) !== EdgelessBlockType.FRAME
+      );
 
     return repeat(
       topLevelBlocks,

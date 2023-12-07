@@ -324,18 +324,11 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
 
     const { disposables } = this;
     disposables.add(
-      page.slots.blockUpdated.on(({ flavour, type }) => {
-        if (flavour === FRAME && type !== 'update') {
+      page.slots.blockUpdated.on(({ flavour }) => {
+        if (flavour === FRAME) {
           requestAnimationFrame(() => {
             this._updateFrames();
           });
-        }
-      })
-    );
-    disposables.add(
-      page.slots.blockUpdated.on(e => {
-        if (e.type === 'update') {
-          this._updateFrames();
         }
       })
     );
