@@ -5,9 +5,9 @@ import type {
   PageBlockModel,
 } from '@blocksuite/blocks';
 import {
+  DocEditorBlockSpecs,
   EdgelessEditorBlockSpecs,
   getServiceOrRegister,
-  PageEditorBlockSpecs,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { noop, Slot } from '@blocksuite/global/utils';
@@ -48,19 +48,19 @@ export class EditorContainer
   mode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
-  pagePreset = PageEditorBlockSpecs;
+  docSpecs = DocEditorBlockSpecs;
 
   @property({ attribute: false })
-  edgelessPreset = EdgelessEditorBlockSpecs;
+  edgelessSpecs = EdgelessEditorBlockSpecs;
 
   @property({ attribute: false })
   override autofocus = false;
 
-  /** @deprecated This property is unreliable since pagePreset can be overridden. */
+  /** @deprecated unreliable since docSpecs can be overridden */
   @query('affine-doc-page')
   private _defaultPageBlock?: DocPageBlockComponent;
 
-  /** @deprecated This property is unreliable since edgelessPreset can be overridden. */
+  /** @deprecated unreliable since edgelessSpecs can be overridden */
   @query('affine-edgeless-page')
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
 

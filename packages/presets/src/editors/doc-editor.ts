@@ -1,4 +1,4 @@
-import { PageEditorBlockSpecs } from '@blocksuite/blocks';
+import { DocEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import {
   BlockSuiteRoot,
@@ -18,7 +18,7 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
   page!: Page;
 
   @property({ attribute: false })
-  preset = PageEditorBlockSpecs;
+  preset = DocEditorBlockSpecs;
 
   root: Ref<BlockSuiteRoot> = createRef<BlockSuiteRoot>();
 

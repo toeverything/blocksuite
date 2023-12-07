@@ -73,8 +73,8 @@ export function createEditor(page: Page, element: HTMLElement) {
   const presets = getPlaygroundPresets();
 
   const editor = new EditorContainer();
-  editor.pagePreset = presets.pageModePreset;
-  editor.edgelessPreset = presets.edgelessModePreset;
+  editor.docSpecs = presets.pageModePreset;
+  editor.edgelessSpecs = presets.edgelessModePreset;
   editor.page = page;
   editor.slots.pageLinkClicked.on(({ pageId }) => {
     const target = page.workspace.getPage(pageId);

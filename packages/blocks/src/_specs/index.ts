@@ -191,7 +191,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   EmbedGithubBlockSpec,
 ];
 
-export const PageEditorBlockSpecs: BlockSpec[] = [
+export const DocEditorBlockSpecs: BlockSpec[] = [
   DocPageSpec,
   ...CommonFirstPartyBlockSpecs,
 ];
