@@ -15,7 +15,7 @@ import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { noop, Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 
@@ -175,9 +175,8 @@ export class EditorContainer
   }
 
   override render() {
-    if (!this.model) return null;
+    if (!this.model) return nothing;
 
-    console.log('render', this.mode);
     return html`${keyed(
       this.model.id,
       this.mode === 'page'
