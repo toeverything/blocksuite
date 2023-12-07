@@ -103,37 +103,6 @@ export class EditorContainer
   override connectedCallback() {
     super.connectedCallback();
 
-    const keydown = (e: KeyboardEvent) => {
-      if (e.altKey && e.metaKey && e.code === 'KeyC') {
-        e.preventDefault();
-      }
-
-      // `esc`  clear selection
-      if (e.code !== 'Escape') {
-        return;
-      }
-      const pageModel = this.model;
-      if (!pageModel) return;
-
-      if (this.mode === 'page') {
-        // FIXME(mirone)
-        // getPageBlock(pageModel)?.selection?.clear();
-      }
-
-      const selection = getSelection();
-      if (!selection || selection.isCollapsed || !this.isEditorElementActive) {
-        return;
-      }
-      selection.removeAllRanges();
-    };
-
-    // Question: Why do we prevent this?
-    if (IS_FIREFOX) {
-      this._disposables.addFromEvent(document.body, 'keydown', keydown);
-    } else {
-      this._disposables.addFromEvent(window, 'keydown', keydown);
-    }
-
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
     }
