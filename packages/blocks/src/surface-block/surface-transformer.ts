@@ -19,6 +19,7 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
         delta: value.toDelta(),
       };
     } else if (value instanceof Workspace.Y.Map) {
+      // now the YMap type only in group element, which is Y.Map<string,true>
       return {
         [SURFACE_YMAP_UNIQ_IDENTIFIER]: true,
         json: value.toJSON(),
