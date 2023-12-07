@@ -2,7 +2,7 @@ import { BlocksUtils } from '@blocksuite/blocks';
 import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
 import { type BaseBlockModel, Slice } from '@blocksuite/store';
 
-import type { EditorContainer } from '../../../components/index.js';
+import type { EditorContainer } from '../../../editors/index.js';
 import { getMarkdownFromSlice } from './markdown-utils.js';
 import { getEdgelessPageBlockFromEditor } from './mind-map-utils.js';
 

@@ -10,7 +10,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import type { EditorContainer } from '../../../components/index.js';
+import type { EditorContainer } from '../../../editors/index.js';
 
 interface Position {
   x: number;

@@ -8,7 +8,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { Workspace } from '@blocksuite/store';
 
-import type { EditorContainer } from '../../components/index.js';
+import type { EditorContainer } from '../../editors/index.js';
 import { GPTAPI, type GPTAPIPayloadMap } from './actions/index.js';
 import { demoScript } from './demo-script.js';
 import {
@@ -30,8 +30,8 @@ export class EditorWithAI {
 
   constructor(private editor: EditorContainer) {
     this.workspace = editor.page.workspace;
-    assertExists(editor.root.value, 'Editor root is not ready');
-    this.root = editor.root.value;
+    assertExists(editor.root, 'Editor root is not ready');
+    this.root = editor.root;
   }
 
   async makeItReal() {
