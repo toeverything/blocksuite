@@ -327,6 +327,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         this.requestUpdate();
       })
     );
+    _disposables.add(
+      this.edgeless.slots.navigatorSettingUpdated.on(({ hideToolbar }) => {
+        if (hideToolbar !== undefined && hideToolbar !== this._hideToolbar) {
+          this._hideToolbar = hideToolbar;
+        }
+      })
+    );
   }
 
   private _trySaveBrushStateLocalRecord = () => {

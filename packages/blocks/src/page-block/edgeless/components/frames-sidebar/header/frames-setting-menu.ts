@@ -12,6 +12,8 @@ import {
 import { stopPropagation } from '../../../../../_common/utils/event.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 
+const HIDE_TOOLBAR_KEY = 'blocksuite:presentation:hideToolbar';
+
 const styles = css`
   :host {
     display: block;
@@ -87,11 +89,16 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   @state()
   fillScreen = false;
 
+  @state()
+  hideToolbar = false;
+
   private _tryRestoreSettings() {
     const blackBackground = sessionStorage.getItem(BLACK_BACKGROUND_KEY);
     const fillScreen = sessionStorage.getItem(FILL_SCREEN_KEY);
+    const hideToolbar = sessionStorage.getItem(HIDE_TOOLBAR_KEY);
     this.blackBackground = blackBackground !== 'false';
     this.fillScreen = fillScreen === 'true';
+    this.hideToolbar = hideToolbar === 'true';
   }
 
   private _onBlackBackgroundChange = (checked: boolean) => {
@@ -109,6 +116,14 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     sessionStorage.setItem(FILL_SCREEN_KEY, this.fillScreen.toString());
   };
 
+  private _onHideToolBarChange = (checked: boolean) => {
+    this.hideToolbar = checked;
+    this.edgeless.slots.navigatorSettingUpdated.emit({
+      hideToolbar: this.hideToolbar,
+    });
+    sessionStorage.setItem(HIDE_TOOLBAR_KEY, this.hideToolbar.toString());
+  };
+
   override connectedCallback() {
     super.connectedCallback();
     this._tryRestoreSettings();
@@ -120,14 +135,20 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
 
   override firstUpdated() {
     this.disposables.add(
-      this.edgeless.slots.navigatorSettingUpdated.on(({ blackBackground }) => {
-        if (
-          blackBackground !== undefined &&
-          blackBackground !== this.blackBackground
-        ) {
-          this.blackBackground = blackBackground;
+      this.edgeless.slots.navigatorSettingUpdated.on(
+        ({ blackBackground, hideToolbar }) => {
+          if (
+            blackBackground !== undefined &&
+            blackBackground !== this.blackBackground
+          ) {
+            this.blackBackground = blackBackground;
+          }
+
+          if (hideToolbar !== undefined && hideToolbar !== this.hideToolbar) {
+            this.hideToolbar = hideToolbar;
+          }
         }
-      })
+      )
     );
   }
 
@@ -156,7 +177,12 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
       </div>
       <div class="frames-setting-menu-item action">
         <div class="action-label">Hide toolbar while presenting</div>
-        <div class="toggle-button"><toggle-switch></toggle-switch></div>
+        <div class="toggle-button">
+          <toggle-switch
+            .on=${this.hideToolbar}
+            .onChange=${this._onHideToolBarChange}
+          ></toggle-switch>
+        </div>
       </div>
       <div class="frames-setting-menu-item action">
         <div class="action-label">Hide background while presenting</div>
