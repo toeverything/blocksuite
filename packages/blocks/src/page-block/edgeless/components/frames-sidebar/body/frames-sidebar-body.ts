@@ -162,6 +162,8 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
         .map(frameItem => frameItem.frame)
         .sort(this.edgeless.surface.compare);
 
+      // update selected frames index
+      // make the indexes larger than the frame before and smaller than the frame after
       let before = frames[insertIndex - 1]?.index || null;
       const after = frames[insertIndex]?.index || null;
       selectedFrames.forEach(frame => {
@@ -250,10 +252,7 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
         this.insertIndex = undefined;
 
         if (insertIdx === undefined) return;
-        // update selected frames index
-        // make the indexes larger than the frame before and smaller than the frame after
         this._reorderFrames(selected, framesMap, insertIdx);
-        // this._moveBlocks(insertIdx, selected, framesMap, frames);
       },
       onDragMove: idx => {
         this.insertIndex = idx;

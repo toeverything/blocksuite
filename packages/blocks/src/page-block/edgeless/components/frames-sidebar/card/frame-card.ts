@@ -154,7 +154,6 @@ const styles = css`
   }
 
   .frame-card-container.placeholder {
-    /* pointer-events: none; */
     opacity: 0.5;
   }
 `;
