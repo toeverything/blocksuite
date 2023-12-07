@@ -18,6 +18,7 @@ import {
 } from './utils/edit-image.js';
 import { genHtml } from './utils/gen-html.js';
 import { getEdgelessPageBlockFromEditor } from './utils/mind-map-utils.js';
+import { askDallE3 } from './utils/request.js';
 import {
   getSelectedTextContent,
   selectedToCanvas,
@@ -25,18 +26,20 @@ import {
 } from './utils/selection-utils.js';
 
 export class EditorWithAI {
-  workspace: Workspace;
-  root: BlockSuiteRoot;
-
-  constructor(private editor: EditorContainer) {
-    this.workspace = editor.page.workspace;
-    assertExists(editor.root, 'Editor root is not ready');
-    this.root = editor.root;
+  get workspace(): Workspace {
+    return this.editor.page.workspace;
+  }
+  get root(): BlockSuiteRoot {
+    assertExists(this.editor.root);
+    return this.editor.root;
   }
 
-  async makeItReal() {
+  constructor(private editor: EditorContainer) {}
+
+  makeItReal = async () => {
     const png = await selectedToPng(this.editor);
     if (!png) {
+      alert('Please select some shapes first');
       return;
     }
     const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
@@ -65,19 +68,23 @@ export class EditorWithAI {
       { html, design: png, xywh: '[0, 400, 400, 200]' },
       edgelessPage.surface.model.id
     );
-  }
+  };
 
-  async htmlBlockDemo() {
+  htmlBlockDemo = async () => {
     const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
     edgelessPage.page.addBlock(
       EmbedHtmlBlockSpec.schema.model.flavour,
       { html: demoScript, xywh: '[0, 400, 400, 200]' },
       edgelessPage.surface.model.id
     );
-  }
+  };
 
-  async showMeImage() {
+  showMeImage = async () => {
     const canvas = await selectedToCanvas(this.editor);
+    if (!canvas) {
+      alert('Please select some shapes first');
+      return;
+    }
     canvas?.toBlob(async blob => {
       if (blob) {
         const prompt =
@@ -96,31 +103,37 @@ export class EditorWithAI {
         edgelessPage.addImages(imgs);
       }
     });
-  }
+  };
 
-  async createImage() {
-    const pmt = prompt('What image would you like to create?');
-    if (!pmt) {
+  createImage = async () => {
+    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
+    const prompt =
+      (
+        document.getElementById(
+          'ai-panel-create-image-prompt'
+        ) as HTMLInputElement
+      )?.value ?? '';
+    if (!prompt) {
+      alert('Please enter some prompt first');
       return;
     }
-    const b64 = await editImage(pmt);
+    const b64 = await askDallE3(prompt);
     if (b64) {
       const imgFile = pngBase64ToFile(b64, 'img');
-      const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
       const imgs = await loadImages([imgFile], this.workspace.blob);
       await edgelessPage.addImages(imgs);
     }
-  }
+  };
 
-  async textCompletion<K extends keyof GPTAPIPayloadMap>(
+  textCompletion = async <K extends keyof GPTAPIPayloadMap>(
     key: K,
     payload: Omit<GPTAPIPayloadMap[K], 'input'>
-  ) {
+  ) => {
     const input = await getSelectedTextContent(this.root);
     if (!input) {
       alert('Please select some text first');
       return;
     }
     return GPTAPI[key]({ input, ...payload } as never);
-  }
+  };
 }

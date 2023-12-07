@@ -101,6 +101,9 @@ export async function selectedToCanvas(editor: EditorContainer) {
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
     edgelessPage.selectionManager.elements
   );
+  if (notes.length + frames.length + images.length + shapes.length === 0) {
+    return;
+  }
   const canvas = await edgelessPage.clipboard.toCanvas(
     [...notes, ...frames, ...images],
     shapes
@@ -119,3 +122,7 @@ export async function getSelectedTextContent(root: BlockSuiteRoot) {
   const slice = await getSelectedTextSlice(root);
   return await getMarkdownFromSlice(root, slice);
 }
+
+export const stopPropagation = (e: Event) => {
+  e.stopPropagation();
+};

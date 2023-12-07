@@ -71,7 +71,10 @@ export function getSurfaceElementFromEditor(editor: EditorContainer) {
 }
 export function getEdgelessPageBlockFromEditor(editor: EditorContainer) {
   const edgelessPage = editor.getElementsByTagName('affine-edgeless-page')[0];
-  assertExists(edgelessPage);
+  if (!edgelessPage) {
+    alert('Please switch to edgeless mode');
+    throw new Error('Please open switch to edgeless mode');
+  }
   return edgelessPage;
 }
 

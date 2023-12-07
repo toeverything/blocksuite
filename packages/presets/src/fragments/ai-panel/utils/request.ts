@@ -72,13 +72,12 @@ const getGPTAPIKey = () => {
   const apiKey = APIKeys.GPTAPIKey;
   if (!apiKey) {
     alert('Please enter your API key first.');
-    assertExists(apiKey, 'Please enter your API key first.');
+    throw new Error('Please enter your API key first.');
   }
   return apiKey;
 };
 const getFalAPIKey = () => {
   const apiKey = APIKeys.FalAPIKey;
-
   if (!apiKey) {
     alert('Please enter your API key first.');
     assertExists(apiKey, 'Please enter your API key first.');

@@ -1,6 +1,9 @@
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import {
+  type BlockSuiteRoot,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/lit';
+import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -11,10 +14,10 @@ import { EditorWithAI } from './api.js';
 import { LANGUAGE, TONE } from './config.js';
 import { APIKeys } from './utils/api-keys.js';
 import { insertFromMarkdown } from './utils/markdown-utils.js';
-import { getSelectedBlocks } from './utils/selection-utils.js';
+import { getSelectedBlocks, stopPropagation } from './utils/selection-utils.js';
 
 @customElement('ai-panel')
-export class AiPanel extends WithDisposable(LitElement) {
+export class AiPanel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     ai-panel {
       width: 100%;
@@ -45,7 +48,7 @@ export class AiPanel extends WithDisposable(LitElement) {
       background-color: var(--affine-primary-color);
       border-radius: 8px;
       color: white;
-      height: 24px;
+      height: 32px;
       border: 1px solid var(--affine-border-color, #e3e2e4);
       display: flex;
       align-items: center;
@@ -197,6 +200,7 @@ export class AiPanel extends WithDisposable(LitElement) {
         <input
           class="ai-panel-key-input"
           type="text"
+          @keydown="${stopPropagation}"
           .value="${APIKeys.GPTAPIKey}"
           @input="${changeGPTAPIKey}"
         />
@@ -204,6 +208,7 @@ export class AiPanel extends WithDisposable(LitElement) {
         <input
           class="ai-panel-key-input"
           type="text"
+          @keydown="${stopPropagation}"
           .value="${APIKeys.FalAPIKey}"
           @input="${changeFalAPIKey}"
         />
@@ -312,6 +317,13 @@ export class AiPanel extends WithDisposable(LitElement) {
       <div class="ai-panel-action-button" @click="${this.api.createImage}">
         Create Image
       </div>
+      <input
+        id="ai-panel-create-image-prompt"
+        class="ai-panel-action-prompt"
+        type="text"
+        @keydown="${stopPropagation}"
+        placeholder="Prompt"
+      />
       <div class="ai-panel-action-description">
         Type prompt to create an image.
       </div>
@@ -322,6 +334,7 @@ export class AiPanel extends WithDisposable(LitElement) {
         id="ai-panel-edit-image-prompt"
         class="ai-panel-action-prompt"
         type="text"
+        @keydown="${stopPropagation}"
         placeholder="Prompt"
       />
       <div class="ai-panel-action-description">
