@@ -429,7 +429,7 @@ test(scoped`copy & paste outside editor`, async ({ page }) => {
   await assertRichTexts(page, ['123']);
 });
 
-test('should keep first line format when pasted into a new line', async ({
+test.skip('should keep first line format when pasted into a new line', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);

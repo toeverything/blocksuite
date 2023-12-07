@@ -99,7 +99,7 @@ export class ClipboardController implements ReactiveController {
         .withRoot()
         .try(cmd => [
           cmd.getTextSelection().deleteText(),
-          cmd.getBlockSelections().deleteSelectedModels(),
+          cmd.getSelectedModels().deleteSelectedModels(),
         ])
         .run();
     }).run();
