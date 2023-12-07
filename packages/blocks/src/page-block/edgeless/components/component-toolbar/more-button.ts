@@ -21,17 +21,11 @@ import {
   SendToBackIcon,
 } from '../../../../_common/icons/index.js';
 import { type ReorderingType } from '../../../../_common/utils/index.js';
-import { groupBy } from '../../../../_common/utils/iterable.js';
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import type { ImageBlockModel } from '../../../../models.js';
-import type { NoteBlockModel } from '../../../../note-block/index.js';
-import { type CanvasElement } from '../../../../surface-block/index.js';
-import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { removeContainedFrames } from '../../frame-manager.js';
-import { duplicate } from '../../utils/clipboard-utils.js';
+import { duplicate, splitElements } from '../../utils/clipboard-utils.js';
 import { deleteElements } from '../../utils/crud.js';
-import { isFrameBlock, isImageBlock, isNoteBlock } from '../../utils/query.js';
+import { isFrameBlock } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
 
 type Action =
@@ -191,35 +185,6 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   get surface() {
     return this.edgeless.surface;
   }
-
-  private _splitElements() {
-    const { notes, frames, shapes, images } = groupBy(
-      getElementsWithoutGroup(this.selection.elements),
-      element => {
-        if (isNoteBlock(element)) {
-          return 'notes';
-        } else if (isFrameBlock(element)) {
-          return 'frames';
-        } else if (isImageBlock(element)) {
-          return 'images';
-        }
-        return 'shapes';
-      }
-    ) as {
-      notes: NoteBlockModel[];
-      shapes: CanvasElement[];
-      frames: FrameBlockModel[];
-      images: ImageBlockModel[];
-    };
-
-    return {
-      notes: notes ?? [],
-      shapes: shapes ?? [],
-      frames: frames ?? [],
-      images: images ?? [],
-    };
-  }
-
   private _delete() {
     this.page.captureSync();
     deleteElements(this.surface, this.selection.elements);
@@ -246,8 +211,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'copy-as-png': {
-        const { notes, frames, shapes, images } = this._splitElements();
-
+        const { notes, frames, shapes, images } = splitElements(
+          this.selection.elements
+        );
         this.slots.copyAsPng.emit({
           blocks: [...notes, ...removeContainedFrames(frames), ...images],
           shapes,

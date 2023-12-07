@@ -89,7 +89,6 @@ export class Schema {
       parentSchema,
       new SchemaValidateError(parentFlavour, SCHEMA_NOT_FOUND_MESSAGE)
     );
-
     this.validateSchema(schema, parentSchema);
     validateChildren();
   };

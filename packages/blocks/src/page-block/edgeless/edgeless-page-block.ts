@@ -859,7 +859,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _initElementSlot() {
     this._disposables.add(
       this.page.slots.blockUpdated.on(event => {
-        if (![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType))
+        if (
+          ![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType) &&
+          !/affine:embed-*/.test(event.flavour)
+        )
           return;
 
         if (event.flavour === IMAGE) {
