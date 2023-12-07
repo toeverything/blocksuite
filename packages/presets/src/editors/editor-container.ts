@@ -44,6 +44,7 @@ export class EditorContainer
   @property({ attribute: false })
   page!: Page;
 
+  /** Due to product naming, `DocEditor` may be referred to as "page mode" */
   @property({ attribute: false })
   mode: 'page' | 'edgeless' = 'page';
 
@@ -58,16 +59,16 @@ export class EditorContainer
 
   /** @deprecated unreliable since docSpecs can be overridden */
   @query('affine-doc-page')
-  private _defaultPageBlock?: DocPageBlockComponent;
+  private _docPage?: DocPageBlockComponent;
 
   /** @deprecated unreliable since edgelessSpecs can be overridden */
   @query('affine-edgeless-page')
-  private _edgelessPageBlock?: EdgelessPageBlockComponent;
+  private _edgelessPage?: EdgelessPageBlockComponent;
 
   get root() {
     return this.mode === 'page'
-      ? this._defaultPageBlock?.root
-      : this._edgelessPageBlock?.root;
+      ? this._docPage?.root
+      : this._edgelessPage?.root;
   }
 
   readonly themeObserver = new ThemeObserver();
@@ -121,7 +122,7 @@ export class EditorContainer
     if (this.mode === 'page') {
       setTimeout(() => {
         if (this.autofocus) {
-          this._defaultPageBlock?.titleVEditor.focusEnd();
+          this._docPage?.titleVEditor.focusEnd();
         }
       });
     }
@@ -137,12 +138,8 @@ export class EditorContainer
     }
 
     requestAnimationFrame(() => {
-      if (this._defaultPageBlock) {
-        forwardSlot(this._defaultPageBlock.slots, this.slots);
-      }
-      if (this._edgelessPageBlock) {
-        forwardSlot(this._edgelessPageBlock.slots, this.slots);
-      }
+      if (this._docPage) forwardSlot(this._docPage.slots, this.slots);
+      if (this._edgelessPage) forwardSlot(this._edgelessPage.slots, this.slots);
     });
   }
 
