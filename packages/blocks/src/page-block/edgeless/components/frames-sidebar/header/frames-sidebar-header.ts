@@ -14,15 +14,18 @@ import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js
 import { createButtonPopper } from '../../utils.js';
 
 const styles = css`
+  :host {
+    display: flex;
+    width: calc(100% - 16px);
+    justify-content: center;
+  }
+
   .frames-sidebar-header {
     display: flex;
     width: 284px;
     height: 36px;
     align-items: center;
     justify-content: space-between;
-
-    box-sizing: border-box;
-    padding: 0 8px;
   }
 
   .all-frames-setting {

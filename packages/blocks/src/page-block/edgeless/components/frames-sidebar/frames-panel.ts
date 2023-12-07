@@ -23,7 +23,7 @@ const styles = css`
 
   .frames-panel-container {
     background-color: var(--affine-background-primary-color);
-    padding: 16px;
+    /* padding: 0 16px; */
     box-sizing: border-box;
 
     display: flex;
@@ -35,9 +35,9 @@ const styles = css`
   }
 
   .frames-sidebar-body {
+    padding-top: 12px;
     flex-grow: 1;
     width: 100%;
-    padding: 0 8px;
 
     overflow-y: scroll;
   }

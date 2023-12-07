@@ -19,8 +19,10 @@ export function startDragging(
   options: {
     width: number;
     onDragEnd?: (insertIndex?: number) => void;
-    onDragMove?: (insertIdx?: number) => void;
+    onDragMove?: (insertIdx?: number, indicatorTranslateY?: number) => void;
+    framesSidebarBody: HTMLElement;
     frameListContainer: HTMLElement;
+    frameElementHeight: number;
     doc: Document;
     host: Document | HTMLElement;
     container: FramesSidebarBody;
@@ -37,6 +39,8 @@ export function startDragging(
     container,
     onDragMove,
     onDragEnd,
+    frameElementHeight,
+    framesSidebarBody,
     frameListContainer,
     start,
   } = options;
@@ -57,9 +61,11 @@ export function startDragging(
     return el;
   });
   const maskElement = createMaskElement(doc);
-  const listContainerRect = frameListContainer.getBoundingClientRect();
+  const listContainerRect = framesSidebarBody.getBoundingClientRect();
   const children = Array.from(frameListContainer.children) as FrameCard[];
+  const framePadding = 12;
   let idx: undefined | number;
+  let indicatorTranslateY: undefined | number;
 
   container.renderRoot.appendChild(maskElement);
   container.renderRoot.append(...cardElements);
@@ -83,7 +89,7 @@ export function startDragging(
 
     if (!insideListContainer(e)) {
       idx = undefined;
-      onDragMove?.(idx);
+      onDragMove?.(idx, 0);
       return;
     }
 
@@ -92,13 +98,20 @@ export function startDragging(
       if (!card.frame) break;
 
       const topBoundary =
-        listContainerRect.top + card.offsetTop - frameListContainer.scrollTop;
+        listContainerRect.top +
+        card.offsetTop -
+        framesSidebarBody.scrollTop -
+        framePadding / 2;
       const midBoundary = topBoundary + card.offsetHeight / 2;
-      const bottomBoundary = topBoundary + card.offsetHeight;
+      const bottomBoundary = topBoundary + card.offsetHeight + framePadding;
 
       if (e.clientY >= topBoundary && e.clientY <= bottomBoundary) {
         idx = e.clientY > midBoundary ? idx + 1 : idx;
-        onDragMove?.(idx);
+
+        indicatorTranslateY =
+          idx * (frameElementHeight + framePadding) - framePadding / 2;
+
+        onDragMove?.(idx, indicatorTranslateY);
         return;
       }
 

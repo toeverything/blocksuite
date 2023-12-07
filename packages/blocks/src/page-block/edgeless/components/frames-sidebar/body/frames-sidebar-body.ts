@@ -31,13 +31,12 @@ const { FRAME } = EdgelessBlockType;
 
 const styles = css`
   .frame-list-container {
-    display: block;
+    display: flex;
+    align-items: center;
     box-sizing: border-box;
     flex-direction: column;
-    flex-grow: 1;
     width: 100%;
-    height: 100%;
-
+    gap: 12px;
     position: relative;
   }
 
@@ -69,7 +68,7 @@ const styles = css`
     position: absolute;
     contain: layout size;
     width: 284px;
-    left: 0;
+    left: 50%;
   }
 `;
 
@@ -101,10 +100,8 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
   @query('.frame-list-container')
   frameListContainer!: HTMLElement;
 
-  @query('frames-sidebar-body')
-  framesSidebarBody!: HTMLElement;
-
   private _frameElementHeight = 0;
+  private _indicatorTranslateY = 0;
 
   get viewportPadding(): [number, number, number, number] {
     return this.fitPadding
@@ -245,7 +242,9 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
         x: e.detail.clientX,
         y: e.detail.clientY,
       },
+      framesSidebarBody: this,
       frameListContainer: this.frameListContainer,
+      frameElementHeight: this._frameElementHeight,
       edgeless: this.edgeless,
       onDragEnd: insertIdx => {
         this._dragging = false;
@@ -254,8 +253,9 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
         if (insertIdx === undefined) return;
         this._reorderFrames(selected, framesMap, insertIdx);
       },
-      onDragMove: idx => {
+      onDragMove: (idx, indicatorTranslateY) => {
         this.insertIndex = idx;
+        this._indicatorTranslateY = indicatorTranslateY ?? 0;
       },
     });
   }
@@ -308,24 +308,19 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
           @select=${this._selectFrame}
           @fitview=${this._fitToElement}
           @drag=${this._drag}
-          style=${this.insertIndex !== undefined && idx >= this.insertIndex
-            ? 'transform: translateY(20px)'
-            : ''}
         ></frame-card>`
     );
 
-    const frameList = html`<div class="frame-list-container">
+    // console.log('this._indicatorTranslateY: ', this._indicatorTranslateY);
+    const frameList = html` <div class="frame-list-container">
       ${this.insertIndex !== undefined
         ? html`<div
             class="insert-indicator"
-            style="transform: translateY(${this.insertIndex *
-              this._frameElementHeight +
-            10}px)"
+            style=${`transform: translateY(${this._indicatorTranslateY}px) translateX(-50%)`}
           ></div>`
         : nothing}
       ${frameCards}
     </div>`;
-
     return frameList;
   }
 

@@ -16,6 +16,7 @@ export class CustomFramesPanel extends WithDisposable(LitElement) {
       height: 100vh;
       width: 350px;
       box-sizing: border-box;
+      padding-top: 16px;
       z-index: 1;
     }
   `;
