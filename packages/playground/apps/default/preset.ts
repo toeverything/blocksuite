@@ -1,7 +1,7 @@
 import {
   AttachmentService,
+  DocEditorBlockSpecs,
   EdgelessEditorBlockSpecs,
-  PageEditorBlockSpecs,
 } from '@blocksuite/blocks';
 
 const params = new URLSearchParams(location.search);
@@ -19,7 +19,7 @@ class CustomAttachmentService extends AttachmentService {
 }
 
 export function getPlaygroundPresets() {
-  const pageModePreset = PageEditorBlockSpecs.map(preset => {
+  const docModePreset = DocEditorBlockSpecs.map(preset => {
     if (preset.schema.model.flavour === 'affine:attachment') {
       return {
         ...preset,
@@ -39,7 +39,7 @@ export function getPlaygroundPresets() {
   });
 
   return {
-    pageModePreset,
+    docModePreset,
     edgelessModePreset,
   };
 }
