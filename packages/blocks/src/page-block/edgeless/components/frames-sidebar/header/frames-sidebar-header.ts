@@ -20,7 +20,6 @@ const styles = css`
     height: 36px;
     align-items: center;
     justify-content: space-between;
-    font-family: sans-serif;
 
     box-sizing: border-box;
     padding: 0 8px;

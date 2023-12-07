@@ -57,7 +57,6 @@ const styles = css`
 
     /* light/base */
     font-size: 15px;
-    font-family: 'Inter', sans-serif;
     font-style: normal;
     font-weight: 400;
     line-height: 24px;

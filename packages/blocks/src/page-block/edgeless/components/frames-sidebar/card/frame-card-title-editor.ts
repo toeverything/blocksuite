@@ -56,14 +56,12 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
 
       this.disposables.addFromEvent(this.vEditorContainer, 'blur', () => {
         this._unmount();
-        this.titleContentElement.style.display = 'block';
       });
 
       this.disposables.addFromEvent(this.vEditorContainer, 'keydown', e => {
         e.stopPropagation();
         if (e.key === 'Enter' && !this._isComposing) {
           this._unmount();
-          this.titleContentElement.style.display = 'block';
         }
       });
     });
@@ -73,6 +71,7 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
     this.remove();
+    this.titleContentElement.style.display = 'block';
   }
 
   override render() {
@@ -80,6 +79,7 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
       transformOrigin: 'top left',
       borderRadius: '4px',
       maxWidth: `${this.maxWidth}px`,
+      maxHeight: '20px',
       width: 'fit-content',
       height: '20px',
       fontSize: '12px',
@@ -88,11 +88,12 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
       left: `${this.left}px`,
       top: '0px',
       minWidth: '8px',
-      fontFamily: 'var(--affine-font-family)',
-      background: 'var(--affine-white)',
-      color: 'var(--affine-black)',
-      outline: '1px solid var(--affine-blue-500)',
+      background: 'var(--affine-background-primary-color)',
+      color: 'var(--affine-text-primary-color)',
+      boxShadow: '0px 0px 0px 2px rgba(30, 150, 235, 0.30)',
       zIndex: '1',
+      display: 'block',
+      overflow: 'hidden',
     });
     return html`<rich-text
       .yText=${this.frameModel.title.yText}

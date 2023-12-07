@@ -460,6 +460,13 @@ export class FramePreview extends WithDisposable(LitElement) {
         }
       })
     );
+
+    this._disposables.add(
+      this.frame.propsUpdated.on(() => {
+        this.requestUpdate();
+        this._refreshViewport();
+      })
+    );
   }
 
   override updated(_changedProperties: PropertyValues) {

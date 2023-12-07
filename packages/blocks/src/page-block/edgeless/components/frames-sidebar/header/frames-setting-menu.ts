@@ -37,7 +37,6 @@ const styles = css`
   }
 
   .frames-setting-menu-item .setting-label {
-    font-family: sans-serif;
     font-size: 12px;
     font-weight: 500;
     line-height: 20px;
@@ -61,7 +60,6 @@ const styles = css`
     width: 204px;
     height: 20px;
     padding: 0 4px;
-    font-family: sans-serif;
     font-size: 12px;
     font-weight: 500;
     line-height: 20px;

@@ -52,6 +52,10 @@ const styles = css`
 
   .frame-card-title-container {
     display: flex;
+    white-space: nowrap;
+    display: flex;
+    justify-content: start;
+    align-items: center;
     width: 100%;
     height: 20px;
     box-sizing: border-box;
@@ -59,6 +63,7 @@ const styles = css`
     font-size: 12px;
     font-family: Inter;
     cursor: default;
+    position: relative;
   }
 
   .frame-card-title-container .card-index {
@@ -80,12 +85,15 @@ const styles = css`
   }
 
   .frame-card-title-container .card-title {
-    flex: 1 0 0;
     height: 20px;
     color: var(--affine-text-primary-color);
     font-weight: 400;
     line-height: 20px;
-    position: relative;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
   }
 
   .frame-card-body {
@@ -259,9 +267,7 @@ export class FrameCard extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    const { disposables } = this;
-
-    disposables.add(
+    this._disposables.add(
       this.frame.propsUpdated.on(() => {
         this.requestUpdate();
       })
