@@ -80,10 +80,6 @@ export class EditorContainer
     return this.page.root as PageBlockModel | null;
   }
 
-  get isEditorElementActive(): boolean {
-    return document.activeElement?.closest('editor-container') !== null;
-  }
-
   slots: AbstractEditor['slots'] = {
     pageLinkClicked: new Slot(),
     pageModeSwitched: new Slot(),
