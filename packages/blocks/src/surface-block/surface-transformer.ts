@@ -9,6 +9,7 @@ import { BaseBlockTransformer, Workspace } from '@blocksuite/store';
 import type { SurfaceBlockProps } from './surface-model.js';
 
 const SURFACE_TEXT_UNIQ_IDENTIFIER = 'affine:surface:text';
+// Used for group children field
 const SURFACE_YMAP_UNIQ_IDENTIFIER = 'affine:surface:ymap';
 
 export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockProps> {
@@ -19,7 +20,6 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
         delta: value.toDelta(),
       };
     } else if (value instanceof Workspace.Y.Map) {
-      // now the YMap type only in group element, which is Y.Map<string,true>
       return {
         [SURFACE_YMAP_UNIQ_IDENTIFIER]: true,
         json: value.toJSON(),
