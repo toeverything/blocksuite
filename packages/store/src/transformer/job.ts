@@ -196,8 +196,18 @@ export class Job {
       index
     );
 
-    for (const [index, child] of children.entries()) {
-      await this._snapshotToBlock(child, page, id, index);
+    // surface-block needs to be initialized at last.
+    // because the reference id in group and connector need to be updated.
+    if (snapshot.flavour === 'affine:page') {
+      const length = children.length;
+      for (let i = length - 1; i >= 0; i--) {
+        const child = children[i];
+        await this._snapshotToBlock(child, page, id, length - 1 - i);
+      }
+    } else {
+      for (const [index, child] of children.entries()) {
+        await this._snapshotToBlock(child, page, id, index);
+      }
     }
 
     const model = page.getBlockById(id);
