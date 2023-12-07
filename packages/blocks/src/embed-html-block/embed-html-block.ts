@@ -42,6 +42,7 @@ export class EmbedHtmlBlock extends EmbedBlockElement<EmbedHtmlBlockModel> {
       }
       return html`<iframe
         class="embed-html-block-iframe"
+        sandbox="allow-scripts"
         scrolling="false"
         .srcdoc="${this.model.html}"
       ></iframe>`;
