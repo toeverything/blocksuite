@@ -5,7 +5,12 @@ import type {
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { type BlockSnapshot, fromJSON, Job } from '@blocksuite/store';
+import {
+  type BlockSnapshot,
+  fromJSON,
+  Job,
+  Workspace,
+} from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
@@ -28,7 +33,7 @@ import type { IBound } from '../../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
-import type { CanvasElementType } from '../../../surface-block/elements/edgeless-element.js';
+import { CanvasElementType } from '../../../surface-block/elements/edgeless-element.js';
 import {
   type CanvasElement,
   GroupElement,
@@ -53,6 +58,8 @@ import {
 
 const BLOCKSUITE_SURFACE = 'blocksuite/surface';
 const IMAGE_PNG = 'image/png';
+
+const { GROUP } = CanvasElementType;
 
 export class EdgelessClipboardController implements ReactiveController {
   constructor(
@@ -227,7 +234,20 @@ export class EdgelessClipboardController implements ReactiveController {
     });
   };
 
-  private _createCanvasElement(clipboardData: Record<string, unknown>) {
+  private _createCanvasElement(
+    clipboardData: Record<string, unknown>,
+    idMap: Map<string, string>
+  ) {
+    if (clipboardData.type === GROUP) {
+      const yMap = new Workspace.Y.Map();
+      const children = clipboardData.children ?? {};
+      for (const [key, value] of Object.entries(children)) {
+        const newKey = idMap.get(key);
+        assertExists(newKey);
+        yMap.set(newKey, value);
+      }
+      clipboardData.children = yMap;
+    }
     const id = this.surface.addElement(
       clipboardData.type as CanvasElementType,
       clipboardData
@@ -241,16 +261,23 @@ export class EdgelessClipboardController implements ReactiveController {
     elements: Record<string, unknown>[],
     idMap: Map<string, string>
   ) {
-    const result = groupBy(elements, item =>
-      item.type === 'connector' ? 'connectors' : 'nonConnectors'
-    );
+    const result = groupBy(elements, item => {
+      switch (item.type) {
+        case 'connector':
+          return 'connectors';
+        case 'group':
+          return 'groups';
+        default:
+          return 'others';
+      }
+    });
 
     return [
-      ...(result.nonConnectors
+      ...(result.others
         ?.map(d => {
           const oldId = d.id as string;
           assertExists(oldId);
-          const element = this._createCanvasElement(d);
+          const element = this._createCanvasElement(d, idMap);
           idMap.set(oldId, element.id);
           return element;
         })
@@ -267,7 +294,17 @@ export class EdgelessClipboardController implements ReactiveController {
           (<Connection>connector.target).id =
             idMap.get(targetId) ?? (targetId as string);
         }
-        return this._createCanvasElement(connector);
+        const element = this._createCanvasElement(connector, idMap);
+        idMap.set(connector.id as string, element.id);
+        return element;
+      }) ?? []),
+
+      ...(result.groups?.map(group => {
+        const oldId = group.id as string;
+        assertExists(oldId);
+        const element = this._createCanvasElement(group, idMap);
+        idMap.set(oldId, element.id);
+        return element;
       }) ?? []),
     ];
   }
