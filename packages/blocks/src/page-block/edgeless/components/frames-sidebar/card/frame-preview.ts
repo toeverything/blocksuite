@@ -356,6 +356,7 @@ export class FramePreview extends WithDisposable(LitElement) {
       });
       element.computedValue = this._getCSSPropertyValue;
       element.mount(this._surfaceRenderer);
+      this.surfaceRenderer.layerManager.add(element);
       this._elements.set(element.id, element);
       this._onElementUpdatedOrAdded(element.id);
     } else if (type.action === 'update') {
@@ -364,6 +365,7 @@ export class FramePreview extends WithDisposable(LitElement) {
       const element = this._elements.get(id);
 
       if (element) {
+        this.surfaceRenderer.layerManager.delete(element);
         element.unmount();
         this._elements.delete(id);
       }
@@ -498,17 +500,10 @@ export class FramePreview extends WithDisposable(LitElement) {
         }
       })
     );
-
-    // When canvas elements are added, deleted or moved inside the frame
-    // we also need to refresh the viewport
-    if (!this._surfaceModel) return;
-    console.log('surface model', this._surfaceModel);
   }
 
   override render() {
-    console.log('element render: ', this._elements);
     const { _surfaceModel, frame } = this;
-    console.log('renderer: ', this._surfaceRenderer);
     const noContent = !_surfaceModel || !frame || !frame.xywh;
 
     return html`<div class="frame-preview-container">
