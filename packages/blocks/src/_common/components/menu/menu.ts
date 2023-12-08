@@ -726,6 +726,23 @@ export const createPopup = (
       options?.onClose?.();
     }
   };
+
+  // logic to update pop-up position during resizing of screen
+  let currentScreenWidth = window.innerWidth;
+  window.addEventListener('resize', function () {
+    const updatedScreenWidth = window.innerWidth;
+    if (updatedScreenWidth !== currentScreenWidth) {
+      computePosition(target, content, {
+        middleware: options?.middleware ?? [shift({ crossAxis: true })],
+      }).then(({ x, y }) => {
+        Object.assign(content.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+        });
+        currentScreenWidth = updatedScreenWidth;
+      });
+    }
+  });
   return () => {
     modal.remove();
   };

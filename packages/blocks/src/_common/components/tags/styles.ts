@@ -4,10 +4,6 @@ import { css, unsafeCSS } from 'lit';
 export const styles = css`
   affine-multi-tag-select {
     position: absolute;
-    top: 40% !important;
-    left: 50% !important;
-    width: 30% !important;
-    transform: translate(-50%, -50%);
     width: 100%;
     z-index: 2;
     border: 1px solid var(--affine-border-color);
