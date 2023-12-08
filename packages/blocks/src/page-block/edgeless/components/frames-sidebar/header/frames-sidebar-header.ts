@@ -6,6 +6,10 @@ import { css, html, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
 import {
+  FILL_SCREEN_KEY,
+  type NavigatorMode,
+} from '../../../../../_common/edgeless/frame/consts.js';
+import {
   SettingsIcon,
   SmallFrameNavigatorIcon,
 } from '../../../../../_common/icons/edgeless.js';
@@ -118,13 +122,20 @@ export class FramesSidebarHeader extends WithDisposable(LitElement) {
     typeof createButtonPopper
   > | null = null;
 
+  private _navigatorMode: NavigatorMode = 'fit';
+
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
     this.edgeless.tools.setEdgelessTool(edgelessTool);
   };
 
   private _enterPresentationMode = () => {
-    this.setEdgelessTool({ type: 'frameNavigator' });
+    this.setEdgelessTool({ type: 'frameNavigator', mode: this._navigatorMode });
   };
+
+  private _tryLoadNavigatorStateLocalRecord() {
+    this._navigatorMode =
+      sessionStorage.getItem(FILL_SCREEN_KEY) === 'true' ? 'fill' : 'fit';
+  }
 
   override firstUpdated() {
     const _disposables = this._disposables;
@@ -139,6 +150,14 @@ export class FramesSidebarHeader extends WithDisposable(LitElement) {
       -120
     );
     _disposables.add(this._framesSettingMenuPopper);
+
+    _disposables.add(
+      this.edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
+        this._navigatorMode = fillScreen ? 'fill' : 'fit';
+      })
+    );
+
+    this._tryLoadNavigatorStateLocalRecord();
   }
 
   override render() {

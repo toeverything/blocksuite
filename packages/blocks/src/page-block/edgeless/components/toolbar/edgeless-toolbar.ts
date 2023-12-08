@@ -24,7 +24,11 @@ import {
 import { customElement, state } from 'lit/decorators.js';
 
 import { toast } from '../../../../_common/components/toast.js';
-import type { NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
+import {
+  FILL_SCREEN_KEY,
+  HIDE_TOOLBAR_KEY,
+  type NavigatorMode,
+} from '../../../../_common/edgeless/frame/consts.js';
 import {
   EdgelessImageIcon,
   EdgelessTextIcon,
@@ -45,8 +49,6 @@ import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
 
 const { FRAME } = EdgelessBlockType;
-
-const HIDE_TOOLBAR_KEY = 'blocksuite:presentation:hideToolbar';
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {
@@ -256,6 +258,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     );
   }
 
+  private _tryLoadNavigatorStateLocalRecord() {
+    this._navigatorMode =
+      sessionStorage.getItem(FILL_SCREEN_KEY) === 'true' ? 'fill' : 'fit';
+  }
+
   override firstUpdated() {
     const { _disposables, edgeless } = this;
     const { slots, page } = edgeless;
@@ -328,12 +335,20 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       })
     );
     _disposables.add(
-      this.edgeless.slots.navigatorSettingUpdated.on(({ hideToolbar }) => {
-        if (hideToolbar !== undefined && hideToolbar !== this._hideToolbar) {
-          this._hideToolbar = hideToolbar;
+      this.edgeless.slots.navigatorSettingUpdated.on(
+        ({ hideToolbar, fillScreen }) => {
+          if (hideToolbar !== undefined && hideToolbar !== this._hideToolbar) {
+            this._hideToolbar = hideToolbar;
+          }
+
+          if (fillScreen !== undefined) {
+            this._navigatorMode = fillScreen ? 'fill' : 'fit';
+          }
         }
-      })
+      )
     );
+
+    this._tryLoadNavigatorStateLocalRecord();
   }
 
   private _trySaveBrushStateLocalRecord = () => {
@@ -568,7 +583,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .tooltipOffset=${17}
           .iconContainerPadding=${8}
           @click=${() => {
-            this.setEdgelessTool({ type: 'frameNavigator' });
+            this.setEdgelessTool({
+              type: 'frameNavigator',
+              mode: this._navigatorMode,
+            });
           }}
         >
           ${FrameNavigatorIcon}
