@@ -8,7 +8,7 @@ import type { EditorContainer } from '../../src/index.js';
 export function getSurface(page: Page, editor: EditorContainer) {
   const surfaceModel = page.getBlockByFlavour('affine:surface');
 
-  return editor.root.value!.view.viewFromPath('block', [
+  return editor.root!.view.viewFromPath('block', [
     page.root!.id,
     surfaceModel[0]!.id,
   ]) as SurfaceBlockComponent;

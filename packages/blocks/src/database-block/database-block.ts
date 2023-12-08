@@ -93,9 +93,22 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         this.indicator.remove();
         const model = this.page.getBlockById(id);
         const target = this.page.getBlockById(result.dropBlockId);
-        const parent = this.page.getParent(result.dropBlockId);
+        let parent = this.page.getParent(result.dropBlockId);
+        const shouldInsertIn = result.dropType === 'in';
+        if (shouldInsertIn) {
+          parent = target;
+        }
         if (model && target && parent) {
-          this.page.moveBlocks([model], parent, target, result.dropBefore);
+          if (shouldInsertIn) {
+            this.page.moveBlocks([model], parent);
+          } else {
+            this.page.moveBlocks(
+              [model],
+              parent,
+              target,
+              result.dropType === 'before'
+            );
+          }
         }
       };
     }

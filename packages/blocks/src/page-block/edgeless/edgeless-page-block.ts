@@ -18,7 +18,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { toast } from '../../_common/components/toast.js';
 import { BLOCK_ID_ATTR } from '../../_common/consts.js';
 import { listenToThemeChange } from '../../_common/theme/utils.js';
-import { getViewportFromSession } from '../../_common/utils/edgeless.js';
+import {
+  getViewportFromSession,
+  saveViewportToSession,
+} from '../../_common/utils/edgeless.js';
 import type {
   EdgelessElement,
   EdgelessTool,
@@ -60,6 +63,7 @@ import type {
   SurfaceBlockComponent,
 } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import type { SurfaceService } from '../../surface-block/surface-service.js';
 import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -299,14 +303,14 @@ export class EdgelessPageBlockComponent extends BlockElement<
     );
 
     this._disposables.add(
-      listenToThemeChange(this, () => {
-        this.surface.refresh();
-      })
+      listenToThemeChange(this, () => this.surface.refresh())
     );
 
+    const surfaceService = this.surface.service as SurfaceService;
     _disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         this.edgelessTool = edgelessTool;
+        surfaceService.slots.edgelessToolUpdated.emit(edgelessTool);
         slots.cursorUpdated.emit(getCursorMode(edgelessTool));
       })
     );
@@ -363,7 +367,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
     _disposables.add(
       slots.elementRemoved.on(({ element }) => {
         if (isFrameBlock(element)) {
-          this._updateFrames();
+          const frames = this.page.getBlockByFlavour(
+            FRAME
+          ) as FrameBlockModel[];
+          this.frames = frames
+            .filter(frame => frame.id !== element.id)
+            .sort(compare);
         }
       })
     );
@@ -722,13 +731,20 @@ export class EdgelessPageBlockComponent extends BlockElement<
     });
   }
 
+  private _saveViewportLocalRecord() {
+    const { viewport } = this.surface;
+    saveViewportToSession(this.page.id, {
+      x: viewport.center.x,
+      y: viewport.center.y,
+      zoom: viewport.zoom,
+    });
+  }
+
   private _getSavedViewport() {
     const { viewport } = this.surface;
     const viewportData = getViewportFromSession(this.page.id);
 
-    if (!viewportData) {
-      return null;
-    }
+    if (!viewportData) return null;
 
     if ('referenceId' in viewportData) {
       const block = this.surface.pickById(
@@ -843,7 +859,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _initElementSlot() {
     this._disposables.add(
       this.page.slots.blockUpdated.on(event => {
-        if (![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType))
+        if (
+          ![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType) &&
+          !/affine:embed-*/.test(event.flavour)
+        )
           return;
 
         if (event.flavour === IMAGE) {
@@ -915,6 +934,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.tools.dispose();
 
     this.selectionManager.dispose();
+    this._saveViewportLocalRecord();
   }
 
   override render() {

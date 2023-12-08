@@ -30,7 +30,7 @@ export class GroupSetting extends WithDisposable(ShadowlessElement) {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      ${unsafeCSS(dataViewCssVariable())}
+      ${unsafeCSS(dataViewCssVariable())};
     }
     .group-item {
       display: flex;

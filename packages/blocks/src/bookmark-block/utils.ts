@@ -38,8 +38,8 @@ async function queryUrlData(url: string): Promise<BookmarkBlockUrlData> {
     }
   } else {
     const response = await fetch(
-      // https://github.com/toeverything/link-preview
-      'https://link-preview.toeverything.workers.dev',
+      // https://github.com/toeverything/affine-workers/tree/main/packages/link-preview
+      'https://affine-worker.toeverything.workers.dev/api/linkPreview',
       {
         method: 'POST',
         headers: {
@@ -49,7 +49,8 @@ async function queryUrlData(url: string): Promise<BookmarkBlockUrlData> {
           url,
         }),
       }
-    );
+    ).catch(() => null);
+    if (!response || !response.ok) return {};
     const data: LinkPreviewResponseData = await response.json();
     return {
       title: data.title,

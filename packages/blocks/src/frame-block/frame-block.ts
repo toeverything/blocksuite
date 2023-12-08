@@ -51,8 +51,10 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     );
 
     this._disposables.add(
-      this.surface.edgeless.slots.elementUpdated.on(() => {
-        this.requestUpdate();
+      this.surface.edgeless.slots.elementUpdated.on(({ id }) => {
+        if (id === this.model.id) {
+          this.requestUpdate();
+        }
       })
     );
   }

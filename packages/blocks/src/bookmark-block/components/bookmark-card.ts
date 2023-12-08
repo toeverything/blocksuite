@@ -115,16 +115,45 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       border-radius: 8px;
       overflow: hidden;
     }
+
+    .overlay-mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
   `;
 
   @state()
   bookmark!: BookmarkBlockComponent;
+
+  @state()
+  private _pointerPressed = false;
 
   override connectedCallback(): void {
     super.connectedCallback();
     this.disposables.add(
       this.bookmark.model.propsUpdated.on(() => {
         this.requestUpdate();
+      })
+    );
+
+    this.disposables.add(
+      this.bookmark.std.event.add('pointerDown', e => {
+        const event = e.get('pointerState');
+        // 0: Main button pressed, usually the left button or the un-initialized state
+        // See https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
+        if (event.button !== 0) return;
+        this._pointerPressed = true;
+      })
+    );
+    this.disposables.add(
+      this.bookmark.std.event.add('pointerUp', e => {
+        const event = e.get('pointerState');
+        // 0: Main button pressed, usually the left button or the un-initialized state
+        if (event.button !== 0) return;
+        this._pointerPressed = false;
       })
     );
   }
@@ -153,6 +182,10 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       this.bookmark.model.bookmarkTitle ??
       'Bookmark';
     const isEmbed = type === 'embed';
+    // See https://github.com/toeverything/blocksuite/issues/5579
+    const selectionMask = this._pointerPressed
+      ? html`<div class="overlay-mask"></div>`
+      : null;
 
     return html`<div
       class="affine-bookmark-link"
@@ -164,7 +197,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     >
       ${isEmbed
         ? html`<div class="affine-bookmark-embed-frame">
-            ${embedIframeTemplate(url)}
+            ${selectionMask} ${embedIframeTemplate(url)}
           </div>`
         : nothing}
       <div
