@@ -204,11 +204,14 @@ export const templates: TemplateCategory[] = [
                     J_7Uy0M1s3: {
                       type: 'group',
                       children: {
-                        BmOmdekpay: true,
-                        JI8htWNAxX: true,
-                        '-K-H02zO-R': true,
-                        '-vvVHIw4aX': true,
-                        'block:nc1pGg4Gsh': true,
+                        'affine:surface:ymap': true,
+                        json: {
+                          BmOmdekpay: true,
+                          JI8htWNAxX: true,
+                          '-K-H02zO-R': true,
+                          '-vvVHIw4aX': true,
+                          'block:nc1pGg4Gsh': true,
+                        },
                       },
                       title: {
                         'affine:surface:text': true,

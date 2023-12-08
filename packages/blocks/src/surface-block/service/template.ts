@@ -6,6 +6,7 @@ import {
   type PageSnapshot,
   PageSnapshotSchema,
   type SnapshotReturn,
+  Workspace,
 } from '@blocksuite/store';
 
 import type { SurfaceBlockModel } from '../surface-model.js';
@@ -33,7 +34,7 @@ type TemplateType = 'edgeless-template' | 'sticker';
 export type SlotBlockPayload = {
   type: 'block';
   data: {
-    modelData: SnapshotReturn<object>;
+    blockJson: BlockSnapshot;
     parent?: string;
     index?: number;
   };
@@ -66,14 +67,7 @@ export class TemplateJob {
 
   slots = {
     beforeInsert: new Slot<
-      | {
-          type: 'block';
-          data: {
-            modelData: SnapshotReturn<object>;
-            parent?: string;
-            index?: number;
-          };
-        }
+      | SlotBlockPayload
       | {
           type: 'template';
           template: PageSnapshot;
@@ -88,9 +82,12 @@ export class TemplateJob {
     TemplateJob.middlewares.forEach(middleware => middleware(this));
   }
 
-  private _mergeElements(from: Y.Map<unknown>, to: Y.Map<unknown>) {
-    from.forEach((val, key) => {
-      to.set(key, val);
+  private _mergeElements(from: Boxed<Y.Map<unknown>>, to: Y.Map<unknown>) {
+    const tempDoc = new Workspace.Y.Doc();
+    tempDoc.getMap('temp').set('from', from.yMap);
+
+    from.yMap.get('value')!.forEach((val, key) => {
+      to.set(key, (val as Y.Map<unknown>).clone());
     });
   }
 
@@ -104,7 +101,7 @@ export class TemplateJob {
             from as SnapshotReturn<{
               elements: Boxed<Y.Map<unknown>>;
             }>
-          ).props.elements.getValue()!,
+          ).props.elements,
           (to as SurfaceBlockModel).elements.getValue()!
         );
         break;
@@ -165,6 +162,14 @@ export class TemplateJob {
         return;
       }
 
+      const slotData = {
+        blockJson: snapshot,
+        parent,
+        index,
+      };
+
+      this.slots.beforeInsert.emit({ type: 'block', data: slotData });
+
       const modelData = await job.snapshotToModelData(snapshot);
 
       blockList.push({
@@ -191,8 +196,6 @@ export class TemplateJob {
     const mergeBlockMap = new Map<string, string>();
 
     blockList.forEach(block => {
-      this.slots.beforeInsert.emit({ type: 'block', data: block });
-
       const { modelData, parent, index } = block;
 
       if (MERGE_BLOCK.includes(modelData.flavour as MergeBlockFlavour)) {

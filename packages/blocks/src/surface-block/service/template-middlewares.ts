@@ -1,6 +1,5 @@
 import { assertType } from '@blocksuite/global/utils';
-import type { Boxed } from '@blocksuite/store';
-import { type SnapshotReturn, Workspace, type Y } from '@blocksuite/store';
+import { type SnapshotReturn } from '@blocksuite/store';
 
 import { generateElementId } from '../index.js';
 import type { SlotBlockPayload, TemplateJob } from './template.js';
@@ -19,93 +18,89 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
   const generateBlock = (data: SlotBlockPayload['data']) => {
     const newId = job.model.page.workspace.idGenerator('block');
 
-    const { modelData } = data;
+    const { blockJson } = data;
 
-    regeneratedIdMap.set(modelData.id, newId);
+    regeneratedIdMap.set(blockJson.id, newId);
 
-    modelData.id = newId;
+    blockJson.id = newId;
 
     data.parent = data.parent
       ? regeneratedIdMap.get(data.parent) ?? data.parent
       : undefined;
 
-    if (modelData.flavour === 'affine:surface-ref') {
+    if (blockJson.flavour === 'affine:surface-ref') {
       assertType<
         SnapshotReturn<{
           reference: string;
         }>
-      >(modelData);
+      >(blockJson);
 
-      modelData.props['reference'] =
-        regeneratedIdMap.get(modelData.props['reference']) ?? '';
+      blockJson.props['reference'] =
+        regeneratedIdMap.get(blockJson.props['reference']) ?? '';
     }
 
-    if (modelData.flavour === 'affine:surface') {
-      assertType<
-        SnapshotReturn<{
-          elements: Boxed<Y.Map<Y.Map<unknown>>>;
-        }>
-      >(modelData);
-
-      const elementsMap = new Workspace.Y.Map() as Y.Map<Y.Map<unknown>>;
+    if (blockJson.flavour === 'affine:surface') {
+      const elements: Record<string, Record<string, unknown>> = {};
       const defered: string[] = [];
 
-      modelData.props.elements.getValue()?.forEach((val, id) => {
+      Object.entries(
+        blockJson.props.elements as Record<string, Record<string, unknown>>
+      ).forEach(([id, val]) => {
         const newId = generateElementId();
 
         regeneratedIdMap.set(id, newId);
-        elementsMap.set(newId, val);
+        val.id = newId;
+        elements[newId] = val;
 
-        const type = val.get('type') as string;
-
-        if (['group', 'connector'].includes(type)) {
+        if (['group', 'connector'].includes(val['type'] as string)) {
           defered.push(newId);
         }
       });
 
       defered.forEach(id => {
-        const element = elementsMap.get(id)!;
+        const element = elements[id]!;
 
-        switch (element.get('type') as string) {
+        switch (element['type'] as string) {
           case 'group':
             {
-              const children = element.get('children') as Y.Map<unknown>;
-              const newChildren = new Workspace.Y.Map();
+              const children = element['children'] as {
+                json: Record<string, boolean>;
+              };
+              const newChildrenJson: Record<string, boolean> = {};
 
-              children.forEach((_, childId) => {
-                newChildren.set(regeneratedIdMap.get(childId) ?? childId, true);
+              Object.entries(children.json).forEach(([key, val]) => {
+                newChildrenJson[regeneratedIdMap.get(key) ?? key] = val;
               });
 
-              element.set('children', newChildren);
+              children.json = newChildrenJson;
             }
+
             break;
           case 'connector':
             {
-              const target = element.get('target') as { id?: string };
+              const target = element['target'] as { id?: string };
 
               if (target.id) {
-                element.set('target', {
+                element['target'] = {
                   ...target,
                   id: regeneratedIdMap.get(target.id),
-                });
+                };
               }
 
-              const source = element.get('source') as { id?: string };
+              const source = element['source'] as { id?: string };
 
               if (source.id) {
-                element.set('source', {
+                element['source'] = {
                   ...source,
                   id: regeneratedIdMap.get(source.id),
-                });
+                };
               }
             }
             break;
         }
       });
 
-      console.log(elementsMap);
-      modelData.props.elements.setValue(elementsMap);
-      console.log(modelData.props.elements.getValue());
+      blockJson.props.elements = elements;
     }
   };
 };

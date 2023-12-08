@@ -9,6 +9,8 @@ import { BaseBlockTransformer, Workspace } from '@blocksuite/store';
 import type { SurfaceBlockProps } from './surface-model.js';
 
 const SURFACE_TEXT_UNIQ_IDENTIFIER = 'affine:surface:text';
+// Used for group children field
+const SURFACE_YMAP_UNIQ_IDENTIFIER = 'affine:surface:ymap';
 
 export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockProps> {
   private _toJSON(value: unknown): unknown {
@@ -27,6 +29,13 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
         const yText = new Workspace.Y.Text();
         yText.applyDelta(Reflect.get(value, 'delta'));
         return yText;
+      } else if (Reflect.has(value, SURFACE_YMAP_UNIQ_IDENTIFIER)) {
+        const yMap = new Workspace.Y.Map();
+        const json = Reflect.get(value, 'json') as Record<string, unknown>;
+        Object.entries(json).forEach(([key, value]) => {
+          yMap.set(key, value);
+        });
+        return yMap;
       }
     }
     return value;
@@ -78,6 +87,7 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
 
     Object.entries(elementsJSON).forEach(([key, value]) => {
       const element = this._elementFromJSON(value as Record<string, unknown>);
+
       yMap.set(key, element);
     });
 
