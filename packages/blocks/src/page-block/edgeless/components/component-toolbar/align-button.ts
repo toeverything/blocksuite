@@ -18,9 +18,12 @@ import {
   SmallArrowDownIcon,
 } from '../../../../_common/icons/index.js';
 import type { EdgelessElement } from '../../../../_common/utils/index.js';
-import { Bound, ConnectorElement } from '../../../../surface-block/index.js';
+import {
+  Bound,
+  ConnectorElement,
+  GroupElement,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { isTopLevelBlock } from '../../utils/query.js';
 
 @customElement('edgeless-align-button')
 export class EdgelessAlignButton extends WithDisposable(LitElement) {
@@ -40,12 +43,16 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
   }
 
   private _updateXYWH(ele: EdgelessElement, bound: Bound) {
-    if (isTopLevelBlock(ele)) {
-      this.edgeless.page.updateBlock(ele, {
-        xywh: bound.serialize(),
-      });
-    } else if (ele instanceof ConnectorElement) {
+    if (ele instanceof ConnectorElement) {
       this.edgeless.surface.connector.updateXYWH(ele, bound);
+    } else if (ele instanceof GroupElement) {
+      const groupBound = Bound.deserialize(ele.xywh);
+      ele.childElements.forEach(child => {
+        const newBound = Bound.deserialize(child.xywh);
+        newBound.x += bound.x - groupBound.x;
+        newBound.y += bound.y - groupBound.y;
+        this._updateXYWH(child, newBound);
+      });
     } else {
       this.edgeless.surface.updateElement(ele.id, {
         xywh: bound.serialize(),
