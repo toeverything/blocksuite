@@ -260,7 +260,7 @@ describe('addBlock', () => {
       title: new page.Text(),
     });
 
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': [],
@@ -274,7 +274,7 @@ describe('addBlock', () => {
     const page = await createTestPage();
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -299,7 +299,7 @@ describe('addBlock', () => {
       noteId
     );
 
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -380,7 +380,7 @@ describe('addBlock', () => {
     assert.equal(root.children[0].children[0].flavour, 'affine:paragraph');
     assert.equal(root.childMap.get('1'), 0);
 
-    const serializedChildren = serializeWorkspace(page.doc).spaces[spaceId]
+    const serializedChildren = serializeWorkspace(page.rootDoc).spaces[spaceId]
       .blocks['0']['sys:children'];
     assert.deepEqual(serializedChildren, ['1']);
     assert.equal(root.children[0].id, '1');
@@ -401,7 +401,10 @@ describe('addBlock', () => {
     workspace.removePage(page0.id);
 
     assert.equal(workspace.pages.size, 1);
-    assert.equal(serializeWorkspace(page0.doc).spaces['page:home'], undefined);
+    assert.equal(
+      serializeWorkspace(page0.rootDoc).spaces['page:home'],
+      undefined
+    );
 
     workspace.removePage(page1.id);
     assert.equal(workspace.pages.size, 0);
@@ -482,7 +485,7 @@ describe('deleteBlock', () => {
     const noteId = page.addBlock('affine:note', {}, pageId);
     page.addBlock('affine:paragraph', {}, noteId);
     page.addBlock('affine:paragraph', {}, noteId);
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -525,7 +528,7 @@ describe('deleteBlock', () => {
     const deletedModel = page.getBlockById('1') as BaseBlockModel;
     page.deleteBlock(deletedModel);
 
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': [],
@@ -544,7 +547,7 @@ describe('deleteBlock', () => {
     page.addBlock('affine:paragraph', {}, p1);
     page.addBlock('affine:paragraph', {}, p1);
 
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -597,7 +600,7 @@ describe('deleteBlock', () => {
       bringChildrenTo: deletedModelParent,
     });
 
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -649,7 +652,7 @@ describe('deleteBlock', () => {
     page.addBlock('affine:paragraph', {}, p1);
     page.addBlock('affine:paragraph', {}, p2);
 
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -716,7 +719,7 @@ describe('deleteBlock', () => {
       bringChildrenTo: moveToModel,
     });
 
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -779,7 +782,7 @@ describe('deleteBlock', () => {
     page.addBlock('affine:paragraph', {}, noteId);
 
     // before delete
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -815,7 +818,7 @@ describe('deleteBlock', () => {
     page.deleteBlock(root.children[0].children[0]);
 
     // after delete
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+    assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
