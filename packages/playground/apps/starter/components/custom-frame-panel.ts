@@ -48,7 +48,11 @@ export class CustomFramePanel extends WithDisposable(LitElement) {
     });
 
     this.disposables.add(
-      this.editor.slots.pageModeSwitched.on(() => this.requestUpdate())
+      this.editor.slots.pageModeSwitched.on(() => {
+        this.editor.updateComplete.then(() => {
+          this.requestUpdate();
+        });
+      })
     );
   }
 
