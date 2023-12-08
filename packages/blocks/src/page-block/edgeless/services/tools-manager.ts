@@ -29,7 +29,6 @@ import type { EdgelessToolController } from '../controllers/tools/index.js';
 import { NoteToolController } from '../controllers/tools/note-tool.js';
 import { PanToolController } from '../controllers/tools/pan-tool.js';
 import { ShapeToolController } from '../controllers/tools/shape-tool.js';
-import { TemplateToolController } from '../controllers/tools/template-tool.js';
 import { TextToolController } from '../controllers/tools/text-tool.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
@@ -164,7 +163,6 @@ export class EdgelessToolsManager {
       eraser: new EraserToolController(this.container),
       frame: new FrameToolController(this.container),
       frameNavigator: new PresentToolController(this.container),
-      template: new TemplateToolController(this.container),
     };
 
     this._initMouseAndWheelEvents();

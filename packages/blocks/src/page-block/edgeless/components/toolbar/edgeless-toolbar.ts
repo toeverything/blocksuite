@@ -552,11 +552,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         >
           ${EdgelessImageIcon}
         </edgeless-toolbar-button>
-        <edgeless-template-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        >
+        <edgeless-template-button .edgeless=${this.edgeless}>
         </edgeless-template-button>
       </div>
     `;

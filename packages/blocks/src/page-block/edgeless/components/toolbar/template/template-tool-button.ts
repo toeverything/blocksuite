@@ -32,9 +32,6 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgelessTool!: EdgelessTool;
-
-  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
@@ -42,16 +39,13 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
 
   private _openedPanel: EdgelessTemplatePanel | null = null;
   private _cleanup: (() => void) | null = null;
+  private _previousTool: EdgelessTool | null = null;
 
   private _togglePanel() {
     if (this._openedPanel) {
       this._closePanel();
       return;
     }
-
-    this.setEdgelessTool({
-      type: 'template',
-    });
 
     const panel = document.createElement('edgeless-templates-panel');
     panel.edgeless = this.edgeless;
@@ -85,19 +79,16 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
       this._openedPanel.remove();
       this._openedPanel = null;
       this.requestUpdate();
+
+      if (this._previousTool) {
+        this.setEdgelessTool(this._previousTool);
+        this._previousTool = null;
+      }
     }
   }
 
   private _renderIcon(expanded: boolean) {
     return html`<div class="icon">${renderIcon(expanded)}</div>`;
-  }
-
-  override updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('edgelessTool')) {
-      if (this.edgelessTool.type !== 'template') {
-        this._closePanel();
-      }
-    }
   }
 
   override render() {
