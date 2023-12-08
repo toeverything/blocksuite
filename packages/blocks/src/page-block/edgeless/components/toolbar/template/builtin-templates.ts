@@ -2,7 +2,7 @@ import { templates } from './templates.js';
 
 export type Template = {
   name: string;
-  content: string;
+  content: unknown;
   preview: string;
 };
 
@@ -38,7 +38,7 @@ export const builtInTemplates = {
     const candidates: Template[] = [];
 
     templates.forEach(categroy => {
-      if (cateName && cateName !== categroy.cateName) {
+      if (cateName && cateName !== categroy.name) {
         return;
       }
 

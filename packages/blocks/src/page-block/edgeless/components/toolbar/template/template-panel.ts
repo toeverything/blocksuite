@@ -86,6 +86,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.02);
       background-color: #fff;
       border-radius: 4px;
+      cursor: pointer;
     }
 
     .template-item > svg {
@@ -113,6 +114,15 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
     this._currentCategory = EdgelessTemplatePanel.templates.categories()[0];
     this.addEventListener('keydown', stopPropagation, false);
+  }
+
+  private _insertTemplate(template: unknown) {
+    const job = this.edgeless.surface.service!.TemplateJob.create(
+      this.edgeless.surfaceBlockModel,
+      'edgeless-template'
+    );
+
+    job.insertTemplate(template);
   }
 
   override render() {
@@ -150,7 +160,10 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
             templates,
             template => template.name,
             template => {
-              return html`<div class="template-item">
+              return html`<div
+                class="template-item"
+                @click=${() => this._insertTemplate(template.content)}
+              >
                 ${unsafeHTML(template.preview)}
               </div>`;
             }

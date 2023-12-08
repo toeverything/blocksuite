@@ -70,6 +70,7 @@ import { LayerManager } from './managers/layer-manager.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
+import type { SurfaceService } from './surface-service.js';
 import { Bound } from './utils/bound.js';
 import { getCommonBound } from './utils/bound.js';
 import {
@@ -88,7 +89,10 @@ export type IndexedCanvasUpdateEvent = CustomEvent<{
 }>;
 
 @customElement('affine-surface')
-export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
+export class SurfaceBlockComponent extends BlockElement<
+  SurfaceBlockModel,
+  SurfaceService
+> {
   static override styles = css`
     .affine-edgeless-surface-block-container {
       position: absolute;
