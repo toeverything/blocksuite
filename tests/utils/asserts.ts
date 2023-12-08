@@ -623,7 +623,7 @@ export async function assertStoreMatchJSX(
     plugins: [prettyFormatPlugins.ReactTestComponent],
     printFunctionName: false,
   });
-  expect(snapshot.trimStart(), formattedJSX).toEqual(formattedJSX);
+  expect(formattedJSX, formattedJSX).toEqual(snapshot.trimStart());
 }
 
 type MimeType = 'text/plain' | 'blocksuite/x-c+w' | 'text/html';
