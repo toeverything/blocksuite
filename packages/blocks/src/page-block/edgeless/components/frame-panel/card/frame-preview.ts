@@ -6,11 +6,7 @@ import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { FILL_SCREEN_KEY } from '../../../../../_common/edgeless/frame/consts.js';
-import {
-  type CssVariableName,
-  isCssVariable,
-} from '../../../../../_common/theme/css-variables.js';
-import { getThemePropertyValue } from '../../../../../_common/theme/utils.js';
+import { isCssVariable } from '../../../../../_common/theme/css-variables.js';
 import type {
   EdgelessElement,
   TopLevelBlockModel,
@@ -380,11 +376,9 @@ export class FramePreview extends WithDisposable(LitElement) {
   }
 
   private _getCSSPropertyValue = (value: string) => {
+    const computedStyle = getComputedStyle(this.edgeless);
     if (isCssVariable(value)) {
-      const cssValue = getThemePropertyValue(
-        this.root,
-        value as CssVariableName
-      );
+      const cssValue = computedStyle.getPropertyValue(value);
       if (cssValue === undefined) {
         console.error(
           new Error(

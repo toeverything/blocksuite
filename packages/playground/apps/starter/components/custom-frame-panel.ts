@@ -1,4 +1,4 @@
-import { registerFrameSidebarComponents } from '@blocksuite/blocks';
+import { registerFramePanelComponents } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
 import type { EditorContainer } from '@blocksuite/presets';
 import { css, html, LitElement, nothing } from 'lit';
@@ -41,7 +41,7 @@ export class CustomFramePanel extends WithDisposable(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
 
-    registerFrameSidebarComponents(components => {
+    registerFramePanelComponents(components => {
       Object.entries(components).forEach(([name, component]) => {
         customElements.define(name, component);
       });

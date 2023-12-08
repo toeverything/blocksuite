@@ -72,7 +72,7 @@ const styles = css`
   }
 `;
 
-export class FrameSidebarBody extends WithDisposable(LitElement) {
+export class FramePanelBody extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -124,7 +124,7 @@ export class FrameSidebarBody extends WithDisposable(LitElement) {
       return;
     }
 
-    const frameItems: FrameSidebarBody['_frameItems'] = [];
+    const frameItems: FramePanelBody['_frameItems'] = [];
     const oldSelectedSet = new Set(this._selected);
     const newSelected: string[] = [];
 
@@ -242,7 +242,7 @@ export class FrameSidebarBody extends WithDisposable(LitElement) {
         x: e.detail.clientX,
         y: e.detail.clientY,
       },
-      frameSidebarBody: this,
+      framePanelBody: this,
       frameListContainer: this.frameListContainer,
       frameElementHeight: this._frameElementHeight,
       edgeless: this.edgeless,
@@ -361,6 +361,6 @@ export class FrameSidebarBody extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'frame-sidebar-body': FrameSidebarBody;
+    'frame-panel-body': FramePanelBody;
   }
 }
