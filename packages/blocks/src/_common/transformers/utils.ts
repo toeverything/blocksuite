@@ -48,6 +48,17 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
       snapshot.id = newId;
 
       if (snapshot.flavour === 'affine:surface') {
+        // Generate new IDs for images and frames in advance.
+        snapshot.children.forEach(child => {
+          const original = child.id;
+          if (idMap.has(original)) {
+            newId = idMap.get(original)!;
+          } else {
+            newId = workspace.idGenerator('block');
+            idMap.set(original, newId);
+          }
+        });
+
         Object.entries(
           snapshot.props.elements as Record<string, Record<string, unknown>>
         ).forEach(([_, value]) => {
