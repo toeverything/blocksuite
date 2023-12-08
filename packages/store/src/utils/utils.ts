@@ -4,7 +4,8 @@ import type { z } from 'zod';
 
 import { SYS_KEYS } from '../consts.js';
 import { native2Y } from '../reactive/index.js';
-import type { BlockSchema } from '../schema/base.js';
+import type { BaseBlockModel } from '../schema/base.js';
+import { type BlockSchema } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
 import type { YBlock } from '../workspace/block/block.js';
 import type { Workspace } from '../workspace/index.js';
@@ -25,6 +26,7 @@ export function assertValidChildren(
 
 export function syncBlockProps(
   schema: z.infer<typeof BlockSchema>,
+  model: BaseBlockModel,
   yBlock: YBlock,
   props: Partial<BlockProps>
 ) {
@@ -34,7 +36,8 @@ export function syncBlockProps(
     if (SYS_KEYS.has(key)) return;
     if (value === undefined) return;
 
-    yBlock.set(`prop:${key}`, native2Y(value));
+    // @ts-ignore
+    model[key] = value;
   });
 
   // set default value
@@ -45,7 +48,8 @@ export function syncBlockProps(
       return;
     }
 
-    yBlock.set(`prop:${key}`, native2Y(value));
+    // @ts-ignore
+    model[key] = native2Y(value);
   });
 }
 
