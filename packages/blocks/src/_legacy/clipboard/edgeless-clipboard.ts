@@ -5,16 +5,17 @@ import { groupBy } from '../../_common/utils/iterable.js';
 import { AttachmentService } from '../../attachment-block/attachment-service.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
-import type {
-  EdgelessElement,
-  Selectable,
-  SerializedBlock,
-  TopLevelBlockModel,
+import {
+  type EdgelessElement,
+  type Selectable,
+  type SerializedBlock,
+  type TopLevelBlockModel,
 } from '../../index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {
+  isBookmarkBlock,
   isCanvasElementWithText,
   isFrameBlock,
   isImageBlock,
@@ -40,6 +41,7 @@ import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js
 import { ContentParser } from '../content-parser/index.js';
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
+import type { BookmarkBlockService } from '../service/legacy-services/bookmark-service.js';
 import type { FrameBlockService } from '../service/legacy-services/frame-service.js';
 import type { ImageBlockService } from '../service/legacy-services/image-service.js';
 import type { Clipboard } from './type.js';
@@ -111,6 +113,9 @@ async function prepareClipboardData(selectedAll: Selectable[]) {
       } else if (isImageBlock(selected)) {
         const service = getService(selected.flavour) as ImageBlockService;
         return { ...service.block2Json(selected, []) };
+      } else if (isBookmarkBlock(selected)) {
+        const service = getService(selected.flavour) as BookmarkBlockService;
+        return service.block2Json(selected, []);
       } else if (selected instanceof ConnectorElement) {
         return prepareConnectorClipboardData(selected, selectedAll);
       } else {

@@ -1,4 +1,15 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+
+import { BLOCK_BATCH } from '../surface-block/batch.js';
+import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
+import type { IEdgelessElement } from '../surface-block/elements/edgeless-element.js';
+import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
+import { Bound } from '../surface-block/utils/bound.js';
+import type { PointLocation } from '../surface-block/utils/point-location.js';
+import type { IVec } from '../surface-block/utils/vec.js';
+import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
+export type BookmarkBlockType = 'horizontal' | 'list' | 'vertical' | 'cube';
 
 export interface BookmarkBlockUrlData {
   description?: string;
@@ -18,18 +29,31 @@ export interface BookmarkBlockUrlData {
   crawled?: boolean;
 }
 
+export interface BookmarkBlockEdgelessProps {
+  index: string;
+  xywh?: SerializedXYWH;
+  rotate: number;
+}
+
 export type BookmarkBlockProps = {
-  /**
-   * The embed mode will embed the url into the block
-   */
-  type: 'card' | 'embed';
+  style: BookmarkBlockType;
   url: string;
   caption?: string;
-} & BookmarkBlockUrlData;
+
+  /**
+   * @deprecated
+   * we will use another block to handle embed
+   */
+  type?: 'card' | 'embed';
+} & BookmarkBlockUrlData &
+  BookmarkBlockEdgelessProps;
 
 export const defaultBookmarkProps: BookmarkBlockProps = {
-  type: 'card',
+  style: 'horizontal',
   url: '',
+  index: 'a0',
+  xywh: '[0,0,0,0]',
+  rotate: 0,
 };
 
 export const BookmarkBlockSchema = defineBlockSchema({
@@ -38,8 +62,33 @@ export const BookmarkBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'content',
-    parent: ['affine:note'],
+    parent: ['affine:note', 'affine:surface'],
   },
+  toModel: () => new BookmarkBlockModel(),
 });
 
-export type BookmarkBlockModel = SchemaToModel<typeof BookmarkBlockSchema>;
+@EdgelessSelectableMixin
+export class BookmarkBlockModel
+  extends BaseBlockModel<BookmarkBlockProps>
+  implements IEdgelessElement
+{
+  elementBound!: Bound;
+  override xywh!: SerializedXYWH;
+  override flavour!: EdgelessBlockType.BOOKMARK;
+  get batch() {
+    return BLOCK_BATCH;
+  }
+
+  get connectable() {
+    return true;
+  }
+  containedByBounds!: (_: Bound) => boolean;
+  getNearestPoint!: (_: IVec) => IVec;
+  intersectWithLine!: (_: IVec, _1: IVec) => PointLocation[] | null;
+  getRelativePointLocation!: (_: IVec) => PointLocation;
+  boxSelect!: (bound: Bound) => boolean;
+  hitTest(x: number, y: number): boolean {
+    const bound = Bound.deserialize(this.xywh);
+    return bound.isPointInBound([x, y], 0);
+  }
+}

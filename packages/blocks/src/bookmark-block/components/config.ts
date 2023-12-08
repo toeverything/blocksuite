@@ -73,7 +73,7 @@ export const config: ConfigItem[] = [
     icon: BookmarkIcon,
     tooltip: 'Turn into Card view',
     showWhen: model =>
-      !model.page.readonly && model.type && model.type !== 'card',
+      !model.page.readonly && !!model.type && model.type !== 'card',
     action: (model, callback) => {
       model.page.updateBlock<Partial<BookmarkBlockProps>>(model, {
         type: 'card',

@@ -76,7 +76,7 @@ import { serializeXYWH } from './utils/xywh.js';
 
 type id = string;
 
-const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
+const { NOTE, IMAGE, FRAME, BOOKMARK } = EdgelessBlockType;
 
 export type IndexedCanvasUpdateEvent = CustomEvent<{
   content: HTMLCanvasElement[];
@@ -222,6 +222,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       ...this.getBlocks(FRAME),
       ...this.getBlocks(NOTE),
       ...this.getBlocks(IMAGE),
+      ...this.getBlocks(BOOKMARK),
     ];
   }
 

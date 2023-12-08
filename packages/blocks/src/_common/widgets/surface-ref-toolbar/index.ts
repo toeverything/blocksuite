@@ -162,7 +162,7 @@ function SurfaceRefToolbarOptions(options: {
             .then(blob => {
               const fileName =
                 'title' in referencedModel
-                  ? referencedModel.title.toString()
+                  ? referencedModel.title?.toString() ?? 'Edgeless Content'
                   : 'Edgeless Content';
 
               downloadBlob(blob, fileName);

@@ -3,6 +3,7 @@ import { Workspace } from '@blocksuite/store';
 
 import type { EdgelessElement } from '../../../_common/utils/index.js';
 import { getBlockClipboardInfo } from '../../../_legacy/clipboard/index.js';
+import type { BookmarkBlockService } from '../../../_legacy/service/legacy-services/bookmark-service.js';
 import type { FrameBlockService } from '../../../_legacy/service/legacy-services/frame-service.js';
 import type { ImageBlockService } from '../../../_legacy/service/legacy-services/image-service.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
@@ -14,7 +15,12 @@ import {
 import { getCopyElements } from '../controllers/clipboard.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from './bound-utils.js';
-import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
+import {
+  isBookmarkBlock,
+  isFrameBlock,
+  isImageBlock,
+  isNoteBlock,
+} from './query.js';
 
 const offset = 10;
 export async function duplicate(
@@ -73,6 +79,19 @@ export async function duplicate(
         const json = service.block2Json(element, []);
         id = surface.addElement(
           EdgelessBlockType.IMAGE,
+          {
+            xywh: bound.serialize(),
+            sourceId: json.sourceId,
+          },
+          surface.model.id
+        );
+      } else if (isBookmarkBlock(element)) {
+        const service = edgeless.getService(
+          element.flavour
+        ) as BookmarkBlockService;
+        const json = service.block2Json(element, []);
+        id = surface.addElement(
+          EdgelessBlockType.BOOKMARK,
           {
             xywh: bound.serialize(),
             sourceId: json.sourceId,

@@ -85,7 +85,6 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
         </div>
         <div class="bookmark-modal-input-wrapper">
           <textarea
-            type="text"
             class="bookmark-modal-input description"
             placeholder="Description"
             .value=${this.bookmarkModel.description ?? ''}

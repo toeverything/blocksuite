@@ -10,6 +10,7 @@ import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
+import type { BookmarkBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { type ShapeStyle } from '../../surface-block/consts.js';
 import {
@@ -129,7 +130,8 @@ export type ExtendedModel = BaseBlockModel & Record<string, any>;
 export type TopLevelBlockModel =
   | NoteBlockModel
   | FrameBlockModel
-  | ImageBlockModel;
+  | ImageBlockModel
+  | BookmarkBlockModel;
 
 export type EdgelessElement = TopLevelBlockModel | CanvasElement;
 

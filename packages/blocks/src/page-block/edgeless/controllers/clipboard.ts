@@ -44,6 +44,7 @@ import type { ClipboardController } from '../../clipboard/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { deleteElements } from '../utils/crud.js';
 import {
+  isBookmarkBlock,
   isCanvasElementWithText,
   isFrameBlock,
   isImageBlock,
@@ -783,6 +784,9 @@ async function prepareClipboardData(
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (isImageBlock(selected)) {
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
+      } else if (isBookmarkBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (selected instanceof ConnectorElement) {

@@ -29,6 +29,7 @@ import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
 import {
+  isBookmarkBlock,
   isCanvasElement,
   isFrameBlock,
   isImageBlock,
@@ -398,6 +399,19 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     } else if (isImageBlock(selected)) {
       const imageService = _edgeless.getService(EdgelessBlockType.IMAGE);
       const json = imageService.block2Json(selected, []);
+      const id = this._surface.addElement(
+        EdgelessBlockType.IMAGE,
+        {
+          xywh: json.xywh,
+          sourceId: json.sourceId,
+          rotate: json.rotate,
+        },
+        this._surface.model
+      );
+      return _surface.pickById(id);
+    } else if (isBookmarkBlock(selected)) {
+      const bookmarkService = _edgeless.getService(EdgelessBlockType.BOOKMARK);
+      const json = bookmarkService.block2Json(selected, []);
       const id = this._surface.addElement(
         EdgelessBlockType.IMAGE,
         {

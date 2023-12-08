@@ -31,6 +31,7 @@ import {
   groupBy,
   pickValues,
 } from '../../../../_common/utils/iterable.js';
+import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
@@ -45,7 +46,12 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
-import { isFrameBlock, isImageBlock, isNoteBlock } from '../../utils/query.js';
+import {
+  isBookmarkBlock,
+  isFrameBlock,
+  isImageBlock,
+  isNoteBlock,
+} from '../../utils/query.js';
 
 type CategorizedElements = {
   shape: ShapeElement[];
@@ -56,6 +62,7 @@ type CategorizedElements = {
   note: NoteBlockModel[];
   frame: FrameBlockModel[];
   image: ImageBlockModel[];
+  bookmark: BookmarkBlockModel[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -115,6 +122,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         return 'frame';
       } else if (isImageBlock(model)) {
         return 'image';
+      } else if (isBookmarkBlock(model)) {
+        return 'bookmark';
       }
       return model.type;
     });
