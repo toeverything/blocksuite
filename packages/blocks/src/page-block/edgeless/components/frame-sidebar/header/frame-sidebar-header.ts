@@ -24,7 +24,7 @@ const styles = css`
     justify-content: center;
   }
 
-  .frames-sidebar-header {
+  .frame-sidebar-header {
     display: flex;
     width: 284px;
     height: 36px;
@@ -103,7 +103,7 @@ const styles = css`
   }
 `;
 
-export class FramesSidebarHeader extends WithDisposable(LitElement) {
+export class FrameSidebarHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -161,7 +161,7 @@ export class FramesSidebarHeader extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="frames-sidebar-header">
+    return html`<div class="frame-sidebar-header">
       <div class="all-frames-setting">
         <span class="all-frames-setting-label">All frames</span>
         <edgeless-tool-icon-button
@@ -192,6 +192,6 @@ export class FramesSidebarHeader extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'frames-sidebar-header': FramesSidebarHeader;
+    'frame-sidebar-header': FrameSidebarHeader;
   }
 }

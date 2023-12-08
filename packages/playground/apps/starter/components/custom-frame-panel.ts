@@ -1,13 +1,13 @@
-import { registerFramesSidebarComponents } from '@blocksuite/blocks';
+import { registerFrameSidebarComponents } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
 import type { EditorContainer } from '@blocksuite/presets';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-@customElement('custom-frames-panel')
-export class CustomFramesPanel extends WithDisposable(LitElement) {
+@customElement('custom-frame-panel')
+export class CustomFramePanel extends WithDisposable(LitElement) {
   static override styles = css`
-    .custom-frames-container {
+    .custom-frame-container {
       position: absolute;
       top: 0;
       right: 0;
@@ -31,7 +31,7 @@ export class CustomFramesPanel extends WithDisposable(LitElement) {
   }
 
   private _renderPanel() {
-    return html`<frames-panel .edgeless=${this.edgeless}></frames-panel>`;
+    return html`<frame-panel .edgeless=${this.edgeless}></frame-panel>`;
   }
 
   public toggleDisplay() {
@@ -41,7 +41,7 @@ export class CustomFramesPanel extends WithDisposable(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
 
-    registerFramesSidebarComponents(components => {
+    registerFrameSidebarComponents(components => {
       Object.entries(components).forEach(([name, component]) => {
         customElements.define(name, component);
       });
@@ -55,9 +55,7 @@ export class CustomFramesPanel extends WithDisposable(LitElement) {
   override render() {
     return html`
       ${this._show
-        ? html`<div class="custom-frames-container">
-            ${this._renderPanel()}
-          </div>`
+        ? html`<div class="custom-frame-container">${this._renderPanel()}</div>`
         : nothing}
     `;
   }
@@ -65,6 +63,6 @@ export class CustomFramesPanel extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'custom-frames-panel': CustomFramesPanel;
+    'custom-frame-panel': CustomFramePanel;
   }
 }

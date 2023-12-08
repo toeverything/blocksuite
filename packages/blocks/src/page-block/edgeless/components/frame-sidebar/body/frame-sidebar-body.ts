@@ -40,13 +40,13 @@ const styles = css`
     position: relative;
   }
 
-  .no-frames-container {
+  .no-frame-container {
     display: flex;
     flex-direction: column;
     width: 100%;
   }
 
-  .no-frames-placeholder {
+  .no-frame-placeholder {
     margin-top: 240px;
     align-self: center;
     width: 230px;
@@ -72,7 +72,7 @@ const styles = css`
   }
 `;
 
-export class FramesSidebarBody extends WithDisposable(LitElement) {
+export class FrameSidebarBody extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -124,7 +124,7 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
       return;
     }
 
-    const frameItems: FramesSidebarBody['_frameItems'] = [];
+    const frameItems: FrameSidebarBody['_frameItems'] = [];
     const oldSelectedSet = new Set(this._selected);
     const newSelected: string[] = [];
 
@@ -242,7 +242,7 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
         x: e.detail.clientX,
         y: e.detail.clientY,
       },
-      framesSidebarBody: this,
+      frameSidebarBody: this,
       frameListContainer: this.frameListContainer,
       frameElementHeight: this._frameElementHeight,
       edgeless: this.edgeless,
@@ -281,8 +281,8 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
   };
 
   private _renderEmptyContent() {
-    const emptyContent = html` <div class="no-frames-container">
-      <div class="no-frames-placeholder">
+    const emptyContent = html` <div class="no-frame-container">
+      <div class="no-frame-placeholder">
         Add frames to organize and present your Edgeless
       </div>
     </div>`;
@@ -361,6 +361,6 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'frames-sidebar-body': FramesSidebarBody;
+    'frame-sidebar-body': FrameSidebarBody;
   }
 }
