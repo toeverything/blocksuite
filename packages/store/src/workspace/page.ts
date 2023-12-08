@@ -195,8 +195,10 @@ export class Page extends Space<FlatBlockMap> {
     return this._idGenerator('block');
   }
 
-  getBlockById(id: string) {
-    return this._blockTree.getBlock(id)?.model ?? null;
+  getBlockById<Model extends BaseBlockModel = BaseBlockModel>(
+    id: string
+  ): Model | null {
+    return (this._blockTree.getBlock(id)?.model as Model) ?? null;
   }
 
   getBlockByFlavour(blockFlavour: string | string[]) {

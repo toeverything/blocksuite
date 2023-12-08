@@ -18,9 +18,7 @@ import { defaultAttachmentProps } from './attachment-model.js';
 
 const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
 
-export function cloneAttachmentProperties(
-  model: BaseBlockModel<AttachmentBlockModel>
-) {
+export function cloneAttachmentProperties(model: AttachmentBlockModel) {
   const clonedProps = {} as AttachmentBlockProps;
   for (const cur in defaultAttachmentProps) {
     const key = cur as keyof AttachmentBlockProps;
