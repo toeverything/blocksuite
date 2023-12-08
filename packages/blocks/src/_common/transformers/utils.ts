@@ -26,7 +26,17 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
     }
 
     if (payload.type === 'block') {
-      const snapshot = payload.snapshot;
+      const { snapshot } = payload;
+      if (snapshot.flavour === 'affine:page') {
+        const index = snapshot.children.findIndex(
+          c => c.flavour === 'affine:surface'
+        );
+        if (index !== -1) {
+          const [surface] = snapshot.children.splice(index, 1);
+          snapshot.children.push(surface);
+        }
+      }
+
       const original = snapshot.id;
       let newId: string;
       if (idMap.has(original)) {
