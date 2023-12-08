@@ -630,7 +630,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
-      this.surface.onResize();
       this.selectionManager.setSelection(this.selectionManager.state);
     });
 
