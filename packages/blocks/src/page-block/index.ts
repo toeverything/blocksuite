@@ -1,3 +1,5 @@
+import './commands/index.js';
+
 export * from './doc/doc-page-block.js';
 export { getAllowSelectedBlocks } from './doc/utils.js';
 export {
