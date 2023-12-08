@@ -24,10 +24,10 @@ import {
 } from '../../page-block/edgeless/utils/query.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
-import { CanvasElementType } from '../../surface-block/index.js';
 import {
   Bound,
   type CanvasElement,
+  CanvasElementType,
   type Connection,
   ConnectorElement,
   deserializeXYWH,
@@ -232,7 +232,10 @@ export class EdgelessClipboard implements Clipboard {
       if (files.length === 0) {
         return;
       }
-      const res: { file: File; sourceId: string }[] = [];
+      const res: {
+        file: File;
+        sourceId: string;
+      }[] = [];
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (file.type.startsWith('image')) {
@@ -480,7 +483,9 @@ export class EdgelessClipboard implements Clipboard {
       frames: SerializedBlock[];
       notes?: SerializedBlock[];
       images?: SerializedBlock[];
-      elements?: { type: CanvasElement['type'] }[];
+      elements?: {
+        type: CanvasElement['type'];
+      }[];
     };
 
     // map old id to new id to rebuild connector's source and target
@@ -560,7 +565,7 @@ export class EdgelessClipboard implements Clipboard {
     );
   }
 
-  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+  async toCanvas(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
     const blocksLen = blocks.length;
     const shapesLen = shapes.length;
 
@@ -592,6 +597,14 @@ export class EdgelessClipboard implements Clipboard {
 
     assertExists(canvas);
 
+    return canvas;
+  }
+
+  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+    const canvas = await this.toCanvas(blocks, shapes);
+    if (!canvas) {
+      return;
+    }
     // @ts-ignore
     if (window.apis?.clipboard?.copyAsImageFromString) {
       // @ts-ignore

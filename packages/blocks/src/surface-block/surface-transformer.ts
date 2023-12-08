@@ -95,7 +95,7 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
       yMap.set(key, element);
     });
 
-    const elements = this._internal.Native(yMap);
+    const elements = this._internal.Boxed(yMap);
 
     snapshotRet.props = {
       elements,

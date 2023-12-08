@@ -114,7 +114,7 @@ const migration = {
 export const SurfaceBlockSchema = defineBlockSchema({
   flavour: 'affine:surface',
   props: (internalPrimitives): SurfaceBlockProps => ({
-    elements: internalPrimitives.Native(new Workspace.Y.Map()),
+    elements: internalPrimitives.Boxed(new Workspace.Y.Map()),
   }),
   metadata: {
     version: 5,

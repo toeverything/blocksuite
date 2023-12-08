@@ -113,3 +113,4 @@ Example:
 - minjuSong @mingjuu 2023/11/26
 - Seohyun Park, @sseooh, 2023/11/26
 - Eunseo Seo, @ddeonseo, 2023/11/29
+- Gaurav Ruhela, @gauravruhela07, 2023/12/07

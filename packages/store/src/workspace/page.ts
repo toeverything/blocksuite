@@ -195,8 +195,10 @@ export class Page extends Space<FlatBlockMap> {
     return this._idGenerator('block');
   }
 
-  getBlockById(id: string) {
-    return this._blockTree.getBlock(id)?.model ?? null;
+  getBlockById<Model extends BaseBlockModel = BaseBlockModel>(
+    id: string
+  ): Model | null {
+    return (this._blockTree.getBlock(id)?.model as Model) ?? null;
   }
 
   getBlockByFlavour(blockFlavour: string | string[]) {
@@ -509,7 +511,7 @@ export class Page extends Space<FlatBlockMap> {
 
         const schema = this.schema.flavourSchemaMap.get(model.flavour);
         assertExists(schema);
-        syncBlockProps(schema, yBlock, callBackOrProps);
+        syncBlockProps(schema, model, yBlock, callBackOrProps);
         return;
       }
 
@@ -741,6 +743,7 @@ export class Page extends Space<FlatBlockMap> {
       this.slots.rootDeleted.emit(id);
     }
     assertExists(model);
+    this._blockTree.onBlockRemoved(id);
     this.slots.blockUpdated.emit({
       type: 'delete',
       id,
@@ -748,7 +751,6 @@ export class Page extends Space<FlatBlockMap> {
       parent: this.getParent(model)?.id ?? '',
       model,
     });
-    this._blockTree.onBlockRemoved(id);
   }
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
@@ -776,17 +778,15 @@ export class Page extends Space<FlatBlockMap> {
     }
   };
 
-  validateVersion() {
-    this.workspace.meta.validateVersion(this.workspace);
-  }
-
   private _handleVersion() {
     // Initialization from empty yDoc, indicating that the document is new.
     if (!this.workspace.meta.hasVersion) {
       this.workspace.meta.writeVersion(this.workspace);
     } else {
       // Initialization from existing yDoc, indicating that the document is loaded from storage.
-      this.validateVersion();
+      if (this.awarenessStore.getFlag('enable_legacy_validation')) {
+        this.workspace.meta.validateVersion(this.workspace);
+      }
     }
   }
 

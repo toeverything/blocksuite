@@ -8,8 +8,9 @@ import {
   StrokeStyle,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorContainer } from '@blocksuite/presets';
 import { Workspace } from '@blocksuite/store';
+
+import type { EditorContainer } from '../../../editors/index.js';
 
 interface Position {
   x: number;
@@ -67,6 +68,14 @@ export function getSurfaceElementFromEditor(editor: EditorContainer) {
   assertExists(surfaceElement);
 
   return surfaceElement;
+}
+export function getEdgelessPageBlockFromEditor(editor: EditorContainer) {
+  const edgelessPage = editor.getElementsByTagName('affine-edgeless-page')[0];
+  if (!edgelessPage) {
+    alert('Please switch to edgeless mode');
+    throw new Error('Please open switch to edgeless mode');
+  }
+  return edgelessPage;
 }
 
 export function createMindMapOnEdgeless(

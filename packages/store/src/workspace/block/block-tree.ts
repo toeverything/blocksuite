@@ -53,9 +53,9 @@ export class BlockTree {
     }
 
     const block = this._blocks.get(id)!;
-    block.model.deleted.emit();
     block.model.dispose();
     this._blocks.delete(id);
+    block.model.deleted.emit();
   }
 
   addBlock(id: string, flavour: string, initialProps: Record<string, unknown>) {
