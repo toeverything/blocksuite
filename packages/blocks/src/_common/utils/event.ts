@@ -89,6 +89,12 @@ export function once<
   handler: (ev: M[K]) => void,
   options?: boolean | AddEventListenerOptions
 ): () => void;
+export function once<T extends HTMLElement>(
+  element: T,
+  event: string,
+  handler: (ev: Event) => void,
+  options?: boolean | AddEventListenerOptions
+): () => void;
 export function once<
   T extends Document,
   K extends keyof M,

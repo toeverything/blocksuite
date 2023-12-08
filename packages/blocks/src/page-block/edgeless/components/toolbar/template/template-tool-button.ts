@@ -5,6 +5,7 @@ import { arrow, computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { once } from '../../../../../_common/utils/event.js';
 import type { EdgelessTool } from '../../../../../index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { renderIcon } from './icon.js';
@@ -40,6 +41,7 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   private _openedPanel: EdgelessTemplatePanel | null = null;
+  private _cleanup: (() => void) | null = null;
 
   private _togglePanel() {
     if (this._openedPanel) {
@@ -53,6 +55,10 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
 
     const panel = document.createElement('edgeless-templates-panel');
     panel.edgeless = this.edgeless;
+
+    this._cleanup = once(panel, 'closepanel', () => {
+      this._closePanel();
+    });
     this._openedPanel = panel;
     this.renderRoot.appendChild(panel);
     this.requestUpdate();
@@ -74,6 +80,8 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
 
   private _closePanel() {
     if (this._openedPanel) {
+      this._cleanup?.();
+      this._cleanup = null;
       this._openedPanel.remove();
       this._openedPanel = null;
       this.requestUpdate();

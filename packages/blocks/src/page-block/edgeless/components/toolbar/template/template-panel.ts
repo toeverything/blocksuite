@@ -122,7 +122,13 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       'edgeless-template'
     );
 
-    job.insertTemplate(template);
+    job.insertTemplate(template).then(() => {
+      this._closePanel();
+    });
+  }
+
+  private _closePanel() {
+    this.dispatchEvent(new CustomEvent('closepanel'));
   }
 
   override render() {
