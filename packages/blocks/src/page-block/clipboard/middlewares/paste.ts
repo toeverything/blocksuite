@@ -53,6 +53,7 @@ class PasteTr {
   private readonly firstSnapshot: BlockSnapshot;
   private readonly lastSnapshot: BlockSnapshot;
   private readonly lastIndex: number;
+  private readonly firstSnapshotIsPlainText: boolean;
   constructor(
     public readonly std: BlockSuiteRoot['std'],
     public readonly text: TextSelection,
@@ -69,6 +70,9 @@ class PasteTr {
     this.firstSnapshot = snapshot.content[0];
     this.lastSnapshot = findLast(snapshot.content[snapshot.content.length - 1]);
     this.lastIndex = this.endPointState.text.length - end.index - end.length;
+    this.firstSnapshotIsPlainText =
+      this.firstSnapshot.flavour === 'affine:paragraph' &&
+      this.firstSnapshot.props.type === 'text';
   }
 
   canMerge = () => {
@@ -77,8 +81,9 @@ class PasteTr {
     return (
       firstTextSnapshot &&
       lastTextSnapshot &&
-      this.fromPointState.text.length > 0 &&
-      this.endPointState.text.length > 0
+      ((this.fromPointState.text.length > 0 &&
+        this.endPointState.text.length > 0) ||
+        this.firstSnapshotIsPlainText)
     );
   };
 
@@ -117,7 +122,10 @@ class PasteTr {
 
   private _mergeSingle = () => {
     this.firstSnapshot.flavour = this.fromPointState.model.flavour;
-    if (this.firstSnapshot.props.type && this.fromPointState.text.length > 0) {
+    if (
+      this.firstSnapshot.props.type &&
+      (this.fromPointState.text.length > 0 || this.firstSnapshotIsPlainText)
+    ) {
       this.firstSnapshot.props.type = (
         this.fromPointState.model as ParagraphBlockModel
       ).type;
@@ -130,7 +138,10 @@ class PasteTr {
 
   private _mergeMultiple = () => {
     this.firstSnapshot.flavour = this.fromPointState.model.flavour;
-    if (this.firstSnapshot.props.type && this.fromPointState.text.length > 0) {
+    if (
+      this.firstSnapshot.props.type &&
+      (this.fromPointState.text.length > 0 || this.firstSnapshotIsPlainText)
+    ) {
       this.firstSnapshot.props.type = (
         this.fromPointState.model as ParagraphBlockModel
       ).type;

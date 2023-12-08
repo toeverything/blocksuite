@@ -2,8 +2,7 @@ import { VirgoElement, VirgoLine } from '../components/index.js';
 
 export function isNativeTextInVText(text: unknown): text is Text {
   return (
-    text instanceof Text &&
-    (text.parentElement?.dataset.virgoText === 'true' ?? false)
+    text instanceof Text && text.parentElement?.dataset.virgoText === 'true'
   );
 }
 
