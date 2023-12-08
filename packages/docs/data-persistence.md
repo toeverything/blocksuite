@@ -39,9 +39,9 @@ BlockSuite supports a bunch of providers. It allows for the combination of diffe
 // IndexedDB provider from yjs community
 import { IndexeddbPersistence } from 'y-indexeddb';
 
-// `page.doc` is the underlying CRDT data structure.
+// `page.spaceDoc` is the underlying CRDT data structure.
 // Here we connect the doc to the IndexedDB table named 'my-doc'
-const provider = new IndexeddbPersistence('my-doc', page.doc);
+const provider = new IndexeddbPersistence('my-doc', page.spaceDoc);
 ```
 
 ::: info
