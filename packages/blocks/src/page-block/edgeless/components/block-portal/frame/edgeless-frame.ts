@@ -50,6 +50,10 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
     return bound;
   }
 
+  private _updateElement = () => {
+    this.requestUpdate();
+  };
+
   override firstUpdated() {
     const { _disposables, edgeless } = this;
     const { surface } = edgeless;
@@ -91,6 +95,11 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
     });
 
     this.setAttribute('data-frame-title-id', this.frame.id);
+
+    this.frame.title.yText.observe(this._updateElement);
+    _disposables.add(() => {
+      this.frame.title.yText.unobserve(this._updateElement);
+    });
   }
 
   override render() {

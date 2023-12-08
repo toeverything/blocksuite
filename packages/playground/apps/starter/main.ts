@@ -13,6 +13,7 @@ import { AiPanel } from '@blocksuite/presets';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
 
+import { CustomFramePanel } from './components/custom-frame-panel';
 import { CustomNavigationPanel } from './components/custom-navigation-panel.js';
 import { DebugMenu } from './components/debug-menu.js';
 import { SidePanel } from './components/side-panel';
@@ -46,6 +47,7 @@ function subscribePage(workspace: Workspace) {
     const contentParser = new ContentParser(page);
     const debugMenu = new DebugMenu();
     const navigationPanel = new CustomNavigationPanel();
+    const framePanel = new CustomFramePanel();
     const aiPanel = new AiPanel();
     const sidePanel = new SidePanel();
 
@@ -54,15 +56,18 @@ function subscribePage(workspace: Workspace) {
     debugMenu.mode = defaultMode;
     debugMenu.contentParser = contentParser;
     debugMenu.navigationPanel = navigationPanel;
+    debugMenu.framePanel = framePanel;
     debugMenu.aiPanel = aiPanel;
     debugMenu.sidePanel = sidePanel;
 
     navigationPanel.editor = editor;
     aiPanel.editor = editor;
+    framePanel.editor = editor;
 
     document.body.appendChild(debugMenu);
     document.body.appendChild(navigationPanel);
     document.body.appendChild(sidePanel);
+    document.body.appendChild(framePanel);
 
     window.editor = editor;
     window.page = page;
