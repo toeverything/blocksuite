@@ -80,10 +80,10 @@ export class Block {
     // @ts-ignore
     const value = this.model[prop];
 
-    const yValue = native2Y(value);
-    this.yBlock.set(`prop:${prop}`, yValue);
-
     this._stashed.delete(prop);
+
+    // @ts-ignore
+    this.model[prop] = value;
   };
 
   private _byPassUpdate = (fn: () => void) => {
