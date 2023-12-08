@@ -26,7 +26,6 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertBlockCount,
-  assertDOMRectEqual,
   assertEdgelessNonSelectedRect,
   assertEdgelessSelectedRect,
   assertEdgelessSelectedRectModel,
@@ -167,21 +166,19 @@ test('cmd + A should not fire inside active note', async ({ page }) => {
   await type(page, 'hello');
   await switchEditorMode(page);
 
-  const start = { x: 200, y: 100 };
-  const end = { x: 300, y: 200 };
-  await addBasicRectShapeElement(page, start, end);
-  await selectAllByKeyboard(page);
-
   await selectNoteInEdgeless(page, noteId);
-  const box1 = await getEdgelessSelectedRect(page);
-
   // second click become active
   await selectNoteInEdgeless(page, noteId);
   await selectAllByKeyboard(page);
 
-  const box2 = await getEdgelessSelectedRect(page);
-
-  assertDOMRectEqual(box1, box2);
+  // should not have selected rect
+  let error = null;
+  try {
+    await getEdgelessSelectedRect(page);
+  } catch (e) {
+    error = e;
+  }
+  expect(error).not.toBeNull();
 });
 
 test.describe('delete', () => {

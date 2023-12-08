@@ -12,6 +12,9 @@ import './surface-block/index.js';
 import './database-block/index.js';
 import './surface-ref-block/index.js';
 
+import { matchFlavours } from './_common/utils/index.js';
+import { splitElements } from './page-block/edgeless/utils/clipboard-utils.js';
+
 export * from './_common/adapters/index.js';
 export * from './_common/components/index.js';
 export * from './_common/consts.js';
@@ -30,13 +33,17 @@ export * from './_common/utils/types.js';
 export * from './_common/widgets/index.js';
 export { getServiceOrRegister } from './_legacy/service/index.js';
 export type { BaseService } from './_legacy/service/service.js';
-export * from './_presets/index.js';
+export * from './_specs/index.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
 export * from './data-view-block/index.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
+export * from './embed-html-block/embed-html-block.js';
+export * from './embed-html-block/embed-html-model.js';
+export * from './embed-html-block/embed-html-service.js';
+export * from './embed-html-block/embed-html-spec.js';
 export * from './frame-block/index.js';
 export * from './image-block/index.js';
 export * from './list-block/index.js';
@@ -49,7 +56,10 @@ export * from './surface-block/surface-block.js';
 export * from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
-
+export const BlocksUtils = {
+  splitElements,
+  matchFlavours,
+};
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
     ? globalThis

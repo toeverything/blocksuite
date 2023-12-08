@@ -52,7 +52,8 @@ export interface StoreOptions<
   blobStorages?: ((id: string) => BlobStorage)[];
 }
 
-const flagsPreset = {
+const FLAGS_PRESET = {
+  enable_legacy_validation: true,
   enable_expand_database_block: false,
   enable_bultin_ledits: false,
   readonly: {},
@@ -80,7 +81,7 @@ export class Store {
     this.awarenessStore = new AwarenessStore(
       this,
       awareness ?? new Awareness<RawAwarenessState>(this.doc),
-      merge(true, flagsPreset, defaultFlags)
+      merge(true, FLAGS_PRESET, defaultFlags)
     );
 
     if (typeof idGenerator === 'function') {

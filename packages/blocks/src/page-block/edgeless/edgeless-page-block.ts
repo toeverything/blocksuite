@@ -18,7 +18,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { toast } from '../../_common/components/toast.js';
 import { BLOCK_ID_ATTR } from '../../_common/consts.js';
 import { listenToThemeChange } from '../../_common/theme/utils.js';
-import { getViewportFromSession } from '../../_common/utils/edgeless.js';
+import {
+  getViewportFromSession,
+  saveViewportToSession,
+} from '../../_common/utils/edgeless.js';
 import type {
   EdgelessElement,
   EdgelessTool,
@@ -297,9 +300,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     );
 
     this._disposables.add(
-      listenToThemeChange(this, () => {
-        this.surface.refresh();
-      })
+      listenToThemeChange(this, () => this.surface.refresh())
     );
 
     const surfaceService = this.surface.service as SurfaceService;
@@ -720,13 +721,20 @@ export class EdgelessPageBlockComponent extends BlockElement<
     });
   }
 
+  private _saveViewportLocalRecord() {
+    const { viewport } = this.surface;
+    saveViewportToSession(this.page.id, {
+      x: viewport.center.x,
+      y: viewport.center.y,
+      zoom: viewport.zoom,
+    });
+  }
+
   private _getSavedViewport() {
     const { viewport } = this.surface;
     const viewportData = getViewportFromSession(this.page.id);
 
-    if (!viewportData) {
-      return null;
-    }
+    if (!viewportData) return null;
 
     if ('referenceId' in viewportData) {
       const block = this.surface.pickById(
@@ -841,7 +849,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _initElementSlot() {
     this._disposables.add(
       this.page.slots.blockUpdated.on(event => {
-        if (![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType))
+        if (
+          ![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType) &&
+          !/affine:embed-*/.test(event.flavour)
+        )
           return;
 
         if (event.flavour === IMAGE) {
@@ -912,6 +923,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.tools.dispose();
 
     this.selectionManager.dispose();
+    this._saveViewportLocalRecord();
   }
 
   override render() {
