@@ -14,7 +14,7 @@ export class Space<
   State extends Record<string, unknown> = Record<string, any>,
 > {
   readonly id: string;
-  readonly doc: BlockSuiteDoc;
+  readonly rootDoc: BlockSuiteDoc;
   readonly awarenessStore: AwarenessStore;
 
   private _loaded!: boolean;
@@ -28,9 +28,13 @@ export class Space<
   protected readonly _ySpaceDoc: Y.Doc;
   protected readonly _yBlocks: Y.Map<State[keyof State]>;
 
-  constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
+  constructor(
+    id: string,
+    rootDoc: BlockSuiteDoc,
+    awarenessStore: AwarenessStore
+  ) {
     this.id = id;
-    this.doc = doc;
+    this.rootDoc = rootDoc;
     this.awarenessStore = awarenessStore;
 
     this._ySpaceDoc = this._initSubDoc();
@@ -70,7 +74,7 @@ export class Space<
 
   remove() {
     this.destroy();
-    this.doc.spaces.delete(this.id);
+    this.rootDoc.spaces.delete(this.id);
   }
 
   destroy() {
@@ -84,17 +88,17 @@ export class Space<
   }
 
   private _initSubDoc = () => {
-    let subDoc = this.doc.spaces.get(this.id);
+    let subDoc = this.rootDoc.spaces.get(this.id);
     if (!subDoc) {
       subDoc = new Y.Doc({
         guid: this.id,
       });
-      this.doc.spaces.set(this.id, subDoc);
+      this.rootDoc.spaces.set(this.id, subDoc);
       this._loaded = true;
       this._onLoadSlot.emit();
     } else {
       this._loaded = false;
-      this.doc.on('subdocs', this._onSubdocEvent);
+      this.rootDoc.on('subdocs', this._onSubdocEvent);
     }
 
     return subDoc;
@@ -107,7 +111,7 @@ export class Space<
     if (!result) {
       return;
     }
-    this.doc.off('subdocs', this._onSubdocEvent);
+    this.rootDoc.off('subdocs', this._onSubdocEvent);
     this._loaded = true;
     this._onLoadSlot.emit();
   };
@@ -116,6 +120,6 @@ export class Space<
    * If `shouldTransact` is `false`, the transaction will not be push to the history stack.
    */
   transact(fn: () => void, shouldTransact = true) {
-    this._ySpaceDoc.transact(fn, shouldTransact ? this.doc.clientID : null);
+    this._ySpaceDoc.transact(fn, shouldTransact ? this.rootDoc.clientID : null);
   }
 }
