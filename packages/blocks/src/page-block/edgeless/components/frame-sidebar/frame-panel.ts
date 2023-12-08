@@ -1,5 +1,5 @@
-import './header/frames-sidebar-header.js';
-import './body/frames-sidebar-body.js';
+import './header/frame-sidebar-header.js';
+import './body/frame-sidebar-body.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';

@@ -339,7 +339,6 @@ export class FramePreview extends WithDisposable(LitElement) {
     elementsMap: Y.Map<Y.Map<unknown>>
   ) => {
     if (type.action === 'add') {
-      console.log('add event on yElements: ', id);
       const yElement = elementsMap.get(id) as Y.Map<unknown>;
       const type = yElement.get('type') as CanvasElementType;
 
