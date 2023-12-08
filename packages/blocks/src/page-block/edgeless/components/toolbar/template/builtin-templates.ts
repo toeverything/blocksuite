@@ -3,6 +3,7 @@ import { templates } from './templates.js';
 export type Template = {
   name: string;
   content: unknown;
+  asserts?: Record<string, string>;
   preview: string;
 };
 

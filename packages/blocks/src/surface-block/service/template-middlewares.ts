@@ -10,17 +10,20 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
   job.slots.beforeInsert.on(payload => {
     switch (payload.type) {
       case 'block':
-        generateBlock(payload.data);
+        regenerateBlockId(payload.data);
         break;
     }
   });
 
-  const generateBlock = (data: SlotBlockPayload['data']) => {
-    const newId = job.model.page.workspace.idGenerator('block');
-
+  const regenerateBlockId = (data: SlotBlockPayload['data']) => {
     const { blockJson } = data;
+    const newId = regeneratedIdMap.has(blockJson.id)
+      ? regeneratedIdMap.get(blockJson.id)!
+      : job.model.page.workspace.idGenerator('block');
 
-    regeneratedIdMap.set(blockJson.id, newId);
+    if (!regeneratedIdMap.has(blockJson.id)) {
+      regeneratedIdMap.set(blockJson.id, newId);
+    }
 
     blockJson.id = newId;
 
@@ -55,6 +58,13 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
         if (['group', 'connector'].includes(val['type'] as string)) {
           defered.push(newId);
         }
+      });
+
+      blockJson.children.forEach(block => {
+        regeneratedIdMap.set(
+          block.id,
+          job.model.page.workspace.idGenerator('block')
+        );
       });
 
       defered.forEach(id => {

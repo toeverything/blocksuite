@@ -116,13 +116,26 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     this.addEventListener('keydown', stopPropagation, false);
   }
 
-  private _insertTemplate(template: unknown) {
-    const job = this.edgeless.surface.service!.TemplateJob.create(
+  private async _insertTemplate(
+    template: unknown,
+    assets?: Record<string, string>
+  ) {
+    const templateJob = this.edgeless.surface.service!.TemplateJob.create(
       this.edgeless.surfaceBlockModel,
       'edgeless-template'
     );
 
-    job.insertTemplate(template).then(() => {
+    if (assets) {
+      await Promise.all(
+        Object.entries(assets).map(([key, value]) =>
+          fetch(value)
+            .then(res => res.blob())
+            .then(blob => templateJob.job.assets.set(key, blob))
+        )
+      );
+    }
+
+    templateJob.insertTemplate(template).then(() => {
       this._closePanel();
     });
   }
@@ -168,7 +181,8 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
             template => {
               return html`<div
                 class="template-item"
-                @click=${() => this._insertTemplate(template.content)}
+                @click=${() =>
+                  this._insertTemplate(template.content, template.asserts)}
               >
                 ${unsafeHTML(template.preview)}
               </div>`;

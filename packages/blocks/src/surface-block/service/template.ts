@@ -61,8 +61,8 @@ export class TemplateJob {
 
   static middlewares = [replaceIdMiddleware];
 
+  job: Job;
   model: SurfaceBlockModel;
-
   type: TemplateType;
 
   slots = {
@@ -76,6 +76,7 @@ export class TemplateJob {
   };
 
   constructor({ model, type }: TemplateJobConfig) {
+    this.job = new Job({ workspace: model.page.workspace, middlewares: [] });
     this.model = model;
     this.type = type;
 
@@ -86,12 +87,27 @@ export class TemplateJob {
     const tempDoc = new Workspace.Y.Doc();
     tempDoc.getMap('temp').set('from', from.yMap);
 
+    const defered: [string, unknown][] = [];
+
     from.yMap.get('value')!.forEach((val, key) => {
+      if (
+        ['connector', 'group'].includes(
+          (val as Y.Map<unknown>).get('type') as string
+        )
+      ) {
+        defered.push([key, val]);
+        return;
+      }
+
+      to.set(key, (val as Y.Map<unknown>).clone());
+    });
+
+    defered.forEach(([key, val]) => {
       to.set(key, (val as Y.Map<unknown>).clone());
     });
   }
 
-  private _mergeBlock(from: SnapshotReturn<object>, to: BaseBlockModel) {
+  private _mergeProps(from: SnapshotReturn<object>, to: BaseBlockModel) {
     switch (from.flavour as MergeBlockFlavour) {
       case 'affine:page':
         break;
@@ -127,7 +143,7 @@ export class TemplateJob {
       template: template,
     });
 
-    const { model } = this;
+    const { model, job } = this;
     const defered: {
       snapshot: BlockSnapshot;
       parent?: string;
@@ -138,10 +154,6 @@ export class TemplateJob {
       parent?: string;
       index?: number;
     }[] = [];
-    const job = new Job({
-      workspace: this.model.page.workspace,
-      middlewares: [],
-    });
     const toModel = async (
       snapshot: BlockSnapshot,
       parent?: string,
@@ -193,20 +205,15 @@ export class TemplateJob {
       await toModel(block.snapshot, block.parent, block.index, false);
     }
 
-    const mergeBlockMap = new Map<string, string>();
+    const mergeIdMapping = new Map<string, string>();
+    const mergeBlocks: SnapshotReturn<object>[] = [];
 
     blockList.forEach(block => {
       const { modelData, parent, index } = block;
 
       if (MERGE_BLOCK.includes(modelData.flavour as MergeBlockFlavour)) {
-        const targetBlockId = this._getMergeBlockId(modelData);
-        mergeBlockMap.set(modelData.id, targetBlockId);
-
-        this._mergeBlock(
-          modelData,
-          this.model.page.getBlockById(targetBlockId) as BaseBlockModel
-        );
-
+        mergeIdMapping.set(modelData.id, this._getMergeBlockId(modelData));
+        mergeBlocks.push(modelData);
         return;
       }
 
@@ -216,8 +223,17 @@ export class TemplateJob {
           ...modelData.props,
           id: modelData.id,
         },
-        parent ? mergeBlockMap.get(parent) ?? parent : undefined,
+        parent ? mergeIdMapping.get(parent) ?? parent : undefined,
         index
+      );
+    });
+
+    mergeBlocks.forEach(modelData => {
+      this._mergeProps(
+        modelData,
+        this.model.page.getBlockById(
+          this._getMergeBlockId(modelData)
+        ) as BaseBlockModel
       );
     });
   }
