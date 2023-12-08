@@ -104,7 +104,7 @@ export async function selectedToCanvas(editor: EditorContainer) {
   if (notes.length + frames.length + images.length + shapes.length === 0) {
     return;
   }
-  const canvas = await edgelessPage.clipboard.toCanvas(
+  const canvas = await edgelessPage.clipboardController.toCanvas(
     [...notes, ...frames, ...images],
     shapes
   );
