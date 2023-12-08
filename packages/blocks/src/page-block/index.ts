@@ -8,8 +8,8 @@ export {
 } from './edgeless/components/component-toolbar/change-shape-button.js';
 export {
   FramePanel,
-  registerFrameSidebarComponents,
-} from './edgeless/components/frame-sidebar/frame-panel.js';
+  registerFramePanelComponents,
+} from './edgeless/components/frame-panel/frame-panel.js';
 export {
   registerTOCComponents,
   TOCNotesPanel,

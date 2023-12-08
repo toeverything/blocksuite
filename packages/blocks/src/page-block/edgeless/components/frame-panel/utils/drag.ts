@@ -2,7 +2,7 @@ import { on, once } from '../../../../../_common/utils/index.js';
 import { lastN } from '../../../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../../../models.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import type { FrameSidebarBody } from '../body/frame-sidebar-body.js';
+import type { FramePanelBody } from '../body/frame-panel-body.js';
 import { FrameCard } from '../card/frame-card.js';
 
 /**
@@ -20,12 +20,12 @@ export function startDragging(
     width: number;
     onDragEnd?: (insertIndex?: number) => void;
     onDragMove?: (insertIdx?: number, indicatorTranslateY?: number) => void;
-    frameSidebarBody: HTMLElement;
+    framePanelBody: HTMLElement;
     frameListContainer: HTMLElement;
     frameElementHeight: number;
     doc: Document;
     host: Document | HTMLElement;
-    container: FrameSidebarBody;
+    container: FramePanelBody;
     start: {
       x: number;
       y: number;
@@ -40,7 +40,7 @@ export function startDragging(
     onDragMove,
     onDragEnd,
     frameElementHeight,
-    frameSidebarBody,
+    framePanelBody,
     frameListContainer,
     start,
   } = options;
@@ -61,7 +61,7 @@ export function startDragging(
     return el;
   });
   const maskElement = createMaskElement(doc);
-  const listContainerRect = frameSidebarBody.getBoundingClientRect();
+  const listContainerRect = framePanelBody.getBoundingClientRect();
   const children = Array.from(frameListContainer.children) as FrameCard[];
   const framePadding = 12;
   let idx: undefined | number;
@@ -100,7 +100,7 @@ export function startDragging(
       const topBoundary =
         listContainerRect.top +
         card.offsetTop -
-        frameSidebarBody.scrollTop -
+        framePanelBody.scrollTop -
         framePadding / 2;
       const midBoundary = topBoundary + card.offsetHeight / 2;
       const bottomBoundary = topBoundary + card.offsetHeight + framePadding;
