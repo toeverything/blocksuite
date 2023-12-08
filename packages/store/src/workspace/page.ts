@@ -511,7 +511,7 @@ export class Page extends Space<FlatBlockMap> {
 
         const schema = this.schema.flavourSchemaMap.get(model.flavour);
         assertExists(schema);
-        syncBlockProps(schema, yBlock, callBackOrProps);
+        syncBlockProps(schema, model, yBlock, callBackOrProps);
         return;
       }
 
