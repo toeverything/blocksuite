@@ -1,4 +1,5 @@
-export * from './components/index.js';
+export * from './editors/index.js';
+export * from './fragments/index.js';
 
 const env =
   typeof globalThis !== 'undefined'

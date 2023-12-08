@@ -59,6 +59,7 @@ export class ContentParser {
   private _notionHtmlParser: NotionHtmlParser;
   private urlPattern =
     /(?<=\s|^)https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)(?=\s|$)/g;
+
   constructor(
     page: Page,
     options: {
@@ -183,7 +184,7 @@ export class ContentParser {
       gridColor: string;
     }
   ) {
-    const svgImg = `<svg width="${ctx.canvas.width}px" height="${ctx.canvas.height}px" xmlns="http://www.w3.org/2000/svg" style="background-size:${size}px ${size}px;background-color:${backgroundColor}; background-image: radial-gradient(${gridColor} 1px, ${backgroundColor} 1px)"></svg>`;
+    const svgImg = `<svg width='${ctx.canvas.width}px' height='${ctx.canvas.height}px' xmlns='http://www.w3.org/2000/svg' style='background-size:${size}px ${size}px;background-color:${backgroundColor}; background-image: radial-gradient(${gridColor} 1px, ${backgroundColor} 1px)'></svg>`;
     const img = new Image();
     const cleanup = () => {
       img.onload = null;
@@ -274,7 +275,9 @@ export class ContentParser {
     nodes?: TopLevelBlockModel[],
     surfaces?: SurfaceElement[],
     blockElementGetter: (model: BaseBlockModel) => Element | null = () => null,
-    edgelessBackground?: { zoom: number }
+    edgelessBackground?: {
+      zoom: number;
+    }
   ): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
     if (!root) return;
@@ -314,6 +317,27 @@ export class ContentParser {
     // TODO: refactor of this part
     const blocks = nodes ?? edgeless?.getSortedElementsByBound(bound) ?? [];
     for (const block of blocks) {
+      if (block.flavour === 'affine:image') {
+        const blob = await block.page.blob.get(block.sourceId);
+        if (!blob) {
+          return;
+        }
+        const blobToImage = (blob: Blob) =>
+          new Promise<HTMLImageElement>((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = URL.createObjectURL(blob);
+          });
+        const blockBound = xywhArrayToObject(block);
+        ctx.drawImage(
+          await blobToImage(blob),
+          blockBound.x - bound.x,
+          blockBound.y - bound.y,
+          blockBound.w,
+          blockBound.h
+        );
+      }
       const blockElement = blockElementGetter(block)?.parentElement;
 
       if (blockElement) {
@@ -918,13 +942,13 @@ export class ContentParser {
         return;
       },
       renderer(token: marked.Tokens.Generic) {
-        return `<div class="page-meta-data">
-          <div class="value">
-            <div class="tags">
+        return `<div class='page-meta-data'>
+          <div class='value'>
+            <div class='tags'>
               ${(token.text as string)
                 .split(',')
                 .map(tag => {
-                  return `<div class="tag">${tag}</div>`;
+                  return `<div class='tag'>${tag}</div>`;
                 })
                 .join('')}
             </div>
