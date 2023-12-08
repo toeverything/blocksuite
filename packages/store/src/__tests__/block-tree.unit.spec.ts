@@ -86,3 +86,38 @@ test('trigger props updated', async () => {
   expect(getItems().get(0)).toBeInstanceOf(Y.Map);
   expect((getItems().get(0) as Y.Map<unknown>).get('id')).toBe('1');
 });
+
+test('stash and pop', async () => {
+  const options = createTestOptions();
+  const workspace = new Workspace(options);
+
+  const page = workspace.createPage({ id: 'home' });
+  await page.load();
+
+  page.addBlock('page');
+
+  const root = page.root as PageBlockModel;
+
+  expect(root).not.toBeNull();
+
+  const onPropsUpdated = vi.fn();
+  root.propsUpdated.on(onPropsUpdated);
+
+  const getCount = () => root.yBlock.get('prop:count');
+
+  root.count = 1;
+  expect(onPropsUpdated).toBeCalledTimes(1);
+  expect(onPropsUpdated).toHaveBeenNthCalledWith(1, { key: 'count' });
+  expect(getCount()).toBe(1);
+
+  root.stash('count');
+  root.count = 2;
+  expect(onPropsUpdated).toBeCalledTimes(2);
+  expect(onPropsUpdated).toHaveBeenNthCalledWith(2, { key: 'count' });
+  expect(root.yBlock.get('prop:count')).toBe(1);
+
+  root.pop('count');
+  expect(onPropsUpdated).toBeCalledTimes(3);
+  expect(onPropsUpdated).toHaveBeenNthCalledWith(3, { key: 'count' });
+  expect(root.yBlock.get('prop:count')).toBe(2);
+});

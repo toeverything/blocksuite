@@ -741,6 +741,7 @@ export class Page extends Space<FlatBlockMap> {
       this.slots.rootDeleted.emit(id);
     }
     assertExists(model);
+    this._blockTree.onBlockRemoved(id);
     this.slots.blockUpdated.emit({
       type: 'delete',
       id,
@@ -748,7 +749,6 @@ export class Page extends Space<FlatBlockMap> {
       parent: this.getParent(model)?.id ?? '',
       model,
     });
-    this._blockTree.onBlockRemoved(id);
   }
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
