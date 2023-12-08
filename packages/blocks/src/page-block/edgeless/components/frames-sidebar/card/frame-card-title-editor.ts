@@ -99,7 +99,8 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
       boxShadow: '0px 0px 0px 2px rgba(30, 150, 235, 0.30)',
       zIndex: '1',
       display: 'block',
-      overflow: 'hidden',
+      overflowY: 'hidden',
+      overflowX: 'auto',
     });
     return html`<rich-text
       .yText=${this.frameModel.title.yText}

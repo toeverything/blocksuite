@@ -280,13 +280,20 @@ export class FrameCard extends WithDisposable(LitElement) {
     </div>`;
   }
 
+  private _updateElement = () => {
+    this.requestUpdate();
+  };
+
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
-      this.frame.propsUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
+    this._disposables.add(this.frame.propsUpdated.on(this._updateElement));
+  }
+
+  override firstUpdated() {
+    this.frame.title.yText.observe(this._updateElement);
+    this._disposables.add(() => {
+      this.frame.title.yText.unobserve(this._updateElement);
+    });
   }
 
   override render() {
