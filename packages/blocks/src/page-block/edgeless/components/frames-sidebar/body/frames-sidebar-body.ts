@@ -311,7 +311,6 @@ export class FramesSidebarBody extends WithDisposable(LitElement) {
         ></frame-card>`
     );
 
-    // console.log('this._indicatorTranslateY: ', this._indicatorTranslateY);
     const frameList = html` <div class="frame-list-container">
       ${this.insertIndex !== undefined
         ? html`<div
