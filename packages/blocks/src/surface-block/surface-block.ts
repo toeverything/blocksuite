@@ -460,6 +460,7 @@ export class SurfaceBlockComponent extends BlockElement<
       if (!created) {
         canvas.className = 'indexable-canvas';
 
+        canvas.style.setProperty('transform-origin', '0 0');
         canvas.style.setProperty('position', 'absolute');
         canvas.style.setProperty('pointer-events', 'none');
       }

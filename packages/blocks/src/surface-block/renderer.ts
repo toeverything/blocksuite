@@ -363,24 +363,23 @@ export class Renderer implements SurfaceViewport {
     this._shouldUpdate = false;
   }
 
-  setIndexedCanvas(canvas: HTMLCanvasElement[]) {
-    this.indexedCanvases = canvas;
-  }
+  setIndexedCanvas(canvases: HTMLCanvasElement[]) {
+    this.indexedCanvases = canvases;
 
-  private _setIndexCanvasSize(canvas: HTMLCanvasElement, bound: IBound) {
     const dpr = window.devicePixelRatio;
-    const width = bound.w;
-    const height = bound.h;
+    const width = Math.ceil(this._width * dpr);
+    const height = Math.ceil(this._height * dpr);
 
-    if (canvas.width !== width * dpr) canvas.width = width * dpr;
-    if (canvas.height !== height * dpr) canvas.height = height * dpr;
+    canvases.forEach(canvas => {
+      if (canvas.width === width && canvas.height === height) {
+        return;
+      }
 
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    canvas.style.transform = `translate(${bound.x * this.zoom}px, ${
-      bound.y * this.zoom
-    }px) scale(${this.zoom})`;
-    canvas.style.transformOrigin = '0 0';
+      canvas.style.setProperty('width', `${this._width}px`);
+      canvas.style.setProperty('height', `${this._height}px`);
+      canvas.width = width;
+      canvas.height = height;
+    });
   }
 
   private _resetSize() {
@@ -394,6 +393,11 @@ export class Renderer implements SurfaceViewport {
 
     canvas.width = Math.ceil(bbox.width * dpr);
     canvas.height = Math.ceil(bbox.height * dpr);
+
+    this.indexedCanvases.forEach(() => {
+      canvas.width = Math.ceil(bbox.width * dpr);
+      canvas.height = Math.ceil(bbox.height * dpr);
+    });
 
     this._left = bbox.left;
     this._top = bbox.top;
@@ -433,17 +437,12 @@ export class Renderer implements SurfaceViewport {
 
       const canvas = this.indexedCanvases[idx];
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-      const bound = getElementsBound(layer.elements);
-      const layerTransform = new DOMMatrix().scaleSelf(dpr);
-
-      this._setIndexCanvasSize(canvas, bound);
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
+      ctx.setTransform(matrix);
 
-      if (intersects(viewportBounds, bound)) {
-        this._renderByBound(ctx, layerTransform, rc, bound, layer.elements);
-      }
+      this._renderByBound(ctx, matrix, rc, viewportBounds, layer.elements);
     });
 
     ctx.clearRect(0, 0, width * dpr, height * dpr);

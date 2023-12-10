@@ -129,8 +129,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @queryAll('.surface-layer')
   canvases!: HTMLCanvasElement[];
 
-  @query('.portal-slot')
-  portalSlot!: HTMLDivElement;
+  @query('.canvas-slot')
+  canvasSlot!: HTMLDivElement;
 
   @state()
   private _showAutoConnect = false;
@@ -190,7 +190,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   }
 
   refreshLayerViewport = () => {
-    if (!this.isConnected || !this.edgeless || !this.edgeless.surface) return;
+    if (!this.edgeless || !this.edgeless.surface) return;
 
     const { surface } = this.edgeless;
     const { zoom, translateX, translateY } = surface.viewport;
@@ -202,11 +202,17 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
     this.layer.style.setProperty('transform', this._getLayerViewport());
+    Array.from(this.canvasSlot.children).forEach(canvas => {
+      (canvas as HTMLCanvasElement).style.setProperty(
+        'transform',
+        this._getLayerViewport(true)
+      );
+    });
   };
 
   setSlotContent(children: HTMLElement[]) {
-    if (this.portalSlot.children.length !== children.length)
-      this.portalSlot.replaceChildren(...children);
+    if (this.canvasSlot.children.length !== children.length)
+      this.canvasSlot.replaceChildren(...children);
   }
 
   private _getLayerViewport(negative = false) {
@@ -422,7 +428,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             : html`<affine-note-slicer
                 .edgelessPage=${edgeless}
               ></affine-note-slicer>`}
-          <div class="portal-slot"></div>
+          <div class="canvas-slot"></div>
           ${layers
             .filter(layer => layer.type === 'block')
             .map(layer => {

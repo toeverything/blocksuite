@@ -17,6 +17,9 @@ const RS_RTL_CHARS = '\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC';
 const RE_RTL_CHECK = new RegExp(`^[^${RS_LTR_CHARS}]*[${RS_RTL_CHARS}]`);
 export const isRTL = (text: string) => RE_RTL_CHECK.test(text);
 
+const privateCanvas = document.createElement('canvas');
+const privateCtx = privateCanvas.getContext('2d')!;
+
 export const isChrome =
   globalThis.navigator?.userAgent.indexOf('Chrome') !== -1;
 export const isSafari =
@@ -30,23 +33,10 @@ export function getLineHeight(
   fontFamily: CanvasTextFontFamily,
   fontSize: number
 ) {
-  // Browser may have minimum font size setting
-  // so we need to multiple the multiplier between the actual size and the expected size
-  const actualFontSize = Math.max(fontSize, 12);
-  const div = document.createElement('div');
-  const span = document.createElement('span');
+  privateCtx.font = `${fontSize}px ${wrapFontFamily(fontFamily)}`;
+  const textMetrcs = privateCtx.measureText('M');
 
-  span.style.fontFamily = wrapFontFamily(fontFamily);
-  span.style.fontSize = actualFontSize + 'px';
-  span.style.lineHeight = 'initial';
-  span.textContent = 'M';
-
-  div.appendChild(span);
-  document.body.appendChild(div);
-  const { height } = div.getBoundingClientRect();
-
-  div.remove();
-  return height * (fontSize / actualFontSize);
+  return textMetrcs.fontBoundingBoxAscent + textMetrcs.fontBoundingBoxDescent;
 }
 
 export function getFontString({
@@ -81,11 +71,8 @@ export function splitIntoLines(text: string): string[] {
 }
 
 export function getLineWidth(text: string, font: string): number {
-  const canvas = document.createElement('canvas');
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const canvas2dContext = canvas.getContext('2d')!;
-  canvas2dContext.font = font;
-  const width = canvas2dContext.measureText(text).width;
+  privateCtx.font = font;
+  const width = privateCtx.measureText(text).width;
 
   return width;
 }
