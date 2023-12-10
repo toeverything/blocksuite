@@ -2,12 +2,11 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { stopPropagation } from '../../../../../_common/utils/event.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { builtInTemplates } from './builtin-templates.js';
-import { ArrowIcon } from './icon.js';
+import { ArrowIcon, Preview } from './icon.js';
 
 @customElement('edgeless-templates-panel')
 export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
@@ -184,7 +183,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
                 @click=${() =>
                   this._insertTemplate(template.content, template.asserts)}
               >
-                ${unsafeHTML(template.preview)}
+                ${Preview}
               </div>`;
             }
           )}
