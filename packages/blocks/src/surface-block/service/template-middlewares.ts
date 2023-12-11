@@ -1,11 +1,8 @@
 import { assertExists, assertType } from '@blocksuite/global/utils';
-import {
-  type BlockSnapshot,
-  type PageSnapshot,
-  type SnapshotReturn,
-} from '@blocksuite/store';
+import { type BlockSnapshot, type SnapshotReturn } from '@blocksuite/store';
 
-import { Bound, generateElementId, getCommonBound } from '../index.js';
+import { Bound } from '../utils/bound.js';
+import { generateElementId } from '../utils/index.js';
 import type { SlotBlockPayload, TemplateJob } from './template.js';
 
 export const replaceIdMiddleware = (job: TemplateJob) => {
