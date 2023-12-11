@@ -1,31 +1,54 @@
-import { Bound } from '../utils/bound.js';
+import type { Constructor } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
+
+import { BLOCK_BATCH } from '../../../surface-block/batch.js';
 import {
+  Bound,
   getBoundsWithRotation,
   getPointsFromBoundsWithRotation,
+  type IEdgelessElement,
+  type IVec,
   linePolygonIntersects,
+  PointLocation,
   polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
-} from '../utils/math-utils.js';
-import { PointLocation } from '../utils/point-location.js';
-import type { IVec } from '../utils/vec.js';
-import type { IEdgelessElement } from './edgeless-element.js';
+  type SerializedXYWH,
+} from '../../../surface-block/index.js';
 
-export const EdgelessSelectableMixin = <
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends new (...args: any[]) => IEdgelessElement,
->(
-  originalClass: T
-) =>
-  class extends originalClass {
-    override get elementBound() {
+export type EdgelessSelectableProps = {
+  xywh: SerializedXYWH;
+  index: string;
+  rotate?: number;
+};
+
+export function selectable<
+  Props extends EdgelessSelectableProps,
+  T extends Constructor<BaseBlockModel<Props>> = Constructor<
+    BaseBlockModel<Props>
+  >,
+>(SuperClass: T) {
+  class DerivedSelectableInEdgelessClass
+    extends SuperClass
+    implements IEdgelessElement
+  {
+    connectable = true;
+    batch = BLOCK_BATCH;
+    override rotate = 0;
+
+    get elementBound() {
       const bound = Bound.deserialize(this.xywh);
       return Bound.from(
         getBoundsWithRotation({ ...bound, rotate: this.rotate })
       );
     }
 
-    override containedByBounds(bounds: Bound): boolean {
+    hitTest(x: number, y: number): boolean {
+      const bound = Bound.deserialize(this.xywh);
+      return bound.isPointInBound([x, y], 0);
+    }
+
+    containedByBounds(bounds: Bound): boolean {
       const bound = Bound.deserialize(this.xywh);
       const points = getPointsFromBoundsWithRotation({
         x: bound.x,
@@ -37,7 +60,7 @@ export const EdgelessSelectableMixin = <
       return points.some(point => bounds.containsPoint(point));
     }
 
-    override getNearestPoint(point: IVec): IVec {
+    getNearestPoint(point: IVec): IVec {
       const bound = Bound.deserialize(this.xywh);
       return polygonNearestPoint(
         rotatePoints(bound.points, bound.center, this.rotate ?? 0),
@@ -45,7 +68,7 @@ export const EdgelessSelectableMixin = <
       );
     }
 
-    override intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
+    intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
       const bound = Bound.deserialize(this.xywh);
       return linePolygonIntersects(
         start,
@@ -54,7 +77,7 @@ export const EdgelessSelectableMixin = <
       );
     }
 
-    override getRelativePointLocation(relativePoint: IVec): PointLocation {
+    getRelativePointLocation(relativePoint: IVec): PointLocation {
       const bound = Bound.deserialize(this.xywh);
       const point = bound.getRelativePoint(relativePoint);
       const rotatePoint = rotatePoints(
@@ -68,7 +91,7 @@ export const EdgelessSelectableMixin = <
       return new PointLocation(rotatePoint, tangent);
     }
 
-    override boxSelect(bound: Bound): boolean {
+    boxSelect(bound: Bound): boolean {
       return (
         this.containedByBounds(bound) ||
         bound.points.some((point, i, points) =>
@@ -76,4 +99,9 @@ export const EdgelessSelectableMixin = <
         )
       );
     }
-  };
+  }
+
+  return DerivedSelectableInEdgelessClass as Constructor<
+    BaseBlockModel<Props> & IEdgelessElement
+  >;
+}
