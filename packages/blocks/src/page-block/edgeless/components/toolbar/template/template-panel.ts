@@ -5,17 +5,25 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { stopPropagation } from '../../../../../_common/utils/event.js';
+import {
+  requestConnectedFrame,
+  stopPropagation,
+} from '../../../../../_common/utils/event.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { builtInTemplates, type Template } from './builtin-templates.js';
 import { ArrowIcon, Preview } from './icon.js';
 
 @customElement('edgeless-templates-panel')
 export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
+  static override shadowRootOptions: ShadowRootInit = {
+    mode: 'open',
+  };
+
   static templates = builtInTemplates;
   static override styles = css`
     :host {
       position: absolute;
+      font-family: var(--affine-font-family);
     }
 
     .edgeless-templates-panel {
@@ -27,7 +35,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     }
 
     .search-bar {
-      padding: 21px 16px;
+      padding: 21px 24px;
       font-size: 18px;
       color: var(--affine-secondary);
       border-bottom: 1px solid var(--affine-divider-color);
@@ -36,6 +44,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     .search-input {
       border: 0;
       color: var(--affine-text-primary-color);
+      font-size: 20px;
       background-color: inherit;
       outline: none;
       width: 100%;
@@ -49,17 +58,16 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       display: flex;
       flex-direction: column;
       padding: 6px 8px;
-      border-bottom: 1px solid var(--affine-divider-color);
       gap: 4px;
       overflow-x: scroll;
     }
 
     .category-entry {
-      color: var(--affine-text-secondary-color);
+      color: var(--affine-text-primary-color);
       font-size: 12px;
       font-weight: 600;
       line-height: 20px;
-      border-radius: 32px;
+      border-radius: 8px;
       flex-shrink: 0;
       flex-grow: 0;
       width: fit-content;
@@ -99,7 +107,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
     .template-item:hover::before {
       content: attr(data-hover-text);
-      position: relative;
+      position: absolute;
       display: block;
       left: 50%;
       top: 50%;
@@ -167,6 +175,18 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     this.addEventListener('keydown', stopPropagation, false);
   }
 
+  override firstUpdated() {
+    requestConnectedFrame(() => {
+      this._disposables.addFromEvent(document, 'click', evt => {
+        if (this.contains(evt.target as HTMLElement)) {
+          return;
+        }
+
+        this._closePanel();
+      });
+    }, this);
+  }
+
   private async _insertTemplate(template: Template) {
     this._loadingTemplate = template;
 
@@ -215,7 +235,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
           <input
             class="search-input"
             type="text"
-            placeholder="Search file or anything"
+            placeholder="Search file or anything..."
             @input=${this._updateSearchKeyword}
           />
         </div>

@@ -54,8 +54,8 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
       this._closePanel();
     });
     this._openedPanel = panel;
-    this.renderRoot.appendChild(panel);
-    this.requestUpdate();
+
+    document.body.appendChild(panel);
 
     requestAnimationFrame(() => {
       const arrowEl = panel.renderRoot.querySelector('.arrow') as HTMLElement;
@@ -74,10 +74,10 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
 
   private _closePanel() {
     if (this._openedPanel) {
-      this._cleanup?.();
-      this._cleanup = null;
       this._openedPanel.remove();
       this._openedPanel = null;
+      this._cleanup?.();
+      this._cleanup = null;
       this.requestUpdate();
 
       if (this._previousTool) {
