@@ -3,6 +3,7 @@ import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
 import './change-note-button.js';
+import './change-bookmark-button.js';
 import './change-text-button.js';
 import './change-frame-button.js';
 import './change-group-button.js';
@@ -31,6 +32,7 @@ import {
   groupBy,
   pickValues,
 } from '../../../../_common/utils/iterable.js';
+import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
@@ -45,17 +47,23 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
-import { isFrameBlock, isImageBlock, isNoteBlock } from '../../utils/query.js';
+import {
+  isBookmarkBlock,
+  isFrameBlock,
+  isImageBlock,
+  isNoteBlock,
+} from '../../utils/query.js';
 
 type CategorizedElements = {
-  shape: ShapeElement[];
-  brush: BrushElement[];
-  text: TextElement[];
-  group: GroupElement[];
-  connector: ConnectorElement[];
-  note: NoteBlockModel[];
-  frame: FrameBlockModel[];
-  image: ImageBlockModel[];
+  shape?: ShapeElement[];
+  brush?: BrushElement[];
+  text?: TextElement[];
+  group?: GroupElement[];
+  connector?: ConnectorElement[];
+  note?: NoteBlockModel[];
+  frame?: FrameBlockModel[];
+  image?: ImageBlockModel[];
+  bookmark?: BookmarkBlockModel[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -115,6 +123,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         return 'frame';
       } else if (isImageBlock(model)) {
         return 'image';
+      } else if (isBookmarkBlock(model)) {
+        return 'bookmark';
       }
       return model.type;
     });
@@ -159,7 +169,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   private _NoteButton(notes?: NoteBlockModel[]) {
-    return notes?.length === 1
+    return notes && notes.length >= 0
       ? html`<edgeless-change-note-button
           .notes=${notes}
           .surface=${this.surface}
@@ -169,7 +179,20 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _TextButton(textElements: TextElement[]) {
+  private _BookmarkButton(bookmarks?: BookmarkBlockModel[]) {
+    return bookmarks?.length === 1
+      ? html`
+          <edgeless-change-bookmark-button
+            .bookmark=${bookmarks[0]}
+            .page=${this.page}
+            .surface=${this.surface}
+            .slots=${this.slots}
+          ></edgeless-change-bookmark-button>
+        `
+      : nothing;
+  }
+
+  private _TextButton(textElements?: TextElement[]) {
     return textElements?.length
       ? html`<edgeless-change-text-button
           .texts=${textElements}
@@ -181,7 +204,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _FrameButton(frames: FrameBlockModel[]) {
+  private _FrameButton(frames?: FrameBlockModel[]) {
     return frames?.length
       ? html`
           <edgeless-change-frame-button
@@ -193,7 +216,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _GroupButton(groups: GroupElement[]) {
+  private _GroupButton(groups?: GroupElement[]) {
     return groups?.length
       ? html`<edgeless-change-group-button
           .surface=${this.surface}
@@ -313,7 +336,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless, selection } = this;
-    const { shape, brush, connector, note, text, frame, group } =
+    const { shape, brush, connector, note, text, frame, group, bookmark } =
       groupedSelected;
     const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -329,6 +352,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._BrushButton(brush),
           this._ConnectorButton(connector),
           this._NoteButton(note),
+          this._BookmarkButton(bookmark),
           this._TextButton(text),
           this._FrameButton(frame),
           this._GroupButton(group),

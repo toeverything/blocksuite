@@ -1,35 +1,61 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+
+import { selectable } from '../_common/edgeless/mixin/index.js';
+import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
+import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
+export type BookmarkBlockType = 'horizontal' | 'list' | 'vertical' | 'cube';
 
 export interface BookmarkBlockUrlData {
-  description?: string;
-  icon?: string;
-  image?: string;
-  title?: string;
+  description: string | null;
+  icon: string | null;
+  image: string | null;
+  title: string | null;
 
   /**
    * @deprecated
    * use `title` instead
    */
-  bookmarkTitle?: string;
+  // bookmarkTitle: string;
   /**
    * @deprecated
    * we don't need this anymore
    */
-  crawled?: boolean;
+  // crawled: boolean;
+}
+
+export interface BookmarkBlockEdgelessProps {
+  index: string;
+  xywh: SerializedXYWH;
+  rotate: number;
 }
 
 export type BookmarkBlockProps = {
-  /**
-   * The embed mode will embed the url into the block
-   */
-  type: 'card' | 'embed';
+  style: BookmarkBlockType;
   url: string;
-  caption?: string;
-} & BookmarkBlockUrlData;
+  caption: string | null;
+
+  /**
+   * @deprecated
+   * we will use another block to handle embed
+   */
+  // type: 'card' | 'embed';
+} & BookmarkBlockUrlData &
+  BookmarkBlockEdgelessProps;
 
 export const defaultBookmarkProps: BookmarkBlockProps = {
-  type: 'card',
+  style: 'horizontal',
   url: '',
+  caption: null,
+
+  description: null,
+  icon: null,
+  image: null,
+  title: null,
+
+  index: 'a0',
+  xywh: '[0,0,0,0]',
+  rotate: 0,
 };
 
 export const BookmarkBlockSchema = defineBlockSchema({
@@ -38,8 +64,13 @@ export const BookmarkBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'content',
-    parent: ['affine:note'],
+    parent: ['affine:note', 'affine:surface'],
   },
+  toModel: () => new BookmarkBlockModel(),
 });
 
-export type BookmarkBlockModel = SchemaToModel<typeof BookmarkBlockSchema>;
+export class BookmarkBlockModel extends selectable<BookmarkBlockProps>(
+  BaseBlockModel
+) {
+  override flavour!: EdgelessBlockType.BOOKMARK;
+}

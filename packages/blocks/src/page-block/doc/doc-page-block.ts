@@ -12,7 +12,7 @@ import {
   asyncFocusRichText,
   matchFlavours,
 } from '../../_common/utils/index.js';
-import { PageClipboard } from '../../_legacy/clipboard/index.js';
+import { PageClipboard } from '../../_legacy/clipboard/page-clipboard.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ClipboardController } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';

@@ -14,7 +14,9 @@ interface LinkPreviewResponseData {
   favicons?: string[];
 }
 
-async function queryUrlData(url: string): Promise<BookmarkBlockUrlData> {
+async function queryUrlData(
+  url: string
+): Promise<Partial<BookmarkBlockUrlData>> {
   if (
     (url.startsWith('https://x.com/') ||
       url.startsWith('https://www.x.com/') ||
@@ -69,7 +71,12 @@ export async function refreshBookmarkUrlData(
 
   const metaData = await queryUrlData(bookmarkElement.model.url);
 
-  const { title, description, icon, image } = metaData;
+  const {
+    title = null,
+    description = null,
+    icon = null,
+    image = null,
+  } = metaData;
   bookmarkElement.page.updateBlock(bookmarkElement.model, {
     description,
     icon,

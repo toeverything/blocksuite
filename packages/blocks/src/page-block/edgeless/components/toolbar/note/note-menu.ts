@@ -2,10 +2,19 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { BookmarkIcon } from '../../../../../_common/icons/edgeless.js';
 import {
   type EdgelessTool,
   type NoteChildrenFlavour,
 } from '../../../../../_common/utils/index.js';
+import { toggleBookmarkCreateModal } from '../../../../../bookmark-block/components/modal/bookmark-create-modal.js';
+import {
+  EdgelessBookmarkHeight,
+  EdgelessBookmarkWidth,
+} from '../../../../../bookmark-block/edgeless-bookmark-block.js';
+import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
+import { Bound } from '../../../../../surface-block/utils/bound.js';
+import { Vec } from '../../../../../surface-block/utils/vec.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { NOTE_MENU_ITEMS, NOTE_MENU_WIDTH } from './note-menu-config.js';
 
@@ -95,6 +104,35 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                 </edgeless-tool-icon-button>
               `;
             })}
+            <edgeless-tool-icon-button
+              .activeMode=${'background'}
+              .iconContainerPadding=${2}
+              .tooltip=${'bookmark'}
+              @click=${async () => {
+                const url = await toggleBookmarkCreateModal(this.edgeless.root);
+                if (!url) return;
+
+                const center = Vec.toVec(this.edgeless.surface.viewport.center);
+                this.edgeless.surface.addElement(
+                  EdgelessBlockType.BOOKMARK,
+                  {
+                    url,
+                    xywh: Bound.fromCenter(
+                      center,
+                      EdgelessBookmarkWidth.horizontal,
+                      EdgelessBookmarkHeight.horizontal
+                    ).serialize(),
+                  },
+                  this.edgeless.surface.model
+                );
+
+                this.edgeless.tools.setEdgelessTool({
+                  type: 'default',
+                });
+              }}
+            >
+              ${BookmarkIcon}
+            </edgeless-tool-icon-button>
           </div>
         </div>
       </edgeless-slide-menu>

@@ -354,7 +354,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (this.notes.length !== 1) return nothing;
+    const length = this.notes.length;
     const note = this.notes[0];
     const { hidden, background, edgeless } = note;
     const { shadowType, borderRadius, borderSize, borderStyle } =
@@ -363,26 +363,34 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     const { collapse } = edgeless;
 
     return html`
-      <div
-        class="hidden-status"
-        @click=${() => this._setNoteHidden(note, !hidden)}
-      >
-        ${hidden
-          ? html`<div class="unhover">${HiddenIcon} Hide in Page Mode</div>
-              <div class="hover">${NoteSmallIcon} Show in Page Mode</div>
-              <affine-tooltip
-                >Show this node in both page and edgeless mode</affine-tooltip
-              >`
-          : html`<div class="unhover">${NoteSmallIcon} Shown in Page Mode</div>
-              <div class="hover">${HiddenIcon} Hide in Page Mode</div>
-              <affine-tooltip
-                >Only show this note here, but not in page mode</affine-tooltip
-              > `}
-      </div>
+      ${length === 1
+        ? html`<div
+              class="hidden-status"
+              @click=${() => this._setNoteHidden(note, !hidden)}
+            >
+              ${hidden
+                ? html`<div class="unhover">
+                      ${HiddenIcon} Hide in Page Mode
+                    </div>
+                    <div class="hover">${NoteSmallIcon} Show in Page Mode</div>
+                    <affine-tooltip
+                      >Show this node in both page and edgeless
+                      mode</affine-tooltip
+                    >`
+                : html`<div class="unhover">
+                      ${NoteSmallIcon} Shown in Page Mode
+                    </div>
+                    <div class="hover">${HiddenIcon} Hide in Page Mode</div>
+                    <affine-tooltip
+                      >Only show this note here, but not in page
+                      mode</affine-tooltip
+                    > `}
+            </div>
 
-      <component-toolbar-menu-divider
-        .vertical=${true}
-      ></component-toolbar-menu-divider>
+            <component-toolbar-menu-divider
+              .vertical=${true}
+            ></component-toolbar-menu-divider>`
+        : nothing}
       ${hidden
         ? nothing
         : html`

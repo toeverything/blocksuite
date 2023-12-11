@@ -442,6 +442,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const current = this._currentFrameIndex;
     const frames = this._frames;
     const frame = frames[current];
+    const { page } = this.edgeless;
 
     return html`
       <edgeless-tool-icon-button
@@ -502,7 +503,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       <div
         class="edgeless-frame-navigator-stop"
         @click=${() => {
-          this.setEdgelessTool({ type: 'pan', panning: false });
+          this.setEdgelessTool(
+            page.readonly
+              ? { type: 'pan', panning: false }
+              : { type: 'default' }
+          );
+
           document.fullscreenElement && this._toggleFullScreen();
           setTimeout(() => this._moveToCurrentFrame(), 400);
         }}

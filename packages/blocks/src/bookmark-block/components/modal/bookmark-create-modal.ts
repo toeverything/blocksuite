@@ -28,10 +28,11 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
         this.input.focus();
       });
     });
-    this.disposables.addFromEvent(document, 'keydown', this._onDocumentKeydown);
+    this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
   }
 
   private _onDocumentKeydown = (e: KeyboardEvent) => {
+    e.stopPropagation();
     if (e.key === 'Enter' && !e.isComposing) {
       this._onConfirm();
     }

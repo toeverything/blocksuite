@@ -1,6 +1,7 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 import './note/edgeless-note.js';
 import './image/edgeless-image.js';
+import './bookmark/edgeless-bookmark.js';
 import './frame/edgeless-frame.js';
 import './embed/edgeless-embed.js';
 import '../rects/edgeless-selected-rect.js';
@@ -58,12 +59,13 @@ export type AutoConnectElement =
   | FrameBlockModel
   | GroupElement;
 
-const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
+const { NOTE, IMAGE, FRAME, BOOKMARK } = EdgelessBlockType;
 
 const portalMap = new Map<EdgelessBlockType | RegExp, string>([
   [FRAME, 'edgeless-block-portal-frame'],
   [NOTE, 'edgeless-block-portal-note'],
   [IMAGE, 'edgeless-block-portal-image'],
+  [BOOKMARK, 'edgeless-block-portal-bookmark'],
   [/affine:embed-*/, 'edgeless-block-portal-embed'],
 ]);
 

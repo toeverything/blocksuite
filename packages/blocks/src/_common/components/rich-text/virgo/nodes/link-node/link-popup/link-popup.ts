@@ -10,14 +10,11 @@ import {
   isValidUrl,
   normalizeUrl,
 } from '../../../../../../../_common/utils/url.js';
-import type { BookmarkBlockProps } from '../../../../../../../bookmark-block/bookmark-model.js';
-import { allowEmbed } from '../../../../../../../bookmark-block/embed.js';
 import { BLOCK_ID_ATTR } from '../../../../../../consts.js';
 import { BookmarkIcon } from '../../../../../../icons/edgeless.js';
 import {
   ConfirmIcon,
   EditIcon,
-  EmbedWebIcon,
   UnlinkIcon,
 } from '../../../../../../icons/text.js';
 import type { IconButton } from '../../../../../button.js';
@@ -209,12 +206,11 @@ export class LinkPopup extends WithDisposable(LitElement) {
     this.remove();
   }
 
-  private _linkToBookmark(type: BookmarkBlockProps['type']) {
+  private _linkToBookmark() {
     if (!this.vEditor.isVRangeValid(this.goalVRange)) return;
 
     const blockElement = this.blockElement;
     const props = {
-      type,
       url: this.currentLink,
       title: this.currentText,
     };
@@ -296,20 +292,11 @@ export class LinkPopup extends WithDisposable(LitElement) {
         ? html`<span class="affine-link-popover-dividing-line"></span
             ><icon-button
               data-testid="link-to-card"
-              @click=${() => this._linkToBookmark('card')}
+              @click=${() => this._linkToBookmark()}
             >
               ${BookmarkIcon}
               <affine-tooltip .offset=${12}>Turn into Card view</affine-tooltip>
             </icon-button>`
-        : nothing}
-      ${this._isBookmarkAllowed() && allowEmbed(this.currentLink)
-        ? html`<icon-button
-            data-testid="link-to-embed"
-            @click=${() => this._linkToBookmark('embed')}
-          >
-            ${EmbedWebIcon}
-            <affine-tooltip .offset=${12}>Turn into Embed view</affine-tooltip>
-          </icon-button>`
         : nothing}
       <span class="affine-link-popover-dividing-line"></span>
       <icon-button

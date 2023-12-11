@@ -6,10 +6,11 @@ import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { Bound } from '../../surface-block/index.js';
-import type { EmbedProps } from './types.js';
+import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
 
 export class EmbedBlockElement<
-  Model extends BaseBlockModel<EmbedProps> = BaseBlockModel<EmbedProps>,
+  Model extends
+    BaseBlockModel<EdgelessSelectableProps> = BaseBlockModel<EdgelessSelectableProps>,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {

@@ -61,7 +61,14 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:bookmark
-      prop:type="card"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
       prop:url="${inputUrl}"
     />
   </affine:note>
@@ -109,7 +116,14 @@ test.skip(scoped`create bookmark by blockhub`, async ({ page }) => {
       prop:type="text"
     />
     <affine:bookmark
-      prop:type="card"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
       prop:url="${inputUrl}"
     />
   </affine:note>
@@ -191,7 +205,14 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
       prop:type="text"
     />
     <affine:bookmark
-      prop:type="card"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
       prop:url="${inputUrl}"
     />
   </affine:note>
@@ -241,7 +262,14 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
       prop:type="text"
     />
     <affine:bookmark
-      prop:type="card"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
       prop:url="${inputUrl}"
     />
   </affine:note>
@@ -270,7 +298,14 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:bookmark
-      prop:type="card"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
       prop:url="${inputUrl}"
     />
   </affine:note>
@@ -317,7 +352,14 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:bookmark
-      prop:type="card"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
       prop:url="${inputUrl}"
     />
     <affine:paragraph
@@ -377,7 +419,14 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
       prop:type="text"
     />
     <affine:bookmark
-      prop:type="card"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
       prop:url="${inputUrl}"
     />
     <affine:paragraph
