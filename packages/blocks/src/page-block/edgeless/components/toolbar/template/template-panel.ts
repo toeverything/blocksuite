@@ -171,10 +171,11 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     this._loadingTemplate = template;
 
     try {
-      const templateJob = this.edgeless.surface.service!.TemplateJob.create(
-        this.edgeless.surfaceBlockModel,
-        'edgeless-template'
-      );
+      const templateJob = this.edgeless.surface.service!.TemplateJob.create({
+        model: this.edgeless.surfaceBlockModel,
+        type: 'edgeless-template',
+        middlewares: [],
+      });
       const { asserts: assets } = template;
 
       if (assets) {

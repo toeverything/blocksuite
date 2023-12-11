@@ -20,7 +20,7 @@ const DEFERED_BLOCK = ['affine:surface', 'affine:surface-ref'] as const;
 
 /**
  * Those block should not be inserted directly
- * it should merge with current existing block
+ * it should be merged with current existing block
  */
 const MERGE_BLOCK = ['affine:surface', 'affine:page'] as const;
 
@@ -50,13 +50,18 @@ export type SlotPayload =
 export type TemplateJobConfig = {
   model: SurfaceBlockModel;
   type: TemplateType;
+  middlewares: ((job: TemplateJob) => void)[];
 };
 
 export class TemplateJob {
   static beforeHookCtr = [replaceIdMiddleware];
 
-  static create(model: SurfaceBlockModel, type: TemplateType) {
-    return new TemplateJob({ model, type });
+  static create(options: {
+    model: SurfaceBlockModel;
+    type: TemplateType;
+    middlewares: ((job: TemplateJob) => void)[];
+  }) {
+    return new TemplateJob(options);
   }
 
   static middlewares = [replaceIdMiddleware];
@@ -75,11 +80,12 @@ export class TemplateJob {
     >(),
   };
 
-  constructor({ model, type }: TemplateJobConfig) {
+  constructor({ model, type, middlewares }: TemplateJobConfig) {
     this.job = new Job({ workspace: model.page.workspace, middlewares: [] });
     this.model = model;
     this.type = type;
 
+    middlewares.forEach(middleware => middleware(this));
     TemplateJob.middlewares.forEach(middleware => middleware(this));
   }
 
