@@ -2,19 +2,21 @@ import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { type Page, Workspace } from '@blocksuite/store';
 
 import { groupBy } from '../../_common/utils/iterable.js';
-import { AttachmentService } from '../../attachment-block/attachment-service.js';
-import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { ImageBlockModel } from '../../image-block/index.js';
 import type {
   EdgelessElement,
   Selectable,
   SerializedBlock,
   TopLevelBlockModel,
-} from '../../index.js';
-import type { NoteBlockModel } from '../../note-block/index.js';
+} from '../../_common/utils/types.js';
+import { AttachmentService } from '../../attachment-block/attachment-service.js';
+import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
+import type { FrameBlockModel } from '../../frame-block/frame-model.js';
+import type { ImageBlockModel } from '../../image-block/image-model.js';
+import type { NoteBlockModel } from '../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {
+  isBookmarkBlock,
   isCanvasElementWithText,
   isFrameBlock,
   isImageBlock,
@@ -40,6 +42,7 @@ import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js
 import { ContentParser } from '../content-parser/index.js';
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
+import type { BookmarkBlockService } from '../service/legacy-services/bookmark-service.js';
 import type { FrameBlockService } from '../service/legacy-services/frame-service.js';
 import type { ImageBlockService } from '../service/legacy-services/image-service.js';
 import type { Clipboard } from './type.js';
@@ -111,6 +114,9 @@ async function prepareClipboardData(selectedAll: Selectable[]) {
       } else if (isImageBlock(selected)) {
         const service = getService(selected.flavour) as ImageBlockService;
         return { ...service.block2Json(selected, []) };
+      } else if (isBookmarkBlock(selected)) {
+        const service = getService(selected.flavour) as BookmarkBlockService;
+        return service.block2Json(selected, []);
       } else if (selected instanceof ConnectorElement) {
         return prepareConnectorClipboardData(selected, selectedAll);
       } else {
@@ -420,6 +426,31 @@ export class EdgelessClipboard implements Clipboard {
     return imageIds;
   }
 
+  private async _createBookmarkBlocks(bookmarks: SerializedBlock[]) {
+    const bookmarkIds = await Promise.all(
+      bookmarks.map(async bookmark => {
+        const { xywh, style, url, caption, description, icon, image, title } =
+          bookmark;
+        const bookmarkId = this.surface.addElement(
+          EdgelessBlockType.BOOKMARK,
+          {
+            xywh,
+            style,
+            url,
+            caption,
+            description,
+            icon,
+            image,
+            title,
+          },
+          this.surface.model.id
+        );
+        return bookmarkId;
+      })
+    );
+    return bookmarkIds;
+  }
+
   private _getOldCommonBound(
     canvasElements: CanvasElement[],
     blocks: TopLevelBlockModel[]
@@ -473,11 +504,14 @@ export class EdgelessClipboard implements Clipboard {
           ? 'frames'
           : isImageBlock(data as unknown as Selectable)
             ? 'images'
-            : 'elements'
+            : isBookmarkBlock(data as unknown as Selectable)
+              ? 'bookmarks'
+              : 'elements'
     ) as unknown as {
       frames: SerializedBlock[];
       notes?: SerializedBlock[];
       images?: SerializedBlock[];
+      bookmarks?: SerializedBlock[];
       elements?: {
         type: CanvasElement['type'];
       }[];
@@ -493,6 +527,9 @@ export class EdgelessClipboard implements Clipboard {
     );
     const frameIds = await this._createFrameBlocks(groupedByType.frames ?? []);
     const imageIds = await this._createImageBlocks(groupedByType.images ?? []);
+    const bookmarkIds = await this._createBookmarkBlocks(
+      groupedByType.bookmarks ?? []
+    );
 
     const notes = noteIds.map(id =>
       this._page.getBlockById(id)
@@ -505,6 +542,10 @@ export class EdgelessClipboard implements Clipboard {
     const images = imageIds.map(id =>
       this.surface.pickById(id)
     ) as ImageBlockModel[];
+
+    const bookmarks = bookmarkIds.map(id =>
+      this.surface.pickById(id)
+    ) as BookmarkBlockModel[];
 
     const elements = this._createCanvasElements(
       groupedByType.elements || [],
@@ -520,6 +561,7 @@ export class EdgelessClipboard implements Clipboard {
       ...notes,
       ...frames,
       ...images,
+      ...bookmarks,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
@@ -541,7 +583,7 @@ export class EdgelessClipboard implements Clipboard {
       }
     });
 
-    [...notes, ...frames, ...images].forEach(block => {
+    [...notes, ...frames, ...images, ...bookmarks].forEach(block => {
       const [x, y, w, h] = deserializeXYWH(block.xywh);
       const newBound = new Bound(
         pasteX + x - oldCommonBound.x,

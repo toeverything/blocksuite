@@ -2,26 +2,27 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { getBlockElementByPath } from '../_common/utils/query.js';
+import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import { getBlockElementByPath } from '../_common/utils/index.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import type {
-  HitTestOptions,
-  IEdgelessElement,
-} from '../surface-block/elements/edgeless-element.js';
-import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
 import {
   Bound,
-  type IVec,
-  linePolygonIntersects,
-  type PointLocation,
+  type HitTestOptions,
   type SerializedXYWH,
 } from '../surface-block/index.js';
 import type { FrameBlockComponent } from './frame-block.js';
 
+type FrameBlockProps = {
+  title: Text;
+  background: string;
+  xywh: SerializedXYWH;
+  index: string;
+};
+
 export const FrameBlockSchema = defineBlockSchema({
   flavour: 'affine:frame',
-  props: internal => ({
+  props: (internal): FrameBlockProps => ({
     title: internal.Text(),
     background: '--affine-palette-transparent',
     xywh: `[0,0,100,100]`,
@@ -38,55 +39,15 @@ export const FrameBlockSchema = defineBlockSchema({
   },
 });
 
-type Props = {
-  title: Text;
-  background: string;
-  xywh: SerializedXYWH;
-  index: string;
-};
-
-@EdgelessSelectableMixin
-export class FrameBlockModel
-  extends BaseBlockModel<Props>
-  implements IEdgelessElement
-{
+export class FrameBlockModel extends selectable<FrameBlockProps>(
+  BaseBlockModel
+) {
   override flavour!: EdgelessBlockType.FRAME;
-
-  get connectable() {
-    return true;
-  }
-
-  get batch() {
-    return FRAME_BATCH;
-  }
-
-  get rotate() {
-    return 0;
-  }
-
-  get elementBound() {
-    return Bound.deserialize(this.xywh);
-  }
-
-  containedByBounds(bound: Bound): boolean {
-    return bound.contains(Bound.deserialize(this.xywh));
-  }
-  getNearestPoint(_: IVec): IVec {
-    throw new Error('Function not implemented.');
-  }
-  intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
-    return linePolygonIntersects(
-      start,
-      end,
-      Bound.deserialize(this.xywh).points
-    );
-  }
-  getRelativePointLocation!: (_: IVec) => PointLocation;
-  hitTest(x: number, y: number, _: HitTestOptions): boolean {
+  override batch = FRAME_BATCH;
+  override hitTest(x: number, y: number, _: HitTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointOnBound([x, y]);
     if (hit) return true;
-
     assertExists(this.page.root);
     const block = getBlockElementByPath([
       this.page.root?.id,
@@ -96,7 +57,8 @@ export class FrameBlockModel
     const titleBound = block.titleBound;
     return titleBound.isPointInBound([x, y], 0);
   }
-  boxSelect(bound: Bound): boolean {
+
+  override boxSelect(bound: Bound): boolean {
     return Bound.deserialize(this.xywh).isIntersectWithBound(bound);
   }
 }

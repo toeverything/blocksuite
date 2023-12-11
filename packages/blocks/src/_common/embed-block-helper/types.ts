@@ -1,10 +1,10 @@
 import type { BlockServiceConstructor } from '@blocksuite/block-std';
 import type {
-  BaseBlockModel,
   BaseBlockTransformer,
   InternalPrimitives,
 } from '@blocksuite/store';
 
+import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
 import type { EmbedBlockModel } from './embed-block-model.js';
 
 export type EmbedBlockGeneratorOptions<
@@ -27,12 +27,4 @@ export type EmbedBlockGeneratorOptions<
   };
 };
 
-export type EmbedProps<Props = object> = Props & {
-  rotate: number;
-  xywh: string;
-  index: string;
-};
-
-export type BaseEmbedBlockModel<Props extends object = object> = BaseBlockModel<
-  EmbedProps<Props>
->;
+export type EmbedProps<Props = object> = Props & EdgelessSelectableProps;

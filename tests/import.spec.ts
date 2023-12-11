@@ -370,7 +370,7 @@ test(scoped`import notion html-format bookmark`, async ({ page }) => {
       flavour: 'affine:bookmark',
       children: [],
       url: 'https://github.com/toeverything/AFFiNE',
-      bookmarkTitle:
+      title:
         'GitHub - toeverything/AFFiNE: There can be more than Notion and\n                  Miro. AFFiNE is a next-gen knowledge base that brings planning, sorting and creating all\n                  together. Privacy first, open-source, customizable and ready to use.',
       description:
         'There can be more than Notion and Miro. AFFiNE is a\n                  next-gen knowledge base that brings planning, sorting and creating all together. Privacy\n                  first, open-source, customizable and ready to use. - Gi...',

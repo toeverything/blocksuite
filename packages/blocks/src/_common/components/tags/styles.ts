@@ -3,13 +3,18 @@ import { css, unsafeCSS } from 'lit';
 
 export const styles = css`
   affine-multi-tag-select {
-    position: absolute;
-    width: 100%;
+    position: fixed;
+    top: 290px !important;
+    left: 50% !important;
+    width: 75% !important;
+    transform: translate(-50%, -50%);
     z-index: 2;
     border: 1px solid var(--affine-border-color);
     border-radius: 8px;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-shadow-2);
+    min-width: 300px;
+    max-width: 720px;
   }
 
   .affine-select-cell-select {

@@ -1115,7 +1115,7 @@ describe('notion html to snapshot', () => {
           props: {
             type: 'card',
             url: 'https://affine.pro/',
-            bookmarkTitle: 'AFFiNE - All In One KnowledgeOS',
+            title: 'AFFiNE - All In One KnowledgeOS',
             description:
               'The universal editor that lets you work, play, present or create just about anything.',
             icon: 'https://affine.pro/favicon-96.png',

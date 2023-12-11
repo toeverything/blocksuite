@@ -3,21 +3,15 @@ import type { TemplateResult } from 'lit';
 
 import { toast } from '../../_common/components/toast.js';
 import {
-  BookmarkIcon,
   CaptionIcon,
   CopyIcon,
   DeleteIcon,
   DuplicateIcon,
   EditIcon,
-  EmbedWebIcon,
   LinkIcon,
   RefreshIcon,
 } from '../../_common/icons/index.js';
-import {
-  type BookmarkBlockModel,
-  type BookmarkBlockProps,
-} from '../bookmark-model.js';
-import { allowEmbed } from '../embed.js';
+import type { BookmarkBlockModel } from '../bookmark-model.js';
 import type { BookmarkOperationMenu } from './bookmark-operation-popper.js';
 
 export type ConfigItem = {
@@ -51,7 +45,7 @@ export const config: ConfigItem[] = [
       const index = parent?.children.indexOf(model);
 
       const yText = new Workspace.Y.Text();
-      const insert = model.bookmarkTitle || model.caption || model.url;
+      const insert = model.title || model.caption || model.url;
       yText.insert(0, insert);
       yText.format(0, insert.length, { link: model.url });
       const text = new page.Text(yText);
@@ -67,34 +61,6 @@ export const config: ConfigItem[] = [
       model.page.deleteBlock(model);
       callback?.('link');
     },
-  },
-  {
-    type: 'card',
-    icon: BookmarkIcon,
-    tooltip: 'Turn into Card view',
-    showWhen: model =>
-      !model.page.readonly && model.type && model.type !== 'card',
-    action: (model, callback) => {
-      model.page.updateBlock<Partial<BookmarkBlockProps>>(model, {
-        type: 'card',
-      });
-      callback?.('card');
-    },
-    divider: true,
-  },
-  {
-    type: 'embed',
-    icon: EmbedWebIcon,
-    tooltip: 'Turn into Embed view',
-    showWhen: model =>
-      !model.page.readonly && model.type !== 'embed' && allowEmbed(model.url),
-    action: (model, callback) => {
-      model.page.updateBlock<Partial<BookmarkBlockProps>>(model, {
-        type: 'embed',
-      });
-      callback?.('embed');
-    },
-    divider: true,
   },
   {
     type: 'edit',
@@ -151,7 +117,7 @@ export const moreOperations: MoreOperation[] = [
     label: 'Duplicate',
     showWhen: model => !model.page.readonly,
     action: (model, callback) => {
-      const { page, url, type } = model;
+      const { page, url } = model;
 
       const parent = page.getParent(model);
       const index = parent?.children.indexOf(model);
@@ -160,7 +126,6 @@ export const moreOperations: MoreOperation[] = [
         'affine:bookmark',
         {
           url,
-          type,
         },
         parent,
         index
