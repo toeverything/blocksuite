@@ -5,18 +5,18 @@ import { customElement, property } from 'lit/decorators.js';
 import { humanFileSize } from '../../_common/utils/math.js';
 import { FailedImageIcon, ImageIcon, LoadingIcon } from '../styles.js';
 
-const ELEMENT_TAG = 'affine-image-card' as const;
+const ELEMENT_TAG = 'affine-image-block-card' as const;
 
 export enum ImageState {
-  Loading,
   Ready,
+  Loading,
   Failed,
 }
 
 @customElement(ELEMENT_TAG)
 export class AffinePageImageCard extends ShadowlessElement {
   static override styles = css`
-    .affine-image-card {
+    .affine-image-block-card {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -26,7 +26,7 @@ export class AffinePageImageCard extends ShadowlessElement {
       padding: 12px;
     }
 
-    .affine-image-card-content {
+    .affine-image-block-card-content {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -89,10 +89,13 @@ export class AffinePageImageCard extends ShadowlessElement {
         : null;
 
     return html`
-      <div class="affine-image-card" style="width:${width};height:${height};">
-        <div class="affine-image-card-content">
+      <div
+        class="affine-image-block-card"
+        style="width:${width};height:${height};"
+      >
+        <div class="affine-image-block-card-content">
           ${contentIcon}
-          <span class="affine-image-card-title">${contentText}</span>
+          <span class="affine-image-block-card-title">${contentText}</span>
         </div>
         <div class="affine-image-card-size">${size}</div>
       </div>

@@ -155,10 +155,10 @@ export class ContentParser {
         }
         const root = this._page.root;
         const pageBlock = root ? getBlockElementByModel(root) : null;
-        const imageLoadingComponent = document.querySelector(
-          'affine-image-block-loading-card'
-        );
-        if (pageBlock && !imageLoadingComponent) {
+        const imageCard = document.querySelector('affine-image-block-card');
+        const isReady =
+          !imageCard || imageCard.getAttribute('imageState') === '0';
+        if (pageBlock && isReady) {
           clearInterval(checkReactRender);
           resolve(true);
         }

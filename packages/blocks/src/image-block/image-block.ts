@@ -105,11 +105,11 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   override render() {
     if (this._imageState !== ImageState.Ready) {
-      return html`<affine-image-card
+      return html`<affine-image-block-card
         imageState=${this._imageState}
         ?isinsurface=${this._isInSurface}
         @click=${this._onCardClick}
-      ></affine-image-card>`;
+      ></affine-image-block-card>`;
     }
 
     if (this._isInSurface) {
