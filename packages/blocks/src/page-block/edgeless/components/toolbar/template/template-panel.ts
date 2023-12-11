@@ -189,7 +189,6 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
       await templateJob.insertTemplate(template.content);
     } finally {
-      console.log('what');
       this._loadingTemplate = null;
       this._closePanel();
     }
