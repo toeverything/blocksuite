@@ -314,10 +314,6 @@ export class DebugMenu extends ShadowlessElement {
     this.navigationPanel.toggleDisplay();
   }
 
-  private _toggleFramePanel() {
-    this.framePanel.toggleDisplay();
-  }
-
   private _toggleCopilotPanel() {
     if (this.sidePanel.currentContent === this.aiPanel) {
       this.sidePanel.hideContent();
@@ -327,32 +323,32 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _mindMapDemo() {
-    // function makeid(length: number) {
-    //   let result = '';
-    //   const characters =
-    //     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    //   const charactersLength = characters.length;
-    //   let counter = 0;
-    //   while (counter < length) {
-    //     result += characters.charAt(
-    //       Math.floor(Math.random() * charactersLength)
-    //     );
-    //     counter += 1;
-    //   }
-    //   return result;
-    // }
-    //
-    // const genTree = (deep: number = 0): TreeNode => {
-    //   const count = Math.floor(Math.random() * 10) - deep - 2;
-    //   const children: TreeNode[] = [];
-    //   for (let i = 0; i < count; i++) {
-    //     children.push(genTree(deep + 1));
-    //   }
-    //   return {
-    //     text: makeid(Math.random() * 200 + 30),
-    //     children,
-    //   };
-    // };
+    function makeid(length: number) {
+      let result = '';
+      const characters =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const charactersLength = characters.length;
+      let counter = 0;
+      while (counter < length) {
+        result += characters.charAt(
+          Math.floor(Math.random() * charactersLength)
+        );
+        counter += 1;
+      }
+      return result;
+    }
+
+    const genTree = (deep: number = 0): TreeNode => {
+      const count = Math.floor(Math.random() * 10) - deep - 2;
+      const children: TreeNode[] = [];
+      for (let i = 0; i < count; i++) {
+        children.push(genTree(deep + 1));
+      }
+      return {
+        text: makeid(Math.random() * 200 + 30),
+        children,
+      };
+    };
     const blocks = getSelectedBlocks(this.editor.root!);
     const toTreeNode = (block: BaseBlockModel): TreeNode => {
       return {
@@ -360,11 +356,14 @@ export class DebugMenu extends ShadowlessElement {
         children: block.children.map(toTreeNode),
       };
     };
-    console.log(blocks);
+    const node = {
+      text: 'Root',
+      children: blocks.map(v => toTreeNode(v.model)),
+    };
     // const node: TreeNode = genTree();
     BlocksUtils.mindMap.drawInEdgeless(
       getSurfaceElementFromEditor(this.editor),
-      { text: 'Root', children: blocks.map(v => toTreeNode(v.model)) }
+      node
     );
   }
 
@@ -611,8 +610,8 @@ export class DebugMenu extends ShadowlessElement {
             <sl-tooltip content="Undo" placement="bottom" hoist>
               <sl-button
                 size="small"
-                .disabled="${!this._canUndo}"
-                @click="${() => this.page.undo()}"
+                .disabled=${!this._canUndo}
+                @click=${() => this.page.undo()}
               >
                 <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
               </sl-button>
@@ -621,8 +620,8 @@ export class DebugMenu extends ShadowlessElement {
             <sl-tooltip content="Redo" placement="bottom" hoist>
               <sl-button
                 size="small"
-                .disabled="${!this._canRedo}"
-                @click="${() => this.page.redo()}"
+                .disabled=${!this._canRedo}
+                @click=${() => this.page.redo()}
               >
                 <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
               </sl-button>
@@ -635,63 +634,60 @@ export class DebugMenu extends ShadowlessElement {
               Test Operations
             </sl-button>
             <sl-menu>
-              <sl-menu-item @click="${this._toggleConnection}">
+              <sl-menu-item @click=${this._toggleConnection}>
                 ${this._connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
-              <sl-menu-item @click="${this._exportMarkDown}">
+              <sl-menu-item @click=${this._exportMarkDown}>
                 Export Markdown
               </sl-menu-item>
-              <sl-menu-item @click="${this._exportHtml}">
+              <sl-menu-item @click=${this._exportHtml}>
                 Export HTML
               </sl-menu-item>
-              <sl-menu-item @click="${this._exportPdf}">
+              <sl-menu-item @click=${this._exportPdf}>
                 Export PDF
               </sl-menu-item>
-              <sl-menu-item @click="${this._exportPng}">
+              <sl-menu-item @click=${this._exportPng}>
                 Export PNG
               </sl-menu-item>
-              <sl-menu-item @click="${this._exportSnapshot}">
+              <sl-menu-item @click=${this._exportSnapshot}>
                 Export Snapshot
               </sl-menu-item>
-              <sl-menu-item @click="${this._importSnapshot}">
+              <sl-menu-item @click=${this._importSnapshot}>
                 Import Snapshot
               </sl-menu-item>
-              <sl-menu-item @click="${this._shareUrl}">Share URL</sl-menu-item>
-              <sl-menu-item @click="${this._toggleStyleDebugMenu}">
+              <sl-menu-item @click=${this._shareUrl}>Share URL</sl-menu-item>
+              <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click="${this._toggleReadonly}">
+              <sl-menu-item @click=${this._toggleReadonly}>
                 Toggle Readonly
               </sl-menu-item>
-              <sl-menu-item @click="${this._shareSelection}">
+              <sl-menu-item @click=${this._shareSelection}>
                 Share Selection
               </sl-menu-item>
-              <sl-menu-item @click="${this._switchOffsetMode}">
+              <sl-menu-item @click=${this._switchOffsetMode}>
                 Switch Offset Mode
               </sl-menu-item>
-              <sl-menu-item @click="${this._toggleNavigationPanel}">
+              <sl-menu-item @click=${this._toggleNavigationPanel}>
                 Toggle Navigation Panel
               </sl-menu-item>
-              <sl-menu-item @click="${this._toggleFramePanel}">
-                Toggle Frame Panel
-              </sl-menu-item>
-              <sl-menu-item @click="${this._extendFormatBar}">
+              <sl-menu-item @click=${this._extendFormatBar}>
                 Extend Format Bar
               </sl-menu-item>
-              <sl-menu-item @click="${this._addNote}">Add Note</sl-menu-item>
+              <sl-menu-item @click=${this._addNote}>Add Note</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
           <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
-            <sl-button size="small" @click="${this._switchEditorMode}">
+            <sl-button size="small" @click=${this._switchEditorMode}>
               <sl-icon name="repeat"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
           <sl-tooltip content="Toggle Dark Mode" placement="bottom" hoist>
-            <sl-button size="small" @click="${this._toggleDarkMode}">
+            <sl-button size="small" @click=${this._toggleDarkMode}>
               <sl-icon
-                name="${this._dark ? 'moon' : 'brightness-high'}"
+                name=${this._dark ? 'moon' : 'brightness-high'}
               ></sl-icon>
             </sl-button>
           </sl-tooltip>
@@ -699,7 +695,7 @@ export class DebugMenu extends ShadowlessElement {
           <sl-tooltip content="Add New Page" placement="bottom" hoist>
             <sl-button
               size="small"
-              @click="${() => createPageBlock(this.workspace)}"
+              @click=${() => createPageBlock(this.workspace)}
             >
               <sl-icon name="file-earmark-plus"></sl-icon>
             </sl-button>
@@ -712,7 +708,7 @@ export class DebugMenu extends ShadowlessElement {
             placement="bottom"
             hoist
           >
-            <sl-button size="small" @click="${this._toggleCopilotPanel}">
+            <sl-button size="small" @click=${this._toggleCopilotPanel}>
               <sl-icon name="stars"></sl-icon>
             </sl-button>
           </sl-tooltip>

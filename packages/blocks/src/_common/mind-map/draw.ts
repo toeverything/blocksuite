@@ -41,44 +41,26 @@ export type TreeNode = {
   text: string;
   children: TreeNode[];
 };
-const positionMap: Record<
-  keyof typeof layout,
-  { method: keyof typeof layout; fromPosition: number[]; toPosition: number[] }
-> = {
+const directionMap: Record<string, { from: number[]; to: number[] }> = {
   left: {
-    method: 'left',
-    fromPosition: [0, 0.5],
-    toPosition: [1, 0.5],
+    from: [0, 0.5],
+    to: [1, 0.5],
   },
   right: {
-    method: 'right',
-    fromPosition: [1, 0.5],
-    toPosition: [0, 0.5],
+    from: [1, 0.5],
+    to: [0, 0.5],
   },
   top: {
-    method: 'top',
-    fromPosition: [0.5, 0],
-    toPosition: [0.5, 1],
+    from: [0.5, 0],
+    to: [0.5, 1],
   },
   bottom: {
-    method: 'bottom',
-    fromPosition: [0.5, 1],
-    toPosition: [0.5, 0],
-  },
-  leftRight: {
-    method: 'leftRight',
-    fromPosition: [0, 0.5],
-    toPosition: [1, 0.5],
-  },
-  topBottom: {
-    method: 'topBottom',
-    fromPosition: [0.5, 0],
-    toPosition: [0.5, 1],
+    from: [0.5, 1],
+    to: [0.5, 0],
   },
 };
 
 const drawAllNode = (node: TreeNode, surface: SurfaceBlockComponent) => {
-  const position = positionMap['right'];
   const shapeIds: string[] = [];
   const connectorIds: string[] = [];
   const connectors: { from: string; to: string }[] = [];
@@ -114,7 +96,7 @@ const drawAllNode = (node: TreeNode, surface: SurfaceBlockComponent) => {
     };
   };
   const layoutNode = drawNode(node);
-  const result = layout[position.method](layoutNode, {
+  const result = layout.leftRight(layoutNode, {
     gapHorizontal: 130,
     gapVertical: 10,
   });
@@ -125,24 +107,26 @@ const drawAllNode = (node: TreeNode, surface: SurfaceBlockComponent) => {
       xywh: `[${x},${y},${width},${height}]`,
     });
     node.children.forEach((child, index) => {
-      updatePosition(child, result.children[index]);
+      const layoutNodeResult = result.children[index];
+      updatePosition(child, layoutNodeResult);
+      if (layoutNodeResult.connector) {
+        const direction = directionMap[layoutNodeResult.connector.direction];
+        const connectorId = surface.addElement(CanvasElementType.CONNECTOR, {
+          ...DEFAULT_CONNECTOR_PROPS,
+          source: {
+            id: id,
+            position: direction.from,
+          },
+          target: {
+            id: child.id,
+            position: direction.to,
+          },
+        });
+        connectorIds.push(connectorId);
+      }
     });
   };
   updatePosition(layoutNode, result);
-  connectors.forEach(({ from, to }) => {
-    const connectorId = surface.addElement(CanvasElementType.CONNECTOR, {
-      ...DEFAULT_CONNECTOR_PROPS,
-      source: {
-        id: from,
-        position: position.fromPosition,
-      },
-      target: {
-        id: to,
-        position: position.toPosition,
-      },
-    });
-    connectorIds.push(connectorId);
-  });
   return { shapeIds, connectorIds };
 };
 export function drawMindMap(
