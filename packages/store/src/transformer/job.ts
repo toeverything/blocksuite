@@ -213,7 +213,7 @@ export class Job {
     return model;
   }
 
-  async snapshotToModelData(snapshot: BlockSnapshot) {
+  snapshotToModelData = async (snapshot: BlockSnapshot) => {
     const { children, flavour, props, id } = snapshot;
 
     const schema = this._getSchema(flavour);
@@ -230,7 +230,7 @@ export class Job {
     });
 
     return modelData;
-  }
+  };
 
   snapshotToBlock = async (
     snapshot: BlockSnapshot,
