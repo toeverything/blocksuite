@@ -391,7 +391,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
 
   override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('page')) {
-      this._setPageDisposables(page);
+      this._setPageDisposables(this.page);
     }
 
     if (_changedProperties.has('edgeless')) {
