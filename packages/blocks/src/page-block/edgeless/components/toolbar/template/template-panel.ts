@@ -18,15 +18,12 @@ import { ArrowIcon, Preview } from './icon.js';
 
 @customElement('edgeless-templates-panel')
 export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
-  static override shadowRootOptions: ShadowRootInit = {
-    mode: 'open',
-  };
-
   static templates = builtInTemplates;
   static override styles = css`
     :host {
       position: absolute;
       font-family: var(--affine-font-family);
+      z-index: 1;
     }
 
     .edgeless-templates-panel {
