@@ -3,6 +3,7 @@ import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
 import './change-note-button.js';
+import './change-bookmark-button.js';
 import './change-text-button.js';
 import './change-frame-button.js';
 import './change-group-button.js';
@@ -178,6 +179,19 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
+  private _BookmarkButton(bookmarks: BookmarkBlockModel[]) {
+    return bookmarks.length === 1
+      ? html`
+          <edgeless-change-bookmark-button
+            .bookmark=${bookmarks[0]}
+            .page=${this.page}
+            .surface=${this.surface}
+            .slots=${this.slots}
+          ></edgeless-change-bookmark-button>
+        `
+      : nothing;
+  }
+
   private _TextButton(textElements: TextElement[]) {
     return textElements?.length
       ? html`<edgeless-change-text-button
@@ -322,7 +336,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless, selection } = this;
-    const { shape, brush, connector, note, text, frame, group } =
+    const { shape, brush, connector, note, text, frame, group, bookmark } =
       groupedSelected;
     const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -338,6 +352,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._BrushButton(brush),
           this._ConnectorButton(connector),
           this._NoteButton(note),
+          this._BookmarkButton(bookmark),
           this._TextButton(text),
           this._FrameButton(frame),
           this._GroupButton(group),

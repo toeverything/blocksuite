@@ -12,45 +12,52 @@ import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 export type BookmarkBlockType = 'horizontal' | 'list' | 'vertical' | 'cube';
 
 export interface BookmarkBlockUrlData {
-  description?: string;
-  icon?: string;
-  image?: string;
-  title?: string;
+  description: string | null;
+  icon: string | null;
+  image: string | null;
+  title: string | null;
 
   /**
    * @deprecated
    * use `title` instead
    */
-  bookmarkTitle?: string;
+  // bookmarkTitle: string;
   /**
    * @deprecated
    * we don't need this anymore
    */
-  crawled?: boolean;
+  // crawled: boolean;
 }
 
 export interface BookmarkBlockEdgelessProps {
   index: string;
-  xywh?: SerializedXYWH;
+  xywh: SerializedXYWH;
   rotate: number;
 }
 
 export type BookmarkBlockProps = {
   style: BookmarkBlockType;
   url: string;
-  caption?: string;
+  caption: string | null;
 
   /**
    * @deprecated
    * we will use another block to handle embed
    */
-  type?: 'card' | 'embed';
+  // type: 'card' | 'embed';
 } & BookmarkBlockUrlData &
   BookmarkBlockEdgelessProps;
 
 export const defaultBookmarkProps: BookmarkBlockProps = {
   style: 'horizontal',
   url: '',
+  caption: null,
+
+  description: null,
+  icon: null,
+  image: null,
+  title: null,
+
   index: 'a0',
   xywh: '[0,0,0,0]',
   rotate: 0,

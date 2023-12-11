@@ -29,7 +29,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    refreshBookmarkUrlData(this);
+    if (!this.model.description) {
+      refreshBookmarkUrlData(this);
+    }
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {

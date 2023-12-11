@@ -296,7 +296,7 @@ export class NotionHtmlParser extends BaseParser {
         flavour: 'affine:bookmark',
         children: [],
         url: bookmarkUrl,
-        bookmarkTitle: bookmarkTitle,
+        title: bookmarkTitle,
         description: bookmarkDescription,
         icon: bookmarkIcon,
         image: bookmarkImage,

@@ -31,10 +31,11 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
       this.titleInput.setSelectionRange(0, this.titleInput.value.length);
     });
 
-    this.disposables.addFromEvent(document, 'keydown', this._onDocumentKeydown);
+    this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
   }
 
   private _onDocumentKeydown = (e: KeyboardEvent) => {
+    e.stopPropagation();
     if (e.key === 'Enter' && !e.isComposing) {
       this._onConfirm();
     }
@@ -53,9 +54,7 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const title =
-      this.bookmarkModel.title ??
-      this.bookmarkModel.bookmarkTitle ??
-      'Bookmark';
+      this.bookmarkModel.title ?? this.bookmarkModel.title ?? 'Bookmark';
 
     return html`<div class="bookmark-modal">
       <div class="bookmark-modal-mask" @click=${() => this.remove()}></div>
