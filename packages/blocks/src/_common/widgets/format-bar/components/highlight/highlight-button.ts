@@ -1,8 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { computePosition, flip, shift } from '@floating-ui/dom';
+import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
+import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
+import { whenHover } from '../../../../components/hover/index.js';
 import type { AffineTextAttributes } from '../../../../components/rich-text/virgo/types.js';
 import {
   ArrowDownIcon,
@@ -48,8 +50,11 @@ const updateHighlight = (
     .run();
 };
 
-const HighlightPanel = (formatBar: AffineFormatBarWidget) => {
-  return html`<div class="highlight-panel">
+const HighlightPanel = (
+  formatBar: AffineFormatBarWidget,
+  containerRef?: RefOrCallback
+) => {
+  return html`<div ${ref(containerRef)} class="highlight-panel">
     <!-- Text Color Highlight -->
     <div class="highligh-panel-heading">Color</div>
     ${foregroundConfig.map(
@@ -99,9 +104,15 @@ const HighlightPanel = (formatBar: AffineFormatBarWidget) => {
 export const HighlightButton = (formatBar: AffineFormatBarWidget) => {
   const root = formatBar.blockElement.root;
 
-  const highlightPanel = HighlightPanel(formatBar);
-
-  const onHover = () => {
+  const { setFloating, setReference } = whenHover(isHover => {
+    if (!isHover) {
+      const panel = formatBar.shadowRoot?.querySelector(
+        '.highlight-panel'
+      ) as HTMLElement | null;
+      assertExists(panel);
+      panel.style.display = 'none';
+      return;
+    }
     const button = formatBar.shadowRoot?.querySelector(
       '.highlight-button'
     ) as HTMLElement | null;
@@ -115,6 +126,7 @@ export const HighlightButton = (formatBar: AffineFormatBarWidget) => {
       placement: 'bottom',
       middleware: [
         flip(),
+        offset(10),
         shift({
           padding: 6,
         }),
@@ -123,20 +135,11 @@ export const HighlightButton = (formatBar: AffineFormatBarWidget) => {
       panel.style.left = `${x}px`;
       panel.style.top = `${y}px`;
     });
-  };
-  const onHoverEnd = () => {
-    const panel = formatBar.shadowRoot?.querySelector(
-      '.highlight-panel'
-    ) as HTMLElement | null;
-    assertExists(panel);
-    panel.style.display = 'none';
-  };
+  });
 
-  return html`<div
-    @mouseleave=${onHoverEnd}
-    @mouseenter=${onHover}
-    class="highlight-button"
-  >
+  const highlightPanel = HighlightPanel(formatBar, setFloating);
+
+  return html`<div ${ref(setReference)} class="highlight-button">
     <icon-button
       class="highlight-icon"
       data-last-used="${lastUsedColor ?? 'unset'}"
