@@ -56,8 +56,6 @@ export type TemplateJobConfig = {
 };
 
 export class TemplateJob {
-  static beforeHookCtr = [replaceIdMiddleware];
-
   static create(options: {
     model: SurfaceBlockModel;
     type: TemplateType;
