@@ -2,6 +2,7 @@ import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import { type SerializedXYWH } from '../surface-block/index.js';
 
@@ -35,4 +36,5 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(
   BaseBlockModel
 ) {
   override flavour!: EdgelessBlockType.FRAME;
+  override batch = FRAME_BATCH;
 }
