@@ -2,6 +2,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import { BLACK_BACKGROUND_KEY } from '../../../../_common/edgeless/frame/consts.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -29,6 +30,13 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  private _blackBackground = false;
+
+  private _tryLoadBlackBackground() {
+    const blackBackground = sessionStorage.getItem(BLACK_BACKGROUND_KEY);
+    this._blackBackground = blackBackground !== 'false';
+  }
+
   override firstUpdated() {
     const { _disposables, edgeless } = this;
     _disposables.add(
@@ -40,6 +48,13 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
     _disposables.add(
       edgeless.slots.navigatorSettingUpdated.on(({ blackBackground }) => {
         if (blackBackground !== undefined) {
+          sessionStorage.setItem(
+            BLACK_BACKGROUND_KEY,
+            blackBackground.toString()
+          );
+
+          this._blackBackground = blackBackground;
+
           this.show =
             blackBackground && edgeless.edgelessTool.type === 'frameNavigator';
         }
@@ -50,6 +65,8 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
       edgeless.slots.edgelessToolUpdated.on(tool => {
         if (tool.type !== 'frameNavigator') {
           this.show = false;
+        } else {
+          this.show = this._blackBackground;
         }
       })
     );
@@ -62,6 +79,8 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
           }, 500) // wait for full screen animation
       )
     );
+
+    this._tryLoadBlackBackground();
   }
 
   override render() {

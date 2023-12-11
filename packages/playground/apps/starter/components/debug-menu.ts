@@ -40,6 +40,7 @@ import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
 import { extendFormatBar } from './custom-format-bar.js';
+import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
 import type { SidePanel } from './side-panel';
 
@@ -153,6 +154,9 @@ export class DebugMenu extends ShadowlessElement {
   navigationPanel!: CustomNavigationPanel;
 
   @property({ attribute: false })
+  framePanel!: CustomFramePanel;
+
+  @property({ attribute: false })
   aiPanel!: AiPanel;
   @property({ attribute: false })
   sidePanel!: SidePanel;
@@ -259,6 +263,10 @@ export class DebugMenu extends ShadowlessElement {
 
   private _toggleNavigationPanel() {
     this.navigationPanel.toggleDisplay();
+  }
+
+  private _toggleFramePanel() {
+    this.framePanel.toggleDisplay();
   }
 
   private _toggleCopilotPanel() {
@@ -638,6 +646,9 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleNavigationPanel}>
                 Toggle Navigation Panel
+              </sl-menu-item>
+              <sl-menu-item @click=${this._toggleFramePanel}>
+                Toggle Frame Panel
               </sl-menu-item>
               <sl-menu-item @click=${this._extendFormatBar}>
                 Extend Format Bar

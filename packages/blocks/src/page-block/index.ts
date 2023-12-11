@@ -1,9 +1,15 @@
+import './commands/index.js';
+
 export * from './doc/doc-page-block.js';
 export { getAllowSelectedBlocks } from './doc/utils.js';
 export {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from './edgeless/components/component-toolbar/change-shape-button.js';
+export {
+  FramePanel,
+  registerFramePanelComponents,
+} from './edgeless/components/frame-panel/frame-panel.js';
 export {
   registerTOCComponents,
   TOCNotesPanel,

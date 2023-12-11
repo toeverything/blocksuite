@@ -19,6 +19,12 @@ export class SurfaceRefImagePortal extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   renderModel!: (model: BaseBlockModel) => TemplateResult;
 
+  override firstUpdated() {
+    this.disposables.add(
+      this.model.propsUpdated.on(() => this.requestUpdate())
+    );
+  }
+
   override render() {
     const { model, index } = this;
     const bound = Bound.deserialize(model.xywh);

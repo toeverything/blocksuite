@@ -7,8 +7,8 @@ titleTemplate: Block-Based Collaborative Editing
 
 hero:
   name: BlockSuite
-  text: Where Diverse Editing Tools Converge
-  tagline: BlockSuite is an open-source project for block-based collaborative editing.
+  text: Toolkit for Diverse Content Editing
+  tagline: BlockSuite helps you compose your collaborative editing app.
   actions:
     - theme: brand
       text: Get Started

@@ -437,11 +437,24 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   override firstUpdated() {
     if (!this._isEdgeless) return;
+
     this.attach(this._surfaceContainer);
+    this._initResizeEffect();
   }
 
   override updated() {
     if (!this._isEdgeless) return;
+  }
+
+  private _initResizeEffect() {
+    const observer = new ResizeObserver(() => {
+      this._renderer.onResize();
+    });
+
+    observer.observe(this._surfaceContainer);
+    this._disposables.add(() => {
+      observer.disconnect();
+    });
   }
 
   init() {
