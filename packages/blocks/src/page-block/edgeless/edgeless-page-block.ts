@@ -96,7 +96,7 @@ import { getCursorMode, isCanvasElement, isFrameBlock } from './utils/query.js';
 
 type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
 
-const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
+const { NOTE, IMAGE, FRAME, BOOKMARK } = EdgelessBlockType;
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -860,7 +860,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._disposables.add(
       this.page.slots.blockUpdated.on(event => {
         if (
-          ![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType) &&
+          ![IMAGE, NOTE, FRAME, BOOKMARK].includes(
+            event.flavour as EdgelessBlockType
+          ) &&
           !/affine:embed-*/.test(event.flavour)
         )
           return;

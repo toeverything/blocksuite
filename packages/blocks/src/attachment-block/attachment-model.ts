@@ -57,30 +57,4 @@ export const AttachmentBlockSchema = defineBlockSchema({
   toModel: () => new AttachmentBlockModel(),
 });
 
-export class AttachmentBlockModel extends BaseBlockModel<AttachmentBlockProps> {
-  constructor() {
-    super();
-
-    this.created.on(() => {
-      const blobId = this.sourceId;
-      if (!blobId) return;
-      const blob = this.page.blob.get(blobId);
-      if (!blob) {
-        console.error(`Blob ${blobId} not found in blob manager`);
-        return;
-      }
-      this.page.blob.increaseRef(blobId);
-    });
-    this.deleted.on(() => {
-      const blobId = this.sourceId;
-      if (!blobId) return;
-      const blob = this.page.blob.get(blobId);
-      if (!blob) {
-        console.error(`Blob ${blobId} not found in blob manager`);
-        return;
-      }
-
-      this.page.blob.decreaseRef(blobId);
-    });
-  }
-}
+export class AttachmentBlockModel extends BaseBlockModel<AttachmentBlockProps> {}

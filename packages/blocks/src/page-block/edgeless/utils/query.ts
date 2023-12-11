@@ -8,6 +8,7 @@ import {
   type Selectable,
   type TopLevelBlockModel,
 } from '../../../_common/utils/index.js';
+import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
@@ -61,6 +62,16 @@ export function isImageBlock(
     !!element &&
     'flavour' in element &&
     element.flavour === EdgelessBlockType.IMAGE
+  );
+}
+
+export function isBookmarkBlock(
+  element: BaseBlockModel | EdgelessElement | null
+): element is BookmarkBlockModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === EdgelessBlockType.BOOKMARK
   );
 }
 

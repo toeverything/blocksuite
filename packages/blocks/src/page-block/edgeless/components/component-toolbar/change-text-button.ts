@@ -45,3 +45,9 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
     </div>`;
   }
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'edgeless-change-text-button': EdgelessChangeTextButton;
+  }
+}
