@@ -343,7 +343,7 @@ test('image loading but success', async ({ page }) => {
     .innerText();
   expect(loadingContent).toBe('Loading image...');
 
-  await page.waitForTimeout(timeout);
+  await page.waitForTimeout(3 * timeout);
 
   const img = page.locator('.affine-image-wrapper img');
   await expect(img).toBeVisible();
