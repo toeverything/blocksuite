@@ -26,6 +26,8 @@ overrides:
   has-property-descriptors: npm:@nolyfill/has-property-descriptors@latest
   has-proto: npm:@nolyfill/has-proto@latest
   has-symbols: npm:@nolyfill/has-symbols@latest
+  hasown: npm:@nolyfill/hasown@latest
+  isarray: npm:@nolyfill/isarray@latest
 
 importers:
 
@@ -1829,10 +1831,20 @@ packages:
     engines: {node: '>=12.4.0'}
     dev: true
 
+  /@nolyfill/hasown@1.0.25:
+    resolution: {integrity: sha512-RhoW4Hk6B4/DM8B6sjbCkVJkhmtycA38cURrC489u4lwb/YafpUeknuLRzBoaNWvfLqkyR3rM/t0aa8U2/tvkQ==}
+    engines: {node: '>=12.4.0'}
+    dev: true
+
   /@nolyfill/is-generator-function@1.0.24:
     resolution: {integrity: sha512-1b5eOnqdmfMusjU5YNvojLlZguoENQfA3wa1AQNEvBsR5pi41i2Zn1WNvk4Ph1QI3hpW8xWOmAJS1ouMF5cNkA==}
     engines: {node: '>=12.4.0'}
     dev: true
+
+  /@nolyfill/isarray@1.0.25:
+    resolution: {integrity: sha512-wAC/8sqF2qaHrZpIxTR/9qc0XFyLW4WHX6gHVNpzKtCP8DuAL3L7eQwsMUWCg1ANL/Da3XiuueTx1J/S9piqtQ==}
+    engines: {node: '>=12.4.0'}
+    dev: false
 
   /@open-draft/deferred-promise@2.2.0:
     resolution: {integrity: sha512-CecwLWx3rhxVQF6V4bAgPS5t+So2sTbPgAzafKkVizyi7tlwpcFpdFqq+wqF2OwNBmqFuu6tOyouTuxgpMfzmA==}
@@ -4544,7 +4556,7 @@ packages:
       function-bind: /@nolyfill/function-bind@1.0.21
       has-proto: /@nolyfill/has-proto@1.0.24
       has-symbols: /@nolyfill/has-symbols@1.0.21
-      hasown: 2.0.0
+      hasown: /@nolyfill/hasown@1.0.25
     dev: true
 
   /get-own-enumerable-property-symbols@3.0.2:
@@ -4682,13 +4694,6 @@ packages:
     dependencies:
       is-stream: 2.0.1
       type-fest: 0.8.1
-    dev: true
-
-  /hasown@2.0.0:
-    resolution: {integrity: sha512-vUptKVTpIJhcczKBbgnS+RtcuYMB8+oNzPK2/Hp3hanz8JmpATdmmgLgSaadVREkDm+e2giHwY3ZRkyjSIDDFA==}
-    engines: {node: '>= 0.4'}
-    dependencies:
-      function-bind: /@nolyfill/function-bind@1.0.21
     dev: true
 
   /hast-util-from-html@2.0.1:
@@ -4976,7 +4981,7 @@ packages:
   /is-core-module@2.13.1:
     resolution: {integrity: sha512-hHrIjvZsftOsvKSn2TRYl63zvxsgE0K+0mYMoH6gD4omR5IWB2KynivBQczo3+wF1cCkjzvptnI9Q0sPU66ilw==}
     dependencies:
-      hasown: 2.0.0
+      hasown: /@nolyfill/hasown@1.0.25
     dev: true
 
   /is-docker@2.2.1:
@@ -5133,10 +5138,6 @@ packages:
     dependencies:
       is-docker: 2.2.1
     dev: true
-
-  /isarray@1.0.0:
-    resolution: {integrity: sha512-VLghIWNM6ELQzo7zwmcg0NmTVyWKYjvIeM83yjp0wRDTmUnrM678fQbcKBo6n2CJEF0szoG//ytg+TKla89ALQ==}
-    dev: false
 
   /isbinaryfile@5.0.0:
     resolution: {integrity: sha512-UDdnyGvMajJUWCkib7Cei/dvyJrrvo4FIrsvSFWdPpXSUorzXrDJ0S+X5Q4ZlasfPjca4yqCNNsjbCeiy8FFeg==}
@@ -6858,7 +6859,7 @@ packages:
     dependencies:
       core-util-is: 1.0.3
       inherits: 2.0.4
-      isarray: 1.0.0
+      isarray: /@nolyfill/isarray@1.0.25
       process-nextick-args: 2.0.1
       safe-buffer: 5.1.2
       string_decoder: 1.1.1
