@@ -11,7 +11,7 @@ export type ProxyOptions<T> = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const proxies = new WeakMap<any, unknown>();
+const proxies = new WeakMap<any, BaseReactiveYData<any, any>>();
 
 export class ReactiveYArray extends BaseReactiveYData<
   unknown[],
@@ -25,8 +25,18 @@ export class ReactiveYArray extends BaseReactiveYData<
   ) {
     super();
     this._proxy = this._getProxy();
-    proxies.set(_ySource, this._proxy);
+    proxies.set(_ySource, this);
     _ySource.observe(this._observer);
+  }
+
+  stash(prop: number) {
+    this._stashed.add(prop);
+  }
+
+  pop(prop: number) {
+    const value = this._source[prop];
+    this._stashed.delete(prop);
+    this._proxy[prop] = value;
   }
 
   protected _getProxy = () => {
@@ -39,25 +49,29 @@ export class ReactiveYArray extends BaseReactiveYData<
           throw new Error('key cannot be a symbol');
         }
 
-        const proxied = proxies.get(this._ySource);
-        assertExists(proxied, 'YData is not subscribed before changes');
-        const doc = this._ySource.doc;
-        assertExists(doc, 'YData is not bound to a Y.Doc');
-
         const index = Number(p);
         if (this._skipNext || Number.isNaN(index)) {
           return Reflect.set(target, p, value, receiver);
         }
 
-        const yData = native2Y(value);
+        if (this._stashed.has(index)) {
+          const result = Reflect.set(target, p, value, receiver);
+          this._options.onChange?.(this._proxy);
+          return result;
+        }
 
+        const reactive = proxies.get(this._ySource);
+        assertExists(reactive, 'YData is not subscribed before changes');
+        const doc = this._ySource.doc;
+        assertExists(doc, 'YData is not bound to a Y.Doc');
+
+        const yData = native2Y(value);
         this._transact(doc, () => {
           if (index < this._ySource.length) {
             this._ySource.delete(index, 1);
           }
           this._ySource.insert(index, [yData]);
         });
-
         const data = createYProxy(yData, this._options);
         return Reflect.set(target, p, data, receiver);
       },
@@ -126,8 +140,18 @@ export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
   ) {
     super();
     this._proxy = this._getProxy();
-    proxies.set(_ySource, this._proxy);
+    proxies.set(_ySource, this);
     _ySource.observe(this._observer);
+  }
+
+  stash(prop: string) {
+    this._stashed.add(prop);
+  }
+
+  pop(prop: string) {
+    const value = this._source[prop];
+    this._stashed.delete(prop);
+    this._proxy[prop] = value;
   }
 
   protected _getProxy = () => {
@@ -143,8 +167,14 @@ export class ReactiveYMap extends BaseReactiveYData<UnRecord, YMap<unknown>> {
           return Reflect.set(target, p, value, receiver);
         }
 
-        const proxied = proxies.get(this._ySource);
-        assertExists(proxied, 'YData is not subscribed before changes');
+        if (this._stashed.has(p)) {
+          const result = Reflect.set(target, p, value, receiver);
+          this._options.onChange?.(this._proxy);
+          return result;
+        }
+
+        const reactive = proxies.get(this._ySource);
+        assertExists(reactive, 'YData is not subscribed before changes');
         const doc = this._ySource.doc;
         assertExists(doc, 'YData is not bound to a Y.Doc');
 
@@ -209,7 +239,7 @@ export function createYProxy<Data>(
   options: ProxyOptions<Data> = {}
 ): Data {
   if (proxies.has(yAbstract)) {
-    return proxies.get(yAbstract) as Data;
+    return proxies.get(yAbstract)!.proxy as Data;
   }
 
   return y2Native(yAbstract, {
@@ -237,4 +267,20 @@ export function createYProxy<Data>(
       return value;
     },
   }) as Data;
+}
+
+export function stashProp(yMap: YMap<unknown>, prop: string): void;
+export function stashProp(yMap: YArray<unknown>, prop: number): void;
+export function stashProp(yAbstract: unknown, prop: string | number) {
+  const proxy = proxies.get(yAbstract);
+  assertExists(proxy, 'YData is not subscribed before changes');
+  proxy.stash(prop);
+}
+
+export function popProp(yMap: YMap<unknown>, prop: string): void;
+export function popProp(yMap: YArray<unknown>, prop: number): void;
+export function popProp(yAbstract: unknown, prop: string | number) {
+  const proxy = proxies.get(yAbstract);
+  assertExists(proxy, 'YData is not subscribed before changes');
+  proxy.pop(prop);
 }

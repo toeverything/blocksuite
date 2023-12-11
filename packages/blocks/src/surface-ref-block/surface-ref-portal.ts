@@ -58,7 +58,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
 
   private _renderTopLevelBlocks() {
     const containerModel = this.containerModel;
-    const topLevelBlocks =
+    let topLevelBlocks =
       'flavour' in containerModel
         ? getBlocksInFrame(
             this.page,
@@ -67,7 +67,12 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
           )
         : this._getBlocksInChildren(containerModel);
 
-    topLevelBlocks.sort(compare);
+    topLevelBlocks = topLevelBlocks
+      .sort(compare)
+      .filter(
+        model =>
+          (model.flavour as EdgelessBlockType) !== EdgelessBlockType.FRAME
+      );
 
     return repeat(
       topLevelBlocks,
@@ -93,10 +98,14 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
     translateY: number;
     zoom: number;
   }) => {
-    this.portal?.style.setProperty(
-      'transform',
-      `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
-    );
+    this.requestUpdate();
+    this.updateComplete.then(() => {
+      this.portal?.style.setProperty(
+        'transform',
+        `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
+      );
+      this.portal?.style.setProperty('transform-origin', '0 0');
+    });
   };
 
   override render() {

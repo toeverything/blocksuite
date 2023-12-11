@@ -19,6 +19,11 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
         [SURFACE_TEXT_UNIQ_IDENTIFIER]: true,
         delta: value.toDelta(),
       };
+    } else if (value instanceof Workspace.Y.Map) {
+      return {
+        [SURFACE_YMAP_UNIQ_IDENTIFIER]: true,
+        json: value.toJSON(),
+      };
     }
     return value;
   }
@@ -91,7 +96,7 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
       yMap.set(key, element);
     });
 
-    const elements = this._internal.Native(yMap);
+    const elements = this._internal.Boxed(yMap);
 
     snapshotRet.props = {
       elements,

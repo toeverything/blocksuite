@@ -27,6 +27,7 @@ import {
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { ShadowlessElement } from '@blocksuite/lit';
+import type { AiPanel } from '@blocksuite/presets';
 import { EditorContainer } from '@blocksuite/presets';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
@@ -36,9 +37,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
-import type { CustomCopilotPanel } from './copilot/custom-copilot-panel.js';
 import { extendFormatBar } from './custom-format-bar.js';
+import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
+import type { SidePanel } from './side-panel';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -150,7 +152,12 @@ export class DebugMenu extends ShadowlessElement {
   navigationPanel!: CustomNavigationPanel;
 
   @property({ attribute: false })
-  copilotPanel!: CustomCopilotPanel;
+  framePanel!: CustomFramePanel;
+
+  @property({ attribute: false })
+  aiPanel!: AiPanel;
+  @property({ attribute: false })
+  sidePanel!: SidePanel;
 
   @state()
   private _connected = true;
@@ -195,8 +202,8 @@ export class DebugMenu extends ShadowlessElement {
     super.connectedCallback();
 
     const readSelectionFromURL = async () => {
-      const editor = this.editor.root.value;
-      if (!editor) {
+      const root = this.editor.root;
+      if (!root) {
         await new Promise(resolve => {
           setTimeout(resolve, 500);
         });
@@ -208,7 +215,7 @@ export class DebugMenu extends ShadowlessElement {
       if (!sel) return;
       try {
         const json = JSON.parse(lz.decompressFromEncodedURIComponent(sel));
-        editor.std.selection.fromJSON(json);
+        root.std.selection.fromJSON(json);
       } catch {
         return;
       }
@@ -256,8 +263,16 @@ export class DebugMenu extends ShadowlessElement {
     this.navigationPanel.toggleDisplay();
   }
 
+  private _toggleFramePanel() {
+    this.framePanel.toggleDisplay();
+  }
+
   private _toggleCopilotPanel() {
-    this.copilotPanel.toggleDisplay();
+    if (this.sidePanel.currentContent === this.aiPanel) {
+      this.sidePanel.hideContent();
+    } else {
+      this.sidePanel.showContent(this.aiPanel);
+    }
   }
 
   private _switchOffsetMode() {
@@ -357,7 +372,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _shareSelection() {
-    const selection = this.editor.root.value?.selection.value;
+    const selection = this.editor.root?.selection.value;
     if (!selection || selection.length === 0) {
       return;
     }
@@ -563,6 +578,9 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleNavigationPanel}>
                 Toggle Navigation Panel
+              </sl-menu-item>
+              <sl-menu-item @click=${this._toggleFramePanel}>
+                Toggle Frame Panel
               </sl-menu-item>
               <sl-menu-item @click=${this._extendFormatBar}>
                 Extend Format Bar

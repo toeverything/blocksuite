@@ -16,7 +16,6 @@ import { getThemePropertyValue } from '../_common/theme/utils.js';
 import {
   type EdgelessElement,
   type ReorderingAction,
-  requestConnectedFrame,
   type Selectable,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
@@ -27,9 +26,6 @@ import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
 import {
   isConnectable,
-  isFrameBlock,
-  isImageBlock,
-  isNoteBlock,
   isTopLevelBlock,
 } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
@@ -51,7 +47,6 @@ import {
 } from './elements/edgeless-element.js';
 import { GROUP_ROOT } from './elements/group/consts.js';
 import {
-  BrushElement,
   ConnectorElement,
   ElementCtors,
   ElementDefaultProps,
@@ -261,7 +256,6 @@ export class SurfaceBlockComponent extends BlockElement<
     this._initEvents();
     this.layer.init([...this._elements.values(), ...this.blocks]);
     this.init();
-    this._initEffects();
   }
 
   getCSSPropertyValue = (value: string) => {
@@ -387,51 +381,6 @@ export class SurfaceBlockComponent extends BlockElement<
     });
   };
 
-  private _initEffects() {
-    const { _disposables, page, edgeless } = this;
-    _disposables.add(
-      page.slots.blockUpdated.on(({ id, type }) => {
-        if (type === 'add') {
-          const model = page.getBlockById(id) as TopLevelBlockModel;
-          assertExists(model);
-          if (
-            isNoteBlock(model) ||
-            isFrameBlock(model) ||
-            isImageBlock(model)
-          ) {
-            requestConnectedFrame(() => {
-              this.fitElementToViewport(model);
-            }, this);
-          }
-        }
-      })
-    );
-
-    _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id, props }) => {
-        const element = this.pickById(id);
-        assertExists(element);
-
-        if (
-          element instanceof BrushElement ||
-          edgeless.selectionManager.editing ||
-          (props && !('xywh' in props && 'rotate' in props))
-        )
-          return;
-        this.fitElementToViewport(element);
-      })
-    );
-
-    _disposables.add(
-      edgeless.slots.elementAdded.on(({ id }) => {
-        const element = this.pickById(id);
-        assertExists(element);
-        if (element instanceof BrushElement) return;
-        this.fitElementToViewport(element);
-      })
-    );
-  }
-
   private _updateIndexCanvases() {
     const evt = new CustomEvent('indexedcanvasupdate', {
       detail: {
@@ -493,11 +442,24 @@ export class SurfaceBlockComponent extends BlockElement<
 
   override firstUpdated() {
     if (!this._isEdgeless) return;
+
     this.attach(this._surfaceContainer);
+    this._initResizeEffect();
   }
 
   override updated() {
     if (!this._isEdgeless) return;
+  }
+
+  private _initResizeEffect() {
+    const observer = new ResizeObserver(() => {
+      this._renderer.onResize();
+    });
+
+    observer.observe(this._surfaceContainer);
+    this._disposables.add(() => {
+      observer.disconnect();
+    });
   }
 
   init() {
@@ -555,6 +517,9 @@ export class SurfaceBlockComponent extends BlockElement<
       },
       setGroupParent: (element, group) => {
         return this.setGroupParent(element, group);
+      },
+      removeElement: id => {
+        return this.removeElement(id);
       },
       selectionManager: this.edgeless.selectionManager,
     });
@@ -626,6 +591,9 @@ export class SurfaceBlockComponent extends BlockElement<
         },
         setGroupParent: (element, groupId) => {
           return this.setGroupParent(element, groupId);
+        },
+        removeElement: id => {
+          return this.removeElement(id);
         },
         selectionManager: this.edgeless.selectionManager,
       });
@@ -794,9 +762,9 @@ export class SurfaceBlockComponent extends BlockElement<
     }
   }
 
-  fitElementToViewport(ele: EdgelessElement) {
+  fitToViewport(bound: Bound) {
     const { viewport } = this;
-    const bound = ele.elementBound.expand(30);
+    bound = bound.expand(30);
     if (Date.now() - this._lastTime > 200)
       this._cachedViewport = viewport.viewportBounds;
     this._lastTime = Date.now();
@@ -896,13 +864,13 @@ export class SurfaceBlockComponent extends BlockElement<
     }) as EdgelessElement[];
 
     let picked = last(results) ?? null;
+    const { activeGroup } = selectionManager;
     const first = picked;
-    if (selectionManager.activeGroup) {
+    if (activeGroup && picked && isDescendant(picked, activeGroup)) {
       let index = results.length - 1;
       while (
-        picked === selectionManager.activeGroup ||
-        (picked instanceof GroupElement &&
-          isDescendant(selectionManager.activeGroup, picked))
+        picked === activeGroup ||
+        (picked instanceof GroupElement && isDescendant(activeGroup, picked))
       ) {
         picked = results[--index];
       }

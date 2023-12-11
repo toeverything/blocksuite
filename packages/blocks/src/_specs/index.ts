@@ -1,7 +1,6 @@
 import type { BlockSpec } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
-import { AFFINE_BLOCK_HUB_WIDGET } from '../_common/widgets/block-hub/index.js';
 import { AFFINE_DOC_DRAGGING_AREA_WIDGET } from '../_common/widgets/doc-dragging-area/index.js';
 import { AFFINE_DOC_PAGE_META_DATA } from '../_common/widgets/doc-page-meta-data/index.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../_common/widgets/doc-remote-selection/doc-remote-selection.js';
@@ -20,6 +19,7 @@ import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
+import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
@@ -44,9 +44,9 @@ const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
   view: {
     component: literal`affine-doc-page`,
     widgets: {
-      [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
-        AFFINE_BLOCK_HUB_WIDGET
-      )}`,
+      // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
+      //   AFFINE_BLOCK_HUB_WIDGET
+      // )}`,
       [AFFINE_DOC_PAGE_META_DATA]: literal`${unsafeStatic(
         AFFINE_DOC_PAGE_META_DATA
       )}`,
@@ -79,9 +79,9 @@ const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
   view: {
     component: literal`affine-edgeless-page`,
     widgets: {
-      [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
-        AFFINE_BLOCK_HUB_WIDGET
-      )}`,
+      // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
+      //   AFFINE_BLOCK_HUB_WIDGET
+      // )}`,
       [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
       [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
         AFFINE_SLASH_MENU_WIDGET
@@ -105,8 +105,7 @@ const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
   },
 };
 
-export const PagePreset: BlockSpec[] = [
-  DocPageSpec,
+const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   {
     schema: SurfaceBlockSchema,
     view: {
@@ -191,95 +190,21 @@ export const PagePreset: BlockSpec[] = [
     },
   },
   EmbedGithubBlockSpec,
+  EmbedHtmlBlockSpec,
 ];
 
-export const EdgelessPreset: BlockSpec[] = [
+export const DocEditorBlockSpecs: BlockSpec[] = [
+  DocPageSpec,
+  ...CommonFirstPartyBlockSpecs,
+];
+
+export const EdgelessEditorBlockSpecs: BlockSpec[] = [
   EdgelessPageSpec,
-  {
-    schema: SurfaceBlockSchema,
-    view: {
-      component: literal`affine-surface`,
-    },
-    service: SurfaceService,
-  },
-  {
-    schema: ListBlockSchema,
-    view: {
-      component: literal`affine-list`,
-    },
-  },
-  {
-    schema: NoteBlockSchema,
-    service: NoteService,
-    view: {
-      component: literal`affine-note`,
-    },
-  },
+  ...CommonFirstPartyBlockSpecs,
   {
     schema: FrameBlockSchema,
     view: {
       component: literal`affine-frame`,
     },
   },
-  {
-    schema: DatabaseBlockSchema,
-    service: DatabaseService,
-    view: {
-      component: literal`affine-database`,
-    },
-  },
-  {
-    schema: DataViewBlockSchema,
-    view: {
-      component: literal`affine-data-view`,
-    },
-  },
-  {
-    schema: DividerBlockSchema,
-    view: {
-      component: literal`affine-divider`,
-    },
-  },
-  {
-    schema: CodeBlockSchema,
-    view: {
-      component: literal`affine-code`,
-    },
-  },
-  {
-    schema: ImageBlockSchema,
-    service: ImageService,
-    view: {
-      component: literal`affine-image`,
-      widgets: {
-        imageToolbar: literal`affine-image-toolbar-widget`,
-      },
-    },
-  },
-  {
-    schema: ParagraphBlockSchema,
-    view: {
-      component: literal`affine-paragraph`,
-    },
-  },
-  {
-    schema: BookmarkBlockSchema,
-    view: {
-      component: literal`affine-bookmark`,
-    },
-  },
-  {
-    schema: AttachmentBlockSchema,
-    service: AttachmentService,
-    view: {
-      component: literal`affine-attachment`,
-    },
-  },
-  {
-    schema: SurfaceRefBlockSchema,
-    view: {
-      component: literal`affine-surface-ref`,
-    },
-  },
-  EmbedGithubBlockSpec,
 ];

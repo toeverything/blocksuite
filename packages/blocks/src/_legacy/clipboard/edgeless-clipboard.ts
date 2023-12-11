@@ -23,10 +23,10 @@ import {
 } from '../../page-block/edgeless/utils/query.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
-import { CanvasElementType } from '../../surface-block/index.js';
 import {
   Bound,
   type CanvasElement,
+  CanvasElementType,
   type Connection,
   ConnectorElement,
   deserializeXYWH,
@@ -227,7 +227,10 @@ export class EdgelessClipboard implements Clipboard {
       if (files.length === 0) {
         return;
       }
-      const res: { file: File; sourceId: string }[] = [];
+      const res: {
+        file: File;
+        sourceId: string;
+      }[] = [];
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (file.type.startsWith('image')) {
@@ -304,12 +307,19 @@ export class EdgelessClipboard implements Clipboard {
     elements: Record<string, unknown>[],
     idMap: Map<string, string>
   ) {
-    const result = groupBy(elements, item =>
-      item.type === 'connector' ? 'connectors' : 'nonConnectors'
-    );
+    const result = groupBy(elements, item => {
+      switch (item.type) {
+        case 'connector':
+          return 'connectors';
+        case 'group':
+          return 'groups';
+        default:
+          return 'others';
+      }
+    });
 
     return [
-      ...(result.nonConnectors
+      ...(result.others
         ?.map(d => {
           const oldId = d.id as string;
           assertExists(oldId);
@@ -330,7 +340,17 @@ export class EdgelessClipboard implements Clipboard {
           (<Connection>connector.target).id =
             idMap.get(targetId) ?? (targetId as string);
         }
-        return this._createCanvasElement(connector, idMap);
+        const element = this._createCanvasElement(connector, idMap);
+        idMap.set(connector.id as string, element.id);
+        return element;
+      }) ?? []),
+
+      ...(result.groups?.map(group => {
+        const oldId = group.id as string;
+        assertExists(oldId);
+        const element = this._createCanvasElement(group, idMap);
+        idMap.set(oldId, element.id);
+        return element;
       }) ?? []),
     ];
   }
@@ -458,7 +478,9 @@ export class EdgelessClipboard implements Clipboard {
       frames: SerializedBlock[];
       notes?: SerializedBlock[];
       images?: SerializedBlock[];
-      elements?: { type: CanvasElement['type'] }[];
+      elements?: {
+        type: CanvasElement['type'];
+      }[];
     };
 
     // map old id to new id to rebuild connector's source and target
@@ -538,7 +560,7 @@ export class EdgelessClipboard implements Clipboard {
     );
   }
 
-  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+  async toCanvas(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
     const blocksLen = blocks.length;
     const shapesLen = shapes.length;
 
@@ -570,6 +592,14 @@ export class EdgelessClipboard implements Clipboard {
 
     assertExists(canvas);
 
+    return canvas;
+  }
+
+  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+    const canvas = await this.toCanvas(blocks, shapes);
+    if (!canvas) {
+      return;
+    }
     // @ts-ignore
     if (window.apis?.clipboard?.copyAsImageFromString) {
       // @ts-ignore

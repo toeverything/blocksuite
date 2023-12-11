@@ -659,14 +659,14 @@ test.describe('slash menu with customize menu', () => {
       // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
       customElements.define('affine-custom-slash-menu', CustomSlashMenu);
 
-      const pagePreset = window.$blocksuite.blocks.PagePreset;
-      const pageBlockSpec = pagePreset.shift();
+      const docSpecs = window.$blocksuite.blocks.DocEditorBlockSpecs;
+      const pageBlockSpec = docSpecs.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
       // @ts-ignore
       pageBlockSpec.view.widgets['affine-slash-menu-widget'] =
         fakeLiteral`affine-custom-slash-menu`;
-      pagePreset.unshift(pageBlockSpec);
-      editor.pagePreset = pagePreset;
+      docSpecs.unshift(pageBlockSpec);
+      editor.docSpecs = docSpecs;
     });
 
     await initEmptyParagraphState(page);
@@ -720,14 +720,14 @@ test.describe('slash menu with customize menu', () => {
       // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
       customElements.define('affine-custom-slash-menu', CustomSlashMenu);
 
-      const pagePreset = window.$blocksuite.blocks.PagePreset;
-      const pageBlockSpec = pagePreset.shift();
+      const docSpecs = window.$blocksuite.blocks.DocEditorBlockSpecs;
+      const pageBlockSpec = docSpecs.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
       // @ts-ignore
       pageBlockSpec.view.widgets['affine-slash-menu-widget'] =
         fakeLiteral`affine-custom-slash-menu`;
-      pagePreset.unshift(pageBlockSpec);
-      editor.pagePreset = pagePreset;
+      docSpecs.unshift(pageBlockSpec);
+      editor.docSpecs = docSpecs;
     });
 
     await initEmptyParagraphState(page);
