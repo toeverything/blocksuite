@@ -9,6 +9,9 @@ import {
   requestConnectedFrame,
   stopPropagation,
 } from '../../../../../_common/utils/event.js';
+import { Bound, getCommonBound, type IBound } from '../../../../../index.js';
+import type { TemplateJob } from '../../../../../surface-block/service/template.js';
+import { createInsertPlaceMiddleware } from '../../../../../surface-block/service/template-middlewares.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { builtInTemplates, type Template } from './builtin-templates.js';
 import { ArrowIcon, Preview } from './icon.js';
@@ -190,11 +193,25 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   private async _insertTemplate(template: Template) {
     this._loadingTemplate = template;
 
+    const surface = this.edgeless.surface;
+    const currentContentBound = getCommonBound(
+      (
+        surface.blocks.map(block => Bound.deserialize(block.xywh)) as IBound[]
+      ).concat(surface.getElements())
+    );
+    const middlewares: ((job: TemplateJob) => void)[] = [];
+
+    if (currentContentBound) {
+      currentContentBound.x +=
+        currentContentBound.w + 20 / surface.viewport.zoom;
+      middlewares.push(createInsertPlaceMiddleware(currentContentBound));
+    }
+
     try {
       const templateJob = this.edgeless.surface.service!.TemplateJob.create({
         model: this.edgeless.surfaceBlockModel,
         type: 'edgeless-template',
-        middlewares: [],
+        middlewares,
       });
       const { asserts: assets } = template;
 
@@ -208,7 +225,16 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
         );
       }
 
-      await templateJob.insertTemplate(template.content);
+      const insertedBound = await templateJob.insertTemplate(template.content);
+
+      if (insertedBound) {
+        const padding = 20 / surface.viewport.zoom;
+        surface.viewport.setViewportByBound(
+          insertedBound,
+          [padding, padding, padding, padding],
+          true
+        );
+      }
     } finally {
       this._loadingTemplate = null;
       this._closePanel();

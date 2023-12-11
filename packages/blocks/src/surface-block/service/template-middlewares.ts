@@ -1,7 +1,11 @@
-import { assertType } from '@blocksuite/global/utils';
-import { type SnapshotReturn } from '@blocksuite/store';
+import { assertExists, assertType } from '@blocksuite/global/utils';
+import {
+  type BlockSnapshot,
+  type PageSnapshot,
+  type SnapshotReturn,
+} from '@blocksuite/store';
 
-import { generateElementId } from '../index.js';
+import { Bound, generateElementId, getCommonBound } from '../index.js';
 import type { SlotBlockPayload, TemplateJob } from './template.js';
 
 export const replaceIdMiddleware = (job: TemplateJob) => {
@@ -112,5 +116,65 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
 
       blockJson.props.elements = elements;
     }
+  };
+};
+
+export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
+  return (job: TemplateJob) => {
+    let templateBound: Bound | null = null;
+    let offset: {
+      x: number;
+      y: number;
+    };
+
+    job.slots.beforeInsert.on(blockData => {
+      if (blockData.type === 'template') {
+        templateBound = blockData.bound;
+
+        if (templateBound) {
+          offset = {
+            x: targetPlace.x - templateBound.x,
+            y: targetPlace.y - templateBound.y,
+          };
+
+          templateBound.x = targetPlace.x;
+          templateBound.y = targetPlace.y;
+        }
+      } else {
+        if (templateBound && offset) changePosition(blockData.data.blockJson);
+      }
+    });
+
+    const changePosition = (blockJson: BlockSnapshot) => {
+      assertExists(templateBound);
+
+      if (blockJson.props.xywh) {
+        const bound = Bound.deserialize(blockJson.props['xywh'] as string);
+
+        blockJson.props['xywh'] = new Bound(
+          bound.x + offset.x,
+          bound.y + offset.y,
+          bound.w,
+          bound.h
+        ).serialize();
+      }
+
+      if (blockJson.flavour === 'affine:surface') {
+        Object.entries(
+          blockJson.props.elements as Record<string, Record<string, unknown>>
+        ).forEach(([_, val]) => {
+          if (val['xywh']) {
+            const bound = Bound.deserialize(val['xywh'] as string);
+
+            val['xywh'] = new Bound(
+              bound.x + offset.x,
+              bound.y + offset.y,
+              bound.w,
+              bound.h
+            ).serialize();
+          }
+        });
+      }
+    };
   };
 };

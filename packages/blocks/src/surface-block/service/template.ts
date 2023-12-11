@@ -9,6 +9,7 @@ import {
   Workspace,
 } from '@blocksuite/store';
 
+import { Bound, getCommonBound } from '../index.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { replaceIdMiddleware } from './template-middlewares.js';
 
@@ -45,6 +46,7 @@ export type SlotPayload =
   | {
       type: 'template';
       template: PageSnapshot;
+      bound: Bound | null;
     };
 
 export type TemplateJobConfig = {
@@ -76,6 +78,7 @@ export class TemplateJob {
       | {
           type: 'template';
           template: PageSnapshot;
+          bound: Bound | null;
         }
     >(),
   };
@@ -139,14 +142,45 @@ export class TemplateJob {
     }
   }
 
+  getTemplateBound(template: PageSnapshot) {
+    const bounds: Bound[] = [];
+
+    const iterate = (block: BlockSnapshot) => {
+      if (block.props.xywh) {
+        bounds.push(Bound.deserialize(block.props['xywh'] as string));
+      }
+
+      if (block.flavour === 'affine:surface') {
+        Object.entries(
+          block.props.elements as Record<string, Record<string, unknown>>
+        ).forEach(([_, val]) => {
+          if (val['xywh']) {
+            bounds.push(Bound.deserialize(val['xywh'] as string));
+          }
+        });
+      }
+
+      if (block.children) {
+        block.children.forEach(iterate);
+      }
+    };
+
+    iterate(template.blocks);
+
+    return getCommonBound(bounds);
+  }
+
   async insertTemplate(template: unknown) {
     PageSnapshotSchema.parse(template);
 
     assertType<PageSnapshot>(template);
 
+    const templateBound = this.getTemplateBound(template);
+
     this.slots.beforeInsert.emit({
       type: 'template',
       template: template,
+      bound: templateBound,
     });
 
     const { model, job } = this;
@@ -242,5 +276,7 @@ export class TemplateJob {
         ) as BaseBlockModel
       );
     });
+
+    return templateBound;
   }
 }
