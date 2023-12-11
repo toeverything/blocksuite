@@ -12,14 +12,14 @@ export type TemplateCategory = {
   templates: Template[];
 };
 
-interface ITemplateManager {
+interface TemplateManager {
   list(category?: string): Template[];
 
   categories(): string[];
 
   search(keyword: string, category?: string): Template[];
 
-  extends(category: string, templates: Template[]): void;
+  extend(category: string, templates: Template[]): void;
 }
 
 export const builtInTemplates = {
@@ -51,11 +51,11 @@ export const builtInTemplates = {
     return candidates;
   },
 
-  extends: (cateName: string, templates: Template[]) => {
+  extend: (cateName: string, templates: Template[]) => {
     const categoryTemplates = builtInTemplates.list(cateName);
 
     if (categoryTemplates) {
       categoryTemplates.push(...templates);
     }
   },
-} satisfies ITemplateManager;
+} satisfies TemplateManager;
