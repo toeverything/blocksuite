@@ -20,7 +20,7 @@
 
 ## Overview
 
-BlockSuite is an open-source project for block-based collaborative editing. This repository contains two essential parts:
+BlockSuite is an open-source toolkit for diverse content editing. It allows you to _compose_ your collaborative editing applications. This repository contains two essential parts:
 
 - **A framework** for building block-based [structure editors](https://en.wikipedia.org/wiki/Structure_editor), providing foundational support for editor essentials such as [block schema](https://blocksuite.affine.pro/block-schema.html), [selection](https://blocksuite.affine.pro/selection-api.html), [rich text](https://github.com/toeverything/blocksuite/tree/master/packages/virgo), [real-time collaboration](https://blocksuite.affine.pro/unidirectional-data-flow.html), and [UI component definition](https://blocksuite.affine.pro/block-view.html).
 - **Multiple first-party editors** capable of handling documents, whiteboards, and data grids. These editors are highly interoperable, and are already used by the [AFFiNE](https://github.com/toeverything/AFFiNE) project.
