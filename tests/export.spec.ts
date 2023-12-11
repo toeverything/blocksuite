@@ -191,11 +191,11 @@ test('export markdown bookmark', async ({ page }) => {
   await focusRichText(page);
   await type(page, '/bookmark');
   await pressEnter(page);
-  await type(page, 'https://github.com/toeverything/AFFiNE');
+  await type(page, 'http://localhost:5173');
   await pressEnter(page);
 
   const markdownText = await export2markdown(page);
   expect(markdownText).toEqual(
-    '# Untitled\r\n\r\n[Bookmark](https://github.com/toeverything/AFFiNE)'
+    '# Untitled\r\n\r\n[Bookmark](http://localhost:5173)'
   );
 });
