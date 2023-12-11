@@ -390,6 +390,31 @@ export class EdgelessClipboardController implements ReactiveController {
     return imageIds;
   }
 
+  private async _createBookmarkBlocks(bookmarks: BlockSnapshot[]) {
+    const bookmarkIds = await Promise.all(
+      bookmarks.map(async ({ props }) => {
+        const { xywh, style, url, caption, description, icon, image, title } =
+          props;
+        const bookmarkId = this.surface.addElement(
+          EdgelessBlockType.BOOKMARK,
+          {
+            xywh,
+            style,
+            url,
+            caption,
+            description,
+            icon,
+            image,
+            title,
+          },
+          this.surface.model.id
+        );
+        return bookmarkId;
+      })
+    );
+    return bookmarkIds;
+  }
+
   private _getOldCommonBound(
     canvasElements: CanvasElement[],
     blocks: TopLevelBlockModel[]
@@ -443,11 +468,14 @@ export class EdgelessClipboardController implements ReactiveController {
           ? 'frames'
           : isImageBlock(data as unknown as Selectable)
             ? 'images'
-            : 'elements'
+            : isBookmarkBlock(data as unknown as Selectable)
+              ? 'bookmarks'
+              : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];
       images?: BlockSnapshot[];
+      bookmarks?: BlockSnapshot[];
       elements?: { type: CanvasElement['type'] }[];
     };
 
@@ -461,6 +489,9 @@ export class EdgelessClipboardController implements ReactiveController {
     );
     const frameIds = await this._createFrameBlocks(groupedByType.frames ?? []);
     const imageIds = await this._createImageBlocks(groupedByType.images ?? []);
+    const bookmarkIds = await this._createBookmarkBlocks(
+      groupedByType.bookmarks ?? []
+    );
 
     const notes = noteIds.map(id =>
       this.page.getBlockById(id)
@@ -471,6 +502,10 @@ export class EdgelessClipboardController implements ReactiveController {
     ) as FrameBlockModel[];
 
     const images = imageIds.map(id =>
+      this.surface.pickById(id)
+    ) as ImageBlockModel[];
+
+    const bookmarks = bookmarkIds.map(id =>
       this.surface.pickById(id)
     ) as ImageBlockModel[];
 
@@ -488,6 +523,7 @@ export class EdgelessClipboardController implements ReactiveController {
       ...notes,
       ...frames,
       ...images,
+      ...bookmarks,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
@@ -509,7 +545,7 @@ export class EdgelessClipboardController implements ReactiveController {
       }
     });
 
-    [...notes, ...frames, ...images].forEach(block => {
+    [...notes, ...frames, ...images, ...bookmarks].forEach(block => {
       const [x, y, w, h] = deserializeXYWH(block.xywh);
       const newBound = new Bound(
         pasteX + x - oldCommonBound.x,

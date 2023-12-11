@@ -271,6 +271,7 @@ export type SerializedBlock = {
   // note block
   xywh?: string;
   // bookmark block
+  style?: string;
   title?: string;
   description?: string;
   icon?: string;
