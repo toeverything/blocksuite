@@ -314,6 +314,10 @@ export class DebugMenu extends ShadowlessElement {
     this.navigationPanel.toggleDisplay();
   }
 
+  private _toggleFramePanel() {
+    this.framePanel.toggleDisplay();
+  }
+
   private _toggleCopilotPanel() {
     if (this.sidePanel.currentContent === this.aiPanel) {
       this.sidePanel.hideContent();
@@ -670,6 +674,9 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleNavigationPanel}>
                 Toggle Navigation Panel
+              </sl-menu-item>
+              <sl-menu-item @click=${this._toggleFramePanel}>
+                Toggle Frame Panel
               </sl-menu-item>
               <sl-menu-item @click=${this._extendFormatBar}>
                 Extend Format Bar
