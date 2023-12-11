@@ -2,16 +2,16 @@ import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { type Page, Workspace } from '@blocksuite/store';
 
 import { groupBy } from '../../_common/utils/iterable.js';
+import type {
+  EdgelessElement,
+  Selectable,
+  SerializedBlock,
+  TopLevelBlockModel,
+} from '../../_common/utils/types.js';
 import { AttachmentService } from '../../attachment-block/attachment-service.js';
-import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { ImageBlockModel } from '../../image-block/index.js';
-import {
-  type EdgelessElement,
-  type Selectable,
-  type SerializedBlock,
-  type TopLevelBlockModel,
-} from '../../index.js';
-import type { NoteBlockModel } from '../../note-block/index.js';
+import type { FrameBlockModel } from '../../frame-block/frame-model.js';
+import type { ImageBlockModel } from '../../image-block/image-model.js';
+import type { NoteBlockModel } from '../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {

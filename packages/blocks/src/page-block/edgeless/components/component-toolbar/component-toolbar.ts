@@ -55,15 +55,15 @@ import {
 } from '../../utils/query.js';
 
 type CategorizedElements = {
-  shape: ShapeElement[];
-  brush: BrushElement[];
-  text: TextElement[];
-  group: GroupElement[];
-  connector: ConnectorElement[];
-  note: NoteBlockModel[];
-  frame: FrameBlockModel[];
-  image: ImageBlockModel[];
-  bookmark: BookmarkBlockModel[];
+  shape?: ShapeElement[];
+  brush?: BrushElement[];
+  text?: TextElement[];
+  group?: GroupElement[];
+  connector?: ConnectorElement[];
+  note?: NoteBlockModel[];
+  frame?: FrameBlockModel[];
+  image?: ImageBlockModel[];
+  bookmark?: BookmarkBlockModel[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -179,8 +179,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _BookmarkButton(bookmarks: BookmarkBlockModel[]) {
-    return bookmarks.length === 1
+  private _BookmarkButton(bookmarks?: BookmarkBlockModel[]) {
+    return bookmarks?.length === 1
       ? html`
           <edgeless-change-bookmark-button
             .bookmark=${bookmarks[0]}
@@ -192,7 +192,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _TextButton(textElements: TextElement[]) {
+  private _TextButton(textElements?: TextElement[]) {
     return textElements?.length
       ? html`<edgeless-change-text-button
           .texts=${textElements}
@@ -204,7 +204,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _FrameButton(frames: FrameBlockModel[]) {
+  private _FrameButton(frames?: FrameBlockModel[]) {
     return frames?.length
       ? html`
           <edgeless-change-frame-button
@@ -216,7 +216,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _GroupButton(groups: GroupElement[]) {
+  private _GroupButton(groups?: GroupElement[]) {
     return groups?.length
       ? html`<edgeless-change-group-button
           .surface=${this.surface}
