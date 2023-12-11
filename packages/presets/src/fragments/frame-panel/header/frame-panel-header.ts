@@ -16,8 +16,8 @@ import { SettingsIcon, SmallFrameNavigatorIcon } from '../../_common/icons.js';
 const styles = css`
   :host {
     display: flex;
-    width: calc(100% - 16px);
-    justify-content: center;
+    width: 100%;
+    justify-content: start;
   }
 
   .frame-panel-header {
@@ -34,7 +34,8 @@ const styles = css`
     gap: 8px;
     width: 100px;
     height: 24px;
-    margin: 6px 0;
+    margin: 8px 0;
+    padding-left: 2px;
   }
 
   .all-frames-setting-button svg {
@@ -49,7 +50,7 @@ const styles = css`
   .all-frames-setting-label {
     width: 68px;
     height: 22px;
-    font-size: 14px;
+    font-size: var(--affine-font-sm);
     font-weight: 500;
     line-height: 22px;
     color: var(--light-text-color-text-secondary-color, #8e8d91);
@@ -77,7 +78,7 @@ const styles = css`
     height: 28px;
     padding: 4px 8px;
     border-radius: 8px;
-    margin: 4px;
+    margin: 4px 0;
     border: 1px solid var(--affine-border-color);
     background: var(--affine-white);
   }

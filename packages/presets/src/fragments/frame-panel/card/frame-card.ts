@@ -1,19 +1,19 @@
+import './frame-card-title.js';
+
 import {
   type EdgelessPageBlockComponent,
   type FrameBlockModel,
   FramePreview,
   on,
   once,
-  stopPropagation,
 } from '@blocksuite/blocks';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-
-import { FrameCardTitleEditor } from './frame-card-title-editor.js';
 
 export type ReorderEvent = CustomEvent<{
   currentNumber: number;
@@ -54,52 +54,6 @@ const styles = css`
     position: relative;
   }
 
-  .frame-card-title-container {
-    display: flex;
-    white-space: nowrap;
-    display: flex;
-    justify-content: start;
-    align-items: center;
-    width: 100%;
-    height: 20px;
-    box-sizing: border-box;
-    gap: 6px;
-    font-size: var(--affine-font-sm);
-    font-family: Inter;
-    cursor: default;
-    position: relative;
-  }
-
-  .frame-card-title-container .card-index {
-    display: flex;
-    align-self: center;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    box-sizing: border-box;
-    border-radius: 2px;
-    background: var(--affine-black);
-    margin-left: 2px;
-
-    color: var(--affine-white);
-    text-align: center;
-    font-weight: 500;
-    line-height: 18px;
-  }
-
-  .frame-card-title-container .card-title {
-    height: 20px;
-    color: var(--affine-text-primary-color);
-    font-weight: 400;
-    line-height: 20px;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-  }
-
   .frame-card-body {
     display: flex;
     width: 100%;
@@ -128,7 +82,7 @@ const styles = css`
     z-index: calc(var(--affine-z-index-popover, 0) + 3);
   }
 
-  .frame-card-container.dragging .frame-card-title-container {
+  .frame-card-container.dragging frame-card-title {
     display: none;
   }
 
@@ -196,14 +150,7 @@ export class FrameCard extends WithDisposable(LitElement) {
   @query('.frame-card-container')
   containerElement!: HTMLElement;
 
-  @query('.frame-card-title-container')
-  titleContainer!: HTMLElement;
-
-  @query('.frame-card-title-container .card-index')
-  titleIndexElement!: HTMLElement;
-
-  @query('.frame-card-title-container .card-title')
-  titleContentElement!: HTMLElement;
+  private _frameDisposables: DisposableGroup | null = null;
 
   private _dispatchSelectEvent(e: MouseEvent) {
     e.stopPropagation();
@@ -265,18 +212,6 @@ export class FrameCard extends WithDisposable(LitElement) {
     });
   }
 
-  private _mountTitleEditor = (e: MouseEvent) => {
-    e.stopPropagation();
-
-    const titleEditor = new FrameCardTitleEditor();
-    titleEditor.frameModel = this.frame;
-    titleEditor.titleContentElement = this.titleContentElement;
-    const left = this.titleIndexElement.offsetWidth + 6;
-    titleEditor.left = left;
-    titleEditor.maxWidth = this.titleContainer.offsetWidth - left - 6;
-    this.titleContainer.appendChild(titleEditor);
-  };
-
   private _renderDraggingCardNumber() {
     if (this.draggingCardNumber === undefined) return nothing;
 
@@ -289,16 +224,30 @@ export class FrameCard extends WithDisposable(LitElement) {
     this.requestUpdate();
   };
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._disposables.add(this.frame.propsUpdated.on(this._updateElement));
+  private _clearFrameDisposables = () => {
+    this._frameDisposables?.dispose();
+    this._frameDisposables = null;
+  };
+
+  private _setFrameDisposables(frame: FrameBlockModel) {
+    this._clearFrameDisposables();
+    this._frameDisposables = new DisposableGroup();
+    this._frameDisposables.add(frame.propsUpdated.on(this._updateElement));
   }
 
-  override firstUpdated() {
-    this.frame.title.yText.observe(this._updateElement);
-    this._disposables.add(() => {
-      this.frame.title.yText.unobserve(this._updateElement);
-    });
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('frame')) {
+      this._setFrameDisposables(this.frame);
+    }
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._clearFrameDisposables();
   }
 
   override render() {
@@ -319,20 +268,12 @@ export class FrameCard extends WithDisposable(LitElement) {
       class="frame-card-container ${this.status ?? ''}"
       style=${containerStyle}
     >
-      <div class="frame-card-title-container">
-        <div
-          class="card-index"
-          @click=${stopPropagation}
-          @dblclick=${stopPropagation}
-        >
-          ${this.cardIndex + 1}
-        </div>
-        <div class="card-title">
-          <span @click=${stopPropagation} @dblclick=${this._mountTitleEditor}
-            >${this.frame.title}</span
-          >
-        </div>
-      </div>
+      ${this.status === 'dragging'
+        ? nothing
+        : html`<frame-card-title
+            .cardIndex=${this.cardIndex}
+            .frame=${this.frame}
+          ></frame-card-title>`}
       <div
         class="frame-card-body"
         @click=${this._dispatchSelectEvent}

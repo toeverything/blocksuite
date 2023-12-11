@@ -9,6 +9,7 @@ import { property } from 'lit/decorators.js';
 import type { EditorContainer } from '../../index.js';
 import { FramePanelBody } from './body/frame-panel-body.js';
 import { FrameCard } from './card/frame-card.js';
+import { FrameCardTitle } from './card/frame-card-title.js';
 import { FrameCardTitleEditor } from './card/frame-card-title-editor.js';
 import { FramePanelHeader } from './header/frame-panel-header.js';
 import { FramesSettingMenu } from './header/frames-setting-menu.js';
@@ -31,10 +32,11 @@ const styles = css`
 
     height: 100%;
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+    padding: 0 16px;
   }
 
   .frame-panel-body {
-    padding-top: 12px;
+    padding-top: 16px;
     flex-grow: 1;
     width: 100%;
 
@@ -119,6 +121,7 @@ const componentsMap = {
   'frame-panel-body': FramePanelBody,
   'frames-setting-menu': FramesSettingMenu,
   'frame-card': FrameCard,
+  'frame-card-title': FrameCardTitle,
   'frame-card-title-editor': FrameCardTitleEditor,
 };
 

@@ -116,6 +116,7 @@ export class FramePreview extends WithDisposable(LitElement) {
   private _elements = new Map<string, SurfaceElement>();
   private _edgelessDisposables: DisposableGroup | null = null;
   private _pageDisposables: DisposableGroup | null = null;
+  private _frameDisposables: DisposableGroup | null = null;
 
   @query('.surface-canvas-container')
   container!: HTMLDivElement;
@@ -426,11 +427,30 @@ export class FramePreview extends WithDisposable(LitElement) {
     this._pageDisposables = null;
   };
 
-  private _setPageDisposables = () => {
+  private _clearFrameDisposables = () => {
+    this._frameDisposables?.dispose();
+    this._frameDisposables = null;
+  };
+
+  private _setEdgelessDisposables(edgeless: EdgelessPageBlockComponent | null) {
+    this._clearEdgelessDisposables();
+    if (!edgeless) return;
+    this._edgelessDisposables = new DisposableGroup();
+    this._edgelessDisposables.add(
+      edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
+        if (fillScreen !== undefined) {
+          this.fillScreen = fillScreen;
+          this._refreshViewport();
+        }
+      })
+    );
+  }
+
+  private _setPageDisposables(page: Page) {
     this._clearPageDisposables();
     this._pageDisposables = new DisposableGroup();
     this._pageDisposables.add(
-      this.page.slots.blockUpdated.on(event => {
+      page.slots.blockUpdated.on(event => {
         const { type, flavour } = event;
         const isTopLevelBlock = ['affine:image', 'affine:note'].includes(
           flavour
@@ -445,7 +465,7 @@ export class FramePreview extends WithDisposable(LitElement) {
             this._refreshViewport();
           }
         } else {
-          const topLevelBlock = this.page.getBlockById(event.id);
+          const topLevelBlock = page.getBlockById(event.id);
           if (!topLevelBlock) return;
           const newBound = Bound.deserialize(
             (topLevelBlock as TopLevelBlockModel).xywh
@@ -456,7 +476,17 @@ export class FramePreview extends WithDisposable(LitElement) {
         }
       })
     );
-  };
+  }
+
+  private _setFrameDisposables(frame: FrameBlockModel) {
+    this._clearFrameDisposables();
+    this._frameDisposables = new DisposableGroup();
+    this._frameDisposables.add(
+      frame.propsUpdated.on(() => {
+        this._refreshViewport();
+      })
+    );
+  }
 
   private _renderSurfaceContent(referencedModel: FrameBlockModel) {
     const { width, height } = this._getViewportWH(referencedModel);
@@ -494,42 +524,18 @@ export class FramePreview extends WithDisposable(LitElement) {
     this._initSurfaceModel();
     this._initReferencedModel();
     this._initSurfaceRenderer();
-
-    this._disposables.add(
-      this.frame.propsUpdated.on(() => {
-        this.requestUpdate();
-        this._refreshViewport();
-      })
-    );
   }
 
   override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('frame')) {
-      this.requestUpdate();
       this._refreshViewport();
+      this._setFrameDisposables(this.frame);
     }
-
     if (_changedProperties.has('edgeless')) {
-      this._edgelessDisposables?.dispose();
-      if (this.edgeless) {
-        if (!this._edgelessDisposables)
-          this._edgelessDisposables = new DisposableGroup();
-
-        this._edgelessDisposables.add(
-          this.edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
-            if (fillScreen !== undefined) {
-              this.fillScreen = fillScreen;
-              this._refreshViewport();
-            }
-          })
-        );
-      } else {
-        this._clearEdgelessDisposables();
-      }
+      this._setEdgelessDisposables(this.edgeless);
     }
-
     if (_changedProperties.has('page')) {
-      this._setPageDisposables();
+      this._setPageDisposables(this.page);
     }
 
     this._attachRenderer();

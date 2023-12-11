@@ -37,7 +37,7 @@ const { FRAME } = EdgelessBlockType;
 const styles = css`
   .frame-list-container {
     display: flex;
-    align-items: center;
+    align-items: start;
     box-sizing: border-box;
     flex-direction: column;
     width: 100%;
@@ -73,7 +73,7 @@ const styles = css`
     position: absolute;
     contain: layout size;
     width: 284px;
-    left: 50%;
+    left: 0;
   }
 `;
 
@@ -99,9 +99,6 @@ export class FramePanelBody extends WithDisposable(LitElement) {
   @state()
   private _dragging = false;
 
-  @state()
-  private _frameItems: FrameListItem[] = [];
-
   @property({ attribute: false })
   insertIndex?: number;
 
@@ -114,12 +111,14 @@ export class FramePanelBody extends WithDisposable(LitElement) {
   @query('.frame-list-container')
   frameListContainer!: HTMLElement;
 
+  private _frameItems: FrameListItem[] = [];
   private _frameElementHeight = 0;
   private _indicatorTranslateY = 0;
   private _pageDisposables: DisposableGroup | null = null;
 
   get frames() {
-    return this.page.getBlockByFlavour(FRAME) as FrameBlockModel[];
+    const frames = this.page.getBlockByFlavour(FRAME) as FrameBlockModel[];
+    return frames.sort(this.compare);
   }
 
   get viewportPadding(): [number, number, number, number] {
@@ -141,11 +140,11 @@ export class FramePanelBody extends WithDisposable(LitElement) {
     this._pageDisposables = null;
   };
 
-  private _setPageDisposables = () => {
+  private _setPageDisposables(page: Page) {
     this._clearPageDisposables();
     this._pageDisposables = new DisposableGroup();
     this._pageDisposables.add(
-      this.page.slots.blockUpdated.on(({ flavour }) => {
+      page.slots.blockUpdated.on(({ flavour }) => {
         if (flavour === FRAME) {
           requestAnimationFrame(() => {
             this._updateFrames();
@@ -153,7 +152,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
         }
       })
     );
-  };
+  }
 
   private _updateFrames() {
     if (this._dragging) return;
@@ -183,6 +182,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
 
     this._frameItems = frameItems;
     this._selected = newSelected;
+    this.requestUpdate();
   }
 
   private _reorderFrames(
@@ -331,6 +331,14 @@ export class FramePanelBody extends WithDisposable(LitElement) {
     });
   };
 
+  private _updateFrameItems = () => {
+    this._frameItems = this.frames.map((frame, idx) => ({
+      frame,
+      frameIndex: frame.index,
+      cardIndex: idx,
+    }));
+  };
+
   private _renderEmptyContent() {
     const emptyContent = html` <div class="no-frame-container">
       <div class="no-frame-placeholder">
@@ -368,7 +376,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
       ${this.insertIndex !== undefined
         ? html`<div
             class="insert-indicator"
-            style=${`transform: translateY(${this._indicatorTranslateY}px) translateX(-50%)`}
+            style=${`transform: translateY(${this._indicatorTranslateY}px)`}
           ></div>`
         : nothing}
       ${frameCards}
@@ -379,18 +387,11 @@ export class FramePanelBody extends WithDisposable(LitElement) {
   override firstUpdated() {
     const disposables = this.disposables;
     disposables.addFromEvent(this, 'click', this._clickBlank);
-
-    this._frameItems = this.frames.map((frame, idx) => ({
-      frame,
-      frameIndex: frame.index,
-      cardIndex: idx,
-    }));
   }
 
   override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('page')) {
-      this._setPageDisposables();
-      this._updateFrames();
+      this._setPageDisposables(page);
     }
 
     if (_changedProperties.has('edgeless')) {
@@ -400,13 +401,13 @@ export class FramePanelBody extends WithDisposable(LitElement) {
           elements: this._selected,
           editing: false,
         });
-        this._updateFrames();
       }
     }
   }
 
   override connectedCallback() {
     super.connectedCallback();
+    this._updateFrameItems();
   }
 
   override disconnectedCallback() {
@@ -415,6 +416,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
   }
 
   override render() {
+    this._updateFrameItems();
     return html` ${this._frameItems.length
       ? this._renderFrameList()
       : this._renderEmptyContent()}`;
