@@ -1,11 +1,13 @@
+import './template-loading.js';
+
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { stopPropagation } from '../../../../../_common/utils/event.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import { builtInTemplates } from './builtin-templates.js';
+import { builtInTemplates, type Template } from './builtin-templates.js';
 import { ArrowIcon, Preview } from './icon.js';
 
 @customElement('edgeless-templates-panel')
@@ -80,6 +82,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     }
 
     .template-item {
+      position: relative;
       width: 135px;
       height: 80px;
       box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.02);
@@ -94,6 +97,49 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       transform: translateY(20%);
     }
 
+    .template-item:hover::before {
+      content: attr(data-hover-text);
+      position: relative;
+      display: block;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 110px;
+      border-radius: 8px;
+      padding: 4px 22px;
+      box-sizing: border-box;
+      z-index: 1;
+      text-align: center;
+      font-size: 12px;
+
+      background-color: var(--affine-primary-color);
+      color: var(--affine-white);
+    }
+
+    .template-item:hover::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--affine-black-10);
+      border-radius: 4px;
+      background-color: var(--affine-hover-color);
+    }
+
+    .template-item.loading::before {
+      display: none;
+    }
+
+    .template-item.loading > affine-template-loading {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
     .arrow {
       bottom: 0;
       position: absolute;
@@ -105,6 +151,9 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   @state()
   private _currentCategory = '';
 
+  @state()
+  private _loadingTemplate: Template | null = null;
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -115,32 +164,42 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     this.addEventListener('keydown', stopPropagation, false);
   }
 
-  private async _insertTemplate(
-    template: unknown,
-    assets?: Record<string, string>
-  ) {
-    const templateJob = this.edgeless.surface.service!.TemplateJob.create(
-      this.edgeless.surfaceBlockModel,
-      'edgeless-template'
-    );
+  private async _insertTemplate(template: Template) {
+    this._loadingTemplate = template;
 
-    if (assets) {
-      await Promise.all(
-        Object.entries(assets).map(([key, value]) =>
-          fetch(value)
-            .then(res => res.blob())
-            .then(blob => templateJob.job.assets.set(key, blob))
-        )
+    try {
+      const templateJob = this.edgeless.surface.service!.TemplateJob.create(
+        this.edgeless.surfaceBlockModel,
+        'edgeless-template'
       );
-    }
+      const { asserts: assets } = template;
 
-    templateJob.insertTemplate(template).then(() => {
+      if (assets) {
+        await Promise.all(
+          Object.entries(assets).map(([key, value]) =>
+            fetch(value)
+              .then(res => res.blob())
+              .then(blob => templateJob.job.assets.set(key, blob))
+          )
+        );
+      }
+
+      await templateJob.insertTemplate(template.content);
+    } finally {
+      console.log('what');
+      this._loadingTemplate = null;
       this._closePanel();
-    });
+    }
   }
 
   private _closePanel() {
     this.dispatchEvent(new CustomEvent('closepanel'));
+  }
+
+  private _search(inputEvt: InputEvent) {
+    EdgelessTemplatePanel.templates.search(
+      (inputEvt.target as HTMLInputElement).value
+    );
   }
 
   override render() {
@@ -156,6 +215,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
             class="search-input"
             type="text"
             placeholder="Search file or anything"
+            @input=${this._search}
           />
         </div>
         <div class="template-categories">
@@ -178,13 +238,23 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
             templates,
             template => template.name,
             template => {
-              return html`<div
-                class="template-item"
-                @click=${() =>
-                  this._insertTemplate(template.content, template.asserts)}
-              >
-                ${Preview}
-              </div>`;
+              return html`
+                <div
+                  class=${`template-item ${
+                    template === this._loadingTemplate ? 'loading' : ''
+                  }`}
+                  data-hover-text="Add"
+                  @click=${() => this._insertTemplate(template)}
+                >
+                  ${Preview}
+                  ${template === this._loadingTemplate
+                    ? html`<affine-template-loading></affine-template-loading>`
+                    : nothing}
+                  <affine-tooltip .offset=${12} tip-position="top">
+                    ${template.name}
+                  </affine-tooltip>
+                </div>
+              `;
             }
           )}
         </div>
