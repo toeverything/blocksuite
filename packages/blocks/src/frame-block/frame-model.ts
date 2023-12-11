@@ -1,10 +1,13 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import { getBlockElementByPath } from '../_common/utils/index.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import { Bound, type SerializedXYWH } from '../surface-block/index.js';
+import type { FrameBlockComponent } from './frame-block.js';
 
 type FrameBlockProps = {
   title: Text;
@@ -41,6 +44,12 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointOnBound([x, y]);
     if (hit) return true;
+    assertExists(this.page.root);
+    const block = getBlockElementByPath([
+      this.page.root?.id,
+      this.id,
+    ]) as FrameBlockComponent;
+    if (!block) return false;
     const titleBound = block.titleBound;
     return titleBound.isPointInBound([x, y], 0);
   }
