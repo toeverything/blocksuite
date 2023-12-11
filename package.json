@@ -124,7 +124,9 @@
       "gopd": "npm:@nolyfill/gopd@latest",
       "has-property-descriptors": "npm:@nolyfill/has-property-descriptors@latest",
       "has-proto": "npm:@nolyfill/has-proto@latest",
-      "has-symbols": "npm:@nolyfill/has-symbols@latest"
+      "has-symbols": "npm:@nolyfill/has-symbols@latest",
+      "hasown": "npm:@nolyfill/hasown@latest",
+      "isarray": "npm:@nolyfill/isarray@latest"
     }
   },
   "stackblitz": {
