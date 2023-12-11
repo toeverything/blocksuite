@@ -25,7 +25,7 @@ export class EmbedBlockElement<
     return this.root.querySelector('affine-surface');
   }
 
-  get bound() {
+  get bound(): Bound {
     return Bound.deserialize(
       (this.surface?.pickById(this.model.id) ?? this.model).xywh
     );

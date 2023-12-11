@@ -17,6 +17,20 @@ const RS_RTL_CHARS = '\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC';
 const RE_RTL_CHECK = new RegExp(`^[^${RS_LTR_CHARS}]*[${RS_RTL_CHARS}]`);
 export const isRTL = (text: string) => RE_RTL_CHECK.test(text);
 
+const getMeasureCtx = (function initMeasureContext() {
+  let ctx: CanvasRenderingContext2D | null = null;
+  let canvas: HTMLCanvasElement | null = null;
+
+  return () => {
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      ctx = canvas.getContext('2d')!;
+    }
+
+    return ctx!;
+  };
+})();
+
 export const isChrome =
   globalThis.navigator?.userAgent.indexOf('Chrome') !== -1;
 export const isSafari =
@@ -30,23 +44,12 @@ export function getLineHeight(
   fontFamily: CanvasTextFontFamily,
   fontSize: number
 ) {
-  // Browser may have minimum font size setting
-  // so we need to multiple the multiplier between the actual size and the expected size
-  const actualFontSize = Math.max(fontSize, 12);
-  const div = document.createElement('div');
-  const span = document.createElement('span');
+  const ctx = getMeasureCtx();
 
-  span.style.fontFamily = wrapFontFamily(fontFamily);
-  span.style.fontSize = actualFontSize + 'px';
-  span.style.lineHeight = 'initial';
-  span.textContent = 'M';
+  ctx.font = `${fontSize}px ${wrapFontFamily(fontFamily)}`;
+  const textMetrcs = ctx.measureText('M');
 
-  div.appendChild(span);
-  document.body.appendChild(div);
-  const { height } = div.getBoundingClientRect();
-
-  div.remove();
-  return height * (fontSize / actualFontSize);
+  return textMetrcs.fontBoundingBoxAscent + textMetrcs.fontBoundingBoxDescent;
 }
 
 export function getFontString({
@@ -81,11 +84,9 @@ export function splitIntoLines(text: string): string[] {
 }
 
 export function getLineWidth(text: string, font: string): number {
-  const canvas = document.createElement('canvas');
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const canvas2dContext = canvas.getContext('2d')!;
-  canvas2dContext.font = font;
-  const width = canvas2dContext.measureText(text).width;
+  const ctx = getMeasureCtx();
+  ctx.font = font;
+  const width = ctx.measureText(text).width;
 
   return width;
 }

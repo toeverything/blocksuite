@@ -213,6 +213,25 @@ export class Job {
     return model;
   }
 
+  snapshotToModelData = async (snapshot: BlockSnapshot) => {
+    const { children, flavour, props, id } = snapshot;
+
+    const schema = this._getSchema(flavour);
+    const snapshotLeaf = {
+      id,
+      flavour,
+      props,
+    };
+    const transformer = this._getTransformer(schema);
+    const modelData = await transformer.fromSnapshot({
+      json: snapshotLeaf,
+      assets: this._assetsManager,
+      children,
+    });
+
+    return modelData;
+  };
+
   snapshotToBlock = async (
     snapshot: BlockSnapshot,
     page: Page,

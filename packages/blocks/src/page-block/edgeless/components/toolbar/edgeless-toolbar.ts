@@ -10,6 +10,7 @@ import './default/default-tool-button.js';
 import './text/text-tool-button.js';
 import './eraser/eraser-tool-button.js';
 import './frame/navigator-setting-button.js';
+import './template/template-tool-button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
@@ -556,6 +557,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         >
           ${EdgelessImageIcon}
         </edgeless-toolbar-button>
+        <edgeless-template-button .edgeless=${this.edgeless}>
+        </edgeless-template-button>
       </div>
     `;
   }
