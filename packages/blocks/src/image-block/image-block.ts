@@ -34,6 +34,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   private _source: string = '';
   private _retryCount = 0;
 
+  blob?: Blob;
+
   get resizeImg() {
     return this._pageImage.resizeImg;
   }
@@ -53,6 +55,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       .get(this.model.sourceId)
       .then(blob => {
         if (blob) {
+          this.blob = blob;
           this._source = URL.createObjectURL(blob);
           this._lastSourceId = this.model.sourceId;
           this._imageState = ImageState.Ready;

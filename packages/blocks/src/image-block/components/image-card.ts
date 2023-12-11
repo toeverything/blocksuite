@@ -63,7 +63,7 @@ export class AffinePageImageCard extends ShadowlessElement {
   imageName: string | null = null;
 
   @property({ type: Number })
-  imageSize = 111111;
+  imageSize = -1;
 
   override render() {
     const width = this.isInSurface ? '220px' : '100%';
@@ -76,7 +76,7 @@ export class AffinePageImageCard extends ShadowlessElement {
           ? FailedImageIcon
           : ImageIcon;
 
-    const content =
+    const contentText =
       this.imageState === ImageState.Loading
         ? 'Loading image...'
         : this.imageState === ImageState.Failed
@@ -92,9 +92,9 @@ export class AffinePageImageCard extends ShadowlessElement {
       <div class="affine-image-card" style="width:${width};height:${height};">
         <div class="affine-image-card-content">
           ${contentIcon}
-          <span class="affine-image-card-status">${content}</span>
+          <span class="affine-image-card-title">${contentText}</span>
         </div>
-        <div class="affine-image-card-size">${size}&nbsp;</div>
+        <div class="affine-image-card-size">${size}</div>
       </div>
     `;
   }
