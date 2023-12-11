@@ -52,30 +52,6 @@ export class ImageBlockModel
   override xywh!: SerializedXYWH;
   override flavour!: EdgelessBlockType.IMAGE;
 
-  constructor() {
-    super();
-
-    this.created.on(() => {
-      const blobId = this.sourceId;
-      const blob = this.page.blob.get(blobId);
-      if (!blob) {
-        console.error(`Blob ${blobId} not found in blob manager`);
-        return;
-      }
-      this.page.blob.increaseRef(blobId);
-    });
-    this.deleted.on(() => {
-      const blobId = this.sourceId;
-      const blob = this.page.blob.get(blobId);
-      if (!blob) {
-        console.error(`Blob ${blobId} not found in blob manager`);
-        return;
-      }
-
-      this.page.blob.decreaseRef(blobId);
-    });
-  }
-
   get batch() {
     return BLOCK_BATCH;
   }
