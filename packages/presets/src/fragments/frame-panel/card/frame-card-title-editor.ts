@@ -1,4 +1,8 @@
-import type { FrameBlockModel, RichText } from '@blocksuite/blocks';
+import type {
+  AffineVEditor,
+  FrameBlockModel,
+  RichText,
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
@@ -23,7 +27,7 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
 
   private _isComposing = false;
 
-  get vEditor() {
+  get vEditor(): AffineVEditor {
     assertExists(this.richText.vEditor);
     return this.richText.vEditor;
   }
