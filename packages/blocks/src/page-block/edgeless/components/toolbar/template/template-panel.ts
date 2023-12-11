@@ -154,6 +154,9 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   @state()
   private _loadingTemplate: Template | null = null;
 
+  @state()
+  private _searchKeyword = '';
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -196,17 +199,15 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     this.dispatchEvent(new CustomEvent('closepanel'));
   }
 
-  private _search(inputEvt: InputEvent) {
-    EdgelessTemplatePanel.templates.search(
-      (inputEvt.target as HTMLInputElement).value
-    );
+  private _updateSearchKeyword(inputEvt: InputEvent) {
+    this._searchKeyword = (inputEvt.target as HTMLInputElement).value;
   }
 
   override render() {
     const categories = EdgelessTemplatePanel.templates.categories();
-    const templates = EdgelessTemplatePanel.templates.list(
-      this._currentCategory
-    );
+    const templates = this._searchKeyword
+      ? EdgelessTemplatePanel.templates.search(this._searchKeyword)
+      : EdgelessTemplatePanel.templates.list(this._currentCategory);
 
     return html`
       <div class="edgeless-templates-panel">
@@ -215,7 +216,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
             class="search-input"
             type="text"
             placeholder="Search file or anything"
-            @input=${this._search}
+            @input=${this._updateSearchKeyword}
           />
         </div>
         <div class="template-categories">
