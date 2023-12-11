@@ -5,20 +5,10 @@ import {
   DEFAULT_NOTE_COLOR,
   NOTE_SHADOWS,
 } from '../_common/edgeless/note/consts.js';
-import { BLOCK_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import type {
-  HitTestOptions,
-  IEdgelessElement,
-} from '../surface-block/elements/edgeless-element.js';
-import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
+import { BlockEdgelessMixin } from '../surface-block/elements/selectable.js';
 import type { StrokeStyle } from '../surface-block/index.js';
-import {
-  Bound,
-  type IVec,
-  type PointLocation,
-  type SerializedXYWH,
-} from '../surface-block/index.js';
+import { type SerializedXYWH } from '../surface-block/index.js';
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
@@ -66,6 +56,7 @@ type NoteProps = {
   index: string;
   hidden: boolean;
   edgeless: NoteEdgelessProps;
+  rotate: number;
 };
 
 type NoteEdgelessProps = {
@@ -79,34 +70,12 @@ type NoteEdgelessProps = {
   collapsedHeight: number;
 };
 
-@EdgelessSelectableMixin
-export class NoteBlockModel
-  extends BaseBlockModel<NoteProps>
-  implements IEdgelessElement
-{
-  override flavour!: EdgelessBlockType.NOTE;
-  elementBound!: Bound;
-
-  get connectable() {
-    return true;
+const NoteBlockModelEdgeless = BlockEdgelessMixin(
+  class extends BaseBlockModel<NoteProps> {
+    override flavour!: EdgelessBlockType.NOTE;
   }
+);
 
-  get batch() {
-    return BLOCK_BATCH;
-  }
-
-  get rotate() {
-    return 0;
-  }
-
-  containedByBounds!: (_: Bound) => boolean;
-  getNearestPoint!: (_: IVec) => IVec;
-  intersectWithLine!: (_: IVec, _1: IVec) => PointLocation[] | null;
-  getRelativePointLocation!: (_: IVec) => PointLocation;
-  boxSelect!: (bound: Bound) => boolean;
-
-  hitTest(x: number, y: number, _: HitTestOptions): boolean {
-    const bound = Bound.deserialize(this.xywh);
-    return bound.isPointInBound([x, y], 0);
-  }
+export class NoteBlockModel extends NoteBlockModelEdgeless {
+  override rotate = 0;
 }

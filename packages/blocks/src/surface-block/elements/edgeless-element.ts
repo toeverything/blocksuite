@@ -28,11 +28,11 @@ export interface HitTestOptions {
 }
 export interface IEdgelessElement {
   xywh: SerializedXYWH;
-  rotate: number;
-  connectable: boolean;
   index: string;
-  batch: string | null;
-  elementBound: Bound;
+  readonly rotate: number;
+  readonly connectable: boolean;
+  readonly batch: string | null;
+  readonly elementBound: Bound;
   containedByBounds(bounds: Bound): boolean;
   getNearestPoint(point: IVec): IVec;
   intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;

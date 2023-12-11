@@ -5,18 +5,8 @@ import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 import { getBlockElementByPath } from '../_common/utils/query.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import type {
-  HitTestOptions,
-  IEdgelessElement,
-} from '../surface-block/elements/edgeless-element.js';
-import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
-import {
-  Bound,
-  type IVec,
-  linePolygonIntersects,
-  type PointLocation,
-  type SerializedXYWH,
-} from '../surface-block/index.js';
+import { BlockEdgelessMixin } from '../surface-block/elements/selectable.js';
+import { Bound, type SerializedXYWH } from '../surface-block/index.js';
 import type { FrameBlockComponent } from './frame-block.js';
 
 export const FrameBlockSchema = defineBlockSchema({
@@ -43,46 +33,20 @@ type Props = {
   background: string;
   xywh: SerializedXYWH;
   index: string;
+  rotate: number;
 };
 
-@EdgelessSelectableMixin
-export class FrameBlockModel
-  extends BaseBlockModel<Props>
-  implements IEdgelessElement
-{
-  override flavour!: EdgelessBlockType.FRAME;
+const FrameBlockModelEdgeless = BlockEdgelessMixin(
+  class extends BaseBlockModel<Props> {
+    override flavour!: EdgelessBlockType.FRAME;
+  }
+);
 
-  get connectable() {
-    return true;
-  }
+export class FrameBlockModel extends FrameBlockModelEdgeless {
+  override batch = FRAME_BATCH;
+  override rotate = 0;
 
-  get batch() {
-    return FRAME_BATCH;
-  }
-
-  get rotate() {
-    return 0;
-  }
-
-  get elementBound() {
-    return Bound.deserialize(this.xywh);
-  }
-
-  containedByBounds(bound: Bound): boolean {
-    return bound.contains(Bound.deserialize(this.xywh));
-  }
-  getNearestPoint(_: IVec): IVec {
-    throw new Error('Function not implemented.');
-  }
-  intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
-    return linePolygonIntersects(
-      start,
-      end,
-      Bound.deserialize(this.xywh).points
-    );
-  }
-  getRelativePointLocation!: (_: IVec) => PointLocation;
-  hitTest(x: number, y: number, _: HitTestOptions): boolean {
+  override hitTest(x: number, y: number): boolean {
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointOnBound([x, y]);
     if (hit) return true;
@@ -96,7 +60,8 @@ export class FrameBlockModel
     const titleBound = block.titleBound;
     return titleBound.isPointInBound([x, y], 0);
   }
-  boxSelect(bound: Bound): boolean {
+
+  override boxSelect(bound: Bound): boolean {
     return Bound.deserialize(this.xywh).isIntersectWithBound(bound);
   }
 }

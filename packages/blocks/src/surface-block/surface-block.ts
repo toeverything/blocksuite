@@ -827,14 +827,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     };
     const pickBlock = () => {
       const candidates = this.layer.blocksGrid.search(hitTestBound);
-      const picked = candidates.filter(element =>
-        element.hitTest(x, y, options)
-      );
+      const picked = candidates.filter(element => element.hitTest(x, y));
       return picked as EdgelessElement[];
     };
     const pickFrames = () => {
       return this.layer.frames.filter(frame =>
-        frame.hitTest(x, y, options)
+        frame.hitTest(x, y)
       ) as EdgelessElement[];
     };
 
