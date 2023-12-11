@@ -120,7 +120,12 @@ export const SurfaceBlockSchema = defineBlockSchema({
     version: 5,
     role: 'hub',
     parent: ['affine:page'],
-    children: ['affine:frame', 'affine:image', 'affine:embed-*'],
+    children: [
+      'affine:frame',
+      'affine:image',
+      'affine:embed-*',
+      'affine:bookmark',
+    ],
   },
   onUpgrade: (data, previousVersion, version) => {
     if (previousVersion < 4 && version >= 4) {
