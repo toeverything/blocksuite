@@ -16,7 +16,6 @@ export const NoteBlockSchema = defineBlockSchema({
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
     hidden: false,
-    rotate: 0,
     edgeless: {
       style: {
         borderRadius: 8,
@@ -53,7 +52,6 @@ export const NoteBlockSchema = defineBlockSchema({
 type NoteProps = {
   xywh: SerializedXYWH;
   background: string;
-  rotate: number;
   index: string;
   hidden: boolean;
   edgeless: NoteEdgelessProps;

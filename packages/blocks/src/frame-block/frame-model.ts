@@ -10,7 +10,6 @@ type FrameBlockProps = {
   background: string;
   xywh: SerializedXYWH;
   index: string;
-  rotate: number;
 };
 
 export const FrameBlockSchema = defineBlockSchema({
@@ -20,7 +19,6 @@ export const FrameBlockSchema = defineBlockSchema({
     background: '--affine-palette-transparent',
     xywh: `[0,0,100,100]`,
     index: 'a0',
-    rotate: 0,
   }),
   metadata: {
     version: 1,

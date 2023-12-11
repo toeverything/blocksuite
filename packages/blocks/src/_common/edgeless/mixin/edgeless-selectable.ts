@@ -19,7 +19,7 @@ import {
 export type EdgelessSelectableProps = {
   xywh: SerializedXYWH;
   index: string;
-  rotate: number;
+  rotate?: number;
 };
 
 export function selectable<
@@ -34,6 +34,7 @@ export function selectable<
   {
     connectable = true;
     batch = BLOCK_BATCH;
+    override rotate = 0;
 
     get elementBound() {
       const bound = Bound.deserialize(this.xywh);
