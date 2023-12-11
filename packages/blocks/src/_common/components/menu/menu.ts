@@ -133,9 +133,6 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       z-index: 999;
     }
 
-    .affine-menu-header {
-    }
-
     .affine-menu-body {
       display: flex;
       flex-direction: column;
@@ -709,8 +706,9 @@ export const createPopup = (
 ) => {
   const root = document.querySelector('block-suite-root');
   assertExists(root);
+
   const modal = createModal(root);
-  const unsub = autoUpdate(target, content, () => {
+  autoUpdate(target, content, () => {
     computePosition(target, content, {
       middleware: options?.middleware ?? [shift({ crossAxis: true })],
     }).then(({ x, y }) => {
@@ -721,6 +719,7 @@ export const createPopup = (
     });
   });
   modal.append(content);
+
   computePosition(target, content, {
     middleware: options?.middleware ?? [shift({ crossAxis: true })],
   }).then(({ x, y }) => {
@@ -729,12 +728,14 @@ export const createPopup = (
       top: `${y}px`,
     });
   });
+
   modal.onmousedown = ev => {
     if (ev.target === modal) {
       modal.remove();
       options?.onClose?.();
     }
   };
+
   modal.oncontextmenu = ev => {
     ev.preventDefault();
     if (ev.target === modal) {
@@ -742,9 +743,8 @@ export const createPopup = (
       options?.onClose?.();
     }
   };
-  return () => {
-    modal.remove();
-  };
+
+  return () => modal.remove();
 };
 export type MenuHandler = {
   close: () => void;
