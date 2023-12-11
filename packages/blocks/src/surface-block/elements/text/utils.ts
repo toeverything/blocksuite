@@ -17,8 +17,19 @@ const RS_RTL_CHARS = '\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC';
 const RE_RTL_CHECK = new RegExp(`^[^${RS_LTR_CHARS}]*[${RS_RTL_CHARS}]`);
 export const isRTL = (text: string) => RE_RTL_CHECK.test(text);
 
-const privateCanvas = document.createElement('canvas');
-const privateCtx = privateCanvas.getContext('2d')!;
+const getMeasureCtx = (function initMeasureContext() {
+  let ctx: CanvasRenderingContext2D | null = null;
+  let canvas: HTMLCanvasElement | null = null;
+
+  return () => {
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      ctx = canvas.getContext('2d')!;
+    }
+
+    return ctx!;
+  };
+})();
 
 export const isChrome =
   globalThis.navigator?.userAgent.indexOf('Chrome') !== -1;
@@ -33,8 +44,10 @@ export function getLineHeight(
   fontFamily: CanvasTextFontFamily,
   fontSize: number
 ) {
-  privateCtx.font = `${fontSize}px ${wrapFontFamily(fontFamily)}`;
-  const textMetrcs = privateCtx.measureText('M');
+  const ctx = getMeasureCtx();
+
+  ctx.font = `${fontSize}px ${wrapFontFamily(fontFamily)}`;
+  const textMetrcs = ctx.measureText('M');
 
   return textMetrcs.fontBoundingBoxAscent + textMetrcs.fontBoundingBoxDescent;
 }
@@ -71,8 +84,9 @@ export function splitIntoLines(text: string): string[] {
 }
 
 export function getLineWidth(text: string, font: string): number {
-  privateCtx.font = font;
-  const width = privateCtx.measureText(text).width;
+  const ctx = getMeasureCtx();
+  ctx.font = font;
+  const width = ctx.measureText(text).width;
 
   return width;
 }
