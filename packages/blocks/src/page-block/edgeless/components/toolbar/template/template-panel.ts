@@ -9,9 +9,13 @@ import {
   requestConnectedFrame,
   stopPropagation,
 } from '../../../../../_common/utils/event.js';
-import { Bound, getCommonBound, type IBound } from '../../../../../index.js';
+import { type IBound } from '../../../../../surface-block/consts.js';
 import type { TemplateJob } from '../../../../../surface-block/service/template.js';
 import { createInsertPlaceMiddleware } from '../../../../../surface-block/service/template-middlewares.js';
+import {
+  Bound,
+  getCommonBound,
+} from '../../../../../surface-block/utils/bound.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { builtInTemplates, type Template } from './builtin-templates.js';
 import { ArrowIcon, Preview } from './icon.js';
