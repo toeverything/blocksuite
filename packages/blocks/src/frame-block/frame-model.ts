@@ -6,7 +6,11 @@ import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import { getBlockElementByPath } from '../_common/utils/index.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import { Bound, type SerializedXYWH } from '../surface-block/index.js';
+import {
+  Bound,
+  type HitTestOptions,
+  type SerializedXYWH,
+} from '../surface-block/index.js';
 import type { FrameBlockComponent } from './frame-block.js';
 
 type FrameBlockProps = {
@@ -40,7 +44,7 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(
 ) {
   override flavour!: EdgelessBlockType.FRAME;
   override batch = FRAME_BATCH;
-  override hitTest(x: number, y: number): boolean {
+  override hitTest(x: number, y: number, _: HitTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointOnBound([x, y]);
     if (hit) return true;
