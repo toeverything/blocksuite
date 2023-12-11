@@ -205,6 +205,11 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       loading,
     });
 
+    const iconType =
+      !icon?.split('.').pop() || icon?.split('.').pop() === 'svg'
+        ? 'svg+xml'
+        : icon?.split('.').pop();
+
     return html`<div
       class="affine-bookmark-card"
       @click=${this._onCardClick}
@@ -216,7 +221,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
             ${this.bookmark.loading
               ? loadingIcon
               : icon
-                ? html`<object type="image/svg+xml" data=${icon}>
+                ? html`<object type="image/${iconType}" data=${icon}>
                     ${WebIcon16}
                   </object>`
                 : WebIcon16}
