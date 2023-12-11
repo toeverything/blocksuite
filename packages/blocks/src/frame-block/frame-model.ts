@@ -4,7 +4,7 @@ import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import { type SerializedXYWH } from '../surface-block/index.js';
+import { Bound, type SerializedXYWH } from '../surface-block/index.js';
 
 type FrameBlockProps = {
   title: Text;
@@ -37,4 +37,15 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(
 ) {
   override flavour!: EdgelessBlockType.FRAME;
   override batch = FRAME_BATCH;
+  override hitTest(x: number, y: number): boolean {
+    const bound = Bound.deserialize(this.xywh);
+    const hit = bound.isPointOnBound([x, y]);
+    if (hit) return true;
+    const titleBound = block.titleBound;
+    return titleBound.isPointInBound([x, y], 0);
+  }
+
+  override boxSelect(bound: Bound): boolean {
+    return Bound.deserialize(this.xywh).isIntersectWithBound(bound);
+  }
 }
