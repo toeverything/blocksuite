@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
-import { computePosition, flip, shift } from '@floating-ui/dom';
+import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import { ArrowDownIcon } from '../../../../_common/icons/index.js';
@@ -98,6 +98,7 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
   });
 
   const onHover = () => {
+    const formatQuickBarElement = formatBar._formatBarElement;
     const button = formatBar.shadowRoot?.querySelector(
       '.paragraph-button'
     ) as HTMLElement | null;
@@ -106,11 +107,13 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
     ) as HTMLElement | null;
     assertExists(button);
     assertExists(panel);
+    assertExists(formatQuickBarElement, 'format quick bar should exist');
     panel.style.display = 'block';
-    computePosition(button, panel, {
+    computePosition(formatQuickBarElement, panel, {
       placement: 'top-start',
       middleware: [
         flip(),
+        offset(4),
         shift({
           padding: 6,
         }),
