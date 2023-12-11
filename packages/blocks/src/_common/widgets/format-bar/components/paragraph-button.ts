@@ -3,17 +3,20 @@ import type { BlockElement } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
+import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
 import { ArrowDownIcon } from '../../../../_common/icons/index.js';
 import type { Flavour, ParagraphBlockModel } from '../../../../models.js';
 import { isPageComponent } from '../../../../page-block/utils/guard.js';
 import { updateBlockElementType } from '../../../../page-block/utils/operations/element/block-level.js';
+import { whenHover } from '../../../components/hover/index.js';
 import { textConversionConfigs } from '../../../configs/text-conversion.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
   page: Page;
   selectedBlockElements: BlockElement[];
+  ref?: RefOrCallback;
 }
 
 const updateParagraphType = (
@@ -44,8 +47,9 @@ const updateParagraphType = (
 const ParagraphPanel = ({
   page,
   selectedBlockElements,
+  ref: containerRef,
 }: ParagraphPanelProps) => {
-  return html`<div class="paragraph-panel">
+  return html`<div ${ref(containerRef)} class="paragraph-panel">
     ${textConversionConfigs
       .filter(({ flavour }) => flavour !== 'affine:divider')
       .filter(({ flavour }) => page.schema.flavourSchemaMap.has(flavour))
@@ -92,13 +96,16 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
     throw new Error('paragraph button host is not a page component');
   }
 
-  const paragraphPanel = ParagraphPanel({
-    selectedBlockElements,
-    page: formatBar.root.page,
-  });
-
-  const onHover = () => {
-    const formatQuickBarElement = formatBar._formatBarElement;
+  const { setFloating, setReference } = whenHover(isHover => {
+    if (!isHover) {
+      const panel = formatBar.shadowRoot?.querySelector(
+        '.paragraph-panel'
+      ) as HTMLElement | null;
+      assertExists(panel);
+      panel.style.display = 'none';
+      return;
+    }
+    const formatQuickBarElement = formatBar.formatBarElement;
     const button = formatBar.shadowRoot?.querySelector(
       '.paragraph-button'
     ) as HTMLElement | null;
@@ -122,20 +129,15 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
       panel.style.left = `${x}px`;
       panel.style.top = `${y}px`;
     });
-  };
-  const onHoverEnd = () => {
-    const panel = formatBar.shadowRoot?.querySelector(
-      '.paragraph-panel'
-    ) as HTMLElement | null;
-    assertExists(panel);
-    panel.style.display = 'none';
-  };
+  });
 
-  return html`<div
-    @mouseenter=${onHover}
-    @mouseleave=${onHoverEnd}
-    class="paragraph-button"
-  >
+  const paragraphPanel = ParagraphPanel({
+    selectedBlockElements,
+    page: formatBar.root.page,
+    ref: setFloating,
+  });
+
+  return html`<div ${ref(setReference)} class="paragraph-button">
     <icon-button class="paragraph-button-icon" width="52px" height="32px">
       ${paragraphIcon} ${ArrowDownIcon}</icon-button
     >
