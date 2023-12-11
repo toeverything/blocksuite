@@ -1,14 +1,19 @@
 import '../card/frame-card.js';
 
-import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing } from 'lit';
+import {
+  Bound,
+  EdgelessBlockType,
+  type EdgelessPageBlockComponent,
+  type FrameBlockModel,
+  generateKeyBetween,
+  saveViewportToSession,
+} from '@blocksuite/blocks';
+import { DisposableGroup } from '@blocksuite/global/utils';
+import { type BlockSuiteRoot, WithDisposable } from '@blocksuite/lit';
+import type { Page } from '@blocksuite/store';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
-import type { FrameBlockModel } from '../../../../../frame-block/frame-model.js';
-import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
-import { Bound } from '../../../../../surface-block/utils/bound.js';
-import { generateKeyBetween } from '../../../../../surface-block/utils/index.js';
-import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type {
   DragEvent,
   FitViewEvent,
@@ -36,7 +41,7 @@ const styles = css`
     box-sizing: border-box;
     flex-direction: column;
     width: 100%;
-    gap: 12px;
+    gap: 16px;
     position: relative;
   }
 
@@ -76,7 +81,16 @@ export class FramePanelBody extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
+  edgeless: EdgelessPageBlockComponent | null = null;
+
+  @property({ attribute: false })
+  page!: Page;
+
+  @property({ attribute: false })
+  root!: BlockSuiteRoot;
+
+  @property({ attribute: false })
+  changeEditorMode!: (mode: 'page' | 'edgeless') => void;
 
   // Store the ids of the selected frames
   @state()
@@ -102,6 +116,11 @@ export class FramePanelBody extends WithDisposable(LitElement) {
 
   private _frameElementHeight = 0;
   private _indicatorTranslateY = 0;
+  private _pageDisposables: DisposableGroup | null = null;
+
+  get frames() {
+    return this.page.getBlockByFlavour(FRAME) as FrameBlockModel[];
+  }
 
   get viewportPadding(): [number, number, number, number] {
     return this.fitPadding
@@ -111,14 +130,35 @@ export class FramePanelBody extends WithDisposable(LitElement) {
       : [0, 0, 0, 0];
   }
 
+  compare(a: FrameBlockModel, b: FrameBlockModel) {
+    if (a.index < b.index) return -1;
+    else if (a.index > b.index) return 1;
+    return 0;
+  }
+
+  private _clearPageDisposables = () => {
+    this._pageDisposables?.dispose();
+    this._pageDisposables = null;
+  };
+
+  private _setPageDisposables = () => {
+    this._clearPageDisposables();
+    this._pageDisposables = new DisposableGroup();
+    this._pageDisposables.add(
+      this.page.slots.blockUpdated.on(({ flavour }) => {
+        if (flavour === FRAME) {
+          requestAnimationFrame(() => {
+            this._updateFrames();
+          });
+        }
+      })
+    );
+  };
+
   private _updateFrames() {
     if (this._dragging) return;
 
-    const frames = this.edgeless.surface.frame.frames.sort(
-      this.edgeless.surface.compare
-    ) as FrameBlockModel[];
-
-    if (!frames.length) {
+    if (!this.frames.length) {
       this._selected = [];
       this._frameItems = [];
       return;
@@ -127,7 +167,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
     const frameItems: FramePanelBody['_frameItems'] = [];
     const oldSelectedSet = new Set(this._selected);
     const newSelected: string[] = [];
-
+    const frames = this.frames.sort(this.compare);
     frames.forEach((frame, idx) => {
       const frameItem = {
         frame,
@@ -157,25 +197,26 @@ export class FramePanelBody extends WithDisposable(LitElement) {
       const selectedFrames = selected
         .map(id => framesMap.get(id) as FrameListItem)
         .map(frameItem => frameItem.frame)
-        .sort(this.edgeless.surface.compare);
+        .sort(this.compare);
 
       // update selected frames index
       // make the indexes larger than the frame before and smaller than the frame after
       let before = frames[insertIndex - 1]?.index || null;
       const after = frames[insertIndex]?.index || null;
       selectedFrames.forEach(frame => {
-        this.edgeless.surface.updateElement(frame.id, {
-          index: generateKeyBetween(before, after),
+        const newIndex = generateKeyBetween(before, after);
+        frame.page.updateBlock(frame, {
+          index: newIndex,
         });
-        before = frame.index;
+        before = newIndex;
       });
 
-      this.edgeless.page.captureSync();
+      this.page.captureSync();
       this._updateFrames();
     }
   }
 
-  private _selectFrame(e: SelectEvent) {
+  private _selectFrame = (e: SelectEvent) => {
     const { selected, id, multiselect } = e.detail;
 
     if (!selected) {
@@ -187,21 +228,29 @@ export class FramePanelBody extends WithDisposable(LitElement) {
       this._selected = [id];
     }
 
-    this.edgeless.selectionManager.setSelection({
+    this.edgeless?.selectionManager.setSelection({
       elements: this._selected,
       editing: false,
     });
-  }
+  };
 
   private _fitToElement(e: FitViewEvent) {
     const { block } = e.detail;
     const bound = Bound.deserialize(block.xywh);
 
-    this.edgeless.surface.viewport.setViewportByBound(
-      bound,
-      this.viewportPadding,
-      true
-    );
+    if (!this.edgeless) {
+      this.changeEditorMode('edgeless');
+      saveViewportToSession(this.page.id, {
+        referenceId: block.id,
+        padding: this.viewportPadding,
+      });
+    } else {
+      this.edgeless.surface.viewport.setViewportByBound(
+        bound,
+        this.viewportPadding,
+        true
+      );
+    }
   }
 
   private _drag(e: DragEvent) {
@@ -246,6 +295,8 @@ export class FramePanelBody extends WithDisposable(LitElement) {
       frameListContainer: this.frameListContainer,
       frameElementHeight: this._frameElementHeight,
       edgeless: this.edgeless,
+      page: this.page,
+      root: this.root,
       onDragEnd: insertIdx => {
         this._dragging = false;
         this.insertIndex = undefined;
@@ -297,6 +348,8 @@ export class FramePanelBody extends WithDisposable(LitElement) {
         html`<frame-card
           data-frame-id=${frameItem.frame.id}
           .edgeless=${this.edgeless}
+          .page=${this.page}
+          .root=${this.root}
           .frame=${frameItem.frame}
           .cardIndex=${idx}
           .frameIndex=${frameItem.frameIndex}
@@ -323,33 +376,42 @@ export class FramePanelBody extends WithDisposable(LitElement) {
     return frameList;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    const { surface, page } = this.edgeless;
-    const frames = surface.frame.frames.sort(
-      surface.compare
-    ) as FrameBlockModel[];
+  override firstUpdated() {
+    const disposables = this.disposables;
+    disposables.addFromEvent(this, 'click', this._clickBlank);
 
-    this._frameItems = frames.map((frame, idx) => ({
+    this._frameItems = this.frames.map((frame, idx) => ({
       frame,
       frameIndex: frame.index,
       cardIndex: idx,
     }));
-
-    const { disposables } = this;
-    disposables.add(
-      page.slots.blockUpdated.on(({ flavour }) => {
-        if (flavour === FRAME) {
-          requestAnimationFrame(() => {
-            this._updateFrames();
-          });
-        }
-      })
-    );
   }
 
-  override firstUpdated() {
-    this._disposables.addFromEvent(this, 'click', this._clickBlank);
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('page')) {
+      this._setPageDisposables();
+      this._updateFrames();
+    }
+
+    if (_changedProperties.has('edgeless')) {
+      // after switch to edgeless mode, should update the selection
+      if (this.edgeless) {
+        this.edgeless.selectionManager.setSelection({
+          elements: this._selected,
+          editing: false,
+        });
+        this._updateFrames();
+      }
+    }
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._clearPageDisposables();
   }
 
   override render() {

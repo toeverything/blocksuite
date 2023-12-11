@@ -1,17 +1,12 @@
-import '../../../../../_common/components/menu-divider.js';
-import '../../../../../_common/components/toggle-switch.js';
-
-import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
-import { property, state } from 'lit/decorators.js';
-
 import {
   BLACK_BACKGROUND_KEY,
+  type EdgelessPageBlockComponent,
   FILL_SCREEN_KEY,
   HIDE_TOOLBAR_KEY,
-} from '../../../../../_common/edgeless/frame/consts.js';
-import { stopPropagation } from '../../../../../_common/utils/event.js';
-import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+} from '@blocksuite/blocks';
+import { WithDisposable } from '@blocksuite/lit';
+import { css, html, LitElement, type PropertyValues } from 'lit';
+import { property, state } from 'lit/decorators.js';
 
 const styles = css`
   :host {
@@ -80,7 +75,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
+  edgeless!: EdgelessPageBlockComponent | null;
 
   @state()
   blackBackground = false;
@@ -102,14 +97,14 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
 
   private _onBlackBackgroundChange = (checked: boolean) => {
     this.blackBackground = !checked;
-    this.edgeless.slots.navigatorSettingUpdated.emit({
+    this.edgeless?.slots.navigatorSettingUpdated.emit({
       blackBackground: this.blackBackground,
     });
   };
 
   private _onFillScreenChange = (checked: boolean) => {
     this.fillScreen = checked;
-    this.edgeless.slots.navigatorSettingUpdated.emit({
+    this.edgeless?.slots.navigatorSettingUpdated.emit({
       fillScreen: this.fillScreen,
     });
     sessionStorage.setItem(FILL_SCREEN_KEY, this.fillScreen.toString());
@@ -117,7 +112,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
 
   private _onHideToolBarChange = (checked: boolean) => {
     this.hideToolbar = checked;
-    this.edgeless.slots.navigatorSettingUpdated.emit({
+    this.edgeless?.slots.navigatorSettingUpdated.emit({
       hideToolbar: this.hideToolbar,
     });
     sessionStorage.setItem(HIDE_TOOLBAR_KEY, this.hideToolbar.toString());
@@ -132,29 +127,40 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     super.disconnectedCallback();
   }
 
-  override firstUpdated() {
-    this.disposables.add(
-      this.edgeless.slots.navigatorSettingUpdated.on(
-        ({ blackBackground, hideToolbar }) => {
-          if (
-            blackBackground !== undefined &&
-            blackBackground !== this.blackBackground
-          ) {
-            this.blackBackground = blackBackground;
-          }
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('edgeless')) {
+      if (this.edgeless) {
+        this.disposables.add(
+          this.edgeless.slots.navigatorSettingUpdated.on(
+            ({ blackBackground, hideToolbar }) => {
+              if (
+                blackBackground !== undefined &&
+                blackBackground !== this.blackBackground
+              ) {
+                this.blackBackground = blackBackground;
+              }
 
-          if (hideToolbar !== undefined && hideToolbar !== this.hideToolbar) {
-            this.hideToolbar = hideToolbar;
-          }
-        }
-      )
-    );
+              if (
+                hideToolbar !== undefined &&
+                hideToolbar !== this.hideToolbar
+              ) {
+                this.hideToolbar = hideToolbar;
+              }
+            }
+          )
+        );
+      } else {
+        this.disposables.dispose();
+      }
+    }
   }
 
   override render() {
     return html`<div
       class="frames-setting-menu-container"
-      @click=${stopPropagation}
+      @click=${(e: MouseEvent) => {
+        e.stopPropagation();
+      }}
     >
       <div class="frames-setting-menu-item">
         <div class="setting-label">Preview Settings</div>

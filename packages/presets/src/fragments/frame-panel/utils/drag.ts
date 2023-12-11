@@ -1,7 +1,12 @@
-import { on, once } from '../../../../../_common/utils/index.js';
-import { lastN } from '../../../../../_common/utils/iterable.js';
-import type { FrameBlockModel } from '../../../../../models.js';
-import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import {
+  type EdgelessPageBlockComponent,
+  type FrameBlockModel,
+  on,
+  once,
+} from '@blocksuite/blocks';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { Page } from '@blocksuite/store';
+
 import type { FramePanelBody } from '../body/frame-panel-body.js';
 import { FrameCard } from '../card/frame-card.js';
 
@@ -30,7 +35,9 @@ export function startDragging(
       x: number;
       y: number;
     };
-    edgeless: EdgelessPageBlockComponent;
+    edgeless: EdgelessPageBlockComponent | null;
+    page: Page;
+    root: BlockSuiteRoot;
   }
 ) {
   const {
@@ -43,27 +50,37 @@ export function startDragging(
     framePanelBody,
     frameListContainer,
     start,
+    edgeless,
+    page,
+    root,
   } = options;
-  const cardElements = lastN(frames, 2).map((frame, idx, arr) => {
-    const el = new FrameCard();
+  const cardElements = frames
+    .slice(frames.length - 2, frames.length)
+    .map((frame, idx, arr) => {
+      const el = new FrameCard();
 
-    el.edgeless = options.edgeless;
-    el.frame = frame.frame;
-    el.cardIndex = frame.cardIndex;
-    el.frameIndex = frame.frameIndex;
-    el.status = 'dragging';
-    el.stackOrder = arr.length - 1 - idx;
-    el.pos = start;
-    el.width = options.width;
-    if (frames.length > 1 && el.stackOrder === 0)
-      el.draggingCardNumber = frames.length;
+      el.edgeless = edgeless;
+      el.page = page;
+      el.root = root;
+      el.frame = frame.frame;
 
-    return el;
-  });
+      el.cardIndex = frame.cardIndex;
+      el.frameIndex = frame.frameIndex;
+      el.status = 'dragging';
+      el.stackOrder = arr.length - 1 - idx;
+      el.pos = start;
+      el.width = options.width;
+      if (frames.length > 1 && el.stackOrder === 0)
+        el.draggingCardNumber = frames.length;
+
+      return el;
+    });
   const maskElement = createMaskElement(doc);
   const listContainerRect = framePanelBody.getBoundingClientRect();
   const children = Array.from(frameListContainer.children) as FrameCard[];
-  const framePadding = 12;
+  const computedStyle = getComputedStyle(frameListContainer);
+  const frameListContainerGap =
+    parseInt(computedStyle.getPropertyValue('gap')) ?? 16;
   let idx: undefined | number;
   let indicatorTranslateY: undefined | number;
 
@@ -101,15 +118,17 @@ export function startDragging(
         listContainerRect.top +
         card.offsetTop -
         framePanelBody.scrollTop -
-        framePadding / 2;
+        frameListContainerGap / 2;
       const midBoundary = topBoundary + card.offsetHeight / 2;
-      const bottomBoundary = topBoundary + card.offsetHeight + framePadding;
+      const bottomBoundary =
+        topBoundary + card.offsetHeight + frameListContainerGap;
 
       if (e.clientY >= topBoundary && e.clientY <= bottomBoundary) {
         idx = e.clientY > midBoundary ? idx + 1 : idx;
 
         indicatorTranslateY =
-          idx * (frameElementHeight + framePadding) - framePadding / 2;
+          idx * (frameElementHeight + frameListContainerGap) -
+          frameListContainerGap / 2;
 
         onDragMove?.(idx, indicatorTranslateY);
         return;

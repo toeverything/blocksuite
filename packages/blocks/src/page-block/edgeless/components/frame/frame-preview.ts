@@ -1,37 +1,43 @@
-import { assertExists, type Disposable } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
-import type { Y } from '@blocksuite/store';
+import {
+  assertExists,
+  type Disposable,
+  DisposableGroup,
+} from '@blocksuite/global/utils';
+import { type BlockSuiteRoot, WithDisposable } from '@blocksuite/lit';
+import type { Page, Y } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
-import { property, query, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { FILL_SCREEN_KEY } from '../../../../../_common/edgeless/frame/consts.js';
-import { isCssVariable } from '../../../../../_common/theme/css-variables.js';
+import { FILL_SCREEN_KEY } from '../../../../_common/edgeless/frame/consts.js';
+import {
+  type CssVariableName,
+  isCssVariable,
+} from '../../../../_common/theme/css-variables.js';
+import { getThemePropertyValue } from '../../../../_common/theme/utils.js';
 import type {
   EdgelessElement,
   TopLevelBlockModel,
-} from '../../../../../_common/utils/types.js';
-import type { FrameBlockModel } from '../../../../../frame-block/frame-model.js';
-import type { NoteBlockModel } from '../../../../../note-block/note-model.js';
-import type { SurfaceElement } from '../../../../../surface-block/elements/surface-element.js';
-import {
-  Bound,
-  type CanvasElementType,
-  ConnectorElement,
-  deserializeXYWH,
-  ElementCtors,
-} from '../../../../../surface-block/index.js';
+} from '../../../../_common/utils/types.js';
+import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
+import type { NoteBlockModel } from '../../../../note-block/note-model.js';
+import { ConnectorElement } from '../../../../surface-block/elements/connector/connector-element.js';
+import type { CanvasElementType } from '../../../../surface-block/elements/edgeless-element.js';
+import { ElementCtors } from '../../../../surface-block/elements/index.js';
+import type { SurfaceElement } from '../../../../surface-block/elements/surface-element.js';
 import {
   getGroupParent,
   setGroupParent,
-} from '../../../../../surface-block/managers/group-manager.js';
-import { LayerManager } from '../../../../../surface-block/managers/layer-manager.js';
-import { Renderer } from '../../../../../surface-block/renderer.js';
-import type { SurfaceBlockModel } from '../../../../../surface-block/surface-model.js';
-import type { SurfaceRefPortal } from '../../../../../surface-ref-block/surface-ref-portal.js';
-import { getSurfaceBlock } from '../../../../../surface-ref-block/utils.js';
-import { ConnectorPathGenerator } from '../../../connector-manager.js';
-import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+} from '../../../../surface-block/managers/group-manager.js';
+import { LayerManager } from '../../../../surface-block/managers/layer-manager.js';
+import { Renderer } from '../../../../surface-block/renderer.js';
+import type { SurfaceBlockModel } from '../../../../surface-block/surface-model.js';
+import { Bound } from '../../../../surface-block/utils/bound.js';
+import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
+import type { SurfaceRefPortal } from '../../../../surface-ref-block/surface-ref-portal.js';
+import { getSurfaceBlock } from '../../../../surface-ref-block/utils.js';
+import { ConnectorPathGenerator } from '../../connector-manager.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 type RefElement = Exclude<EdgelessElement, NoteBlockModel>;
 
@@ -71,14 +77,22 @@ const styles = css`
     position: relative;
   }
 `;
+
+@customElement('frame-preview')
 export class FramePreview extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
+  edgeless: EdgelessPageBlockComponent | null = null;
 
   @property({ attribute: false })
   frame!: FrameBlockModel;
+
+  @property({ attribute: false })
+  page!: Page;
+
+  @property({ attribute: false })
+  root!: BlockSuiteRoot;
 
   @property({ attribute: false })
   surfaceWidth: number = DEFAULT_PREVIEW_CONTAINER_WIDTH;
@@ -100,6 +114,8 @@ export class FramePreview extends WithDisposable(LitElement) {
     refresh: () => this._surfaceRenderer.refresh(),
   });
   private _elements = new Map<string, SurfaceElement>();
+  private _edgelessDisposables: DisposableGroup | null = null;
+  private _pageDisposables: DisposableGroup | null = null;
 
   @query('.surface-canvas-container')
   container!: HTMLDivElement;
@@ -109,14 +125,6 @@ export class FramePreview extends WithDisposable(LitElement) {
 
   get surfaceRenderer() {
     return this._surfaceRenderer;
-  }
-
-  get root() {
-    return this.edgeless.root;
-  }
-
-  get page() {
-    return this.edgeless.page;
   }
 
   private _attachRenderer() {
@@ -376,9 +384,9 @@ export class FramePreview extends WithDisposable(LitElement) {
   }
 
   private _getCSSPropertyValue = (value: string) => {
-    const computedStyle = getComputedStyle(this.edgeless);
+    const root = this.root;
     if (isCssVariable(value)) {
-      const cssValue = computedStyle.getPropertyValue(value);
+      const cssValue = getThemePropertyValue(root, value as CssVariableName);
       if (cssValue === undefined) {
         console.error(
           new Error(
@@ -406,6 +414,48 @@ export class FramePreview extends WithDisposable(LitElement) {
       width: w * scale,
       height: h * scale,
     };
+  };
+
+  private _clearEdgelessDisposables = () => {
+    this._edgelessDisposables?.dispose();
+    this._edgelessDisposables = null;
+  };
+
+  private _clearPageDisposables = () => {
+    this._pageDisposables?.dispose();
+    this._pageDisposables = null;
+  };
+
+  private _setPageDisposables = () => {
+    this._clearPageDisposables();
+    this._pageDisposables = new DisposableGroup();
+    this._pageDisposables.add(
+      this.page.slots.blockUpdated.on(event => {
+        const { type, flavour } = event;
+        const isTopLevelBlock = ['affine:image', 'affine:note'].includes(
+          flavour
+        );
+        if (!isTopLevelBlock) return;
+
+        const frameBound = Bound.deserialize(this.frame.xywh);
+        if (type === 'delete') {
+          const deleteModel = event.model as TopLevelBlockModel;
+          const deleteBound = Bound.deserialize(deleteModel.xywh);
+          if (frameBound.containsPoint([deleteBound.x, deleteBound.y])) {
+            this._refreshViewport();
+          }
+        } else {
+          const topLevelBlock = this.page.getBlockById(event.id);
+          if (!topLevelBlock) return;
+          const newBound = Bound.deserialize(
+            (topLevelBlock as TopLevelBlockModel).xywh
+          );
+          if (frameBound.containsPoint([newBound.x, newBound.y])) {
+            this._refreshViewport();
+          }
+        }
+      })
+    );
   };
 
   private _renderSurfaceContent(referencedModel: FrameBlockModel) {
@@ -446,15 +496,6 @@ export class FramePreview extends WithDisposable(LitElement) {
     this._initSurfaceRenderer();
 
     this._disposables.add(
-      this.edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
-        if (fillScreen !== undefined) {
-          this.fillScreen = fillScreen;
-          this._refreshViewport();
-        }
-      })
-    );
-
-    this._disposables.add(
       this.frame.propsUpdated.on(() => {
         this.requestUpdate();
         this._refreshViewport();
@@ -467,39 +508,37 @@ export class FramePreview extends WithDisposable(LitElement) {
       this.requestUpdate();
       this._refreshViewport();
     }
+
+    if (_changedProperties.has('edgeless')) {
+      this._edgelessDisposables?.dispose();
+      if (this.edgeless) {
+        if (!this._edgelessDisposables)
+          this._edgelessDisposables = new DisposableGroup();
+
+        this._edgelessDisposables.add(
+          this.edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
+            if (fillScreen !== undefined) {
+              this.fillScreen = fillScreen;
+              this._refreshViewport();
+            }
+          })
+        );
+      } else {
+        this._clearEdgelessDisposables();
+      }
+    }
+
+    if (_changedProperties.has('page')) {
+      this._setPageDisposables();
+    }
+
     this._attachRenderer();
   }
 
-  override firstUpdated() {
-    // When top level blocks are added, deleted or moved inside the frame
-    // we need to refresh the viewport
-    this._disposables.add(
-      this.page.slots.blockUpdated.on(event => {
-        const { type, flavour } = event;
-        const isTopLevelBlock = ['affine:image', 'affine:note'].includes(
-          flavour
-        );
-        if (!isTopLevelBlock) return;
-
-        const frameBound = Bound.deserialize(this.frame.xywh);
-        if (type === 'delete') {
-          const deleteModel = event.model as TopLevelBlockModel;
-          const deleteBound = Bound.deserialize(deleteModel.xywh);
-          if (frameBound.containsPoint([deleteBound.x, deleteBound.y])) {
-            this._refreshViewport();
-          }
-        } else {
-          const topLevelBlock = this.page.getBlockById(event.id);
-          if (!topLevelBlock) return;
-          const newBound = Bound.deserialize(
-            (topLevelBlock as TopLevelBlockModel).xywh
-          );
-          if (frameBound.containsPoint([newBound.x, newBound.y])) {
-            this._refreshViewport();
-          }
-        }
-      })
-    );
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._clearEdgelessDisposables();
+    this._clearPageDisposables();
   }
 
   override render() {

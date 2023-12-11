@@ -1,16 +1,15 @@
 import './header/frame-panel-header.js';
 import './body/frame-panel-body.js';
 
-import { WithDisposable } from '@blocksuite/lit';
+import { type BlockSuiteRoot, WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import type { EditorContainer } from '../../index.js';
 import { FramePanelBody } from './body/frame-panel-body.js';
 import { FrameCard } from './card/frame-card.js';
 import { FrameCardTitleEditor } from './card/frame-card-title-editor.js';
-import { FramePreview } from './card/frame-preview.js';
 import { FramePanelHeader } from './header/frame-panel-header.js';
 import { FramesSettingMenu } from './header/frames-setting-menu.js';
 
@@ -47,17 +46,62 @@ export class FramePanel extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless: EdgelessPageBlockComponent | null = null;
+  editor!: EditorContainer;
+
+  @property({ attribute: false })
+  fitPadding: number[] = [50, 380, 50, 50];
+
+  get page() {
+    return this.editor.page;
+  }
+
+  get root() {
+    return this.editor.root as BlockSuiteRoot;
+  }
+
+  get edgeless() {
+    return this.editor.querySelector('affine-edgeless-page');
+  }
+
+  private _changeEditorMode = (mode: 'page' | 'edgeless') => {
+    this.editor.mode = mode;
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+  }
+
+  override firstUpdated() {
+    const { disposables } = this;
+    disposables.add(
+      this.editor.slots.pageModeSwitched.on(() => {
+        this.editor.updateComplete.then(() => {
+          this.requestUpdate();
+        });
+      })
+    );
+    disposables.add(
+      this.editor.slots.pageUpdated.on(() => {
+        this.editor.updateComplete.then(() => {
+          this.requestUpdate();
+        });
+      })
+    );
+  }
 
   override render() {
-    if (!this.edgeless) return nothing;
-
     return html`<div class="frame-panel-container">
-      <frame-panel-header .edgeless=${this.edgeless}></frame-panel-header>
+      <frame-panel-header
+        .edgeless=${this.edgeless}
+        .changeEditorMode=${this._changeEditorMode}
+      ></frame-panel-header>
       <frame-panel-body
         class="frame-panel-body"
         .edgeless=${this.edgeless}
-        .fitPadding=${[50, 380, 50, 50]}
+        .page=${this.page}
+        .root=${this.root}
+        .changeEditorMode=${this._changeEditorMode}
+        .fitPadding=${this.fitPadding}
       ></frame-panel-body>
     </div>`;
   }
@@ -76,7 +120,6 @@ const componentsMap = {
   'frames-setting-menu': FramesSettingMenu,
   'frame-card': FrameCard,
   'frame-card-title-editor': FrameCardTitleEditor,
-  'frame-preview': FramePreview,
 };
 
 export function registerFramePanelComponents(

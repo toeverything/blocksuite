@@ -114,6 +114,7 @@ export type CommonSlots = RefNodeSlots;
 type EditorMode = 'page' | 'edgeless';
 type EditorSlots = {
   pageModeSwitched: Slot<EditorMode>;
+  pageUpdated: Slot<{ newPageId: string }>;
 };
 
 export type AbstractEditor = {

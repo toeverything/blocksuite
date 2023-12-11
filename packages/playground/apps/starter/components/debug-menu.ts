@@ -644,6 +644,9 @@ function PageList(
   // This function is called when a delete option is clicked
   const handleDeletePage = (pageId: string) => {
     workspace.removePage(pageId);
+    // When delete a page, we need to set the editor page to the first remaining page
+    const pages = Array.from(workspace.pages.values());
+    editor.page = pages[0];
     requestUpdate();
   };
 

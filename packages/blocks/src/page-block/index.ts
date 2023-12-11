@@ -6,15 +6,19 @@ export {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from './edgeless/components/component-toolbar/change-shape-button.js';
-export {
-  FramePanel,
-  registerFramePanelComponents,
-} from './edgeless/components/frame-panel/frame-panel.js';
+// export {
+//   FramePanel,
+//   registerFramePanelComponents,
+// } from './edgeless/components/frame-panel/frame-panel.js';
+export * from './edgeless/components/frame/frame-preview.js';
 export {
   registerTOCComponents,
   TOCNotesPanel,
 } from './edgeless/components/notes-toc-panel/toc-panel.js';
-export { readImageSize } from './edgeless/components/utils.js';
+export {
+  createButtonPopper,
+  readImageSize,
+} from './edgeless/components/utils.js';
 export * from './edgeless/edgeless-page-block.js';
 export { type PageBlockModel, PageBlockSchema } from './page-model.js';
 export * from './types.js';

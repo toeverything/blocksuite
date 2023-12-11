@@ -1,17 +1,18 @@
-import './frame-preview.js';
-
+import {
+  type EdgelessPageBlockComponent,
+  type FrameBlockModel,
+  FramePreview,
+  on,
+  once,
+  stopPropagation,
+} from '@blocksuite/blocks';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
+import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  on,
-  once,
-  stopPropagation,
-} from '../../../../../_common/utils/event.js';
-import type { FrameBlockModel } from '../../../../../frame-block/frame-model.js';
-import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { FrameCardTitleEditor } from './frame-card-title-editor.js';
 
 export type ReorderEvent = CustomEvent<{
@@ -63,7 +64,7 @@ const styles = css`
     height: 20px;
     box-sizing: border-box;
     gap: 6px;
-    font-size: 12px;
+    font-size: var(--affine-font-sm);
     font-family: Inter;
     cursor: default;
     position: relative;
@@ -75,7 +76,7 @@ const styles = css`
     align-items: center;
     justify-content: center;
     min-width: 18px;
-    height: 16px;
+    height: 18px;
     box-sizing: border-box;
     border-radius: 2px;
     background: var(--affine-black);
@@ -84,7 +85,7 @@ const styles = css`
     color: var(--affine-white);
     text-align: center;
     font-weight: 500;
-    line-height: 16px;
+    line-height: 18px;
   }
 
   .frame-card-title-container .card-title {
@@ -112,7 +113,6 @@ const styles = css`
     box-shadow: 0px 0px 12px 0px rgba(66, 65, 73, 0.18);
     cursor: pointer;
     position: relative;
-    /* overflow: hidden; */
   }
 
   .frame-card-container.selected .frame-card-body {
@@ -161,10 +161,16 @@ export class FrameCard extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
+  edgeless: EdgelessPageBlockComponent | null = null;
 
   @property({ attribute: false })
   frame!: FrameBlockModel;
+
+  @property({ attribute: false })
+  page!: Page;
+
+  @property({ attribute: false })
+  root!: BlockSuiteRoot;
 
   @property({ attribute: false })
   cardIndex!: number;
@@ -263,7 +269,6 @@ export class FrameCard extends WithDisposable(LitElement) {
     e.stopPropagation();
 
     const titleEditor = new FrameCardTitleEditor();
-    titleEditor.edgeless = this.edgeless;
     titleEditor.frameModel = this.frame;
     titleEditor.titleContentElement = this.titleContentElement;
     const left = this.titleIndexElement.offsetWidth + 6;
@@ -338,8 +343,9 @@ export class FrameCard extends WithDisposable(LitElement) {
           ? nothing
           : html`<frame-preview
               .edgeless=${this.edgeless}
+              .root=${this.root}
+              .page=${this.page}
               .frame=${this.frame}
-              .navigatorMode=${'fill'}
             ></frame-preview>`}
         ${this._renderDraggingCardNumber()}
       </div>

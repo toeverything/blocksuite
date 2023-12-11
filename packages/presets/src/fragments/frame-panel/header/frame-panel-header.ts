@@ -1,21 +1,17 @@
-import '../../buttons/tool-icon-button.js';
 import './frames-setting-menu.js';
 
+import type {
+  EdgelessPageBlockComponent,
+  EdgelessTool,
+} from '@blocksuite/blocks';
+import { FILL_SCREEN_KEY, type NavigatorMode } from '@blocksuite/blocks';
+import { createButtonPopper } from '@blocksuite/blocks';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
-import {
-  FILL_SCREEN_KEY,
-  type NavigatorMode,
-} from '../../../../../_common/edgeless/frame/consts.js';
-import {
-  SettingsIcon,
-  SmallFrameNavigatorIcon,
-} from '../../../../../_common/icons/edgeless.js';
-import type { EdgelessTool } from '../../../../../_common/utils/types.js';
-import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import { createButtonPopper } from '../../utils.js';
+import { SettingsIcon, SmallFrameNavigatorIcon } from '../../_common/icons.js';
 
 const styles = css`
   :host {
@@ -107,7 +103,10 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
+  edgeless!: EdgelessPageBlockComponent | null;
+
+  @property({ attribute: false })
+  changeEditorMode!: (mode: 'page' | 'edgeless') => void;
 
   @state()
   private _settingPopperShow = false;
@@ -123,13 +122,20 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   > | null = null;
 
   private _navigatorMode: NavigatorMode = 'fit';
+  private _edgelessDisposables: DisposableGroup | null = null;
 
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.tools.setEdgelessTool(edgelessTool);
+    this.edgeless?.tools.setEdgelessTool(edgelessTool);
   };
 
   private _enterPresentationMode = () => {
-    this.setEdgelessTool({ type: 'frameNavigator', mode: this._navigatorMode });
+    if (!this.edgeless) this.changeEditorMode('edgeless');
+    this.edgeless?.updateComplete.then(() => {
+      this.setEdgelessTool({
+        type: 'frameNavigator',
+        mode: this._navigatorMode,
+      });
+    });
   };
 
   private _tryLoadNavigatorStateLocalRecord() {
@@ -137,8 +143,30 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
       sessionStorage.getItem(FILL_SCREEN_KEY) === 'true' ? 'fill' : 'fit';
   }
 
+  private _clearEdgelessDisposables = () => {
+    this._edgelessDisposables?.dispose();
+    this._edgelessDisposables = null;
+  };
+
+  private _setEdgelessDisposables = () => {
+    if (!this.edgeless) return;
+
+    this._clearEdgelessDisposables();
+    this._edgelessDisposables = new DisposableGroup();
+    this._edgelessDisposables.add(
+      this.edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
+        this._navigatorMode = fillScreen ? 'fill' : 'fit';
+      })
+    );
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._tryLoadNavigatorStateLocalRecord();
+  }
+
   override firstUpdated() {
-    const _disposables = this._disposables;
+    const disposables = this.disposables;
 
     this._framesSettingMenuPopper = createButtonPopper(
       this._frameSettingButton,
@@ -149,15 +177,24 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
       14,
       -120
     );
-    _disposables.add(this._framesSettingMenuPopper);
+    disposables.add(this._framesSettingMenuPopper);
+  }
 
-    _disposables.add(
-      this.edgeless.slots.navigatorSettingUpdated.on(({ fillScreen }) => {
-        this._navigatorMode = fillScreen ? 'fill' : 'fit';
-      })
-    );
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('edgeless')) {
+      if (this.edgeless) {
+        this._setEdgelessDisposables();
+      } else {
+        this._clearEdgelessDisposables();
+      }
+    }
+  }
 
-    this._tryLoadNavigatorStateLocalRecord();
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this._edgelessDisposables) {
+      this._clearEdgelessDisposables();
+    }
   }
 
   override render() {
