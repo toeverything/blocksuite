@@ -3,7 +3,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
   type EdgelessSelectableProps,
-  makeSelectableInEdgeless,
+  selectable,
 } from '../edgeless/mixin/index.js';
 import type { EmbedProps } from './types.js';
 
@@ -13,7 +13,7 @@ export function makeEmbedModel<
     BaseBlockModel<Props>
   >,
 >(SuperClass: T) {
-  return makeSelectableInEdgeless<Props & EdgelessSelectableProps>(
+  return selectable<Props & EdgelessSelectableProps>(
     SuperClass as Constructor<BaseBlockModel<Props & EdgelessSelectableProps>>
   );
 }

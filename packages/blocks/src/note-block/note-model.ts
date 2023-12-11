@@ -1,7 +1,7 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { NOTE_WIDTH } from '../_common/consts.js';
-import { makeSelectableInEdgeless } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import {
   DEFAULT_NOTE_COLOR,
   NOTE_SHADOWS,
@@ -70,8 +70,6 @@ type NoteEdgelessProps = {
   collapsedHeight?: number;
 };
 
-export class NoteBlockModel extends makeSelectableInEdgeless<NoteProps>(
-  BaseBlockModel
-) {
+export class NoteBlockModel extends selectable<NoteProps>(BaseBlockModel) {
   override flavour!: EdgelessBlockType.NOTE;
 }

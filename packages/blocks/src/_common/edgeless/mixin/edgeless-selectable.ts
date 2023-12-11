@@ -22,7 +22,7 @@ export type EdgelessSelectableProps = {
   rotate: number;
 };
 
-export function makeSelectableInEdgeless<
+export function selectable<
   Props extends EdgelessSelectableProps,
   T extends Constructor<BaseBlockModel<Props>> = Constructor<
     BaseBlockModel<Props>

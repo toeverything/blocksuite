@@ -1,7 +1,7 @@
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { makeSelectableInEdgeless } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import { type SerializedXYWH } from '../surface-block/index.js';
 
@@ -33,7 +33,7 @@ export const FrameBlockSchema = defineBlockSchema({
   },
 });
 
-export class FrameBlockModel extends makeSelectableInEdgeless<FrameBlockProps>(
+export class FrameBlockModel extends selectable<FrameBlockProps>(
   BaseBlockModel
 ) {
   override flavour!: EdgelessBlockType.FRAME;
