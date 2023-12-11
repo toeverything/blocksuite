@@ -1,6 +1,7 @@
 import './header/frame-panel-header.js';
 import './body/frame-panel-body.js';
 
+import { FramePreview } from '@blocksuite/blocks';
 import { type BlockSuiteRoot, WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, unsafeCSS } from 'lit';
@@ -32,7 +33,7 @@ const styles = css`
 
     height: 100%;
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    padding: 0 16px;
+    padding: 0 8px;
   }
 
   .frame-panel-body {
@@ -41,6 +42,10 @@ const styles = css`
     width: 100%;
 
     overflow-y: scroll;
+  }
+
+  .frame-panel-body::-webkit-scrollbar {
+    width: 4px;
   }
 `;
 
@@ -71,6 +76,9 @@ export class FramePanel extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    if (!customElements.get('frame-preview')) {
+      customElements.define('frame-preview', FramePreview);
+    }
   }
 
   override firstUpdated() {

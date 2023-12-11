@@ -22,10 +22,12 @@ const styles = css`
 
   .frame-panel-header {
     display: flex;
-    width: 284px;
+    width: calc(100% - 4px);
     height: 36px;
     align-items: center;
     justify-content: space-between;
+    box-sizing: border-box;
+    padding-left: 12px;
   }
 
   .all-frames-setting {
@@ -35,7 +37,6 @@ const styles = css`
     width: 100px;
     height: 24px;
     margin: 8px 0;
-    padding-left: 2px;
   }
 
   .all-frames-setting-button svg {
@@ -78,7 +79,7 @@ const styles = css`
     height: 28px;
     padding: 4px 8px;
     border-radius: 8px;
-    margin: 4px 0;
+    margin: 4px;
     border: 1px solid var(--affine-border-color);
     background: var(--affine-white);
   }

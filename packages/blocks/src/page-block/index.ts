@@ -6,7 +6,7 @@ export {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from './edgeless/components/component-toolbar/change-shape-button.js';
-export * from './edgeless/components/frame/frame-preview.js';
+export { FramePreview } from './edgeless/components/frame/frame-preview.js';
 export {
   registerTOCComponents,
   TOCNotesPanel,

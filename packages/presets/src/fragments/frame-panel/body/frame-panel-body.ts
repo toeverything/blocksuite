@@ -43,6 +43,7 @@ const styles = css`
     width: 100%;
     gap: 16px;
     position: relative;
+    margin-left: 8px;
   }
 
   .no-frame-container {

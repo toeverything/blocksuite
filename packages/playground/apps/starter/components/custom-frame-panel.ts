@@ -12,9 +12,9 @@ export class CustomFramePanel extends WithDisposable(LitElement) {
       top: 0;
       right: 0;
       border: 1px solid var(--affine-border-color, #e3e2e4);
-      background: var(--affine-background-overlay-panel-color);
+      background-color: var(--affine-background-primary-color);
       height: 100vh;
-      width: 348px;
+      width: 320px;
       box-sizing: border-box;
       padding-top: 16px;
       z-index: 1;

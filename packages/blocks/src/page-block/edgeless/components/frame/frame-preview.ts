@@ -386,6 +386,7 @@ export class FramePreview extends WithDisposable(LitElement) {
 
   private _getCSSPropertyValue = (value: string) => {
     const root = this.root;
+    this.root.updateComplete.then(() => {});
     if (isCssVariable(value)) {
       const cssValue = getThemePropertyValue(root, value as CssVariableName);
       if (cssValue === undefined) {

@@ -3,7 +3,6 @@ import './frame-card-title.js';
 import {
   type EdgelessPageBlockComponent,
   type FrameBlockModel,
-  FramePreview,
   on,
   once,
 } from '@blocksuite/blocks';
