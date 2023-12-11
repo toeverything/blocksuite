@@ -390,18 +390,16 @@ export class FramePanelBody extends WithDisposable(LitElement) {
   }
 
   override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('page')) {
+    if (_changedProperties.has('page') || _changedProperties.has('edgeless')) {
       this._setPageDisposables(this.page);
     }
 
-    if (_changedProperties.has('edgeless')) {
+    if (_changedProperties.has('edgeless') && this.edgeless) {
       // after switch to edgeless mode, should update the selection
-      if (this.edgeless) {
-        this.edgeless.selectionManager.setSelection({
-          elements: this._selected,
-          editing: false,
-        });
-      }
+      this.edgeless.selectionManager.setSelection({
+        elements: this._selected,
+        editing: false,
+      });
     }
   }
 
