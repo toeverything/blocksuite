@@ -1,15 +1,8 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { BLOCK_BATCH } from '../surface-block/batch.js';
+import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
-import type { PointLocation } from '../surface-block/index.js';
-import {
-  Bound,
-  type IEdgelessElement,
-  type IVec,
-  type SerializedXYWH,
-} from '../surface-block/index.js';
+import { type SerializedXYWH } from '../surface-block/index.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {
@@ -18,7 +11,7 @@ export type ImageBlockProps = {
   width?: number;
   height?: number;
   index: string;
-  xywh?: SerializedXYWH;
+  xywh: SerializedXYWH;
   rotate: number;
 };
 
@@ -43,30 +36,8 @@ export const ImageBlockSchema = defineBlockSchema({
   toModel: () => new ImageBlockModel(),
 });
 
-@EdgelessSelectableMixin
-export class ImageBlockModel
-  extends BaseBlockModel<ImageBlockProps>
-  implements IEdgelessElement
-{
-  elementBound!: Bound;
-  override xywh!: SerializedXYWH;
+export class ImageBlockModel extends selectable<ImageBlockProps>(
+  BaseBlockModel
+) {
   override flavour!: EdgelessBlockType.IMAGE;
-
-  get batch() {
-    return BLOCK_BATCH;
-  }
-
-  get connectable() {
-    return true;
-  }
-  containedByBounds!: (_: Bound) => boolean;
-  getNearestPoint!: (_: IVec) => IVec;
-  intersectWithLine!: (_: IVec, _1: IVec) => PointLocation[] | null;
-  getRelativePointLocation!: (_: IVec) => PointLocation;
-  boxSelect!: (bound: Bound) => boolean;
-
-  hitTest(x: number, y: number): boolean {
-    const bound = Bound.deserialize(this.xywh);
-    return bound.isPointInBound([x, y], 0);
-  }
 }

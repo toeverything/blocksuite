@@ -1,12 +1,7 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { BLOCK_BATCH } from '../surface-block/batch.js';
+import { selectable } from '../_common/edgeless/mixin/index.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import type { IEdgelessElement } from '../surface-block/elements/edgeless-element.js';
-import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
-import { Bound } from '../surface-block/utils/bound.js';
-import type { PointLocation } from '../surface-block/utils/point-location.js';
-import type { IVec } from '../surface-block/utils/vec.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 export type BookmarkBlockType = 'horizontal' | 'list' | 'vertical' | 'cube';
@@ -74,28 +69,8 @@ export const BookmarkBlockSchema = defineBlockSchema({
   toModel: () => new BookmarkBlockModel(),
 });
 
-@EdgelessSelectableMixin
-export class BookmarkBlockModel
-  extends BaseBlockModel<BookmarkBlockProps>
-  implements IEdgelessElement
-{
-  elementBound!: Bound;
-  override xywh!: SerializedXYWH;
+export class BookmarkBlockModel extends selectable<BookmarkBlockProps>(
+  BaseBlockModel
+) {
   override flavour!: EdgelessBlockType.BOOKMARK;
-  get batch() {
-    return BLOCK_BATCH;
-  }
-
-  get connectable() {
-    return true;
-  }
-  containedByBounds!: (_: Bound) => boolean;
-  getNearestPoint!: (_: IVec) => IVec;
-  intersectWithLine!: (_: IVec, _1: IVec) => PointLocation[] | null;
-  getRelativePointLocation!: (_: IVec) => PointLocation;
-  boxSelect!: (bound: Bound) => boolean;
-  hitTest(x: number, y: number): boolean {
-    const bound = Bound.deserialize(this.xywh);
-    return bound.isPointInBound([x, y], 0);
-  }
 }
