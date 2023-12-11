@@ -1,37 +1,27 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { NOTE_WIDTH } from '../_common/consts.js';
+import { makeSelectableInEdgeless } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import {
   DEFAULT_NOTE_COLOR,
   NOTE_SHADOWS,
 } from '../_common/edgeless/note/consts.js';
-import { BLOCK_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import type {
-  HitTestOptions,
-  IEdgelessElement,
-} from '../surface-block/elements/edgeless-element.js';
-import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
-import type { StrokeStyle } from '../surface-block/index.js';
-import {
-  Bound,
-  type IVec,
-  type PointLocation,
-  type SerializedXYWH,
-} from '../surface-block/index.js';
+import { type SerializedXYWH, StrokeStyle } from '../surface-block/index.js';
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
-  props: () => ({
+  props: (): NoteProps => ({
     xywh: `[0,0,${NOTE_WIDTH},95]`,
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
     hidden: false,
+    rotate: 0,
     edgeless: {
       style: {
         borderRadius: 8,
         borderSize: 4,
-        borderStyle: 'solid',
+        borderStyle: StrokeStyle.Solid,
         shadowType: NOTE_SHADOWS[1],
       },
     },
@@ -63,6 +53,7 @@ export const NoteBlockSchema = defineBlockSchema({
 type NoteProps = {
   xywh: SerializedXYWH;
   background: string;
+  rotate: number;
   index: string;
   hidden: boolean;
   edgeless: NoteEdgelessProps;
@@ -75,38 +66,12 @@ type NoteEdgelessProps = {
     borderStyle: StrokeStyle;
     shadowType: string;
   };
-  collapse: boolean;
-  collapsedHeight: number;
+  collapse?: boolean;
+  collapsedHeight?: number;
 };
 
-@EdgelessSelectableMixin
-export class NoteBlockModel
-  extends BaseBlockModel<NoteProps>
-  implements IEdgelessElement
-{
+export class NoteBlockModel extends makeSelectableInEdgeless<NoteProps>(
+  BaseBlockModel
+) {
   override flavour!: EdgelessBlockType.NOTE;
-  elementBound!: Bound;
-
-  get connectable() {
-    return true;
-  }
-
-  get batch() {
-    return BLOCK_BATCH;
-  }
-
-  get rotate() {
-    return 0;
-  }
-
-  containedByBounds!: (_: Bound) => boolean;
-  getNearestPoint!: (_: IVec) => IVec;
-  intersectWithLine!: (_: IVec, _1: IVec) => PointLocation[] | null;
-  getRelativePointLocation!: (_: IVec) => PointLocation;
-  boxSelect!: (bound: Bound) => boolean;
-
-  hitTest(x: number, y: number, _: HitTestOptions): boolean {
-    const bound = Bound.deserialize(this.xywh);
-    return bound.isPointInBound([x, y], 0);
-  }
 }

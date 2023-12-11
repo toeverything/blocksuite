@@ -8,11 +8,12 @@ import {
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
+  polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
 } from '../../utils/math-utils.js';
+import { PointLocation } from '../../utils/point-location.js';
 import { type IVec } from '../../utils/vec.js';
-import { EdgelessSelectableMixin } from '../selectable.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta, ITextLocalRecord } from './types.js';
 import {
@@ -25,10 +26,23 @@ import {
   wrapText,
 } from './utils.js';
 
-@EdgelessSelectableMixin
 export class TextElement extends SurfaceElement<IText> {
   get text() {
     return this.yMap.get('text') as IText['text'];
+  }
+
+  override getRelativePointLocation(relativePoint: IVec): PointLocation {
+    const bound = Bound.deserialize(this.xywh);
+    const point = bound.getRelativePoint(relativePoint);
+    const rotatePoint = rotatePoints(
+      [point],
+      bound.center,
+      this.rotate ?? 0
+    )[0];
+    const points = rotatePoints(bound.points, bound.center, this.rotate ?? 0);
+    const tangent = polygonGetPointTangent(points, rotatePoint);
+
+    return new PointLocation(rotatePoint, tangent);
   }
 
   get color() {
