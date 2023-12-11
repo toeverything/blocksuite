@@ -1,5 +1,5 @@
-import './header/frame-sidebar-header.js';
-import './body/frame-sidebar-body.js';
+import './header/frame-panel-header.js';
+import './body/frame-panel-body.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
@@ -7,11 +7,11 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { FrameSidebarBody } from './body/frame-sidebar-body.js';
+import { FramePanelBody } from './body/frame-panel-body.js';
 import { FrameCard } from './card/frame-card.js';
 import { FrameCardTitleEditor } from './card/frame-card-title-editor.js';
 import { FramePreview } from './card/frame-preview.js';
-import { FrameSidebarHeader } from './header/frame-sidebar-header.js';
+import { FramePanelHeader } from './header/frame-panel-header.js';
 import { FramesSettingMenu } from './header/frames-setting-menu.js';
 
 const styles = css`
@@ -34,7 +34,7 @@ const styles = css`
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
   }
 
-  .frame-sidebar-body {
+  .frame-panel-body {
     padding-top: 12px;
     flex-grow: 1;
     width: 100%;
@@ -53,12 +53,12 @@ export class FramePanel extends WithDisposable(LitElement) {
     if (!this.edgeless) return nothing;
 
     return html`<div class="frame-panel-container">
-      <frame-sidebar-header .edgeless=${this.edgeless}></frame-sidebar-header>
-      <frame-sidebar-body
-        class="frame-sidebar-body"
+      <frame-panel-header .edgeless=${this.edgeless}></frame-panel-header>
+      <frame-panel-body
+        class="frame-panel-body"
         .edgeless=${this.edgeless}
         .fitPadding=${[50, 380, 50, 50]}
-      ></frame-sidebar-body>
+      ></frame-panel-body>
     </div>`;
   }
 }
@@ -71,15 +71,15 @@ declare global {
 
 const componentsMap = {
   'frame-panel': FramePanel,
-  'frame-sidebar-header': FrameSidebarHeader,
-  'frame-sidebar-body': FrameSidebarBody,
+  'frame-panel-header': FramePanelHeader,
+  'frame-panel-body': FramePanelBody,
   'frames-setting-menu': FramesSettingMenu,
   'frame-card': FrameCard,
   'frame-card-title-editor': FrameCardTitleEditor,
   'frame-preview': FramePreview,
 };
 
-export function registerFrameSidebarComponents(
+export function registerFramePanelComponents(
   callback: (components: typeof componentsMap) => void
 ) {
   callback(componentsMap);
