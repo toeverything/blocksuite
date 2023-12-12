@@ -1,5 +1,6 @@
 import type { z, ZodTypeDef } from 'zod';
 
+import type { InlineEditor } from '../inline-editor.js';
 import type { AttributeRenderer } from '../types.js';
 import type { InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
@@ -7,7 +8,6 @@ import {
   baseTextAttributes,
   getDefaultAttributeRenderer,
 } from '../utils/index.js';
-import type { InlineEditor } from '../virgo.js';
 
 export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
   private _marks: TextAttributes | null = null;

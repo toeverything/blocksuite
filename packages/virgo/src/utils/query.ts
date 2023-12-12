@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import { VIRGO_ROOT_ATTR } from '../consts.js';
-import type { InlineEditor, InlineRootElement } from '../virgo.js';
+import type { InlineEditor, InlineRootElement } from '../inline-editor.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
 export function findDocumentOrShadowRoot<

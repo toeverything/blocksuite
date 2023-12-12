@@ -2,11 +2,11 @@ import { html, render } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { VirgoLine } from '../index.js';
+import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
 import type { DeltaEntry, InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
 import { deltaInsertsToChunks, renderElement } from '../utils/index.js';
-import type { InlineEditor } from '../virgo.js';
 
 export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
   constructor(public readonly editor: InlineEditor<TextAttributes>) {}

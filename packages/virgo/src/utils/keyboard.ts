@@ -1,7 +1,7 @@
 import { IS_IOS, IS_MAC } from '@blocksuite/global/env';
 
+import type { InlineEditor } from '../inline-editor.js';
 import type { InlineRange } from '../types.js';
-import type { InlineEditor } from '../virgo.js';
 
 const SHORT_KEY_PROPERTY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 

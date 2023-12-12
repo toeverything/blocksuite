@@ -4,8 +4,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { VIRGO_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
+import type { InlineRootElement } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
-import type { InlineRootElement } from '../virgo.js';
 import { EmbedGap } from './embed-gap.js';
 
 @customElement('v-line')

@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { VirgoLine } from '../components/virgo-line.js';
+import type { InlineEditor } from '../inline-editor.js';
 import type {
   InlineRange,
   InlineRangeUpdatedProp,
@@ -14,7 +15,6 @@ import {
   virgoRangeToDomRange,
 } from '../utils/range-conversion.js';
 import { calculateTextLength, getTextNodesFromElement } from '../utils/text.js';
-import type { InlineEditor } from '../virgo.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   private _vRange: InlineRange | null = null;

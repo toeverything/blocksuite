@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import { ZERO_WIDTH_SPACE } from '../consts.js';
+import type { InlineEditor } from '../inline-editor.js';
 import type { NativePoint } from '../types.js';
 import {
   type BaseTextAttributes,
@@ -9,7 +10,6 @@ import {
 } from '../utils/index.js';
 import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
 import { transformInput } from '../utils/transform-input.js';
-import type { InlineEditor } from '../virgo.js';
 import type { VBeforeinputHookCtx, VCompositionEndHookCtx } from './hook.js';
 
 export class VirgoEventService<TextAttributes extends BaseTextAttributes> {

@@ -1,6 +1,6 @@
+import type { InlineEditor } from '../inline-editor.js';
 import type { InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
-import type { InlineEditor } from '../virgo.js';
 
 export interface VBeforeinputHookCtx<
   TextAttributes extends BaseTextAttributes,
