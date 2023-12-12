@@ -62,7 +62,7 @@ export class FramePanel extends WithDisposable(LitElement) {
     return this.editor.page;
   }
 
-  get root() {
+  get host() {
     return this.editor.root as EditorHost;
   }
 
@@ -109,7 +109,7 @@ export class FramePanel extends WithDisposable(LitElement) {
         class="frame-panel-body"
         .edgeless=${this.edgeless}
         .page=${this.page}
-        .editorHost=${this.root}
+        .editorHost=${this.host}
         .changeEditorMode=${this._changeEditorMode}
         .fitPadding=${this.fitPadding}
       ></frame-panel-body>
