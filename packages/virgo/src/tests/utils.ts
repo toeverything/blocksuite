@@ -130,7 +130,7 @@ export async function getVRangeIndexRect(
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any;
-      const domRange = richText.vEditor.toDomRange({
+      const domRange = richText.inlineEditor.toDomRange({
         index: vIndex,
         length: 0,
       });
