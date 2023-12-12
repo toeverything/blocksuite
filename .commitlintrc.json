@@ -4,16 +4,7 @@
     "scope-enum": [
       2,
       "always",
-      [
-        "page",
-        "edgeless",
-        "database",
-        "virgo",
-        "store",
-        "std",
-        "presets",
-        "playground"
-      ]
+      ["page", "edgeless", "database", "store", "std", "presets", "playground"]
     ]
   }
 }

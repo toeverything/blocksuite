@@ -4,24 +4,24 @@ import type { Y } from '@blocksuite/store';
 import { Text, Workspace } from '@blocksuite/store';
 import {
   type AttributeRenderer,
-  createVirgoKeyDownHandler,
-  VEditor,
-  type VRange,
-  type VRangeProvider,
+  createInlineKeyDownHandler,
+  InlineEditor,
+  type InlineRange,
+  type InlineRangeProvider,
 } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { z } from 'zod';
 
-import { tryFormatInlineStyle } from './markdown/inline.js';
-import { onVBeforeinput, onVCompositionEnd } from './virgo/hooks.js';
+import { onVBeforeinput, onVCompositionEnd } from './inline/hooks.js';
 import {
+  type AffineInlineEditor,
   type AffineTextAttributes,
-  type AffineVEditor,
-} from './virgo/types.js';
+} from './inline/types.js';
+import { tryFormatInlineStyle } from './markdown/inline.js';
 
 interface RichTextStackItem {
-  meta: Map<'richtext-v-range', VRange | null>;
+  meta: Map<'richtext-v-range', InlineRange | null>;
   type: 'undo' | 'redo';
 }
 
@@ -42,10 +42,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   `;
 
   @query('.affine-rich-text')
-  private _virgoContainer!: HTMLDivElement;
-  get virgoContainer() {
-    assertExists(this._virgoContainer);
-    return this._virgoContainer;
+  private _inlineEditorContainer!: HTMLDivElement;
+  get inlineEditorContainer() {
+    assertExists(this._inlineEditorContainer);
+    return this._inlineEditorContainer;
   }
 
   @property({ attribute: false })
@@ -60,7 +60,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   readonly = false;
 
   @property({ attribute: false })
-  vRangeProvider?: VRangeProvider;
+  inlineRangeProvider?: InlineRangeProvider;
   // rich-text will create a undoManager if it is not provided.
   @property({ attribute: false })
   undoManager!: Y.UndoManager;
@@ -85,16 +85,16 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   enableFormat = true;
 
-  private _vEditor: AffineVEditor | null = null;
-  get vEditor() {
-    return this._vEditor;
+  private _inlineEditor: AffineInlineEditor | null = null;
+  get inlineEditor() {
+    return this._inlineEditor;
   }
 
   private _lastScrollLeft = 0;
 
   private _init() {
-    if (this._vEditor) {
-      throw new Error('vEditor already exists.');
+    if (this._inlineEditor) {
+      throw new Error('Inline editor already exists.');
     }
 
     if (!this.enableFormat) {
@@ -102,51 +102,51 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       this.attributesSchema = z.object({});
     }
 
-    // init vEditor
-    this._vEditor = new VEditor<AffineTextAttributes>(this._yText, {
+    // init inline editor
+    this._inlineEditor = new InlineEditor<AffineTextAttributes>(this._yText, {
       isEmbed: delta => !!delta.attributes?.reference,
       hooks: {
         beforeinput: onVBeforeinput,
         compositionEnd: onVCompositionEnd,
       },
-      vRangeProvider: this.vRangeProvider,
+      inlineRangeProvider: this.inlineRangeProvider,
     });
     if (this.attributesSchema) {
-      this._vEditor.setAttributeSchema(this.attributesSchema);
+      this._inlineEditor.setAttributeSchema(this.attributesSchema);
     }
     if (this.attributeRenderer) {
-      this._vEditor.setAttributeRenderer(this.attributeRenderer);
+      this._inlineEditor.setAttributeRenderer(this.attributeRenderer);
     }
-    const vEditor = this._vEditor;
+    const inlineEditor = this._inlineEditor;
 
     if (this.enableMarkdownShortcut) {
-      const keyDownHandler = createVirgoKeyDownHandler(vEditor, {
+      const keyDownHandler = createInlineKeyDownHandler(inlineEditor, {
         inputRule: {
           key: [' ', 'Enter'],
           handler: context => tryFormatInlineStyle(context, this.undoManager),
         },
       });
 
-      vEditor.disposables.addFromEvent(
-        this.virgoContainer,
+      inlineEditor.disposables.addFromEvent(
+        this.inlineEditorContainer,
         'keydown',
         keyDownHandler
       );
     }
 
     // init auto scroll
-    vEditor.disposables.add(
-      vEditor.slots.vRangeUpdated.on(([vRange, sync]) => {
-        if (!vRange || !sync) return;
+    inlineEditor.disposables.add(
+      inlineEditor.slots.inlineRangeUpdated.on(([inlineRange, sync]) => {
+        if (!inlineRange || !sync) return;
 
-        vEditor.waitForUpdate().then(() => {
-          if (!vEditor.mounted) return;
+        inlineEditor.waitForUpdate().then(() => {
+          if (!inlineEditor.mounted) return;
 
-          // get newest vRange
-          const vRange = vEditor.getVRange();
-          if (!vRange) return;
+          // get newest inline range
+          const inlineRange = inlineEditor.getInlineRange();
+          if (!inlineRange) return;
 
-          const range = vEditor.toDomRange(vRange);
+          const range = inlineEditor.toDomRange(inlineRange);
           if (!range) return;
 
           // scroll container is window
@@ -184,34 +184,34 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    vEditor.mount(this.virgoContainer);
-    vEditor.setReadonly(this.readonly);
+    inlineEditor.mount(this.inlineEditorContainer);
+    inlineEditor.setReadonly(this.readonly);
   }
 
   private _onStackItemAdded = (event: { stackItem: RichTextStackItem }) => {
-    const vRange = this.vEditor?.getVRange();
-    if (vRange) {
-      event.stackItem.meta.set('richtext-v-range', vRange);
+    const inlineRange = this.inlineEditor?.getInlineRange();
+    if (inlineRange) {
+      event.stackItem.meta.set('richtext-v-range', inlineRange);
     }
   };
 
   private _onStackItemPopped = (event: { stackItem: RichTextStackItem }) => {
-    const vRange = event.stackItem.meta.get('richtext-v-range');
-    if (vRange && this.vEditor?.isVRangeValid(vRange)) {
-      this.vEditor?.setVRange(vRange);
+    const inlineRange = event.stackItem.meta.get('richtext-v-range');
+    if (inlineRange && this.inlineEditor?.isValidInlineRange(inlineRange)) {
+      this.inlineEditor?.setInlineRange(inlineRange);
     }
   };
 
   private _onCopy = (e: ClipboardEvent) => {
-    const vEditor = this.vEditor;
-    assertExists(vEditor);
+    const inlineEditor = this.inlineEditor;
+    assertExists(inlineEditor);
 
-    const vRange = vEditor.getVRange();
-    if (!vRange) return;
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
 
-    const text = vEditor.yTextString.slice(
-      vRange.index,
-      vRange.index + vRange.length
+    const text = inlineEditor.yTextString.slice(
+      inlineRange.index,
+      inlineRange.index + inlineRange.length
     );
 
     e.clipboardData?.setData('text/plain', text);
@@ -220,19 +220,19 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   };
 
   private _onCut = (e: ClipboardEvent) => {
-    const vEditor = this.vEditor;
-    assertExists(vEditor);
+    const inlineEditor = this.inlineEditor;
+    assertExists(inlineEditor);
 
-    const vRange = vEditor.getVRange();
-    if (!vRange) return;
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
 
-    const text = vEditor.yTextString.slice(
-      vRange.index,
-      vRange.index + vRange.length
+    const text = inlineEditor.yTextString.slice(
+      inlineRange.index,
+      inlineRange.index + inlineRange.length
     );
-    vEditor.deleteText(vRange);
-    vEditor.setVRange({
-      index: vRange.index,
+    inlineEditor.deleteText(inlineRange);
+    inlineEditor.setInlineRange({
+      index: inlineRange.index,
       length: 0,
     });
 
@@ -246,18 +246,18 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   private _onPaste = (e: ClipboardEvent) => {
-    const vEditor = this.vEditor;
-    assertExists(vEditor);
+    const inlineEditor = this.inlineEditor;
+    assertExists(inlineEditor);
 
-    const vRange = vEditor.getVRange();
-    if (!vRange) return;
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
 
     const text = e.clipboardData?.getData('text/plain');
     if (!text) return;
 
-    vEditor.insertText(vRange, text);
-    vEditor.setVRange({
-      index: vRange.index + text.length,
+    inlineEditor.insertText(inlineRange, text);
+    inlineEditor.setInlineRange({
+      index: inlineRange.index + text.length,
       length: 0,
     });
 
@@ -266,15 +266,15 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   };
 
   private _unmount() {
-    if (this.vEditor?.mounted) {
-      this.vEditor.unmount();
+    if (this.inlineEditor?.mounted) {
+      this.inlineEditor.unmount();
     }
-    this._vEditor = null;
+    this._inlineEditor = null;
   }
 
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
-    await this.vEditor?.waitForUpdate();
+    await this.inlineEditor?.waitForUpdate();
     return result;
   }
 
@@ -337,13 +337,13 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   override updated() {
-    if (this._vEditor) {
-      this._vEditor.setReadonly(this.readonly);
+    if (this._inlineEditor) {
+      this._inlineEditor.setReadonly(this.readonly);
     }
   }
 
   override render() {
-    return html`<div class="affine-rich-text virgo-editor"></div>`;
+    return html`<div class="affine-rich-text inline-editor"></div>`;
   }
 }
 

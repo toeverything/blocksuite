@@ -5,7 +5,7 @@ import { html } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
 import { whenHover } from '../../../../components/hover/index.js';
-import type { AffineTextAttributes } from '../../../../components/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../../../../components/rich-text/inline/types.js';
 import {
   ArrowDownIcon,
   HighLightDuotoneIcon,

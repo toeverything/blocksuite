@@ -1,15 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import type { VRange } from '@blocksuite/virgo/types';
+import type { InlineRange } from '@blocksuite/virgo/types';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import {
-  isValidUrl,
-  normalizeUrl,
-} from '../../../../../../../_common/utils/url.js';
 import { BLOCK_ID_ATTR } from '../../../../../../consts.js';
 import { BookmarkIcon } from '../../../../../../icons/edgeless.js';
 import {
@@ -17,9 +13,10 @@ import {
   EditIcon,
   UnlinkIcon,
 } from '../../../../../../icons/text.js';
+import { isValidUrl, normalizeUrl } from '../../../../../../utils/url.js';
 import type { IconButton } from '../../../../../button.js';
 import { toast } from '../../../../../toast.js';
-import type { AffineVEditor } from '../../../types.js';
+import type { AffineInlineEditor } from '../../../types.js';
 import { linkPopupStyle } from './styles.js';
 
 @customElement('link-popup')
@@ -30,9 +27,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
   type: 'create' | 'edit' | 'view' = 'create';
 
   @property({ attribute: false })
-  vEditor!: AffineVEditor;
+  inlineEditor!: AffineInlineEditor;
   @property({ attribute: false })
-  goalVRange!: VRange;
+  targetInlineRange!: InlineRange;
 
   @query('#text-input')
   textInput?: HTMLInputElement;
@@ -50,7 +47,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    if (this.goalVRange.length === 0) {
+    if (this.targetInlineRange.length === 0) {
       throw new Error('Cannot toggle link popup on empty range');
     }
 
@@ -94,7 +91,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   override updated() {
     assertExists(this.popupContainer);
-    const range = this.vEditor.toDomRange(this.goalVRange);
+    const range = this.inlineEditor.toDomRange(this.targetInlineRange);
     assertExists(range);
 
     if (this.type !== 'view') {
@@ -133,7 +130,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   get blockElement() {
-    const blockElement = this.vEditor.rootElement.closest<BlockElement>(
+    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
       `[${BLOCK_ID_ATTR}]`
     );
     assertExists(blockElement);
@@ -141,14 +138,14 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   get currentText() {
-    return this.vEditor.yTextString.slice(
-      this.goalVRange.index,
-      this.goalVRange.index + this.goalVRange.length
+    return this.inlineEditor.yTextString.slice(
+      this.targetInlineRange.index,
+      this.targetInlineRange.index + this.targetInlineRange.length
     );
   }
 
   get currentLink() {
-    const link = this.vEditor.getFormat(this.goalVRange).link;
+    const link = this.inlineEditor.getFormat(this.targetInlineRange).link;
     assertExists(link);
     return link;
   }
@@ -173,7 +170,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _onConfirm() {
-    if (!this.vEditor.isVRangeValid(this.goalVRange)) return;
+    if (!this.inlineEditor.isValidInlineRange(this.targetInlineRange)) return;
 
     assertExists(this.linkInput);
     const linkInputValue = this.linkInput.value;
@@ -182,23 +179,23 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const link = normalizeUrl(linkInputValue);
 
     if (this.type === 'create') {
-      this.vEditor.formatText(
-        this.goalVRange,
+      this.inlineEditor.formatText(
+        this.targetInlineRange,
         {
           link: link,
           reference: null,
         },
         { mode: 'replace' }
       );
-      this.vEditor.setVRange(this.goalVRange);
+      this.inlineEditor.setInlineRange(this.targetInlineRange);
     } else if (this.type === 'edit') {
       const text = this.textInput?.value ?? link;
-      this.vEditor.insertText(this.goalVRange, text, {
+      this.inlineEditor.insertText(this.targetInlineRange, text, {
         link: link,
         reference: null,
       });
-      this.vEditor.setVRange({
-        index: this.goalVRange.index,
+      this.inlineEditor.setInlineRange({
+        index: this.targetInlineRange.index,
         length: text.length,
       });
     }
@@ -207,7 +204,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _linkToBookmark() {
-    if (!this.vEditor.isVRangeValid(this.goalVRange)) return;
+    if (!this.inlineEditor.isValidInlineRange(this.targetInlineRange)) return;
 
     const blockElement = this.blockElement;
     const props = {
@@ -225,7 +222,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       index + 1
     );
 
-    this.vEditor.deleteText(this.goalVRange);
+    this.inlineEditor.deleteText(this.targetInlineRange);
 
     this.remove();
   }
@@ -302,8 +299,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
       <icon-button
         data-testid="unlink"
         @click=${() => {
-          if (this.vEditor.isVRangeValid(this.goalVRange)) {
-            this.vEditor.formatText(this.goalVRange, { link: null });
+          if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
+            this.inlineEditor.formatText(this.targetInlineRange, {
+              link: null,
+            });
           }
           this.remove();
         }}

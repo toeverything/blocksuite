@@ -1,7 +1,12 @@
-import type { VirgoElement, VirgoLine } from '../components/index.js';
-import { VIRGO_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
+import type { VElement, VLine } from '../components/index.js';
+import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DomPoint, TextPoint } from '../types.js';
-import { isNativeTextInVText, isVElement, isVLine, isVRoot } from './guard.js';
+import {
+  isInlineRoot,
+  isNativeTextInVText,
+  isVElement,
+  isVLine,
+} from './guard.js';
 import { calculateTextLength, getTextNodesFromElement } from './text.js';
 
 export function nativePointToTextPoint(
@@ -16,11 +21,11 @@ export function nativePointToTextPoint(
     const texts = getTextNodesFromElement(node);
     if (texts.length === 1) {
       const vElement = texts[0].parentElement?.closest(
-        '[data-virgo-element="true"]'
+        '[data-v-element="true"]'
       );
       if (
         vElement instanceof HTMLElement &&
-        vElement.dataset.virgoEmbed === 'true'
+        vElement.dataset.vEmbed === 'true'
       ) {
         return [texts[0], 0];
       }
@@ -28,7 +33,7 @@ export function nativePointToTextPoint(
     return texts[offset] ? [texts[offset], 0] : null;
   }
 
-  if (isVLine(node) || isVRoot(node)) {
+  if (isVLine(node) || isInlineRoot(node)) {
     return getTextPointRoughlyFromElementByOffset(node, offset, true);
   }
 
@@ -50,7 +55,7 @@ export function textPointToDomPoint(
   offset: number,
   rootElement: HTMLElement
 ): DomPoint | null {
-  if (rootElement.dataset.virgoRoot !== 'true') {
+  if (rootElement.dataset.vRoot !== 'true') {
     throw new Error(
       'textRangeToDomPoint should be called with editor root element'
     );
@@ -89,7 +94,7 @@ export function textPointToDomPoint(
   return { text, index: index + lineIndex };
 }
 
-function getVNodesFromNode(node: Node): VirgoElement[] | VirgoLine[] | null {
+function getVNodesFromNode(node: Node): VElement[] | VLine[] | null {
   const vLine = node.parentElement?.closest('v-line');
 
   if (vLine) {
@@ -98,8 +103,8 @@ function getVNodesFromNode(node: Node): VirgoElement[] | VirgoLine[] | null {
 
   const container =
     node instanceof Element
-      ? node.closest(`[${VIRGO_ROOT_ATTR}]`)
-      : node.parentElement?.closest(`[${VIRGO_ROOT_ATTR}]`);
+      ? node.closest(`[${INLINE_ROOT_ATTR}]`)
+      : node.parentElement?.closest(`[${INLINE_ROOT_ATTR}]`);
 
   if (container) {
     return Array.from(container.querySelectorAll('v-line'));
@@ -109,7 +114,7 @@ function getVNodesFromNode(node: Node): VirgoElement[] | VirgoLine[] | null {
 }
 
 function getTextPointFromVNodes(
-  vNodes: VirgoLine[] | VirgoElement[],
+  vNodes: VLine[] | VElement[],
   node: Node,
   offset: number
 ): TextPoint | null {

@@ -14,8 +14,8 @@ import {
   captureHistory,
   enterPlaygroundRoom,
   focusRichText,
+  getInlineSelectionText,
   getSelectionRect,
-  getVirgoSelectionText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
   insertThreeLevelLists,
@@ -238,7 +238,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(slashMenu).not.toBeVisible();
     await assertRichTexts(page, ['/']);
 
-    const selected = await getVirgoSelectionText(page);
+    const selected = await getInlineSelectionText(page);
     expect(selected).toBe('/');
   });
 

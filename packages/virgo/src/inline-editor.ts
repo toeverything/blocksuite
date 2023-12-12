@@ -2,36 +2,40 @@ import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { nothing, render } from 'lit';
 import type * as Y from 'yjs';
 
-import { VIRGO_ROOT_ATTR } from './consts.js';
-import { VirgoHookService } from './services/hook.js';
+import { INLINE_ROOT_ATTR } from './consts.js';
+import { InlineHookService } from './services/hook.js';
 import {
-  VirgoAttributeService,
-  VirgoDeltaService,
-  VirgoEventService,
-  VirgoRangeService,
+  AttributeService,
+  DeltaService,
+  EventService,
+  RangeService,
 } from './services/index.js';
-import type { DeltaInsert, VRange, VRangeUpdatedProp } from './types.js';
+import type {
+  DeltaInsert,
+  InlineRange,
+  InlineRangeUpdatedProp,
+} from './types.js';
 import {
   type BaseTextAttributes,
   nativePointToTextPoint,
   textPointToDomPoint,
 } from './utils/index.js';
+import { intersectInlineRange } from './utils/inline-range.js';
 import { getTextNodesFromElement } from './utils/text.js';
-import { intersectVRange } from './utils/v-range.js';
 
-export type VirgoRootElement<
+export type InlineRootElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > = HTMLElement & {
-  virgoEditor: VEditor<T>;
+  inlineEditor: InlineEditor<T>;
 };
 
-export interface VRangeProvider {
-  getVRange(): VRange | null;
-  setVRange(vRange: VRange | null, sync: boolean): void;
-  vRangeUpdatedSlot: Slot<VRangeUpdatedProp>;
+export interface InlineRangeProvider {
+  getInlineRange(): InlineRange | null;
+  setInlineRange(inlineRange: InlineRange | null, sync: boolean): void;
+  inlineRangeUpdated: Slot<InlineRangeUpdatedProp>;
 }
 
-export class VEditor<
+export class InlineEditor<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
   static nativePointToTextPoint = nativePointToTextPoint;
@@ -44,33 +48,33 @@ export class VEditor<
   }
 
   private readonly _yText: Y.Text;
-  private _rootElement: VirgoRootElement<TextAttributes> | null = null;
+  private _rootElement: InlineRootElement<TextAttributes> | null = null;
   private _isReadonly = false;
 
-  private _eventService: VirgoEventService<TextAttributes> =
-    new VirgoEventService<TextAttributes>(this);
+  private _eventService: EventService<TextAttributes> =
+    new EventService<TextAttributes>(this);
 
-  private _rangeService: VirgoRangeService<TextAttributes> =
-    new VirgoRangeService<TextAttributes>(this);
+  private _rangeService: RangeService<TextAttributes> =
+    new RangeService<TextAttributes>(this);
 
-  private _attributeService: VirgoAttributeService<TextAttributes> =
-    new VirgoAttributeService<TextAttributes>(this);
+  private _attributeService: AttributeService<TextAttributes> =
+    new AttributeService<TextAttributes>(this);
 
-  private _deltaService: VirgoDeltaService<TextAttributes> =
-    new VirgoDeltaService<TextAttributes>(this);
+  private _deltaService: DeltaService<TextAttributes> =
+    new DeltaService<TextAttributes>(this);
 
-  private _hooksService: VirgoHookService<TextAttributes>;
+  private _hooksService: InlineHookService<TextAttributes>;
 
   private _mounted = false;
 
   readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
-  readonly vRangeProvider: VRangeProvider | null;
+  readonly inlineRangeProvider: InlineRangeProvider | null;
 
   slots: {
     mounted: Slot;
     unmounted: Slot;
     updated: Slot;
-    vRangeUpdated: Slot<VRangeUpdatedProp>;
+    inlineRangeUpdated: Slot<InlineRangeUpdatedProp>;
     rangeUpdated: Slot<Range>;
   };
 
@@ -128,26 +132,26 @@ export class VEditor<
 
   // Expose range service API
   toDomRange = this.rangeService.toDomRange;
-  toVRange = this.rangeService.toVRange;
-  getVRange = this.rangeService.getVRange;
-  getVRangeFromElement = this.rangeService.getVRangeFromElement;
+  toInlineRange = this.rangeService.toInlineRange;
+  getInlineRange = this.rangeService.getInlineRange;
+  getInlineRangeFromElement = this.rangeService.getInlineRangeFromElement;
   getNativeSelection = this.rangeService.getNativeSelection;
   getTextPoint = this.rangeService.getTextPoint;
   getLine = this.rangeService.getLine;
-  isVRangeValid = this.rangeService.isVRangeValid;
+  isValidInlineRange = this.rangeService.isValidInlineRange;
   isFirstLine = this.rangeService.isFirstLine;
   isLastLine = this.rangeService.isLastLine;
-  setVRange = this.rangeService.setVRange;
+  setInlineRange = this.rangeService.setInlineRange;
   focusStart = this.rangeService.focusStart;
   focusEnd = this.rangeService.focusEnd;
   selectAll = this.rangeService.selectAll;
   focusIndex = this.rangeService.focusIndex;
-  syncVRange = this.rangeService.syncVRange;
+  syncInlineRange = this.rangeService.syncInlineRange;
 
   // Expose delta service API
-  getDeltasByVRange = this.deltaService.getDeltasByVRange;
+  getDeltasByInlineRange = this.deltaService.getDeltasByInlineRange;
   getDeltaByRangeIndex = this.deltaService.getDeltaByRangeIndex;
-  mapDeltasInVRange = this.deltaService.mapDeltasInVRange;
+  mapDeltasInInlineRange = this.deltaService.mapDeltasInInlineRange;
   isNormalizedDeltaSelected = this.deltaService.isNormalizedDeltaSelected;
 
   // Expose hook service API
@@ -156,11 +160,11 @@ export class VEditor<
   }
 
   constructor(
-    yText: VEditor['yText'],
+    yText: InlineEditor['yText'],
     ops: {
       isEmbed?: (delta: DeltaInsert<TextAttributes>) => boolean;
-      hooks?: VirgoHookService<TextAttributes>['hooks'];
-      vRangeProvider?: VRangeProvider;
+      hooks?: InlineHookService<TextAttributes>['hooks'];
+      inlineRangeProvider?: InlineRangeProvider;
     } = {}
   ) {
     if (!yText.doc) {
@@ -173,35 +177,39 @@ export class VEditor<
       );
     }
 
-    const { isEmbed = () => false, hooks = {}, vRangeProvider = null } = ops;
+    const {
+      isEmbed = () => false,
+      hooks = {},
+      inlineRangeProvider = null,
+    } = ops;
     this._yText = yText;
     this.isEmbed = isEmbed;
-    this._hooksService = new VirgoHookService(this, hooks);
-    this.vRangeProvider = vRangeProvider;
+    this._hooksService = new InlineHookService(this, hooks);
+    this.inlineRangeProvider = inlineRangeProvider;
 
     this.slots = {
       mounted: new Slot(),
       unmounted: new Slot(),
       updated: new Slot(),
-      vRangeUpdated: new Slot<VRangeUpdatedProp>(),
+      inlineRangeUpdated: new Slot<InlineRangeUpdatedProp>(),
       rangeUpdated: new Slot<Range>(),
     };
 
-    if (vRangeProvider) {
-      vRangeProvider.vRangeUpdatedSlot.on(prop => {
-        this.slots.vRangeUpdated.emit(prop);
+    if (inlineRangeProvider) {
+      inlineRangeProvider.inlineRangeUpdated.on(prop => {
+        this.slots.inlineRangeUpdated.emit(prop);
       });
     }
-    this.slots.vRangeUpdated.on(this.rangeService.onVRangeUpdated);
+    this.slots.inlineRangeUpdated.on(this.rangeService.onInlineRangeUpdated);
   }
 
   mount(rootElement: HTMLElement) {
-    const virgoElement = rootElement as VirgoRootElement<TextAttributes>;
-    virgoElement.virgoEditor = this;
-    this._rootElement = virgoElement;
+    const inlineRoot = rootElement as InlineRootElement<TextAttributes>;
+    inlineRoot.inlineEditor = this;
+    this._rootElement = inlineRoot;
     render(nothing, this._rootElement);
     this._rootElement.contentEditable = 'true';
-    this._rootElement.dataset.virgoRoot = 'true';
+    this._rootElement.dataset.vRoot = 'true';
 
     this._bindYTextObserver();
 
@@ -214,15 +222,15 @@ export class VEditor<
 
   unmount() {
     render(nothing, this.rootElement);
-    this.rootElement.removeAttribute(VIRGO_ROOT_ATTR);
+    this.rootElement.removeAttribute(INLINE_ROOT_ATTR);
     this._rootElement = null;
     this._mounted = false;
     this.disposables.dispose();
     this.slots.unmounted.emit();
   }
 
-  requestUpdate(syncVRange = true): void {
-    this._deltaService.render(syncVRange);
+  requestUpdate(syncInlineRange = true): void {
+    this._deltaService.render(syncInlineRange);
   }
 
   async waitForUpdate() {
@@ -239,14 +247,14 @@ export class VEditor<
     return this._isReadonly;
   }
 
-  deleteText(vRange: VRange): void {
+  deleteText(inlineRange: InlineRange): void {
     this._transact(() => {
-      this.yText.delete(vRange.index, vRange.length);
+      this.yText.delete(inlineRange.index, inlineRange.length);
     });
   }
 
   insertText(
-    vRange: VRange,
+    inlineRange: InlineRange,
     text: string,
     attributes: TextAttributes = {} as TextAttributes
   ): void {
@@ -261,56 +269,63 @@ export class VEditor<
     }
 
     this._transact(() => {
-      this.yText.delete(vRange.index, vRange.length);
-      this.yText.insert(vRange.index, text, normalizedAttributes);
+      this.yText.delete(inlineRange.index, inlineRange.length);
+      this.yText.insert(inlineRange.index, text, normalizedAttributes);
     });
   }
 
-  insertLineBreak(vRange: VRange): void {
+  insertLineBreak(inlineRange: InlineRange): void {
     this._transact(() => {
-      this.yText.delete(vRange.index, vRange.length);
-      this.yText.insert(vRange.index, '\n');
+      this.yText.delete(inlineRange.index, inlineRange.length);
+      this.yText.insert(inlineRange.index, '\n');
     });
   }
 
   formatText(
-    vRange: VRange,
+    inlineRange: InlineRange,
     attributes: TextAttributes,
     options: {
-      match?: (delta: DeltaInsert, deltaVRange: VRange) => boolean;
+      match?: (delta: DeltaInsert, deltaInlineRange: InlineRange) => boolean;
       mode?: 'replace' | 'merge';
     } = {}
   ): void {
     const { match = () => true, mode = 'merge' } = options;
-    const deltas = this._deltaService.getDeltasByVRange(vRange);
+    const deltas = this._deltaService.getDeltasByInlineRange(inlineRange);
 
     deltas
-      .filter(([delta, deltaVRange]) => match(delta, deltaVRange))
-      .forEach(([_delta, deltaVRange]) => {
+      .filter(([delta, deltaInlineRange]) => match(delta, deltaInlineRange))
+      .forEach(([_delta, deltaInlineRange]) => {
         const normalizedAttributes =
           this._attributeService.normalizeAttributes(attributes);
         if (!normalizedAttributes) return;
 
-        const targetVRange = intersectVRange(vRange, deltaVRange);
-        if (!targetVRange) return;
+        const targetInlineRange = intersectInlineRange(
+          inlineRange,
+          deltaInlineRange
+        );
+        if (!targetInlineRange) return;
 
         if (mode === 'replace') {
-          this.resetText(targetVRange);
+          this.resetText(targetInlineRange);
         }
 
         this._transact(() => {
           this.yText.format(
-            targetVRange.index,
-            targetVRange.length,
+            targetInlineRange.index,
+            targetInlineRange.length,
             normalizedAttributes
           );
         });
       });
   }
 
-  resetText(vRange: VRange): void {
+  resetText(inlineRange: InlineRange): void {
     const coverDeltas: DeltaInsert[] = [];
-    for (let i = vRange.index; i <= vRange.index + vRange.length; i++) {
+    for (
+      let i = inlineRange.index;
+      i <= inlineRange.index + inlineRange.length;
+      i++
+    ) {
       const delta = this.getDeltaByRangeIndex(i);
       if (delta) {
         coverDeltas.push(delta);
@@ -326,7 +341,7 @@ export class VEditor<
     );
 
     this._transact(() => {
-      this.yText.format(vRange.index, vRange.length, {
+      this.yText.format(inlineRange.index, inlineRange.length, {
         ...unset,
       });
     });

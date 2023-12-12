@@ -5,10 +5,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
-import { getVEditorInsideRoot } from '../utils/query.js';
+import { getInlineEditorInsideRoot } from '../utils/query.js';
 
 @customElement('v-element')
-export class VirgoElement<
+export class VElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > extends LitElement {
   @property({ type: Object })
@@ -20,10 +20,10 @@ export class VirgoElement<
   selected!: boolean;
 
   override render() {
-    const virgoEditor = getVEditorInsideRoot(this);
-    const attributeRenderer = virgoEditor.attributeService.attributeRenderer;
+    const inlineEditor = getInlineEditorInsideRoot(this);
+    const attributeRenderer = inlineEditor.attributeService.attributeRenderer;
 
-    const isEmbed = virgoEditor.isEmbed(this.delta);
+    const isEmbed = inlineEditor.isEmbed(this.delta);
     if (isEmbed) {
       if (this.delta.insert.length !== 1) {
         throw new Error(`The length of embed node should only be 1.
@@ -33,8 +33,8 @@ export class VirgoElement<
       }
 
       return html`<span
-        data-virgo-embed="true"
-        data-virgo-element="true"
+        data-v-embed="true"
+        data-v-element="true"
         contenteditable="false"
         style=${styleMap({ userSelect: 'none' })}
         >${attributeRenderer(this.delta, this.selected)}</span
@@ -43,7 +43,7 @@ export class VirgoElement<
 
     // we need to avoid \n appearing before and after the span element, which will
     // cause the unexpected space
-    return html`<span data-virgo-element="true"
+    return html`<span data-v-element="true"
       >${attributeRenderer(this.delta, this.selected)}</span
     >`;
   }
@@ -55,6 +55,6 @@ export class VirgoElement<
 
 declare global {
   interface HTMLElementTagNameMap {
-    'v-element': VirgoElement;
+    'v-element': VElement;
   }
 }

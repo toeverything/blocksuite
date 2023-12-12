@@ -1,4 +1,4 @@
-import type { DeltaInsert, VEditor } from '@blocksuite/virgo';
+import type { DeltaInsert, InlineEditor } from '@blocksuite/virgo';
 import { baseTextAttributes } from '@blocksuite/virgo';
 import { z } from 'zod';
 
@@ -23,4 +23,4 @@ export type AffineTextAttributes = z.infer<typeof affineTextAttributes>;
 
 export type AffineDeltaInsert = DeltaInsert<AffineTextAttributes>;
 
-export type AffineVEditor = VEditor<AffineTextAttributes>;
+export type AffineInlineEditor = InlineEditor<AffineTextAttributes>;

@@ -1,7 +1,7 @@
 import type * as Y from 'yjs';
 
-import { VirgoElement } from '../components/virgo-element.js';
-import type { VRange } from '../types.js';
+import { VElement } from '../components/v-element.js';
+import type { InlineRange } from '../types.js';
 import { isInEmbedElement } from './guard.js';
 import {
   nativePointToTextPoint,
@@ -9,7 +9,7 @@ import {
 } from './point-conversion.js';
 import { calculateTextLength, getTextNodesFromElement } from './text.js';
 
-type VRangeRunnerContext = {
+type InlineRangeRunnerContext = {
   rootElement: HTMLElement;
   range: Range;
   yText: Y.Text;
@@ -23,8 +23,8 @@ type VRangeRunnerContext = {
   endTextOffset: number;
 };
 
-type Predict = (context: VRangeRunnerContext) => boolean;
-type Handler = (context: VRangeRunnerContext) => VRange | null;
+type Predict = (context: InlineRangeRunnerContext) => boolean;
+type Handler = (context: InlineRangeRunnerContext) => InlineRange | null;
 
 const rangeHasAnchorAndFocus: Predict = ({
   rootElement,
@@ -137,7 +137,7 @@ const buildContext = (
   range: Range,
   rootElement: HTMLElement,
   yText: Y.Text
-): VRangeRunnerContext | null => {
+): InlineRangeRunnerContext | null => {
   const { startContainer, startOffset, endContainer, endOffset } = range;
 
   const startTextPoint = nativePointToTextPoint(startContainer, startOffset);
@@ -166,36 +166,36 @@ const buildContext = (
 };
 
 /**
- * calculate the vRange from dom selection for **this Editor**
- * there are three cases when the vRange of this Editor is not null:
+ * calculate the inline range from dom selection for **this Editor**
+ * there are three cases when the inline range of this Editor is not null:
  * (In the following, "|" mean anchor and focus, each line is a separate Editor)
  * 1. anchor and focus are in this Editor
  *    aaaaaa
  *    b|bbbb|b
  *    cccccc
- *    the vRange of second Editor is {index: 1, length: 4}, the others are null
+ *    the inline range of second Editor is {index: 1, length: 4}, the others are null
  * 2. anchor and focus one in this Editor, one in another Editor
  *    aaa|aaa    aaaaaa
  *    bbbbb|b or bbbbb|b
  *    cccccc     cc|cccc
  *    2.1
- *        the vRange of first Editor is {index: 3, length: 3}, the second is {index: 0, length: 5},
+ *        the inline range of first Editor is {index: 3, length: 3}, the second is {index: 0, length: 5},
  *        the third is null
  *    2.2
- *        the vRange of first Editor is null, the second is {index: 5, length: 1},
+ *        the inline range of first Editor is null, the second is {index: 5, length: 1},
  *        the third is {index: 0, length: 2}
  * 3. anchor and focus are in another Editor
  *    aa|aaaa
  *    bbbbbb
  *    cccc|cc
- *    the vRange of first Editor is {index: 2, length: 4},
+ *    the inline range of first Editor is {index: 2, length: 4},
  *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
  */
-export function domRangeToVirgoRange(
+export function domRangeToInlineRange(
   range: Range,
   rootElement: HTMLElement,
   yText: Y.Text
-): VRange | null {
+): InlineRange | null {
   const context = buildContext(range, rootElement, yText);
 
   if (!context) return null;
@@ -244,11 +244,11 @@ export function domRangeToVirgoRange(
 }
 
 /**
- * calculate the dom selection from vRange for **this Editor**
+ * calculate the dom selection from inline range for **this Editor**
  */
-export function virgoRangeToDomRange(
+export function inlineRangeToDomRange(
   rootElement: HTMLElement,
-  vRange: VRange
+  inlineRange: InlineRange
 ): Range | null {
   const lineElements = Array.from(rootElement.querySelectorAll('v-line'));
 
@@ -268,13 +268,16 @@ export function virgoRangeToDomRange(
     for (const text of texts) {
       const textLength = calculateTextLength(text);
 
-      if (!startText && index + textLength >= vRange.index) {
+      if (!startText && index + textLength >= inlineRange.index) {
         startText = text;
-        anchorOffset = vRange.index - index;
+        anchorOffset = inlineRange.index - index;
       }
-      if (!endText && index + textLength >= vRange.index + vRange.length) {
+      if (
+        !endText &&
+        index + textLength >= inlineRange.index + inlineRange.length
+      ) {
         endText = text;
-        focusOffset = vRange.index + vRange.length - index;
+        focusOffset = inlineRange.index + inlineRange.length - index;
       }
 
       if (startText && endText) {
@@ -303,7 +306,7 @@ export function virgoRangeToDomRange(
     if (!nextSibling) {
       throw new Error('failed to find nextSibling sibling of an embed element');
     }
-    if (nextSibling instanceof VirgoElement) {
+    if (nextSibling instanceof VElement) {
       const texts = getTextNodesFromElement(nextSibling);
       startText = texts[texts.length - 1];
       anchorOffset = calculateTextLength(startText);
@@ -325,7 +328,7 @@ export function virgoRangeToDomRange(
       throw new Error('failed to find nextSibling sibling of an embed element');
     }
 
-    if (nextSibling instanceof VirgoElement) {
+    if (nextSibling instanceof VElement) {
       const texts = getTextNodesFromElement(nextSibling);
       endText = texts[0];
       focusOffset = 0;

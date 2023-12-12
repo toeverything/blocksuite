@@ -1,10 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/virgo';
 import type { TemplateResult } from 'lit';
 
-import { toggleLinkPopup } from '../../components/rich-text/virgo/nodes/link-node/link-popup/toggle-link-popup.js';
-import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
+import { toggleLinkPopup } from '../../components/rich-text/inline/nodes/link-node/link-popup/toggle-link-popup.js';
+import type { AffineTextAttributes } from '../../components/rich-text/inline/types.js';
 import {
   BoldIcon,
   CodeIcon,
@@ -86,24 +86,24 @@ export const textFormatConfigs: TextFormatConfig[] = [
       if (!selection || selection.rangeCount === 0) return;
       const range = selection.getRangeAt(0);
 
-      const vRoot = range.commonAncestorContainer.parentElement?.closest<
-        VirgoRootElement<AffineTextAttributes>
-      >(`[${VIRGO_ROOT_ATTR}]`);
-      if (!vRoot) return;
+      const inlineRoot = range.commonAncestorContainer.parentElement?.closest<
+        InlineRootElement<AffineTextAttributes>
+      >(`[${INLINE_ROOT_ATTR}]`);
+      if (!inlineRoot) return;
 
-      const vEditor = vRoot.virgoEditor;
-      const goalVRange = vEditor.getVRange();
-      assertExists(goalVRange);
+      const inlineEditor = inlineRoot.inlineEditor;
+      const targetInlineRange = inlineEditor.getInlineRange();
+      assertExists(targetInlineRange);
 
-      if (goalVRange.length === 0) return;
+      if (targetInlineRange.length === 0) return;
 
-      const format = vEditor.getFormat(goalVRange);
+      const format = inlineEditor.getFormat(targetInlineRange);
       if (format.link) {
-        vEditor.formatText(goalVRange, { link: null });
+        inlineEditor.formatText(targetInlineRange, { link: null });
         return;
       }
 
-      toggleLinkPopup(vEditor, 'create', goalVRange);
+      toggleLinkPopup(inlineEditor, 'create', targetInlineRange);
     },
   },
 ];

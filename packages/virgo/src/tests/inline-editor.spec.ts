@@ -1,25 +1,25 @@
 import { expect, test } from '@playwright/test';
 
 import { ZERO_WIDTH_SPACE } from '../consts.js';
-import type { VEditor } from '../virgo.js';
+import type { InlineEditor } from '../inline-editor.js';
 import {
   assertSelection,
-  enterVirgoPlayground,
-  focusVirgoRichText,
-  getDeltaFromVirgoRichText,
-  getVirgoRichTextLine,
-  getVRangeIndexRect,
+  enterInlineEditorPlayground,
+  focusInlineRichText,
+  getDeltaFromInlineRichText,
+  getInlineRangeIndexRect,
+  getInlineRichTextLine,
   press,
-  setVirgoRichTextRange,
+  setInlineRichTextRange,
   type,
 } from './utils.js';
 
 test('basic input', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   const editorAUndo = page.getByText('undo').nth(0);
   const editorARedo = page.getByText('redo').nth(0);
@@ -44,7 +44,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abcd😃efg👨‍👨‍👧‍👦hj');
   expect(await editorB.innerText()).toBe('abcd😃efg👨‍👨‍👧‍👦hj');
 
-  await focusVirgoRichText(page);
+  await focusInlineRichText(page);
   await press(page, 'Backspace');
   await press(page, 'Backspace');
   await press(page, 'Backspace');
@@ -62,7 +62,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abcd😃efg');
   expect(await editorB.innerText()).toBe('abcd😃efg');
 
-  await focusVirgoRichText(page);
+  await focusInlineRichText(page);
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
@@ -75,7 +75,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc🥰👨‍👨‍👧‍👦efg');
   expect(await editorB.innerText()).toBe('abc🥰👨‍👨‍👧‍👦efg');
 
-  await setVirgoRichTextRange(page, {
+  await setInlineRichTextRange(page, {
     index: 3,
     length: 16,
   });
@@ -95,7 +95,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc');
   expect(await editorB.innerText()).toBe('abc');
 
-  await focusVirgoRichText(page);
+  await focusInlineRichText(page);
   await page.waitForTimeout(100);
   await press(page, 'Enter');
   await press(page, 'Enter');
@@ -116,7 +116,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
   expect(await editorB.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
 
-  await focusVirgoRichText(page);
+  await focusInlineRichText(page);
   await page.waitForTimeout(100);
   await press(page, 'Backspace');
   await press(page, 'Backspace');
@@ -136,7 +136,7 @@ test('basic input', async ({ page }) => {
 
   expect(await editorA.innerText()).toBe('abc');
 
-  await focusVirgoRichText(page);
+  await focusInlineRichText(page);
   await page.waitForTimeout(100);
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
@@ -157,7 +157,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abbbcdd');
   expect(await editorB.innerText()).toBe('abbbcdd');
 
-  await focusVirgoRichText(page);
+  await focusInlineRichText(page);
   await page.waitForTimeout(100);
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
@@ -179,11 +179,11 @@ test('basic input', async ({ page }) => {
 });
 
 test('chinese input', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -208,8 +208,8 @@ test('chinese input', async ({ page }) => {
 });
 
 test('type many times in one moment', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
   await page.waitForTimeout(100);
   await Promise.all(
     'aaaaaaaaaaaaaaaaaaaa'.split('').map(s => page.keyboard.type(s))
@@ -227,11 +227,11 @@ test('type many times in one moment', async ({ page }) => {
 });
 
 test('readonly mode', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -246,14 +246,14 @@ test('readonly mode', async ({ page }) => {
   await page.evaluate(() => {
     const richTextA = document
       .querySelector('test-page')
-      ?.querySelector('virgo-test-rich-text');
+      ?.querySelector('test-rich-text');
 
     if (!richTextA) {
       throw new Error('Cannot find editor');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (richTextA as any).vEditor.setReadonly(true);
+    (richTextA as any).inlineEditor.setReadonly(true);
   });
 
   await type(page, 'aaaa');
@@ -263,11 +263,11 @@ test('readonly mode', async ({ page }) => {
 });
 
 test('basic styles', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   const editorABold = page.getByText('bold').nth(0);
   const editorAItalic = page.getByText('italic').nth(0);
@@ -288,18 +288,18 @@ test('basic styles', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abcdefg');
   expect(await editorB.innerText()).toBe('abcdefg');
 
-  let delta = await getDeltaFromVirgoRichText(page);
+  let delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'abcdefg',
     },
   ]);
 
-  await setVirgoRichTextRange(page, { index: 2, length: 3 });
+  await setInlineRichTextRange(page, { index: 2, length: 3 });
 
   editorABold.click();
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -317,7 +317,7 @@ test('basic styles', async ({ page }) => {
 
   editorAItalic.click();
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -336,7 +336,7 @@ test('basic styles', async ({ page }) => {
 
   editorAUnderline.click();
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -356,7 +356,7 @@ test('basic styles', async ({ page }) => {
 
   editorAStrike.click();
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -377,7 +377,7 @@ test('basic styles', async ({ page }) => {
 
   editorACode.click();
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -401,7 +401,7 @@ test('basic styles', async ({ page }) => {
     clickCount: 5,
   });
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'abcdefg',
@@ -412,7 +412,7 @@ test('basic styles', async ({ page }) => {
     clickCount: 5,
   });
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -434,7 +434,7 @@ test('basic styles', async ({ page }) => {
 
   editorABold.click();
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -455,7 +455,7 @@ test('basic styles', async ({ page }) => {
 
   editorAItalic.click();
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -475,7 +475,7 @@ test('basic styles', async ({ page }) => {
 
   editorAUnderline.click();
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -494,7 +494,7 @@ test('basic styles', async ({ page }) => {
 
   editorAStrike.click();
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -512,7 +512,7 @@ test('basic styles', async ({ page }) => {
 
   editorACode.click();
   page.waitForTimeout(100);
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'abcdefg',
@@ -521,11 +521,11 @@ test('basic styles', async ({ page }) => {
 });
 
 test('overlapping styles', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   const editorABold = page.getByText('bold').nth(0);
   const editorAItalic = page.getByText('italic').nth(0);
@@ -543,17 +543,17 @@ test('overlapping styles', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abcdefghijk');
   expect(await editorB.innerText()).toBe('abcdefghijk');
 
-  let delta = await getDeltaFromVirgoRichText(page);
+  let delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'abcdefghijk',
     },
   ]);
 
-  await setVirgoRichTextRange(page, { index: 1, length: 3 });
+  await setInlineRichTextRange(page, { index: 1, length: 3 });
   editorABold.click();
 
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'a',
@@ -569,10 +569,10 @@ test('overlapping styles', async ({ page }) => {
     },
   ]);
 
-  await setVirgoRichTextRange(page, { index: 7, length: 3 });
+  await setInlineRichTextRange(page, { index: 7, length: 3 });
   editorABold.click();
 
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'a',
@@ -597,10 +597,10 @@ test('overlapping styles', async ({ page }) => {
     },
   ]);
 
-  await setVirgoRichTextRange(page, { index: 3, length: 5 });
+  await setInlineRichTextRange(page, { index: 3, length: 5 });
   editorAItalic.click();
 
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'a',
@@ -645,7 +645,7 @@ test('overlapping styles', async ({ page }) => {
   editorAUndo.click({
     clickCount: 3,
   });
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'abcdefghijk',
@@ -655,7 +655,7 @@ test('overlapping styles', async ({ page }) => {
   editorARedo.click({
     clickCount: 3,
   });
-  delta = await getDeltaFromVirgoRichText(page);
+  delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'a',
@@ -699,11 +699,11 @@ test('overlapping styles', async ({ page }) => {
 });
 
 test('input continuous spaces', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -715,7 +715,7 @@ test('input continuous spaces', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc   def');
   expect(await editorB.innerText()).toBe('abc   def');
 
-  await focusVirgoRichText(page);
+  await focusInlineRichText(page);
   await page.waitForTimeout(100);
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
@@ -729,11 +729,11 @@ test('input continuous spaces', async ({ page }) => {
 });
 
 test('select from the start of line using shift+arrow', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -784,11 +784,11 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
 });
 
 test('getLine', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -800,12 +800,12 @@ test('getLine', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc\ndef\nghi');
   expect(await editorB.innerText()).toBe('abc\ndef\nghi');
 
-  const [line1, offset1] = await getVirgoRichTextLine(page, 0);
-  const [line2, offset2] = await getVirgoRichTextLine(page, 1);
-  const [line3, offset3] = await getVirgoRichTextLine(page, 4);
-  const [line4, offset4] = await getVirgoRichTextLine(page, 5);
-  const [line5, offset5] = await getVirgoRichTextLine(page, 8);
-  const [line6, offset6] = await getVirgoRichTextLine(page, 11);
+  const [line1, offset1] = await getInlineRichTextLine(page, 0);
+  const [line2, offset2] = await getInlineRichTextLine(page, 1);
+  const [line3, offset3] = await getInlineRichTextLine(page, 4);
+  const [line4, offset4] = await getInlineRichTextLine(page, 5);
+  const [line5, offset5] = await getInlineRichTextLine(page, 8);
+  const [line6, offset6] = await getInlineRichTextLine(page, 11);
 
   expect(line1).toEqual('abc');
   expect(offset1).toEqual(0);
@@ -822,21 +822,21 @@ test('getLine', async ({ page }) => {
 });
 
 test('yText should not contain \r', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
 
   await page.waitForTimeout(100);
   const message = await page.evaluate(() => {
     const richText = document
       .querySelector('test-page')
-      ?.querySelector('virgo-test-rich-text');
+      ?.querySelector('test-rich-text');
 
     if (!richText) {
-      throw new Error('Cannot find virgo-test-rich-text');
+      throw new Error('Cannot find test-rich-text');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richText as any).vEditor as VEditor;
+    const editor = (richText as any).inlineEditor as InlineEditor;
 
     try {
       editor.insertText({ index: 0, length: 0 }, 'abc\r');
@@ -852,10 +852,10 @@ test('yText should not contain \r', async ({ page }) => {
 });
 
 test('embed', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
   const editorAEmbed = page.getByText('embed').nth(0);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -877,7 +877,7 @@ test('embed', async ({ page }) => {
   await assertSelection(page, 0, 1, 3);
 
   await editorAEmbed.click();
-  const embedCount = await page.locator('[data-virgo-embed="true"]').count();
+  const embedCount = await page.locator('[data-v-embed="true"]').count();
   expect(embedCount).toBe(3);
 
   // try to update cursor position using arrow keys
@@ -908,28 +908,28 @@ test('embed', async ({ page }) => {
   await assertSelection(page, 0, 3, 1);
 
   // try to update cursor position and select embed element using mouse click
-  let rect = await getVRangeIndexRect(page, [0, 1]);
+  let rect = await getInlineRangeIndexRect(page, [0, 1]);
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 1, 1);
 
-  rect = await getVRangeIndexRect(page, [0, 2]);
+  rect = await getInlineRangeIndexRect(page, [0, 2]);
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 2, 1);
 
-  rect = await getVRangeIndexRect(page, [0, 3]);
+  rect = await getInlineRangeIndexRect(page, [0, 3]);
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 3, 1);
 });
 
 test('markdown shortcut using keyboard util', async ({ page }) => {
-  await enterVirgoPlayground(page);
-  await focusVirgoRichText(page);
+  await enterInlineEditorPlayground(page);
+  await focusInlineRichText(page);
 
   await page.waitForTimeout(100);
 
   await type(page, 'aaa**bbb** ccc');
 
-  const delta = await getDeltaFromVirgoRichText(page);
+  const delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
       insert: 'aaa',

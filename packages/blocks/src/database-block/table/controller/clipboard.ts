@@ -403,7 +403,7 @@ const cellToStringMap: Record<
       'affine-database-rich-text-cell-editing'
     );
     const value = getColumnValue(container);
-    const range = cell?.vEditor?.getVRange();
+    const range = cell?.inlineEditor?.getInlineRange();
     if (range) {
       const start = range.index;
       const end = range.index + range.length;
@@ -415,7 +415,7 @@ const cellToStringMap: Record<
   title: container => {
     const cell = container?.querySelector('data-view-header-area-text-editing');
     const value = getColumnValue(container);
-    const range = cell?.vEditor?.getVRange();
+    const range = cell?.inlineEditor?.getInlineRange();
     if (range) {
       const start = range.index;
       const end = range.index + range.length;

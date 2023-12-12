@@ -2,15 +2,15 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
 import {
   type DeltaInsert,
-  VIRGO_ROOT_ATTR,
-  type VirgoRootElement,
+  INLINE_ROOT_ATTR,
+  type InlineRootElement,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getModelByElement } from '../../../../../../_common/utils/query.js';
+import { getModelByElement } from '../../../../../utils/query.js';
 import type { AffineTextAttributes } from '../../types.js';
 import { affineTextStyles } from '../affine-text.js';
 import type { LinkPopup } from './link-popup/link-popup.js';
@@ -31,12 +31,12 @@ export class AffineLink extends ShadowlessElement {
     return link;
   }
 
-  get vEditor() {
-    const vRoot = this.closest<VirgoRootElement<AffineTextAttributes>>(
-      `[${VIRGO_ROOT_ATTR}]`
+  get inlineEditor() {
+    const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
+      `[${INLINE_ROOT_ATTR}]`
     );
-    assertExists(vRoot);
-    return vRoot.virgoEditor;
+    assertExists(inlineRoot);
+    return inlineRoot.inlineEditor;
   }
 
   @property({ attribute: false })
@@ -59,7 +59,7 @@ export class AffineLink extends ShadowlessElement {
       cursor: pointer;
     }
 
-    affine-link > a:hover [data-virgo-text='true'] {
+    affine-link > a:hover [data-v-text='true'] {
       text-decoration: underline;
     }
 
@@ -94,9 +94,9 @@ export class AffineLink extends ShadowlessElement {
       return;
     }
 
-    const selfVRange = this.vEditor.getVRangeFromElement(this);
-    assertExists(selfVRange);
-    const popup = toggleLinkPopup(this.vEditor, 'view', selfVRange);
+    const selfInlineRange = this.inlineEditor.getInlineRangeFromElement(this);
+    assertExists(selfInlineRange);
+    const popup = toggleLinkPopup(this.inlineEditor, 'view', selfInlineRange);
     popup.addEventListener('mouseenter', () => {
       this._isLinkPopupHover = true;
     });

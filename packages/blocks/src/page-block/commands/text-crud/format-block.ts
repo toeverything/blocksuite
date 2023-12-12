@@ -1,8 +1,8 @@
 import type { BlockSelection, Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/virgo';
 
-import type { AffineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import { FORMAT_BLOCK_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import type { Flavour } from '../../../models.js';
 
@@ -46,21 +46,21 @@ export const formatBlockCommand: Command<
       const { selectedBlocks } = ctx;
       assertExists(selectedBlocks);
 
-      const selectedVEditors = selectedBlocks.flatMap(el => {
-        const vRoot = el.querySelector<VirgoRootElement<AffineTextAttributes>>(
-          `[${VIRGO_ROOT_ATTR}]`
-        );
-        if (vRoot) {
-          return vRoot.virgoEditor;
+      const selectedInlineEditors = selectedBlocks.flatMap(el => {
+        const inlineRoot = el.querySelector<
+          InlineRootElement<AffineTextAttributes>
+        >(`[${INLINE_ROOT_ATTR}]`);
+        if (inlineRoot) {
+          return inlineRoot.inlineEditor;
         }
         return [];
       });
 
-      selectedVEditors.forEach(vEditor => {
-        vEditor.formatText(
+      selectedInlineEditors.forEach(inlineEditor => {
+        inlineEditor.formatText(
           {
             index: 0,
-            length: vEditor.yTextLength,
+            length: inlineEditor.yTextLength,
           },
           styles,
           {

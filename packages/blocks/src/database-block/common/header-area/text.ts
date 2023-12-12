@@ -1,14 +1,14 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import { Text, Workspace } from '@blocksuite/store';
-import type { VRange } from '@blocksuite/virgo';
-import { VEditor } from '@blocksuite/virgo';
+import type { InlineRange } from '@blocksuite/virgo';
+import { InlineEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { affineAttributeRenderer } from '../../../_common/components/rich-text/virgo/attribute-renderer.js';
-import { affineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
+import { affineAttributeRenderer } from '../../../_common/components/rich-text/inline/attribute-renderer.js';
+import { affineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import {
   getCurrentNativeRange,
   hasNativeSelection,
@@ -22,7 +22,7 @@ import { BaseCellRenderer } from '../columns/base-cell.js';
 const TEXT = 'text/plain';
 
 interface StackItem {
-  meta: Map<'v-range', VRange | null | undefined>;
+  meta: Map<'v-range', InlineRange | null | undefined>;
   type: 'undo' | 'redo';
 }
 
@@ -80,22 +80,23 @@ const styles = css`
   }
 `;
 
-export const addHistoryToVEditor = (vEditor: VEditor) => {
+export const addHistoryToInlineEditor = (inlineEditor: InlineEditor) => {
   let range: Range | null = null;
-  vEditor.slots.rangeUpdated.on(vRange => {
-    range = vRange;
+  inlineEditor.slots.rangeUpdated.on(inlineRange => {
+    range = inlineRange;
   });
-  const undoManager = new Workspace.Y.UndoManager(vEditor.yText, {
-    trackedOrigins: new Set([vEditor.yText.doc?.clientID]),
+  const undoManager = new Workspace.Y.UndoManager(inlineEditor.yText, {
+    trackedOrigins: new Set([inlineEditor.yText.doc?.clientID]),
   });
   undoManager.on('stack-item-added', (event: { stackItem: StackItem }) => {
-    const vRange = range && vEditor.mounted ? vEditor.toVRange(range) : null;
-    event.stackItem.meta.set('v-range', vRange);
+    const inlineRange =
+      range && inlineEditor.mounted ? inlineEditor.toInlineRange(range) : null;
+    event.stackItem.meta.set('v-range', inlineRange);
   });
   undoManager.on('stack-item-popped', (event: { stackItem: StackItem }) => {
-    const vRange = event.stackItem.meta.get('v-range');
-    if (vRange) {
-      vEditor.setVRange(vRange);
+    const inlineRange = event.stackItem.meta.get('v-range');
+    if (inlineRange) {
+      inlineEditor.setInlineRange(inlineRange);
     }
   });
   undoManager.clear();
@@ -139,30 +140,34 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     return tRichText.is(this.titleColumn.dataType);
   }
 
-  vEditor?: VEditor;
+  inlineEditor?: InlineEditor;
   @query('.data-view-header-area-rich-text')
   richText!: HTMLElement;
 
-  protected initVirgo(container: HTMLElement): VEditor {
+  protected initInlineEditor(container: HTMLElement): InlineEditor {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as Y.Text | string | undefined
     );
-    const vEditor = new VEditor(yText);
-    this.vEditor = vEditor;
-    vEditor.setAttributeSchema(affineTextAttributes);
-    vEditor.setAttributeRenderer(affineAttributeRenderer);
-    vEditor.mount(container);
-    return vEditor;
+    const inlineEditor = new InlineEditor(yText);
+    this.inlineEditor = inlineEditor;
+    inlineEditor.setAttributeSchema(affineTextAttributes);
+    inlineEditor.setAttributeRenderer(affineAttributeRenderer);
+    inlineEditor.mount(container);
+    return inlineEditor;
   }
 
-  protected initEditingMode(vEditor: VEditor) {
-    const historyHelper = addHistoryToVEditor(vEditor);
-    vEditor.disposables.addFromEvent(vEditor.rootElement, 'keydown', e => {
-      historyHelper.handleKeyboardEvent(e);
-    });
-    vEditor.focusEnd();
+  protected initEditingMode(inlineEditor: InlineEditor) {
+    const historyHelper = addHistoryToInlineEditor(inlineEditor);
+    inlineEditor.disposables.addFromEvent(
+      inlineEditor.rootElement,
+      'keydown',
+      e => {
+        historyHelper.handleKeyboardEvent(e);
+      }
+    );
+    inlineEditor.focusEnd();
     this._disposables.add(
-      vEditor.slots.vRangeUpdated.on(([range]) => {
+      inlineEditor.slots.inlineRangeUpdated.on(([range]) => {
         if (range) {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
@@ -198,7 +203,9 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
       this.view.cellUpdateValue(
         this.rowId,
         this.titleColumn.id,
-        this.isRichText ? this.vEditor?.yText : this.vEditor?.yText.toString()
+        this.isRichText
+          ? this.inlineEditor?.yText
+          : this.inlineEditor?.yText.toString()
       );
     }
   }
@@ -229,7 +236,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
 @customElement('data-view-header-area-text')
 export class HeaderAreaTextCell extends BaseTextCell {
   private init() {
-    const editor = this.initVirgo(this.richText);
+    const editor = this.initInlineEditor(this.richText);
     editor.setReadonly(true);
     this._disposables.add({
       dispose: () => {
@@ -253,7 +260,7 @@ export class HeaderAreaTextCell extends BaseTextCell {
 @customElement('data-view-header-area-text-editing')
 export class HeaderAreaTextCellEditing extends BaseTextCell {
   private init() {
-    const editor = this.initVirgo(this.richText);
+    const editor = this.initInlineEditor(this.richText);
     this.initEditingMode(editor);
     this._disposables.add({
       dispose: () => {
@@ -275,7 +282,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
 
   override onCopy(_e: ClipboardEvent) {
     let data = '';
-    const range = this.vEditor?.getVRange();
+    const range = this.inlineEditor?.getInlineRange();
     if (range) {
       const start = range.index;
       const end = range.index + range.length;
@@ -303,8 +310,8 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     const textClipboardData = e.clipboardData?.getData(TEXT);
     if (!textClipboardData) return;
 
-    const range = this.vEditor?.getVRange();
-    const yText = this.vEditor?.yText;
+    const range = this.inlineEditor?.getInlineRange();
+    const yText = this.inlineEditor?.yText;
     if (yText) {
       const text = new Text(yText);
       const index = range?.index ?? yText.length;
@@ -313,7 +320,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       } else {
         text.insert(textClipboardData, index);
       }
-      this.vEditor?.setVRange({
+      this.inlineEditor?.setInlineRange({
         index: index + textClipboardData.length,
         length: 0,
       });
