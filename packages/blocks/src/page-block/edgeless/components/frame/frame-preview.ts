@@ -47,10 +47,9 @@ const DEFAULT_PREVIEW_CONTAINER_HEIGHT = 166;
 const styles = css`
   .frame-preview-container {
     display: block;
-    width: calc(100% - 4px);
-    height: calc(100% - 4px);
+    width: 100%;
+    height: 100%;
     box-sizing: border-box;
-    overflow: hidden;
     position: relative;
   }
 
@@ -60,10 +59,12 @@ const styles = css`
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
+    overflow: hidden;
   }
 
   .surface-viewport {
     max-width: 100%;
+    box-sizing: border-box;
     margin: 0 auto;
     position: relative;
     overflow: hidden;

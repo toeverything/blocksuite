@@ -37,7 +37,7 @@ const styles = css`
   }
 
   .frame-panel-body {
-    padding-top: 16px;
+    padding-top: 12px;
     flex-grow: 1;
     width: 100%;
 
