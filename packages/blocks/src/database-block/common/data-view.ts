@@ -1,5 +1,5 @@
 import type {
-  BlockStdProvider,
+  BlockStdScope,
   EventName,
   UIEventHandler,
 } from '@blocksuite/block-std';
@@ -36,7 +36,7 @@ export interface DataViewProps<
 
   getFlag?: Page['awarenessStore']['getFlag'];
 
-  std: BlockStdProvider;
+  std: BlockStdScope;
 }
 
 export interface DataViewExpose {
