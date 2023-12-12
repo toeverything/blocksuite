@@ -10,16 +10,13 @@ import {
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import {
-  FontLinkedPageIcon,
-  FontPageIcon,
-} from '../../../../../_common/icons/index.js';
+import type { DocPageBlockComponent } from '../../../../../page-block/doc/doc-page-block.js';
+import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/index.js';
 import {
   getBlockElementByModel,
   getClosestBlockElementByElement,
   getModelByElement,
-} from '../../../../../_common/utils/index.js';
-import type { DocPageBlockComponent } from '../../../../../page-block/doc/doc-page-block.js';
+} from '../../../../utils/index.js';
 import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from '../../consts.js';
 import type { AffineTextAttributes } from '../types.js';
 import { affineTextStyles } from './affine-text.js';
@@ -159,7 +156,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     );
 
     // we need to add `<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text>` in an
-    // embed element to make sure virgo range calculation is correct
+    // embed element to make sure inline range calculation is correct
     return html`<span
       data-selected=${this.selected}
       class="affine-reference"

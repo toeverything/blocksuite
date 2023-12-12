@@ -1,21 +1,21 @@
 import { PathFinder, type TextSelection } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import {
-  VIRGO_ROOT_ATTR,
-  type VRange,
-  type VRangeProvider,
-  type VRangeUpdatedProp,
+  INLINE_ROOT_ATTR,
+  type InlineRange,
+  type InlineRangeProvider,
+  type InlineRangeUpdatedProp,
 } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
 
-export const getVRangeProvider: (
+export const getInlineRangeProvider: (
   element: BlockElement
-) => VRangeProvider = element => {
+) => InlineRangeProvider = element => {
   const root = element.host;
   const selectionManager = root.selection;
   const rangeManager = root.rangeManager;
-  const vRangeUpdatedSlot = new Slot<VRangeUpdatedProp>();
+  const inlineRangeUpdatedSlot = new Slot<InlineRangeUpdatedProp>();
 
   assertExists(selectionManager);
   assertExists(rangeManager);
@@ -28,8 +28,8 @@ export const getVRangeProvider: (
         range.startContainer instanceof Element
           ? range.startContainer
           : range.startContainer.parentElement;
-      const vRoot = startElement?.closest(`[${VIRGO_ROOT_ATTR}]`);
-      if (!vRoot) return false;
+      const inlineRoot = startElement?.closest(`[${INLINE_ROOT_ATTR}]`);
+      if (!inlineRoot) return false;
 
       const blockElement = startElement?.closest(`[${root.blockIdAttr}]`);
       if (!blockElement || blockElement !== element) return false;
@@ -39,10 +39,10 @@ export const getVRangeProvider: (
     return true;
   };
 
-  const calculateVRange = (
+  const calculateInlineRange = (
     range: Range,
     textSelection: TextSelection
-  ): VRange | null => {
+  ): InlineRange | null => {
     if (!isElementSelected(range)) {
       return null;
     }
@@ -70,24 +70,24 @@ export const getVRangeProvider: (
     };
   };
 
-  const setVRange = (vRange: VRange | null, sync = true) => {
-    if (!vRange) {
+  const setInlineRange = (inlineRange: InlineRange | null, sync = true) => {
+    if (!inlineRange) {
       selectionManager.clear(['text']);
     } else {
       const textSelection = selectionManager.getInstance('text', {
         from: {
           path: element.path,
-          index: vRange.index,
-          length: vRange.length,
+          index: inlineRange.index,
+          length: inlineRange.length,
         },
         to: null,
       });
       selectionManager.setGroup('note', [textSelection]);
     }
-    vRangeUpdatedSlot.emit([vRange, sync]);
+    inlineRangeUpdatedSlot.emit([inlineRange, sync]);
   };
 
-  const getVRange = (): VRange | null => {
+  const getInlineRange = (): InlineRange | null => {
     const sl = document.getSelection();
     if (!sl || sl.rangeCount === 0) {
       return null;
@@ -102,7 +102,7 @@ export const getVRangeProvider: (
       return null;
     }
 
-    return calculateVRange(range, textSelection);
+    return calculateInlineRange(range, textSelection);
   };
 
   selectionManager.slots.changed.on(() => {
@@ -114,14 +114,14 @@ export const getVRangeProvider: (
 
     // wait for lit updated
     requestAnimationFrame(() => {
-      const vRange = calculateVRange(range, textSelection);
-      vRangeUpdatedSlot.emit([vRange, false]);
+      const inlineRange = calculateInlineRange(range, textSelection);
+      inlineRangeUpdatedSlot.emit([inlineRange, false]);
     });
   });
 
   return {
-    setVRange,
-    getVRange,
-    vRangeUpdatedSlot,
+    setInlineRange,
+    getInlineRange,
+    inlineRangeUpdated: inlineRangeUpdatedSlot,
   };
 };

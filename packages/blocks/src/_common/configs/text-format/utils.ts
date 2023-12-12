@@ -1,16 +1,16 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import {
-  VIRGO_ROOT_ATTR,
-  type VirgoRootElement,
-  type VRange,
+  INLINE_ROOT_ATTR,
+  type InlineRange,
+  type InlineRootElement,
 } from '@blocksuite/virgo';
 
 import type { Flavour } from '../../../models.js';
 import type {
+  AffineInlineEditor,
   AffineTextAttributes,
-  AffineVEditor,
-} from '../../components/rich-text/virgo/types.js';
+} from '../../components/rich-text/inline/types.js';
 import { BLOCK_ID_ATTR } from '../../consts.js';
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
@@ -18,20 +18,20 @@ import {
   FORMAT_TEXT_SUPPORT_FLAVOURS,
 } from './consts.js';
 
-function getCombinedFormatFromVEditors(
-  vEditors: [AffineVEditor, VRange | null][]
+function getCombinedFormatFromInlineEditors(
+  inlineEditors: [AffineInlineEditor, InlineRange | null][]
 ): AffineTextAttributes {
   const formatArr: AffineTextAttributes[] = [];
-  vEditors.forEach(([vEditor, vRange]) => {
-    if (!vRange) return;
+  inlineEditors.forEach(([inlineEditor, inlineRange]) => {
+    if (!inlineRange) return;
 
-    const format = vEditor.getFormat(vRange);
+    const format = inlineEditor.getFormat(inlineRange);
     formatArr.push(format);
   });
 
   if (formatArr.length === 0) return {};
 
-  // format will be active only when all vEditors have the same format.
+  // format will be active only when all inline editors have the same format.
   return formatArr.reduce((acc, cur) => {
     const newFormat: AffineTextAttributes = {};
     for (const key in acc) {
@@ -65,18 +65,18 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
           const { selectedBlocks } = ctx;
           assertExists(selectedBlocks);
 
-          const selectedVEditors = selectedBlocks.flatMap(el => {
-            const vRoot = el.querySelector<
-              VirgoRootElement<AffineTextAttributes>
-            >(`[${VIRGO_ROOT_ATTR}]`);
-            if (vRoot && vRoot.virgoEditor.getVRange()) {
-              return vRoot.virgoEditor;
+          const selectedInlineEditors = selectedBlocks.flatMap(el => {
+            const inlineRoot = el.querySelector<
+              InlineRootElement<AffineTextAttributes>
+            >(`[${INLINE_ROOT_ATTR}]`);
+            if (inlineRoot && inlineRoot.inlineEditor.getInlineRange()) {
+              return inlineRoot.inlineEditor;
             }
             return [];
           });
 
-          result = getCombinedFormatFromVEditors(
-            selectedVEditors.map(e => [e, e.getVRange()])
+          result = getCombinedFormatFromInlineEditors(
+            selectedInlineEditors.map(e => [e, e.getInlineRange()])
           );
 
           next();
@@ -93,18 +93,18 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
           const { selectedBlocks } = ctx;
           assertExists(selectedBlocks);
 
-          const selectedVEditors = selectedBlocks.flatMap(el => {
-            const vRoot = el.querySelector<
-              VirgoRootElement<AffineTextAttributes>
-            >(`[${VIRGO_ROOT_ATTR}]`);
-            if (vRoot) {
-              return vRoot.virgoEditor;
+          const selectedInlineEditors = selectedBlocks.flatMap(el => {
+            const inlineRoot = el.querySelector<
+              InlineRootElement<AffineTextAttributes>
+            >(`[${INLINE_ROOT_ATTR}]`);
+            if (inlineRoot) {
+              return inlineRoot.inlineEditor;
             }
             return [];
           });
 
-          result = getCombinedFormatFromVEditors(
-            selectedVEditors.map(e => [
+          result = getCombinedFormatFromInlineEditors(
+            selectedInlineEditors.map(e => [
               e,
               {
                 index: 0,
@@ -117,8 +117,8 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
         }),
       // native selection, corresponding to `formatNative` command
       chain.inline(() => {
-        const selectedVEditors = Array.from<VirgoRootElement>(
-          host.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
+        const selectedInlineEditors = Array.from<InlineRootElement>(
+          host.querySelectorAll(`[${INLINE_ROOT_ATTR}]`)
         )
           .filter(el => {
             const selection = document.getSelection();
@@ -136,10 +136,10 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
             }
             return false;
           })
-          .map(el => el.virgoEditor);
+          .map(el => el.inlineEditor);
 
-        result = getCombinedFormatFromVEditors(
-          selectedVEditors.map(e => [e, e.getVRange()])
+        result = getCombinedFormatFromInlineEditors(
+          selectedInlineEditors.map(e => [e, e.getInlineRange()])
         );
       }),
     ])
@@ -202,17 +202,17 @@ export function isFormatSupported(host: EditorHost) {
 
           if (currentTextSelection.isCollapsed()) return;
 
-          const selectedVEditors = selectedBlocks.flatMap(el => {
-            const vRoot = el.querySelector<
-              VirgoRootElement<AffineTextAttributes>
-            >(`[${VIRGO_ROOT_ATTR}]`);
-            if (vRoot && vRoot.virgoEditor.getVRange()) {
-              return vRoot.virgoEditor;
+          const selectedInlineEditors = selectedBlocks.flatMap(el => {
+            const inlineRoot = el.querySelector<
+              InlineRootElement<AffineTextAttributes>
+            >(`[${INLINE_ROOT_ATTR}]`);
+            if (inlineRoot && inlineRoot.inlineEditor.getInlineRange()) {
+              return inlineRoot.inlineEditor;
             }
             return [];
           });
 
-          result = selectedVEditors.length > 0;
+          result = selectedInlineEditors.length > 0;
           next();
         }),
       // block selection, corresponding to `formatBlock` command
@@ -227,23 +227,23 @@ export function isFormatSupported(host: EditorHost) {
           const { selectedBlocks } = ctx;
           assertExists(selectedBlocks);
 
-          const selectedVEditors = selectedBlocks.flatMap(el => {
-            const vRoot = el.querySelector<
-              VirgoRootElement<AffineTextAttributes>
-            >(`[${VIRGO_ROOT_ATTR}]`);
-            if (vRoot) {
-              return vRoot.virgoEditor;
+          const selectedInlineEditors = selectedBlocks.flatMap(el => {
+            const inlineRoot = el.querySelector<
+              InlineRootElement<AffineTextAttributes>
+            >(`[${INLINE_ROOT_ATTR}]`);
+            if (inlineRoot) {
+              return inlineRoot.inlineEditor;
             }
             return [];
           });
 
-          result = selectedVEditors.length > 0;
+          result = selectedInlineEditors.length > 0;
           next();
         }),
       // native selection, corresponding to `formatNative` command
       chain.inline(() => {
-        const selectedVEditors = Array.from<VirgoRootElement>(
-          host.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
+        const selectedInlineEditors = Array.from<InlineRootElement>(
+          host.querySelectorAll(`[${INLINE_ROOT_ATTR}]`)
         )
           .filter(el => {
             const selection = document.getSelection();
@@ -261,9 +261,9 @@ export function isFormatSupported(host: EditorHost) {
             }
             return false;
           })
-          .map(el => el.virgoEditor);
+          .map(el => el.inlineEditor);
 
-        result = selectedVEditors.length > 0;
+        result = selectedInlineEditors.length > 0;
       }),
     ])
     .run();

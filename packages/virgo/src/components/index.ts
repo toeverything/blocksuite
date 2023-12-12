@@ -1,3 +1,3 @@
-export * from './virgo-element.js';
-export * from './virgo-line.js';
-export * from './virgo-text.js';
+export * from './v-element.js';
+export * from './v-line.js';
+export * from './v-text.js';

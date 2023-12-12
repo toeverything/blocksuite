@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import * as Y from 'yjs';
 
-import { VEditor } from '../virgo.js';
+import { InlineEditor } from '../inline-editor.js';
 
 test('getDeltaByRangeIndex', () => {
   const yDoc = new Y.Doc();
@@ -20,30 +20,30 @@ test('getDeltaByRangeIndex', () => {
       },
     },
   ]);
-  const virgo = new VEditor(yText);
+  const inlineEditor = new InlineEditor(yText);
 
-  expect(virgo.getDeltaByRangeIndex(0)).toEqual({
+  expect(inlineEditor.getDeltaByRangeIndex(0)).toEqual({
     insert: 'aaa',
     attributes: {
       bold: true,
     },
   });
 
-  expect(virgo.getDeltaByRangeIndex(1)).toEqual({
+  expect(inlineEditor.getDeltaByRangeIndex(1)).toEqual({
     insert: 'aaa',
     attributes: {
       bold: true,
     },
   });
 
-  expect(virgo.getDeltaByRangeIndex(3)).toEqual({
+  expect(inlineEditor.getDeltaByRangeIndex(3)).toEqual({
     insert: 'aaa',
     attributes: {
       bold: true,
     },
   });
 
-  expect(virgo.getDeltaByRangeIndex(4)).toEqual({
+  expect(inlineEditor.getDeltaByRangeIndex(4)).toEqual({
     insert: 'bbb',
     attributes: {
       italic: true,
@@ -51,7 +51,7 @@ test('getDeltaByRangeIndex', () => {
   });
 });
 
-test('getDeltasByVRange', () => {
+test('getDeltasByInlineRange', () => {
   const yDoc = new Y.Doc();
   const yText = yDoc.getText('text');
   yText.applyDelta([
@@ -74,10 +74,10 @@ test('getDeltasByVRange', () => {
       },
     },
   ]);
-  const virgo = new VEditor(yText);
+  const inlineEditor = new InlineEditor(yText);
 
   expect(
-    virgo.getDeltasByVRange({
+    inlineEditor.getDeltasByInlineRange({
       index: 0,
       length: 0,
     })
@@ -97,7 +97,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    inlineEditor.getDeltasByInlineRange({
       index: 0,
       length: 1,
     })
@@ -117,7 +117,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    inlineEditor.getDeltasByInlineRange({
       index: 0,
       length: 3,
     })
@@ -137,7 +137,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    inlineEditor.getDeltasByInlineRange({
       index: 0,
       length: 4,
     })
@@ -169,7 +169,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    inlineEditor.getDeltasByInlineRange({
       index: 3,
       length: 1,
     })
@@ -201,7 +201,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    inlineEditor.getDeltasByInlineRange({
       index: 3,
       length: 3,
     })
@@ -233,7 +233,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    inlineEditor.getDeltasByInlineRange({
       index: 3,
       length: 4,
     })
@@ -277,7 +277,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    inlineEditor.getDeltasByInlineRange({
       index: 4,
       length: 0,
     })
@@ -297,7 +297,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    inlineEditor.getDeltasByInlineRange({
       index: 4,
       length: 1,
     })
@@ -317,7 +317,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    inlineEditor.getDeltasByInlineRange({
       index: 4,
       length: 2,
     })
@@ -337,7 +337,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    inlineEditor.getDeltasByInlineRange({
       index: 4,
       length: 4,
     })
@@ -372,9 +372,9 @@ test('getDeltasByVRange', () => {
 test('cursor with format', () => {
   const yDoc = new Y.Doc();
   const yText = yDoc.getText('text');
-  const virgo = new VEditor(yText);
+  const inlineEditor = new InlineEditor(yText);
 
-  virgo.insertText(
+  inlineEditor.insertText(
     {
       index: 0,
       length: 0,
@@ -385,11 +385,11 @@ test('cursor with format', () => {
     }
   );
 
-  virgo.setMarks({
+  inlineEditor.setMarks({
     italic: true,
   });
 
-  virgo.insertText(
+  inlineEditor.insertText(
     {
       index: 3,
       length: 0,
@@ -397,7 +397,7 @@ test('cursor with format', () => {
     'bbb'
   );
 
-  expect(virgo.yText.toDelta()).toEqual([
+  expect(inlineEditor.yText.toDelta()).toEqual([
     {
       insert: 'aaa',
       attributes: {
@@ -416,9 +416,9 @@ test('cursor with format', () => {
 test('incorrect format value `false`', () => {
   const yDoc = new Y.Doc();
   const yText = yDoc.getText('text');
-  const virgo = new VEditor(yText);
+  const inlineEditor = new InlineEditor(yText);
 
-  virgo.insertText(
+  inlineEditor.insertText(
     {
       index: 0,
       length: 0,
@@ -431,7 +431,7 @@ test('incorrect format value `false`', () => {
     }
   );
 
-  virgo.insertText(
+  inlineEditor.insertText(
     {
       index: 3,
       length: 0,
@@ -442,7 +442,7 @@ test('incorrect format value `false`', () => {
     }
   );
 
-  expect(virgo.yText.toDelta()).toEqual([
+  expect(inlineEditor.yText.toDelta()).toEqual([
     {
       insert: 'aaa',
       attributes: {
@@ -465,7 +465,7 @@ test('yText should not contain \r', () => {
 
   expect(yText.toString()).toEqual('aaa\r');
   expect(() => {
-    new VEditor(yText);
+    new InlineEditor(yText);
   }).toThrow(
     'yText must not contain \r because it will break the range synchronization'
   );

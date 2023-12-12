@@ -3,13 +3,13 @@ import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { VIRGO_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
+import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
+import type { InlineRootElement } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
-import type { VirgoRootElement } from '../virgo.js';
 import { EmbedGap } from './embed-gap.js';
 
 @customElement('v-line')
-export class VirgoLine extends LitElement {
+export class VLine extends LitElement {
   @property({ attribute: false })
   elements: [TemplateResult<1>, DeltaInsert][] = [];
 
@@ -48,17 +48,17 @@ export class VirgoLine extends LitElement {
     if (!this.isConnected) return;
 
     const rootElement = this.closest(
-      `[${VIRGO_ROOT_ATTR}]`
-    ) as VirgoRootElement;
+      `[${INLINE_ROOT_ATTR}]`
+    ) as InlineRootElement;
     assertExists(rootElement, 'v-line must be inside a v-root');
-    const virgoEditor = rootElement.virgoEditor;
+    const inlineEditor = rootElement.inlineEditor;
     assertExists(
-      virgoEditor,
-      'v-line must be inside a v-root with virgo-editor'
+      inlineEditor,
+      'v-line must be inside a v-root with inline-editor'
     );
 
     const renderElements = this.elements.flatMap(([template, delta], index) => {
-      if (virgoEditor.isEmbed(delta)) {
+      if (inlineEditor.isEmbed(delta)) {
         if (delta.insert.length !== 1) {
           throw new Error(`The length of embed node should only be 1.
             This seems to be an internal issue with Virgo.
@@ -68,14 +68,14 @@ export class VirgoLine extends LitElement {
         // we add `EmbedGap` to make cursor can be placed between embed elements
         if (index === 0) {
           const nextDelta = this.elements[index + 1]?.[1];
-          if (!nextDelta || virgoEditor.isEmbed(nextDelta)) {
+          if (!nextDelta || inlineEditor.isEmbed(nextDelta)) {
             return [EmbedGap, template, EmbedGap];
           } else {
             return [EmbedGap, template];
           }
         } else {
           const nextDelta = this.elements[index + 1]?.[1];
-          if (!nextDelta || virgoEditor.isEmbed(nextDelta)) {
+          if (!nextDelta || inlineEditor.isEmbed(nextDelta)) {
             return [template, EmbedGap];
           } else {
             return [template];
@@ -101,6 +101,6 @@ export class VirgoLine extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'v-line': VirgoLine;
+    'v-line': VLine;
   }
 }

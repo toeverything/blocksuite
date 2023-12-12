@@ -2,9 +2,9 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { isInsideBlockByFlavour } from '../../../_common/utils/index.js';
-import { getVirgoByModel } from '../../../_common/utils/query.js';
+import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
-import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../../components/rich-text/inline/types.js';
 
 export type SlashMenuOptions = {
   /**
@@ -68,15 +68,15 @@ export function insertContent(
   if (!model.text) {
     throw new Error("Can't insert text! Text not found");
   }
-  const vEditor = getVirgoByModel(model);
-  if (!vEditor) {
-    throw new Error("Can't insert text! vEditor not found");
+  const inlineEditor = getInlineEditorByModel(model);
+  if (!inlineEditor) {
+    throw new Error("Can't insert text! Inline editor not found");
   }
-  const vRange = vEditor.getVRange();
-  const index = vRange ? vRange.index : model.text.length;
+  const inlineRange = inlineEditor.getInlineRange();
+  const index = inlineRange ? inlineRange.index : model.text.length;
   model.text.insert(text, index, attributes);
   // Update the caret to the end of the inserted text
-  vEditor.setVRange({
+  inlineEditor.setInlineRange({
     index: index + text.length,
     length: 0,
   });

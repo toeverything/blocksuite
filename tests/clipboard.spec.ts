@@ -23,9 +23,9 @@ import {
   getCopyClipItemsInPage,
   getEdgelessSelectedRectModel,
   getEditorLocator,
+  getInlineSelectionIndex,
+  getInlineSelectionText,
   getRichTextBoundingBox,
-  getVirgoSelectionIndex,
-  getVirgoSelectionText,
   importMarkdown,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseWithParagraphState,
@@ -47,8 +47,8 @@ import {
   resetHistory,
   selectAllByKeyboard,
   selectNoteInEdgeless,
+  setInlineRangeInSelectedRichText,
   setSelection,
-  setVRangeInSelectedRichText,
   SHORT_KEY,
   switchEditorMode,
   toViewCoord,
@@ -57,13 +57,11 @@ import {
   undoByClick,
   undoByKeyboard,
   waitEmbedLoaded,
-  waitForVirgoStateUpdated,
+  waitForInlineEditorStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
-  assertClipboardItem,
-  assertClipboardSnapshot,
   assertClipData,
   assertClipItems,
   assertEdgelessNoteBackground,
@@ -72,7 +70,6 @@ import {
   assertRichImage,
   assertRichTextModelType,
   assertRichTexts,
-  assertRichTextVRange,
   assertStoreMatchJSX,
   assertText,
   assertTextFormats,
@@ -91,7 +88,7 @@ test(scoped`clipboard copy paste`, async ({ page }) => {
   await focusRichText(page);
 
   await type(page, 'test');
-  await setVRangeInSelectedRichText(page, 0, 3);
+  await setInlineRangeInSelectedRichText(page, 0, 3);
   await waitNextFrame(page);
   await copyByKeyboard(page);
   await focusRichText(page);
@@ -333,7 +330,7 @@ test(scoped`split block when paste`, async ({ page }) => {
   await type(page, 'abc');
   await captureHistory(page);
 
-  await setVRangeInSelectedRichText(page, 1, 1);
+  await setInlineRangeInSelectedRichText(page, 1, 1);
   await pasteContent(page, clipData);
   await waitNextFrame(page);
 
@@ -346,10 +343,10 @@ test(scoped`split block when paste`, async ({ page }) => {
   await pressEnter(page);
   await type(page, 'bb');
   const topLeft123 = await getEditorLocator(page)
-    .locator('[data-block-id="2"] .virgo-editor')
+    .locator('[data-block-id="2"] .inline-editor')
     .boundingBox();
   const bottomRight789 = await getEditorLocator(page)
-    .locator('[data-block-id="5"] .virgo-editor')
+    .locator('[data-block-id="5"] .inline-editor')
     .boundingBox();
   assertExists(topLeft123);
   assertExists(bottomRight789);
@@ -409,12 +406,12 @@ test(scoped`copy partially selected text`, async ({ page }) => {
   await type(page, '123 456 789');
 
   // select 456
-  await setVRangeInSelectedRichText(page, 4, 3);
+  await setInlineRangeInSelectedRichText(page, 4, 3);
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '456');
 
   // move to line end
-  await setVRangeInSelectedRichText(page, 11, 0);
+  await setInlineRangeInSelectedRichText(page, 11, 0);
   await pressEnter(page);
   await pasteByKeyboard(page);
   await waitNextFrame(page);
@@ -569,8 +566,8 @@ test('paste a nested list to a nested list', async ({ page }) => {
    */
 
   await assertRichTexts(page, ['aaa', 'aaa', 'bbb', 'ccc', 'bbb', 'ccc']);
-  expect(await getVirgoSelectionText(page)).toEqual('bbb');
-  expect(await getVirgoSelectionIndex(page)).toEqual(0);
+  expect(await getInlineSelectionText(page)).toEqual('bbb');
+  expect(await getInlineSelectionIndex(page)).toEqual(0);
 
   // paste in middle
   await undoByKeyboard(page);
@@ -591,8 +588,8 @@ test('paste a nested list to a nested list', async ({ page }) => {
    */
 
   await assertRichTexts(page, ['aaa', 'baaa', 'bbb', 'cccbb', 'ccc']);
-  expect(await getVirgoSelectionText(page)).toEqual('cccbb');
-  expect(await getVirgoSelectionIndex(page)).toEqual(3);
+  expect(await getInlineSelectionText(page)).toEqual('cccbb');
+  expect(await getInlineSelectionIndex(page)).toEqual(3);
 
   // paste on end
   await undoByKeyboard(page);
@@ -614,8 +611,8 @@ test('paste a nested list to a nested list', async ({ page }) => {
 
   // FIXME: fix this in new clipboard
   // await assertRichTexts(page, ['aaa', 'bbbaaa', 'bbb', 'ccc', 'ccc']);
-  // expect(await getVirgoSelectionText(page)).toEqual('ccc');
-  // expect(await getVirgoSelectionIndex(page)).toEqual(3);
+  // expect(await getInlineSelectionText(page)).toEqual('ccc');
+  // expect(await getInlineSelectionText(page)).toEqual(3);
 });
 
 test('paste nested lists to a nested list', async ({ page }) => {
@@ -670,8 +667,8 @@ test('paste nested lists to a nested list', async ({ page }) => {
     'bbb',
     'ccc',
   ]);
-  expect(await getVirgoSelectionText(page)).toEqual('bbb');
-  expect(await getVirgoSelectionIndex(page)).toEqual(0);
+  expect(await getInlineSelectionText(page)).toEqual('bbb');
+  expect(await getInlineSelectionIndex(page)).toEqual(0);
 
   // paste in middle
   await undoByKeyboard(page);
@@ -693,8 +690,8 @@ test('paste nested lists to a nested list', async ({ page }) => {
    */
 
   await assertRichTexts(page, ['aaa', 'b111', '222', '111', '222bb', 'ccc']);
-  expect(await getVirgoSelectionText(page)).toEqual('222bb');
-  expect(await getVirgoSelectionIndex(page)).toEqual(3);
+  expect(await getInlineSelectionText(page)).toEqual('222bb');
+  expect(await getInlineSelectionIndex(page)).toEqual(3);
 
   // paste on end
   await undoByKeyboard(page);
@@ -716,8 +713,8 @@ test('paste nested lists to a nested list', async ({ page }) => {
    */
 
   await assertRichTexts(page, ['aaa', 'bbb111', '222', '111', '222', 'ccc']);
-  expect(await getVirgoSelectionText(page)).toEqual('222');
-  expect(await getVirgoSelectionIndex(page)).toEqual(3);
+  expect(await getInlineSelectionText(page)).toEqual('222');
+  expect(await getInlineSelectionIndex(page)).toEqual(3);
 });
 
 test('paste non-nested lists to a nested list', async ({ page }) => {
@@ -757,8 +754,8 @@ test('paste non-nested lists to a nested list', async ({ page }) => {
    */
 
   await assertRichTexts(page, ['123', '456', 'aaa', 'bbb']);
-  expect(await getVirgoSelectionText(page)).toEqual('aaa');
-  expect(await getVirgoSelectionIndex(page)).toEqual(0);
+  expect(await getInlineSelectionText(page)).toEqual('aaa');
+  expect(await getInlineSelectionIndex(page)).toEqual(0);
 });
 
 test(scoped`cut should work for multi-block selection`, async ({ page }) => {
@@ -787,7 +784,7 @@ test(
     await initEmptyParagraphState(page);
     await focusRichText(page);
     await type(page, 'test');
-    await setVRangeInSelectedRichText(page, 0, 4);
+    await setInlineRangeInSelectedRichText(page, 0, 4);
     await copyByKeyboard(page);
     await type(page, '- ');
     await page.keyboard.press(`${SHORT_KEY}+v`);
@@ -1059,8 +1056,8 @@ test(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await switchEditorMode(page);
 
   await activeNoteInEdgeless(page, ids.noteId);
-  await waitForVirgoStateUpdated(page);
-  await setVRangeInSelectedRichText(page, 0, 4);
+  await waitForInlineEditorStateUpdated(page);
+  await setInlineRangeInSelectedRichText(page, 0, 4);
   await copyByKeyboard(page);
   await pressArrowRight(page);
   await type(page, '555');
@@ -1342,7 +1339,7 @@ test(scoped`paste parent block`, async ({ page }) => {
   await page.keyboard.press('Enter');
   await page.keyboard.press('Tab');
   await type(page, 'This is child 2');
-  await setVRangeInSelectedRichText(page, 0, 3);
+  await setInlineRangeInSelectedRichText(page, 0, 3);
   await copyByKeyboard(page);
   await focusRichText(page, 2);
   await page.keyboard.press(`${SHORT_KEY}+v`);

@@ -358,7 +358,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
           data-frame-id=${frameItem.frame.id}
           .edgeless=${this.edgeless}
           .page=${this.page}
-          .root=${this.editorHost}
+          .host=${this.editorHost}
           .frame=${frameItem.frame}
           .cardIndex=${idx}
           .frameIndex=${frameItem.frameIndex}

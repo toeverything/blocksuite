@@ -1,15 +1,15 @@
 import type { z, ZodTypeDef } from 'zod';
 
+import type { InlineEditor } from '../inline-editor.js';
 import type { AttributeRenderer } from '../types.js';
-import type { VRange } from '../types.js';
+import type { InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
 import {
   baseTextAttributes,
   getDefaultAttributeRenderer,
 } from '../utils/index.js';
-import type { VEditor } from '../virgo.js';
 
-export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
+export class AttributeService<TextAttributes extends BaseTextAttributes> {
   private _marks: TextAttributes | null = null;
 
   private _attributeRenderer: AttributeRenderer<TextAttributes> =
@@ -18,7 +18,7 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
   private _attributeSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown> =
     baseTextAttributes as z.ZodSchema<TextAttributes, ZodTypeDef, unknown>;
 
-  constructor(public readonly editor: VEditor<TextAttributes>) {}
+  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
 
   get marks() {
     return this._marks;
@@ -46,13 +46,13 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
     this._attributeRenderer = renderer;
   };
 
-  getFormat = (vRange: VRange, loose = false): TextAttributes => {
+  getFormat = (inlineRange: InlineRange, loose = false): TextAttributes => {
     const deltas = this.editor.deltaService
-      .getDeltasByVRange(vRange)
+      .getDeltasByInlineRange(inlineRange)
       .filter(
         ([_, position]) =>
-          position.index + position.length > vRange.index &&
-          position.index <= vRange.index + vRange.length
+          position.index + position.length > inlineRange.index &&
+          position.index <= inlineRange.index + inlineRange.length
       );
     const maybeAttributesList = deltas.map(([delta]) => delta.attributes);
     if (loose) {

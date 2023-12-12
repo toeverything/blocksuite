@@ -6,7 +6,7 @@ export async function getRichTextBoundingBox(
 ): Promise<DOMRect> {
   return await page.evaluate(id => {
     const paragraph = document.querySelector(
-      `[data-block-id="${id}"] .virgo-editor`
+      `[data-block-id="${id}"] .inline-editor`
     );
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return bbox;

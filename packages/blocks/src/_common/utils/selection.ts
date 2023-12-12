@@ -1,7 +1,7 @@
 import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { type VirgoLine, type VRange } from '@blocksuite/virgo';
+import { type InlineRange, type VLine } from '@blocksuite/virgo';
 
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { SCROLL_THRESHOLD } from '../consts.js';
@@ -28,27 +28,30 @@ declare global {
   }
 }
 
-export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
+export async function asyncSetInlineRange(
+  model: BaseBlockModel,
+  inlineRange: InlineRange
+) {
   const richText = await asyncGetRichTextByModel(model);
   if (!richText) {
     return;
   }
 
   await richText.updateComplete;
-  const vEditor = richText.vEditor;
-  assertExists(vEditor);
-  vEditor.setVRange(vRange);
+  const inlineEditor = richText.inlineEditor;
+  assertExists(inlineEditor);
+  inlineEditor.setInlineRange(inlineRange);
 }
 
 export function asyncFocusRichText(
   page: Page,
   id: string,
-  vRange: VRange = { index: 0, length: 0 }
+  inlineRange: InlineRange = { index: 0, length: 0 }
 ) {
   const model = page.getBlockById(id);
   assertExists(model);
   if (matchFlavours(model, ['affine:divider'])) return;
-  return asyncSetVRange(model, vRange);
+  return asyncSetInlineRange(model, inlineRange);
 }
 
 function caretRangeFromPoint(clientX: number, clientY: number): Range | null {
@@ -157,13 +160,13 @@ export function focusTitle(page: Page, index = Infinity, len = 0) {
   if (!pageComponent) {
     throw new Error("Can't find page component!");
   }
-  if (!pageComponent.titleVEditor) {
-    throw new Error("Can't find title vEditor!");
+  if (!pageComponent.titleInlineEditor) {
+    throw new Error("Can't find title inline editor!");
   }
-  if (index > pageComponent.titleVEditor.yText.length) {
-    index = pageComponent.titleVEditor.yText.length;
+  if (index > pageComponent.titleInlineEditor.yText.length) {
+    index = pageComponent.titleInlineEditor.yText.length;
   }
-  pageComponent.titleVEditor.setVRange({ index, length: len });
+  pageComponent.titleInlineEditor.setInlineRange({ index, length: len });
 }
 
 export async function focusRichText(
@@ -174,7 +177,7 @@ export async function focusRichText(
   const isDocPage = !!getDocPageByElement(editableContainer);
   if (isDocPage) {
     editableContainer
-      .querySelector<VirgoLine>('v-line')
+      .querySelector<VLine>('v-line')
       ?.scrollIntoView({ block: 'nearest' });
   }
 

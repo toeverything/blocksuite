@@ -42,8 +42,8 @@ import {
   assertClassName,
   assertDivider,
   assertPageTitleFocus,
+  assertRichTextInlineRange,
   assertRichTexts,
-  assertRichTextVRange,
   assertStoreMatchJSX,
   assertTitle,
 } from './utils/asserts.js';
@@ -122,7 +122,7 @@ test('backspace and arrow on title', async ({ page }) => {
   await assertTitle(page, 'hll');
 
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 0, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0, 0);
 
   await undoByKeyboard(page);
   await assertTitle(page, 'hello');
@@ -158,7 +158,7 @@ for (const { initState, desc } of [
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
     await page.waitForTimeout(300);
-    await assertRichTextVRange(page, 0, 0, 0);
+    await assertRichTextInlineRange(page, 0, 0, 0);
 
     await pressBackspace(page);
     await assertTitle(page, 'helloabc');
@@ -191,7 +191,7 @@ for (const { initState, desc } of [
     await assertBlockCount(page, 'paragraph', 1);
 
     await pressArrowDown(page);
-    await assertRichTextVRange(page, 0, 0, 0);
+    await assertRichTextInlineRange(page, 0, 0, 0);
   });
 }
 
@@ -200,21 +200,21 @@ test('append new paragraph block by enter', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'hello');
-  await assertRichTextVRange(page, 0, 5, 0);
+  await assertRichTextInlineRange(page, 0, 5, 0);
 
   await pressEnter(page);
   await assertRichTexts(page, ['hello', '']);
-  await assertRichTextVRange(page, 1, 0, 0);
+  await assertRichTextInlineRange(page, 1, 0, 0);
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
   await assertRichTexts(page, ['hello']);
-  await assertRichTextVRange(page, 0, 5, 0);
+  await assertRichTextInlineRange(page, 0, 5, 0);
 
   await redoByKeyboard(page);
   await waitNextFrame(page);
   await assertRichTexts(page, ['hello', '']);
-  await assertRichTextVRange(page, 1, 0, 0);
+  await assertRichTextInlineRange(page, 1, 0, 0);
 });
 
 test('insert new paragraph block by enter', async ({ page }) => {
@@ -252,7 +252,7 @@ test('split paragraph block by enter', async ({ page }) => {
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
   await page.waitForTimeout(300);
-  await assertRichTextVRange(page, 0, 2, 0);
+  await assertRichTextInlineRange(page, 0, 2, 0);
 
   await pressEnter(page);
   await assertRichTexts(page, ['he', 'llo']);
@@ -260,7 +260,7 @@ test('split paragraph block by enter', async ({ page }) => {
     'affine:paragraph',
     'affine:paragraph',
   ]);
-  await assertRichTextVRange(page, 1, 0, 0);
+  await assertRichTextInlineRange(page, 1, 0, 0);
 
   await undoByKeyboard(page);
   await assertRichTexts(page, ['hello']);
@@ -287,7 +287,7 @@ test('split paragraph block with selected text by enter', async ({ page }) => {
   await page.keyboard.press('ArrowLeft');
   await page.waitForTimeout(300);
   await page.keyboard.up('Shift');
-  await assertRichTextVRange(page, 0, 2, 2);
+  await assertRichTextInlineRange(page, 0, 2, 2);
 
   await pressEnter(page);
   await assertRichTexts(page, ['he', 'o']);
@@ -295,7 +295,7 @@ test('split paragraph block with selected text by enter', async ({ page }) => {
     'affine:paragraph',
     'affine:paragraph',
   ]);
-  await assertRichTextVRange(page, 1, 0, 0);
+  await assertRichTextInlineRange(page, 1, 0, 0);
 
   await undoByKeyboard(page);
   await assertRichTexts(page, ['hello']);
@@ -313,13 +313,13 @@ test('add multi line by soft enter', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await pressArrowLeft(page, 3);
-  await assertRichTextVRange(page, 0, 2, 0);
+  await assertRichTextInlineRange(page, 0, 2, 0);
   // Avoid Yjs history manager merge two operations
   await captureHistory(page);
 
   await pressShiftEnter(page);
   await assertRichTexts(page, ['he\nllo']);
-  await assertRichTextVRange(page, 0, 3, 0);
+  await assertRichTextInlineRange(page, 0, 3, 0);
 
   await undoByKeyboard(page);
   await assertRichTexts(page, ['hello']);
@@ -1145,7 +1145,7 @@ test('delete at start of paragraph with content', async ({ page }) => {
   await captureHistory(page);
 
   await pressArrowLeft(page, 3);
-  await assertRichTextVRange(page, 1, 0, 0);
+  await assertRichTextInlineRange(page, 1, 0, 0);
 
   await pressBackspace(page);
   await assertRichTexts(page, ['123456']);
@@ -1190,18 +1190,18 @@ test('after deleting a text row, cursor should jump to the end of previous list 
   await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'hello');
-  await assertRichTextVRange(page, 0, 5, 0);
+  await assertRichTextInlineRange(page, 0, 5, 0);
 
   await pressEnter(page);
   await type(page, 'w');
   await assertRichTexts(page, ['hello', 'w']);
-  await assertRichTextVRange(page, 1, 1, 0);
+  await assertRichTextInlineRange(page, 1, 1, 0);
   await pressArrowUp(page);
   await pressArrowDown(page);
 
   await pressArrowLeft(page);
   await pressBackspace(page);
-  await assertRichTextVRange(page, 0, 5, 0);
+  await assertRichTextInlineRange(page, 0, 5, 0);
 });
 
 test('press tab in paragraph children', async ({ page }) => {
@@ -1807,42 +1807,42 @@ test('arrow up/down navigation within and across paragraphs containing different
   await focusRichText(page);
 
   await type(page, 'a'.repeat(20));
-  await assertRichTextVRange(page, 0, 20, 0);
+  await assertRichTextInlineRange(page, 0, 20, 0);
   await type(page, '*');
   await type(page, 'i'.repeat(5));
   await type(page, '*');
   await pressSpace(page);
-  await assertRichTextVRange(page, 0, 25, 0);
+  await assertRichTextInlineRange(page, 0, 25, 0);
   await type(page, 'a'.repeat(100));
-  await assertRichTextVRange(page, 0, 125, 0);
+  await assertRichTextInlineRange(page, 0, 125, 0);
   await pressEnter(page);
 
   await type(page, 'a'.repeat(100));
-  await assertRichTextVRange(page, 1, 100, 0);
+  await assertRichTextInlineRange(page, 1, 100, 0);
   await type(page, '*');
   await type(page, 'i'.repeat(5));
   await type(page, '*');
   await pressSpace(page);
-  await assertRichTextVRange(page, 1, 105, 0);
+  await assertRichTextInlineRange(page, 1, 105, 0);
   await type(page, 'a'.repeat(20));
-  await assertRichTextVRange(page, 1, 125, 0);
+  await assertRichTextInlineRange(page, 1, 125, 0);
 
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 1, 32, 0);
+  await assertRichTextInlineRange(page, 1, 32, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 0, 125, 0);
+  await assertRichTextInlineRange(page, 0, 125, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 0, 35, 0);
+  await assertRichTextInlineRange(page, 0, 35, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 0, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 0, 93, 0);
+  await assertRichTextInlineRange(page, 0, 93, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 1, 0, 0);
+  await assertRichTextInlineRange(page, 1, 0, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 1, 90, 0);
+  await assertRichTextInlineRange(page, 1, 90, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 1, 125, 0);
+  await assertRichTextInlineRange(page, 1, 125, 0);
 });
 
 test('delete divider using keyboard from prev/next paragraph', async ({
