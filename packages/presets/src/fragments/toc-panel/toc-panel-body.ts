@@ -177,21 +177,6 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
-
-    const { slots, root } = this.page;
-    const slotsForUpdate = root
-      ? [root.childrenUpdated, slots.blockUpdated]
-      : [slots.blockUpdated];
-
-    slots.rootAdded.on(root => {
-      this._disposables.add(root.childrenUpdated.on(() => this._updateNotes()));
-    });
-
-    slotsForUpdate.forEach(slot => {
-      this._disposables.add(slot.on(() => this._updateNotes()));
-    });
-
-    this._updateNotes();
   }
 
   override disconnectedCallback(): void {
@@ -241,7 +226,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   }
 
   override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('page')) {
+    if (_changedProperties.has('page') || _changedProperties.has('edgeless')) {
       this._setPageDisposables();
     }
   }
