@@ -39,6 +39,7 @@ import {
 } from '@blocksuite/lit';
 import type { AiPanel } from '@blocksuite/presets';
 import { EditorContainer } from '@blocksuite/presets';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { Job, Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
