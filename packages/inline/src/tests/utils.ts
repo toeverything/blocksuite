@@ -1,5 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { DeltaInsert, InlineEditor, InlineRange } from '@blocksuite/virgo';
+import type {
+  DeltaInsert,
+  InlineEditor,
+  InlineRange,
+} from '@blocksuite/inline';
 import { expect, type Page } from '@playwright/test';
 
 const defaultPlaygroundURL = new URL(`http://localhost:5173/`);

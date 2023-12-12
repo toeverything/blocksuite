@@ -22,7 +22,7 @@
         '@blocksuite/global': 'nightly',
         '@blocksuite/lit': 'nightly',
         '@blocksuite/store': 'nightly',
-        '@blocksuite/virgo': 'nightly',
+        '@blocksuite/inline': 'nightly',
       },
     }"
     :code-options="codeOptions"

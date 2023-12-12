@@ -11,7 +11,7 @@ packages=(
   "global"
   # "playground" # NOT PUBLISHED
   "store"
-  "virgo"
+  "inline"
   "lit"
 )
 

@@ -40,7 +40,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
     this._inlineRange = newInlineRange;
 
-    // try to trigger update because the `selected` state of the virgo element may change
+    // try to trigger update because the `selected` state of inline editor element may change
     if (this.editor.mounted) {
       // range change may happen before the editor is prepared
       await this.editor.waitForUpdate();

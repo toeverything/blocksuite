@@ -1,5 +1,5 @@
-import type { DeltaInsert, InlineEditor } from '@blocksuite/virgo';
-import { baseTextAttributes } from '@blocksuite/virgo';
+import type { DeltaInsert, InlineEditor } from '@blocksuite/inline';
+import { baseTextAttributes } from '@blocksuite/inline';
 import { z } from 'zod';
 
 export const affineTextAttributes = baseTextAttributes.extend({

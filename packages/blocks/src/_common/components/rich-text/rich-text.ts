@@ -1,14 +1,14 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Y } from '@blocksuite/store';
-import { Text, Workspace } from '@blocksuite/store';
 import {
   type AttributeRenderer,
   createInlineKeyDownHandler,
   InlineEditor,
   type InlineRange,
   type InlineRangeProvider,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Y } from '@blocksuite/store';
+import { Text, Workspace } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { z } from 'zod';

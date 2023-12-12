@@ -1,7 +1,7 @@
 import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
+import { type InlineRange, type VLine } from '@blocksuite/inline';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { type InlineRange, type VLine } from '@blocksuite/virgo';
 
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { SCROLL_THRESHOLD } from '../consts.js';

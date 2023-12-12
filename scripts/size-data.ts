@@ -38,9 +38,9 @@ const presets: Preset[] = [
     entry: 'dist/index.js',
   },
   {
-    name: 'virgo',
+    name: 'inline',
     imports: '*',
-    pkg: path.resolve(pkgDir, 'virgo'),
+    pkg: path.resolve(pkgDir, 'inline'),
     entry: 'dist/index.js',
   },
 ];

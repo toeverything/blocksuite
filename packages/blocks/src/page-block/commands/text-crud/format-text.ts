@@ -1,6 +1,6 @@
 import type { Command, TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/virgo';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';

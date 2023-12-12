@@ -1,7 +1,7 @@
 import type { Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 import type { BlockElement } from '@blocksuite/lit';
-import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/virgo';
 
 import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';

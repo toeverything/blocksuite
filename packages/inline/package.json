@@ -1,5 +1,5 @@
 {
-  "name": "@blocksuite/virgo",
+  "name": "@blocksuite/inline",
   "version": "0.10.0",
   "description": "A micro editor.",
   "type": "module",

@@ -53,7 +53,7 @@
       "path": "./packages/global"
     },
     {
-      "path": "./packages/virgo"
+      "path": "./packages/inline"
     },
     {
       "path": "./tests"

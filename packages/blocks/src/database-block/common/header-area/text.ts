@@ -1,8 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { InlineRange } from '@blocksuite/inline';
+import { InlineEditor } from '@blocksuite/inline';
 import type { Y } from '@blocksuite/store';
 import { Text, Workspace } from '@blocksuite/store';
-import type { InlineRange } from '@blocksuite/virgo';
-import { InlineEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';

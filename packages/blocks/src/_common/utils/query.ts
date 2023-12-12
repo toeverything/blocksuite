@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
+import { INLINE_ROOT_ATTR } from '@blocksuite/inline';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { INLINE_ROOT_ATTR } from '@blocksuite/virgo';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';

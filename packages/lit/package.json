@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/virgo": "workspace:*",
+    "@blocksuite/inline": "workspace:*",
     "lit": "^3.1.0"
   },
   "devDependencies": {

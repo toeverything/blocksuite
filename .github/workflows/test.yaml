@@ -177,8 +177,8 @@ jobs:
       - name: Run integration test
         run: pnpm test:integration
 
-  virgo-e2e-test:
-    name: Virgo E2E test
+  inline-e2e-test:
+    name: Inline Editor E2E test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -197,8 +197,8 @@ jobs:
       - name: Install playwright browsers
         run: npx playwright install chromium
 
-      - name: Run virgo playwright test
-        run: pnpm --filter=@blocksuite/virgo test:e2e
+      - name: Run inline editor playwright test
+        run: pnpm --filter=@blocksuite/inline test:e2e
 
       - name: Upload test results
         if: ${{ failure() }}

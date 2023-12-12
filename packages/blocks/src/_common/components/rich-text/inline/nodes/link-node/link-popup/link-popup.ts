@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { InlineRange } from '@blocksuite/inline/types';
 import type { BlockElement } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import type { InlineRange } from '@blocksuite/virgo/types';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';

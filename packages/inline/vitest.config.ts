@@ -7,7 +7,7 @@ export default defineConfig({
     coverage: {
       provider: 'istanbul', // or 'c8'
       reporter: ['lcov'],
-      reportsDirectory: '../../.coverage/virgo',
+      reportsDirectory: '../../.coverage/inline',
     },
     /**
      * Custom handler for console.log in tests.

@@ -23,6 +23,7 @@ import type {
   RichText,
 } from '../../packages/blocks/src/index.js';
 import { assertExists } from '../../packages/global/src/utils.js';
+import type { InlineRootElement } from '../../packages/inline/src/index.js';
 import type { BlockElement } from '../../packages/lit/src/index.js';
 import {
   PAGE_VERSION,
@@ -33,7 +34,6 @@ import type {
   SerializedStore,
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
-import type { InlineRootElement } from '../../packages/virgo/src/index.js';
 import {
   getCanvasElementsCount,
   getConnectorPath,

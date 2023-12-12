@@ -1,10 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import {
   INLINE_ROOT_ATTR,
   type InlineRange,
   type InlineRootElement,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 
 import type { Flavour } from '../../../models.js';
 import type {

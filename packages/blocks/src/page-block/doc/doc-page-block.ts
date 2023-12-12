@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
+import { InlineEditor } from '@blocksuite/inline';
 import { BlockElement } from '@blocksuite/lit';
-import { InlineEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

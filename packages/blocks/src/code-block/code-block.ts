@@ -3,12 +3,12 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import {
   INLINE_ROOT_ATTR,
   type InlineRangeProvider,
   type InlineRootElement,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
+import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import { autoPlacement, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
