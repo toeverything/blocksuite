@@ -28,7 +28,7 @@ export class DatabaseTableViewFullScreen extends BlockElement<DatabaseBlockModel
       <affine-database
         class="affine-block-element"
         .modalMode=${true}
-        .root=${this.root}
+        .host=${this.host}
         .model=${this.model}
       ></affine-database>
     `;

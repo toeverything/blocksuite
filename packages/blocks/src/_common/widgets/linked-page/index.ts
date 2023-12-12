@@ -11,8 +11,8 @@ import { customElement } from 'lit/decorators.js';
 import { isControlledKeyboardEvent } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/index.js';
 import {
+  getInlineEditorByModel,
   getViewportElement,
-  getVirgoByModel,
 } from '../../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../../_common/utils/selection.js';
 import { getPopperPosition } from '../../../page-block/utils/position.js';
@@ -112,29 +112,31 @@ export class AffineLinkedPageWidget extends WidgetElement {
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
     if (isControlledKeyboardEvent(event) || event.key.length !== 1) return;
-    const text = this.root.selection.value.find(selection =>
+    const text = this.host.selection.value.find(selection =>
       selection.is('text')
     );
     if (!text) {
       return;
     }
-    const model = this.root.page.getBlockById(text.blockId);
+    const model = this.host.page.getBlockById(text.blockId);
     if (!model) {
       return;
     }
     if (matchFlavours(model, this.options.ignoreBlockTypes)) return;
-    const vEditor = getVirgoByModel(model);
-    if (!vEditor) return;
-    const vRange = vEditor.getVRange();
-    if (!vRange) return;
-    if (vRange.length > 0) {
+    const inlineEditor = getInlineEditorByModel(model);
+    if (!inlineEditor) return;
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
+    if (inlineRange.length > 0) {
       // When select text and press `[[` should not trigger transform,
       // since it will break the bracket complete.
       // Expected `[[selected text]]` instead of `@selected text]]`
       return;
     }
 
-    const [leafStart, offsetStart] = vEditor.getTextPoint(vRange.index);
+    const [leafStart, offsetStart] = inlineEditor.getTextPoint(
+      inlineRange.index
+    );
     const prefixText = leafStart.textContent
       ? leafStart.textContent.slice(0, offsetStart)
       : '';
@@ -145,24 +147,25 @@ export class AffineLinkedPageWidget extends WidgetElement {
     if (!matchedKey) return;
 
     const primaryTriggerKey = this.options.triggerKeys[0];
-    vEditor.slots.rangeUpdated.once(() => {
+    inlineEditor.slots.rangeUpdated.once(() => {
       if (this.options.convertTriggerKey && primaryTriggerKey !== matchedKey) {
         // Convert to the primary trigger key
         // e.g. [[ -> @
-        const startIdxBeforeMatchKey = vRange.index - (matchedKey.length - 1);
-        vEditor.deleteText({
+        const startIdxBeforeMatchKey =
+          inlineRange.index - (matchedKey.length - 1);
+        inlineEditor.deleteText({
           index: startIdxBeforeMatchKey,
           length: matchedKey.length,
         });
-        vEditor.insertText(
+        inlineEditor.insertText(
           { index: startIdxBeforeMatchKey, length: 0 },
           primaryTriggerKey
         );
-        vEditor.setVRange({
+        inlineEditor.setInlineRange({
           index: startIdxBeforeMatchKey + primaryTriggerKey.length,
           length: 0,
         });
-        vEditor.slots.rangeUpdated.once(() => {
+        inlineEditor.slots.rangeUpdated.once(() => {
           this.showLinkedPage(model, primaryTriggerKey);
         });
         return;

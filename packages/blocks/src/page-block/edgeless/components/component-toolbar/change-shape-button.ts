@@ -21,7 +21,7 @@ import type { CssVariableName } from '../../../../_common/theme/css-variables.js
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import { LineWidth, type ShapeTool } from '../../../../_common/utils/types.js';
 import { CanvasTextFontFamily } from '../../../../surface-block/consts.js';
-import type { PhasorElementType } from '../../../../surface-block/index.js';
+import type { CanvasElementType } from '../../../../surface-block/index.js';
 import {
   type ShapeElement,
   ShapeStyle,
@@ -274,7 +274,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   slots!: EdgelessSelectionSlots;
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
 
   @query('.change-shape-button')
   private _changeShapeButton!: EdgelessToolIconButton;
@@ -328,7 +328,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     const textColor = this._getTextColor(color);
     const filled = !isTransparent(color);
     this.elements.forEach(ele => {
-      this.surface.updateElement<PhasorElementType.SHAPE>(ele.id, {
+      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
         filled,
         fillColor: color,
         color: textColor,
@@ -338,7 +338,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeColor(color: CssVariableName) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<PhasorElementType.SHAPE>(ele.id, {
+      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
         strokeColor: color,
       });
     });
@@ -346,7 +346,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeWidth(strokeWidth: number) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<PhasorElementType.SHAPE>(ele.id, {
+      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
         strokeWidth,
       });
     });
@@ -354,7 +354,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<PhasorElementType.SHAPE>(ele.id, {
+      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
         strokeStyle,
       });
     });
@@ -384,7 +384,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStyle(shapeStyle: ShapeStyle) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<PhasorElementType.SHAPE>(ele.id, {
+      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
         shapeStyle: shapeStyle,
         fontFamily:
           shapeStyle === ShapeStyle.General
@@ -401,7 +401,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._changeShapeButton,
       this._shapePanel,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._shapePanelPopper);
@@ -414,7 +414,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
         this.page.captureSync();
         this.elements.forEach(element => {
-          this.surface.updateElement<PhasorElementType.SHAPE>(
+          this.surface.updateElement<CanvasElementType.SHAPE>(
             element.id,
             updatedProps
           );
@@ -426,7 +426,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._fillColorButton,
       this._fillColorMenu,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._fillColorMenuPopper);
@@ -435,7 +435,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._strokeColorButton,
       this._strokeColorMenu,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._strokeColorMenuPopper);
@@ -444,7 +444,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._lineStylesButton,
       this._lineStylesPanel,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._lineStylesPanelPopper);
@@ -453,7 +453,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._shapeStyleButton,
       this._shapeStyleMenu,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._shapeStyleMenuPopper);
@@ -477,7 +477,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     return html`
       <div class="change-shape-toolbar-container">
         <edgeless-tool-icon-button
-          .tooltip=${this._popperShow ? '' : 'Switch Type'}
+          .tooltip=${this._showPopper ? '' : 'Switch Type'}
           .tipPosition=${'bottom'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
@@ -496,7 +496,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
         <edgeless-tool-icon-button
-          .tooltip=${this._popperShow ? '' : 'Style'}
+          .tooltip=${this._showPopper ? '' : 'Style'}
           .tipPosition=${'bottom'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
@@ -523,7 +523,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           class="fill-color-button"
-          .tooltip=${this._popperShow ? '' : 'Fill color'}
+          .tooltip=${this._showPopper ? '' : 'Fill color'}
           .tipPosition=${'bottom'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
@@ -544,7 +544,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           class="stroke-color-button"
-          .tooltip=${this._popperShow ? '' : 'Border color'}
+          .tooltip=${this._showPopper ? '' : 'Border color'}
           .tipPosition=${'bottom'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
@@ -567,7 +567,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
         <edgeless-tool-icon-button
-          .tooltip=${this._popperShow ? '' : 'Border style'}
+          .tooltip=${this._showPopper ? '' : 'Border style'}
           .tipPosition=${'bottom'}
           .active=${false}
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}

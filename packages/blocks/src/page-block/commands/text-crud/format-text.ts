@@ -1,15 +1,15 @@
 import type { Command, TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/virgo';
 
-import type { AffineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
-import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
+import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import type { Flavour } from '../../../models.js';
 
 // for text selection
 export const formatTextCommand: Command<
-  'currentTextSelection' | 'root',
+  'currentTextSelection' | 'host',
   never,
   {
     textSelection?: TextSelection;
@@ -17,10 +17,10 @@ export const formatTextCommand: Command<
     mode?: 'replace' | 'merge';
   }
 > = (ctx, next) => {
-  const { root, styles, mode = 'merge' } = ctx;
+  const { host, styles, mode = 'merge' } = ctx;
   assertExists(
-    root,
-    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
+    host,
+    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
   );
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
@@ -29,9 +29,9 @@ export const formatTextCommand: Command<
     '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before adding this command to the pipeline.'
   );
 
-  const success = root.std.command
+  const success = host.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .getSelectedBlocks({
       textSelection,
       filter: el =>
@@ -42,33 +42,33 @@ export const formatTextCommand: Command<
       const { selectedBlocks } = ctx;
       assertExists(selectedBlocks);
 
-      const selectedVEditors = selectedBlocks.flatMap(el => {
-        const vRoot = el.querySelector<VirgoRootElement<AffineTextAttributes>>(
-          `[${VIRGO_ROOT_ATTR}]`
-        );
-        if (vRoot && vRoot.virgoEditor.getVRange()) {
-          return vRoot.virgoEditor;
+      const selectedInlineEditors = selectedBlocks.flatMap(el => {
+        const inlineRoot = el.querySelector<
+          InlineRootElement<AffineTextAttributes>
+        >(`[${INLINE_ROOT_ATTR}]`);
+        if (inlineRoot && inlineRoot.inlineEditor.getInlineRange()) {
+          return inlineRoot.inlineEditor;
         }
         return [];
       });
 
-      selectedVEditors.forEach(vEditor => {
-        const vRange = vEditor.getVRange();
-        if (!vRange) return;
+      selectedInlineEditors.forEach(inlineEditor => {
+        const inlineRange = inlineEditor.getInlineRange();
+        if (!inlineRange) return;
 
-        if (vRange.length === 0) {
-          const delta = vEditor.getDeltaByRangeIndex(vRange.index);
+        if (inlineRange.length === 0) {
+          const delta = inlineEditor.getDeltaByRangeIndex(inlineRange.index);
           if (!delta) return;
 
-          vEditor.setMarks({
-            ...vEditor.marks,
+          inlineEditor.setMarks({
+            ...inlineEditor.marks,
             ...Object.fromEntries(
               Object.entries(styles).map(([key, value]) => {
                 if (typeof value === 'boolean') {
                   return [
                     key,
-                    (vEditor.marks &&
-                      vEditor.marks[key as keyof AffineTextAttributes]) ||
+                    (inlineEditor.marks &&
+                      inlineEditor.marks[key as keyof AffineTextAttributes]) ||
                     (delta.attributes &&
                       delta.attributes[key as keyof AffineTextAttributes])
                       ? null
@@ -79,16 +79,16 @@ export const formatTextCommand: Command<
               })
             ),
           });
-          clearMarksOnDiscontinuousInput(vEditor);
+          clearMarksOnDiscontinuousInput(inlineEditor);
         } else {
-          vEditor.formatText(vRange, styles, {
+          inlineEditor.formatText(inlineRange, styles, {
             mode,
           });
         }
       });
 
       Promise.all(selectedBlocks.map(el => el.updateComplete)).then(() => {
-        root.rangeManager?.syncTextSelectionToRange(textSelection);
+        host.rangeManager?.syncTextSelectionToRange(textSelection);
       });
 
       next();

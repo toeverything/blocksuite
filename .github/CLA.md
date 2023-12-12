@@ -48,7 +48,7 @@ Example:
 - Innei, @Innei, 2023/02/09
 - gotjoshua, @gotjoshua, 2023/02/10
 - Fangdun Tsai, @fundon, 2023/02/13
-- Zhilin Liu, @lzlme, 2023/02/16
+- Zhilin Liu, @devlzl, 2023/02/16
 - zqran, @zqran, 2023/02/17
 - shengxinjing, @shengxinjing, 2023/02/20
 - qinluhe, @qinluhe, 2023/02/21
@@ -90,7 +90,6 @@ Example:
 - Garfield Lee, @Garfield550, 2023/08/09
 - wiirhan @wiirhan 2023/08/10
 - Tomoyuki Yamada @tomoyukiy 2023/08/11
-- devlzl @devlzl 2023/08/12
 - WBbug @WBbug 2023/08/16
 - Quan Deng @dengquan 2023/08/21
 - Ayaka Rizumu @LittleSound 2023/08/22
@@ -108,3 +107,9 @@ Example:
 - Yunfei He, @hyf0, 2023/11/12
 - Rachit Chawla, @rachit1313, 2023/11/22
 - Alisallon, @yangvom, 2023/11/26
+- Jiu Song, @alpakaka0o0, 2023/11/26
+- Kimhyeonju, @kimhyeonju, 2023/11/26
+- minjuSong @mingjuu 2023/11/26
+- Seohyun Park, @sseooh, 2023/11/26
+- Eunseo Seo, @ddeonseo, 2023/11/29
+- Gaurav Ruhela, @gauravruhela07, 2023/12/07

@@ -1,5 +1,5 @@
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
-import { EditorContainer } from '@blocksuite/editor';
+import { AffineEditorContainer } from '@blocksuite/presets';
 import type { BlobStorage, Page, Workspace } from '@blocksuite/store';
 import {
   createIndexeddbStorage,
@@ -13,8 +13,6 @@ import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
 
 export const params = new URLSearchParams(location.search);
 export const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
-
-const featureArgs = (params.get('features') ?? '').split(',');
 
 export function getOptions(
   fn: (params: URLSearchParams) => Record<string, string | number>
@@ -48,10 +46,6 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     idGenerator,
     blobStorages,
     defaultFlags: {
-      enable_toggle_block: featureArgs.includes('toggle'),
-      enable_set_remote_flag: true,
-      enable_block_hub: true,
-      enable_note_index: true,
       enable_bultin_ledits: true,
       readonly: {
         'page:home': false,
@@ -78,9 +72,9 @@ export async function testIDBExistence() {
 export function createEditor(page: Page, element: HTMLElement) {
   const presets = getPlaygroundPresets();
 
-  const editor = new EditorContainer();
-  editor.pagePreset = presets.pageModePreset;
-  editor.edgelessPreset = presets.edgelessModePreset;
+  const editor = new AffineEditorContainer();
+  editor.docSpecs = presets.docModePreset;
+  editor.edgelessSpecs = presets.edgelessModePreset;
   editor.page = page;
   editor.slots.pageLinkClicked.on(({ pageId }) => {
     const target = page.workspace.getPage(pageId);
@@ -92,8 +86,5 @@ export function createEditor(page: Page, element: HTMLElement) {
 
   element.append(editor);
 
-  editor.createBlockHub().then(blockHub => {
-    document.body.appendChild(blockHub);
-  });
   return editor;
 }

@@ -11,9 +11,11 @@ import type { AwarenessStore, BlockSuiteDoc } from '../yjs/index.js';
 import type { YBlock } from './block/index.js';
 import { BlockTree } from './block/index.js';
 import type { PageMeta } from './meta.js';
+import { Space } from './space.js';
 import type { Workspace } from './workspace.js';
 
 export type YBlocks = Y.Map<YBlock>;
+type FlatBlockMap = Record<string, YBlock>;
 
 /** JSON-serializable properties of a block */
 export type BlockSysProps = {
@@ -33,9 +35,10 @@ type PageOptions = {
   idGenerator?: IdGenerator;
 };
 
-export class Page extends BlockTree {
+export class Page extends Space<FlatBlockMap> {
   private readonly _workspace: Workspace;
   private readonly _idGenerator: IdGenerator;
+  private readonly _blockTree: BlockTree;
   private _history!: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
   /** Indicate whether the underlying subdoc has been loaded. */
@@ -58,7 +61,7 @@ export class Page extends BlockTree {
      * Note that at this moment, the whole block tree may not be fully initialized yet.
      */
     rootAdded: new Slot<BaseBlockModel>(),
-    rootDeleted: new Slot<string | string[]>(),
+    rootDeleted: new Slot<string>(),
     blockUpdated: new Slot<
       | {
           type: 'add';
@@ -87,9 +90,13 @@ export class Page extends BlockTree {
     awarenessStore,
     idGenerator = uuidv4,
   }: PageOptions) {
-    super({ id, doc, awarenessStore, schema: workspace.schema });
+    super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
+    this._blockTree = new BlockTree({
+      schema: workspace.schema,
+      yBlocks: this.yBlocks,
+    });
   }
 
   get readonly() {
@@ -109,7 +116,7 @@ export class Page extends BlockTree {
   }
 
   get schema() {
-    return this._schema;
+    return this.workspace.schema;
   }
 
   get meta() {
@@ -188,15 +195,17 @@ export class Page extends BlockTree {
     return this._idGenerator('block');
   }
 
-  getBlockById(id: string) {
-    return this._blocks.get(id)?.model ?? null;
+  getBlockById<Model extends BaseBlockModel = BaseBlockModel>(
+    id: string
+  ): Model | null {
+    return (this._blockTree.getBlock(id)?.model as Model) ?? null;
   }
 
   getBlockByFlavour(blockFlavour: string | string[]) {
     const flavours =
       typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
 
-    return Array.from(this._blocks.values())
+    return Array.from(this._blockTree.blocks.values())
       .filter(({ flavour }) => flavours.includes(flavour))
       .map(x => x.model);
   }
@@ -344,7 +353,7 @@ export class Page extends BlockTree {
     };
 
     this.transact(() => {
-      this._addBlock(id, flavour, { ...blockProps });
+      this._blockTree.addBlock(id, flavour, { ...blockProps });
       // set the yBlock at the very beginning, otherwise yBlock will be always empty
 
       assertValidChildren(this._yBlocks, clonedProps);
@@ -456,13 +465,6 @@ export class Page extends BlockTree {
         targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
       }
     });
-
-    // Emit event to indicate that the children of these blocks have been updated
-    Array.from(childBlocksPerParent.keys()).forEach(parent =>
-      parent.childrenUpdated.emit()
-    );
-
-    newParent.childrenUpdated.emit();
   }
 
   updateBlock<T extends Partial<BlockProps>>(
@@ -509,7 +511,7 @@ export class Page extends BlockTree {
 
         const schema = this.schema.flavourSchemaMap.get(model.flavour);
         assertExists(schema);
-        syncBlockProps(schema, yBlock, callBackOrProps);
+        syncBlockProps(schema, model, yBlock, callBackOrProps);
         return;
       }
 
@@ -614,7 +616,7 @@ export class Page extends BlockTree {
               dl(id);
             });
 
-            this._removeBlock(id);
+            this._blockTree.removeBlock(id);
           };
 
           yModelChildren.forEach(id => {
@@ -623,9 +625,7 @@ export class Page extends BlockTree {
         }
       }
 
-      this._removeBlock(model.id);
-
-      parent.childrenUpdated.emit();
+      this._blockTree.removeBlock(model.id);
     });
   }
 
@@ -696,7 +696,7 @@ export class Page extends BlockTree {
       return;
     }
 
-    this._onBlockAdded(id, {
+    this._blockTree.onBlockAdded(id, this, {
       onChange: (block, key) => {
         block.model.propsUpdated.emit({ key });
       },
@@ -708,15 +708,14 @@ export class Page extends BlockTree {
         });
       },
     });
-    const block = this._blocks.get(id);
+    const block = this._blockTree.getBlock(id);
     assertExists(block);
     const model = block.model;
-    model.page = this;
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
       yChildren.forEach((id: string, index) => {
-        const hasChild = this._blocks.has(id);
+        const hasChild = this._blockTree.blocks.has(id);
 
         if (!hasChild) {
           this._handleYBlockAdd(id);
@@ -744,6 +743,7 @@ export class Page extends BlockTree {
       this.slots.rootDeleted.emit(id);
     }
     assertExists(model);
+    this._blockTree.onBlockRemoved(id);
     this.slots.blockUpdated.emit({
       type: 'delete',
       id,
@@ -751,7 +751,6 @@ export class Page extends BlockTree {
       parent: this.getParent(model)?.id ?? '',
       model,
     });
-    this._onBlockRemoved(id);
   }
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
@@ -779,17 +778,15 @@ export class Page extends BlockTree {
     }
   };
 
-  validateVersion() {
-    this.workspace.meta.validateVersion(this.workspace);
-  }
-
   private _handleVersion() {
     // Initialization from empty yDoc, indicating that the document is new.
     if (!this.workspace.meta.hasVersion) {
       this.workspace.meta.writeVersion(this.workspace);
     } else {
       // Initialization from existing yDoc, indicating that the document is loaded from storage.
-      this.validateVersion();
+      if (this.awarenessStore.getFlag('enable_legacy_validation')) {
+        this.workspace.meta.validateVersion(this.workspace);
+      }
     }
   }
 

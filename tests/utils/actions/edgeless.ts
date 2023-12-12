@@ -54,21 +54,18 @@ export enum Shape {
   'Rounded rectangle' = 'Rounded rectangle',
 }
 
-export async function getNoteRect(
-  page: Page,
-  ids: { pageId: string; noteId: string; paragraphId: string }
-) {
+export async function getNoteRect(page: Page, noteId: string) {
   const xywh: string | null = await page.evaluate(
-    ([id]) => {
+    ([noteId]) => {
       const page = window.workspace.getPage('page:home');
-      const block = page?.getBlockById(id.noteId);
+      const block = page?.getBlockById(noteId);
       if (block?.flavour === 'affine:note') {
         return (block as NoteBlockModel).xywh;
       } else {
         return null;
       }
     },
-    [ids] as const
+    [noteId] as const
   );
   expect(xywh).not.toBeNull();
   const [x, y, w, h] = JSON.parse(xywh as string);
@@ -97,30 +94,33 @@ export async function getNoteProps(page: Page, noteId: string) {
   return props;
 }
 
-export async function registerFormatBarCustomElements(page: Page) {
-  await page.click('sl-button[content="Register FormatBar Custom Elements"]');
+export async function extendFormatBar(page: Page) {
+  await page.click('sl-button:text("Test Operations")');
+  await page.click('sl-menu-item:text("Extend Format Bar")');
+  await waitNextFrame(page);
 }
 
 export async function switchEditorMode(page: Page) {
-  await page.click('sl-button[content="Switch Editor Mode"]');
+  await page.click('sl-tooltip[content="Switch Editor Mode"]');
   // FIXME: listen to editor loaded event
   await waitNextFrame(page);
 }
 
 export async function switchEditorEmbedMode(page: Page) {
-  await page.click('sl-button[content="Add container offset"]');
+  await page.click('sl-button:text("Test Operations")');
+  await page.click('sl-menu-item:text("Switch Offset Mode")');
 }
 
-type BasicEdgelessTool = 'default' | 'pan' | 'note';
-type SpecialEdgelessTool =
+type EdgelessTool =
+  | 'default'
+  | 'pan'
+  | 'note'
   | 'shape'
   | 'brush'
   | 'eraser'
   | 'text'
   | 'connector'
   | 'frame';
-
-type EdgelessTool = BasicEdgelessTool | SpecialEdgelessTool;
 type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
@@ -1185,7 +1185,7 @@ export async function getGroupChildrenIds(page: Page, index = 0) {
   );
 }
 
-export async function getPhasorElementsCount(page: Page) {
+export async function getCanvasElementsCount(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');

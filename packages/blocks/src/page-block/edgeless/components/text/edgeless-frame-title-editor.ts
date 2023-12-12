@@ -25,12 +25,12 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  get vEditor() {
-    assertExists(this.richText.vEditor);
-    return this.richText.vEditor;
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
   }
-  get vEditorContainer() {
-    return this.vEditor.rootElement;
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
   }
 
   get frameBlock() {
@@ -52,12 +52,10 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   override firstUpdated(): void {
     const dispatcher = this.edgeless.dispatcher;
     assertExists(dispatcher);
-    this.frameBlock.showTitle = false;
-
     this.updateComplete.then(() => {
-      this.vEditor.selectAll();
+      this.inlineEditor.selectAll();
 
-      this.vEditor.slots.updated.on(() => {
+      this.inlineEditor.slots.updated.on(() => {
         this.requestUpdate();
       });
 
@@ -82,7 +80,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
       this.disposables.add(dispatcher.add('click', () => true));
       this.disposables.add(dispatcher.add('doubleClick', () => true));
-      this.disposables.addFromEvent(this.vEditorContainer, 'blur', () => {
+      this.disposables.addFromEvent(this.inlineEditorContainer, 'blur', () => {
         this._unmount();
       });
     });
@@ -91,7 +89,6 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
-    this.frameBlock.showTitle = true;
     this.edgeless.selectionManager.setSelection({
       elements: [],
       editing: false,
@@ -101,21 +98,28 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
   override render() {
     const viewport = this.edgeless.surface.viewport;
+    const frameBlock = this.frameBlock;
     const bound = Bound.deserialize(this.frameModel.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const virgoStyle = styleMap({
+    const { isInner } = frameBlock;
+
+    const inlineEditorStyle = styleMap({
       transformOrigin: 'top left',
       borderRadius: '4px',
       width: 'fit-content',
       padding: '4px 10px',
       fontSize: '14px',
       position: 'absolute',
-      left: x + 'px',
-      top: y - 36 + 'px',
+      left: (isInner ? x + 8 : x) + 'px',
+      top: (isInner ? y + 8 : y - 38) + 'px',
       minWidth: '8px',
       fontFamily: 'var(--affine-font-family)',
-      background: 'var(--affine-text-primary-color)',
-      color: 'var(--affine-white)',
+      background: isInner
+        ? 'var(--affine-white)'
+        : 'var(--affine-text-primary-color)',
+      color: isInner
+        ? 'var(--affine-text-secondary-color)'
+        : 'var(--affine-white)',
       outline: 'none',
       zIndex: '1',
       border: `1px solid
@@ -127,7 +131,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
       .enableAutoScrollVertically=${false}
-      style=${virgoStyle}
+      style=${inlineEditorStyle}
     ></rich-text>`;
   }
 }

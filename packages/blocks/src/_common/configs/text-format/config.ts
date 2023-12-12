@@ -1,10 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
+import type { EditorHost } from '@blocksuite/lit';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/virgo';
 import type { TemplateResult } from 'lit';
 
-import { toggleLinkPopup } from '../../components/rich-text/virgo/nodes/link-node/link-popup/toggle-link-popup.js';
-import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
+import { toggleLinkPopup } from '../../components/rich-text/inline/nodes/link-node/link-popup/toggle-link-popup.js';
+import type { AffineTextAttributes } from '../../components/rich-text/inline/types.js';
 import {
   BoldIcon,
   CodeIcon,
@@ -20,8 +20,8 @@ export interface TextFormatConfig {
   name: string;
   icon: TemplateResult<1>;
   hotkey?: string;
-  activeWhen: (root: BlockSuiteRoot) => boolean;
-  action: (root: BlockSuiteRoot) => void;
+  activeWhen: (host: EditorHost) => boolean;
+  action: (host: EditorHost) => void;
 }
 
 export const textFormatConfigs: TextFormatConfig[] = [
@@ -30,9 +30,9 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Bold',
     icon: BoldIcon,
     hotkey: 'Mod-b',
-    activeWhen: root => commonActiveWhen(root, 'bold'),
-    action: root => {
-      handleCommonStyle(root, 'bold');
+    activeWhen: host => commonActiveWhen(host, 'bold'),
+    action: host => {
+      handleCommonStyle(host, 'bold');
     },
   },
   {
@@ -40,9 +40,9 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Italic',
     icon: ItalicIcon,
     hotkey: 'Mod-i',
-    activeWhen: root => commonActiveWhen(root, 'italic'),
-    action: root => {
-      handleCommonStyle(root, 'italic');
+    activeWhen: host => commonActiveWhen(host, 'italic'),
+    action: host => {
+      handleCommonStyle(host, 'italic');
     },
   },
   {
@@ -50,9 +50,9 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Underline',
     icon: UnderlineIcon,
     hotkey: 'Mod-u',
-    activeWhen: root => commonActiveWhen(root, 'underline'),
-    action: root => {
-      handleCommonStyle(root, 'underline');
+    activeWhen: host => commonActiveWhen(host, 'underline'),
+    action: host => {
+      handleCommonStyle(host, 'underline');
     },
   },
   {
@@ -60,9 +60,9 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Strikethrough',
     icon: StrikethroughIcon,
     hotkey: 'Mod-shift-s',
-    activeWhen: root => commonActiveWhen(root, 'strike'),
-    action: root => {
-      handleCommonStyle(root, 'strike');
+    activeWhen: host => commonActiveWhen(host, 'strike'),
+    action: host => {
+      handleCommonStyle(host, 'strike');
     },
   },
   {
@@ -70,9 +70,9 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Code',
     icon: CodeIcon,
     hotkey: 'Mod-e',
-    activeWhen: root => commonActiveWhen(root, 'code'),
-    action: root => {
-      handleCommonStyle(root, 'code');
+    activeWhen: host => commonActiveWhen(host, 'code'),
+    action: host => {
+      handleCommonStyle(host, 'code');
     },
   },
   {
@@ -80,30 +80,30 @@ export const textFormatConfigs: TextFormatConfig[] = [
     name: 'Link',
     icon: LinkIcon,
     hotkey: 'Mod-k',
-    activeWhen: root => commonActiveWhen(root, 'link'),
+    activeWhen: host => commonActiveWhen(host, 'link'),
     action: () => {
       const selection = document.getSelection();
       if (!selection || selection.rangeCount === 0) return;
       const range = selection.getRangeAt(0);
 
-      const vRoot = range.commonAncestorContainer.parentElement?.closest<
-        VirgoRootElement<AffineTextAttributes>
-      >(`[${VIRGO_ROOT_ATTR}]`);
-      if (!vRoot) return;
+      const inlineRoot = range.commonAncestorContainer.parentElement?.closest<
+        InlineRootElement<AffineTextAttributes>
+      >(`[${INLINE_ROOT_ATTR}]`);
+      if (!inlineRoot) return;
 
-      const vEditor = vRoot.virgoEditor;
-      const goalVRange = vEditor.getVRange();
-      assertExists(goalVRange);
+      const inlineEditor = inlineRoot.inlineEditor;
+      const targetInlineRange = inlineEditor.getInlineRange();
+      assertExists(targetInlineRange);
 
-      if (goalVRange.length === 0) return;
+      if (targetInlineRange.length === 0) return;
 
-      const format = vEditor.getFormat(goalVRange);
+      const format = inlineEditor.getFormat(targetInlineRange);
       if (format.link) {
-        vEditor.formatText(goalVRange, { link: null });
+        inlineEditor.formatText(targetInlineRange, { link: null });
         return;
       }
 
-      toggleLinkPopup(vEditor, 'create', goalVRange);
+      toggleLinkPopup(inlineEditor, 'create', targetInlineRange);
     },
   },
 ];

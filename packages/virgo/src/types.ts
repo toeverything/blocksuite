@@ -16,16 +16,16 @@ export type AttributeRenderer<
   selected: boolean
 ) => TemplateResult<1>;
 
-export interface VRange {
+export interface InlineRange {
   index: number;
   length: number;
 }
 
-export type VRangeUpdatedProp = [range: VRange | null, sync: boolean];
+export type InlineRangeUpdatedProp = [range: InlineRange | null, sync: boolean];
 
 export type DeltaEntry<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
-> = [delta: DeltaInsert<TextAttributes>, range: VRange];
+> = [delta: DeltaInsert<TextAttributes>, range: InlineRange];
 
 // corresponding to [anchorNode/focusNode, anchorOffset/focusOffset]
 export type NativePoint = readonly [node: Node, offset: number];

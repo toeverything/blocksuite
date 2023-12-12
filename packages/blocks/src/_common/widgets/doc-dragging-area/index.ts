@@ -166,7 +166,7 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
 
     const getAllNodeFromTree = (): BlockElement[] => {
       const blockElement: BlockElement[] = [];
-      this.root.view.walkThrough(node => {
+      this.host.view.walkThrough(node => {
         const view = node.view;
         if (!(view instanceof BlockElement)) {
           return true;
@@ -186,7 +186,7 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
 
     const elements = getAllNodeFromTree();
 
-    const rootRect = this.root.getBoundingClientRect();
+    const rootRect = this.host.getBoundingClientRect();
     return elements.map(element => {
       const bounding = element.getBoundingClientRect();
       return {
@@ -214,12 +214,12 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
       this._allBlocksWithRect,
       userRect
     ).map(blockPath => {
-      return this.root.selection.getInstance('block', {
+      return this.host.selection.getInstance('block', {
         path: blockPath,
       });
     });
 
-    this.root.selection.setGroup('note', selections);
+    this.host.selection.setGroup('note', selections);
   }
 
   private _clearRaf() {

@@ -22,7 +22,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -71,7 +76,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -180,7 +190,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -342,7 +357,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -772,7 +792,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -866,7 +891,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -909,7 +939,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -972,7 +1007,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1007,7 +1047,7 @@ describe('notion html to snapshot', () => {
   test('image', async () => {
     const html = `<div class="page-body">
       <figure id="ed3d2ae9-62f5-433a-9049-9ddbd1c81ac5" class="image"><a
-          href="https://affine.pro/favicon-96.png"><img src="https://affine.pro/favicon-96.png" /></a>
+          href="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo.svg"><img src="https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo.svg" /></a>
       </figure>
     </div>`;
 
@@ -1015,7 +1055,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1056,7 +1101,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1065,7 +1115,7 @@ describe('notion html to snapshot', () => {
           props: {
             type: 'card',
             url: 'https://affine.pro/',
-            bookmarkTitle: 'AFFiNE - All In One KnowledgeOS',
+            title: 'AFFiNE - All In One KnowledgeOS',
             description:
               'The universal editor that lets you work, play, present or create just about anything.',
             icon: 'https://affine.pro/favicon-96.png',
@@ -1094,7 +1144,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',
@@ -1205,7 +1260,12 @@ describe('notion html to snapshot', () => {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
-      props: {},
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
       children: [
         {
           type: 'block',

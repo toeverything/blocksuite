@@ -6,7 +6,13 @@ import type {
   ReferenceElement,
   VirtualElement,
 } from '@floating-ui/dom';
-import { computePosition, flip, offset, shift } from '@floating-ui/dom';
+import {
+  autoUpdate,
+  computePosition,
+  flip,
+  offset,
+  shift,
+} from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -125,9 +131,6 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       padding: 8px;
       position: absolute;
       z-index: 999;
-    }
-
-    .affine-menu-header {
     }
 
     .affine-menu-body {
@@ -701,10 +704,22 @@ export const createPopup = (
     middleware?: Array<Middleware | null | undefined | false>;
   }
 ) => {
-  const root = document.querySelector('block-suite-root');
-  assertExists(root);
-  const modal = createModal(root);
+  const host = document.querySelector('editor-host');
+  assertExists(host);
+
+  const modal = createModal(host);
+  autoUpdate(target, content, () => {
+    computePosition(target, content, {
+      middleware: options?.middleware ?? [shift({ crossAxis: true })],
+    }).then(({ x, y }) => {
+      Object.assign(content.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    });
+  });
   modal.append(content);
+
   computePosition(target, content, {
     middleware: options?.middleware ?? [shift({ crossAxis: true })],
   }).then(({ x, y }) => {
@@ -713,12 +728,14 @@ export const createPopup = (
       top: `${y}px`,
     });
   });
+
   modal.onmousedown = ev => {
     if (ev.target === modal) {
       modal.remove();
       options?.onClose?.();
     }
   };
+
   modal.oncontextmenu = ev => {
     ev.preventDefault();
     if (ev.target === modal) {
@@ -726,9 +743,8 @@ export const createPopup = (
       options?.onClose?.();
     }
   };
-  return () => {
-    modal.remove();
-  };
+
+  return () => modal.remove();
 };
 export type MenuHandler = {
   close: () => void;

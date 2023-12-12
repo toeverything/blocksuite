@@ -3,15 +3,16 @@ import {
   PathFinder,
   type PointerEventState,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import {
-  calcDropTarget,
   findClosestBlockElement,
+  getClosestBlockElementByElement,
   getClosestBlockElementByPoint,
+  getDropRectByPoint,
   getHoveringNote,
+  getRectByBlockElement,
   isPageMode,
   matchFlavours,
   Point,
@@ -20,9 +21,11 @@ import {
 import type { BlockComponentElement } from '../../../index.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT,
   DRAG_HANDLE_OFFSET_LEFT,
   type DropResult,
+  type DropType,
   LIST_DRAG_HANDLE_OFFSET_LEFT,
 } from './config.js';
 
@@ -149,19 +152,125 @@ export const getClosestBlockByPoint = (
           blockSelector
         )
   ) as BlockElement;
+  if (
+    !closestBlockElement ||
+    !!closestBlockElement.closest('.surface-ref-note-portal')
+  )
+    return null;
   return closestBlockElement;
 };
+
+export function calcDropTarget(
+  point: Point,
+  model: BaseBlockModel,
+  element: Element,
+  draggingElements: BlockComponentElement[],
+  scale: number
+): DropResult | null {
+  let type: DropType | 'none' = 'none';
+  const height = 3 * scale;
+  const { rect: domRect } = getDropRectByPoint(point, model, element);
+
+  const distanceToTop = Math.abs(domRect.top - point.y);
+  const distanceToBottom = Math.abs(domRect.bottom - point.y);
+  const before = distanceToTop < distanceToBottom;
+
+  type = before ? 'before' : 'after';
+  let offsetY = 4;
+
+  if (type === 'before') {
+    // before
+    let prev;
+    let prevRect;
+
+    prev = element.previousElementSibling;
+    if (prev) {
+      if (
+        draggingElements.length &&
+        prev === draggingElements[draggingElements.length - 1]
+      ) {
+        type = 'none';
+      } else {
+        prevRect = getRectByBlockElement(prev);
+      }
+    } else {
+      prev = element.parentElement?.previousElementSibling;
+      if (prev) {
+        prevRect = prev.getBoundingClientRect();
+      }
+    }
+
+    if (prevRect) {
+      offsetY = (domRect.top - prevRect.bottom) / 2;
+    }
+  } else {
+    // Only consider drop as children when target block is list block.
+    // To drop in, the position must after the target first
+    // If drop in target has children, we can use insert before or after of that children
+    // to achieve the same effect.
+    const hasChild = (element as BlockComponentElement).childBlockElements
+      .length;
+    if (
+      matchFlavours(model, ['affine:list']) &&
+      !hasChild &&
+      point.x > domRect.x + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+    ) {
+      type = 'in';
+    }
+    // after
+    let next;
+    let nextRect;
+
+    next = element.nextElementSibling;
+    if (next) {
+      if (
+        type === 'after' &&
+        draggingElements.length &&
+        next === draggingElements[0]
+      ) {
+        type = 'none';
+        next = null;
+      }
+    } else {
+      next = getClosestBlockElementByElement(element.parentElement)
+        ?.nextElementSibling;
+    }
+
+    if (next) {
+      nextRect = getRectByBlockElement(next);
+      offsetY = (nextRect.top - domRect.bottom) / 2;
+    }
+  }
+
+  if (type === 'none') return null;
+
+  let top = domRect.top;
+  if (type === 'before') {
+    top -= offsetY;
+  } else {
+    top += domRect.height + offsetY;
+  }
+
+  if (type === 'in') {
+    domRect.x += BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
+    domRect.width -= BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
+  }
+
+  return {
+    rect: Rect.fromLWTH(domRect.left, domRect.width, top - height / 2, height),
+    dropBlockId: model.id,
+    dropType: type,
+  };
+}
 
 export const getDropResult = (
   event: MouseEvent,
   scale: number = 1
 ): DropResult | null => {
   let dropIndicator = null;
-  let dropBlockId = '';
-  let dropBefore = false;
 
   const target = captureEventTarget(event.target);
-  const rootElement = target?.closest('block-suite-root');
+  const rootElement = target?.closest('editor-host');
   const offset = {
     x: rootElement?.getBoundingClientRect().left ?? 0,
     y: rootElement?.getBoundingClientRect().top ?? 0,
@@ -175,38 +284,17 @@ export const getDropResult = (
     return dropIndicator;
   }
 
-  const blockId = closestBlockElement.model.id;
-  assertExists(blockId);
-
-  dropBlockId = blockId;
-
-  let rect = null;
-  let targetElement = null;
   const model = closestBlockElement.model;
 
-  const isDatabase = matchFlavours(model, ['affine:database'] as const);
+  const isDatabase = matchFlavours(model, ['affine:database']);
   if (isDatabase) {
     return dropIndicator;
   }
 
   const result = calcDropTarget(point, model, closestBlockElement, [], scale);
-
   if (result) {
-    rect = result.rect;
-    targetElement = result.modelState.element;
-    dropBefore = result.type === 'before' ? true : false;
+    dropIndicator = result;
   }
-
-  if (targetElement) {
-    const targetBlockId = targetElement.getAttribute('data-block-id');
-    if (targetBlockId) dropBlockId = targetBlockId;
-  }
-
-  dropIndicator = {
-    rect,
-    dropBlockId,
-    dropBefore,
-  };
 
   return dropIndicator;
 };

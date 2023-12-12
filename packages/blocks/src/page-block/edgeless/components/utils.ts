@@ -66,14 +66,17 @@ export function createButtonPopper(
   popperElement: HTMLElement,
   stateUpdated: (state: { display: 'show' | 'hidden' }) => void = () => {
     /** DEFAULT EMPTY FUNCTION */
-  }
+  },
+  mainAxis?: number,
+  crossAxis?: number
 ) {
   function compute() {
     computePosition(reference, popperElement, {
       placement: 'top',
       middleware: [
         offset({
-          mainAxis: 14,
+          mainAxis: mainAxis ?? 14,
+          crossAxis: crossAxis ?? 0,
         }),
         flip({
           fallbackPlacements: ['bottom'],
@@ -292,4 +295,28 @@ export function getResizeLabel(target: HTMLElement) {
   const ariaLabel = handle.getAttribute('aria-label');
   assertExists(ariaLabel);
   return ariaLabel;
+}
+
+export function launchIntoFullscreen(element: Element) {
+  if (element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if (
+    'mozRequestFullScreen' in element &&
+    element.mozRequestFullScreen instanceof Function
+  ) {
+    // Firefox
+    element.mozRequestFullScreen();
+  } else if (
+    'webkitRequestFullscreen' in element &&
+    element.webkitRequestFullscreen instanceof Function
+  ) {
+    // Chrome, Safari and Opera
+    element.webkitRequestFullscreen();
+  } else if (
+    'msRequestFullscreen' in element &&
+    element.msRequestFullscreen instanceof Function
+  ) {
+    // IE/Edge
+    element.msRequestFullscreen();
+  }
 }

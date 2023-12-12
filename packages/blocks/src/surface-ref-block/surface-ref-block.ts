@@ -28,13 +28,14 @@ import type {
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
-import { type PhasorElementType } from '../surface-block/elements/edgeless-element.js';
+import { type CanvasElementType } from '../surface-block/elements/edgeless-element.js';
 import type { SurfaceElement } from '../surface-block/elements/surface-element.js';
 import { ConnectorElement, ElementCtors } from '../surface-block/index.js';
 import {
   getGroupParent,
   setGroupParent,
 } from '../surface-block/managers/group-manager.js';
+import { LayerManager } from '../surface-block/managers/layer-manager.js';
 import { Renderer } from '../surface-block/renderer.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
@@ -261,7 +262,9 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   private _showCaption: boolean = false;
 
   private _referencedModel: RefElement | null = null;
-  private _surfaceRenderer = new Renderer();
+  private _surfaceRenderer = new Renderer({
+    layerManager: new LayerManager(),
+  });
   private _connectorManager = new ConnectorPathGenerator({
     pickById: id => this.getModel(id),
     refresh: () => this._surfaceRenderer.refresh(),
@@ -303,7 +306,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   }
 
   private _initHotkey() {
-    const selection = this.root.selection;
+    const selection = this.host.selection;
     const addParagraph = () => {
       if (!this.page.getParent(this.model)) return;
 
@@ -343,6 +346,11 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   private _initSurfaceRenderer() {
     let lastWidth = 0;
+    this.surfaceRenderer.layerManager.init([
+      ...this._elements.values(),
+      ...((this._surfaceModel?.children || []) as EdgelessElement[]),
+      ...(this.page.getBlockByFlavour('affine:note') as EdgelessElement[]),
+    ]);
     const observer = new ResizeObserver(entries => {
       if (entries[0].contentRect.width !== lastWidth) {
         lastWidth = entries[0].contentRect.width;
@@ -451,7 +459,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   }
 
   private _initSelection() {
-    const selection = this.root.selection;
+    const selection = this.host.selection;
     this._disposables.add(
       selection.slots.changed.on(selList => {
         this._focused = selList.some(
@@ -487,7 +495,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       const yConnectors: Y.Map<unknown>[] = [];
       const yGroups: Y.Map<unknown>[] = [];
       elementsMap.forEach(yElement => {
-        const type = yElement.get('type') as PhasorElementType;
+        const type = yElement.get('type') as CanvasElementType;
         if (type === 'connector') {
           yConnectors.push(yElement);
           return;
@@ -508,7 +516,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   }
 
   private _createElementFromYMap(yElement: Y.Map<unknown>) {
-    const type = yElement.get('type') as PhasorElementType;
+    const type = yElement.get('type') as CanvasElementType;
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
@@ -523,6 +531,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
           this._connectorManager.updatePath(element);
         }
       },
+      removeElement: () => {},
       updateElementLocalRecord: () => {},
       pickById: id => this.getModel(id),
       getGroupParent: getGroupParent,
@@ -580,7 +589,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   ) => {
     if (type.action === 'add') {
       const yElement = elementsMap.get(id) as Y.Map<unknown>;
-      const type = yElement.get('type') as PhasorElementType;
+      const type = yElement.get('type') as CanvasElementType;
 
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
@@ -591,6 +600,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         pickById: id => this.getModel(id),
         getGroupParent: getGroupParent,
         setGroupParent: setGroupParent,
+        removeElement: () => {},
       });
       element.computedValue = this._getCSSPropertyValue;
       element.mount(this._surfaceRenderer);
@@ -612,7 +622,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   };
 
   private _getCSSPropertyValue = (value: string) => {
-    const root = this.root;
+    const root = this.host;
     if (isCssVariable(value)) {
       const cssValue = getThemePropertyValue(root, value as CssVariableName);
       if (cssValue === undefined) {
@@ -717,7 +727,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         ${flavourOrType === 'affine:frame' || flavourOrType === 'group'
           ? html`<surface-ref-portal
               .page=${this.page}
-              .root=${this.root}
+              .host=${this.host}
               .containerModel=${referencedModel}
               .renderModel=${this.renderModel}
             ></surface-ref-portal>`
@@ -805,7 +815,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   private _shouldRender() {
     return (
-      !!this.root.querySelector('affine-doc-page') &&
+      !!this.host.querySelector('affine-doc-page') &&
       this.parentElement &&
       !this.parentElement.closest('affine-surface-ref')
     );

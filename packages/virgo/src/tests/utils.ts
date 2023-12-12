@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { DeltaInsert, VEditor, VRange } from '@blocksuite/virgo';
+import type { DeltaInsert, InlineEditor, InlineRange } from '@blocksuite/virgo';
 import { expect, type Page } from '@playwright/test';
 
 const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
@@ -13,27 +13,30 @@ export async function press(page: Page, content: string) {
   await page.waitForTimeout(100);
 }
 
-export async function enterVirgoPlayground(page: Page) {
-  const url = new URL('examples/virgo/index.html', defaultPlaygroundURL);
+export async function enterInlineEditorPlayground(page: Page) {
+  const url = new URL('examples/inline/index.html', defaultPlaygroundURL);
   await page.goto(url.toString());
 }
 
-export async function focusVirgoRichText(page: Page, index = 0): Promise<void> {
+export async function focusInlineRichText(
+  page: Page,
+  index = 0
+): Promise<void> {
   await page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')
-      ?.querySelectorAll('virgo-test-rich-text');
+      ?.querySelectorAll('test-rich-text');
 
     if (!richTexts) {
-      throw new Error('Cannot find virgo-test-rich-text');
+      throw new Error('Cannot find test-rich-text');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (richTexts[index] as any).vEditor.focusEnd();
+    (richTexts[index] as any).inlineEditor.focusEnd();
   }, index);
 }
 
-export async function getDeltaFromVirgoRichText(
+export async function getDeltaFromInlineRichText(
   page: Page,
   index = 0
 ): Promise<DeltaInsert> {
@@ -41,76 +44,77 @@ export async function getDeltaFromVirgoRichText(
   return await page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')
-      ?.querySelectorAll('virgo-test-rich-text');
+      ?.querySelectorAll('test-rich-text');
 
     if (!richTexts) {
-      throw new Error('Cannot find virgo-test-rich-text');
+      throw new Error('Cannot find test-rich-text');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTexts[index] as any).vEditor as VEditor;
+    const editor = (richTexts[index] as any).inlineEditor as InlineEditor;
     return editor.yText.toDelta();
   }, index);
 }
 
-export async function getVRangeFromVirgoRichText(
+export async function getInlineRangeFromInlineRichText(
   page: Page,
   index = 0
-): Promise<VRange | null> {
+): Promise<InlineRange | null> {
   await page.waitForTimeout(100);
   return await page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')
-      ?.querySelectorAll('virgo-test-rich-text');
+      ?.querySelectorAll('test-rich-text');
 
     if (!richTexts) {
-      throw new Error('Cannot find virgo-test-rich-text');
+      throw new Error('Cannot find test-rich-text');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTexts[index] as any).vEditor as VEditor;
-    return editor.getVRange();
+    const editor = (richTexts[index] as any).inlineEditor as InlineEditor;
+    return editor.getInlineRange();
   }, index);
 }
 
-export async function setVirgoRichTextRange(
+export async function setInlineRichTextRange(
   page: Page,
-  vRange: VRange,
+  inlineRange: InlineRange,
   index = 0
 ): Promise<void> {
   await page.evaluate(
-    ([vRange, index]) => {
+    ([inlineRange, index]) => {
       const richTexts = document
         .querySelector('test-page')
-        ?.querySelectorAll('virgo-test-rich-text');
+        ?.querySelectorAll('test-rich-text');
 
       if (!richTexts) {
-        throw new Error('Cannot find virgo-test-rich-text');
+        throw new Error('Cannot find test-rich-text');
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const editor = (richTexts[index as number] as any).vEditor as VEditor;
-      editor.setVRange(vRange as VRange);
+      const editor = (richTexts[index as number] as any)
+        .inlineEditor as InlineEditor;
+      editor.setInlineRange(inlineRange as InlineRange);
     },
-    [vRange, index]
+    [inlineRange, index]
   );
 }
 
-export async function getVirgoRichTextLine(
+export async function getInlineRichTextLine(
   page: Page,
   index: number,
   i = 0
 ): Promise<readonly [string, number]> {
   return await page.evaluate(
     ([index, i]) => {
-      const richTexts = document.querySelectorAll('virgo-test-rich-text');
+      const richTexts = document.querySelectorAll('test-rich-text');
 
       if (!richTexts) {
-        throw new Error('Cannot find virgo-test-rich-text');
+        throw new Error('Cannot find test-rich-text');
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const editor = (richTexts[i] as any).vEditor as VEditor;
+      const editor = (richTexts[i] as any).inlineEditor as InlineEditor;
       const line = editor.getLine(index);
       return [line[0].textContent, line[1]] as const;
     },
@@ -118,18 +122,18 @@ export async function getVirgoRichTextLine(
   );
 }
 
-export async function getVRangeIndexRect(
+export async function getInlineRangeIndexRect(
   page: Page,
-  [richTextIndex, vIndex]: [number, number],
+  [richTextIndex, inlineIndex]: [number, number],
   coordOffSet: { x: number; y: number } = { x: 0, y: 0 }
 ) {
   const rect = await page.evaluate(
-    ({ richTextIndex, vIndex, coordOffSet }) => {
-      const richText = document.querySelectorAll('virgo-test-rich-text')[
+    ({ richTextIndex, inlineIndex: vIndex, coordOffSet }) => {
+      const richText = document.querySelectorAll('test-rich-text')[
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any;
-      const domRange = richText.vEditor.toDomRange({
+      const domRange = richText.inlineEditor.toDomRange({
         index: vIndex,
         length: 0,
       });
@@ -141,7 +145,7 @@ export async function getVRangeIndexRect(
     },
     {
       richTextIndex,
-      vIndex,
+      inlineIndex,
       coordOffSet,
     }
   );
@@ -156,12 +160,11 @@ export async function assertSelection(
 ) {
   const actual = await page.evaluate(
     ([richTextIndex]) => {
-      const richText = document?.querySelectorAll('virgo-test-rich-text')[
-        richTextIndex
-      ];
+      const richText =
+        document?.querySelectorAll('test-rich-text')[richTextIndex];
       // @ts-ignore
-      const vEditor = richText.vEditor;
-      return vEditor?.getVRange();
+      const inlineEditor = richText.inlineEditor;
+      return inlineEditor?.getInlineRange();
     },
     [richTextIndex]
   );

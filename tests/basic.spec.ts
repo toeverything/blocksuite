@@ -38,8 +38,8 @@ import {
 import {
   assertBlockChildrenIds,
   assertEmpty,
+  assertRichTextInlineDeltas,
   assertRichTexts,
-  assertRichTextVirgoDeltas,
   assertStore,
   assertStoreMatchJSX,
   assertText,
@@ -571,7 +571,7 @@ test('extended inline format', async ({ page }) => {
   await underlineBtn.click();
   await strikeBtn.click();
   await codeBtn.click();
-  await assertRichTextVirgoDeltas(page, [
+  await assertRichTextInlineDeltas(page, [
     {
       insert: 'aaa',
     },
@@ -594,7 +594,7 @@ test('extended inline format', async ({ page }) => {
   await setSelection(page, 2, 3, 2, 3);
   await captureHistory(page);
   await type(page, 'c');
-  await assertRichTextVirgoDeltas(page, [
+  await assertRichTextInlineDeltas(page, [
     {
       insert: 'aaac',
     },
@@ -617,7 +617,7 @@ test('extended inline format', async ({ page }) => {
   // aaab|bbccc
   await setSelection(page, 2, 4, 2, 4);
   await type(page, 'c');
-  await assertRichTextVirgoDeltas(page, [
+  await assertRichTextInlineDeltas(page, [
     {
       insert: 'aaa',
     },
@@ -640,7 +640,7 @@ test('extended inline format', async ({ page }) => {
   // aaab|b|bccc
   await setSelection(page, 2, 4, 2, 5);
   await type(page, 'c');
-  await assertRichTextVirgoDeltas(page, [
+  await assertRichTextInlineDeltas(page, [
     {
       insert: 'aaa',
     },
@@ -663,7 +663,7 @@ test('extended inline format', async ({ page }) => {
   // aaabbb|ccc
   await setSelection(page, 2, 6, 2, 6);
   await type(page, 'c');
-  await assertRichTextVirgoDeltas(page, [
+  await assertRichTextInlineDeltas(page, [
     {
       insert: 'aaa',
     },

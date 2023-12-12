@@ -6,7 +6,6 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { DEFAULT_EDGELESS_PROP } from '../../../../_common/edgeless/note/consts.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
@@ -17,10 +16,10 @@ import type {
 } from '../../../../_common/utils/types.js';
 import type { NoteBlockModel } from '../../../../models.js';
 import {
+  CanvasElementType,
   deserializeXYWH,
   GroupElement,
   normalizeTextBound,
-  PhasorElementType,
 } from '../../../../surface-block/index.js';
 import {
   Bound,
@@ -42,10 +41,11 @@ import {
 import {
   getSelectableBounds,
   getSelectedRect,
+  isBookmarkBlock,
+  isCanvasElement,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
-  isPhasorElement,
 } from '../../utils/query.js';
 import { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
@@ -374,19 +374,19 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         areAllConnectors = false;
       } else if (isFrameBlock(element)) {
         areAllConnectors = false;
-      } else if (isImageBlock(element)) {
+      } else if (isImageBlock(element) || isBookmarkBlock(element)) {
         areAllConnectors = false;
         areAllShapes = false;
         areAllTexts = false;
       } else {
-        if (element.type !== PhasorElementType.CONNECTOR)
+        if (element.type !== CanvasElementType.CONNECTOR)
           areAllConnectors = false;
         if (
-          element.type !== PhasorElementType.SHAPE &&
-          element.type !== PhasorElementType.GROUP
+          element.type !== CanvasElementType.SHAPE &&
+          element.type !== CanvasElementType.GROUP
         )
           areAllShapes = false;
-        if (element.type !== PhasorElementType.TEXT) areAllTexts = false;
+        if (element.type !== CanvasElementType.TEXT) areAllTexts = false;
       }
     }
 
@@ -426,13 +426,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       if (isNoteBlock(element)) {
         const curBound = Bound.deserialize(element.xywh);
         const props: Partial<NoteBlockModel> = {};
-
-        if (!element.edgeless) {
-          element.edgeless = DEFAULT_EDGELESS_PROP;
-        }
-
         if (curBound.h !== bound.h && !element.edgeless.collapse) {
-          element.edgeless.collapse = true;
+          edgeless.page.updateBlock(element, () => {
+            element.edgeless.collapse = true;
+          });
         }
 
         bound.w = clamp(bound.w, NOTE_MIN_WIDTH, Infinity);
@@ -443,7 +440,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
         props.xywh = bound.serialize();
         edgeless.updateElementInLocal(element.id, props);
-      } else if (isFrameBlock(element)) {
+      } else if (isImageBlock(element) || isBookmarkBlock(element)) {
+        const curBound = Bound.deserialize(element.xywh);
+        if (
+          direction === HandleDirection.Left ||
+          direction === HandleDirection.Right
+        ) {
+          bound.h = (curBound.h / curBound.w) * bound.w;
+        } else if (
+          direction === HandleDirection.Top ||
+          direction === HandleDirection.Bottom
+        ) {
+          bound.w = (curBound.w / curBound.h) * bound.h;
+        }
+
         edgeless.updateElementInLocal(element.id, {
           xywh: bound.serialize(),
         });
@@ -493,8 +503,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const elements = selection.elements.filter(
       element =>
         isImageBlock(element) ||
-        (isPhasorElement(element) &&
-          element.type !== PhasorElementType.CONNECTOR)
+        (isCanvasElement(element) &&
+          element.type !== CanvasElementType.CONNECTOR)
     ) as EdgelessElement[];
 
     getElementsWithoutGroup(elements).forEach(element => {
@@ -623,7 +633,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     } = this;
 
     const rect = getSelectedRect(elements);
-    const proportion = elements.some(ele => isImageBlock(ele));
+    const proportion = elements.some(
+      ele => isImageBlock(ele) || isBookmarkBlock(ele)
+    );
     // if there are more than one element, we need to refresh the state of resize manager
     if (elements.length > 1) refresh = true;
 
@@ -713,7 +725,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _canRotate() {
     return !this.selection.elements.every(
-      ele => isNoteBlock(ele) || isFrameBlock(ele)
+      ele => isNoteBlock(ele) || isFrameBlock(ele) || isBookmarkBlock(ele)
     );
   }
 

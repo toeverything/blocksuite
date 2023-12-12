@@ -1,10 +1,10 @@
 import {
+  CanvasElementType,
   type IElementDefaultProps,
-  PhasorElementType,
 } from '../edgeless-element.js';
 
 export const BrushElementDefaultProps: IElementDefaultProps<'brush'> = {
-  type: PhasorElementType.BRUSH,
+  type: CanvasElementType.BRUSH,
   xywh: '[0,0,0,0]',
 
   rotate: 0,

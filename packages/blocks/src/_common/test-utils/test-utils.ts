@@ -35,6 +35,7 @@ const escapedSnapshotAttributes = [
   '"attributes"',
   '"conditions"',
   '"iconColumn"',
+  '"background"',
 ];
 
 function nanoidReplacementString(snapshotString: string) {

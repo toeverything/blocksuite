@@ -1,15 +1,23 @@
 import type {
-  BlockStdProvider,
+  BlockStdScope,
   SurfaceSelection,
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BlockSnapshot, fromJSON, Job } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import {
+  type BlockSnapshot,
+  fromJSON,
+  Job,
+  Workspace,
+} from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
+import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
   getBlockElementByModel,
+  getBlockElementByPath,
   getEditorContainer,
   isPageMode,
 } from '../../../_common/utils/query.js';
@@ -25,12 +33,11 @@ import type { IBound } from '../../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
-import type { PhasorElementType } from '../../../surface-block/elements/edgeless-element.js';
+import { CanvasElementType } from '../../../surface-block/elements/edgeless-element.js';
 import {
+  type CanvasElement,
   GroupElement,
-  type PhasorElement,
 } from '../../../surface-block/elements/index.js';
-import type { SurfaceElement } from '../../../surface-block/elements/surface-element.js';
 import { compare } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
@@ -40,18 +47,20 @@ import {
 } from '../../../surface-block/utils/xywh.js';
 import type { ClipboardController } from '../../clipboard/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { xywhArrayToObject } from '../utils/convert.js';
 import { deleteElements } from '../utils/crud.js';
 import {
+  isBookmarkBlock,
+  isCanvasElementWithText,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
-  isPhasorElementWithText,
   isTopLevelBlock,
 } from '../utils/query.js';
 
 const BLOCKSUITE_SURFACE = 'blocksuite/surface';
 const IMAGE_PNG = 'image/png';
+
+const { GROUP } = CanvasElementType;
 
 export class EdgelessClipboardController implements ReactiveController {
   constructor(
@@ -118,6 +127,24 @@ export class EdgelessClipboardController implements ReactiveController {
     });
   };
 
+  private _blockElmentGetter(model: BaseBlockModel) {
+    if (matchFlavours(model, ['affine:image', 'affine:frame'])) {
+      let current: BaseBlockModel | null = model;
+      const path: string[] = [];
+      while (current) {
+        // Top level image render under page block not surface block
+        if (!matchFlavours(current, ['affine:surface'])) {
+          path.unshift(current.id);
+        }
+        current = current.page.getParent(current);
+      }
+
+      return getBlockElementByPath(path);
+    } else {
+      return getBlockElementByModel(model);
+    }
+  }
+
   private _onCopy = async (
     _context: UIEventStateContext,
     surfaceSelection: SurfaceSelection
@@ -132,7 +159,7 @@ export class EdgelessClipboardController implements ReactiveController {
     // when note active, handle copy like page mode
     if (surfaceSelection.editing) {
       // use build-in copy handler in rich-text when copy in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(elements[0])) return;
       this.pageClipboardController.onPageCopy(_context);
       return;
     }
@@ -159,7 +186,7 @@ export class EdgelessClipboardController implements ReactiveController {
     const { state, elements } = this.selectionManager;
     if (state.editing) {
       // use build-in paste handler in rich-text when paste in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(elements[0])) return;
       this.pageClipboardController.onPagePaste(_context);
       return;
     }
@@ -199,7 +226,7 @@ export class EdgelessClipboardController implements ReactiveController {
     this._onCopy(_context, state);
     if (state.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(elements[0])) return;
       this.pageClipboardController.onPageCut(_context);
       return;
     }
@@ -214,30 +241,50 @@ export class EdgelessClipboardController implements ReactiveController {
     });
   };
 
-  private _createPhasorElement(clipboardData: Record<string, unknown>) {
+  private _createCanvasElement(
+    clipboardData: Record<string, unknown>,
+    idMap: Map<string, string>
+  ) {
+    if (clipboardData.type === GROUP) {
+      const yMap = new Workspace.Y.Map();
+      const children = clipboardData.children ?? {};
+      for (const [key, value] of Object.entries(children)) {
+        const newKey = idMap.get(key);
+        assertExists(newKey);
+        yMap.set(newKey, value);
+      }
+      clipboardData.children = yMap;
+    }
     const id = this.surface.addElement(
-      clipboardData.type as PhasorElementType,
+      clipboardData.type as CanvasElementType,
       clipboardData
     );
-    const element = this.surface.pickById(id) as PhasorElement;
+    const element = this.surface.pickById(id) as CanvasElement;
     assertExists(element);
     return element;
   }
 
-  private _createPhasorElements(
+  private _createCanvasElements(
     elements: Record<string, unknown>[],
     idMap: Map<string, string>
   ) {
-    const result = groupBy(elements, item =>
-      item.type === 'connector' ? 'connectors' : 'nonConnectors'
-    );
+    const result = groupBy(elements, item => {
+      switch (item.type) {
+        case 'connector':
+          return 'connectors';
+        case 'group':
+          return 'groups';
+        default:
+          return 'others';
+      }
+    });
 
     return [
-      ...(result.nonConnectors
+      ...(result.others
         ?.map(d => {
           const oldId = d.id as string;
           assertExists(oldId);
-          const element = this._createPhasorElement(d);
+          const element = this._createCanvasElement(d, idMap);
           idMap.set(oldId, element.id);
           return element;
         })
@@ -254,7 +301,17 @@ export class EdgelessClipboardController implements ReactiveController {
           (<Connection>connector.target).id =
             idMap.get(targetId) ?? (targetId as string);
         }
-        return this._createPhasorElement(connector);
+        const element = this._createCanvasElement(connector, idMap);
+        idMap.set(connector.id as string, element.id);
+        return element;
+      }) ?? []),
+
+      ...(result.groups?.map(group => {
+        const oldId = group.id as string;
+        assertExists(oldId);
+        const element = this._createCanvasElement(group, idMap);
+        idMap.set(oldId, element.id);
+        return element;
       }) ?? []),
     ];
   }
@@ -333,12 +390,37 @@ export class EdgelessClipboardController implements ReactiveController {
     return imageIds;
   }
 
+  private async _createBookmarkBlocks(bookmarks: BlockSnapshot[]) {
+    const bookmarkIds = await Promise.all(
+      bookmarks.map(async ({ props }) => {
+        const { xywh, style, url, caption, description, icon, image, title } =
+          props;
+        const bookmarkId = this.surface.addElement(
+          EdgelessBlockType.BOOKMARK,
+          {
+            xywh,
+            style,
+            url,
+            caption,
+            description,
+            icon,
+            image,
+            title,
+          },
+          this.surface.model.id
+        );
+        return bookmarkId;
+      })
+    );
+    return bookmarkIds;
+  }
+
   private _getOldCommonBound(
-    phasorElements: PhasorElement[],
+    canvasElements: CanvasElement[],
     blocks: TopLevelBlockModel[]
   ) {
     const commonBound = getCommonBound(
-      [...phasorElements, ...blocks]
+      [...canvasElements, ...blocks]
         .map(({ xywh }) => {
           if (!xywh) {
             return;
@@ -360,11 +442,11 @@ export class EdgelessClipboardController implements ReactiveController {
   }
 
   private _emitSelectionChangeAfterPaste(
-    phasorElementIds: string[],
+    canvasElementIds: string[],
     blockIds: string[]
   ) {
     const newSelected = [
-      ...phasorElementIds,
+      ...canvasElementIds,
       ...blockIds.filter(id => {
         return isTopLevelBlock(this.page.getBlockById(id));
       }),
@@ -386,12 +468,15 @@ export class EdgelessClipboardController implements ReactiveController {
           ? 'frames'
           : isImageBlock(data as unknown as Selectable)
             ? 'images'
-            : 'elements'
+            : isBookmarkBlock(data as unknown as Selectable)
+              ? 'bookmarks'
+              : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];
       images?: BlockSnapshot[];
-      elements?: { type: PhasorElement['type'] }[];
+      bookmarks?: BlockSnapshot[];
+      elements?: { type: CanvasElement['type'] }[];
     };
 
     // map old id to new id to rebuild connector's source and target
@@ -404,6 +489,9 @@ export class EdgelessClipboardController implements ReactiveController {
     );
     const frameIds = await this._createFrameBlocks(groupedByType.frames ?? []);
     const imageIds = await this._createImageBlocks(groupedByType.images ?? []);
+    const bookmarkIds = await this._createBookmarkBlocks(
+      groupedByType.bookmarks ?? []
+    );
 
     const notes = noteIds.map(id =>
       this.page.getBlockById(id)
@@ -417,7 +505,11 @@ export class EdgelessClipboardController implements ReactiveController {
       this.surface.pickById(id)
     ) as ImageBlockModel[];
 
-    const elements = this._createPhasorElements(
+    const bookmarks = bookmarkIds.map(id =>
+      this.surface.pickById(id)
+    ) as ImageBlockModel[];
+
+    const elements = this._createCanvasElements(
       groupedByType.elements || [],
       oldIdToNewIdMap
     );
@@ -431,11 +523,12 @@ export class EdgelessClipboardController implements ReactiveController {
       ...notes,
       ...frames,
       ...images,
+      ...bookmarks,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
 
-    // update phasor elements' position to mouse position
+    // update canvas elements' position to mouse position
     elements.forEach(ele => {
       const newBound = new Bound(
         pasteX + ele.x - oldCommonBound.x,
@@ -452,7 +545,7 @@ export class EdgelessClipboardController implements ReactiveController {
       }
     });
 
-    [...notes, ...frames, ...images].forEach(block => {
+    [...notes, ...frames, ...images, ...bookmarks].forEach(block => {
       const [x, y, w, h] = deserializeXYWH(block.xywh);
       const newBound = new Bound(
         pasteX + x - oldCommonBound.x,
@@ -471,13 +564,7 @@ export class EdgelessClipboardController implements ReactiveController {
     );
   }
 
-  async copyAsPng(blocks: TopLevelBlockModel[], shapes: PhasorElement[]) {
-    const blocksLen = blocks.length;
-    const shapesLen = shapes.length;
-
-    if (blocksLen + shapesLen === 0) return;
-
-    // sort by `index`
+  async toCanvas(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
     blocks.sort(compare);
     shapes.sort(compare);
 
@@ -489,9 +576,7 @@ export class EdgelessClipboardController implements ReactiveController {
       bounds.push(Bound.deserialize(shape.xywh));
     });
     const bound = getCommonBound(bounds);
-    if (!bound) {
-      return;
-    }
+    assertExists(bound, 'bound not exist');
 
     const canvas = await this._edgelessToCanvas(
       this.host,
@@ -499,9 +584,16 @@ export class EdgelessClipboardController implements ReactiveController {
       blocks,
       shapes
     );
+    return canvas;
+  }
 
+  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+    const blocksLen = blocks.length;
+    const shapesLen = shapes.length;
+
+    if (blocksLen + shapesLen === 0) return;
+    const canvas = await this.toCanvas(blocks, shapes);
     assertExists(canvas);
-
     // @ts-ignore
     if (window.apis?.clipboard?.copyAsImageFromString) {
       // @ts-ignore
@@ -569,7 +661,7 @@ export class EdgelessClipboardController implements ReactiveController {
     edgeless: EdgelessPageBlockComponent,
     bound: IBound,
     nodes?: TopLevelBlockModel[],
-    surfaces?: SurfaceElement[]
+    canvasElements: CanvasElement[] = []
   ): Promise<HTMLCanvasElement | undefined> {
     const root = this.page.root;
     if (!root) return;
@@ -646,10 +738,12 @@ export class EdgelessClipboardController implements ReactiveController {
       proxy: _imageProxyEndpoint,
     };
 
-    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
-    for (const nodeElement of nodeElements) {
-      const blockElement = getBlockElementByModel(nodeElement)?.parentElement;
-      const blockBound = xywhArrayToObject(nodeElement);
+    const _drawTopLevelBlock = async (
+      block: TopLevelBlockModel,
+      isInFrame = false
+    ) => {
+      const blockElement = this._blockElmentGetter(block)?.parentElement;
+      const blockBound = Bound.deserialize(block.xywh);
       const canvasData = await html2canvas(
         blockElement as HTMLElement,
         html2canvasOption
@@ -659,14 +753,40 @@ export class EdgelessClipboardController implements ReactiveController {
         blockBound.x - bound.x + 50,
         blockBound.y - bound.y + 50,
         blockBound.w,
-        blockBound.h
+        isInFrame
+          ? (blockBound.w / canvasData.width) * canvasData.height
+          : blockBound.h
       );
+    };
+
+    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
+    for (const nodeElement of nodeElements) {
+      await _drawTopLevelBlock(nodeElement);
+
+      if (nodeElement.flavour === EdgelessBlockType.FRAME) {
+        const blocksInsideFrame: TopLevelBlockModel[] = [];
+        this.surface.frame
+          .getElementsInFrame(nodeElement, false)
+          .forEach(ele => {
+            if (isTopLevelBlock(ele)) {
+              blocksInsideFrame.push(ele);
+            } else {
+              canvasElements.push(ele);
+            }
+          });
+
+        for (let i = 0; i < blocksInsideFrame.length; i++) {
+          const element = blocksInsideFrame[i];
+          await _drawTopLevelBlock(element, true);
+        }
+      }
+
       this._checkCanContinueToCanvas(pathname, pageMode);
     }
 
     const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(
       bound,
-      surfaces
+      canvasElements
     );
     ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
 
@@ -722,7 +842,7 @@ function prepareConnectorClipboardData(
 
 async function prepareClipboardData(
   selectedAll: Selectable[],
-  std: BlockStdProvider
+  std: BlockStdScope
 ) {
   const selected = await Promise.all(
     selectedAll.map(async selected => {
@@ -737,6 +857,9 @@ async function prepareClipboardData(
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (isImageBlock(selected)) {
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
+      } else if (isBookmarkBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (selected instanceof ConnectorElement) {

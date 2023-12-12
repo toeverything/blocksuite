@@ -1,6 +1,7 @@
 import type { TestUtils } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
-import type { EditorContainer } from '@blocksuite/editor';
+import type { EditorHost } from '@blocksuite/lit';
+import type { AffineEditorContainer } from '@blocksuite/presets';
 import type {
   BlockSchema,
   DocProvider,
@@ -12,7 +13,7 @@ import type { z } from 'zod';
 
 declare global {
   interface Window {
-    editor: EditorContainer;
+    editor: AffineEditorContainer;
     page: Page;
     workspace: Workspace;
     blockSchemas: z.infer<typeof BlockSchema>[];
@@ -21,6 +22,7 @@ declare global {
     Y: typeof Workspace.Y;
     std: typeof std;
     testUtils: TestUtils;
+    host: EditorHost;
 
     // TODO: remove this when provider support subdocument
     subdocProviders: Map<string, DocProvider[]>;

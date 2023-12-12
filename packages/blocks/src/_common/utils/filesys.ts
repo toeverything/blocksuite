@@ -216,9 +216,12 @@ export async function uploadImageFromLocal(storage: BlobManager) {
     multiple: true,
   });
   if (!imageFiles) return [];
+  return loadImages(imageFiles, storage);
+}
+export async function loadImages(images: File[], storage: BlobManager) {
   const res: { file: File; sourceId: string }[] = [];
-  for (let i = 0; i < imageFiles.length; i++) {
-    const file = imageFiles[i];
+  for (let i = 0; i < images.length; i++) {
+    const file = images[i];
     const sourceId = await storage.set(file);
     res.push({ file, sourceId });
   }

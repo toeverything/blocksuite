@@ -139,7 +139,7 @@ export async function dragHandleFromBlockToBlockBottomById(
   );
   await page.mouse.down();
   await page.mouse.move(
-    targetBlock.x + targetBlock.width / 2,
+    targetBlock.x,
     targetBlock.y + (bottom ? targetBlock.height - 1 : 1),
     {
       steps: 50,
@@ -148,7 +148,7 @@ export async function dragHandleFromBlockToBlockBottomById(
 
   if (offset) {
     await page.mouse.move(
-      targetBlock.x - offset,
+      targetBlock.x + offset,
       targetBlock.y + (bottom ? targetBlock.height - 1 : 1),
       {
         steps: 50,

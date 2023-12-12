@@ -52,17 +52,10 @@ export interface StoreOptions<
   blobStorages?: ((id: string) => BlobStorage)[];
 }
 
-const flagsPreset = {
-  enable_set_remote_flag: true,
-  enable_block_hub: true,
-
-  enable_transformer_clipboard: false,
-
+const FLAGS_PRESET = {
+  enable_legacy_validation: true,
+  enable_transformer_clipboard: true,
   enable_expand_database_block: false,
-
-  enable_toggle_block: false,
-  enable_note_index: false,
-
   enable_bultin_ledits: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
@@ -89,7 +82,7 @@ export class Store {
     this.awarenessStore = new AwarenessStore(
       this,
       awareness ?? new Awareness<RawAwarenessState>(this.doc),
-      merge(true, flagsPreset, defaultFlags)
+      merge(true, FLAGS_PRESET, defaultFlags)
     );
 
     if (typeof idGenerator === 'function') {

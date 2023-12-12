@@ -42,7 +42,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
   }> = [];
 
   private get _selectionManager() {
-    return this.root.selection;
+    return this.host.selection;
   }
 
   private get _container() {
@@ -88,7 +88,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     });
 
     this._remoteColorManager = new RemoteColorManager(
-      this.root.page.workspace.awarenessStore
+      this.host.page.workspace.awarenessStore
     );
   }
 
@@ -113,7 +113,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     const container = this._container;
     const containerRect = this._containerRect;
     if (textSelection) {
-      const rangeManager = this.root.rangeManager;
+      const rangeManager = this.host.rangeManager;
       assertExists(rangeManager);
       const range = rangeManager.textSelectionToRange(textSelection);
 
@@ -138,7 +138,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
       }
     } else if (blockSelections.length > 0) {
       return blockSelections.flatMap(blockSelection => {
-        const blockElement = this.root.view.viewFromPath(
+        const blockElement = this.host.view.viewFromPath(
           'block',
           blockSelection.path
         );
@@ -180,7 +180,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     const containerRect = this._containerRect;
 
     if (textSelection) {
-      const rangeManager = this.root.rangeManager;
+      const rangeManager = this.host.rangeManager;
       assertExists(rangeManager);
       const range = rangeManager.pointToRange({
         path: textSelection.to
@@ -215,7 +215,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     } else if (blockSelections.length > 0) {
       const lastBlockSelection = blockSelections[blockSelections.length - 1];
 
-      const blockElement = this.root.view.viewFromPath(
+      const blockElement = this.host.view.viewFromPath(
         'block',
         lastBlockSelection.path
       );

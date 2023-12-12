@@ -3,10 +3,10 @@ import { BaseBlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 
 import { isControlledKeyboardEvent } from '../../_common/utils/event.js';
-import { getVirgoByModel } from '../../_common/utils/query.js';
+import { getInlineEditorByModel } from '../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../_common/utils/selection.js';
+import type { AffineInlineEditor } from './rich-text/inline/types.js';
 import type { RichText } from './rich-text/rich-text.js';
-import type { AffineVEditor } from './rich-text/virgo/types.js';
 
 export const createKeydownObserver = ({
   target,
@@ -26,12 +26,12 @@ export const createKeydownObserver = ({
   abortController: AbortController;
 }) => {
   let query = '';
-  const vEditor = target.vEditor;
+  const inlineEditor = target.inlineEditor;
   assertExists(
-    vEditor,
-    'Failed to observer keyboard! virgo editor is not exist.'
+    inlineEditor,
+    'Failed to observer keyboard! Inline editor does not exist.'
   );
-  const startIndex = vEditor?.getVRange()?.index ?? 0;
+  const startIndex = inlineEditor?.getInlineRange()?.index ?? 0;
 
   const updateQuery = async () => {
     // Wait for text update
@@ -54,8 +54,8 @@ export const createKeydownObserver = ({
       abortController.abort();
       return;
     }
-    const curIndex = vEditor.getVRange()?.index ?? 0;
-    const text = vEditor.yText.toString();
+    const curIndex = inlineEditor.getInlineRange()?.index ?? 0;
+    const text = inlineEditor.yText.toString();
     const previousQuery = query;
     query = text.slice(startIndex, curIndex);
 
@@ -203,31 +203,31 @@ export const createKeydownObserver = ({
  * Remove specified text from the current range.
  */
 export function cleanSpecifiedTail(
-  vEditorOrModel: AffineVEditor | BaseBlockModel,
+  inlineEditorOrModel: AffineInlineEditor | BaseBlockModel,
   str: string
 ) {
   if (!str) {
     console.warn('Failed to clean text! Unexpected empty string');
     return;
   }
-  const vEditor =
-    vEditorOrModel instanceof BaseBlockModel
-      ? getVirgoByModel(vEditorOrModel)
-      : vEditorOrModel;
-  assertExists(vEditor, 'Editor not found');
+  const inlineEditor =
+    inlineEditorOrModel instanceof BaseBlockModel
+      ? getInlineEditorByModel(inlineEditorOrModel)
+      : inlineEditorOrModel;
+  assertExists(inlineEditor, 'Inline editor not found');
 
-  const vRange = vEditor.getVRange();
-  assertExists(vRange);
-  const idx = vRange.index - str.length;
-  const textStr = vEditor.yText.toString().slice(idx, idx + str.length);
+  const inlineRange = inlineEditor.getInlineRange();
+  assertExists(inlineRange);
+  const idx = inlineRange.index - str.length;
+  const textStr = inlineEditor.yText.toString().slice(idx, idx + str.length);
   if (textStr !== str) {
     console.warn(
       `Failed to clean text! Text mismatch expected: ${str} but actual: ${textStr}`
     );
     return;
   }
-  vEditor.deleteText({ index: idx, length: str.length });
-  vEditor.setVRange({
+  inlineEditor.deleteText({ index: idx, length: str.length });
+  inlineEditor.setInlineRange({
     index: idx,
     length: 0,
   });

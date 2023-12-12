@@ -18,12 +18,12 @@ export type RoleType = (typeof role)[number];
 
 export interface InternalPrimitives {
   Text: (input?: Y.Text | string) => Text;
-  Native: <T>(input: T) => Boxed<T>;
+  Boxed: <T>(input: T) => Boxed<T>;
 }
 
 export const internalPrimitives: InternalPrimitives = Object.freeze({
   Text: (input: Y.Text | string = '') => new Text(input),
-  Native: <T>(input: T) => new Boxed(input),
+  Boxed: <T>(input: T) => new Boxed(input),
 });
 
 export const BlockSchema = z.object({
@@ -182,6 +182,9 @@ export class BaseBlockModel<
   yBlock!: YBlock;
   keys!: string[];
 
+  stash!: (prop: keyof Props & string) => void;
+  pop!: (prop: keyof Props & string) => void;
+
   // text is optional
   text?: Text;
 
@@ -205,11 +208,11 @@ export class BaseBlockModel<
 
     const children: BaseBlockModel[] = [];
     block.forEach(id => {
-      const child = this.page.getBlock(id);
+      const child = this.page.getBlockById(id);
       if (!child) {
         return;
       }
-      children.push(child.model);
+      children.push(child);
     });
 
     return children;

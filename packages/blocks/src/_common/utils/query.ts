@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
+import { INLINE_ROOT_ATTR } from '@blocksuite/virgo';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
@@ -190,13 +190,13 @@ export function getEditorContainer(page: Page): AbstractEditor {
   );
   const pageBlock = getBlockElementByModel(page.root);
   // EditorContainer
-  const editorContainer = pageBlock?.closest('editor-container');
+  const editorContainer = pageBlock?.closest('affine-editor-container');
   assertExists(editorContainer);
   return editorContainer as AbstractEditor;
 }
 
 function getClosestEditorContainer(ele: Element) {
-  const editorContainer = ele.closest('editor-container');
+  const editorContainer = ele.closest('affine-editor-container');
   assertExists(editorContainer);
   return editorContainer as AbstractEditor;
 }
@@ -210,7 +210,7 @@ export function isPageMode(page: Page) {
 }
 
 export function getLitRoot() {
-  const root = document.querySelector<BlockSuiteRoot>('block-suite-root');
+  const root = document.querySelector<EditorHost>('editor-host');
   assertExists(root);
   return root;
 }
@@ -283,7 +283,7 @@ export async function asyncGetBlockElementByModel(
 }
 
 /**
- * @deprecated In most cases, you not need RichText, you can use {@link getVirgoByModel} instead.
+ * @deprecated In most cases, you not need RichText, you can use {@link getInlineEditorByModel} instead.
  */
 export function getRichTextByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
@@ -301,25 +301,25 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
   return richText;
 }
 
-export function getVirgoByModel(model: BaseBlockModel) {
+export function getInlineEditorByModel(model: BaseBlockModel) {
   if (matchFlavours(model, ['affine:database'])) {
-    // Not support database model since it's may be have multiple Virgo instances.
+    // Not support database model since it's may be have multiple inline editor instances.
     // Support to enter the editing state through the Enter key in the database.
     return null;
   }
   const richText = getRichTextByModel(model);
   if (!richText) return null;
-  return richText.vEditor;
+  return richText.inlineEditor;
 }
 
-export async function asyncGetVirgoByModel(model: BaseBlockModel) {
+export async function asyncGetInlineEditorByModel(model: BaseBlockModel) {
   if (matchFlavours(model, ['affine:database'])) {
-    // Not support database model since it's may be have multiple Virgo instances.
-    throw new Error('Cannot get virgo by database model!');
+    // Not support database model since it's may be have multiple inline editor instances.
+    throw new Error('Cannot get inline editor by database model!');
   }
   const richText = await asyncGetRichTextByModel(model);
   if (!richText) return null;
-  return richText.vEditor;
+  return richText.inlineEditor;
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {
@@ -329,7 +329,7 @@ export function getModelByElement(element: Element): BaseBlockModel {
 }
 
 export function isInsidePageTitle(element: unknown): boolean {
-  const editor = document.querySelector('editor-container');
+  const editor = document.querySelector('affine-editor-container');
   const titleElement = (editor ?? document).querySelector(
     '[data-block-is-title="true"]'
   );
@@ -339,7 +339,7 @@ export function isInsidePageTitle(element: unknown): boolean {
 }
 
 export function isInsideEdgelessTextEditor(element: unknown): boolean {
-  const editor = document.querySelector('editor-container');
+  const editor = document.querySelector('affine-editor-container');
   const textElement = getEdgelessCanvasTextEditor(editor ?? document);
   if (!textElement) return false;
 
@@ -349,7 +349,7 @@ export function isInsideEdgelessTextEditor(element: unknown): boolean {
 export function isDatabaseInput(element: unknown): boolean {
   return (
     element instanceof HTMLElement &&
-    element.getAttribute(VIRGO_ROOT_ATTR) === 'true' &&
+    element.getAttribute(INLINE_ROOT_ATTR) === 'true' &&
     !!element.closest('affine-database')
   );
 }
@@ -763,7 +763,7 @@ export function getDropRectByPoint(
     flag: DropFlags.Normal,
   };
 
-  const isDatabase = matchFlavours(model, ['affine:database'] as const);
+  const isDatabase = matchFlavours(model, ['affine:database']);
 
   if (isDatabase) {
     const table = getDatabaseBlockTableElement(element);

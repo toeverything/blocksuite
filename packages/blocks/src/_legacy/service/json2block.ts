@@ -6,8 +6,8 @@ import { Text } from '@blocksuite/store';
 import { handleBlockSplit } from '../../_common/components/rich-text/rich-text-operations.js';
 import {
   asyncGetBlockElementByModel,
-  asyncSetVRange,
-  getVirgoByModel,
+  asyncSetInlineRange,
+  getInlineEditorByModel,
   type SerializedBlock,
 } from '../../_common/utils/index.js';
 import type { BlockModels } from '../../_common/utils/model.js';
@@ -162,9 +162,9 @@ export async function json2block(
     !shouldMergeFirstBlock &&
     (!isSinglePastedBlock || firstBlock.children.length > 0)
   ) {
-    const vEditor = getVirgoByModel(focusedBlockModel);
-    assertExists(vEditor);
-    vEditor.setVRange({
+    const inlineEditor = getInlineEditorByModel(focusedBlockModel);
+    assertExists(inlineEditor);
+    inlineEditor.setInlineRange({
       index: textRangePoint.index,
       length: 0,
     });
@@ -179,9 +179,9 @@ export async function json2block(
       firstBlock?.text?.reduce((sum, data) => {
         return sum + (data.insert?.length || 0);
       }, 0) ?? 0;
-    const vEditor = getVirgoByModel(focusedBlockModel);
-    assertExists(vEditor);
-    vEditor.setVRange({
+    const inlineEditor = getInlineEditorByModel(focusedBlockModel);
+    assertExists(inlineEditor);
+    inlineEditor.setInlineRange({
       index: (textRangePoint.index ?? 0) + textLength,
       length: 0,
     });
@@ -189,7 +189,7 @@ export async function json2block(
   }
 
   if (lastMergedModel?.text) {
-    asyncSetVRange(lastMergedModel, {
+    asyncSetInlineRange(lastMergedModel, {
       index: lastMergedModelRangeIndex ?? 0,
       length: 0,
     });
@@ -197,7 +197,7 @@ export async function json2block(
     if (lastMergedModel) {
       asyncGetBlockElementByModel(lastMergedModel).then(element => {
         if (element) {
-          const selectionManager = element.root.selection;
+          const selectionManager = element.host.selection;
           const blockSelection = selectionManager?.getInstance('block', {
             path: element.path ?? [],
           });

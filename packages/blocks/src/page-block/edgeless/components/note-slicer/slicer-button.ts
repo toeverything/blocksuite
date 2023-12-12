@@ -41,7 +41,7 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
   private _externalButton: PopupNoteSlicerButton | null = null;
 
   private get _defaultTransform() {
-    return `translate3d(-50%, 0, 0) scale(${1 / this.zoom})`;
+    return `translate3d(-50%, 0, 0)`;
   }
 
   private _createExternalButton() {
@@ -90,9 +90,7 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
     const button = this._button;
 
     requestAnimationFrame(() => {
-      button.style.transform = `translate3d(-${
-        (0.5 + 1 / this.zoom) * 100
-      }%, 0, 0) scale(calc(1 / ${this.zoom}))`;
+      button.style.transform = `translate3d(-${150}%, 0, 0)`;
     });
 
     button.addEventListener('transitionend', this._popupExternalButton, {

@@ -156,6 +156,27 @@ jobs:
           name: blocksuite
           fail_ci_if_error: false
 
+  integration-test:
+    name: Integration test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install playwright browsers
+        run: npx playwright install chromium
+
+      - name: Run integration test
+        run: pnpm test:integration
+
   virgo-e2e-test:
     name: Virgo E2E test
     runs-on: ubuntu-latest

@@ -9,14 +9,14 @@ import {
   matchFlavours,
 } from '../../../_common/utils/model.js';
 import {
+  getInlineEditorByModel,
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
-  getVirgoByModel,
 } from '../../../_common/utils/query.js';
 import {
   asyncFocusRichText,
-  asyncSetVRange,
+  asyncSetInlineRange,
 } from '../../../_common/utils/selection.js';
 import {
   focusBlockByModel,
@@ -224,7 +224,7 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     } as Partial<ListBlockModel>);
   }
 
-  asyncSetVRange(model, { index: offset, length: 0 });
+  asyncSetInlineRange(model, { index: offset, length: 0 });
 }
 
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
@@ -309,7 +309,7 @@ export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
       page.updateBlock(sibling, {});
     });
 
-  asyncSetVRange(model, { index: offset, length: 0 });
+  asyncSetInlineRange(model, { index: offset, length: 0 });
 }
 
 export function handleMultiBlockOutdent(page: Page, models: BaseBlockModel[]) {
@@ -495,8 +495,8 @@ function handleParagraphOrListSibling(
   page.deleteBlock(model, {
     bringChildrenTo: parent,
   });
-  const vEditor = getVirgoByModel(previousSibling);
-  vEditor?.setVRange({
+  const inlineEditor = getInlineEditorByModel(previousSibling);
+  inlineEditor?.setInlineRange({
     index: preTextLength,
     length: 0,
   });
@@ -521,7 +521,7 @@ function handleEmbedDividerCodeSibling(
       'affine:bookmark',
       'affine:attachment',
       'affine:surface-ref',
-    ] as const)
+    ])
   )
     return false;
 
@@ -587,7 +587,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
     page.deleteBlock(model, {
       bringChildrenTo: parent,
     });
-    asyncSetVRange(previousSibling, {
+    asyncSetInlineRange(previousSibling, {
       index: lengthBeforeJoin,
       length: 0,
     });

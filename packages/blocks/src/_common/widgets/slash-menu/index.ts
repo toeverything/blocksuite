@@ -10,7 +10,7 @@ import { customElement } from 'lit/decorators.js';
 
 import {
   getCurrentNativeRange,
-  getVirgoByModel,
+  getInlineEditorByModel,
   isControlledKeyboardEvent,
   matchFlavours,
 } from '../../../_common/utils/index.js';
@@ -121,21 +121,21 @@ export class AffineSlashMenuWidget extends WidgetElement {
     const event = eventState.raw;
     const triggerKey = this.options.isTriggerKey(event);
     if (triggerKey === false) return;
-    const text = this.root.selection.value.find(selection =>
+    const text = this.host.selection.value.find(selection =>
       selection.is('text')
     );
     if (!text) {
       return;
     }
-    const model = this.root.page.getBlockById(text.blockId);
+    const model = this.host.page.getBlockById(text.blockId);
     if (!model) {
       return;
     }
 
     if (matchFlavours(model, ['affine:code'])) return;
-    const vEditor = getVirgoByModel(model);
-    if (!vEditor) return;
-    vEditor.slots.rangeUpdated.once(() => {
+    const inlineEditor = getInlineEditorByModel(model);
+    if (!inlineEditor) return;
+    inlineEditor.slots.rangeUpdated.once(() => {
       const pageElement = this.blockElement;
       if (!isPageComponent(pageElement)) {
         throw new Error('SlashMenuWidget should be used in PageBlock');

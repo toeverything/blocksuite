@@ -1,5 +1,5 @@
 import type { BlockSelection } from '@blocksuite/block-std';
-import { IS_WINDOWS } from '@blocksuite/global/env';
+import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
@@ -31,7 +31,10 @@ export class PageKeyboardManager {
         'Mod-Backspace': () => true,
         Backspace: this._handleDelete,
         Delete: this._handleDelete,
-        'Control-d': this._handleDelete,
+        'Control-d': () => {
+          if (!IS_MAC) return;
+          this._handleDelete();
+        },
       },
       {
         global: true,
@@ -44,7 +47,7 @@ export class PageKeyboardManager {
   }
 
   private get _selection() {
-    return this.pageElement.root.selection;
+    return this.pageElement.host.selection;
   }
 
   private get _currentSelection() {
@@ -97,7 +100,7 @@ export class PageKeyboardManager {
   ) {
     const current = selections[0];
     const first = this._page.getBlockById(current.blockId);
-    const firstElement = this.pageElement.root.view.viewFromPath(
+    const firstElement = this.pageElement.host.view.viewFromPath(
       'block',
       current.path
     );

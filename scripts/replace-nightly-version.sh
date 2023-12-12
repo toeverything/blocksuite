@@ -6,7 +6,7 @@
 packages=(
   "blocks"
   # "docs" # NOT PUBLISHED
-  "editor"
+  "presets"
   "global"
   # "playground" # NOT PUBLISHED
   "store"
@@ -18,9 +18,13 @@ packages=(
 replace() {
   mv package-modified.json package.json
 
-  VERSION=0.0.0
+  CURRENT_VERSION="0.10.0"
+  IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+  MINOR=$((MINOR + 1))
+  VERSION="$MAJOR.$MINOR.$PATCH"
 
-  pnpm version "$VERSION-$BUILD_VERSION-nightly" --no-git-tag-version  --no-commit-hooks
+  # https://github.com/toeverything/set-build-version
+  pnpm version "$VERSION-nightly-$BUILD_VERSION" --no-git-tag-version  --no-commit-hooks
 }
 
 for package in "${packages[@]}"

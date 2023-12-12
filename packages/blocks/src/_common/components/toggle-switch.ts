@@ -1,12 +1,12 @@
 import { css, html, LitElement } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 const styles = css`
   :host {
     display: flex;
   }
 
-  input[type='checkbox'] {
+  .switch {
     height: 0;
     width: 0;
     visibility: hidden;
@@ -35,14 +35,14 @@ const styles = css`
     background: var(--affine-white);
     border: 1px solid var(--affine-black-10);
     border-radius: 16px;
-    transition: 0.4s;
+    transition: 0.2s;
   }
 
-  input:checked + label {
+  label.on {
     background: var(--affine-primary-color);
   }
 
-  input:checked + label:after {
+  label.on:after {
     left: calc(100% - 1px);
     transform: translateX(-100%);
   }
@@ -52,10 +52,11 @@ const styles = css`
   }
 `;
 
+@customElement('toggle-switch')
 export class ToggleSwitch extends LitElement {
   static override styles = styles;
 
-  @state()
+  @property({ attribute: false })
   on = false;
 
   @property({ attribute: false })
@@ -70,13 +71,14 @@ export class ToggleSwitch extends LitElement {
 
   override render() {
     return html`
-      <input
-        type="checkbox"
-        id="switch"
-        ?checked=${this.on}
-        @change=${this._toggleSwitch}
-      />
-      <label for="switch"></label>
+      <label class=${this.on ? 'on' : ''}>
+        <input
+          type="checkbox"
+          class="switch"
+          ?checked=${this.on}
+          @change=${this._toggleSwitch}
+        />
+      </label>
     `;
   }
 }

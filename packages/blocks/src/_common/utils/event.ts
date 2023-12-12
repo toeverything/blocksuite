@@ -41,6 +41,12 @@ export function on<
   handler: (ev: M[K]) => void,
   options?: boolean | AddEventListenerOptions
 ): () => void;
+export function on<T extends HTMLElement>(
+  element: T,
+  event: string,
+  handler: (ev: Event) => void,
+  options?: boolean | AddEventListenerOptions
+): () => void;
 export function on<T extends Document, K extends keyof M, M = DocumentEventMap>(
   element: T,
   event: K,
@@ -83,6 +89,12 @@ export function once<
   handler: (ev: M[K]) => void,
   options?: boolean | AddEventListenerOptions
 ): () => void;
+export function once<T extends HTMLElement>(
+  element: T,
+  event: string,
+  handler: (ev: Event) => void,
+  options?: boolean | AddEventListenerOptions
+): () => void;
 export function once<
   T extends Document,
   K extends keyof M,
@@ -119,4 +131,24 @@ export function delayCallback(callback: () => void, delay: number = 0) {
   const timeoutId = setTimeout(callback, delay);
 
   return () => clearTimeout(timeoutId);
+}
+
+/**
+ * A wrapper around `requestAnimationFrame` that only calls the callback if the
+ * element is still connected to the DOM.
+ */
+export function requestConnectedFrame(
+  callback: () => void,
+  element?: HTMLElement
+) {
+  return requestAnimationFrame(() => {
+    // If element is not provided, fallback to `requestAnimationFrame`
+    if (element === undefined) {
+      callback();
+      return;
+    }
+
+    // Only calls callback if element is still connected to the DOM
+    if (element.isConnected) callback();
+  });
 }

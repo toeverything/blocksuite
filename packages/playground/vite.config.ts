@@ -1,6 +1,5 @@
 import path, { resolve } from 'node:path';
 
-import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'url';
 import { defineConfig, loadEnv } from 'vite';
 import istanbul from 'vite-plugin-istanbul';
@@ -25,7 +24,6 @@ export default ({ mode }) => {
       ),
     },
     plugins: [
-      react(),
       hmrPlugin,
       enableIstanbul &&
         istanbul({
@@ -48,7 +46,7 @@ export default ({ mode }) => {
           main: resolve(__dirname, 'index.html'),
           'starter/': resolve(__dirname, 'starter/index.html'),
           'examples/basic': resolve(__dirname, 'examples/basic/index.html'),
-          'examples/virgo': resolve(__dirname, 'examples/virgo/index.html'),
+          'examples/inline': resolve(__dirname, 'examples/inline/index.html'),
           'examples/store': resolve(__dirname, 'examples/store/index.html'),
         },
       },

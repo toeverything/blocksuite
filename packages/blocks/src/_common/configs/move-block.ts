@@ -3,7 +3,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
 const getSelection = (blockComponent: BlockElement) =>
-  blockComponent.root.selection;
+  blockComponent.host.selection;
 
 function getBlockSelectionBySide(blockElement: BlockElement, tail: boolean) {
   const selection = getSelection(blockElement);
@@ -18,7 +18,7 @@ function getTextSelection(blockElement: BlockElement) {
 }
 
 const pathToBlock = (blockElement: BlockElement, path: string[]) =>
-  blockElement.root.view.viewFromPath('block', path);
+  blockElement.host.view.viewFromPath('block', path);
 
 interface MoveBlockConfig {
   name: string;
@@ -51,7 +51,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
           true
         );
         blockElement.updateComplete.then(() => {
-          const rangeManager = blockElement.root.rangeManager;
+          const rangeManager = blockElement.host.rangeManager;
           assertExists(rangeManager);
           rangeManager.syncTextSelectionToRange(textSelection);
         });
@@ -100,7 +100,7 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
         page.moveBlocks([currentModel], parentModel, nextSiblingModel, false);
         blockElement.updateComplete.then(() => {
           // `textSelection` will not change so we need wo sync it manually
-          const rangeManager = blockElement.root.rangeManager;
+          const rangeManager = blockElement.host.rangeManager;
           assertExists(rangeManager);
           rangeManager.syncTextSelectionToRange(textSelection);
         });

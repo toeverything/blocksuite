@@ -143,7 +143,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     );
 
     requestAnimationFrame(() => {
-      if (surface.edgeless.dispatcher) {
+      if (surface.isConnected && surface.edgeless.dispatcher) {
         this._disposables.add(
           surface.edgeless.dispatcher.add('click', ctx => {
             const event = ctx.get('pointerState');

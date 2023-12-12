@@ -95,8 +95,8 @@ export class UIEventDispatcher {
     this.disposables.dispose();
   }
 
-  get root() {
-    return this.std.root;
+  get host() {
+    return this.std.host;
   }
 
   run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
@@ -235,7 +235,7 @@ export class UIEventDispatcher {
   private _bindEvents() {
     bypassEventNames.forEach(eventName => {
       this.disposables.addFromEvent(
-        this.root,
+        this.host,
         toLowerCase(eventName),
         event => {
           this.run(

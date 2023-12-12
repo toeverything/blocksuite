@@ -17,7 +17,11 @@ import {
   type,
 } from './utils/actions/index.js';
 import { getBoundingClientRect } from './utils/actions/misc.js';
-import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
+import {
+  assertBlockChildrenIds,
+  assertRichTexts,
+  assertStoreMatchJSX,
+} from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
 test('only have one drag handle in screen', async ({ page }) => {
@@ -108,6 +112,54 @@ test('move drag handle in nested block', async ({ page }) => {
   await dragHandleFromBlockToBlockBottomById(page, '3', '8');
   await expect(page.locator('.affine-drag-indicator')).toBeHidden();
   await assertRichTexts(page, ['2', '22', '23', '21', '3', '1']);
+});
+
+test('move drag handle into another block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '-');
+  await page.keyboard.press('Space', { delay: 50 });
+  await type(page, '1');
+  await pressEnter(page);
+  await type(page, '2');
+
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, '21');
+  await pressEnter(page);
+  await type(page, '22');
+  await pressEnter(page);
+  await type(page, '23');
+  await pressEnter(page);
+  await pressShiftTab(page);
+
+  await type(page, '3');
+
+  await assertRichTexts(page, ['1', '2', '21', '22', '23', '3']);
+
+  await dragHandleFromBlockToBlockBottomById(
+    page,
+    '5',
+    '7',
+    true,
+    2 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+  );
+  await expect(page.locator('.affine-drag-indicator')).toBeHidden();
+  await assertRichTexts(page, ['1', '2', '22', '23', '21', '3']);
+  await assertBlockChildrenIds(page, '7', ['5']);
+
+  await dragHandleFromBlockToBlockBottomById(
+    page,
+    '3',
+    '8',
+    true,
+    2 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+  );
+  await expect(page.locator('.affine-drag-indicator')).toBeHidden();
+  await assertRichTexts(page, ['2', '22', '23', '21', '3', '1']);
+  await assertBlockChildrenIds(page, '8', ['3']);
 });
 
 test('move to the last block of each level in multi-level nesting', async ({
@@ -277,7 +329,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     '4',
     '3',
     true,
-    1 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+    -(1 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT)
   );
   await expect(page.locator('.affine-drag-indicator')).toBeHidden();
 
@@ -354,7 +406,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     '3',
     '4',
     true,
-    2 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+    -(2 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT)
   );
   await expect(page.locator('.affine-drag-indicator')).toBeHidden();
 

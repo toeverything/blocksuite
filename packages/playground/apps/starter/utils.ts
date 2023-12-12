@@ -1,9 +1,9 @@
 import * as blocks from '@blocksuite/blocks';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
-import * as editor from '@blocksuite/editor';
-import { EditorContainer } from '@blocksuite/editor';
 import * as globalUtils from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
+import * as editor from '@blocksuite/presets';
+import { AffineEditorContainer } from '@blocksuite/presets';
 import type {
   BlobStorage,
   DocProviderCreator,
@@ -164,11 +164,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     idGenerator,
     blobStorages,
     defaultFlags: {
-      enable_toggle_block: featureArgs.includes('toggle'),
       enable_transformer_clipboard: featureArgs.includes('clipboard'),
-      enable_set_remote_flag: true,
-      enable_block_hub: true,
-      enable_note_index: true,
       enable_bultin_ledits: true,
       readonly: {
         'page:home': false,
@@ -178,12 +174,9 @@ export function createWorkspaceOptions(): WorkspaceOptions {
 }
 
 export function createEditor(page: Page, element: HTMLElement) {
-  const editor = new EditorContainer();
+  const editor = new AffineEditorContainer();
   editor.page = page;
   element.append(editor);
 
-  editor.createBlockHub().then(blockHub => {
-    document.body.appendChild(blockHub);
-  });
   return editor;
 }

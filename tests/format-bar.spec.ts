@@ -6,6 +6,7 @@ import {
   dragBetweenCoords,
   dragBetweenIndices,
   enterPlaygroundRoom,
+  extendFormatBar,
   focusRichText,
   focusTitle,
   getBoundingBox,
@@ -18,7 +19,6 @@ import {
   pressArrowRight,
   pressArrowUp,
   pressEnter,
-  registerFormatBarCustomElements,
   scrollToBottom,
   scrollToTop,
   selectAllByKeyboard,
@@ -35,8 +35,8 @@ import {
   assertExists,
   assertLocatorVisible,
   assertRichImage,
+  assertRichTextInlineRange,
   assertRichTexts,
-  assertRichTextVRange,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -306,32 +306,32 @@ test('should format quick bar be able to format text', async ({ page }) => {
   );
 });
 
-test.fixme(
-  'should format quick bar be able to change background color',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    const { noteId } = await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    // select `456` paragraph by dragging
-    await dragBetweenIndices(page, [1, 0], [1, 3]);
+test('should format quick bar be able to change background color', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  // select `456` paragraph by dragging
+  await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-    const { highlight } = getFormatBar(page);
+  const { highlight } = getFormatBar(page);
 
-    await highlight.backgroundBtn.hover();
-    await expect(highlight.pinkBtn).toBeVisible();
-    await expect(highlight.backgroundBtn).toHaveAttribute(
-      'data-last-used',
-      'unset'
-    );
-    await highlight.pinkBtn.click();
-    await expect(highlight.backgroundBtn).toHaveAttribute(
-      'data-last-used',
-      'var(--affine-text-highlight-pink)'
-    );
+  await highlight.highlightBtn.hover();
+  await expect(highlight.redForegroundBtn).toBeVisible();
+  await expect(highlight.highlightBtn).toHaveAttribute(
+    'data-last-used',
+    'unset'
+  );
+  await highlight.redForegroundBtn.click();
+  await expect(highlight.highlightBtn).toHaveAttribute(
+    'data-last-used',
+    'var(--affine-text-highlight-foreground-red)'
+  );
 
-    await assertStoreMatchJSX(
-      page,
-      `
+  await assertStoreMatchJSX(
+    page,
+    `
 <affine:note
   prop:background="--affine-background-secondary-color"
   prop:edgeless={
@@ -355,7 +355,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          color="var(--affine-text-highlight-foreground-red)"
           insert="456"
         />
       </>
@@ -367,18 +367,18 @@ test.fixme(
     prop:type="text"
   />
 </affine:note>`,
-      noteId
-    );
+    noteId
+  );
 
-    // select `123` paragraph by ctrl + a
-    await focusRichText(page);
-    await selectAllByKeyboard(page);
-    // use last used color
-    await highlight.backgroundBtn.click();
+  // select `123` paragraph by ctrl + a
+  await focusRichText(page);
+  await selectAllByKeyboard(page);
+  // use last used color
+  await highlight.highlightBtn.click();
 
-    await assertStoreMatchJSX(
-      page,
-      `
+  await assertStoreMatchJSX(
+    page,
+    `
 <affine:note
   prop:background="--affine-background-secondary-color"
   prop:edgeless={
@@ -398,7 +398,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          color="var(--affine-text-highlight-foreground-red)"
           insert="123"
         />
       </>
@@ -409,7 +409,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          color="var(--affine-text-highlight-foreground-red)"
           insert="456"
         />
       </>
@@ -421,15 +421,15 @@ test.fixme(
     prop:type="text"
   />
 </affine:note>`,
-      noteId
-    );
+    noteId
+  );
 
-    await expect(highlight.defaultColorBtn).toBeVisible();
-    await highlight.defaultColorBtn.click();
+  await expect(highlight.defaultColorBtn).toBeVisible();
+  await highlight.defaultColorBtn.click();
 
-    await assertStoreMatchJSX(
-      page,
-      `
+  await assertStoreMatchJSX(
+    page,
+    `
 <affine:note
   prop:background="--affine-background-secondary-color"
   prop:edgeless={
@@ -453,7 +453,7 @@ test.fixme(
     prop:text={
       <>
         <text
-          background="var(--affine-text-highlight-pink)"
+          color="var(--affine-text-highlight-foreground-red)"
           insert="456"
         />
       </>
@@ -465,10 +465,9 @@ test.fixme(
     prop:type="text"
   />
 </affine:note>`,
-      noteId
-    );
-  }
-);
+    noteId
+  );
+});
 
 test('should format quick bar be able to format text when select multiple line', async ({
   page,
@@ -802,7 +801,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   );
   await page.waitForTimeout(10);
   // The paragraph button should prevent selection after click
-  await assertRichTextVRange(page, 0, 0, 3);
+  await assertRichTextInlineRange(page, 0, 0, 3);
 });
 
 test('should format quick bar be able to copy', async ({ page }) => {
@@ -814,9 +813,9 @@ test('should format quick bar be able to copy', async ({ page }) => {
 
   const { copyBtn } = getFormatBar(page);
   await expect(copyBtn).toBeVisible();
-  await assertRichTextVRange(page, 1, 0, 3);
+  await assertRichTextInlineRange(page, 1, 0, 3);
   await copyBtn.click();
-  await assertRichTextVRange(page, 1, 0, 3);
+  await assertRichTextInlineRange(page, 1, 0, 3);
 
   await pressArrowRight(page, 1);
   await pasteByKeyboard(page);
@@ -901,7 +900,7 @@ test('should format quick bar position correct at the start of second line', asy
     return paragraphId;
   });
   // await focusRichText(page);
-  const locator = page.locator('.virgo-editor').nth(0);
+  const locator = page.locator('.inline-editor').nth(0);
   const textBox = await locator.boundingBox();
   if (!textBox) {
     throw new Error("Can't get bounding box");
@@ -1422,7 +1421,7 @@ test('should show format-quick-bar and select all text of the block when triple 
   await focusRichText(page);
   await type(page, 'hello world');
 
-  const locator = page.locator('.virgo-editor').nth(0);
+  const locator = page.locator('.inline-editor').nth(0);
   const textBox = await locator.boundingBox();
   if (!textBox) {
     throw new Error("Can't get bounding box");
@@ -1433,7 +1432,7 @@ test('should show format-quick-bar and select all text of the block when triple 
   const { formatBar } = getFormatBar(page);
   await expect(formatBar).toBeVisible();
 
-  await assertRichTextVRange(page, 0, 0, 5);
+  await assertRichTextInlineRange(page, 0, 0, 5);
 
   const noteEl = page.locator('affine-note');
   const { x, y, width, height } = await getBoundingBox(noteEl);
@@ -1457,7 +1456,7 @@ test('should show format-quick-bar and select all text of the block when triple 
   await page.mouse.down(options);
   await page.mouse.up(options);
 
-  await assertRichTextVRange(page, 0, 0, 'hello world'.length);
+  await assertRichTextInlineRange(page, 0, 0, 'hello world'.length);
 });
 
 test('should update the format quick bar state when there is a change in keyboard selection', async ({
@@ -1491,13 +1490,11 @@ test('should update the format quick bar state when there is a change in keyboar
   });
 });
 
-test('should register custom elements in format quick bar', async ({
-  page,
-}) => {
+test('can extend format bar', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-  await registerFormatBarCustomElements(page);
+  await extendFormatBar(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
 });
