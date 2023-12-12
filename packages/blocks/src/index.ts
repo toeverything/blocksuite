@@ -12,6 +12,7 @@ import './surface-block/index.js';
 import './database-block/index.js';
 import './surface-ref-block/index.js';
 
+import { mindMap } from './_common/mind-map/index.js';
 import { matchFlavours } from './_common/utils/index.js';
 import { splitElements } from './page-block/edgeless/utils/clipboard-utils.js';
 
@@ -61,6 +62,7 @@ export * from './surface-ref-block/index.js';
 export const BlocksUtils = {
   splitElements,
   matchFlavours,
+  mindMap,
 };
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'

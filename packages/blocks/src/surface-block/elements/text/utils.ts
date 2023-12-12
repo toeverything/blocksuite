@@ -159,7 +159,6 @@ export const truncateTextByWidth = (
   }
   return text.slice(0, i);
 };
-
 export function wrapText(text: string, font: string, maxWidth: number): string {
   // if maxWidth is not finite or NaN which can happen in case of bugs in
   // computation, we need to make sure we don't continue as we'll end up
