@@ -255,6 +255,10 @@ export class Text {
       return result;
     }
 
+    if (begin === 0 && end === 0) {
+      return [];
+    }
+
     const delta = this.toDelta();
     if (begin < 1 && !end) {
       return delta;
