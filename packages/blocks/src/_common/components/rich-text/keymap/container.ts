@@ -69,13 +69,13 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   };
 
   const _getInlineEditor = () => {
-    const inlieRoot = blockElement.querySelector<InlineRootElement>(
+    const inlineRoot = blockElement.querySelector<InlineRootElement>(
       `[${INLINE_ROOT_ATTR}]`
     );
-    if (!inlieRoot) {
+    if (!inlineRoot) {
       throw new Error('Inline editor root not found');
     }
-    return inlieRoot.inlineEditor;
+    return inlineRoot.inlineEditor;
   };
 
   const _getPrefixText = (inlineEditor: InlineEditor) => {
