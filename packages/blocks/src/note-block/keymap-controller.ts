@@ -675,7 +675,7 @@ export class KeymapController implements ReactiveController {
 
             return this._std.command
               .pipe()
-              .withRoot()
+              .withHost()
               .tryAll(chain => [
                 chain.getTextSelection(),
                 chain.getBlockSelections(),

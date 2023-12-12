@@ -50,7 +50,7 @@ export class FileDropManager {
     }
 
     this._blockService.disposables.addFromEvent(
-      this._blockService.std.root,
+      this._blockService.std.host,
       'drop',
       this.onDrop
     );

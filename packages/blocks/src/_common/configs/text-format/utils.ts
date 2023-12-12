@@ -51,7 +51,7 @@ function getCombinedFormat(root: EditorHost): AffineTextAttributes {
 
   root.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .try(chain => [
       // text selection, corresponding to `formatText` command
       chain
@@ -166,7 +166,7 @@ export function handleCommonStyle(
   };
   root.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .try(chain => [
       chain.getTextSelection().formatText(payload),
       chain.getBlockSelections().formatBlock(payload),
@@ -185,7 +185,7 @@ export function isFormatSupported(root: EditorHost) {
 
   root.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .try(chain => [
       // text selection, corresponding to `formatText` command
       chain

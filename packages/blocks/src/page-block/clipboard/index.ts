@@ -105,7 +105,7 @@ export class ClipboardController implements ReactiveController {
   private _copySelected = (event: ClipboardEvent, onCopy?: () => void) => {
     return this._std.command
       .pipe()
-      .withRoot()
+      .withHost()
       .with({ onCopy })
       .getSelectedModels()
       .copySelectedModels({ event });
@@ -125,7 +125,7 @@ export class ClipboardController implements ReactiveController {
     this._copySelected(e, () => {
       this._std.command
         .pipe()
-        .withRoot()
+        .withHost()
         .try(cmd => [
           cmd.getTextSelection().deleteText(),
           cmd.getBlockSelections().deleteSelectedModels(),

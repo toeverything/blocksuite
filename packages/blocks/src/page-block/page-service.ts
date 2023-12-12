@@ -16,7 +16,7 @@ import {
   getSelectedBlocksCommand,
   getSelectedModelsCommand,
   getTextSelectionCommand,
-  withRootCommand,
+  withHostCommand,
 } from './commands/index.js';
 import { FontLoader } from './font-loader/font-loader.js';
 import type { PageBlockModel } from './page-model.js';
@@ -42,7 +42,7 @@ export class PageService extends BlockService<PageBlockModel> {
       .add('formatBlock', formatBlockCommand)
       .add('formatNative', formatNativeCommand)
       .add('formatText', formatTextCommand)
-      .add('withRoot', withRootCommand);
+      .add('withRoot', withHostCommand);
 
     this.loadFonts();
   }

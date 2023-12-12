@@ -66,7 +66,7 @@ export class ViewStore {
     if (this._cachedPath.has(node)) {
       return this._cachedPath.get(node) as NodeView[];
     }
-    const root = this.std.root;
+    const root = this.std.host;
 
     const iterate = (
       node: Node | null,
@@ -114,7 +114,7 @@ export class ViewStore {
         children,
       };
     };
-    const firstBlock = this.std.root.firstElementChild;
+    const firstBlock = this.std.host.firstElementChild;
     assertExists(firstBlock);
 
     const tree = {
@@ -308,7 +308,7 @@ export class ViewStore {
   };
 
   mount() {
-    this._observer.observe(this.std.root, observeOptions);
+    this._observer.observe(this.std.host, observeOptions);
   }
 
   unmount() {

@@ -81,7 +81,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           action: ({ pageElement }) => {
             pageElement.root.std.command
               .pipe()
-              .withRoot()
+              .withHost()
               .tryAll(chain => [
                 chain.getTextSelection(),
                 chain.getBlockSelections(),
@@ -162,7 +162,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         action: ({ pageElement }) => {
           pageElement.root.std.command
             .pipe()
-            .withRoot()
+            .withHost()
             .tryAll(chain => [
               chain.getTextSelection(),
               chain.getBlockSelections(),

@@ -198,7 +198,7 @@ export class AffineFormatBarWidget extends WidgetElement {
 
             this.root.std.command
               .pipe()
-              .withRoot()
+              .withHost()
               .getTextSelection()
               .getSelectedBlocks({
                 types: ['text'],

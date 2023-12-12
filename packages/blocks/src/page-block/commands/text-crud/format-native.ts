@@ -10,7 +10,7 @@ import type { Flavour } from '../../../models.js';
 
 // for native range
 export const formatNativeCommand: Command<
-  'root',
+  'host',
   never,
   {
     range?: Range;
@@ -18,10 +18,10 @@ export const formatNativeCommand: Command<
     mode?: 'replace' | 'merge';
   }
 > = (ctx, next) => {
-  const { root, styles, mode = 'merge' } = ctx;
+  const { host, styles, mode = 'merge' } = ctx;
   assertExists(
-    root,
-    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
+    host,
+    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
   );
 
   let range = ctx.range;
@@ -33,7 +33,7 @@ export const formatNativeCommand: Command<
   if (!range) return;
 
   const selectedVEditors = Array.from<VirgoRootElement>(
-    root.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
+    host.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
   )
     .filter(el => range?.intersectsNode(el))
     .filter(el => {

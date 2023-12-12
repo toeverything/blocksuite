@@ -96,7 +96,7 @@ export class UIEventDispatcher {
   }
 
   get root() {
-    return this.std.root;
+    return this.std.host;
   }
 
   run(name: EventName, context: UIEventStateContext, scope?: EventScope) {

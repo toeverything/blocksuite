@@ -9,7 +9,7 @@ export function getSelectedContentModels(
   const result: BaseBlockModel[] = [];
   root.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .tryAll(chain => [
       chain.getTextSelection(),
       chain.getBlockSelections(),

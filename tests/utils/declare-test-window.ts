@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import type { ContentParser } from '../../packages/blocks/src/content-parser.js';
 import type { TestUtils } from '../../packages/blocks/src/index.js';
-import type { BlockSuiteRoot } from '../../packages/lit/src/index.js';
+import type { EditorHost } from '../../packages/lit/src/index.js';
 import type { DebugMenu } from '../../packages/playground/apps/starter/components/debug-menu.js';
 import type { AffineEditorContainer } from '../../packages/presets/src/index.js';
 import type {
@@ -28,7 +28,7 @@ declare global {
     page: Page;
     debugMenu: DebugMenu;
     editor: AffineEditorContainer;
-    root: BlockSuiteRoot;
+    root: EditorHost;
     testUtils: TestUtils;
 
     // TODO: remove this when provider support subdocument

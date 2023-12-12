@@ -92,7 +92,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
 
     this.std = new BlockStdProvider({
-      root: this,
+      host: this,
       workspace: this.page.workspace,
       page: this.page,
     });

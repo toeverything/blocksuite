@@ -8,7 +8,7 @@ import { SpecStore } from '../spec/index.js';
 import { ViewStore } from '../view/index.js';
 
 export interface BlockStdProviderOptions {
-  root: HTMLElement;
+  host: HTMLElement;
   workspace: Workspace;
   page: Page;
 }
@@ -19,13 +19,13 @@ export class BlockStdProvider {
   readonly event: UIEventDispatcher;
   readonly selection: SelectionManager;
   readonly command: CommandManager;
-  readonly root: HTMLElement;
+  readonly host: HTMLElement;
   readonly spec: SpecStore;
   readonly view: ViewStore;
   readonly clipboard: Clipboard;
 
   constructor(options: BlockStdProviderOptions) {
-    this.root = options.root;
+    this.host = options.host;
     this.workspace = options.workspace;
     this.page = options.page;
     this.event = new UIEventDispatcher(this);

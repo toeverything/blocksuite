@@ -16,7 +16,7 @@ export async function updateBlockType(
       const blocks: BlockElement[] = [];
       window.root.std.command
         .pipe()
-        .withRoot()
+        .withHost()
         .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
         .getSelectedBlocks({
           types: ['text', 'block'],
