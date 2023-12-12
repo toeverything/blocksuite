@@ -14,7 +14,7 @@ export async function updateBlockType(
   await page.evaluate(
     ([flavour, type]) => {
       const blocks: BlockElement[] = [];
-      window.root.std.command
+      window.host.std.command
         .pipe()
         .withHost()
         .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
