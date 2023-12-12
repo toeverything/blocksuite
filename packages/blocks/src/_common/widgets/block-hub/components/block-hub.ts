@@ -1,6 +1,6 @@
 import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, query, queryAll, state } from 'lit/decorators.js';
@@ -90,13 +90,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _lastDraggingFlavour: string | null = null;
   private _timer: number | null = null;
   private _rafID: number = 0;
-  private _root: BlockSuiteRoot;
+  private _host: EditorHost;
 
   static override styles = styles;
 
-  constructor(root: BlockSuiteRoot) {
+  constructor(host: EditorHost) {
     super();
-    this._root = root;
+    this._host = host;
   }
 
   override connectedCallback() {
@@ -106,13 +106,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this, 'dragstart', this._onDragStart);
     disposables.addFromEvent(this, 'drag', this._onDrag);
     disposables.addFromEvent(this, 'dragend', this._onDragEnd);
-    disposables.addFromEvent(this._root, 'dragover', this._onDragOver);
-    disposables.addFromEvent(this._root, 'drop', this._onDrop);
+    disposables.addFromEvent(this._host, 'dragover', this._onDragOver);
+    disposables.addFromEvent(this._host, 'drop', this._onDrop);
     disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
 
     if (IS_FIREFOX) {
       disposables.addFromEvent(
-        this._root,
+        this._host,
         'dragover',
         this._onDragOverDocument
       );
@@ -193,13 +193,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   }
 
   private get _isPageMode() {
-    return isPageMode(this._root.page);
+    return isPageMode(this._host.page);
   }
 
   private get _pageBlockElement() {
     const pageElement = this._isPageMode
-      ? (getDocPage(this._root.page) as DocPageBlockComponent)
-      : (getEdgelessPage(this._root.page) as EdgelessPageBlockComponent);
+      ? (getDocPage(this._host.page) as DocPageBlockComponent)
+      : (getEdgelessPage(this._host.page) as EdgelessPageBlockComponent);
     return pageElement;
   }
 
@@ -214,7 +214,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     if (this._isPageMode) {
       const closestNoteBlock = getClosestNoteBlock(
-        this._root.page,
+        this._host.page,
         this._pageBlockElement,
         point
       );
@@ -347,7 +347,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       if (x >= min.x && x <= max.x && y >= min.y) {
         const lastBlock = this._pageBlockElement.model.lastChild();
         if (lastBlock) {
-          const lastElement = this._root.view.viewFromPath('block', [
+          const lastElement = this._host.view.viewFromPath('block', [
             lastBlock.id,
           ]);
           element = lastElement;
@@ -435,7 +435,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     assertExists(e.dataTransfer);
     if (!e.dataTransfer.getData('affine/block-hub')) return;
 
-    const page = this._root.page;
+    const page = this._host.page;
     const point = this._indicator?.rect?.min ?? new Point(e.clientX, e.clientY);
     const lastModelState = this._lastDroppingTarget;
     const lastType = this._lastDroppingType;
@@ -455,7 +455,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         }))
       );
     } else if (props.flavour === 'affine:bookmark') {
-      const url = await toggleBookmarkCreateModal(this._root);
+      const url = await toggleBookmarkCreateModal(this._host);
       url &&
         models.push({
           flavour: 'affine:bookmark',
@@ -509,7 +509,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     let noteId;
     if (focusId && parentModel) {
-      const targetNoteBlock = this._root.view.viewFromPath(
+      const targetNoteBlock = this._host.view.viewFromPath(
         'block',
         buildPath(parentModel)
       );
@@ -549,7 +549,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       flavour: blockHubElement.getAttribute('affine-flavour') ?? '',
       type: affineType ?? undefined,
     };
-    const page = this._root.page;
+    const page = this._host.page;
     const models = [];
 
     if (data.flavour === 'affine:image' && data.type === 'image') {
@@ -560,7 +560,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         }))
       );
     } else if (data.flavour === 'affine:bookmark') {
-      const url = await toggleBookmarkCreateModal(this._root);
+      const url = await toggleBookmarkCreateModal(this._host);
       url &&
         models.push({
           flavour: 'affine:bookmark',

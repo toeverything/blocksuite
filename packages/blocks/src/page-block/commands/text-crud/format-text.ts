@@ -9,7 +9,7 @@ import type { Flavour } from '../../../models.js';
 
 // for text selection
 export const formatTextCommand: Command<
-  'currentTextSelection' | 'root',
+  'currentTextSelection' | 'host',
   never,
   {
     textSelection?: TextSelection;
@@ -17,10 +17,10 @@ export const formatTextCommand: Command<
     mode?: 'replace' | 'merge';
   }
 > = (ctx, next) => {
-  const { root, styles, mode = 'merge' } = ctx;
+  const { host, styles, mode = 'merge' } = ctx;
   assertExists(
-    root,
-    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
+    host,
+    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
   );
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
@@ -29,9 +29,9 @@ export const formatTextCommand: Command<
     '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before adding this command to the pipeline.'
   );
 
-  const success = root.std.command
+  const success = host.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .getSelectedBlocks({
       textSelection,
       filter: el =>
@@ -88,7 +88,7 @@ export const formatTextCommand: Command<
       });
 
       Promise.all(selectedBlocks.map(el => el.updateComplete)).then(() => {
-        root.rangeManager?.syncTextSelectionToRange(textSelection);
+        host.rangeManager?.syncTextSelectionToRange(textSelection);
       });
 
       next();

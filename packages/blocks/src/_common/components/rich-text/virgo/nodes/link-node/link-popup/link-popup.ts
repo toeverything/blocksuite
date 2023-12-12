@@ -65,7 +65,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       });
     }
 
-    const parent = this.blockElement.root.page.getParent(
+    const parent = this.blockElement.host.page.getParent(
       this.blockElement.model
     );
     assertExists(parent);
@@ -155,8 +155,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   private _isBookmarkAllowed() {
     const blockElement = this.blockElement;
-    const schema = blockElement.root.page.schema;
-    const parent = blockElement.root.page.getParent(blockElement.model);
+    const schema = blockElement.host.page.schema;
+    const parent = blockElement.host.page.getParent(blockElement.model);
     assertExists(parent);
     const bookmarkSchema = schema.flavourSchemaMap.get('affine:bookmark');
     assertExists(bookmarkSchema);
@@ -214,11 +214,11 @@ export class LinkPopup extends WithDisposable(LitElement) {
       url: this.currentLink,
       title: this.currentText,
     };
-    const page = blockElement.root.page;
+    const page = blockElement.host.page;
     const parent = page.getParent(blockElement.model);
     assertExists(parent);
     const index = parent.children.indexOf(blockElement.model);
-    blockElement.root.page.addBlock(
+    blockElement.host.page.addBlock(
       'affine:bookmark',
       props,
       parent,

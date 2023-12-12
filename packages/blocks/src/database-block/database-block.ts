@@ -253,9 +253,9 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   private _dataSource?: DataSource;
   public get dataSource(): DataSource {
     if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDatasource(this.root, {
+      this._dataSource = new DatabaseBlockDatasource(this.host, {
         type: 'database-block',
-        pageId: this.root.page.id,
+        pageId: this.host.page.id,
         blockId: this.model.id,
       });
     }
@@ -329,21 +329,21 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   selectionUpdated = new Slot<DataViewSelection | undefined>();
 
   get getFlag() {
-    return this.root.page.awarenessStore.getFlag.bind(
-      this.root.page.awarenessStore
+    return this.host.page.awarenessStore.getFlag.bind(
+      this.host.page.awarenessStore
     );
   }
 
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
-      dispose: this.root.event.bindHotkey(hotkeys, {
+      dispose: this.host.event.bindHotkey(hotkeys, {
         path: this.path,
       }),
     };
   };
   _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
     return {
-      dispose: this.root.event.add(name, handler, {
+      dispose: this.host.event.add(name, handler, {
         path: this.path,
       }),
     };

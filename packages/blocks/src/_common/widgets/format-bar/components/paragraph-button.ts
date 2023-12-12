@@ -130,7 +130,7 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
 
   const paragraphPanel = ParagraphPanel({
     selectedBlockElements,
-    page: formatBar.root.page,
+    page: formatBar.host.page,
     ref: setFloating,
   });
 

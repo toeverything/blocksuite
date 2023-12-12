@@ -1,4 +1,4 @@
-import type { BlockStdProvider } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -43,7 +43,7 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
   onSelected?: MenuActionCallback;
 
   @property({ attribute: false })
-  std!: BlockStdProvider;
+  std!: BlockStdScope;
 
   override connectedCallback() {
     super.connectedCallback();

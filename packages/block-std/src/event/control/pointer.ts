@@ -18,24 +18,24 @@ export class PointerControl {
 
   listen() {
     this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.root,
+      this._dispatcher.host,
       'pointerdown',
       this._down
     );
     this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.root,
+      this._dispatcher.host,
       'pointermove',
       this._moveOn
     );
     this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.root,
+      this._dispatcher.host,
       'pointerout',
       this._out
     );
   }
 
   private get _rect() {
-    return this._dispatcher.root.getBoundingClientRect();
+    return this._dispatcher.host.getBoundingClientRect();
   }
 
   private _reset = () => {

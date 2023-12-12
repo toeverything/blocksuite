@@ -124,9 +124,9 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   get selectedBlocks() {
-    return this.root.selection.find('text')
-      ? this.root.selection.filter('text')
-      : this.root.selection.filter('block');
+    return this.host.selection.find('text')
+      ? this.host.selection.filter('text')
+      : this.host.selection.filter('block');
   }
 
   clearRaf() {
@@ -309,7 +309,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       width = Math.max(width, element.getBoundingClientRect().width);
       const container = document.createElement('div');
       container.classList.add('affine-block-element');
-      render(this.root.renderModel(element.model), container);
+      render(this.host.renderModel(element.model), container);
       fragment.appendChild(container);
     });
 
@@ -382,7 +382,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   private _getBlockElementFromViewStore(path: string[]) {
-    return this.root.view.viewFromPath('block', path);
+    return this.host.view.viewFromPath('block', path);
   }
 
   private get _viewportOffset() {
@@ -602,7 +602,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   private _setSelectedBlocks(blockElements: BlockElement[], noteId?: string) {
-    const { selection } = this.root;
+    const { selection } = this.host;
     const selections = blockElements.map(blockElement =>
       selection.getInstance('block', {
         path: blockElement.path,
@@ -626,8 +626,8 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   private get _rangeManager() {
-    assertExists(this.root.rangeManager);
-    return this.root.rangeManager;
+    assertExists(this.host.rangeManager);
+    return this.host.rangeManager;
   }
 
   private _removeHoverRect() {
@@ -679,7 +679,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       return;
     }
 
-    const blockId = closestBlockElement.getAttribute(this.root.blockIdAttr);
+    const blockId = closestBlockElement.getAttribute(this.host.blockIdAttr);
     const blockPath = closestBlockElement.path;
     assertExists(blockId);
     assertExists(blockPath);
@@ -763,7 +763,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       return;
     }
 
-    const { selection } = this.root;
+    const { selection } = this.host;
     const selectedBlocks = this.selectedBlocks;
 
     // Should clear selection if current block is the first selected block

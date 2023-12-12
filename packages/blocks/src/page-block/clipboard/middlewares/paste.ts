@@ -5,7 +5,7 @@ import type {
 } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import type {
   BaseBlockModel,
   BlockSnapshot,
@@ -29,7 +29,7 @@ class PointState {
   readonly text: Text;
   readonly model: BaseBlockModel;
   constructor(
-    readonly std: BlockSuiteRoot['std'],
+    readonly std: EditorHost['std'],
     readonly point: TextRangePoint
   ) {
     this.block = this._blockFromPath(point.path);
@@ -55,7 +55,7 @@ class PasteTr {
   private readonly lastIndex: number;
   private readonly firstSnapshotIsPlainText: boolean;
   constructor(
-    public readonly std: BlockSuiteRoot['std'],
+    public readonly std: EditorHost['std'],
     public readonly text: TextSelection,
     public readonly snapshot: SliceSnapshot
   ) {
@@ -226,7 +226,7 @@ function flatNote(snapshot: SliceSnapshot) {
   }
 }
 
-export const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
+export const pasteMiddleware = (std: EditorHost['std']): JobMiddleware => {
   return ({ slots }) => {
     let tr: PasteTr | undefined;
     slots.beforeImport.on(payload => {

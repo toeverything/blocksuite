@@ -187,7 +187,7 @@ export async function assertTextContain(page: Page, text: string, i = 0) {
 
 export async function assertRichTexts(page: Page, texts: string[]) {
   const actualTexts = await page.evaluate(index => {
-    const editor = document.querySelectorAll('editor-container')[index];
+    const editor = document.querySelectorAll('affine-editor-container')[index];
     const richTexts = Array.from(
       editor?.querySelectorAll<RichText>('rich-text') ?? []
     );
@@ -301,7 +301,9 @@ export async function assertRichTextVRange(
 ) {
   const actual = await page.evaluate(
     ([richTextIndex, index]) => {
-      const editor = document.querySelectorAll('editor-container')[index];
+      const editor = document.querySelectorAll('affine-editor-container')[
+        index
+      ];
       const richText = editor?.querySelectorAll('rich-text')[richTextIndex];
       const vEditor = richText.vEditor;
       return vEditor?.getVRange();
@@ -386,7 +388,7 @@ export async function assertRichTextModelType(
 
 export async function assertTextFormats(page: Page, resultObj: unknown[]) {
   const actual = await page.evaluate(index => {
-    const editor = document.querySelectorAll('editor-container')[index];
+    const editor = document.querySelectorAll('affine-editor-container')[index];
     const elements = editor?.querySelectorAll('rich-text');
     return Array.from(elements).map(el => {
       const vEditor = el.vEditor;
@@ -505,7 +507,7 @@ export async function assertBlockProps(
 
 export async function assertBlockTypes(page: Page, blockTypes: string[]) {
   const actual = await page.evaluate(index => {
-    const editor = document.querySelectorAll('editor-container')[index];
+    const editor = document.querySelectorAll('affine-editor-container')[index];
     const elements = editor?.querySelectorAll('[data-block-id]');
     return (
       Array.from(elements)
@@ -637,7 +639,7 @@ export async function assertClipItems(
   // FIXME: use original clipboard API
   // const clipItems = await page.evaluate(() => {
   //   return document
-  //     .getElementsByTagName('editor-container')[0]
+  //     .getElementsByTagName('affine-editor-container')[0]
   //     .clipboard['_copy']['_getClipItems']();
   // });
   // const actual = clipItems.find(item => item.mimeType === key)?.data;

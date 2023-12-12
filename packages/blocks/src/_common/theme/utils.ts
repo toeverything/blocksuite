@@ -5,7 +5,7 @@ import type { ThemeObserver } from './theme-observer.js';
 
 function getClosestEditorContainer(element: Element) {
   const container = element.closest(
-    'editor-container'
+    'affine-editor-container'
   ) as unknown as Element & {
     themeObserver: ThemeObserver;
   };

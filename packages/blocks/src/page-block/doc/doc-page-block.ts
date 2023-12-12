@@ -382,7 +382,7 @@ export class DocPageBlockComponent extends BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.root.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
+    this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);
@@ -408,8 +408,8 @@ export class DocPageBlockComponent extends BlockElement<
 
     this.bindHotKey({
       ArrowUp: () => {
-        const view = this.root.view;
-        const selection = this.root.selection;
+        const view = this.host.view;
+        const selection = this.host.selection;
         const sel = selection.value.find(
           sel => sel.is('text') || sel.is('block')
         );
@@ -469,8 +469,8 @@ export class DocPageBlockComponent extends BlockElement<
         return true;
       },
       ArrowDown: () => {
-        const view = this.root.view;
-        const selection = this.root.selection;
+        const view = this.host.view;
+        const selection = this.host.selection;
         const sel = selection.value.find(
           sel => sel.is('text') || sel.is('block')
         );
@@ -573,8 +573,8 @@ export class DocPageBlockComponent extends BlockElement<
       }
 
       requestAnimationFrame(() => {
-        this.root.selection.setGroup('note', [
-          this.root.selection.getInstance('text', {
+        this.host.selection.setGroup('note', [
+          this.host.selection.getInstance('text', {
             from: {
               path: [this.model.id, noteId, paragraphId],
               index,

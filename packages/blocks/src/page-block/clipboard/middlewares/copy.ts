@@ -1,6 +1,6 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import type {
   BaseBlockModel,
   BlockSnapshot,
@@ -30,7 +30,7 @@ const handlePoint = (
     model.text?.sliceToDelta(index, length + index);
 };
 
-const sliceText = (slots: JobSlots, std: BlockSuiteRoot['std']) => {
+const sliceText = (slots: JobSlots, std: EditorHost['std']) => {
   slots.afterExport.on(payload => {
     if (payload.type === 'block') {
       const snapshot = payload.snapshot;
@@ -49,7 +49,7 @@ const sliceText = (slots: JobSlots, std: BlockSuiteRoot['std']) => {
   });
 };
 
-export const copyMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
+export const copyMiddleware = (std: EditorHost['std']): JobMiddleware => {
   return ({ slots }) => {
     sliceText(slots, std);
   };

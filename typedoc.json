@@ -1,6 +1,7 @@
 {
   "entryPoints": [
     "packages/block-std",
+    "packages/blocks",
     "packages/presets",
     "packages/lit",
     "packages/store",

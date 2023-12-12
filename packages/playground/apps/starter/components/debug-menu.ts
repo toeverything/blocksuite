@@ -34,11 +34,11 @@ import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockElement,
-  type BlockSuiteRoot,
+  type EditorHost,
   ShadowlessElement,
 } from '@blocksuite/lit';
-import type { AiPanel } from '@blocksuite/presets';
-import { EditorContainer } from '@blocksuite/presets';
+import type { CopilotPanel } from '@blocksuite/presets';
+import { AffineEditorContainer } from '@blocksuite/presets';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Job, Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
@@ -53,7 +53,7 @@ import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
 import type { SidePanel } from './side-panel';
 
-export function getSurfaceElementFromEditor(editor: EditorContainer) {
+export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
   const { page } = editor;
   const surfaceModel = page.getBlockByFlavour('affine:surface')[0];
   assertExists(surfaceModel);
@@ -150,10 +150,10 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
     });
   }
 }
-export function getSelectedBlocks(root: BlockSuiteRoot) {
+export function getSelectedBlocks(host: EditorHost) {
   let blocks: BlockElement[] = [];
 
-  root.std.command
+  host.std.command
     .pipe()
     .getBlockSelections()
     .inline((ctx, next) => {
@@ -196,7 +196,7 @@ export class DebugMenu extends ShadowlessElement {
   workspace!: Workspace;
 
   @property({ attribute: false })
-  editor!: EditorContainer;
+  editor!: AffineEditorContainer;
 
   @property({ attribute: false })
   contentParser!: ContentParser;
@@ -208,7 +208,8 @@ export class DebugMenu extends ShadowlessElement {
   framePanel!: CustomFramePanel;
 
   @property({ attribute: false })
-  aiPanel!: AiPanel;
+  copilotPanel!: CopilotPanel;
+
   @property({ attribute: false })
   sidePanel!: SidePanel;
 
@@ -302,8 +303,10 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _switchEditorMode() {
-    const editor = document.querySelector<EditorContainer>('editor-container');
-    if (editor instanceof EditorContainer) {
+    const editor = document.querySelector<AffineEditorContainer>(
+      'affine-editor-container'
+    );
+    if (editor instanceof AffineEditorContainer) {
       const mode = editor.mode === 'page' ? 'edgeless' : 'page';
       editor.mode = mode;
     } else {
@@ -321,10 +324,10 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _toggleCopilotPanel() {
-    if (this.sidePanel.currentContent === this.aiPanel) {
+    if (this.sidePanel.currentContent === this.copilotPanel) {
       this.sidePanel.hideContent();
     } else {
-      this.sidePanel.showContent(this.aiPanel);
+      this.sidePanel.showContent(this.copilotPanel);
     }
   }
 
@@ -803,7 +806,7 @@ function createPageBlock(workspace: Workspace) {
 
 function PageList(
   workspace: Workspace,
-  editor: EditorContainer,
+  editor: AffineEditorContainer,
   requestUpdate: () => void
 ) {
   workspace.meta.pageMetasUpdated.on(requestUpdate);

@@ -8,7 +8,7 @@ export const ActionItems = (formatBar: AffineFormatBarWidget) => {
     return null;
   }
 
-  const root = formatBar.root;
+  const root = formatBar.host;
   return quickActionConfig
     .filter(({ showWhen }) => showWhen(root))
     .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {

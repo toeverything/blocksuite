@@ -8,7 +8,7 @@ import type { Flavour } from '../../../models.js';
 
 // for block selection
 export const formatBlockCommand: Command<
-  'currentBlockSelections' | 'root',
+  'currentBlockSelections' | 'host',
   never,
   {
     blockSelections?: BlockSelection[];
@@ -22,10 +22,10 @@ export const formatBlockCommand: Command<
     '`blockSelections` is required, you need to pass it in args or use `getBlockSelections` command before adding this command to the pipeline.'
   );
 
-  const root = ctx.root;
+  const host = ctx.host;
   assertExists(
-    root,
-    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
+    host,
+    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
   );
 
   if (blockSelections.length === 0) return;
@@ -33,9 +33,9 @@ export const formatBlockCommand: Command<
   const styles = ctx.styles;
   const mode = ctx.mode ?? 'merge';
 
-  const success = root.std.command
+  const success = host.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .getSelectedBlocks({
       blockSelections,
       filter: el =>

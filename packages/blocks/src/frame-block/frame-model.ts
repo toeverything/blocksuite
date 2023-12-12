@@ -58,7 +58,11 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(
     return titleBound.isPointInBound([x, y], 0);
   }
 
-  override boxSelect(bound: Bound): boolean {
-    return Bound.deserialize(this.xywh).isIntersectWithBound(bound);
+  override boxSelect(seclectedBound: Bound): boolean {
+    const bound = Bound.deserialize(this.xywh);
+    return (
+      bound.isIntersectWithBound(seclectedBound) ||
+      seclectedBound.contains(bound)
+    );
   }
 }

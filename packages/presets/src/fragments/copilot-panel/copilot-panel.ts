@@ -1,5 +1,5 @@
 import {
-  type BlockSuiteRoot,
+  type EditorHost,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
@@ -8,7 +8,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EditorContainer } from '../../index.js';
+import type { AffineEditorContainer } from '../../index.js';
 import { GPTAPI, type GPTAPIPayloadMap } from './actions/index.js';
 import { EditorWithAI } from './api.js';
 import { LANGUAGE, TONE } from './config.js';
@@ -16,23 +16,23 @@ import { APIKeys } from './utils/api-keys.js';
 import { insertFromMarkdown } from './utils/markdown-utils.js';
 import { getSelectedBlocks, stopPropagation } from './utils/selection-utils.js';
 
-@customElement('ai-panel')
-export class AiPanel extends WithDisposable(ShadowlessElement) {
+@customElement('copilot-panel')
+export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    ai-panel {
+    copilot-panel {
       width: 100%;
       font-family: var(--affine-font-family);
       overflow-y: scroll;
       overflow-x: visible;
     }
 
-    .ai-panel-setting-title {
+    .copilot-panel-setting-title {
       font-size: 14px;
       margin-top: 12px;
       margin-bottom: 4px;
       color: var(--affine-text-secondary-color);
     }
-    .ai-panel-key-input {
+    .copilot-panel-key-input {
       width: 100%;
       border: 1px solid var(--affine-border-color, #e3e2e4);
       border-radius: 4px;
@@ -41,7 +41,7 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
       margin-bottom: 12px;
     }
 
-    .ai-panel-action-button {
+    .copilot-panel-action-button {
       cursor: pointer;
       user-select: none;
       padding: 4px;
@@ -55,7 +55,7 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
       justify-content: center;
       margin-top: 36px;
     }
-    .ai-panel-action-prompt {
+    .copilot-panel-action-prompt {
       width: 100%;
       border: 1px solid var(--affine-border-color, #e3e2e4);
       border-radius: 4px;
@@ -64,7 +64,7 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
       margin-top: 8px;
     }
 
-    .ai-panel-action-description {
+    .copilot-panel-action-description {
       font-size: 14px;
       margin-bottom: 8px;
       margin-top: 4px;
@@ -76,7 +76,7 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
   private _result = '';
 
   @property({ attribute: false })
-  editor!: EditorContainer;
+  editor!: AffineEditorContainer;
   editorWithAI?: EditorWithAI;
   get api() {
     if (!this.editorWithAI) {
@@ -90,7 +90,7 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
   }
 
   get root() {
-    return this.editor.root as BlockSuiteRoot;
+    return this.editor.root as EditorHost;
   }
 
   public override connectedCallback() {
@@ -166,14 +166,14 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
       <div style="margin-top: 16px;">${this._result}</div>
       <div style="display:flex;align-items:center;">
         <div
-          class="ai-panel-action-button"
+          class="copilot-panel-action-button"
           style="flex: 1;"
           @click="${this._replace}"
         >
           Replace
         </div>
         <div
-          class="ai-panel-action-button"
+          class="copilot-panel-action-button"
           style="flex: 1;"
           @click="${this._insertBelow}"
         >
@@ -196,17 +196,17 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
     };
     return html`
       <div>
-        <div class="ai-panel-setting-title">GPT API Key</div>
+        <div class="copilot-panel-setting-title">GPT API Key</div>
         <input
-          class="ai-panel-key-input"
+          class="copilot-panel-key-input"
           type="text"
           @keydown="${stopPropagation}"
           .value="${APIKeys.GPTAPIKey}"
           @input="${changeGPTAPIKey}"
         />
-        <div class="ai-panel-setting-title">Fal API Key</div>
+        <div class="copilot-panel-setting-title">Fal API Key</div>
         <input
-          class="ai-panel-key-input"
+          class="copilot-panel-key-input"
           type="text"
           @keydown="${stopPropagation}"
           .value="${APIKeys.FalAPIKey}"
@@ -241,7 +241,7 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
       };
       return html`<div style="margin-top: 16px;">
         <input
-          class="ai-panel-action-prompt"
+          class="copilot-panel-action-prompt"
           type="text"
           .value="${this.payload.question ?? ''}"
           @input="${change}"
@@ -302,48 +302,51 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
         </select>
       </div>
       ${this.extraPayload[this.payload.type]()}
-      <div class="ai-panel-action-button" @click="${this.ask}">Ask</div>
+      <div class="copilot-panel-action-button" @click="${this.ask}">Ask</div>
       <div>${this._ResultArea()}</div>
     </div>`;
   };
   edgeless = () => {
     return html`
-      <div class="ai-panel-action-button" @click="${this.api.makeItReal}">
+      <div class="copilot-panel-action-button" @click="${this.api.makeItReal}">
         Make It Real
       </div>
-      <div class="ai-panel-action-description">
+      <div class="copilot-panel-action-description">
         Select some shapes and text to generate html
       </div>
-      <div class="ai-panel-action-button" @click="${this.api.createImage}">
+      <div class="copilot-panel-action-button" @click="${this.api.createImage}">
         Create Image
       </div>
       <input
-        id="ai-panel-create-image-prompt"
-        class="ai-panel-action-prompt"
+        id="copilot-panel-create-image-prompt"
+        class="copilot-panel-action-prompt"
         type="text"
         @keydown="${stopPropagation}"
         placeholder="Prompt"
       />
-      <div class="ai-panel-action-description">
+      <div class="copilot-panel-action-description">
         Type prompt to create an image.
       </div>
-      <div class="ai-panel-action-button" @click="${this.api.showMeImage}">
+      <div class="copilot-panel-action-button" @click="${this.api.showMeImage}">
         Edit Image
       </div>
       <input
-        id="ai-panel-edit-image-prompt"
-        class="ai-panel-action-prompt"
+        id="copilot-panel-edit-image-prompt"
+        class="copilot-panel-action-prompt"
         type="text"
         @keydown="${stopPropagation}"
         placeholder="Prompt"
       />
-      <div class="ai-panel-action-description">
+      <div class="copilot-panel-action-description">
         Select some shapes and type prompt to edit them.
       </div>
-      <div class="ai-panel-action-button" @click="${this.api.htmlBlockDemo}">
+      <div
+        class="copilot-panel-action-button"
+        @click="${this.api.htmlBlockDemo}"
+      >
         HTML Block Test
       </div>
-      <div class="ai-panel-action-description">Generate a html block</div>
+      <div class="copilot-panel-action-description">Generate a html block</div>
     `;
   };
   panels = {
@@ -392,6 +395,6 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ai-panel': AiPanel;
+    'copilot-panel': CopilotPanel;
   }
 }

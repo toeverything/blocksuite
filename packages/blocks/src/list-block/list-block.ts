@@ -30,7 +30,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   private _isCollapsedWhenReadOnly = !!this.model?.collapsed;
 
   private _select() {
-    const selection = this.root.selection;
+    const selection = this.host.selection;
     selection.update(selList => {
       return selList
         .filter(sel => !sel.is('text') && !sel.is('block'))

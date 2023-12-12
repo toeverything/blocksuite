@@ -25,7 +25,7 @@ export class Gesture {
   private _rafID = 0;
 
   private get _selectionManager() {
-    return this.pageElement.root.selection;
+    return this.pageElement.host.selection;
   }
 
   private get _viewportElement() {
@@ -36,8 +36,8 @@ export class Gesture {
   }
 
   private get _rangeManager() {
-    assertExists(this.pageElement.root.rangeManager);
-    return this.pageElement.root.rangeManager;
+    assertExists(this.pageElement.host.rangeManager);
+    return this.pageElement.host.rangeManager;
   }
 
   constructor(public pageElement: PageBlockComponent) {

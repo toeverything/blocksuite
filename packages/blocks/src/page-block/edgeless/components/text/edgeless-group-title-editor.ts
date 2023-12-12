@@ -103,13 +103,13 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
       top: y - 36 + 'px',
       minWidth: '8px',
       fontFamily: 'var(--affine-font-family)',
-      background: 'var(--affine-text-primary-color)',
-      color: 'var(--affine-white)',
+      color: 'var(--affine-text-primary-color)',
+      background: 'var(--affine-white-10)',
       outline: 'none',
       zIndex: '1',
       border: `1px solid
         var(--affine-primary-color)`,
-      boxShadow: `0px 0px 0px 2px rgba(30, 150, 235, 0.3)`,
+      boxShadow: 'var(--affine-active-shadow)',
     });
     return html`<rich-text
       .yText=${this.group.title}

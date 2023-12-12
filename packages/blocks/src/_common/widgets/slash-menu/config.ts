@@ -79,9 +79,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             return true;
           },
           action: ({ pageElement }) => {
-            pageElement.root.std.command
+            pageElement.host.std.command
               .pipe()
-              .withRoot()
+              .withHost()
               .tryAll(chain => [
                 chain.getTextSelection(),
                 chain.getBlockSelections(),
@@ -160,9 +160,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return true;
         },
         action: ({ pageElement }) => {
-          pageElement.root.std.command
+          pageElement.host.std.command
             .pipe()
-            .withRoot()
+            .withHost()
             .tryAll(chain => [
               chain.getTextSelection(),
               chain.getBlockSelections(),
@@ -282,7 +282,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const url = await toggleBookmarkCreateModal(pageElement.root);
+          const url = await toggleBookmarkCreateModal(pageElement.host);
           if (!url) return;
           const props = {
             flavour: 'affine:bookmark',
@@ -306,7 +306,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) return;
           const file = await openFileOrFiles();
           if (!file) return;
-          const service = pageElement.root.spec.getService('affine:attachment');
+          const service = pageElement.host.spec.getService('affine:attachment');
           assertExists(service);
           assertInstanceOf(service, AttachmentService);
           const maxFileSize = service.maxFileSize;

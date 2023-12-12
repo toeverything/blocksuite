@@ -3,9 +3,9 @@ import type { SurfaceBlockComponent } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { EditorContainer } from '../../src/index.js';
+import type { AffineEditorContainer } from '../../src/index.js';
 
-export function getSurface(page: Page, editor: EditorContainer) {
+export function getSurface(page: Page, editor: AffineEditorContainer) {
   const surfaceModel = page.getBlockByFlavour('affine:surface');
 
   return editor.root!.view.viewFromPath('block', [

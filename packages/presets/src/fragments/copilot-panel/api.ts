@@ -5,10 +5,10 @@ import {
   loadImages,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import type { Workspace } from '@blocksuite/store';
 
-import type { EditorContainer } from '../../editors/index.js';
+import type { AffineEditorContainer } from '../../editors/index.js';
 import { GPTAPI, type GPTAPIPayloadMap } from './actions/index.js';
 import { demoScript } from './demo-script.js';
 import {
@@ -29,12 +29,12 @@ export class EditorWithAI {
   get workspace(): Workspace {
     return this.editor.page.workspace;
   }
-  get root(): BlockSuiteRoot {
+  get root(): EditorHost {
     assertExists(this.editor.root);
     return this.editor.root;
   }
 
-  constructor(private editor: EditorContainer) {}
+  constructor(private editor: AffineEditorContainer) {}
 
   makeItReal = async () => {
     const png = await selectedToPng(this.editor);
@@ -90,7 +90,7 @@ export class EditorWithAI {
         const prompt =
           (
             document.getElementById(
-              'ai-panel-edit-image-prompt'
+              'copilot-panel-edit-image-prompt'
             ) as HTMLInputElement
           )?.value ?? '';
         const b64 = await editImage(prompt, canvas);
@@ -110,7 +110,7 @@ export class EditorWithAI {
     const prompt =
       (
         document.getElementById(
-          'ai-panel-create-image-prompt'
+          'copilot-panel-create-image-prompt'
         ) as HTMLInputElement
       )?.value ?? '';
     if (!prompt) {

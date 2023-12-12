@@ -1,4 +1,4 @@
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -96,9 +96,9 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
 }
 
 export async function toggleBookmarkCreateModal(
-  root: BlockSuiteRoot
+  host: EditorHost
 ): Promise<null | string> {
-  root.selection.clear();
+  host.selection.clear();
   const bookmarkCreateModal = new BookmarkCreateModal();
   return new Promise(resolve => {
     bookmarkCreateModal.onConfirm = url => {

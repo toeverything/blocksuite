@@ -143,8 +143,8 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
           // If start dragging from the attachment element
           // Set selection and take over dragStart event to start dragging
-          this.root.selection.set([
-            this.root.selection.getInstance('block', {
+          this.host.selection.set([
+            this.host.selection.getInstance('block', {
               path: attachmentBlock.path,
             }),
           ]);
@@ -179,7 +179,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   }
 
   private _focusAttachment() {
-    const selectionManager = this.root.selection;
+    const selectionManager = this.host.selection;
     const blockSelection = selectionManager.getInstance('block', {
       path: this.path,
     });

@@ -1,22 +1,22 @@
 import type { Command } from '@blocksuite/block-std';
 import { assertInstanceOf } from '@blocksuite/global/utils';
-import { BlockSuiteRoot } from '@blocksuite/lit';
+import { EditorHost } from '@blocksuite/lit';
 
-export const withRootCommand: Command<never, 'root'> = (ctx, next) => {
-  const root = ctx.std.root;
-  assertInstanceOf(root, BlockSuiteRoot);
+export const withHostCommand: Command<never, 'host'> = (ctx, next) => {
+  const host = ctx.std.host;
+  assertInstanceOf(host, EditorHost);
 
-  next({ root });
+  next({ host });
 };
 
 declare global {
   namespace BlockSuite {
     interface CommandData {
-      root?: BlockSuiteRoot;
+      host?: EditorHost;
     }
 
     interface Commands {
-      withRoot: typeof withRootCommand;
+      withHost: typeof withHostCommand;
     }
   }
 }

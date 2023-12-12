@@ -3,7 +3,7 @@ import {
   type Disposable,
   DisposableGroup,
 } from '@blocksuite/global/utils';
-import { type BlockSuiteRoot, WithDisposable } from '@blocksuite/lit';
+import { type EditorHost, WithDisposable } from '@blocksuite/lit';
 import type { Page, Y } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -93,7 +93,7 @@ export class FramePreview extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  host!: EditorHost;
 
   @property({ attribute: false })
   surfaceWidth: number = DEFAULT_PREVIEW_CONTAINER_WIDTH;
@@ -386,8 +386,8 @@ export class FramePreview extends WithDisposable(LitElement) {
   }
 
   private _getCSSPropertyValue = (value: string) => {
-    const root = this.root;
-    this.root.updateComplete.then(() => {});
+    const root = this.host;
+    this.host.updateComplete.then(() => {});
     if (isCssVariable(value)) {
       const cssValue = getThemePropertyValue(root, value as CssVariableName);
       if (cssValue === undefined) {
@@ -509,9 +509,9 @@ export class FramePreview extends WithDisposable(LitElement) {
       >
         <surface-ref-portal
           .page=${this.page}
-          .root=${this.root}
+          .host=${this.host}
           .containerModel=${referencedModel}
-          .renderModel=${this.root.renderModel}
+          .renderModel=${this.host.renderModel}
         ></surface-ref-portal>
         <div class="surface-canvas-container">
           <!-- attach canvas here -->

@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import {
   VIRGO_ROOT_ATTR,
   type VirgoRootElement,
@@ -46,12 +46,12 @@ function getCombinedFormatFromVEditors(
   });
 }
 
-function getCombinedFormat(root: BlockSuiteRoot): AffineTextAttributes {
+function getCombinedFormat(host: EditorHost): AffineTextAttributes {
   let result: AffineTextAttributes = {};
 
-  root.std.command
+  host.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .try(chain => [
       // text selection, corresponding to `formatText` command
       chain
@@ -118,7 +118,7 @@ function getCombinedFormat(root: BlockSuiteRoot): AffineTextAttributes {
       // native selection, corresponding to `formatNative` command
       chain.inline(() => {
         const selectedVEditors = Array.from<VirgoRootElement>(
-          root.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
+          host.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
         )
           .filter(el => {
             const selection = document.getSelection();
@@ -149,13 +149,13 @@ function getCombinedFormat(root: BlockSuiteRoot): AffineTextAttributes {
 }
 
 export function handleCommonStyle(
-  root: BlockSuiteRoot,
+  host: EditorHost,
   key: Extract<
     keyof AffineTextAttributes,
     'bold' | 'italic' | 'underline' | 'strike' | 'code'
   >
 ) {
-  const active = commonActiveWhen(root, key);
+  const active = commonActiveWhen(host, key);
   const payload: {
     styles: AffineTextAttributes;
     mode?: 'replace' | 'merge';
@@ -164,9 +164,9 @@ export function handleCommonStyle(
       [key]: active ? null : true,
     },
   };
-  root.std.command
+  host.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .try(chain => [
       chain.getTextSelection().formatText(payload),
       chain.getBlockSelections().formatBlock(payload),
@@ -175,17 +175,17 @@ export function handleCommonStyle(
     .run();
 }
 
-export function commonActiveWhen(root: BlockSuiteRoot, key: string) {
-  const format = getCombinedFormat(root);
+export function commonActiveWhen(host: EditorHost, key: string) {
+  const format = getCombinedFormat(host);
   return key in format;
 }
 
-export function isFormatSupported(root: BlockSuiteRoot) {
+export function isFormatSupported(host: EditorHost) {
   let result = false;
 
-  root.std.command
+  host.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .try(chain => [
       // text selection, corresponding to `formatText` command
       chain
@@ -243,7 +243,7 @@ export function isFormatSupported(root: BlockSuiteRoot) {
       // native selection, corresponding to `formatNative` command
       chain.inline(() => {
         const selectedVEditors = Array.from<VirgoRootElement>(
-          root.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
+          host.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
         )
           .filter(el => {
             const selection = document.getSelection();
