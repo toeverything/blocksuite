@@ -4,11 +4,18 @@ import {
   on,
   once,
 } from '@blocksuite/blocks';
-import { noop } from '@blocksuite/global/utils';
+import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type PropertyValues,
+  unsafeCSS,
+} from 'lit';
 import { property } from 'lit/decorators.js';
 
 import { TOCBlockPreview } from './toc-preview.js';
@@ -108,11 +115,11 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       opacity: 0.5;
     }
 
-    .card-container.selected .card-preview {
+    .card-container.selected .card-preview.edgeless {
       background: var(--affine-hover-color);
     }
 
-    .card-container.placeholder .card-preview {
+    .card-container.placeholder .card-preview.edgeless {
       background: var(--affine-hover-color);
       opacity: 0.9;
     }
@@ -155,15 +162,10 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
   @property({ attribute: false })
   showCardNumber = true;
 
+  private _noteDisposables: DisposableGroup | null = null;
+
   override connectedCallback(): void {
     super.connectedCallback();
-
-    this._disposables.add(
-      this.note.childrenUpdated.on(() => this.requestUpdate())
-    );
-    this._disposables.add(
-      this.note.propsUpdated.on(() => this.requestUpdate())
-    );
 
     const observer = new MutationObserver(() => this.requestUpdate());
 
@@ -177,7 +179,35 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     this._disposables.add(() => observer.disconnect());
   }
 
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._clearNoteDisposables();
+  }
+
+  private _clearNoteDisposables = () => {
+    this._noteDisposables?.dispose();
+    this._noteDisposables = null;
+  };
+
+  private _setPageDisposables() {
+    this._clearNoteDisposables();
+    this._noteDisposables = new DisposableGroup();
+    this._noteDisposables.add(
+      this.note.childrenUpdated.on(() => this.requestUpdate())
+    );
+    this._noteDisposables.add(
+      this.note.propsUpdated.on(() => this.requestUpdate())
+    );
+  }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('note') || _changedProperties.has('index')) {
+      this._setPageDisposables();
+    }
+  }
+
   private _dispatchSelectEvent(e: MouseEvent) {
+    e.stopPropagation();
     const event = new CustomEvent('select', {
       detail: {
         id: this.note.id,
@@ -234,14 +264,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     return [this.note.id, block.id];
   }
 
-  private _dispatchClickBlockEvent(
-    e: MouseEvent,
-    invisible: boolean,
-    block: BaseBlockModel
-  ) {
-    e.stopPropagation();
-    if (invisible) return;
-
+  private _dispatchClickBlockEvent(block: BaseBlockModel) {
     const event = new CustomEvent('clickblock', {
       detail: {
         blockPath: this._buildBlockPath(block),
@@ -282,8 +305,11 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
                 .block=${block}
                 .hidePreviewIcon=${this.hidePreviewIcon}
                 .disabledIcon=${this.invisible}
-                @click=${(e: MouseEvent) =>
-                  this._dispatchClickBlockEvent(e, this.invisible, block)}
+                .cardNumber=${this.number}
+                @click=${() => {
+                  if (this.editorMode === 'edgeless' || this.invisible) return;
+                  this._dispatchClickBlockEvent(block);
+                }}
               ></toc-block-preview>`;
             })}
             </div>

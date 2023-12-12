@@ -176,6 +176,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   @property({ attribute: false })
   disabledIcon = false;
 
+  @property({ attribute: false })
+  cardNumber!: number;
+
   private _textDisposables: DisposableGroup | null = null;
 
   private _clearTextDisposables = () => {
@@ -206,8 +209,8 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     this._clearTextDisposables();
   }
 
-  override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('block')) {
+  override updated() {
+    this.updateComplete.then(() => {
       if (
         BlocksUtils.matchFlavours(this.block, [
           'affine:paragraph',
@@ -216,7 +219,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       ) {
         this._setPageDisposables(this.block);
       }
-    }
+    });
   }
 
   renderBlockByFlavour() {

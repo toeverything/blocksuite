@@ -62,7 +62,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       padding-left: 8px;
       height: 40px;
       box-sizing: border-box;
-      padding: 8px 8px;
+      padding: 6px 8px;
     }
 
     .insert-indicator {
@@ -280,6 +280,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   }
 
   private _selectNote(e: SelectEvent) {
+    if (!this._isEdgelessMode()) return;
+
     const { selected, id, multiselect } = e.detail;
 
     if (!selected) {
@@ -337,11 +339,12 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   /*
    * click at blank area to clear selection
    */
-  private _clickBlank = (e: MouseEvent) => {
+  private _clickBlank(e: MouseEvent) {
     e.stopPropagation();
+    console.log('click blank');
     // check if click at toc-card, if not, set this._selected to empty
     if (
-      (e.target as HTMLElement).closest('edgeless-note-toc-card') ||
+      (e.target as HTMLElement).closest('toc-note-card') ||
       this._selected.length === 0
     ) {
       return;
@@ -352,16 +355,12 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       elements: this._selected,
       editing: false,
     });
-  };
+  }
 
   override firstUpdated(): void {
     this._zoomToFit();
 
-    this._disposables.addFromEvent(
-      this.tocPanelContainer,
-      'click',
-      this._clickBlank
-    );
+    this._disposables.addFromEvent(this, 'click', this._clickBlank);
   }
 
   private _zoomToFit() {
