@@ -1,14 +1,16 @@
-import { registerTOCComponents } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
-import type { AffineEditorContainer } from '@blocksuite/presets';
+import {
+  type AffineEditorContainer,
+  registerTOCPanelComponents,
+} from '@blocksuite/presets';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('custom-navigation-panel')
-export class CustomNavigationPanel extends WithDisposable(LitElement) {
+export class CustomTOCOutlinePanel extends WithDisposable(LitElement) {
   static override styles = css`
-    .custom-navigation-container {
+    .custom-toc-outline-container {
       position: absolute;
       top: 0;
       right: 0;
@@ -30,10 +32,10 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
   editor!: AffineEditorContainer;
 
   private _renderPanel() {
-    return html`<edgeless-toc-notes-panel
+    return html`<toc-note-panel
       .page=${this.page}
       .fitPadding=${[50, 360, 50, 50]}
-    ></edgeless-toc-notes-panel>`;
+    ></toc-note-panel>`;
   }
 
   public toggleDisplay() {
@@ -44,7 +46,7 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
     super.connectedCallback();
     this.page = this.editor.page;
 
-    registerTOCComponents(components => {
+    registerTOCPanelComponents(components => {
       Object.entries(components).forEach(([name, component]) => {
         customElements.define(name, component);
       });
@@ -55,7 +57,7 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
     return html`
       ${this._show
         ? html`
-            <div class="custom-navigation-container">
+            <div class="custom-toc-outline-container">
               ${this._renderPanel()}
             </div>
           `
@@ -66,6 +68,6 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'custom-navigation-panel': CustomNavigationPanel;
+    'custom-toc-outline-panel': CustomTOCOutlinePanel;
   }
 }

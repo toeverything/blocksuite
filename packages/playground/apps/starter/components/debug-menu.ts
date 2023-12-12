@@ -48,7 +48,7 @@ import type { Pane } from 'tweakpane';
 
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
-import type { CustomNavigationPanel } from './custom-navigation-panel.js';
+import type { CustomTOCOutlinePanel } from './custom-toc-outline-panel.js';
 import type { SidePanel } from './side-panel';
 
 export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
@@ -200,7 +200,7 @@ export class DebugMenu extends ShadowlessElement {
   contentParser!: ContentParser;
 
   @property({ attribute: false })
-  navigationPanel!: CustomNavigationPanel;
+  navigationPanel!: CustomTOCOutlinePanel;
 
   @property({ attribute: false })
   framePanel!: CustomFramePanel;
@@ -676,7 +676,7 @@ export class DebugMenu extends ShadowlessElement {
                 Switch Offset Mode
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleNavigationPanel}>
-                Toggle Navigation Panel
+                Toggle TOC Outline Panel
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleFramePanel}>
                 Toggle Frame Panel

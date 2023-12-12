@@ -29,6 +29,7 @@ export * from './_common/utils/edgeless.js';
 export { on, once, stopPropagation } from './_common/utils/event.js';
 export * from './_common/utils/filesys.js';
 export * from './_common/utils/init.js';
+export type { BlockModels } from './_common/utils/model.js';
 export * from './_common/utils/query.js';
 export * from './_common/utils/rect.js';
 export * from './_common/utils/selection.js';
