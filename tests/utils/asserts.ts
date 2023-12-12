@@ -191,7 +191,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
       editor?.querySelectorAll<RichText>('rich-text') ?? []
     );
     return richTexts.map(richText => {
-      const editor = richText.vEditor;
+      const editor = richText.inlineEditor;
       return editor.yText.toString();
     });
   }, currentEditorIndex);

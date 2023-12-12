@@ -30,9 +30,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
   type: 'create' | 'edit' | 'view' = 'create';
 
   @property({ attribute: false })
-  vEditor!: AffineInlineEditor;
+  inlineEditor!: AffineInlineEditor;
   @property({ attribute: false })
-  goalVRange!: VRange;
+  targetVRange!: VRange;
 
   @query('#text-input')
   textInput?: HTMLInputElement;
@@ -50,7 +50,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    if (this.goalVRange.length === 0) {
+    if (this.targetVRange.length === 0) {
       throw new Error('Cannot toggle link popup on empty range');
     }
 
@@ -94,7 +94,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   override updated() {
     assertExists(this.popupContainer);
-    const range = this.vEditor.toDomRange(this.goalVRange);
+    const range = this.inlineEditor.toDomRange(this.targetVRange);
     assertExists(range);
 
     if (this.type !== 'view') {
@@ -133,7 +133,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   get blockElement() {
-    const blockElement = this.vEditor.rootElement.closest<BlockElement>(
+    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
       `[${BLOCK_ID_ATTR}]`
     );
     assertExists(blockElement);
@@ -141,14 +141,14 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   get currentText() {
-    return this.vEditor.yTextString.slice(
-      this.goalVRange.index,
-      this.goalVRange.index + this.goalVRange.length
+    return this.inlineEditor.yTextString.slice(
+      this.targetVRange.index,
+      this.targetVRange.index + this.targetVRange.length
     );
   }
 
   get currentLink() {
-    const link = this.vEditor.getFormat(this.goalVRange).link;
+    const link = this.inlineEditor.getFormat(this.targetVRange).link;
     assertExists(link);
     return link;
   }
@@ -173,7 +173,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _onConfirm() {
-    if (!this.vEditor.isVRangeValid(this.goalVRange)) return;
+    if (!this.inlineEditor.isVRangeValid(this.targetVRange)) return;
 
     assertExists(this.linkInput);
     const linkInputValue = this.linkInput.value;
@@ -182,23 +182,23 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const link = normalizeUrl(linkInputValue);
 
     if (this.type === 'create') {
-      this.vEditor.formatText(
-        this.goalVRange,
+      this.inlineEditor.formatText(
+        this.targetVRange,
         {
           link: link,
           reference: null,
         },
         { mode: 'replace' }
       );
-      this.vEditor.setVRange(this.goalVRange);
+      this.inlineEditor.setVRange(this.targetVRange);
     } else if (this.type === 'edit') {
       const text = this.textInput?.value ?? link;
-      this.vEditor.insertText(this.goalVRange, text, {
+      this.inlineEditor.insertText(this.targetVRange, text, {
         link: link,
         reference: null,
       });
-      this.vEditor.setVRange({
-        index: this.goalVRange.index,
+      this.inlineEditor.setVRange({
+        index: this.targetVRange.index,
         length: text.length,
       });
     }
@@ -207,7 +207,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _linkToBookmark() {
-    if (!this.vEditor.isVRangeValid(this.goalVRange)) return;
+    if (!this.inlineEditor.isVRangeValid(this.targetVRange)) return;
 
     const blockElement = this.blockElement;
     const props = {
@@ -225,7 +225,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       index + 1
     );
 
-    this.vEditor.deleteText(this.goalVRange);
+    this.inlineEditor.deleteText(this.targetVRange);
 
     this.remove();
   }
@@ -302,8 +302,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
       <icon-button
         data-testid="unlink"
         @click=${() => {
-          if (this.vEditor.isVRangeValid(this.goalVRange)) {
-            this.vEditor.formatText(this.goalVRange, { link: null });
+          if (this.inlineEditor.isVRangeValid(this.targetVRange)) {
+            this.inlineEditor.formatText(this.targetVRange, { link: null });
           }
           this.remove();
         }}

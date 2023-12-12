@@ -8,12 +8,12 @@ import { LinkPopup } from './link-popup.js';
 export function toggleLinkPopup(
   inlineEditor: AffineInlineEditor,
   type: LinkPopup['type'],
-  goalVRange: VRange
+  targetVRange: VRange
 ): LinkPopup {
   const popup = new LinkPopup();
-  popup.vEditor = inlineEditor;
+  popup.inlineEditor = inlineEditor;
   popup.type = type;
-  popup.goalVRange = goalVRange;
+  popup.targetVRange = targetVRange;
 
   document.body.appendChild(popup);
 

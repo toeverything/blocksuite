@@ -77,7 +77,7 @@ import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js
 import {
   EdgelessZoomToolbar,
   type ZoomAction,
-} from './components/zoom/zoom-tool-bar.js';
+} from './components/zoom/zoom-toolbar.js';
 import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';

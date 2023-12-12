@@ -137,15 +137,15 @@ export class RichText extends ShadowlessElement {
   private _container!: HTMLDivElement;
 
   @property({ attribute: false })
-  vEditor!: InlineEditor;
+  inlineEditor!: InlineEditor;
 
   @property({ attribute: false })
   undoManager!: Y.UndoManager;
 
   override firstUpdated() {
-    this.vEditor.mount(this._container);
+    this.inlineEditor.mount(this._container);
 
-    const keydownHandler = createVirgoKeyDownHandler(this.vEditor, {
+    const keydownHandler = createVirgoKeyDownHandler(this.inlineEditor, {
       inputRule: {
         key: ' ',
         handler: context => {
@@ -169,19 +169,19 @@ export class RichText extends ShadowlessElement {
     });
     this._container.addEventListener('keydown', keydownHandler);
 
-    this.vEditor.slots.updated.on(() => {
+    this.inlineEditor.slots.updated.on(() => {
       const el = this.querySelector('.y-text');
       if (el) {
-        const text = this.vEditor.yText.toDelta();
+        const text = this.inlineEditor.yText.toDelta();
         const span = document.createElement('span');
         span.innerHTML = JSON.stringify(text);
         el.replaceChildren(span);
       }
     });
-    this.vEditor.slots.vRangeUpdated.on(() => {
+    this.inlineEditor.slots.vRangeUpdated.on(() => {
       const el = this.querySelector('.v-range');
       if (el) {
-        const vRange = this.vEditor.getVRange();
+        const vRange = this.inlineEditor.getVRange();
         if (vRange) {
           const span = document.createElement('span');
           span.innerHTML = JSON.stringify(vRange);
@@ -249,10 +249,10 @@ yDocB.on('update', update => {
   Y.applyUpdate(yDocA, update);
 });
 
-@customElement('tool-bar')
-export class ToolBar extends ShadowlessElement {
+@customElement('custom-toolbar')
+export class CustomToolbar extends ShadowlessElement {
   static override styles = css`
-    .tool-bar {
+    .custom-toolbar {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       grid-template-rows: repeat(2, minmax(0, 1fr));
@@ -260,7 +260,7 @@ export class ToolBar extends ShadowlessElement {
   `;
 
   @property({ attribute: false })
-  vEditor!: InlineEditor;
+  inlineEditor!: InlineEditor;
 
   @property({ attribute: false })
   undoManager!: Y.UndoManager;
@@ -290,8 +290,8 @@ export class ToolBar extends ShadowlessElement {
       throw new Error('Cannot find button');
     }
 
-    const undoManager = new Y.UndoManager(this.vEditor.yText, {
-      trackedOrigins: new Set([this.vEditor.yText.doc?.clientID]),
+    const undoManager = new Y.UndoManager(this.inlineEditor.yText, {
+      trackedOrigins: new Set([this.inlineEditor.yText.doc?.clientID]),
     });
 
     addEventListener('keydown', e => {
@@ -318,42 +318,42 @@ export class ToolBar extends ShadowlessElement {
 
     boldButton.addEventListener('click', () => {
       undoManager.stopCapturing();
-      toggleStyle(this.vEditor, { bold: true });
+      toggleStyle(this.inlineEditor, { bold: true });
     });
     italicButton.addEventListener('click', () => {
       undoManager.stopCapturing();
-      toggleStyle(this.vEditor, { italic: true });
+      toggleStyle(this.inlineEditor, { italic: true });
     });
     underlineButton.addEventListener('click', () => {
       undoManager.stopCapturing();
-      toggleStyle(this.vEditor, { underline: true });
+      toggleStyle(this.inlineEditor, { underline: true });
     });
     strikeButton.addEventListener('click', () => {
       undoManager.stopCapturing();
-      toggleStyle(this.vEditor, { strike: true });
+      toggleStyle(this.inlineEditor, { strike: true });
     });
     code.addEventListener('click', () => {
       undoManager.stopCapturing();
-      toggleStyle(this.vEditor, { code: true });
+      toggleStyle(this.inlineEditor, { code: true });
     });
     embed.addEventListener('click', () => {
       undoManager.stopCapturing();
       //@ts-ignore
-      toggleStyle(this.vEditor, { embed: true });
+      toggleStyle(this.inlineEditor, { embed: true });
     });
     resetButton.addEventListener('click', () => {
       undoManager.stopCapturing();
-      const rangeStatic = this.vEditor.getVRange();
+      const rangeStatic = this.inlineEditor.getVRange();
       if (!rangeStatic) {
         return;
       }
-      this.vEditor.resetText(rangeStatic);
+      this.inlineEditor.resetText(rangeStatic);
     });
   }
 
   override render() {
     return html`
-      <div class="tool-bar">
+      <div class="custom-toolbar">
         <sl-button class="bold">bold</sl-button>
         <sl-button class="italic">italic</sl-button>
         <sl-button class="underline">underline</sl-button>
@@ -441,22 +441,22 @@ export class TestPage extends ShadowlessElement {
       <div class="container">
         <div class="editors">
           <div class="doc-a">
-            <tool-bar
-              .vEditor=${this._editorA}
+            <custom-toolbar
+              .inlineEditor=${this._editorA}
               .undoManager=${this._undoManagerA}
-            ></tool-bar>
+            ></custom-toolbar>
             <virgo-test-rich-text
-              .vEditor=${this._editorA}
+              .inlineEditor=${this._editorA}
               .undoManager=${this._undoManagerA!}
             ></virgo-test-rich-text>
           </div>
           <div class="doc-b">
-            <tool-bar
-              .vEditor=${this._editorB}
+            <custom-toolbar
+              .inlineEditor=${this._editorB}
               .undoManager=${this._undoManagerB!}
-            ></tool-bar>
+            ></custom-toolbar>
             <virgo-test-rich-text
-              .vEditor=${this._editorB}
+              .inlineEditor=${this._editorB}
               .undoManager=${this._undoManagerB}
             ></virgo-test-rich-text>
           </div>

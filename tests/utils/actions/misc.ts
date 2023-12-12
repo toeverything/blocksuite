@@ -547,7 +547,7 @@ export async function focusDatabaseTitle(page: Page) {
       throw new Error('Cannot find database title');
     }
 
-    dbTitle.vEditor.focusEnd();
+    dbTitle.inlineEditor.focusEnd();
   });
   await waitNextFrame(page);
 }
@@ -853,14 +853,14 @@ export async function setSelection(
       const anchorRichText = document.querySelector<RichText>(
         `[data-block-id="${anchorBlockId}"] rich-text`
       )!;
-      const anchorRichTextRange = anchorRichText.vEditor.toDomRange({
+      const anchorRichTextRange = anchorRichText.inlineEditor.toDomRange({
         index: anchorOffset,
         length: 0,
       })!;
       const focusRichText = document.querySelector<RichText>(
         `[data-block-id="${focusBlockId}"] rich-text`
       )!;
-      const focusRichTextRange = focusRichText.vEditor.toDomRange({
+      const focusRichTextRange = focusRichText.inlineEditor.toDomRange({
         index: focusOffset,
         length: 0,
       })!;
