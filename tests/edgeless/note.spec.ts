@@ -543,7 +543,7 @@ test.describe('note slicer', () => {
     expect(result?.[1]).toBe(blockStyleText);
   });
 
-  test('note slicer should work correctly when there is only one note', async ({
+  test('note slicer button should appears at right position when editor is not located at left top corner', async ({
     page,
   }) => {
     await enterPlaygroundRoom(page);
@@ -556,9 +556,12 @@ test.describe('note slicer', () => {
 
     await page.evaluate(() => {
       const el = document.createElement('div');
-      const app = document.querySelector('#app');
+      const app = document.querySelector('#app') as HTMLElement;
 
       el.style.height = '100px';
+      el.style.background = 'red';
+
+      app!.style.paddingLeft = '80px';
 
       document.body.insertBefore(el, app);
     });
