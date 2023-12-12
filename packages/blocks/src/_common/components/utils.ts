@@ -216,9 +216,9 @@ export function cleanSpecifiedTail(
       : inlineEditorOrModel;
   assertExists(inlineEditor, 'Inline editor not found');
 
-  const vRange = inlineEditor.getInlineRange();
-  assertExists(vRange);
-  const idx = vRange.index - str.length;
+  const inlineRange = inlineEditor.getInlineRange();
+  assertExists(inlineRange);
+  const idx = inlineRange.index - str.length;
   const textStr = inlineEditor.yText.toString().slice(idx, idx + str.length);
   if (textStr !== str) {
     console.warn(

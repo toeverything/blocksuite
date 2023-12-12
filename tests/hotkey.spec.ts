@@ -25,7 +25,7 @@ import {
   redoByClick,
   redoByKeyboard,
   resetHistory,
-  setVRangeInSelectedRichText,
+  setInlineRangeInSelectedRichText,
   SHORT_KEY,
   strikethrough,
   type,
@@ -86,7 +86,7 @@ test('type character jump out code node', async ({ page }) => {
   const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'Hello');
-  await setVRangeInSelectedRichText(page, 0, 5);
+  await setInlineRangeInSelectedRichText(page, 0, 5);
   await inlineCode(page);
   await assertStoreMatchJSX(
     page,
@@ -499,7 +499,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     noteId
   );
 
-  await setVRangeInSelectedRichText(page, 3, 0);
+  await setInlineRangeInSelectedRichText(page, 3, 0);
   await waitNextFrame(page);
   await type(page, 'hhh');
 
@@ -1347,7 +1347,7 @@ test('should forwardDelete works when delete multi characters', async ({
   await focusRichText(page, 0);
   await type(page, 'hello');
   await pressArrowLeft(page, 5);
-  await setVRangeInSelectedRichText(page, 1, 3);
+  await setInlineRangeInSelectedRichText(page, 1, 3);
   await pressForwardDelete(page);
   await assertRichTexts(page, ['ho']);
 });
