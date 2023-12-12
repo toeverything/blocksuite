@@ -237,7 +237,7 @@ export class TestRichText extends ShadowlessElement {
   }
 }
 
-const TEXT_ID = 'virgo';
+const TEXT_ID = 'inline-editor';
 const yDocA = new Y.Doc();
 const yDocB = new Y.Doc();
 

@@ -644,8 +644,8 @@ test('paste a nested list to a nested list', async ({ page }) => {
 
   // FIXME: fix this in new clipboard
   // await assertRichTexts(page, ['aaa', 'bbbaaa', 'bbb', 'ccc', 'ccc']);
-  // expect(await getVirgoSelectionText(page)).toEqual('ccc');
-  // expect(await getVirgoSelectionIndex(page)).toEqual(3);
+  // expect(await getInlineSelectionText(page)).toEqual('ccc');
+  // expect(await getInlineSelectionText(page)).toEqual(3);
 });
 
 test('paste nested lists to a nested list', async ({ page }) => {

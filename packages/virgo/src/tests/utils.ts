@@ -14,7 +14,7 @@ export async function press(page: Page, content: string) {
 }
 
 export async function enterInlineEditorPlayground(page: Page) {
-  const url = new URL('examples/virgo/index.html', defaultPlaygroundURL);
+  const url = new URL('examples/inline/index.html', defaultPlaygroundURL);
   await page.goto(url.toString());
 }
 
