@@ -36,7 +36,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    const parent = this.root.page.getParent(this.model);
+    const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
   }
 
@@ -53,14 +53,14 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       return html`<affine-edgeless-image
         .model=${this.model}
         .page=${this.page}
-        .root=${this.root}
+        .host=${this.host}
         .widgets=${this.widgets}
       ></affine-edgeless-image>`;
     } else {
       return html`<affine-page-image
         .model=${this.model}
         .page=${this.page}
-        .root=${this.root}
+        .host=${this.host}
         .widgets=${this.widgets}
       ></affine-page-image>`;
     }
@@ -286,8 +286,8 @@ export class ImageBlockPageComponent extends ImageBlock {
           if (!imageBlock || shouldResizeImage(imageBlock, target))
             return false;
 
-          this.root.selection.set([
-            this.root.selection.getInstance('block', {
+          this.host.selection.set([
+            this.host.selection.getInstance('block', {
               path: imageBlock.path,
             }),
           ]);
@@ -313,7 +313,7 @@ export class ImageBlockPageComponent extends ImageBlock {
     const embedResizeManager = new ImageResizeManager();
 
     this._disposables.add(
-      this.root.event.add('dragStart', ctx => {
+      this.host.event.add('dragStart', ctx => {
         const pointerState = ctx.get('pointerState');
         const target = pointerState.event.target;
         if (shouldResizeImage(this, target)) {
@@ -325,7 +325,7 @@ export class ImageBlockPageComponent extends ImageBlock {
       })
     );
     this._disposables.add(
-      this.root.event.add('dragMove', ctx => {
+      this.host.event.add('dragMove', ctx => {
         const pointerState = ctx.get('pointerState');
         if (this._isDragging) {
           embedResizeManager.onMove(pointerState);
@@ -335,7 +335,7 @@ export class ImageBlockPageComponent extends ImageBlock {
       })
     );
     this._disposables.add(
-      this.root.event.add('dragEnd', () => {
+      this.host.event.add('dragEnd', () => {
         if (this._isDragging) {
           this._isDragging = false;
           embedResizeManager.onEnd();
@@ -347,7 +347,7 @@ export class ImageBlockPageComponent extends ImageBlock {
   }
 
   private _handleSelection() {
-    const selection = this.root.selection;
+    const selection = this.host.selection;
     this._disposables.add(
       selection.slots.changed.on(selList => {
         const curr = selList.find(
@@ -388,7 +388,7 @@ export class ImageBlockPageComponent extends ImageBlock {
   }
 
   private _bindKeymap() {
-    const selection = this.root.selection;
+    const selection = this.host.selection;
     const addParagraph = () => {
       const parent = this.page.getParent(this.model);
       if (!parent) return;

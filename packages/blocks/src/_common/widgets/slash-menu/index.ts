@@ -121,13 +121,13 @@ export class AffineSlashMenuWidget extends WidgetElement {
     const event = eventState.raw;
     const triggerKey = this.options.isTriggerKey(event);
     if (triggerKey === false) return;
-    const text = this.root.selection.value.find(selection =>
+    const text = this.host.selection.value.find(selection =>
       selection.is('text')
     );
     if (!text) {
       return;
     }
-    const model = this.root.page.getBlockById(text.blockId);
+    const model = this.host.page.getBlockById(text.blockId);
     if (!model) {
       return;
     }

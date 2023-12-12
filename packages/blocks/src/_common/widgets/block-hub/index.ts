@@ -13,7 +13,7 @@ export class BlockHubWidget extends WidgetElement {
   override connectedCallback() {
     super.connectedCallback();
 
-    const blockHub = new BlockHub(this.root);
+    const blockHub = new BlockHub(this.host);
     document.body.appendChild(blockHub);
 
     this.disposables.add(() => blockHub.remove());

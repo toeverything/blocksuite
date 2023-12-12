@@ -1,5 +1,5 @@
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
-import { EditorContainer } from '@blocksuite/presets';
+import { AffineEditorContainer } from '@blocksuite/presets';
 import type { BlobStorage, Page, Workspace } from '@blocksuite/store';
 import {
   createIndexeddbStorage,
@@ -72,7 +72,7 @@ export async function testIDBExistence() {
 export function createEditor(page: Page, element: HTMLElement) {
   const presets = getPlaygroundPresets();
 
-  const editor = new EditorContainer();
+  const editor = new AffineEditorContainer();
   editor.docSpecs = presets.docModePreset;
   editor.edgelessSpecs = presets.edgelessModePreset;
   editor.page = page;

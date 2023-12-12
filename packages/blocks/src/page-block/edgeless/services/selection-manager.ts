@@ -89,7 +89,7 @@ export class EdgelessSelectionManager {
   }
 
   private get _selection() {
-    return this.container.root.selection;
+    return this.container.host.selection;
   }
 
   private _setState(selection: SurfaceSelection) {

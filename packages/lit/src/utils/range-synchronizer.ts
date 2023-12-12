@@ -31,34 +31,34 @@ export class RangeSynchronizer {
   }
 
   private get _selectionManager() {
-    return this.root.selection;
+    return this.host.selection;
   }
 
   private get _rangeManager() {
-    assertExists(this.root.rangeManager);
-    return this.root.rangeManager;
+    assertExists(this.host.rangeManager);
+    return this.host.rangeManager;
   }
 
   private _isComposing = false;
 
-  get root() {
-    return this.manager.root;
+  get host() {
+    return this.manager.host;
   }
 
   constructor(public manager: RangeManager) {
-    this.root.disposables.add(
+    this.host.disposables.add(
       this._selectionManager.slots.changed.on(this._onSelectionModelChanged)
     );
 
-    this.root.event.add('compositionStart', () => {
+    this.host.event.add('compositionStart', () => {
       this._isComposing = true;
     });
-    this.root.event.add('compositionEnd', () => {
+    this.host.event.add('compositionEnd', () => {
       this._isComposing = false;
     });
 
-    this.root.disposables.add(
-      this.root.event.add('selectionChange', () => {
+    this.host.disposables.add(
+      this.host.event.add('selectionChange', () => {
         const selection = window.getSelection();
         if (!selection) {
           this._selectionManager.clear();
@@ -85,7 +85,7 @@ export class RangeSynchronizer {
           return;
         }
 
-        if (range === null || range.intersectsNode(this.root)) {
+        if (range === null || range.intersectsNode(this.host)) {
           this._prevSelection = this._rangeManager.syncRangeToTextSelection(
             range,
             isRangeReversed
@@ -97,10 +97,10 @@ export class RangeSynchronizer {
       })
     );
 
-    this.root.disposables.add(
-      this.root.event.add('beforeInput', ctx => {
+    this.host.disposables.add(
+      this.host.event.add('beforeInput', ctx => {
         const event = ctx.get('defaultState').event as InputEvent;
-        if (this.root.page.readonly) return;
+        if (this.host.page.readonly) return;
 
         const current = this._selectionManager.find('text');
         if (!current) return;
@@ -137,7 +137,7 @@ export class RangeSynchronizer {
       this._prevSelection = text;
       this._rangeManager.syncTextSelectionToRange(text);
     });
-    this.root.disposables.add(() => {
+    this.host.disposables.add(() => {
       cancelAnimationFrame(rafId);
     });
   };
@@ -163,7 +163,7 @@ export class RangeSynchronizer {
 
     const endIsSelectedAll = to.length === endText.length;
 
-    this.root.page.transact(() => {
+    this.host.page.transact(() => {
       if (endIsSelectedAll && event.isComposing) {
         this._shamefullyResetIMERangeBeforeInput(startText, start, from);
       }
@@ -180,9 +180,9 @@ export class RangeSynchronizer {
         // delete from lowest to highest
         .reverse()
         .forEach(block => {
-          const parent = this.root.page.getParent(block.model);
+          const parent = this.host.page.getParent(block.model);
           assertExists(parent);
-          this.root.page.deleteBlock(block.model, {
+          this.host.page.deleteBlock(block.model, {
             bringChildrenTo: parent,
           });
         });

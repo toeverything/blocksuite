@@ -27,10 +27,10 @@ import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';
 
-@customElement('block-suite-root')
-export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
+@customElement('editor-host')
+export class EditorHost extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  preset!: BlockSpec[];
+  specs!: BlockSpec[];
 
   @property({ attribute: false })
   page!: Page;
@@ -63,7 +63,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('preset')) {
-      this.std.spec.applySpecs(this.preset);
+      this.std.spec.applySpecs(this.specs);
     }
     super.willUpdate(changedProperties);
   }
@@ -92,14 +92,14 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
 
     this.std = new BlockStdProvider({
-      root: this,
+      host: this,
       workspace: this.page.workspace,
       page: this.page,
     });
     this._registerView();
 
     this.std.mount();
-    this.std.spec.applySpecs(this.preset);
+    this.std.spec.applySpecs(this.specs);
     this.rangeManager = new RangeManager(this);
   }
 
@@ -138,7 +138,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
       ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
           const template = html`<${tag} ${unsafeStatic(
             this.widgetIdAttr
-          )}=${key} .root=${this} .page=${this.page}></${tag}>`;
+          )}=${key} .host=${this} .page=${this.page}></${tag}>`;
 
           return {
             ...mapping,
@@ -149,7 +149,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
     return html`<${tag}
       ${unsafeStatic(this.blockIdAttr)}=${model.id}
-      .root=${this}
+      .host=${this}
       .page=${this.page}
       .model=${model}
       .widgets=${widgets}
@@ -249,7 +249,7 @@ function getChildren(
 
 declare global {
   interface HTMLElementTagNameMap {
-    'block-suite-root': BlockSuiteRoot;
+    'editor-host': EditorHost;
   }
 
   namespace BlockSuite {

@@ -177,7 +177,7 @@ export class EdgelessClipboard implements Clipboard {
     if (state.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
       if (isCanvasElementWithText(elements[0])) return;
-      deleteModelsByTextSelection(this._edgeless.root);
+      deleteModelsByTextSelection(this._edgeless.host);
       return;
     }
 
@@ -203,7 +203,7 @@ export class EdgelessClipboard implements Clipboard {
     if (state.editing) {
       // use build-in copy handler in rich-text when copy in surface text element
       if (isCanvasElementWithText(elements[0])) return;
-      await copyBlocksInPage(this._edgeless.root);
+      await copyBlocksInPage(this._edgeless.host);
       return;
     }
     const data = await prepareClipboardData(elements);
@@ -258,7 +258,7 @@ export class EdgelessClipboard implements Clipboard {
 
   private async _pasteInTextNote(e: ClipboardEvent) {
     const attachmentService =
-      this._edgeless.root.spec.getService('affine:attachment');
+      this._edgeless.host.spec.getService('affine:attachment');
     assertExists(attachmentService);
     assertInstanceOf(attachmentService, AttachmentService);
     const maxFileSize = attachmentService.maxFileSize;
@@ -272,11 +272,11 @@ export class EdgelessClipboard implements Clipboard {
     }
     this._page.captureSync();
 
-    deleteModelsByTextSelection(this._edgeless.root);
+    deleteModelsByTextSelection(this._edgeless.host);
 
     const textSelection = this.textSelection;
     assertExists(textSelection);
-    const selectedModels = getSelectedContentModels(this._edgeless.root, [
+    const selectedModels = getSelectedContentModels(this._edgeless.host, [
       'text',
     ]);
 

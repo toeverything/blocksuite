@@ -1,5 +1,5 @@
 import {
-  type BlockSuiteRoot,
+  type EditorHost,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
@@ -8,7 +8,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EditorContainer } from '../../index.js';
+import type { AffineEditorContainer } from '../../index.js';
 import { GPTAPI, type GPTAPIPayloadMap } from './actions/index.js';
 import { EditorWithAI } from './api.js';
 import { LANGUAGE, TONE } from './config.js';
@@ -76,7 +76,7 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
   private _result = '';
 
   @property({ attribute: false })
-  editor!: EditorContainer;
+  editor!: AffineEditorContainer;
   editorWithAI?: EditorWithAI;
   get api() {
     if (!this.editorWithAI) {
@@ -90,7 +90,7 @@ export class AiPanel extends WithDisposable(ShadowlessElement) {
   }
 
   get root() {
-    return this.editor.root as BlockSuiteRoot;
+    return this.editor.root as EditorHost;
   }
 
   public override connectedCallback() {

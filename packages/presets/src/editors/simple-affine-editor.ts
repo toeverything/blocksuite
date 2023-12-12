@@ -4,7 +4,7 @@ import { Schema, Workspace } from '@blocksuite/store';
 import { LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { EditorContainer } from './editor-container.js';
+import { AffineEditorContainer } from './editor-container.js';
 
 /**
  * This is the editor component to be used out-of-the-box.
@@ -33,7 +33,7 @@ export class SimpleAffineEditor extends LitElement {
   }
 
   override connectedCallback() {
-    const editor = new EditorContainer();
+    const editor = new AffineEditorContainer();
     editor.page = this.page;
     this.appendChild(editor);
   }

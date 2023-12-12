@@ -24,7 +24,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
     this.fileDropManager = new FileDropManager(this, this.fileDropRule);
 
     this.disposables.addFromEvent(
-      this.std.root,
+      this.std.host,
       'dragover',
       this.fileDropManager.onDragOver
     );

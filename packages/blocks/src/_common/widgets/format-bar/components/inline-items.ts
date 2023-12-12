@@ -6,7 +6,7 @@ import type { AffineFormatBarWidget } from '../format-bar.js';
 import { HighlightButton } from './highlight/highlight-button.js';
 
 export const InlineItems = (formatBar: AffineFormatBarWidget) => {
-  const root = formatBar.root;
+  const root = formatBar.host;
 
   if (!isFormatSupported(root)) {
     return null;

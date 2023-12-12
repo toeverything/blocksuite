@@ -1,15 +1,15 @@
 import { BlocksUtils } from '@blocksuite/blocks';
-import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import { type BaseBlockModel, Slice } from '@blocksuite/store';
 
-import type { EditorContainer } from '../../../editors/index.js';
+import type { AffineEditorContainer } from '../../../editors/index.js';
 import { getMarkdownFromSlice } from './markdown-utils.js';
 import { getEdgelessPageBlockFromEditor } from './mind-map-utils.js';
 
-export function hasSelectedTextContent(root: BlockSuiteRoot) {
+export function hasSelectedTextContent(host: EditorHost) {
   let result = false;
 
-  root.std.command
+  host.std.command
     .pipe()
     .getBlockSelections()
     .inline((ctx, next) => {
@@ -36,10 +36,10 @@ export function hasSelectedTextContent(root: BlockSuiteRoot) {
   return result;
 }
 
-export async function getSelectedTextSlice(root: BlockSuiteRoot) {
+export async function getSelectedTextSlice(host: EditorHost) {
   let models: BaseBlockModel[] = [];
 
-  root.std.command
+  host.std.command
     .pipe()
     .getBlockSelections()
     .inline((ctx, next) => {
@@ -64,13 +64,13 @@ export async function getSelectedTextSlice(root: BlockSuiteRoot) {
     })
     .run();
 
-  return Slice.fromModels(root.std.page, models);
+  return Slice.fromModels(host.std.page, models);
 }
 
-export async function getSelectedBlocks(root: BlockSuiteRoot) {
+export async function getSelectedBlocks(host: EditorHost) {
   let blocks: BlockElement[] = [];
 
-  root.std.command
+  host.std.command
     .pipe()
     .getBlockSelections()
     .inline((ctx, next) => {
@@ -96,7 +96,7 @@ export async function getSelectedBlocks(root: BlockSuiteRoot) {
   return blocks;
 }
 
-export async function selectedToCanvas(editor: EditorContainer) {
+export async function selectedToCanvas(editor: AffineEditorContainer) {
   const edgelessPage = getEdgelessPageBlockFromEditor(editor);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
     edgelessPage.selectionManager.elements
@@ -114,13 +114,13 @@ export async function selectedToCanvas(editor: EditorContainer) {
   return canvas;
 }
 
-export async function selectedToPng(editor: EditorContainer) {
+export async function selectedToPng(editor: AffineEditorContainer) {
   return (await selectedToCanvas(editor))?.toDataURL('image/png');
 }
 
-export async function getSelectedTextContent(root: BlockSuiteRoot) {
-  const slice = await getSelectedTextSlice(root);
-  return await getMarkdownFromSlice(root, slice);
+export async function getSelectedTextContent(host: EditorHost) {
+  const slice = await getSelectedTextSlice(host);
+  return await getMarkdownFromSlice(host, slice);
 }
 
 export const stopPropagation = (e: Event) => {

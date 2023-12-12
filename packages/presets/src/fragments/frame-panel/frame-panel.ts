@@ -2,12 +2,12 @@ import './header/frame-panel-header.js';
 import './body/frame-panel-body.js';
 
 import { FramePreview } from '@blocksuite/blocks';
-import { type BlockSuiteRoot, WithDisposable } from '@blocksuite/lit';
+import { type EditorHost, WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { EditorContainer } from '../../index.js';
+import type { AffineEditorContainer } from '../../index.js';
 import { FramePanelBody } from './body/frame-panel-body.js';
 import { FrameCard } from './card/frame-card.js';
 import { FrameCardTitle } from './card/frame-card-title.js';
@@ -53,7 +53,7 @@ export class FramePanel extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  editor!: EditorContainer;
+  editor!: AffineEditorContainer;
 
   @property({ attribute: false })
   fitPadding: number[] = [50, 380, 50, 50];
@@ -63,7 +63,7 @@ export class FramePanel extends WithDisposable(LitElement) {
   }
 
   get root() {
-    return this.editor.root as BlockSuiteRoot;
+    return this.editor.root as EditorHost;
   }
 
   get edgeless() {
@@ -109,7 +109,7 @@ export class FramePanel extends WithDisposable(LitElement) {
         class="frame-panel-body"
         .edgeless=${this.edgeless}
         .page=${this.page}
-        .root=${this.root}
+        .editorHost=${this.root}
         .changeEditorMode=${this._changeEditorMode}
         .fitPadding=${this.fitPadding}
       ></frame-panel-body>

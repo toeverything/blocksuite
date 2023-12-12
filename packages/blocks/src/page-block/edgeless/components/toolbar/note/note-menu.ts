@@ -109,7 +109,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
               .iconContainerPadding=${2}
               .tooltip=${'bookmark'}
               @click=${async () => {
-                const url = await toggleBookmarkCreateModal(this.edgeless.root);
+                const url = await toggleBookmarkCreateModal(this.edgeless.host);
                 if (!url) return;
 
                 const center = Vec.toVec(this.edgeless.surface.viewport.center);

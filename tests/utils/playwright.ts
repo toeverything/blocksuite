@@ -83,8 +83,9 @@ if (scope) {
     }
     const focusInSecondEditor = await page.evaluate(
       ([currentEditorIndex]) => {
-        const editor =
-          document.querySelectorAll('editor-container')[currentEditorIndex];
+        const editor = document.querySelectorAll('affine-editor-container')[
+          currentEditorIndex
+        ];
         const selection = getSelection();
         if (!selection || selection.rangeCount === 0) {
           return true;
@@ -101,7 +102,7 @@ if (scope) {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     const count = await page.evaluate(() => {
-      return document.querySelectorAll('editor-container').length;
+      return document.querySelectorAll('affine-editor-container').length;
     });
 
     expect(count).toBe(2);

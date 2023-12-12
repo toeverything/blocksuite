@@ -112,13 +112,13 @@ export class AffineLinkedPageWidget extends WidgetElement {
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
     if (isControlledKeyboardEvent(event) || event.key.length !== 1) return;
-    const text = this.root.selection.value.find(selection =>
+    const text = this.host.selection.value.find(selection =>
       selection.is('text')
     );
     if (!text) {
       return;
     }
-    const model = this.root.page.getBlockById(text.blockId);
+    const model = this.host.page.getBlockById(text.blockId);
     if (!model) {
       return;
     }

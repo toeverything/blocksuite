@@ -645,8 +645,8 @@ test.describe('slash menu with customize menu', () => {
           r: Symbol.for(''),
         }) as const;
 
-      const editor = document.querySelector('editor-container');
-      if (!editor) throw new Error("Can't find editor-container");
+      const editor = document.querySelector('affine-editor-container');
+      if (!editor) throw new Error("Can't find affine-editor-container");
 
       const SlashMenuWidget = window.$blocksuite.blocks.AffineSlashMenuWidget;
       class CustomSlashMenu extends SlashMenuWidget {
@@ -691,8 +691,8 @@ test.describe('slash menu with customize menu', () => {
           r: Symbol.for(''),
         }) as const;
 
-      const editor = document.querySelector('editor-container');
-      if (!editor) throw new Error("Can't find editor-container");
+      const editor = document.querySelector('affine-editor-container');
+      if (!editor) throw new Error("Can't find affine-editor-container");
       const SlashMenuWidget = window.$blocksuite.blocks.AffineSlashMenuWidget;
 
       class CustomSlashMenu extends SlashMenuWidget {

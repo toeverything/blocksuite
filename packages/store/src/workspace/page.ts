@@ -61,7 +61,7 @@ export class Page extends Space<FlatBlockMap> {
      * Note that at this moment, the whole block tree may not be fully initialized yet.
      */
     rootAdded: new Slot<BaseBlockModel>(),
-    rootDeleted: new Slot<string | string[]>(),
+    rootDeleted: new Slot<string>(),
     blockUpdated: new Slot<
       | {
           type: 'add';

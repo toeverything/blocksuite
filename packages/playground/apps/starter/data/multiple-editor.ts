@@ -1,4 +1,4 @@
-import { EditorContainer } from '@blocksuite/presets';
+import { AffineEditorContainer } from '@blocksuite/presets';
 import { Text, type Workspace } from '@blocksuite/store';
 
 import { createEditor } from '../utils';
@@ -27,7 +27,7 @@ export const multiEditor: InitFn = async (workspace: Workspace, id: string) => {
     createEditor(page, app);
     app.style.display = 'flex';
     app.childNodes.forEach(node => {
-      if (node instanceof EditorContainer) {
+      if (node instanceof AffineEditorContainer) {
         node.style.flex = '1';
       }
     });

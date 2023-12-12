@@ -297,7 +297,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
     bindContainerHotkey(this);
 
-    const selectionManager = this.root.selection;
+    const selectionManager = this.host.selection;
     const INDENT_SYMBOL = '  ';
     const LINE_BREAK_SYMBOL = '\n';
     const allIndexOf = (

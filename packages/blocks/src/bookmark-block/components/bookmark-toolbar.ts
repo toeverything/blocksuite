@@ -45,7 +45,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
   onSelected?: ToolbarActionCallback & MenuActionCallback;
 
   @property({ attribute: false })
-  root!: HTMLElement;
+  host!: HTMLElement;
 
   @property({ attribute: false })
   abortController!: AbortController;

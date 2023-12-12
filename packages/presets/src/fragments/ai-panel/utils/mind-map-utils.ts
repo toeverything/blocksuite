@@ -6,7 +6,7 @@ import {
   StrokeStyle,
 } from '@blocksuite/blocks';
 
-import type { EditorContainer } from '../../../editors/index.js';
+import type { AffineEditorContainer } from '../../../editors/index.js';
 
 interface Position {
   x: number;
@@ -52,7 +52,7 @@ export const DEFAULT_CONNECTOR_PROPS = {
   rearEndpointStyle: ConnectorEndpointStyle.None,
 };
 
-export function getEdgelessPageBlockFromEditor(editor: EditorContainer) {
+export function getEdgelessPageBlockFromEditor(editor: AffineEditorContainer) {
   const edgelessPage = editor.getElementsByTagName('affine-edgeless-page')[0];
   if (!edgelessPage) {
     alert('Please switch to edgeless mode');

@@ -197,7 +197,7 @@ export async function json2block(
     if (lastMergedModel) {
       asyncGetBlockElementByModel(lastMergedModel).then(element => {
         if (element) {
-          const selectionManager = element.root.selection;
+          const selectionManager = element.host.selection;
           const blockSelection = selectionManager?.getInstance('block', {
             path: element.path ?? [],
           });

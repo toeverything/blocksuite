@@ -12,13 +12,13 @@ export class DocPageMetaDataWidget extends WidgetElement {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.root.updateComplete.then(() => {
+    this.host.updateComplete.then(() => {
       const pageElement = getDocPage(this.page);
       assertExists(pageElement);
 
       const pageMetaData = new PageMetaData(this.page, pageElement);
 
-      const pageTitleContainer = this.root.querySelector(
+      const pageTitleContainer = this.host.querySelector(
         '.affine-doc-page-block-title-container'
       );
       assertExists(pageTitleContainer);

@@ -1,15 +1,15 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
 export function getSelectedContentModels(
-  root: BlockSuiteRoot,
+  host: EditorHost,
   types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[]
 ): BaseBlockModel[] {
   const result: BaseBlockModel[] = [];
-  root.std.command
+  host.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .tryAll(chain => [
       chain.getTextSelection(),
       chain.getBlockSelections(),
