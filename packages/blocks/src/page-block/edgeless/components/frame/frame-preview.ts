@@ -135,10 +135,13 @@ export class FramePreview extends WithDisposable(LitElement) {
     this._surfaceRenderer.attach(this.container);
   }
 
-  private _initSurfaceRenderer(page: Page) {
+  private _initSurfaceRenderer(
+    page: Page,
+    surfaceModel: SurfaceBlockModel | null
+  ) {
     this.surfaceRenderer.layerManager.init([
       ...this._elements.values(),
-      ...((this._surfaceModel?.children || []) as EdgelessElement[]),
+      ...((surfaceModel?.children || []) as EdgelessElement[]),
       ...(page.getBlockByFlavour('affine:note') as EdgelessElement[]),
     ]);
   }
@@ -427,7 +430,7 @@ export class FramePreview extends WithDisposable(LitElement) {
     this._clearPageDisposables();
     this._pageDisposables = new DisposableGroup();
     this._initSurfaceModel(page, this._pageDisposables);
-    this._initSurfaceRenderer(page);
+    this._initSurfaceRenderer(page, this._surfaceModel);
     this._connectorManager = new ConnectorPathGenerator({
       pickById: id => this.getModel(id),
       refresh: () => this._surfaceRenderer.refresh(),
