@@ -16,13 +16,14 @@ import {
   NOTE_WIDTH,
 } from '../../packages/blocks/src/_common/consts.js';
 import type {
+  AffineInlineEditor,
   CssVariableName,
   NoteBlockModel,
   PageBlockModel,
+  RichText,
 } from '../../packages/blocks/src/index.js';
 import { assertExists } from '../../packages/global/src/utils.js';
 import type { BlockElement } from '../../packages/lit/src/index.js';
-import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import {
   PAGE_VERSION,
   WORKSPACE_VERSION,
@@ -191,7 +192,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
       editor?.querySelectorAll<RichText>('rich-text') ?? []
     );
     return richTexts.map(richText => {
-      const editor = richText.inlineEditor;
+      const editor = richText.vEditor as AffineInlineEditor;
       return editor.yText.toString();
     });
   }, currentEditorIndex);
