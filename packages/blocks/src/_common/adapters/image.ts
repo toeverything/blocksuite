@@ -30,12 +30,12 @@ type PngToSliceSnapshotPayload = {
 
 export class ImageAdapter extends BaseAdapter<Image> {
   override fromPageSnapshot(
-    payload: FromPageSnapshotPayload
+    _payload: FromPageSnapshotPayload
   ): Promise<FromPageSnapshotResult<Image>> {
     throw new Error('Method not implemented.');
   }
   override fromBlockSnapshot(
-    payload: FromBlockSnapshotPayload
+    _payload: FromBlockSnapshotPayload
   ): Promise<FromBlockSnapshotResult<Image>> {
     throw new Error('Method not implemented.');
   }
@@ -56,12 +56,12 @@ export class ImageAdapter extends BaseAdapter<Image> {
     return Promise.resolve({ file: images, assetsIds: [] });
   }
   override toPageSnapshot(
-    payload: ToPageSnapshotPayload<Image>
+    _payload: ToPageSnapshotPayload<Image>
   ): Promise<PageSnapshot> {
     throw new Error('Method not implemented.');
   }
   override toBlockSnapshot(
-    payload: ToBlockSnapshotPayload<Image>
+    _payload: ToBlockSnapshotPayload<Image>
   ): Promise<BlockSnapshot> {
     throw new Error('Method not implemented.');
   }
