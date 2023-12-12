@@ -7,10 +7,10 @@ import {
   enterVirgoPlayground,
   focusVirgoRichText,
   getDeltaFromVirgoRichText,
-  getVirgoRichTextLine,
-  getVRangeIndexRect,
+  getInlineRangeIndexRect,
+  getInlineRichTextLine,
   press,
-  setVirgoRichTextRange,
+  setInlineRichTextRange,
   type,
 } from './utils.js';
 
@@ -75,7 +75,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc🥰👨‍👨‍👧‍👦efg');
   expect(await editorB.innerText()).toBe('abc🥰👨‍👨‍👧‍👦efg');
 
-  await setVirgoRichTextRange(page, {
+  await setInlineRichTextRange(page, {
     index: 3,
     length: 16,
   });
@@ -295,7 +295,7 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  await setVirgoRichTextRange(page, { index: 2, length: 3 });
+  await setInlineRichTextRange(page, { index: 2, length: 3 });
 
   editorABold.click();
   page.waitForTimeout(100);
@@ -550,7 +550,7 @@ test('overlapping styles', async ({ page }) => {
     },
   ]);
 
-  await setVirgoRichTextRange(page, { index: 1, length: 3 });
+  await setInlineRichTextRange(page, { index: 1, length: 3 });
   editorABold.click();
 
   delta = await getDeltaFromVirgoRichText(page);
@@ -569,7 +569,7 @@ test('overlapping styles', async ({ page }) => {
     },
   ]);
 
-  await setVirgoRichTextRange(page, { index: 7, length: 3 });
+  await setInlineRichTextRange(page, { index: 7, length: 3 });
   editorABold.click();
 
   delta = await getDeltaFromVirgoRichText(page);
@@ -597,7 +597,7 @@ test('overlapping styles', async ({ page }) => {
     },
   ]);
 
-  await setVirgoRichTextRange(page, { index: 3, length: 5 });
+  await setInlineRichTextRange(page, { index: 3, length: 5 });
   editorAItalic.click();
 
   delta = await getDeltaFromVirgoRichText(page);
@@ -800,12 +800,12 @@ test('getLine', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc\ndef\nghi');
   expect(await editorB.innerText()).toBe('abc\ndef\nghi');
 
-  const [line1, offset1] = await getVirgoRichTextLine(page, 0);
-  const [line2, offset2] = await getVirgoRichTextLine(page, 1);
-  const [line3, offset3] = await getVirgoRichTextLine(page, 4);
-  const [line4, offset4] = await getVirgoRichTextLine(page, 5);
-  const [line5, offset5] = await getVirgoRichTextLine(page, 8);
-  const [line6, offset6] = await getVirgoRichTextLine(page, 11);
+  const [line1, offset1] = await getInlineRichTextLine(page, 0);
+  const [line2, offset2] = await getInlineRichTextLine(page, 1);
+  const [line3, offset3] = await getInlineRichTextLine(page, 4);
+  const [line4, offset4] = await getInlineRichTextLine(page, 5);
+  const [line5, offset5] = await getInlineRichTextLine(page, 8);
+  const [line6, offset6] = await getInlineRichTextLine(page, 11);
 
   expect(line1).toEqual('abc');
   expect(offset1).toEqual(0);
@@ -908,15 +908,15 @@ test('embed', async ({ page }) => {
   await assertSelection(page, 0, 3, 1);
 
   // try to update cursor position and select embed element using mouse click
-  let rect = await getVRangeIndexRect(page, [0, 1]);
+  let rect = await getInlineRangeIndexRect(page, [0, 1]);
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 1, 1);
 
-  rect = await getVRangeIndexRect(page, [0, 2]);
+  rect = await getInlineRangeIndexRect(page, [0, 2]);
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 2, 1);
 
-  rect = await getVRangeIndexRect(page, [0, 3]);
+  rect = await getInlineRangeIndexRect(page, [0, 3]);
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 3, 1);
 });

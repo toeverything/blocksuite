@@ -285,7 +285,7 @@ export async function assertRowCount(page: Page, count: number) {
   expect(actual).toBe(count);
 }
 
-export async function assertRichTextVRange(
+export async function assertRichTextInlineRange(
   page: Page,
   richTextIndex: number,
   rangeIndex: number,
@@ -298,7 +298,7 @@ export async function assertRichTextVRange(
       ];
       const richText = editor?.querySelectorAll('rich-text')[richTextIndex];
       const inlineEditor = richText.inlineEditor;
-      return inlineEditor?.getVRange();
+      return inlineEditor?.getInlineRange();
     },
     [richTextIndex, currentEditorIndex]
   );

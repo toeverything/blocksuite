@@ -53,7 +53,7 @@ export async function getDeltaFromVirgoRichText(
   }, index);
 }
 
-export async function getVRangeFromVirgoRichText(
+export async function getInlineRangeFromInlineRichText(
   page: Page,
   index = 0
 ): Promise<InlineRange | null> {
@@ -73,13 +73,13 @@ export async function getVRangeFromVirgoRichText(
   }, index);
 }
 
-export async function setVirgoRichTextRange(
+export async function setInlineRichTextRange(
   page: Page,
-  vRange: InlineRange,
+  inlineRange: InlineRange,
   index = 0
 ): Promise<void> {
   await page.evaluate(
-    ([vRange, index]) => {
+    ([inlineRange, index]) => {
       const richTexts = document
         .querySelector('test-page')
         ?.querySelectorAll('virgo-test-rich-text');
@@ -91,13 +91,13 @@ export async function setVirgoRichTextRange(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const editor = (richTexts[index as number] as any)
         .inlineEditor as InlineEditor;
-      editor.setInlineRange(vRange as InlineRange);
+      editor.setInlineRange(inlineRange as InlineRange);
     },
-    [vRange, index]
+    [inlineRange, index]
   );
 }
 
-export async function getVirgoRichTextLine(
+export async function getInlineRichTextLine(
   page: Page,
   index: number,
   i = 0
@@ -119,13 +119,13 @@ export async function getVirgoRichTextLine(
   );
 }
 
-export async function getVRangeIndexRect(
+export async function getInlineRangeIndexRect(
   page: Page,
-  [richTextIndex, vIndex]: [number, number],
+  [richTextIndex, inlineIndex]: [number, number],
   coordOffSet: { x: number; y: number } = { x: 0, y: 0 }
 ) {
   const rect = await page.evaluate(
-    ({ richTextIndex, vIndex, coordOffSet }) => {
+    ({ richTextIndex, inlineIndex: vIndex, coordOffSet }) => {
       const richText = document.querySelectorAll('virgo-test-rich-text')[
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -142,7 +142,7 @@ export async function getVRangeIndexRect(
     },
     {
       richTextIndex,
-      vIndex,
+      inlineIndex,
       coordOffSet,
     }
   );
@@ -162,7 +162,7 @@ export async function assertSelection(
       ];
       // @ts-ignore
       const inlineEditor = richText.inlineEditor;
-      return inlineEditor?.getVRange();
+      return inlineEditor?.getInlineRange();
     },
     [richTextIndex]
   );

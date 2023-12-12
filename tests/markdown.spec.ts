@@ -16,9 +16,9 @@ import {
 } from './utils/actions/index.js';
 import {
   assertBlockType,
+  assertRichTextInlineRange,
   assertRichTexts,
   assertRichTextVirgoDeltas,
-  assertRichTextVRange,
   assertText,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -212,7 +212,7 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    await assertRichTextVRange(page, 0, 11);
+    await assertRichTextInlineRange(page, 0, 11);
     await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa***bb*** ',
@@ -265,7 +265,7 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    await assertRichTextVRange(page, 0, 9);
+    await assertRichTextInlineRange(page, 0, 9);
     await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa**bb** ',
@@ -316,7 +316,7 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    await assertRichTextVRange(page, 0, 7);
+    await assertRichTextInlineRange(page, 0, 7);
     await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa*bb* ',
@@ -368,7 +368,7 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    await assertRichTextVRange(page, 0, 9);
+    await assertRichTextInlineRange(page, 0, 9);
     await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa~~bb~~ ',
@@ -419,7 +419,7 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    await assertRichTextVRange(page, 0, 7);
+    await assertRichTextInlineRange(page, 0, 7);
     await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa~bb~ ',
@@ -470,7 +470,7 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    await assertRichTextVRange(page, 0, 7);
+    await assertRichTextInlineRange(page, 0, 7);
     await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa`bb` ',

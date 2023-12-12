@@ -87,8 +87,8 @@ function toggleStyle(
   inlineEditor: InlineEditor,
   attrs: NonNullable<BaseTextAttributes>
 ): void {
-  const vRange = inlineEditor.getInlineRange();
-  if (!vRange) {
+  const inlineRange = inlineEditor.getInlineRange();
+  if (!inlineRange) {
     return;
   }
 
@@ -97,7 +97,7 @@ function toggleStyle(
     return;
   }
 
-  const deltas = inlineEditor.getDeltasByInlineRange(vRange);
+  const deltas = inlineEditor.getDeltasByInlineRange(inlineRange);
   let oldAttributes: NonNullable<BaseTextAttributes> = {};
 
   for (const [delta] of deltas) {
@@ -123,12 +123,12 @@ function toggleStyle(
     })
   );
 
-  inlineEditor.formatText(vRange, newAttributes, {
+  inlineEditor.formatText(inlineRange, newAttributes, {
     mode: 'merge',
   });
   root.blur();
 
-  inlineEditor.setInlineRange(vRange);
+  inlineEditor.setInlineRange(inlineRange);
 }
 
 @customElement('virgo-test-rich-text')
@@ -149,14 +149,14 @@ export class RichText extends ShadowlessElement {
       inputRule: {
         key: ' ',
         handler: context => {
-          const { inlineEditor, prefixText, inlineRange: vRange } = context;
+          const { inlineEditor, prefixText, inlineRange } = context;
           for (const match of markdownMatches) {
             const matchedText = prefixText.match(match.pattern);
             if (matchedText) {
               return match.action({
                 inlineEditor,
                 prefixText,
-                vRange,
+                inlineRange,
                 pattern: match.pattern,
                 undoManager: this.undoManager,
               });
@@ -181,10 +181,10 @@ export class RichText extends ShadowlessElement {
     this.inlineEditor.slots.inlineRangeUpdated.on(() => {
       const el = this.querySelector('.v-range');
       if (el) {
-        const vRange = this.inlineEditor.getInlineRange();
-        if (vRange) {
+        const inlineRange = this.inlineEditor.getInlineRange();
+        if (inlineRange) {
           const span = document.createElement('span');
-          span.innerHTML = JSON.stringify(vRange);
+          span.innerHTML = JSON.stringify(inlineRange);
           el.replaceChildren(span);
         }
       }

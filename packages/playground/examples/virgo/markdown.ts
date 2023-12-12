@@ -12,7 +12,7 @@ interface MarkdownMatch {
   action: (props: {
     inlineEditor: InlineEditor;
     prefixText: string;
-    vRange: InlineRange;
+    inlineRange: InlineRange;
     pattern: RegExp;
     undoManager: Y.UndoManager;
   }) => boolean;
@@ -22,14 +22,20 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'bolditalic',
     pattern: /(?:\*){3}([^* \n](.+?[^* \n])?)(?:\*){3}$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return KEYBOARD_ALLOW_DEFAULT;
       }
 
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       inlineEditor.insertText(
         {
@@ -76,13 +82,19 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'bold',
     pattern: /(?:\*){2}([^* \n](.+?[^* \n])?)(?:\*){2}$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       inlineEditor.insertText(
         {
@@ -128,13 +140,19 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'italic',
     pattern: /(?:\*){1}([^* \n](.+?[^* \n])?)(?:\*){1}$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       inlineEditor.insertText(
         {
@@ -180,13 +198,19 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'strikethrough',
     pattern: /(?:~~)([^~ \n](.+?[^~ \n])?)(?:~~)$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       inlineEditor.insertText(
         {
@@ -232,13 +256,19 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'underthrough',
     pattern: /(?:~)([^~ \n](.+?[^~ \n])?)(?:~)$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       inlineEditor.insertText(
         {
@@ -265,7 +295,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 1,
       });
       inlineEditor.deleteText({
-        index: vRange.index - 1,
+        index: inlineRange.index - 1,
         length: 1,
       });
       inlineEditor.deleteText({
@@ -284,13 +314,19 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'code',
     pattern: /(?:`)(`{2,}?|[^`]+)(?:`)$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       if (prefixText.match(/^([* \n]+)$/g)) {
         return KEYBOARD_ALLOW_DEFAULT;

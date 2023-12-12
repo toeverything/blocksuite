@@ -36,9 +36,9 @@ import {
 } from './utils/actions/index.js';
 import {
   assertBlockChildrenIds,
+  assertRichTextInlineRange,
   assertRichTextModelType,
   assertRichTexts,
-  assertRichTextVRange,
   assertStoreMatchJSX,
   assertTextFormat,
   assertTitle,
@@ -1243,23 +1243,23 @@ test.skip('should left/right key navigator works', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await focusRichText(page, 0);
-  await assertRichTextVRange(page, 0, 3);
+  await assertRichTextInlineRange(page, 0, 3);
   await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
-  await assertRichTextVRange(page, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0);
   await pressArrowLeft(page);
-  await assertRichTextVRange(page, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0);
   await page.keyboard.press(`${SHORT_KEY}+ArrowRight`, { delay: 50 });
-  await assertRichTextVRange(page, 0, 3);
+  await assertRichTextInlineRange(page, 0, 3);
   await pressArrowRight(page);
-  await assertRichTextVRange(page, 1, 0);
+  await assertRichTextInlineRange(page, 1, 0);
   await pressArrowLeft(page);
-  await assertRichTextVRange(page, 0, 3);
+  await assertRichTextInlineRange(page, 0, 3);
   await pressArrowRight(page, 4);
-  await assertRichTextVRange(page, 1, 3);
+  await assertRichTextInlineRange(page, 1, 3);
   await pressArrowRight(page);
-  await assertRichTextVRange(page, 2, 0);
+  await assertRichTextInlineRange(page, 2, 0);
   await pressArrowLeft(page);
-  await assertRichTextVRange(page, 1, 3);
+  await assertRichTextInlineRange(page, 1, 3);
 });
 
 test('should up/down key navigator works', async ({ page }) => {
@@ -1267,20 +1267,20 @@ test('should up/down key navigator works', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await focusRichText(page, 0);
-  await assertRichTextVRange(page, 0, 3);
+  await assertRichTextInlineRange(page, 0, 3);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 1, 3);
+  await assertRichTextInlineRange(page, 1, 3);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 2, 3);
+  await assertRichTextInlineRange(page, 2, 3);
   await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
-  await assertRichTextVRange(page, 2, 0);
+  await assertRichTextInlineRange(page, 2, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 1, 0);
+  await assertRichTextInlineRange(page, 1, 0);
   await pressArrowRight(page);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 0, 1);
+  await assertRichTextInlineRange(page, 0, 1);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 1, 1);
+  await assertRichTextInlineRange(page, 1, 1);
 });
 
 test('should cut in title works', async ({ page }) => {
@@ -1418,13 +1418,13 @@ test.describe('keyboard operation to move block up or down', () => {
     await pressEnter(page);
     await type(page, 'foo');
     await assertRichTexts(page, ['hello', 'world', 'foo']);
-    await assertRichTextVRange(page, 2, 3);
+    await assertRichTextInlineRange(page, 2, 3);
     await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
     await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
-    await assertRichTextVRange(page, 0, 3);
+    await assertRichTextInlineRange(page, 0, 3);
     await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
     await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
-    await assertRichTextVRange(page, 2, 3);
+    await assertRichTextInlineRange(page, 2, 3);
   });
 });
 

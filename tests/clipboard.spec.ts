@@ -64,9 +64,9 @@ import {
   assertEdgelessSelectedRectModel,
   assertExists,
   assertRichImage,
+  assertRichTextInlineRange,
   assertRichTextModelType,
   assertRichTexts,
-  assertRichTextVRange,
   assertStoreMatchJSX,
   assertText,
   assertTextFormats,
@@ -327,7 +327,7 @@ test(scoped`split block when paste`, async ({ page }) => {
   await waitNextFrame(page);
 
   await assertRichTexts(page, ['atext', 'h1c']);
-  await assertRichTextVRange(page, 1, 2, 0);
+  await assertRichTextInlineRange(page, 1, 2, 0);
 
   // FIXME: one redundant step in clipboard operation
   await undoByClick(page);

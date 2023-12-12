@@ -54,8 +54,8 @@ import {
   assertClipItems,
   assertDivider,
   assertExists,
+  assertRichTextInlineRange,
   assertRichTexts,
-  assertRichTextVRange,
   assertStoreMatchJSX,
   assertTitle,
 } from '../utils/asserts.js';
@@ -70,17 +70,17 @@ test('click on blank area', async ({ page }) => {
   const box123 = await getRichTextBoundingBox(page, '2');
   const inside123 = { x: box123.left, y: box123.top + 5 };
   await page.mouse.click(inside123.x, inside123.y);
-  await assertRichTextVRange(page, 0, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0, 0);
 
   const box456 = await getRichTextBoundingBox(page, '3');
   const inside456 = { x: box456.left, y: box456.top + 5 };
   await page.mouse.click(inside456.x, inside456.y);
-  await assertRichTextVRange(page, 1, 0, 0);
+  await assertRichTextInlineRange(page, 1, 0, 0);
 
   const box789 = await getRichTextBoundingBox(page, '4');
   const inside789 = { x: box789.left, y: box789.bottom - 5 };
   await page.mouse.click(inside789.x, inside789.y);
-  await assertRichTextVRange(page, 2, 0, 0);
+  await assertRichTextInlineRange(page, 2, 0, 0);
 });
 
 test('native range delete', async ({ page }) => {
@@ -1797,7 +1797,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await pressShiftEnter(page);
   await waitNextFrame(page);
   await pressEnter(page);
-  await assertRichTextVRange(page, 2, 0);
+  await assertRichTextInlineRange(page, 2, 0);
   // - aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1806,7 +1806,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 2);
+  await assertRichTextInlineRange(page, 1, 2);
   // - aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1815,7 +1815,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 0);
+  await assertRichTextInlineRange(page, 1, 0);
   // - aaa... (no \n)
   //   a
   // - |b  (have \n)
@@ -1824,7 +1824,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowRight(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 1);
+  await assertRichTextInlineRange(page, 1, 1);
   // - aaa... (no \n)
   //   a
   // - b|  (have \n)
@@ -1834,7 +1834,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await pressArrowUp(page);
   await pressArrowLeft(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 90);
+  await assertRichTextInlineRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)
@@ -1843,7 +1843,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0);
   // - |aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1857,7 +1857,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0);
   // - |aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1866,7 +1866,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 90);
+  await assertRichTextInlineRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)
@@ -1875,7 +1875,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 0);
+  await assertRichTextInlineRange(page, 1, 0);
   // - aaa... (no \n)
   //   a
   // - |b  (have \n)
@@ -1884,7 +1884,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowRight(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 1);
+  await assertRichTextInlineRange(page, 1, 1);
   // - aaa... (no \n)
   //   a
   // - b|  (have \n)
@@ -1893,7 +1893,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 2);
+  await assertRichTextInlineRange(page, 1, 2);
   // - aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1902,7 +1902,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 2, 0);
+  await assertRichTextInlineRange(page, 2, 0);
   // - aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1938,14 +1938,14 @@ test('should not scroll page when mouse is click down', async ({ page }) => {
   const rect = await longText.boundingBox();
   if (!rect) throw new Error();
   await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
-  await assertRichTextVRange(page, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0);
 
   await page.mouse.down();
-  await assertRichTextVRange(page, 10, 22);
+  await assertRichTextInlineRange(page, 10, 22);
   // simulate user click down and wait for 500ms
   await waitNextFrame(page, 500);
   await page.mouse.up();
-  await assertRichTextVRange(page, 10, 22);
+  await assertRichTextInlineRange(page, 10, 22);
 });
 
 test('scroll vertically when inputting long text in a block', async ({
