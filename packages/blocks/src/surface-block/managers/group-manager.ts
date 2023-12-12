@@ -125,7 +125,7 @@ export class EdgelessGroupManager {
     const { surface } = this;
     const { edgeless } = surface;
     const { selectionManager } = edgeless;
-    if (selectionManager.elements.length <= 1) return;
+    if (selectionManager.elements.length <= 0) return;
 
     const map = new Workspace.Y.Map<boolean>();
     let isValid = true;
