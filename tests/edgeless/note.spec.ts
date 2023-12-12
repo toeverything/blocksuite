@@ -542,6 +542,56 @@ test.describe('note slicer', () => {
     result = zIndexPattern.exec(styleText);
     expect(result?.[1]).toBe(blockStyleText);
   });
+
+  test('note slicer button should appears at right position when editor is not located at left top corner', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    const { noteId } = await initEmptyEdgelessState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
+
+    await switchEditorMode(page);
+    await selectNoteInEdgeless(page, noteId);
+
+    await page.evaluate(() => {
+      const el = document.createElement('div');
+      const app = document.querySelector('#app') as HTMLElement;
+
+      el.style.height = '100px';
+      el.style.background = 'red';
+
+      app!.style.paddingLeft = '80px';
+
+      document.body.insertBefore(el, app);
+    });
+
+    const blockes = await page
+      .locator(`[data-block-id="${noteId}"] [data-block-id]`)
+      .all();
+    expect(blockes.length).toBe(3);
+
+    const firstBlockRect = await blockes[0].boundingBox();
+    assertRectExist(firstBlockRect);
+    const secondblockRect = await blockes[1].boundingBox();
+    assertRectExist(secondblockRect);
+    await page.mouse.move(
+      secondblockRect.x + 1,
+      secondblockRect.y + secondblockRect.height / 2
+    );
+
+    const slicerButtonRect = await page
+      .locator('note-slicer-button .slicer-button')
+      .boundingBox();
+    assertRectExist(slicerButtonRect);
+
+    const buttonRectMiddle = slicerButtonRect.y + slicerButtonRect.height / 2;
+
+    expect(buttonRectMiddle).toBeGreaterThan(
+      firstBlockRect.y + firstBlockRect.height
+    );
+    expect(buttonRectMiddle).toBeLessThan(secondblockRect.y);
+  });
 });
 
 test('undo/redo should work correctly after clipping', async ({ page }) => {
