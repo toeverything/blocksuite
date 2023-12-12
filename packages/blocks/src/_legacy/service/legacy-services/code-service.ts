@@ -106,7 +106,7 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
 
     const inlineEditor = getInlineEditorByModel(focusedBlockModel);
     assertExists(inlineEditor);
-    inlineEditor.setVRange({
+    inlineEditor.setInlineRange({
       index: textRangePoint.index + text.length,
       length: 0,
     });

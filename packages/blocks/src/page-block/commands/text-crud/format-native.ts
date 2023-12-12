@@ -48,7 +48,7 @@ export const formatNativeCommand: Command<
     .map(el => el.inlineEditor);
 
   selectedInlineEditors.forEach(inlineEditor => {
-    const vRange = inlineEditor.getVRange();
+    const vRange = inlineEditor.getInlineRange();
     if (!vRange) return;
 
     inlineEditor.formatText(vRange, styles, {

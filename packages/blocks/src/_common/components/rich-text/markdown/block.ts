@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/virgo';
 
 import {
-  asyncSetVRange,
+  asyncSetInlineRange,
   matchFlavours,
 } from '../../../../_common/utils/index.js';
 import { getStandardLanguage } from '../../../../code-block/utils/code-languages.js';
@@ -83,7 +83,7 @@ export function tryConvertBlock(
 
     const codeBlock = page.getBlockById(codeId);
     assertExists(codeBlock);
-    asyncSetVRange(codeBlock, { index: 0, length: 0 });
+    asyncSetInlineRange(codeBlock, { index: 0, length: 0 });
 
     return KEYBOARD_PREVENT_DEFAULT;
   }

@@ -94,7 +94,7 @@ export class AffineLink extends ShadowlessElement {
       return;
     }
 
-    const selfVRange = this.inlineEditor.getVRangeFromElement(this);
+    const selfVRange = this.inlineEditor.getInlineRangeFromElement(this);
     assertExists(selfVRange);
     const popup = toggleLinkPopup(this.inlineEditor, 'view', selfVRange);
     popup.addEventListener('mouseenter', () => {

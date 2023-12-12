@@ -248,7 +248,7 @@ export class RangeManager {
       return null;
     }
     const vRange = this._range
-      ? virgoElement.inlineEditor.toVRange(this._range)
+      ? virgoElement.inlineEditor.toInlineRange(this._range)
       : null;
     if (!vRange) {
       return null;

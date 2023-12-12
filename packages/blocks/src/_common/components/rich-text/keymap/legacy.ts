@@ -17,12 +17,12 @@ import {
 } from '../rich-text-operations.js';
 
 function isCollapsedAtBlockStart(inlineEditor: AffineInlineEditor) {
-  const vRange = inlineEditor.getVRange();
+  const vRange = inlineEditor.getInlineRange();
   return vRange?.index === 0 && vRange?.length === 0;
 }
 
 function isCollapsedAtBlockEnd(inlineEditor: AffineInlineEditor) {
-  const vRange = inlineEditor.getVRange();
+  const vRange = inlineEditor.getInlineRange();
   return vRange?.index === inlineEditor.yText.length && vRange?.length === 0;
 }
 
@@ -31,7 +31,7 @@ export function onSoftEnter(
   inlineEditor: AffineInlineEditor
 ) {
   inlineEditor.insertText(inlineRange, '\n');
-  inlineEditor.setVRange({
+  inlineEditor.setInlineRange({
     index: inlineRange.index + 1,
     length: 0,
   });

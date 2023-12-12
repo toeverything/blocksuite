@@ -1,4 +1,4 @@
-import { VirgoElement, VirgoLine } from '../components/index.js';
+import { VElement, VLine } from '../components/index.js';
 
 export function isNativeTextInVText(text: unknown): text is Text {
   return (
@@ -10,14 +10,14 @@ export function isNativeTextInVText(text: unknown): text is Text {
 export function isVElement(element: unknown): element is HTMLElement {
   return (
     element instanceof HTMLElement &&
-    (element.dataset.virgoElement === 'true' || element instanceof VirgoElement)
+    (element.dataset.virgoElement === 'true' || element instanceof VElement)
   );
 }
 
 export function isVLine(element: unknown): element is HTMLElement {
   return (
     element instanceof HTMLElement &&
-    (element instanceof VirgoLine || element.parentElement instanceof VirgoLine)
+    (element instanceof VLine || element.parentElement instanceof VLine)
   );
 }
 
@@ -27,7 +27,7 @@ export function isVRoot(element: unknown): element is HTMLElement {
 
 export function isInEmbedElement(node: Node): boolean {
   if (node instanceof Element) {
-    if (node instanceof VirgoElement) {
+    if (node instanceof VElement) {
       return node.querySelector('[data-virgo-embed="true"]') !== null;
     }
     const vElement = node.closest('[data-virgo-embed="true"]');

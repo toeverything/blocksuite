@@ -109,7 +109,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
         beforeinput: onVBeforeinput,
         compositionEnd: onVCompositionEnd,
       },
-      vRangeProvider: this.vRangeProvider,
+      inlineRangeProvider: this.vRangeProvider,
     });
     if (this.attributesSchema) {
       this._inlineEditor.setAttributeSchema(this.attributesSchema);
@@ -136,14 +136,14 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
     // init auto scroll
     inlineEditor.disposables.add(
-      inlineEditor.slots.vRangeUpdated.on(([vRange, sync]) => {
+      inlineEditor.slots.inlineRangeUpdated.on(([vRange, sync]) => {
         if (!vRange || !sync) return;
 
         inlineEditor.waitForUpdate().then(() => {
           if (!inlineEditor.mounted) return;
 
           // get newest vRange
-          const vRange = inlineEditor.getVRange();
+          const vRange = inlineEditor.getInlineRange();
           if (!vRange) return;
 
           const range = inlineEditor.toDomRange(vRange);
@@ -189,7 +189,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   private _onStackItemAdded = (event: { stackItem: RichTextStackItem }) => {
-    const vRange = this.inlineEditor?.getVRange();
+    const vRange = this.inlineEditor?.getInlineRange();
     if (vRange) {
       event.stackItem.meta.set('richtext-v-range', vRange);
     }
@@ -197,8 +197,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
   private _onStackItemPopped = (event: { stackItem: RichTextStackItem }) => {
     const vRange = event.stackItem.meta.get('richtext-v-range');
-    if (vRange && this.inlineEditor?.isVRangeValid(vRange)) {
-      this.inlineEditor?.setVRange(vRange);
+    if (vRange && this.inlineEditor?.isValidInlineRange(vRange)) {
+      this.inlineEditor?.setInlineRange(vRange);
     }
   };
 
@@ -206,7 +206,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     const inlineEditor = this.inlineEditor;
     assertExists(inlineEditor);
 
-    const vRange = inlineEditor.getVRange();
+    const vRange = inlineEditor.getInlineRange();
     if (!vRange) return;
 
     const text = inlineEditor.yTextString.slice(
@@ -223,7 +223,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     const inlineEditor = this.inlineEditor;
     assertExists(inlineEditor);
 
-    const vRange = inlineEditor.getVRange();
+    const vRange = inlineEditor.getInlineRange();
     if (!vRange) return;
 
     const text = inlineEditor.yTextString.slice(
@@ -231,7 +231,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       vRange.index + vRange.length
     );
     inlineEditor.deleteText(vRange);
-    inlineEditor.setVRange({
+    inlineEditor.setInlineRange({
       index: vRange.index,
       length: 0,
     });
@@ -249,14 +249,14 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     const inlineEditor = this.inlineEditor;
     assertExists(inlineEditor);
 
-    const vRange = inlineEditor.getVRange();
+    const vRange = inlineEditor.getInlineRange();
     if (!vRange) return;
 
     const text = e.clipboardData?.getData('text/plain');
     if (!text) return;
 
     inlineEditor.insertText(vRange, text);
-    inlineEditor.setVRange({
+    inlineEditor.setInlineRange({
       index: vRange.index + text.length,
       length: 0,
     });

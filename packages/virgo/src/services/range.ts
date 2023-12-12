@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { VirgoLine } from '../components/virgo-line.js';
+import type { VLine } from '../components/v-line.js';
 import type { InlineEditor } from '../inline-editor.js';
 import type {
   InlineRange,
@@ -17,25 +17,28 @@ import {
 import { calculateTextLength, getTextNodesFromElement } from '../utils/text.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
-  private _vRange: InlineRange | null = null;
+  private _inlineRange: InlineRange | null = null;
 
   constructor(public readonly editor: InlineEditor<TextAttributes>) {}
 
-  get vRangeProvider() {
-    return this.editor.vRangeProvider;
+  get inlineRangeProvider() {
+    return this.editor.inlineRangeProvider;
   }
 
   get rootElement() {
     return this.editor.rootElement;
   }
 
-  onVRangeUpdated = async ([newVRange, sync]: InlineRangeUpdatedProp) => {
-    const eq = isMaybeInlineRangeEqual(this._vRange, newVRange);
+  onInlineRangeUpdated = async ([
+    newInlineRange,
+    sync,
+  ]: InlineRangeUpdatedProp) => {
+    const eq = isMaybeInlineRangeEqual(this._inlineRange, newInlineRange);
     if (eq) {
       return;
     }
 
-    this._vRange = newVRange;
+    this._inlineRange = newInlineRange;
 
     // try to trigger update because the `selected` state of the virgo element may change
     if (this.editor.mounted) {
@@ -48,7 +51,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
       return;
     }
 
-    if (this._vRange === null) {
+    if (this._inlineRange === null) {
       const selectionRoot = findDocumentOrShadowRoot(this.editor);
       const selection = selectionRoot.getSelection();
       if (selection && selection.rangeCount > 0) {
@@ -62,11 +65,11 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
     const fn = () => {
       // There may be multiple range update events in one frame,
-      // so we need to obtain the latest vRange.
+      // so we need to obtain the latest inline ranage.
       // see https://github.com/toeverything/blocksuite/issues/2982
-      // when using input method _vRange will return to the starting point,
+      // when using input method inline ranage will return to the starting point,
       // so we need to re-sync
-      this.syncVRange();
+      this.syncInlineRange();
     };
 
     // updates in lit are performed asynchronously
@@ -82,15 +85,15 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     return selection;
   }
 
-  getVRange = (): InlineRange | null => {
-    if (this.vRangeProvider) {
-      return this.vRangeProvider.getVRange();
+  getInlineRange = (): InlineRange | null => {
+    if (this.inlineRangeProvider) {
+      return this.inlineRangeProvider.getInlineRange();
     }
 
-    return this._vRange;
+    return this._inlineRange;
   };
 
-  getVRangeFromElement = (element: Element): InlineRange | null => {
+  getInlineRangeFromElement = (element: Element): InlineRange | null => {
     const range = document.createRange();
     const text = element.querySelector('[data-virgo-text');
     if (!text) {
@@ -100,8 +103,8 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     assertExists(textNode instanceof Text);
     range.setStart(textNode, 0);
     range.setEnd(textNode, textNode.textContent?.length ?? 0);
-    const vRange = this.toVRange(range);
-    return vRange;
+    const inlineRange = this.toInlineRange(range);
+    return inlineRange;
   };
 
   getTextPoint(rangeIndex: InlineRange['index']): TextPoint {
@@ -128,7 +131,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   }
 
   // the number is related to the VirgoLine's textLength
-  getLine(rangeIndex: InlineRange['index']): readonly [VirgoLine, number] {
+  getLine(rangeIndex: InlineRange['index']): readonly [VLine, number] {
     const lineElements = Array.from(
       this.rootElement.querySelectorAll('v-line')
     );
@@ -150,11 +153,11 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     throw new Error('failed to find line');
   }
 
-  isVRangeValid = (vRange: InlineRange | null): boolean => {
+  isValidInlineRange = (inlineRange: InlineRange | null): boolean => {
     return !(
-      vRange &&
-      (vRange.index < 0 ||
-        vRange.index + vRange.length > this.editor.yText.length)
+      inlineRange &&
+      (inlineRange.index < 0 ||
+        inlineRange.index + inlineRange.length > this.editor.yText.length)
     );
   };
 
@@ -163,20 +166,20 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    * 1. long text auto wrap in span element
    * 2. soft break
    */
-  isFirstLine = (vRange: InlineRange | null): boolean => {
-    if (!vRange) return false;
+  isFirstLine = (inlineRange: InlineRange | null): boolean => {
+    if (!inlineRange) return false;
 
-    if (vRange.length > 0) {
-      throw new Error('vRange should be collapsed');
+    if (inlineRange.length > 0) {
+      throw new Error('Inline range should be collapsed');
     }
 
-    const range = this.toDomRange(vRange);
+    const range = this.toDomRange(inlineRange);
     if (!range) {
-      throw new Error('failed to convert vRange to domRange');
+      throw new Error('failed to convert inline range to domRange');
     }
 
     // check case 1:
-    const beforeText = this.editor.yTextString.slice(0, vRange.index);
+    const beforeText = this.editor.yTextString.slice(0, inlineRange.index);
     if (beforeText.includes('\n')) {
       return false;
     }
@@ -187,7 +190,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     // aaaaaaaa| or aaaaaaaa
     // bb           |bb
     // We have no way to distinguish them and we just assume that the cursor
-    // can not in the first line because if we apply the vRange manually the
+    // can not in the first line because if we apply the inline ranage manually the
     // cursor will jump to the second line.
     const container = range.commonAncestorContainer.parentElement;
     assertExists(container);
@@ -207,22 +210,22 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    * 1. long text auto wrap in span element
    * 2. soft break
    */
-  isLastLine = (vRange: InlineRange | null): boolean => {
-    if (!vRange) return false;
+  isLastLine = (inlineRange: InlineRange | null): boolean => {
+    if (!inlineRange) return false;
 
-    if (vRange.length > 0) {
-      throw new Error('vRange should be collapsed');
+    if (inlineRange.length > 0) {
+      throw new Error('Inline range should be collapsed');
     }
 
     // check case 1:
-    const afterText = this.editor.yTextString.slice(vRange.index);
+    const afterText = this.editor.yTextString.slice(inlineRange.index);
     if (afterText.includes('\n')) {
       return false;
     }
 
-    const range = this.toDomRange(vRange);
+    const range = this.toDomRange(inlineRange);
     if (!range) {
-      throw new Error('failed to convert vRange to domRange');
+      throw new Error('failed to convert inline range to domRange');
     }
 
     // check case 2:
@@ -231,7 +234,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     // aaaaaaaa| or aaaaaaaa
     // bb           |bb
     // We have no way to distinguish them and we just assume that the cursor
-    // can not in the first line because if we apply the vRange manually the
+    // can not in the first line because if we apply the inline ranage manually the
     // cursor will jump to the second line.
     const container = range.commonAncestorContainer.parentElement;
     assertExists(container);
@@ -247,107 +250,107 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   /**
-   * the vRange is synced to the native selection asynchronically
+   * the inline ranage is synced to the native selection asynchronically
    * if sync is true, the native selection will be synced immediately
    */
-  setVRange = (vRange: InlineRange | null, sync = true): void => {
-    if (!this.isVRangeValid(vRange)) {
-      throw new Error('invalid vRange');
+  setInlineRange = (inlineRange: InlineRange | null, sync = true): void => {
+    if (!this.isValidInlineRange(inlineRange)) {
+      throw new Error('invalid inline range');
     }
 
-    if (this.vRangeProvider) {
-      this.vRangeProvider.setVRange(vRange, sync);
+    if (this.inlineRangeProvider) {
+      this.inlineRangeProvider.setInlineRange(inlineRange, sync);
       return;
     }
 
-    this.editor.slots.vRangeUpdated.emit([vRange, sync]);
+    this.editor.slots.inlineRangeUpdated.emit([inlineRange, sync]);
   };
 
   focusEnd = (): void => {
-    this.setVRange({
+    this.setInlineRange({
       index: this.editor.yTextLength,
       length: 0,
     });
   };
 
   focusStart = (): void => {
-    this.setVRange({
+    this.setInlineRange({
       index: 0,
       length: 0,
     });
   };
 
   selectAll = (): void => {
-    this.setVRange({
+    this.setInlineRange({
       index: 0,
       length: this.editor.yTextLength,
     });
   };
 
   focusIndex = (index: number): void => {
-    this.setVRange({
+    this.setInlineRange({
       index,
       length: 0,
     });
   };
 
   /**
-   * sync the dom selection from vRange for **this Editor**
+   * sync the dom selection from inline ranage for **this Editor**
    */
-  syncVRange = (): void => {
-    const vRange = this.getVRange();
-    if (vRange && this.editor.mounted) {
-      this._applyVRange(vRange);
+  syncInlineRange = (): void => {
+    const inlineRange = this.getInlineRange();
+    if (inlineRange && this.editor.mounted) {
+      this._applyInlineRange(inlineRange);
     }
   };
 
   /**
-   * calculate the dom selection from vRange for **this Editor**
+   * calculate the dom selection from inline ranage for **this Editor**
    */
-  toDomRange = (vRange: InlineRange): Range | null => {
+  toDomRange = (inlineRange: InlineRange): Range | null => {
     const rootElement = this.editor.rootElement;
-    return virgoRangeToDomRange(rootElement, vRange);
+    return virgoRangeToDomRange(rootElement, inlineRange);
   };
 
   /**
-   * calculate the vRange from dom selection for **this Editor**
-   * there are three cases when the vRange of this Editor is not null:
+   * calculate the inline ranage from dom selection for **this Editor**
+   * there are three cases when the inline ranage of this Editor is not null:
    * (In the following, "|" mean anchor and focus, each line is a separate Editor)
    * 1. anchor and focus are in this Editor
    *    aaaaaa
    *    b|bbbb|b
    *    cccccc
-   *    the vRange of second Editor is {index: 1, length: 4}, the others are null
+   *    the inline ranage of second Editor is {index: 1, length: 4}, the others are null
    * 2. anchor and focus one in this Editor, one in another Editor
    *    aaa|aaa    aaaaaa
    *    bbbbb|b or bbbbb|b
    *    cccccc     cc|cccc
    *    2.1
-   *        the vRange of first Editor is {index: 3, length: 3}, the second is {index: 0, length: 5},
+   *        the inline ranage of first Editor is {index: 3, length: 3}, the second is {index: 0, length: 5},
    *        the third is null
    *    2.2
-   *        the vRange of first Editor is null, the second is {index: 5, length: 1},
+   *        the inline ranage of first Editor is null, the second is {index: 5, length: 1},
    *        the third is {index: 0, length: 2}
    * 3. anchor and focus are in another Editor
    *    aa|aaaa
    *    bbbbbb
    *    cccc|cc
-   *    the vRange of first Editor is {index: 2, length: 4},
+   *    the inline range of first Editor is {index: 2, length: 4},
    *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
    */
-  toVRange = (range: Range): InlineRange | null => {
+  toInlineRange = (range: Range): InlineRange | null => {
     const { rootElement, yText } = this.editor;
 
     return domRangeToVirgoRange(range, rootElement, yText);
   };
 
-  private _applyVRange = (vRange: InlineRange): void => {
+  private _applyInlineRange = (inlineRange: InlineRange): void => {
     const selectionRoot = findDocumentOrShadowRoot(this.editor);
     const selection = selectionRoot.getSelection();
     if (!selection) {
       return;
     }
-    const newRange = this.toDomRange(vRange);
+    const newRange = this.toDomRange(inlineRange);
 
     if (!newRange) {
       return;

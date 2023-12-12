@@ -31,7 +31,7 @@ export const createKeydownObserver = ({
     inlineEditor,
     'Failed to observer keyboard! virgo editor is not exist.'
   );
-  const startIndex = inlineEditor?.getVRange()?.index ?? 0;
+  const startIndex = inlineEditor?.getInlineRange()?.index ?? 0;
 
   const updateQuery = async () => {
     // Wait for text update
@@ -54,7 +54,7 @@ export const createKeydownObserver = ({
       abortController.abort();
       return;
     }
-    const curIndex = inlineEditor.getVRange()?.index ?? 0;
+    const curIndex = inlineEditor.getInlineRange()?.index ?? 0;
     const text = inlineEditor.yText.toString();
     const previousQuery = query;
     query = text.slice(startIndex, curIndex);
@@ -216,7 +216,7 @@ export function cleanSpecifiedTail(
       : inlineEditorOrModel;
   assertExists(inlineEditor, 'Inline editor not found');
 
-  const vRange = inlineEditor.getVRange();
+  const vRange = inlineEditor.getInlineRange();
   assertExists(vRange);
   const idx = vRange.index - str.length;
   const textStr = inlineEditor.yText.toString().slice(idx, idx + str.length);
@@ -227,7 +227,7 @@ export function cleanSpecifiedTail(
     return;
   }
   inlineEditor.deleteText({ index: idx, length: str.length });
-  inlineEditor.setVRange({
+  inlineEditor.setInlineRange({
     index: idx,
     length: 0,
   });

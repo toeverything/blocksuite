@@ -77,7 +77,7 @@ test('getDeltasByVRange', () => {
   const virgo = new InlineEditor(yText);
 
   expect(
-    virgo.getDeltasByVRange({
+    virgo.getDeltasByInlineRange({
       index: 0,
       length: 0,
     })
@@ -97,7 +97,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    virgo.getDeltasByInlineRange({
       index: 0,
       length: 1,
     })
@@ -117,7 +117,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    virgo.getDeltasByInlineRange({
       index: 0,
       length: 3,
     })
@@ -137,7 +137,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    virgo.getDeltasByInlineRange({
       index: 0,
       length: 4,
     })
@@ -169,7 +169,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    virgo.getDeltasByInlineRange({
       index: 3,
       length: 1,
     })
@@ -201,7 +201,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    virgo.getDeltasByInlineRange({
       index: 3,
       length: 3,
     })
@@ -233,7 +233,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    virgo.getDeltasByInlineRange({
       index: 3,
       length: 4,
     })
@@ -277,7 +277,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    virgo.getDeltasByInlineRange({
       index: 4,
       length: 0,
     })
@@ -297,7 +297,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    virgo.getDeltasByInlineRange({
       index: 4,
       length: 1,
     })
@@ -317,7 +317,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    virgo.getDeltasByInlineRange({
       index: 4,
       length: 2,
     })
@@ -337,7 +337,7 @@ test('getDeltasByVRange', () => {
   ]);
 
   expect(
-    virgo.getDeltasByVRange({
+    virgo.getDeltasByInlineRange({
       index: 4,
       length: 4,
     })

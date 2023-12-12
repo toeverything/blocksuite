@@ -33,7 +33,7 @@ export function deleteModelsByTextSelection(
       return startModel;
     }
     startModel.text.delete(textSelection.from.index, textSelection.from.length);
-    inlineEditor.setVRange({
+    inlineEditor.setInlineRange({
       index: textSelection.from.index,
       length: 0,
     });
@@ -50,7 +50,7 @@ export function deleteModelsByTextSelection(
     page.deleteBlock(model);
   });
 
-  inlineEditor.setVRange({
+  inlineEditor.setInlineRange({
     index: textSelection.from.index,
     length: 0,
   });

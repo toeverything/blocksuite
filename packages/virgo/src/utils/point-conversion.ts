@@ -1,4 +1,4 @@
-import type { VirgoElement, VirgoLine } from '../components/index.js';
+import type { VElement, VLine } from '../components/index.js';
 import { VIRGO_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DomPoint, TextPoint } from '../types.js';
 import { isNativeTextInVText, isVElement, isVLine, isVRoot } from './guard.js';
@@ -89,7 +89,7 @@ export function textPointToDomPoint(
   return { text, index: index + lineIndex };
 }
 
-function getVNodesFromNode(node: Node): VirgoElement[] | VirgoLine[] | null {
+function getVNodesFromNode(node: Node): VElement[] | VLine[] | null {
   const vLine = node.parentElement?.closest('v-line');
 
   if (vLine) {
@@ -109,7 +109,7 @@ function getVNodesFromNode(node: Node): VirgoElement[] | VirgoLine[] | null {
 }
 
 function getTextPointFromVNodes(
-  vNodes: VirgoLine[] | VirgoElement[],
+  vNodes: VLine[] | VElement[],
   node: Node,
   offset: number
 ): TextPoint | null {

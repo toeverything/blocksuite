@@ -54,7 +54,7 @@ export const onVBeforeinput = (
   ctx: VBeforeinputHookCtx<AffineTextAttributes>
 ) => {
   const { inlineEditor, vRange, data, raw } = ctx;
-  const deltas = inlineEditor.getDeltasByVRange(vRange);
+  const deltas = inlineEditor.getDeltasByInlineRange(vRange);
 
   // Overwrite the default behavior (Insert period when consecutive spaces) of IME.
   if (raw.inputType === 'insertText' && data === ' ') {
@@ -101,7 +101,7 @@ export const onVCompositionEnd = (
   ctx: VCompositionEndHookCtx<AffineTextAttributes>
 ) => {
   const { inlineEditor, vRange, data } = ctx;
-  const deltas = inlineEditor.getDeltasByVRange(vRange);
+  const deltas = inlineEditor.getDeltasByInlineRange(vRange);
 
   if (data && data.length > 0 && data !== '\n') {
     if (deltas.length > 1 || (deltas.length === 1 && vRange.index !== 0)) {

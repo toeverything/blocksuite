@@ -31,7 +31,6 @@ import {
   resetNativeSelection,
   uploadImageFromLocal,
 } from '../../../_common/utils/index.js';
-import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
 import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
@@ -49,6 +48,7 @@ import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { textConversionConfigs } from '../../configs/text-conversion.js';
 import { textFormatConfigs } from '../../configs/text-format/config.js';
+import { clearMarksOnDiscontinuousInput } from '../../utils/inline-editor.js';
 import type { AffineLinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,

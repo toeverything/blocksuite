@@ -120,8 +120,8 @@ export const getVRangeProvider: (
   });
 
   return {
-    setVRange,
-    getVRange,
+    setInlineRange: setVRange,
+    getInlineRange: getVRange,
     inlineRangeUpdated: vRangeUpdatedSlot,
   };
 };

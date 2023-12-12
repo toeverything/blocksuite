@@ -212,10 +212,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     assertExists(richText);
     const inlineEditor = richText.inlineEditor;
     assertExists(inlineEditor);
-    const range = inlineEditor.getVRange();
+    const range = inlineEditor.getInlineRange();
     inlineEditor.requestUpdate();
     if (range) {
-      inlineEditor.setVRange(range);
+      inlineEditor.setInlineRange(range);
     }
   }
 
@@ -345,7 +345,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         const state = ctx.get('keyboardState');
         const event = state.raw;
         const inlineEditor = this.inlineEditor;
-        const vRange = inlineEditor.getVRange();
+        const vRange = inlineEditor.getInlineRange();
         if (vRange) {
           event.stopPropagation();
           event.preventDefault();
@@ -374,7 +374,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
               INDENT_SYMBOL
             );
           });
-          this.inlineEditor.setVRange({
+          this.inlineEditor.setInlineRange({
             index: vRange.index + 2,
             length:
               vRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
@@ -389,7 +389,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         const state = ctx.get('keyboardState');
         const event = state.raw;
         const inlineEditor = this.inlineEditor;
-        const vRange = inlineEditor.getVRange();
+        const vRange = inlineEditor.getInlineRange();
         if (vRange) {
           event.stopPropagation();
           event.preventDefault();
@@ -419,7 +419,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
             });
           });
           if (indexArr.length > 0) {
-            this.inlineEditor.setVRange({
+            this.inlineEditor.setInlineRange({
               index:
                 vRange.index -
                 (indexArr[indexArr.length - 1] < vRange.index ? 2 : 0),

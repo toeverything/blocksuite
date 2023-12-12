@@ -6,8 +6,8 @@ import type { InlineEditor } from '@blocksuite/virgo';
 export function clearMarksOnDiscontinuousInput(
   inlineEditor: InlineEditor
 ): void {
-  let vRange = inlineEditor.getVRange();
-  const dispose = inlineEditor.slots.vRangeUpdated.on(([r, s]) => {
+  let vRange = inlineEditor.getInlineRange();
+  const dispose = inlineEditor.slots.inlineRangeUpdated.on(([r, s]) => {
     if (
       vRange &&
       r &&

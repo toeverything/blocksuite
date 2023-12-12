@@ -82,7 +82,7 @@ export function createVirgoKeyDownHandler(
     const keyMatches = keyBindings.filter(binding => keyMatch(evt, binding));
     if (keyMatches.length === 0) return;
 
-    const inlineRange = inlineEditor.getVRange();
+    const inlineRange = inlineEditor.getInlineRange();
     if (!inlineRange) return;
 
     const [leafStart, offsetStart] = inlineEditor.getTextPoint(

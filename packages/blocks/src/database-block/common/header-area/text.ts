@@ -90,13 +90,13 @@ export const addHistoryToInlineEditor = (inlineEditor: InlineEditor) => {
   });
   undoManager.on('stack-item-added', (event: { stackItem: StackItem }) => {
     const vRange =
-      range && inlineEditor.mounted ? inlineEditor.toVRange(range) : null;
+      range && inlineEditor.mounted ? inlineEditor.toInlineRange(range) : null;
     event.stackItem.meta.set('v-range', vRange);
   });
   undoManager.on('stack-item-popped', (event: { stackItem: StackItem }) => {
     const vRange = event.stackItem.meta.get('v-range');
     if (vRange) {
-      inlineEditor.setVRange(vRange);
+      inlineEditor.setInlineRange(vRange);
     }
   });
   undoManager.clear();
@@ -167,7 +167,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     );
     inlineEditor.focusEnd();
     this._disposables.add(
-      inlineEditor.slots.vRangeUpdated.on(([range]) => {
+      inlineEditor.slots.inlineRangeUpdated.on(([range]) => {
         if (range) {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
@@ -282,7 +282,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
 
   override onCopy(_e: ClipboardEvent) {
     let data = '';
-    const range = this.inlineEditor?.getVRange();
+    const range = this.inlineEditor?.getInlineRange();
     if (range) {
       const start = range.index;
       const end = range.index + range.length;
@@ -310,7 +310,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     const textClipboardData = e.clipboardData?.getData(TEXT);
     if (!textClipboardData) return;
 
-    const range = this.inlineEditor?.getVRange();
+    const range = this.inlineEditor?.getInlineRange();
     const yText = this.inlineEditor?.yText;
     if (yText) {
       const text = new Text(yText);
@@ -320,7 +320,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       } else {
         text.insert(textClipboardData, index);
       }
-      this.inlineEditor?.setVRange({
+      this.inlineEditor?.setInlineRange({
         index: index + textClipboardData.length,
         length: 0,
       });

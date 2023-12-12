@@ -96,7 +96,7 @@ export function convertToParagraph(
     model.text?.delete(0, prefix.length + 1);
     const inlineEditor = getInlineEditorByModel(model);
     if (inlineEditor) {
-      inlineEditor.setVRange({
+      inlineEditor.setInlineRange({
         index: 0,
         length: 0,
       });

@@ -21,7 +21,7 @@ function toggleStyle(
   inlineEditor: AffineInlineEditor,
   attrs: AffineTextAttributes
 ): void {
-  const vRange = inlineEditor.getVRange();
+  const vRange = inlineEditor.getInlineRange();
   if (!vRange) {
     return;
   }
@@ -31,7 +31,7 @@ function toggleStyle(
     return;
   }
 
-  const deltas = inlineEditor.getDeltasByVRange(vRange);
+  const deltas = inlineEditor.getDeltasByInlineRange(vRange);
   let oldAttributes: AffineTextAttributes = {};
 
   for (const [delta] of deltas) {
@@ -67,7 +67,7 @@ function toggleStyle(
   });
   root.blur();
 
-  inlineEditor.syncVRange();
+  inlineEditor.syncInlineRange();
 }
 
 @customElement('affine-database-rich-text-cell')
@@ -281,13 +281,13 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
 
   private _onSoftEnter = () => {
     if (this.value && this.inlineEditor) {
-      const vRange = this.inlineEditor.getVRange();
+      const vRange = this.inlineEditor.getInlineRange();
       assertExists(vRange);
 
       this.column.captureSync();
       const text = new Text(this.inlineEditor.yText);
       text.replace(vRange.index, length, '\n');
-      this.inlineEditor.setVRange({
+      this.inlineEditor.setInlineRange({
         index: vRange.index + 1,
         length: 0,
       });

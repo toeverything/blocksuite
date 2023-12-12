@@ -1,6 +1,6 @@
 import type * as Y from 'yjs';
 
-import { VirgoElement } from '../components/virgo-element.js';
+import { VElement } from '../components/v-element.js';
 import type { InlineRange } from '../types.js';
 import { isInEmbedElement } from './guard.js';
 import {
@@ -303,7 +303,7 @@ export function virgoRangeToDomRange(
     if (!nextSibling) {
       throw new Error('failed to find nextSibling sibling of an embed element');
     }
-    if (nextSibling instanceof VirgoElement) {
+    if (nextSibling instanceof VElement) {
       const texts = getTextNodesFromElement(nextSibling);
       startText = texts[texts.length - 1];
       anchorOffset = calculateTextLength(startText);
@@ -325,7 +325,7 @@ export function virgoRangeToDomRange(
       throw new Error('failed to find nextSibling sibling of an embed element');
     }
 
-    if (nextSibling instanceof VirgoElement) {
+    if (nextSibling instanceof VElement) {
       const texts = getTextNodesFromElement(nextSibling);
       endText = texts[0];
       focusOffset = 0;

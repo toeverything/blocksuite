@@ -69,14 +69,14 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
             const vRoot = el.querySelector<
               InlineRootElement<AffineTextAttributes>
             >(`[${VIRGO_ROOT_ATTR}]`);
-            if (vRoot && vRoot.inlineEditor.getVRange()) {
+            if (vRoot && vRoot.inlineEditor.getInlineRange()) {
               return vRoot.inlineEditor;
             }
             return [];
           });
 
           result = getCombinedFormatFromInlineEditors(
-            selectedInlineEditors.map(e => [e, e.getVRange()])
+            selectedInlineEditors.map(e => [e, e.getInlineRange()])
           );
 
           next();
@@ -139,7 +139,7 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
           .map(el => el.inlineEditor);
 
         result = getCombinedFormatFromInlineEditors(
-          selectedInlineEditors.map(e => [e, e.getVRange()])
+          selectedInlineEditors.map(e => [e, e.getInlineRange()])
         );
       }),
     ])
@@ -206,7 +206,7 @@ export function isFormatSupported(host: EditorHost) {
             const vRoot = el.querySelector<
               InlineRootElement<AffineTextAttributes>
             >(`[${VIRGO_ROOT_ATTR}]`);
-            if (vRoot && vRoot.inlineEditor.getVRange()) {
+            if (vRoot && vRoot.inlineEditor.getInlineRange()) {
               return vRoot.inlineEditor;
             }
             return [];

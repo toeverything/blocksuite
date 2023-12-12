@@ -6,7 +6,7 @@ import { Text } from '@blocksuite/store';
 import { handleBlockSplit } from '../../_common/components/rich-text/rich-text-operations.js';
 import {
   asyncGetBlockElementByModel,
-  asyncSetVRange,
+  asyncSetInlineRange,
   getInlineEditorByModel,
   type SerializedBlock,
 } from '../../_common/utils/index.js';
@@ -164,7 +164,7 @@ export async function json2block(
   ) {
     const inlineEditor = getInlineEditorByModel(focusedBlockModel);
     assertExists(inlineEditor);
-    inlineEditor.setVRange({
+    inlineEditor.setInlineRange({
       index: textRangePoint.index,
       length: 0,
     });
@@ -181,7 +181,7 @@ export async function json2block(
       }, 0) ?? 0;
     const inlineEditor = getInlineEditorByModel(focusedBlockModel);
     assertExists(inlineEditor);
-    inlineEditor.setVRange({
+    inlineEditor.setInlineRange({
       index: (textRangePoint.index ?? 0) + textLength,
       length: 0,
     });
@@ -189,7 +189,7 @@ export async function json2block(
   }
 
   if (lastMergedModel?.text) {
-    asyncSetVRange(lastMergedModel, {
+    asyncSetInlineRange(lastMergedModel, {
       index: lastMergedModelRangeIndex ?? 0,
       length: 0,
     });

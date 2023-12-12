@@ -4,7 +4,7 @@ import { type InlineRootElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
 import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
-import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
+import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import type { Flavour } from '../../../models.js';
 
 // for text selection
@@ -46,14 +46,14 @@ export const formatTextCommand: Command<
         const vRoot = el.querySelector<InlineRootElement<AffineTextAttributes>>(
           `[${VIRGO_ROOT_ATTR}]`
         );
-        if (vRoot && vRoot.inlineEditor.getVRange()) {
+        if (vRoot && vRoot.inlineEditor.getInlineRange()) {
           return vRoot.inlineEditor;
         }
         return [];
       });
 
       selectedInlineEditors.forEach(inlineEditor => {
-        const vRange = inlineEditor.getVRange();
+        const vRange = inlineEditor.getInlineRange();
         if (!vRange) return;
 
         if (vRange.length === 0) {

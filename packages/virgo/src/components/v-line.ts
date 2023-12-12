@@ -9,7 +9,7 @@ import type { DeltaInsert } from '../types.js';
 import { EmbedGap } from './embed-gap.js';
 
 @customElement('v-line')
-export class VirgoLine extends LitElement {
+export class VLine extends LitElement {
   @property({ attribute: false })
   elements: [TemplateResult<1>, DeltaInsert][] = [];
 
@@ -101,6 +101,6 @@ export class VirgoLine extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'v-line': VirgoLine;
+    'v-line': VLine;
   }
 }

@@ -92,7 +92,7 @@ export const textFormatConfigs: TextFormatConfig[] = [
       if (!vRoot) return;
 
       const inlineEditor = vRoot.inlineEditor;
-      const targetVRange = inlineEditor.getVRange();
+      const targetVRange = inlineEditor.getInlineRange();
       assertExists(targetVRange);
 
       if (targetVRange.length === 0) return;

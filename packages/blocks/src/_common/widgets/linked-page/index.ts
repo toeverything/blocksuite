@@ -125,7 +125,7 @@ export class AffineLinkedPageWidget extends WidgetElement {
     if (matchFlavours(model, this.options.ignoreBlockTypes)) return;
     const inlineEditor = getInlineEditorByModel(model);
     if (!inlineEditor) return;
-    const vRange = inlineEditor.getVRange();
+    const vRange = inlineEditor.getInlineRange();
     if (!vRange) return;
     if (vRange.length > 0) {
       // When select text and press `[[` should not trigger transform,
@@ -158,7 +158,7 @@ export class AffineLinkedPageWidget extends WidgetElement {
           { index: startIdxBeforeMatchKey, length: 0 },
           primaryTriggerKey
         );
-        inlineEditor.setVRange({
+        inlineEditor.setInlineRange({
           index: startIdxBeforeMatchKey + primaryTriggerKey.length,
           length: 0,
         });

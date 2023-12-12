@@ -8,7 +8,7 @@ import type { BaseTextAttributes } from '../utils/base-attributes.js';
 import { getInlineEditorInsideRoot } from '../utils/query.js';
 
 @customElement('v-element')
-export class VirgoElement<
+export class VElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > extends LitElement {
   @property({ type: Object })
@@ -55,6 +55,6 @@ export class VirgoElement<
 
 declare global {
   interface HTMLElementTagNameMap {
-    'v-element': VirgoElement;
+    'v-element': VElement;
   }
 }

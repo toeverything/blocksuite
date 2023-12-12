@@ -170,7 +170,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _onConfirm() {
-    if (!this.inlineEditor.isVRangeValid(this.targetVRange)) return;
+    if (!this.inlineEditor.isValidInlineRange(this.targetVRange)) return;
 
     assertExists(this.linkInput);
     const linkInputValue = this.linkInput.value;
@@ -187,14 +187,14 @@ export class LinkPopup extends WithDisposable(LitElement) {
         },
         { mode: 'replace' }
       );
-      this.inlineEditor.setVRange(this.targetVRange);
+      this.inlineEditor.setInlineRange(this.targetVRange);
     } else if (this.type === 'edit') {
       const text = this.textInput?.value ?? link;
       this.inlineEditor.insertText(this.targetVRange, text, {
         link: link,
         reference: null,
       });
-      this.inlineEditor.setVRange({
+      this.inlineEditor.setInlineRange({
         index: this.targetVRange.index,
         length: text.length,
       });
@@ -204,7 +204,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _linkToBookmark() {
-    if (!this.inlineEditor.isVRangeValid(this.targetVRange)) return;
+    if (!this.inlineEditor.isValidInlineRange(this.targetVRange)) return;
 
     const blockElement = this.blockElement;
     const props = {
@@ -299,7 +299,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       <icon-button
         data-testid="unlink"
         @click=${() => {
-          if (this.inlineEditor.isVRangeValid(this.targetVRange)) {
+          if (this.inlineEditor.isValidInlineRange(this.targetVRange)) {
             this.inlineEditor.formatText(this.targetVRange, { link: null });
           }
           this.remove();

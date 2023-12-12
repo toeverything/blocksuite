@@ -1,7 +1,7 @@
 import { html, render } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { VirgoLine } from '../index.js';
+import type { VLine } from '../index.js';
 import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
 import type { DeltaEntry, InlineRange } from '../types.js';
@@ -34,7 +34,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     return result;
   }
 
-  mapDeltasInVRange = <Result>(
+  mapDeltasInInlineRange = <Result>(
     vRange: InlineRange,
     callback: (
       delta: DeltaInsert<TextAttributes>,
@@ -73,7 +73,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
   ): boolean {
     let result = false;
     if (vRange.length >= 1) {
-      this.editor.mapDeltasInVRange(
+      this.editor.mapDeltasInInlineRange(
         vRange,
         (_, rangeIndex, deltaIndex) => {
           if (
@@ -186,8 +186,10 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
    *  [{ insert: 'ccc', attributes: { underline: true }, }, { index: 6, length: 3, }]]
    * ```
    */
-  getDeltasByVRange = (vRange: InlineRange): DeltaEntry<TextAttributes>[] => {
-    return this.mapDeltasInVRange(
+  getDeltasByInlineRange = (
+    vRange: InlineRange
+  ): DeltaEntry<TextAttributes>[] => {
+    return this.mapDeltasInInlineRange(
       vRange,
       (delta, index): DeltaEntry<TextAttributes> => [
         delta,
@@ -215,10 +217,10 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
           normalizedDeltaIndex++;
         });
 
-        const elements: VirgoLine['elements'] = lineDeltas.map(
+        const elements: VLine['elements'] = lineDeltas.map(
           ([delta, normalizedDeltaIndex]) => {
             let selected = false;
-            const vRange = this.editor.getVRange();
+            const vRange = this.editor.getInlineRange();
             if (vRange) {
               selected = this.isNormalizedDeltaSelected(
                 normalizedDeltaIndex,
@@ -263,7 +265,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     if (syncVRange) {
       // We need to synchronize the selection immediately after rendering is completed,
       // otherwise there is a possibility of an error in the cursor position
-      this.editor.rangeService.syncVRange();
+      this.editor.rangeService.syncInlineRange();
     }
 
     this.editor.slots.updated.emit();

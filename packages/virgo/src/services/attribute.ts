@@ -48,7 +48,7 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
 
   getFormat = (vRange: InlineRange, loose = false): TextAttributes => {
     const deltas = this.editor.deltaService
-      .getDeltasByVRange(vRange)
+      .getDeltasByInlineRange(vRange)
       .filter(
         ([_, position]) =>
           position.index + position.length > vRange.index &&
