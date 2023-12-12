@@ -29,7 +29,7 @@ export async function focusVirgoRichText(page: Page, index = 0): Promise<void> {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (richTexts[index] as any).vEditor.focusEnd();
+    (richTexts[index] as any).inlineEditor.focusEnd();
   }, index);
 }
 
