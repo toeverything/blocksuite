@@ -1,5 +1,5 @@
 import type { TextSelection } from '@blocksuite/block-std';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { BaseBlockModel, type Page } from '@blocksuite/store';
 
 import {
@@ -189,7 +189,7 @@ async function createPageClipboardItems(
   return [textClipboardItem, htmlClipboardItem, pageClipboardItem];
 }
 
-export async function copyBlocksInPage(root: BlockSuiteRoot) {
+export async function copyBlocksInPage(root: EditorHost) {
   const selectedModels = getSelectedContentModels(root, [
     'text',
     'block',

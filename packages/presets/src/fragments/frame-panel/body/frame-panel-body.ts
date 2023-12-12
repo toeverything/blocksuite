@@ -9,7 +9,7 @@ import {
   saveViewportToSession,
 } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { type BlockSuiteRoot, WithDisposable } from '@blocksuite/lit';
+import { type EditorHost, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
@@ -88,7 +88,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  root!: EditorHost;
 
   @property({ attribute: false })
   changeEditorMode!: (mode: 'page' | 'edgeless') => void;

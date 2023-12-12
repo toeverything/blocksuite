@@ -1,5 +1,5 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import type { Workspace } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 
@@ -82,7 +82,7 @@ export class TagsDatasource extends BaseDataSource {
     return Object.keys(this.propertiesMap);
   }
 
-  constructor(root: BlockSuiteRoot, _config: TagsDatasourceConfig) {
+  constructor(root: EditorHost, _config: TagsDatasourceConfig) {
     super();
     this.meta = root.page.workspace.meta;
     root.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);

@@ -1,12 +1,12 @@
 import { BlocksUtils } from '@blocksuite/blocks';
-import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import { type BaseBlockModel, Slice } from '@blocksuite/store';
 
-import type { EditorContainer } from '../../../editors/index.js';
+import type { AffineEditorContainer } from '../../../editors/index.js';
 import { getMarkdownFromSlice } from './markdown-utils.js';
 import { getEdgelessPageBlockFromEditor } from './mind-map-utils.js';
 
-export function hasSelectedTextContent(root: BlockSuiteRoot) {
+export function hasSelectedTextContent(root: EditorHost) {
   let result = false;
 
   root.std.command
@@ -36,7 +36,7 @@ export function hasSelectedTextContent(root: BlockSuiteRoot) {
   return result;
 }
 
-export async function getSelectedTextSlice(root: BlockSuiteRoot) {
+export async function getSelectedTextSlice(root: EditorHost) {
   let models: BaseBlockModel[] = [];
 
   root.std.command
@@ -67,7 +67,7 @@ export async function getSelectedTextSlice(root: BlockSuiteRoot) {
   return Slice.fromModels(root.std.page, models);
 }
 
-export async function getSelectedBlocks(root: BlockSuiteRoot) {
+export async function getSelectedBlocks(root: EditorHost) {
   let blocks: BlockElement[] = [];
 
   root.std.command
@@ -96,7 +96,7 @@ export async function getSelectedBlocks(root: BlockSuiteRoot) {
   return blocks;
 }
 
-export async function selectedToCanvas(editor: EditorContainer) {
+export async function selectedToCanvas(editor: AffineEditorContainer) {
   const edgelessPage = getEdgelessPageBlockFromEditor(editor);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
     edgelessPage.selectionManager.elements
@@ -114,11 +114,11 @@ export async function selectedToCanvas(editor: EditorContainer) {
   return canvas;
 }
 
-export async function selectedToPng(editor: EditorContainer) {
+export async function selectedToPng(editor: AffineEditorContainer) {
   return (await selectedToCanvas(editor))?.toDataURL('image/png');
 }
 
-export async function getSelectedTextContent(root: BlockSuiteRoot) {
+export async function getSelectedTextContent(root: EditorHost) {
   const slice = await getSelectedTextSlice(root);
   return await getMarkdownFromSlice(root, slice);
 }

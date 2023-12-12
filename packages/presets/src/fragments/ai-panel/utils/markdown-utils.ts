@@ -1,9 +1,9 @@
 import { MarkdownAdapter } from '@blocksuite/blocks';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Job, type Slice } from '@blocksuite/store';
 
-export async function getMarkdownFromSlice(root: BlockSuiteRoot, slice: Slice) {
+export async function getMarkdownFromSlice(root: EditorHost, slice: Slice) {
   const job = new Job({ workspace: root.std.page.workspace });
   const snapshot = await job.sliceToSnapshot(slice);
   const markdownAdapter = new MarkdownAdapter();
@@ -16,7 +16,7 @@ export async function getMarkdownFromSlice(root: BlockSuiteRoot, slice: Slice) {
 }
 
 export async function insertFromMarkdown(
-  root: BlockSuiteRoot,
+  root: EditorHost,
   markdown: string,
   parent?: string,
   index?: number

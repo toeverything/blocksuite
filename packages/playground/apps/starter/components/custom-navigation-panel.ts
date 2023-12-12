@@ -1,6 +1,6 @@
 import { registerTOCComponents } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
-import type { EditorContainer } from '@blocksuite/presets';
+import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -27,7 +27,7 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  editor!: EditorContainer;
+  editor!: AffineEditorContainer;
 
   private _renderPanel() {
     return html`<edgeless-toc-notes-panel

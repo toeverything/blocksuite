@@ -1,9 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
 export function getSelectedContentModels(
-  root: BlockSuiteRoot,
+  root: EditorHost,
   types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[]
 ): BaseBlockModel[] {
   const result: BaseBlockModel[] = [];

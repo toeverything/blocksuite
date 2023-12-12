@@ -36,8 +36,8 @@ function forwardSlot<T extends Record<string, Slot<any>>>(
   });
 }
 
-@customElement('editor-container')
-export class EditorContainer
+@customElement('affine-editor-container')
+export class AffineEditorContainer
   extends WithDisposable(ShadowlessElement)
   implements AbstractEditor
 {
@@ -162,6 +162,6 @@ export class EditorContainer
 
 declare global {
   interface HTMLElementTagNameMap {
-    'editor-container': EditorContainer;
+    'affine-editor-container': AffineEditorContainer;
   }
 }

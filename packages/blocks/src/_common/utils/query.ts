@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
@@ -190,13 +190,13 @@ export function getEditorContainer(page: Page): AbstractEditor {
   );
   const pageBlock = getBlockElementByModel(page.root);
   // EditorContainer
-  const editorContainer = pageBlock?.closest('editor-container');
+  const editorContainer = pageBlock?.closest('affine-editor-container');
   assertExists(editorContainer);
   return editorContainer as AbstractEditor;
 }
 
 function getClosestEditorContainer(ele: Element) {
-  const editorContainer = ele.closest('editor-container');
+  const editorContainer = ele.closest('affine-editor-container');
   assertExists(editorContainer);
   return editorContainer as AbstractEditor;
 }
@@ -210,7 +210,7 @@ export function isPageMode(page: Page) {
 }
 
 export function getLitRoot() {
-  const root = document.querySelector<BlockSuiteRoot>('block-suite-root');
+  const root = document.querySelector<EditorHost>('editor-host');
   assertExists(root);
   return root;
 }
@@ -329,7 +329,7 @@ export function getModelByElement(element: Element): BaseBlockModel {
 }
 
 export function isInsidePageTitle(element: unknown): boolean {
-  const editor = document.querySelector('editor-container');
+  const editor = document.querySelector('affine-editor-container');
   const titleElement = (editor ?? document).querySelector(
     '[data-block-is-title="true"]'
   );
@@ -339,7 +339,7 @@ export function isInsidePageTitle(element: unknown): boolean {
 }
 
 export function isInsideEdgelessTextEditor(element: unknown): boolean {
-  const editor = document.querySelector('editor-container');
+  const editor = document.querySelector('affine-editor-container');
   const textElement = getEdgelessCanvasTextEditor(editor ?? document);
   if (!textElement) return false;
 

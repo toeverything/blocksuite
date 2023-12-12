@@ -1,6 +1,6 @@
 // FIXME: this should be move to more appropriate place after extension system has completed
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 
 import type {
   AffineModalWidget,
@@ -15,7 +15,7 @@ function createGradioApp() {
   return app;
 }
 
-function getPageElement(root: BlockSuiteRoot) {
+function getPageElement(root: EditorHost) {
   assertExists(root.page.root?.id);
 
   const page = root.view.viewFromPath('block', [
@@ -28,7 +28,7 @@ function getPageElement(root: BlockSuiteRoot) {
 export function openLeditsEditor(
   model: ImageBlockModel,
   blob: Blob,
-  root: BlockSuiteRoot
+  root: EditorHost
 ) {
   const pageElement = getPageElement(root);
   const app = createGradioApp();

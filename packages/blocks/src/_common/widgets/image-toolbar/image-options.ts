@@ -1,4 +1,4 @@
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
@@ -34,7 +34,7 @@ export function ImageOptionsTemplate({
   /**
    * @deprecated
    */
-  root: BlockSuiteRoot;
+  root: EditorHost;
 }) {
   const supportAttachment =
     model.page.schema.flavourSchemaMap.has('affine:attachment');

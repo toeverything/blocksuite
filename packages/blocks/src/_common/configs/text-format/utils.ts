@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import {
   VIRGO_ROOT_ATTR,
   type VirgoRootElement,
@@ -46,7 +46,7 @@ function getCombinedFormatFromVEditors(
   });
 }
 
-function getCombinedFormat(root: BlockSuiteRoot): AffineTextAttributes {
+function getCombinedFormat(root: EditorHost): AffineTextAttributes {
   let result: AffineTextAttributes = {};
 
   root.std.command
@@ -149,7 +149,7 @@ function getCombinedFormat(root: BlockSuiteRoot): AffineTextAttributes {
 }
 
 export function handleCommonStyle(
-  root: BlockSuiteRoot,
+  root: EditorHost,
   key: Extract<
     keyof AffineTextAttributes,
     'bold' | 'italic' | 'underline' | 'strike' | 'code'
@@ -175,12 +175,12 @@ export function handleCommonStyle(
     .run();
 }
 
-export function commonActiveWhen(root: BlockSuiteRoot, key: string) {
+export function commonActiveWhen(root: EditorHost, key: string) {
   const format = getCombinedFormat(root);
   return key in format;
 }
 
-export function isFormatSupported(root: BlockSuiteRoot) {
+export function isFormatSupported(root: EditorHost) {
   let result = false;
 
   root.std.command

@@ -21,7 +21,7 @@ import { DatabaseSelection } from '../../../selection.js';
 export function showDatabasePreviewModal(database: DatabaseBlockComponent) {
   const viewComponent = new DatabaseBlockModalPreview();
   viewComponent.database = database;
-  const root = document.querySelector('block-suite-root');
+  const root = document.querySelector('editor-host');
   assertExists(root);
   const modal = createModal(root);
   const close = () => {

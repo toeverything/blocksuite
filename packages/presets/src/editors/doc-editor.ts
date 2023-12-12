@@ -1,16 +1,12 @@
 import { DocEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
-import {
-  BlockSuiteRoot,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/lit';
+import { EditorHost, ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
-noop(BlockSuiteRoot);
+noop(EditorHost);
 
 @customElement('doc-editor')
 export class DocEditor extends WithDisposable(ShadowlessElement) {
@@ -20,7 +16,7 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   preset = DocEditorBlockSpecs;
 
-  root: Ref<BlockSuiteRoot> = createRef<BlockSuiteRoot>();
+  root: Ref<EditorHost> = createRef<EditorHost>();
 
   override render() {
     return html`
@@ -42,11 +38,11 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
           }
         }
       </style>
-      <block-suite-root
+      <editor-host
         ${ref(this.root)}
         .page=${this.page}
         .preset=${this.preset}
-      ></block-suite-root>
+      ></editor-host>
     `;
   }
 }

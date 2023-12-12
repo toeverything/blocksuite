@@ -1,7 +1,7 @@
 import './database-convert-view.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { html, type TemplateResult } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
@@ -18,9 +18,9 @@ export interface QuickActionConfig {
   disabledToolTip?: string;
   icon: TemplateResult<1>;
   hotkey?: string;
-  showWhen: (root: BlockSuiteRoot) => boolean;
-  enabledWhen: (root: BlockSuiteRoot) => boolean;
-  action: (root: BlockSuiteRoot) => void;
+  showWhen: (root: EditorHost) => boolean;
+  enabledWhen: (root: EditorHost) => boolean;
+  action: (root: EditorHost) => void;
 }
 
 export const quickActionConfig: QuickActionConfig[] = [

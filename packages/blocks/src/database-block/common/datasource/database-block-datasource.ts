@@ -1,6 +1,6 @@
 import type { Disposable } from '@blocksuite/global/utils';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Text, type Y } from '@blocksuite/store';
 
@@ -35,7 +35,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   constructor(
-    private root: BlockSuiteRoot,
+    private root: EditorHost,
     config: DatabaseBlockDatasourceConfig
   ) {
     super();

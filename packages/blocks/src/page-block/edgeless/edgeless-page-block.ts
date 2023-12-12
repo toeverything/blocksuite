@@ -260,7 +260,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   get editorContainer(): EdtitorContainer {
     if (this._editorContainer) return this._editorContainer;
-    this._editorContainer = this.closest('editor-container');
+    this._editorContainer = this.closest('affine-editor-container');
     assertExists(this._editorContainer);
     return this._editorContainer;
   }
@@ -402,7 +402,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   /**
-   * Adds a new note with the given point on the editor-container.
+   * Adds a new note with the given point on the affine-editor-container.
    *
    * @param: point Point
    * @returns: The id of new note

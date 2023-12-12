@@ -27,8 +27,8 @@ import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';
 
-@customElement('block-suite-root')
-export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
+@customElement('editor-host')
+export class EditorHost extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   preset!: BlockSpec[];
 
@@ -249,7 +249,7 @@ function getChildren(
 
 declare global {
   interface HTMLElementTagNameMap {
-    'block-suite-root': BlockSuiteRoot;
+    'editor-host': EditorHost;
   }
 
   namespace BlockSuite {

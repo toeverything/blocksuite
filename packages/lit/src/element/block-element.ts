@@ -9,7 +9,7 @@ import type { TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 import { WithDisposable } from '../with-disposable.js';
-import type { BlockSuiteRoot } from './lit-root.js';
+import type { EditorHost } from './lit-host.js';
 import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';
 
@@ -19,7 +19,7 @@ export class BlockElement<
   WidgetName extends string = string,
 > extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  root!: EditorHost;
 
   @property({ attribute: false })
   model!: Model;

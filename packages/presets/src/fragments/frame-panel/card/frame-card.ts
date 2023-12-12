@@ -7,7 +7,7 @@ import {
   once,
 } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
@@ -123,7 +123,7 @@ export class FrameCard extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  root!: EditorHost;
 
   @property({ attribute: false })
   cardIndex!: number;

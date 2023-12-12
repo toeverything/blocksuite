@@ -7,13 +7,13 @@ import { property } from 'lit/decorators.js';
 
 import { WithDisposable } from '../with-disposable.js';
 import type { BlockElement } from './block-element.js';
-import type { BlockSuiteRoot } from './lit-root.js';
+import type { EditorHost } from './lit-host.js';
 
 export class WidgetElement<
   B extends BlockElement = BlockElement,
 > extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  root!: EditorHost;
 
   @property({ attribute: false })
   page!: Page;

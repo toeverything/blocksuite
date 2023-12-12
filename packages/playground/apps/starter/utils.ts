@@ -3,7 +3,7 @@ import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import * as globalUtils from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
-import { EditorContainer } from '@blocksuite/presets';
+import { AffineEditorContainer } from '@blocksuite/presets';
 import type {
   BlobStorage,
   DocProviderCreator,
@@ -174,7 +174,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
 }
 
 export function createEditor(page: Page, element: HTMLElement) {
-  const editor = new EditorContainer();
+  const editor = new AffineEditorContainer();
   editor.page = page;
   element.append(editor);
 

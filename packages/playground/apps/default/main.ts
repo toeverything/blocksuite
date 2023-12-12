@@ -157,7 +157,7 @@ async function main() {
   window.ContentParser = ContentParser;
   Object.defineProperty(globalThis, 'root', {
     get() {
-      return document.querySelector('block-suite-root') as BlockSuiteRoot;
+      return document.querySelector('editor-host') as BlockSuiteRoot;
     },
   });
 

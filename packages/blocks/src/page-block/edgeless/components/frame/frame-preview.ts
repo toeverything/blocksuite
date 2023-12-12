@@ -3,7 +3,7 @@ import {
   type Disposable,
   DisposableGroup,
 } from '@blocksuite/global/utils';
-import { type BlockSuiteRoot, WithDisposable } from '@blocksuite/lit';
+import { type EditorHost, WithDisposable } from '@blocksuite/lit';
 import type { Page, Y } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -93,7 +93,7 @@ export class FramePreview extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  root!: EditorHost;
 
   @property({ attribute: false })
   surfaceWidth: number = DEFAULT_PREVIEW_CONTAINER_WIDTH;

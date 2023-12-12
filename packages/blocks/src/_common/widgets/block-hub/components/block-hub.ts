@@ -1,6 +1,6 @@
 import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, query, queryAll, state } from 'lit/decorators.js';
@@ -90,11 +90,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _lastDraggingFlavour: string | null = null;
   private _timer: number | null = null;
   private _rafID: number = 0;
-  private _root: BlockSuiteRoot;
+  private _root: EditorHost;
 
   static override styles = styles;
 
-  constructor(root: BlockSuiteRoot) {
+  constructor(root: EditorHost) {
     super();
     this._root = root;
   }

@@ -270,7 +270,7 @@ export const getDropResult = (
   let dropIndicator = null;
 
   const target = captureEventTarget(event.target);
-  const rootElement = target?.closest('block-suite-root');
+  const rootElement = target?.closest('editor-host');
   const offset = {
     x: rootElement?.getBoundingClientRect().left ?? 0,
     y: rootElement?.getBoundingClientRect().top ?? 0,

@@ -3,7 +3,7 @@ import type { ContentParser } from '../../packages/blocks/src/content-parser.js'
 import type { TestUtils } from '../../packages/blocks/src/index.js';
 import type { BlockSuiteRoot } from '../../packages/lit/src/index.js';
 import type { DebugMenu } from '../../packages/playground/apps/starter/components/debug-menu.js';
-import type { EditorContainer } from '../../packages/presets/src/index.js';
+import type { AffineEditorContainer } from '../../packages/presets/src/index.js';
 import type {
   BaseBlockModel,
   Page,
@@ -27,7 +27,7 @@ declare global {
     blockSchema: Record<string, typeof BaseBlockModel>;
     page: Page;
     debugMenu: DebugMenu;
-    editor: EditorContainer;
+    editor: AffineEditorContainer;
     root: BlockSuiteRoot;
     testUtils: TestUtils;
 

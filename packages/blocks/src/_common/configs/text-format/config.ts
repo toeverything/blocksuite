@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 import type { TemplateResult } from 'lit';
 
@@ -20,8 +20,8 @@ export interface TextFormatConfig {
   name: string;
   icon: TemplateResult<1>;
   hotkey?: string;
-  activeWhen: (root: BlockSuiteRoot) => boolean;
-  action: (root: BlockSuiteRoot) => void;
+  activeWhen: (root: EditorHost) => boolean;
+  action: (root: EditorHost) => void;
 }
 
 export const textFormatConfigs: TextFormatConfig[] = [

@@ -1,5 +1,5 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import type { Page, Workspace } from '@blocksuite/store';
 
 import type { InsertToPosition } from '../../types.js';
@@ -60,7 +60,7 @@ export class AllPageDatasource extends BaseDataSource {
     return Object.keys(this.propertiesMap);
   }
 
-  constructor(root: BlockSuiteRoot, _config: AllPageDatasourceConfig) {
+  constructor(root: EditorHost, _config: AllPageDatasourceConfig) {
     super();
     this.workspace = root.page.workspace;
     root.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);

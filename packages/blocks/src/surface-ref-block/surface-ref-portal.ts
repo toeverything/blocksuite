@@ -3,7 +3,7 @@
 import './portal/image.js';
 import './portal/note.js';
 
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { css, type TemplateResult } from 'lit';
@@ -36,7 +36,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  root!: EditorHost;
 
   @property({ attribute: false })
   page!: Page;

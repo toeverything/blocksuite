@@ -704,7 +704,7 @@ export const createPopup = (
     middleware?: Array<Middleware | null | undefined | false>;
   }
 ) => {
-  const root = document.querySelector('block-suite-root');
+  const root = document.querySelector('editor-host');
   assertExists(root);
 
   const modal = createModal(root);

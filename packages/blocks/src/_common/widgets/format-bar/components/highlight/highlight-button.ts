@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 
@@ -22,7 +22,7 @@ let lastUsedColor: string | null = null;
 let lastUsedHighlightType: HighlightType = HighlightType.Background;
 
 const updateHighlight = (
-  root: BlockSuiteRoot,
+  root: EditorHost,
   color: string | null,
   highlightType: HighlightType
 ) => {

@@ -85,7 +85,7 @@ async function initEmptyEditor({
           throw new Error('Cannot find app root element(#app).');
         }
         const createEditor = () => {
-          const editor = document.createElement('editor-container');
+          const editor = document.createElement('affine-editor-container');
           editor.page = page;
           editor.autofocus = true;
           editor.slots.pageLinkClicked.on(({ pageId }) => {
@@ -140,7 +140,7 @@ async function initEmptyEditor({
 }
 
 export const getEditorLocator = (page: Page) => {
-  return page.locator('editor-container').nth(currentEditorIndex);
+  return page.locator('affine-editor-container').nth(currentEditorIndex);
 };
 export const getBlockHub = (page: Page) => {
   return page.locator('affine-block-hub').nth(currentEditorIndex);
@@ -599,7 +599,7 @@ export async function focusRichText(
 export async function focusRichTextEnd(page: Page, i = 0) {
   await page.evaluate(
     ([i]) => {
-      const editor = document.querySelectorAll('editor-container')[i];
+      const editor = document.querySelectorAll('affine-editor-container')[i];
       const richTexts = Array.from(editor.querySelectorAll('rich-text'));
 
       richTexts[i].vEditor?.focusEnd();
@@ -1104,8 +1104,8 @@ export async function initImageState(page: Page) {
 
 export async function getCurrentEditorPageId(page: Page) {
   return await page.evaluate(index => {
-    const editor = document.querySelectorAll('editor-container')[index];
-    if (!editor) throw new Error("Can't find editor-container");
+    const editor = document.querySelectorAll('affine-editor-container')[index];
+    if (!editor) throw new Error("Can't find affine-editor-container");
     const pageId = editor.page.id;
     return pageId;
   }, currentEditorIndex);
@@ -1118,7 +1118,7 @@ export async function getCurrentHTMLTheme(page: Page) {
 
 export async function getCurrentEditorTheme(page: Page) {
   const mode = await page
-    .locator('editor-container')
+    .locator('affine-editor-container')
     .first()
     .evaluate(ele => {
       return (ele as unknown as Element & { themeObserver: ThemeObserver })
@@ -1132,7 +1132,7 @@ export async function getCurrentThemeCSSPropertyValue(
   property: CssVariableName
 ) {
   const value = await page
-    .locator('editor-container')
+    .locator('affine-editor-container')
     .evaluate((ele, property: CssVariableName) => {
       return (ele as unknown as Element & { themeObserver: ThemeObserver })
         .themeObserver.cssVariables?.[property];

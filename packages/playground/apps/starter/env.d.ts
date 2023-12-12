@@ -1,6 +1,6 @@
 import type { TestUtils } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
-import type { EditorContainer } from '@blocksuite/presets';
+import type { AffineEditorContainer } from '@blocksuite/presets';
 import type {
   BlockSchema,
   DocProvider,
@@ -12,7 +12,7 @@ import type { z } from 'zod';
 
 declare global {
   interface Window {
-    editor: EditorContainer;
+    editor: AffineEditorContainer;
     page: Page;
     workspace: Workspace;
     blockSchemas: z.infer<typeof BlockSchema>[];

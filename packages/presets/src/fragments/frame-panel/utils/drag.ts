@@ -4,7 +4,7 @@ import {
   on,
   once,
 } from '@blocksuite/blocks';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 
 import type { FramePanelBody } from '../body/frame-panel-body.js';
@@ -37,7 +37,7 @@ export function startDragging(
     };
     edgeless: EdgelessPageBlockComponent | null;
     page: Page;
-    root: BlockSuiteRoot;
+    root: EditorHost;
   }
 ) {
   const {
