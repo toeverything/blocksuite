@@ -51,7 +51,7 @@ export class VirgoLine extends LitElement {
       `[${VIRGO_ROOT_ATTR}]`
     ) as VirgoRootElement;
     assertExists(rootElement, 'v-line must be inside a v-root');
-    const virgoEditor = rootElement.virgoEditor;
+    const virgoEditor = rootElement.inlineEditor;
     assertExists(
       virgoEditor,
       'v-line must be inside a v-root with virgo-editor'

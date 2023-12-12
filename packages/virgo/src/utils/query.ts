@@ -30,7 +30,7 @@ export function getInlineEditorInsideRoot(element: Element): InlineEditor {
     `[${VIRGO_ROOT_ATTR}]`
   ) as VirgoRootElement;
   assertExists(rootElement, 'element must be inside a v-root');
-  const virgoEditor = rootElement.virgoEditor;
+  const virgoEditor = rootElement.inlineEditor;
   assertExists(
     virgoEditor,
     'element must be inside a v-root with virgo-editor'

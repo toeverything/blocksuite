@@ -224,13 +224,13 @@ export class RangeManager {
       `Cannot find virgo element in block ${point.path.join(' > ')}}`
     );
 
-    const maxLength = virgoRoot.virgoEditor.yText.length;
+    const maxLength = virgoRoot.inlineEditor.yText.length;
     const index = point.index >= maxLength ? maxLength : point.index;
     const length =
       index + point.length >= maxLength ? maxLength - index : point.length;
 
     return [
-      virgoRoot.virgoEditor,
+      virgoRoot.inlineEditor,
       {
         index,
         length,
@@ -248,7 +248,7 @@ export class RangeManager {
       return null;
     }
     const vRange = this._range
-      ? virgoElement.virgoEditor.toVRange(this._range)
+      ? virgoElement.inlineEditor.toVRange(this._range)
       : null;
     if (!vRange) {
       return null;

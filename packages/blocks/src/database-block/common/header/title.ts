@@ -63,12 +63,12 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   @query('rich-text')
   private richText!: RichText;
-  get vEditor() {
+  get inlineEditor() {
     assertExists(this.richText.inlineEditor);
     return this.richText.inlineEditor;
   }
-  get vEditorContainer() {
-    return this.vEditor.rootElement;
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
   }
 
   override firstUpdated() {
@@ -79,31 +79,31 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
     this.updateComplete.then(() => {
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'focus',
         this._onTitleFocus
       );
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'blur',
         this._onTitleBlur
       );
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'compositionstart',
         () => {
           this.isComposing = true;
         }
       );
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'compositionend',
         () => {
           this.isComposing = false;
         }
       );
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'keydown',
         this._onKeyDown
       );

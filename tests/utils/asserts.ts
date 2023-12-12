@@ -156,7 +156,7 @@ export async function assertInlineEditorDeltas(
     const vRoot = document.querySelectorAll<VirgoRootElement>(
       '[data-virgo-root="true"]'
     )[i];
-    return vRoot.virgoEditor.yTextDeltas;
+    return vRoot.inlineEditor.yTextDeltas;
   }, i);
   expect(actual).toEqual(deltas);
 }
@@ -170,7 +170,7 @@ export async function assertRichTextVirgoDeltas(
     const vRoot = document.querySelectorAll<VirgoRootElement>(
       'rich-text [data-virgo-root="true"]'
     )[i];
-    return vRoot.virgoEditor.yTextDeltas;
+    return vRoot.inlineEditor.yTextDeltas;
   }, i);
   expect(actual).toEqual(deltas);
 }
@@ -208,7 +208,7 @@ export async function assertEdgelessCanvasText(page: Page, text: string) {
       throw new Error('editor not found');
     }
     // @ts-ignore
-    const inlineEditor = editor.vEditor;
+    const inlineEditor = editor.inlineEditor;
     return inlineEditor?.yText.toString();
   });
   expect(actualTexts).toEqual(text);
@@ -344,7 +344,7 @@ export async function assertTextFormat(
       const richText = document.querySelectorAll('rich-text')[richTextIndex];
       const inlineEditor = richText.inlineEditor;
       if (!inlineEditor) {
-        throw new Error('vEditor is undefined');
+        throw new Error('Inline editor is undefined');
       }
 
       const result = inlineEditor.getFormat({
@@ -385,7 +385,7 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
     return Array.from(elements).map(el => {
       const inlineEditor = el.inlineEditor;
       if (!inlineEditor) {
-        throw new Error('vEditor is undefined');
+        throw new Error('Inline editor is undefined');
       }
 
       const result = inlineEditor.getFormat({

@@ -27,13 +27,13 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
 
   private _isComposing = false;
 
-  get vEditor(): AffineInlineEditor {
+  get inlineEditor(): AffineInlineEditor {
     assertExists(this.richText.inlineEditor);
     return this.richText.inlineEditor;
   }
 
-  get vEditorContainer() {
-    return this.vEditor.rootElement;
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
   }
 
   override async getUpdateComplete(): Promise<boolean> {
@@ -46,28 +46,36 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
     this.updateComplete.then(() => {
       this.titleContentElement.style.display = 'none';
 
-      this.vEditor.selectAll();
+      this.inlineEditor.selectAll();
 
-      this.vEditor.slots.updated.on(() => {
+      this.inlineEditor.slots.updated.on(() => {
         this.requestUpdate();
       });
 
-      this.disposables.addFromEvent(this.vEditorContainer, 'blur', () => {
+      this.disposables.addFromEvent(this.inlineEditorContainer, 'blur', () => {
         this._unmount();
       });
-      this.disposables.addFromEvent(this.vEditorContainer, 'click', e => {
+      this.disposables.addFromEvent(this.inlineEditorContainer, 'click', e => {
         e.stopPropagation();
       });
-      this.disposables.addFromEvent(this.vEditorContainer, 'dblclick', e => {
-        e.stopPropagation();
-      });
-
-      this.disposables.addFromEvent(this.vEditorContainer, 'keydown', e => {
-        e.stopPropagation();
-        if (e.key === 'Enter' && !this._isComposing) {
-          this._unmount();
+      this.disposables.addFromEvent(
+        this.inlineEditorContainer,
+        'dblclick',
+        e => {
+          e.stopPropagation();
         }
-      });
+      );
+
+      this.disposables.addFromEvent(
+        this.inlineEditorContainer,
+        'keydown',
+        e => {
+          e.stopPropagation();
+          if (e.key === 'Enter' && !this._isComposing) {
+            this._unmount();
+          }
+        }
+      );
     });
   }
 

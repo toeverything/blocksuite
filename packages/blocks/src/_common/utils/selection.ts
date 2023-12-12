@@ -158,7 +158,7 @@ export function focusTitle(page: Page, index = Infinity, len = 0) {
     throw new Error("Can't find page component!");
   }
   if (!pageComponent.titleInlineEditor) {
-    throw new Error("Can't find title vEditor!");
+    throw new Error("Can't find title inline editor!");
   }
   if (index > pageComponent.titleInlineEditor.yText.length) {
     index = pageComponent.titleInlineEditor.yText.length;

@@ -205,7 +205,7 @@ export class DocPageBlockComponent extends BlockElement<
     };
   }
 
-  private _initTitleVEditor() {
+  private _initTitleInlineEditor() {
     const { model } = this;
     const title = model.title;
 
@@ -337,7 +337,7 @@ export class DocPageBlockComponent extends BlockElement<
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('model')) {
       if (this.model && !this._titleInlineEditor) {
-        this._initTitleVEditor();
+        this._initTitleInlineEditor();
       }
     }
   }

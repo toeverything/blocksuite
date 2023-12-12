@@ -91,7 +91,7 @@ export const textFormatConfigs: TextFormatConfig[] = [
       >(`[${VIRGO_ROOT_ATTR}]`);
       if (!vRoot) return;
 
-      const inlineEditor = vRoot.virgoEditor;
+      const inlineEditor = vRoot.inlineEditor;
       const targetVRange = inlineEditor.getVRange();
       assertExists(targetVRange);
 

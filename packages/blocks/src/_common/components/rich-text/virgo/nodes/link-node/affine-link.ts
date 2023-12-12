@@ -36,7 +36,7 @@ export class AffineLink extends ShadowlessElement {
       `[${VIRGO_ROOT_ATTR}]`
     );
     assertExists(vRoot);
-    return vRoot.virgoEditor;
+    return vRoot.inlineEditor;
   }
 
   @property({ attribute: false })

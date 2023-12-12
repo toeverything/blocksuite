@@ -27,12 +27,12 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  get vEditor() {
+  get inlineEditor() {
     assertExists(this.richText.inlineEditor);
     return this.richText.inlineEditor;
   }
-  get vEditorContainer() {
-    return this.vEditor.rootElement;
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
   }
 
   private _keeping = false;
@@ -105,14 +105,14 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     );
 
     this.updateComplete.then(() => {
-      this.vEditor.focusEnd();
+      this.inlineEditor.focusEnd();
 
       this.disposables.add(
-        this.vEditor.slots.updated.on(() => {
+        this.inlineEditor.slots.updated.on(() => {
           this._updateHeight();
         })
       );
-      this.disposables.addFromEvent(this.vEditorContainer, 'blur', () => {
+      this.disposables.addFromEvent(this.inlineEditorContainer, 'blur', () => {
         if (this._keeping) return;
         this._unmount();
       });

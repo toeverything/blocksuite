@@ -80,22 +80,23 @@ const styles = css`
   }
 `;
 
-export const addHistoryToVEditor = (vEditor: InlineEditor) => {
+export const addHistoryToInlineEditor = (inlineEditor: InlineEditor) => {
   let range: Range | null = null;
-  vEditor.slots.rangeUpdated.on(vRange => {
+  inlineEditor.slots.rangeUpdated.on(vRange => {
     range = vRange;
   });
-  const undoManager = new Workspace.Y.UndoManager(vEditor.yText, {
-    trackedOrigins: new Set([vEditor.yText.doc?.clientID]),
+  const undoManager = new Workspace.Y.UndoManager(inlineEditor.yText, {
+    trackedOrigins: new Set([inlineEditor.yText.doc?.clientID]),
   });
   undoManager.on('stack-item-added', (event: { stackItem: StackItem }) => {
-    const vRange = range && vEditor.mounted ? vEditor.toVRange(range) : null;
+    const vRange =
+      range && inlineEditor.mounted ? inlineEditor.toVRange(range) : null;
     event.stackItem.meta.set('v-range', vRange);
   });
   undoManager.on('stack-item-popped', (event: { stackItem: StackItem }) => {
     const vRange = event.stackItem.meta.get('v-range');
     if (vRange) {
-      vEditor.setVRange(vRange);
+      inlineEditor.setVRange(vRange);
     }
   });
   undoManager.clear();
@@ -139,7 +140,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     return tRichText.is(this.titleColumn.dataType);
   }
 
-  vEditor?: InlineEditor;
+  inlineEditor?: InlineEditor;
   @query('.data-view-header-area-rich-text')
   richText!: HTMLElement;
 
@@ -148,21 +149,25 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
       this.titleColumn.getValue(this.rowId) as Y.Text | string | undefined
     );
     const inlineEditor = new InlineEditor(yText);
-    this.vEditor = inlineEditor;
+    this.inlineEditor = inlineEditor;
     inlineEditor.setAttributeSchema(affineTextAttributes);
     inlineEditor.setAttributeRenderer(affineAttributeRenderer);
     inlineEditor.mount(container);
     return inlineEditor;
   }
 
-  protected initEditingMode(vEditor: InlineEditor) {
-    const historyHelper = addHistoryToVEditor(vEditor);
-    vEditor.disposables.addFromEvent(vEditor.rootElement, 'keydown', e => {
-      historyHelper.handleKeyboardEvent(e);
-    });
-    vEditor.focusEnd();
+  protected initEditingMode(inlineEditor: InlineEditor) {
+    const historyHelper = addHistoryToInlineEditor(inlineEditor);
+    inlineEditor.disposables.addFromEvent(
+      inlineEditor.rootElement,
+      'keydown',
+      e => {
+        historyHelper.handleKeyboardEvent(e);
+      }
+    );
+    inlineEditor.focusEnd();
     this._disposables.add(
-      vEditor.slots.vRangeUpdated.on(([range]) => {
+      inlineEditor.slots.vRangeUpdated.on(([range]) => {
         if (range) {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
@@ -198,7 +203,9 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
       this.view.cellUpdateValue(
         this.rowId,
         this.titleColumn.id,
-        this.isRichText ? this.vEditor?.yText : this.vEditor?.yText.toString()
+        this.isRichText
+          ? this.inlineEditor?.yText
+          : this.inlineEditor?.yText.toString()
       );
     }
   }
@@ -275,7 +282,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
 
   override onCopy(_e: ClipboardEvent) {
     let data = '';
-    const range = this.vEditor?.getVRange();
+    const range = this.inlineEditor?.getVRange();
     if (range) {
       const start = range.index;
       const end = range.index + range.length;
@@ -303,8 +310,8 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     const textClipboardData = e.clipboardData?.getData(TEXT);
     if (!textClipboardData) return;
 
-    const range = this.vEditor?.getVRange();
-    const yText = this.vEditor?.yText;
+    const range = this.inlineEditor?.getVRange();
+    const yText = this.inlineEditor?.yText;
     if (yText) {
       const text = new Text(yText);
       const index = range?.index ?? yText.length;
@@ -313,7 +320,7 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       } else {
         text.insert(textClipboardData, index);
       }
-      this.vEditor?.setVRange({
+      this.inlineEditor?.setVRange({
         index: index + textClipboardData.length,
         length: 0,
       });

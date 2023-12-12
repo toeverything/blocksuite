@@ -42,33 +42,33 @@ export const formatTextCommand: Command<
       const { selectedBlocks } = ctx;
       assertExists(selectedBlocks);
 
-      const selectedVEditors = selectedBlocks.flatMap(el => {
+      const selectedInlineEditors = selectedBlocks.flatMap(el => {
         const vRoot = el.querySelector<VirgoRootElement<AffineTextAttributes>>(
           `[${VIRGO_ROOT_ATTR}]`
         );
-        if (vRoot && vRoot.virgoEditor.getVRange()) {
-          return vRoot.virgoEditor;
+        if (vRoot && vRoot.inlineEditor.getVRange()) {
+          return vRoot.inlineEditor;
         }
         return [];
       });
 
-      selectedVEditors.forEach(vEditor => {
-        const vRange = vEditor.getVRange();
+      selectedInlineEditors.forEach(inlineEditor => {
+        const vRange = inlineEditor.getVRange();
         if (!vRange) return;
 
         if (vRange.length === 0) {
-          const delta = vEditor.getDeltaByRangeIndex(vRange.index);
+          const delta = inlineEditor.getDeltaByRangeIndex(vRange.index);
           if (!delta) return;
 
-          vEditor.setMarks({
-            ...vEditor.marks,
+          inlineEditor.setMarks({
+            ...inlineEditor.marks,
             ...Object.fromEntries(
               Object.entries(styles).map(([key, value]) => {
                 if (typeof value === 'boolean') {
                   return [
                     key,
-                    (vEditor.marks &&
-                      vEditor.marks[key as keyof AffineTextAttributes]) ||
+                    (inlineEditor.marks &&
+                      inlineEditor.marks[key as keyof AffineTextAttributes]) ||
                     (delta.attributes &&
                       delta.attributes[key as keyof AffineTextAttributes])
                       ? null
@@ -79,9 +79,9 @@ export const formatTextCommand: Command<
               })
             ),
           });
-          clearMarksOnDiscontinuousInput(vEditor);
+          clearMarksOnDiscontinuousInput(inlineEditor);
         } else {
-          vEditor.formatText(vRange, styles, {
+          inlineEditor.formatText(vRange, styles, {
             mode,
           });
         }

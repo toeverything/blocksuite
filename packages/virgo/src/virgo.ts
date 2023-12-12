@@ -22,7 +22,7 @@ import { intersectVRange } from './utils/v-range.js';
 export type VirgoRootElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > = HTMLElement & {
-  virgoEditor: InlineEditor<T>;
+  inlineEditor: InlineEditor<T>;
 };
 
 export interface VRangeProvider {
@@ -197,7 +197,7 @@ export class InlineEditor<
 
   mount(rootElement: HTMLElement) {
     const virgoElement = rootElement as VirgoRootElement<TextAttributes>;
-    virgoElement.virgoEditor = this;
+    virgoElement.inlineEditor = this;
     this._rootElement = virgoElement;
     render(nothing, this._rootElement);
     this._rootElement.contentEditable = 'true';

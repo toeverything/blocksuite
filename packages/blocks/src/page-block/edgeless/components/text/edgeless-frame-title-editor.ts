@@ -25,12 +25,12 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  get vEditor() {
+  get inlineEditor() {
     assertExists(this.richText.inlineEditor);
     return this.richText.inlineEditor;
   }
-  get vEditorContainer() {
-    return this.vEditor.rootElement;
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
   }
 
   get frameBlock() {
@@ -53,9 +53,9 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     const dispatcher = this.edgeless.dispatcher;
     assertExists(dispatcher);
     this.updateComplete.then(() => {
-      this.vEditor.selectAll();
+      this.inlineEditor.selectAll();
 
-      this.vEditor.slots.updated.on(() => {
+      this.inlineEditor.slots.updated.on(() => {
         this.requestUpdate();
       });
 
@@ -80,7 +80,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
       this.disposables.add(dispatcher.add('click', () => true));
       this.disposables.add(dispatcher.add('doubleClick', () => true));
-      this.disposables.addFromEvent(this.vEditorContainer, 'blur', () => {
+      this.disposables.addFromEvent(this.inlineEditorContainer, 'blur', () => {
         this._unmount();
       });
     });

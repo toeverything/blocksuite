@@ -221,12 +221,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   private _vRangeProvider: VRangeProvider | null = null;
 
-  get vEditor() {
+  get inlineEditor() {
     const vRoot = this.querySelector<VirgoRootElement>(`[${VIRGO_ROOT_ATTR}]`);
     if (!vRoot) {
       throw new Error('Virgo root not found');
     }
-    return vRoot.virgoEditor;
+    return vRoot.inlineEditor;
   }
 
   @query('rich-text')
@@ -344,13 +344,13 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       Tab: ctx => {
         const state = ctx.get('keyboardState');
         const event = state.raw;
-        const inlineEditor = this.vEditor;
+        const inlineEditor = this.inlineEditor;
         const vRange = inlineEditor.getVRange();
         if (vRange) {
           event.stopPropagation();
           event.preventDefault();
 
-          const text = this.vEditor.yText.toString();
+          const text = this.inlineEditor.yText.toString();
           const index = text.lastIndexOf(LINE_BREAK_SYMBOL, vRange.index - 1);
           const indexArr = allIndexOf(
             text,
@@ -366,7 +366,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
             indexArr.push(0);
           }
           indexArr.forEach(i => {
-            this.vEditor.insertText(
+            this.inlineEditor.insertText(
               {
                 index: i,
                 length: 0,
@@ -374,7 +374,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
               INDENT_SYMBOL
             );
           });
-          this.vEditor.setVRange({
+          this.inlineEditor.setVRange({
             index: vRange.index + 2,
             length:
               vRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
@@ -388,13 +388,13 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       'Shift-Tab': ctx => {
         const state = ctx.get('keyboardState');
         const event = state.raw;
-        const inlineEditor = this.vEditor;
+        const inlineEditor = this.inlineEditor;
         const vRange = inlineEditor.getVRange();
         if (vRange) {
           event.stopPropagation();
           event.preventDefault();
 
-          const text = this.vEditor.yText.toString();
+          const text = this.inlineEditor.yText.toString();
           const index = text.lastIndexOf(LINE_BREAK_SYMBOL, vRange.index - 1);
           let indexArr = allIndexOf(
             text,
@@ -413,13 +413,13 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
             i => text.slice(i, i + 2) === INDENT_SYMBOL
           );
           indexArr.forEach(i => {
-            this.vEditor.deleteText({
+            this.inlineEditor.deleteText({
               index: i,
               length: 2,
             });
           });
           if (indexArr.length > 0) {
-            this.vEditor.setVRange({
+            this.inlineEditor.setVRange({
               index:
                 vRange.index -
                 (indexArr[indexArr.length - 1] < vRange.index ? 2 : 0),

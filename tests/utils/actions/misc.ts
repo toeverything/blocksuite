@@ -774,7 +774,7 @@ export async function setVRangeInInlineEditor(
     ({ i, vRange }) => {
       const inlineEditor = document.querySelectorAll<VirgoRootElement>(
         '[data-virgo-root="true"]'
-      )[i]?.virgoEditor;
+      )[i]?.inlineEditor;
       if (!inlineEditor) {
         throw new Error('Cannot find inline editor');
       }

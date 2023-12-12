@@ -70,7 +70,7 @@ export function insertContent(
   }
   const inlineEditor = getInlineEditorByModel(model);
   if (!inlineEditor) {
-    throw new Error("Can't insert text! vEditor not found");
+    throw new Error("Can't insert text! Inline editor not found");
   }
   const vRange = inlineEditor.getVRange();
   const index = vRange ? vRange.index : model.text.length;

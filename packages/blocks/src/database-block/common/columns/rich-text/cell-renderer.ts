@@ -18,20 +18,20 @@ import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';
 
 function toggleStyle(
-  vEditor: AffineInlineEditor,
+  inlineEditor: AffineInlineEditor,
   attrs: AffineTextAttributes
 ): void {
-  const vRange = vEditor.getVRange();
+  const vRange = inlineEditor.getVRange();
   if (!vRange) {
     return;
   }
 
-  const root = vEditor.rootElement;
+  const root = inlineEditor.rootElement;
   if (!root) {
     return;
   }
 
-  const deltas = vEditor.getDeltasByVRange(vRange);
+  const deltas = inlineEditor.getDeltasByVRange(vRange);
   let oldAttributes: AffineTextAttributes = {};
 
   for (const [delta] of deltas) {
@@ -62,12 +62,12 @@ function toggleStyle(
     })
   );
 
-  vEditor.formatText(vRange, newAttributes, {
+  inlineEditor.formatText(vRange, newAttributes, {
     mode: 'merge',
   });
   root.blur();
 
-  vEditor.syncVRange();
+  inlineEditor.syncVRange();
 }
 
 @customElement('affine-database-rich-text-cell')

@@ -30,11 +30,6 @@ export function deleteModelsByTextSelection(
   if (startModel === endModel) {
     page.captureSync();
     if (textSelection.from.index > 0 && textSelection.isCollapsed()) {
-      // startModel.text.delete(blockRange.startOffset - 1, 1);
-      // vEditor.setVRange({
-      //   index: blockRange.startOffset - 1,
-      //   length: 0,
-      // });
       return startModel;
     }
     startModel.text.delete(textSelection.from.index, textSelection.from.length);

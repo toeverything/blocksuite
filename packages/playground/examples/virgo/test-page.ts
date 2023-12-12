@@ -84,20 +84,20 @@ const attributeRenderer: AttributeRenderer = (
 };
 
 function toggleStyle(
-  vEditor: InlineEditor,
+  inlineEditor: InlineEditor,
   attrs: NonNullable<BaseTextAttributes>
 ): void {
-  const vRange = vEditor.getVRange();
+  const vRange = inlineEditor.getVRange();
   if (!vRange) {
     return;
   }
 
-  const root = vEditor.rootElement;
+  const root = inlineEditor.rootElement;
   if (!root) {
     return;
   }
 
-  const deltas = vEditor.getDeltasByVRange(vRange);
+  const deltas = inlineEditor.getDeltasByVRange(vRange);
   let oldAttributes: NonNullable<BaseTextAttributes> = {};
 
   for (const [delta] of deltas) {
@@ -123,12 +123,12 @@ function toggleStyle(
     })
   );
 
-  vEditor.formatText(vRange, newAttributes, {
+  inlineEditor.formatText(vRange, newAttributes, {
     mode: 'merge',
   });
   root.blur();
 
-  vEditor.setVRange(vRange);
+  inlineEditor.setVRange(vRange);
 }
 
 @customElement('virgo-test-rich-text')

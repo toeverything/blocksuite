@@ -69,8 +69,8 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
             const vRoot = el.querySelector<
               VirgoRootElement<AffineTextAttributes>
             >(`[${VIRGO_ROOT_ATTR}]`);
-            if (vRoot && vRoot.virgoEditor.getVRange()) {
-              return vRoot.virgoEditor;
+            if (vRoot && vRoot.inlineEditor.getVRange()) {
+              return vRoot.inlineEditor;
             }
             return [];
           });
@@ -98,7 +98,7 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
               VirgoRootElement<AffineTextAttributes>
             >(`[${VIRGO_ROOT_ATTR}]`);
             if (vRoot) {
-              return vRoot.virgoEditor;
+              return vRoot.inlineEditor;
             }
             return [];
           });
@@ -136,7 +136,7 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
             }
             return false;
           })
-          .map(el => el.virgoEditor);
+          .map(el => el.inlineEditor);
 
         result = getCombinedFormatFromInlineEditors(
           selectedInlineEditors.map(e => [e, e.getVRange()])
@@ -206,8 +206,8 @@ export function isFormatSupported(host: EditorHost) {
             const vRoot = el.querySelector<
               VirgoRootElement<AffineTextAttributes>
             >(`[${VIRGO_ROOT_ATTR}]`);
-            if (vRoot && vRoot.virgoEditor.getVRange()) {
-              return vRoot.virgoEditor;
+            if (vRoot && vRoot.inlineEditor.getVRange()) {
+              return vRoot.inlineEditor;
             }
             return [];
           });
@@ -232,7 +232,7 @@ export function isFormatSupported(host: EditorHost) {
               VirgoRootElement<AffineTextAttributes>
             >(`[${VIRGO_ROOT_ATTR}]`);
             if (vRoot) {
-              return vRoot.virgoEditor;
+              return vRoot.inlineEditor;
             }
             return [];
           });
@@ -261,7 +261,7 @@ export function isFormatSupported(host: EditorHost) {
             }
             return false;
           })
-          .map(el => el.virgoEditor);
+          .map(el => el.inlineEditor);
 
         result = selectedInlineEditors.length > 0;
       }),

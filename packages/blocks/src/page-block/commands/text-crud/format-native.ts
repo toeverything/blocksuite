@@ -32,7 +32,7 @@ export const formatNativeCommand: Command<
   }
   if (!range) return;
 
-  const selectedVEditors = Array.from<VirgoRootElement>(
+  const selectedInlineEditors = Array.from<VirgoRootElement>(
     host.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
   )
     .filter(el => range?.intersectsNode(el))
@@ -45,13 +45,13 @@ export const formatNativeCommand: Command<
       }
       return false;
     })
-    .map(el => el.virgoEditor);
+    .map(el => el.inlineEditor);
 
-  selectedVEditors.forEach(vEditor => {
-    const vRange = vEditor.getVRange();
+  selectedInlineEditors.forEach(inlineEditor => {
+    const vRange = inlineEditor.getVRange();
     if (!vRange) return;
 
-    vEditor.formatText(vRange, styles, {
+    inlineEditor.formatText(vRange, styles, {
       mode,
     });
   });

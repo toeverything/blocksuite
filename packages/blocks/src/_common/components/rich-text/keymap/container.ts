@@ -75,7 +75,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     if (!vRoot) {
       throw new Error('Virgo root not found');
     }
-    return vRoot.virgoEditor;
+    return vRoot.inlineEditor;
   };
 
   const _getPrefixText = (inlineEditor: InlineEditor) => {
@@ -228,7 +228,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       );
       if (
         text.from.index === 0 &&
-        text.from.length === virgo?.virgoEditor.yText.length
+        text.from.length === virgo?.inlineEditor.yText.length
       ) {
         return _selectBlock();
       }

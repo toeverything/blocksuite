@@ -46,21 +46,21 @@ export const formatBlockCommand: Command<
       const { selectedBlocks } = ctx;
       assertExists(selectedBlocks);
 
-      const selectedVEditors = selectedBlocks.flatMap(el => {
+      const selectedInlineEditors = selectedBlocks.flatMap(el => {
         const vRoot = el.querySelector<VirgoRootElement<AffineTextAttributes>>(
           `[${VIRGO_ROOT_ATTR}]`
         );
         if (vRoot) {
-          return vRoot.virgoEditor;
+          return vRoot.inlineEditor;
         }
         return [];
       });
 
-      selectedVEditors.forEach(vEditor => {
-        vEditor.formatText(
+      selectedInlineEditors.forEach(inlineEditor => {
+        inlineEditor.formatText(
           {
             index: 0,
-            length: vEditor.yTextLength,
+            length: inlineEditor.yTextLength,
           },
           styles,
           {
