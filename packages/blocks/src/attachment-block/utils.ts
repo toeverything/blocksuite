@@ -78,6 +78,7 @@ export async function turnIntoImage(model: AttachmentBlockModel) {
   const imageProp: Partial<ImageBlockProps> = {
     sourceId,
     caption: model.caption,
+    size: model.size,
     ...imageConvertData,
   };
   transformModel(model, 'affine:image', imageProp);
