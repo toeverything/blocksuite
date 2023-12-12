@@ -6,7 +6,7 @@ import '@blocksuite/presets/themes/affine.css';
 
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { type DocProviderCreator, type Page, Text } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
 
@@ -157,7 +157,7 @@ async function main() {
   window.ContentParser = ContentParser;
   Object.defineProperty(globalThis, 'root', {
     get() {
-      return document.querySelector('editor-host') as BlockSuiteRoot;
+      return document.querySelector('editor-host') as EditorHost;
     },
   });
 

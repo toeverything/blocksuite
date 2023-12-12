@@ -32,7 +32,7 @@ import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockElement,
-  type BlockSuiteRoot,
+  type EditorHost,
   ShadowlessElement,
 } from '@blocksuite/lit';
 import type { AiPanel } from '@blocksuite/presets';
@@ -148,7 +148,7 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
     });
   }
 }
-export function getSelectedBlocks(root: BlockSuiteRoot) {
+export function getSelectedBlocks(root: EditorHost) {
   let blocks: BlockElement[] = [];
 
   root.std.command
