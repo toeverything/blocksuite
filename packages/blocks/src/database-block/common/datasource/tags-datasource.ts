@@ -82,10 +82,10 @@ export class TagsDatasource extends BaseDataSource {
     return Object.keys(this.propertiesMap);
   }
 
-  constructor(root: EditorHost, _config: TagsDatasourceConfig) {
+  constructor(host: EditorHost, _config: TagsDatasourceConfig) {
     super();
-    this.meta = root.page.workspace.meta;
-    root.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);
+    this.meta = host.page.workspace.meta;
+    host.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);
   }
 
   public cellChangeValue(

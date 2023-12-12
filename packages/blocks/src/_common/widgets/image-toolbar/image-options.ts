@@ -25,7 +25,7 @@ export function ImageOptionsTemplate({
   model,
   blob,
   abortController,
-  root,
+  host,
 }: {
   ref?: RefOrCallback;
   model: ImageBlockModel;
@@ -34,7 +34,7 @@ export function ImageOptionsTemplate({
   /**
    * @deprecated
    */
-  root: EditorHost;
+  host: EditorHost;
 }) {
   const supportAttachment =
     model.page.schema.flavourSchemaMap.has('affine:attachment');
@@ -125,7 +125,7 @@ export function ImageOptionsTemplate({
           @click="${() => {
             if (!blob) return;
             abortController.abort();
-            openLeditsEditor(model, blob, root);
+            openLeditsEditor(model, blob, host);
           }}"
         >
           ${HighLightDuotoneIcon}

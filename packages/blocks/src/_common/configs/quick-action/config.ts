@@ -18,9 +18,9 @@ export interface QuickActionConfig {
   disabledToolTip?: string;
   icon: TemplateResult<1>;
   hotkey?: string;
-  showWhen: (root: EditorHost) => boolean;
-  enabledWhen: (root: EditorHost) => boolean;
-  action: (root: EditorHost) => void;
+  showWhen: (host: EditorHost) => boolean;
+  enabledWhen: (host: EditorHost) => boolean;
+  action: (host: EditorHost) => void;
 }
 
 export const quickActionConfig: QuickActionConfig[] = [

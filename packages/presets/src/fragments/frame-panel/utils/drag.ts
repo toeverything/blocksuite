@@ -37,7 +37,7 @@ export function startDragging(
     };
     edgeless: EdgelessPageBlockComponent | null;
     page: Page;
-    root: EditorHost;
+    editorHost: EditorHost;
   }
 ) {
   const {
@@ -52,7 +52,7 @@ export function startDragging(
     start,
     edgeless,
     page,
-    root,
+    editorHost,
   } = options;
   const cardElements = frames
     .slice(frames.length - 2, frames.length)
@@ -61,7 +61,7 @@ export function startDragging(
 
       el.edgeless = edgeless;
       el.page = page;
-      el.root = root;
+      el.root = editorHost;
       el.frame = frame.frame;
 
       el.cardIndex = frame.cardIndex;

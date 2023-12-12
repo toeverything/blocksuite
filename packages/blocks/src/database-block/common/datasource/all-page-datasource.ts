@@ -60,10 +60,10 @@ export class AllPageDatasource extends BaseDataSource {
     return Object.keys(this.propertiesMap);
   }
 
-  constructor(root: EditorHost, _config: AllPageDatasourceConfig) {
+  constructor(host: EditorHost, _config: AllPageDatasourceConfig) {
     super();
-    this.workspace = root.page.workspace;
-    root.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);
+    this.workspace = host.page.workspace;
+    host.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);
   }
 
   public cellChangeValue(

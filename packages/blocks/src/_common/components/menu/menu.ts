@@ -704,10 +704,10 @@ export const createPopup = (
     middleware?: Array<Middleware | null | undefined | false>;
   }
 ) => {
-  const root = document.querySelector('editor-host');
-  assertExists(root);
+  const host = document.querySelector('editor-host');
+  assertExists(host);
 
-  const modal = createModal(root);
+  const modal = createModal(host);
   autoUpdate(target, content, () => {
     computePosition(target, content, {
       middleware: options?.middleware ?? [shift({ crossAxis: true })],

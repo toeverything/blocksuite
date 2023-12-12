@@ -5,12 +5,12 @@ import { getVirgoByModel } from '../../../_common/utils/query.js';
 import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 
 export function deleteModelsByTextSelection(
-  root: EditorHost,
-  textSelection = root.selection.find('text')
+  host: EditorHost,
+  textSelection = host.selection.find('text')
 ) {
   assertExists(textSelection);
-  const page = root.page;
-  const selectedModels = getSelectedContentModels(root, ['text']);
+  const page = host.page;
+  const selectedModels = getSelectedContentModels(host, ['text']);
 
   if (selectedModels.length === 0) {
     return null;

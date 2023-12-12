@@ -6,10 +6,10 @@ import type { AffineEditorContainer } from '../../../editors/index.js';
 import { getMarkdownFromSlice } from './markdown-utils.js';
 import { getEdgelessPageBlockFromEditor } from './mind-map-utils.js';
 
-export function hasSelectedTextContent(root: EditorHost) {
+export function hasSelectedTextContent(host: EditorHost) {
   let result = false;
 
-  root.std.command
+  host.std.command
     .pipe()
     .getBlockSelections()
     .inline((ctx, next) => {
@@ -36,10 +36,10 @@ export function hasSelectedTextContent(root: EditorHost) {
   return result;
 }
 
-export async function getSelectedTextSlice(root: EditorHost) {
+export async function getSelectedTextSlice(host: EditorHost) {
   let models: BaseBlockModel[] = [];
 
-  root.std.command
+  host.std.command
     .pipe()
     .getBlockSelections()
     .inline((ctx, next) => {
@@ -64,13 +64,13 @@ export async function getSelectedTextSlice(root: EditorHost) {
     })
     .run();
 
-  return Slice.fromModels(root.std.page, models);
+  return Slice.fromModels(host.std.page, models);
 }
 
-export async function getSelectedBlocks(root: EditorHost) {
+export async function getSelectedBlocks(host: EditorHost) {
   let blocks: BlockElement[] = [];
 
-  root.std.command
+  host.std.command
     .pipe()
     .getBlockSelections()
     .inline((ctx, next) => {
@@ -118,9 +118,9 @@ export async function selectedToPng(editor: AffineEditorContainer) {
   return (await selectedToCanvas(editor))?.toDataURL('image/png');
 }
 
-export async function getSelectedTextContent(root: EditorHost) {
-  const slice = await getSelectedTextSlice(root);
-  return await getMarkdownFromSlice(root, slice);
+export async function getSelectedTextContent(host: EditorHost) {
+  const slice = await getSelectedTextSlice(host);
+  return await getMarkdownFromSlice(host, slice);
 }
 
 export const stopPropagation = (e: Event) => {

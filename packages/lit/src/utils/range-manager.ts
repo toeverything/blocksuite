@@ -25,7 +25,7 @@ type RangeSnapshot = {
 export class RangeManager {
   readonly rangeSynchronizer = new RangeSynchronizer(this);
 
-  constructor(public root: EditorHost) {}
+  constructor(public host: EditorHost) {}
 
   get value() {
     return this._range;
@@ -39,7 +39,7 @@ export class RangeManager {
     this._isRangeReversed = false;
     window.getSelection()?.removeAllRanges();
     if (sync) {
-      this.root.selection.clear(['text']);
+      this.host.selection.clear(['text']);
     }
   }
 
@@ -63,7 +63,7 @@ export class RangeManager {
     }
 
     const { from, to } = selection;
-    const fromBlock = this.root.view.viewFromPath('block', from.path);
+    const fromBlock = this.host.view.viewFromPath('block', from.path);
     if (!fromBlock) {
       this.clearRange();
       return;
@@ -85,7 +85,7 @@ export class RangeManager {
       return null;
     }
 
-    const selectionManager = this.root.selection;
+    const selectionManager = this.host.selection;
     this._range = range;
     this._isRangeReversed = isRangeReversed;
 
@@ -133,8 +133,8 @@ export class RangeManager {
     const { mode = 'all', match = () => true } = options;
 
     let result = Array.from<BlockElement>(
-      this.root.querySelectorAll(
-        `[${this.root.blockIdAttr}]:not([data-queryable="false"])`
+      this.host.querySelectorAll(
+        `[${this.host.blockIdAttr}]:not([data-queryable="false"])`
       )
     ).filter(el => range.intersectsNode(el) && match(el));
 
@@ -147,7 +147,7 @@ export class RangeManager {
         ? range.startContainer
         : range.startContainer.parentElement;
     const firstElement = rangeStartElement?.closest(
-      `[${this.root.blockIdAttr}]`
+      `[${this.host.blockIdAttr}]`
     );
     assertExists(firstElement);
 
@@ -178,7 +178,7 @@ export class RangeManager {
 
   textSelectionToRange(selection: TextSelection): Range | null {
     const { from, to } = selection;
-    const fromBlock = this.root.view.viewFromPath('block', from.path);
+    const fromBlock = this.host.view.viewFromPath('block', from.path);
     if (!fromBlock) {
       return null;
     }
@@ -210,7 +210,7 @@ export class RangeManager {
   }
 
   private _calculateVirgo(point: TextRangePoint): [VEditor, VRange] | null {
-    const block = this.root.view.viewFromPath('block', point.path);
+    const block = this.host.view.viewFromPath('block', point.path);
     if (!block) {
       return null;
     }
@@ -354,6 +354,6 @@ export class RangeManager {
   }
 
   private _getBlock(element: HTMLElement) {
-    return element.closest(`[${this.root.blockIdAttr}]`) as BlockElement;
+    return element.closest(`[${this.host.blockIdAttr}]`) as BlockElement;
   }
 }

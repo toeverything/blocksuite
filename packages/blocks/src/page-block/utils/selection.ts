@@ -3,11 +3,11 @@ import type { EditorHost } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
 export function getSelectedContentModels(
-  root: EditorHost,
+  host: EditorHost,
   types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[]
 ): BaseBlockModel[] {
   const result: BaseBlockModel[] = [];
-  root.std.command
+  host.std.command
     .pipe()
     .withHost()
     .tryAll(chain => [

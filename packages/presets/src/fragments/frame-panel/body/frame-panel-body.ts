@@ -297,7 +297,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
       frameElementHeight: this._frameElementHeight,
       edgeless: this.edgeless,
       page: this.page,
-      root: this.root,
+      editorHost: this.root,
       onDragEnd: insertIdx => {
         this._dragging = false;
         this.insertIndex = undefined;

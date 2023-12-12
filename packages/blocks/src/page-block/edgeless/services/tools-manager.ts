@@ -347,7 +347,7 @@ export class EdgelessToolsManager {
     e.event.preventDefault();
     const pointerEventState = new PointerEventState({
       event: e.event as PointerEvent,
-      rect: this.dispatcher.root.getBoundingClientRect(),
+      rect: this.dispatcher.host.getBoundingClientRect(),
       startX: 0,
       startY: 0,
       last: null,

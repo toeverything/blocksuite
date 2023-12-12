@@ -20,8 +20,8 @@ export interface TextFormatConfig {
   name: string;
   icon: TemplateResult<1>;
   hotkey?: string;
-  activeWhen: (root: EditorHost) => boolean;
-  action: (root: EditorHost) => void;
+  activeWhen: (host: EditorHost) => boolean;
+  action: (host: EditorHost) => void;
 }
 
 export const textFormatConfigs: TextFormatConfig[] = [

@@ -46,10 +46,10 @@ function getCombinedFormatFromVEditors(
   });
 }
 
-function getCombinedFormat(root: EditorHost): AffineTextAttributes {
+function getCombinedFormat(host: EditorHost): AffineTextAttributes {
   let result: AffineTextAttributes = {};
 
-  root.std.command
+  host.std.command
     .pipe()
     .withHost()
     .try(chain => [
@@ -118,7 +118,7 @@ function getCombinedFormat(root: EditorHost): AffineTextAttributes {
       // native selection, corresponding to `formatNative` command
       chain.inline(() => {
         const selectedVEditors = Array.from<VirgoRootElement>(
-          root.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
+          host.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
         )
           .filter(el => {
             const selection = document.getSelection();
@@ -149,13 +149,13 @@ function getCombinedFormat(root: EditorHost): AffineTextAttributes {
 }
 
 export function handleCommonStyle(
-  root: EditorHost,
+  host: EditorHost,
   key: Extract<
     keyof AffineTextAttributes,
     'bold' | 'italic' | 'underline' | 'strike' | 'code'
   >
 ) {
-  const active = commonActiveWhen(root, key);
+  const active = commonActiveWhen(host, key);
   const payload: {
     styles: AffineTextAttributes;
     mode?: 'replace' | 'merge';
@@ -164,7 +164,7 @@ export function handleCommonStyle(
       [key]: active ? null : true,
     },
   };
-  root.std.command
+  host.std.command
     .pipe()
     .withHost()
     .try(chain => [
@@ -175,15 +175,15 @@ export function handleCommonStyle(
     .run();
 }
 
-export function commonActiveWhen(root: EditorHost, key: string) {
-  const format = getCombinedFormat(root);
+export function commonActiveWhen(host: EditorHost, key: string) {
+  const format = getCombinedFormat(host);
   return key in format;
 }
 
-export function isFormatSupported(root: EditorHost) {
+export function isFormatSupported(host: EditorHost) {
   let result = false;
 
-  root.std.command
+  host.std.command
     .pipe()
     .withHost()
     .try(chain => [
@@ -243,7 +243,7 @@ export function isFormatSupported(root: EditorHost) {
       // native selection, corresponding to `formatNative` command
       chain.inline(() => {
         const selectedVEditors = Array.from<VirgoRootElement>(
-          root.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
+          host.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
         )
           .filter(el => {
             const selection = document.getSelection();

@@ -148,10 +148,10 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
     });
   }
 }
-export function getSelectedBlocks(root: EditorHost) {
+export function getSelectedBlocks(host: EditorHost) {
   let blocks: BlockElement[] = [];
 
-  root.std.command
+  host.std.command
     .pipe()
     .getBlockSelections()
     .inline((ctx, next) => {

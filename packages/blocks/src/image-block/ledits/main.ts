@@ -15,11 +15,11 @@ function createGradioApp() {
   return app;
 }
 
-function getPageElement(root: EditorHost) {
-  assertExists(root.page.root?.id);
+function getPageElement(host: EditorHost) {
+  assertExists(host.page.root?.id);
 
-  const page = root.view.viewFromPath('block', [
-    root.page.root.id,
+  const page = host.view.viewFromPath('block', [
+    host.page.root.id,
   ]) as DocPageBlockComponent;
 
   return page;
@@ -28,9 +28,9 @@ function getPageElement(root: EditorHost) {
 export function openLeditsEditor(
   model: ImageBlockModel,
   blob: Blob,
-  root: EditorHost
+  host: EditorHost
 ) {
-  const pageElement = getPageElement(root);
+  const pageElement = getPageElement(host);
   const app = createGradioApp();
   const modal = (
     pageElement.widgetElements['affine-modal-widget'] as AffineModalWidget

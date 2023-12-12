@@ -35,11 +35,11 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   constructor(
-    private root: EditorHost,
+    private host: EditorHost,
     config: DatabaseBlockDatasourceConfig
   ) {
     super();
-    this._model = root.page.workspace
+    this._model = host.page.workspace
       .getPage(config.pageId)
       ?.getBlockById(config.blockId) as DatabaseBlockModel;
     this._model.childrenUpdated.pipe(this.slots.update);
@@ -125,7 +125,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       const model = this.getModelById(rowId);
       if (model) {
         return {
-          result: this.root.renderModel(model),
+          result: this.host.renderModel(model),
           model,
         };
       }

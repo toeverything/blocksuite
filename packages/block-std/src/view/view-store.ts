@@ -66,13 +66,13 @@ export class ViewStore {
     if (this._cachedPath.has(node)) {
       return this._cachedPath.get(node) as NodeView[];
     }
-    const root = this.std.host;
+    const host = this.std.host;
 
     const iterate = (
       node: Node | null,
       path: Array<NodeView>
     ): Array<NodeView> => {
-      if (!node || node === root) return path;
+      if (!node || node === host) return path;
       const nodeView = this.getNodeView(node);
       if (!nodeView) {
         return path;

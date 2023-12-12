@@ -24,7 +24,7 @@ let lastUsedColor: string | null = null;
 let lastUsedHighlightType: HighlightType = HighlightType.Background;
 
 const updateHighlight = (
-  root: EditorHost,
+  host: EditorHost,
   color: string | null,
   highlightType: HighlightType
 ) => {
@@ -39,7 +39,7 @@ const updateHighlight = (
       background: highlightType === HighlightType.Background ? color : null,
     },
   };
-  root.std.command
+  host.std.command
     .pipe()
     .withHost()
     .try(chain => [
