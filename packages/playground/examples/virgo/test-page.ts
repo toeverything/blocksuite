@@ -8,7 +8,7 @@ import {
   baseTextAttributes,
   createVirgoKeyDownHandler,
   type DeltaInsert,
-  VEditor,
+  InlineEditor,
   VKEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
 } from '@blocksuite/virgo';
@@ -84,7 +84,7 @@ const attributeRenderer: AttributeRenderer = (
 };
 
 function toggleStyle(
-  vEditor: VEditor,
+  vEditor: InlineEditor,
   attrs: NonNullable<BaseTextAttributes>
 ): void {
   const vRange = vEditor.getVRange();
@@ -137,7 +137,7 @@ export class RichText extends ShadowlessElement {
   private _container!: HTMLDivElement;
 
   @property({ attribute: false })
-  vEditor!: VEditor;
+  vEditor!: InlineEditor;
 
   @property({ attribute: false })
   undoManager!: Y.UndoManager;
@@ -260,7 +260,7 @@ export class ToolBar extends ShadowlessElement {
   `;
 
   @property({ attribute: false })
-  vEditor!: VEditor;
+  vEditor!: InlineEditor;
 
   @property({ attribute: false })
   undoManager!: Y.UndoManager;
@@ -399,14 +399,14 @@ export class TestPage extends ShadowlessElement {
     }
   `;
 
-  private _editorA: VEditor | null = null;
-  private _editorB: VEditor | null = null;
+  private _editorA: InlineEditor | null = null;
+  private _editorB: InlineEditor | null = null;
   private _undoManagerA: Y.UndoManager | null = null;
   private _undoManagerB: Y.UndoManager | null = null;
 
   override firstUpdated() {
     const textA = yDocA.getText(TEXT_ID);
-    this._editorA = new VEditor<
+    this._editorA = new InlineEditor<
       BaseTextAttributes & {
         embed?: true;
       }
@@ -424,7 +424,7 @@ export class TestPage extends ShadowlessElement {
     });
 
     const textB = yDocB.getText(TEXT_ID);
-    this._editorB = new VEditor(textB);
+    this._editorB = new InlineEditor(textB);
     this._undoManagerB = new Y.UndoManager(textB, {
       trackedOrigins: new Set([textB.doc?.clientID]),
     });

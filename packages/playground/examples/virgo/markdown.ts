@@ -1,5 +1,5 @@
 import {
-  type VEditor,
+  type InlineEditor,
   VKEYBOARD_ALLOW_DEFAULT,
   VKEYBOARD_PREVENT_DEFAULT,
   type VRange,
@@ -10,7 +10,7 @@ interface MarkdownMatch {
   name: string;
   pattern: RegExp;
   action: (props: {
-    vEditor: VEditor;
+    vEditor: InlineEditor;
     prefixText: string;
     vRange: VRange;
     pattern: RegExp;
