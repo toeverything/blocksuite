@@ -147,12 +147,12 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as Y.Text | string | undefined
     );
-    const vEditor = new InlineEditor(yText);
-    this.vEditor = vEditor;
-    vEditor.setAttributeSchema(affineTextAttributes);
-    vEditor.setAttributeRenderer(affineAttributeRenderer);
-    vEditor.mount(container);
-    return vEditor;
+    const inlineEditor = new InlineEditor(yText);
+    this.vEditor = inlineEditor;
+    inlineEditor.setAttributeSchema(affineTextAttributes);
+    inlineEditor.setAttributeRenderer(affineAttributeRenderer);
+    inlineEditor.mount(container);
+    return inlineEditor;
   }
 
   protected initEditingMode(vEditor: InlineEditor) {

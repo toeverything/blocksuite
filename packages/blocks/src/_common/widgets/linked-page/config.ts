@@ -8,7 +8,7 @@ import {
   NewPageIcon,
   PageIcon,
 } from '../../../_common/icons/index.js';
-import { getVirgoByModel } from '../../../_common/utils/query.js';
+import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import type { Flavour } from '../../../models.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
@@ -53,14 +53,14 @@ export function insertLinkedNode({
   pageId: string;
   model: BaseBlockModel;
 }) {
-  const vEditor = getVirgoByModel(model);
-  assertExists(vEditor, 'Editor not found');
-  const vRange = vEditor.getVRange();
+  const inlineEditor = getInlineEditorByModel(model);
+  assertExists(inlineEditor, 'Editor not found');
+  const vRange = inlineEditor.getVRange();
   assertExists(vRange);
-  vEditor.insertText(vRange, REFERENCE_NODE, {
+  inlineEditor.insertText(vRange, REFERENCE_NODE, {
     reference: { type: 'LinkedPage', pageId },
   });
-  vEditor.setVRange({
+  inlineEditor.setVRange({
     index: vRange.index + 1,
     length: 0,
   });

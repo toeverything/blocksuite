@@ -283,7 +283,7 @@ export async function asyncGetBlockElementByModel(
 }
 
 /**
- * @deprecated In most cases, you not need RichText, you can use {@link getVirgoByModel} instead.
+ * @deprecated In most cases, you not need RichText, you can use {@link getInlineEditorByModel} instead.
  */
 export function getRichTextByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
@@ -301,7 +301,7 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
   return richText;
 }
 
-export function getVirgoByModel(model: BaseBlockModel) {
+export function getInlineEditorByModel(model: BaseBlockModel) {
   if (matchFlavours(model, ['affine:database'])) {
     // Not support database model since it's may be have multiple Virgo instances.
     // Support to enter the editing state through the Enter key in the database.

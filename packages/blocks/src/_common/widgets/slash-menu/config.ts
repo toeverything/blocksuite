@@ -25,7 +25,7 @@ import {
   createPage,
   getBlockElementByModel,
   getCurrentNativeRange,
-  getVirgoByModel,
+  getInlineEditorByModel,
   matchFlavours,
   openFileOrFiles,
   resetNativeSelection,
@@ -108,9 +108,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
                   }
                   const codeModel = newModels[0];
                   onModelTextUpdated(codeModel, richText => {
-                    const vEditor = richText.vEditor;
-                    assertExists(vEditor);
-                    vEditor.focusEnd();
+                    const inlineEditor = richText.vEditor;
+                    assertExists(inlineEditor);
+                    inlineEditor.focusEnd();
                   });
                 }
               })
@@ -132,12 +132,15 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           const len = model.text.length;
           if (!len) {
-            const vEditor = getVirgoByModel(model);
-            assertExists(vEditor, "Can't set style mark! vEditor not found");
-            vEditor.setMarks({
+            const inlineEditor = getInlineEditorByModel(model);
+            assertExists(
+              inlineEditor,
+              "Can't set style mark! Inline editor not found"
+            );
+            inlineEditor.setMarks({
               [id]: true,
             });
-            clearMarksOnDiscontinuousInput(vEditor);
+            clearMarksOnDiscontinuousInput(inlineEditor);
             return;
           }
           model.text.format(0, len, {

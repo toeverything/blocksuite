@@ -112,9 +112,9 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
   get vEditor() {
     assertExists(this._richTextElement);
-    const vEditor = this._richTextElement.vEditor;
-    assertExists(vEditor);
-    return vEditor;
+    const inlineEditor = this._richTextElement.vEditor;
+    assertExists(inlineEditor);
+    return inlineEditor;
   }
 
   override connectedCallback() {
@@ -180,9 +180,9 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
 
   get vEditor() {
     assertExists(this._richTextElement);
-    const vEditor = this._richTextElement.vEditor;
-    assertExists(vEditor);
-    return vEditor;
+    const inlineEditor = this._richTextElement.vEditor;
+    assertExists(inlineEditor);
+    return inlineEditor;
   }
 
   override connectedCallback() {
@@ -231,7 +231,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       return;
     }
 
-    const vEditor = this.vEditor;
+    const inlineEditor = this.vEditor;
 
     switch (event.key) {
       // bold ctrl+b
@@ -263,7 +263,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       case 's':
         if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
           event.preventDefault();
-          toggleStyle(vEditor, { strike: true });
+          toggleStyle(inlineEditor, { strike: true });
         }
         break;
       // inline code ctrl+shift+e
@@ -271,7 +271,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       case 'e':
         if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
           event.preventDefault();
-          toggleStyle(vEditor, { code: true });
+          toggleStyle(inlineEditor, { code: true });
         }
         break;
       default:

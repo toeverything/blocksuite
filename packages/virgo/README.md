@@ -15,10 +15,10 @@ To use Virgo in your project, all you need to do is to create a `Y.Text` instanc
 ```ts
 const doc = new Y.Doc();
 const yText = doc.getText('text');
-const vEditor = new VEditor(yText);
+const inlineEditor = new InlineEditor(yText);
 
 const editorContainer = document.getElementById('editor');
-vEditor.mount(editorContainer);
+inlineEditor.mount(editorContainer);
 ```
 
 You can go to [virgo playground](https://try-blocksuite.vercel.app/examples/virgo/)
@@ -61,11 +61,11 @@ const customSchema = baseTextAttributes.extend({
 
 const doc = new Y.Doc();
 const yText = doc.getText('text');
-const vEditor = new VEditor(yText);
-vEditor.setAttributesSchema(customSchema);
+const inlineEditor = new inlineEditor(yText);
+inlineEditor.setAttributesSchema(customSchema);
 
 const editorContainer = document.getElementById('editor');
-vEditor.mount(editorContainer);
+inlineEditor.mount(editorContainer);
 ```
 
 Virgo has default attributes schema, so you can skip this step if you think it is enough.
@@ -105,11 +105,11 @@ const attributeRenderer: AttributeRenderer<AffineTextAttributes> = (
 
 const doc = new Y.Doc();
 const yText = doc.getText('text');
-const vEditor = new VEditor(yText);
-vEditor.setAttributeRenderer(attributeRenderer);
+const inlineEditor = new inlineEditor(yText);
+inlineEditor.setAttributeRenderer(attributeRenderer);
 
 const editorContainer = document.getElementById('editor');
-vEditor.mount(editorContainer);
+inlineEditor.mount(editorContainer);
 ```
 
 You will see there is a `v-text` in the template, it is a custom element that render text node.

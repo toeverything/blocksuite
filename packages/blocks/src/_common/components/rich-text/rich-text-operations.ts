@@ -9,10 +9,10 @@ import {
   matchFlavours,
 } from '../../../_common/utils/model.js';
 import {
+  getInlineEditorByModel,
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
-  getVirgoByModel,
 } from '../../../_common/utils/query.js';
 import {
   asyncFocusRichText,
@@ -495,8 +495,8 @@ function handleParagraphOrListSibling(
   page.deleteBlock(model, {
     bringChildrenTo: parent,
   });
-  const vEditor = getVirgoByModel(previousSibling);
-  vEditor?.setVRange({
+  const inlineEditor = getInlineEditorByModel(previousSibling);
+  inlineEditor?.setVRange({
     index: preTextLength,
     length: 0,
   });

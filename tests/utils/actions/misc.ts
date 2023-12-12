@@ -766,13 +766,13 @@ export async function setVRangeInSelectedRichText(
 export async function setVRangeInVEditor(page: Page, vRange: VRange, i = 0) {
   await page.evaluate(
     ({ i, vRange }) => {
-      const vEditor = document.querySelectorAll<VirgoRootElement>(
+      const inlineEditor = document.querySelectorAll<VirgoRootElement>(
         '[data-virgo-root="true"]'
       )[i]?.virgoEditor;
-      if (!vEditor) {
+      if (!inlineEditor) {
         throw new Error('Cannot find vEditor');
       }
-      vEditor.setVRange(vRange);
+      inlineEditor.setVRange(vRange);
     },
     { i, vRange }
   );

@@ -161,8 +161,8 @@ export async function assertSelection(
         richTextIndex
       ];
       // @ts-ignore
-      const vEditor = richText.vEditor;
-      return vEditor?.getVRange();
+      const inlineEditor = richText.vEditor;
+      return inlineEditor?.getVRange();
     },
     [richTextIndex]
   );

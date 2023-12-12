@@ -141,8 +141,8 @@ export async function assertEmpty(page: Page) {
 
 export async function assertTitle(page: Page, text: string) {
   const editor = getEditorLocator(page);
-  const vEditor = editor.locator('[data-block-is-title="true"]').first();
-  const vText = virgoEditorInnerTextToString(await vEditor.innerText());
+  const inlineEditor = editor.locator('[data-block-is-title="true"]').first();
+  const vText = virgoEditorInnerTextToString(await inlineEditor.innerText());
   expect(vText).toBe(text);
 }
 
@@ -198,14 +198,6 @@ export async function assertRichTexts(page: Page, texts: string[]) {
   expect(actualTexts).toEqual(texts);
 }
 
-export async function assertSelectionPath(page: Page, expected: string[]) {
-  const actual = await page.evaluate(() => {
-    const { root } = window;
-    return root.std.selection.value[0].path;
-  });
-  expect(actual).toEqual(expected);
-}
-
 export async function assertEdgelessCanvasText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
     const editor = document.querySelector(
@@ -215,8 +207,8 @@ export async function assertEdgelessCanvasText(page: Page, text: string) {
       throw new Error('editor not found');
     }
     // @ts-ignore
-    const vEditor = editor.vEditor;
-    return vEditor?.yText.toString();
+    const inlineEditor = editor.vEditor;
+    return inlineEditor?.yText.toString();
   });
   expect(actualTexts).toEqual(text);
 }
@@ -304,8 +296,8 @@ export async function assertRichTextVRange(
         index
       ];
       const richText = editor?.querySelectorAll('rich-text')[richTextIndex];
-      const vEditor = richText.vEditor;
-      return vEditor?.getVRange();
+      const inlineEditor = richText.vEditor;
+      return inlineEditor?.getVRange();
     },
     [richTextIndex, currentEditorIndex]
   );
@@ -349,12 +341,12 @@ export async function assertTextFormat(
   const actual = await page.evaluate(
     ({ richTextIndex, index }) => {
       const richText = document.querySelectorAll('rich-text')[richTextIndex];
-      const vEditor = richText.vEditor;
-      if (!vEditor) {
+      const inlineEditor = richText.vEditor;
+      if (!inlineEditor) {
         throw new Error('vEditor is undefined');
       }
 
-      const result = vEditor.getFormat({
+      const result = inlineEditor.getFormat({
         index,
         length: 0,
       });
@@ -390,14 +382,14 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
     const editor = document.querySelectorAll('affine-editor-container')[index];
     const elements = editor?.querySelectorAll('rich-text');
     return Array.from(elements).map(el => {
-      const vEditor = el.vEditor;
-      if (!vEditor) {
+      const inlineEditor = el.vEditor;
+      if (!inlineEditor) {
         throw new Error('vEditor is undefined');
       }
 
-      const result = vEditor.getFormat({
+      const result = inlineEditor.getFormat({
         index: 0,
-        length: vEditor.yText.length,
+        length: inlineEditor.yText.length,
       });
       return result;
     });

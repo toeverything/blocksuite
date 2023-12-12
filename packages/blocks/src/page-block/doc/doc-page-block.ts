@@ -305,12 +305,12 @@ export class DocPageBlockComponent extends BlockElement<
   };
 
   private _onTitleCopy = (event: ClipboardEvent) => {
-    const vEditor = this._titleVEditor;
-    if (!vEditor) return;
-    const vRange = vEditor.getVRange();
+    const inlineEditor = this._titleVEditor;
+    if (!inlineEditor) return;
+    const vRange = inlineEditor.getVRange();
     if (!vRange) return;
 
-    const toBeCopiedText = vEditor.yText
+    const toBeCopiedText = inlineEditor.yText
       .toString()
       .substring(vRange.index, vRange.index + vRange.length);
     event.clipboardData?.setData('text/plain', toBeCopiedText);
@@ -318,16 +318,16 @@ export class DocPageBlockComponent extends BlockElement<
 
   private _onTitlePaste = (event: ClipboardEvent) => {
     event.stopPropagation();
-    const vEditor = this._titleVEditor;
-    if (!vEditor) return;
-    const vRange = vEditor.getVRange();
+    const inlineEditor = this._titleVEditor;
+    if (!inlineEditor) return;
+    const vRange = inlineEditor.getVRange();
     if (!vRange) return;
 
     const data = event.clipboardData?.getData('text/plain');
     if (data) {
       const text = data.replace(/(\r\n|\r|\n)/g, '\n');
-      vEditor.insertText(vRange, text);
-      vEditor.setVRange({
+      inlineEditor.insertText(vRange, text);
+      inlineEditor.setVRange({
         index: vRange.index + text.length,
         length: 0,
       });

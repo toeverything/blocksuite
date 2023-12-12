@@ -91,19 +91,19 @@ export const textFormatConfigs: TextFormatConfig[] = [
       >(`[${VIRGO_ROOT_ATTR}]`);
       if (!vRoot) return;
 
-      const vEditor = vRoot.virgoEditor;
-      const goalVRange = vEditor.getVRange();
+      const inlineEditor = vRoot.virgoEditor;
+      const goalVRange = inlineEditor.getVRange();
       assertExists(goalVRange);
 
       if (goalVRange.length === 0) return;
 
-      const format = vEditor.getFormat(goalVRange);
+      const format = inlineEditor.getFormat(goalVRange);
       if (format.link) {
-        vEditor.formatText(goalVRange, { link: null });
+        inlineEditor.formatText(goalVRange, { link: null });
         return;
       }
 
-      toggleLinkPopup(vEditor, 'create', goalVRange);
+      toggleLinkPopup(inlineEditor, 'create', goalVRange);
     },
   },
 ];

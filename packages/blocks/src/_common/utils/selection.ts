@@ -35,9 +35,9 @@ export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
   }
 
   await richText.updateComplete;
-  const vEditor = richText.vEditor;
-  assertExists(vEditor);
-  vEditor.setVRange(vRange);
+  const inlineEditor = richText.vEditor;
+  assertExists(inlineEditor);
+  inlineEditor.setVRange(vRange);
 }
 
 export function asyncFocusRichText(

@@ -3,7 +3,7 @@ import { BaseBlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 
 import { isControlledKeyboardEvent } from '../../_common/utils/event.js';
-import { getVirgoByModel } from '../../_common/utils/query.js';
+import { getInlineEditorByModel } from '../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../_common/utils/selection.js';
 import type { RichText } from './rich-text/rich-text.js';
 import type { AffineInlineEditor } from './rich-text/virgo/types.js';
@@ -26,12 +26,12 @@ export const createKeydownObserver = ({
   abortController: AbortController;
 }) => {
   let query = '';
-  const vEditor = target.vEditor;
+  const inlineEditor = target.vEditor;
   assertExists(
-    vEditor,
+    inlineEditor,
     'Failed to observer keyboard! virgo editor is not exist.'
   );
-  const startIndex = vEditor?.getVRange()?.index ?? 0;
+  const startIndex = inlineEditor?.getVRange()?.index ?? 0;
 
   const updateQuery = async () => {
     // Wait for text update
@@ -54,8 +54,8 @@ export const createKeydownObserver = ({
       abortController.abort();
       return;
     }
-    const curIndex = vEditor.getVRange()?.index ?? 0;
-    const text = vEditor.yText.toString();
+    const curIndex = inlineEditor.getVRange()?.index ?? 0;
+    const text = inlineEditor.yText.toString();
     const previousQuery = query;
     query = text.slice(startIndex, curIndex);
 
@@ -210,24 +210,24 @@ export function cleanSpecifiedTail(
     console.warn('Failed to clean text! Unexpected empty string');
     return;
   }
-  const vEditor =
+  const inlineEditor =
     vEditorOrModel instanceof BaseBlockModel
-      ? getVirgoByModel(vEditorOrModel)
+      ? getInlineEditorByModel(vEditorOrModel)
       : vEditorOrModel;
-  assertExists(vEditor, 'Editor not found');
+  assertExists(inlineEditor, 'Inline editor not found');
 
-  const vRange = vEditor.getVRange();
+  const vRange = inlineEditor.getVRange();
   assertExists(vRange);
   const idx = vRange.index - str.length;
-  const textStr = vEditor.yText.toString().slice(idx, idx + str.length);
+  const textStr = inlineEditor.yText.toString().slice(idx, idx + str.length);
   if (textStr !== str) {
     console.warn(
       `Failed to clean text! Text mismatch expected: ${str} but actual: ${textStr}`
     );
     return;
   }
-  vEditor.deleteText({ index: idx, length: str.length });
-  vEditor.setVRange({
+  inlineEditor.deleteText({ index: idx, length: str.length });
+  inlineEditor.setVRange({
     index: idx,
     length: 0,
   });

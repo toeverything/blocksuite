@@ -7,7 +7,7 @@ import { handleBlockSplit } from '../../_common/components/rich-text/rich-text-o
 import {
   asyncGetBlockElementByModel,
   asyncSetVRange,
-  getVirgoByModel,
+  getInlineEditorByModel,
   type SerializedBlock,
 } from '../../_common/utils/index.js';
 import type { BlockModels } from '../../_common/utils/model.js';
@@ -162,9 +162,9 @@ export async function json2block(
     !shouldMergeFirstBlock &&
     (!isSinglePastedBlock || firstBlock.children.length > 0)
   ) {
-    const vEditor = getVirgoByModel(focusedBlockModel);
-    assertExists(vEditor);
-    vEditor.setVRange({
+    const inlineEditor = getInlineEditorByModel(focusedBlockModel);
+    assertExists(inlineEditor);
+    inlineEditor.setVRange({
       index: textRangePoint.index,
       length: 0,
     });
@@ -179,9 +179,9 @@ export async function json2block(
       firstBlock?.text?.reduce((sum, data) => {
         return sum + (data.insert?.length || 0);
       }, 0) ?? 0;
-    const vEditor = getVirgoByModel(focusedBlockModel);
-    assertExists(vEditor);
-    vEditor.setVRange({
+    const inlineEditor = getInlineEditorByModel(focusedBlockModel);
+    assertExists(inlineEditor);
+    inlineEditor.setVRange({
       index: (textRangePoint.index ?? 0) + textLength,
       length: 0,
     });

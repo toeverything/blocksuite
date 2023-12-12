@@ -117,17 +117,17 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     if (this.attributeRenderer) {
       this._vEditor.setAttributeRenderer(this.attributeRenderer);
     }
-    const vEditor = this._vEditor;
+    const inlineEditor = this._vEditor;
 
     if (this.enableMarkdownShortcut) {
-      const keyDownHandler = createVirgoKeyDownHandler(vEditor, {
+      const keyDownHandler = createVirgoKeyDownHandler(inlineEditor, {
         inputRule: {
           key: [' ', 'Enter'],
           handler: context => tryFormatInlineStyle(context, this.undoManager),
         },
       });
 
-      vEditor.disposables.addFromEvent(
+      inlineEditor.disposables.addFromEvent(
         this.virgoContainer,
         'keydown',
         keyDownHandler
@@ -135,18 +135,18 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     }
 
     // init auto scroll
-    vEditor.disposables.add(
-      vEditor.slots.vRangeUpdated.on(([vRange, sync]) => {
+    inlineEditor.disposables.add(
+      inlineEditor.slots.vRangeUpdated.on(([vRange, sync]) => {
         if (!vRange || !sync) return;
 
-        vEditor.waitForUpdate().then(() => {
-          if (!vEditor.mounted) return;
+        inlineEditor.waitForUpdate().then(() => {
+          if (!inlineEditor.mounted) return;
 
           // get newest vRange
-          const vRange = vEditor.getVRange();
+          const vRange = inlineEditor.getVRange();
           if (!vRange) return;
 
-          const range = vEditor.toDomRange(vRange);
+          const range = inlineEditor.toDomRange(vRange);
           if (!range) return;
 
           // scroll container is window
@@ -184,8 +184,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    vEditor.mount(this.virgoContainer);
-    vEditor.setReadonly(this.readonly);
+    inlineEditor.mount(this.virgoContainer);
+    inlineEditor.setReadonly(this.readonly);
   }
 
   private _onStackItemAdded = (event: { stackItem: RichTextStackItem }) => {
@@ -203,13 +203,13 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   };
 
   private _onCopy = (e: ClipboardEvent) => {
-    const vEditor = this.vEditor;
-    assertExists(vEditor);
+    const inlineEditor = this.vEditor;
+    assertExists(inlineEditor);
 
-    const vRange = vEditor.getVRange();
+    const vRange = inlineEditor.getVRange();
     if (!vRange) return;
 
-    const text = vEditor.yTextString.slice(
+    const text = inlineEditor.yTextString.slice(
       vRange.index,
       vRange.index + vRange.length
     );
@@ -220,18 +220,18 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   };
 
   private _onCut = (e: ClipboardEvent) => {
-    const vEditor = this.vEditor;
-    assertExists(vEditor);
+    const inlineEditor = this.vEditor;
+    assertExists(inlineEditor);
 
-    const vRange = vEditor.getVRange();
+    const vRange = inlineEditor.getVRange();
     if (!vRange) return;
 
-    const text = vEditor.yTextString.slice(
+    const text = inlineEditor.yTextString.slice(
       vRange.index,
       vRange.index + vRange.length
     );
-    vEditor.deleteText(vRange);
-    vEditor.setVRange({
+    inlineEditor.deleteText(vRange);
+    inlineEditor.setVRange({
       index: vRange.index,
       length: 0,
     });
@@ -246,17 +246,17 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   private _onPaste = (e: ClipboardEvent) => {
-    const vEditor = this.vEditor;
-    assertExists(vEditor);
+    const inlineEditor = this.vEditor;
+    assertExists(inlineEditor);
 
-    const vRange = vEditor.getVRange();
+    const vRange = inlineEditor.getVRange();
     if (!vRange) return;
 
     const text = e.clipboardData?.getData('text/plain');
     if (!text) return;
 
-    vEditor.insertText(vRange, text);
-    vEditor.setVRange({
+    inlineEditor.insertText(vRange, text);
+    inlineEditor.setVRange({
       index: vRange.index + text.length,
       length: 0,
     });

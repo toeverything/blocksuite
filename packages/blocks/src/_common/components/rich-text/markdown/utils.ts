@@ -2,7 +2,7 @@ import type { BlockElement } from '@blocksuite/lit';
 
 import {
   asyncFocusRichText,
-  getVirgoByModel,
+  getInlineEditorByModel,
   matchFlavours,
 } from '../../../../_common/utils/index.js';
 import type { ListType } from '../../../../list-block/index.js';
@@ -94,9 +94,9 @@ export function convertToParagraph(
     page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
-    const vEditor = getVirgoByModel(model);
-    if (vEditor) {
-      vEditor.setVRange({
+    const inlineEditor = getInlineEditorByModel(model);
+    if (inlineEditor) {
+      inlineEditor.setVRange({
         index: 0,
         length: 0,
       });

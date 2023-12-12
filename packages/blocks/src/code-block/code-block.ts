@@ -187,9 +187,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       if (!loadedLangs.includes(lang.id as Lang)) {
         this._highlighter.loadLanguage(lang).then(() => {
           const richText = this.querySelector('rich-text');
-          const vEditor = richText?.vEditor;
-          if (vEditor) {
-            vEditor.requestUpdate();
+          const inlineEditor = richText?.vEditor;
+          if (inlineEditor) {
+            inlineEditor.requestUpdate();
           }
         });
       }
@@ -210,12 +210,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
     const richText = this.querySelector('rich-text');
     assertExists(richText);
-    const vEditor = richText.vEditor;
-    assertExists(vEditor);
-    const range = vEditor.getVRange();
-    vEditor.requestUpdate();
+    const inlineEditor = richText.vEditor;
+    assertExists(inlineEditor);
+    const range = inlineEditor.getVRange();
+    inlineEditor.requestUpdate();
     if (range) {
-      vEditor.setVRange(range);
+      inlineEditor.setVRange(range);
     }
   }
 
@@ -285,12 +285,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       listenToThemeChange(this, async () => {
         if (!this._highlighter) return;
         const richText = this.querySelector('rich-text');
-        const vEditor = richText?.vEditor;
-        if (!vEditor) return;
+        const inlineEditor = richText?.vEditor;
+        if (!inlineEditor) return;
 
         // update code-line theme
         setTimeout(() => {
-          vEditor.requestUpdate();
+          inlineEditor.requestUpdate();
         });
       })
     );
@@ -344,8 +344,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       Tab: ctx => {
         const state = ctx.get('keyboardState');
         const event = state.raw;
-        const vEditor = this.vEditor;
-        const vRange = vEditor.getVRange();
+        const inlineEditor = this.vEditor;
+        const vRange = inlineEditor.getVRange();
         if (vRange) {
           event.stopPropagation();
           event.preventDefault();
@@ -388,8 +388,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       'Shift-Tab': ctx => {
         const state = ctx.get('keyboardState');
         const event = state.raw;
-        const vEditor = this.vEditor;
-        const vRange = vEditor.getVRange();
+        const inlineEditor = this.vEditor;
+        const vRange = inlineEditor.getVRange();
         if (vRange) {
           event.stopPropagation();
           event.preventDefault();
@@ -454,9 +454,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       }
 
       const richText = this.querySelector('rich-text');
-      const vEditor = richText?.vEditor;
-      if (vEditor) {
-        vEditor.requestUpdate();
+      const inlineEditor = richText?.vEditor;
+      if (inlineEditor) {
+        inlineEditor.requestUpdate();
       }
     }
 
