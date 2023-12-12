@@ -37,6 +37,7 @@ import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
 import { toggleBookmarkCreateModal } from '../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { addSiblingImageBlock } from '../../../image-block/image/utils.js';
+import { ImageService } from '../../../image-block/image-service.js';
 import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { copyBlock } from '../../../page-block/doc/utils.js';
@@ -49,6 +50,7 @@ import { toast } from '../../components/toast.js';
 import { textConversionConfigs } from '../../configs/text-conversion.js';
 import { textFormatConfigs } from '../../configs/text-format/config.js';
 import { clearMarksOnDiscontinuousInput } from '../../utils/inline-editor.js';
+import { humanFileSize } from '../../utils/math.js';
 import type { AffineLinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
@@ -259,9 +261,26 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
 
           const imageFiles = await getImageFilesFromLocal();
-          imageFiles.forEach(file =>
-            addSiblingImageBlock(pageElement.page, file, model)
+          const imageService = pageElement.host.spec.getService('affine:image');
+          assertExists(imageService);
+          assertInstanceOf(imageService, ImageService);
+          const maxFileSize = imageService.maxFileSize;
+          const isSizeExceeded = imageFiles.some(
+            file => file.size > maxFileSize
           );
+          if (isSizeExceeded) {
+            toast(
+              `You can only upload files less than ${humanFileSize(
+                maxFileSize,
+                true,
+                0
+              )}`
+            );
+          } else {
+            imageFiles.forEach(file => {
+              addSiblingImageBlock(pageElement.page, file, model);
+            });
+          }
         }),
       },
       {

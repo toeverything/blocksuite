@@ -1,5 +1,5 @@
 import { IS_FIREFOX } from '@blocksuite/global/env';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
@@ -17,18 +17,25 @@ import {
   getDocPage,
   getEdgelessPage,
   getHoveringNote,
+  getImageFilesFromLocal,
   getModelByBlockElement,
   isPageMode,
   Point,
   Rect,
   stopPropagation,
-  uploadImageFromLocal,
 } from '../../../../_common/utils/index.js';
 import { getServiceOrRegister } from '../../../../_legacy/service/index.js';
 import { toggleBookmarkCreateModal } from '../../../../bookmark-block/components/index.js';
+import {
+  addSiblingImageBlock,
+  uploadBlobForImage,
+} from '../../../../image-block/image/utils.js';
+import { ImageService } from '../../../../image-block/image-service.js';
 import { DocPageBlockComponent } from '../../../../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../../../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../../../page-block/text-selection/utils.js';
+import { toast } from '../../../components/toast.js';
+import { humanFileSize } from '../../../utils/math.js';
 import { getClosestNoteBlock } from '../../drag-handle/utils.js';
 import { type DragIndicator } from './../../../components/drag-indicator.js';
 import {
@@ -448,13 +455,32 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     const isDatabase = props.flavour === 'affine:database';
 
     // TO DO: fix image loading state for block hub
-    if (props.flavour === 'affine:image' && props.type === 'image') {
-      models.push(
-        ...(await uploadImageFromLocal(page.blob)).map(({ sourceId }) => ({
-          flavour: 'affine:image',
-          sourceId,
-        }))
-      );
+    if (
+      props.flavour === 'affine:image' &&
+      props.type === 'image' &&
+      lastModelState &&
+      lastType !== 'none' &&
+      lastType !== 'database'
+    ) {
+      const imageFiles = await getImageFilesFromLocal();
+      const imageService = this._host.spec.getService('affine:image');
+      assertExists(imageService);
+      assertInstanceOf(imageService, ImageService);
+      const maxFileSize = imageService.maxFileSize;
+      const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
+      if (isSizeExceeded) {
+        toast(
+          `You can only upload files less than ${humanFileSize(
+            maxFileSize,
+            true,
+            0
+          )}`
+        );
+      } else {
+        imageFiles.forEach(file => {
+          addSiblingImageBlock(page, file, lastModelState.model);
+        });
+      }
     } else if (props.flavour === 'affine:bookmark') {
       const url = await toggleBookmarkCreateModal(this._host);
       url &&
@@ -553,14 +579,40 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     const page = this._host.page;
     const models = [];
 
+    const defaultNoteBlock =
+      page.root?.children.findLast(block => block.flavour === 'affine:note') ??
+      page.addBlock('affine:note', {}, page.root?.id);
+
+    // add to end
+    let lastId;
+
     // TO DO: fix image loading state for blockhub
     if (data.flavour === 'affine:image' && data.type === 'image') {
-      models.push(
-        ...(await uploadImageFromLocal(page.blob)).map(({ sourceId }) => ({
-          flavour: 'affine:image',
-          sourceId,
-        }))
-      );
+      const imageFiles = await getImageFilesFromLocal();
+      const imageService = this._host.spec.getService('affine:image');
+      assertExists(imageService);
+      assertInstanceOf(imageService, ImageService);
+      const maxFileSize = imageService.maxFileSize;
+      const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
+      if (isSizeExceeded) {
+        toast(
+          `You can only upload files less than ${humanFileSize(
+            maxFileSize,
+            true,
+            0
+          )}`
+        );
+      } else {
+        imageFiles.forEach(file => {
+          const blockId = page.addBlock(
+            'affine:image',
+            { flavour: 'affine:image', size: file.size },
+            defaultNoteBlock
+          );
+          uploadBlobForImage(page, blockId, file);
+          lastId = blockId;
+        });
+      }
     } else if (data.flavour === 'affine:bookmark') {
       const url = await toggleBookmarkCreateModal(this._host);
       url &&
@@ -572,12 +624,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       models.push(data);
     }
 
-    const defaultNoteBlock =
-      page.root?.children.findLast(block => block.flavour === 'affine:note') ??
-      page.addBlock('affine:note', {}, page.root?.id);
-
-    // add to end
-    let lastId;
     models.forEach(model => {
       lastId = page.addBlock(
         model.flavour ?? 'affine:paragraph',

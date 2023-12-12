@@ -133,9 +133,10 @@ export async function uploadBlobForImage(
   }
   setImageLoading(blockId, true);
   const storage = page.blob;
+  let sourceId = '';
+  let imageBlock: BaseBlockModel | null;
   try {
-    const sourceId = await storage.set(blob);
-    const imageBlock = page.getBlockById(blockId);
+    imageBlock = page.getBlockById(blockId);
     if (!imageBlock) {
       throw new Error('the attachment model is not found!');
     }
@@ -143,13 +144,7 @@ export async function uploadBlobForImage(
       console.error(imageBlock);
       throw new Error('the model is not an image model!');
     }
-    setImageLoading(blockId, false);
-
-    page.withoutTransact(() => {
-      page.updateBlock(imageBlock, {
-        sourceId,
-      } satisfies Partial<ImageBlockProps>);
-    });
+    sourceId = await storage.set(blob);
   } catch (error) {
     console.error(error);
     setImageLoading(blockId, false);
@@ -159,7 +154,14 @@ export async function uploadBlobForImage(
       );
     }
   }
-
+  setImageLoading(blockId, false);
+  page.withoutTransact(() => {
+    if (imageBlock) {
+      page.updateBlock(imageBlock, {
+        sourceId,
+      } satisfies Partial<ImageBlockProps>);
+    }
+  });
   return blockId;
 }
 

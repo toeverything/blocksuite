@@ -5,6 +5,7 @@ import './components/block-portal/frame/edgeless-frame.js';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
   assertExists,
+  assertInstanceOf,
   debounce,
   Slot,
   throttle,
@@ -36,17 +37,16 @@ import {
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
+import { humanFileSize } from '../../_common/utils/math.js';
 import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import {
   SURFACE_IMAGE_CARD_HEIGHT,
   SURFACE_IMAGE_CARD_WIDTH,
 } from '../../image-block/components/image-card.js';
-import type {
-  ImageBlockModel,
-  ImageBlockProps,
-} from '../../image-block/index.js';
-import type { FrameBlockModel } from '../../models.js';
+import type { ImageBlockProps } from '../../image-block/image-model.js';
+import { ImageService } from '../../image-block/image-service.js';
+import type { FrameBlockModel, ImageBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
@@ -508,6 +508,22 @@ export class EdgelessPageBlockComponent extends BlockElement<
       file.type.startsWith('image/')
     );
     if (!imageFiles.length) return [];
+
+    const imageService = this.host.spec.getService('affine:image');
+    assertExists(imageService);
+    assertInstanceOf(imageService, ImageService);
+    const maxFileSize = imageService.maxFileSize;
+    const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
+    if (isSizeExceeded) {
+      toast(
+        `You can only upload files less than ${humanFileSize(
+          maxFileSize,
+          true,
+          0
+        )}`
+      );
+      return [];
+    }
 
     let { x, y } = this.surface.viewport.center;
     if (point) [x, y] = this.surface.toModelCoord(point.x, point.y);
