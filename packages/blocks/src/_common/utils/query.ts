@@ -309,7 +309,7 @@ export function getInlineEditorByModel(model: BaseBlockModel) {
   }
   const richText = getRichTextByModel(model);
   if (!richText) return null;
-  return richText.vEditor;
+  return richText.inlineEditor;
 }
 
 export async function asyncGetVirgoByModel(model: BaseBlockModel) {
@@ -319,7 +319,7 @@ export async function asyncGetVirgoByModel(model: BaseBlockModel) {
   }
   const richText = await asyncGetRichTextByModel(model);
   if (!richText) return null;
-  return richText.vEditor;
+  return richText.inlineEditor;
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {

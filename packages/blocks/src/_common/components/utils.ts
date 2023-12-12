@@ -26,7 +26,7 @@ export const createKeydownObserver = ({
   abortController: AbortController;
 }) => {
   let query = '';
-  const inlineEditor = target.vEditor;
+  const inlineEditor = target.inlineEditor;
   assertExists(
     inlineEditor,
     'Failed to observer keyboard! virgo editor is not exist.'

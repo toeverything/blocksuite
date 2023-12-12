@@ -74,8 +74,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   edgeless!: EdgelessPageBlockComponent;
 
   get vEditor() {
-    assertExists(this.richText.vEditor);
-    return this.richText.vEditor;
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
   }
   get vEditorContainer() {
     return this.vEditor.rootElement;

@@ -64,8 +64,8 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   @query('rich-text')
   private richText!: RichText;
   get vEditor() {
-    assertExists(this.richText.vEditor);
-    return this.richText.vEditor;
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
   }
   get vEditorContainer() {
     return this.vEditor.rootElement;

@@ -602,7 +602,7 @@ export async function focusRichTextEnd(page: Page, i = 0) {
       const editor = document.querySelectorAll('affine-editor-container')[i];
       const richTexts = Array.from(editor.querySelectorAll('rich-text'));
 
-      richTexts[i].vEditor?.focusEnd();
+      richTexts[i].inlineEditor?.focusEnd();
     },
     [i, currentEditorIndex]
   );
@@ -688,7 +688,7 @@ export async function getVirgoSelectionIndex(page: Page) {
 
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    const index = component?.vEditor?.getVRange()?.index;
+    const index = component?.inlineEditor?.getVRange()?.index;
     return index !== undefined ? index : -1;
   });
 }
@@ -698,7 +698,7 @@ export async function getVirgoSelectionText(page: Page) {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    return component?.vEditor?.yText.toString() ?? '';
+    return component?.inlineEditor?.yText.toString() ?? '';
   });
 }
 
@@ -708,11 +708,11 @@ export async function getSelectedTextByVirgo(page: Page) {
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
 
-    const vRange = component?.vEditor?.getVRange();
+    const vRange = component?.inlineEditor?.getVRange();
     if (!vRange) return '';
 
     const { index, length } = vRange;
-    return component?.vEditor?.yText.toString().slice(index, length) || '';
+    return component?.inlineEditor?.yText.toString().slice(index, length) || '';
   });
 }
 
@@ -730,11 +730,13 @@ export async function getSelectedText(page: Page) {
       ) || [];
 
     components.forEach(component => {
-      const vRange = component.vEditor?.getVRange();
+      const vRange = component.inlineEditor?.getVRange();
       if (!vRange) return;
       const { index, length } = vRange;
       content +=
-        component?.vEditor?.yText.toString().slice(index, index + length) || '';
+        component?.inlineEditor?.yText
+          .toString()
+          .slice(index, index + length) || '';
     });
 
     return content;
@@ -753,7 +755,7 @@ export async function setVRangeInSelectedRichText(
       const range = selection.getRangeAt(0);
       const component =
         range.startContainer.parentElement?.closest('rich-text');
-      component?.vEditor?.setVRange({
+      component?.inlineEditor?.setVRange({
         index,
         length,
       });
@@ -990,7 +992,7 @@ export async function getIndexCoordinate(
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any;
-      const domRange = richText.vEditor.toDomRange({
+      const domRange = richText.inlineEditor.toDomRange({
         index: vIndex,
         length: 0,
       });
@@ -1078,7 +1080,7 @@ export async function waitForVirgoStateUpdated(page: Page) {
 
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    await component?.vEditor?.waitForUpdate();
+    await component?.inlineEditor?.waitForUpdate();
   });
 }
 

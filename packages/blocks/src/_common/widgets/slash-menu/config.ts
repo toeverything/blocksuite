@@ -108,7 +108,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
                   }
                   const codeModel = newModels[0];
                   onModelTextUpdated(codeModel, richText => {
-                    const inlineEditor = richText.vEditor;
+                    const inlineEditor = richText.inlineEditor;
                     assertExists(inlineEditor);
                     inlineEditor.focusEnd();
                   });

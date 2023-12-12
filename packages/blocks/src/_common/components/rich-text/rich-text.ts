@@ -86,7 +86,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   enableFormat = true;
 
   private _inlineEditor: AffineInlineEditor | null = null;
-  get vEditor() {
+  get inlineEditor() {
     return this._inlineEditor;
   }
 
@@ -189,7 +189,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   private _onStackItemAdded = (event: { stackItem: RichTextStackItem }) => {
-    const vRange = this.vEditor?.getVRange();
+    const vRange = this.inlineEditor?.getVRange();
     if (vRange) {
       event.stackItem.meta.set('richtext-v-range', vRange);
     }
@@ -197,13 +197,13 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
   private _onStackItemPopped = (event: { stackItem: RichTextStackItem }) => {
     const vRange = event.stackItem.meta.get('richtext-v-range');
-    if (vRange && this.vEditor?.isVRangeValid(vRange)) {
-      this.vEditor?.setVRange(vRange);
+    if (vRange && this.inlineEditor?.isVRangeValid(vRange)) {
+      this.inlineEditor?.setVRange(vRange);
     }
   };
 
   private _onCopy = (e: ClipboardEvent) => {
-    const inlineEditor = this.vEditor;
+    const inlineEditor = this.inlineEditor;
     assertExists(inlineEditor);
 
     const vRange = inlineEditor.getVRange();
@@ -220,7 +220,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   };
 
   private _onCut = (e: ClipboardEvent) => {
-    const inlineEditor = this.vEditor;
+    const inlineEditor = this.inlineEditor;
     assertExists(inlineEditor);
 
     const vRange = inlineEditor.getVRange();
@@ -246,7 +246,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   private _onPaste = (e: ClipboardEvent) => {
-    const inlineEditor = this.vEditor;
+    const inlineEditor = this.inlineEditor;
     assertExists(inlineEditor);
 
     const vRange = inlineEditor.getVRange();
@@ -266,15 +266,15 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   };
 
   private _unmount() {
-    if (this.vEditor?.mounted) {
-      this.vEditor.unmount();
+    if (this.inlineEditor?.mounted) {
+      this.inlineEditor.unmount();
     }
     this._inlineEditor = null;
   }
 
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
-    await this.vEditor?.waitForUpdate();
+    await this.inlineEditor?.waitForUpdate();
     return result;
   }
 

@@ -110,9 +110,9 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  get vEditor() {
+  get inlineEditor() {
     assertExists(this._richTextElement);
-    const inlineEditor = this._richTextElement.vEditor;
+    const inlineEditor = this._richTextElement.inlineEditor;
     assertExists(inlineEditor);
     return inlineEditor;
   }
@@ -178,9 +178,9 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  get vEditor() {
+  get inlineEditor() {
     assertExists(this._richTextElement);
-    const inlineEditor = this._richTextElement.vEditor;
+    const inlineEditor = this._richTextElement.inlineEditor;
     assertExists(inlineEditor);
     return inlineEditor;
   }
@@ -201,7 +201,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     );
 
     this._richTextElement?.updateComplete.then(() => {
-      this.vEditor.focusEnd();
+      this.inlineEditor.focusEnd();
     });
   }
 
@@ -231,7 +231,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       return;
     }
 
-    const inlineEditor = this.vEditor;
+    const inlineEditor = this.inlineEditor;
 
     switch (event.key) {
       // bold ctrl+b
@@ -239,7 +239,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       case 'b':
         if (event.metaKey || event.ctrlKey) {
           event.preventDefault();
-          toggleStyle(this.vEditor, { bold: true });
+          toggleStyle(this.inlineEditor, { bold: true });
         }
         break;
       // italic ctrl+i
@@ -247,7 +247,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       case 'i':
         if (event.metaKey || event.ctrlKey) {
           event.preventDefault();
-          toggleStyle(this.vEditor, { italic: true });
+          toggleStyle(this.inlineEditor, { italic: true });
         }
         break;
       // underline ctrl+u
@@ -255,7 +255,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       case 'u':
         if (event.metaKey || event.ctrlKey) {
           event.preventDefault();
-          toggleStyle(this.vEditor, { underline: true });
+          toggleStyle(this.inlineEditor, { underline: true });
         }
         break;
       // strikethrough ctrl+shift+s
@@ -280,14 +280,14 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   };
 
   private _onSoftEnter = () => {
-    if (this.value && this.vEditor) {
-      const vRange = this.vEditor.getVRange();
+    if (this.value && this.inlineEditor) {
+      const vRange = this.inlineEditor.getVRange();
       assertExists(vRange);
 
       this.column.captureSync();
-      const text = new Text(this.vEditor.yText);
+      const text = new Text(this.inlineEditor.yText);
       text.replace(vRange.index, length, '\n');
-      this.vEditor.setVRange({
+      this.inlineEditor.setVRange({
         index: vRange.index + 1,
         length: 0,
       });

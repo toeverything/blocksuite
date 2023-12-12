@@ -28,8 +28,8 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
   private _isComposing = false;
 
   get vEditor(): AffineInlineEditor {
-    assertExists(this.richText.vEditor);
-    return this.richText.vEditor;
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
   }
 
   get vEditorContainer() {

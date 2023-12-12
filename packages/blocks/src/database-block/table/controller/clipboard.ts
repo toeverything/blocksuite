@@ -403,7 +403,7 @@ const cellToStringMap: Record<
       'affine-database-rich-text-cell-editing'
     );
     const value = getColumnValue(container);
-    const range = cell?.vEditor?.getVRange();
+    const range = cell?.inlineEditor?.getVRange();
     if (range) {
       const start = range.index;
       const end = range.index + range.length;

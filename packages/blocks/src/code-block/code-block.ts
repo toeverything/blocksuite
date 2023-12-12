@@ -187,7 +187,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       if (!loadedLangs.includes(lang.id as Lang)) {
         this._highlighter.loadLanguage(lang).then(() => {
           const richText = this.querySelector('rich-text');
-          const inlineEditor = richText?.vEditor;
+          const inlineEditor = richText?.inlineEditor;
           if (inlineEditor) {
             inlineEditor.requestUpdate();
           }
@@ -210,7 +210,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
     const richText = this.querySelector('rich-text');
     assertExists(richText);
-    const inlineEditor = richText.vEditor;
+    const inlineEditor = richText.inlineEditor;
     assertExists(inlineEditor);
     const range = inlineEditor.getVRange();
     inlineEditor.requestUpdate();
@@ -285,7 +285,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       listenToThemeChange(this, async () => {
         if (!this._highlighter) return;
         const richText = this.querySelector('rich-text');
-        const inlineEditor = richText?.vEditor;
+        const inlineEditor = richText?.inlineEditor;
         if (!inlineEditor) return;
 
         // update code-line theme
@@ -454,7 +454,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       }
 
       const richText = this.querySelector('rich-text');
-      const inlineEditor = richText?.vEditor;
+      const inlineEditor = richText?.inlineEditor;
       if (inlineEditor) {
         inlineEditor.requestUpdate();
       }

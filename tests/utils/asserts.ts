@@ -192,7 +192,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
       editor?.querySelectorAll<RichText>('rich-text') ?? []
     );
     return richTexts.map(richText => {
-      const editor = richText.vEditor as AffineInlineEditor;
+      const editor = richText.inlineEditor as AffineInlineEditor;
       return editor.yText.toString();
     });
   }, currentEditorIndex);
@@ -297,7 +297,7 @@ export async function assertRichTextVRange(
         index
       ];
       const richText = editor?.querySelectorAll('rich-text')[richTextIndex];
-      const inlineEditor = richText.vEditor;
+      const inlineEditor = richText.inlineEditor;
       return inlineEditor?.getVRange();
     },
     [richTextIndex, currentEditorIndex]
@@ -342,7 +342,7 @@ export async function assertTextFormat(
   const actual = await page.evaluate(
     ({ richTextIndex, index }) => {
       const richText = document.querySelectorAll('rich-text')[richTextIndex];
-      const inlineEditor = richText.vEditor;
+      const inlineEditor = richText.inlineEditor;
       if (!inlineEditor) {
         throw new Error('vEditor is undefined');
       }
@@ -383,7 +383,7 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
     const editor = document.querySelectorAll('affine-editor-container')[index];
     const elements = editor?.querySelectorAll('rich-text');
     return Array.from(elements).map(el => {
-      const inlineEditor = el.vEditor;
+      const inlineEditor = el.inlineEditor;
       if (!inlineEditor) {
         throw new Error('vEditor is undefined');
       }
