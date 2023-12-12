@@ -131,8 +131,8 @@ function toggleStyle(
   inlineEditor.setInlineRange(inlineRange);
 }
 
-@customElement('virgo-test-rich-text')
-export class RichText extends ShadowlessElement {
+@customElement('test-rich-text')
+export class TestRichText extends ShadowlessElement {
   @query('.rich-text-container')
   private _container!: HTMLDivElement;
 
@@ -193,7 +193,7 @@ export class RichText extends ShadowlessElement {
 
   override render() {
     return html`<style>
-        virgo-test-rich-text {
+        test-rich-text {
           display: grid;
           grid-template-rows: minmax(0, 3fr) minmax(0, 1fr) minmax(0, 1fr);
           grid-template-columns: minmax(0, 1fr);
@@ -445,20 +445,20 @@ export class TestPage extends ShadowlessElement {
               .inlineEditor=${this._editorA}
               .undoManager=${this._undoManagerA}
             ></custom-toolbar>
-            <virgo-test-rich-text
+            <test-rich-text
               .inlineEditor=${this._editorA}
               .undoManager=${this._undoManagerA!}
-            ></virgo-test-rich-text>
+            ></test-rich-text>
           </div>
           <div class="doc-b">
             <custom-toolbar
               .inlineEditor=${this._editorB}
               .undoManager=${this._undoManagerB!}
             ></custom-toolbar>
-            <virgo-test-rich-text
+            <test-rich-text
               .inlineEditor=${this._editorB}
               .undoManager=${this._undoManagerB}
-            ></virgo-test-rich-text>
+            ></test-rich-text>
           </div>
         </div>
       </div>

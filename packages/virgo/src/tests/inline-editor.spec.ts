@@ -246,7 +246,7 @@ test('readonly mode', async ({ page }) => {
   await page.evaluate(() => {
     const richTextA = document
       .querySelector('test-page')
-      ?.querySelector('virgo-test-rich-text');
+      ?.querySelector('test-rich-text');
 
     if (!richTextA) {
       throw new Error('Cannot find editor');
@@ -829,10 +829,10 @@ test('yText should not contain \r', async ({ page }) => {
   const message = await page.evaluate(() => {
     const richText = document
       .querySelector('test-page')
-      ?.querySelector('virgo-test-rich-text');
+      ?.querySelector('test-rich-text');
 
     if (!richText) {
-      throw new Error('Cannot find virgo-test-rich-text');
+      throw new Error('Cannot find test-rich-text');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

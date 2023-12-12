@@ -25,10 +25,10 @@ export async function focusInlineRichText(
   await page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')
-      ?.querySelectorAll('virgo-test-rich-text');
+      ?.querySelectorAll('test-rich-text');
 
     if (!richTexts) {
-      throw new Error('Cannot find virgo-test-rich-text');
+      throw new Error('Cannot find test-rich-text');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,10 +44,10 @@ export async function getDeltaFromInlineRichText(
   return await page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')
-      ?.querySelectorAll('virgo-test-rich-text');
+      ?.querySelectorAll('test-rich-text');
 
     if (!richTexts) {
-      throw new Error('Cannot find virgo-test-rich-text');
+      throw new Error('Cannot find test-rich-text');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,10 +64,10 @@ export async function getInlineRangeFromInlineRichText(
   return await page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')
-      ?.querySelectorAll('virgo-test-rich-text');
+      ?.querySelectorAll('test-rich-text');
 
     if (!richTexts) {
-      throw new Error('Cannot find virgo-test-rich-text');
+      throw new Error('Cannot find test-rich-text');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,10 +85,10 @@ export async function setInlineRichTextRange(
     ([inlineRange, index]) => {
       const richTexts = document
         .querySelector('test-page')
-        ?.querySelectorAll('virgo-test-rich-text');
+        ?.querySelectorAll('test-rich-text');
 
       if (!richTexts) {
-        throw new Error('Cannot find virgo-test-rich-text');
+        throw new Error('Cannot find test-rich-text');
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,10 +107,10 @@ export async function getInlineRichTextLine(
 ): Promise<readonly [string, number]> {
   return await page.evaluate(
     ([index, i]) => {
-      const richTexts = document.querySelectorAll('virgo-test-rich-text');
+      const richTexts = document.querySelectorAll('test-rich-text');
 
       if (!richTexts) {
-        throw new Error('Cannot find virgo-test-rich-text');
+        throw new Error('Cannot find test-rich-text');
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -129,7 +129,7 @@ export async function getInlineRangeIndexRect(
 ) {
   const rect = await page.evaluate(
     ({ richTextIndex, inlineIndex: vIndex, coordOffSet }) => {
-      const richText = document.querySelectorAll('virgo-test-rich-text')[
+      const richText = document.querySelectorAll('test-rich-text')[
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any;
@@ -160,9 +160,8 @@ export async function assertSelection(
 ) {
   const actual = await page.evaluate(
     ([richTextIndex]) => {
-      const richText = document?.querySelectorAll('virgo-test-rich-text')[
-        richTextIndex
-      ];
+      const richText =
+        document?.querySelectorAll('test-rich-text')[richTextIndex];
       // @ts-ignore
       const inlineEditor = richText.inlineEditor;
       return inlineEditor?.getInlineRange();

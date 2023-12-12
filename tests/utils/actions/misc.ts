@@ -5,6 +5,7 @@ import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { ClipboardItem } from '../../../packages/blocks/src/_legacy/clipboard/clipboard-item.js';
+import type { RichText } from '../../../packages/blocks/src/index.js';
 import {
   type CssVariableName,
   type DatabaseBlockModel,
@@ -14,7 +15,6 @@ import {
 } from '../../../packages/blocks/src/index.js';
 import { assertExists } from '../../../packages/global/src/utils.js';
 import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
-import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import {
   type InlineRange,
@@ -547,7 +547,7 @@ export async function focusDatabaseTitle(page: Page) {
       throw new Error('Cannot find database title');
     }
 
-    dbTitle.inlineEditor.focusEnd();
+    dbTitle.inlineEditor!.focusEnd();
   });
   await waitNextFrame(page);
 }
@@ -855,14 +855,14 @@ export async function setSelection(
       const anchorRichText = document.querySelector<RichText>(
         `[data-block-id="${anchorBlockId}"] rich-text`
       )!;
-      const anchorRichTextRange = anchorRichText.inlineEditor.toDomRange({
+      const anchorRichTextRange = anchorRichText.inlineEditor!.toDomRange({
         index: anchorOffset,
         length: 0,
       })!;
       const focusRichText = document.querySelector<RichText>(
         `[data-block-id="${focusBlockId}"] rich-text`
       )!;
-      const focusRichTextRange = focusRichText.inlineEditor.toDomRange({
+      const focusRichTextRange = focusRichText.inlineEditor!.toDomRange({
         index: focusOffset,
         length: 0,
       })!;
