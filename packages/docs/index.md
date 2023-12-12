@@ -3,7 +3,7 @@
 layout: home
 
 title: BlockSuite
-titleTemplate: Block-Based Collaborative Editing
+titleTemplate: Content Editing Toolkit
 
 hero:
   name: BlockSuite
