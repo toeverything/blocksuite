@@ -318,10 +318,11 @@ export class ContentParser {
     const blocks = nodes ?? edgeless?.getSortedElementsByBound(bound) ?? [];
     for (const block of blocks) {
       if (block.flavour === 'affine:image') {
+        if (!block.sourceId) return;
+
         const blob = await block.page.blob.get(block.sourceId);
-        if (!blob) {
-          return;
-        }
+        if (!blob) return;
+
         const blobToImage = (blob: Blob) =>
           new Promise<HTMLImageElement>((resolve, reject) => {
             const img = new Image();
@@ -597,8 +598,20 @@ export class ContentParser {
   ): Promise<SerializedBlock[]> {
     const files = clipboardData.files;
     if (!files) return [];
+
     const file = files[0];
     if (!file) return [];
+
+    if (file.size > maxFileSize) {
+      toast(
+        `You can only upload files less than ${humanFileSize(
+          maxFileSize,
+          true,
+          0
+        )}`
+      );
+      return [];
+    }
 
     const storage = this._page.blob;
     if (file.type.includes('image')) {
@@ -615,16 +628,6 @@ export class ContentParser {
       ];
     }
 
-    if (file.size > maxFileSize) {
-      toast(
-        `You can only upload files less than ${humanFileSize(
-          maxFileSize,
-          true,
-          0
-        )}`
-      );
-      return [];
-    }
     try {
       const sourceId = await storage.set(
         new File([file], file.name, { type: file.type })

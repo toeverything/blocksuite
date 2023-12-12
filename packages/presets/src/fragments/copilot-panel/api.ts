@@ -2,7 +2,6 @@ import {
   BlocksUtils,
   EmbedHtmlBlockModel,
   EmbedHtmlBlockSpec,
-  loadImages,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
@@ -99,8 +98,7 @@ export class EditorWithAI {
         }
         const imgFile = jpegBase64ToFile(b64, 'img');
         const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
-        const imgs = await loadImages([imgFile], this.workspace.blob);
-        edgelessPage.addImages(imgs);
+        edgelessPage.addImages([imgFile]);
       }
     });
   };
@@ -120,8 +118,7 @@ export class EditorWithAI {
     const b64 = await askDallE3(prompt);
     if (b64) {
       const imgFile = pngBase64ToFile(b64, 'img');
-      const imgs = await loadImages([imgFile], this.workspace.blob);
-      await edgelessPage.addImages(imgs);
+      await edgelessPage.addImages([imgFile]);
     }
   };
 

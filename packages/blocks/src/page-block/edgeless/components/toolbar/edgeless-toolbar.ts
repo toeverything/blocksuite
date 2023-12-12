@@ -40,7 +40,7 @@ import {
   NavigatorFullScreenIcon,
 } from '../../../../_common/icons/index.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
-import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
+import { getImageFilesFromLocal } from '../../../../_common/utils/filesys.js';
 import type { EdgelessTool } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
@@ -209,7 +209,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private async _addImages() {
     this._imageLoading = true;
 
-    const fileInfos = await uploadImageFromLocal(this.edgeless.page.blob);
+    const fileInfos = await getImageFilesFromLocal();
 
     if (!fileInfos.length) {
       this._imageLoading = false;

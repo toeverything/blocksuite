@@ -3,6 +3,7 @@ import { BlockElement } from '@blocksuite/lit';
 import { Text } from '@blocksuite/store';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../_common/utils/event.js';
@@ -13,7 +14,7 @@ import { Bound } from '../surface-block/index.js';
 import { ImageState } from './components/image-card.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
-import { shouldResizeImage } from './image/utils.js';
+import { isImageLoading, shouldResizeImage } from './image/utils.js';
 import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 
 const MAX_RETRY_COUNT = 3;
@@ -41,6 +42,16 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _fetchImage = () => {
+    if (isImageLoading(this.model.id)) {
+      this._retryCount = 0;
+      return;
+    }
+
+    if (!this.model.sourceId) {
+      this._imageState = ImageState.Failed;
+      return;
+    }
+
     if (
       this._imageState === ImageState.Ready &&
       this._lastSourceId &&
@@ -51,13 +62,14 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
     this._imageState = ImageState.Loading;
     const storage = this.model.page.blob;
+    const sourceId = this.model.sourceId;
     storage
-      .get(this.model.sourceId)
+      .get(sourceId)
       .then(blob => {
         if (blob) {
           this.blob = blob;
           this._source = URL.createObjectURL(blob);
-          this._lastSourceId = this.model.sourceId;
+          this._lastSourceId = sourceId;
           this._imageState = ImageState.Ready;
         } else {
           throw new Error('Cannot find blob');
@@ -95,6 +107,17 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this._isInSurface = parent?.flavour === 'affine:surface';
 
     this._fetchImage();
+
+    this.model.propsUpdated.on(({ key }) => {
+      if (key === 'sourceId') {
+        if (this._source) {
+          URL.revokeObjectURL(this._source);
+          this._source = '';
+        }
+        this._retryCount = 0;
+        this._fetchImage();
+      }
+    });
   }
 
   override disconnectedCallback() {
@@ -104,10 +127,15 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   override render() {
-    if (this._imageState !== ImageState.Ready) {
+    const imageState = isImageLoading(this.model.id)
+      ? ImageState.Loading
+      : this._imageState;
+
+    if (imageState !== ImageState.Ready) {
       return html`<affine-image-block-card
-        imageState=${this._imageState}
+        imageState=${imageState}
         ?isinsurface=${this._isInSurface}
+        imageSize=${ifDefined(this.model.size)}
         @click=${this._onCardClick}
       ></affine-image-block-card>`;
     }

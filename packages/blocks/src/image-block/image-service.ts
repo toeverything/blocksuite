@@ -5,12 +5,26 @@ import {
   FileDropManager,
   type FileDropRule,
 } from '../_common/components/file-drop-manager.js';
-import type { EdgelessPageBlockComponent, Point } from '../index.js';
-// import { buildPath } from '../index.js';
+import type { Point } from '../_common/utils/index.js';
+import { isPageMode } from '../_common/utils/index.js';
+import type { DocPageBlockComponent } from '../page-block/doc/doc-page-block.js';
+import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import type { ImageBlockModel } from './image-model.js';
 import { ImageSelection } from './image-selection.js';
 
 export class ImageService extends BlockService<ImageBlockModel> {
+  get pageBlockComponent(): DocPageBlockComponent | EdgelessPageBlockComponent {
+    const pageBlock = this.page.root;
+    assertExists(pageBlock);
+
+    const pageElement = this.std.view.viewFromPath('block', [pageBlock.id]) as
+      | DocPageBlockComponent
+      | EdgelessPageBlockComponent
+      | null;
+    assertExists(pageElement);
+    return pageElement;
+  }
+
   maxFileSize = 10 * 1000 * 1000; // 10MB (default)
 
   fileDropRule: FileDropRule = {
@@ -18,25 +32,15 @@ export class ImageService extends BlockService<ImageBlockModel> {
     maxFileSize: this.maxFileSize,
     embed: true,
     matcher: file => file.type.startsWith('image/'),
-    handleDropInEdgeless: async (point: Point, files: File[]) => {
-      const pageBlock = this.page.root;
-      assertExists(pageBlock);
+    handleDropInSurface: async (files: File[], point: Point) => {
+      console.log(point);
+      if (isPageMode(this.page)) return false;
+      const edgelessPage = this
+        .pageBlockComponent as EdgelessPageBlockComponent;
 
-      const edgelessPageElement = this.std.view.viewFromPath('block', [
-        pageBlock.id,
-      ]) as EdgelessPageBlockComponent | null;
-      assertExists(edgelessPageElement);
+      await edgelessPage.addImages(files, point);
 
-      const storage = this.page.blob;
-      const fileInfos = await Promise.all(
-        files.map(async file => {
-          const sourceId = await storage.set(
-            new Blob([file], { type: file.type })
-          );
-          return { file, sourceId };
-        })
-      );
-      edgelessPageElement.addImages(fileInfos, point);
+      return true;
     },
   };
 

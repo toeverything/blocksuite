@@ -1,11 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Buffer } from 'buffer';
 
 import { toast } from '../../_common/components/toast.js';
 import { downloadBlob } from '../../_common/utils/filesys.js';
 import { getBlockElementByModel } from '../../_common/utils/query.js';
-import type { ImageBlockModel } from '../image-model.js';
+import { ImageBlockModel, type ImageBlockProps } from '../image-model.js';
 
 async function getImageBlob(model: ImageBlockModel) {
   const blob = await getBlobByModel(model);
@@ -120,4 +120,56 @@ export function shouldResizeImage(node: Node, target: EventTarget | null) {
     node.contains(target) &&
     target.classList.contains('resize')
   );
+}
+
+export async function uploadBlobForImage(
+  page: Page,
+  blockId: string,
+  blob: Blob
+): Promise<string> {
+  const isLoading = isImageLoading(blockId);
+  if (isLoading) {
+    throw new Error('the image is already uploading!');
+  }
+  setImageLoading(blockId, true);
+  const storage = page.blob;
+  try {
+    const sourceId = await storage.set(blob);
+    const imageBlock = page.getBlockById(blockId);
+    if (!imageBlock) {
+      throw new Error('the attachment model is not found!');
+    }
+    if (!(imageBlock instanceof ImageBlockModel)) {
+      console.error(imageBlock);
+      throw new Error('the model is not an image model!');
+    }
+    page.withoutTransact(() => {
+      page.updateBlock(imageBlock, {
+        sourceId,
+      } satisfies Partial<ImageBlockProps>);
+    });
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      toast(
+        `Failed to upload attachment! ${error.message || error.toString()}`
+      );
+    }
+  } finally {
+    setImageLoading(blockId, false);
+  }
+  return blockId;
+}
+
+const imageLoadingMap = new Set<string>();
+export function setImageLoading(blockId: string, loading: boolean) {
+  if (loading) {
+    imageLoadingMap.add(blockId);
+  } else {
+    imageLoadingMap.delete(blockId);
+  }
+}
+
+export function isImageLoading(blockId: string) {
+  return imageLoadingMap.has(blockId);
 }

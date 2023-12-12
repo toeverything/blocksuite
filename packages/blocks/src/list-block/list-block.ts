@@ -27,7 +27,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   readonly attributeRenderer = affineAttributeRenderer;
 
   @state()
-  private _isCollapsedWhenReadOnly = !!this.model?.collapsed ?? false;
+  private _isCollapsedWhenReadOnly = !!this.model?.collapsed;
 
   private _select() {
     const selection = this.host.selection;

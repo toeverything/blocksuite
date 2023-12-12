@@ -196,18 +196,13 @@ export class EdgelessClipboardController implements ReactiveController {
 
     if (isPureFileInClipboard(data)) {
       const files = data.files;
-      if (files.length === 0) {
-        return;
-      }
-      const res: { file: File; sourceId: string }[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (file.type.startsWith('image')) {
-          const sourceId = await this.page.blob.set(file);
-          res.push({ file, sourceId });
-        }
-      }
-      await this.host.addImages(res);
+      if (files.length === 0) return;
+
+      const imageFiles = [...files].filter(file =>
+        file.type.startsWith('image/')
+      );
+      await this.host.addImages(imageFiles);
+
       return;
     }
 

@@ -22,11 +22,11 @@ import {
   getViewportFromSession,
   saveViewportToSession,
 } from '../../_common/utils/edgeless.js';
-import type {
-  EdgelessElement,
-  EdgelessTool,
+import {
+  type EdgelessElement,
+  type EdgelessTool,
   Point,
-  Selectable,
+  type Selectable,
 } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
@@ -38,7 +38,14 @@ import {
 import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
 import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
-import type { ImageBlockModel } from '../../image-block/index.js';
+import {
+  SURFACE_IMAGE_CARD_HEIGHT,
+  SURFACE_IMAGE_CARD_WIDTH,
+} from '../../image-block/components/image-card.js';
+import type {
+  ImageBlockModel,
+  ImageBlockProps,
+} from '../../image-block/index.js';
 import type { FrameBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
@@ -496,45 +503,65 @@ export class EdgelessPageBlockComponent extends BlockElement<
     );
   }
 
-  async addImages(
-    fileInfos: {
-      file: File;
-      sourceId: string;
-    }[],
-    point?: Point
-  ) {
-    const models: Partial<ImageBlockModel>[] = [];
-    for (const { file, sourceId } of fileInfos) {
-      const size = await readImageSize(file);
-      models.push({
-        flavour: IMAGE,
-        sourceId,
-        ...size,
-      });
-    }
+  async addImages(files: File[], point?: Point): Promise<string[]> {
+    const imageFiles = [...files].filter(file =>
+      file.type.startsWith('image/')
+    );
 
-    const center = Vec.toVec(point ?? this.surface.viewport.center);
+    let { x, y } = this.surface.viewport.center;
+    if (point) [x, y] = this.surface.toModelCoord(point.x, point.y);
 
-    const ids = models.map(model => {
+    const dropInfos: { point: Point; blockId: string }[] = [];
+
+    // create image cards without image data
+    imageFiles.map(file => {
+      const point = new Point(x, y);
+      const center = Vec.toVec(point);
+      console.log(center);
       const bound = Bound.fromCenter(
         center,
-        model.width ?? 0,
-        model.height ?? 0
+        SURFACE_IMAGE_CARD_WIDTH,
+        SURFACE_IMAGE_CARD_HEIGHT
       );
-      return this.surface.addElement(
+      const blockId = this.surface.addElement(
         IMAGE,
         {
+          size: file.size,
           xywh: bound.serialize(),
-          sourceId: model.sourceId,
         },
         this.surface.model
       );
+      dropInfos.push({ point, blockId });
     });
 
+    // upload image data and update the image model
+    const uploadPromises = imageFiles.map(async (file, index) => {
+      const { point, blockId } = dropInfos[index];
+      const sourceId = await this.page.blob.set(file);
+      const imageSize = await readImageSize(file);
+      const center = Vec.toVec(point);
+      console.log(center);
+      const bound = Bound.fromCenter(center, imageSize.width, imageSize.height);
+
+      this.page.withoutTransact(() => {
+        this.surface.updateElement(blockId, {
+          sourceId,
+          xywh: bound.serialize(),
+          ...imageSize,
+        } satisfies Partial<ImageBlockProps>);
+      });
+    });
+
+    await Promise.all(uploadPromises);
+
+    const blockIds = dropInfos.map(info => info.blockId);
+
     this.selectionManager.setSelection({
-      elements: ids.map(id => id),
+      elements: blockIds,
       editing: false,
     });
+
+    return blockIds;
   }
 
   /*

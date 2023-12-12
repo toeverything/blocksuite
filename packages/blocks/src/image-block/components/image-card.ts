@@ -6,6 +6,9 @@ import { humanFileSize } from '../../_common/utils/math.js';
 import { FailedImageIcon, ImageIcon, LoadingIcon } from '../styles.js';
 
 const ELEMENT_TAG = 'affine-image-block-card' as const;
+export const SURFACE_IMAGE_CARD_WIDTH = 220;
+export const SURFACE_IMAGE_CARD_HEIGHT = 122;
+export const NOTE_IMAGE_CARD_HEIGHT = 78;
 
 export enum ImageState {
   Ready,
@@ -66,8 +69,10 @@ export class AffinePageImageCard extends ShadowlessElement {
   imageSize = -1;
 
   override render() {
-    const width = this.isInSurface ? '220px' : '100%';
-    const height = this.isInSurface ? '122px' : '78px';
+    const width = this.isInSurface ? `${SURFACE_IMAGE_CARD_WIDTH}px` : '100%';
+    const height = this.isInSurface
+      ? `${SURFACE_IMAGE_CARD_HEIGHT}px`
+      : `${NOTE_IMAGE_CARD_HEIGHT}px`;
 
     const contentIcon =
       this.imageState === ImageState.Loading
@@ -85,7 +90,7 @@ export class AffinePageImageCard extends ShadowlessElement {
 
     const size =
       !isNaN(this.imageSize) && this.imageSize > 0
-        ? humanFileSize(this.imageSize)
+        ? humanFileSize(this.imageSize, true, 0)
         : null;
 
     return html`

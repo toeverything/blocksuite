@@ -20,12 +20,13 @@ export type FileDropRule = {
   maxFileSize?: number;
   embed: boolean;
   matcher: (file: File) => boolean;
-  handleDropInPage?: (
-    targetModel: BaseBlockModel,
+  handleDropInNote?: (
     files: File[],
+    targetModel: BaseBlockModel,
+
     place: 'before' | 'after'
   ) => void;
-  handleDropInEdgeless?: (point: Point, files: File[]) => void;
+  handleDropInSurface?: (files: File[], point: Point) => void;
 };
 
 export class FileDropManager {
@@ -122,7 +123,7 @@ export class FileDropManager {
     if (effectAllowed !== 'all') return;
 
     const { page } = this._blockService;
-    const { embed, handleDropInEdgeless, matcher } = this._fileDropRule;
+    const { matcher, handleDropInSurface, embed } = this._fileDropRule;
     const targetModel = this.targetModel;
     const place = this.type;
 
@@ -154,8 +155,8 @@ export class FileDropManager {
           }
         })
       );
-    } else if (!this.isPageMode && handleDropInEdgeless) {
-      handleDropInEdgeless(this._point, matchedFiles);
+    } else if (!this.isPageMode && handleDropInSurface) {
+      handleDropInSurface(matchedFiles, this._point);
     }
 
     this._point = null;

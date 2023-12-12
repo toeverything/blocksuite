@@ -90,6 +90,8 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
   if (!model.page.schema.flavourSchemaMap.has('affine:attachment'))
     throw new Error('The attachment flavour is not supported!');
 
+  if (!model.sourceId) throw new Error('Image data not aviailable');
+
   const sourceId = model.sourceId;
   assertExists(sourceId);
   const { saveImageData, getAttachmentData } = withTempBlobData();
