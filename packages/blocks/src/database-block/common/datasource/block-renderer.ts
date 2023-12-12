@@ -1,4 +1,4 @@
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -45,7 +45,7 @@ export class BlockRenderer
   public view!: DataViewTableManager | DataViewKanbanManager;
   @property({ attribute: false })
   public rowId!: string;
-  root?: BlockSuiteRoot;
+  root?: EditorHost;
 
   get model() {
     return this.root?.page.getBlockById(this.rowId);
@@ -53,7 +53,7 @@ export class BlockRenderer
 
   public override connectedCallback() {
     super.connectedCallback();
-    this.root = this.closest('block-suite-root') ?? undefined;
+    this.root = this.closest('editor-host') ?? undefined;
     this._disposables.addFromEvent(
       this,
       'keydown',

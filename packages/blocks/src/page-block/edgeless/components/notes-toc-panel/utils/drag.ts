@@ -1,68 +1,31 @@
 import type { Page } from '@blocksuite/store';
 
 import { on, once } from '../../../../../_common/utils/index.js';
-import { lastN } from '../../../../../_common/utils/iterable.js';
-import type { NoteBlockModel } from '../../../../../models.js';
-import { TOCNoteCard } from '../toc-card.js';
+import { type TOCNoteCard } from '../toc-card.js';
 import type { TOCNotesPanel } from '../toc-panel.js';
 
 /**
  * start drag notes
  * @param notes notes to drag
  */
-export function startDragging(
-  notes: {
-    note: NoteBlockModel;
-    element: TOCNoteCard;
-    index: number;
-    number: number;
-  }[],
-  options: {
-    width: number;
-    onDragEnd?: (insertIndex?: number) => void;
-    onDragMove?: (insertIdx?: number) => void;
-    tocListContainer: HTMLElement;
-    doc: Document;
-    host: Document | HTMLElement;
-    container: TOCNotesPanel;
-    page: Page;
-    start: {
-      x: number;
-      y: number;
-    };
-  }
-) {
-  const {
-    doc,
-    host,
-    container,
-    page,
-    onDragMove,
-    onDragEnd,
-    tocListContainer,
-    start,
-  } = options;
-  const cardElements = lastN(notes, 2).map((note, idx, arr) => {
-    const el = new TOCNoteCard();
-
-    el.page = page;
-    el.note = note.note;
-    el.index = note.index;
-    el.number = note.number;
-    el.status = 'dragging';
-    el.stackOrder = arr.length - 1 - idx;
-    el.pos = start;
-    el.width = options.width;
-
-    return el;
-  });
+export function startDragging(options: {
+  onDragEnd?: (insertIndex?: number) => void;
+  onDragMove?: (insertIdx?: number, indicatorTranslateY?: number) => void;
+  tocListContainer: HTMLElement;
+  doc: Document;
+  host: Document | HTMLElement;
+  container: TOCNotesPanel;
+  page: Page;
+}) {
+  const { doc, host, container, onDragMove, onDragEnd, tocListContainer } =
+    options;
   const maskElement = createMaskElement(doc);
   const listContainerRect = tocListContainer.getBoundingClientRect();
   const children = Array.from(tocListContainer.children) as TOCNoteCard[];
   let idx: undefined | number;
+  let indicatorTranslateY: undefined | number;
 
   container.renderRoot.appendChild(maskElement);
-  container.renderRoot.append(...cardElements);
 
   const insideListContainer = (e: MouseEvent) => {
     return (
@@ -74,16 +37,9 @@ export function startDragging(
   };
 
   const disposeMove = on(container, 'mousemove', e => {
-    cardElements.forEach(el => {
-      el.pos = {
-        x: e.clientX,
-        y: e.clientY,
-      };
-    });
-
     if (!insideListContainer(e)) {
       idx = undefined;
-      onDragMove?.(idx);
+      onDragMove?.(idx, 0);
       return;
     }
 
@@ -98,7 +54,12 @@ export function startDragging(
 
       if (e.clientY >= topBoundary && e.clientY <= bottomBoundary) {
         idx = e.clientY > midBoundary ? idx + 1 : idx;
-        onDragMove?.(idx);
+
+        indicatorTranslateY =
+          e.clientY > midBoundary ? bottomBoundary : topBoundary;
+        indicatorTranslateY -= listContainerRect.top;
+
+        onDragMove?.(idx, indicatorTranslateY);
         return;
       }
 
@@ -113,7 +74,6 @@ export function startDragging(
     if (ended) return;
 
     ended = true;
-    cardElements.forEach(child => container.renderRoot.removeChild(child));
     container.renderRoot.removeChild(maskElement);
 
     disposeMove();

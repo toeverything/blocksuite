@@ -9,7 +9,7 @@ import type { TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 import { WithDisposable } from '../with-disposable.js';
-import type { BlockSuiteRoot } from './lit-root.js';
+import type { EditorHost } from './lit-host.js';
 import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';
 
@@ -19,7 +19,7 @@ export class BlockElement<
   WidgetName extends string = string,
 > extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  host!: EditorHost;
 
   @property({ attribute: false })
   model!: Model;
@@ -65,13 +65,13 @@ export class BlockElement<
   get parentBlockElement() {
     const parentElement = this.parentElement;
     assertExists(parentElement);
-    const nodeView = this.root.view.getNodeView(parentElement);
+    const nodeView = this.host.view.getNodeView(parentElement);
     assertExists(nodeView);
     return nodeView.view as BlockElement;
   }
 
   get childBlockElements() {
-    const children = this.root.view.getChildren(this.path);
+    const children = this.host.view.getChildren(this.path);
     return children
       .filter(child => child.type === 'block')
       .map(child => child.view as BlockElement);
@@ -85,23 +85,23 @@ export class BlockElement<
     return Object.keys(this.widgets).reduce((mapping, key) => {
       return {
         ...mapping,
-        [key]: this.root.view.viewFromPath('widget', [...this.path, key]),
+        [key]: this.host.view.viewFromPath('widget', [...this.path, key]),
       };
     }, {});
   }
 
   get service(): Service | undefined {
-    return this.root.std.spec.getService(this.model.flavour) as
+    return this.host.std.spec.getService(this.model.flavour) as
       | Service
       | undefined;
   }
 
   get selection() {
-    return this.root.selection;
+    return this.host.selection;
   }
 
   get std() {
-    return this.root.std;
+    return this.host.std;
   }
 
   handleEvent = (
@@ -118,7 +118,7 @@ export class BlockElement<
           : undefined,
       path: options?.global || options?.flavour ? undefined : this.path,
     };
-    this._disposables.add(this.root.event.add(name, handler, config));
+    this._disposables.add(this.host.event.add(name, handler, config));
   };
 
   bindHotKey(
@@ -134,11 +134,15 @@ export class BlockElement<
           : undefined,
       path: options?.global || options?.flavour ? undefined : this.path,
     };
-    this._disposables.add(this.root.event.bindHotkey(keymap, config));
+    this._disposables.add(this.host.event.bindHotkey(keymap, config));
   }
 
-  renderModel = (model: BaseBlockModel): TemplateResult | null => {
-    return this.root.renderModel(model);
+  renderModel = (model: BaseBlockModel): TemplateResult => {
+    return this.host.renderModel(model);
+  };
+
+  renderModelChildren = (model: BaseBlockModel): TemplateResult => {
+    return this.host.renderModelChildren(model);
   };
 
   protected override async getUpdateComplete(): Promise<boolean> {
@@ -150,7 +154,7 @@ export class BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.path = this.root.view.calculatePath(this);
+    this.path = this.host.view.calculatePath(this);
 
     this._disposables.add(
       this.model.propsUpdated.on(() => {
@@ -165,7 +169,7 @@ export class BlockElement<
     );
 
     this._disposables.add(
-      this.root.selection.slots.changed.on(selections => {
+      this.host.selection.slots.changed.on(selections => {
         const selection = selections.find(selection => {
           return PathFinder.equals(selection.path, this.path);
         });

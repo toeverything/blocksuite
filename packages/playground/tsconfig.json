@@ -13,12 +13,11 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
-    "jsx": "react-jsx",
     "experimentalDecorators": true,
     "composite": false,
     "paths": {
       // Why? See https://github.com/DimensionDev/Maskbook/blob/2a042633c5bde18dd97a21d34e4943c8c4efa514/tsconfig.json#L33-L67
-      "@blocksuite/editor": ["../editor/src"],
+      "@blocksuite/presets": ["../presets/src"],
       "@blocksuite/blocks": ["../blocks/src"],
       "@blocksuite/blocks/*": ["../blocks/src/*"],
       "@blocksuite/global/*": ["../global/src/*"],

@@ -5,6 +5,7 @@ import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { ClipboardItem } from '../../../packages/blocks/src/_legacy/clipboard/clipboard-item.js';
+import type { RichText } from '../../../packages/blocks/src/index.js';
 import {
   type CssVariableName,
   type DatabaseBlockModel,
@@ -14,11 +15,10 @@ import {
 } from '../../../packages/blocks/src/index.js';
 import { assertExists } from '../../../packages/global/src/utils.js';
 import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
-import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import {
-  type VirgoRootElement,
-  type VRange,
+  type InlineRange,
+  type InlineRootElement,
 } from '../../../packages/virgo/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
@@ -39,7 +39,7 @@ export const defaultPlaygroundURL = new URL(`http://localhost:5173/starter/`);
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
-const RICH_TEXT_SELECTOR = '.virgo-editor';
+const RICH_TEXT_SELECTOR = '.inline-editor';
 
 function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
@@ -85,7 +85,7 @@ async function initEmptyEditor({
           throw new Error('Cannot find app root element(#app).');
         }
         const createEditor = () => {
-          const editor = document.createElement('editor-container');
+          const editor = document.createElement('affine-editor-container');
           editor.page = page;
           editor.autofocus = true;
           editor.slots.pageLinkClicked.on(({ pageId }) => {
@@ -96,9 +96,6 @@ async function initEmptyEditor({
             editor.page = newPage;
           });
           appRoot.append(editor);
-          editor.createBlockHub().then(blockHub => {
-            document.body.appendChild(blockHub);
-          });
           return editor;
         };
         const editor = createEditor();
@@ -107,7 +104,7 @@ async function initEmptyEditor({
         const debugMenu: DebugMenu = document.createElement('debug-menu');
         debugMenu.workspace = workspace;
         debugMenu.editor = editor;
-        debugMenu.contentParser = editor.createContentParser();
+        debugMenu.contentParser = new window.ContentParser(page);
         document.body.appendChild(debugMenu);
         window.debugMenu = debugMenu;
         window.editor = editor;
@@ -143,7 +140,7 @@ async function initEmptyEditor({
 }
 
 export const getEditorLocator = (page: Page) => {
-  return page.locator('editor-container').nth(currentEditorIndex);
+  return page.locator('affine-editor-container').nth(currentEditorIndex);
 };
 export const getBlockHub = (page: Page) => {
   return page.locator('affine-block-hub').nth(currentEditorIndex);
@@ -550,7 +547,7 @@ export async function focusDatabaseTitle(page: Page) {
       throw new Error('Cannot find database title');
     }
 
-    dbTitle.vEditor.focusEnd();
+    dbTitle.inlineEditor!.focusEnd();
   });
   await waitNextFrame(page);
 }
@@ -602,10 +599,10 @@ export async function focusRichText(
 export async function focusRichTextEnd(page: Page, i = 0) {
   await page.evaluate(
     ([i]) => {
-      const editor = document.querySelectorAll('editor-container')[i];
+      const editor = document.querySelectorAll('affine-editor-container')[i];
       const richTexts = Array.from(editor.querySelectorAll('rich-text'));
 
-      richTexts[i].vEditor?.focusEnd();
+      richTexts[i].inlineEditor?.focusEnd();
     },
     [i, currentEditorIndex]
   );
@@ -685,37 +682,37 @@ export async function initParagraphsByCount(page: Page, count: number) {
   await resetHistory(page);
 }
 
-export async function getVirgoSelectionIndex(page: Page) {
+export async function getInlineSelectionIndex(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
 
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    const index = component?.vEditor?.getVRange()?.index;
+    const index = component?.inlineEditor?.getInlineRange()?.index;
     return index !== undefined ? index : -1;
   });
 }
 
-export async function getVirgoSelectionText(page: Page) {
+export async function getInlineSelectionText(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    return component?.vEditor?.yText.toString() ?? '';
+    return component?.inlineEditor?.yText.toString() ?? '';
   });
 }
 
-export async function getSelectedTextByVirgo(page: Page) {
+export async function getSelectedTextByInlineEditor(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
 
-    const vRange = component?.vEditor?.getVRange();
-    if (!vRange) return '';
+    const inlineRange = component?.inlineEditor?.getInlineRange();
+    if (!inlineRange) return '';
 
-    const { index, length } = vRange;
-    return component?.vEditor?.yText.toString().slice(index, length) || '';
+    const { index, length } = inlineRange;
+    return component?.inlineEditor?.yText.toString().slice(index, length) || '';
   });
 }
 
@@ -733,18 +730,20 @@ export async function getSelectedText(page: Page) {
       ) || [];
 
     components.forEach(component => {
-      const vRange = component.vEditor?.getVRange();
-      if (!vRange) return;
-      const { index, length } = vRange;
+      const inlineRange = component.inlineEditor?.getInlineRange();
+      if (!inlineRange) return;
+      const { index, length } = inlineRange;
       content +=
-        component?.vEditor?.yText.toString().slice(index, index + length) || '';
+        component?.inlineEditor?.yText
+          .toString()
+          .slice(index, index + length) || '';
     });
 
     return content;
   });
 }
 
-export async function setVRangeInSelectedRichText(
+export async function setInlineRangeInSelectedRichText(
   page: Page,
   index: number,
   length: number
@@ -756,7 +755,7 @@ export async function setVRangeInSelectedRichText(
       const range = selection.getRangeAt(0);
       const component =
         range.startContainer.parentElement?.closest('rich-text');
-      component?.vEditor?.setVRange({
+      component?.inlineEditor?.setInlineRange({
         index,
         length,
       });
@@ -766,18 +765,22 @@ export async function setVRangeInSelectedRichText(
   await waitNextFrame(page);
 }
 
-export async function setVRangeInVEditor(page: Page, vRange: VRange, i = 0) {
+export async function setInlineRangeInInlineEditor(
+  page: Page,
+  inlineRange: InlineRange,
+  i = 0
+) {
   await page.evaluate(
-    ({ i, vRange }) => {
-      const vEditor = document.querySelectorAll<VirgoRootElement>(
-        '[data-virgo-root="true"]'
-      )[i]?.virgoEditor;
-      if (!vEditor) {
-        throw new Error('Cannot find vEditor');
+    ({ i, inlineRange }) => {
+      const inlineEditor = document.querySelectorAll<InlineRootElement>(
+        '[data-v-root="true"]'
+      )[i]?.inlineEditor;
+      if (!inlineEditor) {
+        throw new Error('Cannot find inline editor');
       }
-      vEditor.setVRange(vRange);
+      inlineEditor.setInlineRange(inlineRange);
     },
-    { i, vRange }
+    { i, inlineRange }
   );
   await waitNextFrame(page);
 }
@@ -852,14 +855,14 @@ export async function setSelection(
       const anchorRichText = document.querySelector<RichText>(
         `[data-block-id="${anchorBlockId}"] rich-text`
       )!;
-      const anchorRichTextRange = anchorRichText.vEditor.toDomRange({
+      const anchorRichTextRange = anchorRichText.inlineEditor!.toDomRange({
         index: anchorOffset,
         length: 0,
       })!;
       const focusRichText = document.querySelector<RichText>(
         `[data-block-id="${focusBlockId}"] rich-text`
       )!;
-      const focusRichTextRange = focusRichText.vEditor.toDomRange({
+      const focusRichTextRange = focusRichText.inlineEditor!.toDomRange({
         index: focusOffset,
         length: 0,
       })!;
@@ -989,7 +992,7 @@ export async function getIndexCoordinate(
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any;
-      const domRange = richText.vEditor.toDomRange({
+      const domRange = richText.inlineEditor.toDomRange({
         index: vIndex,
         length: 0,
       });
@@ -1008,7 +1011,7 @@ export async function getIndexCoordinate(
   return coord;
 }
 
-export function virgoEditorInnerTextToString(innerText: string): string {
+export function inlineEditorInnerTextToString(innerText: string): string {
   return innerText.replace('\u200B', '').trim();
 }
 
@@ -1027,7 +1030,7 @@ export async function focusTitle(page: Page) {
     if (!defaultPageComponent) {
       throw new Error('default page component not found');
     }
-    defaultPageComponent.titleVEditor.focusEnd();
+    defaultPageComponent.titleInlineEditor.focusEnd();
   }, currentEditorIndex);
   await waitNextFrame(page);
 }
@@ -1049,7 +1052,7 @@ export async function shamefullyBlurActiveElement(page: Page) {
 
 /**
  * FIXME:
- * Sometimes virgo state is not updated in time. Bad case like below:
+ * Sometimes inline editor state is not updated in time. Bad case like below:
  *
  * ```
  * await focusRichText(page);
@@ -1069,7 +1072,7 @@ export async function shamefullyBlurActiveElement(page: Page) {
  * ```
  *
  */
-export async function waitForVirgoStateUpdated(page: Page) {
+export async function waitForInlineEditorStateUpdated(page: Page) {
   return await page.evaluate(async () => {
     const selection = window.getSelection() as Selection;
 
@@ -1077,7 +1080,7 @@ export async function waitForVirgoStateUpdated(page: Page) {
 
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    await component?.vEditor?.waitForUpdate();
+    await component?.inlineEditor?.waitForUpdate();
   });
 }
 
@@ -1107,8 +1110,8 @@ export async function initImageState(page: Page) {
 
 export async function getCurrentEditorPageId(page: Page) {
   return await page.evaluate(index => {
-    const editor = document.querySelectorAll('editor-container')[index];
-    if (!editor) throw new Error("Can't find editor-container");
+    const editor = document.querySelectorAll('affine-editor-container')[index];
+    if (!editor) throw new Error("Can't find affine-editor-container");
     const pageId = editor.page.id;
     return pageId;
   }, currentEditorIndex);
@@ -1121,7 +1124,7 @@ export async function getCurrentHTMLTheme(page: Page) {
 
 export async function getCurrentEditorTheme(page: Page) {
   const mode = await page
-    .locator('editor-container')
+    .locator('affine-editor-container')
     .first()
     .evaluate(ele => {
       return (ele as unknown as Element & { themeObserver: ThemeObserver })
@@ -1135,7 +1138,7 @@ export async function getCurrentThemeCSSPropertyValue(
   property: CssVariableName
 ) {
   const value = await page
-    .locator('editor-container')
+    .locator('affine-editor-container')
     .evaluate((ele, property: CssVariableName) => {
       return (ele as unknown as Element & { themeObserver: ThemeObserver })
         .themeObserver.cssVariables?.[property];

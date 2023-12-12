@@ -13,13 +13,20 @@ export default defineConfig({
   },
   lang: 'en-US',
   title: 'BlockSuite',
-  description: 'The Block-Based Collaborative Framework',
+  description: 'Toolkit for Diverse Content Editing',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       {
+        text: 'Editors',
+        items: [
+          { text: '🚧 DocEditor', link: '#' },
+          { text: '🚧 EdgelessEditor', link: '#' },
+        ],
+      },
+      {
         text: 'Playground',
-        link: 'https://blocksuite-toeverything.vercel.app/starter/?init',
+        link: 'https://try-blocksuite.vercel.app/starter/?init',
       },
       { text: 'Docs', link: '/blocksuite-overview' },
       {
@@ -83,7 +90,11 @@ export default defineConfig({
           },
           { text: '@blocksuite/lit', link: '/api/@blocksuite/lit/index' },
           { text: '@blocksuite/virgo', link: '/api/@blocksuite/virgo/index' },
-          { text: '@blocksuite/editor', link: '/api/@blocksuite/editor/index' },
+          {
+            text: '@blocksuite/presets',
+            link: '/api/@blocksuite/presets/index',
+          },
+          // { text: '🚧 @blocksuite/blocks', link: '/api/@blocksuite/blocks/index' },
         ],
       },
       {

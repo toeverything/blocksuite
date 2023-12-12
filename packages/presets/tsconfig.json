@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "noEmit": true
+  },
+  "include": ["./src", "./tests"],
+  "references": [
+    {
+      "path": "../global"
+    },
+    {
+      "path": "../store"
+    },
+    {
+      "path": "../block-std"
+    },
+    {
+      "path": "../lit"
+    },
+    {
+      "path": "../blocks"
+    }
+  ]
+}

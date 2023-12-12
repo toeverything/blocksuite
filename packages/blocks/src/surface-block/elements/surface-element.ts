@@ -1,9 +1,9 @@
 import type { Y } from '@blocksuite/store';
 
 import type {
+  CanvasElementLocalRecordValues,
   EdgelessElement,
   GroupElement,
-  PhasorElementLocalRecordValues,
 } from '../../index.js';
 import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
 import type { Renderer } from '../renderer.js';
@@ -18,14 +18,14 @@ import {
   type XYWH,
 } from '../utils/xywh.js';
 import type {
+  CanvasElementType,
   HitTestOptions,
   IEdgelessElement,
-  PhasorElementType,
 } from './edgeless-element.js';
 
 export interface ISurfaceElement {
   id: string;
-  type: PhasorElementType;
+  type: CanvasElementType;
   xywh: SerializedXYWH;
   index: string;
   seed: number;
@@ -72,7 +72,7 @@ export abstract class SurfaceElement<
   yMap: Y.Map<unknown>;
 
   protected options: {
-    getLocalRecord: (id: string) => PhasorElementLocalRecordValues | undefined;
+    getLocalRecord: (id: string) => CanvasElementLocalRecordValues | undefined;
     onElementUpdated: (update: {
       id: string;
       props: Record<string, unknown>;
@@ -83,10 +83,8 @@ export abstract class SurfaceElement<
     ) => void;
     pickById: (id: string) => EdgelessElement | null;
     getGroupParent: (element: string | EdgelessElement) => GroupElement;
-    setGroupParent: (
-      element: string | EdgelessElement,
-      group: GroupElement
-    ) => void;
+    setGroupParent: (element: string, group: GroupElement) => void;
+    removeElement: (id: string) => void;
     selectionManager?: EdgelessSelectionManager;
   };
   protected renderer: Renderer | null = null;
@@ -147,7 +145,7 @@ export abstract class SurfaceElement<
     return (this.yMap.get('batch') as T['batch']) ?? null;
   }
 
-  get gridBound() {
+  get elementBound() {
     if (this.rotate) {
       return Bound.from(getBoundsWithRotation(this));
     }

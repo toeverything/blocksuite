@@ -13,7 +13,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  calcDropTarget,
   getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getCurrentNativeRange,
@@ -37,11 +36,13 @@ import {
   type DragHandleOption,
   DragHandleOptionsRunner,
   type DropResult,
+  type DropType,
   HOVER_DRAG_HANDLE_GRABBER_WIDTH,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
 import {
+  calcDropTarget,
   captureEventTarget,
   containBlock,
   containChildBlock,
@@ -79,7 +80,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   draggingElements: BlockElement[] = [];
   dropBlockId = '';
-  dropBefore = false;
+  dropType: DropType | null = null;
   dragging = false;
   dragPreview: DragPreview | null = null;
   dropIndicator: DropIndicator | null = null;
@@ -123,9 +124,9 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   get selectedBlocks() {
-    return this.root.selection.find('text')
-      ? this.root.selection.filter('text')
-      : this.root.selection.filter('block');
+    return this.host.selection.find('text')
+      ? this.host.selection.filter('text')
+      : this.host.selection.filter('block');
   }
 
   clearRaf() {
@@ -187,10 +188,9 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.dropBlockId = blockId;
 
     let rect = null;
-    let targetElement = null;
     const model = closestBlockElement.model;
 
-    const isDatabase = matchFlavours(model, ['affine:database'] as const);
+    const isDatabase = matchFlavours(model, ['affine:database']);
     if (isDatabase) {
       return dropIndicator;
     }
@@ -203,6 +203,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       this.scale
     );
 
+    let dropType: DropType = 'before';
     if (result) {
       rect = result.rect;
       if (rect) {
@@ -211,19 +212,13 @@ export class AffineDragHandleWidget extends WidgetElement<
         rect.right = rect.right - state.containerOffset.x;
         rect.bottom = rect.bottom - state.containerOffset.y;
       }
-      targetElement = result.modelState.element;
-      this.dropBefore = result.type === 'before' ? true : false;
-    }
-
-    if (targetElement) {
-      const targetBlockId = targetElement.getAttribute(this.root.blockIdAttr);
-      if (targetBlockId) this.dropBlockId = targetBlockId;
+      dropType = result.dropType;
     }
 
     dropIndicator = {
       rect,
       dropBlockId: this.dropBlockId,
-      dropBefore: this.dropBefore,
+      dropType,
     };
 
     return dropIndicator;
@@ -236,7 +231,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   updateDropIndicator = (indicator: DropResult | null) => {
     this.dropBlockId = indicator?.dropBlockId ?? '';
-    this.dropBefore = indicator?.dropBefore ?? false;
+    this.dropType = indicator?.dropType ?? null;
     if (this.dropIndicator) {
       this.dropIndicator.rect = indicator?.rect ?? null;
     }
@@ -251,7 +246,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   resetDropResult = () => {
     this.dropBlockId = '';
-    this.dropBefore = false;
+    this.dropType = null;
     if (this.dropIndicator) this.dropIndicator.rect = null;
   };
 
@@ -314,7 +309,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       width = Math.max(width, element.getBoundingClientRect().width);
       const container = document.createElement('div');
       container.classList.add('affine-block-element');
-      render(this.root.renderModel(element.model), container);
+      render(this.host.renderModel(element.model), container);
       fragment.appendChild(container);
     });
 
@@ -387,7 +382,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   private _getBlockElementFromViewStore(path: string[]) {
-    return this.root.view.viewFromPath('block', path);
+    return this.host.view.viewFromPath('block', path);
   }
 
   private get _viewportOffset() {
@@ -417,7 +412,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   private _reset() {
     this.draggingElements = [];
     this.dropBlockId = '';
-    this.dropBefore = false;
+    this.dropType = null;
     this.lastDragPointerState = null;
     this.rafID = 0;
     this.dragging = false;
@@ -607,7 +602,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   private _setSelectedBlocks(blockElements: BlockElement[], noteId?: string) {
-    const { selection } = this.root;
+    const { selection } = this.host;
     const selections = blockElements.map(blockElement =>
       selection.getInstance('block', {
         path: blockElement.path,
@@ -631,8 +626,8 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   private get _rangeManager() {
-    assertExists(this.root.rangeManager);
-    return this.root.rangeManager;
+    assertExists(this.host.rangeManager);
+    return this.host.rangeManager;
   }
 
   private _removeHoverRect() {
@@ -641,6 +636,8 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   private _canEditing = (noteBlock: BlockElement) => {
+    if (noteBlock.page.id !== this.page.id) return false;
+
     if (isPageMode(this.page)) return true;
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
     const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
@@ -682,7 +679,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       return;
     }
 
-    const blockId = closestBlockElement.getAttribute(this.root.blockIdAttr);
+    const blockId = closestBlockElement.getAttribute(this.host.blockIdAttr);
     const blockPath = closestBlockElement.path;
     assertExists(blockId);
     assertExists(blockPath);
@@ -709,6 +706,10 @@ export class AffineDragHandleWidget extends WidgetElement<
   };
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
+    if (this.page.readonly) {
+      this.hide();
+      return;
+    }
     const state = ctx.get('pointerState');
 
     const { target } = state.raw;
@@ -762,7 +763,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       return;
     }
 
-    const { selection } = this.root;
+    const { selection } = this.host;
     const selectedBlocks = this.selectedBlocks;
 
     // Should clear selection if current block is the first selected block
@@ -874,7 +875,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   private _onDragEnd = () => {
     const targetBlockId = this.dropBlockId;
-    const shouldInsertBefore = this.dropBefore;
+    const dropType = this.dropType;
     const draggingElements = this.draggingElements;
 
     this.hide(true);
@@ -894,15 +895,23 @@ export class AffineDragHandleWidget extends WidgetElement<
       .map(element => getModelByBlockElement(element))
       .filter((x): x is BaseBlockModel => !!x);
     const targetBlock = this.page.getBlockById(targetBlockId);
-    const parent = this.page.getParent(targetBlockId);
+
+    const shouldInsertIn = dropType === 'in';
+    const parent = shouldInsertIn
+      ? targetBlock
+      : this.page.getParent(targetBlockId);
 
     if (targetBlock && parent && selectedBlocks.length > 0) {
-      this.page.moveBlocks(
-        selectedBlocks,
-        parent,
-        targetBlock,
-        shouldInsertBefore
-      );
+      if (shouldInsertIn) {
+        this.page.moveBlocks(selectedBlocks, targetBlock);
+      } else {
+        this.page.moveBlocks(
+          selectedBlocks,
+          parent,
+          targetBlock,
+          dropType === 'before'
+        );
+      }
     }
 
     // TODO: need a better way to update selection
@@ -980,7 +989,11 @@ export class AffineDragHandleWidget extends WidgetElement<
    */
   private _dragEndHandler: UIEventHandler = ctx => {
     this.clearRaf();
-    if (!this.dragging || this.draggingElements.length === 0) {
+    if (
+      !this.dragging ||
+      this.draggingElements.length === 0 ||
+      this.page.readonly
+    ) {
       this.hide(true);
       return false;
     }

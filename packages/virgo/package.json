@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/virgo",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "A micro editor.",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -16,8 +16,8 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "lit": "^3.0.2",
-    "yjs": "^13.6.8"
+    "lit": "^3.1.0",
+    "yjs": "^13.6.10"
   },
   "peerDependencies": {
     "lit": "^3.0.2",

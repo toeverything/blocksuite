@@ -30,17 +30,12 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
     super.connectedCallback();
 
     this.handleEvent('click', () => {
-      this.root.selection.set([
-        this.root.selection.getInstance('block', {
+      this.host.selection.set([
+        this.host.selection.getInstance('block', {
           path: this.path,
         }),
       ]);
     });
-  }
-
-  override firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
   override render() {
@@ -48,7 +43,7 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
     >
-      ${this.content}
+      ${this.renderModelChildren(this.model)}
     </div>`;
 
     return html`

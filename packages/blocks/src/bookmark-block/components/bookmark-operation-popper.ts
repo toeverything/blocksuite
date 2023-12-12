@@ -1,10 +1,10 @@
-import type { BlockStdProvider } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { BookmarkBlockModel } from '../bookmark-model.js';
 import { type MenuActionCallback, moreOperations } from './config.js';
 
 @customElement('bookmark-operation-menu')
@@ -37,13 +37,13 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!: BaseBlockModel;
+  model!: BookmarkBlockModel;
 
   @property({ attribute: false })
   onSelected?: MenuActionCallback;
 
   @property({ attribute: false })
-  std!: BlockStdProvider;
+  std!: BlockStdScope;
 
   override connectedCallback() {
     super.connectedCallback();

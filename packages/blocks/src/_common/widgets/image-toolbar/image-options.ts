@@ -1,4 +1,4 @@
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
@@ -25,16 +25,16 @@ export function ImageOptionsTemplate({
   model,
   blob,
   abortController,
-  root,
+  host,
 }: {
   ref?: RefOrCallback;
   model: ImageBlockModel;
-  blob: Blob;
+  blob?: Blob;
   abortController: AbortController;
   /**
    * @deprecated
    */
-  root: BlockSuiteRoot;
+  host: EditorHost;
 }) {
   const supportAttachment =
     model.page.schema.flavourSchemaMap.has('affine:attachment');
@@ -76,8 +76,9 @@ export function ImageOptionsTemplate({
         ${supportAttachment
           ? html`<icon-button
               size="32px"
-              ?hidden=${readonly}
+              ?hidden=${readonly || !blob}
               @click=${() => {
+                if (!blob) return;
                 abortController.abort();
                 turnImageIntoCardView(model, blob);
               }}
@@ -119,10 +120,12 @@ export function ImageOptionsTemplate({
         <icon-button
           size="32px"
           ?hidden=${readonly ||
+          !blob ||
           !model.page.awarenessStore.getFlag('enable_bultin_ledits')}
           @click="${() => {
+            if (!blob) return;
             abortController.abort();
-            openLeditsEditor(model, blob, root);
+            openLeditsEditor(model, blob, host);
           }}"
         >
           ${HighLightDuotoneIcon}

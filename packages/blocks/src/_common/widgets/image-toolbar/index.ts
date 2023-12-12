@@ -22,7 +22,7 @@ export class AffineImageToolbarWidget extends WidgetElement<ImageBlockComponent>
           model: imageBlock.model,
           blob: imageBlock.blob,
           abortController,
-          root: this.blockElement.root,
+          host: this.blockElement.host,
         }),
         computePosition: {
           referenceElement: imageContainer,

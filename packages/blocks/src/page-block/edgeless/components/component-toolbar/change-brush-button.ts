@@ -13,7 +13,7 @@ import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import { LineWidth } from '../../../../_common/utils/types.js';
 import type {
   BrushElement,
-  PhasorElementType,
+  CanvasElementType,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -104,7 +104,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   slots!: EdgelessSelectionSlots;
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
 
   @state()
   private _selectedColor: string | null = null;
@@ -122,7 +122,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.lineWidth !== size) {
-        this.surface.updateElement<PhasorElementType.BRUSH>(element.id, {
+        this.surface.updateElement<CanvasElementType.BRUSH>(element.id, {
           lineWidth: size,
         });
       }
@@ -133,7 +133,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
-        this.surface.updateElement<PhasorElementType.BRUSH>(element.id, {
+        this.surface.updateElement<CanvasElementType.BRUSH>(element.id, {
           color,
         });
       }
@@ -150,7 +150,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       this,
       this._colorPanel,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
       }
     );
     _disposables.add(this._colorPanelPopper);
@@ -173,7 +173,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       </edgeless-line-width-panel>
       <menu-divider .vertical=${true}></menu-divider>
       <edgeless-tool-icon-button
-        .tooltip=${this._popperShow ? '' : 'Color'}
+        .tooltip=${this._showPopper ? '' : 'Color'}
         .active=${false}
         .iconContainerPadding=${2}
         @click=${() => this._colorPanelPopper?.toggle()}

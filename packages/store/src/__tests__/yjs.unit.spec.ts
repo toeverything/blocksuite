@@ -1,28 +1,19 @@
 import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
-import { Boxed } from '../yjs/boxed.js';
-import { BlockSuiteDoc, ProxyManager } from '../yjs/index.js';
-
-const proxyManager = new ProxyManager();
+import type { Text } from '../reactive/index.js';
+import { popProp } from '../reactive/index.js';
+import { stashProp } from '../reactive/index.js';
+import { Boxed, createYProxy } from '../reactive/index.js';
 
 describe('blocksuite yjs', () => {
-  test('doc', () => {
-    const doc = new BlockSuiteDoc();
-    const map = doc.getMap('x');
-    const proxy = doc.getMapProxy<string, { x: number }>('x');
-    expect(proxy.x).toBeUndefined();
-    map.set('x', 1);
-    expect(proxy.x).toBe(1);
-  });
-
   describe('array', () => {
     test('proxy', () => {
       const ydoc = new Y.Doc();
       const arr = ydoc.getArray('arr');
       arr.push([0]);
 
-      const proxy = proxyManager.createYProxy(arr) as unknown[];
+      const proxy = createYProxy(arr) as unknown[];
       expect(arr.get(0)).toBe(0);
 
       proxy.push(1);
@@ -50,7 +41,7 @@ describe('blocksuite yjs', () => {
       map2.set('foo', 40);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const proxy = proxyManager.createYProxy<Record<string, any>>(map);
+      const proxy = createYProxy<Record<string, any>>(map);
 
       expect(proxy.num).toBe(0);
       expect(proxy.obj.foo).toBe(1);
@@ -90,10 +81,10 @@ describe('blocksuite yjs', () => {
       const text = new Y.Text('hello');
       inner.set('text', text);
 
-      const proxy = proxyManager.createYProxy<{ inner: { text: Y.Text } }>(map);
+      const proxy = createYProxy<{ inner: { text: Text } }>(map);
       proxy.inner = { ...proxy.inner };
-      expect(proxy.inner.text).toBeInstanceOf(Y.Text);
-      expect(proxy.inner.text.toJSON()).toBe('hello');
+      expect(proxy.inner.text.yText).toBeInstanceOf(Y.Text);
+      expect(proxy.inner.text.yText.toJSON()).toBe('hello');
     });
 
     test('with native wrapper', () => {
@@ -104,7 +95,7 @@ describe('blocksuite yjs', () => {
       const native = new Boxed(['hello', 'world']);
       inner.set('native', native.yMap);
 
-      const proxy = proxyManager.createYProxy<{
+      const proxy = createYProxy<{
         inner: {
           native: Boxed<string[]>;
           native2: Boxed<number>;
@@ -126,6 +117,62 @@ describe('blocksuite yjs', () => {
       expect(map.get('inner').get('native2').get('value')).toBe(0);
       native2.setValue(1);
       expect(map.get('inner').get('native2').get('value')).toBe(1);
+    });
+  });
+
+  describe('stash and pop', () => {
+    test('object', () => {
+      const ydoc = new Y.Doc();
+      const map = ydoc.getMap('map');
+      map.set('num', 0);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const proxy = createYProxy<Record<string, any>>(map);
+
+      expect(proxy.num).toBe(0);
+      stashProp(map, 'num');
+      proxy.num = 1;
+      expect(proxy.num).toBe(1);
+      expect(map.get('num')).toBe(0);
+      proxy.num = 2;
+      popProp(map, 'num');
+      expect(map.get('num')).toBe(2);
+    });
+
+    test('array', () => {
+      const ydoc = new Y.Doc();
+      const arr = ydoc.getArray('arr');
+      arr.push([0]);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const proxy = createYProxy<Record<string, any>>(arr);
+
+      expect(proxy[0]).toBe(0);
+      stashProp(arr, 0);
+      proxy[0] = 1;
+      expect(proxy[0]).toBe(1);
+      expect(arr.get(0)).toBe(0);
+      popProp(arr, 0);
+      expect(arr.get(0)).toBe(1);
+    });
+
+    test('nested', () => {
+      const ydoc = new Y.Doc();
+      const map = ydoc.getMap('map');
+      const arr = new Y.Array();
+      map.set('arr', arr);
+      arr.push([0]);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const proxy = createYProxy<Record<string, any>>(map);
+
+      expect(proxy.arr[0]).toBe(0);
+      stashProp(arr, 0);
+      proxy.arr[0] = 1;
+      expect(proxy.arr[0]).toBe(1);
+      expect(arr.get(0)).toBe(0);
+      popProp(arr, 0);
+      expect(arr.get(0)).toBe(1);
     });
   });
 });

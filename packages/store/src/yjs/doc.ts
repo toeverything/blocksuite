@@ -1,7 +1,7 @@
 import type { Transaction } from 'yjs';
 import * as Y from 'yjs';
 
-import { ProxyManager } from './proxy.js';
+import { createYProxy } from '../reactive/proxy.js';
 
 export type BlockSuiteDocAllowedValue =
   | Record<string, unknown>
@@ -10,7 +10,6 @@ export type BlockSuiteDocAllowedValue =
 export type BlockSuiteDocData = Record<string, BlockSuiteDocAllowedValue>;
 
 export class BlockSuiteDoc extends Y.Doc {
-  proxy = new ProxyManager();
   private _spaces: Y.Map<Y.Doc> = this.getMap('spaces');
 
   get spaces() {
@@ -41,7 +40,7 @@ export class BlockSuiteDoc extends Y.Doc {
       : never,
   >(key: Key): Value {
     const map = super.getMap(key);
-    return this.proxy.createYProxy(map);
+    return createYProxy(map);
   }
 
   getArrayProxy<
@@ -51,7 +50,7 @@ export class BlockSuiteDoc extends Y.Doc {
       : never,
   >(key: Key): Value {
     const array = super.getArray(key);
-    return this.proxy.createYProxy(array) as Value;
+    return createYProxy(array) as Value;
   }
 
   override transact<T>(f: (arg0: Transaction) => T, origin?: number | string) {

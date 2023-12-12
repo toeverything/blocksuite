@@ -97,10 +97,11 @@ export const popSideDetail = (ops: {
     document.querySelector('affine-doc-page') ??
     document.querySelector('affine-edgeless-page');
   assertExists(page);
+  const block = findFirstBlockParent(page) ?? page;
   const modal = createModal(page);
   // fit to the size of the page element
-  const cancel = autoUpdate(page, modal, () => {
-    computePosition(page, modal, {
+  const cancel = autoUpdate(block, modal, () => {
+    computePosition(block, modal, {
       middleware: [
         size({
           apply: ({ rects }) => {
@@ -131,4 +132,10 @@ export const popSideDetail = (ops: {
   };
   modal.onclick = close;
   modal.append(sideContainer);
+};
+const findFirstBlockParent = (ele: HTMLElement | null) => {
+  while (ele && ele.computedStyleMap().get('display')?.toString() !== 'block') {
+    ele = ele.parentElement;
+  }
+  return ele;
 };

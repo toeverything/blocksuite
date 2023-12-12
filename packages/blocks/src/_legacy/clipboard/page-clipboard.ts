@@ -59,7 +59,7 @@ export class PageClipboard implements Clipboard {
 
     let blocks = [];
     const focusedBlockModel = deleteModelsByTextSelection(
-      this._ele.root,
+      this._ele.host,
       textSelection
     );
     // This assert is unreliable
@@ -69,7 +69,7 @@ export class PageClipboard implements Clipboard {
       blocks = await textedClipboardData2Blocks(this._page, e.clipboardData);
     } else {
       const attachmentService =
-        this._ele.root.spec.getService('affine:attachment');
+        this._ele.host.spec.getService('affine:attachment');
       assertExists(attachmentService);
       assertInstanceOf(attachmentService, AttachmentService);
       const maxFileSize = attachmentService.maxFileSize;
@@ -89,8 +89,6 @@ export class PageClipboard implements Clipboard {
     await service.json2Block(focusedBlockModel, blocks, textSelection.from);
 
     this._page.captureSync();
-
-    this._page.slots.pasted.emit(blocks);
   };
 
   private _onCopy = async (ctx: UIEventStateContext) => {
@@ -101,12 +99,10 @@ export class PageClipboard implements Clipboard {
     await this._copyBlocksInPage();
 
     this._page.captureSync();
-
-    this._page.slots.copied.emit();
   };
 
   private async _copyBlocksInPage() {
-    return await copyBlocksInPage(this._ele.root);
+    return await copyBlocksInPage(this._ele.host);
   }
 
   private _onCut = async (ctx: UIEventStateContext) => {
@@ -116,7 +112,7 @@ export class PageClipboard implements Clipboard {
     if (textSelection) {
       e.preventDefault();
       await this._onCopy(ctx);
-      deleteModelsByTextSelection(this._ele.root, textSelection);
+      deleteModelsByTextSelection(this._ele.host, textSelection);
       return;
     }
     const blockSelections = this._ele.selection.filter('block');

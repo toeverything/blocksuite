@@ -1,33 +1,33 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import { ZERO_WIDTH_SPACE } from '../consts.js';
+import type { InlineEditor } from '../inline-editor.js';
 import type { NativePoint } from '../types.js';
 import {
   type BaseTextAttributes,
   findDocumentOrShadowRoot,
   isInEmbedElement,
 } from '../utils/index.js';
+import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
 import { transformInput } from '../utils/transform-input.js';
-import { isMaybeVRangeEqual } from '../utils/v-range.js';
-import type { VEditor } from '../virgo.js';
-import type { VBeforeinputHookCtx, VCompositionEndHookCtx } from './hook.js';
+import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
 
-export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
+export class EventService<TextAttributes extends BaseTextAttributes> {
   private _isComposing = false;
 
   private _previousAnchor: NativePoint | null = null;
   private _previousFocus: NativePoint | null = null;
 
-  constructor(public readonly editor: VEditor<TextAttributes>) {}
+  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
 
-  get vRangeProvider() {
-    return this.editor.vRangeProvider;
+  get inlineRangeProvider() {
+    return this.editor.inlineRangeProvider;
   }
 
   mount = () => {
     const rootElement = this.editor.rootElement;
 
-    if (!this.vRangeProvider) {
+    if (!this.inlineRangeProvider) {
       this.editor.disposables.addFromEvent(
         document,
         'selectionchange',
@@ -86,7 +86,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   private _onSelectionChange = () => {
     const rootElement = this.editor.rootElement;
-    const previousVRange = this.editor.getVRange();
+    const previousInlineRange = this.editor.getInlineRange();
     if (this._isComposing) {
       return;
     }
@@ -95,8 +95,8 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     const selection = selectionRoot.getSelection();
     if (!selection) return;
     if (selection.rangeCount === 0) {
-      if (previousVRange !== null) {
-        this.editor.setVRange(null, false);
+      if (previousInlineRange !== null) {
+        this.editor.setInlineRange(null, false);
       }
 
       return;
@@ -130,8 +130,8 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         this.editor.focusEnd();
         return;
       } else {
-        if (previousVRange !== null) {
-          this.editor.setVRange(null, false);
+        if (previousInlineRange !== null) {
+          this.editor.setInlineRange(null, false);
         }
         return;
       }
@@ -140,12 +140,12 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._previousAnchor = [range.startContainer, range.startOffset];
     this._previousFocus = [range.endContainer, range.endOffset];
 
-    const vRange = this.editor.toVRange(selection.getRangeAt(0));
-    if (!isMaybeVRangeEqual(previousVRange, vRange)) {
-      this.editor.setVRange(vRange, false);
+    const inlineRange = this.editor.toInlineRange(selection.getRangeAt(0));
+    if (!isMaybeInlineRangeEqual(previousInlineRange, inlineRange)) {
+      this.editor.setInlineRange(inlineRange, false);
     }
 
-    // avoid infinite syncVRange
+    // avoid infinite syncInlineRange
     if (
       ((range.startContainer.nodeType !== Node.TEXT_NODE ||
         range.endContainer.nodeType !== Node.TEXT_NODE) &&
@@ -156,7 +156,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       range.startContainer.nodeType === Node.COMMENT_NODE ||
       range.endContainer.nodeType === Node.COMMENT_NODE
     ) {
-      this.editor.syncVRange();
+      this.editor.syncInlineRange();
     }
   };
 
@@ -164,7 +164,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._isComposing = true;
     // embeds is not editable and it will break IME
     const embeds = this.editor.rootElement.querySelectorAll(
-      '[data-virgo-embed="true"]'
+      '[data-v-embed="true"]'
     );
     embeds.forEach(embed => {
       embed.removeAttribute('contenteditable');
@@ -178,13 +178,13 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
     if (this.editor.isReadonly || !this._isRangeCompletelyInRoot()) return;
 
-    const vRange = this.editor.getVRange();
-    if (!vRange) return;
+    const inlineRange = this.editor.getInlineRange();
+    if (!inlineRange) return;
 
-    let ctx: VCompositionEndHookCtx<TextAttributes> | null = {
-      vEditor: this.editor,
+    let ctx: CompositionEndHookCtx<TextAttributes> | null = {
+      inlineEditor: this.editor,
       raw: event,
-      vRange,
+      inlineRange,
       data: event.data,
       attributes: {} as TextAttributes,
     };
@@ -194,8 +194,8 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     }
     if (!ctx) return;
 
-    const { vRange: newVRange, data: newData } = ctx;
-    if (newVRange.index >= 0) {
+    const { inlineRange: newInlineRange, data: newData } = ctx;
+    if (newInlineRange.index >= 0) {
       const selection = window.getSelection();
       if (selection && selection.rangeCount !== 0) {
         const range = selection.getRangeAt(0);
@@ -205,10 +205,10 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         // IME will directly modify the DOM and is difficult to hijack and cancel.
         // We need to delete this part of the content and restore the selection.
         if (container instanceof Text) {
-          if (container.parentElement?.dataset.virgoText !== 'true') {
+          if (container.parentElement?.dataset.vText !== 'true') {
             container.remove();
           } else {
-            const [text] = this.editor.getTextPoint(newVRange.index);
+            const [text] = this.editor.getTextPoint(newInlineRange.index);
             const vText = text.parentElement?.closest('v-text');
             if (vText) {
               if (vText.str !== text.textContent) {
@@ -216,23 +216,23 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
               }
             } else {
               const forgedVText = text.parentElement?.closest(
-                '[data-virgo-text="true"]'
+                '[data-v-text="true"]'
               );
               if (forgedVText instanceof HTMLElement) {
-                if (forgedVText.dataset.virgoTextValue) {
-                  if (forgedVText.dataset.virgoTextValue !== text.textContent) {
-                    text.textContent = forgedVText.dataset.virgoTextValue;
+                if (forgedVText.dataset.vTextValue) {
+                  if (forgedVText.dataset.vTextValue !== text.textContent) {
+                    text.textContent = forgedVText.dataset.vTextValue;
                   }
                 } else {
                   throw new Error(
-                    'We detect a forged v-text node but it has no data-virgo-text-value attribute.'
+                    'We detect a forged v-text node but it has no data-v-text-value attribute.'
                   );
                 }
               }
             }
           }
 
-          const newRange = this.editor.toDomRange(newVRange);
+          const newRange = this.editor.toDomRange(newInlineRange);
           if (newRange) {
             assertExists(newRange);
             selection.removeAllRanges();
@@ -242,11 +242,11 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       }
 
       if (newData && newData.length > 0) {
-        this.editor.insertText(newVRange, newData, ctx.attributes);
+        this.editor.insertText(newInlineRange, newData, ctx.attributes);
 
-        this.editor.setVRange(
+        this.editor.setInlineRange(
           {
-            index: newVRange.index + newData.length,
+            index: newInlineRange.index + newData.length,
             length: 0,
           },
           false
@@ -265,7 +265,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     )
       return;
 
-    if (!this.editor.getVRange()) return;
+    if (!this.editor.getInlineRange()) return;
 
     const targetRanges = event.getTargetRanges();
     if (targetRanges.length > 0) {
@@ -273,20 +273,20 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       const range = document.createRange();
       range.setStart(staticRange.startContainer, staticRange.startOffset);
       range.setEnd(staticRange.endContainer, staticRange.endOffset);
-      const vRange = this.editor.toVRange(range);
+      const inlineRange = this.editor.toInlineRange(range);
 
-      if (!isMaybeVRangeEqual(this.editor.getVRange(), vRange)) {
-        this.editor.setVRange(vRange, false);
+      if (!isMaybeInlineRangeEqual(this.editor.getInlineRange(), inlineRange)) {
+        this.editor.setInlineRange(inlineRange, false);
       }
     }
 
-    const vRange = this.editor.getVRange();
-    if (!vRange) return;
+    const inlineRange = this.editor.getInlineRange();
+    if (!inlineRange) return;
 
-    let ctx: VBeforeinputHookCtx<TextAttributes> | null = {
-      vEditor: this.editor,
+    let ctx: BeforeinputHookCtx<TextAttributes> | null = {
+      inlineEditor: this.editor,
       raw: event,
-      vRange,
+      inlineRange: inlineRange,
       data: event.data,
       attributes: {} as TextAttributes,
     };
@@ -296,13 +296,13 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     }
     if (!ctx) return;
 
-    const { raw: newEvent, data, vRange: newVRange } = ctx;
+    const { raw: newEvent, data, inlineRange: newInlineRange } = ctx;
     transformInput<TextAttributes>(
       newEvent.inputType,
       data,
       ctx.attributes,
-      newVRange,
-      this.editor as VEditor
+      newInlineRange,
+      this.editor as InlineEditor
     );
   };
 
@@ -311,20 +311,20 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       !event.shiftKey &&
       (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
     ) {
-      const vRange = this.editor.getVRange();
-      if (!vRange || vRange.length !== 0) return;
+      const inlineRange = this.editor.getInlineRange();
+      if (!inlineRange || inlineRange.length !== 0) return;
 
       const prevent = () => {
         event.preventDefault();
         event.stopPropagation();
       };
 
-      const deltas = this.editor.getDeltasByVRange(vRange);
+      const deltas = this.editor.getDeltasByInlineRange(inlineRange);
       if (deltas.length === 2) {
         if (event.key === 'ArrowLeft' && this.editor.isEmbed(deltas[0][0])) {
           prevent();
-          this.editor.setVRange({
-            index: vRange.index - 1,
+          this.editor.setInlineRange({
+            index: inlineRange.index - 1,
             length: 1,
           });
         } else if (
@@ -332,27 +332,27 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
           this.editor.isEmbed(deltas[1][0])
         ) {
           prevent();
-          this.editor.setVRange({
-            index: vRange.index,
+          this.editor.setInlineRange({
+            index: inlineRange.index,
             length: 1,
           });
         }
       } else if (deltas.length === 1) {
         const delta = deltas[0][0];
         if (this.editor.isEmbed(delta)) {
-          if (event.key === 'ArrowLeft' && vRange.index - 1 >= 0) {
+          if (event.key === 'ArrowLeft' && inlineRange.index - 1 >= 0) {
             prevent();
-            this.editor.setVRange({
-              index: vRange.index - 1,
+            this.editor.setInlineRange({
+              index: inlineRange.index - 1,
               length: 1,
             });
           } else if (
             event.key === 'ArrowRight' &&
-            vRange.index + 1 <= this.editor.yTextLength
+            inlineRange.index + 1 <= this.editor.yTextLength
           ) {
             prevent();
-            this.editor.setVRange({
-              index: vRange.index,
+            this.editor.setInlineRange({
+              index: inlineRange.index,
               length: 1,
             });
           }

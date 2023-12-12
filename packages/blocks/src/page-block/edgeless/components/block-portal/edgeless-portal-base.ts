@@ -21,15 +21,26 @@ export class EdgelessPortalBase<
   edgeless!: EdgelessPageBlockComponent;
 
   protected renderModel(model: T) {
-    return this.surface.root.renderModel(this.surface.unwrap(model));
+    return this.surface.host.renderModel(this.surface.unwrap(model));
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
 
     this._disposables.add(
-      this.model.childrenUpdated.on(() => {
+      this.edgeless.slots.viewportUpdated.on(() => {
         this.requestUpdate();
+      })
+    );
+
+    this._disposables.add(
+      this.model.propsUpdated.on(event => {
+        this.edgeless.slots.elementUpdated.emit({
+          id: this.model.id,
+          props: {
+            [event.key]: this.model[event.key as keyof typeof this.model],
+          },
+        });
       })
     );
 

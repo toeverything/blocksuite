@@ -1,5 +1,4 @@
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { Page } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type {
   AttachmentBlockModel,
@@ -74,15 +73,11 @@ export function assertFlavours(model: { flavour: string }, allowed: string[]) {
   }
 }
 
-type BlockModelKey = keyof BlockModels;
-type Flavours<T> = T extends BlockModelKey[] ? BlockModels[T[number]] : never;
-type Writeable<T> = { -readonly [P in keyof T]: T[P] };
-
-export function matchFlavours<const Key extends readonly string[]>(
+export function matchFlavours<Key extends (keyof BlockModels)[]>(
   model: BaseBlockModel | null,
   expected: Key
-): model is Flavours<Writeable<Key>> {
-  return !!model && expected.includes(model.flavour);
+): model is BlockModels[Key[number]] {
+  return !!model && expected.includes(model.flavour as keyof BlockModels);
 }
 
 export function isInsideBlockByFlavour(

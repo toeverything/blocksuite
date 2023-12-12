@@ -3,14 +3,13 @@ import * as Y from 'yjs';
 import type { z } from 'zod';
 
 import { SYS_KEYS } from '../consts.js';
-import type { BlockSchema } from '../schema/base.js';
+import { native2Y } from '../reactive/index.js';
+import type { BaseBlockModel } from '../schema/base.js';
+import { type BlockSchema } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
-import type { YBlock } from '../workspace/block.js';
+import type { YBlock } from '../workspace/block/block.js';
 import type { Workspace } from '../workspace/index.js';
 import type { BlockProps, YBlocks } from '../workspace/page.js';
-import type { ProxyManager, ProxyOptions } from '../yjs/index.js';
-import { canToProxy, canToY } from '../yjs/index.js';
-import { Boxed, native2Y, Text } from '../yjs/index.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -27,6 +26,7 @@ export function assertValidChildren(
 
 export function syncBlockProps(
   schema: z.infer<typeof BlockSchema>,
+  model: BaseBlockModel,
   yBlock: YBlock,
   props: Partial<BlockProps>
 ) {
@@ -36,7 +36,8 @@ export function syncBlockProps(
     if (SYS_KEYS.has(key)) return;
     if (value === undefined) return;
 
-    yBlock.set(`prop:${key}`, propsToValue(value));
+    // @ts-ignore
+    model[key] = value;
   });
 
   // set default value
@@ -47,63 +48,9 @@ export function syncBlockProps(
       return;
     }
 
-    yBlock.set(`prop:${key}`, propsToValue(value));
+    // @ts-ignore
+    model[key] = native2Y(value);
   });
-}
-
-export function valueToProps(
-  value: unknown,
-  proxy: ProxyManager,
-  options: ProxyOptions<never>
-): unknown {
-  if (Boxed.is(value)) {
-    return new Boxed(value);
-  }
-
-  if (value instanceof Y.Text) {
-    return new Text(value);
-  }
-
-  if (canToProxy(value)) {
-    return proxy.createYProxy(value, options);
-  }
-
-  return value;
-}
-
-export function propsToValue(value: unknown): unknown {
-  if (value instanceof Boxed) {
-    return value.yMap;
-  }
-
-  if (value instanceof Text) {
-    return value.yText;
-  }
-
-  if (canToY(value)) {
-    return native2Y(value, true);
-  }
-
-  return value;
-}
-
-export function toBlockProps(
-  yBlock: YBlock,
-  proxy: ProxyManager,
-  options: ProxyOptions<Record<string, unknown>> = {}
-): Partial<BlockProps> {
-  const prefixedProps = yBlock.toJSON();
-  const props: Partial<BlockProps> = {};
-
-  Object.keys(prefixedProps).forEach(prefixedKey => {
-    if (prefixedKey.startsWith('prop:')) {
-      const key = prefixedKey.replace('prop:', '');
-      const realValue = yBlock.get(prefixedKey);
-      props[key] = valueToProps(realValue, proxy, options);
-    }
-  });
-
-  return props;
 }
 
 export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {

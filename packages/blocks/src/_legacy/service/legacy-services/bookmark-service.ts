@@ -1,8 +1,7 @@
 import { WebIcon16 } from '../../../_common/icons/text.js';
 import type { SerializedBlock } from '../../../_common/utils/types.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
-import { DefaultBanner } from '../../../bookmark-block/images/banners.js';
-import { cloneBookmarkProperties } from '../../../bookmark-block/utils.js';
+import { BookmarkDefaultImage } from '../../../bookmark-block/components/bookmark-default-image.js';
 import { BaseService } from '../service.js';
 
 export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
@@ -15,7 +14,7 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
       : '';
     const banner = block.image
       ? `<img class="bookmark-image" alt="image" src="${block.image}">`
-      : this.templateResult2String(DefaultBanner);
+      : this.templateResult2String(BookmarkDefaultImage());
     return `
   <figure class="affine-bookmark-block-container">
     <a href="${block.url}" class="affine-bookmark-link bookmark source">
@@ -25,7 +24,7 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
             ${icon}
           </div>
           <div class="affine-bookmark-title-content bookmark-title">${
-            block.bookmarkTitle || 'Bookmark'
+            block.title || 'Bookmark'
           }</div>
         </div>
         <div class="affine-bookmark-description bookmark-description">${
@@ -46,14 +45,21 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
   }
 
   override async block2markdown(block: BookmarkBlockModel) {
-    return `[${block.bookmarkTitle || 'Bookmark'}](${block.url})`;
+    return `[${block.title || 'Bookmark'}](${block.url})`;
   }
 
   override block2Json(
     block: BookmarkBlockModel,
     children: SerializedBlock[]
   ): SerializedBlock {
-    const clonedProps = cloneBookmarkProperties(block);
+    const clonedProps = block.keys.reduce(
+      (acc, key) => {
+        // @ts-ignore
+        acc[key] = block[key];
+        return acc;
+      },
+      {} as Record<string, unknown>
+    );
 
     return {
       flavour: block.flavour,

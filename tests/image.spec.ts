@@ -31,8 +31,8 @@ import {
   assertImageSize,
   assertRichDragButton,
   assertRichImage,
+  assertRichTextInlineRange,
   assertRichTexts,
-  assertRichTextVRange,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -165,7 +165,7 @@ test('should support the enter key of image caption', async ({ page }) => {
   await expect(caption).toHaveValue('abc');
 
   await assertRichTexts(page, ['123', '']);
-  await assertRichTextVRange(page, 0, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0, 0);
 });
 
 test('popup menu should follow position of image when scrolling', async ({

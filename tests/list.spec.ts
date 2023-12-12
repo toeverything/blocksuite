@@ -28,8 +28,8 @@ import {
   assertBlockCount,
   assertBlockType,
   assertListPrefix,
+  assertRichTextInlineRange,
   assertRichTexts,
-  assertRichTextVRange,
   assertStoreMatchJSX,
   assertTextContent,
 } from './utils/asserts.js';
@@ -80,7 +80,7 @@ test('convert to numbered list block', async ({ page }) => {
 
   const listSelector = '.affine-list-rich-text-wrapper';
   const bulletIconSelector = `${listSelector} > div`;
-  await assertTextContent(page, bulletIconSelector, /1 \./);
+  await assertTextContent(page, bulletIconSelector, /1\./);
 
   await undoByClick(page);
   // const numberIconSelector = `${listSelector} > svg`;
@@ -175,7 +175,7 @@ test('delete at start of list block', async ({ page }) => {
     'affine:list',
   ]);
   await waitNextFrame(page, 200);
-  await assertRichTextVRange(page, 1, 0, 0);
+  await assertRichTextInlineRange(page, 1, 0, 0);
 
   await undoByClick(page);
   await assertBlockChildrenFlavours(page, '1', [
@@ -583,7 +583,7 @@ test.describe('indent correctly when deleting list item', () => {
 
     await assertBlockChildrenIds(page, '3', ['4', '6']);
     await assertRichTexts(page, ['a', 'bc', 'd']);
-    await assertRichTextVRange(page, 1, 1);
+    await assertRichTextInlineRange(page, 1, 1);
   });
 
   test('merge two lists', async ({ page }) => {
@@ -669,7 +669,7 @@ test('delete list item with nested children items', async ({ page }) => {
   // 3
   // 4
 
-  await assertRichTextVRange(page, 0, 1);
+  await assertRichTextInlineRange(page, 0, 1);
   await assertRichTexts(page, ['12', '3', '4']);
   await assertBlockChildrenIds(page, '1', ['2', '4', '5']);
 });

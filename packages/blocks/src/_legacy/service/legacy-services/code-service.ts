@@ -4,8 +4,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
   getBlockElementByModel,
+  getInlineEditorByModel,
   getThemeMode,
-  getVirgoByModel,
 } from '../../../_common/utils/index.js';
 import type {
   BlockTransformContext,
@@ -104,9 +104,9 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     const text = lines.join('\n');
     focusedBlockModel.text?.insert(text, textRangePoint.index);
 
-    const vEditor = getVirgoByModel(focusedBlockModel);
-    assertExists(vEditor);
-    vEditor.setVRange({
+    const inlineEditor = getInlineEditorByModel(focusedBlockModel);
+    assertExists(inlineEditor);
+    inlineEditor.setInlineRange({
       index: textRangePoint.index + text.length,
       length: 0,
     });

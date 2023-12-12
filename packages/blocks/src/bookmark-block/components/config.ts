@@ -1,38 +1,27 @@
-import type { BaseBlockModel } from '@blocksuite/store';
 import { Slice, Workspace } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { toast } from '../../_common/components/toast.js';
 import {
-  BookmarkIcon,
   CaptionIcon,
   CopyIcon,
   DeleteIcon,
   DuplicateIcon,
   EditIcon,
-  EmbedWebIcon,
   LinkIcon,
   RefreshIcon,
 } from '../../_common/icons/index.js';
-import { getBlockElementByModel } from '../../_common/utils/index.js';
-import type { BookmarkBlockComponent } from '../bookmark-block.js';
-import type { BookmarkBlockModel, BookmarkProps } from '../bookmark-model.js';
-import { allowEmbed } from '../embed.js';
-import {
-  cloneBookmarkProperties,
-  reloadBookmarkBlock,
-  tryGetBookmarkAPI,
-} from '../utils.js';
+import type { BookmarkBlockModel } from '../bookmark-model.js';
 import type { BookmarkOperationMenu } from './bookmark-operation-popper.js';
 
 export type ConfigItem = {
   type: 'link' | 'card' | 'embed' | 'edit' | 'caption';
   icon: TemplateResult;
   tooltip: string;
-  showWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
-  disableWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
+  showWhen?: (model: BookmarkBlockModel) => boolean;
+  disableWhen?: (model: BookmarkBlockModel) => boolean;
   action: (
-    model: BaseBlockModel<BookmarkBlockModel>,
+    model: BookmarkBlockModel,
     /**
      * @deprecated
      */
@@ -56,7 +45,7 @@ export const config: ConfigItem[] = [
       const index = parent?.children.indexOf(model);
 
       const yText = new Workspace.Y.Text();
-      const insert = model.bookmarkTitle || model.caption || model.url;
+      const insert = model.title || model.caption || model.url;
       yText.insert(0, insert);
       yText.format(0, insert.length, { link: model.url });
       const text = new page.Text(yText);
@@ -72,34 +61,6 @@ export const config: ConfigItem[] = [
       model.page.deleteBlock(model);
       callback?.('link');
     },
-  },
-  {
-    type: 'card',
-    icon: BookmarkIcon,
-    tooltip: 'Turn into Card view',
-    showWhen: model =>
-      !model.page.readonly && model.type && model.type !== 'card',
-    action: (model, callback) => {
-      model.page.updateBlock<Partial<BookmarkProps>>(model, {
-        type: 'card',
-      });
-      callback?.('card');
-    },
-    divider: true,
-  },
-  {
-    type: 'embed',
-    icon: EmbedWebIcon,
-    tooltip: 'Turn into Embed view',
-    showWhen: model =>
-      !model.page.readonly && model.type !== 'embed' && allowEmbed(model.url),
-    action: (model, callback) => {
-      model.page.updateBlock<Partial<BookmarkProps>>(model, {
-        type: 'embed',
-      });
-      callback?.('embed');
-    },
-    divider: true,
   },
   {
     type: 'edit',
@@ -129,12 +90,12 @@ type MoreOperation = {
   icon: TemplateResult;
   label: string;
   action: (
-    model: BaseBlockModel<BookmarkBlockModel>,
+    model: BookmarkBlockModel,
     callback?: MenuActionCallback,
     element?: BookmarkOperationMenu
   ) => void;
-  showWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
-  disableWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
+  showWhen?: (model: BookmarkBlockModel) => boolean;
+  disableWhen?: (model: BookmarkBlockModel) => boolean;
   divider?: boolean;
 };
 
@@ -156,14 +117,19 @@ export const moreOperations: MoreOperation[] = [
     label: 'Duplicate',
     showWhen: model => !model.page.readonly,
     action: (model, callback) => {
-      const { page } = model;
+      const { page, url } = model;
 
       const parent = page.getParent(model);
       const index = parent?.children.indexOf(model);
 
-      const clonedProps = cloneBookmarkProperties(model);
-
-      page.addBlock('affine:bookmark', clonedProps, parent, index);
+      page.addBlock(
+        'affine:bookmark',
+        {
+          url,
+        },
+        parent,
+        index
+      );
 
       callback?.('duplicate');
     },
@@ -173,13 +139,7 @@ export const moreOperations: MoreOperation[] = [
     icon: RefreshIcon,
     label: 'Reload',
     showWhen: model => !model.page.readonly,
-    disableWhen: () => !tryGetBookmarkAPI(),
-    action: (model, callback) => {
-      reloadBookmarkBlock(
-        model,
-        getBlockElementByModel(model) as BookmarkBlockComponent,
-        true
-      );
+    action: (_, callback) => {
       callback?.('reload');
     },
   },

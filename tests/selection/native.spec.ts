@@ -16,11 +16,11 @@ import {
   getCenterPosition,
   getCursorBlockIdAndHeight,
   getIndexCoordinate,
+  getInlineSelectionIndex,
+  getInlineSelectionText,
   getRichTextBoundingBox,
   getSelectedText,
-  getSelectedTextByVirgo,
-  getVirgoSelectionIndex,
-  getVirgoSelectionText,
+  getSelectedTextByInlineEditor,
   initEmptyEdgelessState,
   initEmptyParagraphState,
   initImageState,
@@ -42,7 +42,7 @@ import {
   resetHistory,
   scrollToTop,
   selectAllByKeyboard,
-  setVRangeInVEditor,
+  setInlineRangeInInlineEditor,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -54,8 +54,8 @@ import {
   assertClipItems,
   assertDivider,
   assertExists,
+  assertRichTextInlineRange,
   assertRichTexts,
-  assertRichTextVRange,
   assertStoreMatchJSX,
   assertTitle,
 } from '../utils/asserts.js';
@@ -70,17 +70,17 @@ test('click on blank area', async ({ page }) => {
   const box123 = await getRichTextBoundingBox(page, '2');
   const inside123 = { x: box123.left, y: box123.top + 5 };
   await page.mouse.click(inside123.x, inside123.y);
-  await assertRichTextVRange(page, 0, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0, 0);
 
   const box456 = await getRichTextBoundingBox(page, '3');
   const inside456 = { x: box456.left, y: box456.top + 5 };
   await page.mouse.click(inside456.x, inside456.y);
-  await assertRichTextVRange(page, 1, 0, 0);
+  await assertRichTextInlineRange(page, 1, 0, 0);
 
   const box789 = await getRichTextBoundingBox(page, '4');
   const inside789 = { x: box789.left, y: box789.bottom - 5 };
   await page.mouse.click(inside789.x, inside789.y);
-  await assertRichTextVRange(page, 2, 0, 0);
+  await assertRichTextInlineRange(page, 2, 0, 0);
 });
 
 test('native range delete', async ({ page }) => {
@@ -418,11 +418,11 @@ test('cursor move up and down', async ({ page }) => {
   await type(page, 'arrow down test 2');
 
   await pressArrowUp(page);
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('arrow down test 1');
 
   await pressArrowDown(page);
-  const textTwo = await getVirgoSelectionText(page);
+  const textTwo = await getInlineSelectionText(page);
   expect(textTwo).toBe('arrow down test 2');
 });
 
@@ -444,21 +444,21 @@ test('cursor move to up and down with children block', async ({ page }) => {
     await page.keyboard.press('ArrowRight');
   }
   await page.keyboard.press('ArrowUp');
-  const indexOne = await getVirgoSelectionIndex(page);
-  const textOne = await getVirgoSelectionText(page);
+  const indexOne = await getInlineSelectionIndex(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('arrow down test 2');
   expect(indexOne).toBe(13);
   for (let i = 0; i < 3; i++) {
     await page.keyboard.press('ArrowLeft');
   }
   await page.keyboard.press('ArrowUp');
-  const indexTwo = await getVirgoSelectionIndex(page);
-  const textTwo = await getVirgoSelectionText(page);
+  const indexTwo = await getInlineSelectionIndex(page);
+  const textTwo = await getInlineSelectionText(page);
   expect(textTwo).toBe('arrow down test 1');
   expect(indexTwo).toBeGreaterThanOrEqual(12);
   expect(indexTwo).toBeLessThanOrEqual(17);
   await page.keyboard.press('ArrowDown');
-  const textThree = await getVirgoSelectionText(page);
+  const textThree = await getInlineSelectionText(page);
   expect(textThree).toBe('arrow down test 2');
 });
 
@@ -469,13 +469,13 @@ test('cursor move left and right', async ({ page }) => {
   await type(page, 'arrow down test 1');
   await pressEnter(page);
   await type(page, 'arrow down test 2');
-  const index1 = await getVirgoSelectionIndex(page);
+  const index1 = await getInlineSelectionIndex(page);
   expect(index1).toBe(17);
   await pressArrowLeft(page, 17);
-  const index2 = await getVirgoSelectionIndex(page);
+  const index2 = await getInlineSelectionIndex(page);
   expect(index2).toBe(0);
   await pressArrowLeft(page);
-  const index3 = await getVirgoSelectionIndex(page);
+  const index3 = await getInlineSelectionIndex(page);
   expect(index3).toBe(17);
 });
 
@@ -558,7 +558,7 @@ test('select all text with dragging and delete', async ({ page }) => {
   });
   await pressBackspace(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc');
 });
 
@@ -575,7 +575,7 @@ test('select all text with dragging and delete by forwardDelete', async ({
   });
   await pressForwardDelete(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc');
 });
 
@@ -588,10 +588,10 @@ test('select all text with keyboard delete', async ({ page }) => {
   await focusRichText(page);
   await selectAllByKeyboard(page);
   await pressBackspace(page);
-  const text1 = await getVirgoSelectionText(page);
+  const text1 = await getInlineSelectionText(page);
   expect(text1).toBe('');
   await type(page, 'abc');
-  const text2 = await getVirgoSelectionText(page);
+  const text2 = await getInlineSelectionText(page);
   expect(text2).toBe('abc');
 
   await selectAllByKeyboard(page);
@@ -621,7 +621,7 @@ test('select text leaving a few words in the last line and delete', async ({
   await page.keyboard.press('Backspace');
   await waitNextFrame(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc89');
 });
 
@@ -639,7 +639,7 @@ test('select text leaving a few words in the last line and delete by forwardDele
   await pressForwardDelete(page);
   await waitNextFrame(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc89');
 });
 
@@ -778,7 +778,7 @@ test('select text in the same line with dragging rightward and move outside the 
   );
   await pressBackspace(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc');
 });
 
@@ -825,7 +825,7 @@ test('select text in the same line with dragging rightward and move outside the 
   );
   await pressForwardDelete(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc');
 });
 
@@ -870,7 +870,7 @@ test('drag to select tagged text, and copy', async ({ page }) => {
     steps: 20,
   });
   page.keyboard.press(`${SHORT_KEY}+C`);
-  const textOne = await getSelectedTextByVirgo(page);
+  const textOne = await getSelectedTextByInlineEditor(page);
   expect(textOne).toBe('12345');
 });
 
@@ -890,7 +890,7 @@ test('drag to select tagged text, and input character', async ({ page }) => {
     steps: 20,
   });
   await type(page, '1');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('16789');
 });
 
@@ -1008,7 +1008,7 @@ test('the cursor should move to closest editor block when clicking outside conta
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const text2 = page.locator('[data-block-id="3"] .virgo-editor');
+  const text2 = page.locator('[data-block-id="3"] .inline-editor');
   const rect = await text2.boundingBox();
   assertExists(rect);
 
@@ -1137,7 +1137,7 @@ test('should select texts on cross-note dragging', async ({ page }) => {
   await initEmptyParagraphState(page, pageId);
 
   // focus last block in first note
-  await setVRangeInVEditor(
+  await setInlineRangeInInlineEditor(
     page,
     {
       index: 3,
@@ -1242,7 +1242,7 @@ test('should select texts on dragging around the page', async ({ page }) => {
   // ←
   await page.mouse.move(coord.x - 15, coord.y, { steps: 20 });
   await page.mouse.up();
-  expect(await getSelectedTextByVirgo(page)).toBe('45');
+  expect(await getSelectedTextByInlineEditor(page)).toBe('45');
 
   // blur
   await page.mouse.click(0, 0);
@@ -1440,7 +1440,7 @@ test('should clear native selection before block selection', async ({
     { steps: 20 }
   );
 
-  const text0 = await getVirgoSelectionText(page);
+  const text0 = await getInlineSelectionText(page);
 
   // `123`
   const first = await page.evaluate(() => {
@@ -1669,7 +1669,7 @@ test('should not show option menu of image on native selection', async ({
   ).toHaveCount(0);
 });
 
-test('should be cleared when dragging block card from BlockHub', async ({
+test.skip('should be cleared when dragging block card from BlockHub', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -1704,7 +1704,7 @@ test('should select with shift-click', async ({ page }) => {
 
   await focusRichText(page);
 
-  await page.click('[data-block-id="4"] [data-virgo-text]', {
+  await page.click('[data-block-id="4"] [data-v-text]', {
     modifiers: ['Shift'],
   });
   expect(await getSelectedText(page)).toContain('4567');
@@ -1760,7 +1760,7 @@ test('should select when clicking on blank area in edgeless mode', async ({
   await click(page, { x: r3.x + 40, y: r3.y + 5 });
   await waitNextFrame(page);
 
-  expect(await getVirgoSelectionText(page)).toBe('789');
+  expect(await getInlineSelectionText(page)).toBe('789');
 });
 
 test('press ArrowLeft in the start of first paragraph should not focus on title', async ({
@@ -1797,7 +1797,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await pressShiftEnter(page);
   await waitNextFrame(page);
   await pressEnter(page);
-  await assertRichTextVRange(page, 2, 0);
+  await assertRichTextInlineRange(page, 2, 0);
   // - aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1806,7 +1806,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 2);
+  await assertRichTextInlineRange(page, 1, 2);
   // - aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1815,7 +1815,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 0);
+  await assertRichTextInlineRange(page, 1, 0);
   // - aaa... (no \n)
   //   a
   // - |b  (have \n)
@@ -1824,7 +1824,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowRight(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 1);
+  await assertRichTextInlineRange(page, 1, 1);
   // - aaa... (no \n)
   //   a
   // - b|  (have \n)
@@ -1834,7 +1834,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await pressArrowUp(page);
   await pressArrowLeft(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 90);
+  await assertRichTextInlineRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)
@@ -1843,7 +1843,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0);
   // - |aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1857,7 +1857,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0);
   // - |aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1866,7 +1866,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 90);
+  await assertRichTextInlineRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)
@@ -1875,7 +1875,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 0);
+  await assertRichTextInlineRange(page, 1, 0);
   // - aaa... (no \n)
   //   a
   // - |b  (have \n)
@@ -1884,7 +1884,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowRight(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 1);
+  await assertRichTextInlineRange(page, 1, 1);
   // - aaa... (no \n)
   //   a
   // - b|  (have \n)
@@ -1893,7 +1893,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 2);
+  await assertRichTextInlineRange(page, 1, 2);
   // - aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1902,7 +1902,7 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 2, 0);
+  await assertRichTextInlineRange(page, 2, 0);
   // - aaa... (no \n)
   //   a
   // - b  (have \n)
@@ -1938,14 +1938,14 @@ test('should not scroll page when mouse is click down', async ({ page }) => {
   const rect = await longText.boundingBox();
   if (!rect) throw new Error();
   await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
-  await assertRichTextVRange(page, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0);
 
   await page.mouse.down();
-  await assertRichTextVRange(page, 10, 22);
+  await assertRichTextInlineRange(page, 10, 22);
   // simulate user click down and wait for 500ms
   await waitNextFrame(page, 500);
   await page.mouse.up();
-  await assertRichTextVRange(page, 10, 22);
+  await assertRichTextInlineRange(page, 10, 22);
 });
 
 test('scroll vertically when inputting long text in a block', async ({

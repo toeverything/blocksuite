@@ -655,10 +655,10 @@ export class KeymapController implements ReactiveController {
       if (!config.hotkey) return;
       this.host.bindHotKey({
         [config.hotkey]: ctx => {
-          if (!config.showWhen(this.host.root)) return;
+          if (!config.showWhen(this.host.host)) return;
 
           ctx.get('defaultState').event.preventDefault();
-          config.action(this.host.root);
+          config.action(this.host.host);
         },
       });
     });
@@ -675,7 +675,7 @@ export class KeymapController implements ReactiveController {
 
             return this._std.command
               .pipe()
-              .withRoot()
+              .withHost()
               .tryAll(chain => [
                 chain.getTextSelection(),
                 chain.getBlockSelections(),

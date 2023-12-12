@@ -147,10 +147,10 @@ export async function cutByKeyboard(page: Page) {
 export async function pasteByKeyboard(page: Page, forceFocus = true) {
   if (forceFocus) {
     const isEditorActive = await page.evaluate(
-      () => document.activeElement?.closest('editor-container')
+      () => document.activeElement?.closest('affine-editor-container')
     );
     if (!isEditorActive) {
-      await page.click('editor-container');
+      await page.click('affine-editor-container');
     }
   }
 

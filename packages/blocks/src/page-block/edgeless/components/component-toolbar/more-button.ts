@@ -12,6 +12,7 @@ import {
   BringToFrontIcon,
   CopyAsPngIcon,
   FrameIcon,
+  GroupIcon,
   MoreCopyIcon,
   MoreDeleteIcon,
   MoreDuplicateIcon,
@@ -21,16 +22,11 @@ import {
   SendToBackIcon,
 } from '../../../../_common/icons/index.js';
 import { type ReorderingType } from '../../../../_common/utils/index.js';
-import { groupBy } from '../../../../_common/utils/iterable.js';
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import type { ImageBlockModel } from '../../../../models.js';
-import type { NoteBlockModel } from '../../../../note-block/index.js';
-import { type PhasorElement } from '../../../../surface-block/index.js';
-import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { duplicate } from '../../utils/clipboard-utils.js';
+import { removeContainedFrames } from '../../frame-manager.js';
+import { duplicate, splitElements } from '../../utils/clipboard-utils.js';
 import { deleteElements } from '../../utils/crud.js';
-import { isFrameBlock, isImageBlock, isNoteBlock } from '../../utils/query.js';
+import { isFrameBlock } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
 
 type Action =
@@ -41,6 +37,7 @@ type Action =
         | 'delete'
         | 'copy-as-png'
         | 'create-frame'
+        | 'create-group'
         | 'copy'
         | 'duplicate'
         | ReorderingType;
@@ -52,6 +49,7 @@ type Action =
 
 const ACTIONS: Action[] = [
   { icon: FrameIcon, name: 'Frame Section', type: 'create-frame' },
+  { icon: GroupIcon, name: 'Group Section', type: 'create-group' },
   { type: 'divider' },
   { icon: BringToFrontIcon, name: 'Bring to Front', type: 'front' },
   { icon: BringForwardIcon, name: 'Bring Forward', type: 'forward' },
@@ -164,7 +162,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   vertical = false;
 
   @state()
-  private _popperShow = false;
+  private _showPopper = false;
+
+  @property({ attribute: false })
+  setPoppetShow!: (poppetShow: boolean) => void;
 
   @query('.more-actions-container')
   private _actionsMenu!: HTMLDivElement;
@@ -187,35 +188,6 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   get surface() {
     return this.edgeless.surface;
   }
-
-  private _splitElements() {
-    const { notes, frames, shapes, images } = groupBy(
-      getElementsWithoutGroup(this.selection.elements),
-      element => {
-        if (isNoteBlock(element)) {
-          return 'notes';
-        } else if (isFrameBlock(element)) {
-          return 'frames';
-        } else if (isImageBlock(element)) {
-          return 'images';
-        }
-        return 'shapes';
-      }
-    ) as {
-      notes: NoteBlockModel[];
-      shapes: PhasorElement[];
-      frames: FrameBlockModel[];
-      images: ImageBlockModel[];
-    };
-
-    return {
-      notes: notes ?? [],
-      shapes: shapes ?? [],
-      frames: frames ?? [],
-      images: images ?? [],
-    };
-  }
-
   private _delete() {
     this.page.captureSync();
     deleteElements(this.surface, this.selection.elements);
@@ -242,9 +214,11 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'copy-as-png': {
-        const { notes, frames, shapes, images } = this._splitElements();
+        const { notes, frames, shapes, images } = splitElements(
+          this.selection.elements
+        );
         this.slots.copyAsPng.emit({
-          blocks: [...notes, ...frames, ...images],
+          blocks: [...notes, ...removeContainedFrames(frames), ...images],
           shapes,
         });
         break;
@@ -253,23 +227,18 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         this.edgeless.surface.frame.createFrameOnSelected();
         break;
       }
+      case 'create-group': {
+        this.edgeless.surface.group.createGroupOnSelected();
+        break;
+      }
       case 'front':
       case 'forward':
       case 'backward':
       case 'back': {
-        const { notes, shapes, images } = this._splitElements();
-        if (notes.length + images.length > 0) {
-          this.slots.reorderingBlocksUpdated.emit({
-            elements: [...notes, ...images],
-            type,
-          });
-        }
-        if (shapes.length) {
-          this.slots.reorderingShapesUpdated.emit({
-            elements: shapes,
-            type,
-          });
-        }
+        this.edgeless.slots.reorderingElements.emit({
+          elements: this.selection.elements,
+          type,
+        });
         break;
       }
     }
@@ -283,7 +252,8 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       this,
       this._actionsMenu,
       ({ display }) => {
-        this._popperShow = display === 'show';
+        this._showPopper = display === 'show';
+        this.setPoppetShow(this._showPopper);
       }
     );
     _disposables.add(this._actionsMenuPopper);
@@ -301,7 +271,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     );
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${this._popperShow ? '' : 'More'}
+        .tooltip=${this._showPopper ? '' : 'More'}
         .active=${false}
         .iconContainerPadding=${2}
         @click=${() => this._actionsMenuPopper?.toggle()}

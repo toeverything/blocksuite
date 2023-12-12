@@ -60,10 +60,10 @@ export class EdgelessSnapManager extends Overlay {
     const viewportBounds = Bound.from(viewport.viewportBounds);
     viewport.addOverlay(this);
 
-    const phasorElements = surface.getElements();
+    const canvasElements = surface.getElements();
     const excludes = [...alignables, ...connectors];
     this._alignableBounds = [];
-    (<Alignable[]>[...surface.blocks, ...phasorElements]).forEach(alignable => {
+    (<Alignable[]>[...surface.blocks, ...canvasElements]).forEach(alignable => {
       const bounds = this._getBoundsWithRotationByAlignable(alignable);
       if (
         viewportBounds.isOverlapWithBound(bounds) &&

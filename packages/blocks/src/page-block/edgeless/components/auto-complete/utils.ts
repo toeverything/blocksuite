@@ -9,12 +9,12 @@ import {
 } from '../../../../surface-block/consts.js';
 import {
   Bound,
+  CanvasElementType,
   type Connection,
   GroupElement,
   normalizeDegAngle,
   type Options,
   Overlay,
-  PhasorElementType,
   type RoughCanvas,
   ShapeElement,
   type ShapeStyle,
@@ -22,7 +22,6 @@ import {
   type XYWH,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { getGridBound } from '../../utils/bound-utils.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 
@@ -214,7 +213,7 @@ export function nextBound(
   }
 
   function isValidBound(bound: Bound) {
-    return !elements.some(e => bound.isOverlapWithBound(getGridBound(e)));
+    return !elements.some(a => bound.isOverlapWithBound(a.elementBound));
   }
 
   let count = 0;
@@ -306,7 +305,9 @@ export function createEdgelessElement(
     );
     const note = page.getBlockById(id) as NoteBlockModel;
     assertExists(note);
-    note.edgeless.collapse = true;
+    page.updateBlock(note, () => {
+      note.edgeless.collapse = true;
+    });
     page.addBlock('affine:paragraph', {}, note.id);
   }
   const group = surface.getGroupParent(current);
@@ -340,7 +341,7 @@ export async function createTextElement(
   current: ShapeElement
 ) {
   const { surface } = edgeless;
-  const id = edgeless.surface.addElement(PhasorElementType.TEXT, {
+  const id = edgeless.surface.addElement(CanvasElementType.TEXT, {
     text: new Workspace.Y.Text(),
     textAlign: 'left',
     fontSize: 24,

@@ -3,6 +3,7 @@ import {
   Boxed,
   defineBlockSchema,
   type SchemaToModel,
+  Text,
   Workspace,
 } from '@blocksuite/store';
 
@@ -95,7 +96,11 @@ const migration = {
         Object.entries(value).forEach(([_key, _value]) => {
           map.set(
             _key,
-            _value instanceof Workspace.Y.Text ? _value.clone() : _value
+            _value instanceof Workspace.Y.Text
+              ? _value.clone()
+              : _value instanceof Text
+                ? _value.yText.clone()
+                : _value
           );
         });
         yMap.set(key, map);
@@ -109,13 +114,18 @@ const migration = {
 export const SurfaceBlockSchema = defineBlockSchema({
   flavour: 'affine:surface',
   props: (internalPrimitives): SurfaceBlockProps => ({
-    elements: internalPrimitives.Native(new Workspace.Y.Map()),
+    elements: internalPrimitives.Boxed(new Workspace.Y.Map()),
   }),
   metadata: {
     version: 5,
     role: 'hub',
     parent: ['affine:page'],
-    children: ['affine:frame', 'affine:image'],
+    children: [
+      'affine:frame',
+      'affine:image',
+      'affine:embed-*',
+      'affine:bookmark',
+    ],
   },
   onUpgrade: (data, previousVersion, version) => {
     if (previousVersion < 4 && version >= 4) {

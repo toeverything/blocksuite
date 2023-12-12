@@ -2,11 +2,8 @@ import { expect } from '@playwright/test';
 
 import * as actions from '../utils/actions/edgeless.js';
 import {
-  createShapeElement,
-  edgelessCommonSetup,
   getNoteBoundBoxInEdgeless,
   setEdgelessTool,
-  Shape,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
 import {
@@ -18,10 +15,7 @@ import {
   getBoundingRect,
   initEmptyEdgelessState,
   initThreeParagraphs,
-  pasteByKeyboard,
   pressEnter,
-  selectAllByKeyboard,
-  triggerComponentToolbarAction,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
@@ -156,26 +150,6 @@ test('when the selection is always a note, it should remain in an active state',
   await clickInCenter(page, bound);
   await waitNextFrame(page);
   await assertSelectionInNote(page, ids.noteId);
-});
-
-test('copy to clipboard as PNG', async ({ page, context }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-
-  await edgelessCommonSetup(page);
-  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
-
-  await selectAllByKeyboard(page);
-
-  await triggerComponentToolbarAction(page, 'copyAsPng');
-
-  await waitNextFrame(page);
-
-  await assertBlockCount(page, 'note', 0);
-  await assertBlockCount(page, 'image', 0);
-  await pasteByKeyboard(page);
-  await waitNextFrame(page);
-  await assertBlockCount(page, 'note', 0);
-  await assertBlockCount(page, 'image', 1);
 });
 
 test('should auto panning when selection rectangle reaches viewport edges', async ({

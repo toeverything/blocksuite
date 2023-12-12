@@ -17,6 +17,13 @@ export const styles = css`
     cursor: pointer;
   }
 
+  .affine-attachment-embed-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-top: calc(var(--affine-paragraph-space) + 8px);
+  }
+
   .affine-attachment-title {
     display: flex;
     gap: 8px;
@@ -80,6 +87,14 @@ export const styles = css`
   }
   .affine-attachment-caption::placeholder {
     color: var(--affine-placeholder-color);
+  }
+
+  .overlay-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
   }
 `;
 

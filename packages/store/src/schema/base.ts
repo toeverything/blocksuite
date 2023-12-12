@@ -2,11 +2,11 @@ import { Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
+import { Boxed } from '../reactive/boxed.js';
+import { Text } from '../reactive/text.js';
 import type { BaseBlockTransformer } from '../transformer/base.js';
-import type { YBlock } from '../workspace/block.js';
+import type { YBlock } from '../workspace/block/block.js';
 import type { Page } from '../workspace/index.js';
-import { Boxed } from '../yjs/boxed.js';
-import { Text } from '../yjs/text-adapter.js';
 
 const FlavourSchema = z.string();
 const ParentSchema = z.array(z.string()).optional();
@@ -18,12 +18,12 @@ export type RoleType = (typeof role)[number];
 
 export interface InternalPrimitives {
   Text: (input?: Y.Text | string) => Text;
-  Native: <T>(input: T) => Boxed<T>;
+  Boxed: <T>(input: T) => Boxed<T>;
 }
 
 export const internalPrimitives: InternalPrimitives = Object.freeze({
   Text: (input: Y.Text | string = '') => new Text(input),
-  Native: <T>(input: T) => new Boxed(input),
+  Boxed: <T>(input: T) => new Boxed(input),
 });
 
 export const BlockSchema = z.object({
@@ -182,12 +182,15 @@ export class BaseBlockModel<
   yBlock!: YBlock;
   keys!: string[];
 
+  stash!: (prop: keyof Props & string) => void;
+  pop!: (prop: keyof Props & string) => void;
+
   // text is optional
   text?: Text;
 
   created = new Slot();
   deleted = new Slot();
-  propsUpdated = new Slot();
+  propsUpdated = new Slot<{ key: string }>();
   childrenUpdated = new Slot();
 
   get childMap() {
@@ -205,11 +208,11 @@ export class BaseBlockModel<
 
     const children: BaseBlockModel[] = [];
     block.forEach(id => {
-      const child = this.page.getBlock(id);
+      const child = this.page.getBlockById(id);
       if (!child) {
         return;
       }
-      children.push(child.model);
+      children.push(child);
     });
 
     return children;
@@ -228,13 +231,6 @@ export class BaseBlockModel<
       return this;
     }
     return this.children[this.children.length - 1].lastChild();
-  }
-
-  firstItem(): BaseBlockModel | null {
-    if (!this.children.length) {
-      return this;
-    }
-    return this.children[0];
   }
 
   lastItem(): BaseBlockModel | null {

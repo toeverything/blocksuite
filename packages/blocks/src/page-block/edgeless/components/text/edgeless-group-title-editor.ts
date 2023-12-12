@@ -21,12 +21,12 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  get vEditor() {
-    assertExists(this.richText.vEditor);
-    return this.richText.vEditor;
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
   }
-  get vEditorContainer() {
-    return this.vEditor.rootElement;
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
   }
 
   override async getUpdateComplete(): Promise<boolean> {
@@ -40,11 +40,11 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
     assertExists(dispatcher);
 
     this.updateComplete.then(() => {
-      this.vEditor.selectAll();
+      this.inlineEditor.selectAll();
 
       this.edgeless.localRecord.update(this.group.id, { showTitle: false });
 
-      this.vEditor.slots.updated.on(() => {
+      this.inlineEditor.slots.updated.on(() => {
         this.requestUpdate();
       });
 
@@ -69,7 +69,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
 
       this.disposables.add(dispatcher.add('click', () => true));
       this.disposables.add(dispatcher.add('doubleClick', () => true));
-      this.disposables.addFromEvent(this.vEditorContainer, 'blur', () => {
+      this.disposables.addFromEvent(this.inlineEditorContainer, 'blur', () => {
         this._unmount();
       });
     });
@@ -92,7 +92,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
     const viewport = this.edgeless.surface.viewport;
     const bound = Bound.deserialize(this.group.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const virgoStyle = styleMap({
+    const inlineEditorStyle = styleMap({
       transformOrigin: 'top left',
       borderRadius: '35px',
       width: 'fit-content',
@@ -103,20 +103,20 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
       top: y - 36 + 'px',
       minWidth: '8px',
       fontFamily: 'var(--affine-font-family)',
-      background: 'var(--affine-text-primary-color)',
-      color: 'var(--affine-white)',
+      color: 'var(--affine-text-primary-color)',
+      background: 'var(--affine-white-10)',
       outline: 'none',
       zIndex: '1',
       border: `1px solid
         var(--affine-primary-color)`,
-      boxShadow: `0px 0px 0px 2px rgba(30, 150, 235, 0.3)`,
+      boxShadow: 'var(--affine-active-shadow)',
     });
     return html`<rich-text
       .yText=${this.group.title}
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
       .enableAutoScrollVertically=${false}
-      style=${virgoStyle}
+      style=${inlineEditorStyle}
     ></rich-text>`;
   }
 }

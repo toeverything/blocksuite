@@ -9,7 +9,7 @@ import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import { SHAPE_TEXT_PADDING } from '../../../../surface-block/elements/shape/consts.js';
 import { wrapFontFamily } from '../../../../surface-block/elements/text/utils.js';
 import type {
-  PhasorElementType,
+  CanvasElementType,
   ShapeElement,
 } from '../../../../surface-block/index.js';
 import { Bound, toRadian, Vec } from '../../../../surface-block/index.js';
@@ -27,12 +27,12 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  get vEditor() {
-    assertExists(this.richText.vEditor);
-    return this.richText.vEditor;
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
   }
-  get vEditorContainer() {
-    return this.vEditor.rootElement;
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
   }
 
   private _keeping = false;
@@ -58,7 +58,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         leftTopY
       );
 
-      this.edgeless.surface.updateElement<PhasorElementType.SHAPE>(
+      this.edgeless.surface.updateElement<CanvasElementType.SHAPE>(
         this.element.id,
         {
           xywh: new Bound(
@@ -105,14 +105,14 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     );
 
     this.updateComplete.then(() => {
-      this.vEditor.focusEnd();
+      this.inlineEditor.focusEnd();
 
       this.disposables.add(
-        this.vEditor.slots.updated.on(() => {
+        this.inlineEditor.slots.updated.on(() => {
           this._updateHeight();
         })
       );
-      this.disposables.addFromEvent(this.vEditorContainer, 'blur', () => {
+      this.disposables.addFromEvent(this.inlineEditorContainer, 'blur', () => {
         if (this._keeping) return;
         this._unmount();
       });
@@ -156,7 +156,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     );
     const [x, y] = this.edgeless.surface.toViewCoord(leftTopX, leftTopY);
 
-    const virgoStyle = styleMap({
+    const inlineEditorStyle = styleMap({
       position: 'absolute',
       left: x + 'px',
       top: y + 'px',
@@ -191,7 +191,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
       .enableAutoScrollVertically=${false}
-      style=${virgoStyle}
+      style=${inlineEditorStyle}
     ></rich-text>`;
   }
 }

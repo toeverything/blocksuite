@@ -25,17 +25,16 @@ import {
   createPage,
   getBlockElementByModel,
   getCurrentNativeRange,
-  getVirgoByModel,
+  getInlineEditorByModel,
   matchFlavours,
   openFileOrFiles,
   resetNativeSelection,
   uploadImageFromLocal,
 } from '../../../_common/utils/index.js';
-import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
 import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
-import { appendAttachmentBlock } from '../../../attachment-block/utils.js';
-import { getBookmarkInitialProps } from '../../../bookmark-block/components/bookmark-create-modal.js';
+import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
+import { toggleBookmarkCreateModal } from '../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockProps } from '../../../image-block/image-model.js';
 import type { SurfaceBlockModel } from '../../../models.js';
@@ -44,11 +43,12 @@ import { copyBlock } from '../../../page-block/doc/utils.js';
 import { onModelTextUpdated } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
-import { PhasorElementType } from '../../../surface-block/index.js';
+import { CanvasElementType } from '../../../surface-block/index.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { textConversionConfigs } from '../../configs/text-conversion.js';
 import { textFormatConfigs } from '../../configs/text-format/config.js';
+import { clearMarksOnDiscontinuousInput } from '../../utils/inline-editor.js';
 import type { AffineLinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
@@ -79,9 +79,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             return true;
           },
           action: ({ pageElement }) => {
-            pageElement.root.std.command
+            pageElement.host.std.command
               .pipe()
-              .withRoot()
+              .withHost()
               .tryAll(chain => [
                 chain.getTextSelection(),
                 chain.getBlockSelections(),
@@ -108,9 +108,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
                   }
                   const codeModel = newModels[0];
                   onModelTextUpdated(codeModel, richText => {
-                    const vEditor = richText.vEditor;
-                    assertExists(vEditor);
-                    vEditor.focusEnd();
+                    const inlineEditor = richText.inlineEditor;
+                    assertExists(inlineEditor);
+                    inlineEditor.focusEnd();
                   });
                 }
               })
@@ -132,12 +132,15 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           const len = model.text.length;
           if (!len) {
-            const vEditor = getVirgoByModel(model);
-            assertExists(vEditor, "Can't set style mark! vEditor not found");
-            vEditor.setMarks({
+            const inlineEditor = getInlineEditorByModel(model);
+            assertExists(
+              inlineEditor,
+              "Can't set style mark! Inline editor not found"
+            );
+            inlineEditor.setMarks({
               [id]: true,
             });
-            clearMarksOnDiscontinuousInput(vEditor);
+            clearMarksOnDiscontinuousInput(inlineEditor);
             return;
           }
           model.text.format(0, len, {
@@ -160,9 +163,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return true;
         },
         action: ({ pageElement }) => {
-          pageElement.root.std.command
+          pageElement.host.std.command
             .pipe()
-            .withRoot()
+            .withHost()
             .tryAll(chain => [
               chain.getTextSelection(),
               chain.getBlockSelections(),
@@ -272,7 +275,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         name: 'Bookmark',
         icon: BookmarkIcon,
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_bookmark_operation')) {
+          if (!model.page.schema.flavourSchemaMap.has('affine:bookmark')) {
             return false;
           }
           return !insideDatabase(model);
@@ -282,7 +285,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const url = await getBookmarkInitialProps();
+          const url = await toggleBookmarkCreateModal(pageElement.host);
           if (!url) return;
           const props = {
             flavour: 'affine:bookmark',
@@ -306,11 +309,11 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) return;
           const file = await openFileOrFiles();
           if (!file) return;
-          const service = pageElement.root.spec.getService('affine:attachment');
+          const service = pageElement.host.spec.getService('affine:attachment');
           assertExists(service);
           assertInstanceOf(service, AttachmentService);
           const maxFileSize = service.maxFileSize;
-          await appendAttachmentBlock(file, model, maxFileSize);
+          addSiblingAttachmentBlock(file, model, maxFileSize);
         }),
       },
     ],
@@ -489,7 +492,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       if (!surfaceModel) return [];
       const groupElements = (<Array<Y.Map<string>>>(
         Array.from(surfaceModel.elements.getValue()?.values() ?? [])
-      )).filter(element => element.get('type') === PhasorElementType.GROUP);
+      )).filter(element => element.get('type') === CanvasElementType.GROUP);
 
       return (
         groupElements.map(element => {

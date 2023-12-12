@@ -35,12 +35,12 @@ export class AffineFormatBarWidget extends WidgetElement {
   customItemsContainer!: HTMLElement;
 
   @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
-  private _formatBarElement?: HTMLElement;
+  formatBarElement?: HTMLElement;
 
   private _customElements: HTMLDivElement[] = [];
 
   private get _selectionManager() {
-    return this.root.selection;
+    return this.host.selection;
   }
 
   private _dragging = false;
@@ -87,6 +87,28 @@ export class AffineFormatBarWidget extends WidgetElement {
     return !readonly && this.displayType !== 'none' && !this._dragging;
   }
 
+  private _appendCustomElement() {
+    if (
+      !this.customItemsContainer ||
+      this.customItemsContainer.children.length ===
+        AffineFormatBarWidget.customElements.size
+    )
+      return;
+
+    if (
+      this._customElements.length !== AffineFormatBarWidget.customElements.size
+    )
+      this._initCustomElement();
+
+    this.customItemsContainer.replaceChildren(...this._customElements);
+  }
+
+  private _initCustomElement() {
+    this._customElements = Array.from(AffineFormatBarWidget.customElements).map(
+      elementCtr => elementCtr(this)
+    );
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this._abortController = new AbortController();
@@ -107,15 +129,19 @@ export class AffineFormatBarWidget extends WidgetElement {
       );
     }
 
+    this._disposables.add(() => {
+      this._customElements = [];
+    });
+
     this.disposables.add(
-      this.root.event.add('dragStart', () => {
+      this.host.event.add('dragStart', () => {
         this._dragging = true;
         this.requestUpdate();
       })
     );
 
     this.disposables.add(
-      this.root.event.add('dragEnd', () => {
+      this.host.event.add('dragEnd', () => {
         this._dragging = false;
         this.requestUpdate();
       })
@@ -123,7 +149,7 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     // calculate placement
     this.disposables.add(
-      this.root.event.add('pointerUp', ctx => {
+      this.host.event.add('pointerUp', ctx => {
         if (this.displayType === 'text' || this.displayType === 'native') {
           const range = this.nativeRange;
           assertExists(range);
@@ -153,12 +179,12 @@ export class AffineFormatBarWidget extends WidgetElement {
     // listen to selection change
     this.disposables.add(
       this._selectionManager.slots.changed.on(async () => {
-        await this.updateComplete;
+        await this.host.updateComplete;
         const textSelection = pageElement.selection.find('text');
         const blockSelections = pageElement.selection.filter('block');
 
         if (textSelection) {
-          const block = this.root.view.viewFromPath(
+          const block = this.host.view.viewFromPath(
             'block',
             textSelection.path
           );
@@ -168,11 +194,11 @@ export class AffineFormatBarWidget extends WidgetElement {
             block.model.role === 'content'
           ) {
             this._displayType = 'text';
-            assertExists(pageElement.root.rangeManager);
+            assertExists(pageElement.host.rangeManager);
 
-            this.root.std.command
+            this.host.std.command
               .pipe()
-              .withRoot()
+              .withHost()
               .getTextSelection()
               .getSelectedBlocks({
                 types: ['text'],
@@ -191,7 +217,7 @@ export class AffineFormatBarWidget extends WidgetElement {
           this._selectedBlockElements = blockSelections
             .map(selection => {
               const path = selection.path;
-              return this.blockElement.root.view.viewFromPath('block', path);
+              return this.blockElement.host.view.viewFromPath('block', path);
             })
             .filter((el): el is BlockElement => !!el);
         } else {
@@ -202,7 +228,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       })
     );
     this.disposables.addFromEvent(document, 'selectionchange', () => {
-      const databaseSelection = this.root.selection.find('database');
+      const databaseSelection = this.host.selection.find('database');
       const reset = () => {
         this._reset();
         this.requestUpdate();
@@ -237,26 +263,11 @@ export class AffineFormatBarWidget extends WidgetElement {
       }
       return;
     }
-    if (
-      this._customElements.length === 0 &&
-      AffineFormatBarWidget.customElements.size !== 0
-    ) {
-      this._customElements = Array.from(
-        AffineFormatBarWidget.customElements
-      ).map(element => element(this));
-      this.customItemsContainer.append(...this._customElements);
-      this._disposables.add(() => {
-        this._customElements.forEach(element => {
-          element.remove();
-        });
-        this._customElements = [];
-        this.customItemsContainer.replaceChildren();
-      });
-    }
 
+    this._appendCustomElement();
     this._floatDisposables = new DisposableGroup();
 
-    const formatQuickBarElement = this._formatBarElement;
+    const formatQuickBarElement = this.formatBarElement;
     assertExists(formatQuickBarElement, 'format quick bar should exist');
     if (this.displayType === 'text' || this.displayType === 'native') {
       const range = this.nativeRange;
@@ -273,7 +284,17 @@ export class AffineFormatBarWidget extends WidgetElement {
           visualElement,
           formatQuickBarElement,
           () => {
-            computePosition(visualElement, formatQuickBarElement, {
+            // Why not use `range` and `visualElement` directly:
+            // https://github.com/toeverything/blocksuite/issues/5144
+            const latestRange = this.nativeRange;
+            if (!latestRange) {
+              return;
+            }
+            const latestVisualElement = {
+              getBoundingClientRect: () => latestRange.getBoundingClientRect(),
+              getClientRects: () => latestRange.getClientRects(),
+            };
+            computePosition(latestVisualElement, formatQuickBarElement, {
               placement: this._placement,
               middleware: [
                 offset(10),

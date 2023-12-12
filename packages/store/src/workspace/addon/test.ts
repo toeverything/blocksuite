@@ -1,16 +1,14 @@
 import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
+import { Boxed, native2Y, Text } from '../../reactive/index.js';
 import type { JSXElement } from '../../utils/jsx.js';
 import { serializeYDoc, yDocToJSXNode } from '../../utils/jsx.js';
-import { Boxed, native2Y, Text } from '../../yjs/index.js';
 import type { Page } from '../page.js';
 import { addOnFactory } from './shared.js';
 
 export interface TestAddon {
   importPageSnapshot: (json: unknown, pageId: string) => Promise<void>;
-  exportPageSnapshot: (pageId: string) => Record<string, unknown>;
-  exportPageYDoc: (pageId: string) => void;
   exportJSX: (blockId?: string, pageId?: string) => JSXElement;
 }
 
@@ -65,7 +63,7 @@ export const test = addOnFactory<keyof TestAddon>(
                 yText.applyDelta(_element['text']);
                 _element['text'] = yText;
               }
-              wrapper.set(key, native2Y(_element, false));
+              wrapper.set(key, native2Y(_element, { deep: false }));
             });
 
             props['prop:elements'] = new Boxed(wrapper);
@@ -171,39 +169,6 @@ export const test = addOnFactory<keyof TestAddon>(
           return schema?.model?.role === 'root';
         });
         await addBlockByProps(page, root);
-      }
-
-      exportPageSnapshot(pageId: string) {
-        const page = this.getPage(pageId);
-        assertExists(page, `page ${pageId} not found`);
-        return serializeYDoc(page.spaceDoc);
-      }
-
-      exportSnapshot() {
-        return serializeYDoc(this.doc);
-      }
-
-      /**
-       * @internal Only for testing
-       */
-      exportPageYDoc(pageId: string) {
-        const pages = this.doc.getMap('spaces');
-        const pageDoc = pages.get(pageId);
-
-        if (!(pageDoc instanceof Y.Doc)) {
-          throw new Error(`Page ${pageId} not found or not a Y.Doc`);
-        }
-
-        const binary = Y.encodeStateAsUpdate(pageDoc);
-        const file = new Blob([binary], { type: 'application/octet-stream' });
-        const fileUrl = URL.createObjectURL(file);
-
-        const link = document.createElement('a');
-        link.href = fileUrl;
-        link.download = 'workspace.ydoc';
-        link.click();
-
-        URL.revokeObjectURL(fileUrl);
       }
 
       /** @internal Only for testing */

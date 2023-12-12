@@ -43,6 +43,6 @@ export class EdgelessToolbarButton extends EdgelessToolIconButton {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-tool-bar-button': EdgelessToolbarButton;
+    'edgeless-toolbar-button': EdgelessToolbarButton;
   }
 }

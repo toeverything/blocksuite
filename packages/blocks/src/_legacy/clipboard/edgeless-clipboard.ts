@@ -2,37 +2,39 @@ import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { type Page, Workspace } from '@blocksuite/store';
 
 import { groupBy } from '../../_common/utils/iterable.js';
-import { AttachmentService } from '../../attachment-block/attachment-service.js';
-import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { ImageBlockModel } from '../../image-block/index.js';
 import type {
   EdgelessElement,
   Selectable,
   SerializedBlock,
   TopLevelBlockModel,
-} from '../../index.js';
-import type { NoteBlockModel } from '../../note-block/index.js';
+} from '../../_common/utils/types.js';
+import { AttachmentService } from '../../attachment-block/attachment-service.js';
+import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
+import type { FrameBlockModel } from '../../frame-block/frame-model.js';
+import type { ImageBlockModel } from '../../image-block/image-model.js';
+import type { NoteBlockModel } from '../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {
+  isBookmarkBlock,
+  isCanvasElementWithText,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
-  isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
-import { PhasorElementType } from '../../surface-block/index.js';
 import {
   Bound,
+  type CanvasElement,
+  CanvasElementType,
   type Connection,
   ConnectorElement,
   deserializeXYWH,
   getCommonBound,
   GroupElement,
   type IBound,
-  type PhasorElement,
   serializeXYWH,
 } from '../../surface-block/index.js';
 import { compare } from '../../surface-block/managers/group-manager.js';
@@ -40,6 +42,7 @@ import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js
 import { ContentParser } from '../content-parser/index.js';
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
+import type { BookmarkBlockService } from '../service/legacy-services/bookmark-service.js';
 import type { FrameBlockService } from '../service/legacy-services/frame-service.js';
 import type { ImageBlockService } from '../service/legacy-services/image-service.js';
 import type { Clipboard } from './type.js';
@@ -57,7 +60,7 @@ import {
 } from './utils/index.js';
 import { deleteModelsByTextSelection } from './utils/operation.js';
 
-const { GROUP } = PhasorElementType;
+const { GROUP } = CanvasElementType;
 const { NOTE, FRAME, IMAGE } = EdgelessBlockType;
 
 export function getCopyElements(
@@ -111,6 +114,9 @@ async function prepareClipboardData(selectedAll: Selectable[]) {
       } else if (isImageBlock(selected)) {
         const service = getService(selected.flavour) as ImageBlockService;
         return { ...service.block2Json(selected, []) };
+      } else if (isBookmarkBlock(selected)) {
+        const service = getService(selected.flavour) as BookmarkBlockService;
+        return service.block2Json(selected, []);
       } else if (selected instanceof ConnectorElement) {
         return prepareConnectorClipboardData(selected, selectedAll);
       } else {
@@ -170,8 +176,8 @@ export class EdgelessClipboard implements Clipboard {
     const { state, elements } = this.selection;
     if (state.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
-      deleteModelsByTextSelection(this._edgeless.root);
+      if (isCanvasElementWithText(elements[0])) return;
+      deleteModelsByTextSelection(this._edgeless.host);
       return;
     }
 
@@ -196,8 +202,8 @@ export class EdgelessClipboard implements Clipboard {
     // when note active, handle copy like page mode
     if (state.editing) {
       // use build-in copy handler in rich-text when copy in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
-      await copyBlocksInPage(this._edgeless.root);
+      if (isCanvasElementWithText(elements[0])) return;
+      await copyBlocksInPage(this._edgeless.host);
       return;
     }
     const data = await prepareClipboardData(elements);
@@ -217,7 +223,7 @@ export class EdgelessClipboard implements Clipboard {
     const { state, elements } = this.selection;
     if (state.editing) {
       // use build-in paste handler in rich-text when paste in surface text element
-      if (isPhasorElementWithText(elements[0])) return;
+      if (isCanvasElementWithText(elements[0])) return;
       await this._pasteInTextNote(e);
       return;
     }
@@ -227,7 +233,10 @@ export class EdgelessClipboard implements Clipboard {
       if (files.length === 0) {
         return;
       }
-      const res: { file: File; sourceId: string }[] = [];
+      const res: {
+        file: File;
+        sourceId: string;
+      }[] = [];
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (file.type.startsWith('image')) {
@@ -249,7 +258,7 @@ export class EdgelessClipboard implements Clipboard {
 
   private async _pasteInTextNote(e: ClipboardEvent) {
     const attachmentService =
-      this._edgeless.root.spec.getService('affine:attachment');
+      this._edgeless.host.spec.getService('affine:attachment');
     assertExists(attachmentService);
     assertInstanceOf(attachmentService, AttachmentService);
     const maxFileSize = attachmentService.maxFileSize;
@@ -263,11 +272,11 @@ export class EdgelessClipboard implements Clipboard {
     }
     this._page.captureSync();
 
-    deleteModelsByTextSelection(this._edgeless.root);
+    deleteModelsByTextSelection(this._edgeless.host);
 
     const textSelection = this.textSelection;
     assertExists(textSelection);
-    const selectedModels = getSelectedContentModels(this._edgeless.root, [
+    const selectedModels = getSelectedContentModels(this._edgeless.host, [
       'text',
     ]);
 
@@ -277,7 +286,7 @@ export class EdgelessClipboard implements Clipboard {
     await service.json2Block(focusedBlockModel, blocks, textSelection.from);
   }
 
-  private _createPhasorElement(
+  private _createCanvasElement(
     clipboardData: Record<string, unknown>,
     idMap: Map<string, string>
   ) {
@@ -292,28 +301,35 @@ export class EdgelessClipboard implements Clipboard {
       clipboardData.children = yMap;
     }
     const id = this.surface.addElement(
-      clipboardData.type as PhasorElementType,
+      clipboardData.type as CanvasElementType,
       clipboardData
     );
-    const element = this.surface.pickById(id) as PhasorElement;
+    const element = this.surface.pickById(id) as CanvasElement;
     assertExists(element);
     return element;
   }
 
-  private _createPhasorElements(
+  private _createCanvasElements(
     elements: Record<string, unknown>[],
     idMap: Map<string, string>
   ) {
-    const result = groupBy(elements, item =>
-      item.type === 'connector' ? 'connectors' : 'nonConnectors'
-    );
+    const result = groupBy(elements, item => {
+      switch (item.type) {
+        case 'connector':
+          return 'connectors';
+        case 'group':
+          return 'groups';
+        default:
+          return 'others';
+      }
+    });
 
     return [
-      ...(result.nonConnectors
+      ...(result.others
         ?.map(d => {
           const oldId = d.id as string;
           assertExists(oldId);
-          const element = this._createPhasorElement(d, idMap);
+          const element = this._createCanvasElement(d, idMap);
           idMap.set(oldId, element.id);
           return element;
         })
@@ -330,7 +346,17 @@ export class EdgelessClipboard implements Clipboard {
           (<Connection>connector.target).id =
             idMap.get(targetId) ?? (targetId as string);
         }
-        return this._createPhasorElement(connector, idMap);
+        const element = this._createCanvasElement(connector, idMap);
+        idMap.set(connector.id as string, element.id);
+        return element;
+      }) ?? []),
+
+      ...(result.groups?.map(group => {
+        const oldId = group.id as string;
+        assertExists(oldId);
+        const element = this._createCanvasElement(group, idMap);
+        idMap.set(oldId, element.id);
+        return element;
       }) ?? []),
     ];
   }
@@ -400,12 +426,37 @@ export class EdgelessClipboard implements Clipboard {
     return imageIds;
   }
 
+  private async _createBookmarkBlocks(bookmarks: SerializedBlock[]) {
+    const bookmarkIds = await Promise.all(
+      bookmarks.map(async bookmark => {
+        const { xywh, style, url, caption, description, icon, image, title } =
+          bookmark;
+        const bookmarkId = this.surface.addElement(
+          EdgelessBlockType.BOOKMARK,
+          {
+            xywh,
+            style,
+            url,
+            caption,
+            description,
+            icon,
+            image,
+            title,
+          },
+          this.surface.model.id
+        );
+        return bookmarkId;
+      })
+    );
+    return bookmarkIds;
+  }
+
   private _getOldCommonBound(
-    phasorElements: PhasorElement[],
+    canvasElements: CanvasElement[],
     blocks: TopLevelBlockModel[]
   ) {
     const commonBound = getCommonBound(
-      [...phasorElements, ...blocks]
+      [...canvasElements, ...blocks]
         .map(({ xywh }) => {
           if (!xywh) {
             return;
@@ -427,11 +478,11 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   private _emitSelectionChangeAfterPaste(
-    phasorElementIds: string[],
+    canvasElementIds: string[],
     blockIds: string[]
   ) {
     const newSelected = [
-      ...phasorElementIds,
+      ...canvasElementIds,
       ...blockIds.filter(id => {
         return isTopLevelBlock(this._page.getBlockById(id));
       }),
@@ -453,12 +504,17 @@ export class EdgelessClipboard implements Clipboard {
           ? 'frames'
           : isImageBlock(data as unknown as Selectable)
             ? 'images'
-            : 'elements'
+            : isBookmarkBlock(data as unknown as Selectable)
+              ? 'bookmarks'
+              : 'elements'
     ) as unknown as {
       frames: SerializedBlock[];
       notes?: SerializedBlock[];
       images?: SerializedBlock[];
-      elements?: { type: PhasorElement['type'] }[];
+      bookmarks?: SerializedBlock[];
+      elements?: {
+        type: CanvasElement['type'];
+      }[];
     };
 
     // map old id to new id to rebuild connector's source and target
@@ -471,6 +527,9 @@ export class EdgelessClipboard implements Clipboard {
     );
     const frameIds = await this._createFrameBlocks(groupedByType.frames ?? []);
     const imageIds = await this._createImageBlocks(groupedByType.images ?? []);
+    const bookmarkIds = await this._createBookmarkBlocks(
+      groupedByType.bookmarks ?? []
+    );
 
     const notes = noteIds.map(id =>
       this._page.getBlockById(id)
@@ -484,7 +543,11 @@ export class EdgelessClipboard implements Clipboard {
       this.surface.pickById(id)
     ) as ImageBlockModel[];
 
-    const elements = this._createPhasorElements(
+    const bookmarks = bookmarkIds.map(id =>
+      this.surface.pickById(id)
+    ) as BookmarkBlockModel[];
+
+    const elements = this._createCanvasElements(
       groupedByType.elements || [],
       oldIdToNewIdMap
     );
@@ -498,11 +561,12 @@ export class EdgelessClipboard implements Clipboard {
       ...notes,
       ...frames,
       ...images,
+      ...bookmarks,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
 
-    // update phasor elements' position to mouse position
+    // update canvas elements' position to mouse position
     elements.forEach(ele => {
       const newBound = new Bound(
         pasteX + ele.x - oldCommonBound.x,
@@ -519,7 +583,7 @@ export class EdgelessClipboard implements Clipboard {
       }
     });
 
-    [...notes, ...frames, ...images].forEach(block => {
+    [...notes, ...frames, ...images, ...bookmarks].forEach(block => {
       const [x, y, w, h] = deserializeXYWH(block.xywh);
       const newBound = new Bound(
         pasteX + x - oldCommonBound.x,
@@ -538,7 +602,7 @@ export class EdgelessClipboard implements Clipboard {
     );
   }
 
-  async copyAsPng(blocks: TopLevelBlockModel[], shapes: PhasorElement[]) {
+  async toCanvas(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
     const blocksLen = blocks.length;
     const shapesLen = shapes.length;
 
@@ -556,11 +620,10 @@ export class EdgelessClipboard implements Clipboard {
       bounds.push(Bound.deserialize(shape.xywh));
     });
     const bound = getCommonBound(bounds);
-    if (!bound) {
-      return;
-    }
+    assertExists(bound);
 
     const parser = new ContentParser(this._page);
+
     const canvas = await parser.edgelessToCanvas(
       this._edgeless.surface.viewport,
       bound,
@@ -571,6 +634,14 @@ export class EdgelessClipboard implements Clipboard {
 
     assertExists(canvas);
 
+    return canvas;
+  }
+
+  async copyAsPng(blocks: TopLevelBlockModel[], shapes: CanvasElement[]) {
+    const canvas = await this.toCanvas(blocks, shapes);
+    if (!canvas) {
+      return;
+    }
     // @ts-ignore
     if (window.apis?.clipboard?.copyAsImageFromString) {
       // @ts-ignore

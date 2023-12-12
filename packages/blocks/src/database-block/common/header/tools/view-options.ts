@@ -62,7 +62,7 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<
     }
   }
 
-  private _clickMoreAction = (e: MouseEvent) => {
+  public clickMoreAction = (e: MouseEvent) => {
     e.stopPropagation();
     this.showToolBar(true);
     const target = eventToVRect(e);
@@ -77,7 +77,7 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<
     }
     return html` <div
       class="affine-database-toolbar-item more-action dv-icon-20"
-      @click="${this._clickMoreAction}"
+      @click="${this.clickMoreAction}"
     >
       ${MoreHorizontalIcon}
     </div>`;

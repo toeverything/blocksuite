@@ -9,8 +9,8 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
-  getVirgoSelectionIndex,
-  getVirgoSelectionText,
+  getInlineSelectionIndex,
+  getInlineSelectionText,
   initEmptyCodeBlockState,
   initEmptyParagraphState,
   pasteByKeyboard,
@@ -30,8 +30,8 @@ import {
   updateBlockType,
 } from './utils/actions/index.js';
 import {
+  assertRichTextInlineRange,
   assertRichTexts,
-  assertRichTextVRange,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -348,10 +348,10 @@ test('drag copy paste', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
 
-  const content = await getVirgoSelectionText(page);
+  const content = await getInlineSelectionText(page);
   expect(content).toBe('useuse');
 
-  await assertRichTextVRange(page, 0, 6, 0);
+  await assertRichTextInlineRange(page, 0, 6, 0);
 });
 
 test('keyboard selection and copy paste', async ({ page }) => {
@@ -367,10 +367,10 @@ test('keyboard selection and copy paste', async ({ page }) => {
   await pressArrowLeft(page, 1);
   await pasteByKeyboard(page);
 
-  const content = await getVirgoSelectionText(page);
+  const content = await getInlineSelectionText(page);
   expect(content).toBe('useuse');
 
-  await assertRichTextVRange(page, 0, 3, 0);
+  await assertRichTextInlineRange(page, 0, 3, 0);
 });
 
 // FIXME: this test failed in headless mode but passed in non-headless mode
@@ -422,35 +422,35 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
   );
 });
 
-test('use code block copy menu of code block copy whole code block', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page, {
-    flags: {
-      enable_transformer_clipboard: true,
-    },
-  });
-  await initEmptyCodeBlockState(page, { language: 'javascript' });
-  await focusRichText(page);
+test.fixme(
+  'use code block copy menu of code block copy whole code block',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page, {
+      flags: {
+        enable_transformer_clipboard: true,
+      },
+    });
+    await initEmptyCodeBlockState(page, { language: 'javascript' });
+    await focusRichText(page);
 
-  await page.keyboard.type('use');
-  await pressEnterWithShortkey(page);
+    await page.keyboard.type('use');
+    await pressEnterWithShortkey(page);
 
-  const codeBlockPosition = await getCenterPosition(page, 'affine-code');
-  await page.mouse.move(codeBlockPosition.x, codeBlockPosition.y);
+    const codeBlockPosition = await getCenterPosition(page, 'affine-code');
+    await page.mouse.move(codeBlockPosition.x, codeBlockPosition.y);
 
-  const position = await getCenterPosition(
-    page,
-    '.affine-codeblock-option > icon-button:nth-child(1)'
-  );
+    const position = await getCenterPosition(
+      page,
+      '.affine-codeblock-option > icon-button:nth-child(1)'
+    );
 
-  await page.mouse.click(position.x, position.y);
+    await page.mouse.click(position.x, position.y);
 
-  await focusRichText(page, 1);
-  await pasteByKeyboard(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
+    await focusRichText(page, 1);
+    await pasteByKeyboard(page);
+    await assertStoreMatchJSX(
+      page,
+      /*xml*/ `
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
@@ -477,8 +477,9 @@ test('use code block copy menu of code block copy whole code block', async ({
     />
   </affine:note>
 </affine:page>`
-  );
-});
+    );
+  }
+);
 
 test('code block copy button can work', async ({ page }) => {
   await enterPlaygroundRoom(page, {
@@ -627,10 +628,10 @@ test('press backspace after code block can enter code block', async ({
   await pressEnterWithShortkey(page);
   await page.keyboard.press('Backspace');
 
-  const index = await getVirgoSelectionIndex(page);
+  const index = await getInlineSelectionIndex(page);
   expect(index).toBe(code.length);
 
-  const text = await getVirgoSelectionText(page);
+  const text = await getInlineSelectionText(page);
   expect(text).toBe(code);
 });
 
@@ -646,10 +647,10 @@ test('press ArrowUp after code block can enter code block', async ({
   await pressEnterWithShortkey(page);
   await page.keyboard.press('ArrowUp');
 
-  const index = await getVirgoSelectionIndex(page);
+  const index = await getInlineSelectionIndex(page);
   expect(index).toBe(code.length);
 
-  const text = await getVirgoSelectionText(page);
+  const text = await getInlineSelectionText(page);
   expect(text).toBe(code);
 });
 

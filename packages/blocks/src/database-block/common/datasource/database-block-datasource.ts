@@ -1,6 +1,6 @@
 import type { Disposable } from '@blocksuite/global/utils';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Text, type Y } from '@blocksuite/store';
 
@@ -35,11 +35,11 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   constructor(
-    private root: BlockSuiteRoot,
+    private host: EditorHost,
     config: DatabaseBlockDatasourceConfig
   ) {
     super();
-    this._model = root.page.workspace
+    this._model = host.page.workspace
       .getPage(config.pageId)
       ?.getBlockById(config.blockId) as DatabaseBlockModel;
     this._model.childrenUpdated.pipe(this.slots.update);
@@ -125,7 +125,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       const model = this.getModelById(rowId);
       if (model) {
         return {
-          result: this.root.renderModel(model),
+          result: this.host.renderModel(model),
           model,
         };
       }

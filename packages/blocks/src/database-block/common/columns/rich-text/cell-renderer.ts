@@ -6,32 +6,30 @@ import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
-import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import { affineAttributeRenderer } from '../../../../_common/components/rich-text/virgo/attribute-renderer.js';
+import { affineAttributeRenderer } from '../../../../_common/components/rich-text/inline/attribute-renderer.js';
 import {
+  type AffineInlineEditor,
   type AffineTextAttributes,
   affineTextAttributes,
-  type AffineVEditor,
-} from '../../../../_common/components/rich-text/virgo/types.js';
+} from '../../../../_common/components/rich-text/inline/types.js';
+import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';
 
 function toggleStyle(
-  vEditor: AffineVEditor,
+  inlineEditor: AffineInlineEditor,
   attrs: AffineTextAttributes
 ): void {
-  const vRange = vEditor.getVRange();
-  if (!vRange) {
-    return;
-  }
+  const inlineRange = inlineEditor.getInlineRange();
+  if (!inlineRange) return;
 
-  const root = vEditor.rootElement;
+  const root = inlineEditor.rootElement;
   if (!root) {
     return;
   }
 
-  const deltas = vEditor.getDeltasByVRange(vRange);
+  const deltas = inlineEditor.getDeltasByInlineRange(inlineRange);
   let oldAttributes: AffineTextAttributes = {};
 
   for (const [delta] of deltas) {
@@ -62,12 +60,12 @@ function toggleStyle(
     })
   );
 
-  vEditor.formatText(vRange, newAttributes, {
+  inlineEditor.formatText(inlineRange, newAttributes, {
     mode: 'merge',
   });
   root.blur();
 
-  vEditor.syncVRange();
+  inlineEditor.syncInlineRange();
 }
 
 @customElement('affine-database-rich-text-cell')
@@ -110,11 +108,11 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  get vEditor() {
+  get inlineEditor() {
     assertExists(this._richTextElement);
-    const vEditor = this._richTextElement.vEditor;
-    assertExists(vEditor);
-    return vEditor;
+    const inlineEditor = this._richTextElement.inlineEditor;
+    assertExists(inlineEditor);
+    return inlineEditor;
   }
 
   override connectedCallback() {
@@ -135,13 +133,13 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
       .readonly=${true}
-      class="affine-database-rich-text virgo-editor"
+      class="affine-database-rich-text inline-editor"
     ></rich-text>`;
   }
 }
 
 @customElement('affine-database-rich-text-cell-editing')
-export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
+export class RichTextCellEditing extends BaseCellRenderer<Text> {
   static override styles = css`
     affine-database-rich-text-cell-editing {
       display: flex;
@@ -178,11 +176,11 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  get vEditor() {
+  get inlineEditor() {
     assertExists(this._richTextElement);
-    const vEditor = this._richTextElement.vEditor;
-    assertExists(vEditor);
-    return vEditor;
+    const inlineEditor = this._richTextElement.inlineEditor;
+    assertExists(inlineEditor);
+    return inlineEditor;
   }
 
   override connectedCallback() {
@@ -201,12 +199,12 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     );
 
     this._richTextElement?.updateComplete.then(() => {
-      this.vEditor.focusEnd();
+      this.inlineEditor.focusEnd();
     });
   }
 
   private _initYText = (text?: string) => {
-    const yText = new Workspace.Y.Text(text);
+    const yText = new Text(text);
     this.onChange(yText);
   };
 
@@ -231,7 +229,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       return;
     }
 
-    const vEditor = this.vEditor;
+    const inlineEditor = this.inlineEditor;
 
     switch (event.key) {
       // bold ctrl+b
@@ -239,7 +237,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       case 'b':
         if (event.metaKey || event.ctrlKey) {
           event.preventDefault();
-          toggleStyle(this.vEditor, { bold: true });
+          toggleStyle(this.inlineEditor, { bold: true });
         }
         break;
       // italic ctrl+i
@@ -247,7 +245,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       case 'i':
         if (event.metaKey || event.ctrlKey) {
           event.preventDefault();
-          toggleStyle(this.vEditor, { italic: true });
+          toggleStyle(this.inlineEditor, { italic: true });
         }
         break;
       // underline ctrl+u
@@ -255,7 +253,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       case 'u':
         if (event.metaKey || event.ctrlKey) {
           event.preventDefault();
-          toggleStyle(this.vEditor, { underline: true });
+          toggleStyle(this.inlineEditor, { underline: true });
         }
         break;
       // strikethrough ctrl+shift+s
@@ -263,7 +261,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       case 's':
         if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
           event.preventDefault();
-          toggleStyle(vEditor, { strike: true });
+          toggleStyle(inlineEditor, { strike: true });
         }
         break;
       // inline code ctrl+shift+e
@@ -271,7 +269,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       case 'e':
         if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
           event.preventDefault();
-          toggleStyle(vEditor, { code: true });
+          toggleStyle(inlineEditor, { code: true });
         }
         break;
       default:
@@ -280,15 +278,15 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   };
 
   private _onSoftEnter = () => {
-    if (this.value && this.vEditor) {
-      const vRange = this.vEditor.getVRange();
-      assertExists(vRange);
+    if (this.value && this.inlineEditor) {
+      const inlineRange = this.inlineEditor.getInlineRange();
+      assertExists(inlineRange);
 
       this.column.captureSync();
-      const text = new Text(this.vEditor.yText);
-      text.replace(vRange.index, length, '\n');
-      this.vEditor.setVRange({
-        index: vRange.index + 1,
+      const text = new Text(this.inlineEditor.yText);
+      text.replace(inlineRange.index, length, '\n');
+      this.inlineEditor.setInlineRange({
+        index: inlineRange.index + 1,
         length: 0,
       });
     }
@@ -299,7 +297,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       .yText=${this.value}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
-      class="affine-database-rich-text virgo-editor"
+      class="affine-database-rich-text inline-editor"
     ></rich-text>`;
   }
 }

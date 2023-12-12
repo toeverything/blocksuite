@@ -1,0 +1,397 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+
+import { wait } from '../utils/common.js';
+import { addElement, addNote, getSurface } from '../utils/edgeless.js';
+import { cleanup, setupEditor } from '../utils/setup.js';
+
+beforeEach(async () => {
+  await setupEditor('edgeless');
+});
+
+afterEach(() => {
+  cleanup();
+});
+
+test('layer manager inital state', () => {
+  const surface = getSurface(window.page, window.editor);
+
+  expect(surface.layer).toBeDefined();
+  expect(surface.layer.layers.length).toBe(0);
+  expect(surface.layer.canvasLayers.length).toBe(1);
+});
+
+test('new added frame should not affect layer', async () => {
+  const surface = getSurface(window.page, window.editor);
+
+  surface.addElement(
+    'affine:frame' as any,
+    {
+      xywh: '[0, 0, 100, 100]',
+    },
+    surface.model
+  );
+
+  await wait();
+
+  expect(surface.layer.layers.length).toBe(0);
+  expect(surface.layer.canvasLayers.length).toBe(1);
+});
+
+test('add new edgeless blocks or canvas elements should update layer automatically', async () => {
+  const surface = getSurface(window.page, window.editor);
+
+  addNote(page);
+  addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+
+  await wait();
+
+  expect(surface.layer.layers.length).toBe(2);
+});
+
+test('delete element should update layer automatically', async () => {
+  const surface = getSurface(window.page, window.editor);
+
+  const id = addNote(page);
+  const canvasElId = addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+
+  surface.removeElement(id);
+
+  expect(surface.layer.layers.length).toBe(1);
+
+  surface.removeElement(canvasElId);
+
+  expect(surface.layer.layers.length).toBe(0);
+});
+
+test('change element should update layer automatically', async () => {
+  const surface = getSurface(window.page, window.editor);
+
+  const id = addNote(page);
+  const canvasElId = addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+
+  await wait();
+
+  surface.updateElement(id, {
+    index: surface.layer.getReorderedIndex(surface.pickById(id)!, 'forward'),
+  });
+  expect(surface.layer.layers[surface.layer.layers.length - 1].type).toBe(
+    'block'
+  );
+
+  surface.updateElement(canvasElId, {
+    index: surface.layer.getReorderedIndex(
+      surface.pickById(canvasElId)!,
+      'forward'
+    ),
+  });
+  expect(surface.layer.layers[surface.layer.layers.length - 1].type).toBe(
+    'canvas'
+  );
+});
+
+test('new added notes should be placed under the topmost canvas layer', async () => {
+  const surface = getSurface(window.page, window.editor);
+
+  addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+  addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+  addNote(page, {
+    index: surface.layer.generateIndex('common', 'block'),
+  });
+  addNote(page, {
+    index: surface.layer.generateIndex('common', 'block'),
+  });
+  addNote(page, {
+    index: surface.layer.generateIndex('common', 'block'),
+  });
+
+  await wait();
+
+  expect(surface.layer.layers.length).toBe(2);
+  expect(surface.layer.layers[1].type).toBe('canvas');
+});
+
+test('new added canvas elements should be placed in the topmost canvas layer', async () => {
+  const surface = getSurface(window.page, window.editor);
+
+  addNote(page);
+  addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+
+  await wait();
+
+  expect(surface.layer.layers.length).toBe(2);
+  expect(surface.layer.layers[1].type).toBe('canvas');
+});
+
+test("there should be at lease one layer in canvasLayers property even there's no canvas element", () => {
+  const surface = getSurface(window.page, window.editor);
+
+  addNote(page);
+
+  expect(surface.layer.canvasLayers.length).toBe(1);
+});
+
+test('if the topmost layer is canvas layer, the number of layers in the canvasLayers prop should has the same with the number of canvas layer in the layers prop', () => {
+  const surface = getSurface(window.page, window.editor);
+
+  addNote(page);
+  addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+  addNote(page, {
+    index: surface.layer.generateIndex('common', 'canvas'),
+  });
+  addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+
+  expect(surface.layer.layers.length).toBe(4);
+  expect(surface.layer.canvasLayers.length).toBe(
+    surface.layer.layers.filter(layer => layer.type === 'canvas').length
+  );
+});
+
+test('a new layer should be created in canvasLayers prop when the topmost layer is not canvas layer', () => {
+  const surface = getSurface(window.page, window.editor);
+
+  addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+  addNote(page, {
+    index: surface.layer.generateIndex('common', 'canvas'),
+  });
+  addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+  addNote(page, {
+    index: surface.layer.generateIndex('common', 'canvas'),
+  });
+
+  expect(surface.layer.canvasLayers.length).toBe(3);
+});
+
+describe('layer reorder functionality', () => {
+  let ids: string[] = [];
+
+  beforeEach(() => {
+    const surface = getSurface(window.page, window.editor);
+
+    ids = [
+      addElement(
+        'shape',
+        {
+          shapeType: 'rect',
+        },
+        surface
+      ),
+      addNote(page, {
+        index: surface.layer.generateIndex('common', 'canvas'),
+      }),
+      addElement(
+        'shape',
+        {
+          shapeType: 'rect',
+        },
+        surface
+      ),
+      addNote(page, {
+        index: surface.layer.generateIndex('common', 'canvas'),
+      }),
+    ];
+  });
+
+  test('forward', async () => {
+    const surface = getSurface(window.page, window.editor);
+
+    surface.updateElement(ids[0], {
+      index: surface.layer.getReorderedIndex(
+        surface.pickById(ids[0])!,
+        'forward'
+      ),
+    });
+
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[0]) as any)
+      )
+    ).toBe(1);
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[1]) as any)
+      )
+    ).toBe(0);
+
+    await wait();
+
+    surface.updateElement(ids[1], {
+      index: surface.layer.getReorderedIndex(
+        surface.pickById(ids[1])!,
+        'forward'
+      ),
+    });
+
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[0]) as any)
+      )
+    ).toBe(0);
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[1]) as any)
+      )
+    ).toBe(1);
+  });
+
+  test('front', async () => {
+    const surface = getSurface(window.page, window.editor);
+
+    surface.updateElement(ids[0], {
+      index: surface.layer.getReorderedIndex(
+        surface.pickById(ids[0])!,
+        'front'
+      ),
+    });
+
+    await wait();
+
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[0]) as any)
+      )
+    ).toBe(3);
+
+    surface.updateElement(ids[1], {
+      index: surface.layer.getReorderedIndex(
+        surface.pickById(ids[1])!,
+        'front'
+      ),
+    });
+
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[1]) as any)
+      )
+    ).toBe(3);
+  });
+
+  test('backward', async () => {
+    const surface = getSurface(window.page, window.editor);
+
+    surface.updateElement(ids[3], {
+      index: surface.layer.getReorderedIndex(
+        surface.pickById(ids[3])!,
+        'backward'
+      ),
+    });
+
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[3]) as any)
+      )
+    ).toBe(1);
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[2]) as any)
+      )
+    ).toBe(2);
+
+    await wait();
+
+    surface.updateElement(ids[2], {
+      index: surface.layer.getReorderedIndex(
+        surface.pickById(ids[2])!,
+        'backward'
+      ),
+    });
+
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[3]) as any)
+      )
+    ).toBe(3);
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[2]) as any)
+      )
+    ).toBe(2);
+  });
+
+  test('back', async () => {
+    const surface = getSurface(window.page, window.editor);
+
+    surface.updateElement(ids[3], {
+      index: surface.layer.getReorderedIndex(surface.pickById(ids[3])!, 'back'),
+    });
+
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[3]) as any)
+      )
+    ).toBe(0);
+
+    await wait();
+
+    surface.updateElement(ids[2], {
+      index: surface.layer.getReorderedIndex(surface.pickById(ids[2])!, 'back'),
+    });
+
+    expect(
+      surface.layer.layers.findIndex(layer =>
+        layer.set.has(surface.pickById(ids[2]) as any)
+      )
+    ).toBe(0);
+  });
+});

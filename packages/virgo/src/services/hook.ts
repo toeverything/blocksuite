@@ -1,40 +1,38 @@
-import type { VRange } from '../types.js';
+import type { InlineEditor } from '../inline-editor.js';
+import type { InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
-import type { VEditor } from '../virgo.js';
 
-export interface VBeforeinputHookCtx<
-  TextAttributes extends BaseTextAttributes,
-> {
-  vEditor: VEditor<TextAttributes>;
+export interface BeforeinputHookCtx<TextAttributes extends BaseTextAttributes> {
+  inlineEditor: InlineEditor<TextAttributes>;
   raw: InputEvent;
-  vRange: VRange;
+  inlineRange: InlineRange;
   data: string | null;
   attributes: TextAttributes;
 }
-export interface VCompositionEndHookCtx<
+export interface CompositionEndHookCtx<
   TextAttributes extends BaseTextAttributes,
 > {
-  vEditor: VEditor<TextAttributes>;
+  inlineEditor: InlineEditor<TextAttributes>;
   raw: CompositionEvent;
-  vRange: VRange;
+  inlineRange: InlineRange;
   data: string | null;
   attributes: TextAttributes;
 }
 
-export type VHookContext<TextAttributes extends BaseTextAttributes> =
-  | VBeforeinputHookCtx<TextAttributes>
-  | VCompositionEndHookCtx<TextAttributes>;
+export type HookContext<TextAttributes extends BaseTextAttributes> =
+  | BeforeinputHookCtx<TextAttributes>
+  | CompositionEndHookCtx<TextAttributes>;
 
-export class VirgoHookService<TextAttributes extends BaseTextAttributes> {
+export class InlineHookService<TextAttributes extends BaseTextAttributes> {
   constructor(
-    public readonly editor: VEditor<TextAttributes>,
+    public readonly editor: InlineEditor<TextAttributes>,
     public readonly hooks: {
       beforeinput?: (
-        props: VBeforeinputHookCtx<TextAttributes>
-      ) => VBeforeinputHookCtx<TextAttributes> | null;
+        props: BeforeinputHookCtx<TextAttributes>
+      ) => BeforeinputHookCtx<TextAttributes> | null;
       compositionEnd?: (
-        props: VCompositionEndHookCtx<TextAttributes>
-      ) => VCompositionEndHookCtx<TextAttributes> | null;
+        props: CompositionEndHookCtx<TextAttributes>
+      ) => CompositionEndHookCtx<TextAttributes> | null;
     } = {}
   ) {}
 }

@@ -4,4 +4,4 @@ BlockSuite data store built for general purpose state management. Used in [AFFiN
 
 ## Documentation
 
-Checkout [blocksuite.affine.pro](https://blocksuite.affine.pro/) for comprehensive documentation.
+Checkout [blocksuite.io](https://blocksuite.io/) for comprehensive documentation.

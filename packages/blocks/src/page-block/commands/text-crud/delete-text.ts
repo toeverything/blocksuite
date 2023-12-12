@@ -3,7 +3,7 @@ import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
 export const deleteTextCommand: Command<
-  'currentTextSelection' | 'root',
+  'currentTextSelection' | 'host',
   never,
   {
     textSelection?: TextSelection;
@@ -15,16 +15,16 @@ export const deleteTextCommand: Command<
     '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before adding this command to the pipeline.'
   );
 
-  const root = ctx.root;
+  const host = ctx.host;
   assertExists(
-    root,
-    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
+    host,
+    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
   );
-  assertExists(root.rangeManager);
+  assertExists(host.rangeManager);
 
-  const range = root.rangeManager.textSelectionToRange(textSelection);
+  const range = host.rangeManager.textSelectionToRange(textSelection);
   if (!range) return;
-  const selectedElements = root.rangeManager.getSelectedBlockElementsByRange(
+  const selectedElements = host.rangeManager.getSelectedBlockElementsByRange(
     range,
     {
       mode: 'flat',

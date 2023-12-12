@@ -7,7 +7,7 @@ packages=(
   "blocks"
   "block-std"
   # "docs" # NOT PUBLISHED
-  "editor"
+  "presets"
   "global"
   # "playground" # NOT PUBLISHED
   "store"
@@ -17,7 +17,7 @@ packages=(
 
 npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
 
-pnpm build:editor
+pnpm build:packages
 
 for package in "${packages[@]}"
 do

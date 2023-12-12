@@ -1,64 +1,55 @@
-import type { VRange } from '../types.js';
-import type { VEditor } from '../virgo.js';
+import type { InlineEditor } from '../inline-editor.js';
+import type { InlineRange } from '../types.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
 function handleInsertText<TextAttributes extends BaseTextAttributes>(
-  vRange: VRange,
+  inlineRange: InlineRange,
   data: string | null,
-  editor: VEditor,
+  editor: InlineEditor,
   attributes: TextAttributes
 ) {
   if (!data) return;
-  editor.insertText(vRange, data, attributes);
-  editor.setVRange(
-    {
-      index: vRange.index + data.length,
-      length: 0,
-    },
-    false
-  );
+  editor.insertText(inlineRange, data, attributes);
+  editor.setInlineRange({
+    index: inlineRange.index + data.length,
+    length: 0,
+  });
 }
 
-function handleInsertParagraph(vRange: VRange, editor: VEditor) {
-  editor.insertLineBreak(vRange);
-  editor.setVRange(
-    {
-      index: vRange.index + 1,
-      length: 0,
-    },
-    false
-  );
+function handleInsertParagraph(inlineRange: InlineRange, editor: InlineEditor) {
+  editor.insertLineBreak(inlineRange);
+  editor.setInlineRange({
+    index: inlineRange.index + 1,
+    length: 0,
+  });
 }
 
-function handleDelete(vRange: VRange, editor: VEditor) {
-  editor.deleteText(vRange);
-  editor.setVRange(
-    {
-      index: vRange.index,
-      length: 0,
-    },
-    false
-  );
+function handleDelete(inlineRange: InlineRange, editor: InlineEditor) {
+  editor.deleteText(inlineRange);
+  editor.setInlineRange({
+    index: inlineRange.index,
+    length: 0,
+  });
 }
 
 export function transformInput<TextAttributes extends BaseTextAttributes>(
   inputType: string,
   data: string | null,
   attributes: TextAttributes,
-  vRange: VRange,
-  editor: VEditor
+  inlineRange: InlineRange,
+  editor: InlineEditor
 ) {
-  if (!editor.isVRangeValid(vRange)) return;
+  if (!editor.isValidInlineRange(inlineRange)) return;
 
   if (inputType === 'insertText') {
-    handleInsertText(vRange, data, editor, attributes);
+    handleInsertText(inlineRange, data, editor, attributes);
   } else if (
     inputType === 'insertParagraph' ||
     inputType === 'insertLineBreak'
   ) {
-    handleInsertParagraph(vRange, editor);
+    handleInsertParagraph(inlineRange, editor);
   } else if (inputType.startsWith('delete')) {
-    handleDelete(vRange, editor);
+    handleDelete(inlineRange, editor);
   } else {
     return;
   }

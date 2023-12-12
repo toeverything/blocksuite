@@ -1,20 +1,22 @@
 /// <reference types="./env.d.ts" />
 import '@blocksuite/blocks';
-import '@blocksuite/editor';
+import '@blocksuite/presets';
 import './components/start-panel';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import '@blocksuite/editor/themes/affine.css';
+import '@blocksuite/presets/themes/affine.css';
 
 import { TestUtils } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
+import { CopilotPanel } from '@blocksuite/presets';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
 
-import { CustomCopilotPanel } from './components/copilot/custom-copilot-panel.js';
+import { CustomFramePanel } from './components/custom-frame-panel';
 import { CustomNavigationPanel } from './components/custom-navigation-panel.js';
 import { DebugMenu } from './components/debug-menu.js';
+import { SidePanel } from './components/side-panel';
 import type { InitFn } from './data';
 import {
   createEditor,
@@ -45,21 +47,27 @@ function subscribePage(workspace: Workspace) {
     const contentParser = new ContentParser(page);
     const debugMenu = new DebugMenu();
     const navigationPanel = new CustomNavigationPanel();
-    const copilotPanel = new CustomCopilotPanel();
+    const framePanel = new CustomFramePanel();
+    const copilotPanelPanel = new CopilotPanel();
+    const sidePanel = new SidePanel();
 
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
     debugMenu.mode = defaultMode;
     debugMenu.contentParser = contentParser;
     debugMenu.navigationPanel = navigationPanel;
-    debugMenu.copilotPanel = copilotPanel;
+    debugMenu.framePanel = framePanel;
+    debugMenu.copilotPanel = copilotPanelPanel;
+    debugMenu.sidePanel = sidePanel;
 
     navigationPanel.editor = editor;
-    copilotPanel.editor = editor;
+    copilotPanelPanel.editor = editor;
+    framePanel.editor = editor;
 
     document.body.appendChild(debugMenu);
     document.body.appendChild(navigationPanel);
-    document.body.appendChild(copilotPanel);
+    document.body.appendChild(sidePanel);
+    document.body.appendChild(framePanel);
 
     window.editor = editor;
     window.page = page;
@@ -105,9 +113,9 @@ async function main() {
   window.blockSchemas = AffineSchemas;
   window.Y = Workspace.Y;
   window.ContentParser = ContentParser;
-  Object.defineProperty(globalThis, 'root', {
+  Object.defineProperty(globalThis, 'host', {
     get() {
-      return document.querySelector('block-suite-root') as BlockSuiteRoot;
+      return document.querySelector('editor-host') as EditorHost;
     },
   });
 

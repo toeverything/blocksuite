@@ -4,15 +4,13 @@ import type * as Y from 'yjs';
 
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
 import { pageMigrations, workspaceMigrations } from '../migration/index.js';
-import { ProxyManager } from '../yjs/index.js';
+import { Block } from '../workspace/block/block.js';
 import type { BlockSchemaType } from './base.js';
 import { BlockSchema } from './base.js';
 import { MigrationError, SchemaValidateError } from './error.js';
-import { toBlockMigrationData } from './utils.js';
 
 export class Schema {
   readonly flavourSchemaMap = new Map<string, BlockSchemaType>();
-  readonly proxy = new ProxyManager();
 
   get versions() {
     return Object.fromEntries(
@@ -91,7 +89,6 @@ export class Schema {
       parentSchema,
       new SchemaValidateError(parentFlavour, SCHEMA_NOT_FOUND_MESSAGE)
     );
-
     this.validateSchema(schema, parentSchema);
     validateChildren();
   };
@@ -166,9 +163,9 @@ export class Schema {
         return;
       }
 
-      const data = toBlockMigrationData(blockData, this.proxy);
+      const block = new Block(this, blockData);
 
-      return onUpgrade(data, oldVersion, version);
+      return onUpgrade(block.model, oldVersion, version);
     } catch (err) {
       throw new MigrationError(`upgrade block ${flavour} failed.
           ${err}`);

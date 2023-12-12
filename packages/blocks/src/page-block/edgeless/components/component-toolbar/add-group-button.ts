@@ -3,8 +3,9 @@ import '../buttons/tool-icon-button.js';
 import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
-import { AddGroupButtonIcon } from '../../../../_common/icons/index.js';
+import { GroupIcon } from '../../../../_common/icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-add-group-button')
@@ -21,7 +22,15 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
       .tooltip=${'Group'}
       .tipPosition=${'bottom'}
     >
-      ${AddGroupButtonIcon}
+      ${GroupIcon}<span
+        style=${styleMap({
+          fontSize: '12px',
+          fontWeight: 400,
+          color: 'var(--affine-icon-color)',
+          marginLeft: '4px',
+        })}
+        >Group</span
+      >
     </edgeless-tool-icon-button>`;
   }
 }

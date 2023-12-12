@@ -3,7 +3,7 @@
 import './portal/image.js';
 import './portal/note.js';
 
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { css, type TemplateResult } from 'lit';
@@ -36,7 +36,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  host!: EditorHost;
 
   @property({ attribute: false })
   page!: Page;
@@ -58,7 +58,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
 
   private _renderTopLevelBlocks() {
     const containerModel = this.containerModel;
-    const topLevelBlocks =
+    let topLevelBlocks =
       'flavour' in containerModel
         ? getBlocksInFrame(
             this.page,
@@ -67,7 +67,12 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
           )
         : this._getBlocksInChildren(containerModel);
 
-    topLevelBlocks.sort(compare);
+    topLevelBlocks = topLevelBlocks
+      .sort(compare)
+      .filter(
+        model =>
+          (model.flavour as EdgelessBlockType) !== EdgelessBlockType.FRAME
+      );
 
     return repeat(
       topLevelBlocks,
@@ -81,7 +86,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
           .index=${index}
           .model=${model}
           .page=${this.page}
-          .root=${this.root}
+          .host=${this.host}
           .renderModel=${this.renderModel}
         ></${tag}>`;
       }
@@ -93,10 +98,14 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
     translateY: number;
     zoom: number;
   }) => {
-    this.portal?.style.setProperty(
-      'transform',
-      `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
-    );
+    this.requestUpdate();
+    this.updateComplete.then(() => {
+      this.portal?.style.setProperty(
+        'transform',
+        `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
+      );
+      this.portal?.style.setProperty('transform-origin', '0 0');
+    });
   };
 
   override render() {

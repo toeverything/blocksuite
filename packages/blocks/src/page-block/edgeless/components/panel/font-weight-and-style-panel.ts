@@ -24,6 +24,7 @@ export class EdgelessFontWeightAndStylePanel extends LitElement {
       background: var(--affine-background-overlay-panel-color);
       gap: 8px;
       padding: 8px;
+      border-radius: 8px;
     }
 
     .container edgeless-tool-icon-button {

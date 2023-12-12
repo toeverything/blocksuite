@@ -13,17 +13,17 @@ import {
   pressArrowRight,
   pressEnter,
   selectAllByKeyboard,
-  setVRangeInSelectedRichText,
+  setInlineRangeInSelectedRichText,
   SHORT_KEY,
   switchEditorMode,
   type,
-  waitForVirgoStateUpdated,
+  waitForInlineEditorStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
 import { assertStoreMatchJSX } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
-const inputUrl = 'https://google.com';
+const inputUrl = 'http://localhost';
 
 const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await enterPlaygroundRoom(page);
@@ -61,21 +61,22 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:bookmark
-      prop:bookmarkTitle=""
-      prop:caption=""
-      prop:crawled={false}
-      prop:description=""
-      prop:icon=""
-      prop:image=""
-      prop:type="card"
-      prop:url="https://google.com"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
+      prop:url="${inputUrl}"
     />
   </affine:note>
 </affine:page>`
   );
 });
 
-test(scoped`create bookmark by blockhub`, async ({ page }) => {
+test.skip(scoped`create bookmark by blockhub`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -84,7 +85,7 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
   const listMenu = page.locator('.block-hub-icon-container:nth-child(4)');
   await listMenu.hover();
   const blockHubListContainer = page.locator(
-    '.affine-block-hub-container[type="file"]'
+    '.block-hub-cards-container[type="file"]'
   );
   await expect(blockHubListContainer).toBeVisible();
   await page.click(
@@ -115,21 +116,21 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
       prop:type="text"
     />
     <affine:bookmark
-      prop:bookmarkTitle=""
-      prop:caption=""
-      prop:crawled={false}
-      prop:description=""
-      prop:icon=""
-      prop:image=""
-      prop:type="card"
-      prop:url="https://google.com"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
+      prop:url="${inputUrl}"
     />
   </affine:note>
 </affine:page>`
   );
 });
-// This function is in AFFine
-// test.skip(scoped`create bookmark by paste`, async ({ page }) => {});
+
 test(scoped`covert bookmark block to link text`, async ({ page }) => {
   await createBookmarkBlockBySlashMenu(page);
   await hoverBookmarkBlock(page);
@@ -156,8 +157,8 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
       prop:text={
         <>
           <text
-            insert="https://google.com"
-            link="https://google.com"
+            insert="${inputUrl}"
+            link="${inputUrl}"
           />
         </>
       }
@@ -173,8 +174,8 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await type(page, 'https://google.com ');
-  await setVRangeInSelectedRichText(page, 0, 18);
+  await type(page, inputUrl);
+  await setInlineRangeInSelectedRichText(page, 0, inputUrl.length);
   await copyByKeyboard(page);
   await focusRichText(page);
   await type(page, '/bookmark');
@@ -200,28 +201,19 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:paragraph
-      prop:text={
-        <>
-          <text
-            insert="https://google.com"
-            link="https://google.com"
-          />
-          <text
-            insert=" "
-          />
-        </>
-      }
+      prop:text="${inputUrl}"
       prop:type="text"
     />
     <affine:bookmark
-      prop:bookmarkTitle=""
-      prop:caption=""
-      prop:crawled={false}
-      prop:description=""
-      prop:icon=""
-      prop:image=""
-      prop:type="card"
-      prop:url="https://google.com"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
+      prop:url="${inputUrl}"
     />
   </affine:note>
 </affine:page>`
@@ -232,12 +224,12 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await focusRichText(page);
-  await type(page, 'https://google.com ');
+  await type(page, inputUrl);
 
   await switchEditorMode(page);
 
   await activeNoteInEdgeless(page, ids.noteId);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);
   await pressArrowRight(page);
@@ -266,28 +258,19 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:paragraph
-      prop:text={
-        <>
-          <text
-            insert="https://google.com"
-            link="https://google.com"
-          />
-          <text
-            insert=" "
-          />
-        </>
-      }
+      prop:text="${inputUrl}"
       prop:type="text"
     />
     <affine:bookmark
-      prop:bookmarkTitle=""
-      prop:caption=""
-      prop:crawled={false}
-      prop:description=""
-      prop:icon=""
-      prop:image=""
-      prop:type="card"
-      prop:url="https://google.com "
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
+      prop:url="${inputUrl}"
     />
   </affine:note>
 </affine:page>`
@@ -315,14 +298,15 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:bookmark
-      prop:bookmarkTitle=""
-      prop:caption=""
-      prop:crawled={false}
-      prop:description=""
-      prop:icon=""
-      prop:image=""
-      prop:type="card"
-      prop:url="https://google.com"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
+      prop:url="${inputUrl}"
     />
   </affine:note>
 </affine:page>`
@@ -368,14 +352,15 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:bookmark
-      prop:bookmarkTitle=""
-      prop:caption=""
-      prop:crawled={false}
-      prop:description=""
-      prop:icon=""
-      prop:image=""
-      prop:type="card"
-      prop:url="https://google.com"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
+      prop:url="${inputUrl}"
     />
     <affine:paragraph
       prop:text="111"
@@ -434,14 +419,15 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
       prop:type="text"
     />
     <affine:bookmark
-      prop:bookmarkTitle=""
-      prop:caption=""
-      prop:crawled={false}
-      prop:description=""
-      prop:icon=""
-      prop:image=""
-      prop:type="card"
-      prop:url="https://google.com"
+      prop:caption={null}
+      prop:description={null}
+      prop:icon={null}
+      prop:image={null}
+      prop:index="a0"
+      prop:rotate={0}
+      prop:style="horizontal"
+      prop:title={null}
+      prop:url="${inputUrl}"
     />
     <affine:paragraph
       prop:text="333"

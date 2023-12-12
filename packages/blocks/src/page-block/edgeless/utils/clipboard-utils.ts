@@ -2,19 +2,31 @@ import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
 import type { EdgelessElement } from '../../../_common/utils/index.js';
+import { groupBy } from '../../../_common/utils/iterable.js';
 import { getBlockClipboardInfo } from '../../../_legacy/clipboard/index.js';
+import type { BookmarkBlockService } from '../../../_legacy/service/legacy-services/bookmark-service.js';
 import type { FrameBlockService } from '../../../_legacy/service/legacy-services/frame-service.js';
 import type { ImageBlockService } from '../../../_legacy/service/legacy-services/image-service.js';
+import type { FrameBlockModel } from '../../../frame-block/index.js';
+import type { ImageBlockModel } from '../../../image-block/index.js';
+import type { NoteBlockModel } from '../../../note-block/index.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import {
   Bound,
+  type CanvasElement,
   ConnectorElement,
   GroupElement,
 } from '../../../surface-block/index.js';
+import { getElementsWithoutGroup } from '../../../surface-block/managers/group-manager.js';
 import { getCopyElements } from '../controllers/clipboard.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { edgelessElementsBound, getGridBound } from './bound-utils.js';
-import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
+import { edgelessElementsBound } from './bound-utils.js';
+import {
+  isBookmarkBlock,
+  isFrameBlock,
+  isImageBlock,
+  isNoteBlock,
+} from './query.js';
 
 const offset = 10;
 export async function duplicate(
@@ -31,13 +43,18 @@ export async function duplicate(
     copyElements.map(async element => {
       const bound = isFrameBlock(element)
         ? Bound.deserialize(element.xywh)
-        : getGridBound(element);
+        : element.elementBound;
       bound.x += totalBound.w + offset;
       let id;
       if (isNoteBlock(element)) {
         id = surface.addElement(
           element.flavour,
-          { xywh: bound.serialize() },
+          {
+            xywh: bound.serialize(),
+            hidden: element.hidden,
+            background: element.background,
+            edgeless: element.edgeless,
+          },
           page.root?.id
         );
         const block = page.getBlockById(id);
@@ -74,6 +91,19 @@ export async function duplicate(
           },
           surface.model.id
         );
+      } else if (isBookmarkBlock(element)) {
+        const service = edgeless.getService(
+          element.flavour
+        ) as BookmarkBlockService;
+        const json = service.block2Json(element, []);
+        id = surface.addElement(
+          EdgelessBlockType.BOOKMARK,
+          {
+            xywh: bound.serialize(),
+            sourceId: json.sourceId,
+          },
+          surface.model.id
+        );
       } else if (element instanceof GroupElement) {
         const props = element.serialize();
         const yMap = new Workspace.Y.Map<boolean>();
@@ -101,6 +131,12 @@ export async function duplicate(
     })
   );
 
+  edgeless.surface.fitToViewport(
+    edgelessElementsBound(
+      newElements.map(id => surface.pickById(id)) as EdgelessElement[]
+    )
+  );
+
   if (select) {
     edgeless.selectionManager.setSelection({
       elements: newElements,
@@ -108,3 +144,30 @@ export async function duplicate(
     });
   }
 }
+export const splitElements = (elements: EdgelessElement[]) => {
+  const { notes, frames, shapes, images } = groupBy(
+    getElementsWithoutGroup(elements),
+    element => {
+      if (isNoteBlock(element)) {
+        return 'notes';
+      } else if (isFrameBlock(element)) {
+        return 'frames';
+      } else if (isImageBlock(element)) {
+        return 'images';
+      }
+      return 'shapes';
+    }
+  ) as {
+    notes: NoteBlockModel[];
+    shapes: CanvasElement[];
+    frames: FrameBlockModel[];
+    images: ImageBlockModel[];
+  };
+
+  return {
+    notes: notes ?? [],
+    shapes: shapes ?? [],
+    frames: frames ?? [],
+    images: images ?? [],
+  };
+};
