@@ -36,7 +36,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  root!: EditorHost;
+  host!: EditorHost;
 
   @property({ attribute: false })
   page!: Page;
@@ -86,7 +86,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
           .index=${index}
           .model=${model}
           .page=${this.page}
-          .root=${this.root}
+          .host=${this.host}
           .renderModel=${this.renderModel}
         ></${tag}>`;
       }

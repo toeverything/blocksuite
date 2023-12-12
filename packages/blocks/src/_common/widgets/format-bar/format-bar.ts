@@ -40,7 +40,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   private _customElements: HTMLDivElement[] = [];
 
   private get _selectionManager() {
-    return this.root.selection;
+    return this.host.selection;
   }
 
   private _dragging = false;
@@ -134,14 +134,14 @@ export class AffineFormatBarWidget extends WidgetElement {
     });
 
     this.disposables.add(
-      this.root.event.add('dragStart', () => {
+      this.host.event.add('dragStart', () => {
         this._dragging = true;
         this.requestUpdate();
       })
     );
 
     this.disposables.add(
-      this.root.event.add('dragEnd', () => {
+      this.host.event.add('dragEnd', () => {
         this._dragging = false;
         this.requestUpdate();
       })
@@ -149,7 +149,7 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     // calculate placement
     this.disposables.add(
-      this.root.event.add('pointerUp', ctx => {
+      this.host.event.add('pointerUp', ctx => {
         if (this.displayType === 'text' || this.displayType === 'native') {
           const range = this.nativeRange;
           assertExists(range);
@@ -179,12 +179,12 @@ export class AffineFormatBarWidget extends WidgetElement {
     // listen to selection change
     this.disposables.add(
       this._selectionManager.slots.changed.on(async () => {
-        await this.root.updateComplete;
+        await this.host.updateComplete;
         const textSelection = pageElement.selection.find('text');
         const blockSelections = pageElement.selection.filter('block');
 
         if (textSelection) {
-          const block = this.root.view.viewFromPath(
+          const block = this.host.view.viewFromPath(
             'block',
             textSelection.path
           );
@@ -194,9 +194,9 @@ export class AffineFormatBarWidget extends WidgetElement {
             block.model.role === 'content'
           ) {
             this._displayType = 'text';
-            assertExists(pageElement.root.rangeManager);
+            assertExists(pageElement.host.rangeManager);
 
-            this.root.std.command
+            this.host.std.command
               .pipe()
               .withHost()
               .getTextSelection()
@@ -217,7 +217,7 @@ export class AffineFormatBarWidget extends WidgetElement {
           this._selectedBlockElements = blockSelections
             .map(selection => {
               const path = selection.path;
-              return this.blockElement.root.view.viewFromPath('block', path);
+              return this.blockElement.host.view.viewFromPath('block', path);
             })
             .filter((el): el is BlockElement => !!el);
         } else {
@@ -228,7 +228,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       })
     );
     this.disposables.addFromEvent(document, 'selectionchange', () => {
-      const databaseSelection = this.root.selection.find('database');
+      const databaseSelection = this.host.selection.find('database');
       const reset = () => {
         this._reset();
         this.requestUpdate();

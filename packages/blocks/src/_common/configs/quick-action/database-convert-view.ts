@@ -156,14 +156,14 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  root!: EditorHost;
+  host!: EditorHost;
 
   get page() {
-    return this.root.page;
+    return this.host.page;
   }
 
   private _convertToDatabase(viewType: DataViewTypes) {
-    const selectedModels = getSelectedContentModels(this.root, [
+    const selectedModels = getSelectedContentModels(this.host, [
       'text',
       'block',
     ]);
@@ -187,7 +187,7 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
     databaseModel.applyColumnUpdate();
     this.page.moveBlocks(selectedModels, databaseModel);
 
-    const selectionManager = this.root.selection;
+    const selectionManager = this.host.selection;
     selectionManager.clear();
 
     this.remove();

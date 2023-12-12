@@ -32,8 +32,8 @@ export const quickActionConfig: QuickActionConfig[] = [
     hotkey: undefined,
     showWhen: () => true,
     enabledWhen: () => true,
-    action: root => {
-      copyBlocksInPage(root);
+    action: host => {
+      copyBlocksInPage(host);
       toast('Copied to clipboard');
     },
   },
@@ -44,8 +44,8 @@ export const quickActionConfig: QuickActionConfig[] = [
       'Contains Block types that cannot be converted to Database',
     icon: DatabaseTableViewIcon20,
     hotkey: `Mod-g`,
-    showWhen: root => {
-      const selectedModels = getSelectedContentModels(root, ['text', 'block']);
+    showWhen: host => {
+      const selectedModels = getSelectedContentModels(host, ['text', 'block']);
 
       if (selectedModels.length === 0) {
         return false;
@@ -58,8 +58,8 @@ export const quickActionConfig: QuickActionConfig[] = [
 
       return true;
     },
-    enabledWhen: root => {
-      const selectedModels = getSelectedContentModels(root, ['text', 'block']);
+    enabledWhen: host => {
+      const selectedModels = getSelectedContentModels(host, ['text', 'block']);
 
       if (selectedModels.length === 0) {
         return false;
@@ -69,10 +69,10 @@ export const quickActionConfig: QuickActionConfig[] = [
         DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)
       );
     },
-    action: root => {
+    action: host => {
       createSimplePortal({
         template: html`<database-convert-view
-          .root=${root}
+          .host=${host}
         ></database-convert-view>`,
       });
     },

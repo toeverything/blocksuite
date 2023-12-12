@@ -13,7 +13,7 @@ export class WidgetElement<
   B extends BlockElement = BlockElement,
 > extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  root!: EditorHost;
+  host!: EditorHost;
 
   @property({ attribute: false })
   page!: Page;
@@ -31,7 +31,7 @@ export class WidgetElement<
   get blockElement(): B {
     const parentElement = this.parentElement;
     assertExists(parentElement);
-    const nodeView = this.root.view.getNodeView(parentElement);
+    const nodeView = this.host.view.getNodeView(parentElement);
     assertExists(nodeView);
     return nodeView.view as B;
   }
@@ -42,7 +42,7 @@ export class WidgetElement<
   }
 
   get std() {
-    return this.root.std;
+    return this.host.std;
   }
 
   handleEvent = (
@@ -51,7 +51,7 @@ export class WidgetElement<
     options?: { global?: boolean }
   ) => {
     this._disposables.add(
-      this.root.event.add(name, handler, {
+      this.host.event.add(name, handler, {
         flavour: options?.global ? undefined : this.flavour,
       })
     );
@@ -62,7 +62,7 @@ export class WidgetElement<
     options?: { global: boolean }
   ) {
     this._disposables.add(
-      this.root.event.bindHotkey(keymap, {
+      this.host.event.bindHotkey(keymap, {
         flavour: options?.global ? undefined : this.flavour,
       })
     );
@@ -70,7 +70,7 @@ export class WidgetElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.path = this.root.view.calculatePath(this);
+    this.path = this.host.view.calculatePath(this);
   }
 
   override render(): unknown {

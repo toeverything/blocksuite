@@ -896,13 +896,13 @@ export class EdgelessPageBlockComponent extends BlockElement<
   override connectedCallback() {
     super.connectedCallback();
     this._updateFrames();
-    this.root.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
+    this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new EdgelessPageKeyboardManager(this);
 
     this.handleEvent('selectionChange', () => {
-      const surface = this.root.selection.value.find(
+      const surface = this.host.selection.value.find(
         (sel): sel is SurfaceSelection => sel.is('surface')
       );
       if (!surface) return;
@@ -918,7 +918,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);
-    this.tools = new EdgelessToolsManager(this, this.root.event);
+    this.tools = new EdgelessToolsManager(this, this.host.event);
     this._initLocalRecordManager();
   }
 

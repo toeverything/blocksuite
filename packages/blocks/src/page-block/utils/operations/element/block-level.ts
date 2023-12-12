@@ -18,7 +18,7 @@ export function updateBlockElementType(
   if (blockElements.length === 0) {
     return [];
   }
-  const root = blockElements[0].root;
+  const root = blockElements[0].host;
   const page = blockElements[0].page;
   const hasSamePage = blockElements.every(block => block.page === page);
   if (!hasSamePage) {

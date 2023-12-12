@@ -12,7 +12,7 @@ import type { BlockElement } from '../element/block-element.js';
 export const getVRangeProvider: (
   element: BlockElement
 ) => VRangeProvider = element => {
-  const root = element.root;
+  const root = element.host;
   const selectionManager = root.selection;
   const rangeManager = root.rangeManager;
   const vRangeUpdatedSlot = new Slot<VRangeUpdatedProp>();

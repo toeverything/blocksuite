@@ -67,8 +67,8 @@ export class AffineEditorContainer
 
   get root() {
     return this.mode === 'page'
-      ? this._docPage?.root
-      : this._edgelessPage?.root;
+      ? this._docPage?.host
+      : this._edgelessPage?.host;
   }
 
   readonly themeObserver = new ThemeObserver();

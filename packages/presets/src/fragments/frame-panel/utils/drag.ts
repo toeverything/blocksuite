@@ -29,7 +29,7 @@ export function startDragging(
     frameListContainer: HTMLElement;
     frameElementHeight: number;
     doc: Document;
-    host: Document | HTMLElement;
+    domHost: Document | HTMLElement;
     container: FramePanelBody;
     start: {
       x: number;
@@ -42,7 +42,7 @@ export function startDragging(
 ) {
   const {
     doc,
-    host,
+    domHost,
     container,
     onDragMove,
     onDragEnd,
@@ -61,7 +61,7 @@ export function startDragging(
 
       el.edgeless = edgeless;
       el.page = page;
-      el.root = editorHost;
+      el.host = editorHost;
       el.frame = frame.frame;
 
       el.cardIndex = frame.cardIndex;
@@ -152,7 +152,7 @@ export function startDragging(
     onDragEnd?.(idx);
   };
 
-  once(host as Document, 'mouseup', dragEnd);
+  once(domHost as Document, 'mouseup', dragEnd);
 }
 
 function createMaskElement(doc: Document) {

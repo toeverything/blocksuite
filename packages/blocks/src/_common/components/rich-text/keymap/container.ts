@@ -29,9 +29,9 @@ import { bracketPairs } from './bracket-pairs.js';
 import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
 
 export const bindContainerHotkey = (blockElement: BlockElement) => {
-  const selection = blockElement.root.selection;
+  const selection = blockElement.host.selection;
   const model = blockElement.model;
-  const root = blockElement.root;
+  const root = blockElement.host;
   const leftBrackets = bracketPairs.map(pair => pair.left);
 
   const _selectBlock = () => {
@@ -394,7 +394,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   }
 
   function tryConvertToLinkedPage() {
-    const pageBlock = blockElement.root.view.viewFromPath(
+    const pageBlock = blockElement.host.view.viewFromPath(
       'block',
       buildPath(model.page.root)
     );

@@ -138,7 +138,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
       ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
           const template = html`<${tag} ${unsafeStatic(
             this.widgetIdAttr
-          )}=${key} .root=${this} .page=${this.page}></${tag}>`;
+          )}=${key} .host=${this} .page=${this.page}></${tag}>`;
 
           return {
             ...mapping,
@@ -149,7 +149,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
     return html`<${tag}
       ${unsafeStatic(this.blockIdAttr)}=${model.id}
-      .root=${this}
+      .host=${this}
       .page=${this.page}
       .model=${model}
       .widgets=${widgets}

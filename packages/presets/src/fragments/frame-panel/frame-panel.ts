@@ -109,7 +109,7 @@ export class FramePanel extends WithDisposable(LitElement) {
         class="frame-panel-body"
         .edgeless=${this.edgeless}
         .page=${this.page}
-        .root=${this.root}
+        .editorHost=${this.root}
         .changeEditorMode=${this._changeEditorMode}
         .fitPadding=${this.fitPadding}
       ></frame-panel-body>

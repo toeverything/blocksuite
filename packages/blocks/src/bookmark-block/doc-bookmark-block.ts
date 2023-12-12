@@ -33,7 +33,7 @@ export class DocBookmarkBlockComponent extends WithDisposable(
   }
 
   get root() {
-    return this.block.root;
+    return this.block.host;
   }
 
   override connectedCallback() {
@@ -97,7 +97,7 @@ export class DocBookmarkBlockComponent extends WithDisposable(
         <bookmark-toolbar
           .model=${this.model}
           .onSelected=${this._onToolbarSelected}
-          .root=${this}
+          .host=${this}
           .abortController=${abortController}
           .std=${this.block.std}
         ></bookmark-toolbar>`,

@@ -66,7 +66,7 @@ const HighlightPanel = (
           text="${name}"
           data-testid="${color ?? 'unset'}"
           @click="${() => {
-            updateHighlight(formatBar.root, color, HighlightType.Foreground);
+            updateHighlight(formatBar.host, color, HighlightType.Foreground);
             formatBar.requestUpdate();
           }}"
         >
@@ -86,7 +86,7 @@ const HighlightPanel = (
           style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
           text="${name}"
           @click="${() => {
-            updateHighlight(formatBar.root, color, HighlightType.Background);
+            updateHighlight(formatBar.host, color, HighlightType.Background);
             formatBar.requestUpdate();
           }}"
         >
@@ -102,7 +102,7 @@ const HighlightPanel = (
 };
 
 export const HighlightButton = (formatBar: AffineFormatBarWidget) => {
-  const root = formatBar.blockElement.root;
+  const root = formatBar.blockElement.host;
 
   const { setFloating, setReference } = whenHover(isHover => {
     if (!isHover) {

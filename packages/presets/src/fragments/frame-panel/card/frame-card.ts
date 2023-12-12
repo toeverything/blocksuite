@@ -123,7 +123,7 @@ export class FrameCard extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  root!: EditorHost;
+  host!: EditorHost;
 
   @property({ attribute: false })
   cardIndex!: number;
@@ -283,7 +283,7 @@ export class FrameCard extends WithDisposable(LitElement) {
           ? nothing
           : html`<frame-preview
               .edgeless=${this.edgeless}
-              .root=${this.root}
+              .host=${this.host}
               .page=${this.page}
               .frame=${this.frame}
             ></frame-preview>`}
