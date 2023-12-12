@@ -507,17 +507,22 @@ export class EdgelessPageBlockComponent extends BlockElement<
     const imageFiles = [...files].filter(file =>
       file.type.startsWith('image/')
     );
+    if (!imageFiles.length) return [];
 
     let { x, y } = this.surface.viewport.center;
     if (point) [x, y] = this.surface.toModelCoord(point.x, point.y);
 
     const dropInfos: { point: Point; blockId: string }[] = [];
 
+    const IMAGE_STACK_GAP = 32;
+
     // create image cards without image data
-    imageFiles.map(file => {
-      const point = new Point(x, y);
+    imageFiles.map((file, index) => {
+      const point = new Point(
+        x + index * IMAGE_STACK_GAP,
+        y + index * IMAGE_STACK_GAP
+      );
       const center = Vec.toVec(point);
-      console.log(center);
       const bound = Bound.fromCenter(
         center,
         SURFACE_IMAGE_CARD_WIDTH,
@@ -537,30 +542,28 @@ export class EdgelessPageBlockComponent extends BlockElement<
     // upload image data and update the image model
     const uploadPromises = imageFiles.map(async (file, index) => {
       const { point, blockId } = dropInfos[index];
+
       const sourceId = await this.page.blob.set(file);
       const imageSize = await readImageSize(file);
+
       const center = Vec.toVec(point);
-      console.log(center);
       const bound = Bound.fromCenter(center, imageSize.width, imageSize.height);
 
       this.page.withoutTransact(() => {
         this.surface.updateElement(blockId, {
           sourceId,
-          xywh: bound.serialize(),
           ...imageSize,
+          xywh: bound.serialize(),
         } satisfies Partial<ImageBlockProps>);
       });
     });
-
     await Promise.all(uploadPromises);
 
     const blockIds = dropInfos.map(info => info.blockId);
-
     this.selectionManager.setSelection({
       elements: blockIds,
       editing: false,
     });
-
     return blockIds;
   }
 
