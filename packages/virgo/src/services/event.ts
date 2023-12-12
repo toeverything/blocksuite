@@ -12,7 +12,7 @@ import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
 import { transformInput } from '../utils/transform-input.js';
 import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
 
-export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
+export class EventService<TextAttributes extends BaseTextAttributes> {
   private _isComposing = false;
 
   private _previousAnchor: NativePoint | null = null;

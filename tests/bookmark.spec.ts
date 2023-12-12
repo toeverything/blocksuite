@@ -17,7 +17,7 @@ import {
   SHORT_KEY,
   switchEditorMode,
   type,
-  waitForVirgoStateUpdated,
+  waitForInlineEditorStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
 import { assertStoreMatchJSX } from './utils/asserts.js';
@@ -229,7 +229,7 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
   await switchEditorMode(page);
 
   await activeNoteInEdgeless(page, ids.noteId);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);
   await pressArrowRight(page);

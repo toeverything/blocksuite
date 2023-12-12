@@ -16,7 +16,7 @@ import {
 } from '../utils/range-conversion.js';
 import { calculateTextLength, getTextNodesFromElement } from '../utils/text.js';
 
-export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
+export class RangeService<TextAttributes extends BaseTextAttributes> {
   private _inlineRange: InlineRange | null = null;
 
   constructor(public readonly editor: InlineEditor<TextAttributes>) {}

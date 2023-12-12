@@ -8,7 +8,7 @@ import type { DeltaEntry, InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
 import { deltaInsertsToChunks, renderElement } from '../utils/index.js';
 
-export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
+export class DeltaService<TextAttributes extends BaseTextAttributes> {
   constructor(public readonly editor: InlineEditor<TextAttributes>) {}
 
   get deltas() {

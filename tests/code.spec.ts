@@ -9,8 +9,8 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
-  getVirgoSelectionIndex,
-  getVirgoSelectionText,
+  getInlineSelectionIndex,
+  getInlineSelectionText,
   initEmptyCodeBlockState,
   initEmptyParagraphState,
   pasteByKeyboard,
@@ -348,7 +348,7 @@ test('drag copy paste', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
 
-  const content = await getVirgoSelectionText(page);
+  const content = await getInlineSelectionText(page);
   expect(content).toBe('useuse');
 
   await assertRichTextInlineRange(page, 0, 6, 0);
@@ -367,7 +367,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
   await pressArrowLeft(page, 1);
   await pasteByKeyboard(page);
 
-  const content = await getVirgoSelectionText(page);
+  const content = await getInlineSelectionText(page);
   expect(content).toBe('useuse');
 
   await assertRichTextInlineRange(page, 0, 3, 0);
@@ -628,10 +628,10 @@ test('press backspace after code block can enter code block', async ({
   await pressEnterWithShortkey(page);
   await page.keyboard.press('Backspace');
 
-  const index = await getVirgoSelectionIndex(page);
+  const index = await getInlineSelectionIndex(page);
   expect(index).toBe(code.length);
 
-  const text = await getVirgoSelectionText(page);
+  const text = await getInlineSelectionText(page);
   expect(text).toBe(code);
 });
 
@@ -647,10 +647,10 @@ test('press ArrowUp after code block can enter code block', async ({
   await pressEnterWithShortkey(page);
   await page.keyboard.press('ArrowUp');
 
-  const index = await getVirgoSelectionIndex(page);
+  const index = await getInlineSelectionIndex(page);
   expect(index).toBe(code.length);
 
-  const text = await getVirgoSelectionText(page);
+  const text = await getInlineSelectionText(page);
   expect(text).toBe(code);
 });
 

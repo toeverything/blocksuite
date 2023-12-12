@@ -5,10 +5,10 @@ import type * as Y from 'yjs';
 import { VIRGO_ROOT_ATTR } from './consts.js';
 import { InlineHookService } from './services/hook.js';
 import {
-  VirgoAttributeService,
-  VirgoDeltaService,
-  VirgoEventService,
-  VirgoRangeService,
+  AttributeService,
+  DeltaService,
+  EventService,
+  RangeService,
 } from './services/index.js';
 import type {
   DeltaInsert,
@@ -51,17 +51,17 @@ export class InlineEditor<
   private _rootElement: InlineRootElement<TextAttributes> | null = null;
   private _isReadonly = false;
 
-  private _eventService: VirgoEventService<TextAttributes> =
-    new VirgoEventService<TextAttributes>(this);
+  private _eventService: EventService<TextAttributes> =
+    new EventService<TextAttributes>(this);
 
-  private _rangeService: VirgoRangeService<TextAttributes> =
-    new VirgoRangeService<TextAttributes>(this);
+  private _rangeService: RangeService<TextAttributes> =
+    new RangeService<TextAttributes>(this);
 
-  private _attributeService: VirgoAttributeService<TextAttributes> =
-    new VirgoAttributeService<TextAttributes>(this);
+  private _attributeService: AttributeService<TextAttributes> =
+    new AttributeService<TextAttributes>(this);
 
-  private _deltaService: VirgoDeltaService<TextAttributes> =
-    new VirgoDeltaService<TextAttributes>(this);
+  private _deltaService: DeltaService<TextAttributes> =
+    new DeltaService<TextAttributes>(this);
 
   private _hooksService: InlineHookService<TextAttributes>;
 

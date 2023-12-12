@@ -40,7 +40,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
-  waitForVirgoStateUpdated,
+  waitForInlineEditorStateUpdated,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
@@ -201,7 +201,7 @@ test('add empty Note', async ({ page }) => {
   await setEdgelessTool(page, 'note');
   // add note at 300,300
   await page.mouse.click(300, 300);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
 
@@ -244,7 +244,7 @@ test('edgeless arrow up/down', async ({ page }) => {
   await type(page, 'aaa');
 
   await activeNoteInEdgeless(page, noteId);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
   // 0 for page, 1 for surface, 2 for note, 3 for paragraph
   expect(paragraphId).toBe('3');
   await clickBlockById(page, paragraphId);

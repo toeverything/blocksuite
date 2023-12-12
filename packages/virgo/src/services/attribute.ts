@@ -9,7 +9,7 @@ import {
   getDefaultAttributeRenderer,
 } from '../utils/index.js';
 
-export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
+export class AttributeService<TextAttributes extends BaseTextAttributes> {
   private _marks: TextAttributes | null = null;
 
   private _attributeRenderer: AttributeRenderer<TextAttributes> =

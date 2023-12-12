@@ -11,7 +11,7 @@ import {
   enterPlaygroundRoom,
   initEmptyEdgelessState,
   type,
-  waitForVirgoStateUpdated,
+  waitForInlineEditorStateUpdated,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
@@ -91,7 +91,7 @@ test('pan tool shortcut when user is editing', async ({ page }) => {
   await setEdgelessTool(page, 'default');
 
   await activeNoteInEdgeless(page, ids.noteId);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
 
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);

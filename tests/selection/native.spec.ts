@@ -16,11 +16,11 @@ import {
   getCenterPosition,
   getCursorBlockIdAndHeight,
   getIndexCoordinate,
+  getInlineSelectionIndex,
+  getInlineSelectionText,
   getRichTextBoundingBox,
   getSelectedText,
-  getSelectedTextByVirgo,
-  getVirgoSelectionIndex,
-  getVirgoSelectionText,
+  getSelectedTextByInlineEditor,
   initEmptyEdgelessState,
   initEmptyParagraphState,
   initImageState,
@@ -418,11 +418,11 @@ test('cursor move up and down', async ({ page }) => {
   await type(page, 'arrow down test 2');
 
   await pressArrowUp(page);
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('arrow down test 1');
 
   await pressArrowDown(page);
-  const textTwo = await getVirgoSelectionText(page);
+  const textTwo = await getInlineSelectionText(page);
   expect(textTwo).toBe('arrow down test 2');
 });
 
@@ -444,21 +444,21 @@ test('cursor move to up and down with children block', async ({ page }) => {
     await page.keyboard.press('ArrowRight');
   }
   await page.keyboard.press('ArrowUp');
-  const indexOne = await getVirgoSelectionIndex(page);
-  const textOne = await getVirgoSelectionText(page);
+  const indexOne = await getInlineSelectionIndex(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('arrow down test 2');
   expect(indexOne).toBe(13);
   for (let i = 0; i < 3; i++) {
     await page.keyboard.press('ArrowLeft');
   }
   await page.keyboard.press('ArrowUp');
-  const indexTwo = await getVirgoSelectionIndex(page);
-  const textTwo = await getVirgoSelectionText(page);
+  const indexTwo = await getInlineSelectionIndex(page);
+  const textTwo = await getInlineSelectionText(page);
   expect(textTwo).toBe('arrow down test 1');
   expect(indexTwo).toBeGreaterThanOrEqual(12);
   expect(indexTwo).toBeLessThanOrEqual(17);
   await page.keyboard.press('ArrowDown');
-  const textThree = await getVirgoSelectionText(page);
+  const textThree = await getInlineSelectionText(page);
   expect(textThree).toBe('arrow down test 2');
 });
 
@@ -469,13 +469,13 @@ test('cursor move left and right', async ({ page }) => {
   await type(page, 'arrow down test 1');
   await pressEnter(page);
   await type(page, 'arrow down test 2');
-  const index1 = await getVirgoSelectionIndex(page);
+  const index1 = await getInlineSelectionIndex(page);
   expect(index1).toBe(17);
   await pressArrowLeft(page, 17);
-  const index2 = await getVirgoSelectionIndex(page);
+  const index2 = await getInlineSelectionIndex(page);
   expect(index2).toBe(0);
   await pressArrowLeft(page);
-  const index3 = await getVirgoSelectionIndex(page);
+  const index3 = await getInlineSelectionIndex(page);
   expect(index3).toBe(17);
 });
 
@@ -558,7 +558,7 @@ test('select all text with dragging and delete', async ({ page }) => {
   });
   await pressBackspace(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc');
 });
 
@@ -575,7 +575,7 @@ test('select all text with dragging and delete by forwardDelete', async ({
   });
   await pressForwardDelete(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc');
 });
 
@@ -588,10 +588,10 @@ test('select all text with keyboard delete', async ({ page }) => {
   await focusRichText(page);
   await selectAllByKeyboard(page);
   await pressBackspace(page);
-  const text1 = await getVirgoSelectionText(page);
+  const text1 = await getInlineSelectionText(page);
   expect(text1).toBe('');
   await type(page, 'abc');
-  const text2 = await getVirgoSelectionText(page);
+  const text2 = await getInlineSelectionText(page);
   expect(text2).toBe('abc');
 
   await selectAllByKeyboard(page);
@@ -621,7 +621,7 @@ test('select text leaving a few words in the last line and delete', async ({
   await page.keyboard.press('Backspace');
   await waitNextFrame(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc89');
 });
 
@@ -639,7 +639,7 @@ test('select text leaving a few words in the last line and delete by forwardDele
   await pressForwardDelete(page);
   await waitNextFrame(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc89');
 });
 
@@ -778,7 +778,7 @@ test('select text in the same line with dragging rightward and move outside the 
   );
   await pressBackspace(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc');
 });
 
@@ -825,7 +825,7 @@ test('select text in the same line with dragging rightward and move outside the 
   );
   await pressForwardDelete(page);
   await type(page, 'abc');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('abc');
 });
 
@@ -870,7 +870,7 @@ test('drag to select tagged text, and copy', async ({ page }) => {
     steps: 20,
   });
   page.keyboard.press(`${SHORT_KEY}+C`);
-  const textOne = await getSelectedTextByVirgo(page);
+  const textOne = await getSelectedTextByInlineEditor(page);
   expect(textOne).toBe('12345');
 });
 
@@ -890,7 +890,7 @@ test('drag to select tagged text, and input character', async ({ page }) => {
     steps: 20,
   });
   await type(page, '1');
-  const textOne = await getVirgoSelectionText(page);
+  const textOne = await getInlineSelectionText(page);
   expect(textOne).toBe('16789');
 });
 
@@ -1242,7 +1242,7 @@ test('should select texts on dragging around the page', async ({ page }) => {
   // ←
   await page.mouse.move(coord.x - 15, coord.y, { steps: 20 });
   await page.mouse.up();
-  expect(await getSelectedTextByVirgo(page)).toBe('45');
+  expect(await getSelectedTextByInlineEditor(page)).toBe('45');
 
   // blur
   await page.mouse.click(0, 0);
@@ -1440,7 +1440,7 @@ test('should clear native selection before block selection', async ({
     { steps: 20 }
   );
 
-  const text0 = await getVirgoSelectionText(page);
+  const text0 = await getInlineSelectionText(page);
 
   // `123`
   const first = await page.evaluate(() => {
@@ -1760,7 +1760,7 @@ test('should select when clicking on blank area in edgeless mode', async ({
   await click(page, { x: r3.x + 40, y: r3.y + 5 });
   await waitNextFrame(page);
 
-  expect(await getVirgoSelectionText(page)).toBe('789');
+  expect(await getInlineSelectionText(page)).toBe('789');
 });
 
 test('press ArrowLeft in the start of first paragraph should not focus on title', async ({

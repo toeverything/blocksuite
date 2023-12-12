@@ -230,7 +230,7 @@ export async function enterPlaygroundRoom(
   url.searchParams.set('room', room);
   url.searchParams.set('blobStorage', blobStorage?.join(',') || 'idb');
   await page.goto(url.toString());
-  await waitForPageReady(page);
+  const readyPromise = waitForPageReady(page);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
@@ -257,6 +257,8 @@ export async function enterPlaygroundRoom(
     noInit: ops?.noInit,
     multiEditor,
   });
+
+  await readyPromise;
 
   await page.evaluate(() => {
     if (typeof window.$blocksuite !== 'object') {
@@ -680,7 +682,7 @@ export async function initParagraphsByCount(page: Page, count: number) {
   await resetHistory(page);
 }
 
-export async function getVirgoSelectionIndex(page: Page) {
+export async function getInlineSelectionIndex(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
 
@@ -691,7 +693,7 @@ export async function getVirgoSelectionIndex(page: Page) {
   });
 }
 
-export async function getVirgoSelectionText(page: Page) {
+export async function getInlineSelectionText(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
@@ -700,7 +702,7 @@ export async function getVirgoSelectionText(page: Page) {
   });
 }
 
-export async function getSelectedTextByVirgo(page: Page) {
+export async function getSelectedTextByInlineEditor(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
@@ -1009,7 +1011,7 @@ export async function getIndexCoordinate(
   return coord;
 }
 
-export function virgoEditorInnerTextToString(innerText: string): string {
+export function inlineEditorInnerTextToString(innerText: string): string {
   return innerText.replace('\u200B', '').trim();
 }
 
@@ -1050,7 +1052,7 @@ export async function shamefullyBlurActiveElement(page: Page) {
 
 /**
  * FIXME:
- * Sometimes virgo state is not updated in time. Bad case like below:
+ * Sometimes inline editor state is not updated in time. Bad case like below:
  *
  * ```
  * await focusRichText(page);
@@ -1070,7 +1072,7 @@ export async function shamefullyBlurActiveElement(page: Page) {
  * ```
  *
  */
-export async function waitForVirgoStateUpdated(page: Page) {
+export async function waitForInlineEditorStateUpdated(page: Page) {
   return await page.evaluate(async () => {
     const selection = window.getSelection() as Selection;
 

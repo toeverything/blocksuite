@@ -59,7 +59,7 @@ import {
   getCurrentEditorPageId,
   getCurrentThemeCSSPropertyValue,
   getEditorLocator,
-  virgoEditorInnerTextToString,
+  inlineEditorInnerTextToString,
 } from './actions/misc.js';
 import { getStringFromRichText } from './inline-editor.js';
 import { currentEditorIndex } from './multiple-editor.js';
@@ -143,7 +143,7 @@ export async function assertEmpty(page: Page) {
 export async function assertTitle(page: Page, text: string) {
   const editor = getEditorLocator(page);
   const inlineEditor = editor.locator('[data-block-is-title="true"]').first();
-  const vText = virgoEditorInnerTextToString(await inlineEditor.innerText());
+  const vText = inlineEditorInnerTextToString(await inlineEditor.innerText());
   expect(vText).toBe(text);
 }
 

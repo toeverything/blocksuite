@@ -42,10 +42,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   `;
 
   @query('.affine-rich-text')
-  private _virgoContainer!: HTMLDivElement;
-  get virgoContainer() {
-    assertExists(this._virgoContainer);
-    return this._virgoContainer;
+  private _inlineEditorContainer!: HTMLDivElement;
+  get inlineEditorContainer() {
+    assertExists(this._inlineEditorContainer);
+    return this._inlineEditorContainer;
   }
 
   @property({ attribute: false })
@@ -128,7 +128,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       });
 
       inlineEditor.disposables.addFromEvent(
-        this.virgoContainer,
+        this.inlineEditorContainer,
         'keydown',
         keyDownHandler
       );
@@ -184,7 +184,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    inlineEditor.mount(this.virgoContainer);
+    inlineEditor.mount(this.inlineEditorContainer);
     inlineEditor.setReadonly(this.readonly);
   }
 
