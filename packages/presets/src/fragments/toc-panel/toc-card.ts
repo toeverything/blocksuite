@@ -70,6 +70,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
       cursor: default;
       user-select: none;
+      padding: 4px 0px;
     }
 
     .card-preview.edgeless:hover {

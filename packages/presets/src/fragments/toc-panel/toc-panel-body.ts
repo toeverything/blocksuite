@@ -297,10 +297,10 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     const newChildren = [...leftPart, ...blocks, ...rightPart];
 
     this._changedFlag = true;
-    console.log('this.page.root', this.page);
     this.page.updateBlock(this.page.root, {
       children: newChildren,
     });
+    this.page.root.childrenUpdated.emit();
   }
 
   private _selectNote(e: SelectEvent) {
@@ -365,7 +365,6 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
    */
   private _clickBlank(e: MouseEvent) {
     e.stopPropagation();
-    console.log('click blank');
     // check if click at toc-card, if not, set this._selected to empty
     if (
       (e.target as HTMLElement).closest('toc-note-card') ||
