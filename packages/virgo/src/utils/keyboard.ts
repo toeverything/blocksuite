@@ -33,7 +33,7 @@ export type KeyboardBindingHandler = (
   context: KeyboardBindingContext
 ) => typeof KEYBOARD_PREVENT_DEFAULT | typeof KEYBOARD_ALLOW_DEFAULT;
 
-export function createVirgoKeyDownHandler(
+export function createInlineKeyDownHandler(
   inlineEditor: InlineEditor,
   bindings: KeyboardBindingRecord
 ): (evt: KeyboardEvent) => void {

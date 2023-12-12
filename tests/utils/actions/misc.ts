@@ -688,7 +688,7 @@ export async function getVirgoSelectionIndex(page: Page) {
 
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    const index = component?.inlineEditor?.getVRange()?.index;
+    const index = component?.inlineEditor?.getInlineRange()?.index;
     return index !== undefined ? index : -1;
   });
 }
@@ -708,7 +708,7 @@ export async function getSelectedTextByVirgo(page: Page) {
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
 
-    const vRange = component?.inlineEditor?.getVRange();
+    const vRange = component?.inlineEditor?.getInlineRange();
     if (!vRange) return '';
 
     const { index, length } = vRange;
@@ -730,7 +730,7 @@ export async function getSelectedText(page: Page) {
       ) || [];
 
     components.forEach(component => {
-      const vRange = component.inlineEditor?.getVRange();
+      const vRange = component.inlineEditor?.getInlineRange();
       if (!vRange) return;
       const { index, length } = vRange;
       content +=
@@ -743,7 +743,7 @@ export async function getSelectedText(page: Page) {
   });
 }
 
-export async function setVRangeInSelectedRichText(
+export async function setInlineRangeInSelectedRichText(
   page: Page,
   index: number,
   length: number
@@ -755,7 +755,7 @@ export async function setVRangeInSelectedRichText(
       const range = selection.getRangeAt(0);
       const component =
         range.startContainer.parentElement?.closest('rich-text');
-      component?.inlineEditor?.setVRange({
+      component?.inlineEditor?.setInlineRange({
         index,
         length,
       });
@@ -765,7 +765,7 @@ export async function setVRangeInSelectedRichText(
   await waitNextFrame(page);
 }
 
-export async function setVRangeInInlineEditor(
+export async function setInlineRangeInInlineEditor(
   page: Page,
   vRange: InlineRange,
   i = 0
@@ -778,7 +778,7 @@ export async function setVRangeInInlineEditor(
       if (!inlineEditor) {
         throw new Error('Cannot find inline editor');
       }
-      inlineEditor.setVRange(vRange);
+      inlineEditor.setInlineRange(vRange);
     },
     { i, vRange }
   );

@@ -13,12 +13,15 @@ export async function press(page: Page, content: string) {
   await page.waitForTimeout(100);
 }
 
-export async function enterVirgoPlayground(page: Page) {
+export async function enterInlineEditorPlayground(page: Page) {
   const url = new URL('examples/virgo/index.html', defaultPlaygroundURL);
   await page.goto(url.toString());
 }
 
-export async function focusVirgoRichText(page: Page, index = 0): Promise<void> {
+export async function focusInlineRichText(
+  page: Page,
+  index = 0
+): Promise<void> {
   await page.evaluate(index => {
     const richTexts = document
       .querySelector('test-page')
@@ -33,7 +36,7 @@ export async function focusVirgoRichText(page: Page, index = 0): Promise<void> {
   }, index);
 }
 
-export async function getDeltaFromVirgoRichText(
+export async function getDeltaFromInlineRichText(
   page: Page,
   index = 0
 ): Promise<DeltaInsert> {

@@ -4,7 +4,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { AttributeRenderer } from '../types.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
-function virgoTextStyles(
+function inlineTextStyles(
   props: BaseTextAttributes
 ): ReturnType<typeof styleMap> {
   let textDecorations = '';
@@ -43,7 +43,7 @@ export const getDefaultAttributeRenderer =
   <T extends BaseTextAttributes>(): AttributeRenderer<T> =>
   delta => {
     const style = delta.attributes
-      ? virgoTextStyles(delta.attributes)
+      ? inlineTextStyles(delta.attributes)
       : styleMap({});
     return html`<span style=${style}
       ><v-text .str=${delta.insert}></v-text

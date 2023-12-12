@@ -19,7 +19,7 @@ import {
   pressShiftEnter,
   redoByKeyboard,
   selectAllByKeyboard,
-  setVRangeInInlineEditor,
+  setInlineRangeInInlineEditor,
   type,
   undoByClick,
   undoByKeyboard,
@@ -538,7 +538,7 @@ test('database format-bar in header and text column', async ({ page }) => {
   // header | column
 
   const formatBar = getFormatBar(page);
-  await setVRangeInInlineEditor(page, { index: 1, length: 4 }, 2);
+  await setInlineRangeInInlineEditor(page, { index: 1, length: 4 }, 2);
   expect(await formatBar.formatBar.isVisible()).toBe(true);
   // Title    | Column1
   // ----------------
@@ -576,7 +576,7 @@ test('database format-bar in header and text column', async ({ page }) => {
   await pressEscape(page);
   await pressArrowRight(page);
   await pressEnter(page);
-  await setVRangeInInlineEditor(page, { index: 2, length: 2 }, 3);
+  await setInlineRangeInInlineEditor(page, { index: 2, length: 2 }, 3);
   expect(await formatBar.formatBar.isVisible()).toBe(true);
   // Title  | Column1
   // ----------------

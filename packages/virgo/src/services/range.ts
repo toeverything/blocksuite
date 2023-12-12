@@ -11,8 +11,8 @@ import type { BaseTextAttributes } from '../utils/base-attributes.js';
 import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
 import { findDocumentOrShadowRoot } from '../utils/query.js';
 import {
-  domRangeToVirgoRange,
-  virgoRangeToDomRange,
+  domRangeToInlineRange,
+  inlineRangeToDomRange,
 } from '../utils/range-conversion.js';
 import { calculateTextLength, getTextNodesFromElement } from '../utils/text.js';
 
@@ -309,7 +309,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    */
   toDomRange = (inlineRange: InlineRange): Range | null => {
     const rootElement = this.editor.rootElement;
-    return virgoRangeToDomRange(rootElement, inlineRange);
+    return inlineRangeToDomRange(rootElement, inlineRange);
   };
 
   /**
@@ -341,7 +341,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   toInlineRange = (range: Range): InlineRange | null => {
     const { rootElement, yText } = this.editor;
 
-    return domRangeToVirgoRange(range, rootElement, yText);
+    return domRangeToInlineRange(range, rootElement, yText);
   };
 
   private _applyInlineRange = (inlineRange: InlineRange): void => {

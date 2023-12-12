@@ -4,7 +4,7 @@ import type { Y } from '@blocksuite/store';
 import { Text, Workspace } from '@blocksuite/store';
 import {
   type AttributeRenderer,
-  createVirgoKeyDownHandler,
+  createInlineKeyDownHandler,
   InlineEditor,
   type InlineRange,
   type InlineRangeProvider,
@@ -120,7 +120,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     const inlineEditor = this._inlineEditor;
 
     if (this.enableMarkdownShortcut) {
-      const keyDownHandler = createVirgoKeyDownHandler(inlineEditor, {
+      const keyDownHandler = createInlineKeyDownHandler(inlineEditor, {
         inputRule: {
           key: [' ', 'Enter'],
           handler: context => tryFormatInlineStyle(context, this.undoManager),

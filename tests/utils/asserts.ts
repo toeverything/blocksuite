@@ -161,7 +161,7 @@ export async function assertInlineEditorDeltas(
   expect(actual).toEqual(deltas);
 }
 
-export async function assertRichTextVirgoDeltas(
+export async function assertRichTextInlineDeltas(
   page: Page,
   deltas: unknown[],
   i = 0

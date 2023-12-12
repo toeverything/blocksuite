@@ -6,7 +6,7 @@ import {
   type AttributeRenderer,
   type BaseTextAttributes,
   baseTextAttributes,
-  createVirgoKeyDownHandler,
+  createInlineKeyDownHandler,
   type DeltaInsert,
   InlineEditor,
   KEYBOARD_ALLOW_DEFAULT,
@@ -145,7 +145,7 @@ export class RichText extends ShadowlessElement {
   override firstUpdated() {
     this.inlineEditor.mount(this._container);
 
-    const keydownHandler = createVirgoKeyDownHandler(this.inlineEditor, {
+    const keydownHandler = createInlineKeyDownHandler(this.inlineEditor, {
       inputRule: {
         key: ' ',
         handler: context => {
