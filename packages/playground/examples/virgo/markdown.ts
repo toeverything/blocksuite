@@ -65,7 +65,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 3,
       });
 
-      inlineEditor.setVRange({
+      inlineEditor.setInlineRange({
         index: startIndex + annotatedText.length - 6,
         length: 0,
       });
@@ -117,7 +117,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 2,
       });
 
-      inlineEditor.setVRange({
+      inlineEditor.setInlineRange({
         index: startIndex + annotatedText.length - 4,
         length: 0,
       });
@@ -169,7 +169,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 1,
       });
 
-      inlineEditor.setVRange({
+      inlineEditor.setInlineRange({
         index: startIndex + annotatedText.length - 2,
         length: 0,
       });
@@ -221,7 +221,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 2,
       });
 
-      inlineEditor.setVRange({
+      inlineEditor.setInlineRange({
         index: startIndex + annotatedText.length - 4,
         length: 0,
       });
@@ -273,7 +273,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 1,
       });
 
-      inlineEditor.setVRange({
+      inlineEditor.setInlineRange({
         index: startIndex + annotatedText.length - 2,
         length: 0,
       });
@@ -329,7 +329,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 1,
       });
 
-      inlineEditor.setVRange({
+      inlineEditor.setInlineRange({
         index: startIndex + annotatedText.length - 2,
         length: 0,
       });

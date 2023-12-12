@@ -87,7 +87,7 @@ function toggleStyle(
   inlineEditor: InlineEditor,
   attrs: NonNullable<BaseTextAttributes>
 ): void {
-  const vRange = inlineEditor.getVRange();
+  const vRange = inlineEditor.getInlineRange();
   if (!vRange) {
     return;
   }
@@ -97,7 +97,7 @@ function toggleStyle(
     return;
   }
 
-  const deltas = inlineEditor.getDeltasByVRange(vRange);
+  const deltas = inlineEditor.getDeltasByInlineRange(vRange);
   let oldAttributes: NonNullable<BaseTextAttributes> = {};
 
   for (const [delta] of deltas) {
@@ -128,7 +128,7 @@ function toggleStyle(
   });
   root.blur();
 
-  inlineEditor.setVRange(vRange);
+  inlineEditor.setInlineRange(vRange);
 }
 
 @customElement('virgo-test-rich-text')
@@ -178,10 +178,10 @@ export class RichText extends ShadowlessElement {
         el.replaceChildren(span);
       }
     });
-    this.inlineEditor.slots.vRangeUpdated.on(() => {
+    this.inlineEditor.slots.inlineRangeUpdated.on(() => {
       const el = this.querySelector('.v-range');
       if (el) {
-        const vRange = this.inlineEditor.getVRange();
+        const vRange = this.inlineEditor.getInlineRange();
         if (vRange) {
           const span = document.createElement('span');
           span.innerHTML = JSON.stringify(vRange);
@@ -343,7 +343,7 @@ export class CustomToolbar extends ShadowlessElement {
     });
     resetButton.addEventListener('click', () => {
       undoManager.stopCapturing();
-      const rangeStatic = this.inlineEditor.getVRange();
+      const rangeStatic = this.inlineEditor.getInlineRange();
       if (!rangeStatic) {
         return;
       }
