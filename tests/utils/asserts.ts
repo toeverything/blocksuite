@@ -55,6 +55,7 @@ import {
 } from './actions/keyboard.js';
 import {
   captureHistory,
+  getClipboardCustomData,
   getCurrentEditorPageId,
   getCurrentThemeCSSPropertyValue,
   getEditorLocator,
@@ -969,6 +970,34 @@ export function assertBound(received: Bound, expected: Bound) {
   expect(received[1]).toBeCloseTo(expected[1], 0);
   expect(received[2]).toBeCloseTo(expected[2], 0);
   expect(received[3]).toBeCloseTo(expected[3], 0);
+}
+
+export async function assertClipboardItem(
+  page: Page,
+  data: unknown,
+  type: string
+) {
+  type Args = [type: string];
+  const dataInClipboard = await page.evaluate(
+    async ([type]: Args) => {
+      const clipItems = await navigator.clipboard.read();
+      const item = clipItems.find(item => item.types.includes(type));
+      const data = await item?.getType(type);
+      return data?.text();
+    },
+    [type] as Args
+  );
+
+  expect(dataInClipboard).toBe(data);
+}
+
+export async function assertClipboardCustomData(
+  page: Page,
+  type: string,
+  data: unknown
+) {
+  const dataInClipboard = await getClipboardCustomData(page, type);
+  expect(dataInClipboard).toBe(data);
 }
 
 export function assertClipData(

@@ -17,6 +17,9 @@ import {
   focusRichText,
   focusTitle,
   getAllNoteIds,
+  getClipboardHTML,
+  getClipboardSnapshot,
+  getClipboardText,
   getCopyClipItemsInPage,
   getEdgelessSelectedRectModel,
   getEditorLocator,
@@ -58,6 +61,8 @@ import {
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
+  assertClipboardItem,
+  assertClipboardSnapshot,
   assertClipData,
   assertClipItems,
   assertEdgelessNoteBackground,
@@ -73,6 +78,11 @@ import {
   assertTitle,
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
+
+// eslint-disable-next-line no-empty-pattern
+test.beforeEach(async ({}, testInfo) => {
+  testInfo.snapshotSuffix = '';
+});
 
 test(scoped`clipboard copy paste`, async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -518,48 +528,15 @@ test('copy a nested list by clicking button, the clipboard data should be comple
     { x: rootListBound.x + 1, y: rootListBound.y + rootListBound.height - 1 }
   );
   await copyByKeyboard(page);
-  const clipItems = await getCopyClipItemsInPage(page);
-  const blockJson = [
-    {
-      flavour: 'affine:list',
-      type: 'bulleted',
-      text: [{ insert: 'aaa' }],
-      children: [
-        {
-          flavour: 'affine:list',
-          type: 'bulleted',
-          text: [{ insert: 'bbb' }],
-          children: [
-            {
-              flavour: 'affine:list',
-              type: 'bulleted',
-              text: [{ insert: 'ccc' }],
-              children: [],
-            },
-          ],
-        },
-      ],
-    },
-  ];
-  const htmlText =
-    `<ul><li>aaa<ul><li>bbb<ul><li>ccc</li></ul></li></ul></li></ul>` +
-    `<blocksuite style="display: none" data-type="blocksuite/page" data-clipboard="${JSON.stringify(
-      blockJson
-    ).replace(/"/g, '&quot;')}"></blocksuite>`;
-  const expectClipItems = [
-    { mimeType: 'text/plain', data: 'aaabbbccc' },
-    {
-      mimeType: 'text/html',
-      data: htmlText,
-    },
-    {
-      mimeType: 'blocksuite/page',
-      data: JSON.stringify(blockJson),
-    },
-  ];
-  assertClipData(clipItems, expectClipItems, 'text/plain');
-  assertClipData(clipItems, expectClipItems, 'text/html');
-  assertClipData(clipItems, expectClipItems, 'blocksuite/page');
+
+  const text = await getClipboardText(page);
+  const html = await getClipboardHTML(page);
+  const snapshot = await getClipboardSnapshot(page);
+  expect(text).toMatchSnapshot('clipboard.md');
+  expect(JSON.stringify(snapshot.snapshot.content, null, 2)).toMatchSnapshot(
+    'clipboard.json'
+  );
+  expect(html).toMatchSnapshot('clipboard.html');
 });
 
 test('paste a nested list to a nested list', async ({ page }) => {

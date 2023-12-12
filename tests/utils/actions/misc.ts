@@ -1,8 +1,14 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type { ConsoleMessage, Locator, Page } from '@playwright/test';
+import type {
+  BrowserContext,
+  ConsoleMessage,
+  Locator,
+  Page,
+} from '@playwright/test';
 import { expect } from '@playwright/test';
+import lz from 'lz-string';
 
 import type { ClipboardItem } from '../../../packages/blocks/src/_legacy/clipboard/clipboard-item.js';
 import {
@@ -230,7 +236,7 @@ export async function enterPlaygroundRoom(
   url.searchParams.set('room', room);
   url.searchParams.set('blobStorage', blobStorage?.join(',') || 'idb');
   await page.goto(url.toString());
-  const readyPromise = waitForPageReady(page);
+  // const readyPromise = waitForPageReady(page);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
@@ -258,7 +264,7 @@ export async function enterPlaygroundRoom(
     multiEditor,
   });
 
-  await readyPromise;
+  // await readyPromise;
 
   await page.evaluate(() => {
     if (typeof window.$blocksuite !== 'object') {
@@ -834,6 +840,89 @@ export async function importMarkdown(
     },
     { data, focusedBlockId }
   );
+}
+
+export async function getClipboardHTML(page: Page) {
+  const dataInClipboard = await page.evaluate(async () => {
+    function format(node: HTMLElement, level: number) {
+      const indentBefore = new Array(level++ + 1).join('  ');
+      const indentAfter = new Array(level - 1).join('  ');
+      let textNode;
+
+      for (let i = 0; i < node.children.length; i++) {
+        textNode = document.createTextNode('\n' + indentBefore);
+        node.insertBefore(textNode, node.children[i]);
+
+        format(node.children[i] as HTMLElement, level);
+
+        if (node.lastElementChild == node.children[i]) {
+          textNode = document.createTextNode('\n' + indentAfter);
+          node.appendChild(textNode);
+        }
+      }
+
+      return node;
+    }
+    const clipItems = await navigator.clipboard.read();
+    const item = clipItems.find(item => item.types.includes('text/html'));
+    const data = await item?.getType('text/html');
+    const text = await data?.text();
+    const html = new DOMParser().parseFromString(text ?? '', 'text/html');
+    const container = html.querySelector<HTMLDivElement>(
+      '[data-blocksuite-snapshot]'
+    );
+    if (!container) {
+      return '';
+    }
+    return format(container, 0).innerHTML.trim();
+  });
+
+  return dataInClipboard;
+}
+
+export async function getClipboardText(page: Page) {
+  const dataInClipboard = await page.evaluate(async () => {
+    const clipItems = await navigator.clipboard.read();
+    const item = clipItems.find(item => item.types.includes('text/plain'));
+    const data = await item?.getType('text/plain');
+    const text = await data?.text();
+    return text ?? '';
+  });
+  return dataInClipboard;
+}
+
+export async function getClipboardCustomData(page: Page, type: string) {
+  const dataInClipboard = await page.evaluate(async () => {
+    const clipItems = await navigator.clipboard.read();
+    const item = clipItems.find(item => item.types.includes('text/html'));
+    const data = await item?.getType('text/html');
+    const text = await data?.text();
+    const html = new DOMParser().parseFromString(text ?? '', 'text/html');
+    const container = html.querySelector<HTMLDivElement>(
+      '[data-blocksuite-snapshot]'
+    );
+    return container?.dataset.blocksuiteSnapshot ?? '';
+  });
+
+  const decompressed = lz.decompressFromEncodedURIComponent(dataInClipboard);
+  let json: Record<string, unknown> | null = null;
+  try {
+    json = JSON.parse(decompressed);
+  } catch {
+    throw new Error(`Invalid snapshot in clipboard: ${dataInClipboard}`);
+  }
+
+  return json?.[type];
+}
+
+export async function getClipboardSnapshot(page: Page) {
+  const dataInClipboard = await getClipboardCustomData(
+    page,
+    'BLOCKSUITE/SNAPSHOT'
+  );
+  assertExists(dataInClipboard);
+  const json = JSON.parse(dataInClipboard as string);
+  return json;
 }
 
 export async function setSelection(
