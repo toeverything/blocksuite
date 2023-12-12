@@ -9,8 +9,8 @@ export function extendFormatBar() {
       element.textContent = '❤️';
       element.setAttribute('data-testid', 'custom-format-bar-element');
       element.addEventListener('click', () => {
-        const root = formatBar.root;
-        const selectionManager = root.selection;
+        const host = formatBar.host;
+        const selectionManager = host.selection;
         console.log('selections', selectionManager.value);
       });
 
