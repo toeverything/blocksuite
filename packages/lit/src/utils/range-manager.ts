@@ -204,9 +204,9 @@ export class RangeManager {
     if (!result) {
       return null;
     }
-    const [virgoEditor, vRange] = result;
+    const [inlineEditor, inlineRange] = result;
 
-    return virgoEditor.toDomRange(vRange);
+    return inlineEditor.toDomRange(inlineRange);
   }
 
   private _calculateVirgo(
@@ -247,18 +247,18 @@ export class RangeManager {
     if (!block) {
       return null;
     }
-    const vRange = this._range
+    const inlineRange = this._range
       ? virgoElement.inlineEditor.toInlineRange(this._range)
       : null;
-    if (!vRange) {
+    if (!inlineRange) {
       return null;
     }
 
     return {
       blockId: block.model.id,
       path: block.path,
-      index: vRange.index,
-      length: vRange.length,
+      index: inlineRange.index,
+      length: inlineRange.length,
     };
   }
 

@@ -53,11 +53,11 @@ export const formatTextCommand: Command<
       });
 
       selectedInlineEditors.forEach(inlineEditor => {
-        const vRange = inlineEditor.getInlineRange();
-        if (!vRange) return;
+        const inlineRange = inlineEditor.getInlineRange();
+        if (!inlineRange) return;
 
-        if (vRange.length === 0) {
-          const delta = inlineEditor.getDeltaByRangeIndex(vRange.index);
+        if (inlineRange.length === 0) {
+          const delta = inlineEditor.getDeltaByRangeIndex(inlineRange.index);
           if (!delta) return;
 
           inlineEditor.setMarks({
@@ -81,7 +81,7 @@ export const formatTextCommand: Command<
           });
           clearMarksOnDiscontinuousInput(inlineEditor);
         } else {
-          inlineEditor.formatText(vRange, styles, {
+          inlineEditor.formatText(inlineRange, styles, {
             mode,
           });
         }

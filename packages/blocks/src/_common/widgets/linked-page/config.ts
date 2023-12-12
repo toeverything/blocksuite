@@ -55,13 +55,13 @@ export function insertLinkedNode({
 }) {
   const inlineEditor = getInlineEditorByModel(model);
   assertExists(inlineEditor, 'Editor not found');
-  const vRange = inlineEditor.getInlineRange();
-  assertExists(vRange);
-  inlineEditor.insertText(vRange, REFERENCE_NODE, {
+  const inlineRange = inlineEditor.getInlineRange();
+  assertExists(inlineRange);
+  inlineEditor.insertText(inlineRange, REFERENCE_NODE, {
     reference: { type: 'LinkedPage', pageId },
   });
   inlineEditor.setInlineRange({
-    index: vRange.index + 1,
+    index: inlineRange.index + 1,
     length: 0,
   });
 }

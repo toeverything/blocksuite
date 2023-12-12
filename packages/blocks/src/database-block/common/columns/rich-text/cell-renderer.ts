@@ -21,17 +21,15 @@ function toggleStyle(
   inlineEditor: AffineInlineEditor,
   attrs: AffineTextAttributes
 ): void {
-  const vRange = inlineEditor.getInlineRange();
-  if (!vRange) {
-    return;
-  }
+  const inlineRange = inlineEditor.getInlineRange();
+  if (!inlineRange) return;
 
   const root = inlineEditor.rootElement;
   if (!root) {
     return;
   }
 
-  const deltas = inlineEditor.getDeltasByInlineRange(vRange);
+  const deltas = inlineEditor.getDeltasByInlineRange(inlineRange);
   let oldAttributes: AffineTextAttributes = {};
 
   for (const [delta] of deltas) {
@@ -62,7 +60,7 @@ function toggleStyle(
     })
   );
 
-  inlineEditor.formatText(vRange, newAttributes, {
+  inlineEditor.formatText(inlineRange, newAttributes, {
     mode: 'merge',
   });
   root.blur();
@@ -281,14 +279,14 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
 
   private _onSoftEnter = () => {
     if (this.value && this.inlineEditor) {
-      const vRange = this.inlineEditor.getInlineRange();
-      assertExists(vRange);
+      const inlineRange = this.inlineEditor.getInlineRange();
+      assertExists(inlineRange);
 
       this.column.captureSync();
       const text = new Text(this.inlineEditor.yText);
-      text.replace(vRange.index, length, '\n');
+      text.replace(inlineRange.index, length, '\n');
       this.inlineEditor.setInlineRange({
-        index: vRange.index + 1,
+        index: inlineRange.index + 1,
         length: 0,
       });
     }

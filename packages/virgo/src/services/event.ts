@@ -20,14 +20,14 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   constructor(public readonly editor: InlineEditor<TextAttributes>) {}
 
-  get vRangeProvider() {
+  get inlineRangeProvider() {
     return this.editor.inlineRangeProvider;
   }
 
   mount = () => {
     const rootElement = this.editor.rootElement;
 
-    if (!this.vRangeProvider) {
+    if (!this.inlineRangeProvider) {
       this.editor.disposables.addFromEvent(
         document,
         'selectionchange',
@@ -86,7 +86,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   private _onSelectionChange = () => {
     const rootElement = this.editor.rootElement;
-    const previousVRange = this.editor.getInlineRange();
+    const previousInlineRange = this.editor.getInlineRange();
     if (this._isComposing) {
       return;
     }
@@ -95,7 +95,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     const selection = selectionRoot.getSelection();
     if (!selection) return;
     if (selection.rangeCount === 0) {
-      if (previousVRange !== null) {
+      if (previousInlineRange !== null) {
         this.editor.setInlineRange(null, false);
       }
 
@@ -130,7 +130,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         this.editor.focusEnd();
         return;
       } else {
-        if (previousVRange !== null) {
+        if (previousInlineRange !== null) {
           this.editor.setInlineRange(null, false);
         }
         return;
@@ -140,12 +140,12 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._previousAnchor = [range.startContainer, range.startOffset];
     this._previousFocus = [range.endContainer, range.endOffset];
 
-    const vRange = this.editor.toInlineRange(selection.getRangeAt(0));
-    if (!isMaybeInlineRangeEqual(previousVRange, vRange)) {
-      this.editor.setInlineRange(vRange, false);
+    const inlineRange = this.editor.toInlineRange(selection.getRangeAt(0));
+    if (!isMaybeInlineRangeEqual(previousInlineRange, inlineRange)) {
+      this.editor.setInlineRange(inlineRange, false);
     }
 
-    // avoid infinite syncVRange
+    // avoid infinite syncInlineRange
     if (
       ((range.startContainer.nodeType !== Node.TEXT_NODE ||
         range.endContainer.nodeType !== Node.TEXT_NODE) &&
@@ -178,13 +178,13 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
     if (this.editor.isReadonly || !this._isRangeCompletelyInRoot()) return;
 
-    const vRange = this.editor.getInlineRange();
-    if (!vRange) return;
+    const inlineRange = this.editor.getInlineRange();
+    if (!inlineRange) return;
 
     let ctx: CompositionEndHookCtx<TextAttributes> | null = {
       inlineEditor: this.editor,
       raw: event,
-      inlineRange: vRange,
+      inlineRange,
       data: event.data,
       attributes: {} as TextAttributes,
     };
@@ -194,8 +194,8 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     }
     if (!ctx) return;
 
-    const { inlineRange: newVRange, data: newData } = ctx;
-    if (newVRange.index >= 0) {
+    const { inlineRange: newInlineRange, data: newData } = ctx;
+    if (newInlineRange.index >= 0) {
       const selection = window.getSelection();
       if (selection && selection.rangeCount !== 0) {
         const range = selection.getRangeAt(0);
@@ -208,7 +208,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
           if (container.parentElement?.dataset.virgoText !== 'true') {
             container.remove();
           } else {
-            const [text] = this.editor.getTextPoint(newVRange.index);
+            const [text] = this.editor.getTextPoint(newInlineRange.index);
             const vText = text.parentElement?.closest('v-text');
             if (vText) {
               if (vText.str !== text.textContent) {
@@ -232,7 +232,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
             }
           }
 
-          const newRange = this.editor.toDomRange(newVRange);
+          const newRange = this.editor.toDomRange(newInlineRange);
           if (newRange) {
             assertExists(newRange);
             selection.removeAllRanges();
@@ -242,11 +242,11 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       }
 
       if (newData && newData.length > 0) {
-        this.editor.insertText(newVRange, newData, ctx.attributes);
+        this.editor.insertText(newInlineRange, newData, ctx.attributes);
 
         this.editor.setInlineRange(
           {
-            index: newVRange.index + newData.length,
+            index: newInlineRange.index + newData.length,
             length: 0,
           },
           false
@@ -273,20 +273,20 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       const range = document.createRange();
       range.setStart(staticRange.startContainer, staticRange.startOffset);
       range.setEnd(staticRange.endContainer, staticRange.endOffset);
-      const vRange = this.editor.toInlineRange(range);
+      const inlineRange = this.editor.toInlineRange(range);
 
-      if (!isMaybeInlineRangeEqual(this.editor.getInlineRange(), vRange)) {
-        this.editor.setInlineRange(vRange, false);
+      if (!isMaybeInlineRangeEqual(this.editor.getInlineRange(), inlineRange)) {
+        this.editor.setInlineRange(inlineRange, false);
       }
     }
 
-    const vRange = this.editor.getInlineRange();
-    if (!vRange) return;
+    const inlineRange = this.editor.getInlineRange();
+    if (!inlineRange) return;
 
     let ctx: BeforeinputHookCtx<TextAttributes> | null = {
       inlineEditor: this.editor,
       raw: event,
-      inlineRange: vRange,
+      inlineRange: inlineRange,
       data: event.data,
       attributes: {} as TextAttributes,
     };
@@ -296,12 +296,12 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     }
     if (!ctx) return;
 
-    const { raw: newEvent, data, inlineRange: newVRange } = ctx;
+    const { raw: newEvent, data, inlineRange: newInlineRange } = ctx;
     transformInput<TextAttributes>(
       newEvent.inputType,
       data,
       ctx.attributes,
-      newVRange,
+      newInlineRange,
       this.editor as InlineEditor
     );
   };
@@ -311,20 +311,20 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       !event.shiftKey &&
       (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
     ) {
-      const vRange = this.editor.getInlineRange();
-      if (!vRange || vRange.length !== 0) return;
+      const inlineRange = this.editor.getInlineRange();
+      if (!inlineRange || inlineRange.length !== 0) return;
 
       const prevent = () => {
         event.preventDefault();
         event.stopPropagation();
       };
 
-      const deltas = this.editor.getDeltasByInlineRange(vRange);
+      const deltas = this.editor.getDeltasByInlineRange(inlineRange);
       if (deltas.length === 2) {
         if (event.key === 'ArrowLeft' && this.editor.isEmbed(deltas[0][0])) {
           prevent();
           this.editor.setInlineRange({
-            index: vRange.index - 1,
+            index: inlineRange.index - 1,
             length: 1,
           });
         } else if (
@@ -333,26 +333,26 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         ) {
           prevent();
           this.editor.setInlineRange({
-            index: vRange.index,
+            index: inlineRange.index,
             length: 1,
           });
         }
       } else if (deltas.length === 1) {
         const delta = deltas[0][0];
         if (this.editor.isEmbed(delta)) {
-          if (event.key === 'ArrowLeft' && vRange.index - 1 >= 0) {
+          if (event.key === 'ArrowLeft' && inlineRange.index - 1 >= 0) {
             prevent();
             this.editor.setInlineRange({
-              index: vRange.index - 1,
+              index: inlineRange.index - 1,
               length: 1,
             });
           } else if (
             event.key === 'ArrowRight' &&
-            vRange.index + 1 <= this.editor.yTextLength
+            inlineRange.index + 1 <= this.editor.yTextLength
           ) {
             prevent();
             this.editor.setInlineRange({
-              index: vRange.index,
+              index: inlineRange.index,
               length: 1,
             });
           }

@@ -72,8 +72,8 @@ export function insertContent(
   if (!inlineEditor) {
     throw new Error("Can't insert text! Inline editor not found");
   }
-  const vRange = inlineEditor.getInlineRange();
-  const index = vRange ? vRange.index : model.text.length;
+  const inlineRange = inlineEditor.getInlineRange();
+  const index = inlineRange ? inlineRange.index : model.text.length;
   model.text.insert(text, index, attributes);
   // Update the caret to the end of the inserted text
   inlineEditor.setInlineRange({

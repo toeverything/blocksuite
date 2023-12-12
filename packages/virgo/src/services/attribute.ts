@@ -46,13 +46,13 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
     this._attributeRenderer = renderer;
   };
 
-  getFormat = (vRange: InlineRange, loose = false): TextAttributes => {
+  getFormat = (inlineRange: InlineRange, loose = false): TextAttributes => {
     const deltas = this.editor.deltaService
-      .getDeltasByInlineRange(vRange)
+      .getDeltasByInlineRange(inlineRange)
       .filter(
         ([_, position]) =>
-          position.index + position.length > vRange.index &&
-          position.index <= vRange.index + vRange.length
+          position.index + position.length > inlineRange.index &&
+          position.index <= inlineRange.index + inlineRange.length
       );
     const maybeAttributesList = deltas.map(([delta]) => delta.attributes);
     if (loose) {

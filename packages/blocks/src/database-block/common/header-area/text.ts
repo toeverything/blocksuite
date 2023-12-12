@@ -82,21 +82,21 @@ const styles = css`
 
 export const addHistoryToInlineEditor = (inlineEditor: InlineEditor) => {
   let range: Range | null = null;
-  inlineEditor.slots.rangeUpdated.on(vRange => {
-    range = vRange;
+  inlineEditor.slots.rangeUpdated.on(inlineRange => {
+    range = inlineRange;
   });
   const undoManager = new Workspace.Y.UndoManager(inlineEditor.yText, {
     trackedOrigins: new Set([inlineEditor.yText.doc?.clientID]),
   });
   undoManager.on('stack-item-added', (event: { stackItem: StackItem }) => {
-    const vRange =
+    const inlineRange =
       range && inlineEditor.mounted ? inlineEditor.toInlineRange(range) : null;
-    event.stackItem.meta.set('v-range', vRange);
+    event.stackItem.meta.set('v-range', inlineRange);
   });
   undoManager.on('stack-item-popped', (event: { stackItem: StackItem }) => {
-    const vRange = event.stackItem.meta.get('v-range');
-    if (vRange) {
-      inlineEditor.setInlineRange(vRange);
+    const inlineRange = event.stackItem.meta.get('v-range');
+    if (inlineRange) {
+      inlineEditor.setInlineRange(inlineRange);
     }
   });
   undoManager.clear();

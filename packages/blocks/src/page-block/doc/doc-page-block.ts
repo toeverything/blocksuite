@@ -270,9 +270,9 @@ export class DocPageBlockComponent extends BlockElement<
     if (e.key === 'Enter' && hasContent && !e.isComposing) {
       e.preventDefault();
       assertExists(this._titleInlineEditor);
-      const vRange = this._titleInlineEditor.getInlineRange();
-      assertExists(vRange);
-      const right = model.title.split(vRange.index);
+      const inlineRange = this._titleInlineEditor.getInlineRange();
+      assertExists(inlineRange);
+      const right = model.title.split(inlineRange.index);
       const newFirstParagraphId = page.addBlock(
         'affine:paragraph',
         { text: right },
@@ -307,12 +307,12 @@ export class DocPageBlockComponent extends BlockElement<
   private _onTitleCopy = (event: ClipboardEvent) => {
     const inlineEditor = this._titleInlineEditor;
     if (!inlineEditor) return;
-    const vRange = inlineEditor.getInlineRange();
-    if (!vRange) return;
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
 
     const toBeCopiedText = inlineEditor.yText
       .toString()
-      .substring(vRange.index, vRange.index + vRange.length);
+      .substring(inlineRange.index, inlineRange.index + inlineRange.length);
     event.clipboardData?.setData('text/plain', toBeCopiedText);
   };
 
@@ -320,15 +320,15 @@ export class DocPageBlockComponent extends BlockElement<
     event.stopPropagation();
     const inlineEditor = this._titleInlineEditor;
     if (!inlineEditor) return;
-    const vRange = inlineEditor.getInlineRange();
-    if (!vRange) return;
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
 
     const data = event.clipboardData?.getData('text/plain');
     if (data) {
       const text = data.replace(/(\r\n|\r|\n)/g, '\n');
-      inlineEditor.insertText(vRange, text);
+      inlineEditor.insertText(inlineRange, text);
       inlineEditor.setInlineRange({
-        index: vRange.index + text.length,
+        index: inlineRange.index + text.length,
         length: 0,
       });
     }

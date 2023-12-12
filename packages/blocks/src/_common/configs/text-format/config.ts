@@ -92,18 +92,18 @@ export const textFormatConfigs: TextFormatConfig[] = [
       if (!vRoot) return;
 
       const inlineEditor = vRoot.inlineEditor;
-      const targetVRange = inlineEditor.getInlineRange();
-      assertExists(targetVRange);
+      const targetInlineRange = inlineEditor.getInlineRange();
+      assertExists(targetInlineRange);
 
-      if (targetVRange.length === 0) return;
+      if (targetInlineRange.length === 0) return;
 
-      const format = inlineEditor.getFormat(targetVRange);
+      const format = inlineEditor.getFormat(targetInlineRange);
       if (format.link) {
-        inlineEditor.formatText(targetVRange, { link: null });
+        inlineEditor.formatText(targetInlineRange, { link: null });
         return;
       }
 
-      toggleLinkPopup(inlineEditor, 'create', targetVRange);
+      toggleLinkPopup(inlineEditor, 'create', targetInlineRange);
     },
   },
 ];

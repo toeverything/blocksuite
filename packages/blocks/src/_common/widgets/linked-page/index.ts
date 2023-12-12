@@ -125,16 +125,18 @@ export class AffineLinkedPageWidget extends WidgetElement {
     if (matchFlavours(model, this.options.ignoreBlockTypes)) return;
     const inlineEditor = getInlineEditorByModel(model);
     if (!inlineEditor) return;
-    const vRange = inlineEditor.getInlineRange();
-    if (!vRange) return;
-    if (vRange.length > 0) {
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
+    if (inlineRange.length > 0) {
       // When select text and press `[[` should not trigger transform,
       // since it will break the bracket complete.
       // Expected `[[selected text]]` instead of `@selected text]]`
       return;
     }
 
-    const [leafStart, offsetStart] = inlineEditor.getTextPoint(vRange.index);
+    const [leafStart, offsetStart] = inlineEditor.getTextPoint(
+      inlineRange.index
+    );
     const prefixText = leafStart.textContent
       ? leafStart.textContent.slice(0, offsetStart)
       : '';
@@ -149,7 +151,8 @@ export class AffineLinkedPageWidget extends WidgetElement {
       if (this.options.convertTriggerKey && primaryTriggerKey !== matchedKey) {
         // Convert to the primary trigger key
         // e.g. [[ -> @
-        const startIdxBeforeMatchKey = vRange.index - (matchedKey.length - 1);
+        const startIdxBeforeMatchKey =
+          inlineRange.index - (matchedKey.length - 1);
         inlineEditor.deleteText({
           index: startIdxBeforeMatchKey,
           length: matchedKey.length,

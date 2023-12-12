@@ -79,9 +79,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   };
 
   const _getPrefixText = (inlineEditor: InlineEditor) => {
-    const vRange = inlineEditor.getInlineRange();
-    assertExists(vRange);
-    const [leafStart, offsetStart] = inlineEditor.getTextPoint(vRange.index);
+    const inlineRange = inlineEditor.getInlineRange();
+    assertExists(inlineRange);
+    const [leafStart, offsetStart] = inlineEditor.getTextPoint(
+      inlineRange.index
+    );
     return leafStart.textContent
       ? leafStart.textContent.slice(0, offsetStart)
       : '';
@@ -125,12 +127,15 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       if (!blockElement.selected?.is('text')) return;
       const inlineEditor = _getInlineEditor();
-      const vRange = inlineEditor.getInlineRange();
-      if (!vRange) {
+      const inlineRange = inlineEditor.getInlineRange();
+      if (!inlineRange) {
         return;
       }
 
-      if (vRange.length === 0 && vRange.index === inlineEditor.yText.length) {
+      if (
+        inlineRange.length === 0 &&
+        inlineRange.index === inlineEditor.yText.length
+      ) {
         _preventDefault(ctx);
         return;
       }
@@ -143,12 +148,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
       if (!blockElement.selected?.is('text')) return;
       const inlineEditor = _getInlineEditor();
-      const vRange = inlineEditor.getInlineRange();
-      if (!vRange) {
-        return;
-      }
+      const inlineRange = inlineEditor.getInlineRange();
+      if (!inlineRange) return;
 
-      if (vRange.length === 0 && vRange.index === 0) {
+      if (inlineRange.length === 0 && inlineRange.index === 0) {
         _preventDefault(ctx);
         return;
       }
@@ -183,15 +186,15 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       blockElement.model.page.captureSync();
 
       const inlineEditor = _getInlineEditor();
-      const vRange = inlineEditor.getInlineRange();
-      assertExists(vRange);
+      const inlineRange = inlineEditor.getInlineRange();
+      assertExists(inlineRange);
 
       if (
         !tryConvertBlock(
           blockElement,
           inlineEditor,
           _getPrefixText(inlineEditor),
-          vRange
+          inlineRange
         )
       ) {
         _preventDefault(ctx);
@@ -199,7 +202,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
 
       const state = ctx.get('keyboardState');
-      hardEnter(model, vRange, inlineEditor, state.raw);
+      hardEnter(model, inlineRange, inlineEditor, state.raw);
       _preventDefault(ctx);
 
       return true;
@@ -209,9 +212,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       const state = ctx.get('keyboardState');
       const inlineEditor = _getInlineEditor();
-      const vRange = inlineEditor.getInlineRange();
-      assertExists(vRange);
-      hardEnter(model, vRange, inlineEditor, state.raw, true);
+      const inlineRange = inlineEditor.getInlineRange();
+      assertExists(inlineRange);
+      hardEnter(model, inlineRange, inlineEditor, state.raw, true);
       _preventDefault(ctx);
 
       return true;
@@ -247,9 +250,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       const textModels = getSelectedContentModels(root, ['text']);
       if (textModels.length === 1) {
         const inlineEditor = _getInlineEditor();
-        const vRange = inlineEditor.getInlineRange();
-        assertExists(vRange);
-        handleIndent(model.page, model, vRange.index);
+        const inilneRange = inlineEditor.getInlineRange();
+        assertExists(inilneRange);
+        handleIndent(model.page, model, inilneRange.index);
         _preventDefault(ctx);
 
         return true;
@@ -276,10 +279,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       const textModels = getSelectedContentModels(root, ['text']);
       if (textModels.length === 1) {
         const inlineEditor = _getInlineEditor();
-        const vRange = inlineEditor.getInlineRange();
-        assertExists(vRange);
-        if (vRange.index === 0) {
-          handleRemoveAllIndent(model.page, model, vRange.index);
+        const inlineRange = inlineEditor.getInlineRange();
+        assertExists(inlineRange);
+        if (inlineRange.index === 0) {
+          handleRemoveAllIndent(model.page, model, inlineRange.index);
           _preventDefault(ctx);
         }
 
@@ -307,9 +310,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       const textModels = getSelectedContentModels(root, ['text']);
       if (textModels.length === 1) {
         const inlineEditor = _getInlineEditor();
-        const vRange = inlineEditor.getInlineRange();
-        assertExists(vRange);
-        handleUnindent(model.page, model, vRange.index);
+        const inlineRange = inlineEditor.getInlineRange();
+        assertExists(inlineRange);
+        handleUnindent(model.page, model, inlineRange.index);
         _preventDefault(ctx);
 
         return true;
@@ -329,12 +332,12 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       // Auto delete bracket right
       if (matchFlavours(blockElement.model, ['affine:code'])) {
-        const vRange = inlineEditor.getInlineRange();
-        assertExists(vRange);
-        const left = inlineEditor.yText.toString()[vRange.index - 1];
-        const right = inlineEditor.yText.toString()[vRange.index];
+        const inlineRange = inlineEditor.getInlineRange();
+        assertExists(inlineRange);
+        const left = inlineEditor.yText.toString()[inlineRange.index - 1];
+        const right = inlineEditor.yText.toString()[inlineRange.index];
         if (bracketPairs[leftBrackets.indexOf(left)]?.right === right) {
-          const index = vRange.index - 1;
+          const index = inlineRange.index - 1;
           inlineEditor.deleteText({
             index: index,
             length: 2,
@@ -376,12 +379,12 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     if (!blockElement.selected?.is('text')) return;
 
     const inlineEditor = _getInlineEditor();
-    const vRange = inlineEditor.getInlineRange();
-    assertExists(vRange);
+    const inlineRange = inlineEditor.getInlineRange();
+    assertExists(inlineRange);
 
     const prefixText = _getPrefixText(inlineEditor);
 
-    if (!tryConvertBlock(blockElement, inlineEditor, prefixText, vRange)) {
+    if (!tryConvertBlock(blockElement, inlineEditor, prefixText, inlineRange)) {
       _preventDefault(ctx);
     }
 
@@ -409,20 +412,23 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     if (!linkedPageWidgetEle) return false;
 
     const inlineEditor = _getInlineEditor();
-    const vRange = inlineEditor.getInlineRange();
-    assertExists(vRange);
+    const inlineRange = inlineEditor.getInlineRange();
+    assertExists(inlineRange);
     const text = inlineEditor.yText.toString();
-    const left = text[vRange.index - 1];
-    const right = text[vRange.index + vRange.length];
+    const left = text[inlineRange.index - 1];
+    const right = text[inlineRange.index + inlineRange.length];
     const needConvert = left === '[' && right === ']';
     if (!needConvert) return false;
 
-    const pageName = text.slice(vRange.index, vRange.index + vRange.length);
+    const pageName = text.slice(
+      inlineRange.index,
+      inlineRange.index + inlineRange.length
+    );
     inlineEditor.deleteText({
-      index: vRange.index - 1,
-      length: vRange.length + 2,
+      index: inlineRange.index - 1,
+      length: inlineRange.length + 2,
     });
-    inlineEditor.setInlineRange({ index: vRange.index - 1, length: 0 });
+    inlineEditor.setInlineRange({ index: inlineRange.index - 1, length: 0 });
 
     createPage(blockElement.page.workspace, {
       title: pageName,
@@ -453,22 +459,25 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         _preventDefault(ctx);
 
         const inlineEditor = _getInlineEditor();
-        const vRange = inlineEditor.getInlineRange();
-        assertExists(vRange);
+        const inlineRange = inlineEditor.getInlineRange();
+        assertExists(inlineRange);
         const selectedText = inlineEditor.yText
           .toString()
-          .slice(vRange.index, vRange.index + vRange.length);
+          .slice(inlineRange.index, inlineRange.index + inlineRange.length);
         if (pair.name === 'square bracket') {
           // [[Selected text]] should automatically be converted to a Linked page with the title "Selected text".
           // See https://github.com/toeverything/blocksuite/issues/2730
           const success = tryConvertToLinkedPage();
           if (success) return;
         }
-        inlineEditor.insertText(vRange, pair.left + selectedText + pair.right);
+        inlineEditor.insertText(
+          inlineRange,
+          pair.left + selectedText + pair.right
+        );
 
         inlineEditor.setInlineRange({
-          index: vRange.index + 1,
-          length: vRange.length,
+          index: inlineRange.index + 1,
+          length: inlineRange.length,
         });
 
         return true;
@@ -482,13 +491,13 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       [pair.right]: ctx => {
         if (!matchFlavours(blockElement.model, ['affine:code'])) return;
         const inlineEditor = _getInlineEditor();
-        const vRange = inlineEditor.getInlineRange();
-        assertExists(vRange);
-        const left = inlineEditor.yText.toString()[vRange.index - 1];
-        const right = inlineEditor.yText.toString()[vRange.index];
+        const inlineRange = inlineEditor.getInlineRange();
+        assertExists(inlineRange);
+        const left = inlineEditor.yText.toString()[inlineRange.index - 1];
+        const right = inlineEditor.yText.toString()[inlineRange.index];
         if (pair.left === left && pair.right === right) {
           inlineEditor.setInlineRange({
-            index: vRange.index + 1,
+            index: inlineRange.index + 1,
             length: 0,
           });
           _preventDefault(ctx);
@@ -508,13 +517,13 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       _preventDefault(ctx);
       const inlineEditor = _getInlineEditor();
-      const vRange = inlineEditor.getInlineRange();
-      assertExists(vRange);
-      inlineEditor.formatText(vRange, { code: true });
+      const inlineRange = inlineEditor.getInlineRange();
+      assertExists(inlineRange);
+      inlineEditor.formatText(inlineRange, { code: true });
 
       inlineEditor.setInlineRange({
-        index: vRange.index,
-        length: vRange.length,
+        index: inlineRange.index,
+        length: inlineRange.length,
       });
 
       return true;

@@ -3,31 +3,31 @@ import type { InlineRange } from '../types.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
 function handleInsertText<TextAttributes extends BaseTextAttributes>(
-  vRange: InlineRange,
+  inlineRange: InlineRange,
   data: string | null,
   editor: InlineEditor,
   attributes: TextAttributes
 ) {
   if (!data) return;
-  editor.insertText(vRange, data, attributes);
+  editor.insertText(inlineRange, data, attributes);
   editor.setInlineRange({
-    index: vRange.index + data.length,
+    index: inlineRange.index + data.length,
     length: 0,
   });
 }
 
-function handleInsertParagraph(vRange: InlineRange, editor: InlineEditor) {
-  editor.insertLineBreak(vRange);
+function handleInsertParagraph(inlineRange: InlineRange, editor: InlineEditor) {
+  editor.insertLineBreak(inlineRange);
   editor.setInlineRange({
-    index: vRange.index + 1,
+    index: inlineRange.index + 1,
     length: 0,
   });
 }
 
-function handleDelete(vRange: InlineRange, editor: InlineEditor) {
-  editor.deleteText(vRange);
+function handleDelete(inlineRange: InlineRange, editor: InlineEditor) {
+  editor.deleteText(inlineRange);
   editor.setInlineRange({
-    index: vRange.index,
+    index: inlineRange.index,
     length: 0,
   });
 }

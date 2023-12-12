@@ -39,7 +39,7 @@ export const getInlineRangeProvider: (
     return true;
   };
 
-  const calculateVRange = (
+  const calculateInlineRange = (
     range: Range,
     textSelection: TextSelection
   ): InlineRange | null => {
@@ -70,21 +70,21 @@ export const getInlineRangeProvider: (
     };
   };
 
-  const setInlineRange = (vRange: InlineRange | null, sync = true) => {
-    if (!vRange) {
+  const setInlineRange = (inlineRange: InlineRange | null, sync = true) => {
+    if (!inlineRange) {
       selectionManager.clear(['text']);
     } else {
       const textSelection = selectionManager.getInstance('text', {
         from: {
           path: element.path,
-          index: vRange.index,
-          length: vRange.length,
+          index: inlineRange.index,
+          length: inlineRange.length,
         },
         to: null,
       });
       selectionManager.setGroup('note', [textSelection]);
     }
-    inlineRangeUpdatedSlot.emit([vRange, sync]);
+    inlineRangeUpdatedSlot.emit([inlineRange, sync]);
   };
 
   const getInlineRange = (): InlineRange | null => {
@@ -102,7 +102,7 @@ export const getInlineRangeProvider: (
       return null;
     }
 
-    return calculateVRange(range, textSelection);
+    return calculateInlineRange(range, textSelection);
   };
 
   selectionManager.slots.changed.on(() => {
@@ -114,8 +114,8 @@ export const getInlineRangeProvider: (
 
     // wait for lit updated
     requestAnimationFrame(() => {
-      const vRange = calculateVRange(range, textSelection);
-      inlineRangeUpdatedSlot.emit([vRange, false]);
+      const inlineRange = calculateInlineRange(range, textSelection);
+      inlineRangeUpdatedSlot.emit([inlineRange, false]);
     });
   });
 

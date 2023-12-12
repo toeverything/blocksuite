@@ -345,18 +345,21 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         const state = ctx.get('keyboardState');
         const event = state.raw;
         const inlineEditor = this.inlineEditor;
-        const vRange = inlineEditor.getInlineRange();
-        if (vRange) {
+        const inlineRange = inlineEditor.getInlineRange();
+        if (inlineRange) {
           event.stopPropagation();
           event.preventDefault();
 
           const text = this.inlineEditor.yText.toString();
-          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, vRange.index - 1);
+          const index = text.lastIndexOf(
+            LINE_BREAK_SYMBOL,
+            inlineRange.index - 1
+          );
           const indexArr = allIndexOf(
             text,
             LINE_BREAK_SYMBOL,
-            vRange.index,
-            vRange.index + vRange.length
+            inlineRange.index,
+            inlineRange.index + inlineRange.length
           )
             .map(i => i + 1)
             .reverse();
@@ -375,9 +378,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
             );
           });
           this.inlineEditor.setInlineRange({
-            index: vRange.index + 2,
+            index: inlineRange.index + 2,
             length:
-              vRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
+              inlineRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
           });
 
           return true;
@@ -389,18 +392,21 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         const state = ctx.get('keyboardState');
         const event = state.raw;
         const inlineEditor = this.inlineEditor;
-        const vRange = inlineEditor.getInlineRange();
-        if (vRange) {
+        const inlineRange = inlineEditor.getInlineRange();
+        if (inlineRange) {
           event.stopPropagation();
           event.preventDefault();
 
           const text = this.inlineEditor.yText.toString();
-          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, vRange.index - 1);
+          const index = text.lastIndexOf(
+            LINE_BREAK_SYMBOL,
+            inlineRange.index - 1
+          );
           let indexArr = allIndexOf(
             text,
             LINE_BREAK_SYMBOL,
-            vRange.index,
-            vRange.index + vRange.length
+            inlineRange.index,
+            inlineRange.index + inlineRange.length
           )
             .map(i => i + 1)
             .reverse();
@@ -421,10 +427,11 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           if (indexArr.length > 0) {
             this.inlineEditor.setInlineRange({
               index:
-                vRange.index -
-                (indexArr[indexArr.length - 1] < vRange.index ? 2 : 0),
+                inlineRange.index -
+                (indexArr[indexArr.length - 1] < inlineRange.index ? 2 : 0),
               length:
-                vRange.length - (indexArr.length - 1) * INDENT_SYMBOL.length,
+                inlineRange.length -
+                (indexArr.length - 1) * INDENT_SYMBOL.length,
             });
           }
 

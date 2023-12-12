@@ -22,10 +22,10 @@ function getCombinedFormatFromInlineEditors(
   inlineEditors: [AffineInlineEditor, InlineRange | null][]
 ): AffineTextAttributes {
   const formatArr: AffineTextAttributes[] = [];
-  inlineEditors.forEach(([inlineEditor, vRange]) => {
-    if (!vRange) return;
+  inlineEditors.forEach(([inlineEditor, inlineRange]) => {
+    if (!inlineRange) return;
 
-    const format = inlineEditor.getFormat(vRange);
+    const format = inlineEditor.getFormat(inlineRange);
     formatArr.push(format);
   });
 

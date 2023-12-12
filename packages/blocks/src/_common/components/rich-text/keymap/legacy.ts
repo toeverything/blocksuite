@@ -17,13 +17,16 @@ import {
 } from '../rich-text-operations.js';
 
 function isCollapsedAtBlockStart(inlineEditor: AffineInlineEditor) {
-  const vRange = inlineEditor.getInlineRange();
-  return vRange?.index === 0 && vRange?.length === 0;
+  const inlineRange = inlineEditor.getInlineRange();
+  return inlineRange?.index === 0 && inlineRange?.length === 0;
 }
 
 function isCollapsedAtBlockEnd(inlineEditor: AffineInlineEditor) {
-  const vRange = inlineEditor.getInlineRange();
-  return vRange?.index === inlineEditor.yText.length && vRange?.length === 0;
+  const inlineRange = inlineEditor.getInlineRange();
+  return (
+    inlineRange?.index === inlineEditor.yText.length &&
+    inlineRange?.length === 0
+  );
 }
 
 export function onSoftEnter(

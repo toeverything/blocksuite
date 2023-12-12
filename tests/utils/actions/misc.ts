@@ -728,9 +728,9 @@ export async function getSelectedText(page: Page) {
       ) || [];
 
     components.forEach(component => {
-      const vRange = component.inlineEditor?.getInlineRange();
-      if (!vRange) return;
-      const { index, length } = vRange;
+      const inlineRange = component.inlineEditor?.getInlineRange();
+      if (!inlineRange) return;
+      const { index, length } = inlineRange;
       content +=
         component?.inlineEditor?.yText
           .toString()
@@ -765,20 +765,20 @@ export async function setInlineRangeInSelectedRichText(
 
 export async function setInlineRangeInInlineEditor(
   page: Page,
-  vRange: InlineRange,
+  inlineRange: InlineRange,
   i = 0
 ) {
   await page.evaluate(
-    ({ i, vRange }) => {
+    ({ i, inlineRange }) => {
       const inlineEditor = document.querySelectorAll<InlineRootElement>(
         '[data-virgo-root="true"]'
       )[i]?.inlineEditor;
       if (!inlineEditor) {
         throw new Error('Cannot find inline editor');
       }
-      inlineEditor.setInlineRange(vRange);
+      inlineEditor.setInlineRange(inlineRange);
     },
-    { i, vRange }
+    { i, inlineRange }
   );
   await waitNextFrame(page);
 }

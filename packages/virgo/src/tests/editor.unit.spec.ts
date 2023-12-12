@@ -51,7 +51,7 @@ test('getDeltaByRangeIndex', () => {
   });
 });
 
-test('getDeltasByVRange', () => {
+test('getDeltasByInlineRange', () => {
   const yDoc = new Y.Doc();
   const yText = yDoc.getText('text');
   yText.applyDelta([
