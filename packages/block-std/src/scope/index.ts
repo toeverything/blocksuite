@@ -1,1 +1,1 @@
-export * from './block-std-provider.js';
+export * from './block-std-scope.js';
