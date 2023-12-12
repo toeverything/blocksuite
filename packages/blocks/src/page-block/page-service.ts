@@ -58,7 +58,7 @@ export class PageService extends BlockService<PageBlockModel> {
 
     this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
     this.disposables.addFromEvent(
-      this.std.root,
+      this.std.host,
       'dragover',
       this.fileDropManager.onDragOver
     );

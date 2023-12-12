@@ -46,11 +46,13 @@ export class FileDropManager {
       document.body.appendChild(this._indicator);
     }
 
-    this._blockService.disposables.addFromEvent(
-      this._blockService.std.host,
-      'drop',
-      this.onDrop
-    );
+    if (fileDropOptions.onDrop) {
+      this._blockService.disposables.addFromEvent(
+        this._blockService.std.host,
+        'drop',
+        this.onDrop
+      );
+    }
   }
 
   get isPageMode(): boolean {
