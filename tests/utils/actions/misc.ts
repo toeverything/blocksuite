@@ -230,7 +230,7 @@ export async function enterPlaygroundRoom(
   url.searchParams.set('room', room);
   url.searchParams.set('blobStorage', blobStorage?.join(',') || 'idb');
   await page.goto(url.toString());
-  const readyPromise = waitForPageReady(page);
+  await waitForPageReady(page);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
@@ -257,8 +257,6 @@ export async function enterPlaygroundRoom(
     noInit: ops?.noInit,
     multiEditor,
   });
-
-  await readyPromise;
 
   await page.evaluate(() => {
     if (typeof window.$blocksuite !== 'object') {
@@ -708,10 +706,10 @@ export async function getSelectedTextByVirgo(page: Page) {
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
 
-    const vRange = component?.inlineEditor?.getInlineRange();
-    if (!vRange) return '';
+    const inlineRange = component?.inlineEditor?.getInlineRange();
+    if (!inlineRange) return '';
 
-    const { index, length } = vRange;
+    const { index, length } = inlineRange;
     return component?.inlineEditor?.yText.toString().slice(index, length) || '';
   });
 }

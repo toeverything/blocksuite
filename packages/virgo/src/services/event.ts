@@ -10,7 +10,7 @@ import {
 } from '../utils/index.js';
 import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
 import { transformInput } from '../utils/transform-input.js';
-import type { VBeforeinputHookCtx, VCompositionEndHookCtx } from './hook.js';
+import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
 
 export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   private _isComposing = false;
@@ -181,10 +181,10 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     const vRange = this.editor.getInlineRange();
     if (!vRange) return;
 
-    let ctx: VCompositionEndHookCtx<TextAttributes> | null = {
+    let ctx: CompositionEndHookCtx<TextAttributes> | null = {
       inlineEditor: this.editor,
       raw: event,
-      vRange,
+      inlineRange: vRange,
       data: event.data,
       attributes: {} as TextAttributes,
     };
@@ -194,7 +194,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     }
     if (!ctx) return;
 
-    const { vRange: newVRange, data: newData } = ctx;
+    const { inlineRange: newVRange, data: newData } = ctx;
     if (newVRange.index >= 0) {
       const selection = window.getSelection();
       if (selection && selection.rangeCount !== 0) {
@@ -283,10 +283,10 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     const vRange = this.editor.getInlineRange();
     if (!vRange) return;
 
-    let ctx: VBeforeinputHookCtx<TextAttributes> | null = {
+    let ctx: BeforeinputHookCtx<TextAttributes> | null = {
       inlineEditor: this.editor,
       raw: event,
-      vRange,
+      inlineRange: vRange,
       data: event.data,
       attributes: {} as TextAttributes,
     };
@@ -296,7 +296,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     }
     if (!ctx) return;
 
-    const { raw: newEvent, data, vRange: newVRange } = ctx;
+    const { raw: newEvent, data, inlineRange: newVRange } = ctx;
     transformInput<TextAttributes>(
       newEvent.inputType,
       data,

@@ -36,20 +36,20 @@ export function transformInput<TextAttributes extends BaseTextAttributes>(
   inputType: string,
   data: string | null,
   attributes: TextAttributes,
-  vRange: InlineRange,
+  inlineRange: InlineRange,
   editor: InlineEditor
 ) {
-  if (!editor.isValidInlineRange(vRange)) return;
+  if (!editor.isValidInlineRange(inlineRange)) return;
 
   if (inputType === 'insertText') {
-    handleInsertText(vRange, data, editor, attributes);
+    handleInsertText(inlineRange, data, editor, attributes);
   } else if (
     inputType === 'insertParagraph' ||
     inputType === 'insertLineBreak'
   ) {
-    handleInsertParagraph(vRange, editor);
+    handleInsertParagraph(inlineRange, editor);
   } else if (inputType.startsWith('delete')) {
-    handleDelete(vRange, editor);
+    handleDelete(inlineRange, editor);
   } else {
     return;
   }

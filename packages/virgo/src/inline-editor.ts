@@ -3,7 +3,7 @@ import { nothing, render } from 'lit';
 import type * as Y from 'yjs';
 
 import { VIRGO_ROOT_ATTR } from './consts.js';
-import { VirgoHookService } from './services/hook.js';
+import { InlineHookService } from './services/hook.js';
 import {
   VirgoAttributeService,
   VirgoDeltaService,
@@ -63,7 +63,7 @@ export class InlineEditor<
   private _deltaService: VirgoDeltaService<TextAttributes> =
     new VirgoDeltaService<TextAttributes>(this);
 
-  private _hooksService: VirgoHookService<TextAttributes>;
+  private _hooksService: InlineHookService<TextAttributes>;
 
   private _mounted = false;
 
@@ -163,7 +163,7 @@ export class InlineEditor<
     yText: InlineEditor['yText'],
     ops: {
       isEmbed?: (delta: DeltaInsert<TextAttributes>) => boolean;
-      hooks?: VirgoHookService<TextAttributes>['hooks'];
+      hooks?: InlineHookService<TextAttributes>['hooks'];
       inlineRangeProvider?: InlineRangeProvider;
     } = {}
   ) {
@@ -184,7 +184,7 @@ export class InlineEditor<
     } = ops;
     this._yText = yText;
     this.isEmbed = isEmbed;
-    this._hooksService = new VirgoHookService(this, hooks);
+    this._hooksService = new InlineHookService(this, hooks);
     this.inlineRangeProvider = inlineRangeProvider;
 
     this.slots = {

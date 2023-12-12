@@ -14,7 +14,7 @@ import {
   mergeInlineRange,
 } from '../utils/inline-range.js';
 
-test('isVRangeContain', () => {
+test('isInlineRangeContain', () => {
   expect(
     isInlineRangeContain({ index: 0, length: 0 }, { index: 0, length: 0 })
   ).toEqual(true);
@@ -60,7 +60,7 @@ test('isVRangeContain', () => {
   ).toEqual(false);
 });
 
-test('isVRangeEqual', () => {
+test('isInlineRangeEqual', () => {
   expect(
     isInlineRangeEqual({ index: 0, length: 0 }, { index: 0, length: 0 })
   ).toEqual(true);
@@ -82,7 +82,7 @@ test('isVRangeEqual', () => {
   ).toEqual(true);
 });
 
-test('isVRangeIntersect', () => {
+test('isInlineRangeIntersect', () => {
   expect(
     isInlineRangeIntersect({ index: 0, length: 2 }, { index: 0, length: 0 })
   ).toEqual(true);
@@ -116,7 +116,7 @@ test('isVRangeIntersect', () => {
   ).toEqual(true);
 });
 
-test('isVRangeBefore', () => {
+test('isInlineRangeBefore', () => {
   expect(
     isInlineRangeBefore({ index: 0, length: 1 }, { index: 2, length: 0 })
   ).toEqual(true);
@@ -146,7 +146,7 @@ test('isVRangeBefore', () => {
   ).toEqual(false);
 });
 
-test('isVRangeAfter', () => {
+test('isInlineRangeAfter', () => {
   expect(
     isInlineRangeAfter({ index: 2, length: 0 }, { index: 0, length: 1 })
   ).toEqual(true);
@@ -176,7 +176,7 @@ test('isVRangeAfter', () => {
   ).toEqual(true);
 });
 
-test('isVRangeEdge', () => {
+test('isInlineRangeEdge', () => {
   expect(isInlineRangeEdge(1, { index: 1, length: 0 })).toEqual(true);
 
   expect(isInlineRangeEdge(1, { index: 0, length: 1 })).toEqual(true);
@@ -190,7 +190,7 @@ test('isVRangeEdge', () => {
   expect(isInlineRangeEdge(0, { index: 0, length: 1 })).toEqual(true);
 });
 
-test('isVRangeEdgeBefore', () => {
+test('isInlineRangeEdgeBefore', () => {
   expect(isInlineRangeEdgeBefore(1, { index: 1, length: 0 })).toEqual(true);
 
   expect(isInlineRangeEdgeBefore(1, { index: 0, length: 1 })).toEqual(false);
@@ -204,7 +204,7 @@ test('isVRangeEdgeBefore', () => {
   expect(isInlineRangeEdgeBefore(0, { index: 0, length: 1 })).toEqual(true);
 });
 
-test('isVRangeEdgeAfter', () => {
+test('isInlineRangeEdgeAfter', () => {
   expect(isInlineRangeEdgeAfter(1, { index: 0, length: 1 })).toEqual(true);
 
   expect(isInlineRangeEdgeAfter(1, { index: 1, length: 0 })).toEqual(true);
@@ -232,7 +232,7 @@ test('isPoint', () => {
   expect(isPoint({ index: 2, length: 2 })).toEqual(false);
 });
 
-test('mergeVRange', () => {
+test('mergeInlineRange', () => {
   expect(
     mergeInlineRange({ index: 0, length: 0 }, { index: 1, length: 0 })
   ).toEqual({
@@ -304,7 +304,7 @@ test('mergeVRange', () => {
   });
 });
 
-test('intersectVRange', () => {
+test('intersectInlineRange', () => {
   expect(
     intersectInlineRange({ index: 0, length: 0 }, { index: 1, length: 0 })
   ).toEqual(null);

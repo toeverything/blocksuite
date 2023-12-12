@@ -20,7 +20,7 @@ import { z } from 'zod';
 
 import { markdownMatches } from './markdown.js';
 
-function virgoTextStyles(
+function inlineTextStyles(
   props: BaseTextAttributes
 ): ReturnType<typeof styleMap> {
   let textDecorations = '';
@@ -72,7 +72,7 @@ const attributeRenderer: AttributeRenderer = (
   }
 
   const style = delta.attributes
-    ? virgoTextStyles(delta.attributes)
+    ? inlineTextStyles(delta.attributes)
     : styleMap({
         'white-space': 'break-spaces',
         'word-wrap': 'break-word',

@@ -2,7 +2,7 @@
 import '../_common/components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
+import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import type { InlineRangeProvider } from '@blocksuite/virgo';
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -61,7 +61,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  private _vRangeProvider: InlineRangeProvider | null = null;
+  private _inlineRangeProvider: InlineRangeProvider | null = null;
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
@@ -92,7 +92,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     super.connectedCallback();
     bindContainerHotkey(this);
 
-    this._vRangeProvider = getVRangeProvider(this);
+    this._inlineRangeProvider = getInlineRangeProvider(this);
   }
 
   private _toggleChildren() {
@@ -162,7 +162,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
             .attributeRenderer=${this.attributeRenderer}
             .attributesSchema=${this.attributesSchema}
             .readonly=${this.model.page.readonly}
-            .vRangeProvider=${this._vRangeProvider}
+            .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}
           ></rich-text>

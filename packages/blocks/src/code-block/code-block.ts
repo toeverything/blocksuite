@@ -3,7 +3,7 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
+import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import {
   type InlineRangeProvider,
   type InlineRootElement,
@@ -219,7 +219,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
   }
 
-  private _vRangeProvider: InlineRangeProvider | null = null;
+  private _inlineRangeProvider: InlineRangeProvider | null = null;
 
   get inlineEditor() {
     const vRoot = this.querySelector<InlineRootElement>(`[${VIRGO_ROOT_ATTR}]`);
@@ -435,7 +435,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       },
     });
 
-    this._vRangeProvider = getVRangeProvider(this);
+    this._inlineRangeProvider = getInlineRangeProvider(this);
   }
 
   override disconnectedCallback() {
@@ -594,7 +594,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           .attributesSchema=${this.attributesSchema}
           .attributeRenderer=${this.getAttributeRenderer()}
           .readonly=${this.model.page.readonly}
-          .vRangeProvider=${this._vRangeProvider}
+          .inlineRangeProvider=${this._inlineRangeProvider}
           .enableClipboard=${false}
           .enableUndoRedo=${false}
         >

@@ -144,7 +144,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
   @query('.data-view-header-area-rich-text')
   richText!: HTMLElement;
 
-  protected initVirgo(container: HTMLElement): InlineEditor {
+  protected initInlineEditor(container: HTMLElement): InlineEditor {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as Y.Text | string | undefined
     );
@@ -236,7 +236,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
 @customElement('data-view-header-area-text')
 export class HeaderAreaTextCell extends BaseTextCell {
   private init() {
-    const editor = this.initVirgo(this.richText);
+    const editor = this.initInlineEditor(this.richText);
     editor.setReadonly(true);
     this._disposables.add({
       dispose: () => {
@@ -260,7 +260,7 @@ export class HeaderAreaTextCell extends BaseTextCell {
 @customElement('data-view-header-area-text-editing')
 export class HeaderAreaTextCellEditing extends BaseTextCell {
   private init() {
-    const editor = this.initVirgo(this.richText);
+    const editor = this.initInlineEditor(this.richText);
     this.initEditingMode(editor);
     this._disposables.add({
       dispose: () => {

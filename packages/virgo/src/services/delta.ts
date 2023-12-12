@@ -151,35 +151,35 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
    * ]
    * ```
    *
-   * `getDeltasByVRange({ index: 0, length: 0 })` returns
+   * `getDeltasByInlineRange({ index: 0, length: 0 })` returns
    * ```
    * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }]]
    * ```
    *
-   * `getDeltasByVRange({ index: 0, length: 1 })` returns
+   * `getDeltasByInlineRange({ index: 0, length: 1 })` returns
    * ```
    * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }]]
    * ```
    *
-   * `getDeltasByVRange({ index: 0, length: 4 })` returns
+   * `getDeltasByInlineRange({ index: 0, length: 4 })` returns
    * ```
    * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
    *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }]]
    * ```
    *
-   * `getDeltasByVRange({ index: 3, length: 1 })` returns
+   * `getDeltasByInlineRange({ index: 3, length: 1 })` returns
    * ```
    * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
    *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }]]
    * ```
    *
-   * `getDeltasByVRange({ index: 3, length: 3 })` returns
+   * `getDeltasByInlineRange({ index: 3, length: 3 })` returns
    * ```
    * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
    *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }]]
    * ```
    *
-   *  `getDeltasByVRange({ index: 3, length: 4 })` returns
+   *  `getDeltasByInlineRange({ index: 3, length: 4 })` returns
    * ```
    * [{ insert: 'aaa', attributes: { bold: true }, }, { index: 0, length: 3, }],
    *  [{ insert: 'bbb', attributes: { italic: true }, }, { index: 3, length: 3, }],
