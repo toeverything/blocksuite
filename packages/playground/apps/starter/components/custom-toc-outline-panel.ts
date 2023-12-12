@@ -3,7 +3,6 @@ import {
   type AffineEditorContainer,
   registerTOCPanelComponents,
 } from '@blocksuite/presets';
-import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -17,7 +16,7 @@ export class CustomTOCOutlinePanel extends WithDisposable(LitElement) {
       border: 1px solid var(--affine-border-color, #e3e2e4);
       background: var(--affine-background-overlay-panel-color);
       height: 100vh;
-      width: 345px;
+      width: 320px;
       box-sizing: border-box;
       z-index: 1;
     }
@@ -26,16 +25,13 @@ export class CustomTOCOutlinePanel extends WithDisposable(LitElement) {
   private _show = false;
 
   @property({ attribute: false })
-  page!: Page;
-
-  @property({ attribute: false })
   editor!: AffineEditorContainer;
 
   private _renderPanel() {
-    return html`<toc-note-panel
-      .page=${this.page}
+    return html`<toc-panel
+      .editor=${this.editor}
       .fitPadding=${[50, 360, 50, 50]}
-    ></toc-note-panel>`;
+    ></toc-panel>`;
   }
 
   public toggleDisplay() {
@@ -44,7 +40,6 @@ export class CustomTOCOutlinePanel extends WithDisposable(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.page = this.editor.page;
 
     registerTOCPanelComponents(components => {
       Object.entries(components).forEach(([name, component]) => {

@@ -70,7 +70,7 @@ export class TOCNotesSettingMenu extends WithDisposable(LitElement) {
       @click=${stopPropagation}
     >
       <div class="notes-setting-menu-item">
-        <div class="setting-label">SETTINGS</div>
+        <div class="setting-label">Settings</div>
       </div>
       <div class="notes-setting-menu-item action">
         <div class="action-label">Hide type icon</div>
@@ -87,6 +87,6 @@ export class TOCNotesSettingMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-toc-notes-setting-menu': TOCNotesSettingMenu;
+    'toc-notes-setting-menu': TOCNotesSettingMenu;
   }
 }

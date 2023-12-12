@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -30,6 +30,10 @@ export type SelectEvent = CustomEvent<{
 
 export type FitViewEvent = CustomEvent<{
   block: NoteBlockModel;
+}>;
+
+export type ClickBlockEvent = CustomEvent<{
+  blockPath: string[];
 }>;
 
 export class TOCNoteCard extends WithDisposable(LitElement) {
@@ -57,14 +61,13 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       border-radius: 4px;
       background-color: var(--affine-background-primary-color);
 
-      cursor: pointer;
+      cursor: default;
       user-select: none;
-
-      transition: border-color 0.2s ease-out;
     }
 
-    .card-preview:hover {
+    .card-preview.edgeless:hover {
       background: var(--affine-hover-color);
+      cursor: pointer;
     }
 
     .card-number-container {
@@ -79,7 +82,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
     .card-number-container .card-number {
       text-align: center;
-      font-size: 12px;
+      font-size: var(--affine-font-sm);
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       color: var(--light-brand-color, #1e96eb);
       font-weight: 500;
@@ -117,11 +120,19 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     .card-container[data-invisible='true'] .card-number-container .card-number,
     .card-container[data-invisible='true'] .card-preview .card-content {
       color: var(--affine-text-disable-color);
+      pointer-events: none;
+    }
+
+    .card-preview.page toc-block-preview:hover {
+      color: var(--affine-blue-500);
     }
   `;
 
   @property({ attribute: false })
   page!: Page;
+
+  @property({ attribute: false })
+  editorMode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
   note!: NoteBlockModel;
@@ -218,6 +229,28 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     this.dispatchEvent(event);
   }
 
+  // Need to consider the case that block not a child of a note
+  private _buildBlockPath(block: BaseBlockModel) {
+    return [this.note.id, block.id];
+  }
+
+  private _dispatchClickBlockEvent(
+    e: MouseEvent,
+    invisible: boolean,
+    block: BaseBlockModel
+  ) {
+    e.stopPropagation();
+    if (invisible) return;
+
+    const event = new CustomEvent('clickblock', {
+      detail: {
+        blockPath: this._buildBlockPath(block),
+      },
+    });
+
+    this.dispatchEvent(event);
+  }
+
   override render() {
     if (this.note.isEmpty()) return nothing;
 
@@ -230,7 +263,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
         class="card-container ${this.status ?? ''} ${mode}"
       >
         <div
-          class="card-preview"
+          class="card-preview ${this.editorMode}"
           @mousedown=${this._dispatchDragEvent}
           @click=${this._dispatchSelectEvent}
           @dblclick=${this._dispatchFitViewEvent}
@@ -249,6 +282,8 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
                 .block=${block}
                 .hidePreviewIcon=${this.hidePreviewIcon}
                 .disabledIcon=${this.invisible}
+                @click=${(e: MouseEvent) =>
+                  this._dispatchClickBlockEvent(e, this.invisible, block)}
               ></toc-block-preview>`;
             })}
             </div>

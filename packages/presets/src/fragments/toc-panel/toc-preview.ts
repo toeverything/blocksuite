@@ -11,9 +11,17 @@ import type {
   ParagraphBlockModel,
   SurfaceRefBlockModel,
 } from '@blocksuite/blocks';
-import { noop } from '@blocksuite/global/utils';
+import { BlocksUtils } from '@blocksuite/blocks';
+import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type PropertyValues,
+  type TemplateResult,
+} from 'lit';
 import { property } from 'lit/decorators.js';
 
 import {
@@ -46,6 +54,34 @@ const paragraphIconMap: {
   h6: SmallHeading6Icon,
 };
 
+const paragraphPlaceholderMap: {
+  [key in ParagraphBlockModel['type']]: string;
+} = {
+  quote: 'Quote',
+  text: 'Text Block',
+  h1: 'Heading 1',
+  h2: 'Heading 2',
+  h3: 'Heading 3',
+  h4: 'Heading 4',
+  h5: 'Heading 5',
+  h6: 'Heading 6',
+};
+
+const placeholderMap = {
+  code: 'Code Block',
+  bulleted: 'Bulleted List',
+  numbered: 'Numbered List',
+  toggle: 'Toggle List',
+  todo: 'Todo',
+  bookmark: 'Bookmark',
+  image: 'Image Block',
+  linkedPage: 'Linked Page',
+  database: 'Database',
+  attachment: 'Attachment',
+  surfaceRef: 'Surface Reference',
+  ...paragraphPlaceholderMap,
+};
+
 export class TOCBlockPreview extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
@@ -53,10 +89,10 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       width: 100%;
     }
 
-    .edgeless-toc-block-preview {
+    .toc-block-preview {
       width: 100%;
       box-sizing: border-box;
-      padding: 8px 8px;
+      padding: 6px 8px;
       white-space: nowrap;
       display: flex;
       justify-content: start;
@@ -87,7 +123,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       text-overflow: ellipsis;
       flex: 1;
 
-      font-size: 15px;
+      font-size: var(--affine-font-sm);
       line-height: 24px;
     }
 
@@ -95,7 +131,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     .subtype.text,
     .subtype.quote {
       font-weight: 400;
-      padding-left: 20px;
+      padding-left: 28px;
     }
 
     .subtype.h1,
@@ -114,16 +150,20 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       padding-left: 4px;
     }
     .subtype.h3 {
-      padding-left: 8px;
-    }
-    .subtype.h4 {
       padding-left: 12px;
     }
-    .subtype.h5 {
+    .subtype.h4 {
       padding-left: 16px;
     }
-    .subtype.h6 {
+    .subtype.h5 {
       padding-left: 20px;
+    }
+    .subtype.h6 {
+      padding-left: 24px;
+    }
+
+    .toc-block-preview:not(:has(span)) {
+      display: none;
     }
   `;
 
@@ -136,12 +176,47 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   @property({ attribute: false })
   disabledIcon = false;
 
+  private _textDisposables: DisposableGroup | null = null;
+
+  private _clearTextDisposables = () => {
+    this._textDisposables?.dispose();
+    this._textDisposables = null;
+  };
+
+  private _setPageDisposables = (block: ValuesOf<BlockModels>) => {
+    this._clearTextDisposables();
+    this._textDisposables = new DisposableGroup();
+    block.text?.yText.observe(this._updateElement);
+    this._textDisposables.add({
+      dispose: () => block.text?.yText.unobserve(this._updateElement),
+    });
+    this._textDisposables.add(this.block.propsUpdated.on(this._updateElement));
+  };
+
+  private _updateElement = () => {
+    this.requestUpdate();
+  };
+
   override connectedCallback(): void {
     super.connectedCallback();
+  }
 
-    this._disposables.add(
-      this.block.propsUpdated.on(() => this.requestUpdate())
-    );
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._clearTextDisposables();
+  }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('block')) {
+      if (
+        BlocksUtils.matchFlavours(this.block, [
+          'affine:paragraph',
+          'affine:list',
+        ])
+      ) {
+        this._setPageDisposables(this.block);
+      }
+    }
   }
 
   renderBlockByFlavour() {
@@ -151,11 +226,13 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     switch (block.flavour as keyof BlockModels) {
       case 'affine:paragraph':
         assertType<ParagraphBlockModel>(block);
+        if (!block.text.toString().length) return nothing;
+
         return html`
           <span class="text subtype ${block.type}"
             >${block.text.toString().length
               ? block.text.toString()
-              : 'placeholder'}</span
+              : placeholderMap[block.type]}</span
           >
           ${!this.hidePreviewIcon
             ? html`<span class=${iconClass}
@@ -166,7 +243,11 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       case 'affine:list':
         assertType<ListBlockModel>(block);
         return html`
-          <span class="text general">${block.text.toString()}</span>
+          <span class="text general"
+            >${block.text.toString().length
+              ? block.text.toString()
+              : placeholderMap[block.type]}</span
+          >
           ${!this.hidePreviewIcon
             ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
@@ -175,7 +256,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         assertType<BookmarkBlockModel>(block);
         return html`
           <span class="text general"
-            >${block.title || block.url || 'Bookmark'}</span
+            >${block.title || block.url || placeholderMap['bookmark']}</span
           >
           ${!this.hidePreviewIcon
             ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
@@ -184,7 +265,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       case 'affine:code':
         assertType<CodeBlockModel>(block);
         return html`
-          <span class="text general">${block.language}</span>
+          <span class="text general"
+            >${block.language ?? placeholderMap['code']}</span
+          >
           ${!this.hidePreviewIcon
             ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
@@ -192,7 +275,11 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       case 'affine:database':
         assertType<DatabaseBlockModel>(block);
         return html`
-          <span class="text general">${block.title || 'Database'}</span>
+          <span class="text general"
+            >${block.title.toString().length
+              ? block.title.toString()
+              : placeholderMap['database']}</span
+          >
           ${!this.hidePreviewIcon
             ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
@@ -200,7 +287,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       case 'affine:image':
         assertType<ImageBlockModel>(block);
         return html`
-          <span class="text general">${block.caption || 'Image'}</span>
+          <span class="text general"
+            >${block.caption ?? placeholderMap['image']}</span
+          >
           ${!this.hidePreviewIcon
             ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
@@ -208,7 +297,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       case 'affine:attachment':
         assertType<AttachmentBlockModel>(block);
         return html`
-          <span class="text general">${block.name}</span>
+          <span class="text general"
+            >${block.name ?? placeholderMap['attachment']}</span
+          >
           ${!this.hidePreviewIcon
             ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
             : nothing}
@@ -231,21 +322,14 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         `;
       case 'affine:surface-ref':
         assertType<SurfaceRefBlockModel>(block);
-        return html`
-          <span class="text general"
-            >${block.caption ? block.caption : 'Surface-Ref'}</span
-          >
-          ${!this.hidePreviewIcon
-            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
-            : nothing}
-        `;
+        return nothing;
       default:
-        return block.flavour;
+        return nothing;
     }
   }
 
   override render() {
-    return html`<div class="edgeless-toc-block-preview">
+    return html`<div class="toc-block-preview">
       ${this.renderBlockByFlavour()}
     </div>`;
   }
@@ -253,6 +337,6 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-toc-block-preview': TOCBlockPreview;
+    'toc-block-preview': TOCBlockPreview;
   }
 }

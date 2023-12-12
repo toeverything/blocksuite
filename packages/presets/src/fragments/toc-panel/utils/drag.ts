@@ -2,7 +2,7 @@ import { on, once } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 
 import { type TOCNoteCard } from '../toc-card.js';
-import type { TOCNotePanel } from '../toc-panel.js';
+import type { TOCPanelBody } from '../toc-panel-body.js';
 
 /**
  * start drag notes
@@ -14,7 +14,7 @@ export function startDragging(options: {
   tocListContainer: HTMLElement;
   doc: Document;
   host: Document | HTMLElement;
-  container: TOCNotePanel;
+  container: TOCPanelBody;
   page: Page;
 }) {
   const { doc, host, container, onDragMove, onDragEnd, tocListContainer } =
