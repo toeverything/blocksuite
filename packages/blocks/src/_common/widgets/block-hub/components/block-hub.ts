@@ -447,6 +447,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     const props = JSON.parse(data);
     const isDatabase = props.flavour === 'affine:database';
 
+    // TO DO: fix image loading state for block hub
     if (props.flavour === 'affine:image' && props.type === 'image') {
       models.push(
         ...(await uploadImageFromLocal(page.blob)).map(({ sourceId }) => ({
@@ -552,6 +553,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     const page = this._host.page;
     const models = [];
 
+    // TO DO: fix image loading state for blockhub
     if (data.flavour === 'affine:image' && data.type === 'image') {
       models.push(
         ...(await uploadImageFromLocal(page.blob)).map(({ sourceId }) => ({

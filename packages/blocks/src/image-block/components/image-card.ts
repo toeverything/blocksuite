@@ -27,6 +27,7 @@ export class AffinePageImageCard extends ShadowlessElement {
       border-radius: 8px;
       border: 1px solid var(--affine-background-tertiary-color, #eee);
       padding: 12px;
+      margin-top: 12px;
     }
 
     .affine-image-block-card-content {

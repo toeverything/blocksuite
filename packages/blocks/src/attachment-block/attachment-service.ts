@@ -16,12 +16,18 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
     maxFileSize: this.maxFileSize,
-    matcher: (file: File) => !file.type.startsWith('image/'), // generic attachment block for all files except images
     onDrop: async ({ files, targetModel, place }) => {
       if (!files.length || !targetModel) return false;
       if (matchFlavours(targetModel, ['affine:surface'])) return false;
 
-      const isSizeExceeded = files.some(file => file.size > this.maxFileSize);
+      // generic attachment block for all files except images
+      const attachmentFiles = files.filter(
+        file => !file.type.startsWith('image/')
+      );
+
+      const isSizeExceeded = attachmentFiles.some(
+        file => file.size > this.maxFileSize
+      );
       if (isSizeExceeded) {
         toast(
           `You can only upload files less than ${humanFileSize(
@@ -33,7 +39,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
         return true;
       }
 
-      files.forEach(file =>
+      attachmentFiles.forEach(file =>
         addSiblingAttachmentBlock(file, targetModel, this.maxFileSize, place)
       );
       return true;

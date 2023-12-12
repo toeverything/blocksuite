@@ -25,18 +25,18 @@ import {
   createPage,
   getBlockElementByModel,
   getCurrentNativeRange,
+  getImageFilesFromLocal,
   getInlineEditorByModel,
   matchFlavours,
   openFileOrFiles,
   resetNativeSelection,
-  uploadImageFromLocal,
 } from '../../../_common/utils/index.js';
 import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
 import { toggleBookmarkCreateModal } from '../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
-import type { ImageBlockProps } from '../../../image-block/image-model.js';
+import { addSiblingImageBlock } from '../../../image-block/image/utils.js';
 import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { copyBlock } from '../../../page-block/doc/utils.js';
@@ -257,18 +257,11 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const fileData = await uploadImageFromLocal(pageElement.page.blob);
-          const props = fileData.map(
-            ({
-              sourceId,
-            }): Partial<ImageBlockProps> & {
-              flavour: 'affine:image';
-            } => ({
-              flavour: 'affine:image',
-              sourceId,
-            })
+
+          const imageFiles = await getImageFilesFromLocal();
+          imageFiles.forEach(file =>
+            addSiblingImageBlock(pageElement.page, file, model)
           );
-          pageElement.page.addSiblingBlocks(model, props);
         }),
       },
       {

@@ -10,6 +10,7 @@ import { isPageMode, matchFlavours } from '../_common/utils/index.js';
 import { humanFileSize } from '../_common/utils/math.js';
 import type { DocPageBlockComponent } from '../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
+import { addSiblingImageBlock } from './image/utils.js';
 import type { ImageBlockModel } from './image-model.js';
 import { ImageSelection } from './image-selection.js';
 
@@ -29,11 +30,14 @@ export class ImageService extends BlockService<ImageBlockModel> {
   maxFileSize = 10 * 1000 * 1000; // 10MB (default)
 
   private _fileDropOptions: FileDropOptions = {
-    flavour: 'Image',
+    flavour: this.flavour,
     maxFileSize: this.maxFileSize,
-    matcher: file => file.type.startsWith('image/'),
     onDrop: async ({ files, targetModel, place, point }) => {
-      const isSizeExceeded = files.some(file => file.size > this.maxFileSize);
+      const imageFiles = files.filter(file => file.type.startsWith('image/'));
+
+      const isSizeExceeded = imageFiles.some(
+        file => file.size > this.maxFileSize
+      );
       if (isSizeExceeded) {
         toast(
           `You can only upload files less than ${humanFileSize(
@@ -46,12 +50,13 @@ export class ImageService extends BlockService<ImageBlockModel> {
       }
 
       if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
-        place;
-        // implement drop in note
+        imageFiles.forEach(file =>
+          addSiblingImageBlock(this.page, file, targetModel, place)
+        );
       } else if (!isPageMode(this.page)) {
         const edgelessPage = this
           .pageBlockComponent as EdgelessPageBlockComponent;
-        await edgelessPage.addImages(files, point);
+        await edgelessPage.addImages(imageFiles, point);
       }
 
       return true;

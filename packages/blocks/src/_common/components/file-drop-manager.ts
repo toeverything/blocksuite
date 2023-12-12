@@ -22,14 +22,12 @@ export type onDropProps = {
 export type FileDropOptions = {
   flavour: string;
   maxFileSize?: number;
-  matcher?: (file: File) => boolean;
   onDrop?: ({ files, targetModel, place, point }: onDropProps) => void;
 };
 
 export class FileDropManager {
   private _blockService: BlockService;
   private _fileDropOptions: FileDropOptions;
-
   private _indicator!: DragIndicator;
 
   constructor(blockService: BlockService, fileDropOptions: FileDropOptions) {
@@ -50,7 +48,7 @@ export class FileDropManager {
       this._blockService.disposables.addFromEvent(
         this._blockService.std.host,
         'drop',
-        this.onDrop
+        this._onDrop
       );
     }
   }
@@ -113,9 +111,9 @@ export class FileDropManager {
     this._indicator.rect = rect;
   };
 
-  onDrop = async (event: DragEvent) => {
-    const { matcher, onDrop } = this._fileDropOptions;
-    if (!matcher || !onDrop) return;
+  private _onDrop = async (event: DragEvent) => {
+    const { onDrop } = this._fileDropOptions;
+    if (!onDrop) return;
 
     event.preventDefault();
 
@@ -123,9 +121,8 @@ export class FileDropManager {
     const effectAllowed = event.dataTransfer?.effectAllowed ?? 'none';
     if (effectAllowed !== 'all') return;
 
-    const droppedFiles = event.dataTransfer?.files ?? [];
-    const matchedFiles = [...droppedFiles].filter(matcher);
-    if (!matchedFiles.length) return;
+    const droppedFiles = event.dataTransfer?.files;
+    if (!droppedFiles || !droppedFiles.length) return;
 
     const targetModel = this.targetModel;
     const place = this.type;
@@ -133,7 +130,7 @@ export class FileDropManager {
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
 
-    onDrop({ files: matchedFiles, targetModel, place, point });
+    onDrop({ files: [...droppedFiles], targetModel, place, point });
 
     this._indicator.reset();
   };

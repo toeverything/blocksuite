@@ -143,6 +143,8 @@ export async function uploadBlobForImage(
       console.error(imageBlock);
       throw new Error('the model is not an image model!');
     }
+    setImageLoading(blockId, false);
+
     page.withoutTransact(() => {
       page.updateBlock(imageBlock, {
         sourceId,
@@ -150,14 +152,14 @@ export async function uploadBlobForImage(
     });
   } catch (error) {
     console.error(error);
+    setImageLoading(blockId, false);
     if (error instanceof Error) {
       toast(
         `Failed to upload attachment! ${error.message || error.toString()}`
       );
     }
-  } finally {
-    setImageLoading(blockId, false);
   }
+
   return blockId;
 }
 
@@ -172,4 +174,21 @@ export function setImageLoading(blockId: string, loading: boolean) {
 
 export function isImageLoading(blockId: string) {
   return imageLoadingMap.has(blockId);
+}
+
+export function addSiblingImageBlock(
+  page: Page,
+  file: File,
+  targetModel: BaseBlockModel,
+  place: 'after' | 'before' = 'after'
+) {
+  const imageBlockProps: Partial<ImageBlockProps> & {
+    flavour: 'affine:image';
+  } = {
+    flavour: 'affine:image',
+    size: file.size,
+  };
+
+  const blockId = page.addSiblingBlocks(targetModel, [imageBlockProps], place);
+  return uploadBlobForImage(page, blockId[0], file);
 }
