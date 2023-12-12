@@ -18,8 +18,11 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       {
-        text: '🚧 Editors',
-        link: '#',
+        text: 'Editors',
+        items: [
+          { text: '🚧 DocEditor', link: '#' },
+          { text: '🚧 EdgelessEditor', link: '#' },
+        ],
       },
       {
         text: 'Playground',

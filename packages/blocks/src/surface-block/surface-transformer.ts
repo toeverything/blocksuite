@@ -92,6 +92,7 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
 
     Object.entries(elementsJSON).forEach(([key, value]) => {
       const element = this._elementFromJSON(value as Record<string, unknown>);
+
       yMap.set(key, element);
     });
 

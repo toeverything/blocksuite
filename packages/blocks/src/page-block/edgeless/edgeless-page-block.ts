@@ -131,6 +131,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       left: 0;
       top: 0;
       contain: size layout;
+      z-index: 1;
     }
 
     .affine-edgeless-layer {
