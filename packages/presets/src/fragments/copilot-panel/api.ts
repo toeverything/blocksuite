@@ -90,7 +90,7 @@ export class EditorWithAI {
         const prompt =
           (
             document.getElementById(
-              'ai-panel-edit-image-prompt'
+              'copilot-panel-edit-image-prompt'
             ) as HTMLInputElement
           )?.value ?? '';
         const b64 = await editImage(prompt, canvas);
@@ -110,7 +110,7 @@ export class EditorWithAI {
     const prompt =
       (
         document.getElementById(
-          'ai-panel-create-image-prompt'
+          'copilot-panel-create-image-prompt'
         ) as HTMLInputElement
       )?.value ?? '';
     if (!prompt) {

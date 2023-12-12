@@ -1,4 +1,4 @@
-export * from './ai-panel/ai-panel.js';
+export * from './copilot-panel/copilot-panel.js';
 export {
   FramePanel,
   registerFramePanelComponents,

@@ -35,7 +35,7 @@ import {
   type EditorHost,
   ShadowlessElement,
 } from '@blocksuite/lit';
-import type { AiPanel } from '@blocksuite/presets';
+import type { CopilotPanel } from '@blocksuite/presets';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Utils, type Workspace } from '@blocksuite/store';
@@ -206,7 +206,8 @@ export class DebugMenu extends ShadowlessElement {
   framePanel!: CustomFramePanel;
 
   @property({ attribute: false })
-  aiPanel!: AiPanel;
+  copilotPanel!: CopilotPanel;
+
   @property({ attribute: false })
   sidePanel!: SidePanel;
 
@@ -321,10 +322,10 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _toggleCopilotPanel() {
-    if (this.sidePanel.currentContent === this.aiPanel) {
+    if (this.sidePanel.currentContent === this.copilotPanel) {
       this.sidePanel.hideContent();
     } else {
-      this.sidePanel.showContent(this.aiPanel);
+      this.sidePanel.showContent(this.copilotPanel);
     }
   }
 
