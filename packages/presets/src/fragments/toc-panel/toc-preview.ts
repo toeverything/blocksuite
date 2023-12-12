@@ -179,7 +179,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     this._textDisposables = null;
   };
 
-  private _setPageDisposables = (block: ValuesOf<BlockModels>) => {
+  private _setTextDisposables = (block: ValuesOf<BlockModels>) => {
     this._clearTextDisposables();
     this._textDisposables = new DisposableGroup();
     block.text?.yText.observe(this._updateElement);
@@ -210,7 +210,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
           'affine:list',
         ])
       ) {
-        this._setPageDisposables(this.block);
+        this._setTextDisposables(this.block);
       }
     });
   }
@@ -238,6 +238,8 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         `;
       case 'affine:list':
         assertType<ListBlockModel>(block);
+        if (!block.text.toString().length) return nothing;
+
         return html`
           <span class="text general"
             >${block.text.toString().length
@@ -284,7 +286,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         assertType<ImageBlockModel>(block);
         return html`
           <span class="text general"
-            >${block.caption ?? placeholderMap['image']}</span
+            >${block.caption?.length
+              ? block.caption
+              : placeholderMap['image']}</span
           >
           ${!this.hidePreviewIcon
             ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
@@ -294,7 +298,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         assertType<AttachmentBlockModel>(block);
         return html`
           <span class="text general"
-            >${block.name ?? placeholderMap['attachment']}</span
+            >${block.name?.length
+              ? block.name
+              : placeholderMap['attachment']}</span
           >
           ${!this.hidePreviewIcon
             ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`

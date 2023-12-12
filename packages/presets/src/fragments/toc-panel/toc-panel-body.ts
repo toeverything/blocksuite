@@ -297,6 +297,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     const newChildren = [...leftPart, ...blocks, ...rightPart];
 
     this._changedFlag = true;
+    console.log('this.page.root', this.page);
     this.page.updateBlock(this.page.root, {
       children: newChildren,
     });

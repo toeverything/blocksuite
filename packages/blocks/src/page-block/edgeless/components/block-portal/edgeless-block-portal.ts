@@ -326,6 +326,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       })
     );
 
+    console.log('page: ', page);
     _disposables.add(
       (page.root as BaseBlockModel).childrenUpdated.on(() => {
         this.requestUpdate();
