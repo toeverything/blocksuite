@@ -48,7 +48,7 @@ export async function getDeltaFromVirgoRichText(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTexts[index] as any).vEditor as InlineEditor;
+    const editor = (richTexts[index] as any).inlineEditor as InlineEditor;
     return editor.yText.toDelta();
   }, index);
 }
@@ -90,7 +90,7 @@ export async function setVirgoRichTextRange(
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const editor = (richTexts[index as number] as any)
-        .vEditor as InlineEditor;
+        .inlineEditor as InlineEditor;
       editor.setVRange(vRange as VRange);
     },
     [vRange, index]
