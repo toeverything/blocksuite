@@ -9,7 +9,7 @@ import { TestUtils } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { EditorHost } from '@blocksuite/lit';
-import { AiPanel } from '@blocksuite/presets';
+import { CopilotPanel } from '@blocksuite/presets';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
 
@@ -48,7 +48,7 @@ function subscribePage(workspace: Workspace) {
     const debugMenu = new DebugMenu();
     const navigationPanel = new CustomNavigationPanel();
     const framePanel = new CustomFramePanel();
-    const aiPanel = new AiPanel();
+    const copilotPanelPanel = new CopilotPanel();
     const sidePanel = new SidePanel();
 
     debugMenu.workspace = workspace;
@@ -57,11 +57,11 @@ function subscribePage(workspace: Workspace) {
     debugMenu.contentParser = contentParser;
     debugMenu.navigationPanel = navigationPanel;
     debugMenu.framePanel = framePanel;
-    debugMenu.aiPanel = aiPanel;
+    debugMenu.copilotPanel = copilotPanelPanel;
     debugMenu.sidePanel = sidePanel;
 
     navigationPanel.editor = editor;
-    aiPanel.editor = editor;
+    copilotPanelPanel.editor = editor;
     framePanel.editor = editor;
 
     document.body.appendChild(debugMenu);
