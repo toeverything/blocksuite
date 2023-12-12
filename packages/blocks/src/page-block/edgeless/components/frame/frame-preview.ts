@@ -1,8 +1,4 @@
-import {
-  assertExists,
-  type Disposable,
-  DisposableGroup,
-} from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { type EditorHost, WithDisposable } from '@blocksuite/lit';
 import type { Page, Y } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
