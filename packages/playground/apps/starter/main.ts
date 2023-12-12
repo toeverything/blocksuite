@@ -113,7 +113,7 @@ async function main() {
   window.blockSchemas = AffineSchemas;
   window.Y = Workspace.Y;
   window.ContentParser = ContentParser;
-  Object.defineProperty(globalThis, 'root', {
+  Object.defineProperty(globalThis, 'host', {
     get() {
       return document.querySelector('editor-host') as EditorHost;
     },

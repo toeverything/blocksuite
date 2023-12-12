@@ -155,7 +155,7 @@ async function main() {
   window.job = new Job({ workspace });
   window.Y = Workspace.Y;
   window.ContentParser = ContentParser;
-  Object.defineProperty(globalThis, 'root', {
+  Object.defineProperty(globalThis, 'host', {
     get() {
       return document.querySelector('editor-host') as EditorHost;
     },

@@ -30,7 +30,7 @@ import type { WidgetElement } from './widget-element.js';
 @customElement('editor-host')
 export class EditorHost extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  preset!: BlockSpec[];
+  specs!: BlockSpec[];
 
   @property({ attribute: false })
   page!: Page;
@@ -63,7 +63,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('preset')) {
-      this.std.spec.applySpecs(this.preset);
+      this.std.spec.applySpecs(this.specs);
     }
     super.willUpdate(changedProperties);
   }
@@ -99,7 +99,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     this._registerView();
 
     this.std.mount();
-    this.std.spec.applySpecs(this.preset);
+    this.std.spec.applySpecs(this.specs);
     this.rangeManager = new RangeManager(this);
   }
 

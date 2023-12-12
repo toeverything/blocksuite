@@ -28,7 +28,7 @@ declare global {
     page: Page;
     debugMenu: DebugMenu;
     editor: AffineEditorContainer;
-    root: EditorHost;
+    host: EditorHost;
     testUtils: TestUtils;
 
     // TODO: remove this when provider support subdocument

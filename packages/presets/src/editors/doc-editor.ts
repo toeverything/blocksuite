@@ -14,9 +14,9 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
   page!: Page;
 
   @property({ attribute: false })
-  preset = DocEditorBlockSpecs;
+  specs = DocEditorBlockSpecs;
 
-  root: Ref<EditorHost> = createRef<EditorHost>();
+  host: Ref<EditorHost> = createRef<EditorHost>();
 
   override render() {
     return html`
@@ -39,9 +39,9 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
         }
       </style>
       <editor-host
-        ${ref(this.root)}
+        ${ref(this.host)}
         .page=${this.page}
-        .preset=${this.preset}
+        .specs=${this.specs}
       ></editor-host>
     `;
   }

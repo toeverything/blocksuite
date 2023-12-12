@@ -1,5 +1,6 @@
 import type { TestUtils } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
+import type { EditorHost } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import type {
   BlockSchema,
@@ -21,6 +22,7 @@ declare global {
     Y: typeof Workspace.Y;
     std: typeof std;
     testUtils: TestUtils;
+    host: EditorHost;
 
     // TODO: remove this when provider support subdocument
     subdocProviders: Map<string, DocProvider[]>;
