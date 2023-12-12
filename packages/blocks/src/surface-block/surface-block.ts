@@ -390,6 +390,7 @@ export class SurfaceBlockComponent extends BlockElement<
     }) as IndexedCanvasUpdateEvent;
 
     this.dispatchEvent(evt);
+    this.refresh();
   }
 
   renderCanvas() {

@@ -128,9 +128,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @query('.affine-edgeless-layer')
   layer!: HTMLDivElement;
 
-  @queryAll('.surface-layer')
-  canvases!: HTMLCanvasElement[];
-
   @query('.canvas-slot')
   canvasSlot!: HTMLDivElement;
 
@@ -180,6 +177,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     return this.selectedRect.dragging;
   }
 
+  private _updateCanvasViewport() {
+    Array.from(this.canvasSlot.children).forEach(canvas => {
+      (canvas as HTMLCanvasElement).style.setProperty(
+        'transform',
+        this._getLayerViewport(true)
+      );
+    });
+  }
+
   aboutToChangeViewport() {
     if (this._cancelRestoreWillchange) this._cancelRestoreWillchange();
     if (!this.layer.style.willChange)
@@ -204,17 +210,14 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
     this.layer.style.setProperty('transform', this._getLayerViewport());
-    Array.from(this.canvasSlot.children).forEach(canvas => {
-      (canvas as HTMLCanvasElement).style.setProperty(
-        'transform',
-        this._getLayerViewport(true)
-      );
-    });
+    this._updateCanvasViewport();
   };
 
   setSlotContent(children: HTMLElement[]) {
     if (this.canvasSlot.children.length !== children.length)
       this.canvasSlot.replaceChildren(...children);
+
+    this._updateCanvasViewport();
   }
 
   private _getLayerViewport(negative = false) {

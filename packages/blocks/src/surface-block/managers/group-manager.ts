@@ -14,11 +14,7 @@ export function getGroupParent(element: string | EdgelessElement) {
   return GroupMap.get(id) ?? (GROUP_ROOT as GroupElement);
 }
 
-export function setGroupParent(
-  element: string | EdgelessElement,
-  group: GroupElement
-) {
-  const id = typeof element === 'string' ? element : element.id;
+export function setGroupParent(id: string, group: GroupElement) {
   if (group === GROUP_ROOT) {
     GroupMap.delete(id);
     return;

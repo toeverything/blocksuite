@@ -492,7 +492,9 @@ export class LayerManager {
       updateArray(this.canvasElements, element);
 
       if (element instanceof GroupElement && indexChanged) {
-        element.childElements.forEach(child => this._updateLayer(child));
+        element.childElements.forEach(
+          child => child && this._updateLayer(child)
+        );
       }
     } else if (element.flavour === 'affine:frame') {
       updateArray(this.frames, element);
@@ -520,7 +522,9 @@ export class LayerManager {
       insertToOrderedArray(this.canvasElements, element);
 
       if (element instanceof GroupElement) {
-        element.childElements.forEach(child => this._updateLayer(child));
+        element.childElements.forEach(
+          child => child && this._updateLayer(child)
+        );
       }
     } else if (element.flavour === 'affine:frame') {
       insertToOrderedArray(this.frames, element);
