@@ -19,7 +19,7 @@ import {
   pressShiftEnter,
   redoByKeyboard,
   selectAllByKeyboard,
-  setVRangeInVEditor,
+  setVRangeInInlineEditor,
   type,
   undoByClick,
   undoByKeyboard,
@@ -27,8 +27,8 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertBlockProps,
+  assertInlineEditorDeltas,
   assertRowCount,
-  assertVEditorDeltas,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 import {
@@ -538,13 +538,13 @@ test('database format-bar in header and text column', async ({ page }) => {
   // header | column
 
   const formatBar = getFormatBar(page);
-  await setVRangeInVEditor(page, { index: 1, length: 4 }, 2);
+  await setVRangeInInlineEditor(page, { index: 1, length: 4 }, 2);
   expect(await formatBar.formatBar.isVisible()).toBe(true);
   // Title    | Column1
   // ----------------
   // h|eade|r | column
 
-  await assertVEditorDeltas(
+  await assertInlineEditorDeltas(
     page,
     [
       {
@@ -554,7 +554,7 @@ test('database format-bar in header and text column', async ({ page }) => {
     2
   );
   await formatBar.boldBtn.click();
-  await assertVEditorDeltas(
+  await assertInlineEditorDeltas(
     page,
     [
       {
@@ -576,13 +576,13 @@ test('database format-bar in header and text column', async ({ page }) => {
   await pressEscape(page);
   await pressArrowRight(page);
   await pressEnter(page);
-  await setVRangeInVEditor(page, { index: 2, length: 2 }, 3);
+  await setVRangeInInlineEditor(page, { index: 2, length: 2 }, 3);
   expect(await formatBar.formatBar.isVisible()).toBe(true);
   // Title  | Column1
   // ----------------
   // header | co|lu|mn
 
-  await assertVEditorDeltas(
+  await assertInlineEditorDeltas(
     page,
     [
       {
@@ -592,7 +592,7 @@ test('database format-bar in header and text column', async ({ page }) => {
     3
   );
   await formatBar.boldBtn.click();
-  await assertVEditorDeltas(
+  await assertInlineEditorDeltas(
     page,
     [
       {

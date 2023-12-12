@@ -6,12 +6,12 @@ import type { AffineInlineEditor } from '../../../types.js';
 import { LinkPopup } from './link-popup.js';
 
 export function toggleLinkPopup(
-  vEditor: AffineInlineEditor,
+  inlineEditor: AffineInlineEditor,
   type: LinkPopup['type'],
   goalVRange: VRange
 ): LinkPopup {
   const popup = new LinkPopup();
-  popup.vEditor = vEditor;
+  popup.vEditor = inlineEditor;
   popup.type = type;
   popup.goalVRange = goalVRange;
 

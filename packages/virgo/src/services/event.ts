@@ -182,7 +182,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     if (!vRange) return;
 
     let ctx: VCompositionEndHookCtx<TextAttributes> | null = {
-      vEditor: this.editor,
+      inlineEditor: this.editor,
       raw: event,
       vRange,
       data: event.data,
@@ -284,7 +284,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     if (!vRange) return;
 
     let ctx: VBeforeinputHookCtx<TextAttributes> | null = {
-      vEditor: this.editor,
+      inlineEditor: this.editor,
       raw: event,
       vRange,
       data: event.data,

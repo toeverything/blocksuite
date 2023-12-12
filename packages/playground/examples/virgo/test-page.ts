@@ -149,12 +149,12 @@ export class RichText extends ShadowlessElement {
       inputRule: {
         key: ' ',
         handler: context => {
-          const { vEditor, prefixText, vRange } = context;
+          const { inlineEditor, prefixText, vRange } = context;
           for (const match of markdownMatches) {
             const matchedText = prefixText.match(match.pattern);
             if (matchedText) {
               return match.action({
-                vEditor,
+                inlineEditor,
                 prefixText,
                 vRange,
                 pattern: match.pattern,

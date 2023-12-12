@@ -763,14 +763,18 @@ export async function setVRangeInSelectedRichText(
   await waitNextFrame(page);
 }
 
-export async function setVRangeInVEditor(page: Page, vRange: VRange, i = 0) {
+export async function setVRangeInInlineEditor(
+  page: Page,
+  vRange: VRange,
+  i = 0
+) {
   await page.evaluate(
     ({ i, vRange }) => {
       const inlineEditor = document.querySelectorAll<VirgoRootElement>(
         '[data-virgo-root="true"]'
       )[i]?.virgoEditor;
       if (!inlineEditor) {
-        throw new Error('Cannot find vEditor');
+        throw new Error('Cannot find inline editor');
       }
       inlineEditor.setVRange(vRange);
     },
@@ -1024,7 +1028,7 @@ export async function focusTitle(page: Page) {
     if (!defaultPageComponent) {
       throw new Error('default page component not found');
     }
-    defaultPageComponent.titleVEditor.focusEnd();
+    defaultPageComponent.titleInlineEditor.focusEnd();
   }, currentEditorIndex);
   await waitNextFrame(page);
 }

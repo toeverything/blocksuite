@@ -203,7 +203,7 @@ export const createKeydownObserver = ({
  * Remove specified text from the current range.
  */
 export function cleanSpecifiedTail(
-  vEditorOrModel: AffineInlineEditor | BaseBlockModel,
+  inlineEditorOrModel: AffineInlineEditor | BaseBlockModel,
   str: string
 ) {
   if (!str) {
@@ -211,9 +211,9 @@ export function cleanSpecifiedTail(
     return;
   }
   const inlineEditor =
-    vEditorOrModel instanceof BaseBlockModel
-      ? getInlineEditorByModel(vEditorOrModel)
-      : vEditorOrModel;
+    inlineEditorOrModel instanceof BaseBlockModel
+      ? getInlineEditorByModel(inlineEditorOrModel)
+      : inlineEditorOrModel;
   assertExists(inlineEditor, 'Inline editor not found');
 
   const vRange = inlineEditor.getVRange();

@@ -146,7 +146,7 @@ export async function assertTitle(page: Page, text: string) {
   expect(vText).toBe(text);
 }
 
-export async function assertVEditorDeltas(
+export async function assertInlineEditorDeltas(
   page: Page,
   deltas: unknown[],
   i = 0

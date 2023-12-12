@@ -157,13 +157,13 @@ export function focusTitle(page: Page, index = Infinity, len = 0) {
   if (!pageComponent) {
     throw new Error("Can't find page component!");
   }
-  if (!pageComponent.titleVEditor) {
+  if (!pageComponent.titleInlineEditor) {
     throw new Error("Can't find title vEditor!");
   }
-  if (index > pageComponent.titleVEditor.yText.length) {
-    index = pageComponent.titleVEditor.yText.length;
+  if (index > pageComponent.titleInlineEditor.yText.length) {
+    index = pageComponent.titleInlineEditor.yText.length;
   }
-  pageComponent.titleVEditor.setVRange({ index, length: len });
+  pageComponent.titleInlineEditor.setVRange({ index, length: len });
 }
 
 export async function focusRichText(

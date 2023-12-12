@@ -85,16 +85,16 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   enableFormat = true;
 
-  private _vEditor: AffineInlineEditor | null = null;
+  private _inlineEditor: AffineInlineEditor | null = null;
   get vEditor() {
-    return this._vEditor;
+    return this._inlineEditor;
   }
 
   private _lastScrollLeft = 0;
 
   private _init() {
-    if (this._vEditor) {
-      throw new Error('vEditor already exists.');
+    if (this._inlineEditor) {
+      throw new Error('Inline editor already exists.');
     }
 
     if (!this.enableFormat) {
@@ -102,8 +102,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       this.attributesSchema = z.object({});
     }
 
-    // init vEditor
-    this._vEditor = new InlineEditor<AffineTextAttributes>(this._yText, {
+    // init inline editor
+    this._inlineEditor = new InlineEditor<AffineTextAttributes>(this._yText, {
       isEmbed: delta => !!delta.attributes?.reference,
       hooks: {
         beforeinput: onVBeforeinput,
@@ -112,12 +112,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       vRangeProvider: this.vRangeProvider,
     });
     if (this.attributesSchema) {
-      this._vEditor.setAttributeSchema(this.attributesSchema);
+      this._inlineEditor.setAttributeSchema(this.attributesSchema);
     }
     if (this.attributeRenderer) {
-      this._vEditor.setAttributeRenderer(this.attributeRenderer);
+      this._inlineEditor.setAttributeRenderer(this.attributeRenderer);
     }
-    const inlineEditor = this._vEditor;
+    const inlineEditor = this._inlineEditor;
 
     if (this.enableMarkdownShortcut) {
       const keyDownHandler = createVirgoKeyDownHandler(inlineEditor, {
@@ -269,7 +269,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     if (this.vEditor?.mounted) {
       this.vEditor.unmount();
     }
-    this._vEditor = null;
+    this._inlineEditor = null;
   }
 
   override async getUpdateComplete(): Promise<boolean> {
@@ -337,8 +337,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   override updated() {
-    if (this._vEditor) {
-      this._vEditor.setReadonly(this.readonly);
+    if (this._inlineEditor) {
+      this._inlineEditor.setReadonly(this.readonly);
     }
   }
 

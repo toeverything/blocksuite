@@ -5,7 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
-import { getVEditorInsideRoot } from '../utils/query.js';
+import { getInlineEditorInsideRoot } from '../utils/query.js';
 
 @customElement('v-element')
 export class VirgoElement<
@@ -20,7 +20,7 @@ export class VirgoElement<
   selected!: boolean;
 
   override render() {
-    const virgoEditor = getVEditorInsideRoot(this);
+    const virgoEditor = getInlineEditorInsideRoot(this);
     const attributeRenderer = virgoEditor.attributeService.attributeRenderer;
 
     const isEmbed = virgoEditor.isEmbed(this.delta);

@@ -5,7 +5,7 @@ import type { InlineEditor } from '../virgo.js';
 export interface VBeforeinputHookCtx<
   TextAttributes extends BaseTextAttributes,
 > {
-  vEditor: InlineEditor<TextAttributes>;
+  inlineEditor: InlineEditor<TextAttributes>;
   raw: InputEvent;
   vRange: VRange;
   data: string | null;
@@ -14,7 +14,7 @@ export interface VBeforeinputHookCtx<
 export interface VCompositionEndHookCtx<
   TextAttributes extends BaseTextAttributes,
 > {
-  vEditor: InlineEditor<TextAttributes>;
+  inlineEditor: InlineEditor<TextAttributes>;
   raw: CompositionEvent;
   vRange: VRange;
   data: string | null;

@@ -10,7 +10,7 @@ interface MarkdownMatch {
   name: string;
   pattern: RegExp;
   action: (props: {
-    vEditor: InlineEditor;
+    inlineEditor: InlineEditor;
     prefixText: string;
     vRange: VRange;
     pattern: RegExp;
@@ -22,7 +22,7 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'bolditalic',
     pattern: /(?:\*){3}([^* \n](.+?[^* \n])?)(?:\*){3}$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -31,7 +31,7 @@ export const markdownMatches: MarkdownMatch[] = [
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
@@ -41,7 +41,7 @@ export const markdownMatches: MarkdownMatch[] = [
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -52,20 +52,20 @@ export const markdownMatches: MarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length - 3,
         length: 3,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 3,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 6,
         length: 0,
       });
@@ -76,7 +76,7 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'bold',
     pattern: /(?:\*){2}([^* \n](.+?[^* \n])?)(?:\*){2}$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -84,7 +84,7 @@ export const markdownMatches: MarkdownMatch[] = [
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
@@ -94,7 +94,7 @@ export const markdownMatches: MarkdownMatch[] = [
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -104,20 +104,20 @@ export const markdownMatches: MarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length - 2,
         length: 2,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 2,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 4,
         length: 0,
       });
@@ -128,7 +128,7 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'italic',
     pattern: /(?:\*){1}([^* \n](.+?[^* \n])?)(?:\*){1}$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -136,7 +136,7 @@ export const markdownMatches: MarkdownMatch[] = [
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
@@ -146,7 +146,7 @@ export const markdownMatches: MarkdownMatch[] = [
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -156,20 +156,20 @@ export const markdownMatches: MarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length - 1,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 1,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 2,
         length: 0,
       });
@@ -180,7 +180,7 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'strikethrough',
     pattern: /(?:~~)([^~ \n](.+?[^~ \n])?)(?:~~)$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -188,7 +188,7 @@ export const markdownMatches: MarkdownMatch[] = [
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
@@ -198,7 +198,7 @@ export const markdownMatches: MarkdownMatch[] = [
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -208,20 +208,20 @@ export const markdownMatches: MarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length - 2,
         length: 2,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 2,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 4,
         length: 0,
       });
@@ -232,7 +232,7 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'underthrough',
     pattern: /(?:~)([^~ \n](.+?[^~ \n])?)(?:~)$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -240,7 +240,7 @@ export const markdownMatches: MarkdownMatch[] = [
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
@@ -250,7 +250,7 @@ export const markdownMatches: MarkdownMatch[] = [
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -260,20 +260,20 @@ export const markdownMatches: MarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: vRange.index - 1,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 1,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 2,
         length: 0,
       });
@@ -284,7 +284,7 @@ export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'code',
     pattern: /(?:`)(`{2,}?|[^`]+)(?:`)$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -296,7 +296,7 @@ export const markdownMatches: MarkdownMatch[] = [
         return VKEYBOARD_ALLOW_DEFAULT;
       }
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
@@ -306,7 +306,7 @@ export const markdownMatches: MarkdownMatch[] = [
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -316,20 +316,20 @@ export const markdownMatches: MarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length - 1,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 1,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 2,
         length: 0,
       });

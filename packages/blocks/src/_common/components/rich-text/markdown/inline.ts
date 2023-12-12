@@ -13,7 +13,7 @@ interface InlineMarkdownMatch {
   name: string;
   pattern: RegExp;
   action: (props: {
-    vEditor: InlineEditor;
+    inlineEditor: InlineEditor;
     prefixText: string;
     vRange: VRange;
     pattern: RegExp;
@@ -31,7 +31,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   {
     name: 'bolditalic',
     pattern: /(?:\*\*\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*\*\*)$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -40,21 +40,21 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
         },
         ' '
       );
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length + 1,
         length: 0,
       });
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -65,20 +65,20 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length - 3,
         length: 3,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 3,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 6,
         length: 0,
       });
@@ -89,7 +89,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   {
     name: 'bold',
     pattern: /(?:\*\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*\*)$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -97,21 +97,21 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
         },
         ' '
       );
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length + 1,
         length: 0,
       });
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -121,20 +121,20 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length - 2,
         length: 2,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 2,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 4,
         length: 0,
       });
@@ -145,7 +145,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   {
     name: 'italic',
     pattern: /(?:\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*)$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -153,21 +153,21 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
         },
         ' '
       );
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length + 1,
         length: 0,
       });
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -177,20 +177,20 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length - 1,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 1,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 2,
         length: 0,
       });
@@ -201,7 +201,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   {
     name: 'strikethrough',
     pattern: /(?:~~)([^\s~](?:[^~]*?[^\s~])?)(?:~~)$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -209,21 +209,21 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
         },
         ' '
       );
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length + 1,
         length: 0,
       });
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -233,20 +233,20 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length - 2,
         length: 2,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 2,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 4,
         length: 0,
       });
@@ -257,7 +257,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   {
     name: 'underthrough',
     pattern: /(?:~)([^\s~](?:[^~]*?[^\s~])?)(?:~)$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -265,21 +265,21 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
         },
         ' '
       );
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length + 1,
         length: 0,
       });
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -289,20 +289,20 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: vRange.index - 1,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 1,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 2,
         length: 0,
       });
@@ -313,7 +313,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   {
     name: 'code',
     pattern: /(?:`)([^\s`](?:[^`]*?[^\s`])?)(?:`)$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
         return VKEYBOARD_ALLOW_DEFAULT;
@@ -325,21 +325,21 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         return VKEYBOARD_ALLOW_DEFAULT;
       }
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: startIndex + annotatedText.length,
           length: 0,
         },
         ' '
       );
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length + 1,
         length: 0,
       });
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: startIndex,
           length: annotatedText.length,
@@ -349,20 +349,20 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex + annotatedText.length - 1,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: startIndex,
         length: 1,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: startIndex + annotatedText.length - 2,
         length: 0,
       });
@@ -373,7 +373,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   {
     name: 'link',
     pattern: /(?:\[(.+?)\])(?:\((.+?)\))$/g,
-    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const startIndex = prefixText.search(pattern);
       const matchedText = prefixText.match(pattern)?.[0];
       const hrefText = prefixText.match(/(?:\[(.*?)\])/g)?.[0];
@@ -383,21 +383,21 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
       }
       const start = vRange.index - matchedText.length;
 
-      vEditor.insertText(
+      inlineEditor.insertText(
         {
           index: vRange.index,
           length: 0,
         },
         ' '
       );
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: vRange.index + 1,
         length: 0,
       });
 
       undoManager.stopCapturing();
 
-      vEditor.formatText(
+      inlineEditor.formatText(
         {
           index: start,
           length: hrefText.length,
@@ -407,20 +407,20 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         }
       );
 
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: vRange.index + matchedText.length,
         length: 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: vRange.index - hrefLink.length - 1,
         length: hrefLink.length + 1,
       });
-      vEditor.deleteText({
+      inlineEditor.deleteText({
         index: start,
         length: 1,
       });
 
-      vEditor.setVRange({
+      inlineEditor.setVRange({
         index: start + hrefText.length - 1,
         length: 0,
       });
@@ -437,12 +437,12 @@ export function tryFormatInlineStyle(
   context: VKeyboardBindingContext,
   undoManager: Y.UndoManager
 ) {
-  const { vEditor, prefixText, vRange } = context;
+  const { inlineEditor, prefixText, vRange } = context;
   for (const match of inlineMarkdownMatches) {
     const matchedText = prefixText.match(match.pattern);
     if (matchedText) {
       return match.action({
-        vEditor,
+        inlineEditor,
         prefixText,
         vRange,
         pattern: match.pattern,

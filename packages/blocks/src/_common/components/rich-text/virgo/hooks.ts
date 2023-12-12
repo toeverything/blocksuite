@@ -18,13 +18,13 @@ const autoIdentifyLink = (ctx: VHookContext<AffineTextAttributes>) => {
 
   // space is typed at the end of link, remove the link attribute on typed space
   if (ctx.attributes?.link) {
-    if (ctx.vRange.index === ctx.vEditor.yText.length) {
+    if (ctx.vRange.index === ctx.inlineEditor.yText.length) {
       delete ctx.attributes['link'];
     }
     return;
   }
 
-  const [line] = ctx.vEditor.getLine(ctx.vRange.index);
+  const [line] = ctx.inlineEditor.getLine(ctx.vRange.index);
 
   const verifyData = line.textContent.slice(0, ctx.vRange.index).split(' ');
 
@@ -38,7 +38,7 @@ const autoIdentifyLink = (ctx: VHookContext<AffineTextAttributes>) => {
 
   const startIndex = ctx.vRange.index - verifyStr.length;
 
-  ctx.vEditor.formatText(
+  ctx.inlineEditor.formatText(
     {
       index: startIndex,
       length: verifyStr.length,
@@ -53,8 +53,8 @@ let ifPrefixSpace = false;
 export const onVBeforeinput = (
   ctx: VBeforeinputHookCtx<AffineTextAttributes>
 ) => {
-  const { vEditor, vRange, data, raw } = ctx;
-  const deltas = vEditor.getDeltasByVRange(vRange);
+  const { inlineEditor, vRange, data, raw } = ctx;
+  const deltas = inlineEditor.getDeltasByVRange(vRange);
 
   // Overwrite the default behavior (Insert period when consecutive spaces) of IME.
   if (raw.inputType === 'insertText' && data === ' ') {
@@ -77,7 +77,7 @@ export const onVBeforeinput = (
       // 1. aaa**b|bb**ccc --input 'd'--> aaa**bdbb**ccc, d should extend the bold attribute
       // 2. aaa**bbb|**ccc --input 'd'--> aaa**bbbd**ccc, d should extend the bold attribute
       const { attributes } = deltas[0][0];
-      if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
+      if (deltas.length !== 1 || vRange.index === inlineEditor.yText.length) {
         // `EDGE_IGNORED_ATTRIBUTES` is which attributes should be ignored in case 2
         EDGE_IGNORED_ATTRIBUTES.forEach(attr => {
           delete attributes?.[attr];
@@ -100,13 +100,13 @@ export const onVBeforeinput = (
 export const onVCompositionEnd = (
   ctx: VCompositionEndHookCtx<AffineTextAttributes>
 ) => {
-  const { vEditor, vRange, data } = ctx;
-  const deltas = vEditor.getDeltasByVRange(vRange);
+  const { inlineEditor, vRange, data } = ctx;
+  const deltas = inlineEditor.getDeltasByVRange(vRange);
 
   if (data && data.length > 0 && data !== '\n') {
     if (deltas.length > 1 || (deltas.length === 1 && vRange.index !== 0)) {
       const newAttributes = deltas[0][0].attributes;
-      if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
+      if (deltas.length !== 1 || vRange.index === inlineEditor.yText.length) {
         EDGE_IGNORED_ATTRIBUTES.forEach(attr => {
           delete newAttributes?.[attr];
         });

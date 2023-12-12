@@ -25,7 +25,7 @@ export function findDocumentOrShadowRoot<
   return el.ownerDocument;
 }
 
-export function getVEditorInsideRoot(element: Element): InlineEditor {
+export function getInlineEditorInsideRoot(element: Element): InlineEditor {
   const rootElement = element.closest(
     `[${VIRGO_ROOT_ATTR}]`
   ) as VirgoRootElement;

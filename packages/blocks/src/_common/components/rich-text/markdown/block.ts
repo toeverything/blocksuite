@@ -21,7 +21,7 @@ import {
 
 export function tryConvertBlock(
   element: BlockElement,
-  vEditor: AffineInlineEditor,
+  inline: AffineInlineEditor,
   prefixText: string,
   range: { index: number; length: number }
 ) {
@@ -34,7 +34,7 @@ export function tryConvertBlock(
     return VKEYBOARD_ALLOW_DEFAULT;
   }
 
-  const [, offset] = vEditor.getLine(range.index);
+  const [, offset] = inline.getLine(range.index);
   if (offset > prefixText.length) {
     return VKEYBOARD_ALLOW_DEFAULT;
   }

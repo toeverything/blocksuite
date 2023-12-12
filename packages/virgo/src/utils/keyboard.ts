@@ -23,7 +23,7 @@ export type VKeyboardBindingRecord = Record<string, VKeyboardBinding>;
 
 export interface VKeyboardBindingContext {
   vRange: VRange;
-  vEditor: InlineEditor;
+  inlineEditor: InlineEditor;
   collapsed: boolean;
   prefixText: string;
   suffixText: string;
@@ -34,7 +34,7 @@ export type VKeyboardBindingHandler = (
 ) => typeof VKEYBOARD_PREVENT_DEFAULT | typeof VKEYBOARD_ALLOW_DEFAULT;
 
 export function createVirgoKeyDownHandler(
-  vEditor: InlineEditor,
+  inlineEditor: InlineEditor,
   bindings: VKeyboardBindingRecord
 ): (evt: KeyboardEvent) => void {
   const bindingStore: Record<string, VKeyboardBinding[]> = {};
@@ -82,14 +82,14 @@ export function createVirgoKeyDownHandler(
     const keyMatches = keyBindings.filter(binding => keyMatch(evt, binding));
     if (keyMatches.length === 0) return;
 
-    const vRange = vEditor.getVRange();
+    const vRange = inlineEditor.getVRange();
     if (!vRange) return;
 
-    const [leafStart, offsetStart] = vEditor.getTextPoint(vRange.index);
+    const [leafStart, offsetStart] = inlineEditor.getTextPoint(vRange.index);
     const [leafEnd, offsetEnd] =
       vRange.length === 0
         ? [leafStart, offsetStart]
-        : vEditor.getTextPoint(vRange.index + vRange.length);
+        : inlineEditor.getTextPoint(vRange.index + vRange.length);
     const prefixText = leafStart.textContent
       ? leafStart.textContent.slice(0, offsetStart)
       : '';
@@ -98,7 +98,7 @@ export function createVirgoKeyDownHandler(
       : '';
     const currContext: VKeyboardBindingContext = {
       vRange,
-      vEditor,
+      inlineEditor: inlineEditor,
       collapsed: vRange.length === 0,
       prefixText,
       suffixText,

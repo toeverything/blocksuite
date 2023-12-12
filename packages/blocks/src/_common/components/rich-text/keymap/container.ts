@@ -78,10 +78,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     return vRoot.virgoEditor;
   };
 
-  const _getPrefixText = (vEditor: InlineEditor) => {
-    const vRange = vEditor.getVRange();
+  const _getPrefixText = (inlineEditor: InlineEditor) => {
+    const vRange = inlineEditor.getVRange();
     assertExists(vRange);
-    const [leafStart, offsetStart] = vEditor.getTextPoint(vRange.index);
+    const [leafStart, offsetStart] = inlineEditor.getTextPoint(vRange.index);
     return leafStart.textContent
       ? leafStart.textContent.slice(0, offsetStart)
       : '';

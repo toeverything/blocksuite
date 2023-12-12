@@ -16,19 +16,19 @@ import {
 } from '../rich-text-operations.js';
 import type { AffineInlineEditor } from '../virgo/types.js';
 
-function isCollapsedAtBlockStart(vEditor: AffineInlineEditor) {
-  const vRange = vEditor.getVRange();
+function isCollapsedAtBlockStart(inlineEditor: AffineInlineEditor) {
+  const vRange = inlineEditor.getVRange();
   return vRange?.index === 0 && vRange?.length === 0;
 }
 
-function isCollapsedAtBlockEnd(vEditor: AffineInlineEditor) {
-  const vRange = vEditor.getVRange();
-  return vRange?.index === vEditor.yText.length && vRange?.length === 0;
+function isCollapsedAtBlockEnd(inlineEditor: AffineInlineEditor) {
+  const vRange = inlineEditor.getVRange();
+  return vRange?.index === inlineEditor.yText.length && vRange?.length === 0;
 }
 
-export function onSoftEnter(vRange: VRange, vEditor: AffineInlineEditor) {
-  vEditor.insertText(vRange, '\n');
-  vEditor.setVRange({
+export function onSoftEnter(vRange: VRange, inlineEditor: AffineInlineEditor) {
+  inlineEditor.insertText(vRange, '\n');
+  inlineEditor.setVRange({
     index: vRange.index + 1,
     length: 0,
   });
@@ -41,7 +41,7 @@ export function hardEnter(
   /**
    * @deprecated
    */
-  vEditor: AffineInlineEditor,
+  inlineEditor: AffineInlineEditor,
   e: KeyboardEvent,
   shortKey = false
 ) {
@@ -96,7 +96,7 @@ export function hardEnter(
       }
 
       // add a new line to the block when press Enter solely
-      onSoftEnter(range, vEditor);
+      onSoftEnter(range, inlineEditor);
       return VKEYBOARD_PREVENT_DEFAULT;
     }
 
@@ -105,7 +105,7 @@ export function hardEnter(
     const shouldSoftEnter = softEnterable && !endWithTwoBlankLines;
 
     if (shouldSoftEnter || shortKey) {
-      onSoftEnter(range, vEditor);
+      onSoftEnter(range, inlineEditor);
       return VKEYBOARD_PREVENT_DEFAULT;
     }
 
@@ -129,7 +129,7 @@ export function hardEnter(
 
   const isSoftEnterBlock = isSoftEnterable(model);
   if (isSoftEnterBlock) {
-    onSoftEnter(range, vEditor);
+    onSoftEnter(range, inlineEditor);
     return VKEYBOARD_PREVENT_DEFAULT;
   }
 
@@ -152,9 +152,9 @@ function isSoftEnterable(model: BaseBlockModel) {
 export function onBackspace(
   model: BaseBlockModel,
   e: KeyboardEvent,
-  vEditor: AffineInlineEditor
+  inlineEditor: AffineInlineEditor
 ) {
-  if (isCollapsedAtBlockStart(vEditor)) {
+  if (isCollapsedAtBlockStart(inlineEditor)) {
     if (model.flavour === 'affine:code') {
       return VKEYBOARD_ALLOW_DEFAULT;
     }
@@ -169,10 +169,10 @@ export function onBackspace(
 export function onForwardDelete(
   model: BaseBlockModel,
   e: KeyboardEvent,
-  vEditor: AffineInlineEditor
+  inlineEditor: AffineInlineEditor
 ) {
   e.stopPropagation();
-  if (isCollapsedAtBlockEnd(vEditor)) {
+  if (isCollapsedAtBlockEnd(inlineEditor)) {
     handleLineEndForwardDelete(model.page, model);
     return VKEYBOARD_PREVENT_DEFAULT;
   }

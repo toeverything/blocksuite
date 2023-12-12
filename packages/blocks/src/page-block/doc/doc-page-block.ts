@@ -171,11 +171,11 @@ export class DocPageBlockComponent extends BlockElement<
 
   @query('.affine-doc-page-block-title')
   private _titleContainer!: HTMLElement;
-  private _titleVEditor: InlineEditor | null = null;
+  private _titleInlineEditor: InlineEditor | null = null;
 
-  get titleVEditor() {
-    assertExists(this._titleVEditor);
-    return this._titleVEditor;
+  get titleInlineEditor() {
+    assertExists(this._titleInlineEditor);
+    return this._titleInlineEditor;
   }
 
   get viewport(): PageViewport {
@@ -209,14 +209,14 @@ export class DocPageBlockComponent extends BlockElement<
     const { model } = this;
     const title = model.title;
 
-    this._titleVEditor = new InlineEditor(title.yText);
-    this._titleVEditor.mount(this._titleContainer);
-    this._titleVEditor.disposables.addFromEvent(
+    this._titleInlineEditor = new InlineEditor(title.yText);
+    this._titleInlineEditor.mount(this._titleContainer);
+    this._titleInlineEditor.disposables.addFromEvent(
       this._titleContainer,
       'keydown',
       this._onTitleKeyDown
     );
-    this._titleVEditor.disposables.addFromEvent(
+    this._titleInlineEditor.disposables.addFromEvent(
       this._titleContainer,
       'paste',
       this._onTitlePaste
@@ -239,7 +239,7 @@ export class DocPageBlockComponent extends BlockElement<
       this._updateTitleInMeta();
       this.requestUpdate();
     });
-    this._titleVEditor.setReadonly(this.page.readonly);
+    this._titleInlineEditor.setReadonly(this.page.readonly);
   }
 
   private _createDefaultNoteBlock() {
@@ -269,8 +269,8 @@ export class DocPageBlockComponent extends BlockElement<
 
     if (e.key === 'Enter' && hasContent && !e.isComposing) {
       e.preventDefault();
-      assertExists(this._titleVEditor);
-      const vRange = this._titleVEditor.getVRange();
+      assertExists(this._titleInlineEditor);
+      const vRange = this._titleInlineEditor.getVRange();
       assertExists(vRange);
       const right = model.title.split(vRange.index);
       const newFirstParagraphId = page.addBlock(
@@ -305,7 +305,7 @@ export class DocPageBlockComponent extends BlockElement<
   };
 
   private _onTitleCopy = (event: ClipboardEvent) => {
-    const inlineEditor = this._titleVEditor;
+    const inlineEditor = this._titleInlineEditor;
     if (!inlineEditor) return;
     const vRange = inlineEditor.getVRange();
     if (!vRange) return;
@@ -318,7 +318,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   private _onTitlePaste = (event: ClipboardEvent) => {
     event.stopPropagation();
-    const inlineEditor = this._titleVEditor;
+    const inlineEditor = this._titleInlineEditor;
     if (!inlineEditor) return;
     const vRange = inlineEditor.getVRange();
     if (!vRange) return;
@@ -336,7 +336,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('model')) {
-      if (this.model && !this._titleVEditor) {
+      if (this.model && !this._titleInlineEditor) {
         this._initTitleVEditor();
       }
     }
@@ -365,7 +365,7 @@ export class DocPageBlockComponent extends BlockElement<
       page.awarenessStore.slots.update.on(() => {
         if (readonly !== page.readonly) {
           readonly = page.readonly;
-          this._titleVEditor?.setReadonly(readonly);
+          this._titleInlineEditor?.setReadonly(readonly);
         }
       })
     );

@@ -31,7 +31,7 @@ export class AffineLink extends ShadowlessElement {
     return link;
   }
 
-  get vEditor() {
+  get inlineEditor() {
     const vRoot = this.closest<VirgoRootElement<AffineTextAttributes>>(
       `[${VIRGO_ROOT_ATTR}]`
     );
@@ -94,9 +94,9 @@ export class AffineLink extends ShadowlessElement {
       return;
     }
 
-    const selfVRange = this.vEditor.getVRangeFromElement(this);
+    const selfVRange = this.inlineEditor.getVRangeFromElement(this);
     assertExists(selfVRange);
-    const popup = toggleLinkPopup(this.vEditor, 'view', selfVRange);
+    const popup = toggleLinkPopup(this.inlineEditor, 'view', selfVRange);
     popup.addEventListener('mouseenter', () => {
       this._isLinkPopupHover = true;
     });
