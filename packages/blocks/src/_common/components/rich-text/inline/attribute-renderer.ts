@@ -1,6 +1,6 @@
 import './nodes/index.js';
 
-import type { AttributeRenderer } from '@blocksuite/virgo';
+import type { AttributeRenderer } from '@blocksuite/inline';
 import { html } from 'lit';
 
 import type { AffineTextAttributes } from './types.js';

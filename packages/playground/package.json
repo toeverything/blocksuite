@@ -17,7 +17,7 @@
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/presets": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@blocksuite/virgo": "workspace:*",
+    "@blocksuite/inline": "workspace:*",
     "@shoelace-style/shoelace": "2.12.0",
     "@toeverything/y-indexeddb": "0.10.0-canary.9",
     "async-call-rpc": "^6.3.1",

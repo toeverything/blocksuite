@@ -1,10 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
 import {
   type InlineRange,
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { AffineInlineEditor } from '../inline/types.js';

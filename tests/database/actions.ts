@@ -8,7 +8,7 @@ import type {
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ColumnType } from '../../packages/blocks/src/index.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { ZERO_WIDTH_SPACE } from '../../packages/virgo/src/consts.js';
+import { ZERO_WIDTH_SPACE } from '../../packages/inline/src/consts.js';
 import {
   pressEnter,
   pressEscape,

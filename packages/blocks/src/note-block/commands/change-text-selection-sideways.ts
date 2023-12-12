@@ -1,5 +1,5 @@
 import type { Command } from '@blocksuite/block-std';
-import { getTextNodesFromElement } from '@blocksuite/virgo';
+import { getTextNodesFromElement } from '@blocksuite/inline';
 
 import { applyCarets, getCurrentTextSelectionCarets } from '../utils.js';
 

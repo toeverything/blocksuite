@@ -1,4 +1,4 @@
-# `@blocksuite/virgo`
+# `@blocksuite/inline`
 
 Inline rich text editing component for BlockSuite.
 
@@ -6,7 +6,7 @@ Usage:
 
 ```ts
 import * as Y from 'yjs';
-import { InlineEditor } from '@blocksuite/virgo';
+import { InlineEditor } from '@blocksuite/inline';
 
 const doc = new Y.Doc();
 const yText = doc.getText('text');
@@ -16,8 +16,8 @@ const myEditor = document.getElementById('my-editor');
 inlineEditor.mount(myEditor);
 ```
 
-You can go to [virgo playground](https://try-blocksuite.vercel.app/examples/virgo/)
-for online testing and check out the code in its [repository](https://github.com/toeverything/blocksuite/tree/master/packages/playground/examples/virgo).
+You can go to [inline editor playground](https://try-blocksuite.vercel.app/examples/inline/)
+for online testing and check out the code in its [repository](https://github.com/toeverything/blocksuite/tree/master/packages/playground/examples/inline).
 
 ### Attributes
 
@@ -34,7 +34,7 @@ A delta expressing a bold text node would look like this:
 }
 ```
 
-Virgo use zod to validate attributes, you can use `setAttributesSchema` to set the schema:
+The inline editor use zod to validate attributes, you can use `setAttributesSchema` to set the schema:
 
 ```ts
 // you don't have to extend baseTextAttributes
@@ -64,7 +64,7 @@ const editorContainer = document.getElementById('editor');
 inlineEditor.mount(editorContainer);
 ```
 
-Virgo has default attributes schema, so you can skip this step if you think it is enough.
+`InlineEditor` has default attributes schema, so you can skip this step if you think it is enough.
 
 ```ts
 // default attributes schema
@@ -82,7 +82,7 @@ const baseTextAttributes = z.object({
 
 Attributes Renderer is a function that takes a delta and returns `TemplateResult<1>`, which is a valid [lit-html](https://github.com/lit/lit/tree/main/packages/lit-html) template result.
 
-Virgo use this function to render text with custom format and it is also the way to customize the text render.
+`InlineEditor` use this function to render text with custom format and it is also the way to customize the text render.
 
 ```ts
 type AffineTextAttributes = {
@@ -109,9 +109,8 @@ const editorContainer = document.getElementById('editor');
 inlineEditor.mount(editorContainer);
 ```
 
-You will see there is a `v-text` in the template, it is a custom element that render text node.
-Virgo use them to calculate range so you have to use them to render text content from delta.
+You will see there is a `v-text` in the template, it is a custom element that render text node. `InlineEditor` use them to calculate range so you have to use them to render text content from delta.
 
 ### Rich Text
 
-If you find Virgo's features too limited or difficult to use, you can refer to or directly use the [rich-text](https://github.com/toeverything/blocksuite/blob/f71df00ce18e3f300caad914aaedf63267158885/packages/blocks/src/components/rich-text/rich-text.ts) encapsulated in the blocks package. It contains basic editing features like copy/cut/paste, undo/redo (including range restore).
+If you find the `InlineEditor` features may be limited or a bit verbose to use, you can refer to or directly use the [rich-text](https://github.com/toeverything/blocksuite/blob/f71df00ce18e3f300caad914aaedf63267158885/packages/blocks/src/components/rich-text/rich-text.ts) encapsulated in the `blocks` package. It contains basic editing features like copy/cut/paste, undo/redo (including range restore).

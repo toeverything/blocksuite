@@ -65,11 +65,11 @@ export default ({ mode }) => {
         '@blocksuite/store': path.resolve(
           fileURLToPath(new URL('../store/src', import.meta.url))
         ),
-        '@blocksuite/virgo': path.resolve(
-          fileURLToPath(new URL('../virgo/src', import.meta.url))
+        '@blocksuite/inline': path.resolve(
+          fileURLToPath(new URL('../inline/src', import.meta.url))
         ),
-        '@blocksuite/virgo/*': path.resolve(
-          fileURLToPath(new URL('../virgo/src/*', import.meta.url))
+        '@blocksuite/inline/*': path.resolve(
+          fileURLToPath(new URL('../inline/src/*', import.meta.url))
         ),
       },
     },

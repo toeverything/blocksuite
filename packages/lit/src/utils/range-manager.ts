@@ -6,7 +6,7 @@ import {
   type InlineEditor,
   type InlineRange,
   type InlineRootElement,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
 
 import type { BlockElement } from '../element/block-element.js';
 import type { EditorHost } from '../element/lit-host.js';

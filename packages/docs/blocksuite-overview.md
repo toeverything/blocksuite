@@ -2,7 +2,7 @@
 
 BlockSuite is an open-source project for block-based collaborative editing. It contains two essential parts:
 
-- **A framework** for building block-based [structure editors](https://en.wikipedia.org/wiki/Structure_editor), providing foundational support for editor essentials such as [block schema](https://blocksuite.io/block-schema.html), [selection](https://blocksuite.io/selection-api.html), [rich text](https://github.com/toeverything/blocksuite/tree/master/packages/virgo), [real-time collaboration](https://blocksuite.io/unidirectional-data-flow.html), and [UI component definition](https://blocksuite.io/block-view.html).
+- **A framework** for building block-based [structure editors](https://en.wikipedia.org/wiki/Structure_editor), providing foundational support for editor essentials such as [block schema](https://blocksuite.io/block-schema.html), [selection](https://blocksuite.io/selection-api.html), [rich text](https://github.com/toeverything/blocksuite/tree/master/packages/inline), [real-time collaboration](https://blocksuite.io/unidirectional-data-flow.html), and [UI component definition](https://blocksuite.io/block-view.html).
 - **Multiple first-party editors** capable of handling documents, whiteboards, and data grids. These editors are highly interoperable, and are already used by the [AFFiNE](https://github.com/toeverything/AFFiNE) project.
 
 By using BlockSuite, you can:
@@ -18,7 +18,7 @@ The major packages in BlockSuite include the following:
 - `@blocksuite/store`: CRDT-driven block state management, enabling editors to have built-in conflict resolution and time travel capabilities.
 - `@blocksuite/block-std`: The standard toolkit for working with editable blocks, including selections, events, services, commands and more.
 - `@blocksuite/lit`: The default view layer for rendering blocks and widgets as [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). It's built on top of [lit](https://lit.dev/) and the headless `block-std`, and could be replaced by alternative frameworks.
-- `@blocksuite/virgo`: Atomic rich text _component_ used in BlockSuite. Every editable block could hold its own virgo instances, leveraging the store to reconcile the block tree.
+- `@blocksuite/inline`: Atomic rich text _component_ used in BlockSuite. Every editable block could hold its own inline editor instances, leveraging the store to reconcile the block tree.
 - `@blocksuite/blocks`: Editable first-party blocks under the `affine` scope. The default AFFiNE editors are simply different implementations of the `affine:page` blocks.
 - `@blocksuite/presets`: The ready-to-use editors composed by blocks.
 - `@blocksuite/playground`: Default editor playground with local-first data persistence and real-time collaboration support.

@@ -5,7 +5,7 @@
     "packages/presets",
     "packages/lit",
     "packages/store",
-    "packages/virgo"
+    "packages/inline"
   ],
   "plugin": ["typedoc-plugin-markdown"],
   "out": "packages/docs/api",

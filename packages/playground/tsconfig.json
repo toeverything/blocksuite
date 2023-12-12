@@ -23,8 +23,8 @@
       "@blocksuite/global/*": ["../global/src/*"],
       "@blocksuite/store": ["../store/src"],
       "@blocksuite/store/*": ["../store/src/*"],
-      "@blocksuite/virgo": ["../virgo/src"],
-      "@blocksuite/virgo/*": ["../virgo/src/*"]
+      "@blocksuite/inline": ["../inline/src"],
+      "@blocksuite/inline/*": ["../inline/src/*"]
     }
   },
   "include": ["./apps", "./examples"],

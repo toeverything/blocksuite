@@ -14,12 +14,12 @@ import {
   type ThemeObserver,
 } from '../../../packages/blocks/src/index.js';
 import { assertExists } from '../../../packages/global/src/utils.js';
-import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
-import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import {
   type InlineRange,
   type InlineRootElement,
-} from '../../../packages/virgo/src/index.js';
+} from '../../../packages/inline/src/index.js';
+import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
+import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,

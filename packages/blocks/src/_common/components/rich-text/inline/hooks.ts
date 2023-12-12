@@ -2,7 +2,7 @@ import type {
   BeforeinputHookCtx,
   CompositionEndHookCtx,
   HookContext,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
 
 import { isStrictUrl } from '../../../utils/url.js';
 import type { AffineTextAttributes } from './types.js';
@@ -73,7 +73,7 @@ export const onVBeforeinput = (
       deltas.length > 1 || // cursor is in the between of two deltas
       (deltas.length === 1 && inlineRange.index !== 0) // cursor is in the end of line or in the middle of a delta
     ) {
-      // each new text inserted by virgo will not contain any attributes,
+      // each new text inserted by inline editor will not contain any attributes,
       // but we want to keep the attributes of previous text or current text where the cursor is in
       // here are two cases:
       // 1. aaa**b|bb**ccc --input 'd'--> aaa**bdbb**ccc, d should extend the bold attribute

@@ -89,7 +89,7 @@ export default defineConfig({
             link: '/api/@blocksuite/block-std/index',
           },
           { text: '@blocksuite/lit', link: '/api/@blocksuite/lit/index' },
-          { text: '@blocksuite/virgo', link: '/api/@blocksuite/virgo/index' },
+          { text: '@blocksuite/inline', link: '/api/@blocksuite/inline/index' },
           {
             text: '@blocksuite/presets',
             link: '/api/@blocksuite/presets/index',

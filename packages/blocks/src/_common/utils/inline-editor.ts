@@ -1,4 +1,4 @@
-import type { InlineEditor } from '@blocksuite/virgo';
+import type { InlineEditor } from '@blocksuite/inline';
 
 // When the user selects a range, check if it matches the previous selection.
 // If it does, apply the marks from the previous selection.
