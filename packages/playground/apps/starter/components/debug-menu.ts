@@ -326,7 +326,7 @@ export class DebugMenu extends ShadowlessElement {
     }
   }
 
-  private _mindMapDemo() {
+  private _createMindMap() {
     function makeid(length: number) {
       let result = '';
       const characters =
@@ -681,6 +681,9 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._extendFormatBar}>
                 Extend Format Bar
               </sl-menu-item>
+              <sl-menu-item @click=${this._createMindMap}>
+                Create Mind Map
+              </sl-menu-item>
               <sl-menu-item @click=${this._addNote}>Add Note</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
@@ -719,9 +722,6 @@ export class DebugMenu extends ShadowlessElement {
               <sl-icon name="stars"></sl-icon>
             </sl-button>
           </sl-tooltip>
-          <sl-button size="small" @click="${this._mindMapDemo}">
-            mind map test
-          </sl-button>
         </div>
       </div>
     `;
