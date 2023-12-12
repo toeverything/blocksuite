@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { VEditor } from '../../packages/virgo/src/index.js';
+import type { InlineEditor } from '../../packages/virgo/src/index.js';
 
 export async function getStringFromRichText(
   page: Page,
@@ -16,7 +16,7 @@ export async function getStringFromRichText(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTexts[index] as any).vEditor as VEditor;
+    const editor = (richTexts[index] as any).inlineEditor as InlineEditor;
     return editor.yText.toString();
   }, index);
 }
