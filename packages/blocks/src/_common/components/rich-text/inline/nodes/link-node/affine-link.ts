@@ -2,15 +2,15 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
 import {
   type DeltaInsert,
+  type InlineRootElement,
   VIRGO_ROOT_ATTR,
-  type VirgoRootElement,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getModelByElement } from '../../../../../../_common/utils/query.js';
+import { getModelByElement } from '../../../../../utils/query.js';
 import type { AffineTextAttributes } from '../../types.js';
 import { affineTextStyles } from '../affine-text.js';
 import type { LinkPopup } from './link-popup/link-popup.js';
@@ -32,7 +32,7 @@ export class AffineLink extends ShadowlessElement {
   }
 
   get inlineEditor() {
-    const vRoot = this.closest<VirgoRootElement<AffineTextAttributes>>(
+    const vRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
       `[${VIRGO_ROOT_ATTR}]`
     );
     assertExists(vRoot);

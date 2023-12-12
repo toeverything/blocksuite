@@ -1,7 +1,7 @@
 import type * as Y from 'yjs';
 
 import { VirgoElement } from '../components/virgo-element.js';
-import type { VRange } from '../types.js';
+import type { InlineRange } from '../types.js';
 import { isInEmbedElement } from './guard.js';
 import {
   nativePointToTextPoint,
@@ -24,7 +24,7 @@ type VRangeRunnerContext = {
 };
 
 type Predict = (context: VRangeRunnerContext) => boolean;
-type Handler = (context: VRangeRunnerContext) => VRange | null;
+type Handler = (context: VRangeRunnerContext) => InlineRange | null;
 
 const rangeHasAnchorAndFocus: Predict = ({
   rootElement,
@@ -195,7 +195,7 @@ export function domRangeToVirgoRange(
   range: Range,
   rootElement: HTMLElement,
   yText: Y.Text
-): VRange | null {
+): InlineRange | null {
   const context = buildContext(range, rootElement, yText);
 
   if (!context) return null;
@@ -248,7 +248,7 @@ export function domRangeToVirgoRange(
  */
 export function virgoRangeToDomRange(
   rootElement: HTMLElement,
-  vRange: VRange
+  vRange: InlineRange
 ): Range | null {
   const lineElements = Array.from(rootElement.querySelectorAll('v-line'));
 

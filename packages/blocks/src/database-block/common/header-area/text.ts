@@ -1,14 +1,14 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import { Text, Workspace } from '@blocksuite/store';
-import type { VRange } from '@blocksuite/virgo';
+import type { InlineRange } from '@blocksuite/virgo';
 import { InlineEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { affineAttributeRenderer } from '../../../_common/components/rich-text/virgo/attribute-renderer.js';
-import { affineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
+import { affineAttributeRenderer } from '../../../_common/components/rich-text/inline/attribute-renderer.js';
+import { affineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import {
   getCurrentNativeRange,
   hasNativeSelection,
@@ -22,7 +22,7 @@ import { BaseCellRenderer } from '../columns/base-cell.js';
 const TEXT = 'text/plain';
 
 interface StackItem {
-  meta: Map<'v-range', VRange | null | undefined>;
+  meta: Map<'v-range', InlineRange | null | undefined>;
   type: 'undo' | 'redo';
 }
 

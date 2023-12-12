@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { DeltaInsert, InlineEditor, VRange } from '@blocksuite/virgo';
+import type { DeltaInsert, InlineEditor, InlineRange } from '@blocksuite/virgo';
 import { expect, type Page } from '@playwright/test';
 
 const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
@@ -56,7 +56,7 @@ export async function getDeltaFromVirgoRichText(
 export async function getVRangeFromVirgoRichText(
   page: Page,
   index = 0
-): Promise<VRange | null> {
+): Promise<InlineRange | null> {
   await page.waitForTimeout(100);
   return await page.evaluate(index => {
     const richTexts = document
@@ -75,7 +75,7 @@ export async function getVRangeFromVirgoRichText(
 
 export async function setVirgoRichTextRange(
   page: Page,
-  vRange: VRange,
+  vRange: InlineRange,
   index = 0
 ): Promise<void> {
   await page.evaluate(
@@ -91,7 +91,7 @@ export async function setVirgoRichTextRange(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const editor = (richTexts[index as number] as any)
         .inlineEditor as InlineEditor;
-      editor.setVRange(vRange as VRange);
+      editor.setVRange(vRange as InlineRange);
     },
     [vRange, index]
   );

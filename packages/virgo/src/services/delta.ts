@@ -3,7 +3,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { VirgoLine } from '../index.js';
 import type { DeltaInsert } from '../types.js';
-import type { DeltaEntry, VRange } from '../types.js';
+import type { DeltaEntry, InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
 import { deltaInsertsToChunks, renderElement } from '../utils/index.js';
 import type { InlineEditor } from '../virgo.js';
@@ -35,7 +35,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
   }
 
   mapDeltasInVRange = <Result>(
-    vRange: VRange,
+    vRange: InlineRange,
     callback: (
       delta: DeltaInsert<TextAttributes>,
       rangeIndex: number,
@@ -69,7 +69,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
 
   isNormalizedDeltaSelected(
     normalizedDeltaIndex: number,
-    vRange: VRange
+    vRange: InlineRange
   ): boolean {
     let result = false;
     if (vRange.length >= 1) {
@@ -186,7 +186,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
    *  [{ insert: 'ccc', attributes: { underline: true }, }, { index: 6, length: 3, }]]
    * ```
    */
-  getDeltasByVRange = (vRange: VRange): DeltaEntry<TextAttributes>[] => {
+  getDeltasByVRange = (vRange: InlineRange): DeltaEntry<TextAttributes>[] => {
     return this.mapDeltasInVRange(
       vRange,
       (delta, index): DeltaEntry<TextAttributes> => [

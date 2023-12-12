@@ -1,6 +1,6 @@
 import './link-popup.js';
 
-import type { VRange } from '@blocksuite/virgo';
+import type { InlineRange } from '@blocksuite/virgo';
 
 import type { AffineInlineEditor } from '../../../types.js';
 import { LinkPopup } from './link-popup.js';
@@ -8,7 +8,7 @@ import { LinkPopup } from './link-popup.js';
 export function toggleLinkPopup(
   inlineEditor: AffineInlineEditor,
   type: LinkPopup['type'],
-  targetVRange: VRange
+  targetVRange: InlineRange
 ): LinkPopup {
   const popup = new LinkPopup();
   popup.inlineEditor = inlineEditor;

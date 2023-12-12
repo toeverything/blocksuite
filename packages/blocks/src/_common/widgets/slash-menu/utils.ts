@@ -4,7 +4,7 @@ import type { TemplateResult } from 'lit';
 import { isInsideBlockByFlavour } from '../../../_common/utils/index.js';
 import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
-import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../../components/rich-text/inline/types.js';
 
 export type SlashMenuOptions = {
   /**

@@ -1,12 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import {
-  VKEYBOARD_ALLOW_DEFAULT,
-  VKEYBOARD_PREVENT_DEFAULT,
-  type VRange,
+  type InlineRange,
+  KEYBOARD_ALLOW_DEFAULT,
+  KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/virgo';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
+import type { AffineInlineEditor } from '../inline/types.js';
 import {
   handleBlockEndEnter,
   handleBlockSplit,
@@ -14,7 +15,6 @@ import {
   handleLineStartBackspace,
   handleUnindent,
 } from '../rich-text-operations.js';
-import type { AffineInlineEditor } from '../virgo/types.js';
 
 function isCollapsedAtBlockStart(inlineEditor: AffineInlineEditor) {
   const vRange = inlineEditor.getVRange();
@@ -26,18 +26,21 @@ function isCollapsedAtBlockEnd(inlineEditor: AffineInlineEditor) {
   return vRange?.index === inlineEditor.yText.length && vRange?.length === 0;
 }
 
-export function onSoftEnter(vRange: VRange, inlineEditor: AffineInlineEditor) {
-  inlineEditor.insertText(vRange, '\n');
+export function onSoftEnter(
+  inlineRange: InlineRange,
+  inlineEditor: AffineInlineEditor
+) {
+  inlineEditor.insertText(inlineRange, '\n');
   inlineEditor.setVRange({
-    index: vRange.index + 1,
+    index: inlineRange.index + 1,
     length: 0,
   });
-  return VKEYBOARD_PREVENT_DEFAULT;
+  return KEYBOARD_PREVENT_DEFAULT;
 }
 
 export function hardEnter(
   model: BaseBlockModel,
-  range: VRange,
+  range: InlineRange,
   /**
    * @deprecated
    */
@@ -71,7 +74,7 @@ export function hardEnter(
     // - list
     // |   <-- will replace with a new text block
     handleLineStartBackspace(page, model);
-    return VKEYBOARD_PREVENT_DEFAULT;
+    return KEYBOARD_PREVENT_DEFAULT;
   }
   if (isEmptyList && isLastChild) {
     // Before
@@ -82,7 +85,7 @@ export function hardEnter(
     // - line1
     // - | <-- will unindent the block
     handleUnindent(page, model, range.index);
-    return VKEYBOARD_PREVENT_DEFAULT;
+    return KEYBOARD_PREVENT_DEFAULT;
   }
 
   const isEnd = model.text.length === range.index;
@@ -92,12 +95,12 @@ export function hardEnter(
       if (shortKey) {
         // shortKey+Enter to exit the block
         handleBlockEndEnter(page, model);
-        return VKEYBOARD_PREVENT_DEFAULT;
+        return KEYBOARD_PREVENT_DEFAULT;
       }
 
       // add a new line to the block when press Enter solely
       onSoftEnter(range, inlineEditor);
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     }
 
     const textStr = model.text.toString();
@@ -106,7 +109,7 @@ export function hardEnter(
 
     if (shouldSoftEnter || shortKey) {
       onSoftEnter(range, inlineEditor);
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     }
 
     // delete the \n at the end of block
@@ -119,22 +122,22 @@ export function hardEnter(
     // - | <-- will unindent the block
     model.text.delete(range.index - 1, 1);
     handleBlockEndEnter(page, model);
-    return VKEYBOARD_PREVENT_DEFAULT;
+    return KEYBOARD_PREVENT_DEFAULT;
   }
 
   if (isEnd || shortKey) {
     handleBlockEndEnter(page, model);
-    return VKEYBOARD_PREVENT_DEFAULT;
+    return KEYBOARD_PREVENT_DEFAULT;
   }
 
   const isSoftEnterBlock = isSoftEnterable(model);
   if (isSoftEnterBlock) {
     onSoftEnter(range, inlineEditor);
-    return VKEYBOARD_PREVENT_DEFAULT;
+    return KEYBOARD_PREVENT_DEFAULT;
   }
 
   handleBlockSplit(page, model, range.index, range.length);
-  return VKEYBOARD_PREVENT_DEFAULT;
+  return KEYBOARD_PREVENT_DEFAULT;
 }
 
 // If a block is soft enterable, the rule is:
@@ -156,14 +159,14 @@ export function onBackspace(
 ) {
   if (isCollapsedAtBlockStart(inlineEditor)) {
     if (model.flavour === 'affine:code') {
-      return VKEYBOARD_ALLOW_DEFAULT;
+      return KEYBOARD_ALLOW_DEFAULT;
     }
     e.stopPropagation();
     handleLineStartBackspace(model.page, model);
-    return VKEYBOARD_PREVENT_DEFAULT;
+    return KEYBOARD_PREVENT_DEFAULT;
   }
   e.stopPropagation();
-  return VKEYBOARD_ALLOW_DEFAULT;
+  return KEYBOARD_ALLOW_DEFAULT;
 }
 
 export function onForwardDelete(
@@ -174,7 +177,7 @@ export function onForwardDelete(
   e.stopPropagation();
   if (isCollapsedAtBlockEnd(inlineEditor)) {
     handleLineEndForwardDelete(model.page, model);
-    return VKEYBOARD_PREVENT_DEFAULT;
+    return KEYBOARD_PREVENT_DEFAULT;
   }
-  return VKEYBOARD_ALLOW_DEFAULT;
+  return KEYBOARD_ALLOW_DEFAULT;
 }

@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import * as Y from 'yjs';
 
-import { InlineEditor } from '../virgo.js';
+import { InlineEditor } from '../inline-editor.js';
 
 test('getDeltaByRangeIndex', () => {
   const yDoc = new Y.Doc();

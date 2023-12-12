@@ -1,7 +1,7 @@
 import type { z, ZodTypeDef } from 'zod';
 
 import type { AttributeRenderer } from '../types.js';
-import type { VRange } from '../types.js';
+import type { InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
 import {
   baseTextAttributes,
@@ -46,7 +46,7 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
     this._attributeRenderer = renderer;
   };
 
-  getFormat = (vRange: VRange, loose = false): TextAttributes => {
+  getFormat = (vRange: InlineRange, loose = false): TextAttributes => {
     const deltas = this.editor.deltaService
       .getDeltasByVRange(vRange)
       .filter(

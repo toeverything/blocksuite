@@ -10,16 +10,13 @@ import {
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import {
-  FontLinkedPageIcon,
-  FontPageIcon,
-} from '../../../../../_common/icons/index.js';
+import type { DocPageBlockComponent } from '../../../../../page-block/doc/doc-page-block.js';
+import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/index.js';
 import {
   getBlockElementByModel,
   getClosestBlockElementByElement,
   getModelByElement,
-} from '../../../../../_common/utils/index.js';
-import type { DocPageBlockComponent } from '../../../../../page-block/doc/doc-page-block.js';
+} from '../../../../utils/index.js';
 import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from '../../consts.js';
 import type { AffineTextAttributes } from '../types.js';
 import { affineTextStyles } from './affine-text.js';

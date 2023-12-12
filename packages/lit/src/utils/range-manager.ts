@@ -3,9 +3,9 @@ import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type InlineEditor,
+  type InlineRange,
+  type InlineRootElement,
   VIRGO_ROOT_ATTR,
-  type VirgoRootElement,
-  type VRange,
 } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
@@ -211,12 +211,12 @@ export class RangeManager {
 
   private _calculateVirgo(
     point: TextRangePoint
-  ): [InlineEditor, VRange] | null {
+  ): [InlineEditor, InlineRange] | null {
     const block = this.host.view.viewFromPath('block', point.path);
     if (!block) {
       return null;
     }
-    const virgoRoot = block.querySelector<VirgoRootElement>(
+    const virgoRoot = block.querySelector<InlineRootElement>(
       `[${VIRGO_ROOT_ATTR}]`
     );
     assertExists(
@@ -352,7 +352,7 @@ export class RangeManager {
       return;
     }
 
-    return element.closest(`[${VIRGO_ROOT_ATTR}]`) as VirgoRootElement;
+    return element.closest(`[${VIRGO_ROOT_ATTR}]`) as InlineRootElement;
   }
 
   private _getBlock(element: HTMLElement) {

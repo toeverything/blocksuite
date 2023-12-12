@@ -5,8 +5,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import {
   type InlineEditor,
+  type InlineRootElement,
   VIRGO_ROOT_ATTR,
-  type VirgoRootElement,
 } from '@blocksuite/virgo';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
@@ -44,7 +44,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       });
     });
     blockElement
-      .querySelector<VirgoRootElement>(`[${VIRGO_ROOT_ATTR}]`)
+      .querySelector<InlineRootElement>(`[${VIRGO_ROOT_ATTR}]`)
       ?.blur();
     return true;
   };
@@ -69,7 +69,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   };
 
   const _getInlineEditor = () => {
-    const vRoot = blockElement.querySelector<VirgoRootElement>(
+    const vRoot = blockElement.querySelector<InlineRootElement>(
       `[${VIRGO_ROOT_ATTR}]`
     );
     if (!vRoot) {
@@ -223,7 +223,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!blockElement.selected?.is('text')) return;
 
       const text = blockElement.selected;
-      const virgo = blockElement.querySelector<VirgoRootElement>(
+      const virgo = blockElement.querySelector<InlineRootElement>(
         `[${VIRGO_ROOT_ATTR}]`
       );
       if (

@@ -5,7 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { VIRGO_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DeltaInsert } from '../types.js';
-import type { VirgoRootElement } from '../virgo.js';
+import type { InlineRootElement } from '../virgo.js';
 import { EmbedGap } from './embed-gap.js';
 
 @customElement('v-line')
@@ -49,7 +49,7 @@ export class VirgoLine extends LitElement {
 
     const rootElement = this.closest(
       `[${VIRGO_ROOT_ATTR}]`
-    ) as VirgoRootElement;
+    ) as InlineRootElement;
     assertExists(rootElement, 'v-line must be inside a v-root');
     const virgoEditor = rootElement.inlineEditor;
     assertExists(

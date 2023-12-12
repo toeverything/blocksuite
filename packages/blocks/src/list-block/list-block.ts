@@ -3,15 +3,15 @@ import '../_common/components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
-import type { VRangeProvider } from '@blocksuite/virgo';
+import type { InlineRangeProvider } from '@blocksuite/virgo';
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
+import { affineAttributeRenderer } from '../_common/components/rich-text/inline/attribute-renderer.js';
+import { affineTextAttributes } from '../_common/components/rich-text/inline/types.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
-import { affineAttributeRenderer } from '../_common/components/rich-text/virgo/attribute-renderer.js';
-import { affineTextAttributes } from '../_common/components/rich-text/virgo/types.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import type { ListBlockModel } from './list-model.js';
 import { styles } from './styles.js';
@@ -61,7 +61,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  private _vRangeProvider: VRangeProvider | null = null;
+  private _vRangeProvider: InlineRangeProvider | null = null;
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();

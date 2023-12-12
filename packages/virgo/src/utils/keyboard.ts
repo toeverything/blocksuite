@@ -1,16 +1,16 @@
 import { IS_IOS, IS_MAC } from '@blocksuite/global/env';
 
-import type { VRange } from '../types.js';
+import type { InlineRange } from '../types.js';
 import type { InlineEditor } from '../virgo.js';
 
 const SHORT_KEY_PROPERTY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 
-export const VKEYBOARD_PREVENT_DEFAULT = false;
-export const VKEYBOARD_ALLOW_DEFAULT = true;
+export const KEYBOARD_PREVENT_DEFAULT = false;
+export const KEYBOARD_ALLOW_DEFAULT = true;
 
-export interface VKeyboardBinding {
+export interface KeyboardBinding {
   key: number | string | string[];
-  handler: VKeyboardBindingHandler;
+  handler: KeyboardBindingHandler;
   prefix?: RegExp;
   suffix?: RegExp;
   shortKey?: boolean;
@@ -19,27 +19,27 @@ export interface VKeyboardBinding {
   metaKey?: boolean;
   ctrlKey?: boolean;
 }
-export type VKeyboardBindingRecord = Record<string, VKeyboardBinding>;
+export type KeyboardBindingRecord = Record<string, KeyboardBinding>;
 
-export interface VKeyboardBindingContext {
-  vRange: VRange;
+export interface KeyboardBindingContext {
+  inlineRange: InlineRange;
   inlineEditor: InlineEditor;
   collapsed: boolean;
   prefixText: string;
   suffixText: string;
   raw: KeyboardEvent;
 }
-export type VKeyboardBindingHandler = (
-  context: VKeyboardBindingContext
-) => typeof VKEYBOARD_PREVENT_DEFAULT | typeof VKEYBOARD_ALLOW_DEFAULT;
+export type KeyboardBindingHandler = (
+  context: KeyboardBindingContext
+) => typeof KEYBOARD_PREVENT_DEFAULT | typeof KEYBOARD_ALLOW_DEFAULT;
 
 export function createVirgoKeyDownHandler(
   inlineEditor: InlineEditor,
-  bindings: VKeyboardBindingRecord
+  bindings: KeyboardBindingRecord
 ): (evt: KeyboardEvent) => void {
-  const bindingStore: Record<string, VKeyboardBinding[]> = {};
+  const bindingStore: Record<string, KeyboardBinding[]> = {};
 
-  function normalize(binding: VKeyboardBinding): VKeyboardBinding {
+  function normalize(binding: KeyboardBinding): KeyboardBinding {
     if (binding.shortKey) {
       binding[SHORT_KEY_PROPERTY] = binding.shortKey;
       delete binding.shortKey;
@@ -47,7 +47,7 @@ export function createVirgoKeyDownHandler(
     return binding;
   }
 
-  function keyMatch(evt: KeyboardEvent, binding: VKeyboardBinding) {
+  function keyMatch(evt: KeyboardEvent, binding: KeyboardBinding) {
     if (
       (['altKey', 'ctrlKey', 'metaKey', 'shiftKey'] as const).some(
         key => Object.hasOwn(binding, key) && binding[key] !== evt[key]
@@ -58,7 +58,7 @@ export function createVirgoKeyDownHandler(
     return binding.key === evt.key;
   }
 
-  function addBinding(keyBinding: VKeyboardBinding) {
+  function addBinding(keyBinding: KeyboardBinding) {
     const binding = normalize(keyBinding);
     const keys = Array.isArray(binding.key) ? binding.key : [binding.key];
     keys.forEach(key => {
@@ -82,24 +82,26 @@ export function createVirgoKeyDownHandler(
     const keyMatches = keyBindings.filter(binding => keyMatch(evt, binding));
     if (keyMatches.length === 0) return;
 
-    const vRange = inlineEditor.getVRange();
-    if (!vRange) return;
+    const inlineRange = inlineEditor.getVRange();
+    if (!inlineRange) return;
 
-    const [leafStart, offsetStart] = inlineEditor.getTextPoint(vRange.index);
+    const [leafStart, offsetStart] = inlineEditor.getTextPoint(
+      inlineRange.index
+    );
     const [leafEnd, offsetEnd] =
-      vRange.length === 0
+      inlineRange.length === 0
         ? [leafStart, offsetStart]
-        : inlineEditor.getTextPoint(vRange.index + vRange.length);
+        : inlineEditor.getTextPoint(inlineRange.index + inlineRange.length);
     const prefixText = leafStart.textContent
       ? leafStart.textContent.slice(0, offsetStart)
       : '';
     const suffixText = leafEnd.textContent
       ? leafEnd.textContent.slice(offsetEnd)
       : '';
-    const currContext: VKeyboardBindingContext = {
-      vRange,
+    const currContext: KeyboardBindingContext = {
+      inlineRange,
       inlineEditor: inlineEditor,
-      collapsed: vRange.length === 0,
+      collapsed: inlineRange.length === 0,
       prefixText,
       suffixText,
       raw: evt,
@@ -111,7 +113,7 @@ export function createVirgoKeyDownHandler(
       if (binding.suffix && !binding.suffix.test(currContext.suffixText)) {
         return false;
       }
-      return binding.handler(currContext) === VKEYBOARD_PREVENT_DEFAULT;
+      return binding.handler(currContext) === KEYBOARD_PREVENT_DEFAULT;
     });
     if (prevented) {
       evt.preventDefault();

@@ -9,7 +9,7 @@ import {
   createVirgoKeyDownHandler,
   type DeltaInsert,
   InlineEditor,
-  VKEYBOARD_ALLOW_DEFAULT,
+  KEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
 } from '@blocksuite/virgo';
 import { css, html, nothing } from 'lit';
@@ -149,7 +149,7 @@ export class RichText extends ShadowlessElement {
       inputRule: {
         key: ' ',
         handler: context => {
-          const { inlineEditor, prefixText, vRange } = context;
+          const { inlineEditor, prefixText, inlineRange: vRange } = context;
           for (const match of markdownMatches) {
             const matchedText = prefixText.match(match.pattern);
             if (matchedText) {
@@ -163,7 +163,7 @@ export class RichText extends ShadowlessElement {
             }
           }
 
-          return VKEYBOARD_ALLOW_DEFAULT;
+          return KEYBOARD_ALLOW_DEFAULT;
         },
       },
     });

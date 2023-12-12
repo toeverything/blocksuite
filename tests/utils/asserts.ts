@@ -33,7 +33,7 @@ import type {
   SerializedStore,
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
-import type { VirgoRootElement } from '../../packages/virgo/src/index.js';
+import type { InlineRootElement } from '../../packages/virgo/src/index.js';
 import {
   getCanvasElementsCount,
   getConnectorPath,
@@ -61,8 +61,8 @@ import {
   getEditorLocator,
   virgoEditorInnerTextToString,
 } from './actions/misc.js';
+import { getStringFromRichText } from './inline-editor.js';
 import { currentEditorIndex } from './multiple-editor.js';
-import { getStringFromRichText } from './virgo.js';
 
 export { assertExists };
 
@@ -153,7 +153,7 @@ export async function assertInlineEditorDeltas(
   i = 0
 ) {
   const actual = await page.evaluate(i => {
-    const vRoot = document.querySelectorAll<VirgoRootElement>(
+    const vRoot = document.querySelectorAll<InlineRootElement>(
       '[data-virgo-root="true"]'
     )[i];
     return vRoot.inlineEditor.yTextDeltas;
@@ -167,7 +167,7 @@ export async function assertRichTextVirgoDeltas(
   i = 0
 ) {
   const actual = await page.evaluate(i => {
-    const vRoot = document.querySelectorAll<VirgoRootElement>(
+    const vRoot = document.querySelectorAll<InlineRootElement>(
       'rich-text [data-virgo-root="true"]'
     )[i];
     return vRoot.inlineEditor.yTextDeltas;

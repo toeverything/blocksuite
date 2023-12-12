@@ -1,21 +1,21 @@
 import { PathFinder, type TextSelection } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import {
+  type InlineRange,
+  type InlineRangeProvider,
+  type InlineRangeUpdatedProp,
   VIRGO_ROOT_ATTR,
-  type VRange,
-  type VRangeProvider,
-  type VRangeUpdatedProp,
 } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
 
 export const getVRangeProvider: (
   element: BlockElement
-) => VRangeProvider = element => {
+) => InlineRangeProvider = element => {
   const root = element.host;
   const selectionManager = root.selection;
   const rangeManager = root.rangeManager;
-  const vRangeUpdatedSlot = new Slot<VRangeUpdatedProp>();
+  const vRangeUpdatedSlot = new Slot<InlineRangeUpdatedProp>();
 
   assertExists(selectionManager);
   assertExists(rangeManager);
@@ -42,7 +42,7 @@ export const getVRangeProvider: (
   const calculateVRange = (
     range: Range,
     textSelection: TextSelection
-  ): VRange | null => {
+  ): InlineRange | null => {
     if (!isElementSelected(range)) {
       return null;
     }
@@ -70,7 +70,7 @@ export const getVRangeProvider: (
     };
   };
 
-  const setVRange = (vRange: VRange | null, sync = true) => {
+  const setVRange = (vRange: InlineRange | null, sync = true) => {
     if (!vRange) {
       selectionManager.clear(['text']);
     } else {
@@ -87,7 +87,7 @@ export const getVRangeProvider: (
     vRangeUpdatedSlot.emit([vRange, sync]);
   };
 
-  const getVRange = (): VRange | null => {
+  const getVRange = (): InlineRange | null => {
     const sl = document.getSelection();
     if (!sl || sl.rangeCount === 0) {
       return null;
@@ -122,6 +122,6 @@ export const getVRangeProvider: (
   return {
     setVRange,
     getVRange,
-    vRangeUpdatedSlot,
+    inlineRangeUpdated: vRangeUpdatedSlot,
   };
 };

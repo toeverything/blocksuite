@@ -1,10 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
+import { type InlineRootElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 import type { TemplateResult } from 'lit';
 
-import { toggleLinkPopup } from '../../components/rich-text/virgo/nodes/link-node/link-popup/toggle-link-popup.js';
-import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
+import { toggleLinkPopup } from '../../components/rich-text/inline/nodes/link-node/link-popup/toggle-link-popup.js';
+import type { AffineTextAttributes } from '../../components/rich-text/inline/types.js';
 import {
   BoldIcon,
   CodeIcon,
@@ -87,7 +87,7 @@ export const textFormatConfigs: TextFormatConfig[] = [
       const range = selection.getRangeAt(0);
 
       const vRoot = range.commonAncestorContainer.parentElement?.closest<
-        VirgoRootElement<AffineTextAttributes>
+        InlineRootElement<AffineTextAttributes>
       >(`[${VIRGO_ROOT_ATTR}]`);
       if (!vRoot) return;
 

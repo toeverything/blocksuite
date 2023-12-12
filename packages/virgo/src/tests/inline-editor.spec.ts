@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { ZERO_WIDTH_SPACE } from '../consts.js';
-import type { InlineEditor } from '../virgo.js';
+import type { InlineEditor } from '../inline-editor.js';
 import {
   assertSelection,
   enterVirgoPlayground,

@@ -3,16 +3,16 @@ import '../_common/components/rich-text/rich-text.js';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { VRangeProvider } from '@blocksuite/virgo';
+import type { InlineRangeProvider } from '@blocksuite/virgo';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
+import { affineAttributeRenderer } from '../_common/components/rich-text/inline/attribute-renderer.js';
+import { affineTextAttributes } from '../_common/components/rich-text/inline/types.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
-import { affineAttributeRenderer } from '../_common/components/rich-text/virgo/attribute-renderer.js';
-import { affineTextAttributes } from '../_common/components/rich-text/virgo/types.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import {
   getThemeMode,
@@ -211,7 +211,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
 
   private _placeholderDisposables = new DisposableGroup();
 
-  private _vRangeProvider: VRangeProvider | null = null;
+  private _vRangeProvider: InlineRangeProvider | null = null;
 
   @query('rich-text')
   private _richTextElement?: RichText;

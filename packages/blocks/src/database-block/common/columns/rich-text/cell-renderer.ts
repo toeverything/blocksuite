@@ -6,13 +6,13 @@ import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
-import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import { affineAttributeRenderer } from '../../../../_common/components/rich-text/virgo/attribute-renderer.js';
+import { affineAttributeRenderer } from '../../../../_common/components/rich-text/inline/attribute-renderer.js';
 import {
   type AffineInlineEditor,
   type AffineTextAttributes,
   affineTextAttributes,
-} from '../../../../_common/components/rich-text/virgo/types.js';
+} from '../../../../_common/components/rich-text/inline/types.js';
+import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';

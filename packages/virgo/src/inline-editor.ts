@@ -10,25 +10,29 @@ import {
   VirgoEventService,
   VirgoRangeService,
 } from './services/index.js';
-import type { DeltaInsert, VRange, VRangeUpdatedProp } from './types.js';
+import type {
+  DeltaInsert,
+  InlineRange,
+  InlineRangeUpdatedProp,
+} from './types.js';
 import {
   type BaseTextAttributes,
   nativePointToTextPoint,
   textPointToDomPoint,
 } from './utils/index.js';
+import { intersectInlineRange } from './utils/inline-range.js';
 import { getTextNodesFromElement } from './utils/text.js';
-import { intersectVRange } from './utils/v-range.js';
 
-export type VirgoRootElement<
+export type InlineRootElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > = HTMLElement & {
   inlineEditor: InlineEditor<T>;
 };
 
-export interface VRangeProvider {
-  getVRange(): VRange | null;
-  setVRange(vRange: VRange | null, sync: boolean): void;
-  vRangeUpdatedSlot: Slot<VRangeUpdatedProp>;
+export interface InlineRangeProvider {
+  getVRange(): InlineRange | null;
+  setVRange(vRange: InlineRange | null, sync: boolean): void;
+  inlineRangeUpdated: Slot<InlineRangeUpdatedProp>;
 }
 
 export class InlineEditor<
@@ -44,7 +48,7 @@ export class InlineEditor<
   }
 
   private readonly _yText: Y.Text;
-  private _rootElement: VirgoRootElement<TextAttributes> | null = null;
+  private _rootElement: InlineRootElement<TextAttributes> | null = null;
   private _isReadonly = false;
 
   private _eventService: VirgoEventService<TextAttributes> =
@@ -64,13 +68,13 @@ export class InlineEditor<
   private _mounted = false;
 
   readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
-  readonly vRangeProvider: VRangeProvider | null;
+  readonly vRangeProvider: InlineRangeProvider | null;
 
   slots: {
     mounted: Slot;
     unmounted: Slot;
     updated: Slot;
-    vRangeUpdated: Slot<VRangeUpdatedProp>;
+    vRangeUpdated: Slot<InlineRangeUpdatedProp>;
     rangeUpdated: Slot<Range>;
   };
 
@@ -160,7 +164,7 @@ export class InlineEditor<
     ops: {
       isEmbed?: (delta: DeltaInsert<TextAttributes>) => boolean;
       hooks?: VirgoHookService<TextAttributes>['hooks'];
-      vRangeProvider?: VRangeProvider;
+      vRangeProvider?: InlineRangeProvider;
     } = {}
   ) {
     if (!yText.doc) {
@@ -183,12 +187,12 @@ export class InlineEditor<
       mounted: new Slot(),
       unmounted: new Slot(),
       updated: new Slot(),
-      vRangeUpdated: new Slot<VRangeUpdatedProp>(),
+      vRangeUpdated: new Slot<InlineRangeUpdatedProp>(),
       rangeUpdated: new Slot<Range>(),
     };
 
     if (vRangeProvider) {
-      vRangeProvider.vRangeUpdatedSlot.on(prop => {
+      vRangeProvider.inlineRangeUpdated.on(prop => {
         this.slots.vRangeUpdated.emit(prop);
       });
     }
@@ -196,7 +200,7 @@ export class InlineEditor<
   }
 
   mount(rootElement: HTMLElement) {
-    const virgoElement = rootElement as VirgoRootElement<TextAttributes>;
+    const virgoElement = rootElement as InlineRootElement<TextAttributes>;
     virgoElement.inlineEditor = this;
     this._rootElement = virgoElement;
     render(nothing, this._rootElement);
@@ -239,14 +243,14 @@ export class InlineEditor<
     return this._isReadonly;
   }
 
-  deleteText(vRange: VRange): void {
+  deleteText(vRange: InlineRange): void {
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
     });
   }
 
   insertText(
-    vRange: VRange,
+    vRange: InlineRange,
     text: string,
     attributes: TextAttributes = {} as TextAttributes
   ): void {
@@ -266,7 +270,7 @@ export class InlineEditor<
     });
   }
 
-  insertLineBreak(vRange: VRange): void {
+  insertLineBreak(vRange: InlineRange): void {
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
       this.yText.insert(vRange.index, '\n');
@@ -274,10 +278,10 @@ export class InlineEditor<
   }
 
   formatText(
-    vRange: VRange,
+    vRange: InlineRange,
     attributes: TextAttributes,
     options: {
-      match?: (delta: DeltaInsert, deltaVRange: VRange) => boolean;
+      match?: (delta: DeltaInsert, deltaVRange: InlineRange) => boolean;
       mode?: 'replace' | 'merge';
     } = {}
   ): void {
@@ -291,7 +295,7 @@ export class InlineEditor<
           this._attributeService.normalizeAttributes(attributes);
         if (!normalizedAttributes) return;
 
-        const targetVRange = intersectVRange(vRange, deltaVRange);
+        const targetVRange = intersectInlineRange(vRange, deltaVRange);
         if (!targetVRange) return;
 
         if (mode === 'replace') {
@@ -308,7 +312,7 @@ export class InlineEditor<
       });
   }
 
-  resetText(vRange: VRange): void {
+  resetText(vRange: InlineRange): void {
     const coverDeltas: DeltaInsert[] = [];
     for (let i = vRange.index; i <= vRange.index + vRange.length; i++) {
       const delta = this.getDeltaByRangeIndex(i);

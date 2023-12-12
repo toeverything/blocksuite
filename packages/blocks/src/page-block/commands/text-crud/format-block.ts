@@ -1,8 +1,8 @@
 import type { BlockSelection, Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
+import { type InlineRootElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
-import type { AffineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import { FORMAT_BLOCK_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import type { Flavour } from '../../../models.js';
 
@@ -47,7 +47,7 @@ export const formatBlockCommand: Command<
       assertExists(selectedBlocks);
 
       const selectedInlineEditors = selectedBlocks.flatMap(el => {
-        const vRoot = el.querySelector<VirgoRootElement<AffineTextAttributes>>(
+        const vRoot = el.querySelector<InlineRootElement<AffineTextAttributes>>(
           `[${VIRGO_ROOT_ATTR}]`
         );
         if (vRoot) {

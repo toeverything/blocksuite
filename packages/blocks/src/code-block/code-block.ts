@@ -5,9 +5,9 @@ import './components/lang-list.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
 import {
+  type InlineRangeProvider,
+  type InlineRootElement,
   VIRGO_ROOT_ATTR,
-  type VirgoRootElement,
-  type VRangeProvider,
 } from '@blocksuite/virgo';
 import { autoPlacement, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
@@ -219,10 +219,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
   }
 
-  private _vRangeProvider: VRangeProvider | null = null;
+  private _vRangeProvider: InlineRangeProvider | null = null;
 
   get inlineEditor() {
-    const vRoot = this.querySelector<VirgoRootElement>(`[${VIRGO_ROOT_ATTR}]`);
+    const vRoot = this.querySelector<InlineRootElement>(`[${VIRGO_ROOT_ATTR}]`);
     if (!vRoot) {
       throw new Error('Virgo root not found');
     }

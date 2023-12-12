@@ -1,7 +1,7 @@
 import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { type VirgoLine, type VRange } from '@blocksuite/virgo';
+import { type InlineRange, type VirgoLine } from '@blocksuite/virgo';
 
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { SCROLL_THRESHOLD } from '../consts.js';
@@ -28,7 +28,10 @@ declare global {
   }
 }
 
-export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
+export async function asyncSetVRange(
+  model: BaseBlockModel,
+  vRange: InlineRange
+) {
   const richText = await asyncGetRichTextByModel(model);
   if (!richText) {
     return;
@@ -43,7 +46,7 @@ export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
 export function asyncFocusRichText(
   page: Page,
   id: string,
-  vRange: VRange = { index: 0, length: 0 }
+  vRange: InlineRange = { index: 0, length: 0 }
 ) {
   const model = page.getBlockById(id);
   assertExists(model);

@@ -1,15 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import type { VRange } from '@blocksuite/virgo/types';
+import type { InlineRange } from '@blocksuite/virgo/types';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import {
-  isValidUrl,
-  normalizeUrl,
-} from '../../../../../../../_common/utils/url.js';
 import { BLOCK_ID_ATTR } from '../../../../../../consts.js';
 import { BookmarkIcon } from '../../../../../../icons/edgeless.js';
 import {
@@ -17,6 +13,7 @@ import {
   EditIcon,
   UnlinkIcon,
 } from '../../../../../../icons/text.js';
+import { isValidUrl, normalizeUrl } from '../../../../../../utils/url.js';
 import type { IconButton } from '../../../../../button.js';
 import { toast } from '../../../../../toast.js';
 import type { AffineInlineEditor } from '../../../types.js';
@@ -32,7 +29,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   @property({ attribute: false })
   inlineEditor!: AffineInlineEditor;
   @property({ attribute: false })
-  targetVRange!: VRange;
+  targetVRange!: InlineRange;
 
   @query('#text-input')
   textInput?: HTMLInputElement;

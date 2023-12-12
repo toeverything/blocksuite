@@ -7,8 +7,8 @@ import {
   findDocumentOrShadowRoot,
   isInEmbedElement,
 } from '../utils/index.js';
+import { isMaybeInlineRangeEqual } from '../utils/inline-range.js';
 import { transformInput } from '../utils/transform-input.js';
-import { isMaybeVRangeEqual } from '../utils/v-range.js';
 import type { InlineEditor } from '../virgo.js';
 import type { VBeforeinputHookCtx, VCompositionEndHookCtx } from './hook.js';
 
@@ -141,7 +141,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._previousFocus = [range.endContainer, range.endOffset];
 
     const vRange = this.editor.toVRange(selection.getRangeAt(0));
-    if (!isMaybeVRangeEqual(previousVRange, vRange)) {
+    if (!isMaybeInlineRangeEqual(previousVRange, vRange)) {
       this.editor.setVRange(vRange, false);
     }
 
@@ -275,7 +275,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       range.setEnd(staticRange.endContainer, staticRange.endOffset);
       const vRange = this.editor.toVRange(range);
 
-      if (!isMaybeVRangeEqual(this.editor.getVRange(), vRange)) {
+      if (!isMaybeInlineRangeEqual(this.editor.getVRange(), vRange)) {
         this.editor.setVRange(vRange, false);
       }
     }

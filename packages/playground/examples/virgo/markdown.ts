@@ -1,8 +1,8 @@
 import {
   type InlineEditor,
-  VKEYBOARD_ALLOW_DEFAULT,
-  VKEYBOARD_PREVENT_DEFAULT,
-  type VRange,
+  type InlineRange,
+  KEYBOARD_ALLOW_DEFAULT,
+  KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/virgo';
 import type * as Y from 'yjs';
 
@@ -12,7 +12,7 @@ interface MarkdownMatch {
   action: (props: {
     inlineEditor: InlineEditor;
     prefixText: string;
-    vRange: VRange;
+    vRange: InlineRange;
     pattern: RegExp;
     undoManager: Y.UndoManager;
   }) => boolean;
@@ -25,7 +25,7 @@ export const markdownMatches: MarkdownMatch[] = [
     action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
 
       const annotatedText = match[0];
@@ -70,7 +70,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
@@ -79,7 +79,7 @@ export const markdownMatches: MarkdownMatch[] = [
     action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
@@ -122,7 +122,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
@@ -131,7 +131,7 @@ export const markdownMatches: MarkdownMatch[] = [
     action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
@@ -174,7 +174,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
@@ -183,7 +183,7 @@ export const markdownMatches: MarkdownMatch[] = [
     action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
@@ -226,7 +226,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
@@ -235,7 +235,7 @@ export const markdownMatches: MarkdownMatch[] = [
     action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
@@ -278,7 +278,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
@@ -287,13 +287,13 @@ export const markdownMatches: MarkdownMatch[] = [
     action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
       if (prefixText.match(/^([* \n]+)$/g)) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
 
       inlineEditor.insertText(
@@ -334,7 +334,7 @@ export const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
 ];

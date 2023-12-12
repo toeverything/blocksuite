@@ -6,22 +6,22 @@ import {
   type AttributeRenderer,
   createVirgoKeyDownHandler,
   InlineEditor,
-  type VRange,
-  type VRangeProvider,
+  type InlineRange,
+  type InlineRangeProvider,
 } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { z } from 'zod';
 
-import { tryFormatInlineStyle } from './markdown/inline.js';
-import { onVBeforeinput, onVCompositionEnd } from './virgo/hooks.js';
+import { onVBeforeinput, onVCompositionEnd } from './inline/hooks.js';
 import {
   type AffineInlineEditor,
   type AffineTextAttributes,
-} from './virgo/types.js';
+} from './inline/types.js';
+import { tryFormatInlineStyle } from './markdown/inline.js';
 
 interface RichTextStackItem {
-  meta: Map<'richtext-v-range', VRange | null>;
+  meta: Map<'richtext-v-range', InlineRange | null>;
   type: 'undo' | 'redo';
 }
 
@@ -60,7 +60,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   readonly = false;
 
   @property({ attribute: false })
-  vRangeProvider?: VRangeProvider;
+  vRangeProvider?: InlineRangeProvider;
   // rich-text will create a undoManager if it is not provided.
   @property({ attribute: false })
   undoManager!: Y.UndoManager;

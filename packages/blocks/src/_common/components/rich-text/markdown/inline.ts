@@ -2,11 +2,11 @@
 import type { Y } from '@blocksuite/store';
 import {
   type InlineEditor,
-  VKEYBOARD_ALLOW_DEFAULT,
-  VKEYBOARD_PREVENT_DEFAULT,
-  type VKeyboardBindingContext,
-  type VKeyboardBindingHandler,
-  type VRange,
+  type InlineRange,
+  KEYBOARD_ALLOW_DEFAULT,
+  KEYBOARD_PREVENT_DEFAULT,
+  type KeyboardBindingContext,
+  type KeyboardBindingHandler,
 } from '@blocksuite/virgo';
 
 interface InlineMarkdownMatch {
@@ -15,10 +15,10 @@ interface InlineMarkdownMatch {
   action: (props: {
     inlineEditor: InlineEditor;
     prefixText: string;
-    vRange: VRange;
+    inlineRange: InlineRange;
     pattern: RegExp;
     undoManager: Y.UndoManager;
-  }) => ReturnType<VKeyboardBindingHandler>;
+  }) => ReturnType<KeyboardBindingHandler>;
 }
 
 // inline markdown match rules:
@@ -31,14 +31,20 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   {
     name: 'bolditalic',
     pattern: /(?:\*\*\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*\*\*)$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
 
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       inlineEditor.insertText(
         {
@@ -83,19 +89,25 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
     name: 'bold',
     pattern: /(?:\*\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*\*)$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       inlineEditor.insertText(
         {
@@ -139,19 +151,25 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
     name: 'italic',
     pattern: /(?:\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*)$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       inlineEditor.insertText(
         {
@@ -195,19 +213,25 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
     name: 'strikethrough',
     pattern: /(?:~~)([^\s~](?:[^~]*?[^\s~])?)(?:~~)$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       inlineEditor.insertText(
         {
@@ -251,19 +275,25 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
     name: 'underthrough',
     pattern: /(?:~)([^\s~](?:[^~]*?[^\s~])?)(?:~)$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       inlineEditor.insertText(
         {
@@ -294,7 +324,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         length: 1,
       });
       inlineEditor.deleteText({
-        index: vRange.index - 1,
+        index: inlineRange.index - 1,
         length: 1,
       });
       inlineEditor.deleteText({
@@ -307,22 +337,28 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
     name: 'code',
     pattern: /(?:`)([^\s`](?:[^`]*?[^\s`])?)(?:`)$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
-      const startIndex = vRange.index - annotatedText.length;
+      const startIndex = inlineRange.index - annotatedText.length;
 
       if (prefixText.match(/^([* \n]+)$/g)) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
 
       inlineEditor.insertText(
@@ -367,31 +403,37 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
     name: 'link',
     pattern: /(?:\[(.+?)\])(?:\((.+?)\))$/g,
-    action: ({ inlineEditor, prefixText, vRange, pattern, undoManager }) => {
+    action: ({
+      inlineEditor,
+      prefixText,
+      inlineRange,
+      pattern,
+      undoManager,
+    }) => {
       const startIndex = prefixText.search(pattern);
       const matchedText = prefixText.match(pattern)?.[0];
       const hrefText = prefixText.match(/(?:\[(.*?)\])/g)?.[0];
       const hrefLink = prefixText.match(/(?:\((.*?)\))/g)?.[0];
       if (startIndex === -1 || !matchedText || !hrefText || !hrefLink) {
-        return VKEYBOARD_ALLOW_DEFAULT;
+        return KEYBOARD_ALLOW_DEFAULT;
       }
-      const start = vRange.index - matchedText.length;
+      const start = inlineRange.index - matchedText.length;
 
       inlineEditor.insertText(
         {
-          index: vRange.index,
+          index: inlineRange.index,
           length: 0,
         },
         ' '
       );
       inlineEditor.setVRange({
-        index: vRange.index + 1,
+        index: inlineRange.index + 1,
         length: 0,
       });
 
@@ -408,11 +450,11 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
       );
 
       inlineEditor.deleteText({
-        index: vRange.index + matchedText.length,
+        index: inlineRange.index + matchedText.length,
         length: 1,
       });
       inlineEditor.deleteText({
-        index: vRange.index - hrefLink.length - 1,
+        index: inlineRange.index - hrefLink.length - 1,
         length: hrefLink.length + 1,
       });
       inlineEditor.deleteText({
@@ -425,7 +467,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         length: 0,
       });
 
-      return VKEYBOARD_PREVENT_DEFAULT;
+      return KEYBOARD_PREVENT_DEFAULT;
     },
   },
 ];
@@ -434,22 +476,22 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
  * Returns true if markdown matches and converts to the appropriate format
  */
 export function tryFormatInlineStyle(
-  context: VKeyboardBindingContext,
+  context: KeyboardBindingContext,
   undoManager: Y.UndoManager
 ) {
-  const { inlineEditor, prefixText, vRange } = context;
+  const { inlineEditor, prefixText, inlineRange } = context;
   for (const match of inlineMarkdownMatches) {
     const matchedText = prefixText.match(match.pattern);
     if (matchedText) {
       return match.action({
         inlineEditor,
         prefixText,
-        vRange,
+        inlineRange,
         pattern: match.pattern,
         undoManager,
       });
     }
   }
 
-  return VKEYBOARD_ALLOW_DEFAULT;
+  return KEYBOARD_ALLOW_DEFAULT;
 }

@@ -17,8 +17,8 @@ import type { DebugMenu } from '../../../packages/playground/apps/starter/compon
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import {
-  type VirgoRootElement,
-  type VRange,
+  type InlineRange,
+  type InlineRootElement,
 } from '../../../packages/virgo/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
@@ -767,12 +767,12 @@ export async function setVRangeInSelectedRichText(
 
 export async function setVRangeInInlineEditor(
   page: Page,
-  vRange: VRange,
+  vRange: InlineRange,
   i = 0
 ) {
   await page.evaluate(
     ({ i, vRange }) => {
-      const inlineEditor = document.querySelectorAll<VirgoRootElement>(
+      const inlineEditor = document.querySelectorAll<InlineRootElement>(
         '[data-virgo-root="true"]'
       )[i]?.inlineEditor;
       if (!inlineEditor) {

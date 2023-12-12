@@ -1,4 +1,4 @@
-import type { VRange } from '../types.js';
+import type { InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
 import type { InlineEditor } from '../virgo.js';
 
@@ -7,7 +7,7 @@ export interface VBeforeinputHookCtx<
 > {
   inlineEditor: InlineEditor<TextAttributes>;
   raw: InputEvent;
-  vRange: VRange;
+  vRange: InlineRange;
   data: string | null;
   attributes: TextAttributes;
 }
@@ -16,7 +16,7 @@ export interface VCompositionEndHookCtx<
 > {
   inlineEditor: InlineEditor<TextAttributes>;
   raw: CompositionEvent;
-  vRange: VRange;
+  vRange: InlineRange;
   data: string | null;
   attributes: TextAttributes;
 }
