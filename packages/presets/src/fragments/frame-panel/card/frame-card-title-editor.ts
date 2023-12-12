@@ -1,19 +1,17 @@
+import type {
+  AffineVEditor,
+  FrameBlockModel,
+  RichText,
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { RichText } from '../../../../../_common/components/rich-text/rich-text.js';
-import type { FrameBlockModel } from '../../../../../frame-block/frame-model.js';
-import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-
 export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
   @query('rich-text')
   richText!: RichText;
-
-  @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
   frameModel!: FrameBlockModel;
@@ -29,7 +27,7 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
 
   private _isComposing = false;
 
-  get vEditor() {
+  get vEditor(): AffineVEditor {
     assertExists(this.richText.vEditor);
     return this.richText.vEditor;
   }
