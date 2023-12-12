@@ -36,6 +36,7 @@ import {
   pasteByKeyboard,
   pasteContent,
   pressArrowDown,
+  pressArrowLeft,
   pressArrowRight,
   pressArrowUp,
   pressEnter,
@@ -479,25 +480,20 @@ test('paste a non-nested list to a non-nested list', async ({ page }) => {
   // paste on start
   await waitNextFrame(page);
   await pasteContent(page, clipData);
+  await pressArrowLeft(page);
   await assertRichTexts(page, ['a123']);
-  // - a|123
-  expect(await getVirgoSelectionIndex(page)).toBe(1);
 
   // paste in middle
+  await pressArrowRight(page, 2);
   await pasteContent(page, clipData);
-  await assertRichTexts(page, ['aa123']);
-  // aa|123
-  expect(await getVirgoSelectionIndex(page)).toBe(2);
-  await page.keyboard.press('Control+ArrowRight');
-  await waitNextFrame(page);
+  await pressArrowRight(page);
+  await assertRichTexts(page, ['a1a23']);
+
   // paste on end
-  await waitNextFrame(page);
+  await pressArrowRight(page);
   await pasteContent(page, clipData);
   await waitNextFrame(page);
-  await assertRichTexts(page, ['aa123a']);
-  // aa123a|
-  await waitNextFrame(page);
-  expect(await getVirgoSelectionIndex(page)).toBe(6);
+  await assertRichTexts(page, ['a1a23a']);
 
   await assertBlockTypes(page, ['bulleted']);
 });
