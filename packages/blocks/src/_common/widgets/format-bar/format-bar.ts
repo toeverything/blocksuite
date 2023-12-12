@@ -35,7 +35,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   customItemsContainer!: HTMLElement;
 
   @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
-  private _formatBarElement?: HTMLElement;
+  formatBarElement?: HTMLElement;
 
   private _customElements: HTMLDivElement[] = [];
 
@@ -267,7 +267,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     this._appendCustomElement();
     this._floatDisposables = new DisposableGroup();
 
-    const formatQuickBarElement = this._formatBarElement;
+    const formatQuickBarElement = this.formatBarElement;
     assertExists(formatQuickBarElement, 'format quick bar should exist');
     if (this.displayType === 'text' || this.displayType === 'native') {
       const range = this.nativeRange;
