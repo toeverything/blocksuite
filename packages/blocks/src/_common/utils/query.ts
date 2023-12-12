@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
+import { INLINE_ROOT_ATTR } from '@blocksuite/inline';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
@@ -283,7 +283,7 @@ export async function asyncGetBlockElementByModel(
 }
 
 /**
- * @deprecated In most cases, you not need RichText, you can use {@link getVirgoByModel} instead.
+ * @deprecated In most cases, you not need RichText, you can use {@link getInlineEditorByModel} instead.
  */
 export function getRichTextByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
@@ -301,25 +301,25 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
   return richText;
 }
 
-export function getVirgoByModel(model: BaseBlockModel) {
+export function getInlineEditorByModel(model: BaseBlockModel) {
   if (matchFlavours(model, ['affine:database'])) {
-    // Not support database model since it's may be have multiple Virgo instances.
+    // Not support database model since it's may be have multiple inline editor instances.
     // Support to enter the editing state through the Enter key in the database.
     return null;
   }
   const richText = getRichTextByModel(model);
   if (!richText) return null;
-  return richText.vEditor;
+  return richText.inlineEditor;
 }
 
-export async function asyncGetVirgoByModel(model: BaseBlockModel) {
+export async function asyncGetInlineEditorByModel(model: BaseBlockModel) {
   if (matchFlavours(model, ['affine:database'])) {
-    // Not support database model since it's may be have multiple Virgo instances.
-    throw new Error('Cannot get virgo by database model!');
+    // Not support database model since it's may be have multiple inline editor instances.
+    throw new Error('Cannot get inline editor by database model!');
   }
   const richText = await asyncGetRichTextByModel(model);
   if (!richText) return null;
-  return richText.vEditor;
+  return richText.inlineEditor;
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {
@@ -349,7 +349,7 @@ export function isInsideEdgelessTextEditor(element: unknown): boolean {
 export function isDatabaseInput(element: unknown): boolean {
   return (
     element instanceof HTMLElement &&
-    element.getAttribute(VIRGO_ROOT_ATTR) === 'true' &&
+    element.getAttribute(INLINE_ROOT_ATTR) === 'true' &&
     !!element.closest('affine-database')
   );
 }

@@ -8,7 +8,10 @@ import {
   pressEnter,
   type,
 } from './utils/actions/index.js';
-import { assertRichTextVRange, assertTextContain } from './utils/asserts.js';
+import {
+  assertRichTextInlineRange,
+  assertTextContain,
+} from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
 test('prohibit creating divider within quote', async ({ page }) => {
@@ -57,45 +60,45 @@ test('quote arrow up/down', async ({ page }) => {
   await pressEnter(page);
   await type(page, 'aaa');
 
-  await assertRichTextVRange(page, 6, 3, 0);
+  await assertRichTextInlineRange(page, 6, 3, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 5, 3, 0);
+  await assertRichTextInlineRange(page, 5, 3, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 4, 3, 0);
+  await assertRichTextInlineRange(page, 4, 3, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 3, 15, 0);
+  await assertRichTextInlineRange(page, 3, 15, 0);
   await pressArrowRight(page, 8);
-  await assertRichTextVRange(page, 3, 23, 0);
+  await assertRichTextInlineRange(page, 3, 23, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 3, 13, 0);
+  await assertRichTextInlineRange(page, 3, 13, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 3, 3, 0);
+  await assertRichTextInlineRange(page, 3, 3, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 2, 3, 0);
+  await assertRichTextInlineRange(page, 2, 3, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 1, 3, 0);
+  await assertRichTextInlineRange(page, 1, 3, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 0, 3, 0);
+  await assertRichTextInlineRange(page, 0, 3, 0);
   await pressArrowUp(page);
-  await assertRichTextVRange(page, 0, 0, 0);
+  await assertRichTextInlineRange(page, 0, 0, 0);
   await pressArrowRight(page, 4);
-  await assertRichTextVRange(page, 0, 4, 0);
+  await assertRichTextInlineRange(page, 0, 4, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 1, 4, 0);
+  await assertRichTextInlineRange(page, 1, 4, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 2, 3, 0);
+  await assertRichTextInlineRange(page, 2, 3, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 3, 1, 0);
+  await assertRichTextInlineRange(page, 3, 1, 0);
   await pressArrowRight(page, 8);
-  await assertRichTextVRange(page, 3, 9, 0);
+  await assertRichTextInlineRange(page, 3, 9, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 3, 13, 0);
+  await assertRichTextInlineRange(page, 3, 13, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 3, 17, 0);
+  await assertRichTextInlineRange(page, 3, 17, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 4, 5, 0);
+  await assertRichTextInlineRange(page, 4, 5, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 5, 5, 0);
+  await assertRichTextInlineRange(page, 5, 5, 0);
   await pressArrowDown(page);
-  await assertRichTextVRange(page, 6, 3, 0);
+  await assertRichTextInlineRange(page, 6, 3, 0);
 });

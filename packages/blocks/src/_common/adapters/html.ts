@@ -1,4 +1,5 @@
 import { assertEquals } from '@blocksuite/global/utils';
+import type { DeltaInsert } from '@blocksuite/inline';
 import type {
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
@@ -20,7 +21,6 @@ import {
   type PageSnapshot,
   type SliceSnapshot,
 } from '@blocksuite/store';
-import type { DeltaInsert } from '@blocksuite/virgo';
 import type { ElementContent, Root, Text } from 'hast';
 import rehypeStringify from 'rehype-stringify';
 import { getHighlighter, type IThemedToken, type Lang } from 'shiki';

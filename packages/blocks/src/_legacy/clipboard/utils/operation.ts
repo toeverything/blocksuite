@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 
-import { getVirgoByModel } from '../../../_common/utils/query.js';
+import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 
 export function deleteModelsByTextSelection(
@@ -23,22 +23,17 @@ export function deleteModelsByTextSelection(
     throw new Error('startModel or endModel does not have text');
   }
 
-  const vEditor = getVirgoByModel(startModel);
-  assertExists(vEditor);
+  const inlineEditor = getInlineEditorByModel(startModel);
+  assertExists(inlineEditor);
 
   // Only select one block
   if (startModel === endModel) {
     page.captureSync();
     if (textSelection.from.index > 0 && textSelection.isCollapsed()) {
-      // startModel.text.delete(blockRange.startOffset - 1, 1);
-      // vEditor.setVRange({
-      //   index: blockRange.startOffset - 1,
-      //   length: 0,
-      // });
       return startModel;
     }
     startModel.text.delete(textSelection.from.index, textSelection.from.length);
-    vEditor.setVRange({
+    inlineEditor.setInlineRange({
       index: textSelection.from.index,
       length: 0,
     });
@@ -55,7 +50,7 @@ export function deleteModelsByTextSelection(
     page.deleteBlock(model);
   });
 
-  vEditor.setVRange({
+  inlineEditor.setInlineRange({
     index: textSelection.from.index,
     length: 0,
   });

@@ -3,7 +3,7 @@ import type { PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import type { PageBlockComponent } from '../../../index.js';
-import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../../components/rich-text/inline/types.js';
 import { LinkedPageIcon, PageIcon } from '../../icons/index.js';
 
 export const DEFAULT_PAGE_NAME = 'Untitled';

@@ -3,12 +3,12 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
 import {
-  VIRGO_ROOT_ATTR,
-  type VirgoRootElement,
-  type VRangeProvider,
-} from '@blocksuite/virgo';
+  INLINE_ROOT_ATTR,
+  type InlineRangeProvider,
+  type InlineRootElement,
+} from '@blocksuite/inline';
+import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import { autoPlacement, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -62,7 +62,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       margin-bottom: 24px;
     }
 
-    .affine-code-block-container .virgo-editor {
+    .affine-code-block-container .inline-editor {
       font-family: var(--affine-font-code-family);
       font-variant-ligatures: none;
     }
@@ -136,7 +136,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       white-space: break-spaces;
     }
 
-    .affine-code-block-container .virgo-editor::-webkit-scrollbar {
+    .affine-code-block-container .inline-editor::-webkit-scrollbar {
       display: none;
     }
 
@@ -187,9 +187,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       if (!loadedLangs.includes(lang.id as Lang)) {
         this._highlighter.loadLanguage(lang).then(() => {
           const richText = this.querySelector('rich-text');
-          const vEditor = richText?.vEditor;
-          if (vEditor) {
-            vEditor.requestUpdate();
+          const inlineEditor = richText?.inlineEditor;
+          if (inlineEditor) {
+            inlineEditor.requestUpdate();
           }
         });
       }
@@ -210,23 +210,25 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
     const richText = this.querySelector('rich-text');
     assertExists(richText);
-    const vEditor = richText.vEditor;
-    assertExists(vEditor);
-    const range = vEditor.getVRange();
-    vEditor.requestUpdate();
+    const inlineEditor = richText.inlineEditor;
+    assertExists(inlineEditor);
+    const range = inlineEditor.getInlineRange();
+    inlineEditor.requestUpdate();
     if (range) {
-      vEditor.setVRange(range);
+      inlineEditor.setInlineRange(range);
     }
   }
 
-  private _vRangeProvider: VRangeProvider | null = null;
+  private _inlineRangeProvider: InlineRangeProvider | null = null;
 
-  get vEditor() {
-    const vRoot = this.querySelector<VirgoRootElement>(`[${VIRGO_ROOT_ATTR}]`);
-    if (!vRoot) {
-      throw new Error('Virgo root not found');
+  get inlineEditor() {
+    const inlineRoot = this.querySelector<InlineRootElement>(
+      `[${INLINE_ROOT_ATTR}]`
+    );
+    if (!inlineRoot) {
+      throw new Error('Inline editor root not found');
     }
-    return vRoot.virgoEditor;
+    return inlineRoot.inlineEditor;
   }
 
   @query('rich-text')
@@ -285,12 +287,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       listenToThemeChange(this, async () => {
         if (!this._highlighter) return;
         const richText = this.querySelector('rich-text');
-        const vEditor = richText?.vEditor;
-        if (!vEditor) return;
+        const inlineEditor = richText?.inlineEditor;
+        if (!inlineEditor) return;
 
         // update code-line theme
         setTimeout(() => {
-          vEditor.requestUpdate();
+          inlineEditor.requestUpdate();
         });
       })
     );
@@ -344,19 +346,22 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       Tab: ctx => {
         const state = ctx.get('keyboardState');
         const event = state.raw;
-        const vEditor = this.vEditor;
-        const vRange = vEditor.getVRange();
-        if (vRange) {
+        const inlineEditor = this.inlineEditor;
+        const inlineRange = inlineEditor.getInlineRange();
+        if (inlineRange) {
           event.stopPropagation();
           event.preventDefault();
 
-          const text = this.vEditor.yText.toString();
-          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, vRange.index - 1);
+          const text = this.inlineEditor.yText.toString();
+          const index = text.lastIndexOf(
+            LINE_BREAK_SYMBOL,
+            inlineRange.index - 1
+          );
           const indexArr = allIndexOf(
             text,
             LINE_BREAK_SYMBOL,
-            vRange.index,
-            vRange.index + vRange.length
+            inlineRange.index,
+            inlineRange.index + inlineRange.length
           )
             .map(i => i + 1)
             .reverse();
@@ -366,7 +371,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
             indexArr.push(0);
           }
           indexArr.forEach(i => {
-            this.vEditor.insertText(
+            this.inlineEditor.insertText(
               {
                 index: i,
                 length: 0,
@@ -374,10 +379,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
               INDENT_SYMBOL
             );
           });
-          this.vEditor.setVRange({
-            index: vRange.index + 2,
+          this.inlineEditor.setInlineRange({
+            index: inlineRange.index + 2,
             length:
-              vRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
+              inlineRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
           });
 
           return true;
@@ -388,19 +393,22 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       'Shift-Tab': ctx => {
         const state = ctx.get('keyboardState');
         const event = state.raw;
-        const vEditor = this.vEditor;
-        const vRange = vEditor.getVRange();
-        if (vRange) {
+        const inlineEditor = this.inlineEditor;
+        const inlineRange = inlineEditor.getInlineRange();
+        if (inlineRange) {
           event.stopPropagation();
           event.preventDefault();
 
-          const text = this.vEditor.yText.toString();
-          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, vRange.index - 1);
+          const text = this.inlineEditor.yText.toString();
+          const index = text.lastIndexOf(
+            LINE_BREAK_SYMBOL,
+            inlineRange.index - 1
+          );
           let indexArr = allIndexOf(
             text,
             LINE_BREAK_SYMBOL,
-            vRange.index,
-            vRange.index + vRange.length
+            inlineRange.index,
+            inlineRange.index + inlineRange.length
           )
             .map(i => i + 1)
             .reverse();
@@ -413,18 +421,19 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
             i => text.slice(i, i + 2) === INDENT_SYMBOL
           );
           indexArr.forEach(i => {
-            this.vEditor.deleteText({
+            this.inlineEditor.deleteText({
               index: i,
               length: 2,
             });
           });
           if (indexArr.length > 0) {
-            this.vEditor.setVRange({
+            this.inlineEditor.setInlineRange({
               index:
-                vRange.index -
-                (indexArr[indexArr.length - 1] < vRange.index ? 2 : 0),
+                inlineRange.index -
+                (indexArr[indexArr.length - 1] < inlineRange.index ? 2 : 0),
               length:
-                vRange.length - (indexArr.length - 1) * INDENT_SYMBOL.length,
+                inlineRange.length -
+                (indexArr.length - 1) * INDENT_SYMBOL.length,
             });
           }
 
@@ -435,7 +444,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       },
     });
 
-    this._vRangeProvider = getVRangeProvider(this);
+    this._inlineRangeProvider = getInlineRangeProvider(this);
   }
 
   override disconnectedCallback() {
@@ -454,9 +463,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       }
 
       const richText = this.querySelector('rich-text');
-      const vEditor = richText?.vEditor;
-      if (vEditor) {
-        vEditor.requestUpdate();
+      const inlineEditor = richText?.inlineEditor;
+      if (inlineEditor) {
+        inlineEditor.requestUpdate();
       }
     }
 
@@ -594,7 +603,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           .attributesSchema=${this.attributesSchema}
           .attributeRenderer=${this.getAttributeRenderer()}
           .readonly=${this.model.page.readonly}
-          .vRangeProvider=${this._vRangeProvider}
+          .inlineRangeProvider=${this._inlineRangeProvider}
           .enableClipboard=${false}
           .enableUndoRedo=${false}
         >

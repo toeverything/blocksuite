@@ -7,7 +7,7 @@ const allPackages = [
   'global',
   'playground',
   'store',
-  'virgo',
+  'inline',
   'lit',
   'block-std',
 ];
@@ -63,7 +63,7 @@ module.exports = {
     'packages/presets/dist/*',
     'packages/global/dist/*',
     'packages/playground/dist/assets/*',
-    'packages/virgo/dist/*',
+    'packages/inline/dist/*',
     'packages/block-std/dist/*',
   ],
   overrides: [

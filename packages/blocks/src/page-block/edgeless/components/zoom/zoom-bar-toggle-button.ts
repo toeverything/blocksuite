@@ -6,7 +6,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { MoreIcon } from '../../../../_common/icons/index.js';
 import { stopPropagation } from '../../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { EdgelessZoomToolbar } from './zoom-tool-bar.js';
+import { EdgelessZoomToolbar } from './zoom-toolbar.js';
 
 interface ZoomBarPopper {
   element: EdgelessZoomToolbar;

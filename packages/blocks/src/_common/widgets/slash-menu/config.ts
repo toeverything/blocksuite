@@ -25,13 +25,12 @@ import {
   createPage,
   getBlockElementByModel,
   getCurrentNativeRange,
-  getVirgoByModel,
+  getInlineEditorByModel,
   matchFlavours,
   openFileOrFiles,
   resetNativeSelection,
   uploadImageFromLocal,
 } from '../../../_common/utils/index.js';
-import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
 import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
@@ -49,6 +48,7 @@ import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { textConversionConfigs } from '../../configs/text-conversion.js';
 import { textFormatConfigs } from '../../configs/text-format/config.js';
+import { clearMarksOnDiscontinuousInput } from '../../utils/inline-editor.js';
 import type { AffineLinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
@@ -108,9 +108,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
                   }
                   const codeModel = newModels[0];
                   onModelTextUpdated(codeModel, richText => {
-                    const vEditor = richText.vEditor;
-                    assertExists(vEditor);
-                    vEditor.focusEnd();
+                    const inlineEditor = richText.inlineEditor;
+                    assertExists(inlineEditor);
+                    inlineEditor.focusEnd();
                   });
                 }
               })
@@ -132,12 +132,15 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           const len = model.text.length;
           if (!len) {
-            const vEditor = getVirgoByModel(model);
-            assertExists(vEditor, "Can't set style mark! vEditor not found");
-            vEditor.setMarks({
+            const inlineEditor = getInlineEditorByModel(model);
+            assertExists(
+              inlineEditor,
+              "Can't set style mark! Inline editor not found"
+            );
+            inlineEditor.setMarks({
               [id]: true,
             });
-            clearMarksOnDiscontinuousInput(vEditor);
+            clearMarksOnDiscontinuousInput(inlineEditor);
             return;
           }
           model.text.format(0, len, {

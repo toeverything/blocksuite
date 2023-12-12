@@ -13,11 +13,11 @@ import {
   pressArrowRight,
   pressEnter,
   selectAllByKeyboard,
-  setVRangeInSelectedRichText,
+  setInlineRangeInSelectedRichText,
   SHORT_KEY,
   switchEditorMode,
   type,
-  waitForVirgoStateUpdated,
+  waitForInlineEditorStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
 import { assertStoreMatchJSX } from './utils/asserts.js';
@@ -175,7 +175,7 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
   await focusRichText(page);
 
   await type(page, inputUrl);
-  await setVRangeInSelectedRichText(page, 0, inputUrl.length);
+  await setInlineRangeInSelectedRichText(page, 0, inputUrl.length);
   await copyByKeyboard(page);
   await focusRichText(page);
   await type(page, '/bookmark');
@@ -229,7 +229,7 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
   await switchEditorMode(page);
 
   await activeNoteInEdgeless(page, ids.noteId);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);
   await pressArrowRight(page);

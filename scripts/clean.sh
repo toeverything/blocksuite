@@ -12,7 +12,7 @@ packages=(
   "lit"
   "playground"
   "store"
-  "virgo"
+  "inline"
 )
 
 for package in "${packages[@]}"

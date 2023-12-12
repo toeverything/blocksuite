@@ -37,8 +37,8 @@ import {
   assertEdgelessHoverRect,
   assertEdgelessSelectedRectModel,
   assertNoteXYWH,
+  assertRichTextInlineRange,
   assertRichTexts,
-  assertRichTextVRange,
   assertSelectedBound,
   assertZoomLevel,
 } from '../utils/asserts.js';
@@ -53,7 +53,7 @@ test('switch to edgeless mode', async ({ page }) => {
   await focusRichText(page);
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
-  await assertRichTextVRange(page, 0, 5, 0);
+  await assertRichTextInlineRange(page, 0, 5, 0);
 
   await switchEditorMode(page);
   const locator = page.locator('edgeless-block-portal-container');

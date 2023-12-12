@@ -1,5 +1,8 @@
 import { expect, type Page } from '@playwright/test';
-import { waitForVirgoStateUpdated, waitNextFrame } from 'utils/actions/misc.js';
+import {
+  waitForInlineEditorStateUpdated,
+  waitNextFrame,
+} from 'utils/actions/misc.js';
 
 import { clickView } from '../utils/actions/click.js';
 import {
@@ -99,7 +102,7 @@ test.describe('auto-complete', () => {
       await expect(canvasTextButton).toBeVisible();
       await canvasTextButton.click();
 
-      await waitForVirgoStateUpdated(page);
+      await waitForInlineEditorStateUpdated(page);
       await waitNextFrame(page);
       await page.keyboard.type('hello');
       await assertEdgelessCanvasText(page, 'hello');
