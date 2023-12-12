@@ -1,4 +1,4 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { type Constructor, DisposableGroup } from '@blocksuite/global/utils';
 import type { LitElement } from 'lit';
 
 // See https://lit.dev/docs/composition/mixins/#mixins-in-typescript
@@ -7,9 +7,6 @@ export declare class DisposableClass {
   readonly disposables: DisposableGroup;
   protected _disposables: DisposableGroup;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Constructor<T = object> = new (...args: any[]) => T;
 
 /**
  * Mixin that adds a `_disposables: DisposableGroup` property to the class.

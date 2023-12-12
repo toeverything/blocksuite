@@ -1,6 +1,6 @@
-import { registerFramePanelComponents } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
 import type { EditorContainer } from '@blocksuite/presets';
+import { registerFramePanelComponents } from '@blocksuite/presets';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -12,9 +12,9 @@ export class CustomFramePanel extends WithDisposable(LitElement) {
       top: 0;
       right: 0;
       border: 1px solid var(--affine-border-color, #e3e2e4);
-      background: var(--affine-background-overlay-panel-color);
+      background-color: var(--affine-background-primary-color);
       height: 100vh;
-      width: 350px;
+      width: 320px;
       box-sizing: border-box;
       padding-top: 16px;
       z-index: 1;
@@ -26,12 +26,8 @@ export class CustomFramePanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   editor!: EditorContainer;
 
-  get edgeless() {
-    return this.editor.querySelector('affine-edgeless-page');
-  }
-
   private _renderPanel() {
-    return html`<frame-panel .edgeless=${this.edgeless}></frame-panel>`;
+    return html`<frame-panel .editor=${this.editor}></frame-panel>`;
   }
 
   public toggleDisplay() {

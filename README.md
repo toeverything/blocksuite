@@ -20,9 +20,9 @@
 
 ## Overview
 
-BlockSuite is an open-source project for block-based collaborative editing. This repository contains two essential parts:
+BlockSuite is an open-source toolkit for diverse content editing. It allows you to _compose_ your collaborative editing applications. This repository contains two essential parts:
 
-- **A framework** for building block-based [structure editors](https://en.wikipedia.org/wiki/Structure_editor), providing foundational support for editor essentials such as [block schema](https://blocksuite.affine.pro/block-schema.html), [selection](https://blocksuite.affine.pro/selection-api.html), [rich text](https://github.com/toeverything/blocksuite/tree/master/packages/virgo), [real-time collaboration](https://blocksuite.affine.pro/unidirectional-data-flow.html), and [UI component definition](https://blocksuite.affine.pro/block-view.html).
+- **A framework** for building block-based [structure editors](https://en.wikipedia.org/wiki/Structure_editor), providing foundational support for editor essentials such as [block schema](https://blocksuite.io/block-schema.html), [selection](https://blocksuite.io/selection-api.html), [rich text](https://github.com/toeverything/blocksuite/tree/master/packages/virgo), [real-time collaboration](https://blocksuite.io/unidirectional-data-flow.html), and [UI component definition](https://blocksuite.io/block-view.html).
 - **Multiple first-party editors** capable of handling documents, whiteboards, and data grids. These editors are highly interoperable, and are already used by the [AFFiNE](https://github.com/toeverything/AFFiNE) project.
 
 By using BlockSuite, you can:
@@ -54,7 +54,7 @@ The major packages in BlockSuite include the following:
 
 ## Getting Started
 
-To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://blocksuite.affine.pro/quick-start.html).
+To learn how to start using BlockSuite, visit [blocksuite.io](https://blocksuite.io/quick-start.html).
 
 ## Resources
 
@@ -63,7 +63,7 @@ To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://bl
   - [The `SimpleAffineEditor` Example](https://try-blocksuite.vercel.app/examples/basic/)
   - [BlockSuite Monorepo in StackBlitz](https://stackblitz.com/github/toeverything/blocksuite)
   - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
-- 📝 [Documentation](https://blocksuite.affine.pro/quick-start.html)
+- 📝 [Documentation](https://blocksuite.io/quick-start.html)
 - 📍 [Good First Issues](https://github.com/toeverything/blocksuite/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 💬 [Discord Channel](https://discord.gg/9vwSWmYYcZ)

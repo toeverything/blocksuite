@@ -3,8 +3,10 @@ import { generateKeyBetween } from 'fractional-indexing';
 
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import { type EdgelessElement } from '../../_common/utils/types.js';
+import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
-import type { ImageBlockModel, NoteBlockModel } from '../../models.js';
+import type { ImageBlockModel } from '../../image-block/image-model.js';
+import type { NoteBlockModel } from '../../note-block/note-model.js';
 import type { CanvasElement } from '../../surface-block/elements/index.js';
 import { GroupElement } from '../../surface-block/elements/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
@@ -22,7 +24,10 @@ import {
   updateLayersIndex,
 } from './layer-utils.js';
 
-export type IndexableBlock = ImageBlockModel | NoteBlockModel;
+export type IndexableBlock =
+  | ImageBlockModel
+  | NoteBlockModel
+  | BookmarkBlockModel;
 
 export type Indexable = CanvasElement | IndexableBlock;
 
@@ -487,7 +492,9 @@ export class LayerManager {
       updateArray(this.canvasElements, element);
 
       if (element instanceof GroupElement && indexChanged) {
-        element.childElements.forEach(child => this._updateLayer(child));
+        element.childElements.forEach(
+          child => child && this._updateLayer(child)
+        );
       }
     } else if (element.flavour === 'affine:frame') {
       updateArray(this.frames, element);
@@ -515,7 +522,9 @@ export class LayerManager {
       insertToOrderedArray(this.canvasElements, element);
 
       if (element instanceof GroupElement) {
-        element.childElements.forEach(child => this._updateLayer(child));
+        element.childElements.forEach(
+          child => child && this._updateLayer(child)
+        );
       }
     } else if (element.flavour === 'affine:frame') {
       insertToOrderedArray(this.frames, element);

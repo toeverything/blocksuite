@@ -481,7 +481,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   props: {
                     type: 'card',
                     url: bookmarkURL ?? '',
-                    bookmarkTitle,
+                    title: bookmarkTitle,
                     description: bookmarkDescription,
                     icon: bookmarkIconURL,
                   },

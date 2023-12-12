@@ -16,6 +16,7 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 
 import {
+  BlocksUtils,
   COLOR_VARIABLES,
   createPage,
   extractCssVariables,
@@ -24,11 +25,18 @@ import {
   MarkdownAdapter,
   NOTE_WIDTH,
   SIZE_VARIABLES,
+  type SurfaceBlockComponent,
   VARIABLES,
   ZipTransformer,
 } from '@blocksuite/blocks';
+import type { TreeNode } from '@blocksuite/blocks/_common/mind-map/draw';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { assertExists } from '@blocksuite/global/utils';
+import {
+  type BlockElement,
+  type BlockSuiteRoot,
+  ShadowlessElement,
+} from '@blocksuite/lit';
 import type { AiPanel } from '@blocksuite/presets';
 import { EditorContainer } from '@blocksuite/presets';
 import { Job, Utils, type Workspace } from '@blocksuite/store';
@@ -43,6 +51,20 @@ import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
 import type { SidePanel } from './side-panel';
+
+export function getSurfaceElementFromEditor(editor: EditorContainer) {
+  const { page } = editor;
+  const surfaceModel = page.getBlockByFlavour('affine:surface')[0];
+  assertExists(surfaceModel);
+
+  const surfaceId = surfaceModel.id;
+  const surfaceElement = editor.querySelector(
+    `affine-surface[data-block-id="${surfaceId}"]`
+  ) as SurfaceBlockComponent;
+  assertExists(surfaceElement);
+
+  return surfaceElement;
+}
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -126,6 +148,34 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
       style.setProperty(plateKey, e.value);
     });
   }
+}
+export function getSelectedBlocks(root: BlockSuiteRoot) {
+  let blocks: BlockElement[] = [];
+
+  root.std.command
+    .pipe()
+    .getBlockSelections()
+    .inline((ctx, next) => {
+      const selections = ctx.currentBlockSelections;
+      if (!selections) return;
+
+      blocks = selections
+        .map(selection => ctx.std.view.viewFromPath('block', selection.path))
+        .filter(
+          (block): block is BlockElement =>
+            block !== null &&
+            BlocksUtils.matchFlavours(block.model, [
+              'affine:paragraph',
+              'affine:list',
+              'affine:code',
+            ])
+        );
+
+      return next();
+    })
+    .run();
+
+  return blocks;
 }
 
 @customElement('debug-menu')
@@ -275,6 +325,51 @@ export class DebugMenu extends ShadowlessElement {
     } else {
       this.sidePanel.showContent(this.aiPanel);
     }
+  }
+
+  private _createMindMap() {
+    function makeid(length: number) {
+      let result = '';
+      const characters =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const charactersLength = characters.length;
+      let counter = 0;
+      while (counter < length) {
+        result += characters.charAt(
+          Math.floor(Math.random() * charactersLength)
+        );
+        counter += 1;
+      }
+      return result;
+    }
+
+    const genTree = (deep: number = 0): TreeNode => {
+      const count = Math.floor(Math.random() * 10) - deep - 2;
+      const children: TreeNode[] = [];
+      for (let i = 0; i < count; i++) {
+        children.push(genTree(deep + 1));
+      }
+      return {
+        text: makeid(Math.random() * 200 + 30),
+        children,
+      };
+    };
+    const blocks = getSelectedBlocks(this.editor.root!);
+    const toTreeNode = (block: BaseBlockModel): TreeNode => {
+      return {
+        text: block.text?.toString() ?? '',
+        children: block.children.map(toTreeNode),
+      };
+    };
+    const node = {
+      text: 'Root',
+      children: blocks.map(v => toTreeNode(v.model)),
+    };
+    // const node: TreeNode = genTree();
+    BlocksUtils.mindMap.drawInEdgeless(
+      getSurfaceElementFromEditor(this.editor),
+      node
+    );
   }
 
   private _switchOffsetMode() {
@@ -653,6 +748,9 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._extendFormatBar}>
                 Extend Format Bar
               </sl-menu-item>
+              <sl-menu-item @click=${this._createMindMap}>
+                Create Mind Map
+              </sl-menu-item>
               <sl-menu-item @click=${this._addNote}>Add Note</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
@@ -712,6 +810,9 @@ function PageList(
   // This function is called when a delete option is clicked
   const handleDeletePage = (pageId: string) => {
     workspace.removePage(pageId);
+    // When delete a page, we need to set the editor page to the first remaining page
+    const pages = Array.from(workspace.pages.values());
+    editor.page = pages[0];
     requestUpdate();
   };
 
@@ -726,20 +827,20 @@ function PageList(
               ${pageMeta.title || 'Untitled'}
               <sl-menu slot="submenu">
                 <sl-menu-item
-                  @click=${() => {
+                  @click="${() => {
                     const newPage = workspace.getPage(pageMeta.id);
                     if (!newPage) return;
                     editor.page = newPage;
-                  }}
+                  }}"
                 >
                   Open
                 </sl-menu-item>
                 <sl-menu-item
-                  .disabled=${workspace.pages.size <= 1}
-                  @click=${() => {
+                  .disabled="${workspace.pages.size <= 1}"
+                  @click="${() => {
                     if (workspace.pages.size <= 1) return;
                     handleDeletePage(pageMeta.id);
-                  }}
+                  }}"
                 >
                   Delete
                 </sl-menu-item>

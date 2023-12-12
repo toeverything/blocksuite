@@ -10,6 +10,7 @@ import './default/default-tool-button.js';
 import './text/text-tool-button.js';
 import './eraser/eraser-tool-button.js';
 import './frame/navigator-setting-button.js';
+import './template/template-tool-button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
@@ -442,6 +443,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const current = this._currentFrameIndex;
     const frames = this._frames;
     const frame = frames[current];
+    const { page } = this.edgeless;
 
     return html`
       <edgeless-tool-icon-button
@@ -502,7 +504,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       <div
         class="edgeless-frame-navigator-stop"
         @click=${() => {
-          this.setEdgelessTool({ type: 'pan', panning: false });
+          this.setEdgelessTool(
+            page.readonly
+              ? { type: 'pan', panning: false }
+              : { type: 'default' }
+          );
+
           document.fullscreenElement && this._toggleFullScreen();
           setTimeout(() => this._moveToCurrentFrame(), 400);
         }}
@@ -550,6 +557,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         >
           ${EdgelessImageIcon}
         </edgeless-toolbar-button>
+        <edgeless-template-button .edgeless=${this.edgeless}>
+        </edgeless-template-button>
       </div>
     `;
   }

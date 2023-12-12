@@ -48,9 +48,10 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
 
     options.updateElementLocalRecord(this.id, { showTitle: true });
 
-    this.childElements.forEach(ele => {
+    this._children.forEach(ele => {
       options.setGroupParent(ele, this);
     });
+
     this._cachedChildren = this._children;
 
     const yChildren = this.yMap.get('children') as IGroup['children'];
@@ -59,7 +60,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
         if (action === 'delete') {
           const child = options.pickById(key);
           if (child && options.getGroupParent(child) === this) {
-            options.setGroupParent(child, options.getGroupParent(this));
+            options.setGroupParent(key, options.getGroupParent(this));
           }
           if (this.children.size === 0) {
             options.removeElement(this.id);
@@ -68,7 +69,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
         } else if (action === 'add') {
           const child = options.pickById(key);
           assertExists(child);
-          options.setGroupParent(child, this);
+          options.setGroupParent(key, this);
         } else {
           console.log('unexpected', key);
         }
@@ -82,11 +83,12 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     const children = this._children;
     if (children.length === 0) return '[0,0,0,0]';
 
-    const bound: Bound = children.reduce((prev, cur) => {
-      const ele = options.pickById(cur);
-      assertExists(ele);
-      return prev.unite(ele.elementBound);
-    }, options.pickById(children[0])!.elementBound);
+    const bound: Bound = children
+      .map(id => options.pickById(id))
+      .filter(el => el)
+      .reduce((prev, ele) => {
+        return prev.unite(ele!.elementBound);
+      }, options.pickById(children[0])!.elementBound);
     return bound.serialize();
   }
 
@@ -231,7 +233,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     this._cachedChildren.forEach(id => {
       const ele = options.pickById(id);
       if (ele && options.getGroupParent(ele) === this)
-        options.setGroupParent(ele, options.getGroupParent(this));
+        options.setGroupParent(id, options.getGroupParent(this));
     });
     super.unmount();
   }

@@ -1,6 +1,7 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 import './note/edgeless-note.js';
 import './image/edgeless-image.js';
+import './bookmark/edgeless-bookmark.js';
 import './frame/edgeless-frame.js';
 import './embed/edgeless-embed.js';
 import '../rects/edgeless-selected-rect.js';
@@ -15,13 +16,7 @@ import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, nothing } from 'lit';
-import {
-  customElement,
-  property,
-  query,
-  queryAll,
-  state,
-} from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
@@ -58,12 +53,13 @@ export type AutoConnectElement =
   | FrameBlockModel
   | GroupElement;
 
-const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
+const { NOTE, IMAGE, FRAME, BOOKMARK } = EdgelessBlockType;
 
 const portalMap = new Map<EdgelessBlockType | RegExp, string>([
   [FRAME, 'edgeless-block-portal-frame'],
   [NOTE, 'edgeless-block-portal-note'],
   [IMAGE, 'edgeless-block-portal-image'],
+  [BOOKMARK, 'edgeless-block-portal-bookmark'],
   [/affine:embed-*/, 'edgeless-block-portal-embed'],
 ]);
 
@@ -126,11 +122,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @query('.affine-edgeless-layer')
   layer!: HTMLDivElement;
 
-  @queryAll('.surface-layer')
-  canvases!: HTMLCanvasElement[];
-
-  @query('.portal-slot')
-  portalSlot!: HTMLDivElement;
+  @query('.canvas-slot')
+  canvasSlot!: HTMLDivElement;
 
   @state()
   private _showAutoConnect = false;
@@ -178,6 +171,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     return this.selectedRect.dragging;
   }
 
+  private _updateCanvasViewport() {
+    Array.from(this.canvasSlot.children).forEach(canvas => {
+      (canvas as HTMLCanvasElement).style.setProperty(
+        'transform',
+        this._getLayerViewport(true)
+      );
+    });
+  }
+
   aboutToChangeViewport() {
     if (this._cancelRestoreWillchange) this._cancelRestoreWillchange();
     if (!this.layer.style.willChange)
@@ -190,7 +192,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   }
 
   refreshLayerViewport = () => {
-    if (!this.isConnected || !this.edgeless || !this.edgeless.surface) return;
+    if (!this.edgeless || !this.edgeless.surface) return;
 
     const { surface } = this.edgeless;
     const { zoom, translateX, translateY } = surface.viewport;
@@ -202,11 +204,14 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
     this.layer.style.setProperty('transform', this._getLayerViewport());
+    this._updateCanvasViewport();
   };
 
   setSlotContent(children: HTMLElement[]) {
-    if (this.portalSlot.children.length !== children.length)
-      this.portalSlot.replaceChildren(...children);
+    if (this.canvasSlot.children.length !== children.length)
+      this.canvasSlot.replaceChildren(...children);
+
+    this._updateCanvasViewport();
   }
 
   private _getLayerViewport(negative = false) {
@@ -422,7 +427,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             : html`<affine-note-slicer
                 .edgelessPage=${edgeless}
               ></affine-note-slicer>`}
-          <div class="portal-slot"></div>
+          <div class="canvas-slot"></div>
           ${layers
             .filter(layer => layer.type === 'block')
             .map(layer => {

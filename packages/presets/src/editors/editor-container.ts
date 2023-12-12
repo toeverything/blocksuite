@@ -80,6 +80,7 @@ export class EditorContainer
   slots: AbstractEditor['slots'] = {
     pageLinkClicked: new Slot(),
     pageModeSwitched: new Slot(),
+    pageUpdated: new Slot(),
     tagClicked: new Slot<{ tagId: string }>(),
   };
 
@@ -131,6 +132,10 @@ export class EditorContainer
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mode')) {
       this.slots.pageModeSwitched.emit(this.mode);
+    }
+
+    if (changedProperties.has('page')) {
+      this.slots.pageUpdated.emit({ newPageId: this.page.id });
     }
 
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {

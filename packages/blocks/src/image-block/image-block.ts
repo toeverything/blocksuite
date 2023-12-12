@@ -151,7 +151,7 @@ class ImageBlockEdgelessComponent extends ImageBlock {
     return html`<img
       style=${styleMap({
         transform: `rotate(${this.model.rotate}deg)`,
-        transfromOrigin: 'center',
+        transformOrigin: 'center',
       })}
       src=${this._source}
       width="${bound.w}px"

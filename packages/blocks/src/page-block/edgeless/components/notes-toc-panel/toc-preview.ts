@@ -175,7 +175,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         assertType<BookmarkBlockModel>(block);
         return html`
           <span class="text general"
-            >${block.bookmarkTitle || block.url || 'Bookmark'}</span
+            >${block.title || block.url || 'Bookmark'}</span
           >
           ${!this.hidePreviewIcon
             ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`

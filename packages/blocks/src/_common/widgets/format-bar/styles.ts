@@ -1,5 +1,7 @@
 import { css } from 'lit';
 
+import { scrollbarStyle } from '../../components/utils.js';
+
 const paragraphButtonStyle = css`
   .paragraph-button-icon > svg:nth-child(2) {
     transition-duration: 0.3s;
@@ -48,6 +50,8 @@ const paragraphButtonStyle = css`
     border-radius: 8px;
     z-index: var(--affine-z-index-popover);
   }
+
+  ${scrollbarStyle('.highlight-panel')}
 
   .highligh-panel-heading {
     color: var(--affine-text-secondary-color);

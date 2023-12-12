@@ -55,7 +55,7 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
     return value;
   }
 
-  private _elementFromJSON(element: Record<string, unknown>) {
+  elementFromJSON(element: Record<string, unknown>) {
     const yMap = new Workspace.Y.Map();
     Object.entries(element).forEach(([key, value]) => {
       yMap.set(key, this._fromJSON(value));
@@ -91,7 +91,8 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
     const yMap = new Workspace.Y.Map();
 
     Object.entries(elementsJSON).forEach(([key, value]) => {
-      const element = this._elementFromJSON(value as Record<string, unknown>);
+      const element = this.elementFromJSON(value as Record<string, unknown>);
+
       yMap.set(key, element);
     });
 

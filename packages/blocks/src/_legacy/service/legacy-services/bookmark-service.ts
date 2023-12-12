@@ -24,7 +24,7 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
             ${icon}
           </div>
           <div class="affine-bookmark-title-content bookmark-title">${
-            block.bookmarkTitle || 'Bookmark'
+            block.title || 'Bookmark'
           }</div>
         </div>
         <div class="affine-bookmark-description bookmark-description">${
@@ -45,7 +45,7 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
   }
 
   override async block2markdown(block: BookmarkBlockModel) {
-    return `[${block.bookmarkTitle || 'Bookmark'}](${block.url})`;
+    return `[${block.title || 'Bookmark'}](${block.url})`;
   }
 
   override block2Json(

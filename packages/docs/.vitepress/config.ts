@@ -13,13 +13,16 @@ export default defineConfig({
   },
   lang: 'en-US',
   title: 'BlockSuite',
-  description: 'The Block-Based Collaborative Framework',
+  description: 'Toolkit for Diverse Content Editing',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       {
-        text: '🚧 Editors',
-        link: '#',
+        text: 'Editors',
+        items: [
+          { text: '🚧 DocEditor', link: '#' },
+          { text: '🚧 EdgelessEditor', link: '#' },
+        ],
       },
       {
         text: 'Playground',

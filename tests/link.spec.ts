@@ -439,7 +439,8 @@ test('convert link to card', async ({ page }) => {
   await expect(linkToEmbedBtn).not.toBeVisible();
 });
 
-test('convert link to embed', async ({ page }) => {
+//TODO: wait for embed block completed
+test.skip('convert link to embed', async ({ page }) => {
   const linkText = 'alinkTexta';
   const link = 'https://www.youtube.com/watch?v=U6s2pdxebSo';
   await enterPlaygroundRoom(page);
