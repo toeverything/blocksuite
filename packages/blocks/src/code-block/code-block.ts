@@ -222,13 +222,13 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   private _inlineRangeProvider: InlineRangeProvider | null = null;
 
   get inlineEditor() {
-    const vRoot = this.querySelector<InlineRootElement>(
+    const inlineRoot = this.querySelector<InlineRootElement>(
       `[${INLINE_ROOT_ATTR}]`
     );
-    if (!vRoot) {
-      throw new Error('Virgo root not found');
+    if (!inlineRoot) {
+      throw new Error('Inline editor root not found');
     }
-    return vRoot.inlineEditor;
+    return inlineRoot.inlineEditor;
   }
 
   @query('rich-text')

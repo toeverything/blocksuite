@@ -47,11 +47,11 @@ export const formatBlockCommand: Command<
       assertExists(selectedBlocks);
 
       const selectedInlineEditors = selectedBlocks.flatMap(el => {
-        const vRoot = el.querySelector<InlineRootElement<AffineTextAttributes>>(
-          `[${INLINE_ROOT_ATTR}]`
-        );
-        if (vRoot) {
-          return vRoot.inlineEditor;
+        const inlineRoot = el.querySelector<
+          InlineRootElement<AffineTextAttributes>
+        >(`[${INLINE_ROOT_ATTR}]`);
+        if (inlineRoot) {
+          return inlineRoot.inlineEditor;
         }
         return [];
       });

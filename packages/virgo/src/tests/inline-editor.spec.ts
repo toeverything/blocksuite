@@ -18,8 +18,8 @@ test('basic input', async ({ page }) => {
   await enterInlineEditorPlayground(page);
   await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   const editorAUndo = page.getByText('undo').nth(0);
   const editorARedo = page.getByText('redo').nth(0);
@@ -182,8 +182,8 @@ test('chinese input', async ({ page }) => {
   await enterInlineEditorPlayground(page);
   await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -230,8 +230,8 @@ test('readonly mode', async ({ page }) => {
   await enterInlineEditorPlayground(page);
   await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -266,8 +266,8 @@ test('basic styles', async ({ page }) => {
   await enterInlineEditorPlayground(page);
   await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   const editorABold = page.getByText('bold').nth(0);
   const editorAItalic = page.getByText('italic').nth(0);
@@ -524,8 +524,8 @@ test('overlapping styles', async ({ page }) => {
   await enterInlineEditorPlayground(page);
   await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   const editorABold = page.getByText('bold').nth(0);
   const editorAItalic = page.getByText('italic').nth(0);
@@ -702,8 +702,8 @@ test('input continuous spaces', async ({ page }) => {
   await enterInlineEditorPlayground(page);
   await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -732,8 +732,8 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
   await enterInlineEditorPlayground(page);
   await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -787,8 +787,8 @@ test('getLine', async ({ page }) => {
   await enterInlineEditorPlayground(page);
   await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
+  const editorB = page.locator('[data-v-root="true"]').nth(1);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -855,7 +855,7 @@ test('embed', async ({ page }) => {
   await enterInlineEditorPlayground(page);
   await focusInlineRichText(page);
 
-  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
+  const editorA = page.locator('[data-v-root="true"]').nth(0);
   const editorAEmbed = page.getByText('embed').nth(0);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -877,7 +877,7 @@ test('embed', async ({ page }) => {
   await assertSelection(page, 0, 1, 3);
 
   await editorAEmbed.click();
-  const embedCount = await page.locator('[data-virgo-embed="true"]').count();
+  const embedCount = await page.locator('[data-v-embed="true"]').count();
   expect(embedCount).toBe(3);
 
   // try to update cursor position using arrow keys

@@ -156,7 +156,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     );
     const [x, y] = this.edgeless.surface.toViewCoord(leftTopX, leftTopY);
 
-    const virgoStyle = styleMap({
+    const inlineEditorStyle = styleMap({
       position: 'absolute',
       left: x + 'px',
       top: y + 'px',
@@ -191,7 +191,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
       .enableAutoScrollVertically=${false}
-      style=${virgoStyle}
+      style=${inlineEditorStyle}
     ></rich-text>`;
   }
 }

@@ -69,13 +69,13 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   };
 
   const _getInlineEditor = () => {
-    const vRoot = blockElement.querySelector<InlineRootElement>(
+    const inlieRoot = blockElement.querySelector<InlineRootElement>(
       `[${INLINE_ROOT_ATTR}]`
     );
-    if (!vRoot) {
-      throw new Error('Virgo root not found');
+    if (!inlieRoot) {
+      throw new Error('Inline editor root not found');
     }
-    return vRoot.inlineEditor;
+    return inlieRoot.inlineEditor;
   };
 
   const _getPrefixText = (inlineEditor: InlineEditor) => {
@@ -226,12 +226,12 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!blockElement.selected?.is('text')) return;
 
       const text = blockElement.selected;
-      const virgo = blockElement.querySelector<InlineRootElement>(
+      const inlineRoot = blockElement.querySelector<InlineRootElement>(
         `[${INLINE_ROOT_ATTR}]`
       );
       if (
         text.from.index === 0 &&
-        text.from.length === virgo?.inlineEditor.yText.length
+        text.from.length === inlineRoot?.inlineEditor.yText.length
       ) {
         return _selectBlock();
       }

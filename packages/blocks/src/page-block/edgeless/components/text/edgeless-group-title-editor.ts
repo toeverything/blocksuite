@@ -92,7 +92,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
     const viewport = this.edgeless.surface.viewport;
     const bound = Bound.deserialize(this.group.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const virgoStyle = styleMap({
+    const inlineEditorStyle = styleMap({
       transformOrigin: 'top left',
       borderRadius: '35px',
       width: 'fit-content',
@@ -116,7 +116,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
       .enableAutoScrollVertically=${false}
-      style=${virgoStyle}
+      style=${inlineEditorStyle}
     ></rich-text>`;
   }
 }

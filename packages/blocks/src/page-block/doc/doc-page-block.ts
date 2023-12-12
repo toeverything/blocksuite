@@ -223,7 +223,7 @@ export class DocPageBlockComponent extends BlockElement<
     );
     this.addEventListener('copy', this._onTitleCopy);
 
-    // Workaround for virgo skips composition event
+    // Workaround for inline editor to skip composition event
     this._disposables.addFromEvent(
       this._titleContainer,
       'compositionstart',

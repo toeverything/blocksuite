@@ -153,10 +153,10 @@ export async function assertInlineEditorDeltas(
   i = 0
 ) {
   const actual = await page.evaluate(i => {
-    const vRoot = document.querySelectorAll<InlineRootElement>(
-      '[data-virgo-root="true"]'
+    const inlineRoot = document.querySelectorAll<InlineRootElement>(
+      '[data-v-root="true"]'
     )[i];
-    return vRoot.inlineEditor.yTextDeltas;
+    return inlineRoot.inlineEditor.yTextDeltas;
   }, i);
   expect(actual).toEqual(deltas);
 }
@@ -167,10 +167,10 @@ export async function assertRichTextInlineDeltas(
   i = 0
 ) {
   const actual = await page.evaluate(i => {
-    const vRoot = document.querySelectorAll<InlineRootElement>(
-      'rich-text [data-virgo-root="true"]'
+    const inlineRoot = document.querySelectorAll<InlineRootElement>(
+      'rich-text [data-v-root="true"]'
     )[i];
-    return vRoot.inlineEditor.yTextDeltas;
+    return inlineRoot.inlineEditor.yTextDeltas;
   }, i);
   expect(actual).toEqual(deltas);
 }

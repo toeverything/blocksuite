@@ -1704,7 +1704,7 @@ test('should select with shift-click', async ({ page }) => {
 
   await focusRichText(page);
 
-  await page.click('[data-block-id="4"] [data-virgo-text]', {
+  await page.click('[data-block-id="4"] [data-v-text]', {
     modifiers: ['Shift'],
   });
   expect(await getSelectedText(page)).toContain('4567');

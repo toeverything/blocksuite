@@ -103,7 +103,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const { isInner } = frameBlock;
 
-    const virgoStyle = styleMap({
+    const inlineEditorStyle = styleMap({
       transformOrigin: 'top left',
       borderRadius: '4px',
       width: 'fit-content',
@@ -131,7 +131,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
       .enableAutoScrollVertically=${false}
-      style=${virgoStyle}
+      style=${inlineEditorStyle}
     ></rich-text>`;
   }
 }

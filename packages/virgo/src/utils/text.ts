@@ -10,7 +10,7 @@ export function calculateTextLength(text: Text): number {
 
 export function getTextNodesFromElement(element: Element): Text[] {
   const textSpanElements = Array.from(
-    element.querySelectorAll('[data-virgo-text="true"]')
+    element.querySelectorAll('[data-v-text="true"]')
   );
   const textNodes = textSpanElements.map(textSpanElement => {
     const textNode = Array.from(textSpanElement.childNodes).find(

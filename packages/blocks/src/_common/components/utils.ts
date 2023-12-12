@@ -29,7 +29,7 @@ export const createKeydownObserver = ({
   const inlineEditor = target.inlineEditor;
   assertExists(
     inlineEditor,
-    'Failed to observer keyboard! virgo editor is not exist.'
+    'Failed to observer keyboard! Inline editor does not exist.'
   );
   const startIndex = inlineEditor?.getInlineRange()?.index ?? 0;
 

@@ -773,7 +773,7 @@ export async function setInlineRangeInInlineEditor(
   await page.evaluate(
     ({ i, inlineRange }) => {
       const inlineEditor = document.querySelectorAll<InlineRootElement>(
-        '[data-virgo-root="true"]'
+        '[data-v-root="true"]'
       )[i]?.inlineEditor;
       if (!inlineEditor) {
         throw new Error('Cannot find inline editor');

@@ -66,11 +66,11 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
           assertExists(selectedBlocks);
 
           const selectedInlineEditors = selectedBlocks.flatMap(el => {
-            const vRoot = el.querySelector<
+            const inlineRoot = el.querySelector<
               InlineRootElement<AffineTextAttributes>
             >(`[${INLINE_ROOT_ATTR}]`);
-            if (vRoot && vRoot.inlineEditor.getInlineRange()) {
-              return vRoot.inlineEditor;
+            if (inlineRoot && inlineRoot.inlineEditor.getInlineRange()) {
+              return inlineRoot.inlineEditor;
             }
             return [];
           });
@@ -94,11 +94,11 @@ function getCombinedFormat(host: EditorHost): AffineTextAttributes {
           assertExists(selectedBlocks);
 
           const selectedInlineEditors = selectedBlocks.flatMap(el => {
-            const vRoot = el.querySelector<
+            const inlineRoot = el.querySelector<
               InlineRootElement<AffineTextAttributes>
             >(`[${INLINE_ROOT_ATTR}]`);
-            if (vRoot) {
-              return vRoot.inlineEditor;
+            if (inlineRoot) {
+              return inlineRoot.inlineEditor;
             }
             return [];
           });
@@ -203,11 +203,11 @@ export function isFormatSupported(host: EditorHost) {
           if (currentTextSelection.isCollapsed()) return;
 
           const selectedInlineEditors = selectedBlocks.flatMap(el => {
-            const vRoot = el.querySelector<
+            const inlineRoot = el.querySelector<
               InlineRootElement<AffineTextAttributes>
             >(`[${INLINE_ROOT_ATTR}]`);
-            if (vRoot && vRoot.inlineEditor.getInlineRange()) {
-              return vRoot.inlineEditor;
+            if (inlineRoot && inlineRoot.inlineEditor.getInlineRange()) {
+              return inlineRoot.inlineEditor;
             }
             return [];
           });
@@ -228,11 +228,11 @@ export function isFormatSupported(host: EditorHost) {
           assertExists(selectedBlocks);
 
           const selectedInlineEditors = selectedBlocks.flatMap(el => {
-            const vRoot = el.querySelector<
+            const inlineRoot = el.querySelector<
               InlineRootElement<AffineTextAttributes>
             >(`[${INLINE_ROOT_ATTR}]`);
-            if (vRoot) {
-              return vRoot.inlineEditor;
+            if (inlineRoot) {
+              return inlineRoot.inlineEditor;
             }
             return [];
           });

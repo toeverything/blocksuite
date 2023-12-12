@@ -87,7 +87,7 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const virgoStyle = styleMap({
+    const inlineEditorStyle = styleMap({
       transformOrigin: 'top left',
       borderRadius: '4px',
       maxWidth: `${this.maxWidth}px`,
@@ -113,7 +113,7 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
       .enableAutoScrollVertically=${false}
-      style=${virgoStyle}
+      style=${inlineEditorStyle}
     ></rich-text>`;
   }
 }

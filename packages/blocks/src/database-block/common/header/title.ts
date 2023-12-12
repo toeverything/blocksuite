@@ -26,25 +26,25 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       cursor: text;
     }
 
-    .database-title [data-virgo-text='true'] {
+    .database-title [data-v-text='true'] {
       display: block;
       word-break: break-all !important;
     }
 
-    .database-title.ellipsis [data-virgo-text='true'] {
+    .database-title.ellipsis [data-v-text='true'] {
       white-space: nowrap !important;
       text-overflow: ellipsis;
       overflow: hidden;
     }
 
-    .database-title-empty [data-virgo-root='true']::before {
+    .database-title-empty [data-v-root='true']::before {
       content: 'Untitled';
       position: absolute;
       pointer-events: none;
       color: var(--affine-text-primary-color);
     }
 
-    .database-title-empty [data-virgo-root='true']:focus::before {
+    .database-title-empty [data-v-root='true']:focus::before {
       color: var(--affine-placeholder-color);
     }
   `;

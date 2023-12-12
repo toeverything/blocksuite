@@ -51,14 +51,14 @@ export class VLine extends LitElement {
       `[${INLINE_ROOT_ATTR}]`
     ) as InlineRootElement;
     assertExists(rootElement, 'v-line must be inside a v-root');
-    const virgoEditor = rootElement.inlineEditor;
+    const inlineEditor = rootElement.inlineEditor;
     assertExists(
-      virgoEditor,
+      inlineEditor,
       'v-line must be inside a v-root with inline-editor'
     );
 
     const renderElements = this.elements.flatMap(([template, delta], index) => {
-      if (virgoEditor.isEmbed(delta)) {
+      if (inlineEditor.isEmbed(delta)) {
         if (delta.insert.length !== 1) {
           throw new Error(`The length of embed node should only be 1.
             This seems to be an internal issue with Virgo.
@@ -68,14 +68,14 @@ export class VLine extends LitElement {
         // we add `EmbedGap` to make cursor can be placed between embed elements
         if (index === 0) {
           const nextDelta = this.elements[index + 1]?.[1];
-          if (!nextDelta || virgoEditor.isEmbed(nextDelta)) {
+          if (!nextDelta || inlineEditor.isEmbed(nextDelta)) {
             return [EmbedGap, template, EmbedGap];
           } else {
             return [EmbedGap, template];
           }
         } else {
           const nextDelta = this.elements[index + 1]?.[1];
-          if (!nextDelta || virgoEditor.isEmbed(nextDelta)) {
+          if (!nextDelta || inlineEditor.isEmbed(nextDelta)) {
             return [template, EmbedGap];
           } else {
             return [template];

@@ -86,12 +86,12 @@ export const textFormatConfigs: TextFormatConfig[] = [
       if (!selection || selection.rangeCount === 0) return;
       const range = selection.getRangeAt(0);
 
-      const vRoot = range.commonAncestorContainer.parentElement?.closest<
+      const inlineRoot = range.commonAncestorContainer.parentElement?.closest<
         InlineRootElement<AffineTextAttributes>
       >(`[${INLINE_ROOT_ATTR}]`);
-      if (!vRoot) return;
+      if (!inlineRoot) return;
 
-      const inlineEditor = vRoot.inlineEditor;
+      const inlineEditor = inlineRoot.inlineEditor;
       const targetInlineRange = inlineEditor.getInlineRange();
       assertExists(targetInlineRange);
 

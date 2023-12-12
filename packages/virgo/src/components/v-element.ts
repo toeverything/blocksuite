@@ -20,10 +20,10 @@ export class VElement<
   selected!: boolean;
 
   override render() {
-    const virgoEditor = getInlineEditorInsideRoot(this);
-    const attributeRenderer = virgoEditor.attributeService.attributeRenderer;
+    const inlineEditor = getInlineEditorInsideRoot(this);
+    const attributeRenderer = inlineEditor.attributeService.attributeRenderer;
 
-    const isEmbed = virgoEditor.isEmbed(this.delta);
+    const isEmbed = inlineEditor.isEmbed(this.delta);
     if (isEmbed) {
       if (this.delta.insert.length !== 1) {
         throw new Error(`The length of embed node should only be 1.
@@ -33,8 +33,8 @@ export class VElement<
       }
 
       return html`<span
-        data-virgo-embed="true"
-        data-virgo-element="true"
+        data-v-embed="true"
+        data-v-element="true"
         contenteditable="false"
         style=${styleMap({ userSelect: 'none' })}
         >${attributeRenderer(this.delta, this.selected)}</span
@@ -43,7 +43,7 @@ export class VElement<
 
     // we need to avoid \n appearing before and after the span element, which will
     // cause the unexpected space
-    return html`<span data-virgo-element="true"
+    return html`<span data-v-element="true"
       >${attributeRenderer(this.delta, this.selected)}</span
     >`;
   }

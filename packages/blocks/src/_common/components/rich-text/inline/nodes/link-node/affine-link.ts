@@ -32,11 +32,11 @@ export class AffineLink extends ShadowlessElement {
   }
 
   get inlineEditor() {
-    const vRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
+    const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
       `[${INLINE_ROOT_ATTR}]`
     );
-    assertExists(vRoot);
-    return vRoot.inlineEditor;
+    assertExists(inlineRoot);
+    return inlineRoot.inlineEditor;
   }
 
   @property({ attribute: false })
@@ -59,7 +59,7 @@ export class AffineLink extends ShadowlessElement {
       cursor: pointer;
     }
 
-    affine-link > a:hover [data-virgo-text='true'] {
+    affine-link > a:hover [data-v-text='true'] {
       text-decoration: underline;
     }
 

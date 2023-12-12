@@ -204,12 +204,12 @@ export class InlineEditor<
   }
 
   mount(rootElement: HTMLElement) {
-    const virgoElement = rootElement as InlineRootElement<TextAttributes>;
-    virgoElement.inlineEditor = this;
-    this._rootElement = virgoElement;
+    const inlineRoot = rootElement as InlineRootElement<TextAttributes>;
+    inlineRoot.inlineEditor = this;
+    this._rootElement = inlineRoot;
     render(nothing, this._rootElement);
     this._rootElement.contentEditable = 'true';
-    this._rootElement.dataset.virgoRoot = 'true';
+    this._rootElement.dataset.vRoot = 'true';
 
     this._bindYTextObserver();
 

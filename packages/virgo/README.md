@@ -1,24 +1,19 @@
 # `@blocksuite/virgo`
 
-## Introduction
+Inline rich text editing component for BlockSuite.
 
-Virgo is a streamlined rich-text editing core that seamlessly synchronizes the state between DOM and [Y.Text](https://docs.yjs.dev/api/shared-types/y.text). What sets it apart from other rich-text editing frameworks is its natively CRDT data model. For comparison, if you want collaborative editing in Slate.js, you'd typically use a plugin like slate-yjs, which acts as a bridge between [Yjs](https://github.com/yjs/yjs) and Slate.js. Within these plugins, all text operations must be translated between Yjs and Slate.js operations, potentially complicating undo/redo functionalities and code maintenance. With Virgo, the synchronization between Yjs and DOM is direct. This means Yjs's state is the singular source of truth, allowing for direct manipulation of the DOM state via the `Y.Text` API, which considerably reduces the editor's complexity.
-
-In BlockSuite, we initially employed Quill for in-block rich-text editing, leveraging only a limited subset of its APIs. Each paragraph in BlockSuite was managed by an individual Quill instance, linked to a `Y.Text` instance for collaborative purposes. Virgo further simplifies this, performing the same function as our usage of the Quill subset. It essentially offers a straightforward rich-text synchronization process, with block-tree-level state management being taken care of by BlockSuite's data store.
-
-The Virgo editor's state is compatible with `Y.Text`, simplifying the conversion between them. Virgo uses the Delta format, similar to Yjs, allowing Yjs to manage all text states, including formatting.
-
-## Usage
-
-To use Virgo in your project, all you need to do is to create a `Y.Text` instance from `Y.Doc`, bind it to the virgo editor, then mount it to the DOM:
+Usage:
 
 ```ts
+import * as Y from 'yjs';
+import { InlineEditor } from '@blocksuite/virgo';
+
 const doc = new Y.Doc();
 const yText = doc.getText('text');
 const inlineEditor = new InlineEditor(yText);
 
-const editorContainer = document.getElementById('editor');
-inlineEditor.mount(editorContainer);
+const myEditor = document.getElementById('my-editor');
+inlineEditor.mount(myEditor);
 ```
 
 You can go to [virgo playground](https://try-blocksuite.vercel.app/examples/virgo/)
@@ -27,6 +22,7 @@ for online testing and check out the code in its [repository](https://github.com
 ### Attributes
 
 Attributes is a property of a delta structure, which is used to store formatting information.
+
 A delta expressing a bold text node would look like this:
 
 ```json
@@ -61,7 +57,7 @@ const customSchema = baseTextAttributes.extend({
 
 const doc = new Y.Doc();
 const yText = doc.getText('text');
-const inlineEditor = new inlineEditor(yText);
+const inlineEditor = new InlineEditor(yText);
 inlineEditor.setAttributesSchema(customSchema);
 
 const editorContainer = document.getElementById('editor');
@@ -85,6 +81,7 @@ const baseTextAttributes = z.object({
 ### Attributes Renderer
 
 Attributes Renderer is a function that takes a delta and returns `TemplateResult<1>`, which is a valid [lit-html](https://github.com/lit/lit/tree/main/packages/lit-html) template result.
+
 Virgo use this function to render text with custom format and it is also the way to customize the text render.
 
 ```ts
@@ -105,7 +102,7 @@ const attributeRenderer: AttributeRenderer<AffineTextAttributes> = (
 
 const doc = new Y.Doc();
 const yText = doc.getText('text');
-const inlineEditor = new inlineEditor(yText);
+const inlineEditor = new InlineEditor(yText);
 inlineEditor.setAttributeRenderer(attributeRenderer);
 
 const editorContainer = document.getElementById('editor');

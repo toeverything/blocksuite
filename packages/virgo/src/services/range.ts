@@ -95,7 +95,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
   getInlineRangeFromElement = (element: Element): InlineRange | null => {
     const range = document.createRange();
-    const text = element.querySelector('[data-virgo-text');
+    const text = element.querySelector('[data-v-text');
     if (!text) {
       return null;
     }
@@ -130,7 +130,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     throw new Error('failed to find leaf');
   }
 
-  // the number is related to the VirgoLine's textLength
+  // the number is related to the VLine's textLength
   getLine(rangeIndex: InlineRange['index']): readonly [VLine, number] {
     const lineElements = Array.from(
       this.rootElement.querySelectorAll('v-line')

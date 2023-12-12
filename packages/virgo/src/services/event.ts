@@ -164,7 +164,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     this._isComposing = true;
     // embeds is not editable and it will break IME
     const embeds = this.editor.rootElement.querySelectorAll(
-      '[data-virgo-embed="true"]'
+      '[data-v-embed="true"]'
     );
     embeds.forEach(embed => {
       embed.removeAttribute('contenteditable');
@@ -205,7 +205,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
         // IME will directly modify the DOM and is difficult to hijack and cancel.
         // We need to delete this part of the content and restore the selection.
         if (container instanceof Text) {
-          if (container.parentElement?.dataset.virgoText !== 'true') {
+          if (container.parentElement?.dataset.vText !== 'true') {
             container.remove();
           } else {
             const [text] = this.editor.getTextPoint(newInlineRange.index);
@@ -216,16 +216,16 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
               }
             } else {
               const forgedVText = text.parentElement?.closest(
-                '[data-virgo-text="true"]'
+                '[data-v-text="true"]'
               );
               if (forgedVText instanceof HTMLElement) {
-                if (forgedVText.dataset.virgoTextValue) {
-                  if (forgedVText.dataset.virgoTextValue !== text.textContent) {
-                    text.textContent = forgedVText.dataset.virgoTextValue;
+                if (forgedVText.dataset.vTextValue) {
+                  if (forgedVText.dataset.vTextValue !== text.textContent) {
+                    text.textContent = forgedVText.dataset.vTextValue;
                   }
                 } else {
                   throw new Error(
-                    'We detect a forged v-text node but it has no data-virgo-text-value attribute.'
+                    'We detect a forged v-text node but it has no data-v-text-value attribute.'
                   );
                 }
               }

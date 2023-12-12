@@ -28,8 +28,8 @@ export const getInlineRangeProvider: (
         range.startContainer instanceof Element
           ? range.startContainer
           : range.startContainer.parentElement;
-      const vRoot = startElement?.closest(`[${INLINE_ROOT_ATTR}]`);
-      if (!vRoot) return false;
+      const inlineRoot = startElement?.closest(`[${INLINE_ROOT_ATTR}]`);
+      if (!inlineRoot) return false;
 
       const blockElement = startElement?.closest(`[${root.blockIdAttr}]`);
       if (!blockElement || blockElement !== element) return false;

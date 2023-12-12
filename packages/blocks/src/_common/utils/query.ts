@@ -312,10 +312,10 @@ export function getInlineEditorByModel(model: BaseBlockModel) {
   return richText.inlineEditor;
 }
 
-export async function asyncGetVirgoByModel(model: BaseBlockModel) {
+export async function asyncGetInlineEditorByModel(model: BaseBlockModel) {
   if (matchFlavours(model, ['affine:database'])) {
     // Not support database model since it's may be have multiple inline editor instances.
-    throw new Error('Cannot get virgo by database model!');
+    throw new Error('Cannot get inline editor by database model!');
   }
   const richText = await asyncGetRichTextByModel(model);
   if (!richText) return null;
