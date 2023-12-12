@@ -4,7 +4,7 @@ import { Schema, Workspace } from '@blocksuite/store';
 import { LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { AffineEditorContainer } from './affine-editor-container.js';
+import { AffineEditorContainer } from './editor-container.js';
 
 /**
  * This is the editor component to be used out-of-the-box.

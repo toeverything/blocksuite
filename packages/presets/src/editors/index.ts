@@ -1,4 +1,4 @@
-import './affine-editor-container.js';
+import './editor-container.js';
 import './simple-affine-editor.js';
 
 export * from './doc-editor.js';
