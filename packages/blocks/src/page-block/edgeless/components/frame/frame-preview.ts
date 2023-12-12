@@ -1,8 +1,4 @@
-import {
-  assertExists,
-  type Disposable,
-  DisposableGroup,
-} from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { type EditorHost, WithDisposable } from '@blocksuite/lit';
 import type { Page, Y } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
@@ -135,44 +131,23 @@ export class FramePreview extends WithDisposable(LitElement) {
     this._surfaceRenderer.attach(this.container);
   }
 
-  private _initSurfaceRenderer() {
+  private _initSurfaceRenderer(
+    page: Page,
+    surfaceModel: SurfaceBlockModel | null
+  ) {
     this.surfaceRenderer.layerManager.init([
       ...this._elements.values(),
-      ...((this._surfaceModel?.children || []) as EdgelessElement[]),
-      ...(this.page.getBlockByFlavour('affine:note') as EdgelessElement[]),
+      ...((surfaceModel?.children || []) as EdgelessElement[]),
+      ...(page.getBlockByFlavour('affine:note') as EdgelessElement[]),
     ]);
   }
 
-  private _initReferencedModel() {
-    let refWathcer: Disposable | null = null;
+  private _initSurfaceModel(page: Page, disposables: DisposableGroup) {
+    this._surfaceModel = null;
+    this._elements.clear();
+
     const init = () => {
-      refWathcer?.dispose();
-
-      const referencedModel = this.frame;
-
-      if (!referencedModel) return;
-
-      if ('propsUpdated' in referencedModel) {
-        refWathcer = referencedModel.propsUpdated.on(() => {
-          this.updateComplete.then(() => {
-            this._refreshViewport();
-          });
-        });
-      }
-
-      this._refreshViewport();
-    };
-
-    init();
-
-    this._disposables.add(() => {
-      refWathcer?.dispose();
-    });
-  }
-
-  private _initSurfaceModel() {
-    const init = () => {
-      this._surfaceModel = getSurfaceBlock(this.page);
+      this._surfaceModel = getSurfaceBlock(page);
 
       if (!this._surfaceModel) return;
 
@@ -183,7 +158,7 @@ export class FramePreview extends WithDisposable(LitElement) {
         this._onElementsChange(event, elementsMap);
       };
       elementsMap.observe(onElementsChange);
-      this._disposables.add(() => elementsMap.unobserve(onElementsChange));
+      disposables.add(() => elementsMap.unobserve(onElementsChange));
 
       this._syncFromExistingContainer(elementsMap);
     };
@@ -191,8 +166,8 @@ export class FramePreview extends WithDisposable(LitElement) {
     init();
 
     if (!this._surfaceModel) {
-      this._disposables.add(
-        this.page.slots.blockUpdated.on(({ type }) => {
+      disposables.add(
+        page.slots.blockUpdated.on(({ type }) => {
           if (
             type === 'add' &&
             !this._surfaceModel &&
@@ -386,10 +361,9 @@ export class FramePreview extends WithDisposable(LitElement) {
   }
 
   private _getCSSPropertyValue = (value: string) => {
-    const root = this.host;
-    this.host.updateComplete.then(() => {});
+    const host = this.host;
     if (isCssVariable(value)) {
-      const cssValue = getThemePropertyValue(root, value as CssVariableName);
+      const cssValue = getThemePropertyValue(host, value as CssVariableName);
       if (cssValue === undefined) {
         console.error(
           new Error(
@@ -451,6 +425,13 @@ export class FramePreview extends WithDisposable(LitElement) {
   private _setPageDisposables(page: Page) {
     this._clearPageDisposables();
     this._pageDisposables = new DisposableGroup();
+    this._initSurfaceModel(page, this._pageDisposables);
+    this._initSurfaceRenderer(page, this._surfaceModel);
+    this._connectorManager = new ConnectorPathGenerator({
+      pickById: id => this.getModel(id),
+      refresh: () => this._surfaceRenderer.refresh(),
+    });
+
     this._pageDisposables.add(
       page.slots.blockUpdated.on(event => {
         const { type, flavour } = event;
@@ -523,9 +504,9 @@ export class FramePreview extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
     this._tryLoadFillScreen();
-    this._initSurfaceModel();
-    this._initReferencedModel();
-    this._initSurfaceRenderer();
+    this._setPageDisposables(this.page);
+    this._setEdgelessDisposables(this.edgeless);
+    this._setFrameDisposables(this.frame);
   }
 
   override updated(_changedProperties: PropertyValues) {
@@ -533,13 +514,18 @@ export class FramePreview extends WithDisposable(LitElement) {
       this._refreshViewport();
       this._setFrameDisposables(this.frame);
     }
+
     if (_changedProperties.has('edgeless')) {
-      this._setEdgelessDisposables(this.edgeless);
+      if (this.edgeless) {
+        this._setEdgelessDisposables(this.edgeless);
+      } else {
+        this._clearEdgelessDisposables();
+      }
     }
+
     if (_changedProperties.has('page')) {
       this._setPageDisposables(this.page);
     }
-
     this._attachRenderer();
   }
 
@@ -547,11 +533,12 @@ export class FramePreview extends WithDisposable(LitElement) {
     super.disconnectedCallback();
     this._clearEdgelessDisposables();
     this._clearPageDisposables();
+    this._clearFrameDisposables();
   }
 
   override render() {
-    const { _surfaceModel, frame } = this;
-    const noContent = !_surfaceModel || !frame || !frame.xywh;
+    const { _surfaceModel, frame, host } = this;
+    const noContent = !_surfaceModel || !frame || !frame.xywh || !host;
 
     return html`<div class="frame-preview-container">
       ${noContent ? nothing : this._renderSurfaceContent(frame)}
