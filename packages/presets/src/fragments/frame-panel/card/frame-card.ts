@@ -211,7 +211,7 @@ export class FrameCard extends WithDisposable(LitElement) {
     });
   }
 
-  private _renderDraggingCardNumber() {
+  private DraggingCardNumber() {
     if (this.draggingCardNumber === undefined) return nothing;
 
     return html`<div class="dragging-card-number">
@@ -287,7 +287,7 @@ export class FrameCard extends WithDisposable(LitElement) {
               .page=${this.page}
               .frame=${this.frame}
             ></frame-preview>`}
-        ${this._renderDraggingCardNumber()}
+        ${this.DraggingCardNumber()}
       </div>
     </div>`;
   }
