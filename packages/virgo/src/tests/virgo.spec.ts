@@ -253,7 +253,7 @@ test('readonly mode', async ({ page }) => {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (richTextA as any).vEditor.setReadonly(true);
+    (richTextA as any).inlineEditor.setReadonly(true);
   });
 
   await type(page, 'aaaa');
@@ -836,7 +836,7 @@ test('yText should not contain \r', async ({ page }) => {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richText as any).vEditor as InlineEditor;
+    const editor = (richText as any).inlineEditor as InlineEditor;
 
     try {
       editor.insertText({ index: 0, length: 0 }, 'abc\r');

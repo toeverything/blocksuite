@@ -68,7 +68,7 @@ export async function getVRangeFromVirgoRichText(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTexts[index] as any).vEditor as InlineEditor;
+    const editor = (richTexts[index] as any).inlineEditor as InlineEditor;
     return editor.getVRange();
   }, index);
 }
@@ -111,7 +111,7 @@ export async function getVirgoRichTextLine(
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const editor = (richTexts[i] as any).vEditor as InlineEditor;
+      const editor = (richTexts[i] as any).inlineEditor as InlineEditor;
       const line = editor.getLine(index);
       return [line[0].textContent, line[1]] as const;
     },
