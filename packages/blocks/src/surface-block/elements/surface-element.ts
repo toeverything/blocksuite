@@ -83,10 +83,7 @@ export abstract class SurfaceElement<
     ) => void;
     pickById: (id: string) => EdgelessElement | null;
     getGroupParent: (element: string | EdgelessElement) => GroupElement;
-    setGroupParent: (
-      element: string | EdgelessElement,
-      group: GroupElement
-    ) => void;
+    setGroupParent: (element: string, group: GroupElement) => void;
     removeElement: (id: string) => void;
     selectionManager?: EdgelessSelectionManager;
   };

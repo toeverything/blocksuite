@@ -16,13 +16,7 @@ import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, nothing } from 'lit';
-import {
-  customElement,
-  property,
-  query,
-  queryAll,
-  state,
-} from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
@@ -128,9 +122,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @query('.affine-edgeless-layer')
   layer!: HTMLDivElement;
 
-  @queryAll('.surface-layer')
-  canvases!: HTMLCanvasElement[];
-
   @query('.canvas-slot')
   canvasSlot!: HTMLDivElement;
 
@@ -180,6 +171,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     return this.selectedRect.dragging;
   }
 
+  private _updateCanvasViewport() {
+    Array.from(this.canvasSlot.children).forEach(canvas => {
+      (canvas as HTMLCanvasElement).style.setProperty(
+        'transform',
+        this._getLayerViewport(true)
+      );
+    });
+  }
+
   aboutToChangeViewport() {
     if (this._cancelRestoreWillchange) this._cancelRestoreWillchange();
     if (!this.layer.style.willChange)
@@ -204,17 +204,14 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
     this.layer.style.setProperty('transform', this._getLayerViewport());
-    Array.from(this.canvasSlot.children).forEach(canvas => {
-      (canvas as HTMLCanvasElement).style.setProperty(
-        'transform',
-        this._getLayerViewport(true)
-      );
-    });
+    this._updateCanvasViewport();
   };
 
   setSlotContent(children: HTMLElement[]) {
     if (this.canvasSlot.children.length !== children.length)
       this.canvasSlot.replaceChildren(...children);
+
+    this._updateCanvasViewport();
   }
 
   private _getLayerViewport(negative = false) {
