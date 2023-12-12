@@ -106,19 +106,16 @@ export const HighlightButton = (formatBar: AffineFormatBarWidget) => {
 
   const { setFloating, setReference } = whenHover(isHover => {
     if (!isHover) {
-      const panel = formatBar.shadowRoot?.querySelector(
-        '.highlight-panel'
-      ) as HTMLElement | null;
-      assertExists(panel);
+      const panel =
+        formatBar.shadowRoot?.querySelector<HTMLElement>('.highlight-panel');
+      if (!panel) return;
       panel.style.display = 'none';
       return;
     }
-    const button = formatBar.shadowRoot?.querySelector(
-      '.highlight-button'
-    ) as HTMLElement | null;
-    const panel = formatBar.shadowRoot?.querySelector(
-      '.highlight-panel'
-    ) as HTMLElement | null;
+    const button =
+      formatBar.shadowRoot?.querySelector<HTMLElement>('.highlight-button');
+    const panel =
+      formatBar.shadowRoot?.querySelector<HTMLElement>('.highlight-panel');
     assertExists(button);
     assertExists(panel);
     panel.style.display = 'block';

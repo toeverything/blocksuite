@@ -98,20 +98,17 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
 
   const { setFloating, setReference } = whenHover(isHover => {
     if (!isHover) {
-      const panel = formatBar.shadowRoot?.querySelector(
-        '.paragraph-panel'
-      ) as HTMLElement | null;
-      assertExists(panel);
+      const panel =
+        formatBar.shadowRoot?.querySelector<HTMLElement>('.paragraph-panel');
+      if (!panel) return;
       panel.style.display = 'none';
       return;
     }
     const formatQuickBarElement = formatBar.formatBarElement;
-    const button = formatBar.shadowRoot?.querySelector(
-      '.paragraph-button'
-    ) as HTMLElement | null;
-    const panel = formatBar.shadowRoot?.querySelector(
-      '.paragraph-panel'
-    ) as HTMLElement | null;
+    const button =
+      formatBar.shadowRoot?.querySelector<HTMLElement>('.paragraph-button');
+    const panel =
+      formatBar.shadowRoot?.querySelector<HTMLElement>('.paragraph-panel');
     assertExists(button);
     assertExists(panel);
     assertExists(formatQuickBarElement, 'format quick bar should exist');
