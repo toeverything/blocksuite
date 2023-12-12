@@ -42,7 +42,7 @@ export class PageService extends BlockService<PageBlockModel> {
       .add('formatBlock', formatBlockCommand)
       .add('formatNative', formatNativeCommand)
       .add('formatText', formatTextCommand)
-      .add('withRoot', withHostCommand);
+      .add('withHost', withHostCommand);
 
     this.loadFonts();
   }
