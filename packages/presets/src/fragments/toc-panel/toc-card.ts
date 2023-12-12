@@ -189,7 +189,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     this._noteDisposables = null;
   };
 
-  private _setPageDisposables() {
+  private _setNoteDisposables() {
     this._clearNoteDisposables();
     this._noteDisposables = new DisposableGroup();
     this._noteDisposables.add(
@@ -202,7 +202,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
   override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('note') || _changedProperties.has('index')) {
-      this._setPageDisposables();
+      this._setNoteDisposables();
     }
   }
 

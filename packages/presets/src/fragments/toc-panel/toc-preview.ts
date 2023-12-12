@@ -14,14 +14,7 @@ import type {
 import { BlocksUtils } from '@blocksuite/blocks';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import {
-  css,
-  html,
-  LitElement,
-  nothing,
-  type PropertyValues,
-  type TemplateResult,
-} from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import {

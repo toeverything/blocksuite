@@ -3,11 +3,11 @@ import type {
   NoteBlockModel,
 } from '@blocksuite/blocks';
 import { Bound } from '@blocksuite/blocks';
-import { noop } from '@blocksuite/global/utils';
+import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import { type Page } from '@blocksuite/store';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -151,6 +151,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   @property({ attribute: false })
   domHost!: Document | HTMLElement;
 
+  private _pageDisposables: DisposableGroup | null = null;
+
   private _indicatorTranslateY = 0;
   private _changedFlag = false;
   private _oldViewport?: {
@@ -205,6 +207,42 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
         [this._oldViewport.center.x, this._oldViewport.center.y],
         true
       );
+    }
+
+    this._clearPageDisposables();
+  }
+
+  private _clearPageDisposables() {
+    this._pageDisposables?.dispose();
+    this._pageDisposables = null;
+  }
+
+  private _setPageDisposables() {
+    const { slots, root } = this.page;
+    const slotsForUpdate = root
+      ? [root.childrenUpdated, slots.blockUpdated]
+      : [slots.blockUpdated];
+
+    slots.rootAdded.on(root => {
+      this._clearPageDisposables();
+      this._pageDisposables = new DisposableGroup();
+      this._pageDisposables.add(
+        root.childrenUpdated.on(() => this._updateNotes())
+      );
+    });
+
+    slotsForUpdate.forEach(slot => {
+      this._clearPageDisposables();
+      this._pageDisposables = new DisposableGroup();
+      this._pageDisposables.add(slot.on(() => this._updateNotes()));
+    });
+
+    this._updateNotes();
+  }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('page')) {
+      this._setPageDisposables();
     }
   }
 
@@ -486,8 +524,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   }
 
   private _renderEmptyPanel() {
-    return html`<div class="no-notes-container">
-      <div class="notes-placeholder">
+    return html`<div class="no-note-container">
+      <div class="note-placeholder">
         Use headings to create a table of contents.
       </div>
     </div>`;
