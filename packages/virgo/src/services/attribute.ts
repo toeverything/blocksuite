@@ -7,7 +7,7 @@ import {
   baseTextAttributes,
   getDefaultAttributeRenderer,
 } from '../utils/index.js';
-import type { VEditor } from '../virgo.js';
+import type { InlineEditor } from '../virgo.js';
 
 export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
   private _marks: TextAttributes | null = null;
@@ -18,7 +18,7 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
   private _attributeSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown> =
     baseTextAttributes as z.ZodSchema<TextAttributes, ZodTypeDef, unknown>;
 
-  constructor(public readonly editor: VEditor<TextAttributes>) {}
+  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
 
   get marks() {
     return this._marks;

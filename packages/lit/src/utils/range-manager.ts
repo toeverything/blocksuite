@@ -2,7 +2,7 @@ import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
-  type VEditor,
+  type InlineEditor,
   VIRGO_ROOT_ATTR,
   type VirgoRootElement,
   type VRange,
@@ -209,7 +209,9 @@ export class RangeManager {
     return virgoEditor.toDomRange(vRange);
   }
 
-  private _calculateVirgo(point: TextRangePoint): [VEditor, VRange] | null {
+  private _calculateVirgo(
+    point: TextRangePoint
+  ): [InlineEditor, VRange] | null {
     const block = this.host.view.viewFromPath('block', point.path);
     if (!block) {
       return null;

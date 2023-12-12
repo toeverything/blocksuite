@@ -10,12 +10,12 @@ import {
 } from '../utils/range-conversion.js';
 import { calculateTextLength, getTextNodesFromElement } from '../utils/text.js';
 import { isMaybeVRangeEqual } from '../utils/v-range.js';
-import type { VEditor } from '../virgo.js';
+import type { InlineEditor } from '../virgo.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   private _vRange: VRange | null = null;
 
-  constructor(public readonly editor: VEditor<TextAttributes>) {}
+  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
 
   get vRangeProvider() {
     return this.editor.vRangeProvider;

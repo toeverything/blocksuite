@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { ZERO_WIDTH_SPACE } from '../consts.js';
-import type { VEditor } from '../virgo.js';
+import type { InlineEditor } from '../virgo.js';
 import {
   assertSelection,
   enterVirgoPlayground,
@@ -836,7 +836,7 @@ test('yText should not contain \r', async ({ page }) => {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richText as any).vEditor as VEditor;
+    const editor = (richText as any).vEditor as InlineEditor;
 
     try {
       editor.insertText({ index: 0, length: 0 }, 'abc\r');

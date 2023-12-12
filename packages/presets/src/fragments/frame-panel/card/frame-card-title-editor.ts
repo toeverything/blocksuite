@@ -1,5 +1,5 @@
 import type {
-  AffineVEditor,
+  AffineInlineEditor,
   FrameBlockModel,
   RichText,
 } from '@blocksuite/blocks';
@@ -27,7 +27,7 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
 
   private _isComposing = false;
 
-  get vEditor(): AffineVEditor {
+  get vEditor(): AffineInlineEditor {
     assertExists(this.richText.vEditor);
     return this.richText.vEditor;
   }

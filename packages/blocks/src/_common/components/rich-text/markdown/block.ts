@@ -12,7 +12,7 @@ import {
 import { getStandardLanguage } from '../../../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../../../code-block/utils/consts.js';
 import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
-import type { AffineVEditor } from '../virgo/types.js';
+import type { AffineInlineEditor } from '../virgo/types.js';
 import {
   convertToDivider,
   convertToList,
@@ -21,7 +21,7 @@ import {
 
 export function tryConvertBlock(
   element: BlockElement,
-  vEditor: AffineVEditor,
+  vEditor: AffineInlineEditor,
   prefixText: string,
   range: { index: number; length: number }
 ) {

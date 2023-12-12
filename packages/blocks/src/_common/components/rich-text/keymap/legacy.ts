@@ -14,19 +14,19 @@ import {
   handleLineStartBackspace,
   handleUnindent,
 } from '../rich-text-operations.js';
-import type { AffineVEditor } from '../virgo/types.js';
+import type { AffineInlineEditor } from '../virgo/types.js';
 
-function isCollapsedAtBlockStart(vEditor: AffineVEditor) {
+function isCollapsedAtBlockStart(vEditor: AffineInlineEditor) {
   const vRange = vEditor.getVRange();
   return vRange?.index === 0 && vRange?.length === 0;
 }
 
-function isCollapsedAtBlockEnd(vEditor: AffineVEditor) {
+function isCollapsedAtBlockEnd(vEditor: AffineInlineEditor) {
   const vRange = vEditor.getVRange();
   return vRange?.index === vEditor.yText.length && vRange?.length === 0;
 }
 
-export function onSoftEnter(vRange: VRange, vEditor: AffineVEditor) {
+export function onSoftEnter(vRange: VRange, vEditor: AffineInlineEditor) {
   vEditor.insertText(vRange, '\n');
   vEditor.setVRange({
     index: vRange.index + 1,
@@ -41,7 +41,7 @@ export function hardEnter(
   /**
    * @deprecated
    */
-  vEditor: AffineVEditor,
+  vEditor: AffineInlineEditor,
   e: KeyboardEvent,
   shortKey = false
 ) {
@@ -152,7 +152,7 @@ function isSoftEnterable(model: BaseBlockModel) {
 export function onBackspace(
   model: BaseBlockModel,
   e: KeyboardEvent,
-  vEditor: AffineVEditor
+  vEditor: AffineInlineEditor
 ) {
   if (isCollapsedAtBlockStart(vEditor)) {
     if (model.flavour === 'affine:code') {
@@ -169,7 +169,7 @@ export function onBackspace(
 export function onForwardDelete(
   model: BaseBlockModel,
   e: KeyboardEvent,
-  vEditor: AffineVEditor
+  vEditor: AffineInlineEditor
 ) {
   e.stopPropagation();
   if (isCollapsedAtBlockEnd(vEditor)) {

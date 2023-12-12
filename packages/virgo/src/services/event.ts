@@ -9,7 +9,7 @@ import {
 } from '../utils/index.js';
 import { transformInput } from '../utils/transform-input.js';
 import { isMaybeVRangeEqual } from '../utils/v-range.js';
-import type { VEditor } from '../virgo.js';
+import type { InlineEditor } from '../virgo.js';
 import type { VBeforeinputHookCtx, VCompositionEndHookCtx } from './hook.js';
 
 export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
@@ -18,7 +18,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   private _previousAnchor: NativePoint | null = null;
   private _previousFocus: NativePoint | null = null;
 
-  constructor(public readonly editor: VEditor<TextAttributes>) {}
+  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
 
   get vRangeProvider() {
     return this.editor.vRangeProvider;
@@ -302,7 +302,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       data,
       ctx.attributes,
       newVRange,
-      this.editor as VEditor
+      this.editor as InlineEditor
     );
   };
 

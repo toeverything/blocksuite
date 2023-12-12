@@ -19,7 +19,7 @@ import {
 } from '../../../../../../icons/text.js';
 import type { IconButton } from '../../../../../button.js';
 import { toast } from '../../../../../toast.js';
-import type { AffineVEditor } from '../../../types.js';
+import type { AffineInlineEditor } from '../../../types.js';
 import { linkPopupStyle } from './styles.js';
 
 @customElement('link-popup')
@@ -30,7 +30,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   type: 'create' | 'edit' | 'view' = 'create';
 
   @property({ attribute: false })
-  vEditor!: AffineVEditor;
+  vEditor!: AffineInlineEditor;
   @property({ attribute: false })
   goalVRange!: VRange;
 

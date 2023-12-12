@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import * as Y from 'yjs';
 
-import { VEditor } from '../virgo.js';
+import { InlineEditor } from '../virgo.js';
 
 test('getDeltaByRangeIndex', () => {
   const yDoc = new Y.Doc();
@@ -20,7 +20,7 @@ test('getDeltaByRangeIndex', () => {
       },
     },
   ]);
-  const virgo = new VEditor(yText);
+  const virgo = new InlineEditor(yText);
 
   expect(virgo.getDeltaByRangeIndex(0)).toEqual({
     insert: 'aaa',
@@ -74,7 +74,7 @@ test('getDeltasByVRange', () => {
       },
     },
   ]);
-  const virgo = new VEditor(yText);
+  const virgo = new InlineEditor(yText);
 
   expect(
     virgo.getDeltasByVRange({
@@ -372,7 +372,7 @@ test('getDeltasByVRange', () => {
 test('cursor with format', () => {
   const yDoc = new Y.Doc();
   const yText = yDoc.getText('text');
-  const virgo = new VEditor(yText);
+  const virgo = new InlineEditor(yText);
 
   virgo.insertText(
     {
@@ -416,7 +416,7 @@ test('cursor with format', () => {
 test('incorrect format value `false`', () => {
   const yDoc = new Y.Doc();
   const yText = yDoc.getText('text');
-  const virgo = new VEditor(yText);
+  const virgo = new InlineEditor(yText);
 
   virgo.insertText(
     {
@@ -465,7 +465,7 @@ test('yText should not contain \r', () => {
 
   expect(yText.toString()).toEqual('aaa\r');
   expect(() => {
-    new VEditor(yText);
+    new InlineEditor(yText);
   }).toThrow(
     'yText must not contain \r because it will break the range synchronization'
   );

@@ -1,7 +1,7 @@
 import { IS_IOS, IS_MAC } from '@blocksuite/global/env';
 
 import type { VRange } from '../types.js';
-import type { VEditor } from '../virgo.js';
+import type { InlineEditor } from '../virgo.js';
 
 const SHORT_KEY_PROPERTY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 
@@ -23,7 +23,7 @@ export type VKeyboardBindingRecord = Record<string, VKeyboardBinding>;
 
 export interface VKeyboardBindingContext {
   vRange: VRange;
-  vEditor: VEditor;
+  vEditor: InlineEditor;
   collapsed: boolean;
   prefixText: string;
   suffixText: string;
@@ -34,7 +34,7 @@ export type VKeyboardBindingHandler = (
 ) => typeof VKEYBOARD_PREVENT_DEFAULT | typeof VKEYBOARD_ALLOW_DEFAULT;
 
 export function createVirgoKeyDownHandler(
-  vEditor: VEditor,
+  vEditor: InlineEditor,
   bindings: VKeyboardBindingRecord
 ): (evt: KeyboardEvent) => void {
   const bindingStore: Record<string, VKeyboardBinding[]> = {};

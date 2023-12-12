@@ -1,12 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import { VIRGO_ROOT_ATTR } from '../consts.js';
-import type { VEditor, VirgoRootElement } from '../virgo.js';
+import type { InlineEditor, VirgoRootElement } from '../virgo.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
 export function findDocumentOrShadowRoot<
   TextAttributes extends BaseTextAttributes,
->(editor: VEditor<TextAttributes>): Document {
+>(editor: InlineEditor<TextAttributes>): Document {
   const el = editor.rootElement;
 
   if (!el) {
@@ -25,7 +25,7 @@ export function findDocumentOrShadowRoot<
   return el.ownerDocument;
 }
 
-export function getVEditorInsideRoot(element: Element): VEditor {
+export function getVEditorInsideRoot(element: Element): InlineEditor {
   const rootElement = element.closest(
     `[${VIRGO_ROOT_ATTR}]`
   ) as VirgoRootElement;

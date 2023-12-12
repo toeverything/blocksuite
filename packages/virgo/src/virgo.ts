@@ -22,7 +22,7 @@ import { intersectVRange } from './utils/v-range.js';
 export type VirgoRootElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > = HTMLElement & {
-  virgoEditor: VEditor<T>;
+  virgoEditor: InlineEditor<T>;
 };
 
 export interface VRangeProvider {
@@ -31,7 +31,7 @@ export interface VRangeProvider {
   vRangeUpdatedSlot: Slot<VRangeUpdatedProp>;
 }
 
-export class VEditor<
+export class InlineEditor<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
   static nativePointToTextPoint = nativePointToTextPoint;
@@ -156,7 +156,7 @@ export class VEditor<
   }
 
   constructor(
-    yText: VEditor['yText'],
+    yText: InlineEditor['yText'],
     ops: {
       isEmbed?: (delta: DeltaInsert<TextAttributes>) => boolean;
       hooks?: VirgoHookService<TextAttributes>['hooks'];

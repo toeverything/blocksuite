@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { VEditor } from '@blocksuite/virgo';
+import { InlineEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -171,7 +171,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   @query('.affine-doc-page-block-title')
   private _titleContainer!: HTMLElement;
-  private _titleVEditor: VEditor | null = null;
+  private _titleVEditor: InlineEditor | null = null;
 
   get titleVEditor() {
     assertExists(this._titleVEditor);
@@ -209,7 +209,7 @@ export class DocPageBlockComponent extends BlockElement<
     const { model } = this;
     const title = model.title;
 
-    this._titleVEditor = new VEditor(title.yText);
+    this._titleVEditor = new InlineEditor(title.yText);
     this._titleVEditor.mount(this._titleContainer);
     this._titleVEditor.disposables.addFromEvent(
       this._titleContainer,

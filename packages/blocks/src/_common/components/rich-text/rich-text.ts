@@ -5,7 +5,7 @@ import { Text, Workspace } from '@blocksuite/store';
 import {
   type AttributeRenderer,
   createVirgoKeyDownHandler,
-  VEditor,
+  InlineEditor,
   type VRange,
   type VRangeProvider,
 } from '@blocksuite/virgo';
@@ -16,8 +16,8 @@ import { z } from 'zod';
 import { tryFormatInlineStyle } from './markdown/inline.js';
 import { onVBeforeinput, onVCompositionEnd } from './virgo/hooks.js';
 import {
+  type AffineInlineEditor,
   type AffineTextAttributes,
-  type AffineVEditor,
 } from './virgo/types.js';
 
 interface RichTextStackItem {
@@ -85,7 +85,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   enableFormat = true;
 
-  private _vEditor: AffineVEditor | null = null;
+  private _vEditor: AffineInlineEditor | null = null;
   get vEditor() {
     return this._vEditor;
   }
@@ -103,7 +103,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     }
 
     // init vEditor
-    this._vEditor = new VEditor<AffineTextAttributes>(this._yText, {
+    this._vEditor = new InlineEditor<AffineTextAttributes>(this._yText, {
       isEmbed: delta => !!delta.attributes?.reference,
       hooks: {
         beforeinput: onVBeforeinput,

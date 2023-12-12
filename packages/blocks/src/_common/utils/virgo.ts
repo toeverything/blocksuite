@@ -1,9 +1,9 @@
-import type { VEditor } from '@blocksuite/virgo';
+import type { InlineEditor } from '@blocksuite/virgo';
 
 // When the user selects a range, check if it matches the previous selection.
 // If it does, apply the marks from the previous selection.
 // If it does not, remove the marks from the previous selection.
-export function clearMarksOnDiscontinuousInput(vEditor: VEditor): void {
+export function clearMarksOnDiscontinuousInput(vEditor: InlineEditor): void {
   let vRange = vEditor.getVRange();
   const dispose = vEditor.slots.vRangeUpdated.on(([r, s]) => {
     if (

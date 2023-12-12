@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import { Text, Workspace } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
-import { VEditor } from '@blocksuite/virgo';
+import { InlineEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -80,7 +80,7 @@ const styles = css`
   }
 `;
 
-export const addHistoryToVEditor = (vEditor: VEditor) => {
+export const addHistoryToVEditor = (vEditor: InlineEditor) => {
   let range: Range | null = null;
   vEditor.slots.rangeUpdated.on(vRange => {
     range = vRange;
@@ -139,15 +139,15 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     return tRichText.is(this.titleColumn.dataType);
   }
 
-  vEditor?: VEditor;
+  vEditor?: InlineEditor;
   @query('.data-view-header-area-rich-text')
   richText!: HTMLElement;
 
-  protected initVirgo(container: HTMLElement): VEditor {
+  protected initVirgo(container: HTMLElement): InlineEditor {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as Y.Text | string | undefined
     );
-    const vEditor = new VEditor(yText);
+    const vEditor = new InlineEditor(yText);
     this.vEditor = vEditor;
     vEditor.setAttributeSchema(affineTextAttributes);
     vEditor.setAttributeRenderer(affineAttributeRenderer);
@@ -155,7 +155,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     return vEditor;
   }
 
-  protected initEditingMode(vEditor: VEditor) {
+  protected initEditingMode(vEditor: InlineEditor) {
     const historyHelper = addHistoryToVEditor(vEditor);
     vEditor.disposables.addFromEvent(vEditor.rootElement, 'keydown', e => {
       historyHelper.handleKeyboardEvent(e);

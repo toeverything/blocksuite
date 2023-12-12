@@ -8,8 +8,8 @@ import {
 
 import type { Flavour } from '../../../models.js';
 import type {
+  AffineInlineEditor,
   AffineTextAttributes,
-  AffineVEditor,
 } from '../../components/rich-text/virgo/types.js';
 import { BLOCK_ID_ATTR } from '../../consts.js';
 import {
@@ -19,7 +19,7 @@ import {
 } from './consts.js';
 
 function getCombinedFormatFromVEditors(
-  vEditors: [AffineVEditor, VRange | null][]
+  vEditors: [AffineInlineEditor, VRange | null][]
 ): AffineTextAttributes {
   const formatArr: AffineTextAttributes[] = [];
   vEditors.forEach(([vEditor, vRange]) => {

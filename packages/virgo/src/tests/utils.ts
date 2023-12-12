@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { DeltaInsert, VEditor, VRange } from '@blocksuite/virgo';
+import type { DeltaInsert, InlineEditor, VRange } from '@blocksuite/virgo';
 import { expect, type Page } from '@playwright/test';
 
 const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
@@ -48,7 +48,7 @@ export async function getDeltaFromVirgoRichText(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTexts[index] as any).vEditor as VEditor;
+    const editor = (richTexts[index] as any).vEditor as InlineEditor;
     return editor.yText.toDelta();
   }, index);
 }
@@ -68,7 +68,7 @@ export async function getVRangeFromVirgoRichText(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTexts[index] as any).vEditor as VEditor;
+    const editor = (richTexts[index] as any).vEditor as InlineEditor;
     return editor.getVRange();
   }, index);
 }
@@ -89,7 +89,8 @@ export async function setVirgoRichTextRange(
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const editor = (richTexts[index as number] as any).vEditor as VEditor;
+      const editor = (richTexts[index as number] as any)
+        .vEditor as InlineEditor;
       editor.setVRange(vRange as VRange);
     },
     [vRange, index]
@@ -110,7 +111,7 @@ export async function getVirgoRichTextLine(
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const editor = (richTexts[i] as any).vEditor as VEditor;
+      const editor = (richTexts[i] as any).vEditor as InlineEditor;
       const line = editor.getLine(index);
       return [line[0].textContent, line[1]] as const;
     },

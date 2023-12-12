@@ -6,10 +6,10 @@ import type { DeltaInsert } from '../types.js';
 import type { DeltaEntry, VRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
 import { deltaInsertsToChunks, renderElement } from '../utils/index.js';
-import type { VEditor } from '../virgo.js';
+import type { InlineEditor } from '../virgo.js';
 
 export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
-  constructor(public readonly editor: VEditor<TextAttributes>) {}
+  constructor(public readonly editor: InlineEditor<TextAttributes>) {}
 
   get deltas() {
     return this.editor.yText.toDelta() as DeltaInsert<TextAttributes>[];

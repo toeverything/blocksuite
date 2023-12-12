@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-escape */
 import type { Y } from '@blocksuite/store';
 import {
-  type VEditor,
+  type InlineEditor,
   VKEYBOARD_ALLOW_DEFAULT,
   VKEYBOARD_PREVENT_DEFAULT,
   type VKeyboardBindingContext,
@@ -13,7 +13,7 @@ interface InlineMarkdownMatch {
   name: string;
   pattern: RegExp;
   action: (props: {
-    vEditor: VEditor;
+    vEditor: InlineEditor;
     prefixText: string;
     vRange: VRange;
     pattern: RegExp;

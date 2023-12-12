@@ -1,11 +1,11 @@
 import type { VRange } from '../types.js';
-import type { VEditor } from '../virgo.js';
+import type { InlineEditor } from '../virgo.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
 function handleInsertText<TextAttributes extends BaseTextAttributes>(
   vRange: VRange,
   data: string | null,
-  editor: VEditor,
+  editor: InlineEditor,
   attributes: TextAttributes
 ) {
   if (!data) return;
@@ -16,7 +16,7 @@ function handleInsertText<TextAttributes extends BaseTextAttributes>(
   });
 }
 
-function handleInsertParagraph(vRange: VRange, editor: VEditor) {
+function handleInsertParagraph(vRange: VRange, editor: InlineEditor) {
   editor.insertLineBreak(vRange);
   editor.setVRange({
     index: vRange.index + 1,
@@ -24,7 +24,7 @@ function handleInsertParagraph(vRange: VRange, editor: VEditor) {
   });
 }
 
-function handleDelete(vRange: VRange, editor: VEditor) {
+function handleDelete(vRange: VRange, editor: InlineEditor) {
   editor.deleteText(vRange);
   editor.setVRange({
     index: vRange.index,
@@ -37,7 +37,7 @@ export function transformInput<TextAttributes extends BaseTextAttributes>(
   data: string | null,
   attributes: TextAttributes,
   vRange: VRange,
-  editor: VEditor
+  editor: InlineEditor
 ) {
   if (!editor.isVRangeValid(vRange)) return;
 

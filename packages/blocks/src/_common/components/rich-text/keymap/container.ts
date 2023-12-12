@@ -4,7 +4,7 @@ import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import {
-  type VEditor,
+  type InlineEditor,
   VIRGO_ROOT_ATTR,
   type VirgoRootElement,
 } from '@blocksuite/virgo';
@@ -78,7 +78,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     return vRoot.virgoEditor;
   };
 
-  const _getPrefixText = (vEditor: VEditor) => {
+  const _getPrefixText = (vEditor: InlineEditor) => {
     const vRange = vEditor.getVRange();
     assertExists(vRange);
     const [leafStart, offsetStart] = vEditor.getTextPoint(vRange.index);

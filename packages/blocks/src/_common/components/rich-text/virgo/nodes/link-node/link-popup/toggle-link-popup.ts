@@ -2,11 +2,11 @@ import './link-popup.js';
 
 import type { VRange } from '@blocksuite/virgo';
 
-import type { AffineVEditor } from '../../../types.js';
+import type { AffineInlineEditor } from '../../../types.js';
 import { LinkPopup } from './link-popup.js';
 
 export function toggleLinkPopup(
-  vEditor: AffineVEditor,
+  vEditor: AffineInlineEditor,
   type: LinkPopup['type'],
   goalVRange: VRange
 ): LinkPopup {

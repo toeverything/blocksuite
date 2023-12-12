@@ -6,7 +6,7 @@ import { isControlledKeyboardEvent } from '../../_common/utils/event.js';
 import { getVirgoByModel } from '../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../_common/utils/selection.js';
 import type { RichText } from './rich-text/rich-text.js';
-import type { AffineVEditor } from './rich-text/virgo/types.js';
+import type { AffineInlineEditor } from './rich-text/virgo/types.js';
 
 export const createKeydownObserver = ({
   target,
@@ -203,7 +203,7 @@ export const createKeydownObserver = ({
  * Remove specified text from the current range.
  */
 export function cleanSpecifiedTail(
-  vEditorOrModel: AffineVEditor | BaseBlockModel,
+  vEditorOrModel: AffineInlineEditor | BaseBlockModel,
   str: string
 ) {
   if (!str) {

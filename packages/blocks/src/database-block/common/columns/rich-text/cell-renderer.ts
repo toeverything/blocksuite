@@ -9,16 +9,16 @@ import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { affineAttributeRenderer } from '../../../../_common/components/rich-text/virgo/attribute-renderer.js';
 import {
+  type AffineInlineEditor,
   type AffineTextAttributes,
   affineTextAttributes,
-  type AffineVEditor,
 } from '../../../../_common/components/rich-text/virgo/types.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';
 
 function toggleStyle(
-  vEditor: AffineVEditor,
+  vEditor: AffineInlineEditor,
   attrs: AffineTextAttributes
 ): void {
   const vRange = vEditor.getVRange();

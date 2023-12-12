@@ -1,11 +1,11 @@
 import type { VRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
-import type { VEditor } from '../virgo.js';
+import type { InlineEditor } from '../virgo.js';
 
 export interface VBeforeinputHookCtx<
   TextAttributes extends BaseTextAttributes,
 > {
-  vEditor: VEditor<TextAttributes>;
+  vEditor: InlineEditor<TextAttributes>;
   raw: InputEvent;
   vRange: VRange;
   data: string | null;
@@ -14,7 +14,7 @@ export interface VBeforeinputHookCtx<
 export interface VCompositionEndHookCtx<
   TextAttributes extends BaseTextAttributes,
 > {
-  vEditor: VEditor<TextAttributes>;
+  vEditor: InlineEditor<TextAttributes>;
   raw: CompositionEvent;
   vRange: VRange;
   data: string | null;
@@ -27,7 +27,7 @@ export type VHookContext<TextAttributes extends BaseTextAttributes> =
 
 export class VirgoHookService<TextAttributes extends BaseTextAttributes> {
   constructor(
-    public readonly editor: VEditor<TextAttributes>,
+    public readonly editor: InlineEditor<TextAttributes>,
     public readonly hooks: {
       beforeinput?: (
         props: VBeforeinputHookCtx<TextAttributes>
