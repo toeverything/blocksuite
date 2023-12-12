@@ -1,5 +1,5 @@
 import type {
-  BlockStdProvider,
+  BlockStdScope,
   SurfaceSelection,
   UIEventStateContext,
 } from '@blocksuite/block-std';
@@ -842,7 +842,7 @@ function prepareConnectorClipboardData(
 
 async function prepareClipboardData(
   selectedAll: Selectable[],
-  std: BlockStdProvider
+  std: BlockStdScope
 ) {
   const selected = await Promise.all(
     selectedAll.map(async selected => {

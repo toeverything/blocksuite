@@ -7,7 +7,7 @@ import type {
   UIEventDispatcher,
   ViewStore,
 } from '@blocksuite/block-std';
-import { BlockStdProvider } from '@blocksuite/block-std';
+import { BlockStdScope } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import {
@@ -91,7 +91,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.std = new BlockStdProvider({
+    this.std = new BlockStdScope({
       host: this,
       workspace: this.page.workspace,
       page: this.page,

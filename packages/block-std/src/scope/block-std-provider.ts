@@ -7,13 +7,13 @@ import { SelectionManager } from '../selection/index.js';
 import { SpecStore } from '../spec/index.js';
 import { ViewStore } from '../view/index.js';
 
-export interface BlockStdProviderOptions {
+export interface BlockStdOptions {
   host: HTMLElement;
   workspace: Workspace;
   page: Page;
 }
 
-export class BlockStdProvider {
+export class BlockStdScope {
   readonly page: Page;
   readonly workspace: Workspace;
   readonly event: UIEventDispatcher;
@@ -24,7 +24,7 @@ export class BlockStdProvider {
   readonly view: ViewStore;
   readonly clipboard: Clipboard;
 
-  constructor(options: BlockStdProviderOptions) {
+  constructor(options: BlockStdOptions) {
     this.host = options.host;
     this.workspace = options.workspace;
     this.page = options.page;
@@ -60,6 +60,6 @@ declare global {
     type Component = Values<ComponentType>;
     type NodeView = Values<NodeViewType>;
 
-    type Std = BlockStdProvider;
+    type Std = BlockStdScope;
   }
 }

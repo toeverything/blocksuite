@@ -2,21 +2,21 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { EventName, UIEventHandler } from '../event/index.js';
-import type { BlockStdProvider } from '../provider/index.js';
+import type { BlockStdScope } from '../scope/index.js';
 
 export interface BlockServiceOptions {
   flavour: string;
-  store: BlockStdProvider;
+  std: BlockStdScope;
 }
 
 export class BlockService<_Model extends BaseBlockModel = BaseBlockModel> {
-  readonly std: BlockStdProvider;
+  readonly std: BlockStdScope;
   readonly flavour: string;
   readonly disposables = new DisposableGroup();
 
   constructor(options: BlockServiceOptions) {
     this.flavour = options.flavour;
-    this.std = options.store;
+    this.std = options.std;
   }
 
   get workspace() {

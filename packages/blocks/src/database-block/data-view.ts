@@ -3,7 +3,7 @@ import './table/renderer.js';
 import './kanban/define.js';
 import './kanban/renderer.js';
 
-import type { BlockStdProvider } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, unsafeCSS } from 'lit';
@@ -62,7 +62,7 @@ export type DataViewNativeConfig = {
   viewSource: ViewSource;
   headerComponent: DataViewProps['header'];
   onDrag?: DataViewProps['onDrag'];
-  std: BlockStdProvider;
+  std: BlockStdScope;
 };
 @customElement('affine-data-view-native')
 export class DataViewNative extends WithDisposable(ShadowlessElement) {
