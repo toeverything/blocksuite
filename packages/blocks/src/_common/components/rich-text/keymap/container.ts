@@ -4,9 +4,9 @@ import { IS_MAC } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import {
+  INLINE_ROOT_ATTR,
   type InlineEditor,
   type InlineRootElement,
-  VIRGO_ROOT_ATTR,
 } from '@blocksuite/virgo';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
@@ -44,7 +44,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       });
     });
     blockElement
-      .querySelector<InlineRootElement>(`[${VIRGO_ROOT_ATTR}]`)
+      .querySelector<InlineRootElement>(`[${INLINE_ROOT_ATTR}]`)
       ?.blur();
     return true;
   };
@@ -70,7 +70,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
   const _getInlineEditor = () => {
     const vRoot = blockElement.querySelector<InlineRootElement>(
-      `[${VIRGO_ROOT_ATTR}]`
+      `[${INLINE_ROOT_ATTR}]`
     );
     if (!vRoot) {
       throw new Error('Virgo root not found');
@@ -227,7 +227,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       const text = blockElement.selected;
       const virgo = blockElement.querySelector<InlineRootElement>(
-        `[${VIRGO_ROOT_ATTR}]`
+        `[${INLINE_ROOT_ATTR}]`
       );
       if (
         text.from.index === 0 &&

@@ -5,9 +5,9 @@ import './components/lang-list.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import {
+  INLINE_ROOT_ATTR,
   type InlineRangeProvider,
   type InlineRootElement,
-  VIRGO_ROOT_ATTR,
 } from '@blocksuite/virgo';
 import { autoPlacement, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
@@ -62,7 +62,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       margin-bottom: 24px;
     }
 
-    .affine-code-block-container .virgo-editor {
+    .affine-code-block-container .inline-editor {
       font-family: var(--affine-font-code-family);
       font-variant-ligatures: none;
     }
@@ -136,7 +136,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       white-space: break-spaces;
     }
 
-    .affine-code-block-container .virgo-editor::-webkit-scrollbar {
+    .affine-code-block-container .inline-editor::-webkit-scrollbar {
       display: none;
     }
 
@@ -222,7 +222,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   private _inlineRangeProvider: InlineRangeProvider | null = null;
 
   get inlineEditor() {
-    const vRoot = this.querySelector<InlineRootElement>(`[${VIRGO_ROOT_ATTR}]`);
+    const vRoot = this.querySelector<InlineRootElement>(
+      `[${INLINE_ROOT_ATTR}]`
+    );
     if (!vRoot) {
       throw new Error('Virgo root not found');
     }

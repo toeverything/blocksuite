@@ -2,8 +2,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
 import {
   type DeltaInsert,
+  INLINE_ROOT_ATTR,
   type InlineRootElement,
-  VIRGO_ROOT_ATTR,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/virgo';
 import { css, html } from 'lit';
@@ -33,7 +33,7 @@ export class AffineLink extends ShadowlessElement {
 
   get inlineEditor() {
     const vRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
-      `[${VIRGO_ROOT_ATTR}]`
+      `[${INLINE_ROOT_ATTR}]`
     );
     assertExists(vRoot);
     return vRoot.inlineEditor;

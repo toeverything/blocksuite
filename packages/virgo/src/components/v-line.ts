@@ -3,7 +3,7 @@ import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { VIRGO_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
+import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import type { InlineRootElement } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
 import { EmbedGap } from './embed-gap.js';
@@ -48,13 +48,13 @@ export class VLine extends LitElement {
     if (!this.isConnected) return;
 
     const rootElement = this.closest(
-      `[${VIRGO_ROOT_ATTR}]`
+      `[${INLINE_ROOT_ATTR}]`
     ) as InlineRootElement;
     assertExists(rootElement, 'v-line must be inside a v-root');
     const virgoEditor = rootElement.inlineEditor;
     assertExists(
       virgoEditor,
-      'v-line must be inside a v-root with virgo-editor'
+      'v-line must be inside a v-root with inline-editor'
     );
 
     const renderElements = this.elements.flatMap(([template, delta], index) => {

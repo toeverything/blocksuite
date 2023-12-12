@@ -1,7 +1,7 @@
 import type { Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import { type InlineRootElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/virgo';
 
 import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
@@ -33,7 +33,7 @@ export const formatNativeCommand: Command<
   if (!range) return;
 
   const selectedInlineEditors = Array.from<InlineRootElement>(
-    host.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
+    host.querySelectorAll(`[${INLINE_ROOT_ATTR}]`)
   )
     .filter(el => range?.intersectsNode(el))
     .filter(el => {

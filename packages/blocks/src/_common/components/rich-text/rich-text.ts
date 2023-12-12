@@ -343,7 +343,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    return html`<div class="affine-rich-text virgo-editor"></div>`;
+    return html`<div class="affine-rich-text inline-editor"></div>`;
   }
 }
 

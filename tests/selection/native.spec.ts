@@ -1008,7 +1008,7 @@ test('the cursor should move to closest editor block when clicking outside conta
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const text2 = page.locator('[data-block-id="3"] .virgo-editor');
+  const text2 = page.locator('[data-block-id="3"] .inline-editor');
   const rect = await text2.boundingBox();
   assertExists(rect);
 

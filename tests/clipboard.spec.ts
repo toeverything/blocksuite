@@ -338,10 +338,10 @@ test(scoped`split block when paste`, async ({ page }) => {
   await pressEnter(page);
   await type(page, 'bb');
   const topLeft123 = await getEditorLocator(page)
-    .locator('[data-block-id="2"] .virgo-editor')
+    .locator('[data-block-id="2"] .inline-editor')
     .boundingBox();
   const bottomRight789 = await getEditorLocator(page)
-    .locator('[data-block-id="5"] .virgo-editor')
+    .locator('[data-block-id="5"] .inline-editor')
     .boundingBox();
   assertExists(topLeft123);
   assertExists(bottomRight789);

@@ -2,10 +2,10 @@ import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
+  INLINE_ROOT_ATTR,
   type InlineEditor,
   type InlineRange,
   type InlineRootElement,
-  VIRGO_ROOT_ATTR,
 } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
@@ -200,7 +200,7 @@ export class RangeManager {
   }
 
   pointToRange(point: TextRangePoint): Range | null {
-    const result = this._calculateVirgo(point);
+    const result = this._calculateInlineEditor(point);
     if (!result) {
       return null;
     }
@@ -209,28 +209,28 @@ export class RangeManager {
     return inlineEditor.toDomRange(inlineRange);
   }
 
-  private _calculateVirgo(
+  private _calculateInlineEditor(
     point: TextRangePoint
   ): [InlineEditor, InlineRange] | null {
     const block = this.host.view.viewFromPath('block', point.path);
     if (!block) {
       return null;
     }
-    const virgoRoot = block.querySelector<InlineRootElement>(
-      `[${VIRGO_ROOT_ATTR}]`
+    const inlineEditorRoot = block.querySelector<InlineRootElement>(
+      `[${INLINE_ROOT_ATTR}]`
     );
     assertExists(
-      virgoRoot,
-      `Cannot find virgo element in block ${point.path.join(' > ')}}`
+      inlineEditorRoot,
+      `Cannot find inline editor element in block ${point.path.join(' > ')}}`
     );
 
-    const maxLength = virgoRoot.inlineEditor.yText.length;
+    const maxLength = inlineEditorRoot.inlineEditor.yText.length;
     const index = point.index >= maxLength ? maxLength : point.index;
     const length =
       index + point.length >= maxLength ? maxLength - index : point.length;
 
     return [
-      virgoRoot.inlineEditor,
+      inlineEditorRoot.inlineEditor,
       {
         index,
         length,
@@ -239,16 +239,16 @@ export class RangeManager {
   }
 
   private _nodeToPoint(node: Node) {
-    const virgoElement = this._getNearestVirgo(node);
-    if (!virgoElement) {
+    const inlineEditorElement = this._getNearestInlineEditor(node);
+    if (!inlineEditorElement) {
       return null;
     }
-    const block = this._getBlock(virgoElement);
+    const block = this._getBlock(inlineEditorElement);
     if (!block) {
       return null;
     }
     const inlineRange = this._range
-      ? virgoElement.inlineEditor.toInlineRange(this._range)
+      ? inlineEditorElement.inlineEditor.toInlineRange(this._range)
       : null;
     if (!inlineRange) {
       return null;
@@ -341,7 +341,7 @@ export class RangeManager {
     }
   }
 
-  private _getNearestVirgo(node: Node) {
+  private _getNearestInlineEditor(node: Node) {
     let element: Element | null;
     if (node instanceof Element) {
       element = node;
@@ -352,7 +352,7 @@ export class RangeManager {
       return;
     }
 
-    return element.closest(`[${VIRGO_ROOT_ATTR}]`) as InlineRootElement;
+    return element.closest(`[${INLINE_ROOT_ATTR}]`) as InlineRootElement;
   }
 
   private _getBlock(element: HTMLElement) {

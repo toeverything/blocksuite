@@ -51,13 +51,13 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       white-space: nowrap;
     }
 
-    .edgeless-text-editor .virgo-container {
+    .edgeless-text-editor .inline-editor-container {
       white-space: nowrap;
       outline: none;
       width: fit-content;
     }
 
-    .edgeless-text-editor .virgo-container span {
+    .edgeless-text-editor .inline-editor-container span {
       white-space: pre !important;
       word-break: keep-all !important;
       overflow-wrap: normal !important;

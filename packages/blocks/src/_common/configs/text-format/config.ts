@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { type InlineRootElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/virgo';
 import type { TemplateResult } from 'lit';
 
 import { toggleLinkPopup } from '../../components/rich-text/inline/nodes/link-node/link-popup/toggle-link-popup.js';
@@ -88,7 +88,7 @@ export const textFormatConfigs: TextFormatConfig[] = [
 
       const vRoot = range.commonAncestorContainer.parentElement?.closest<
         InlineRootElement<AffineTextAttributes>
-      >(`[${VIRGO_ROOT_ATTR}]`);
+      >(`[${INLINE_ROOT_ATTR}]`);
       if (!vRoot) return;
 
       const inlineEditor = vRoot.inlineEditor;

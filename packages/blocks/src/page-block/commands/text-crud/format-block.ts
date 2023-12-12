@@ -1,6 +1,6 @@
 import type { BlockSelection, Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type InlineRootElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/virgo';
 
 import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import { FORMAT_BLOCK_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
@@ -48,7 +48,7 @@ export const formatBlockCommand: Command<
 
       const selectedInlineEditors = selectedBlocks.flatMap(el => {
         const vRoot = el.querySelector<InlineRootElement<AffineTextAttributes>>(
-          `[${VIRGO_ROOT_ATTR}]`
+          `[${INLINE_ROOT_ATTR}]`
         );
         if (vRoot) {
           return vRoot.inlineEditor;

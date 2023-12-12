@@ -1,10 +1,10 @@
 import { PathFinder, type TextSelection } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import {
+  INLINE_ROOT_ATTR,
   type InlineRange,
   type InlineRangeProvider,
   type InlineRangeUpdatedProp,
-  VIRGO_ROOT_ATTR,
 } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
@@ -28,7 +28,7 @@ export const getInlineRangeProvider: (
         range.startContainer instanceof Element
           ? range.startContainer
           : range.startContainer.parentElement;
-      const vRoot = startElement?.closest(`[${VIRGO_ROOT_ATTR}]`);
+      const vRoot = startElement?.closest(`[${INLINE_ROOT_ATTR}]`);
       if (!vRoot) return false;
 
       const blockElement = startElement?.closest(`[${root.blockIdAttr}]`);

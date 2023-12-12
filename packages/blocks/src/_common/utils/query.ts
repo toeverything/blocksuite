@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
+import { INLINE_ROOT_ATTR } from '@blocksuite/virgo';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
@@ -303,7 +303,7 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
 
 export function getInlineEditorByModel(model: BaseBlockModel) {
   if (matchFlavours(model, ['affine:database'])) {
-    // Not support database model since it's may be have multiple Virgo instances.
+    // Not support database model since it's may be have multiple inline editor instances.
     // Support to enter the editing state through the Enter key in the database.
     return null;
   }
@@ -314,7 +314,7 @@ export function getInlineEditorByModel(model: BaseBlockModel) {
 
 export async function asyncGetVirgoByModel(model: BaseBlockModel) {
   if (matchFlavours(model, ['affine:database'])) {
-    // Not support database model since it's may be have multiple Virgo instances.
+    // Not support database model since it's may be have multiple inline editor instances.
     throw new Error('Cannot get virgo by database model!');
   }
   const richText = await asyncGetRichTextByModel(model);
@@ -349,7 +349,7 @@ export function isInsideEdgelessTextEditor(element: unknown): boolean {
 export function isDatabaseInput(element: unknown): boolean {
   return (
     element instanceof HTMLElement &&
-    element.getAttribute(VIRGO_ROOT_ATTR) === 'true' &&
+    element.getAttribute(INLINE_ROOT_ATTR) === 'true' &&
     !!element.closest('affine-database')
   );
 }

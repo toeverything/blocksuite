@@ -133,7 +133,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
       .readonly=${true}
-      class="affine-database-rich-text virgo-editor"
+      class="affine-database-rich-text inline-editor"
     ></rich-text>`;
   }
 }
@@ -297,7 +297,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       .yText=${this.value}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
-      class="affine-database-rich-text virgo-editor"
+      class="affine-database-rich-text inline-editor"
     ></rich-text>`;
   }
 }

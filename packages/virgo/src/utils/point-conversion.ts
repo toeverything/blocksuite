@@ -1,5 +1,5 @@
 import type { VElement, VLine } from '../components/index.js';
-import { VIRGO_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
+import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DomPoint, TextPoint } from '../types.js';
 import { isNativeTextInVText, isVElement, isVLine, isVRoot } from './guard.js';
 import { calculateTextLength, getTextNodesFromElement } from './text.js';
@@ -98,8 +98,8 @@ function getVNodesFromNode(node: Node): VElement[] | VLine[] | null {
 
   const container =
     node instanceof Element
-      ? node.closest(`[${VIRGO_ROOT_ATTR}]`)
-      : node.parentElement?.closest(`[${VIRGO_ROOT_ATTR}]`);
+      ? node.closest(`[${INLINE_ROOT_ATTR}]`)
+      : node.parentElement?.closest(`[${INLINE_ROOT_ATTR}]`);
 
   if (container) {
     return Array.from(container.querySelectorAll('v-line'));

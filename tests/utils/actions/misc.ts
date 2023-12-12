@@ -39,7 +39,7 @@ export const defaultPlaygroundURL = new URL(`http://localhost:5173/starter/`);
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
-const RICH_TEXT_SELECTOR = '.virgo-editor';
+const RICH_TEXT_SELECTOR = '.inline-editor';
 
 function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;

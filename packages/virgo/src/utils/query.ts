@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { VIRGO_ROOT_ATTR } from '../consts.js';
+import { INLINE_ROOT_ATTR } from '../consts.js';
 import type { InlineEditor, InlineRootElement } from '../inline-editor.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
@@ -27,7 +27,7 @@ export function findDocumentOrShadowRoot<
 
 export function getInlineEditorInsideRoot(element: Element): InlineEditor {
   const rootElement = element.closest(
-    `[${VIRGO_ROOT_ATTR}]`
+    `[${INLINE_ROOT_ATTR}]`
   ) as InlineRootElement;
   assertExists(rootElement, 'element must be inside a v-root');
   const inlineEditor = rootElement.inlineEditor;

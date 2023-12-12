@@ -2,7 +2,7 @@ import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { nothing, render } from 'lit';
 import type * as Y from 'yjs';
 
-import { VIRGO_ROOT_ATTR } from './consts.js';
+import { INLINE_ROOT_ATTR } from './consts.js';
 import { InlineHookService } from './services/hook.js';
 import {
   AttributeService,
@@ -222,7 +222,7 @@ export class InlineEditor<
 
   unmount() {
     render(nothing, this.rootElement);
-    this.rootElement.removeAttribute(VIRGO_ROOT_ATTR);
+    this.rootElement.removeAttribute(INLINE_ROOT_ATTR);
     this._rootElement = null;
     this._mounted = false;
     this.disposables.dispose();

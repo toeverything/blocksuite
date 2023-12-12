@@ -900,7 +900,7 @@ test('should format quick bar position correct at the start of second line', asy
     return paragraphId;
   });
   // await focusRichText(page);
-  const locator = page.locator('.virgo-editor').nth(0);
+  const locator = page.locator('.inline-editor').nth(0);
   const textBox = await locator.boundingBox();
   if (!textBox) {
     throw new Error("Can't get bounding box");
@@ -1421,7 +1421,7 @@ test('should show format-quick-bar and select all text of the block when triple 
   await focusRichText(page);
   await type(page, 'hello world');
 
-  const locator = page.locator('.virgo-editor').nth(0);
+  const locator = page.locator('.inline-editor').nth(0);
   const textBox = await locator.boundingBox();
   if (!textBox) {
     throw new Error("Can't get bounding box");
