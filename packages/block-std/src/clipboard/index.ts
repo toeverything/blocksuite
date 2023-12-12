@@ -46,6 +46,18 @@ export class Clipboard {
     });
   }
 
+  private _getDataByType = (data: DataTransfer, type: string) => {
+    const item = data.getData(type);
+    if (item) {
+      return item;
+    }
+    const files = Array.from(data.files).filter(f => f.type === type);
+    if (files) {
+      return files;
+    }
+    return '';
+  };
+
   private async _getClipboardItem(slice: Slice, type: string) {
     const job = this._getJob();
     const adapterItem = this._adapterMap.get(type);
@@ -58,7 +70,7 @@ export class Clipboard {
   }
 
   private _getSnapshotByPriority = async (
-    getItem: (type: string) => string,
+    getItem: (type: string) => string | File[],
     page: Page,
     parent?: string,
     index?: number
@@ -68,6 +80,14 @@ export class Clipboard {
     );
     for (const [type, { adapter }] of byPriority) {
       const item = getItem(type);
+      if (Array.isArray(item)) {
+        if (item.length === 0) {
+          continue;
+        }
+        if (!item.map(f => f.type === type).reduce((a, b) => a || b, false)) {
+          continue;
+        }
+      }
       if (item) {
         const job = this._getJob();
         const payload = {
@@ -118,7 +138,7 @@ export class Clipboard {
       return slice;
     } catch {
       const slice = await this._getSnapshotByPriority(
-        type => data.getData(type),
+        type => this._getDataByType(data, type),
         page,
         parent,
         index
