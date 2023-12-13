@@ -1,9 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type { BlockElement } from '@blocksuite/lit';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
-import { addElement, addNote, getSurface } from '../utils/edgeless.js';
+import {
+  addElement,
+  addNote,
+  getPageRootBlock,
+  getSurface,
+} from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
 beforeEach(async () => {
@@ -437,4 +443,58 @@ test('indexed canvas should be inserted into edgeless portal when switch to edge
   expect(indexedCanvas.height).toBe(surface.renderer.canvas.height);
   expect(indexedCanvas.width).not.toBe(0);
   expect(indexedCanvas.height).not.toBe(0);
+});
+
+test('the actual rendering order of blocks should satisfy the logic order of their indexes', async () => {
+  editor.mode = 'page';
+
+  await wait();
+
+  const indexes = [
+    'ao',
+    'b0D',
+    'ar',
+    'as',
+    'at',
+    'au',
+    'av',
+    'b0Y',
+    'b0V',
+    'b0H',
+    'b0M',
+    'b0T',
+    'b0f',
+    'b0fV',
+    'b0g',
+    'b0i',
+    'b0fl',
+  ];
+
+  indexes.forEach(index => {
+    addNote(page, {
+      index,
+    });
+  });
+
+  await wait();
+
+  editor.mode = 'edgeless';
+  await wait();
+
+  const surface = getSurface(page, editor);
+  const edgeless = getPageRootBlock(page, editor, 'edgeless');
+  const blocks = Array.from(
+    edgeless.pageBlockContainer.layer.querySelectorAll('[data-portal-block-id]')
+  ) as BlockElement[];
+
+  blocks.forEach((block, index) => {
+    if (index === blocks.length - 1) return;
+
+    const prevModel = block.model;
+    const model = blocks[index + 1].model;
+
+    expect(surface.compare(prevModel as any, model as any)).toBeLessThanOrEqual(
+      0
+    );
+  });
 });

@@ -114,9 +114,9 @@ export class LayerManager {
       }
     });
 
-    this.canvasElements.sort();
-    this.frames.sort();
-    this.blocks.sort();
+    this.canvasElements.sort(compare);
+    this.frames.sort(compare);
+    this.blocks.sort(compare);
 
     this._initLayers();
     this._buildCanvasLayers();
