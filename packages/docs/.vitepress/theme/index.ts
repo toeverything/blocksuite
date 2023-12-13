@@ -18,6 +18,5 @@ export default {
   },
   enhanceApp({ app, router, siteData }) {
     app.component('CodeSandbox', CodeSandbox);
-    // ...
   },
 };

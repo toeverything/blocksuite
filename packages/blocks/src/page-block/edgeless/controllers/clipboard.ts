@@ -617,7 +617,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private async _replaceRichTextWithSvgElement(element: HTMLElement) {
-    const richList = Array.from(element.querySelectorAll('.affine-rich-text'));
+    const richList = Array.from(element.querySelectorAll('rich-text'));
     await Promise.all(
       richList.map(async rich => {
         const svgEle = await this._elementToSvgElement(
