@@ -156,8 +156,8 @@ export function getDocPage(page: Page): DocPageBlockComponent | null {
 }
 
 /** If it's not in the page mode, it will return `null` directly */
-export function getDocPageByElement(ele: Element) {
-  return ele.closest('affine-doc-page');
+export function getDocPageByElement(element: Element) {
+  return element.closest('affine-doc-page');
 }
 
 /** If it's not in the edgeless mode, it will return `null` directly */
