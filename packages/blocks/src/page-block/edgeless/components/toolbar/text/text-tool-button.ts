@@ -22,7 +22,7 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
     }
     .edgeless-text-button {
       position: relative;
-      width: 53px;
+      width: 54px;
       height: 44px;
       overflow-y: hidden;
     }
