@@ -114,10 +114,10 @@ export class ContentParser {
         }
         const root = this._page.root;
         const pageBlock = root ? getBlockElementByModel(root) : null;
-        const imageLoadingComponent = document.querySelector(
-          'affine-image-block-loading-card'
-        );
-        if (pageBlock && !imageLoadingComponent) {
+        const imageCard = document.querySelector('affine-image-block-card');
+        const isReady =
+          !imageCard || imageCard.getAttribute('imageState') === '0';
+        if (pageBlock && isReady) {
           clearInterval(checkReactRender);
           resolve(true);
         }
@@ -277,10 +277,11 @@ export class ContentParser {
     const blocks = nodes ?? edgeless?.getSortedElementsByBound(bound) ?? [];
     for (const block of blocks) {
       if (block.flavour === 'affine:image') {
+        if (!block.sourceId) return;
+
         const blob = await block.page.blob.get(block.sourceId);
-        if (!blob) {
-          return;
-        }
+        if (!blob) return;
+
         const blobToImage = (blob: Blob) =>
           new Promise<HTMLImageElement>((resolve, reject) => {
             const img = new Image();

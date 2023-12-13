@@ -1,4 +1,4 @@
-import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/virgo';
+import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/inline';
 import * as Y from 'yjs';
 
 export interface OptionalAttributes {

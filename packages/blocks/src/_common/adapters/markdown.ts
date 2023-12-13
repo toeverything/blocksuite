@@ -1,3 +1,4 @@
+import type { DeltaInsert } from '@blocksuite/inline/types';
 import type {
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
@@ -18,7 +19,6 @@ import {
 import { nanoid } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import { sha } from '@blocksuite/store';
-import type { DeltaInsert } from '@blocksuite/virgo/types';
 import type { Heading, Root, RootContentMap } from 'mdast';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';

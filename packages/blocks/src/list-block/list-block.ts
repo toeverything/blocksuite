@@ -2,8 +2,8 @@
 import '../_common/components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
+import type { InlineRangeProvider } from '@blocksuite/inline';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
-import type { InlineRangeProvider } from '@blocksuite/virgo';
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';

@@ -5,7 +5,7 @@ import {
   type InlineRange,
   type InlineRangeProvider,
   type InlineRangeUpdatedProp,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
 
 import type { BlockElement } from '../element/block-element.js';
 

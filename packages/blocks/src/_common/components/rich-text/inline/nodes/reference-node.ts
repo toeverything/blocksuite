@@ -1,12 +1,12 @@
 import type { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page, PageMeta } from '@blocksuite/store';
 import {
   type DeltaInsert,
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Page, PageMeta } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 

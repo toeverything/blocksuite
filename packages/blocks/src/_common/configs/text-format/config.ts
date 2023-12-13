@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
-import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/virgo';
 import type { TemplateResult } from 'lit';
 
 import { toggleLinkPopup } from '../../components/rich-text/inline/nodes/link-node/link-popup/toggle-link-popup.js';

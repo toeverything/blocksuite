@@ -3,7 +3,7 @@ import {
   type InlineRange,
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
 import type * as Y from 'yjs';
 
 interface MarkdownMatch {

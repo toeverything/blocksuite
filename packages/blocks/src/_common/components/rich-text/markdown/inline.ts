@@ -1,5 +1,4 @@
 /* eslint-disable no-useless-escape */
-import type { Y } from '@blocksuite/store';
 import {
   type InlineEditor,
   type InlineRange,
@@ -7,7 +6,8 @@ import {
   KEYBOARD_PREVENT_DEFAULT,
   type KeyboardBindingContext,
   type KeyboardBindingHandler,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
+import type { Y } from '@blocksuite/store';
 
 interface InlineMarkdownMatch {
   name: string;

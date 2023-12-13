@@ -8,10 +8,6 @@ export {
 } from './edgeless/components/component-toolbar/change-shape-button.js';
 export { FramePreview } from './edgeless/components/frame/frame-preview.js';
 export {
-  registerTOCComponents,
-  TOCNotesPanel,
-} from './edgeless/components/notes-toc-panel/toc-panel.js';
-export {
   createButtonPopper,
   readImageSize,
 } from './edgeless/components/utils.js';

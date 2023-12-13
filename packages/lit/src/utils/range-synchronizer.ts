@@ -5,8 +5,8 @@ import type {
 } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import { getTextNodesFromElement } from '@blocksuite/inline';
 import { type Text } from '@blocksuite/store';
-import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
 import type { RangeManager } from './range-manager.js';

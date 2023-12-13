@@ -12,7 +12,7 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
   ) {
     const blobId = block.sourceId;
     let imageSrc = blobId;
-    if (blobMap) {
+    if (blobId && blobMap) {
       if (blobMap.has(blobId)) {
         imageSrc = blobMap.get(blobId) ?? '';
       } else {
@@ -41,7 +41,7 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
   ) {
     const blobId = block.sourceId;
     let imageSrc = blobId;
-    if (blobMap) {
+    if (blobId && blobMap) {
       if (blobMap.has(blobId)) {
         imageSrc = blobMap.get(blobId) ?? '';
       } else {

@@ -141,7 +141,7 @@ test('when the selection is always a note, it should remain in an active state',
   await waitNextFrame(page);
   await page.keyboard.type('hello');
   await pressEnter(page);
-  // should wait for virgo update and resizeObserver callback
+  // should wait for inline editor update and resizeObserver callback
   await waitNextFrame(page);
   // assert add text success
   await assertBlockCount(page, 'note', 2);

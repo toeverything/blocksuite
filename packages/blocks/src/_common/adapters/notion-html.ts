@@ -1,3 +1,4 @@
+import type { DeltaInsert } from '@blocksuite/inline';
 import type {
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
@@ -14,7 +15,6 @@ import {
   type SliceSnapshot,
 } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
-import type { DeltaInsert } from '@blocksuite/virgo';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
 

@@ -1,11 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement } from '@blocksuite/lit';
 import {
   type DeltaInsert,
   INLINE_ROOT_ATTR,
   type InlineRootElement,
   ZERO_WIDTH_SPACE,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

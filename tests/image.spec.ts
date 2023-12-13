@@ -289,21 +289,15 @@ test('image loading but failed', async ({ page }) => {
   await initMockImage(page);
 
   const loadingContent = await page
-    .locator('.affine-image-block-loading-card .affine-image-block-content')
+    .locator('.affine-image-block-card .affine-image-block-card-title')
     .innerText();
-  expect(loadingContent).toBe('Loading content...');
+  expect(loadingContent).toBe('Loading image...');
 
-  await page.waitForTimeout(timeout);
+  await page.waitForTimeout(3 * timeout);
 
   await expect(
-    page.locator('.affine-image-block-loading-card .affine-image-block-content')
-  ).toContainText('Delivering content...');
-
-  // 1s + 2s + 3s
-  await page.waitForTimeout(6000);
-
-  const imageNotFound = page.locator('.affine-image-block-not-found-card');
-  await expect(imageNotFound).toBeVisible();
+    page.locator('.affine-image-block-card .affine-image-block-card-title')
+  ).toContainText('Image loading failed.');
 });
 
 test('image loading but success', async ({ page }) => {
@@ -345,18 +339,11 @@ test('image loading but success', async ({ page }) => {
   await initMockImage(page);
 
   const loadingContent = await page
-    .locator('.affine-image-block-loading-card .affine-image-block-content')
+    .locator('.affine-image-block-card .affine-image-block-card-title')
     .innerText();
-  expect(loadingContent).toBe('Loading content...');
+  expect(loadingContent).toBe('Loading image...');
 
-  await page.waitForTimeout(timeout);
-
-  await expect(
-    page.locator('.affine-image-block-loading-card .affine-image-block-content')
-  ).toContainText('Delivering content...');
-
-  // 1s + 2s + 3s
-  await page.waitForTimeout(6000);
+  await page.waitForTimeout(3 * timeout);
 
   const img = page.locator('.affine-image-wrapper img');
   await expect(img).toBeVisible();

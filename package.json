@@ -11,7 +11,7 @@
     "packages/lit",
     "packages/playground",
     "packages/store",
-    "packages/virgo"
+    "packages/inline"
   ],
   "private": true,
   "type": "module",
@@ -34,7 +34,7 @@
     "test:update": "playwright test --update-snapshots",
     "test:headed": "playwright test --debug",
     "test:store": "pnpm --filter @blocksuite/store test",
-    "test:virgo": "pnpm --filter @blocksuite/virgo test",
+    "test:inline": "pnpm --filter @blocksuite/inline test",
     "test:integration": "pnpm --filter @blocksuite/presets test",
     "test:node": "node --experimental-specifier-resolution=node --loader ts-node/esm ./scripts/node-import-test.ts",
     "format": "prettier --write --cache packages tests",

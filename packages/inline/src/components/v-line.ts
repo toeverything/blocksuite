@@ -61,7 +61,7 @@ export class VLine extends LitElement {
       if (inlineEditor.isEmbed(delta)) {
         if (delta.insert.length !== 1) {
           throw new Error(`The length of embed node should only be 1.
-            This seems to be an internal issue with Virgo.
+            This seems to be an internal issue with inline editor.
             Please go to https://github.com/toeverything/blocksuite/issues
             to report it.`);
         }

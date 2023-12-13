@@ -202,7 +202,7 @@ test('add empty Note', async ({ page }) => {
   // add note at 300,300
   await page.mouse.click(300, 300);
   await waitForInlineEditorStateUpdated(page);
-  // should wait for virgo update and resizeObserver callback
+  // should wait for inline editor update and resizeObserver callback
   await waitNextFrame(page);
 
   // assert add note success

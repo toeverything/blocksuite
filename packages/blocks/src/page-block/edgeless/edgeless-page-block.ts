@@ -5,6 +5,7 @@ import './components/block-portal/frame/edgeless-frame.js';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
   assertExists,
+  assertInstanceOf,
   debounce,
   Slot,
   throttle,
@@ -22,11 +23,11 @@ import {
   getViewportFromSession,
   saveViewportToSession,
 } from '../../_common/utils/edgeless.js';
-import type {
-  EdgelessElement,
-  EdgelessTool,
+import {
+  type EdgelessElement,
+  type EdgelessTool,
   Point,
-  Selectable,
+  type Selectable,
 } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
@@ -36,9 +37,15 @@ import {
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
+import { humanFileSize } from '../../_common/utils/math.js';
 import { getService } from '../../_legacy/service/index.js';
-import type { ImageBlockModel } from '../../image-block/index.js';
-import type { FrameBlockModel } from '../../models.js';
+import {
+  SURFACE_IMAGE_CARD_HEIGHT,
+  SURFACE_IMAGE_CARD_WIDTH,
+} from '../../image-block/components/image-card.js';
+import type { ImageBlockProps } from '../../image-block/image-model.js';
+import { ImageService } from '../../image-block/image-service.js';
+import type { FrameBlockModel, ImageBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
@@ -490,45 +497,84 @@ export class EdgelessPageBlockComponent extends BlockElement<
     );
   }
 
-  async addImages(
-    fileInfos: {
-      file: File;
-      sourceId: string;
-    }[],
-    point?: Point
-  ) {
-    const models: Partial<ImageBlockModel>[] = [];
-    for (const { file, sourceId } of fileInfos) {
-      const size = await readImageSize(file);
-      models.push({
-        flavour: IMAGE,
-        sourceId,
-        ...size,
-      });
+  async addImages(files: File[], point?: Point): Promise<string[]> {
+    const imageFiles = [...files].filter(file =>
+      file.type.startsWith('image/')
+    );
+    if (!imageFiles.length) return [];
+
+    const imageService = this.host.spec.getService('affine:image');
+    assertExists(imageService);
+    assertInstanceOf(imageService, ImageService);
+    const maxFileSize = imageService.maxFileSize;
+    const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
+    if (isSizeExceeded) {
+      toast(
+        `You can only upload files less than ${humanFileSize(
+          maxFileSize,
+          true,
+          0
+        )}`
+      );
+      return [];
     }
 
-    const center = Vec.toVec(point ?? this.surface.viewport.center);
+    let { x, y } = this.surface.viewport.center;
+    if (point) [x, y] = this.surface.toModelCoord(point.x, point.y);
 
-    const ids = models.map(model => {
+    const dropInfos: { point: Point; blockId: string }[] = [];
+
+    const IMAGE_STACK_GAP = 32;
+
+    // create image cards without image data
+    imageFiles.map((file, index) => {
+      const point = new Point(
+        x + index * IMAGE_STACK_GAP,
+        y + index * IMAGE_STACK_GAP
+      );
+      const center = Vec.toVec(point);
       const bound = Bound.fromCenter(
         center,
-        model.width ?? 0,
-        model.height ?? 0
+        SURFACE_IMAGE_CARD_WIDTH,
+        SURFACE_IMAGE_CARD_HEIGHT
       );
-      return this.surface.addElement(
+      const blockId = this.surface.addElement(
         IMAGE,
         {
+          size: file.size,
           xywh: bound.serialize(),
-          sourceId: model.sourceId,
         },
         this.surface.model
       );
+      dropInfos.push({ point, blockId });
     });
 
+    // upload image data and update the image model
+    const uploadPromises = imageFiles.map(async (file, index) => {
+      const { point, blockId } = dropInfos[index];
+
+      const sourceId = await this.page.blob.set(file);
+      const imageSize = await readImageSize(file);
+
+      const center = Vec.toVec(point);
+      const bound = Bound.fromCenter(center, imageSize.width, imageSize.height);
+
+      this.page.withoutTransact(() => {
+        this.surface.updateElement(blockId, {
+          sourceId,
+          ...imageSize,
+          xywh: bound.serialize(),
+        } satisfies Partial<ImageBlockProps>);
+      });
+    });
+    await Promise.all(uploadPromises);
+
+    const blockIds = dropInfos.map(info => info.blockId);
     this.selectionManager.setSelection({
-      elements: ids.map(id => id),
+      elements: blockIds,
       editing: false,
     });
+    return blockIds;
   }
 
   /*

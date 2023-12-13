@@ -1,9 +1,9 @@
 import '../_common/components/rich-text/rich-text.js';
 
 import { DisposableGroup } from '@blocksuite/global/utils';
+import type { InlineRangeProvider } from '@blocksuite/inline';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { InlineRangeProvider } from '@blocksuite/virgo';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -284,7 +284,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     this._placeholderDisposables.add(() =>
       this.model.text.yText.unobserve(this._updatePlaceholder)
     );
-    // Workaround for virgo skips composition event
+    // Workaround for inline editor skips composition event
     this._placeholderDisposables.addFromEvent(this, 'compositionstart', () => {
       this._isComposing = true;
       this._updatePlaceholder();

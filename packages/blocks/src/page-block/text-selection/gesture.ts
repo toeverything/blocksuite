@@ -4,7 +4,7 @@ import type {
   UIEventHandler,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { getTextNodesFromElement, INLINE_ROOT_ATTR } from '@blocksuite/virgo';
+import { getTextNodesFromElement, INLINE_ROOT_ATTR } from '@blocksuite/inline';
 
 import type { DocPageBlockComponent } from '../doc/doc-page-block.js';
 import type { PageBlockComponent } from '../types.js';

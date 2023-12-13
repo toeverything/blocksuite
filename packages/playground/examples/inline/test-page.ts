@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import '@shoelace-style/shoelace';
 
-import { ShadowlessElement } from '@blocksuite/lit';
 import {
   type AttributeRenderer,
   type BaseTextAttributes,
@@ -11,7 +10,8 @@ import {
   InlineEditor,
   KEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
-} from '@blocksuite/virgo';
+} from '@blocksuite/inline';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
