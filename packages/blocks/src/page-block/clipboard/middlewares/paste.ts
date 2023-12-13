@@ -44,12 +44,12 @@ class PointState {
 }
 
 class PasteTr {
-  private lastIndex: number;
+  private readonly lastIndex: number;
   private readonly fromPointState: PointState;
   private readonly endPointState: PointState;
   private readonly to: TextRangePoint | null;
   private readonly firstSnapshot: BlockSnapshot;
-  private readonly lastSnapshot: BlockSnapshot;
+  private lastSnapshot: BlockSnapshot;
   private readonly firstSnapshotIsPlainText: boolean;
   constructor(
     public readonly std: EditorHost['std'],
@@ -122,6 +122,31 @@ class PasteTr {
     };
   };
 
+  private _mergeCode = () => {
+    const { firstTextSnapshot } = this._getDeltas();
+
+    this.firstSnapshot.flavour = this.fromPointState.model.flavour;
+    const deltas: DeltaOperation[] = [];
+    let i = 0;
+    for (const blockSnapshot of this.snapshot.content) {
+      if (blockSnapshot.props.text) {
+        const text = this._textFromSnapshot(blockSnapshot);
+        if (i > 0) {
+          deltas.push({ insert: '\n' });
+        }
+        deltas.push(...text.delta);
+        i++;
+      } else {
+        break;
+      }
+    }
+    firstTextSnapshot.delta = deltas;
+    this.snapshot.content.splice(1, i);
+    this.lastSnapshot = findLast(
+      this.snapshot.content[this.snapshot.content.length - 1]
+    );
+  };
+
   private _mergeSingle = () => {
     this.firstSnapshot.flavour = this.fromPointState.model.flavour;
     if (
@@ -169,13 +194,13 @@ class PasteTr {
   };
 
   pasted = () => {
-    const lastModel = this.std.page.getBlockById(this.lastSnapshot.id);
-    assertExists(lastModel);
-
     const needCleanup = this.canMerge() || this.endPointState.text.length === 0;
     if (!needCleanup) {
       return;
     }
+
+    const lastModel = this.std.page.getBlockById(this.lastSnapshot.id);
+    assertExists(lastModel);
 
     if (!this.to) {
       this.std.page.deleteBlock(this.fromPointState.model, {
@@ -233,6 +258,10 @@ class PasteTr {
   };
 
   merge() {
+    if (this.fromPointState.model.flavour === 'affine:code' && !this.to) {
+      this._mergeCode();
+      return;
+    }
     if (this.firstSnapshot === this.lastSnapshot) {
       this._mergeSingle();
       return;
