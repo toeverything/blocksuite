@@ -3,11 +3,11 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import { matchFlavours } from './model.js';
 import {
-  type BlockComponentElement,
+  type BlockComponent,
   DropFlags,
   getClosestBlockElementByElement,
   getDropRectByPoint,
-  getModelByBlockElement,
+  getModelByBlockComponent,
   getRectByBlockElement,
 } from './query.js';
 import { type Point, Rect } from './rect.js';
@@ -31,7 +31,7 @@ export function calcDropTarget(
   point: Point,
   model: BaseBlockModel,
   element: Element,
-  draggingElements: BlockComponentElement[] = [],
+  draggingElements: BlockComponent[] = [],
   scale: number = 1,
   flavour: string | null = null // for block-hub
 ): DropResult | null {
@@ -44,7 +44,7 @@ export function calcDropTarget(
   if (children.length) {
     if (draggingElements.length) {
       shouldAppendToDatabase = draggingElements
-        .map(getModelByBlockElement)
+        .map(getModelByBlockComponent)
         .every(m => children.includes(m.flavour));
     } else if (flavour) {
       shouldAppendToDatabase = children.includes(flavour);
@@ -55,7 +55,7 @@ export function calcDropTarget(
     const databaseBlockElement = element.closest('affine-database');
     if (databaseBlockElement) {
       element = databaseBlockElement;
-      model = getModelByBlockElement(element);
+      model = getModelByBlockComponent(element);
     }
   }
 
@@ -76,7 +76,7 @@ export function calcDropTarget(
       modelState: {
         model,
         rect: domRect,
-        element: element as BlockComponentElement,
+        element: element as BlockComponent,
       },
     };
   } else if (flag === DropFlags.Database) {
@@ -97,7 +97,7 @@ export function calcDropTarget(
       modelState: {
         model,
         rect: domRect,
-        element: element as BlockComponentElement,
+        element: element as BlockComponent,
       },
     };
   }
@@ -171,7 +171,7 @@ export function calcDropTarget(
     modelState: {
       model,
       rect: domRect,
-      element: element as BlockComponentElement,
+      element: element as BlockComponent,
     },
   };
 }

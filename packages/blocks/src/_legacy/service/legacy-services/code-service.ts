@@ -3,7 +3,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
-  getBlockElementByModel,
+  getBlockComponentByModel,
   getInlineEditorByModel,
   getThemeMode,
 } from '../../../_common/utils/index.js';
@@ -43,7 +43,7 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     { childText = '', begin, end }: BlockTransformContext = {}
   ): Promise<string> {
     const richTextElement =
-      getBlockElementByModel(block)?.querySelector('rich-text');
+      getBlockComponentByModel(block)?.querySelector('rich-text');
     if (!richTextElement) {
       return await super.block2html(block, {
         childText,

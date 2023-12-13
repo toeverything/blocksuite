@@ -3,7 +3,7 @@ import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import { getBlockElementByPath } from '../_common/utils/index.js';
+import { getBlockComponentByPath } from '../_common/utils/index.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import {
@@ -49,7 +49,7 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(
     const hit = bound.isPointOnBound([x, y]);
     if (hit) return true;
     assertExists(this.page.root);
-    const block = getBlockElementByPath([
+    const block = getBlockComponentByPath([
       this.page.root?.id,
       this.id,
     ]) as FrameBlockComponent;

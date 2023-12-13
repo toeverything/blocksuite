@@ -8,7 +8,7 @@ import { SCROLL_THRESHOLD } from '../consts.js';
 import { matchFlavours } from './model.js';
 import {
   asyncGetRichTextByModel,
-  getBlockElementByModel,
+  getBlockComponentByModel,
   getDocPage,
   getDocPageByElement,
 } from './query.js';
@@ -222,12 +222,12 @@ export function focusBlockByModel(
   }
 
   assertExists(model.page.root);
-  const pageBlock = getBlockElementByModel(
+  const pageBlock = getBlockComponentByModel(
     model.page.root
   ) as DocPageBlockComponent;
   assertExists(pageBlock);
 
-  const element = getBlockElementByModel(model);
+  const element = getBlockComponentByModel(model);
   assertExists(element);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {

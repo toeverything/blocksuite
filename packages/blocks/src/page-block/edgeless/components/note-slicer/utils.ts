@@ -1,5 +1,5 @@
 import {
-  type BlockComponentElement,
+  type BlockComponent,
   type Point,
 } from '../../../../_common/utils/index.js';
 
@@ -8,10 +8,7 @@ import {
  * @param container container which the blocks can be found inside
  * @param point position
  */
-export function findClosestBlock(
-  container: BlockComponentElement,
-  point: Point
-) {
+export function findClosestBlock(container: BlockComponent, point: Point) {
   const children = Array.from(
     container.querySelectorAll(
       '.affine-note-block-container > .affine-block-children-container > [data-block-id]'

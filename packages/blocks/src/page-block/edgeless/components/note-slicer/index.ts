@@ -8,8 +8,8 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../_common/consts.js';
 import {
   buildPath,
-  getBlockElementByPath,
-  getModelByBlockElement,
+  getBlockComponentByPath,
+  getModelByBlockComponent,
   getRectByBlockElement,
   Point,
 } from '../../../../_common/utils/index.js';
@@ -146,7 +146,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   private _getEditingState(e: PointerEventState, block: NoteBlockModel) {
-    const noteBlockElement = getBlockElementByPath(
+    const noteBlockElement = getBlockComponentByPath(
       buildPath(block)
     ) as NoteBlockComponent;
 
@@ -172,8 +172,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       return null;
     }
 
-    const currentBlock = getModelByBlockElement(element);
-    const nearbyBlock = getModelByBlockElement(nearbyBlockElement);
+    const currentBlock = getModelByBlockComponent(element);
+    const nearbyBlock = getModelByBlockComponent(nearbyBlockElement);
     const nearbyBlockRect = nearbyBlockElement.getBoundingClientRect();
     const upperBlockRect = onUpperPart ? nearbyBlockRect : elementRect;
     const lowerBlockRect = onUpperPart ? elementRect : nearbyBlockRect;
