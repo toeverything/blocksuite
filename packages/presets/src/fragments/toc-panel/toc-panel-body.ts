@@ -229,6 +229,10 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     if (_changedProperties.has('page') || _changedProperties.has('edgeless')) {
       this._setPageDisposables();
     }
+
+    if (this._isEdgelessMode() && this.edgeless) {
+      this.edgeless.updateComplete.then(() => this._zoomToFit());
+    }
   }
 
   private _updateNotes() {
@@ -381,8 +385,6 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   }
 
   override firstUpdated(): void {
-    this._zoomToFit();
-
     this._disposables.addFromEvent(this, 'click', this._clickBlank);
   }
 

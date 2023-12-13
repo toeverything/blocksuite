@@ -222,7 +222,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     switch (block.flavour as keyof BlockModels) {
       case 'affine:paragraph':
         assertType<ParagraphBlockModel>(block);
-        if (!block.text.toString().length) return nothing;
+        if (!block.text.toString().trim().length) return nothing;
 
         return html`
           <span class="text subtype ${block.type}"
@@ -238,7 +238,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         `;
       case 'affine:list':
         assertType<ListBlockModel>(block);
-        if (!block.text.toString().length) return nothing;
+        if (!block.text.toString().trim().length) return nothing;
 
         return html`
           <span class="text general"
