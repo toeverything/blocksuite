@@ -230,21 +230,13 @@ export class EdgelessClipboard implements Clipboard {
 
     if (e.clipboardData && isPureFileInClipboard(e.clipboardData)) {
       const files = e.clipboardData.files;
-      if (files.length === 0) {
-        return;
-      }
-      const res: {
-        file: File;
-        sourceId: string;
-      }[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (file.type.startsWith('image')) {
-          const sourceId = await this._edgeless.page.blob.set(file);
-          res.push({ file, sourceId });
-        }
-      }
-      await this._edgeless.addImages(res);
+      if (files.length === 0) return;
+
+      const imageFiles = [...files].filter(file =>
+        file.type.startsWith('image/')
+      );
+      await this._edgeless.addImages(imageFiles);
+
       return;
     }
 

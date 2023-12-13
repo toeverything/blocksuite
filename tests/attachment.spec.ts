@@ -333,6 +333,7 @@ test('should turn attachment to image works', async ({ page }) => {
     prop:height={0}
     prop:index="a0"
     prop:rotate={0}
+    prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
     prop:width={0}
   />

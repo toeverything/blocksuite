@@ -210,6 +210,15 @@ export async function openFileOrFiles({
   });
 }
 
+export async function getImageFilesFromLocal() {
+  const imageFiles = await openFileOrFiles({
+    acceptType: 'Images',
+    multiple: true,
+  });
+  if (!imageFiles) return [];
+  return imageFiles;
+}
+
 export async function uploadImageFromLocal(storage: BlobManager) {
   const imageFiles = await openFileOrFiles({
     acceptType: 'Images',
@@ -218,6 +227,7 @@ export async function uploadImageFromLocal(storage: BlobManager) {
   if (!imageFiles) return [];
   return loadImages(imageFiles, storage);
 }
+
 export async function loadImages(images: File[], storage: BlobManager) {
   const res: { file: File; sourceId: string }[] = [];
   for (let i = 0; i < images.length; i++) {

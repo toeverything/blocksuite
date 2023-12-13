@@ -11,7 +11,7 @@ export class ImageBlockTransformer extends BaseBlockTransformer<ImageBlockProps>
   override async toSnapshot(payload: ToSnapshotPayload<ImageBlockProps>) {
     const snapshot = await super.toSnapshot(payload);
     const sourceId = payload.model.sourceId;
-    await payload.assets.readFromBlob(sourceId);
+    if (sourceId) await payload.assets.readFromBlob(sourceId);
 
     return snapshot;
   }
@@ -21,7 +21,7 @@ export class ImageBlockTransformer extends BaseBlockTransformer<ImageBlockProps>
   ): Promise<SnapshotReturn<ImageBlockProps>> {
     const snapshotRet = await super.fromSnapshot(payload);
     const sourceId = snapshotRet.props.sourceId;
-    await payload.assets.writeToBlob(sourceId);
+    if (sourceId) await payload.assets.writeToBlob(sourceId);
 
     return snapshotRet;
   }

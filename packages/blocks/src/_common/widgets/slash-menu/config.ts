@@ -25,18 +25,19 @@ import {
   createPage,
   getBlockElementByModel,
   getCurrentNativeRange,
+  getImageFilesFromLocal,
   getInlineEditorByModel,
   matchFlavours,
   openFileOrFiles,
   resetNativeSelection,
-  uploadImageFromLocal,
 } from '../../../_common/utils/index.js';
 import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
 import { toggleBookmarkCreateModal } from '../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
-import type { ImageBlockProps } from '../../../image-block/image-model.js';
+import { addSiblingImageBlock } from '../../../image-block/image/utils.js';
+import { ImageService } from '../../../image-block/image-service.js';
 import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { copyBlock } from '../../../page-block/doc/utils.js';
@@ -49,6 +50,7 @@ import { toast } from '../../components/toast.js';
 import { textConversionConfigs } from '../../configs/text-conversion.js';
 import { textFormatConfigs } from '../../configs/text-format/config.js';
 import { clearMarksOnDiscontinuousInput } from '../../utils/inline-editor.js';
+import { humanFileSize } from '../../utils/math.js';
 import type { AffineLinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
@@ -257,18 +259,28 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const fileData = await uploadImageFromLocal(pageElement.page.blob);
-          const props = fileData.map(
-            ({
-              sourceId,
-            }): Partial<ImageBlockProps> & {
-              flavour: 'affine:image';
-            } => ({
-              flavour: 'affine:image',
-              sourceId,
-            })
+
+          const imageFiles = await getImageFilesFromLocal();
+          const imageService = pageElement.host.spec.getService('affine:image');
+          assertExists(imageService);
+          assertInstanceOf(imageService, ImageService);
+          const maxFileSize = imageService.maxFileSize;
+          const isSizeExceeded = imageFiles.some(
+            file => file.size > maxFileSize
           );
-          pageElement.page.addSiblingBlocks(model, props);
+          if (isSizeExceeded) {
+            toast(
+              `You can only upload files less than ${humanFileSize(
+                maxFileSize,
+                true,
+                0
+              )}`
+            );
+          } else {
+            imageFiles.forEach(file => {
+              addSiblingImageBlock(pageElement.page, file, model);
+            });
+          }
         }),
       },
       {
