@@ -17,7 +17,6 @@ import {
   pressBackspace,
   pressBackspaceWithShortKey,
   pressEnter,
-  pressEscape,
   pressForwardDelete,
   pressShiftEnter,
   pressShiftTab,
@@ -1295,8 +1294,7 @@ test('press arrow up in the second line should move caret to the first line', as
   // Focus the empty paragraph
   await focusRichText(page, 1);
   await pressArrowUp(page);
-  await pressEscape(page);
-  await pressArrowLeft(page);
+  await pressArrowUp(page);
   await type(page, '0');
   await pressArrowUp(page);
   await pressArrowUp(page);
