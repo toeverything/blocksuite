@@ -1,6 +1,9 @@
 import type { Command, TextSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { Text } from '@blocksuite/store';
+
+import { matchFlavours } from '../../../_common/utils/index.js';
 
 export const deleteTextCommand: Command<
   'currentTextSelection' | 'host',
@@ -38,7 +41,12 @@ export const deleteTextCommand: Command<
   );
   assertExists(fromElement);
 
-  const fromText = fromElement.model.text;
+  let fromText: Text | undefined;
+  if (matchFlavours(fromElement.model, ['affine:page'])) {
+    fromText = fromElement.model.title;
+  } else {
+    fromText = fromElement.model.text;
+  }
   assertExists(fromText);
   if (!to) {
     fromText.delete(from.index, from.length);

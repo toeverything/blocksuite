@@ -23,7 +23,6 @@ import {
   redoByKeyboard,
   selectAllByKeyboard,
   setSelection,
-  SHORT_KEY,
   switchReadonly,
   type,
   undoByKeyboard,
@@ -345,13 +344,13 @@ test('drag copy paste', async ({ page }) => {
 
   await dragBetweenIndices(page, [0, 0], [0, 3]);
   await copyByKeyboard(page);
-  await focusRichText(page);
-  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await pressArrowLeft(page);
+  await pasteByKeyboard(page);
 
   const content = await getInlineSelectionText(page);
   expect(content).toBe('useuse');
 
-  await assertRichTextInlineRange(page, 0, 6, 0);
+  await assertRichTextInlineRange(page, 0, 3, 0);
 });
 
 test('keyboard selection and copy paste', async ({ page }) => {
@@ -425,11 +424,7 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
 test.fixme(
   'use code block copy menu of code block copy whole code block',
   async ({ page }) => {
-    await enterPlaygroundRoom(page, {
-      flags: {
-        enable_transformer_clipboard: true,
-      },
-    });
+    await enterPlaygroundRoom(page);
     await initEmptyCodeBlockState(page, { language: 'javascript' });
     await focusRichText(page);
 
@@ -482,11 +477,7 @@ test.fixme(
 );
 
 test('code block copy button can work', async ({ page }) => {
-  await enterPlaygroundRoom(page, {
-    flags: {
-      enable_transformer_clipboard: true,
-    },
-  });
+  await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 

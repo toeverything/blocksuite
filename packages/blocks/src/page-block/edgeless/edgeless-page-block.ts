@@ -38,7 +38,6 @@ import {
 } from '../../_common/utils/index.js';
 import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
 import { humanFileSize } from '../../_common/utils/math.js';
-import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import {
   SURFACE_IMAGE_CARD_HEIGHT,
@@ -71,7 +70,6 @@ import type {
 } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { SurfaceService } from '../../surface-block/surface-service.js';
-import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
@@ -196,13 +194,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   @query('.affine-edgeless-layer')
   edgelessLayer!: HTMLDivElement;
 
-  clipboard = new EdgelessClipboard(this.page, this);
-
-  pageClipboardController = new PageClipboardController(this);
-  clipboardController = new EdgelessClipboardController(
-    this,
-    this.pageClipboardController
-  );
+  clipboardController = new EdgelessClipboardController(this);
 
   slots = {
     viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
@@ -352,10 +344,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
 
-        (this.clipboardController._enabled
-          ? this.clipboardController
-          : this.clipboard
-        )
+        this.clipboardController
           .copyAsPng(blocks, shapes)
           .then(() => toast('Copied to clipboard'))
           .catch(() => toast('Failed to copy as PNG'))
@@ -762,10 +751,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initRemoteCursor();
     this._initSurface();
 
-    if (!this.clipboardController._enabled) {
-      this.clipboard.init(this.page);
-    }
-
     this._initViewport();
 
     if (this.page.readonly) {
@@ -941,6 +926,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+    this.clipboardController.hostConnected();
     this._updateFrames();
     this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
@@ -970,7 +956,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.clipboard.dispose();
+    this.clipboardController.hostDisconnected();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
