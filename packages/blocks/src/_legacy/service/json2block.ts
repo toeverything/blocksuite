@@ -5,7 +5,7 @@ import { Text } from '@blocksuite/store';
 
 import { handleBlockSplit } from '../../_common/components/rich-text/rich-text-operations.js';
 import {
-  asyncGetBlockElementByModel,
+  asyncGetBlockComponentByModel,
   asyncSetInlineRange,
   getInlineEditorByModel,
   type SerializedBlock,
@@ -195,7 +195,7 @@ export async function json2block(
     });
   } else {
     if (lastMergedModel) {
-      asyncGetBlockElementByModel(lastMergedModel).then(element => {
+      asyncGetBlockComponentByModel(lastMergedModel).then(element => {
         if (element) {
           const selectionManager = element.host.selection;
           const blockSelection = selectionManager?.getInstance('block', {

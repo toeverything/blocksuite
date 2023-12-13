@@ -20,7 +20,7 @@ import {
   getEdgelessPage,
   getHoveringNote,
   getImageFilesFromLocal,
-  getModelByBlockElement,
+  getModelByBlockComponent,
   isPageMode,
   Point,
   Rect,
@@ -373,7 +373,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     let type: DroppingType = 'none';
     let rect = null;
     let lastModelState = null;
-    const model = getModelByBlockElement(element);
+    const model = getModelByBlockComponent(element);
     const result = calcDropTarget(
       point,
       model,

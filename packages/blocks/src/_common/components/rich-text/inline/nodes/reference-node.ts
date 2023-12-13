@@ -13,7 +13,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import type { DocPageBlockComponent } from '../../../../../page-block/doc/doc-page-block.js';
 import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/index.js';
 import {
-  getBlockElementByModel,
+  getBlockComponentByModel,
   getClosestBlockElementByElement,
   getModelByElement,
 } from '../../../../utils/index.js';
@@ -127,7 +127,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const targetPageId = refMeta.id;
     const root = model.page.root;
     assertExists(root);
-    const element = getBlockElementByModel(root) as DocPageBlockComponent;
+    const element = getBlockComponentByModel(root) as DocPageBlockComponent;
     assertExists(element);
     element.slots.pageLinkClicked.emit({ pageId: targetPageId });
   }
