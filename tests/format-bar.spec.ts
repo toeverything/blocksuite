@@ -830,7 +830,7 @@ test('should format quick bar show when double click text', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-  await page.dblclick('.affine-rich-text', {
+  await page.dblclick('rich-text', {
     position: { x: 10, y: 10 },
   });
   const { formatBar } = getFormatBar(page);
@@ -847,7 +847,7 @@ test('should format quick bar not show at readonly mode', async ({ page }) => {
   const { formatBar } = getFormatBar(page);
   await expect(formatBar).not.toBeVisible();
 
-  await page.dblclick('.affine-rich-text', { position: { x: 10, y: 10 } });
+  await page.dblclick('rich-text', { position: { x: 10, y: 10 } });
   await expect(formatBar).not.toBeVisible();
 });
 

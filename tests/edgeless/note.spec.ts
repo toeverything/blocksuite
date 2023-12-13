@@ -681,7 +681,7 @@ test('format quick bar should show up when double-clicking on text', async ({
   await waitNextFrame(page);
 
   await page
-    .locator('.affine-rich-text')
+    .locator('rich-text')
     .nth(1)
     .dblclick({
       position: { x: 10, y: 10 },

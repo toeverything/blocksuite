@@ -821,7 +821,7 @@ test('auto scroll horizontally when typing', async ({ page }) => {
   }
 
   const richTextScrollLeft1 = await page.evaluate(() => {
-    const richText = document.querySelector('affine-code rich-text');
+    const richText = document.querySelector('affine-code .inline-editor');
     if (!richText) {
       throw new Error('Failed to get rich text');
     }
@@ -834,7 +834,7 @@ test('auto scroll horizontally when typing', async ({ page }) => {
   await type(page, 'aa');
 
   const richTextScrollLeft2 = await page.evaluate(() => {
-    const richText = document.querySelector('affine-code rich-text');
+    const richText = document.querySelector('affine-code .inline-editor');
     if (!richText) {
       throw new Error('Failed to get rich text');
     }

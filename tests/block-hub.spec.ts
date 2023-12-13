@@ -22,7 +22,7 @@ test.skip('auto-scroll should be activate when adding blank lines or blocks', as
   await initEmptyParagraphState(page);
   await initParagraphsByCount(page, 3);
   const paragraph2 = page
-    .locator('.affine-rich-text')
+    .locator('rich-text')
     .filter({ hasText: 'paragraph 2' });
   await expect(paragraph2).toBeVisible();
   const largeText = `
@@ -99,7 +99,7 @@ test.skip('auto-scroll should be activate when adding blank lines or blocks', as
   // in order to make sure paragraph0 is out of current viewport, proactively to scroll the page by input a large amount of text
   await paragraph2.fill(largeText);
   const paragraph0 = page
-    .locator('.affine-rich-text')
+    .locator('rich-text')
     .filter({ hasText: 'paragraph 0' });
 
   // now paragraph0 is out of viewport
