@@ -8,10 +8,8 @@ import { moveBlockConfigs } from '../_common/configs/move-block.js';
 import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
 import { getBlockElementByModel } from '../_common/utils/index.js';
-import {
-  onModelElementUpdated,
-  updateBlockElementType,
-} from '../page-block/index.js';
+import { onModelElementUpdated } from '../page-block/utils/callback.js';
+import { updateBlockElementType } from '../page-block/utils/operations/element/block-level.js';
 import { ensureBlockInContainer } from './utils.js';
 
 export class KeymapController implements ReactiveController {
@@ -655,10 +653,10 @@ export class KeymapController implements ReactiveController {
       if (!config.hotkey) return;
       this.host.bindHotKey({
         [config.hotkey]: ctx => {
-          if (!config.showWhen(this.host.root)) return;
+          if (!config.showWhen(this.host.host)) return;
 
           ctx.get('defaultState').event.preventDefault();
-          config.action(this.host.root);
+          config.action(this.host.host);
         },
       });
     });
@@ -675,7 +673,7 @@ export class KeymapController implements ReactiveController {
 
             return this._std.command
               .pipe()
-              .withRoot()
+              .withHost()
               .tryAll(chain => [
                 chain.getTextSelection(),
                 chain.getBlockSelections(),

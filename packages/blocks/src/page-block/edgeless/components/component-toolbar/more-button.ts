@@ -12,6 +12,7 @@ import {
   BringToFrontIcon,
   CopyAsPngIcon,
   FrameIcon,
+  GroupIcon,
   MoreCopyIcon,
   MoreDeleteIcon,
   MoreDuplicateIcon,
@@ -36,6 +37,7 @@ type Action =
         | 'delete'
         | 'copy-as-png'
         | 'create-frame'
+        | 'create-group'
         | 'copy'
         | 'duplicate'
         | ReorderingType;
@@ -47,6 +49,7 @@ type Action =
 
 const ACTIONS: Action[] = [
   { icon: FrameIcon, name: 'Frame Section', type: 'create-frame' },
+  { icon: GroupIcon, name: 'Group Section', type: 'create-group' },
   { type: 'divider' },
   { icon: BringToFrontIcon, name: 'Bring to Front', type: 'front' },
   { icon: BringForwardIcon, name: 'Bring Forward', type: 'forward' },
@@ -199,7 +202,8 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     const selection = this.edgeless.selectionManager;
     switch (type) {
       case 'copy': {
-        this.edgeless.clipboard.copy();
+        // FIXME(clipboard): copy
+        // this.edgeless.clipboardController.copy();
         break;
       }
       case 'duplicate': {
@@ -222,6 +226,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       }
       case 'create-frame': {
         this.edgeless.surface.frame.createFrameOnSelected();
+        break;
+      }
+      case 'create-group': {
+        this.edgeless.surface.group.createGroupOnSelected();
         break;
       }
       case 'front':

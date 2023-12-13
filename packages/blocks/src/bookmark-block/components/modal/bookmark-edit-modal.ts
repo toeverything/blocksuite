@@ -108,7 +108,7 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
 }
 
 export function toggleBookmarkEditModal(bookmark: BookmarkBlockComponent) {
-  bookmark.root.selection.clear();
+  bookmark.host.selection.clear();
   const modal = new BookmarkEditModal();
   modal.bookmark = bookmark;
   document.body.appendChild(modal);

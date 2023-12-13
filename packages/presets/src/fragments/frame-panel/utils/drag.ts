@@ -4,7 +4,7 @@ import {
   on,
   once,
 } from '@blocksuite/blocks';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 
 import type { FramePanelBody } from '../body/frame-panel-body.js';
@@ -29,7 +29,7 @@ export function startDragging(
     frameListContainer: HTMLElement;
     frameElementHeight: number;
     doc: Document;
-    host: Document | HTMLElement;
+    domHost: Document | HTMLElement;
     container: FramePanelBody;
     start: {
       x: number;
@@ -37,12 +37,12 @@ export function startDragging(
     };
     edgeless: EdgelessPageBlockComponent | null;
     page: Page;
-    root: BlockSuiteRoot;
+    editorHost: EditorHost;
   }
 ) {
   const {
     doc,
-    host,
+    domHost,
     container,
     onDragMove,
     onDragEnd,
@@ -52,7 +52,7 @@ export function startDragging(
     start,
     edgeless,
     page,
-    root,
+    editorHost,
   } = options;
   const cardElements = frames
     .slice(frames.length - 2, frames.length)
@@ -61,7 +61,7 @@ export function startDragging(
 
       el.edgeless = edgeless;
       el.page = page;
-      el.root = root;
+      el.host = editorHost;
       el.frame = frame.frame;
 
       el.cardIndex = frame.cardIndex;
@@ -152,7 +152,7 @@ export function startDragging(
     onDragEnd?.(idx);
   };
 
-  once(host as Document, 'mouseup', dragEnd);
+  once(domHost as Document, 'mouseup', dragEnd);
 }
 
 function createMaskElement(doc: Document) {

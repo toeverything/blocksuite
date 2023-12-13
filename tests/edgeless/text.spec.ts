@@ -10,7 +10,7 @@ import {
   SHORT_KEY,
   switchEditorMode,
   type,
-  waitForVirgoStateUpdated,
+  waitForInlineEditorStateUpdated,
   waitNextFrame,
   zoomResetByKeyboard,
 } from '../utils/actions/index.js';
@@ -40,7 +40,7 @@ test('add text element in default mode', async ({ page }) => {
   await setEdgelessTool(page, 'default');
 
   await page.mouse.dblclick(130, 140);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
   await waitNextFrame(page);
 
   await type(page, 'hello');
@@ -183,7 +183,7 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
   await setEdgelessTool(page, 'default');
 
   await page.mouse.dblclick(130, 140);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
   await waitNextFrame(page);
 
   await type(page, 'hellohello');
@@ -214,7 +214,7 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
   expect(selectedRect.height).toBeGreaterThan(lastHeight);
 
   await page.mouse.dblclick(140, 160);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
   await waitNextFrame(page);
   await assertEdgelessCanvasText(page, 'hellohello');
 
@@ -241,7 +241,7 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
   expect(selectedRect.height).toBeLessThan(lastHeight);
 
   await page.mouse.dblclick(100, 160);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
   await waitNextFrame(page);
   await assertEdgelessCanvasText(page, 'hellohello');
 });
@@ -257,7 +257,7 @@ test('text element should have maxWidth after adjusting width by dragging left o
   await setEdgelessTool(page, 'default');
 
   await page.mouse.dblclick(130, 140);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
   await waitNextFrame(page);
 
   await type(page, 'hellohello');
@@ -291,7 +291,7 @@ test('text element should have maxWidth after adjusting width by dragging left o
   // enter edit mode
   await waitNextFrame(page);
   await page.mouse.dblclick(140, 180);
-  await waitForVirgoStateUpdated(page);
+  await waitForInlineEditorStateUpdated(page);
   await waitNextFrame(page);
   await type(page, 'hello');
   await assertEdgelessCanvasText(page, 'hellohellohello');

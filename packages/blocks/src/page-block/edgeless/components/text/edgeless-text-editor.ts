@@ -51,13 +51,13 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       white-space: nowrap;
     }
 
-    .edgeless-text-editor .virgo-container {
+    .edgeless-text-editor .inline-editor-container {
       white-space: nowrap;
       outline: none;
       width: fit-content;
     }
 
-    .edgeless-text-editor .virgo-container span {
+    .edgeless-text-editor .inline-editor-container span {
       white-space: pre !important;
       word-break: keep-all !important;
       overflow-wrap: normal !important;
@@ -73,12 +73,12 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  get vEditor() {
-    assertExists(this.richText.vEditor);
-    return this.richText.vEditor;
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
   }
-  get vEditorContainer() {
-    return this.vEditor.rootElement;
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
   }
 
   private _keeping = false;
@@ -167,8 +167,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
     if (!edgeless || !element) return;
 
-    const newWidth = this.vEditorContainer.scrollWidth;
-    const newHeight = this.vEditorContainer.scrollHeight;
+    const newWidth = this.inlineEditorContainer.scrollWidth;
+    const newHeight = this.inlineEditorContainer.scrollHeight;
     const bound = new Bound(element.x, element.y, newWidth, newHeight);
     const { x, y, w, h, rotate } = element;
 
@@ -325,7 +325,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     assertExists(dispatcher);
 
     this.updateComplete.then(() => {
-      this.vEditor.slots.updated.on(() => {
+      this.inlineEditor.slots.updated.on(() => {
         this._updateRect();
         this.requestUpdate();
       });
@@ -357,12 +357,12 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         });
       });
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'blur',
         () => !this._keeping && this.remove()
       );
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'compositionstart',
         () => {
           this._isComposition = true;
@@ -370,7 +370,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         }
       );
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'compositionend',
         () => {
           this._isComposition = false;

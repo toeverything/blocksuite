@@ -1,4 +1,4 @@
-import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/virgo';
+import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/inline';
 import * as Y from 'yjs';
 
 export interface OptionalAttributes {
@@ -253,6 +253,10 @@ export class Text {
     const result: DeltaOperation[] = [];
     if (end && begin >= end) {
       return result;
+    }
+
+    if (begin === 0 && end === 0) {
+      return [];
     }
 
     const delta = this.toDelta();

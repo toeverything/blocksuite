@@ -35,7 +35,7 @@ const createToastContainer = () => {
   `;
   const template = html`<div class="toast-container" style="${styles}"></div>`;
   const element = htmlToElement<HTMLDivElement>(template);
-  const container = document.body.querySelector('editor-container');
+  const container = document.body.querySelector('affine-editor-container');
   assertExists(container);
   container.appendChild(element);
   return element;

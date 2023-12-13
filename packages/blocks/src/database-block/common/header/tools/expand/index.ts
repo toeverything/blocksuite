@@ -21,7 +21,7 @@ import { DatabaseSelection } from '../../../selection.js';
 export function showDatabasePreviewModal(database: DatabaseBlockComponent) {
   const viewComponent = new DatabaseBlockModalPreview();
   viewComponent.database = database;
-  const root = document.querySelector('block-suite-root');
+  const root = document.querySelector('editor-host');
   assertExists(root);
   const modal = createModal(root);
   const close = () => {
@@ -153,7 +153,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
 
   selectionUpdated: Slot<DataViewSelection | undefined> = new Slot();
   setSelection: (selection?: DataViewSelection) => void = selection => {
-    this.database.root.selection.set(
+    this.database.host.selection.set(
       selection
         ? [new DatabaseSelection({ path: this.path, viewSelection: selection })]
         : []
@@ -162,7 +162,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
   bindHotkey: (hotkeys: Record<string, UIEventHandler>) => Disposable =
     hotkeys => {
       return {
-        dispose: this.database.root.event.bindHotkey(hotkeys, {
+        dispose: this.database.host.event.bindHotkey(hotkeys, {
           path: [],
         }),
       };
@@ -172,7 +172,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
     handler
   ) => {
     return {
-      dispose: this.database.root.event.add(name, handler, {
+      dispose: this.database.host.event.add(name, handler, {
         path: [],
       }),
     };

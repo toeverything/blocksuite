@@ -5,6 +5,7 @@ import './components/block-portal/frame/edgeless-frame.js';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
   assertExists,
+  assertInstanceOf,
   debounce,
   Slot,
   throttle,
@@ -22,11 +23,11 @@ import {
   getViewportFromSession,
   saveViewportToSession,
 } from '../../_common/utils/edgeless.js';
-import type {
-  EdgelessElement,
-  EdgelessTool,
+import {
+  type EdgelessElement,
+  type EdgelessTool,
   Point,
-  Selectable,
+  type Selectable,
 } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
@@ -36,10 +37,15 @@ import {
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
-import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
+import { humanFileSize } from '../../_common/utils/math.js';
 import { getService } from '../../_legacy/service/index.js';
-import type { ImageBlockModel } from '../../image-block/index.js';
-import type { FrameBlockModel } from '../../models.js';
+import {
+  SURFACE_IMAGE_CARD_HEIGHT,
+  SURFACE_IMAGE_CARD_WIDTH,
+} from '../../image-block/components/image-card.js';
+import type { ImageBlockProps } from '../../image-block/image-model.js';
+import { ImageService } from '../../image-block/image-service.js';
+import type { FrameBlockModel, ImageBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
@@ -64,7 +70,6 @@ import type {
 } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { SurfaceService } from '../../surface-block/surface-service.js';
-import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
@@ -77,7 +82,7 @@ import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js
 import {
   EdgelessZoomToolbar,
   type ZoomAction,
-} from './components/zoom/zoom-tool-bar.js';
+} from './components/zoom/zoom-toolbar.js';
 import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
@@ -189,13 +194,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   @query('.affine-edgeless-layer')
   edgelessLayer!: HTMLDivElement;
 
-  clipboard = new EdgelessClipboard(this.page, this);
-
-  pageClipboardController = new PageClipboardController(this);
-  clipboardController = new EdgelessClipboardController(
-    this,
-    this.pageClipboardController
-  );
+  clipboardController = new EdgelessClipboardController(this);
 
   slots = {
     viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
@@ -260,7 +259,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   get editorContainer(): EdtitorContainer {
     if (this._editorContainer) return this._editorContainer;
-    this._editorContainer = this.closest('editor-container');
+    this._editorContainer = this.closest('affine-editor-container');
     assertExists(this._editorContainer);
     return this._editorContainer;
   }
@@ -345,10 +344,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
 
-        (this.clipboardController._enabled
-          ? this.clipboardController
-          : this.clipboard
-        )
+        this.clipboardController
           .copyAsPng(blocks, shapes)
           .then(() => toast('Copied to clipboard'))
           .catch(() => toast('Failed to copy as PNG'))
@@ -402,7 +398,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   /**
-   * Adds a new note with the given point on the editor-container.
+   * Adds a new note with the given point on the affine-editor-container.
    *
    * @param: point Point
    * @returns: The id of new note
@@ -496,45 +492,84 @@ export class EdgelessPageBlockComponent extends BlockElement<
     );
   }
 
-  async addImages(
-    fileInfos: {
-      file: File;
-      sourceId: string;
-    }[],
-    point?: Point
-  ) {
-    const models: Partial<ImageBlockModel>[] = [];
-    for (const { file, sourceId } of fileInfos) {
-      const size = await readImageSize(file);
-      models.push({
-        flavour: IMAGE,
-        sourceId,
-        ...size,
-      });
+  async addImages(files: File[], point?: Point): Promise<string[]> {
+    const imageFiles = [...files].filter(file =>
+      file.type.startsWith('image/')
+    );
+    if (!imageFiles.length) return [];
+
+    const imageService = this.host.spec.getService('affine:image');
+    assertExists(imageService);
+    assertInstanceOf(imageService, ImageService);
+    const maxFileSize = imageService.maxFileSize;
+    const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
+    if (isSizeExceeded) {
+      toast(
+        `You can only upload files less than ${humanFileSize(
+          maxFileSize,
+          true,
+          0
+        )}`
+      );
+      return [];
     }
 
-    const center = Vec.toVec(point ?? this.surface.viewport.center);
+    let { x, y } = this.surface.viewport.center;
+    if (point) [x, y] = this.surface.toModelCoord(point.x, point.y);
 
-    const ids = models.map(model => {
+    const dropInfos: { point: Point; blockId: string }[] = [];
+
+    const IMAGE_STACK_GAP = 32;
+
+    // create image cards without image data
+    imageFiles.map((file, index) => {
+      const point = new Point(
+        x + index * IMAGE_STACK_GAP,
+        y + index * IMAGE_STACK_GAP
+      );
+      const center = Vec.toVec(point);
       const bound = Bound.fromCenter(
         center,
-        model.width ?? 0,
-        model.height ?? 0
+        SURFACE_IMAGE_CARD_WIDTH,
+        SURFACE_IMAGE_CARD_HEIGHT
       );
-      return this.surface.addElement(
+      const blockId = this.surface.addElement(
         IMAGE,
         {
+          size: file.size,
           xywh: bound.serialize(),
-          sourceId: model.sourceId,
         },
         this.surface.model
       );
+      dropInfos.push({ point, blockId });
     });
 
+    // upload image data and update the image model
+    const uploadPromises = imageFiles.map(async (file, index) => {
+      const { point, blockId } = dropInfos[index];
+
+      const sourceId = await this.page.blob.set(file);
+      const imageSize = await readImageSize(file);
+
+      const center = Vec.toVec(point);
+      const bound = Bound.fromCenter(center, imageSize.width, imageSize.height);
+
+      this.page.withoutTransact(() => {
+        this.surface.updateElement(blockId, {
+          sourceId,
+          ...imageSize,
+          xywh: bound.serialize(),
+        } satisfies Partial<ImageBlockProps>);
+      });
+    });
+    await Promise.all(uploadPromises);
+
+    const blockIds = dropInfos.map(info => info.blockId);
     this.selectionManager.setSelection({
-      elements: ids.map(id => id),
+      elements: blockIds,
       editing: false,
     });
+    return blockIds;
   }
 
   /*
@@ -730,10 +765,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initRemoteCursor();
     this._initSurface();
 
-    if (!this.clipboardController._enabled) {
-      this.clipboard.init(this.page);
-    }
-
     this._initViewport();
 
     if (this.page.readonly) {
@@ -909,14 +940,15 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+    this.clipboardController.hostConnected();
     this._updateFrames();
-    this.root.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
+    this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new EdgelessPageKeyboardManager(this);
 
     this.handleEvent('selectionChange', () => {
-      const surface = this.root.selection.value.find(
+      const surface = this.host.selection.value.find(
         (sel): sel is SurfaceSelection => sel.is('surface')
       );
       if (!surface) return;
@@ -932,13 +964,13 @@ export class EdgelessPageBlockComponent extends BlockElement<
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);
-    this.tools = new EdgelessToolsManager(this, this.root.event);
+    this.tools = new EdgelessToolsManager(this, this.host.event);
     this._initLocalRecordManager();
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.clipboard.dispose();
+    this.clipboardController.hostDisconnected();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
       this._resizeObserver = null;

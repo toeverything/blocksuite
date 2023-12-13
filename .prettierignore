@@ -1,3 +1,4 @@
 dist
 .next
 pnpm-lock.yaml
+tests/snapshots/

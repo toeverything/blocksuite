@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/lit';
-import type { EditorContainer } from '@blocksuite/presets';
+import type { AffineEditorContainer } from '@blocksuite/presets';
 import { registerFramePanelComponents } from '@blocksuite/presets';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -24,7 +24,7 @@ export class CustomFramePanel extends WithDisposable(LitElement) {
   private _show = false;
 
   @property({ attribute: false })
-  editor!: EditorContainer;
+  editor!: AffineEditorContainer;
 
   private _renderPanel() {
     return html`<frame-panel .editor=${this.editor}></frame-panel>`;

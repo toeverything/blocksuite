@@ -31,8 +31,8 @@ import {
   assertImageSize,
   assertRichDragButton,
   assertRichImage,
+  assertRichTextInlineRange,
   assertRichTexts,
-  assertRichTextVRange,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -120,7 +120,7 @@ test('press enter will create new block when click and select image', async ({
   await activeEmbed(page);
   await pressEnter(page);
   await type(page, 'aa');
-  await assertRichTexts(page, ['aa', '']);
+  await assertRichTexts(page, ['aa']);
 });
 
 test('enter shortcut on focusing embed block and its caption', async ({
@@ -164,8 +164,8 @@ test('should support the enter key of image caption', async ({ page }) => {
   await pressEnter(page);
   await expect(caption).toHaveValue('abc');
 
-  await assertRichTexts(page, ['123', '']);
-  await assertRichTextVRange(page, 0, 0, 0);
+  await assertRichTexts(page, ['123']);
+  await assertRichTextInlineRange(page, 0, 0, 0);
 });
 
 test('popup menu should follow position of image when scrolling', async ({
@@ -212,7 +212,7 @@ test('popup menu should follow position of image when scrolling', async ({
   const menuRect = await menu.boundingBox();
   if (!imageRect) throw new Error('image not found');
   if (!menuRect) throw new Error('menu not found');
-  expect(imageRect.y).toBeCloseTo(-9, -0.325);
+  expect(imageRect.y).toBeCloseTo(34, -0.325);
   expect(menuRect.y).toBeCloseTo(65, -0.325);
 });
 
@@ -289,21 +289,15 @@ test('image loading but failed', async ({ page }) => {
   await initMockImage(page);
 
   const loadingContent = await page
-    .locator('.affine-image-block-loading-card .affine-image-block-content')
+    .locator('.affine-image-block-card .affine-image-block-card-title')
     .innerText();
-  expect(loadingContent).toBe('Loading content...');
+  expect(loadingContent).toBe('Loading image...');
 
-  await page.waitForTimeout(timeout);
+  await page.waitForTimeout(3 * timeout);
 
   await expect(
-    page.locator('.affine-image-block-loading-card .affine-image-block-content')
-  ).toContainText('Delivering content...');
-
-  // 1s + 2s + 3s
-  await page.waitForTimeout(6000);
-
-  const imageNotFound = page.locator('.affine-image-block-not-found-card');
-  await expect(imageNotFound).toBeVisible();
+    page.locator('.affine-image-block-card .affine-image-block-card-title')
+  ).toContainText('Image loading failed.');
 });
 
 test('image loading but success', async ({ page }) => {
@@ -345,18 +339,11 @@ test('image loading but success', async ({ page }) => {
   await initMockImage(page);
 
   const loadingContent = await page
-    .locator('.affine-image-block-loading-card .affine-image-block-content')
+    .locator('.affine-image-block-card .affine-image-block-card-title')
     .innerText();
-  expect(loadingContent).toBe('Loading content...');
+  expect(loadingContent).toBe('Loading image...');
 
-  await page.waitForTimeout(timeout);
-
-  await expect(
-    page.locator('.affine-image-block-loading-card .affine-image-block-content')
-  ).toContainText('Delivering content...');
-
-  // 1s + 2s + 3s
-  await page.waitForTimeout(6000);
+  await page.waitForTimeout(3 * timeout);
 
   const img = page.locator('.affine-image-wrapper img');
   await expect(img).toBeVisible();

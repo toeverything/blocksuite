@@ -1,3 +1,4 @@
+import type { DeltaInsert } from '@blocksuite/inline/types';
 import type {
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
@@ -18,7 +19,6 @@ import {
 import { nanoid } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import { sha } from '@blocksuite/store';
-import type { DeltaInsert } from '@blocksuite/virgo/types';
 import type { Heading, Root, RootContentMap } from 'mdast';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
@@ -429,6 +429,21 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .closeNode()
             .closeNode();
           break;
+        }
+        case 'affine:page': {
+          const title = (o.node.props.title ?? { delta: [] }) as {
+            delta: DeltaInsert[];
+          };
+          if (title.delta.length === 0) break;
+          context
+            .openNode(
+              {
+                type: 'paragraph',
+                children: this._deltaToMdAST(title.delta, 0),
+              },
+              'children'
+            )
+            .closeNode();
         }
       }
     });

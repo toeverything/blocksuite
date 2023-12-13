@@ -306,7 +306,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   }
 
   private _initHotkey() {
-    const selection = this.root.selection;
+    const selection = this.host.selection;
     const addParagraph = () => {
       if (!this.page.getParent(this.model)) return;
 
@@ -459,7 +459,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   }
 
   private _initSelection() {
-    const selection = this.root.selection;
+    const selection = this.host.selection;
     this._disposables.add(
       selection.slots.changed.on(selList => {
         this._focused = selList.some(
@@ -622,7 +622,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   };
 
   private _getCSSPropertyValue = (value: string) => {
-    const root = this.root;
+    const root = this.host;
     if (isCssVariable(value)) {
       const cssValue = getThemePropertyValue(root, value as CssVariableName);
       if (cssValue === undefined) {
@@ -727,7 +727,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         ${flavourOrType === 'affine:frame' || flavourOrType === 'group'
           ? html`<surface-ref-portal
               .page=${this.page}
-              .root=${this.root}
+              .host=${this.host}
               .containerModel=${referencedModel}
               .renderModel=${this.renderModel}
             ></surface-ref-portal>`
@@ -815,7 +815,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   private _shouldRender() {
     return (
-      !!this.root.querySelector('affine-doc-page') &&
+      !!this.host.querySelector('affine-doc-page') &&
       this.parentElement &&
       !this.parentElement.closest('affine-surface-ref')
     );

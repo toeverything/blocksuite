@@ -78,6 +78,7 @@ export async function turnIntoImage(model: AttachmentBlockModel) {
   const imageProp: Partial<ImageBlockProps> = {
     sourceId,
     caption: model.caption,
+    size: model.size,
     ...imageConvertData,
   };
   transformModel(model, 'affine:image', imageProp);
@@ -89,6 +90,8 @@ export async function turnIntoImage(model: AttachmentBlockModel) {
 export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
   if (!model.page.schema.flavourSchemaMap.has('affine:attachment'))
     throw new Error('The attachment flavour is not supported!');
+
+  if (!model.sourceId) throw new Error('Image data not aviailable');
 
   const sourceId = model.sourceId;
   assertExists(sourceId);

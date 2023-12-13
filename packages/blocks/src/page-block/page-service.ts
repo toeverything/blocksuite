@@ -1,5 +1,9 @@
 import { BlockService } from '@blocksuite/block-std';
 
+import {
+  FileDropManager,
+  type FileDropOptions,
+} from '../_common/components/file-drop-manager.js';
 import { DEFAULT_CANVAS_TEXT_FONT_CONFIG } from '../surface-block/consts.js';
 import {
   copySelectedModelsCommand,
@@ -16,13 +20,19 @@ import {
   getSelectedBlocksCommand,
   getSelectedModelsCommand,
   getTextSelectionCommand,
-  withRootCommand,
+  withHostCommand,
 } from './commands/index.js';
 import { FontLoader } from './font-loader/font-loader.js';
 import type { PageBlockModel } from './page-model.js';
 
 export class PageService extends BlockService<PageBlockModel> {
   readonly fontLoader = new FontLoader();
+
+  fileDropManager!: FileDropManager;
+
+  private _fileDropOptions: FileDropOptions = {
+    flavour: this.flavour,
+  };
 
   override mounted() {
     super.mounted();
@@ -42,9 +52,16 @@ export class PageService extends BlockService<PageBlockModel> {
       .add('formatBlock', formatBlockCommand)
       .add('formatNative', formatNativeCommand)
       .add('formatText', formatTextCommand)
-      .add('withRoot', withRootCommand);
+      .add('withHost', withHostCommand);
 
     this.loadFonts();
+
+    this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
+    this.disposables.addFromEvent(
+      this.std.host,
+      'dragover',
+      this.fileDropManager.onDragOver
+    );
   }
 
   loadFonts() {

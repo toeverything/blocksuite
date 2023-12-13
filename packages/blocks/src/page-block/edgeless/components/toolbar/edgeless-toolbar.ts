@@ -40,7 +40,7 @@ import {
   NavigatorFullScreenIcon,
 } from '../../../../_common/icons/index.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
-import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
+import { getImageFilesFromLocal } from '../../../../_common/utils/filesys.js';
 import type { EdgelessTool } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
@@ -57,26 +57,23 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     :host {
       user-select: none;
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      position: absolute;
+      z-index: 1;
+      left: calc(50%);
+      transform: translateX(-50%);
+      bottom: 28px;
     }
 
     .edgeless-toolbar-container-placeholder {
+      position: absolute;
       width: 463px;
-      height: 92px;
+      height: 66px;
       border-radius: 40px;
       background-color: transparent;
-      position: absolute;
-      z-index: 3;
-      left: calc(50%);
-      transform: translateX(-50%);
-      bottom: 0px;
     }
 
     .edgeless-toolbar-container {
-      position: absolute;
-      z-index: 3;
-      left: calc(50%);
-      transform: translateX(-50%);
-      transition: 0.5s ease-in-out;
+      position: relative;
       display: flex;
       align-items: center;
       flex-direction: row;
@@ -86,6 +83,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       border: 1px solid var(--affine-border-color);
       border-radius: 40px;
       height: 64px;
+      transition: 0.5s ease-in-out;
     }
     .edgeless-toolbar-container[level='second'] {
       position: absolute;
@@ -208,16 +206,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private async _addImages() {
     this._imageLoading = true;
-
-    const fileInfos = await uploadImageFromLocal(this.edgeless.page.blob);
-
-    if (!fileInfos.length) {
-      this._imageLoading = false;
-      return;
-    }
-
-    await this.edgeless.addImages(fileInfos);
-
+    const imageFiles = await getImageFilesFromLocal();
+    await this.edgeless.addImages(imageFiles);
     this._imageLoading = false;
   }
 
@@ -588,7 +578,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
             ></edgeless-frame-tool-button>`}
 
         <edgeless-tool-icon-button
-          .tooltip=${'Presentation'}
+          .tooltip=${'Present'}
           .tooltipOffset=${17}
           .iconContainerPadding=${8}
           @click=${() => {
@@ -626,11 +616,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     return html`
       <style>
         .edgeless-toolbar-container {
-          bottom: ${this._canHideToolbar() ? '-70px' : '28px'};
+          top: ${this._canHideToolbar() ? '100px' : '0px'};
         }
       </style>
       ${this.edgeless.edgelessTool.type === 'frameNavigator' &&
-      this._hideToolbar
+      this._hideToolbar &&
+      !this._mouseOnToolbar
         ? html`<div
             class="edgeless-toolbar-container-placeholder"
             @mouseenter=${() => (this._mouseOnToolbar = true)}

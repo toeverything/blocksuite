@@ -15,14 +15,14 @@ export class EmbedBlockElement<
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {
   protected get _isInSurface() {
-    const parent = this.root.querySelector('affine-edgeless-page');
+    const parent = this.host.querySelector('affine-edgeless-page');
     return !!parent;
   }
 
   get surface() {
     if (!this._isInSurface) return null;
 
-    return this.root.querySelector('affine-surface');
+    return this.host.querySelector('affine-surface');
   }
 
   get bound(): Bound {

@@ -50,7 +50,7 @@ export function mountTextElementEditor(
 
   pageBlockContainer.appendChild(textEditor);
   textEditor.updateComplete.then(() => {
-    textEditor.vEditor?.focusIndex(cursorIndex);
+    textEditor.inlineEditor?.focusIndex(cursorIndex);
   });
 
   edgeless.tools.switchToDefaultMode({

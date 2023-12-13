@@ -1,12 +1,10 @@
 // FIXME: this should be move to more appropriate place after extension system has completed
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 
-import type {
-  AffineModalWidget,
-  DocPageBlockComponent,
-  ImageBlockModel,
-} from '../../index.js';
+import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
+import type { AffineModalWidget } from '../../page-block/widgets/modal/modal.js';
+import type { ImageBlockModel } from '../image-model.js';
 import { GradioApp } from './gradio-app.js';
 
 function createGradioApp() {
@@ -15,11 +13,11 @@ function createGradioApp() {
   return app;
 }
 
-function getPageElement(root: BlockSuiteRoot) {
-  assertExists(root.page.root?.id);
+function getPageElement(host: EditorHost) {
+  assertExists(host.page.root?.id);
 
-  const page = root.view.viewFromPath('block', [
-    root.page.root.id,
+  const page = host.view.viewFromPath('block', [
+    host.page.root.id,
   ]) as DocPageBlockComponent;
 
   return page;
@@ -28,9 +26,9 @@ function getPageElement(root: BlockSuiteRoot) {
 export function openLeditsEditor(
   model: ImageBlockModel,
   blob: Blob,
-  root: BlockSuiteRoot
+  host: EditorHost
 ) {
-  const pageElement = getPageElement(root);
+  const pageElement = getPageElement(host);
   const app = createGradioApp();
   const modal = (
     pageElement.widgetElements['affine-modal-widget'] as AffineModalWidget

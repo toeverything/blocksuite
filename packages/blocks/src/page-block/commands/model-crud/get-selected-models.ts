@@ -5,7 +5,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { getSelectedContentModels } from '../../utils/index.js';
 
 export const getSelectedModelsCommand: Command<
-  'root',
+  'host',
   'selectedModels',
   {
     selectionType?: Extract<
@@ -14,14 +14,14 @@ export const getSelectedModelsCommand: Command<
     >[];
   }
 > = (ctx, next) => {
-  const { root } = ctx;
+  const { host } = ctx;
   assertExists(
-    root,
-    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
+    host,
+    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
   );
 
   const selectionType = ctx.selectionType ?? ['block', 'text', 'image'];
-  const selectedModels = getSelectedContentModels(root, selectionType);
+  const selectedModels = getSelectedContentModels(host, selectionType);
 
   next({ selectedModels });
 };

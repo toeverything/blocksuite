@@ -65,7 +65,7 @@ export class SpecStore {
 
       const service = new newSpec.service({
         flavour,
-        store: this.std,
+        std: this.std,
       });
       this._services.set(flavour, service);
       service.mounted();

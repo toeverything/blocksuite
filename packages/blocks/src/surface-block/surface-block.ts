@@ -178,7 +178,7 @@ export class SurfaceBlockComponent extends BlockElement<
   }
 
   private get _isEdgeless() {
-    return !!this.root.querySelector('affine-edgeless-page');
+    return !!this.host.querySelector('affine-edgeless-page');
   }
 
   getBlocks<T extends EdgelessBlockType>(
@@ -260,7 +260,7 @@ export class SurfaceBlockComponent extends BlockElement<
   }
 
   getCSSPropertyValue = (value: string) => {
-    const root = this.root;
+    const root = this.host;
     if (isCssVariable(value)) {
       const cssValue = getThemePropertyValue(root, value as CssVariableName);
       if (cssValue === undefined) {

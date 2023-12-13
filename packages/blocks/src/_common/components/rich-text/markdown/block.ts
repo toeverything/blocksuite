@@ -1,18 +1,18 @@
 import { assertExists, isEqual } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
 import {
-  VKEYBOARD_ALLOW_DEFAULT,
-  VKEYBOARD_PREVENT_DEFAULT,
-} from '@blocksuite/virgo';
+  KEYBOARD_ALLOW_DEFAULT,
+  KEYBOARD_PREVENT_DEFAULT,
+} from '@blocksuite/inline';
+import type { BlockElement } from '@blocksuite/lit';
 
 import {
-  asyncSetVRange,
+  asyncSetInlineRange,
   matchFlavours,
 } from '../../../../_common/utils/index.js';
 import { getStandardLanguage } from '../../../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../../../code-block/utils/consts.js';
 import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
-import type { AffineVEditor } from '../virgo/types.js';
+import type { AffineInlineEditor } from '../inline/types.js';
 import {
   convertToDivider,
   convertToList,
@@ -21,7 +21,7 @@ import {
 
 export function tryConvertBlock(
   element: BlockElement,
-  vEditor: AffineVEditor,
+  inline: AffineInlineEditor,
   prefixText: string,
   range: { index: number; length: number }
 ) {
@@ -31,19 +31,19 @@ export function tryConvertBlock(
       /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>|```([a-zA-Z0-9]*))$/
     )
   ) {
-    return VKEYBOARD_ALLOW_DEFAULT;
+    return KEYBOARD_ALLOW_DEFAULT;
   }
 
-  const [, offset] = vEditor.getLine(range.index);
+  const [, offset] = inline.getLine(range.index);
   if (offset > prefixText.length) {
-    return VKEYBOARD_ALLOW_DEFAULT;
+    return KEYBOARD_ALLOW_DEFAULT;
   }
   const isParagraph = matchFlavours(model, ['affine:paragraph']);
   const isHeading = isParagraph && model.type.startsWith('h');
   const isParagraphQuoteBlock = isParagraph && isEqual(model.type, 'quote');
   const isCodeBlock = matchFlavours(model, ['affine:code']);
   if (isHeading || isParagraphQuoteBlock || isCodeBlock) {
-    return VKEYBOARD_ALLOW_DEFAULT;
+    return KEYBOARD_ALLOW_DEFAULT;
   }
 
   // try to add code block
@@ -53,7 +53,7 @@ export function tryConvertBlock(
       model.flavour === 'affine:paragraph' &&
       (model as ParagraphBlockModel).type === 'quote'
     ) {
-      return VKEYBOARD_ALLOW_DEFAULT;
+      return KEYBOARD_ALLOW_DEFAULT;
     }
 
     const page = model.page;
@@ -83,9 +83,9 @@ export function tryConvertBlock(
 
     const codeBlock = page.getBlockById(codeId);
     assertExists(codeBlock);
-    asyncSetVRange(codeBlock, { index: 0, length: 0 });
+    asyncSetInlineRange(codeBlock, { index: 0, length: 0 });
 
-    return VKEYBOARD_PREVENT_DEFAULT;
+    return KEYBOARD_PREVENT_DEFAULT;
   }
 
   let isConverted = false;
@@ -134,5 +134,5 @@ export function tryConvertBlock(
       isConverted = convertToList(element, 'numbered', prefixText);
   }
 
-  return isConverted ? VKEYBOARD_PREVENT_DEFAULT : VKEYBOARD_ALLOW_DEFAULT;
+  return isConverted ? KEYBOARD_PREVENT_DEFAULT : KEYBOARD_ALLOW_DEFAULT;
 }

@@ -8,13 +8,13 @@ import '@blocksuite/presets/themes/affine.css';
 import { TestUtils } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { AiPanel } from '@blocksuite/presets';
+import type { EditorHost } from '@blocksuite/lit';
+import { CopilotPanel } from '@blocksuite/presets';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
 
 import { CustomFramePanel } from './components/custom-frame-panel';
-import { CustomNavigationPanel } from './components/custom-navigation-panel.js';
+import { CustomTOCOutlinePanel } from './components/custom-toc-outline-panel.js';
 import { DebugMenu } from './components/debug-menu.js';
 import { SidePanel } from './components/side-panel';
 import type { InitFn } from './data';
@@ -46,26 +46,26 @@ function subscribePage(workspace: Workspace) {
     const editor = createEditor(page, app);
     const contentParser = new ContentParser(page);
     const debugMenu = new DebugMenu();
-    const navigationPanel = new CustomNavigationPanel();
+    const tocOutlinePanel = new CustomTOCOutlinePanel();
     const framePanel = new CustomFramePanel();
-    const aiPanel = new AiPanel();
+    const copilotPanelPanel = new CopilotPanel();
     const sidePanel = new SidePanel();
 
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
     debugMenu.mode = defaultMode;
     debugMenu.contentParser = contentParser;
-    debugMenu.navigationPanel = navigationPanel;
+    debugMenu.navigationPanel = tocOutlinePanel;
     debugMenu.framePanel = framePanel;
-    debugMenu.aiPanel = aiPanel;
+    debugMenu.copilotPanel = copilotPanelPanel;
     debugMenu.sidePanel = sidePanel;
 
-    navigationPanel.editor = editor;
-    aiPanel.editor = editor;
+    tocOutlinePanel.editor = editor;
+    copilotPanelPanel.editor = editor;
     framePanel.editor = editor;
 
     document.body.appendChild(debugMenu);
-    document.body.appendChild(navigationPanel);
+    document.body.appendChild(tocOutlinePanel);
     document.body.appendChild(sidePanel);
     document.body.appendChild(framePanel);
 
@@ -113,9 +113,9 @@ async function main() {
   window.blockSchemas = AffineSchemas;
   window.Y = Workspace.Y;
   window.ContentParser = ContentParser;
-  Object.defineProperty(globalThis, 'root', {
+  Object.defineProperty(globalThis, 'host', {
     get() {
-      return document.querySelector('block-suite-root') as BlockSuiteRoot;
+      return document.querySelector('editor-host') as EditorHost;
     },
   });
 

@@ -2,14 +2,14 @@ import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import {
-  type VEditor,
-  VIRGO_ROOT_ATTR,
-  type VirgoRootElement,
-  type VRange,
-} from '@blocksuite/virgo';
+  INLINE_ROOT_ATTR,
+  type InlineEditor,
+  type InlineRange,
+  type InlineRootElement,
+} from '@blocksuite/inline';
 
 import type { BlockElement } from '../element/block-element.js';
-import type { BlockSuiteRoot } from '../element/lit-root.js';
+import type { EditorHost } from '../element/lit-host.js';
 import { RangeSynchronizer } from './range-synchronizer.js';
 
 type RangeSnapshot = {
@@ -25,7 +25,7 @@ type RangeSnapshot = {
 export class RangeManager {
   readonly rangeSynchronizer = new RangeSynchronizer(this);
 
-  constructor(public root: BlockSuiteRoot) {}
+  constructor(public host: EditorHost) {}
 
   get value() {
     return this._range;
@@ -39,7 +39,7 @@ export class RangeManager {
     this._isRangeReversed = false;
     window.getSelection()?.removeAllRanges();
     if (sync) {
-      this.root.selection.clear(['text']);
+      this.host.selection.clear(['text']);
     }
   }
 
@@ -63,7 +63,7 @@ export class RangeManager {
     }
 
     const { from, to } = selection;
-    const fromBlock = this.root.view.viewFromPath('block', from.path);
+    const fromBlock = this.host.view.viewFromPath('block', from.path);
     if (!fromBlock) {
       this.clearRange();
       return;
@@ -85,7 +85,7 @@ export class RangeManager {
       return null;
     }
 
-    const selectionManager = this.root.selection;
+    const selectionManager = this.host.selection;
     this._range = range;
     this._isRangeReversed = isRangeReversed;
 
@@ -133,8 +133,8 @@ export class RangeManager {
     const { mode = 'all', match = () => true } = options;
 
     let result = Array.from<BlockElement>(
-      this.root.querySelectorAll(
-        `[${this.root.blockIdAttr}]:not([data-queryable="false"])`
+      this.host.querySelectorAll(
+        `[${this.host.blockIdAttr}]:not([data-queryable="false"])`
       )
     ).filter(el => range.intersectsNode(el) && match(el));
 
@@ -147,7 +147,7 @@ export class RangeManager {
         ? range.startContainer
         : range.startContainer.parentElement;
     const firstElement = rangeStartElement?.closest(
-      `[${this.root.blockIdAttr}]`
+      `[${this.host.blockIdAttr}]`
     );
     assertExists(firstElement);
 
@@ -178,7 +178,7 @@ export class RangeManager {
 
   textSelectionToRange(selection: TextSelection): Range | null {
     const { from, to } = selection;
-    const fromBlock = this.root.view.viewFromPath('block', from.path);
+    const fromBlock = this.host.view.viewFromPath('block', from.path);
     if (!fromBlock) {
       return null;
     }
@@ -200,35 +200,37 @@ export class RangeManager {
   }
 
   pointToRange(point: TextRangePoint): Range | null {
-    const result = this._calculateVirgo(point);
+    const result = this._calculateInlineEditor(point);
     if (!result) {
       return null;
     }
-    const [virgoEditor, vRange] = result;
+    const [inlineEditor, inlineRange] = result;
 
-    return virgoEditor.toDomRange(vRange);
+    return inlineEditor.toDomRange(inlineRange);
   }
 
-  private _calculateVirgo(point: TextRangePoint): [VEditor, VRange] | null {
-    const block = this.root.view.viewFromPath('block', point.path);
+  private _calculateInlineEditor(
+    point: TextRangePoint
+  ): [InlineEditor, InlineRange] | null {
+    const block = this.host.view.viewFromPath('block', point.path);
     if (!block) {
       return null;
     }
-    const virgoRoot = block.querySelector<VirgoRootElement>(
-      `[${VIRGO_ROOT_ATTR}]`
+    const inlineEditorRoot = block.querySelector<InlineRootElement>(
+      `[${INLINE_ROOT_ATTR}]`
     );
     assertExists(
-      virgoRoot,
-      `Cannot find virgo element in block ${point.path.join(' > ')}}`
+      inlineEditorRoot,
+      `Cannot find inline editor element in block ${point.path.join(' > ')}}`
     );
 
-    const maxLength = virgoRoot.virgoEditor.yText.length;
+    const maxLength = inlineEditorRoot.inlineEditor.yText.length;
     const index = point.index >= maxLength ? maxLength : point.index;
     const length =
       index + point.length >= maxLength ? maxLength - index : point.length;
 
     return [
-      virgoRoot.virgoEditor,
+      inlineEditorRoot.inlineEditor,
       {
         index,
         length,
@@ -237,26 +239,26 @@ export class RangeManager {
   }
 
   private _nodeToPoint(node: Node) {
-    const virgoElement = this._getNearestVirgo(node);
-    if (!virgoElement) {
+    const inlineEditorElement = this._getNearestInlineEditor(node);
+    if (!inlineEditorElement) {
       return null;
     }
-    const block = this._getBlock(virgoElement);
+    const block = this._getBlock(inlineEditorElement);
     if (!block) {
       return null;
     }
-    const vRange = this._range
-      ? virgoElement.virgoEditor.toVRange(this._range)
+    const inlineRange = this._range
+      ? inlineEditorElement.inlineEditor.toInlineRange(this._range)
       : null;
-    if (!vRange) {
+    if (!inlineRange) {
       return null;
     }
 
     return {
       blockId: block.model.id,
       path: block.path,
-      index: vRange.index,
-      length: vRange.length,
+      index: inlineRange.index,
+      length: inlineRange.length,
     };
   }
 
@@ -339,7 +341,7 @@ export class RangeManager {
     }
   }
 
-  private _getNearestVirgo(node: Node) {
+  private _getNearestInlineEditor(node: Node) {
     let element: Element | null;
     if (node instanceof Element) {
       element = node;
@@ -350,10 +352,10 @@ export class RangeManager {
       return;
     }
 
-    return element.closest(`[${VIRGO_ROOT_ATTR}]`) as VirgoRootElement;
+    return element.closest(`[${INLINE_ROOT_ATTR}]`) as InlineRootElement;
   }
 
   private _getBlock(element: HTMLElement) {
-    return element.closest(`[${this.root.blockIdAttr}]`) as BlockElement;
+    return element.closest(`[${this.host.blockIdAttr}]`) as BlockElement;
   }
 }

@@ -15,9 +15,9 @@ export async function onModelTextUpdated(
   const richText = await asyncGetRichTextByModel(model);
   assertExists(richText, 'RichText is not ready yet.');
   await richText.updateComplete;
-  const vEditor = richText.vEditor;
-  assertExists(vEditor, 'VEditor is not ready yet.');
-  vEditor.slots.updated.once(() => {
+  const inlineEditor = richText.inlineEditor;
+  assertExists(inlineEditor, 'Inline editor is not ready yet.');
+  inlineEditor.slots.updated.once(() => {
     if (callback) {
       callback(richText);
     }

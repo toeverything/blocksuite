@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
+import { InlineEditor } from '@blocksuite/inline';
 import { BlockElement } from '@blocksuite/lit';
-import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -12,9 +12,8 @@ import {
   asyncFocusRichText,
   matchFlavours,
 } from '../../_common/utils/index.js';
-import { PageClipboard } from '../../_legacy/clipboard/page-clipboard.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
-import { ClipboardController } from '../clipboard/index.js';
+import { PageClipboard } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -141,9 +140,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   gesture: Gesture | null = null;
 
-  clipboard = new PageClipboard(this);
-
-  clipboardController = new ClipboardController(this);
+  clipboardController = new PageClipboard(this);
 
   @state()
   private _isComposing = false;
@@ -171,11 +168,11 @@ export class DocPageBlockComponent extends BlockElement<
 
   @query('.affine-doc-page-block-title')
   private _titleContainer!: HTMLElement;
-  private _titleVEditor: VEditor | null = null;
+  private _titleInlineEditor: InlineEditor | null = null;
 
-  get titleVEditor() {
-    assertExists(this._titleVEditor);
-    return this._titleVEditor;
+  get titleInlineEditor() {
+    assertExists(this._titleInlineEditor);
+    return this._titleInlineEditor;
   }
 
   get viewport(): PageViewport {
@@ -205,25 +202,29 @@ export class DocPageBlockComponent extends BlockElement<
     };
   }
 
-  private _initTitleVEditor() {
+  private _initTitleInlineEditor() {
     const { model } = this;
     const title = model.title;
 
-    this._titleVEditor = new VEditor(title.yText);
-    this._titleVEditor.mount(this._titleContainer);
-    this._titleVEditor.disposables.addFromEvent(
+    this._titleInlineEditor = new InlineEditor(title.yText);
+    this._titleInlineEditor.mount(this._titleContainer);
+    this._titleInlineEditor.disposables.addFromEvent(
       this._titleContainer,
       'keydown',
       this._onTitleKeyDown
     );
-    this._titleVEditor.disposables.addFromEvent(
+    this._titleInlineEditor.disposables.addFromEvent(
       this._titleContainer,
       'paste',
       this._onTitlePaste
     );
-    this.addEventListener('copy', this._onTitleCopy);
+    this._titleInlineEditor.disposables.addFromEvent(
+      this._titleContainer,
+      'copy',
+      this._onTitleCopy
+    );
 
-    // Workaround for virgo skips composition event
+    // Workaround for inline editor to skip composition event
     this._disposables.addFromEvent(
       this._titleContainer,
       'compositionstart',
@@ -239,7 +240,7 @@ export class DocPageBlockComponent extends BlockElement<
       this._updateTitleInMeta();
       this.requestUpdate();
     });
-    this._titleVEditor.setReadonly(this.page.readonly);
+    this._titleInlineEditor.setReadonly(this.page.readonly);
   }
 
   private _createDefaultNoteBlock() {
@@ -269,10 +270,10 @@ export class DocPageBlockComponent extends BlockElement<
 
     if (e.key === 'Enter' && hasContent && !e.isComposing) {
       e.preventDefault();
-      assertExists(this._titleVEditor);
-      const vRange = this._titleVEditor.getVRange();
-      assertExists(vRange);
-      const right = model.title.split(vRange.index);
+      assertExists(this._titleInlineEditor);
+      const inlineRange = this._titleInlineEditor.getInlineRange();
+      assertExists(inlineRange);
+      const right = model.title.split(inlineRange.index);
       const newFirstParagraphId = page.addBlock(
         'affine:paragraph',
         { text: right },
@@ -305,30 +306,32 @@ export class DocPageBlockComponent extends BlockElement<
   };
 
   private _onTitleCopy = (event: ClipboardEvent) => {
-    const vEditor = this._titleVEditor;
-    if (!vEditor) return;
-    const vRange = vEditor.getVRange();
-    if (!vRange) return;
+    event.stopPropagation();
 
-    const toBeCopiedText = vEditor.yText
+    const inlineEditor = this._titleInlineEditor;
+    if (!inlineEditor) return;
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
+
+    const toBeCopiedText = inlineEditor.yText
       .toString()
-      .substring(vRange.index, vRange.index + vRange.length);
+      .substring(inlineRange.index, inlineRange.index + inlineRange.length);
     event.clipboardData?.setData('text/plain', toBeCopiedText);
   };
 
   private _onTitlePaste = (event: ClipboardEvent) => {
     event.stopPropagation();
-    const vEditor = this._titleVEditor;
-    if (!vEditor) return;
-    const vRange = vEditor.getVRange();
-    if (!vRange) return;
+    const inlineEditor = this._titleInlineEditor;
+    if (!inlineEditor) return;
+    const inlineRange = inlineEditor.getInlineRange();
+    if (!inlineRange) return;
 
     const data = event.clipboardData?.getData('text/plain');
     if (data) {
       const text = data.replace(/(\r\n|\r|\n)/g, '\n');
-      vEditor.insertText(vRange, text);
-      vEditor.setVRange({
-        index: vRange.index + text.length,
+      inlineEditor.insertText(inlineRange, text);
+      inlineEditor.setInlineRange({
+        index: inlineRange.index + text.length,
         length: 0,
       });
     }
@@ -336,8 +339,8 @@ export class DocPageBlockComponent extends BlockElement<
 
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('model')) {
-      if (this.model && !this._titleVEditor) {
-        this._initTitleVEditor();
+      if (this.model && !this._titleInlineEditor) {
+        this._initTitleInlineEditor();
       }
     }
   }
@@ -365,7 +368,7 @@ export class DocPageBlockComponent extends BlockElement<
       page.awarenessStore.slots.update.on(() => {
         if (readonly !== page.readonly) {
           readonly = page.readonly;
-          this._titleVEditor?.setReadonly(readonly);
+          this._titleInlineEditor?.setReadonly(readonly);
         }
       })
     );
@@ -378,12 +381,12 @@ export class DocPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+    this.clipboardController.hostConnected();
 
-    this.root.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
+    this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);
-    this.clipboard.init(this.page);
     // filter cut event in page title
     this.handleEvent('cut', ctx => {
       const { event } = ctx.get('defaultState');
@@ -406,8 +409,8 @@ export class DocPageBlockComponent extends BlockElement<
 
     this.bindHotKey({
       ArrowUp: () => {
-        const view = this.root.view;
-        const selection = this.root.selection;
+        const view = this.host.view;
+        const selection = this.host.selection;
         const sel = selection.value.find(
           sel => sel.is('text') || sel.is('block')
         );
@@ -467,8 +470,8 @@ export class DocPageBlockComponent extends BlockElement<
         return true;
       },
       ArrowDown: () => {
-        const view = this.root.view;
-        const selection = this.root.selection;
+        const view = this.host.view;
+        const selection = this.host.selection;
         const sel = selection.value.find(
           sel => sel.is('text') || sel.is('block')
         );
@@ -571,8 +574,8 @@ export class DocPageBlockComponent extends BlockElement<
       }
 
       requestAnimationFrame(() => {
-        this.root.selection.setGroup('note', [
-          this.root.selection.getInstance('text', {
+        this.host.selection.setGroup('note', [
+          this.host.selection.getInstance('text', {
             from: {
               path: [this.model.id, noteId, paragraphId],
               index,
@@ -587,7 +590,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.clipboard.dispose();
+    this.clipboardController.hostDisconnected();
     this._disposables.dispose();
     this.gesture = null;
     this.keyboardManager = null;

@@ -1,5 +1,5 @@
 import type {
-  BlockStdProvider,
+  BlockStdScope,
   EventName,
   UIEventHandler,
 } from '@blocksuite/block-std';
@@ -22,7 +22,7 @@ export abstract class BaseDataView<
   implements DataViewProps<T, Selection>, DataViewExpose
 {
   @property({ attribute: false })
-  std!: BlockStdProvider;
+  std!: BlockStdScope;
 
   @property({ attribute: false })
   header!: UniComponent<{ viewMethods: DataViewExpose; view: T }>;

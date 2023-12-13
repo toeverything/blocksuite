@@ -9,7 +9,7 @@ import {
   saveViewportToSession,
 } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { type BlockSuiteRoot, WithDisposable } from '@blocksuite/lit';
+import { type EditorHost, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
@@ -88,7 +88,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  editorHost!: EditorHost;
 
   @property({ attribute: false })
   changeEditorMode!: (mode: 'page' | 'edgeless') => void;
@@ -107,7 +107,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
   fitPadding!: number[];
 
   @property({ attribute: false })
-  host!: Document | HTMLElement;
+  domHost!: Document | HTMLElement;
 
   @query('.frame-list-container')
   frameListContainer!: HTMLElement;
@@ -116,6 +116,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
   private _frameElementHeight = 0;
   private _indicatorTranslateY = 0;
   private _pageDisposables: DisposableGroup | null = null;
+  private _lastEdgelessPageId = '';
 
   get frames() {
     const frames = this.page.getBlockByFlavour(FRAME) as FrameBlockModel[];
@@ -287,7 +288,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
       width,
       container: this,
       doc: this.ownerDocument,
-      host: this.host ?? this.ownerDocument,
+      domHost: this.domHost ?? this.ownerDocument,
       start: {
         x: e.detail.clientX,
         y: e.detail.clientY,
@@ -297,7 +298,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
       frameElementHeight: this._frameElementHeight,
       edgeless: this.edgeless,
       page: this.page,
-      root: this.root,
+      editorHost: this.editorHost,
       onDragEnd: insertIdx => {
         this._dragging = false;
         this.insertIndex = undefined;
@@ -358,7 +359,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
           data-frame-id=${frameItem.frame.id}
           .edgeless=${this.edgeless}
           .page=${this.page}
-          .root=${this.root}
+          .host=${this.editorHost}
           .frame=${frameItem.frame}
           .cardIndex=${idx}
           .frameIndex=${frameItem.frameIndex}
@@ -397,16 +398,24 @@ export class FramePanelBody extends WithDisposable(LitElement) {
 
     if (_changedProperties.has('edgeless') && this.edgeless) {
       // after switch to edgeless mode, should update the selection
-      this.edgeless.selectionManager.setSelection({
-        elements: this._selected,
-        editing: false,
-      });
+      if (this.edgeless.model.id === this._lastEdgelessPageId) {
+        this.edgeless.selectionManager.setSelection({
+          elements: this._selected,
+          editing: false,
+        });
+      } else {
+        this._selected = [];
+      }
+      this._lastEdgelessPageId = this.edgeless.model.id;
     }
   }
 
   override connectedCallback() {
     super.connectedCallback();
     this._updateFrameItems();
+    if (this.edgeless) {
+      this._lastEdgelessPageId = this.edgeless.model.id;
+    }
   }
 
   override disconnectedCallback() {

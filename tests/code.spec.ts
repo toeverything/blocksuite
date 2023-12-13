@@ -9,8 +9,8 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
-  getVirgoSelectionIndex,
-  getVirgoSelectionText,
+  getInlineSelectionIndex,
+  getInlineSelectionText,
   initEmptyCodeBlockState,
   initEmptyParagraphState,
   pasteByKeyboard,
@@ -23,15 +23,14 @@ import {
   redoByKeyboard,
   selectAllByKeyboard,
   setSelection,
-  SHORT_KEY,
   switchReadonly,
   type,
   undoByKeyboard,
   updateBlockType,
 } from './utils/actions/index.js';
 import {
+  assertRichTextInlineRange,
   assertRichTexts,
-  assertRichTextVRange,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -345,13 +344,13 @@ test('drag copy paste', async ({ page }) => {
 
   await dragBetweenIndices(page, [0, 0], [0, 3]);
   await copyByKeyboard(page);
-  await focusRichText(page);
-  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await pressArrowLeft(page);
+  await pasteByKeyboard(page);
 
-  const content = await getVirgoSelectionText(page);
+  const content = await getInlineSelectionText(page);
   expect(content).toBe('useuse');
 
-  await assertRichTextVRange(page, 0, 6, 0);
+  await assertRichTextInlineRange(page, 0, 3, 0);
 });
 
 test('keyboard selection and copy paste', async ({ page }) => {
@@ -367,10 +366,10 @@ test('keyboard selection and copy paste', async ({ page }) => {
   await pressArrowLeft(page, 1);
   await pasteByKeyboard(page);
 
-  const content = await getVirgoSelectionText(page);
+  const content = await getInlineSelectionText(page);
   expect(content).toBe('useuse');
 
-  await assertRichTextVRange(page, 0, 3, 0);
+  await assertRichTextInlineRange(page, 0, 3, 0);
 });
 
 // FIXME: this test failed in headless mode but passed in non-headless mode
@@ -425,11 +424,7 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
 test.fixme(
   'use code block copy menu of code block copy whole code block',
   async ({ page }) => {
-    await enterPlaygroundRoom(page, {
-      flags: {
-        enable_transformer_clipboard: true,
-      },
-    });
+    await enterPlaygroundRoom(page);
     await initEmptyCodeBlockState(page, { language: 'javascript' });
     await focusRichText(page);
 
@@ -482,11 +477,7 @@ test.fixme(
 );
 
 test('code block copy button can work', async ({ page }) => {
-  await enterPlaygroundRoom(page, {
-    flags: {
-      enable_transformer_clipboard: true,
-    },
-  });
+  await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
@@ -628,10 +619,10 @@ test('press backspace after code block can enter code block', async ({
   await pressEnterWithShortkey(page);
   await page.keyboard.press('Backspace');
 
-  const index = await getVirgoSelectionIndex(page);
+  const index = await getInlineSelectionIndex(page);
   expect(index).toBe(code.length);
 
-  const text = await getVirgoSelectionText(page);
+  const text = await getInlineSelectionText(page);
   expect(text).toBe(code);
 });
 
@@ -647,10 +638,10 @@ test('press ArrowUp after code block can enter code block', async ({
   await pressEnterWithShortkey(page);
   await page.keyboard.press('ArrowUp');
 
-  const index = await getVirgoSelectionIndex(page);
+  const index = await getInlineSelectionIndex(page);
   expect(index).toBe(code.length);
 
-  const text = await getVirgoSelectionText(page);
+  const text = await getInlineSelectionText(page);
   expect(text).toBe(code);
 });
 

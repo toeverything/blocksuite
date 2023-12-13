@@ -99,6 +99,9 @@ importers:
       lit-analyzer:
         specifier: 2.0.1
         version: 2.0.1
+      lz-string:
+        specifier: ^1.5.0
+        version: 1.5.0
       madge:
         specifier: ^6.1.0
         version: 6.1.0(typescript@5.3.2)
@@ -178,15 +181,15 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      '@blocksuite/inline':
+        specifier: workspace:*
+        version: link:../inline
       '@blocksuite/lit':
         specifier: workspace:*
         version: link:../lit
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store
-      '@blocksuite/virgo':
-        specifier: workspace:*
-        version: link:../virgo
       '@floating-ui/dom':
         specifier: ^1.5.3
         version: 1.5.3
@@ -334,14 +337,30 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
 
+  packages/inline:
+    dependencies:
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../global
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      lit:
+        specifier: ^3.1.0
+        version: 3.1.0
+      yjs:
+        specifier: ^13.6.10
+        version: 13.6.10
+
   packages/lit:
     dependencies:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
-      '@blocksuite/virgo':
+      '@blocksuite/inline':
         specifier: workspace:*
-        version: link:../virgo
+        version: link:../inline
       lit:
         specifier: ^3.1.0
         version: 3.1.0
@@ -361,6 +380,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      '@blocksuite/inline':
+        specifier: workspace:*
+        version: link:../inline
       '@blocksuite/lit':
         specifier: workspace:*
         version: link:../lit
@@ -370,9 +392,6 @@ importers:
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store
-      '@blocksuite/virgo':
-        specifier: workspace:*
-        version: link:../virgo
       '@shoelace-style/shoelace':
         specifier: 2.12.0
         version: 2.12.0(@types/react@18.2.42)
@@ -458,9 +477,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
-      '@blocksuite/virgo':
+      '@blocksuite/inline':
         specifier: workspace:*
-        version: link:../virgo
+        version: link:../inline
       '@types/flexsearch':
         specifier: ^0.7.3
         version: 0.7.6
@@ -492,22 +511,6 @@ importers:
       async-call-rpc:
         specifier: ^6.3.1
         version: 6.3.1
-      lit:
-        specifier: ^3.1.0
-        version: 3.1.0
-      yjs:
-        specifier: ^13.6.10
-        version: 13.6.10
-
-  packages/virgo:
-    dependencies:
-      '@blocksuite/global':
-        specifier: workspace:*
-        version: link:../global
-      zod:
-        specifier: ^3.22.4
-        version: 3.22.4
-    devDependencies:
       lit:
         specifier: ^3.1.0
         version: 3.1.0
@@ -5649,7 +5652,6 @@ packages:
   /lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
-    dev: false
 
   /madge@6.1.0(typescript@5.3.2):
     resolution: {integrity: sha512-irWhT5RpFOc6lkzGHKLihonCVgM0YtfNUh4IrFeW3EqHpnt/JHUG3z26j8PeJEktCGB4tmGOOOJi1Rl/ACWucQ==}

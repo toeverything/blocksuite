@@ -7,7 +7,7 @@ const allPackages = [
   'global',
   'playground',
   'store',
-  'virgo',
+  'inline',
   'lit',
   'block-std',
 ];
@@ -57,13 +57,14 @@ module.exports = {
     'plugin:lit/recommended',
   ],
   ignorePatterns: [
+    'tests/snapsthos/*',
     'packages/store/dist/*',
     'packages/lit/dist/*',
     'packages/blocks/dist/*',
     'packages/presets/dist/*',
     'packages/global/dist/*',
     'packages/playground/dist/assets/*',
-    'packages/virgo/dist/*',
+    'packages/inline/dist/*',
     'packages/block-std/dist/*',
   ],
   overrides: [

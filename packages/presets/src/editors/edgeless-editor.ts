@@ -1,16 +1,12 @@
 import { EdgelessEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
-import {
-  BlockSuiteRoot,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/lit';
+import { EditorHost, ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
-noop(BlockSuiteRoot);
+noop(EditorHost);
 
 @customElement('edgeless-editor')
 export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
@@ -18,9 +14,9 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   page!: Page;
 
   @property({ attribute: false })
-  preset = EdgelessEditorBlockSpecs;
+  specs = EdgelessEditorBlockSpecs;
 
-  root: Ref<BlockSuiteRoot> = createRef<BlockSuiteRoot>();
+  host: Ref<EditorHost> = createRef<EditorHost>();
 
   override render() {
     return html`
@@ -42,11 +38,11 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
           }
         }
       </style>
-      <block-suite-root
-        ${ref(this.root)}
+      <editor-host
+        ${ref(this.host)}
         .page=${this.page}
-        .preset=${this.preset}
-      ></block-suite-root>
+        .specs=${this.specs}
+      ></editor-host>
     `;
   }
 }

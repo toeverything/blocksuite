@@ -2,7 +2,6 @@ import type { UIEventHandler } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSnapshot, Page } from '@blocksuite/store';
-import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import { HtmlAdapter, ImageAdapter } from '../../_common/adapters/index.js';
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
@@ -10,18 +9,12 @@ import { replaceIdMiddleware } from '../../_common/transformers/utils.js';
 import { ClipboardAdapter } from './adapter.js';
 import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
 
-export class ClipboardController implements ReactiveController {
+export class PageClipboard {
   protected _disposables = new DisposableGroup();
-  host: ReactiveControllerHost & BlockElement;
+  host: BlockElement;
 
   private get _std() {
     return this.host.std;
-  }
-
-  private get _enabled() {
-    return this._std.page.awarenessStore.getFlag(
-      'enable_transformer_clipboard'
-    );
   }
 
   private _clipboardAdapter = new ClipboardAdapter();
@@ -29,30 +22,25 @@ export class ClipboardController implements ReactiveController {
   private _htmlAdapter = new HtmlAdapter();
   private _imageAdapter = new ImageAdapter();
 
-  constructor(host: ReactiveControllerHost & BlockElement) {
-    (this.host = host).addController(this);
+  constructor(host: BlockElement) {
+    this.host = host;
   }
 
   hostConnected() {
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
     }
-    this.host.updateComplete.then(() => {
-      if (this._enabled) {
-        this._init();
-      }
-    });
+    this.host.handleEvent('copy', this.onPageCopy);
+    this.host.handleEvent('paste', this.onPagePaste);
+    this.host.handleEvent('cut', this.onPageCut);
+    this._init();
   }
 
   hostDisconnected() {
     this._disposables.dispose();
   }
 
-  private _init = () => {
-    this.host.handleEvent('copy', this.onPageCopy);
-    this.host.handleEvent('paste', this.onPagePaste);
-    this.host.handleEvent('cut', this.onPageCut);
-
+  protected _init = () => {
     this._std.clipboard.registerAdapter(
       ClipboardAdapter.MIME,
       this._clipboardAdapter,
@@ -105,7 +93,7 @@ export class ClipboardController implements ReactiveController {
   private _copySelected = (event: ClipboardEvent, onCopy?: () => void) => {
     return this._std.command
       .pipe()
-      .withRoot()
+      .withHost()
       .with({ onCopy })
       .getSelectedModels()
       .copySelectedModels({ event });
@@ -125,10 +113,10 @@ export class ClipboardController implements ReactiveController {
     this._copySelected(e, () => {
       this._std.command
         .pipe()
-        .withRoot()
+        .withHost()
         .try(cmd => [
           cmd.getTextSelection().deleteText(),
-          cmd.getBlockSelections().deleteSelectedModels(),
+          cmd.getSelectedModels().deleteSelectedModels(),
         ])
         .run();
     }).run();
@@ -138,6 +126,7 @@ export class ClipboardController implements ReactiveController {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
+    this._std.page.captureSync();
     this._std.command
       .pipe()
       .try(cmd => [

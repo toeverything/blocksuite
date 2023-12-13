@@ -26,11 +26,11 @@ import {
 } from '../_common/icons/index.js';
 import type { DataViewSelection } from '../_common/utils/index.js';
 import { Rect } from '../_common/utils/index.js';
-import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
+import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   getDropResult,
-} from '../_common/widgets/drag-handle/utils.js';
+} from '../page-block/widgets/drag-handle/utils.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';
@@ -253,9 +253,9 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   private _dataSource?: DataSource;
   public get dataSource(): DataSource {
     if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDatasource(this.root, {
+      this._dataSource = new DatabaseBlockDatasource(this.host, {
         type: 'database-block',
-        pageId: this.root.page.id,
+        pageId: this.host.page.id,
         blockId: this.model.id,
       });
     }
@@ -329,21 +329,21 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   selectionUpdated = new Slot<DataViewSelection | undefined>();
 
   get getFlag() {
-    return this.root.page.awarenessStore.getFlag.bind(
-      this.root.page.awarenessStore
+    return this.host.page.awarenessStore.getFlag.bind(
+      this.host.page.awarenessStore
     );
   }
 
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
-      dispose: this.root.event.bindHotkey(hotkeys, {
+      dispose: this.host.event.bindHotkey(hotkeys, {
         path: this.path,
       }),
     };
   };
   _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
     return {
-      dispose: this.root.event.add(name, handler, {
+      dispose: this.host.event.add(name, handler, {
         path: this.path,
       }),
     };

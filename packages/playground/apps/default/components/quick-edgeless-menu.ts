@@ -19,13 +19,14 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import {
   COLOR_VARIABLES,
   extractCssVariables,
+  HtmlAdapter,
   ZipTransformer,
 } from '@blocksuite/blocks';
 import { NOTE_WIDTH } from '@blocksuite/blocks';
 import { MarkdownAdapter } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { ShadowlessElement } from '@blocksuite/lit';
-import type { EditorContainer } from '@blocksuite/presets';
+import type { AffineEditorContainer } from '@blocksuite/presets';
 import { Job, Utils, type Workspace } from '@blocksuite/store';
 import type { SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
@@ -55,7 +56,7 @@ function getTabGroupTemplate({
   requestUpdate,
 }: {
   workspace: Workspace;
-  editor: EditorContainer;
+  editor: AffineEditorContainer;
   requestUpdate: () => void;
 }) {
   workspace.meta.pageMetasUpdated.on(requestUpdate);
@@ -131,7 +132,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   workspace!: Workspace;
 
   @property({ attribute: false })
-  editor!: EditorContainer;
+  editor!: AffineEditorContainer;
 
   @property({ attribute: false })
   contentParser!: ContentParser;
@@ -242,14 +243,43 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportHtml() {
-    this.contentParser.exportHtml();
+    const job = new Job({ workspace: this.workspace });
+    job.pageToSnapshot(window.page).then(snapshot => {
+      new HtmlAdapter()
+        .fromPageSnapshot({
+          snapshot,
+          assets: job.assetsManager,
+        })
+        .then(async result => {
+          let downloadBlob: Blob;
+          const element = document.createElement('a');
+          const contentBlob = new Blob([result.file], { type: 'plain/text' });
+          if (result.assetsIds.length > 0) {
+            const zip = ZipTransformer.createAssetsArchive(
+              job.assets,
+              result.assetsIds
+            );
+
+            zip.file('index.html', contentBlob);
+
+            downloadBlob = await zip.generateAsync({ type: 'blob' });
+            element.setAttribute('download', 'export.zip');
+          } else {
+            downloadBlob = contentBlob;
+            element.setAttribute('download', 'export.md');
+          }
+          const fileURL = URL.createObjectURL(downloadBlob);
+          element.setAttribute('href', fileURL);
+          element.style.display = 'none';
+          document.body.appendChild(element);
+          element.click();
+          document.body.removeChild(element);
+          URL.revokeObjectURL(fileURL);
+        });
+    });
   }
 
   private _exportMarkDown() {
-    this.contentParser.exportMarkdown();
-  }
-
-  private _exportMarkDownExperimentalAdapter() {
     const job = new Job({ workspace: this.workspace });
     job.pageToSnapshot(window.page).then(snapshot => {
       new MarkdownAdapter()
@@ -515,11 +545,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                     >
                     <sl-menu-item @click=${this._exportMarkDown}>
                       Export Markdown
-                    </sl-menu-item>
-                    <sl-menu-item
-                      @click=${this._exportMarkDownExperimentalAdapter}
-                    >
-                      Export Markdown (Experimental Adapter)
                     </sl-menu-item>
                     <sl-menu-item @click=${this._exportHtml}>
                       Export HTML

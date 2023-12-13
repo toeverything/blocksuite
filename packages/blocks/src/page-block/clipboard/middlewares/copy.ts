@@ -1,6 +1,6 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EditorHost } from '@blocksuite/lit';
 import type {
   BaseBlockModel,
   BlockSnapshot,
@@ -8,12 +8,21 @@ import type {
   JobSlots,
 } from '@blocksuite/store';
 
+import { matchFlavours } from '../../../_common/utils/index.js';
+
 const handlePoint = (
   point: TextRangePoint,
   snapshot: BlockSnapshot,
   model: BaseBlockModel
 ) => {
   const { index, length } = point;
+  if (matchFlavours(model, ['affine:page'])) {
+    if (length === 0) return;
+    (snapshot.props.title as Record<string, unknown>).delta =
+      model.title.sliceToDelta(index, length + index);
+    return;
+  }
+
   if (!snapshot.props.text || length === 0) {
     return;
   }
@@ -21,7 +30,7 @@ const handlePoint = (
     model.text?.sliceToDelta(index, length + index);
 };
 
-const sliceText = (slots: JobSlots, std: BlockSuiteRoot['std']) => {
+const sliceText = (slots: JobSlots, std: EditorHost['std']) => {
   slots.afterExport.on(payload => {
     if (payload.type === 'block') {
       const snapshot = payload.snapshot;
@@ -40,7 +49,7 @@ const sliceText = (slots: JobSlots, std: BlockSuiteRoot['std']) => {
   });
 };
 
-export const copyMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
+export const copyMiddleware = (std: EditorHost['std']): JobMiddleware => {
   return ({ slots }) => {
     sliceText(slots, std);
   };

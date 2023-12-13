@@ -1,14 +1,14 @@
 import type { BlockSelection, Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
-import type { AffineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import { FORMAT_BLOCK_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import type { Flavour } from '../../../models.js';
 
 // for block selection
 export const formatBlockCommand: Command<
-  'currentBlockSelections' | 'root',
+  'currentBlockSelections' | 'host',
   never,
   {
     blockSelections?: BlockSelection[];
@@ -22,10 +22,10 @@ export const formatBlockCommand: Command<
     '`blockSelections` is required, you need to pass it in args or use `getBlockSelections` command before adding this command to the pipeline.'
   );
 
-  const root = ctx.root;
+  const host = ctx.host;
   assertExists(
-    root,
-    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
+    host,
+    '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
   );
 
   if (blockSelections.length === 0) return;
@@ -33,9 +33,9 @@ export const formatBlockCommand: Command<
   const styles = ctx.styles;
   const mode = ctx.mode ?? 'merge';
 
-  const success = root.std.command
+  const success = host.std.command
     .pipe()
-    .withRoot()
+    .withHost()
     .getSelectedBlocks({
       blockSelections,
       filter: el =>
@@ -46,21 +46,21 @@ export const formatBlockCommand: Command<
       const { selectedBlocks } = ctx;
       assertExists(selectedBlocks);
 
-      const selectedVEditors = selectedBlocks.flatMap(el => {
-        const vRoot = el.querySelector<VirgoRootElement<AffineTextAttributes>>(
-          `[${VIRGO_ROOT_ATTR}]`
-        );
-        if (vRoot) {
-          return vRoot.virgoEditor;
+      const selectedInlineEditors = selectedBlocks.flatMap(el => {
+        const inlineRoot = el.querySelector<
+          InlineRootElement<AffineTextAttributes>
+        >(`[${INLINE_ROOT_ATTR}]`);
+        if (inlineRoot) {
+          return inlineRoot.inlineEditor;
         }
         return [];
       });
 
-      selectedVEditors.forEach(vEditor => {
-        vEditor.formatText(
+      selectedInlineEditors.forEach(inlineEditor => {
+        inlineEditor.formatText(
           {
             index: 0,
-            length: vEditor.yTextLength,
+            length: inlineEditor.yTextLength,
           },
           styles,
           {

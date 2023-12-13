@@ -51,7 +51,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   }
 
   override render() {
-    const parent = this.root.page.getParent(this.model);
+    const parent = this.host.page.getParent(this.model);
     const isInSurface = parent?.flavour === 'affine:surface';
 
     if (isInSurface) {

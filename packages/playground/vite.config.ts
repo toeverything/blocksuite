@@ -46,7 +46,7 @@ export default ({ mode }) => {
           main: resolve(__dirname, 'index.html'),
           'starter/': resolve(__dirname, 'starter/index.html'),
           'examples/basic': resolve(__dirname, 'examples/basic/index.html'),
-          'examples/virgo': resolve(__dirname, 'examples/virgo/index.html'),
+          'examples/inline': resolve(__dirname, 'examples/inline/index.html'),
           'examples/store': resolve(__dirname, 'examples/store/index.html'),
         },
       },
@@ -65,11 +65,11 @@ export default ({ mode }) => {
         '@blocksuite/store': path.resolve(
           fileURLToPath(new URL('../store/src', import.meta.url))
         ),
-        '@blocksuite/virgo': path.resolve(
-          fileURLToPath(new URL('../virgo/src', import.meta.url))
+        '@blocksuite/inline': path.resolve(
+          fileURLToPath(new URL('../inline/src', import.meta.url))
         ),
-        '@blocksuite/virgo/*': path.resolve(
-          fileURLToPath(new URL('../virgo/src/*', import.meta.url))
+        '@blocksuite/inline/*': path.resolve(
+          fileURLToPath(new URL('../inline/src/*', import.meta.url))
         ),
       },
     },

@@ -26,25 +26,25 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       cursor: text;
     }
 
-    .database-title [data-virgo-text='true'] {
+    .database-title [data-v-text='true'] {
       display: block;
       word-break: break-all !important;
     }
 
-    .database-title.ellipsis [data-virgo-text='true'] {
+    .database-title.ellipsis [data-v-text='true'] {
       white-space: nowrap !important;
       text-overflow: ellipsis;
       overflow: hidden;
     }
 
-    .database-title-empty [data-virgo-root='true']::before {
+    .database-title-empty [data-v-root='true']::before {
       content: 'Untitled';
       position: absolute;
       pointer-events: none;
       color: var(--affine-text-primary-color);
     }
 
-    .database-title-empty [data-virgo-root='true']:focus::before {
+    .database-title-empty [data-v-root='true']:focus::before {
       color: var(--affine-placeholder-color);
     }
   `;
@@ -63,12 +63,12 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   @query('rich-text')
   private richText!: RichText;
-  get vEditor() {
-    assertExists(this.richText.vEditor);
-    return this.richText.vEditor;
+  get inlineEditor() {
+    assertExists(this.richText.inlineEditor);
+    return this.richText.inlineEditor;
   }
-  get vEditorContainer() {
-    return this.vEditor.rootElement;
+  get inlineEditorContainer() {
+    return this.inlineEditor.rootElement;
   }
 
   override firstUpdated() {
@@ -79,31 +79,31 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
     this.updateComplete.then(() => {
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'focus',
         this._onTitleFocus
       );
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'blur',
         this._onTitleBlur
       );
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'compositionstart',
         () => {
           this.isComposing = true;
         }
       );
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'compositionend',
         () => {
           this.isComposing = false;
         }
       );
       this.disposables.addFromEvent(
-        this.vEditorContainer,
+        this.inlineEditorContainer,
         'keydown',
         this._onKeyDown
       );

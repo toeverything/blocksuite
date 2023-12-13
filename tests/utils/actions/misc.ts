@@ -3,8 +3,10 @@ import '../declare-test-window.js';
 
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import lz from 'lz-string';
 
 import type { ClipboardItem } from '../../../packages/blocks/src/_legacy/clipboard/clipboard-item.js';
+import type { RichText } from '../../../packages/blocks/src/index.js';
 import {
   type CssVariableName,
   type DatabaseBlockModel,
@@ -12,14 +14,13 @@ import {
   type PageBlockModel,
   type ThemeObserver,
 } from '../../../packages/blocks/src/index.js';
-import { assertExists } from '../../../packages/global/src/utils.js';
-import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
-import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
-import type { BaseBlockModel } from '../../../packages/store/src/index.js';
+import { assertExists, sleep } from '../../../packages/global/src/utils.js';
 import {
-  type VirgoRootElement,
-  type VRange,
-} from '../../../packages/virgo/src/index.js';
+  type InlineRange,
+  type InlineRootElement,
+} from '../../../packages/inline/src/index.js';
+import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
+import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
@@ -39,7 +40,7 @@ export const defaultPlaygroundURL = new URL(`http://localhost:5173/starter/`);
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
-const RICH_TEXT_SELECTOR = '.virgo-editor';
+const RICH_TEXT_SELECTOR = '.inline-editor';
 
 function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
@@ -85,7 +86,7 @@ async function initEmptyEditor({
           throw new Error('Cannot find app root element(#app).');
         }
         const createEditor = () => {
-          const editor = document.createElement('editor-container');
+          const editor = document.createElement('affine-editor-container');
           editor.page = page;
           editor.autofocus = true;
           editor.slots.pageLinkClicked.on(({ pageId }) => {
@@ -140,7 +141,7 @@ async function initEmptyEditor({
 }
 
 export const getEditorLocator = (page: Page) => {
-  return page.locator('editor-container').nth(currentEditorIndex);
+  return page.locator('affine-editor-container').nth(currentEditorIndex);
 };
 export const getBlockHub = (page: Page) => {
   return page.locator('affine-block-hub').nth(currentEditorIndex);
@@ -230,7 +231,7 @@ export async function enterPlaygroundRoom(
   url.searchParams.set('room', room);
   url.searchParams.set('blobStorage', blobStorage?.join(',') || 'idb');
   await page.goto(url.toString());
-  const readyPromise = waitForPageReady(page);
+  // const readyPromise = waitForPageReady(page);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
@@ -258,7 +259,7 @@ export async function enterPlaygroundRoom(
     multiEditor,
   });
 
-  await readyPromise;
+  // await readyPromise;
 
   await page.evaluate(() => {
     if (typeof window.$blocksuite !== 'object') {
@@ -547,7 +548,7 @@ export async function focusDatabaseTitle(page: Page) {
       throw new Error('Cannot find database title');
     }
 
-    dbTitle.vEditor.focusEnd();
+    dbTitle.inlineEditor!.focusEnd();
   });
   await waitNextFrame(page);
 }
@@ -599,10 +600,10 @@ export async function focusRichText(
 export async function focusRichTextEnd(page: Page, i = 0) {
   await page.evaluate(
     ([i]) => {
-      const editor = document.querySelectorAll('editor-container')[i];
+      const editor = document.querySelectorAll('affine-editor-container')[i];
       const richTexts = Array.from(editor.querySelectorAll('rich-text'));
 
-      richTexts[i].vEditor?.focusEnd();
+      richTexts[i].inlineEditor?.focusEnd();
     },
     [i, currentEditorIndex]
   );
@@ -682,37 +683,37 @@ export async function initParagraphsByCount(page: Page, count: number) {
   await resetHistory(page);
 }
 
-export async function getVirgoSelectionIndex(page: Page) {
+export async function getInlineSelectionIndex(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
 
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    const index = component?.vEditor?.getVRange()?.index;
+    const index = component?.inlineEditor?.getInlineRange()?.index;
     return index !== undefined ? index : -1;
   });
 }
 
-export async function getVirgoSelectionText(page: Page) {
+export async function getInlineSelectionText(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    return component?.vEditor?.yText.toString() ?? '';
+    return component?.inlineEditor?.yText.toString() ?? '';
   });
 }
 
-export async function getSelectedTextByVirgo(page: Page) {
+export async function getSelectedTextByInlineEditor(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
 
-    const vRange = component?.vEditor?.getVRange();
-    if (!vRange) return '';
+    const inlineRange = component?.inlineEditor?.getInlineRange();
+    if (!inlineRange) return '';
 
-    const { index, length } = vRange;
-    return component?.vEditor?.yText.toString().slice(index, length) || '';
+    const { index, length } = inlineRange;
+    return component?.inlineEditor?.yText.toString().slice(index, length) || '';
   });
 }
 
@@ -730,18 +731,20 @@ export async function getSelectedText(page: Page) {
       ) || [];
 
     components.forEach(component => {
-      const vRange = component.vEditor?.getVRange();
-      if (!vRange) return;
-      const { index, length } = vRange;
+      const inlineRange = component.inlineEditor?.getInlineRange();
+      if (!inlineRange) return;
+      const { index, length } = inlineRange;
       content +=
-        component?.vEditor?.yText.toString().slice(index, index + length) || '';
+        component?.inlineEditor?.yText
+          .toString()
+          .slice(index, index + length) || '';
     });
 
     return content;
   });
 }
 
-export async function setVRangeInSelectedRichText(
+export async function setInlineRangeInSelectedRichText(
   page: Page,
   index: number,
   length: number
@@ -753,7 +756,7 @@ export async function setVRangeInSelectedRichText(
       const range = selection.getRangeAt(0);
       const component =
         range.startContainer.parentElement?.closest('rich-text');
-      component?.vEditor?.setVRange({
+      component?.inlineEditor?.setInlineRange({
         index,
         length,
       });
@@ -763,18 +766,22 @@ export async function setVRangeInSelectedRichText(
   await waitNextFrame(page);
 }
 
-export async function setVRangeInVEditor(page: Page, vRange: VRange, i = 0) {
+export async function setInlineRangeInInlineEditor(
+  page: Page,
+  inlineRange: InlineRange,
+  i = 0
+) {
   await page.evaluate(
-    ({ i, vRange }) => {
-      const vEditor = document.querySelectorAll<VirgoRootElement>(
-        '[data-virgo-root="true"]'
-      )[i]?.virgoEditor;
-      if (!vEditor) {
-        throw new Error('Cannot find vEditor');
+    ({ i, inlineRange }) => {
+      const inlineEditor = document.querySelectorAll<InlineRootElement>(
+        '[data-v-root="true"]'
+      )[i]?.inlineEditor;
+      if (!inlineEditor) {
+        throw new Error('Cannot find inline editor');
       }
-      vEditor.setVRange(vRange);
+      inlineEditor.setInlineRange(inlineRange);
     },
-    { i, vRange }
+    { i, inlineRange }
   );
   await waitNextFrame(page);
 }
@@ -836,6 +843,89 @@ export async function importMarkdown(
   );
 }
 
+export async function getClipboardHTML(page: Page) {
+  const dataInClipboard = await page.evaluate(async () => {
+    function format(node: HTMLElement, level: number) {
+      const indentBefore = new Array(level++ + 1).join('  ');
+      const indentAfter = new Array(level - 1).join('  ');
+      let textNode;
+
+      for (let i = 0; i < node.children.length; i++) {
+        textNode = document.createTextNode('\n' + indentBefore);
+        node.insertBefore(textNode, node.children[i]);
+
+        format(node.children[i] as HTMLElement, level);
+
+        if (node.lastElementChild == node.children[i]) {
+          textNode = document.createTextNode('\n' + indentAfter);
+          node.appendChild(textNode);
+        }
+      }
+
+      return node;
+    }
+    const clipItems = await navigator.clipboard.read();
+    const item = clipItems.find(item => item.types.includes('text/html'));
+    const data = await item?.getType('text/html');
+    const text = await data?.text();
+    const html = new DOMParser().parseFromString(text ?? '', 'text/html');
+    const container = html.querySelector<HTMLDivElement>(
+      '[data-blocksuite-snapshot]'
+    );
+    if (!container) {
+      return '';
+    }
+    return format(container, 0).innerHTML.trim();
+  });
+
+  return dataInClipboard;
+}
+
+export async function getClipboardText(page: Page) {
+  const dataInClipboard = await page.evaluate(async () => {
+    const clipItems = await navigator.clipboard.read();
+    const item = clipItems.find(item => item.types.includes('text/plain'));
+    const data = await item?.getType('text/plain');
+    const text = await data?.text();
+    return text ?? '';
+  });
+  return dataInClipboard;
+}
+
+export async function getClipboardCustomData(page: Page, type: string) {
+  const dataInClipboard = await page.evaluate(async () => {
+    const clipItems = await navigator.clipboard.read();
+    const item = clipItems.find(item => item.types.includes('text/html'));
+    const data = await item?.getType('text/html');
+    const text = await data?.text();
+    const html = new DOMParser().parseFromString(text ?? '', 'text/html');
+    const container = html.querySelector<HTMLDivElement>(
+      '[data-blocksuite-snapshot]'
+    );
+    return container?.dataset.blocksuiteSnapshot ?? '';
+  });
+
+  const decompressed = lz.decompressFromEncodedURIComponent(dataInClipboard);
+  let json: Record<string, unknown> | null = null;
+  try {
+    json = JSON.parse(decompressed);
+  } catch {
+    throw new Error(`Invalid snapshot in clipboard: ${dataInClipboard}`);
+  }
+
+  return json?.[type];
+}
+
+export async function getClipboardSnapshot(page: Page) {
+  const dataInClipboard = await getClipboardCustomData(
+    page,
+    'BLOCKSUITE/SNAPSHOT'
+  );
+  assertExists(dataInClipboard);
+  const json = JSON.parse(dataInClipboard as string);
+  return json;
+}
+
 export async function setSelection(
   page: Page,
   anchorBlockId: number,
@@ -849,14 +939,14 @@ export async function setSelection(
       const anchorRichText = document.querySelector<RichText>(
         `[data-block-id="${anchorBlockId}"] rich-text`
       )!;
-      const anchorRichTextRange = anchorRichText.vEditor.toDomRange({
+      const anchorRichTextRange = anchorRichText.inlineEditor!.toDomRange({
         index: anchorOffset,
         length: 0,
       })!;
       const focusRichText = document.querySelector<RichText>(
         `[data-block-id="${focusBlockId}"] rich-text`
       )!;
-      const focusRichTextRange = focusRichText.vEditor.toDomRange({
+      const focusRichTextRange = focusRichText.inlineEditor!.toDomRange({
         index: focusOffset,
         length: 0,
       })!;
@@ -986,7 +1076,7 @@ export async function getIndexCoordinate(
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any;
-      const domRange = richText.vEditor.toDomRange({
+      const domRange = richText.inlineEditor.toDomRange({
         index: vIndex,
         length: 0,
       });
@@ -1005,7 +1095,7 @@ export async function getIndexCoordinate(
   return coord;
 }
 
-export function virgoEditorInnerTextToString(innerText: string): string {
+export function inlineEditorInnerTextToString(innerText: string): string {
   return innerText.replace('\u200B', '').trim();
 }
 
@@ -1024,7 +1114,7 @@ export async function focusTitle(page: Page) {
     if (!defaultPageComponent) {
       throw new Error('default page component not found');
     }
-    defaultPageComponent.titleVEditor.focusEnd();
+    defaultPageComponent.titleInlineEditor.focusEnd();
   }, currentEditorIndex);
   await waitNextFrame(page);
 }
@@ -1046,7 +1136,7 @@ export async function shamefullyBlurActiveElement(page: Page) {
 
 /**
  * FIXME:
- * Sometimes virgo state is not updated in time. Bad case like below:
+ * Sometimes inline editor state is not updated in time. Bad case like below:
  *
  * ```
  * await focusRichText(page);
@@ -1066,7 +1156,7 @@ export async function shamefullyBlurActiveElement(page: Page) {
  * ```
  *
  */
-export async function waitForVirgoStateUpdated(page: Page) {
+export async function waitForInlineEditorStateUpdated(page: Page) {
   return await page.evaluate(async () => {
     const selection = window.getSelection() as Selection;
 
@@ -1074,28 +1164,41 @@ export async function waitForVirgoStateUpdated(page: Page) {
 
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    await component?.vEditor?.waitForUpdate();
+    await component?.inlineEditor?.waitForUpdate();
   });
 }
 
 export async function initImageState(page: Page) {
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await page.evaluate(() => {
-    const clipData = {
-      'text/html': `<img src='${location.origin}/test-card-1.png' />`,
-    };
-    const e = new ClipboardEvent('paste', {
-      clipboardData: new DataTransfer(),
+  // await initEmptyParagraphState(page);
+  // await focusRichText(page);
+
+  await page.evaluate(async () => {
+    const { page } = window;
+    const pageId = page.addBlock('affine:page', {
+      title: new page.Text(),
     });
-    Object.defineProperty(e, 'target', {
-      writable: false,
-      value: document.body,
-    });
-    Object.entries(clipData).forEach(([key, value]) => {
-      e.clipboardData?.setData(key, value);
-    });
-    document.dispatchEvent(e);
+    const noteId = page.addBlock('affine:note', {}, pageId);
+
+    await new Promise(res => setTimeout(res, 200));
+
+    const docPage = document.querySelector('affine-doc-page');
+    if (!docPage) throw new Error('Cannot find doc page');
+    const imageBlob = await fetch(`${location.origin}/test-card-1.png`).then(
+      response => response.blob()
+    );
+    const storage = docPage.page.blob;
+    const sourceId = await storage.set(imageBlob);
+    const imageId = page.addBlock(
+      'affine:image',
+      {
+        sourceId,
+      },
+      noteId
+    );
+
+    page.resetHistory();
+
+    return { pageId, noteId, imageId };
   });
 
   // due to pasting img calls fetch, so we need timeout for downloading finished.
@@ -1104,8 +1207,8 @@ export async function initImageState(page: Page) {
 
 export async function getCurrentEditorPageId(page: Page) {
   return await page.evaluate(index => {
-    const editor = document.querySelectorAll('editor-container')[index];
-    if (!editor) throw new Error("Can't find editor-container");
+    const editor = document.querySelectorAll('affine-editor-container')[index];
+    if (!editor) throw new Error("Can't find affine-editor-container");
     const pageId = editor.page.id;
     return pageId;
   }, currentEditorIndex);
@@ -1118,7 +1221,7 @@ export async function getCurrentHTMLTheme(page: Page) {
 
 export async function getCurrentEditorTheme(page: Page) {
   const mode = await page
-    .locator('editor-container')
+    .locator('affine-editor-container')
     .first()
     .evaluate(ele => {
       return (ele as unknown as Element & { themeObserver: ThemeObserver })
@@ -1132,7 +1235,7 @@ export async function getCurrentThemeCSSPropertyValue(
   property: CssVariableName
 ) {
   const value = await page
-    .locator('editor-container')
+    .locator('affine-editor-container')
     .evaluate((ele, property: CssVariableName) => {
       return (ele as unknown as Element & { themeObserver: ThemeObserver })
         .themeObserver.cssVariables?.[property];

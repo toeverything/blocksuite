@@ -8,7 +8,7 @@ import type {
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ColumnType } from '../../packages/blocks/src/index.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { ZERO_WIDTH_SPACE } from '../../packages/virgo/src/consts.js';
+import { ZERO_WIDTH_SPACE } from '../../packages/inline/src/consts.js';
 import {
   pressEnter,
   pressEscape,
@@ -215,7 +215,7 @@ export async function assertDatabaseCellRichTexts(
 
   const richText = (await cellEditing.count()) === 0 ? cell : cellEditing;
   const actualTexts = await richText.evaluate(ele => {
-    return (ele as RichTextCellEditing).vEditor?.yTextString;
+    return (ele as RichTextCellEditing).inlineEditor?.yTextString;
   });
   expect(actualTexts).toEqual(text);
 }
@@ -270,7 +270,7 @@ export async function assertDatabaseCellLink(
           'affine-database-link-cell-editing'
         );
       if (!richText) throw new Error('Missing database rich text cell');
-      return richText.vEditor.yText.toString();
+      return richText.inlineEditor.yText.toString();
     },
     { rowIndex, columnIndex }
   );
@@ -483,6 +483,7 @@ export async function getElementStyle(
     ({ key, selector }) => {
       const el = document.querySelector<HTMLElement>(selector);
       if (!el) throw new Error(`Missing ${selector} tag`);
+      // @ts-ignore
       return el.style[key];
     },
     {

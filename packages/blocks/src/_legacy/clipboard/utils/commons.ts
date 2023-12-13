@@ -1,6 +1,6 @@
 import type { TextSelection } from '@blocksuite/block-std';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { BaseBlockModel, type Page } from '@blocksuite/store';
+import type { EditorHost } from '@blocksuite/lit';
+import { BaseBlockModel } from '@blocksuite/store';
 
 import {
   getCurrentNativeRange,
@@ -9,16 +9,12 @@ import {
   type SerializedBlock,
 } from '../../../_common/utils/index.js';
 import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
-import { ContentParser } from '../../content-parser/index.js';
 import type { SelectedBlock } from '../../content-parser/types.js';
 import { getService } from '../../service/index.js';
 import { ClipboardItem } from '../clipboard-item.js';
-import markdownUtils from './markdown.js';
 import {
   CLIPBOARD_MIMETYPE,
   createHTMLStringForCustomData,
-  extractCustomDataFromHTMLString,
-  isPureFileInClipboard,
   performNativeCopy,
 } from './pure.js';
 
@@ -189,13 +185,13 @@ async function createPageClipboardItems(
   return [textClipboardItem, htmlClipboardItem, pageClipboardItem];
 }
 
-export async function copyBlocksInPage(root: BlockSuiteRoot) {
-  const selectedModels = getSelectedContentModels(root, [
+export async function copyBlocksInPage(host: EditorHost) {
+  const selectedModels = getSelectedContentModels(host, [
     'text',
     'block',
     'image',
   ]);
-  const textSelection = root.selection.find('text');
+  const textSelection = host.selection.find('text');
   const clipboardItems = await createPageClipboardItems(
     selectedModels,
     textSelection
@@ -209,85 +205,4 @@ export async function copyBlocksInPage(root: BlockSuiteRoot) {
     resetNativeSelection(savedRange);
   }
   return clipboardItems;
-}
-
-export async function textedClipboardData2Blocks(
-  page: Page,
-  clipboardData: ClipboardEvent['clipboardData']
-) {
-  if (!clipboardData) {
-    return [];
-  }
-
-  const contentParser = new ContentParser(page);
-  const HTMLClipboardData = clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
-
-  if (HTMLClipboardData) {
-    const blockSuiteClipboardData = extractCustomDataFromHTMLString(
-      CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
-      HTMLClipboardData
-    );
-
-    if (blockSuiteClipboardData) {
-      return JSON.parse(blockSuiteClipboardData) as SerializedBlock[];
-    }
-  }
-
-  const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
-
-  return contentParser.text2blocks(textClipData);
-}
-
-export async function clipboardData2Blocks(
-  page: Page,
-  clipboardData: ClipboardEvent['clipboardData'],
-  maxFileSize: number
-) {
-  if (!clipboardData) {
-    return [];
-  }
-
-  const contentParser = new ContentParser(page);
-  if (isPureFileInClipboard(clipboardData)) {
-    return contentParser.file2Blocks(clipboardData, maxFileSize);
-  }
-
-  const HTMLClipboardData = clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
-
-  if (HTMLClipboardData) {
-    const blockSuiteClipboardData = extractCustomDataFromHTMLString(
-      CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
-      HTMLClipboardData
-    );
-
-    if (blockSuiteClipboardData) {
-      return JSON.parse(blockSuiteClipboardData) as SerializedBlock[];
-    }
-  }
-
-  const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
-
-  const isHTMLContainCode = /<code/.test(HTMLClipboardData);
-  const shouldConvertMarkdown =
-    !isHTMLContainCode && markdownUtils.checkIfTextContainsMd(textClipData);
-
-  if (HTMLClipboardData && !shouldConvertMarkdown) {
-    const htmlSerializedBlocks = await contentParser.htmlText2Block(
-      removeFragmentFromHtmlClipboardString(HTMLClipboardData)
-    );
-    if (htmlSerializedBlocks.length) {
-      return htmlSerializedBlocks;
-    }
-  }
-
-  if (shouldConvertMarkdown) {
-    return await contentParser.markdown2Block(textClipData);
-  }
-
-  return contentParser.text2blocks(textClipData);
-}
-
-// https://learn.microsoft.com/en-us/windows/win32/dataxchg/html-clipboard-format
-export function removeFragmentFromHtmlClipboardString(html: string) {
-  return html.replace(/<!--StartFragment-->([^]*)<!--EndFragment-->/g, '$1');
 }

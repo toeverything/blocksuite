@@ -1,6 +1,6 @@
 # Rich Text Orchestration
 
-In typical web applications, it is usually unnecessary to address the native drag-select highlight state as a type of user input. However, in the case of rich content editors, these states are essential. That's why BlockSuite not only offers the Virgo rich text component but also establishes a corresponding cross-block selection state processing mechanism on the host. This enables users to engage in intuitive editing.
+In typical web applications, it is usually unnecessary to address the native drag-select highlight state as a type of user input. However, in the case of rich content editors, these states are essential. That's why BlockSuite not only offers the `@blocksuite/inline` rich text component but also establishes a corresponding cross-block selection state processing mechanism on the host. This enables users to engage in intuitive editing.
 
 Below we will introduce how BlockSuite models complex structures of rich text documents.
 
@@ -8,7 +8,7 @@ Below we will introduce how BlockSuite models complex structures of rich text do
 
 In BlockSuite, all blocks can accommodate nested child nodes without using redundant group containers. As a result, a multi-level indented list can be represented as nested list blocks in a straightforward manner.
 
-However, when it comes to nesting rich text content within rich text content, a multitude of edge cases can arise that are challenging to handle due to compatibility issues with browsers. For this reason, the BlockSuite host will independently render all rich text data types on the block tree into distinct Virgo rich text components:
+However, when it comes to nesting rich text content within rich text content, a multitude of edge cases can arise that are challenging to handle due to compatibility issues with browsers. For this reason, the BlockSuite host will independently render all rich text data types on the block tree into distinct rich text components:
 
 ![flat-rich-text-components](./images/flat-rich-text-components.png)
 
@@ -33,17 +33,17 @@ const delta = [
 ];
 ```
 
-This delta structure is present in the CRDT and can be displayed as a separate `contenteditable` element through Virgo. This is how BlockSuite models rich text content.
+This delta structure is present in the CRDT and can be displayed as a separate `contenteditable` element through the inline editor. This is how BlockSuite models rich text content.
 
 ::: info
-The delta format was initially conceived and implemented by the [Quill](https://quilljs.com/) editor. In the [initial BlockSuite prototype](https://github.com/toeverything/blocksuite/commit/d66b566203f8ef33591a0eaf3b3b28b2a3c22b14), Quill was employed to render rich text content. However, the block-based architecture of BlockSuite significantly decreases the complexity of the rich text component. As a result, we could seamlessly replace the Quill subset used in BlockSuite with Virgo in subsequent iterations, leading to a more than 90% reduction in the bundle size of the rich text module.
+The delta format was initially conceived and implemented by the [Quill](https://quilljs.com/) editor. In the [initial BlockSuite prototype](https://github.com/toeverything/blocksuite/commit/d66b566203f8ef33591a0eaf3b3b28b2a3c22b14), Quill was employed to render rich text content. However, the block-based architecture of BlockSuite significantly decreases the complexity of the rich text component. As a result, we could seamlessly replace the Quill subset used in BlockSuite with inline editor in subsequent iterations, leading to a more than 90% reduction in the bundle size of the rich text module.
 :::
 
 ## Flat Range Selection
 
 When editing rich text, it is common to have native selections spanning multiple paragraphs. The native [`Selection`](https://developer.mozilla.org/en-US/docs/Web/API/Selection) object returns a sequence of `range` structures to identify a selected subtree in the DOM. However, this API is relatively low-level, making it difficult to use and not aligned with the flat mental model of rich text content in BlockSuite.
 
-In BlockSuite, regardless of the complexity of the block tree, the rendered Virgo instances have no nesting. This implies that we can always parse the `Selection` object to obtain a flat array that records the content of the current native selection. For instance, consider the following native range selection state:
+In BlockSuite, regardless of the complexity of the block tree, the rendered inline editor instances have no nesting. This implies that we can always parse the `Selection` object to obtain a flat array that records the content of the current native selection. For instance, consider the following native range selection state:
 
 ![native-range-selection](./images/native-range-selection.png)
 

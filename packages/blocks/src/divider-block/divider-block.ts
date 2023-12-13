@@ -30,8 +30,8 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
     super.connectedCallback();
 
     this.handleEvent('click', () => {
-      this.root.selection.set([
-        this.root.selection.getInstance('block', {
+      this.host.selection.set([
+        this.host.selection.getInstance('block', {
           path: this.path,
         }),
       ]);

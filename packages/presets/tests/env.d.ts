@@ -1,14 +1,14 @@
 import type { Page, Workspace } from '@blocksuite/store';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { EditorContainer } from '../src/index.js';
+import type { AffineEditorContainer } from '../src/index.js';
 
 declare global {
-  const editor: EditorContainer;
+  const editor: AffineEditorContainer;
   const page: Page;
   const workspace: Workspace;
   interface Window {
-    editor: EditorContainer;
+    editor: AffineEditorContainer;
     page: Page;
     workspace: Workspace;
   }

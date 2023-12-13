@@ -7,12 +7,13 @@ import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {
   caption?: string;
-  sourceId: string;
+  sourceId?: string;
   width?: number;
   height?: number;
   index: string;
   xywh: SerializedXYWH;
   rotate: number;
+  size?: number;
 };
 
 const defaultImageProps: ImageBlockProps = {
@@ -23,6 +24,7 @@ const defaultImageProps: ImageBlockProps = {
   index: 'a0',
   xywh: '[0,0,0,0]',
   rotate: 0,
+  size: -1,
 };
 
 export const ImageBlockSchema = defineBlockSchema({

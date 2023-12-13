@@ -14,8 +14,8 @@ import {
   captureHistory,
   enterPlaygroundRoom,
   focusRichText,
+  getInlineSelectionText,
   getSelectionRect,
-  getVirgoSelectionText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
   insertThreeLevelLists,
@@ -238,7 +238,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(slashMenu).not.toBeVisible();
     await assertRichTexts(page, ['/']);
 
-    const selected = await getVirgoSelectionText(page);
+    const selected = await getInlineSelectionText(page);
     expect(selected).toBe('/');
   });
 
@@ -645,8 +645,8 @@ test.describe('slash menu with customize menu', () => {
           r: Symbol.for(''),
         }) as const;
 
-      const editor = document.querySelector('editor-container');
-      if (!editor) throw new Error("Can't find editor-container");
+      const editor = document.querySelector('affine-editor-container');
+      if (!editor) throw new Error("Can't find affine-editor-container");
 
       const SlashMenuWidget = window.$blocksuite.blocks.AffineSlashMenuWidget;
       class CustomSlashMenu extends SlashMenuWidget {
@@ -691,8 +691,8 @@ test.describe('slash menu with customize menu', () => {
           r: Symbol.for(''),
         }) as const;
 
-      const editor = document.querySelector('editor-container');
-      if (!editor) throw new Error("Can't find editor-container");
+      const editor = document.querySelector('affine-editor-container');
+      if (!editor) throw new Error("Can't find affine-editor-container");
       const SlashMenuWidget = window.$blocksuite.blocks.AffineSlashMenuWidget;
 
       class CustomSlashMenu extends SlashMenuWidget {

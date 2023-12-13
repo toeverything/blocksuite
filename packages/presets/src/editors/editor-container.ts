@@ -36,8 +36,8 @@ function forwardSlot<T extends Record<string, Slot<any>>>(
   });
 }
 
-@customElement('editor-container')
-export class EditorContainer
+@customElement('affine-editor-container')
+export class AffineEditorContainer
   extends WithDisposable(ShadowlessElement)
   implements AbstractEditor
 {
@@ -67,8 +67,8 @@ export class EditorContainer
 
   get root() {
     return this.mode === 'page'
-      ? this._docPage?.root
-      : this._edgelessPage?.root;
+      ? this._docPage?.host
+      : this._edgelessPage?.host;
   }
 
   readonly themeObserver = new ThemeObserver();
@@ -123,7 +123,7 @@ export class EditorContainer
     if (this.mode === 'page') {
       setTimeout(() => {
         if (this.autofocus) {
-          this._docPage?.titleVEditor.focusEnd();
+          this._docPage?.titleInlineEditor.focusEnd();
         }
       });
     }
@@ -162,6 +162,6 @@ export class EditorContainer
 
 declare global {
   interface HTMLElementTagNameMap {
-    'editor-container': EditorContainer;
+    'affine-editor-container': AffineEditorContainer;
   }
 }

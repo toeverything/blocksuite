@@ -16,13 +16,15 @@ import {
   NOTE_WIDTH,
 } from '../../packages/blocks/src/_common/consts.js';
 import type {
+  AffineInlineEditor,
   CssVariableName,
   NoteBlockModel,
   PageBlockModel,
+  RichText,
 } from '../../packages/blocks/src/index.js';
 import { assertExists } from '../../packages/global/src/utils.js';
+import type { InlineRootElement } from '../../packages/inline/src/index.js';
 import type { BlockElement } from '../../packages/lit/src/index.js';
-import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import {
   PAGE_VERSION,
   WORKSPACE_VERSION,
@@ -32,7 +34,6 @@ import type {
   SerializedStore,
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
-import type { VirgoRootElement } from '../../packages/virgo/src/index.js';
 import {
   getCanvasElementsCount,
   getConnectorPath,
@@ -55,13 +56,14 @@ import {
 } from './actions/keyboard.js';
 import {
   captureHistory,
+  getClipboardCustomData,
   getCurrentEditorPageId,
   getCurrentThemeCSSPropertyValue,
   getEditorLocator,
-  virgoEditorInnerTextToString,
+  inlineEditorInnerTextToString,
 } from './actions/misc.js';
+import { getStringFromRichText } from './inline-editor.js';
 import { currentEditorIndex } from './multiple-editor.js';
-import { getStringFromRichText } from './virgo.js';
 
 export { assertExists };
 
@@ -141,35 +143,35 @@ export async function assertEmpty(page: Page) {
 
 export async function assertTitle(page: Page, text: string) {
   const editor = getEditorLocator(page);
-  const vEditor = editor.locator('[data-block-is-title="true"]').first();
-  const vText = virgoEditorInnerTextToString(await vEditor.innerText());
+  const inlineEditor = editor.locator('[data-block-is-title="true"]').first();
+  const vText = inlineEditorInnerTextToString(await inlineEditor.innerText());
   expect(vText).toBe(text);
 }
 
-export async function assertVEditorDeltas(
+export async function assertInlineEditorDeltas(
   page: Page,
   deltas: unknown[],
   i = 0
 ) {
   const actual = await page.evaluate(i => {
-    const vRoot = document.querySelectorAll<VirgoRootElement>(
-      '[data-virgo-root="true"]'
+    const inlineRoot = document.querySelectorAll<InlineRootElement>(
+      '[data-v-root="true"]'
     )[i];
-    return vRoot.virgoEditor.yTextDeltas;
+    return inlineRoot.inlineEditor.yTextDeltas;
   }, i);
   expect(actual).toEqual(deltas);
 }
 
-export async function assertRichTextVirgoDeltas(
+export async function assertRichTextInlineDeltas(
   page: Page,
   deltas: unknown[],
   i = 0
 ) {
   const actual = await page.evaluate(i => {
-    const vRoot = document.querySelectorAll<VirgoRootElement>(
-      'rich-text [data-virgo-root="true"]'
+    const inlineRoot = document.querySelectorAll<InlineRootElement>(
+      'rich-text [data-v-root="true"]'
     )[i];
-    return vRoot.virgoEditor.yTextDeltas;
+    return inlineRoot.inlineEditor.yTextDeltas;
   }, i);
   expect(actual).toEqual(deltas);
 }
@@ -186,24 +188,16 @@ export async function assertTextContain(page: Page, text: string, i = 0) {
 
 export async function assertRichTexts(page: Page, texts: string[]) {
   const actualTexts = await page.evaluate(index => {
-    const editor = document.querySelectorAll('editor-container')[index];
+    const editor = document.querySelectorAll('affine-editor-container')[index];
     const richTexts = Array.from(
       editor?.querySelectorAll<RichText>('rich-text') ?? []
     );
     return richTexts.map(richText => {
-      const editor = richText.vEditor;
+      const editor = richText.inlineEditor as AffineInlineEditor;
       return editor.yText.toString();
     });
   }, currentEditorIndex);
   expect(actualTexts).toEqual(texts);
-}
-
-export async function assertSelectionPath(page: Page, expected: string[]) {
-  const actual = await page.evaluate(() => {
-    const { root } = window;
-    return root.std.selection.value[0].path;
-  });
-  expect(actual).toEqual(expected);
 }
 
 export async function assertEdgelessCanvasText(page: Page, text: string) {
@@ -215,8 +209,8 @@ export async function assertEdgelessCanvasText(page: Page, text: string) {
       throw new Error('editor not found');
     }
     // @ts-ignore
-    const vEditor = editor.vEditor;
-    return vEditor?.yText.toString();
+    const inlineEditor = editor.inlineEditor;
+    return inlineEditor?.yText.toString();
   });
   expect(actualTexts).toEqual(text);
 }
@@ -292,7 +286,7 @@ export async function assertRowCount(page: Page, count: number) {
   expect(actual).toBe(count);
 }
 
-export async function assertRichTextVRange(
+export async function assertRichTextInlineRange(
   page: Page,
   richTextIndex: number,
   rangeIndex: number,
@@ -300,10 +294,12 @@ export async function assertRichTextVRange(
 ) {
   const actual = await page.evaluate(
     ([richTextIndex, index]) => {
-      const editor = document.querySelectorAll('editor-container')[index];
+      const editor = document.querySelectorAll('affine-editor-container')[
+        index
+      ];
       const richText = editor?.querySelectorAll('rich-text')[richTextIndex];
-      const vEditor = richText.vEditor;
-      return vEditor?.getVRange();
+      const inlineEditor = richText.inlineEditor;
+      return inlineEditor?.getInlineRange();
     },
     [richTextIndex, currentEditorIndex]
   );
@@ -347,12 +343,12 @@ export async function assertTextFormat(
   const actual = await page.evaluate(
     ({ richTextIndex, index }) => {
       const richText = document.querySelectorAll('rich-text')[richTextIndex];
-      const vEditor = richText.vEditor;
-      if (!vEditor) {
-        throw new Error('vEditor is undefined');
+      const inlineEditor = richText.inlineEditor;
+      if (!inlineEditor) {
+        throw new Error('Inline editor is undefined');
       }
 
-      const result = vEditor.getFormat({
+      const result = inlineEditor.getFormat({
         index,
         length: 0,
       });
@@ -385,17 +381,17 @@ export async function assertRichTextModelType(
 
 export async function assertTextFormats(page: Page, resultObj: unknown[]) {
   const actual = await page.evaluate(index => {
-    const editor = document.querySelectorAll('editor-container')[index];
+    const editor = document.querySelectorAll('affine-editor-container')[index];
     const elements = editor?.querySelectorAll('rich-text');
     return Array.from(elements).map(el => {
-      const vEditor = el.vEditor;
-      if (!vEditor) {
-        throw new Error('vEditor is undefined');
+      const inlineEditor = el.inlineEditor;
+      if (!inlineEditor) {
+        throw new Error('Inline editor is undefined');
       }
 
-      const result = vEditor.getFormat({
+      const result = inlineEditor.getFormat({
         index: 0,
-        length: vEditor.yText.length,
+        length: inlineEditor.yText.length,
       });
       return result;
     });
@@ -504,7 +500,7 @@ export async function assertBlockProps(
 
 export async function assertBlockTypes(page: Page, blockTypes: string[]) {
   const actual = await page.evaluate(index => {
-    const editor = document.querySelectorAll('editor-container')[index];
+    const editor = document.querySelectorAll('affine-editor-container')[index];
     const elements = editor?.querySelectorAll('[data-block-id]');
     return (
       Array.from(elements)
@@ -623,7 +619,7 @@ export async function assertStoreMatchJSX(
     plugins: [prettyFormatPlugins.ReactTestComponent],
     printFunctionName: false,
   });
-  expect(snapshot.trimStart(), formattedJSX).toEqual(formattedJSX);
+  expect(formattedJSX, formattedJSX).toEqual(snapshot.trimStart());
 }
 
 type MimeType = 'text/plain' | 'blocksuite/x-c+w' | 'text/html';
@@ -636,7 +632,7 @@ export async function assertClipItems(
   // FIXME: use original clipboard API
   // const clipItems = await page.evaluate(() => {
   //   return document
-  //     .getElementsByTagName('editor-container')[0]
+  //     .getElementsByTagName('affine-editor-container')[0]
   //     .clipboard['_copy']['_getClipItems']();
   // });
   // const actual = clipItems.find(item => item.mimeType === key)?.data;
@@ -969,6 +965,34 @@ export function assertBound(received: Bound, expected: Bound) {
   expect(received[1]).toBeCloseTo(expected[1], 0);
   expect(received[2]).toBeCloseTo(expected[2], 0);
   expect(received[3]).toBeCloseTo(expected[3], 0);
+}
+
+export async function assertClipboardItem(
+  page: Page,
+  data: unknown,
+  type: string
+) {
+  type Args = [type: string];
+  const dataInClipboard = await page.evaluate(
+    async ([type]: Args) => {
+      const clipItems = await navigator.clipboard.read();
+      const item = clipItems.find(item => item.types.includes(type));
+      const data = await item?.getType(type);
+      return data?.text();
+    },
+    [type] as Args
+  );
+
+  expect(dataInClipboard).toBe(data);
+}
+
+export async function assertClipboardCustomData(
+  page: Page,
+  type: string,
+  data: unknown
+) {
+  const dataInClipboard = await getClipboardCustomData(page, type);
+  expect(dataInClipboard).toBe(data);
 }
 
 export function assertClipData(
