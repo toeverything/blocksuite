@@ -1234,7 +1234,6 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
       updates.source = { position: Vec.add(source.position, offset) };
     if (!target.id && target.position)
       updates.target = { position: Vec.add(target.position, offset) };
-    updates.xywh = bound.serialize();
     surface.updateElement<CanvasElementType.CONNECTOR>(connector.id, updates);
   }
 
