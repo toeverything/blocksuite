@@ -651,22 +651,13 @@ test('paste nested lists to a nested list', async ({ page }) => {
    *   - 111
    *     - 222
    *   - 111
-   *     - 222
-   *   - |bbb
-   *     - ccc
+   *     - 222|bbb
+   *       - ccc
    */
 
-  await assertRichTexts(page, [
-    'aaa',
-    '111',
-    '222',
-    '111',
-    '222',
-    'bbb',
-    'ccc',
-  ]);
-  expect(await getInlineSelectionText(page)).toEqual('bbb');
-  expect(await getInlineSelectionIndex(page)).toEqual(0);
+  await assertRichTexts(page, ['aaa', '111', '222', '111', '222bbb', 'ccc']);
+  expect(await getInlineSelectionText(page)).toEqual('222bbb');
+  expect(await getInlineSelectionIndex(page)).toEqual(3);
 
   // paste in middle
   await undoByKeyboard(page);
@@ -746,14 +737,13 @@ test('paste non-nested lists to a nested list', async ({ page }) => {
   await pasteContent(page, clipData2);
   /**
    * - 123
-   * - 456
-   * - |aaa
+   * - 456|aaa
    *   - bbb
    */
 
-  await assertRichTexts(page, ['123', '456', 'aaa', 'bbb']);
-  expect(await getInlineSelectionText(page)).toEqual('aaa');
-  expect(await getInlineSelectionIndex(page)).toEqual(0);
+  await assertRichTexts(page, ['123', '456aaa', 'bbb']);
+  expect(await getInlineSelectionText(page)).toEqual('456aaa');
+  expect(await getInlineSelectionIndex(page)).toEqual(3);
 });
 
 test(scoped`cut should work for multi-block selection`, async ({ page }) => {
