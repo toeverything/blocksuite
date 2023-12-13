@@ -152,7 +152,6 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   domHost!: Document | HTMLElement;
 
   private _pageDisposables: DisposableGroup | null = null;
-
   private _indicatorTranslateY = 0;
   private _changedFlag = false;
   private _oldViewport?: {
@@ -171,9 +170,9 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       : [0, 0, 0, 0];
   }
 
-  private _isEdgelessMode = () => {
+  private _isEdgelessMode() {
     return this.mode === 'edgeless';
-  };
+  }
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -228,6 +227,16 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('page') || _changedProperties.has('edgeless')) {
       this._setPageDisposables();
+    }
+
+    if (
+      _changedProperties.has('mode') &&
+      this.edgeless &&
+      this._isEdgelessMode()
+    ) {
+      if (_changedProperties.get('mode') === undefined) return;
+
+      requestAnimationFrame(() => this._zoomToFit());
     }
   }
 
@@ -381,8 +390,6 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   }
 
   override firstUpdated(): void {
-    this._zoomToFit();
-
     this._disposables.addFromEvent(this, 'click', this._clickBlank);
   }
 
