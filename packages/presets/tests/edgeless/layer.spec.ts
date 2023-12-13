@@ -487,6 +487,7 @@ test('the actual rendering order of blocks should satisfy the logic order of the
     edgeless.pageBlockContainer.layer.querySelectorAll('[data-portal-block-id]')
   ) as BlockElement[];
 
+  expect(blocks.length).toBe(indexes.length);
   blocks.forEach((block, index) => {
     if (index === blocks.length - 1) return;
 
