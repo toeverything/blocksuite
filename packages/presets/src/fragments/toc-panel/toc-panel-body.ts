@@ -152,7 +152,6 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   domHost!: Document | HTMLElement;
 
   private _pageDisposables: DisposableGroup | null = null;
-
   private _indicatorTranslateY = 0;
   private _changedFlag = false;
   private _oldViewport?: {
@@ -171,9 +170,9 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       : [0, 0, 0, 0];
   }
 
-  private _isEdgelessMode = () => {
+  private _isEdgelessMode() {
     return this.mode === 'edgeless';
-  };
+  }
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -230,8 +229,14 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       this._setPageDisposables();
     }
 
-    if (this._isEdgelessMode() && this.edgeless) {
-      this.edgeless.updateComplete.then(() => this._zoomToFit());
+    if (
+      _changedProperties.has('mode') &&
+      this.edgeless &&
+      this._isEdgelessMode()
+    ) {
+      if (_changedProperties.get('mode') === undefined) return;
+
+      requestAnimationFrame(() => this._zoomToFit());
     }
   }
 
