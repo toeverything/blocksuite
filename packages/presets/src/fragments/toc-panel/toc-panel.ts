@@ -1,7 +1,8 @@
+import { DisposableGroup } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement, type PropertyValues, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../editors/editor-container.js';
@@ -68,30 +69,45 @@ export class TOCPanel extends WithDisposable(LitElement) {
     this.hidePreviewIcon = on;
   };
 
-  override connectedCallback() {
-    super.connectedCallback();
+  private _editorDisposables: DisposableGroup | null = null;
+
+  private _clearEditorDisposables() {
+    this._editorDisposables?.dispose();
+    this._editorDisposables = null;
   }
 
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-  }
-
-  override firstUpdated() {
-    const { disposables } = this;
-    disposables.add(
+  private _setEditorDisposables() {
+    this._clearEditorDisposables();
+    this._editorDisposables = new DisposableGroup();
+    this._editorDisposables.add(
       this.editor.slots.pageModeSwitched.on(() => {
         this.editor.updateComplete.then(() => {
           this.requestUpdate();
         });
       })
     );
-    disposables.add(
+    this._editorDisposables.add(
       this.editor.slots.pageUpdated.on(() => {
         this.editor.updateComplete.then(() => {
           this.requestUpdate();
         });
       })
     );
+  }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('editor')) {
+      this._setEditorDisposables();
+    }
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._clearEditorDisposables();
   }
 
   override render() {

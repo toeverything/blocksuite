@@ -2,9 +2,10 @@ import './header/frame-panel-header.js';
 import './body/frame-panel-body.js';
 
 import { FramePreview } from '@blocksuite/blocks';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import { type EditorHost, WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement, type PropertyValues, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../index.js';
@@ -74,6 +75,38 @@ export class FramePanel extends WithDisposable(LitElement) {
     this.editor.mode = mode;
   };
 
+  private _editorDisposables: DisposableGroup | null = null;
+
+  private _clearEditorDisposables() {
+    this._editorDisposables?.dispose();
+    this._editorDisposables = null;
+  }
+
+  private _setEditorDisposables() {
+    this._clearEditorDisposables();
+    this._editorDisposables = new DisposableGroup();
+    this._editorDisposables.add(
+      this.editor.slots.pageModeSwitched.on(() => {
+        this.editor.updateComplete.then(() => {
+          this.requestUpdate();
+        });
+      })
+    );
+    this._editorDisposables.add(
+      this.editor.slots.pageUpdated.on(() => {
+        this.editor.updateComplete.then(() => {
+          this.requestUpdate();
+        });
+      })
+    );
+  }
+
+  override updated(_changedProperties: PropertyValues) {
+    if (_changedProperties.has('editor')) {
+      this._setEditorDisposables();
+    }
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     if (!customElements.get('frame-preview')) {
@@ -81,22 +114,9 @@ export class FramePanel extends WithDisposable(LitElement) {
     }
   }
 
-  override firstUpdated() {
-    const { disposables } = this;
-    disposables.add(
-      this.editor.slots.pageModeSwitched.on(() => {
-        this.editor.updateComplete.then(() => {
-          this.requestUpdate();
-        });
-      })
-    );
-    disposables.add(
-      this.editor.slots.pageUpdated.on(() => {
-        this.editor.updateComplete.then(() => {
-          this.requestUpdate();
-        });
-      })
-    );
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._clearEditorDisposables();
   }
 
   override render() {
