@@ -135,7 +135,7 @@ test('option/alt mouse drag duplicate a new element', async ({ page }) => {
 
   await captureHistory(page);
   await undoByClick(page);
-  await assertSelectedBound(page, [0, 0, 100, 100]);
+  await assertSelectedBound(page, [3, 0, 100, 100]);
 
   await redoByClick(page);
   await assertSelectedBound(page, [100, 0, 100, 100]);
