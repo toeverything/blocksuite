@@ -22,4 +22,6 @@ document.body.appendChild(editor);
 
 :::
 
-You can also try replacing the `DocEditor` with the `EdgelessEditor` whiteboard in the same manner. In the subsequent sections, we will guide you through the fundamental components of BlockSuite.
+The `DocEditor` here is a standard web component that can also be reused with `<doc-editor>` HTML tag. All first-party components within BlockSuite are implemented as web components. This approach not only ensures the stability of rich text editing by leveraging the native DOM component model, but also makes BlockSuite framework-agnostic.
+
+You can also try replacing the `DocEditor` with the `EdgelessEditor` whiteboard in the same manner. In the subsequent sections, we will guide you through more fundamental components of BlockSuite.
