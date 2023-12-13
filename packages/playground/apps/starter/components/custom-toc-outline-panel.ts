@@ -1,21 +1,22 @@
-import { registerTOCComponents } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
-import type { AffineEditorContainer } from '@blocksuite/presets';
-import type { Page } from '@blocksuite/store';
+import {
+  type AffineEditorContainer,
+  registerTOCPanelComponents,
+} from '@blocksuite/presets';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('custom-navigation-panel')
-export class CustomNavigationPanel extends WithDisposable(LitElement) {
+export class CustomTOCOutlinePanel extends WithDisposable(LitElement) {
   static override styles = css`
-    .custom-navigation-container {
+    .custom-toc-outline-container {
       position: absolute;
       top: 0;
       right: 0;
       border: 1px solid var(--affine-border-color, #e3e2e4);
       background: var(--affine-background-overlay-panel-color);
       height: 100vh;
-      width: 345px;
+      width: 320px;
       box-sizing: border-box;
       z-index: 1;
     }
@@ -24,16 +25,13 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
   private _show = false;
 
   @property({ attribute: false })
-  page!: Page;
-
-  @property({ attribute: false })
   editor!: AffineEditorContainer;
 
   private _renderPanel() {
-    return html`<edgeless-toc-notes-panel
-      .page=${this.page}
+    return html`<toc-panel
+      .editor=${this.editor}
       .fitPadding=${[50, 360, 50, 50]}
-    ></edgeless-toc-notes-panel>`;
+    ></toc-panel>`;
   }
 
   public toggleDisplay() {
@@ -42,9 +40,8 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.page = this.editor.page;
 
-    registerTOCComponents(components => {
+    registerTOCPanelComponents(components => {
       Object.entries(components).forEach(([name, component]) => {
         customElements.define(name, component);
       });
@@ -55,7 +52,7 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
     return html`
       ${this._show
         ? html`
-            <div class="custom-navigation-container">
+            <div class="custom-toc-outline-container">
               ${this._renderPanel()}
             </div>
           `
@@ -66,6 +63,6 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'custom-navigation-panel': CustomNavigationPanel;
+    'custom-toc-outline-panel': CustomTOCOutlinePanel;
   }
 }

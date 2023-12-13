@@ -1,10 +1,7 @@
-import '../../../../_common/components/toggle-switch.js';
-
+import { stopPropagation } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
-
-import { stopPropagation } from '../../../../_common/utils/event.js';
 
 const styles = css`
   :host {
@@ -73,7 +70,7 @@ export class TOCNotesSettingMenu extends WithDisposable(LitElement) {
       @click=${stopPropagation}
     >
       <div class="notes-setting-menu-item">
-        <div class="setting-label">SETTINGS</div>
+        <div class="setting-label">Settings</div>
       </div>
       <div class="notes-setting-menu-item action">
         <div class="action-label">Hide type icon</div>
@@ -90,6 +87,6 @@ export class TOCNotesSettingMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-toc-notes-setting-menu': TOCNotesSettingMenu;
+    'toc-notes-setting-menu': TOCNotesSettingMenu;
   }
 }

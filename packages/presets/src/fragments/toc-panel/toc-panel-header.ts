@@ -1,24 +1,24 @@
 import './toc-setting-menu.js';
 
+import { createButtonPopper } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
-import { SettingsIcon } from '../../../../_common/icons/edgeless.js';
-import { createButtonPopper } from '../utils.js';
+import { SettingsIcon } from '../_common/icons.js';
 
 const styles = css`
   :host {
     display: flex;
-    width: calc(100% - 16px);
+    width: 100%;
     height: 40px;
     align-items: center;
     justify-content: space-between;
     box-sizing: border-box;
-    padding: 8px 0;
+    padding: 8px 16px;
   }
 
-  .toc-notes-header-container {
+  .toc-panel-header-container {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -26,13 +26,13 @@ const styles = css`
     height: 100%;
   }
 
-  .toc-notes-header-label {
+  .toc-panel-header-label {
     width: 119px;
     height: 22px;
     font-size: 14px;
     font-weight: 500;
     line-height: 22px;
-    color: var(--light-text-color-text-secondary-color, #8e8d91);
+    color: var(--affine-text-secondary-color, #8e8d91);
   }
 
   .notes-setting-button svg {
@@ -58,7 +58,7 @@ const styles = css`
   }
 `;
 
-export class TOCNotesHeader extends WithDisposable(LitElement) {
+export class TOCPanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -96,8 +96,8 @@ export class TOCNotesHeader extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="toc-notes-header-container">
-        <span class="toc-notes-header-label">Table of Contents</span>
+    return html`<div class="toc-panel-header-container">
+        <span class="toc-panel-header-label">Table of Contents</span>
         <edgeless-tool-icon-button
           class="notes-setting-button ${this._settingPopperShow
             ? 'active'
@@ -113,16 +113,16 @@ export class TOCNotesHeader extends WithDisposable(LitElement) {
         </edgeless-tool-icon-button>
       </div>
       <div class="notes-setting-container">
-        <edgeless-toc-notes-setting-menu
+        <toc-notes-setting-menu
           .hideIcon=${this.hidePreviewIcon}
           .toggleHideIcon=${this.toggleHidePreviewIcon}
-        ></edgeless-toc-notes-setting-menu>
+        ></toc-notes-setting-menu>
       </div>`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-toc-notes-header': TOCNotesHeader;
+    'toc-panel-header': TOCPanelHeader;
   }
 }
