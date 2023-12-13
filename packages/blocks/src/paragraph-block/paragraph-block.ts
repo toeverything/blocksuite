@@ -19,7 +19,7 @@ import {
   isPageMode,
   matchFlavours,
 } from '../_common/utils/index.js';
-import type { BlockHub } from '../_common/widgets/block-hub/components/block-hub.js';
+import type { BlockHub } from '../page-block/widgets/block-hub/components/block-hub.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {

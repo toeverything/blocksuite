@@ -13,7 +13,6 @@ import {
   SmallNoteIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { FontFamilyIcon } from '../../../../_common/icons/text.js';
-import { captureEventTarget } from '../../../../_common/widgets/drag-handle/utils.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import {
   Bound,
@@ -31,6 +30,7 @@ import {
   Vec,
   type XYWH,
 } from '../../../../surface-block/index.js';
+import { captureEventTarget } from '../../../widgets/drag-handle/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { DEFAULT_NOTE_WIDTH } from '../../utils/consts.js';
 import {

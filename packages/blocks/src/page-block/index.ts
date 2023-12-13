@@ -15,3 +15,4 @@ export * from './edgeless/edgeless-page-block.js';
 export { type PageBlockModel, PageBlockSchema } from './page-model.js';
 export * from './types.js';
 export * from './utils/index.js';
+export * from './widgets/index.js';

@@ -12,10 +12,10 @@ import type { BlockElement } from '@blocksuite/lit';
 import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { PageBlockComponent } from '../../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../../page-block/utils/selection.js';
+import { insertLinkedNode } from '../../../../page-block/widgets/linked-page/config.js';
 import { textFormatConfigs } from '../../../configs/text-format/config.js';
 import { createPage } from '../../../utils/init.js';
 import { buildPath } from '../../../utils/query.js';
-import { insertLinkedNode } from '../../../widgets/linked-page/config.js';
 import { tryConvertBlock } from '../markdown/block.js';
 import {
   handleIndent,
