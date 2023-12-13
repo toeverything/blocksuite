@@ -130,6 +130,7 @@ export class ClipboardController implements ReactiveController {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
+    this._std.page.captureSync();
     this._std.command
       .pipe()
       .try(cmd => [

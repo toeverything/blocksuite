@@ -560,14 +560,13 @@ test('paste a nested list to a nested list', async ({ page }) => {
    * - aaa
    *   - aaa
    *     - bbb
-   *        - ccc
-   *   - |bbb
-   *     - ccc
+   *        - ccc|bbb
+   *          -ccc
    */
 
-  await assertRichTexts(page, ['aaa', 'aaa', 'bbb', 'ccc', 'bbb', 'ccc']);
-  expect(await getInlineSelectionText(page)).toEqual('bbb');
-  expect(await getInlineSelectionIndex(page)).toEqual(0);
+  await assertRichTexts(page, ['aaa', 'aaa', 'bbb', 'cccbbb', 'ccc']);
+  expect(await getInlineSelectionText(page)).toEqual('cccbbb');
+  expect(await getInlineSelectionIndex(page)).toEqual(3);
 
   // paste in middle
   await undoByKeyboard(page);
@@ -584,7 +583,7 @@ test('paste a nested list to a nested list', async ({ page }) => {
    *   - baaa
    *     - bbb
    *       - ccc|bb
-   *     - ccc
+   *        - ccc
    */
 
   await assertRichTexts(page, ['aaa', 'baaa', 'bbb', 'cccbb', 'ccc']);
@@ -606,13 +605,12 @@ test('paste a nested list to a nested list', async ({ page }) => {
    *   - bbbaaa
    *     - bbb
    *       - ccc|
-   *     - ccc
+   *         - ccc
    */
 
-  // FIXME: fix this in new clipboard
-  // await assertRichTexts(page, ['aaa', 'bbbaaa', 'bbb', 'ccc', 'ccc']);
-  // expect(await getInlineSelectionText(page)).toEqual('ccc');
-  // expect(await getInlineSelectionText(page)).toEqual(3);
+  await assertRichTexts(page, ['aaa', 'bbbaaa', 'bbb', 'ccc', 'ccc']);
+  expect(await getInlineSelectionText(page)).toEqual('ccc');
+  expect(await getInlineSelectionIndex(page)).toEqual(3);
 });
 
 test('paste nested lists to a nested list', async ({ page }) => {
