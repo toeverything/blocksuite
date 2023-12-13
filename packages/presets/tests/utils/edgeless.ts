@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { SurfaceBlockComponent } from '@blocksuite/blocks';
+import type {
+  DocPageBlockComponent,
+  EdgelessPageBlockComponent,
+  SurfaceBlockComponent,
+} from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -12,6 +16,26 @@ export function getSurface(page: Page, editor: AffineEditorContainer) {
     page.root!.id,
     surfaceModel[0]!.id,
   ]) as SurfaceBlockComponent;
+}
+
+export function getPageRootBlock(
+  page: Page,
+  editor: AffineEditorContainer,
+  mode: 'page'
+): DocPageBlockComponent;
+export function getPageRootBlock(
+  page: Page,
+  editor: AffineEditorContainer,
+  mode: 'edgeless'
+): EdgelessPageBlockComponent;
+export function getPageRootBlock(
+  page: Page,
+  editor: AffineEditorContainer,
+  _?: 'edgeless' | 'page'
+) {
+  return editor.root!.view.viewFromPath('block', [page.root!.id]) as
+    | EdgelessPageBlockComponent
+    | DocPageBlockComponent;
 }
 
 const defaultProps = {
