@@ -8,8 +8,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../_common/utils/event.js';
 import { asyncFocusRichText } from '../_common/utils/selection.js';
-import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
-import { captureEventTarget } from '../_common/widgets/drag-handle/utils.js';
+import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
+import { captureEventTarget } from '../page-block/widgets/drag-handle/utils.js';
 import { Bound } from '../surface-block/index.js';
 import { ImageState } from './components/image-card.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';

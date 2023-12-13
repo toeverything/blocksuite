@@ -2,11 +2,9 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 
-import type {
-  AffineModalWidget,
-  DocPageBlockComponent,
-  ImageBlockModel,
-} from '../../index.js';
+import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
+import type { AffineModalWidget } from '../../page-block/widgets/modal/modal.js';
+import type { ImageBlockModel } from '../image-model.js';
 import { GradioApp } from './gradio-app.js';
 
 function createGradioApp() {

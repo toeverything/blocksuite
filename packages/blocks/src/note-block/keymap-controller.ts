@@ -8,10 +8,8 @@ import { moveBlockConfigs } from '../_common/configs/move-block.js';
 import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
 import { getBlockElementByModel } from '../_common/utils/index.js';
-import {
-  onModelElementUpdated,
-  updateBlockElementType,
-} from '../page-block/index.js';
+import { onModelElementUpdated } from '../page-block/utils/callback.js';
+import { updateBlockElementType } from '../page-block/utils/operations/element/block-level.js';
 import { ensureBlockInContainer } from './utils.js';
 
 export class KeymapController implements ReactiveController {
