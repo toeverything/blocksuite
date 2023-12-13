@@ -12,6 +12,7 @@ import {
   Workspace,
 } from '@blocksuite/store';
 
+import { matchFlavours } from '../../../_common/utils/index.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 
 const findLast = (snapshot: BlockSnapshot): BlockSnapshot => {
@@ -240,6 +241,20 @@ class PasteTr {
         `[${host.blockIdAttr}="${lastModel.id}"]`
       );
       assertExists(target);
+      if (!lastModel.text) {
+        if (matchFlavours(lastModel, ['affine:image'])) {
+          const selection = this.std.selection.getInstance('image', {
+            path: target.path,
+          });
+          this.std.selection.setGroup('note', [selection]);
+          return;
+        }
+        const selection = this.std.selection.getInstance('block', {
+          path: target.path,
+        });
+        this.std.selection.setGroup('note', [selection]);
+        return;
+      }
       const selection = this.std.selection.getInstance('text', {
         from: {
           path: target.path,
