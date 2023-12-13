@@ -1,10 +1,7 @@
 import { VElement, VLine } from '../components/index.js';
 
 export function isNativeTextInVText(text: unknown): text is Text {
-  return (
-    text instanceof Text &&
-    (text.parentElement?.dataset.vText === 'true' ?? false)
-  );
+  return text instanceof Text && text.parentElement?.dataset.vText === 'true';
 }
 
 export function isVElement(element: unknown): element is HTMLElement {
