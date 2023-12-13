@@ -5,6 +5,7 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: 'tests',
   fullyParallel: true,
+  snapshotDir: 'tests/snapshots',
   webServer: {
     command: 'pnpm dev',
     port: 5173,

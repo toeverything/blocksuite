@@ -40,7 +40,8 @@ export const getSelectedBlocksCommand: Command<
     const selectedBlockElements = rangeManager.getSelectedBlockElementsByRange(
       range,
       {
-        match: (el: BlockElement) => el.model.role === 'content',
+        match: (el: BlockElement) =>
+          el.model.role === 'content' || el.model.role === 'root',
         mode: 'flat',
       }
     );

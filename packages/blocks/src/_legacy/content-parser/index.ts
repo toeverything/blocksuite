@@ -4,7 +4,6 @@ import { nanoid } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import { getTagColor } from '../../_common/components/tags/colors.js';
-import { toast } from '../../_common/components/toast.js';
 import {
   getBlockElementByModel,
   getEditorContainer,
@@ -12,8 +11,6 @@ import {
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
-import { humanFileSize } from '../../_common/utils/math.js';
-import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
 import type { Renderer } from '../../index.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
@@ -100,44 +97,6 @@ export class ContentParser {
     );
     this._markdownParser.registerParsers();
     this._notionHtmlParser.registerParsers();
-  }
-
-  public async exportHtml() {
-    const root = this._page.root;
-    if (!root) return;
-
-    const blobMap = new Map<string, string>();
-    const htmlContent = await this.block2Html(
-      [this.getSelectedBlock(root)],
-      blobMap
-    );
-
-    await FileExporter.exportHtml(
-      (root as PageBlockModel).title.toString(),
-      root.id,
-      htmlContent,
-      blobMap,
-      this._page.blob
-    );
-  }
-
-  public async exportMarkdown() {
-    const root = this._page.root;
-    if (!root) return;
-
-    const blobMap = new Map<string, string>();
-    const markdownContent = await this.block2markdown(
-      [this.getSelectedBlock(root)],
-      blobMap
-    );
-
-    await FileExporter.exportHtmlAsMarkdown(
-      (root as PageBlockModel).title.toString(),
-      root.id,
-      markdownContent,
-      blobMap,
-      this._page.blob
-    );
   }
 
   private async _checkReady() {
@@ -572,14 +531,6 @@ export class ContentParser {
     return markdownText;
   }
 
-  public async block2Text(blocks: SelectedBlock[]): Promise<string> {
-    return (
-      await Promise.all(
-        blocks.map(block => this._getTextInfoBySelectionInfo(block))
-      )
-    ).reduce((text, block) => text + block, '');
-  }
-
   public async htmlText2Block(
     html: string,
     // TODO: for now, we will use notion html as default context
@@ -590,70 +541,6 @@ export class ContentParser {
     htmlEl.querySelector('head')?.remove();
     this.slots.beforeHtml2Block.emit(htmlEl);
     return this._convertHtml2Blocks(htmlEl, context);
-  }
-
-  async file2Blocks(
-    clipboardData: DataTransfer,
-    maxFileSize: number
-  ): Promise<SerializedBlock[]> {
-    const files = clipboardData.files;
-    if (!files) return [];
-
-    const file = files[0];
-    if (!file) return [];
-
-    if (file.size > maxFileSize) {
-      toast(
-        `You can only upload files less than ${humanFileSize(
-          maxFileSize,
-          true,
-          0
-        )}`
-      );
-      return [];
-    }
-
-    const storage = this._page.blob;
-    if (file.type.includes('image')) {
-      // If file's arrayBuffer() is used, original clipboardData.files will release the file pointer.
-      const id = await storage.set(
-        new File([file], file.name, { type: file.type })
-      );
-      return [
-        {
-          flavour: 'affine:image',
-          sourceId: id,
-          children: [],
-        },
-      ];
-    }
-
-    try {
-      const sourceId = await storage.set(
-        new File([file], file.name, { type: file.type })
-      );
-      const attachmentProps: AttachmentBlockProps & {
-        flavour: 'affine:attachment';
-        children: [];
-      } = {
-        flavour: 'affine:attachment',
-        name: file.name,
-        sourceId,
-        size: file.size,
-        type: file.type,
-        embed: false,
-        children: [],
-      };
-      return [attachmentProps];
-    } catch (error) {
-      console.error(error);
-      if (error instanceof Error) {
-        toast(
-          `Failed to upload attachment! ${error.message || error.toString()}`
-        );
-      }
-    }
-    return [];
   }
 
   public async markdown2Block(text: string): Promise<SerializedBlock[]> {
@@ -785,27 +672,6 @@ export class ContentParser {
       blobMap
     );
     return text;
-  }
-
-  private async _getTextInfoBySelectionInfo(
-    selectedBlock: SelectedBlock
-  ): Promise<string> {
-    const model = selectedBlock.model;
-
-    const children: string[] = [];
-    for (const child of selectedBlock.children) {
-      const childText = await this._getTextInfoBySelectionInfo(child);
-      childText && children.push(childText);
-    }
-
-    const { getServiceOrRegister } = await import('../service/index.js');
-    const service = await getServiceOrRegister(model.flavour);
-
-    return service.block2Text(model, {
-      childText: children.join(''),
-      begin: selectedBlock.startPos,
-      end: selectedBlock.endPos,
-    });
   }
 
   private async _getMarkdownInfoBySelectionInfo(

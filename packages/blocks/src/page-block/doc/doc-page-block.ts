@@ -12,9 +12,8 @@ import {
   asyncFocusRichText,
   matchFlavours,
 } from '../../_common/utils/index.js';
-import { PageClipboard } from '../../_legacy/clipboard/page-clipboard.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
-import { ClipboardController } from '../clipboard/index.js';
+import { PageClipboard } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -141,9 +140,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   gesture: Gesture | null = null;
 
-  clipboard = new PageClipboard(this);
-
-  clipboardController = new ClipboardController(this);
+  clipboardController = new PageClipboard(this);
 
   @state()
   private _isComposing = false;
@@ -221,7 +218,11 @@ export class DocPageBlockComponent extends BlockElement<
       'paste',
       this._onTitlePaste
     );
-    this.addEventListener('copy', this._onTitleCopy);
+    this._titleInlineEditor.disposables.addFromEvent(
+      this._titleContainer,
+      'copy',
+      this._onTitleCopy
+    );
 
     // Workaround for inline editor to skip composition event
     this._disposables.addFromEvent(
@@ -305,6 +306,8 @@ export class DocPageBlockComponent extends BlockElement<
   };
 
   private _onTitleCopy = (event: ClipboardEvent) => {
+    event.stopPropagation();
+
     const inlineEditor = this._titleInlineEditor;
     if (!inlineEditor) return;
     const inlineRange = inlineEditor.getInlineRange();
@@ -378,12 +381,12 @@ export class DocPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+    this.clipboardController.hostConnected();
 
     this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);
-    this.clipboard.init(this.page);
     // filter cut event in page title
     this.handleEvent('cut', ctx => {
       const { event } = ctx.get('defaultState');
@@ -587,7 +590,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.clipboard.dispose();
+    this.clipboardController.hostDisconnected();
     this._disposables.dispose();
     this.gesture = null;
     this.keyboardManager = null;

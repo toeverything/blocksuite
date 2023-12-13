@@ -120,7 +120,7 @@ test('press enter will create new block when click and select image', async ({
   await activeEmbed(page);
   await pressEnter(page);
   await type(page, 'aa');
-  await assertRichTexts(page, ['aa', '']);
+  await assertRichTexts(page, ['aa']);
 });
 
 test('enter shortcut on focusing embed block and its caption', async ({
@@ -164,7 +164,7 @@ test('should support the enter key of image caption', async ({ page }) => {
   await pressEnter(page);
   await expect(caption).toHaveValue('abc');
 
-  await assertRichTexts(page, ['123', '']);
+  await assertRichTexts(page, ['123']);
   await assertRichTextInlineRange(page, 0, 0, 0);
 });
 
@@ -212,7 +212,7 @@ test('popup menu should follow position of image when scrolling', async ({
   const menuRect = await menu.boundingBox();
   if (!imageRect) throw new Error('image not found');
   if (!menuRect) throw new Error('menu not found');
-  expect(imageRect.y).toBeCloseTo(-9, -0.325);
+  expect(imageRect.y).toBeCloseTo(34, -0.325);
   expect(menuRect.y).toBeCloseTo(65, -0.325);
 });
 

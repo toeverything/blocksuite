@@ -136,11 +136,15 @@ export class Job {
       model,
       assets: this._assetsManager,
     });
-    const children = await Promise.all(
-      model.children.map(child => {
-        return this._blockToSnapshot(child);
-      })
-    );
+
+    const children =
+      model.role === 'root'
+        ? []
+        : await Promise.all(
+            model.children.map(child => {
+              return this._blockToSnapshot(child);
+            })
+          );
     const snapshot: BlockSnapshot = {
       type: 'block',
       ...snapshotLeaf,

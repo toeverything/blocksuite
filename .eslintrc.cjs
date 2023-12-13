@@ -57,6 +57,7 @@ module.exports = {
     'plugin:lit/recommended',
   ],
   ignorePatterns: [
+    'tests/snapsthos/*',
     'packages/store/dist/*',
     'packages/lit/dist/*',
     'packages/blocks/dist/*',
