@@ -116,6 +116,7 @@ export class FramePanelBody extends WithDisposable(LitElement) {
   private _frameElementHeight = 0;
   private _indicatorTranslateY = 0;
   private _pageDisposables: DisposableGroup | null = null;
+  private _lastEdgelessPageId = '';
 
   get frames() {
     const frames = this.page.getBlockByFlavour(FRAME) as FrameBlockModel[];
@@ -397,16 +398,24 @@ export class FramePanelBody extends WithDisposable(LitElement) {
 
     if (_changedProperties.has('edgeless') && this.edgeless) {
       // after switch to edgeless mode, should update the selection
-      this.edgeless.selectionManager.setSelection({
-        elements: this._selected,
-        editing: false,
-      });
+      if (this.edgeless.model.id === this._lastEdgelessPageId) {
+        this.edgeless.selectionManager.setSelection({
+          elements: this._selected,
+          editing: false,
+        });
+      } else {
+        this._selected = [];
+      }
+      this._lastEdgelessPageId = this.edgeless.model.id;
     }
   }
 
   override connectedCallback() {
     super.connectedCallback();
     this._updateFrameItems();
+    if (this.edgeless) {
+      this._lastEdgelessPageId = this.edgeless.model.id;
+    }
   }
 
   override disconnectedCallback() {
