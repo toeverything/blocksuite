@@ -1324,6 +1324,7 @@ test('click bottom of page and if the last is embed block, editor should insert 
   await page
     .locator('.affine-doc-viewport')
     .click({ position: { x: pageRect.width / 2, y: pageRect.bottom - 10 } });
+
   await assertStoreMatchJSX(
     page,
     `

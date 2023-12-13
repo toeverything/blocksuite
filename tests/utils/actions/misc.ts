@@ -14,7 +14,7 @@ import {
   type PageBlockModel,
   type ThemeObserver,
 } from '../../../packages/blocks/src/index.js';
-import { assertExists } from '../../../packages/global/src/utils.js';
+import { assertExists, sleep } from '../../../packages/global/src/utils.js';
 import {
   type InlineRange,
   type InlineRootElement,
@@ -1169,16 +1169,17 @@ export async function waitForInlineEditorStateUpdated(page: Page) {
 }
 
 export async function initImageState(page: Page) {
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
+  // await initEmptyParagraphState(page);
+  // await focusRichText(page);
 
   await page.evaluate(async () => {
     const { page } = window;
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    page.addBlock('affine:surface', {}, pageId);
     const noteId = page.addBlock('affine:note', {}, pageId);
+
+    await new Promise(res => setTimeout(res, 200));
 
     const docPage = document.querySelector('affine-doc-page');
     if (!docPage) throw new Error('Cannot find doc page');
