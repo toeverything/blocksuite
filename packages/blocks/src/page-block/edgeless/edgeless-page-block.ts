@@ -704,6 +704,16 @@ export class EdgelessPageBlockComponent extends BlockElement<
         );
       })
     );
+
+    if (this.surface.indexedCanvases) {
+      if (this.pageBlockContainer.isUpdatePending) {
+        this.pageBlockContainer.updateComplete.then(() => {
+          this.pageBlockContainer.setSlotContent(this.surface.indexedCanvases);
+        });
+      } else {
+        this.pageBlockContainer.setSlotContent(this.surface.indexedCanvases);
+      }
+    }
   }
 
   override firstUpdated() {
