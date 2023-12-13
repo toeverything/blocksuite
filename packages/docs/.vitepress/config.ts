@@ -144,5 +144,8 @@ export default defineConfig({
         },
       });
     },
+    attrs: {
+      disable: true,
+    },
   },
 });
