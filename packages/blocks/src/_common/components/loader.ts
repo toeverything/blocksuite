@@ -2,7 +2,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { BLOCK_ID_ATTR, BLOCK_SERVICE_LOADING_ATTR } from '../consts.js';
+import { BLOCK_ID_ATTR } from '../consts.js';
 
 @customElement('loader-element')
 export class Loader extends LitElement {
@@ -77,7 +77,7 @@ export class Loader extends LitElement {
     super.connectedCallback();
     if (this.hostModel) {
       this.setAttribute(BLOCK_ID_ATTR, this.hostModel.id);
-      this.setAttribute(BLOCK_SERVICE_LOADING_ATTR, 'true');
+      this.setAttribute('data-service-loading', 'true');
     }
 
     const width = this.width;
