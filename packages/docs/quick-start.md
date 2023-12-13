@@ -12,7 +12,6 @@ Then you can use the prebuilt `DocEditor` out of the box, with a `page` instance
 
 ```ts /index.ts [active] {coderHeight=180 previewHeight=500}
 import '@blocksuite/presets/themes/affine.css';
-
 import { createDefaultPage, DocEditor } from '@blocksuite/presets';
 
 const page = createDefaultPage();
@@ -22,3 +21,5 @@ document.body.appendChild(editor);
 ```
 
 :::
+
+You can also try replacing the `DocEditor` with the `EdgelessEditor` whiteboard in the same manner. In the subsequent sections, we will guide you through the fundamental components of BlockSuite.
