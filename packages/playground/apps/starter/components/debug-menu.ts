@@ -14,11 +14,12 @@ import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
+import './left-side-panel';
+import './side-panel';
 
 import {
   BlocksUtils,
   COLOR_VARIABLES,
-  createPage,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
   HtmlAdapter,
@@ -48,9 +49,12 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
+import type { ChatWithWorkspacePanel } from './chat-with-workspace';
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomTOCOutlinePanel } from './custom-toc-outline-panel.js';
+import type { LeftSidePanel } from './left-side-panel';
+import type { PagesPanel } from './pages-panel';
 import type { SidePanel } from './side-panel';
 
 export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
@@ -212,6 +216,12 @@ export class DebugMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   sidePanel!: SidePanel;
+  @property({ attribute: false })
+  leftSidePanel!: LeftSidePanel;
+  @property({ attribute: false })
+  pagesPanel!: PagesPanel;
+  @property({ attribute: false })
+  chatWithWorkspacePanel!: ChatWithWorkspacePanel;
 
   @state()
   private _connected = true;
@@ -324,11 +334,13 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _toggleCopilotPanel() {
-    if (this.sidePanel.currentContent === this.copilotPanel) {
-      this.sidePanel.hideContent();
-    } else {
-      this.sidePanel.showContent(this.copilotPanel);
-    }
+    this.sidePanel.toggle(this.copilotPanel);
+  }
+  private _togglePagesPanel() {
+    this.leftSidePanel.toggle(this.pagesPanel);
+  }
+  private _toggleChatWithWorkspacePanel() {
+    this.sidePanel.toggle(this.chatWithWorkspacePanel);
   }
 
   private _createMindMap() {
@@ -773,17 +785,6 @@ export class DebugMenu extends ShadowlessElement {
             </sl-button>
           </sl-tooltip>
 
-          <sl-tooltip content="Add New Page" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              @click=${() => createPageBlock(this.workspace)}
-            >
-              <sl-icon name="file-earmark-plus"></sl-icon>
-            </sl-button>
-          </sl-tooltip>
-
-          ${PageList(this.workspace, this.editor, () => this.requestUpdate())}
-
           <sl-tooltip
             content="🚧 Toggle Copilot Panel"
             placement="bottom"
@@ -793,68 +794,16 @@ export class DebugMenu extends ShadowlessElement {
               <sl-icon name="stars"></sl-icon>
             </sl-button>
           </sl-tooltip>
+          <sl-button size="small" @click=${this._togglePagesPanel}>
+            Pages
+          </sl-button>
+          <sl-button size="small" @click=${this._toggleChatWithWorkspacePanel}>
+            Chat with workspace
+          </sl-button>
         </div>
       </div>
     `;
   }
-}
-
-function createPageBlock(workspace: Workspace) {
-  const id = workspace.idGenerator('page');
-  createPage(workspace, { id }).catch(console.error);
-}
-
-function PageList(
-  workspace: Workspace,
-  editor: AffineEditorContainer,
-  requestUpdate: () => void
-) {
-  workspace.meta.pageMetasUpdated.on(requestUpdate);
-
-  // This function is called when a delete option is clicked
-  const handleDeletePage = (pageId: string) => {
-    workspace.removePage(pageId);
-    // When delete a page, we need to set the editor page to the first remaining page
-    const pages = Array.from(workspace.pages.values());
-    editor.page = pages[0];
-    requestUpdate();
-  };
-
-  // Create a dropdown menu for each page with a delete option
-  return html`
-    <sl-dropdown hoist>
-      <sl-button size="small" slot="trigger" caret>Pages</sl-button>
-      <sl-menu>
-        ${workspace.meta.pageMetas.map(
-          pageMeta => html`
-            <sl-menu-item>
-              ${pageMeta.title || 'Untitled'}
-              <sl-menu slot="submenu">
-                <sl-menu-item
-                  @click="${() => {
-                    const newPage = workspace.getPage(pageMeta.id);
-                    if (!newPage) return;
-                    editor.page = newPage;
-                  }}"
-                >
-                  Open
-                </sl-menu-item>
-                <sl-menu-item
-                  .disabled="${workspace.pages.size <= 1}"
-                  @click="${() => {
-                    if (workspace.pages.size <= 1) return;
-                    handleDeletePage(pageMeta.id);
-                  }}"
-                >
-                  Delete
-                </sl-menu-item>
-              </sl-menu>
-            </sl-menu-item>
-          `
-        )}
-      </sl-menu>
-    </sl-dropdown>
-  `;
 }
 
 declare global {
