@@ -33,7 +33,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       display: block;
       height: 100%;
       width: 100%;
-      overflow: auto;
     }
 
     .inline-editor {
@@ -41,6 +40,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       width: 100%;
       outline: none;
       cursor: text;
+    }
+
+    rich-text .nowrap-lines {
+      overflow-x: auto;
     }
 
     rich-text v-line {
@@ -103,8 +106,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   get inlineEditor() {
     return this._inlineEditor;
   }
-
-  private _lastScrollLeft = 0;
 
   private _init() {
     if (this._inlineEditor) {
@@ -174,25 +175,24 @@ export class RichText extends WithDisposable(ShadowlessElement) {
             }
           }
 
-          // scroll container is rich-text
+          // scroll container is `inlineEditorContainer`
           if (this.enableAutoScrollHorizontally) {
-            // make sure the result of moveX is expected
-            this.scrollLeft = 0;
-            const thisRect = this.getBoundingClientRect();
+            const containerRect =
+              this.inlineEditorContainer.getBoundingClientRect();
             const rangeRect = range.getBoundingClientRect();
-            let moveX = 0;
+
+            let scrollLeft = this.inlineEditorContainer.scrollLeft;
             if (
               rangeRect.left + rangeRect.width >
-              thisRect.left + thisRect.width
+              containerRect.left + containerRect.width
             ) {
-              moveX =
+              scrollLeft +=
                 rangeRect.left +
                 rangeRect.width -
-                (thisRect.left + thisRect.width);
-              moveX = Math.max(this._lastScrollLeft, moveX);
+                (containerRect.left + containerRect.width) +
+                2;
             }
-
-            this.scrollLeft = moveX;
+            this.inlineEditorContainer.scrollLeft = scrollLeft;
           }
         });
       })
@@ -343,10 +343,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
           this._unmount();
         },
       });
-    });
-
-    this.disposables.addFromEvent(this, 'scroll', () => {
-      this._lastScrollLeft = this.scrollLeft;
     });
   }
 

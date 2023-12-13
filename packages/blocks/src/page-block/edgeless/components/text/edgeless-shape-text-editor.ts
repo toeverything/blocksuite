@@ -162,6 +162,8 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       top: y + 'px',
       width: rect.width + 'px',
       minHeight: rect.height + 'px',
+      // override rich-text style (height: 100%)
+      height: 'initial',
       fontSize: this.element.fontSize + 'px',
       fontFamily: wrapFontFamily(this.element.fontFamily),
       lineHeight: 'initial',
