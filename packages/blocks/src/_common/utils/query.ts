@@ -151,7 +151,7 @@ export function buildPath(model: BaseBlockModel | null): string[] {
 /** If it's not in the page mode, it will return `null` directly */
 export function getDocPage(page: Page): DocPageBlockComponent | null {
   const pageComponent = getBlockComponentByModel(page.root);
-  if (!(pageComponent?.tagName !== 'AFFINE-DOC-PAGE')) return null;
+  if (pageComponent?.tagName !== 'AFFINE-DOC-PAGE') return null;
   return pageComponent as DocPageBlockComponent;
 }
 
@@ -163,7 +163,7 @@ export function getDocPageByElement(ele: Element) {
 /** If it's not in the edgeless mode, it will return `null` directly */
 export function getEdgelessPage(page: Page): EdgelessPageBlockComponent | null {
   const pageComponent = getBlockComponentByModel(page.root);
-  if (!(pageComponent?.tagName !== 'AFFINE-EDGELESS-PAGE')) return null;
+  if (pageComponent?.tagName !== 'AFFINE-EDGELESS-PAGE') return null;
   return pageComponent as EdgelessPageBlockComponent;
 }
 
