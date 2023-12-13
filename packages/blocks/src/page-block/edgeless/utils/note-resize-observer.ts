@@ -4,7 +4,7 @@ import type { Page } from '@blocksuite/store';
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import { almostEqual } from '../../../_common/utils/math.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import { getBlockElementByModel } from '../../../_common/utils/query.js';
+import { getBlockComponentByModel } from '../../../_common/utils/query.js';
 
 export class NoteResizeObserver {
   private _observer: ResizeObserver;
@@ -62,7 +62,7 @@ export class NoteResizeObserver {
 
       const blockId = model.id;
       unCachedKeys.delete(blockId);
-      const blockElement = getBlockElementByModel(model);
+      const blockElement = getBlockComponentByModel(model);
       const container = blockElement?.querySelector(
         '.affine-note-block-container'
       );

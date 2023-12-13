@@ -27,7 +27,7 @@ import {
 } from '../../../_common/icons/index.js';
 import {
   createPage,
-  getBlockElementByModel,
+  getBlockComponentByModel,
   getCurrentNativeRange,
   getImageFilesFromLocal,
   getInlineEditorByModel,
@@ -208,7 +208,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         icon: DualLinkIcon,
         showWhen: model => {
           assertExists(model.page.root);
-          const pageBlock = getBlockElementByModel(model.page.root);
+          const pageBlock = getBlockComponentByModel(model.page.root);
           assertExists(pageBlock);
           const linkedPageWidgetEle =
             pageBlock.widgetElements['affine-linked-page-widget'];
@@ -225,7 +225,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const triggerKey = '@';
           insertContent(model, triggerKey);
           assertExists(model.page.root);
-          const pageBlock = getBlockElementByModel(model.page.root);
+          const pageBlock = getBlockComponentByModel(model.page.root);
           const widgetEle =
             pageBlock?.widgetElements['affine-linked-page-widget'];
           assertExists(widgetEle);

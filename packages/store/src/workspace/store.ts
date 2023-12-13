@@ -44,7 +44,7 @@ export enum Generator {
 export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
-  id: string;
+  id?: string;
   providerCreators?: DocProviderCreator[];
   awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator | IdGenerator;
@@ -76,7 +76,7 @@ export class Store {
       defaultFlags,
     }: StoreOptions = { id: nanoid('workspace') }
   ) {
-    this.id = id;
+    this.id = id || '';
     this.doc = new BlockSuiteDoc({ guid: id });
     this.awarenessStore = new AwarenessStore(
       this,
@@ -111,7 +111,7 @@ export class Store {
     }
 
     this.providers = providerCreators.map(creator =>
-      creator(id, this.doc, {
+      creator(this.id, this.doc, {
         awareness: this.awarenessStore.awareness,
       })
     );

@@ -26,7 +26,7 @@ const STEPS = MAX_SPACE / 2 / 2;
 
 // Fix use unknown type
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type BlockComponentElement = BlockElement<any>;
+export type BlockComponent = BlockElement<any>;
 
 interface ContainerBlock {
   model?: BaseBlockModel;
@@ -148,65 +148,36 @@ export function buildPath(model: BaseBlockModel | null): string[] {
   return path;
 }
 
-/**
- * If it's not in the page mode, it will return `null` directly.
- */
-export function getDocPage(page: Page) {
-  const editor = getEditorContainer(page);
-  if (editor.mode !== 'page') return null;
-  const pageComponent = editor.querySelector('affine-doc-page');
-  return pageComponent;
+/** If it's not in the page mode, it will return `null` directly */
+export function getDocPage(page: Page): DocPageBlockComponent | null {
+  const pageComponent = getBlockComponentByModel(page.root);
+  if (pageComponent?.tagName !== 'AFFINE-DOC-PAGE') return null;
+  return pageComponent as DocPageBlockComponent;
 }
 
-/**
- * If it's not in the page mode, it will return `null` directly.
- */
-export function getDocPageByElement(ele: Element) {
-  const editor = getClosestEditorContainer(ele);
-  if (editor.mode !== 'page') return null;
-  const pageComponent = editor.querySelector('affine-doc-page');
-  return pageComponent;
+/** If it's not in the page mode, it will return `null` directly */
+export function getDocPageByElement(element: Element) {
+  return element.closest('affine-doc-page');
 }
 
-/**
- * If it's not in the edgeless mode, it will return `null` directly.
- */
-export function getEdgelessPage(page: Page) {
-  const editor = getEditorContainer(page);
-  if (editor.mode !== 'edgeless') return null;
-  const pageComponent = editor.querySelector('affine-edgeless-page');
-  return pageComponent;
+/** If it's not in the edgeless mode, it will return `null` directly */
+export function getEdgelessPage(page: Page): EdgelessPageBlockComponent | null {
+  const pageComponent = getBlockComponentByModel(page.root);
+  if (pageComponent?.tagName !== 'AFFINE-EDGELESS-PAGE') return null;
+  return pageComponent as EdgelessPageBlockComponent;
 }
 
-/**
- * This function exposes higher levels of abstraction.
- *
- * PLEASE USE IT WITH CAUTION!
- */
+/** @deprecated */
 export function getEditorContainer(page: Page): AbstractEditor {
-  assertExists(
-    page.root,
-    'Failed to check page mode! Page root is not exists!'
-  );
-  const pageBlock = getBlockElementByModel(page.root);
-  // EditorContainer
-  const editorContainer = pageBlock?.closest('affine-editor-container');
-  assertExists(editorContainer);
-  return editorContainer as AbstractEditor;
-}
-
-function getClosestEditorContainer(ele: Element) {
-  const editorContainer = ele.closest('affine-editor-container');
+  const pageComponent = getBlockComponentByModel(page.root);
+  const editorContainer = pageComponent?.closest('affine-editor-container');
   assertExists(editorContainer);
   return editorContainer as AbstractEditor;
 }
 
 export function isPageMode(page: Page) {
-  const editor = getEditorContainer(page);
-  if (!('mode' in editor)) {
-    throw new Error('Failed to check page mode! Editor mode is not exists!');
-  }
-  return editor.mode === 'page';
+  const pageComponent = getBlockComponentByModel(page.root);
+  return pageComponent?.tagName === 'AFFINE-DOC-PAGE';
 }
 
 export function getLitRoot() {
@@ -217,7 +188,6 @@ export function getLitRoot() {
 
 /**
  * Get editor viewport element.
- *
  * @example
  * ```ts
  * const viewportElement = getViewportElement(this.model.page);
@@ -231,72 +201,73 @@ export function getViewportElement(page: Page) {
   const isPage = isPageMode(page);
   if (!isPage) return null;
   assertExists(page.root);
-  const defaultPageBlock = getBlockElementByModel(page.root);
+  const pageComponent = getBlockComponentByModel(page.root);
 
   if (
-    !defaultPageBlock ||
-    defaultPageBlock.closest('affine-doc-page') !== defaultPageBlock
+    !pageComponent ||
+    pageComponent.closest('affine-doc-page') !== pageComponent
   ) {
     throw new Error('Failed to get viewport element!');
   }
-  return (defaultPageBlock as DocPageBlockComponent).viewportElement;
+  return (pageComponent as DocPageBlockComponent).viewportElement;
 }
 
 /**
- * Get block element by model.
+ * Get block component by model.
  * Note that this function is used for compatibility only, and may be removed in the future.
  *
  * Use `root.view.viewFromPath` instead.
  * @deprecated
  */
-export function getBlockElementByModel(model: BaseBlockModel) {
-  return getBlockElementByPath(buildPath(model));
+export function getBlockComponentByModel(model: BaseBlockModel | null) {
+  if (!model) return null;
+  return getBlockComponentByPath(buildPath(model));
 }
 
-export function getBlockElementByPath(path: string[]) {
+export function getBlockComponentByPath(path: string[]) {
   const root = getLitRoot();
 
   return root.view.viewFromPath('block', path);
 }
 
 /**
- * Get block element by its model and wait for the page element to finish updating.
+ * Get block component by its model and wait for the page element to finish updating.
  * Note that this function is used for compatibility only, and may be removed in the future.
  *
  * Use `root.view.viewFromPath` instead.
  * @deprecated
  */
-export async function asyncGetBlockElementByModel(
+export async function asyncGetBlockComponentByModel(
   model: BaseBlockModel
-): Promise<BlockComponentElement | null> {
+): Promise<BlockComponent | null> {
   assertExists(model.page.root);
-  const pageElement = getBlockElementByModel(model.page.root);
-  if (!pageElement) return null;
-  await pageElement.updateComplete;
+  const pageComponent = getBlockComponentByModel(model.page.root);
+  if (!pageComponent) return null;
+  await pageComponent.updateComplete;
 
   if (model.id === model.page.root.id) {
-    return pageElement;
+    return pageComponent;
   }
 
-  const blockElement = getBlockElementByModel(model);
-  return blockElement;
+  const blockComponent = getBlockComponentByModel(model);
+  return blockComponent;
 }
 
 /**
  * @deprecated In most cases, you not need RichText, you can use {@link getInlineEditorByModel} instead.
  */
 export function getRichTextByModel(model: BaseBlockModel) {
-  const blockElement = getBlockElementByModel(model);
-  const richText = blockElement?.querySelector<RichText>('rich-text');
+  const blockComponent = getBlockComponentByModel(model);
+  const richText = blockComponent?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;
 }
 
 export async function asyncGetRichTextByModel(model: BaseBlockModel) {
-  const blockElement = await asyncGetBlockElementByModel(model);
-  if (!blockElement) return null;
-  await blockElement.updateComplete;
-  const richText = blockElement?.querySelector<RichText>('rich-text');
+  const blockComponent = await asyncGetBlockComponentByModel(model);
+  if (!blockComponent) return null;
+  await blockComponent.updateComplete;
+  const richText = blockComponent?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;
 }
@@ -325,7 +296,7 @@ export async function asyncGetInlineEditorByModel(model: BaseBlockModel) {
 export function getModelByElement(element: Element): BaseBlockModel {
   const closestBlock = element.closest(ATTR_SELECTOR);
   assertExists(closestBlock, 'Cannot find block element by element');
-  return getModelByBlockElement(closestBlock);
+  return getModelByBlockComponent(closestBlock);
 }
 
 export function isInsidePageTitle(element: unknown): boolean {
@@ -367,7 +338,7 @@ function contains(parent: Element, node: Element) {
 /**
  * Returns `true` if element has `data-block-id` attribute.
  */
-function hasBlockId(element: Element): element is BlockComponentElement {
+function hasBlockId(element: Element): element is BlockComponent {
   return element.hasAttribute(ATTR);
 }
 
@@ -401,7 +372,7 @@ function isPageOrNoteOrSurface(element: Element) {
   );
 }
 
-function isBlock(element: BlockComponentElement) {
+function isBlock(element: BlockComponent) {
   return !isPageOrNoteOrSurface(element);
 }
 
@@ -573,7 +544,7 @@ export function getClosestBlockElementByPoint(
  * @param point position
  */
 export function findClosestBlockElement(
-  container: BlockComponentElement,
+  container: BlockComponent,
   point: Point,
   selector: string
 ) {
@@ -607,14 +578,14 @@ export function findClosestBlockElement(
  */
 export function getClosestBlockElementByElement(
   element: Element | null
-): BlockComponentElement | null {
+): BlockComponent | null {
   if (!element) return null;
   if (hasBlockId(element) && isBlock(element)) {
     return element;
   }
-  const blockElement = element.closest<BlockComponentElement>(ATTR_SELECTOR);
-  if (blockElement && isBlock(blockElement)) {
-    return blockElement;
+  const blockComponent = element.closest<BlockComponent>(ATTR_SELECTOR);
+  if (blockComponent && isBlock(blockComponent)) {
+    return blockComponent;
   }
   return null;
 }
@@ -622,8 +593,8 @@ export function getClosestBlockElementByElement(
 /**
  * Returns the model of the block element.
  */
-export function getModelByBlockElement(element: Element) {
-  const containerBlock = element as ContainerBlock;
+export function getModelByBlockComponent(component: Element) {
+  const containerBlock = component as ContainerBlock;
   // In extreme cases, the block may be loading, and the model is not yet available.
   // For example
   // // `<loader-element data-block-id="586080495:15" data-service-loading="true"></loader-element>`
@@ -643,9 +614,7 @@ export function getModelByBlockElement(element: Element) {
  * https://github.com/toeverything/blocksuite/issues/902
  * https://github.com/toeverything/blocksuite/pull/1121
  */
-export function getRectByBlockElement(
-  element: Element | BlockComponentElement
-) {
+export function getRectByBlockElement(element: Element | BlockComponent) {
   if (isDatabase(element)) return element.getBoundingClientRect();
   return (element.firstElementChild ?? element).getBoundingClientRect();
 }
@@ -655,7 +624,7 @@ export function getRectByBlockElement(
  * Only keep block elements of same level.
  */
 export function getBlockElementsExcludeSubtrees(
-  elements: Element[] | BlockComponentElement[]
+  elements: Element[] | BlockComponent[]
 ) {
   if (elements.length <= 1) return elements;
   let parent = elements[0];

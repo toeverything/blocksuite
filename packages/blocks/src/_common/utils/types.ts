@@ -22,7 +22,7 @@ import {
 import type { RefNodeSlots } from '../components/rich-text/inline/nodes/reference-node.js';
 import type { AffineTextAttributes } from '../components/rich-text/inline/types.js';
 import type { NavigatorMode } from '../edgeless/frame/consts.js';
-import type { BlockComponentElement } from './query.js';
+import type { BlockComponent } from './query.js';
 import type { Point } from './rect.js';
 
 export type SelectionPosition = 'start' | 'end' | Point;
@@ -39,7 +39,7 @@ export interface BlockTransformContext {
 }
 
 export interface EditingState {
-  element: BlockComponentElement;
+  element: BlockComponent;
   model: BaseBlockModel;
   rect: DOMRect;
 }

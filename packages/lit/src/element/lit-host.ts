@@ -91,6 +91,12 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
+    if (!this.page.root) {
+      throw new Error(
+        'This page is missing root block. Please initialize the default block structure before connecting the editor to DOM.'
+      );
+    }
+
     this.std = new BlockStdScope({
       host: this,
       workspace: this.page.workspace,
@@ -112,9 +118,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const { root } = this.page;
-    if (!root) {
-      return null;
-    }
+    if (!root) return nothing;
 
     return this.renderModel(root);
   }

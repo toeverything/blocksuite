@@ -13,7 +13,7 @@ import { Workspace, Schema } from '@blocksuite/store';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 
 const schema = new Schema().register(AffineSchemas);
-const workspace = new Workspace({ id: 'foo', schema });
+const workspace = new Workspace({ schema });
 ```
 
 ::: info

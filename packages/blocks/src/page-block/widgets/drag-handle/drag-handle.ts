@@ -13,10 +13,10 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  getBlockElementByModel,
+  getBlockComponentByModel,
   getBlockElementsExcludeSubtrees,
   getCurrentNativeRange,
-  getModelByBlockElement,
+  getModelByBlockComponent,
   isEdgelessPage,
   isPageMode,
   matchFlavours,
@@ -114,13 +114,9 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   get pageBlockElement() {
-    const pageElement = this.blockElement;
-    const pageBlock = isPageMode(this.page)
-      ? (pageElement as DocPageBlockComponent)
-      : (pageElement as EdgelessPageBlockComponent);
-    assertExists(pageBlock);
-
-    return pageBlock;
+    return this.blockElement as
+      | DocPageBlockComponent
+      | EdgelessPageBlockComponent;
   }
 
   get selectedBlocks() {
@@ -892,7 +888,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     const selectedBlocks = getBlockElementsExcludeSubtrees(draggingElements)
-      .map(element => getModelByBlockElement(element))
+      .map(element => getModelByBlockComponent(element))
       .filter((x): x is BaseBlockModel => !!x);
     const targetBlock = this.page.getBlockById(targetBlockId);
 
@@ -922,7 +918,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       assertExists(parent);
       // Need to update selection when moving blocks successfully
       // Because the block path may be changed after moving
-      const parentElement = getBlockElementByModel(parent);
+      const parentElement = getBlockComponentByModel(parent);
       if (parentElement) {
         const newSelectedBlocks = selectedBlocks
           .map(block => parentElement.path.concat(block.id))

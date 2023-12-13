@@ -6,7 +6,6 @@ import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { PAGE_BLOCK_CHILD_PADDING } from '../../_common/consts.js';
 import type { EditingState } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
@@ -30,6 +29,8 @@ export interface PageViewport {
   clientHeight: number;
   clientWidth: number;
 }
+
+const PAGE_BLOCK_CHILD_PADDING = 24;
 
 function testClickOnBlankArea(
   state: PointerEventState,

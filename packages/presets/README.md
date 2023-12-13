@@ -1,6 +1,6 @@
 # `@blocksuite/presets`
 
-Default BlockSuite-based editor built for [AFFiNE](https://affine.pro).
+Prebuilt editors and opt-in additional UI components built for [AFFiNE](https://affine.pro).
 
 ## Documentation
 

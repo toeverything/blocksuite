@@ -5,15 +5,14 @@ import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  ACTIVE_NOTE_EXTRA_PADDING,
-  EDGELESS_BLOCK_CHILD_PADDING,
-} from '../../../../../_common/consts.js';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
+
+const ACTIVE_NOTE_EXTRA_PADDING = 20;
 
 @customElement('edgeless-note-mask')
 export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
