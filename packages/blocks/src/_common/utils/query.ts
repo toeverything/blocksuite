@@ -5,9 +5,9 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
-import { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
+import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
-import { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
   BLOCK_ID_ATTR as ATTR,
@@ -151,8 +151,8 @@ export function buildPath(model: BaseBlockModel | null): string[] {
 /** If it's not in the page mode, it will return `null` directly */
 export function getDocPage(page: Page): DocPageBlockComponent | null {
   const pageComponent = getBlockComponentByModel(page.root);
-  if (!(pageComponent instanceof DocPageBlockComponent)) return null;
-  return pageComponent;
+  if (!(pageComponent?.tagName !== 'AFFINE-DOC-PAGE')) return null;
+  return pageComponent as DocPageBlockComponent;
 }
 
 /** If it's not in the page mode, it will return `null` directly */
@@ -163,8 +163,8 @@ export function getDocPageByElement(ele: Element) {
 /** If it's not in the edgeless mode, it will return `null` directly */
 export function getEdgelessPage(page: Page): EdgelessPageBlockComponent | null {
   const pageComponent = getBlockComponentByModel(page.root);
-  if (!(pageComponent instanceof EdgelessPageBlockComponent)) return null;
-  return pageComponent;
+  if (!(pageComponent?.tagName !== 'AFFINE-EDGELESS-PAGE')) return null;
+  return pageComponent as EdgelessPageBlockComponent;
 }
 
 /** @deprecated */
@@ -177,7 +177,7 @@ export function getEditorContainer(page: Page): AbstractEditor {
 
 export function isPageMode(page: Page) {
   const pageComponent = getBlockComponentByModel(page.root);
-  return pageComponent instanceof DocPageBlockComponent;
+  return pageComponent?.tagName === 'AFFINE-DOC-PAGE';
 }
 
 export function getLitRoot() {
