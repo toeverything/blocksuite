@@ -13,7 +13,7 @@ import {
   matchFlavours,
 } from '../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
-import { ClipboardController } from '../clipboard/index.js';
+import { PageClipboard } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -140,7 +140,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   gesture: Gesture | null = null;
 
-  clipboardController = new ClipboardController(this);
+  clipboardController = new PageClipboard(this);
 
   @state()
   private _isComposing = false;
@@ -381,6 +381,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+    this.clipboardController.hostConnected();
 
     this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
@@ -589,6 +590,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this.clipboardController.hostDisconnected();
     this._disposables.dispose();
     this.gesture = null;
     this.keyboardManager = null;

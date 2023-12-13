@@ -70,7 +70,6 @@ import type {
 } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { SurfaceService } from '../../surface-block/surface-service.js';
-import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
@@ -195,11 +194,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   @query('.affine-edgeless-layer')
   edgelessLayer!: HTMLDivElement;
 
-  pageClipboardController = new PageClipboardController(this);
-  clipboardController = new EdgelessClipboardController(
-    this,
-    this.pageClipboardController
-  );
+  clipboardController = new EdgelessClipboardController(this);
 
   slots = {
     viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
@@ -931,6 +926,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+    this.clipboardController.hostConnected();
     this._updateFrames();
     this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
@@ -960,6 +956,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this.clipboardController.hostDisconnected();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
       this._resizeObserver = null;

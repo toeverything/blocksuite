@@ -3,7 +3,7 @@ import type {
   SurfaceSelection,
   UIEventStateContext,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import {
   type BlockSnapshot,
@@ -11,7 +11,6 @@ import {
   Job,
   Workspace,
 } from '@blocksuite/store';
-import type { ReactiveController } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
@@ -45,7 +44,7 @@ import {
   deserializeXYWH,
   serializeXYWH,
 } from '../../../surface-block/utils/xywh.js';
-import type { ClipboardController } from '../../clipboard/index.js';
+import { PageClipboard } from '../../clipboard/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { deleteElements } from '../utils/crud.js';
 import {
@@ -62,12 +61,9 @@ const IMAGE_PNG = 'image/png';
 
 const { GROUP } = CanvasElementType;
 
-export class EdgelessClipboardController implements ReactiveController {
-  constructor(
-    public host: EdgelessPageBlockComponent,
-    public pageClipboardController: ClipboardController
-  ) {
-    host.addController(this);
+export class EdgelessClipboardController extends PageClipboard {
+  constructor(public override host: EdgelessPageBlockComponent) {
+    super(host);
   }
 
   private get std() {
@@ -90,35 +86,43 @@ export class EdgelessClipboardController implements ReactiveController {
     return this.host.selectionManager;
   }
 
-  get textSelection() {
-    return this.host.selection.find('text');
+  override hostConnected() {
+    if (this._disposables.disposed) {
+      this._disposables = new DisposableGroup();
+    }
+    this._init();
+    this._initEdgelessClipboard();
   }
 
-  hostConnected() {
-    this.host.updateComplete.then(() => {
-      this._init();
-    });
-  }
+  private _initEdgelessClipboard = () => {
+    this.host.handleEvent(
+      'copy',
+      ctx => {
+        const surfaceSelection = this.selectionManager.state;
+        const elements = surfaceSelection.elements;
+        if (elements.length === 0) return false;
 
-  private _init = () => {
-    this.host.handleEvent('copy', ctx => {
-      const surfaceSelection = this.selectionManager.state;
-      const elements = surfaceSelection.elements;
-      if (elements.length === 0) return false;
+        this._onCopy(ctx, surfaceSelection);
+        return;
+      },
+      { global: true }
+    );
 
-      this._onCopy(ctx, surfaceSelection);
-      return true;
-    });
+    this.host.handleEvent(
+      'paste',
+      ctx => {
+        this._onPaste(ctx);
+      },
+      { global: true }
+    );
 
-    this.host.handleEvent('paste', ctx => {
-      this._onPaste(ctx);
-      return true;
-    });
-
-    this.host.handleEvent('cut', ctx => {
-      this._onCut(ctx);
-      return true;
-    });
+    this.host.handleEvent(
+      'cut',
+      ctx => {
+        this._onCut(ctx);
+      },
+      { global: true }
+    );
   };
 
   private _blockElmentGetter(model: BaseBlockModel) {
@@ -154,7 +158,7 @@ export class EdgelessClipboardController implements ReactiveController {
     if (surfaceSelection.editing) {
       // use build-in copy handler in rich-text when copy in surface text element
       if (isCanvasElementWithText(elements[0])) return;
-      this.pageClipboardController.onPageCopy(_context);
+      this.onPageCopy(_context);
       return;
     }
 
@@ -181,7 +185,7 @@ export class EdgelessClipboardController implements ReactiveController {
     if (state.editing) {
       // use build-in paste handler in rich-text when paste in surface text element
       if (isCanvasElementWithText(elements[0])) return;
-      this.pageClipboardController.onPagePaste(_context);
+      this.onPagePaste(_context);
       return;
     }
 
@@ -216,7 +220,7 @@ export class EdgelessClipboardController implements ReactiveController {
     if (state.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
       if (isCanvasElementWithText(elements[0])) return;
-      this.pageClipboardController.onPageCut(_context);
+      this.onPageCut(_context);
       return;
     }
 
@@ -328,12 +332,7 @@ export class EdgelessClipboardController implements ReactiveController {
         assertExists(note);
 
         children.forEach(child => {
-          this.pageClipboardController.onBlockSnapshotPaste(
-            child,
-            this.page,
-            note.id,
-            0
-          );
+          this.onBlockSnapshotPaste(child, this.page, note.id, 0);
         });
         return noteId;
       })

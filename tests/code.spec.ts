@@ -23,7 +23,6 @@ import {
   redoByKeyboard,
   selectAllByKeyboard,
   setSelection,
-  SHORT_KEY,
   switchReadonly,
   type,
   undoByKeyboard,

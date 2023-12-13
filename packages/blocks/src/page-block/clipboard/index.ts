@@ -2,7 +2,6 @@ import type { UIEventHandler } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSnapshot, Page } from '@blocksuite/store';
-import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import { HtmlAdapter, ImageAdapter } from '../../_common/adapters/index.js';
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
@@ -10,9 +9,9 @@ import { replaceIdMiddleware } from '../../_common/transformers/utils.js';
 import { ClipboardAdapter } from './adapter.js';
 import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
 
-export class ClipboardController implements ReactiveController {
+export class PageClipboard {
   protected _disposables = new DisposableGroup();
-  host: ReactiveControllerHost & BlockElement;
+  host: BlockElement;
 
   private get _std() {
     return this.host.std;
@@ -23,28 +22,25 @@ export class ClipboardController implements ReactiveController {
   private _htmlAdapter = new HtmlAdapter();
   private _imageAdapter = new ImageAdapter();
 
-  constructor(host: ReactiveControllerHost & BlockElement) {
-    (this.host = host).addController(this);
+  constructor(host: BlockElement) {
+    this.host = host;
   }
 
   hostConnected() {
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
     }
-    this.host.updateComplete.then(() => {
-      this._init();
-    });
+    this.host.handleEvent('copy', this.onPageCopy);
+    this.host.handleEvent('paste', this.onPagePaste);
+    this.host.handleEvent('cut', this.onPageCut);
+    this._init();
   }
 
   hostDisconnected() {
     this._disposables.dispose();
   }
 
-  private _init = () => {
-    this.host.handleEvent('copy', this.onPageCopy);
-    this.host.handleEvent('paste', this.onPagePaste);
-    this.host.handleEvent('cut', this.onPageCut);
-
+  protected _init = () => {
     this._std.clipboard.registerAdapter(
       ClipboardAdapter.MIME,
       this._clipboardAdapter,
