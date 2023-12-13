@@ -6,8 +6,8 @@ import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { HoverController } from '../_common/components/hover/controller.js';
-import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
-import { captureEventTarget } from '../_common/widgets/drag-handle/utils.js';
+import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
+import { captureEventTarget } from '../page-block/widgets/drag-handle/utils.js';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 import { BookmarkBlockSchema } from './bookmark-model.js';
 import type { BookmarkCaption } from './components/bookmark-caption.js';

@@ -10,8 +10,8 @@ import { AttachmentIcon16 } from '../_common/icons/index.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import { humanFileSize } from '../_common/utils/math.js';
-import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
-import { captureEventTarget } from '../_common/widgets/drag-handle/utils.js';
+import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
+import { captureEventTarget } from '../page-block/widgets/drag-handle/utils.js';
 import {
   type AttachmentBlockModel,
   type AttachmentBlockProps,

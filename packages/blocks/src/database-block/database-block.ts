@@ -26,11 +26,11 @@ import {
 } from '../_common/icons/index.js';
 import type { DataViewSelection } from '../_common/utils/index.js';
 import { Rect } from '../_common/utils/index.js';
-import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
+import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   getDropResult,
-} from '../_common/widgets/drag-handle/utils.js';
+} from '../page-block/widgets/drag-handle/utils.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';
