@@ -23,6 +23,7 @@ import {
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
+  captureHistory,
   clickView,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -132,6 +133,7 @@ test('option/alt mouse drag duplicate a new element', async ({ page }) => {
   await optionMouseDrag(page, [50, 50], [150, 50]);
   await assertSelectedBound(page, [100, 0, 100, 100]);
 
+  await captureHistory(page);
   await undoByClick(page);
   await assertSelectedBound(page, [0, 0, 100, 100]);
 
