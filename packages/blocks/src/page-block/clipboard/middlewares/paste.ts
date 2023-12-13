@@ -66,14 +66,17 @@ class PasteTr {
 
     this.firstSnapshot = snapshot.content[0];
     this.lastSnapshot = findLast(snapshot.content[snapshot.content.length - 1]);
-    if (this.lastSnapshot.props.text) {
+    if (
+      this.firstSnapshot !== this.lastSnapshot &&
+      this.lastSnapshot.props.text
+    ) {
       const text = fromJSON(this.lastSnapshot.props.text) as Text;
       const doc = new Workspace.Y.Doc();
       const temp = doc.getMap('temp');
       temp.set('text', text.yText);
       this.lastIndex = text.length;
     } else {
-      this.lastIndex = 0;
+      this.lastIndex = this.endPointState.text.length - end.index - end.length;
     }
     this.firstSnapshotIsPlainText =
       this.firstSnapshot.flavour === 'affine:paragraph' &&
@@ -215,7 +218,12 @@ class PasteTr {
       const selection = this.std.selection.getInstance('text', {
         from: {
           path: target.path,
-          index: this.lastIndex,
+          index:
+            this.firstSnapshot === this.lastSnapshot
+              ? lastModel.text
+                ? lastModel.text.length - this.lastIndex
+                : 0
+              : this.lastIndex,
           length: 0,
         },
         to: null,
