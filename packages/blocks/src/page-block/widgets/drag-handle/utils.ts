@@ -18,7 +18,7 @@ import {
   Point,
   Rect,
 } from '../../../_common/utils/index.js';
-import type { BlockComponentElement } from '../../../index.js';
+import type { BlockComponent } from '../../../index.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
@@ -120,7 +120,7 @@ export const getContainerOffsetPoint = (state: PointerEventState) => {
 
 export const getClosestNoteBlock = (
   page: Page,
-  pageBlock: BlockComponentElement,
+  pageBlock: BlockComponent,
   point: Point
 ) => {
   return isPageMode(page)
@@ -130,7 +130,7 @@ export const getClosestNoteBlock = (
 
 export const getClosestBlockByPoint = (
   page: Page,
-  pageBlock: BlockComponentElement,
+  pageBlock: BlockComponent,
   point: Point
 ) => {
   const closestNoteBlock = getClosestNoteBlock(page, pageBlock, point);
@@ -164,7 +164,7 @@ export function calcDropTarget(
   point: Point,
   model: BaseBlockModel,
   element: Element,
-  draggingElements: BlockComponentElement[],
+  draggingElements: BlockComponent[],
   scale: number
 ): DropResult | null {
   let type: DropType | 'none' = 'none';
@@ -208,8 +208,7 @@ export function calcDropTarget(
     // To drop in, the position must after the target first
     // If drop in target has children, we can use insert before or after of that children
     // to achieve the same effect.
-    const hasChild = (element as BlockComponentElement).childBlockElements
-      .length;
+    const hasChild = (element as BlockComponent).childBlockElements.length;
     if (
       matchFlavours(model, ['affine:list']) &&
       !hasChild &&

@@ -15,8 +15,8 @@ import {
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
-  getBlockElementByModel,
-  getBlockElementByPath,
+  getBlockComponentByModel,
+  getBlockComponentByPath,
   getEditorContainer,
   isPageMode,
 } from '../../../_common/utils/query.js';
@@ -138,9 +138,9 @@ export class EdgelessClipboardController extends PageClipboard {
         current = current.page.getParent(current);
       }
 
-      return getBlockElementByPath(path);
+      return getBlockComponentByPath(path);
     } else {
-      return getBlockElementByModel(model);
+      return getBlockComponentByModel(model);
     }
   }
 

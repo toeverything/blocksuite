@@ -5,8 +5,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import {
   calcDropTarget,
   getClosestBlockElementByPoint,
-  getEditorContainer,
-  getModelByBlockElement,
+  getModelByBlockComponent,
+  isPageMode,
   matchFlavours,
   Point,
 } from '../../_common/utils/index.js';
@@ -54,8 +54,7 @@ export class FileDropManager {
   }
 
   get isPageMode(): boolean {
-    const editor = getEditorContainer(this._blockService.page);
-    return editor.mode === 'page';
+    return isPageMode(this._blockService.page);
   }
 
   get type(): 'before' | 'after' {
@@ -100,7 +99,7 @@ export class FileDropManager {
     let result = null;
     let rect = null;
     if (element) {
-      const model = getModelByBlockElement(element);
+      const model = getModelByBlockComponent(element);
       result = calcDropTarget(point, model, element);
       if (result) {
         rect = result.rect;

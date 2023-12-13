@@ -4,7 +4,7 @@ import { type BaseBlockModel } from '@blocksuite/store';
 
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import {
-  asyncGetBlockElementByModel,
+  asyncGetBlockComponentByModel,
   asyncGetRichTextByModel,
 } from '../../_common/utils/query.js';
 
@@ -33,7 +33,7 @@ export async function onModelElementUpdated(
   model: BaseBlockModel,
   callback: (blockElement: BlockElement) => void
 ) {
-  const element = await asyncGetBlockElementByModel(model);
+  const element = await asyncGetBlockComponentByModel(model);
   if (element) {
     callback(element);
   }

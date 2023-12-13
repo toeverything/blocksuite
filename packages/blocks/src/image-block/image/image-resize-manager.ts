@@ -2,7 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
 import {
-  type BlockComponentElement,
+  type BlockComponent,
   getClosestBlockElementByElement,
   getModelByElement,
   isEdgelessPage,
@@ -10,7 +10,7 @@ import {
 import { getClosestPageBlockComponent } from '../../page-block/utils/query.js';
 
 export class ImageResizeManager {
-  private _activeComponent: BlockComponentElement | null = null;
+  private _activeComponent: BlockComponent | null = null;
   private _imageContainer: HTMLElement | null = null;
   private _imageCenterX = 0;
   private _dragMoveTarget = 'right';
@@ -20,7 +20,7 @@ export class ImageResizeManager {
     const eventTarget = e.raw.target as HTMLElement;
     this._activeComponent = getClosestBlockElementByElement(
       eventTarget
-    ) as BlockComponentElement;
+    ) as BlockComponent;
 
     const pageElement = getClosestPageBlockComponent(this._activeComponent);
     if (pageElement && isEdgelessPage(pageElement)) {

@@ -732,13 +732,27 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _initSurface() {
+    const appendIndexedCanvasToPortal = (
+      canvases: HTMLCanvasElement[] = this.surface.indexedCanvases
+    ) => {
+      this.pageBlockContainer.setSlotContent(canvases);
+    };
+
     this._disposables.add(
       on(this.surface, 'indexedcanvasupdate', e => {
-        this.pageBlockContainer.setSlotContent(
+        appendIndexedCanvasToPortal(
           (e as IndexedCanvasUpdateEvent).detail.content
         );
       })
     );
+
+    if (this.pageBlockContainer.isUpdatePending) {
+      this.pageBlockContainer.updateComplete.then(() =>
+        appendIndexedCanvasToPortal()
+      );
+    } else {
+      appendIndexedCanvasToPortal();
+    }
   }
 
   override firstUpdated() {

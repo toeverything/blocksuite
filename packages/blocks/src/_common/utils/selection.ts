@@ -4,11 +4,10 @@ import { type InlineRange, type VLine } from '@blocksuite/inline';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
-import { SCROLL_THRESHOLD } from '../consts.js';
 import { matchFlavours } from './model.js';
 import {
   asyncGetRichTextByModel,
-  getBlockElementByModel,
+  getBlockComponentByModel,
   getDocPage,
   getDocPageByElement,
 } from './query.js';
@@ -114,6 +113,8 @@ function setEndRange(editableContainer: Element) {
 }
 
 async function setNewTop(y: number, editableContainer: Element, zoom = 1) {
+  const SCROLL_THRESHOLD = 100;
+
   const scrollContainer = editableContainer.closest('.affine-doc-viewport');
   const { top, bottom } = Rect.fromDOM(editableContainer);
   const { clientHeight } = document.documentElement;
@@ -169,7 +170,7 @@ export function focusTitle(page: Page, index = Infinity, len = 0) {
   pageComponent.titleInlineEditor.setInlineRange({ index, length: len });
 }
 
-export async function focusRichText(
+async function focusRichText(
   editableContainer: Element,
   position: SelectionPosition = 'end',
   zoom = 1
@@ -222,12 +223,12 @@ export function focusBlockByModel(
   }
 
   assertExists(model.page.root);
-  const pageBlock = getBlockElementByModel(
+  const pageBlock = getBlockComponentByModel(
     model.page.root
   ) as DocPageBlockComponent;
   assertExists(pageBlock);
 
-  const element = getBlockElementByModel(model);
+  const element = getBlockComponentByModel(model);
   assertExists(element);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {

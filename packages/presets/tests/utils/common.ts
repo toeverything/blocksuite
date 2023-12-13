@@ -1,5 +1,7 @@
-export function wait(time: number = 100) {
+export function wait(time: number = 0) {
   return new Promise(resolve => {
-    setTimeout(resolve, time);
+    requestAnimationFrame(() => {
+      setTimeout(resolve, time);
+    });
   });
 }

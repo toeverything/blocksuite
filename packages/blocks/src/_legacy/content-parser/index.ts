@@ -5,7 +5,7 @@ import { marked } from 'marked';
 
 import { getTagColor } from '../../_common/components/tags/colors.js';
 import {
-  getBlockElementByModel,
+  getBlockComponentByModel,
   getEditorContainer,
   isPageMode,
   type SerializedBlock,
@@ -113,7 +113,7 @@ export class ContentParser {
           reject(e);
         }
         const root = this._page.root;
-        const pageBlock = root ? getBlockElementByModel(root) : null;
+        const pageBlock = root ? getBlockComponentByModel(root) : null;
         const imageCard = document.querySelector('affine-image-block-card');
         const isReady =
           !imageCard || imageCard.getAttribute('imageState') === '0';
@@ -451,7 +451,7 @@ export class ContentParser {
       const root = this._page.root;
       if (!root) return;
 
-      const edgeless = getBlockElementByModel(
+      const edgeless = getBlockComponentByModel(
         root
       ) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();

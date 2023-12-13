@@ -48,6 +48,10 @@ export default ({ mode }) => {
           'examples/basic': resolve(__dirname, 'examples/basic/index.html'),
           'examples/inline': resolve(__dirname, 'examples/inline/index.html'),
           'examples/store': resolve(__dirname, 'examples/store/index.html'),
+          'examples/doc-editor': resolve(
+            __dirname,
+            'examples/doc-editor/index.html'
+          ),
         },
       },
     },

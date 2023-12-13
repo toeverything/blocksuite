@@ -1,14 +1,12 @@
-import { afterEach, beforeEach, expect, test } from 'vitest';
+import { beforeEach, expect, test } from 'vitest';
 
 import { getSurface } from '../utils/edgeless.js';
-import { cleanup, setupEditor } from '../utils/setup.js';
+import { setupEditor } from '../utils/setup.js';
 
 beforeEach(async () => {
-  await setupEditor('edgeless');
-});
+  const cleanup = await setupEditor('edgeless');
 
-afterEach(() => {
-  cleanup();
+  return cleanup;
 });
 
 test('basic assert', () => {
