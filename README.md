@@ -60,7 +60,6 @@ To learn how to start using BlockSuite, visit [blocksuite.io](https://blocksuite
 
 - 🎁 Examples
   - [Nightly Playground](https://try-blocksuite.vercel.app/starter/?init)
-  - [The `SimpleAffineEditor` Example](https://try-blocksuite.vercel.app/examples/basic/)
   - [BlockSuite Monorepo in StackBlitz](https://stackblitz.com/github/toeverything/blocksuite)
   - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
 - 📝 [Documentation](https://blocksuite.io/quick-start.html)
