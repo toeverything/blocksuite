@@ -11,6 +11,7 @@ import type { Y } from '@blocksuite/store';
 import { Text, Workspace } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { z } from 'zod';
 
 import { onVBeforeinput, onVCompositionEnd } from './inline/hooks.js';
@@ -28,20 +29,31 @@ interface RichTextStackItem {
 @customElement('rich-text')
 export class RichText extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .affine-rich-text {
+    rich-text {
+      display: block;
+      height: 100%;
+      width: 100%;
+      overflow: auto;
+    }
+
+    .inline-editor {
       height: 100%;
       width: 100%;
       outline: none;
       cursor: text;
     }
 
-    v-line {
+    rich-text v-line {
       scroll-margin-top: 50px;
       scroll-margin-bottom: 30px;
     }
+
+    rich-text .nowrap-lines v-text span {
+      white-space: pre !important;
+    }
   `;
 
-  @query('.affine-rich-text')
+  @query('.inline-editor')
   private _inlineEditorContainer!: HTMLDivElement;
   get inlineEditorContainer() {
     assertExists(this._inlineEditorContainer);
@@ -79,6 +91,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   enableAutoScrollHorizontally = true;
   @property({ attribute: false })
   enableMarkdownShortcut = true;
+  @property({ attribute: false })
+  wrapText = true;
 
   // `enableMarkdownShortcut` will be overwritten to false and
   // `attributesSchema` will be overwritten to `z.object({})` if `enableFormat` is false.
@@ -343,7 +357,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    return html`<div class="affine-rich-text inline-editor"></div>`;
+    const classes = classMap({
+      'inline-editor': true,
+      'nowrap-lines': !this.wrapText,
+    });
+
+    return html`<div class=${classes}></div>`;
   }
 }
 
