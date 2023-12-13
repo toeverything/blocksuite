@@ -1,17 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
 import { addElement, addNote, getSurface } from '../utils/edgeless.js';
-import { cleanup, setupEditor } from '../utils/setup.js';
+import { setupEditor } from '../utils/setup.js';
 
 beforeEach(async () => {
-  await setupEditor('edgeless');
-});
+  const cleanup = await setupEditor('edgeless');
 
-afterEach(() => {
-  cleanup();
+  return cleanup;
 });
 
 test('layer manager inital state', () => {
@@ -394,4 +392,49 @@ describe('layer reorder functionality', () => {
       )
     ).toBe(0);
   });
+});
+
+test('indexed canvas should be inserted into edgeless portal when switch to edgeless mode', async () => {
+  let surface = getSurface(page, editor);
+
+  addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+
+  addNote(page, {
+    index: surface.layer.generateIndex('common', 'canvas'),
+  });
+
+  await wait();
+
+  addElement(
+    'shape',
+    {
+      shapeType: 'rect',
+    },
+    surface
+  );
+
+  editor.mode = 'page';
+  await wait();
+  editor.mode = 'edgeless';
+  await wait();
+
+  surface = getSurface(page, editor);
+  expect(
+    getSurface(page, editor).edgeless.pageBlockContainer.canvasSlot.children
+      .length
+  ).toBe(1);
+
+  const indexedCanvas = getSurface(page, editor).edgeless.pageBlockContainer
+    .canvasSlot.children[0] as HTMLCanvasElement;
+
+  expect(indexedCanvas.width).toBe(surface.renderer.canvas.width);
+  expect(indexedCanvas.height).toBe(surface.renderer.canvas.height);
+  expect(indexedCanvas.width).not.toBe(0);
+  expect(indexedCanvas.height).not.toBe(0);
 });

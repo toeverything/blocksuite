@@ -151,7 +151,7 @@ export class SurfaceBlockComponent extends BlockElement<
   private _yContainer!: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<id, SurfaceElement>();
 
-  private _indexedCanvases: HTMLCanvasElement[] = [];
+  indexedCanvases: HTMLCanvasElement[] = [];
 
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
@@ -399,7 +399,7 @@ export class SurfaceBlockComponent extends BlockElement<
      */
     const canvasLayers = this.layer.getCanvasLayers().slice(0, -1);
     const canvases = [];
-    const currentCanvases = this._indexedCanvases;
+    const currentCanvases = this.indexedCanvases;
 
     for (let i = 0; i < canvasLayers.length; ++i) {
       const layer = canvasLayers[i];
@@ -425,11 +425,11 @@ export class SurfaceBlockComponent extends BlockElement<
       canvases.push(canvas);
     }
 
-    this._indexedCanvases = canvases;
-    this._renderer.setIndexedCanvas(this._indexedCanvases);
+    this.indexedCanvases = canvases;
+    this._renderer.setIndexedCanvas(this.indexedCanvases);
     this.refresh();
 
-    return this._indexedCanvases;
+    return this.indexedCanvases;
   }
 
   override render() {

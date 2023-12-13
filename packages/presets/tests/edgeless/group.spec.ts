@@ -3,22 +3,21 @@ import {
   type SurfaceBlockComponent,
 } from '@blocksuite/blocks';
 import { Workspace } from '@blocksuite/store';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 
 import { addElement, getSurface } from '../utils/edgeless.js';
-import { cleanup, setupEditor } from '../utils/setup.js';
+import { setupEditor } from '../utils/setup.js';
 
 const { GROUP } = CanvasElementType;
 
 describe('group', () => {
   let surface!: SurfaceBlockComponent;
-  beforeEach(async () => {
-    await setupEditor('edgeless');
-    surface = getSurface(window.page, window.editor);
-  });
 
-  afterEach(() => {
-    cleanup();
+  beforeEach(async () => {
+    const cleanup = await setupEditor('edgeless');
+    surface = getSurface(window.page, window.editor);
+
+    return cleanup;
   });
 
   test('remove group without children', async () => {

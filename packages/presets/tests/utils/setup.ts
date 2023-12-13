@@ -63,12 +63,9 @@ function createEditorWhenLoaded(
   workspace: Workspace,
   mode: 'edgeless' | 'page' = 'page'
 ) {
-  return new Promise<void>(resolve => {
+  return new Promise<HTMLDivElement>(resolve => {
     workspace.slots.pageAdded.once(pageId => {
-      resolve();
-
-      const app = document.body;
-
+      const app = document.createElement('div');
       const page = workspace.getPage(pageId) as Page;
       const editor = createEditor(page, app);
 
@@ -76,6 +73,13 @@ function createEditorWhenLoaded(
 
       window.editor = editor;
       window.page = page;
+
+      app.style.width = '100%';
+      app.style.height = '1280px';
+
+      document.body.append(app);
+
+      resolve(app);
     });
   });
 }
@@ -87,7 +91,12 @@ export async function setupEditor(mode: 'edgeless' | 'page' = 'page') {
 
   const loaded = createEditorWhenLoaded(workspace, mode);
   await initWorkspace(workspace);
-  await loaded;
+  const appElement = await loaded;
+
+  return () => {
+    appElement.remove();
+    cleanup();
+  };
 }
 
 export function cleanup() {

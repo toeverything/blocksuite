@@ -1,5 +1,6 @@
 import { Slot } from '@blocksuite/global/utils';
 
+import { requestConnectedFrame } from '../_common/utils/event.js';
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
@@ -390,13 +391,18 @@ export class Renderer implements SurfaceViewport {
     canvas.style.height = '100%';
 
     const bbox = canvas.getBoundingClientRect();
+    const actualWidth = Math.ceil(bbox.width * dpr);
+    const actualHeight = Math.ceil(bbox.height * dpr);
 
-    canvas.width = Math.ceil(bbox.width * dpr);
-    canvas.height = Math.ceil(bbox.height * dpr);
+    canvas.width = actualWidth;
+    canvas.height = actualHeight;
 
-    this.indexedCanvases.forEach(() => {
-      canvas.width = Math.ceil(bbox.width * dpr);
-      canvas.height = Math.ceil(bbox.height * dpr);
+    this.indexedCanvases.forEach(indexedCanvas => {
+      indexedCanvas.width = actualWidth;
+      indexedCanvas.height = actualHeight;
+
+      indexedCanvas.style.width = `${bbox.width}px`;
+      indexedCanvas.style.height = `${bbox.height}px`;
     });
 
     this._left = bbox.left;
@@ -408,13 +414,13 @@ export class Renderer implements SurfaceViewport {
   }
 
   private _loop() {
-    requestAnimationFrame(() => {
+    requestConnectedFrame(() => {
       if (this._shouldUpdate) {
         this._render();
       }
       this._shouldUpdate = false;
       this._loop();
-    });
+    }, this._container);
   }
 
   private _render() {
