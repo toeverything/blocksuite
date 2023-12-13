@@ -123,10 +123,10 @@ class PasteTr {
   };
 
   private _mergeCode = () => {
-    const { firstTextSnapshot } = this._getDeltas();
+    const { firstTextSnapshot, fromDelta, toDelta } = this._getDeltas();
 
     this.firstSnapshot.flavour = this.fromPointState.model.flavour;
-    const deltas: DeltaOperation[] = [];
+    const deltas: DeltaOperation[] = [...fromDelta];
     let i = 0;
     for (const blockSnapshot of this.snapshot.content) {
       if (blockSnapshot.props.text) {
@@ -140,7 +140,7 @@ class PasteTr {
         break;
       }
     }
-    firstTextSnapshot.delta = deltas;
+    firstTextSnapshot.delta = deltas.concat(toDelta);
     this.snapshot.content.splice(1, i);
     this.lastSnapshot = findLast(
       this.snapshot.content[this.snapshot.content.length - 1]
@@ -262,6 +262,7 @@ class PasteTr {
       this._mergeCode();
       return;
     }
+
     if (this.firstSnapshot === this.lastSnapshot) {
       this._mergeSingle();
       return;

@@ -345,13 +345,13 @@ test('drag copy paste', async ({ page }) => {
 
   await dragBetweenIndices(page, [0, 0], [0, 3]);
   await copyByKeyboard(page);
-  await focusRichText(page);
-  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await pressArrowLeft(page);
+  await pasteByKeyboard(page);
 
   const content = await getInlineSelectionText(page);
   expect(content).toBe('useuse');
 
-  await assertRichTextInlineRange(page, 0, 6, 0);
+  await assertRichTextInlineRange(page, 0, 3, 0);
 });
 
 test('keyboard selection and copy paste', async ({ page }) => {
