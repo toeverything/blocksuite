@@ -21,7 +21,7 @@ export const blob = addOnFactory<keyof BlobAddon>(
 
         this._storages = (
           storeOptions.blobStorages ?? [createMemoryStorage]
-        ).map(fn => fn(storeOptions.id));
+        ).map(fn => fn(storeOptions.id || ''));
 
         this.blob = {
           get: async id => {
