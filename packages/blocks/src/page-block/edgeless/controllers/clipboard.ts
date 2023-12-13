@@ -25,6 +25,7 @@ import type {
   Selectable,
   TopLevelBlockModel,
 } from '../../../_common/utils/types.js';
+import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
@@ -446,7 +447,7 @@ export class EdgelessClipboardController extends PageClipboard {
     });
   }
 
-  private async _pasteShapesAndBlocks(
+  async createElementsFromClipboardData(
     elementsRawData: Record<string, unknown>[]
   ) {
     const groupedByType = groupBy(elementsRawData, data =>
@@ -495,7 +496,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const bookmarks = bookmarkIds.map(id =>
       this.surface.pickById(id)
-    ) as ImageBlockModel[];
+    ) as BookmarkBlockModel[];
 
     const elements = this._createCanvasElements(
       groupedByType.elements || [],
@@ -533,7 +534,8 @@ export class EdgelessClipboardController extends PageClipboard {
       }
     });
 
-    [...notes, ...frames, ...images, ...bookmarks].forEach(block => {
+    const blocks = [...notes, ...frames, ...images, ...bookmarks];
+    blocks.forEach(block => {
       const [x, y, w, h] = deserializeXYWH(block.xywh);
       const newBound = new Bound(
         pasteX + x - oldCommonBound.x,
@@ -546,9 +548,17 @@ export class EdgelessClipboardController extends PageClipboard {
       });
     });
 
+    return [elements, blocks] as const;
+  }
+
+  private async _pasteShapesAndBlocks(
+    elementsRawData: Record<string, unknown>[]
+  ) {
+    const [elements, blocks] =
+      await this.createElementsFromClipboardData(elementsRawData);
     this._emitSelectionChangeAfterPaste(
       elements.map(ele => ele.id),
-      [...noteIds, ...frameIds, ...imageIds]
+      blocks.map(block => block.id)
     );
   }
 
@@ -828,7 +838,7 @@ function prepareConnectorClipboardData(
   return serialized;
 }
 
-async function prepareClipboardData(
+export async function prepareClipboardData(
   selectedAll: Selectable[],
   std: BlockStdScope
 ) {
