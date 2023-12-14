@@ -59,7 +59,6 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "@babel/plugin-syntax-import-attributes": "^7.23.3",
     "@commitlint/cli": "^18.4.3",
     "@commitlint/config-conventional": "^18.4.3",
     "@open-wc/dev-server-hmr": "^0.2.0",
