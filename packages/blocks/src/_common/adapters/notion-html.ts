@@ -43,6 +43,7 @@ type NotionHtmlToSliceSnapshotPayload = {
 type NotionHtmlToPageSnapshotPayload = {
   file: NotionHtml;
   assets?: AssetsManager;
+  pageId?: string;
   pageMap?: Map<string, string>;
 };
 
@@ -113,7 +114,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     return {
       type: 'page',
       meta: {
-        id: nanoid('page'),
+        id: payload.pageId ?? nanoid('page'),
         title: hastGetTextContent(titleAst, 'Untitled'),
         createDate: +new Date(),
         tags: [],
@@ -249,7 +250,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 id: nanoid('block'),
                 flavour: 'affine:code',
                 props: {
-                  language: null,
+                  language: 'Plain Text',
                   text: {
                     '$blocksuite:internal:text$': true,
                     delta: this._hastToDelta(codeText, { trim: false }),
@@ -325,7 +326,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               {
                 type: 'block',
                 id: nanoid('block'),
-                flavour: 'affine:heading',
+                flavour: 'affine:paragraph',
                 props: {
                   type: o.node.tagName,
                   text: {
@@ -928,6 +929,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                         pageId,
                       },
                     };
+                    delta.insert = ' ';
                     return delta;
                   }
                 }
