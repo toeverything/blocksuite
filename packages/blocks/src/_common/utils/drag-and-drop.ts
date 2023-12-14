@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
+import { type EditingState } from '../types.js';
 import { matchFlavours } from './model.js';
 import {
   type BlockComponent,
@@ -11,7 +12,6 @@ import {
   getRectByBlockElement,
 } from './query.js';
 import { type Point, Rect } from './rect.js';
-import { type EditingState } from './types.js';
 
 /**
  * A dropping type.

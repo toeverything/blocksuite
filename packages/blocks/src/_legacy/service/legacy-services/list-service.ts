@@ -4,7 +4,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type {
   BlockTransformContext,
   SerializedBlock,
-} from '../../../_common/utils/types.js';
+} from '../../../_common/types.js';
 import type { ListBlockModel } from '../../../list-block/list-model.js';
 import { json2block } from '../json2block.js';
 import { BaseService } from '../service.js';

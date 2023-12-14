@@ -12,6 +12,11 @@ import {
   Workspace,
 } from '@blocksuite/store';
 
+import type {
+  EdgelessElement,
+  Selectable,
+  TopLevelBlockModel,
+} from '../../../_common/types.js';
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
@@ -20,11 +25,6 @@ import {
   getEditorContainer,
   isPageMode,
 } from '../../../_common/utils/query.js';
-import type {
-  EdgelessElement,
-  Selectable,
-  TopLevelBlockModel,
-} from '../../../_common/utils/types.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';

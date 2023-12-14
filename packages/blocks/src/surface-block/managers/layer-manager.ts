@@ -1,8 +1,8 @@
 import { assertType, Slot } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
+import { type EdgelessElement } from '../../_common/types.js';
 import { last, nToLast } from '../../_common/utils/iterable.js';
-import { type EdgelessElement } from '../../_common/utils/types.js';
 import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../image-block/image-model.js';

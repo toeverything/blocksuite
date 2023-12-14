@@ -6,7 +6,7 @@ import { TagsIcon } from '../../../_common/icons/tags.js';
 import type {
   BlockTransformContext,
   SerializedBlock,
-} from '../../../_common/utils/types.js';
+} from '../../../_common/types.js';
 import type { PageBlockModel } from '../../../page-block/page-model.js';
 import { BaseService } from '../service.js';
 import { getService } from '../singleton.js';

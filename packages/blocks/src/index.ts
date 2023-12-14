@@ -18,8 +18,14 @@ import { splitElements } from './page-block/edgeless/utils/clipboard-utils.js';
 
 export * from './_common/adapters/index.js';
 export * from './_common/components/index.js';
+export {
+  EdgelessPresentationConsts as EdgelessPresentationConsts,
+  type NavigatorMode,
+} from './_common/edgeless/frame/consts.js';
 export * from './_common/test-utils/test-utils.js';
+export { ThemeObserver } from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
+export * from './_common/types.js';
 export { on, once, stopPropagation } from './_common/utils/event.js';
 export type { BlockModels } from './_common/utils/model.js';
 export { getServiceOrRegister } from './_legacy/service/index.js';

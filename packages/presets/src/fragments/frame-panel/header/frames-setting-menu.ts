@@ -1,8 +1,6 @@
 import {
-  BLACK_BACKGROUND_KEY,
   type EdgelessPageBlockComponent,
-  FILL_SCREEN_KEY,
-  HIDE_TOOLBAR_KEY,
+  EdgelessPresentationConsts as PresentationConsts,
 } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, type PropertyValues } from 'lit';
@@ -87,9 +85,11 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   hideToolbar = false;
 
   private _tryRestoreSettings() {
-    const blackBackground = sessionStorage.getItem(BLACK_BACKGROUND_KEY);
-    const fillScreen = sessionStorage.getItem(FILL_SCREEN_KEY);
-    const hideToolbar = sessionStorage.getItem(HIDE_TOOLBAR_KEY);
+    const blackBackground = sessionStorage.getItem(
+      PresentationConsts.BlackBackground
+    );
+    const fillScreen = sessionStorage.getItem(PresentationConsts.FillScreen);
+    const hideToolbar = sessionStorage.getItem(PresentationConsts.HideToolbar);
     this.blackBackground = blackBackground !== 'false';
     this.fillScreen = fillScreen === 'true';
     this.hideToolbar = hideToolbar === 'true';
@@ -107,7 +107,10 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless?.slots.navigatorSettingUpdated.emit({
       fillScreen: this.fillScreen,
     });
-    sessionStorage.setItem(FILL_SCREEN_KEY, this.fillScreen.toString());
+    sessionStorage.setItem(
+      PresentationConsts.FillScreen,
+      this.fillScreen.toString()
+    );
   };
 
   private _onHideToolBarChange = (checked: boolean) => {
@@ -115,7 +118,10 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless?.slots.navigatorSettingUpdated.emit({
       hideToolbar: this.hideToolbar,
     });
-    sessionStorage.setItem(HIDE_TOOLBAR_KEY, this.hideToolbar.toString());
+    sessionStorage.setItem(
+      PresentationConsts.HideToolbar,
+      this.hideToolbar.toString()
+    );
   };
 
   override connectedCallback() {

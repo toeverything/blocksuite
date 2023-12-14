@@ -1,7 +1,7 @@
 import type {
   BlockTransformContext,
   SerializedBlock,
-} from '../../../_common/utils/types.js';
+} from '../../../_common/types.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import { BaseService } from '../service.js';
 export class ImageBlockService extends BaseService<ImageBlockModel> {

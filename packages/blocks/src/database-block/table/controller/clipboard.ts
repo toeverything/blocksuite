@@ -3,7 +3,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
-import type { TableViewSelection } from '../../../_common/utils/types.js';
+import type { TableViewSelection } from '../../../_common/types.js';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';
 import type { DataViewTableManager } from '../table-view-manager.js';

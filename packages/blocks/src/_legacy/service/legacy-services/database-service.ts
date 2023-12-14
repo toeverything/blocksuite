@@ -1,8 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
+import type { SerializedBlock } from '../../../_common/types.js';
 import type { BlockModels } from '../../../_common/utils/model.js';
-import type { SerializedBlock } from '../../../_common/utils/types.js';
 import type {
   DataViewDataType,
   DataViewTypes,

@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { LineWidth } from '../../../../_common/utils/types.js';
+import type { LineWidth } from '../../../../_common/types.js';
 import {
   LineStyleButton,
   type LineStyleButtonProps,
