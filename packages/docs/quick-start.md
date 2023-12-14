@@ -8,9 +8,9 @@ pnpm i @blocksuite/presets@nightly
 
 Then you can use the prebuilt `DocEditor` out of the box, with a `page` instance attached as the document model:
 
-::: code-sandbox
+::: code-sandbox {coderHeight=180 previewHeight=500}
 
-```ts /index.ts [active] {coderHeight=180 previewHeight=500}
+```ts /index.ts [active]
 import '@blocksuite/presets/themes/affine.css';
 import { createDefaultPage, DocEditor } from '@blocksuite/presets';
 
