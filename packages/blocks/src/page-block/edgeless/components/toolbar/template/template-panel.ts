@@ -214,7 +214,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
         type: 'edgeless-template',
         middlewares,
       });
-      const { asserts: assets } = template;
+      const { assets } = template;
 
       if (assets) {
         await Promise.all(
