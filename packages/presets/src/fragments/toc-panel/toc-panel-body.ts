@@ -432,7 +432,6 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     );
   }
 
-  // TODO: add highlight to the block, and remove it after 1s
   private _scrollToBlock(e: ClickBlockEvent) {
     if (this._isEdgelessMode() || !this.editorHost) return;
 
@@ -445,9 +444,17 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     if (!blockElement) return;
 
     blockElement.scrollIntoView({
-      behavior: 'smooth',
+      behavior: 'instant',
       block: 'center',
       inline: 'center',
+    });
+
+    requestAnimationFrame(() => {
+      const initColor = blockElement.style.color;
+      blockElement.style.color = 'var(--affine-brand-color)';
+      setTimeout(() => {
+        blockElement.style.color = initColor;
+      }, 1000);
     });
   }
 
