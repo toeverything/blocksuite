@@ -1,4 +1,6 @@
-export const storyboard = {
+import type { Template } from '../builtin-templates.js';
+
+export const storyboard: Template = {
   name: 'storyboard',
   preview: '',
   asserts: {

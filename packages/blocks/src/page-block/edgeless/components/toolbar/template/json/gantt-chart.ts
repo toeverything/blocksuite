@@ -1,4 +1,6 @@
-export const ganttChart = {
+import type { Template } from '../builtin-templates.js';
+
+export const ganttChart: Template = {
   name: 'gantt chart',
   preview: '',
   content: {

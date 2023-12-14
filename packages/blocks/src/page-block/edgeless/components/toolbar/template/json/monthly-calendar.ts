@@ -1,4 +1,6 @@
-export const monthlyCalendar = {
+import type { Template } from '../builtin-templates.js';
+
+export const monthlyCalendar: Template = {
   name: 'monthly calendar',
   preview: '',
   asserts: {

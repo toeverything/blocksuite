@@ -22,7 +22,8 @@ import {
   focusBlockByModel,
   focusTitle,
 } from '../../../_common/utils/selection.js';
-import { type ListBlockModel, type PageBlockModel } from '../../../models.js';
+import type { ListBlockModel } from '../../../list-block/index.js';
+import type { PageBlockModel } from '../../../page-block/index.js';
 import type { ExtendedModel } from '../../types.js';
 
 /**

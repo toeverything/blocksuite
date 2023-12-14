@@ -1,4 +1,6 @@
-export const flowChart = {
+import type { Template } from '../builtin-templates.js';
+
+export const flowChart: Template = {
   name: 'flow chart',
   preview: '',
   content: {

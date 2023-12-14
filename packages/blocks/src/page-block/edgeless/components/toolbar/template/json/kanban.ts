@@ -1,4 +1,6 @@
-export const kanban = {
+import type { Template } from '../builtin-templates.js';
+
+export const kanban: Template = {
   name: 'kanban',
   preview: '',
   content: {
