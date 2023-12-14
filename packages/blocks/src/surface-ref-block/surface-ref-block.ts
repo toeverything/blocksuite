@@ -155,8 +155,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     }
 
     .surface-viewport.frame {
-      border-radius: 8px;
-      border: 2px solid var(--affine-black-30);
+      border-radius: 2px;
+      border: 1px solid var(--affine-black-30);
     }
 
     .surface-canvas-container {
