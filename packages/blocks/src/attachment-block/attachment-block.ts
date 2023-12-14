@@ -168,7 +168,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       if (allowEmbed(this.model)) {
         this._blobUrl = URL.createObjectURL(blob);
       }
-    } catch (error) {
+    } catch (_) {
       this._error = true;
       console.warn(
         'The attachment is unavailable since the blob is missing!',

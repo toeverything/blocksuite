@@ -63,7 +63,7 @@ test('pan tool shortcut', async ({ page }) => {
 
   await page.keyboard.down('Space');
   const defaultButton = locatorEdgelessToolButton(page, 'pan', false);
-  assertHasClass(defaultButton, 'pan');
+  await assertHasClass(defaultButton, 'pan');
 
   await dragBetweenCoords(
     page,
@@ -98,6 +98,6 @@ test('pan tool shortcut when user is editing', async ({ page }) => {
 
   await page.keyboard.down('Space');
   const defaultButton = locatorEdgelessToolButton(page, 'pan', false);
-  assertNotHasClass(defaultButton, 'pan');
+  await assertNotHasClass(defaultButton, 'pan');
   await waitNextFrame(page);
 });

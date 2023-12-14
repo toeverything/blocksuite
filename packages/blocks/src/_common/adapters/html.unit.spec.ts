@@ -805,7 +805,10 @@ describe('snapshot to html', () => {
 
     const htmlAdapter = new HtmlAdapter();
     const blobManager = new MemoryBlobManager();
-    blobManager.set(new Blob(), 'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=');
+    await blobManager.set(
+      new Blob(),
+      'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs='
+    );
     const assets = new AssetsManager({ blob: blobManager });
 
     const target = await htmlAdapter.fromBlockSnapshot({

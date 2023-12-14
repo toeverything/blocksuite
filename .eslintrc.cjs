@@ -57,14 +57,32 @@ module.exports = {
     'plugin:wc/recommended',
     'plugin:lit/recommended',
   ],
-  ignorePatterns: ['tests/snapshots/*', 'packages/*/dist/*', '**/*.cjs'],
+  ignorePatterns: [
+    'tests/snapshots/*',
+    '**/dist/*',
+    '**/node_modules/*',
+    '**/*.cjs',
+  ],
   overrides: [
     {
       plugins: ['@typescript-eslint'],
-      files: ['*.ts'],
+      files: ['*.ts', '*.spec.ts', 'tests/**/*.ts'],
       rules: {
         '@typescript-eslint/ban-ts-comment': 'off',
-        '@typescript-eslint/no-unused-vars': 'off',
+        'no-unused-vars': 'off',
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            vars: 'all',
+            varsIgnorePattern: '^_',
+            args: 'after-used',
+            argsIgnorePattern: '^_',
+            caughtErrors: 'all',
+            caughtErrorsIgnorePattern: '^_',
+            destructuredArrayIgnorePattern: '^_',
+            ignoreRestSiblings: true,
+          },
+        ],
         '@typescript-eslint/no-floating-promises': 'error',
         '@typescript-eslint/no-non-null-asserted-nullish-coalescing': 'error',
         '@typescript-eslint/no-misused-promises': 'error',
@@ -72,18 +90,6 @@ module.exports = {
           'error',
           { allowDeclarations: true },
         ],
-      },
-    },
-    {
-      plugins: ['@typescript-eslint'],
-      files: ['*.spec.ts', 'tests/**/*.ts'],
-      parserOptions: {
-        project: `tsconfig.eslint.json`,
-      },
-      rules: {
-        '@typescript-eslint/no-floating-promises': 'off',
-        '@typescript-eslint/no-non-null-asserted-nullish-coalescing': 'off',
-        '@typescript-eslint/no-misused-promises': 'off',
       },
     },
     ...allPackages.map(pkg => ({

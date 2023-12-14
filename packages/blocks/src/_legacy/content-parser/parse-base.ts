@@ -767,8 +767,8 @@ const getTableCells = (
   columns: Column<Record<string, unknown>>[]
 ) => {
   const cells: Record<string, Record<string, Cell>> = {};
-  let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
-  titleIndex = titleIndex !== -1 ? titleIndex : 0;
+  // let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
+  // titleIndex = titleIndex !== -1 ? titleIndex : 0;
   rows.forEach(row => {
     const rowId = '' + idCounter.next();
     cells[rowId] = {};

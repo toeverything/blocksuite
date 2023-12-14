@@ -77,7 +77,6 @@ export function defineBlockSchema<
   Flavour extends string,
   Role extends RoleType,
   Props extends object,
-  Ext extends Record<string, unknown>,
   Metadata extends Readonly<{
     version: number;
     role: Role;

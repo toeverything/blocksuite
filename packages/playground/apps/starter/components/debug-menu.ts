@@ -347,11 +347,11 @@ export class DebugMenu extends ShadowlessElement {
       return result;
     }
 
-    const genTree = (deep: number = 0): TreeNode => {
+    const _genTree = (deep: number = 0): TreeNode => {
       const count = Math.floor(Math.random() * 10) - deep - 2;
       const children: TreeNode[] = [];
       for (let i = 0; i < count; i++) {
-        children.push(genTree(deep + 1));
+        children.push(_genTree(deep + 1));
       }
       return {
         text: makeid(Math.random() * 200 + 30),

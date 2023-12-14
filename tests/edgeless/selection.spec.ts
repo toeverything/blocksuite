@@ -183,7 +183,7 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   await setEdgelessTool(page, 'default');
   await page.mouse.click(210, 110);
   let selectedRect = await page.locator(selectedRectClass);
-  expect(selectedRect).toBeHidden();
+  await expect(selectedRect).toBeHidden();
   // Click to start selection and hold the mouse to trigger auto panning to the left
   await page.mouse.move(210, 110);
   await page.mouse.down();
@@ -194,7 +194,7 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   // Expect to select the shape element
   selectedRect = await page.locator(selectedRectClass);
   await page.waitForTimeout(300);
-  expect(selectedRect).toBeVisible();
+  await expect(selectedRect).toBeVisible();
 
   // Panning to the top
   await page.mouse.click(400, 600);
@@ -213,7 +213,7 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   await setEdgelessTool(page, 'default');
   await page.mouse.click(600, 100);
   selectedRect = await page.locator(selectedRectClass);
-  expect(selectedRect).toBeHidden();
+  await expect(selectedRect).toBeHidden();
   // Click to start selection and hold the mouse to trigger auto panning to the top
   await page.mouse.move(600, 100);
   await page.mouse.down();
@@ -224,7 +224,7 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   // Expect to select the empty note
   selectedRect = await page.locator(selectedRectClass);
   await page.waitForTimeout(300);
-  expect(selectedRect).toBeVisible();
+  await expect(selectedRect).toBeVisible();
 
   // Panning to the right
   await page.mouse.click(100, 600);
@@ -243,7 +243,7 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   await setEdgelessTool(page, 'default');
   await page.mouse.click(800, 600);
   selectedRect = await page.locator(selectedRectClass);
-  expect(selectedRect).toBeHidden();
+  await expect(selectedRect).toBeHidden();
   // Click to start selection and hold the mouse to trigger auto panning to the right
   await page.mouse.move(800, 600);
   await page.mouse.down();
@@ -254,7 +254,7 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   // Expect to select the empty note
   selectedRect = await page.locator(selectedRectClass);
   await page.waitForTimeout(300);
-  expect(selectedRect).toBeVisible();
+  await expect(selectedRect).toBeVisible();
 
   // Panning to the bottom
   await page.mouse.click(400, 100);
@@ -273,7 +273,7 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   await setEdgelessTool(page, 'default');
   await page.mouse.click(700, 800);
   selectedRect = await page.locator(selectedRectClass);
-  expect(selectedRect).toBeHidden();
+  await expect(selectedRect).toBeHidden();
   // Click to start selection and hold the mouse to trigger auto panning to the right
   await page.mouse.move(700, 800);
   await page.mouse.down();
@@ -284,7 +284,7 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   // Expect to select the empty note
   selectedRect = await page.locator(selectedRectClass);
   await page.waitForTimeout(300);
-  expect(selectedRect).toBeVisible();
+  await expect(selectedRect).toBeVisible();
   await page.waitForTimeout(300);
 });
 
@@ -316,7 +316,7 @@ test('should also update dragging area when viewport changes', async ({
 
   const selectedRectClass = '.affine-edgeless-selected-rect';
   let selectedRect = await page.locator(selectedRectClass);
-  expect(selectedRect).toBeHidden();
+  await expect(selectedRect).toBeHidden();
   // set up initial dragging area
   await page.mouse.move(200, 300);
   await page.mouse.down();
@@ -331,6 +331,6 @@ test('should also update dragging area when viewport changes', async ({
   // Expect to select the empty note
   selectedRect = await page.locator(selectedRectClass);
   await page.waitForTimeout(300);
-  expect(selectedRect).toBeVisible();
+  await expect(selectedRect).toBeVisible();
   await page.waitForTimeout(300);
 });
