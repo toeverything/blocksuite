@@ -2,6 +2,7 @@ import flowchart from './json/flow-chart.json';
 import ganttchart from './json/gantt-chart.json';
 import kanban from './json/kanban.json';
 import monthlycalendar from './json/monthly-calendar.json';
+import presentation from './json/presentation.json';
 import stickers from './json/stickers.json';
 import storyboard from './json/storyboard.json';
 import type {
@@ -12,12 +13,16 @@ import type {
 
 export const templates: TemplateCategory[] = [
   {
-    name: 'Project managerment',
+    name: 'Project management',
     templates: [kanban, storyboard, monthlycalendar, ganttchart, flowchart],
   },
   {
-    name: 'Stickers',
-    templates: stickers,
+    name: 'Presentation',
+    templates: [presentation],
+  },
+  {
+    name: 'Paws and pals',
+    templates: stickers as unknown as Template[],
   },
 ];
 

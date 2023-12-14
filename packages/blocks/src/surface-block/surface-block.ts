@@ -53,7 +53,7 @@ import {
   GroupElement,
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
-import type { CanvasElementType, IVec } from './index.js';
+import type { CanvasElementType, IConnector, IVec } from './index.js';
 import {
   compare,
   EdgelessGroupManager,
@@ -548,12 +548,19 @@ export class SurfaceBlockComponent extends BlockElement<
         return;
       }
 
-      if (
-        change.action === 'add' &&
-        this._yContainer.get(id)?.get('type') === 'connector'
-      ) {
-        connectors.push({ change, id });
-        return;
+      const elementYMap = this._yContainer.get(id) as Y.Map<unknown>;
+      if (change.action === 'add' && elementYMap?.get('type') === 'connector') {
+        const source = elementYMap.get('source') as IConnector['source'];
+        const target = elementYMap.get('target') as IConnector['target'];
+
+        if (
+          (!source?.id || this._elements.has(source.id)) &&
+          (!target?.id || this._elements.has(target.id))
+        ) {
+          this._onYEvent(change, id);
+        } else {
+          connectors.push({ change, id });
+        }
       } else {
         this._onYEvent(change, id);
       }
