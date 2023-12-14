@@ -13,7 +13,6 @@ import {
   getClosestBlockElementByElement,
   getClosestBlockElementByPoint,
   getDropRectByPoint,
-  getEdgelessPage,
   getHoveringNote,
   getRectByBlockElement,
   isPageMode,
@@ -24,6 +23,7 @@ import {
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import type { EdgelessBlockType } from '../../../surface-block/index.js';
 import { Bound } from '../../../surface-block/index.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless/edgeless-page-block.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   DRAG_HANDLE_CONTAINER_HEIGHT,
@@ -364,10 +364,10 @@ export function convertDragPreviewDocToEdgeless({
   width?: number;
   height?: number;
 }): boolean {
-  const page = blockComponent.page;
-  if (isPageMode(page)) return false;
-  const edgelessPage = getEdgelessPage(page);
-  assertExists(edgelessPage);
+  const edgelessPage = blockComponent.closest(
+    'affine-edgeless-page'
+  ) as EdgelessPageBlockComponent;
+  if (!edgelessPage) return false;
 
   const previewEl = dragPreview.querySelector(cssSelector);
   assertExists(previewEl);
@@ -391,7 +391,7 @@ export function convertDragPreviewDocToEdgeless({
     },
     edgelessPage.surface.model
   );
-  page.deleteBlock(blockModel);
+  blockComponent.page.deleteBlock(blockModel);
   return true;
 }
 
