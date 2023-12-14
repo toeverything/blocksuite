@@ -6,15 +6,15 @@ The `@blocksuite/presets` package contains the prebuilt editors and opt-in addit
 pnpm i @blocksuite/presets@nightly
 ```
 
-Then you can use the prebuilt `DocEditor` out of the box, with a `page` instance attached as the document model:
+Then you can use the prebuilt `DocEditor` out of the box, with an initialized `page` instance attached as its document model:
 
 ::: code-sandbox {coderHeight=180 previewHeight=500}
 
 ```ts /index.ts [active]
 import '@blocksuite/presets/themes/affine.css';
-import { createDefaultPage, DocEditor } from '@blocksuite/presets';
+import { createEmptyPage, DocEditor } from '@blocksuite/presets';
 
-const page = createDefaultPage();
+const page = createEmptyPage().init();
 const editor = new DocEditor();
 editor.page = page;
 document.body.appendChild(editor);
