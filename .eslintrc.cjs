@@ -66,7 +66,7 @@ module.exports = {
   overrides: [
     {
       plugins: ['@typescript-eslint'],
-      files: ['*.ts', '*.spec.ts', 'tests/**/*.ts'],
+      files: ['*.ts', '*.spec.ts'],
       rules: {
         '@typescript-eslint/ban-ts-comment': 'off',
         'no-unused-vars': 'off',
