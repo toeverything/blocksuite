@@ -2,10 +2,11 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Buffer } from 'buffer';
 
-import { toast } from '../../_common/components/toast.js';
-import { downloadBlob } from '../../_common/utils/filesys.js';
-import { getBlockComponentByModel } from '../../_common/utils/query.js';
-import { ImageBlockModel, type ImageBlockProps } from '../image-model.js';
+import { humanFileSize } from '../_common/utils/math.js';
+import { toast } from './../_common/components/toast.js';
+import { downloadBlob } from './../_common/utils/filesys.js';
+import { getBlockComponentByModel } from './../_common/utils/query.js';
+import { ImageBlockModel, type ImageBlockProps } from './image-model.js';
 
 async function getImageBlob(model: ImageBlockModel) {
   const blob = await getBlobByModel(model);
@@ -179,18 +180,70 @@ export function isImageLoading(blockId: string) {
 }
 
 export function addSiblingImageBlock(
-  page: Page,
-  file: File,
+  files: File[],
+  maxFileSize: number,
   targetModel: BaseBlockModel,
   place: 'after' | 'before' = 'after'
 ) {
-  const imageBlockProps: Partial<ImageBlockProps> & {
-    flavour: 'affine:image';
-  } = {
+  const imageFiles = files.filter(file => file.type.startsWith('image/'));
+  const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
+  if (isSizeExceeded) {
+    toast(
+      `You can only upload files less than ${humanFileSize(
+        maxFileSize,
+        true,
+        0
+      )}`
+    );
+    return [];
+  }
+
+  const imageBlockProps: Partial<ImageBlockProps> &
+    {
+      flavour: 'affine:image';
+    }[] = imageFiles.map(file => ({
     flavour: 'affine:image',
     size: file.size,
-  };
+  }));
 
-  const blockId = page.addSiblingBlocks(targetModel, [imageBlockProps], place);
-  return uploadBlobForImage(page, blockId[0], file);
+  const page = targetModel.page;
+  const blockIds = page.addSiblingBlocks(targetModel, imageBlockProps, place);
+  blockIds.map((blockId, index) =>
+    uploadBlobForImage(page, blockId, imageFiles[index])
+  );
+  return blockIds;
+}
+
+export function addImageBlock(
+  files: File[],
+  maxFileSize: number,
+  page: Page,
+  parent?: BaseBlockModel | string | null,
+  parentIndex?: number
+): string[] {
+  const imageFiles = files.filter(file => file.type.startsWith('image/'));
+  const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
+  if (isSizeExceeded) {
+    toast(
+      `You can only upload files less than ${humanFileSize(
+        maxFileSize,
+        true,
+        0
+      )}`
+    );
+    return [];
+  }
+
+  const blockIds: string[] = imageFiles.map(file =>
+    page.addBlock(
+      'affine:image',
+      { flavour: 'affine:image', size: file.size },
+      parent,
+      parentIndex
+    )
+  );
+  blockIds.map((blockId, index) =>
+    uploadBlobForImage(page, blockId, imageFiles[index])
+  );
+  return blockIds;
 }

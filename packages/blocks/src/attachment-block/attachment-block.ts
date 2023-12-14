@@ -135,8 +135,8 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     this._disposables.add(
       AffineDragHandleWidget.registerOption({
         flavour: AttachmentBlockSchema.model.flavour,
-        onDragStart: (state, startDragging) => {
-          // Check if start dragging from the image block
+        onDragStart: ({ state, startDragging }) => {
+          // Check if start dragging from the attachment block
           const target = captureEventTarget(state.raw.target);
           const attachmentBlock = target?.closest('affine-attachment');
           if (!attachmentBlock) return false;

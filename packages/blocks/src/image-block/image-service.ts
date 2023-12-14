@@ -5,14 +5,12 @@ import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
-import { toast } from '../_common/components/toast.js';
 import { isPageMode, matchFlavours } from '../_common/utils/index.js';
-import { humanFileSize } from '../_common/utils/math.js';
 import type { DocPageBlockComponent } from '../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
-import { addSiblingImageBlock } from './image/utils.js';
 import type { ImageBlockModel } from './image-model.js';
 import { ImageSelection } from './image-selection.js';
+import { addSiblingImageBlock } from './utils.js';
 
 export class ImageService extends BlockService<ImageBlockModel> {
   get pageBlockComponent(): DocPageBlockComponent | EdgelessPageBlockComponent {
@@ -31,28 +29,11 @@ export class ImageService extends BlockService<ImageBlockModel> {
 
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
-    maxFileSize: this.maxFileSize,
     onDrop: async ({ files, targetModel, place, point }) => {
       const imageFiles = files.filter(file => file.type.startsWith('image/'));
 
-      const isSizeExceeded = imageFiles.some(
-        file => file.size > this.maxFileSize
-      );
-      if (isSizeExceeded) {
-        toast(
-          `You can only upload files less than ${humanFileSize(
-            this.maxFileSize,
-            true,
-            0
-          )}`
-        );
-        return true;
-      }
-
       if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
-        imageFiles.forEach(file =>
-          addSiblingImageBlock(this.page, file, targetModel, place)
-        );
+        addSiblingImageBlock(imageFiles, this.maxFileSize, targetModel, place);
       } else if (!isPageMode(this.page)) {
         const edgelessPage = this
           .pageBlockComponent as EdgelessPageBlockComponent;

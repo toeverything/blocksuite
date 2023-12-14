@@ -216,7 +216,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           }
           return false;
         },
-        onDragEnd: (state, draggingElements) => {
+        onDragEnd: ({ state, draggingElements }) => {
           const target = state.raw.target;
           const view = this.view;
           if (

@@ -40,6 +40,7 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
   </figure>
 `;
   }
+
   override block2Text(block: BookmarkBlockModel): string {
     return block.url;
   }

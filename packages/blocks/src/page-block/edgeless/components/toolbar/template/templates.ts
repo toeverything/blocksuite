@@ -1,13 +1,13 @@
 import type { TemplateCategory } from './builtin-templates.js';
-import flowchart from './json/flow-chart.json';
-import ganttchart from './json/gantt-chart.json';
-import kanban from './json/kanban.json';
-import monthlycalendar from './json/monthly-calendar.json';
-import storyboard from './json/storyboard.json';
+import { flowChart } from './json/flow-chart.js';
+import { ganttChart } from './json/gantt-chart.js';
+import { kanban } from './json/kanban.js';
+import { monthlyCalendar } from './json/monthly-calendar.js';
+import { storyboard } from './json/storyboard.js';
 
 export const templates: TemplateCategory[] = [
   {
     name: 'Project managerment',
-    templates: [kanban, storyboard, monthlycalendar, ganttchart, flowchart],
+    templates: [kanban, storyboard, monthlyCalendar, ganttChart, flowChart],
   },
 ];

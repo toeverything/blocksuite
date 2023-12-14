@@ -383,7 +383,9 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
   await page.mouse.down();
   await page.waitForTimeout(200);
 
-  await page.mouse.move(rect.x + 40, rect.y + rect.height + 80);
+  await page.mouse.move(rect.x + 40, rect.y + rect.height + 80, {
+    steps: 5,
+  });
   await page.waitForTimeout(200);
 
   await page.mouse.up();
