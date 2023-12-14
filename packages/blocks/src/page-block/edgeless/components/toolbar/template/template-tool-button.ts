@@ -39,7 +39,6 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
 
   private _openedPanel: EdgelessTemplatePanel | null = null;
   private _cleanup: (() => void) | null = null;
-  private _previousTool: EdgelessTool | null = null;
 
   private _togglePanel() {
     if (this._openedPanel) {
@@ -55,7 +54,7 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
     });
     this._openedPanel = panel;
 
-    document.body.appendChild(panel);
+    this.renderRoot.appendChild(panel);
 
     requestAnimationFrame(() => {
       const arrowEl = panel.renderRoot.querySelector('.arrow') as HTMLElement;
@@ -79,11 +78,6 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
       this._cleanup?.();
       this._cleanup = null;
       this.requestUpdate();
-
-      if (this._previousTool) {
-        this.setEdgelessTool(this._previousTool);
-        this._previousTool = null;
-      }
     }
   }
 
