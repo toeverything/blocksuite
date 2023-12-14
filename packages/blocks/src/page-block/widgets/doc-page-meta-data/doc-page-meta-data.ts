@@ -12,21 +12,23 @@ export class DocPageMetaDataWidget extends WidgetElement {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.host.updateComplete.then(() => {
-      const pageElement = getDocPage(this.page);
-      assertExists(pageElement);
+    this.host.updateComplete
+      .then(() => {
+        const pageElement = getDocPage(this.page);
+        assertExists(pageElement);
 
-      const pageMetaData = new PageMetaData(this.page, pageElement);
+        const pageMetaData = new PageMetaData(this.page, pageElement);
 
-      const pageTitleContainer = this.host.querySelector(
-        '.affine-doc-page-block-title-container'
-      );
-      assertExists(pageTitleContainer);
+        const pageTitleContainer = this.host.querySelector(
+          '.affine-doc-page-block-title-container'
+        );
+        assertExists(pageTitleContainer);
 
-      // FIXME(Flrande): It is not a best practice,
-      // but merely a temporary measure for reusing previous components.
-      pageTitleContainer.appendChild(pageMetaData);
-    });
+        // FIXME(Flrande): It is not a best practice,
+        // but merely a temporary measure for reusing previous components.
+        pageTitleContainer.appendChild(pageMetaData);
+      })
+      .catch(console.error);
   }
 }
 

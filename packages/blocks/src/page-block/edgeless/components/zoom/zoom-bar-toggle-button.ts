@@ -24,12 +24,14 @@ function createZoomMenuPopper(
 
   computePosition(reference, zoomBar, {
     placement: 'top',
-  }).then(({ x, y }) => {
-    Object.assign(zoomBar.style, {
-      left: `${x}px`,
-      top: `${y - 10}px`,
-    });
-  });
+  })
+    .then(({ x, y }) => {
+      Object.assign(zoomBar.style, {
+        left: `${x}px`,
+        top: `${y - 10}px`,
+      });
+    })
+    .catch(console.error);
 
   return {
     element: zoomBar,

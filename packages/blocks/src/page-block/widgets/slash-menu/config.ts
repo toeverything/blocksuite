@@ -112,7 +112,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
                     const inlineEditor = richText.inlineEditor;
                     assertExists(inlineEditor);
                     inlineEditor.focusEnd();
-                  });
+                  }).catch(console.error);
                 }
               })
               .run();

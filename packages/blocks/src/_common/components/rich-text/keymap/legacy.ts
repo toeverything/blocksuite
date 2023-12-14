@@ -139,7 +139,9 @@ export function hardEnter(
     return KEYBOARD_PREVENT_DEFAULT;
   }
 
-  handleBlockSplit(page, model, range.index, range.length);
+  handleBlockSplit(page, model, range.index, range.length)?.catch(
+    console.error
+  );
   return KEYBOARD_PREVENT_DEFAULT;
 }
 

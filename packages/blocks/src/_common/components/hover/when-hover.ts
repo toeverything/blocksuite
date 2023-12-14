@@ -102,19 +102,35 @@ export const whenHover = (
     const alreadyHover = element.matches(':hover');
     if (alreadyHover && !abortController.signal.aborted) {
       // When the element is already hovered, we need to trigger the callback manually
-      onHoverChange(new MouseEvent('mouseover'));
+      onHoverChange(new MouseEvent('mouseover')).catch(console.error);
     }
-    element.addEventListener('mouseover', onHoverChange, {
-      signal: abortController.signal,
-    });
-    element.addEventListener('mouseleave', onHoverChange, {
-      signal: abortController.signal,
-    });
+    element.addEventListener(
+      'mouseover',
+      (e: Event) => {
+        onHoverChange(e).catch(console.error);
+      },
+      {
+        signal: abortController.signal,
+      }
+    );
+    element.addEventListener(
+      'mouseleave',
+      (e: Event) => {
+        onHoverChange(e).catch(console.error);
+      },
+      {
+        signal: abortController.signal,
+      }
+    );
   };
   const removeHoverListener = (element?: Element) => {
     if (!element) return;
-    element.removeEventListener('mouseover', onHoverChange);
-    element.removeEventListener('mouseleave', onHoverChange);
+    element.removeEventListener('mouseover', (e: Event) => {
+      onHoverChange(e).catch(console.error);
+    });
+    element.removeEventListener('mouseleave', (e: Event) => {
+      onHoverChange(e).catch(console.error);
+    });
   };
 
   const setReference = (element?: Element) => {

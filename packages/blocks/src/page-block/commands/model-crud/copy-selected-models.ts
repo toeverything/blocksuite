@@ -39,9 +39,10 @@ export const copySelectedModelsCommand: Command<
 
   const slice = Slice.fromModels(ctx.std.page, models);
 
-  ctx.std.clipboard.copy(ctx.event, slice).then(() => {
-    ctx.onCopy?.();
-  });
+  ctx.std.clipboard
+    .copy(ctx.event, slice)
+    .then(() => ctx.onCopy?.())
+    .catch(console.error);
   return next();
 };
 

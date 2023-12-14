@@ -1,15 +1,16 @@
 /* eslint-disable no-undef */
 // ALL_PACKAGES
 const allPackages = [
+  'block-std',
   'blocks',
   'docs',
-  'presets',
   'global',
-  'playground',
-  'store',
   'inline',
   'lit',
-  'block-std',
+  'playground',
+  'presets',
+  'store',
+  'virgo',
 ];
 
 const createPattern = packageName => [
@@ -56,17 +57,7 @@ module.exports = {
     'plugin:wc/recommended',
     'plugin:lit/recommended',
   ],
-  ignorePatterns: [
-    'tests/snapshots/*',
-    'packages/store/dist/*',
-    'packages/lit/dist/*',
-    'packages/blocks/dist/*',
-    'packages/presets/dist/*',
-    'packages/global/dist/*',
-    'packages/playground/dist/assets/*',
-    'packages/inline/dist/*',
-    'packages/block-std/dist/*',
-  ],
+  ignorePatterns: ['tests/snapshots/*', 'packages/*/dist/*', '**/*.cjs'],
   overrides: [
     {
       plugins: ['@typescript-eslint'],
@@ -74,10 +65,25 @@ module.exports = {
       rules: {
         '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-unused-vars': 'off',
+        '@typescript-eslint/no-floating-promises': 'error',
+        '@typescript-eslint/no-non-null-asserted-nullish-coalescing': 'error',
+        '@typescript-eslint/no-misused-promises': 'error',
         '@typescript-eslint/no-namespace': [
           'error',
           { allowDeclarations: true },
         ],
+      },
+    },
+    {
+      plugins: ['@typescript-eslint'],
+      files: ['*.spec.ts', 'tests/**/*.ts'],
+      parserOptions: {
+        project: `tsconfig.eslint.json`,
+      },
+      rules: {
+        '@typescript-eslint/no-floating-promises': 'off',
+        '@typescript-eslint/no-non-null-asserted-nullish-coalescing': 'off',
+        '@typescript-eslint/no-misused-promises': 'off',
       },
     },
     ...allPackages.map(pkg => ({
@@ -94,6 +100,8 @@ module.exports = {
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
+    project: `tsconfig.eslint.json`,
+    tsconfigRootDir: __dirname,
     ecmaVersion: 'latest',
     sourceType: 'module',
   },

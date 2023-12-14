@@ -146,10 +146,12 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     this._shapeToolLocalState = this._tryLoadShapeLocalState();
     this.active(this._shapeToolLocalState?.shape ?? 'rect');
 
-    this.updateComplete.then(() => {
-      this._shapeIconColor =
-        this._shapeToolLocalState?.strokeColor ?? DEFAULT_SHAPE_STROKE_COLOR;
-    });
+    this.updateComplete
+      .then(() => {
+        this._shapeIconColor =
+          this._shapeToolLocalState?.strokeColor ?? DEFAULT_SHAPE_STROKE_COLOR;
+      })
+      .catch(console.error);
 
     this._disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(newTool => {

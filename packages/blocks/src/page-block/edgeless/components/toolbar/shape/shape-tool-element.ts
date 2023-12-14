@@ -210,14 +210,16 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   };
 
   private _onMouseUp = (event: MouseEvent) => {
-    this._onDragEnd({ x: event.clientX, y: event.clientY });
+    this._onDragEnd({ x: event.clientX, y: event.clientY }).catch(
+      console.error
+    );
   };
 
   private _onTouchEnd = (event: TouchEvent) => {
     this._onDragEnd({
       x: event.touches[0].clientX,
       y: event.touches[0].clientY,
-    });
+    }).catch(console.error);
   };
 
   @state()

@@ -83,7 +83,9 @@ export function tryConvertBlock(
 
     const codeBlock = page.getBlockById(codeId);
     assertExists(codeBlock);
-    asyncSetInlineRange(codeBlock, { index: 0, length: 0 });
+    asyncSetInlineRange(codeBlock, { index: 0, length: 0 }).catch(
+      console.error
+    );
 
     return KEYBOARD_PREVENT_DEFAULT;
   }

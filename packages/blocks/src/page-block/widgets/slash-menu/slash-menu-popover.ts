@@ -258,7 +258,9 @@ export class SlashMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
 
     const { action } = this._filterItems[index];
-    action({ pageElement: this.pageElement, model: this.model });
+    action({ pageElement: this.pageElement, model: this.model })?.catch(
+      console.error
+    );
   }
 
   private _handleClickCategory(groupName: string) {

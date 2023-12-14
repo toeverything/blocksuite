@@ -12,7 +12,7 @@ type EmbedConfig = {
   /**
    * The action will be executed when the 「Turn into embed view」 button is clicked.
    */
-  action?: (model: AttachmentBlockModel) => void;
+  action?: (model: AttachmentBlockModel) => Promise<void> | void;
   /**
    * The template will be used to render the embed view.
    */
@@ -81,7 +81,7 @@ export function turnIntoEmbedAction(model: AttachmentBlockModel) {
     });
     return;
   }
-  config.action(model);
+  config.action(model)?.catch(console.error);
 }
 
 export function renderEmbedView(model: AttachmentBlockModel, blobUrl: string) {

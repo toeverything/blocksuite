@@ -88,9 +88,11 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     this.disposables.add(
       this.edgeless.slots.viewportUpdated.on(() => {
         this.requestUpdate();
-        this.updateComplete.then(() => {
-          this._updateHeight();
-        });
+        this.updateComplete
+          .then(() => {
+            this._updateHeight();
+          })
+          .catch(console.error);
       })
     );
     this.disposables.add(
@@ -104,19 +106,25 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    this.updateComplete.then(() => {
-      this.inlineEditor.focusEnd();
+    this.updateComplete
+      .then(() => {
+        this.inlineEditor.focusEnd();
 
-      this.disposables.add(
-        this.inlineEditor.slots.updated.on(() => {
-          this._updateHeight();
-        })
-      );
-      this.disposables.addFromEvent(this.inlineEditorContainer, 'blur', () => {
-        if (this._keeping) return;
-        this._unmount();
-      });
-    });
+        this.disposables.add(
+          this.inlineEditor.slots.updated.on(() => {
+            this._updateHeight();
+          })
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'blur',
+          () => {
+            if (this._keeping) return;
+            this._unmount();
+          }
+        );
+      })
+      .catch(console.error);
   }
 
   override async getUpdateComplete(): Promise<boolean> {

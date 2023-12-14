@@ -239,19 +239,19 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.contentParser.exportPdf();
+    this.contentParser.exportPdf().catch(console.error);
   }
 
   private _exportHtml() {
-    HtmlTransformer.exportPage(this.page);
+    HtmlTransformer.exportPage(this.page).catch(console.error);
   }
 
   private _exportMarkDown() {
-    MarkdownTransformer.exportPage(this.page);
+    MarkdownTransformer.exportPage(this.page).catch(console.error);
   }
 
   private _exportPng() {
-    this.contentParser.exportPng();
+    this.contentParser.exportPng().catch(console.error);
   }
 
   private async _exportSnapshot() {

@@ -103,9 +103,11 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.updateComplete.then(() => {
-      this._tryLoadBrushStateLocalColor();
-    });
+    this.updateComplete
+      .then(() => {
+        this._tryLoadBrushStateLocalColor();
+      })
+      .catch(console.error);
     this._disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(newTool => {
         if (newTool.type === 'brush') {

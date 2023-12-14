@@ -232,7 +232,7 @@ export function focusBlockByModel(
   assertExists(element);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
-    focusRichText(editableContainer, position, zoom);
+    focusRichText(editableContainer, position, zoom).catch(console.error);
   }
 }
 

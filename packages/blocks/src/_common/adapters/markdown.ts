@@ -663,7 +663,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             );
             blobId = await sha(await clonedRes.arrayBuffer());
             assets?.getAssets().set(blobId, file);
-            assets?.writeToBlob(blobId);
+            assets?.writeToBlob(blobId).catch(console.error);
           }
           context
             .openNode(

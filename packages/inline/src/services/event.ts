@@ -48,7 +48,9 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     this.editor.disposables.addFromEvent(
       rootElement,
       'compositionend',
-      this._onCompositionEnd
+      (event: CompositionEvent) => {
+        this._onCompositionEnd(event).catch(console.error);
+      }
     );
     this.editor.disposables.addFromEvent(
       rootElement,

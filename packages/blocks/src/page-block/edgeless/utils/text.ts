@@ -49,9 +49,11 @@ export function mountTextElementEditor(
   const pageBlockContainer = edgeless.pageBlockContainer;
 
   pageBlockContainer.appendChild(textEditor);
-  textEditor.updateComplete.then(() => {
-    textEditor.inlineEditor?.focusIndex(cursorIndex);
-  });
+  textEditor.updateComplete
+    .then(() => {
+      textEditor.inlineEditor?.focusIndex(cursorIndex);
+    })
+    .catch(console.error);
 
   edgeless.tools.switchToDefaultMode({
     elements: [textElement.id],

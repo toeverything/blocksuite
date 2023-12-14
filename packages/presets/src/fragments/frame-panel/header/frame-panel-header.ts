@@ -135,12 +135,14 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
 
   private _enterPresentationMode = () => {
     if (!this.edgeless) this.changeEditorMode('edgeless');
-    this.edgeless?.updateComplete.then(() => {
-      this.setEdgelessTool({
-        type: 'frameNavigator',
-        mode: this._navigatorMode,
-      });
-    });
+    this.edgeless?.updateComplete
+      .then(() => {
+        this.setEdgelessTool({
+          type: 'frameNavigator',
+          mode: this._navigatorMode,
+        });
+      })
+      .catch(console.error);
   };
 
   private _tryLoadNavigatorStateLocalRecord() {
