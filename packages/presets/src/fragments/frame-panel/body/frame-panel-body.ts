@@ -8,9 +8,13 @@ import {
   generateKeyBetween,
 } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { type EditorHost, WithDisposable } from '@blocksuite/lit';
+import {
+  type EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
-import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
 import type {
@@ -42,13 +46,14 @@ const styles = css`
     width: 100%;
     gap: 16px;
     position: relative;
-    margin-left: 8px;
+    margin: 0 8px;
   }
 
   .no-frame-container {
     display: flex;
     flex-direction: column;
     width: 100%;
+    min-width: 300px;
   }
 
   .no-frame-placeholder {
@@ -77,7 +82,7 @@ const styles = css`
   }
 `;
 
-export class FramePanelBody extends WithDisposable(LitElement) {
+export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })

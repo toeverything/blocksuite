@@ -1,7 +1,11 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import { type EditorHost, WithDisposable } from '@blocksuite/lit';
+import {
+  type EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/lit';
 import type { Page, Y } from '@blocksuite/store';
-import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -49,7 +53,7 @@ const styles = css`
     position: relative;
   }
 
-  .surface-container {
+  .frame-preview-surface-container {
     position: relative;
     display: flex;
     align-items: center;
@@ -58,7 +62,7 @@ const styles = css`
     overflow: hidden;
   }
 
-  .surface-viewport {
+  .frame-preview-surface-viewport {
     max-width: 100%;
     box-sizing: border-box;
     margin: 0 auto;
@@ -68,7 +72,7 @@ const styles = css`
     user-select: none;
   }
 
-  .surface-canvas-container {
+  .frame-preview-surface-canvas-container {
     height: 100%;
     width: 100%;
     position: relative;
@@ -76,7 +80,7 @@ const styles = css`
 `;
 
 @customElement('frame-preview')
-export class FramePreview extends WithDisposable(LitElement) {
+export class FramePreview extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -115,11 +119,17 @@ export class FramePreview extends WithDisposable(LitElement) {
   private _pageDisposables: DisposableGroup | null = null;
   private _frameDisposables: DisposableGroup | null = null;
 
-  @query('.surface-canvas-container')
+  @query('.frame-preview-surface-canvas-container')
   container!: HTMLDivElement;
 
-  @query('surface-ref-portal')
+  @query('.frame-preview-surface-container surface-ref-portal')
   blocksPortal!: SurfaceRefPortal;
+
+  override createRenderRoot() {
+    // Do not use shadow root, use the element itself as the render root.
+    // This will allow the element to use global styles.
+    return this;
+  }
 
   get surfaceRenderer() {
     return this._surfaceRenderer;
@@ -474,14 +484,14 @@ export class FramePreview extends WithDisposable(LitElement) {
   private _renderSurfaceContent(referencedModel: FrameBlockModel) {
     const { width, height } = this._getViewportWH(referencedModel);
     return html`<div
-      class="surface-container"
+      class="frame-preview-surface-container"
       style=${styleMap({
         width: `${this.surfaceWidth}px`,
         height: `${this.surfaceHeight}px`,
       })}
     >
       <div
-        class="surface-viewport"
+        class="frame-preview-surface-viewport"
         style=${styleMap({
           width: `${width}px`,
           height: `${height}px`,
@@ -494,7 +504,7 @@ export class FramePreview extends WithDisposable(LitElement) {
           .containerModel=${referencedModel}
           .renderModel=${this.host.renderModel}
         ></surface-ref-portal>
-        <div class="surface-canvas-container">
+        <div class="frame-preview-surface-canvas-container">
           <!-- attach canvas here -->
         </div>
       </div>
