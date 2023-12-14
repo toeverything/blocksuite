@@ -7,6 +7,7 @@ import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import {
+  type BlockComponent,
   findClosestBlockElement,
   getClosestBlockElementByElement,
   getClosestBlockElementByPoint,
@@ -18,7 +19,6 @@ import {
   Point,
   Rect,
 } from '../../../_common/utils/index.js';
-import type { BlockComponent } from '../../../index.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,

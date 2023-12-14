@@ -7,7 +7,7 @@ import { buildPath } from '../_common/utils/query.js';
 import {
   getViewportFromSessionCommand,
   saveViewportToSessionCommand,
-} from './commands/session.js';
+} from './commands/index.js';
 import { TemplateJob } from './service/template.js';
 import type { SurfaceBlockComponent } from './surface-block.js';
 import type { SurfaceBlockModel } from './surface-model.js';
