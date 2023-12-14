@@ -22,7 +22,7 @@ import {
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { builtInTemplates } from './builtin-templates.js';
 import { ArrowIcon, defaultPreview } from './icon.js';
-import type { Template } from './templates.js';
+import type { Template } from './template-type.js';
 
 @customElement('edgeless-templates-panel')
 export class EdgelessTemplatePanel extends WithDisposable(LitElement) {

@@ -1,17 +1,17 @@
-import conceptmap from './json/concept-map.json' assert { type: 'json' };
-import flowchart from './json/flow-chart.json' assert { type: 'json' };
-import ganttchart from './json/gantt-chart.json' assert { type: 'json' };
-import kanban from './json/kanban.json' assert { type: 'json' };
-import monthlycalendar from './json/monthly-calendar.json' assert { type: 'json' };
-import presentation from './json/presentation.json' assert { type: 'json' };
-import projectplanning from './json/project-planning.json' assert { type: 'json' };
-import stickers from './json/stickers.json' assert { type: 'json' };
-import storyboard from './json/storyboard.json' assert { type: 'json' };
 import type {
   Template,
   TemplateCategory,
   TemplateManager,
-} from './templates.js';
+} from './template-type.js';
+import conceptmap from './templates/concept-map.js';
+import flowchart from './templates/flow-chart.js';
+import ganttchart from './templates/gantt-chart.js';
+import kanban from './templates/kanban.js';
+import monthlycalendar from './templates/monthly-calendar.js';
+import presentation from './templates/presentation.js';
+import projectplanning from './templates/project-planning.js';
+import stickers from './templates/stickers.js';
+import storyboard from './templates/storyboard.js';
 
 export const templates: TemplateCategory[] = [
   {
