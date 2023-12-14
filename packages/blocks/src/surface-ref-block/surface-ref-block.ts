@@ -69,7 +69,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     .affine-surface-ref {
       position: relative;
       user-select: none;
-      margin: 8px 0;
+      margin: 10px 0;
     }
 
     .surface-empty-placeholder {
