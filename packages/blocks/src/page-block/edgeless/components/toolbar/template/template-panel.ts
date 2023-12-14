@@ -221,9 +221,8 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
         this._closePanel();
       });
     }, this);
-    this._disposables.addFromEvent(this, 'click', e => {
-      e.stopPropagation();
-    });
+    this._disposables.addFromEvent(this, 'click', stopPropagation);
+    this._disposables.addFromEvent(this, 'wheel', stopPropagation);
   }
 
   private _getLocalSelectedCategory() {
