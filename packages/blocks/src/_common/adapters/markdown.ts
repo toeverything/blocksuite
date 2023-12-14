@@ -106,7 +106,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       sliceAssetsIds.push(...assetsIds);
       buffer += this._astToMardown(ast);
     }
-    const markdown = buffer;
+    const markdown = buffer.trimEnd();
     return {
       file: markdown,
       assetsIds: sliceAssetsIds,
