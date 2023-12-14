@@ -1,13 +1,22 @@
-import type { TemplateCategory } from './builtin-templates.js';
-import flowchart from './json/flow-chart.json';
-import ganttchart from './json/gantt-chart.json';
-import kanban from './json/kanban.json';
-import monthlycalendar from './json/monthly-calendar.json';
-import storyboard from './json/storyboard.json';
+export type Template = {
+  name?: string;
+  content: unknown;
+  assets?: Record<string, string>;
+  preview?: string;
+  type: string;
+};
 
-export const templates: TemplateCategory[] = [
-  {
-    name: 'Project managerment',
-    templates: [kanban, storyboard, monthlycalendar, ganttchart, flowchart],
-  },
-];
+export type TemplateCategory = {
+  name: string;
+  templates: Template[];
+};
+
+export interface TemplateManager {
+  list(category?: string): Template[];
+
+  categories(): string[];
+
+  search(keyword: string, category?: string): Template[];
+
+  extend(category: string, templates: Template[]): void;
+}

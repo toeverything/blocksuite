@@ -1,26 +1,25 @@
-import { templates } from './templates.js';
+import flowchart from './json/flow-chart.json';
+import ganttchart from './json/gantt-chart.json';
+import kanban from './json/kanban.json';
+import monthlycalendar from './json/monthly-calendar.json';
+import stickers from './json/stickers.json';
+import storyboard from './json/storyboard.json';
+import type {
+  Template,
+  TemplateCategory,
+  TemplateManager,
+} from './templates.js';
 
-export type Template = {
-  name: string;
-  content: unknown;
-  assets?: Record<string, string>;
-  preview: string;
-};
-
-export type TemplateCategory = {
-  name: string;
-  templates: Template[];
-};
-
-interface TemplateManager {
-  list(category?: string): Template[];
-
-  categories(): string[];
-
-  search(keyword: string, category?: string): Template[];
-
-  extend(category: string, templates: Template[]): void;
-}
+export const templates: TemplateCategory[] = [
+  {
+    name: 'Project managerment',
+    templates: [kanban, storyboard, monthlycalendar, ganttchart, flowchart],
+  },
+  {
+    name: 'Stickers',
+    templates: stickers,
+  },
+];
 
 export const builtInTemplates = {
   list: (category?: string) => {
@@ -44,7 +43,7 @@ export const builtInTemplates = {
       }
 
       categroy.templates.forEach(template => {
-        template.name.includes(keyword) && candidates.push(template);
+        template.name?.includes(keyword) && candidates.push(template);
       });
     });
 

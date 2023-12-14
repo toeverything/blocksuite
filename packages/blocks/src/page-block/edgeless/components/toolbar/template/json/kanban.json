@@ -1,6 +1,7 @@
 {
   "name": "kanban",
   "preview": "",
+  "type": "template",
   "content": {
     "type": "page",
     "meta": {
