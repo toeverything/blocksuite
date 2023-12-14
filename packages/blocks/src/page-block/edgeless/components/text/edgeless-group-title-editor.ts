@@ -96,6 +96,8 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
       transformOrigin: 'top left',
       borderRadius: '35px',
       width: 'fit-content',
+      maxHeight: '30px',
+      lineHeight: '20px',
       padding: '4px 10px',
       fontSize: '14px',
       position: 'absolute',
