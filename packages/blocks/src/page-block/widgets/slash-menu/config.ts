@@ -26,7 +26,7 @@ import {
   YesterdayIcon,
 } from '../../../_common/icons/index.js';
 import {
-  createPage,
+  createDefaultPage,
   getBlockComponentByModel,
   getCurrentNativeRange,
   getImageFilesFromLocal,
@@ -193,7 +193,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         name: 'New Page',
         icon: NewPageIcon,
         action: async ({ pageElement, model }) => {
-          const newPage = await createPage(pageElement.page.workspace);
+          const newPage = await createDefaultPage(pageElement.page.workspace);
           insertContent(model, REFERENCE_NODE, {
             reference: {
               type: 'LinkedPage',

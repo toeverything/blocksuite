@@ -1,5 +1,6 @@
 /* CSS variables. You need to handle all places where `CSS variables` are marked. */
-export const COLOR_VARIABLES = [
+
+export const ColorVariables = [
   '--affine-brand-color',
   '--affine-primary-color',
   '--affine-secondary-color',
@@ -83,7 +84,7 @@ export const COLOR_VARIABLES = [
   '--affine-blue',
 ];
 
-export const SIZE_VARIABLES = [
+export const SizeVariables = [
   '--affine-font-h-1',
   '--affine-font-h-2',
   '--affine-font-h-3',
@@ -98,13 +99,13 @@ export const SIZE_VARIABLES = [
   '--affine-z-index-popover',
 ];
 
-export const FONT_FAMILY_VARIABLES = [
+export const FontFamilyVariables = [
   '--affine-font-family',
   '--affine-font-number-family',
   '--affine-font-code-family',
 ];
 
-export const VARIABLES = [
+export const StyleVariables = [
   '--affine-editor-width',
 
   '--affine-theme-mode',
@@ -122,12 +123,12 @@ export const VARIABLES = [
   '--affine-paragraph-space',
   '--affine-popover-radius',
   '--affine-scale',
-  ...SIZE_VARIABLES,
-  ...COLOR_VARIABLES,
-  ...FONT_FAMILY_VARIABLES,
+  ...SizeVariables,
+  ...ColorVariables,
+  ...FontFamilyVariables,
 ] as const;
 
-type VariablesType = typeof VARIABLES;
+type VariablesType = typeof StyleVariables;
 export type CssVariableName = Extract<
   VariablesType[keyof VariablesType],
   string
@@ -136,5 +137,5 @@ export type CssVariableName = Extract<
 export type CssVariablesMap = Record<CssVariableName, string>;
 
 export function isCssVariable(name: string): name is CssVariableName {
-  return VARIABLES.includes(name as CssVariableName);
+  return StyleVariables.includes(name as CssVariableName);
 }

@@ -19,7 +19,6 @@ import {
 } from '../_common/theme/css-variables.js';
 import { getThemePropertyValue } from '../_common/theme/utils.js';
 import type { EdgelessElement, TopLevelBlockModel } from '../_common/types.js';
-import { saveViewportToSession } from '../_common/utils/edgeless.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import { buildPath, getEditorContainer } from '../_common/utils/query.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
@@ -799,10 +798,13 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
     if (editorContainer.mode !== 'edgeless') {
       editorContainer.mode = 'edgeless';
-      saveViewportToSession(this.page.id, {
+
+      const viewport = {
+        xywh: '', // FIXME
         referenceId: this.model.reference,
-        padding: [60, 20, 20, 20],
-      });
+        padding: [60, 20, 20, 20] as [number, number, number, number],
+      };
+      this.std.command.pipe().withHost().saveViewportToSession({ viewport });
     }
 
     this.selection.update(selections => {

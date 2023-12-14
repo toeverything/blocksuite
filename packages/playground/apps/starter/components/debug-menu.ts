@@ -17,16 +17,16 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 
 import {
   BlocksUtils,
-  COLOR_VARIABLES,
-  createPage,
+  ColorVariables,
+  createDefaultPage,
   extractCssVariables,
-  FONT_FAMILY_VARIABLES,
+  FontFamilyVariables,
   HtmlTransformer,
   MarkdownTransformer,
   NOTE_WIDTH,
-  SIZE_VARIABLES,
+  SizeVariables,
+  StyleVariables,
   type SurfaceBlockComponent,
-  VARIABLES,
   ZipTransformer,
 } from '@blocksuite/blocks';
 import type { TreeNode } from '@blocksuite/blocks/_common/mind-map/draw';
@@ -69,14 +69,14 @@ export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
-COLOR_VARIABLES.forEach((key: string) => {
+ColorVariables.forEach((key: string) => {
   plate[key] = cssVariablesMap[key];
 });
-const OTHER_CSS_VARIABLES = VARIABLES.filter(
+const OTHER_CSS_VARIABLES = StyleVariables.filter(
   variable =>
-    !SIZE_VARIABLES.includes(variable) &&
-    !COLOR_VARIABLES.includes(variable) &&
-    !FONT_FAMILY_VARIABLES.includes(variable)
+    !SizeVariables.includes(variable) &&
+    !ColorVariables.includes(variable) &&
+    !FontFamilyVariables.includes(variable)
 );
 let styleDebugMenuLoaded = false;
 
@@ -96,7 +96,7 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
     title: 'Others',
     expanded: false,
   });
-  SIZE_VARIABLES.forEach(name => {
+  SizeVariables.forEach(name => {
     sizeFolder
       .addBinding(
         {
@@ -114,7 +114,7 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
         style.setProperty(name, `${Math.round(e.value)}px`);
       });
   });
-  FONT_FAMILY_VARIABLES.forEach(name => {
+  FontFamilyVariables.forEach(name => {
     fontFamilyFolder
       .addBinding(
         {
@@ -735,7 +735,7 @@ export class DebugMenu extends ShadowlessElement {
 
 function createPageBlock(workspace: Workspace) {
   const id = workspace.idGenerator('page');
-  createPage(workspace, { id }).catch(console.error);
+  createDefaultPage(workspace, { id }).catch(console.error);
 }
 
 function PageList(

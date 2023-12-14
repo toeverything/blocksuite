@@ -1,11 +1,11 @@
 import { Slot } from '@blocksuite/global/utils';
 
 import type { CssVariablesMap } from './css-variables.js';
-import { VARIABLES } from './css-variables.js';
+import { StyleVariables } from './css-variables.js';
 
 export function extractCssVariables(element: Element): CssVariablesMap {
   const styles = window.getComputedStyle(element);
-  const variables = VARIABLES.reduce((acc, cssName) => {
+  const variables = StyleVariables.reduce((acc, cssName) => {
     const value = styles.getPropertyValue(cssName).trim();
     acc[cssName] = value;
 

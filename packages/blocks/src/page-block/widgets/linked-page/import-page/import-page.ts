@@ -20,7 +20,7 @@ import {
 } from '../../../../_common/icons/index.js';
 import type { SerializedBlock } from '../../../../_common/utils/index.js';
 import {
-  createPage,
+  createDefaultPage,
   openFileOrFiles,
 } from '../../../../_common/utils/index.js';
 import { ContentParser } from '../../../../_legacy/content-parser/index.js';
@@ -123,7 +123,9 @@ export async function importNotion(workspace: Workspace, file: File) {
       }
     }
     const pagePromises = Array.from(pageMap.keys()).map(async file => {
-      const page = await createPage(workspace, { id: pageMap.get(file) });
+      const page = await createDefaultPage(workspace, {
+        id: pageMap.get(file),
+      });
       if (!page) return;
       const lastSplitIndex = file.lastIndexOf('/');
       const folder = file.substring(0, lastSplitIndex) || '';
