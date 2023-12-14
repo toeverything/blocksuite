@@ -3,6 +3,7 @@ import {
   PathFinder,
   type PointerEventState,
 } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
@@ -20,13 +21,18 @@ import {
   Rect,
 } from '../../../_common/utils/index.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
+import type { EdgelessBlockType } from '../../../surface-block/index.js';
+import { Bound } from '../../../surface-block/index.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless/edgeless-page-block.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
-  DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT,
-  DRAG_HANDLE_OFFSET_LEFT,
+  DRAG_HANDLE_CONTAINER_HEIGHT,
+  DRAG_HANDLE_CONTAINER_OFFSET_LEFT,
+  DRAG_HANDLE_CONTAINER_OFFSET_LEFT_LIST,
   type DropResult,
   type DropType,
-  LIST_DRAG_HANDLE_OFFSET_LEFT,
+  NOTE_CONTAINER_PADDING,
+  type OnDragEndProps,
 } from './config.js';
 
 const heightMap: { [key: string]: number } = {
@@ -52,18 +58,18 @@ export const getDragHandleContainerHeight = (model: BaseBlockModel) => {
     key = (model as ParagraphBlockModel).type;
   }
 
-  const height = heightMap[key] ?? DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT;
+  const height = heightMap[key] ?? DRAG_HANDLE_CONTAINER_HEIGHT;
 
   return height;
 };
 
 // To check if the block is a child block of the selected blocks
 export const containChildBlock = (
-  selections: BaseSelection[],
+  blockElements: BlockElement[],
   childPath: string[]
 ) => {
-  return selections.some(selection => {
-    const { path } = selection;
+  return blockElements.some(blockElement => {
+    const path = blockElement.path;
     return PathFinder.includes(childPath, path);
   });
 };
@@ -116,6 +122,27 @@ export const getContainerOffsetPoint = (state: PointerEventState) => {
   const x = state.point.x + state.containerOffset.x;
   const y = state.point.y + state.containerOffset.y;
   return new Point(x, y);
+};
+
+export const isOutOfNoteBlock = (
+  page: Page,
+  noteBlock: Element,
+  point: Point,
+  scale: number
+) => {
+  // TODO: need to find a better way to check if the point is out of note block
+  const rect = noteBlock.getBoundingClientRect();
+  const padding = NOTE_CONTAINER_PADDING * scale;
+  return rect
+    ? isPageMode(page)
+      ? point.y < rect.top ||
+        point.y > rect.bottom ||
+        point.x > rect.right + padding
+      : point.y < rect.top ||
+        point.y > rect.bottom ||
+        point.x < rect.left - padding ||
+        point.x > rect.right + padding
+    : true;
 };
 
 export const getClosestNoteBlock = (
@@ -305,8 +332,8 @@ export function getDragHandleLeftPadding(blockElements: BlockElement[]) {
       blockElement.model.children.length > 0
   );
   const offsetLeft = hasToggleList
-    ? LIST_DRAG_HANDLE_OFFSET_LEFT
-    : DRAG_HANDLE_OFFSET_LEFT;
+    ? DRAG_HANDLE_CONTAINER_OFFSET_LEFT_LIST
+    : DRAG_HANDLE_CONTAINER_OFFSET_LEFT;
   return offsetLeft;
 }
 
@@ -316,4 +343,86 @@ export function updateDragHandleClassName(blockElements: BlockElement[] = []) {
   previousEle.forEach(blockElement => blockElement.classList.remove(className));
   previousEle = blockElements;
   blockElements.forEach(blockElement => blockElement.classList.add(className));
+}
+
+function getBlockProps(model: BaseBlockModel) {
+  const keys = model.keys as (keyof typeof model)[];
+  const values = keys.map(key => model[key]);
+  const blockProps = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
+  return blockProps;
+}
+
+export function convertDragPreviewDocToEdgeless({
+  blockComponent,
+  dragPreview,
+  cssSelector,
+  width,
+  height,
+}: OnDragEndProps & {
+  blockComponent: BlockElement;
+  cssSelector: string;
+  width?: number;
+  height?: number;
+}): boolean {
+  const edgelessPage = blockComponent.closest(
+    'affine-edgeless-page'
+  ) as EdgelessPageBlockComponent;
+  if (!edgelessPage) return false;
+
+  const previewEl = dragPreview.querySelector(cssSelector);
+  assertExists(previewEl);
+  const rect = previewEl.getBoundingClientRect();
+  const point = edgelessPage.surface.toModelCoord(rect.x, rect.y);
+  const bound = new Bound(
+    point[0],
+    point[1],
+    width ?? previewEl.clientWidth,
+    height ?? previewEl.clientHeight
+  );
+
+  const blockModel = blockComponent.model;
+  const blockProps = getBlockProps(blockModel);
+
+  edgelessPage.surface.addElement(
+    blockComponent.flavour as EdgelessBlockType,
+    {
+      ...blockProps,
+      xywh: bound.serialize(),
+    },
+    edgelessPage.surface.model
+  );
+  blockComponent.page.deleteBlock(blockModel);
+  return true;
+}
+
+export function convertDragPreviewEdgelessToDoc({
+  blockComponent,
+  dropBlockId,
+  dropType,
+}: OnDragEndProps & {
+  blockComponent: BlockElement;
+}): boolean {
+  const page = blockComponent.page;
+  const targetBlock = page.getBlockById(dropBlockId);
+  if (!targetBlock) return false;
+
+  const shouldInsertIn = dropType === 'in';
+  const parentBlock = shouldInsertIn
+    ? targetBlock
+    : page.getParent(targetBlock);
+  assertExists(parentBlock);
+  const parentIndex = shouldInsertIn
+    ? 0
+    : parentBlock.children.indexOf(targetBlock);
+
+  const blockModel = blockComponent.model;
+  const blockProps = getBlockProps(blockModel);
+  delete blockProps.width;
+  delete blockProps.height;
+  delete blockProps.xywh;
+  delete blockProps.zIndex;
+
+  page.addBlock(blockModel.flavour, blockProps, parentBlock, parentIndex);
+  page.deleteBlock(blockModel);
+  return true;
 }

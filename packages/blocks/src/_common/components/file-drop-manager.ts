@@ -21,7 +21,6 @@ export type onDropProps = {
 
 export type FileDropOptions = {
   flavour: string;
-  maxFileSize?: number;
   onDrop?: ({ files, targetModel, place, point }: onDropProps) => void;
 };
 
@@ -79,10 +78,6 @@ export class FileDropManager {
     }
 
     return targetModel;
-  }
-
-  get maxFileSize(): number {
-    return this._fileDropOptions.maxFileSize ?? 10 * 1000 * 1000; // default to 10MB
   }
 
   onDragOver = (event: DragEvent) => {

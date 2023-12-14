@@ -3,8 +3,17 @@ import { baseTheme } from '@toeverything/theme';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+import { Point } from '../../../../_common/utils/index.js';
+
 @customElement('affine-drag-preview')
 export class DragPreview extends ShadowlessElement {
+  offset: Point;
+
+  constructor(offset?: Point) {
+    super();
+    this.offset = offset ?? new Point(0, 0);
+  }
+
   override render() {
     return html`<style>
       affine-drag-preview {
@@ -21,7 +30,7 @@ export class DragPreview extends ShadowlessElement {
         font-weight: 400;
         top: 0;
         left: 0;
-        opacity: 0.843;
+        opacity: 0.5;
         cursor: none;
         user-select: none;
         pointer-events: none;
@@ -39,7 +48,7 @@ export class DragPreview extends ShadowlessElement {
         margin-top: 0;
       }
 
-      affine-drag-preview.grabbing {
+      .affine-drag-preview-grabbing * {
         cursor: grabbing;
       }
 

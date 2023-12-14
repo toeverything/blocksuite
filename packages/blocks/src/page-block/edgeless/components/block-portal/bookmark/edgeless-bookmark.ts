@@ -24,7 +24,9 @@ export class EdgelessBlockPortalBookmark extends EdgelessPortalBase<BookmarkBloc
     };
 
     return html`
-      <div style=${styleMap(style)}>${this.renderModel(model)}</div>
+      <div class="edgeless-block-portal-bookmark" style=${styleMap(style)}>
+        ${this.renderModel(model)}
+      </div>
     `;
   }
 }
