@@ -117,7 +117,14 @@ export const hastQuerySelector = (
   ast: HtmlAST,
   selector: string
 ): Element | undefined => {
-  if (ast.type === 'element') {
+  if (ast.type === 'root') {
+    for (const child of ast.children) {
+      const result = hastQuerySelector(child, selector);
+      if (result) {
+        return result;
+      }
+    }
+  } else if (ast.type === 'element') {
     if (selector.startsWith('.')) {
       return querySelectorClass(ast, selector.slice(1));
     } else if (selector.startsWith('#')) {

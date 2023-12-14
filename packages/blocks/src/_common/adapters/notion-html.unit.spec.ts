@@ -34,7 +34,7 @@ describe('notion html to snapshot', () => {
           id: 'matchesReplaceMap[1]',
           flavour: 'affine:code',
           props: {
-            language: null,
+            language: 'Plain Text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
@@ -200,7 +200,7 @@ describe('notion html to snapshot', () => {
         {
           type: 'block',
           id: 'matchesReplaceMap[1]',
-          flavour: 'affine:heading',
+          flavour: 'affine:paragraph',
           props: {
             type: 'h1',
             text: {
@@ -217,7 +217,7 @@ describe('notion html to snapshot', () => {
         {
           type: 'block',
           id: 'matchesReplaceMap[2]',
-          flavour: 'affine:heading',
+          flavour: 'affine:paragraph',
           props: {
             type: 'h2',
             text: {
@@ -234,7 +234,7 @@ describe('notion html to snapshot', () => {
         {
           type: 'block',
           id: 'matchesReplaceMap[3]',
-          flavour: 'affine:heading',
+          flavour: 'affine:paragraph',
           props: {
             type: 'h3',
             text: {
@@ -1363,7 +1363,7 @@ describe('notion html to snapshot', () => {
               },
             ],
             cells: {
-              'matchesReplaceMap[20]': {
+              'matchesReplaceMap[61]': {
                 'matchesReplaceMap[50]': {
                   columnId: 'matchesReplaceMap[50]',
                   value: ['matchesReplaceMap[51]'],
@@ -1385,7 +1385,7 @@ describe('notion html to snapshot', () => {
                   value: false,
                 },
               },
-              'matchesReplaceMap[34]': {
+              'matchesReplaceMap[62]': {
                 'matchesReplaceMap[50]': {
                   columnId: 'matchesReplaceMap[50]',
                   value: ['matchesReplaceMap[37]'],
@@ -1407,7 +1407,7 @@ describe('notion html to snapshot', () => {
                   value: true,
                 },
               },
-              'matchesReplaceMap[48]': {
+              'matchesReplaceMap[63]': {
                 'matchesReplaceMap[50]': {
                   columnId: 'matchesReplaceMap[50]',
                   value: ['matchesReplaceMap[51]'],
