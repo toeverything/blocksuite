@@ -18,22 +18,10 @@ import { splitElements } from './page-block/edgeless/utils/clipboard-utils.js';
 
 export * from './_common/adapters/index.js';
 export * from './_common/components/index.js';
-export * from './_common/consts.js';
-export * from './_common/edgeless/frame/consts.js';
 export * from './_common/test-utils/test-utils.js';
-export type { CssVariableName } from './_common/theme/css-variables.js';
-export * from './_common/theme/css-variables.js';
-export * from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
-export * from './_common/utils/edgeless.js';
 export { on, once, stopPropagation } from './_common/utils/event.js';
-export * from './_common/utils/filesys.js';
-export * from './_common/utils/init.js';
 export type { BlockModels } from './_common/utils/model.js';
-export * from './_common/utils/query.js';
-export * from './_common/utils/rect.js';
-export * from './_common/utils/selection.js';
-export * from './_common/utils/types.js';
 export { getServiceOrRegister } from './_legacy/service/index.js';
 export type { BaseService } from './_legacy/service/service.js';
 export * from './_specs/_specs.js';
@@ -59,11 +47,13 @@ export * from './surface-block/surface-block.js';
 export * from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
+
 export const BlocksUtils = {
   splitElements,
   matchFlavours,
   mindMap,
 };
+
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
     ? globalThis
