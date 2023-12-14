@@ -55,7 +55,7 @@ export const toast = (message: string, duration = 2500) => {
   const styles = `
     max-width: 480px;
     text-align: center;
-    baseTheme: ${baseTheme.fontSansFamily};
+    font-family: ${baseTheme.fontSansFamily};
     font-size: var(--affine-font-sm);
     padding: 6px 12px;
     margin: 10px 0 0 0;
