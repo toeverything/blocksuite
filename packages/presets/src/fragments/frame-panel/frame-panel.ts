@@ -34,7 +34,7 @@ const styles = css`
 
     height: 100%;
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    padding: 0 8px;
+    padding: 8px;
   }
 
   .frame-panel-body {
