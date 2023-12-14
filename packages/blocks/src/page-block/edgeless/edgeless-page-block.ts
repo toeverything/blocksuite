@@ -780,8 +780,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
       centerY: this.surface.viewport.center.y,
       zoom: this.surface.viewport.zoom,
     };
-
-    this.std.command.pipe().withHost().saveViewportToSession({ viewport });
+    this.std.command
+      .pipe()
+      .withHost()
+      .saveViewportToSession({ viewport })
+      .run();
   }
 
   private _getSavedViewport(): SerializedViewport | null {
@@ -814,7 +817,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
         } else {
           result = storedViewport;
         }
-      });
+      })
+      .run();
 
     return result;
   }
