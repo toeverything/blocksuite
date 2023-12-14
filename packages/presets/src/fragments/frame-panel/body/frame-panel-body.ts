@@ -250,7 +250,8 @@ export class FramePanelBody extends WithDisposable(LitElement) {
       this.editorHost.std.command
         .pipe()
         .withHost()
-        .saveViewportToSession({ viewport });
+        .saveViewportToSession({ viewport })
+        .run();
     } else {
       this.edgeless.surface.viewport.setViewportByBound(
         bound,

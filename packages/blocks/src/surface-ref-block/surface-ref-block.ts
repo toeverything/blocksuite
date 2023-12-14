@@ -804,7 +804,11 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         referenceId: this.model.reference,
         padding: [60, 20, 20, 20] as [number, number, number, number],
       };
-      this.std.command.pipe().withHost().saveViewportToSession({ viewport });
+      this.std.command
+        .pipe()
+        .withHost()
+        .saveViewportToSession({ viewport })
+        .run();
     }
 
     this.selection.update(selections => {
