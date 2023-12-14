@@ -18,13 +18,9 @@ import {
   isCssVariable,
 } from '../_common/theme/css-variables.js';
 import { getThemePropertyValue } from '../_common/theme/utils.js';
-import { saveViewportToSession } from '../_common/utils/edgeless.js';
+import type { EdgelessElement, TopLevelBlockModel } from '../_common/types.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import { buildPath, getEditorContainer } from '../_common/utils/query.js';
-import type {
-  EdgelessElement,
-  TopLevelBlockModel,
-} from '../_common/utils/types.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
@@ -803,10 +799,17 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
     if (editorContainer.mode !== 'edgeless') {
       editorContainer.mode = 'edgeless';
-      saveViewportToSession(this.page.id, {
+
+      const viewport = {
+        xywh: '', // FIXME
         referenceId: this.model.reference,
-        padding: [60, 20, 20, 20],
-      });
+        padding: [60, 20, 20, 20] as [number, number, number, number],
+      };
+      this.std.command
+        .pipe()
+        .withHost()
+        .saveViewportToSession({ viewport })
+        .run();
     }
 
     this.selection.update(selections => {

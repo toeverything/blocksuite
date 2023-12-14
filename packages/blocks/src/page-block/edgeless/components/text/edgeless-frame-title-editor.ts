@@ -107,6 +107,8 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       transformOrigin: 'top left',
       borderRadius: '4px',
       width: 'fit-content',
+      maxHeight: '30px',
+      lineHeight: '20px',
       padding: '4px 10px',
       fontSize: '14px',
       position: 'absolute',

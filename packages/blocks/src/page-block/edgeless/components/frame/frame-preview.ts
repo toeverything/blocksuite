@@ -5,7 +5,7 @@ import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { FILL_SCREEN_KEY } from '../../../../_common/edgeless/frame/consts.js';
+import { EdgelessPresentationConsts as PresentationConsts } from '../../../../_common/edgeless/frame/consts.js';
 import {
   type CssVariableName,
   isCssVariable,
@@ -14,7 +14,7 @@ import { getThemePropertyValue } from '../../../../_common/theme/utils.js';
 import type {
   EdgelessElement,
   TopLevelBlockModel,
-} from '../../../../_common/utils/types.js';
+} from '../../../../_common/types.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { ConnectorElement } from '../../../../surface-block/elements/connector/connector-element.js';
@@ -356,7 +356,7 @@ export class FramePreview extends WithDisposable(LitElement) {
   };
 
   private _tryLoadFillScreen() {
-    const fillScreen = sessionStorage.getItem(FILL_SCREEN_KEY);
+    const fillScreen = sessionStorage.getItem(PresentationConsts.FillScreen);
     this.fillScreen = fillScreen === 'true';
   }
 

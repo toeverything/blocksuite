@@ -10,7 +10,7 @@ import {
   NewPageIcon,
   PageIcon,
 } from '../../../_common/icons/index.js';
-import { createPage } from '../../../_common/utils/init.js';
+import { createDefaultPage } from '../../../_common/utils/init.js';
 import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import { isFuzzyMatch } from '../../../_common/utils/string.js';
 import type { Flavour } from '../../../models.js';
@@ -105,7 +105,7 @@ export const getMenus: (ctx: {
           icon: NewPageIcon,
           action: async () => {
             const pageName = query;
-            const newPage = await createPage(page.workspace, {
+            const newPage = await createDefaultPage(page.workspace, {
               title: pageName,
             });
             insertLinkedNode({

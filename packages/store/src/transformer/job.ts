@@ -258,7 +258,6 @@ export class Job {
       meta,
       blocks,
     };
-    console.log(pageSnapshot);
     this._slots.afterExport.emit({
       type: 'page',
       page,

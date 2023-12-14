@@ -302,7 +302,7 @@ test('dragging un-selected note', async ({ page }) => {
   ]);
 });
 
-test('drag handle should be shown when a note is actived in default mode or hidden in other modes', async ({
+test('drag handle should be shown when a note is activated in default mode or hidden in other modes', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -405,8 +405,10 @@ test.describe('note slicer', () => {
 
     assertRectExist(buttonRect);
 
+    // FIXME: note-slicer-button is partly covered by drag handle
+    // increased mouse move x to 5 to avoid this
     await page.mouse.move(
-      buttonRect.x + 1,
+      buttonRect.x + 5,
       buttonRect.y + buttonRect.height / 2
     );
 
@@ -478,8 +480,10 @@ test.describe('note slicer', () => {
 
     assertRectExist(buttonRect);
 
+    // FIXME: note-slicer-button is partly covered by drag handle
+    // increased mouse move x to 5 to avoid this
     await page.mouse.move(
-      buttonRect.x + 1,
+      buttonRect.x + 5,
       buttonRect.y + buttonRect.height / 2
     );
 
@@ -612,7 +616,9 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
 
   assertRectExist(buttonRect);
 
-  await page.mouse.move(buttonRect.x + 1, buttonRect.y + buttonRect.height / 2);
+  // FIXME: note-slicer-button is partly covered by drag handle
+  // increased mouse move x to 5 to avoid this
+  await page.mouse.move(buttonRect.x + 5, buttonRect.y + buttonRect.height / 2);
 
   await waitNextFrame(page, 2000);
   await page.locator('affine-note-slicer-popupbutton').click();
@@ -681,7 +687,7 @@ test('format quick bar should show up when double-clicking on text', async ({
   await waitNextFrame(page);
 
   await page
-    .locator('.affine-rich-text')
+    .locator('rich-text')
     .nth(1)
     .dblclick({
       position: { x: 10, y: 10 },

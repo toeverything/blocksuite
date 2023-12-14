@@ -4,7 +4,7 @@ import {
   type Connectable,
   type EdgelessElement,
   type Selectable,
-} from '../../_common/utils/types.js';
+} from '../../_common/types.js';
 import type { CanvasElementType } from '../../surface-block/index.js';
 import {
   almostEqual,
@@ -1234,7 +1234,6 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
       updates.source = { position: Vec.add(source.position, offset) };
     if (!target.id && target.position)
       updates.target = { position: Vec.add(target.position, offset) };
-    updates.xywh = bound.serialize();
     surface.updateElement<CanvasElementType.CONNECTOR>(connector.id, updates);
   }
 

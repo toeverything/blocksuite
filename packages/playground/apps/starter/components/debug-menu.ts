@@ -17,16 +17,16 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 
 import {
   BlocksUtils,
-  COLOR_VARIABLES,
-  createPage,
+  ColorVariables,
+  createDefaultPage,
   extractCssVariables,
-  FONT_FAMILY_VARIABLES,
-  HtmlAdapter,
-  MarkdownAdapter,
+  FontFamilyVariables,
+  HtmlTransformer,
+  MarkdownTransformer,
   NOTE_WIDTH,
-  SIZE_VARIABLES,
+  SizeVariables,
+  StyleVariables,
   type SurfaceBlockComponent,
-  VARIABLES,
   ZipTransformer,
 } from '@blocksuite/blocks';
 import type { TreeNode } from '@blocksuite/blocks/_common/mind-map/draw';
@@ -40,7 +40,7 @@ import {
 import type { CopilotPanel } from '@blocksuite/presets';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { Job, Utils, type Workspace } from '@blocksuite/store';
+import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
@@ -69,14 +69,14 @@ export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
-COLOR_VARIABLES.forEach((key: string) => {
+ColorVariables.forEach((key: string) => {
   plate[key] = cssVariablesMap[key];
 });
-const OTHER_CSS_VARIABLES = VARIABLES.filter(
+const OTHER_CSS_VARIABLES = StyleVariables.filter(
   variable =>
-    !SIZE_VARIABLES.includes(variable) &&
-    !COLOR_VARIABLES.includes(variable) &&
-    !FONT_FAMILY_VARIABLES.includes(variable)
+    !SizeVariables.includes(variable) &&
+    !ColorVariables.includes(variable) &&
+    !FontFamilyVariables.includes(variable)
 );
 let styleDebugMenuLoaded = false;
 
@@ -96,7 +96,7 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
     title: 'Others',
     expanded: false,
   });
-  SIZE_VARIABLES.forEach(name => {
+  SizeVariables.forEach(name => {
     sizeFolder
       .addBinding(
         {
@@ -114,7 +114,7 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
         style.setProperty(name, `${Math.round(e.value)}px`);
       });
   });
-  FONT_FAMILY_VARIABLES.forEach(name => {
+  FontFamilyVariables.forEach(name => {
     fontFamilyFolder
       .addBinding(
         {
@@ -399,77 +399,11 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportHtml() {
-    const job = new Job({ workspace: this.workspace });
-    job.pageToSnapshot(window.page).then(snapshot => {
-      new HtmlAdapter()
-        .fromPageSnapshot({
-          snapshot,
-          assets: job.assetsManager,
-        })
-        .then(async result => {
-          let downloadBlob: Blob;
-          const element = document.createElement('a');
-          const contentBlob = new Blob([result.file], { type: 'plain/text' });
-          if (result.assetsIds.length > 0) {
-            const zip = ZipTransformer.createAssetsArchive(
-              job.assets,
-              result.assetsIds
-            );
-
-            zip.file('index.html', contentBlob);
-
-            downloadBlob = await zip.generateAsync({ type: 'blob' });
-            element.setAttribute('download', 'export.zip');
-          } else {
-            downloadBlob = contentBlob;
-            element.setAttribute('download', 'export.md');
-          }
-          const fileURL = URL.createObjectURL(downloadBlob);
-          element.setAttribute('href', fileURL);
-          element.style.display = 'none';
-          document.body.appendChild(element);
-          element.click();
-          document.body.removeChild(element);
-          URL.revokeObjectURL(fileURL);
-        });
-    });
+    HtmlTransformer.exportPage(this.page);
   }
 
   private async _exportMarkDown() {
-    const job = new Job({ workspace: this.workspace });
-    job.pageToSnapshot(window.page).then(snapshot => {
-      new MarkdownAdapter()
-        .fromPageSnapshot({
-          snapshot,
-          assets: job.assetsManager,
-        })
-        .then(async result => {
-          let downloadBlob: Blob;
-          const element = document.createElement('a');
-          const contentBlob = new Blob([result.file], { type: 'plain/text' });
-          if (result.assetsIds.length > 0) {
-            const zip = ZipTransformer.createAssetsArchive(
-              job.assets,
-              result.assetsIds
-            );
-
-            zip.file('index.md', contentBlob);
-
-            downloadBlob = await zip.generateAsync({ type: 'blob' });
-            element.setAttribute('download', 'export.zip');
-          } else {
-            downloadBlob = contentBlob;
-            element.setAttribute('download', 'export.md');
-          }
-          const fileURL = URL.createObjectURL(downloadBlob);
-          element.setAttribute('href', fileURL);
-          element.style.display = 'none';
-          document.body.appendChild(element);
-          element.click();
-          document.body.removeChild(element);
-          URL.revokeObjectURL(fileURL);
-        });
-    });
+    MarkdownTransformer.exportPage(this.page);
   }
 
   private _exportPng() {
@@ -801,7 +735,7 @@ export class DebugMenu extends ShadowlessElement {
 
 function createPageBlock(workspace: Workspace) {
   const id = workspace.idGenerator('page');
-  createPage(workspace, { id }).catch(console.error);
+  createDefaultPage(workspace, { id }).catch(console.error);
 }
 
 function PageList(

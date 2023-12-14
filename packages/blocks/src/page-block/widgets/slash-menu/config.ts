@@ -26,7 +26,7 @@ import {
   YesterdayIcon,
 } from '../../../_common/icons/index.js';
 import {
-  createPage,
+  createDefaultPage,
   getBlockComponentByModel,
   getCurrentNativeRange,
   getImageFilesFromLocal,
@@ -36,14 +36,13 @@ import {
   resetNativeSelection,
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
-import { humanFileSize } from '../../../_common/utils/math.js';
 import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
 import { toggleBookmarkCreateModal } from '../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
-import { addSiblingImageBlock } from '../../../image-block/image/utils.js';
 import { ImageService } from '../../../image-block/image-service.js';
+import { addSiblingImageBlock } from '../../../image-block/utils.js';
 import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { copyBlock } from '../../../page-block/doc/utils.js';
@@ -193,7 +192,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         name: 'New Page',
         icon: NewPageIcon,
         action: async ({ pageElement, model }) => {
-          const newPage = await createPage(pageElement.page.workspace);
+          const newPage = await createDefaultPage(pageElement.page.workspace);
           insertContent(model, REFERENCE_NODE, {
             reference: {
               type: 'LinkedPage',
@@ -261,26 +260,13 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
 
           const imageFiles = await getImageFilesFromLocal();
+
           const imageService = pageElement.host.spec.getService('affine:image');
           assertExists(imageService);
           assertInstanceOf(imageService, ImageService);
           const maxFileSize = imageService.maxFileSize;
-          const isSizeExceeded = imageFiles.some(
-            file => file.size > maxFileSize
-          );
-          if (isSizeExceeded) {
-            toast(
-              `You can only upload files less than ${humanFileSize(
-                maxFileSize,
-                true,
-                0
-              )}`
-            );
-          } else {
-            imageFiles.forEach(file => {
-              addSiblingImageBlock(pageElement.page, file, model);
-            });
-          }
+
+          addSiblingImageBlock(imageFiles, maxFileSize, model);
         }),
       },
       {
@@ -319,13 +305,17 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const page = pageElement.page;
           const parent = page.getParent(model);
           if (!parent) return;
+
           const file = await openFileOrFiles();
           if (!file) return;
-          const service = pageElement.host.spec.getService('affine:attachment');
-          assertExists(service);
-          assertInstanceOf(service, AttachmentService);
-          const maxFileSize = service.maxFileSize;
-          addSiblingAttachmentBlock(file, model, maxFileSize);
+
+          const attachmentService =
+            pageElement.host.spec.getService('affine:attachment');
+          assertExists(attachmentService);
+          assertInstanceOf(attachmentService, AttachmentService);
+          const maxFileSize = attachmentService.maxFileSize;
+
+          addSiblingAttachmentBlock(file, maxFileSize, model);
         }),
       },
     ],

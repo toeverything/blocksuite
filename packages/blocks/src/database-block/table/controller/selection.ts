@@ -10,7 +10,7 @@ import type {
   CellFocus,
   MultiSelection,
   TableViewSelection,
-} from '../../../_common/utils/types.js';
+} from '../../../_common/types.js';
 import { startDrag } from '../../utils/drag.js';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';

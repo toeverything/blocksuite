@@ -18,8 +18,8 @@ import {
   ShapeArrowDownSmallIcon,
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import { LineWidth, type ShapeTool } from '../../../../_common/types.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
-import { LineWidth, type ShapeTool } from '../../../../_common/utils/types.js';
 import { CanvasTextFontFamily } from '../../../../surface-block/consts.js';
 import type { CanvasElementType } from '../../../../surface-block/index.js';
 import {

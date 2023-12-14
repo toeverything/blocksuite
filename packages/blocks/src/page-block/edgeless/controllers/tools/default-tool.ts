@@ -1,6 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { DisposableGroup, noop } from '@blocksuite/global/utils';
 
 import {
   type DefaultTool,
@@ -9,9 +8,7 @@ import {
   type Selectable,
   type TopLevelBlockModel,
 } from '../../../../_common/utils/index.js';
-import { getBlockClipboardInfo } from '../../../../_legacy/clipboard/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import type { HitTestOptions } from '../../../../surface-block/elements/edgeless-element.js';
 import {
   Bound,
@@ -29,10 +26,8 @@ import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
 import {
-  isBookmarkBlock,
   isCanvasElement,
   isFrameBlock,
-  isImageBlock,
   isNoteBlock,
 } from '../../utils/query.js';
 import {
@@ -42,6 +37,7 @@ import {
   mountShapeTextEditor,
   mountTextElementEditor,
 } from '../../utils/text.js';
+import { prepareClipboardData } from '../clipboard.js';
 import { EdgelessToolController } from './index.js';
 
 export enum DefaultModeDragType {
@@ -356,79 +352,23 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private async _cloneContent() {
     this._lock = true;
-    const elements = (await Promise.all(
-      this._toBeMoved.map(async selected => {
-        return await this._cloneSelected(selected);
-      })
-    )) as Selectable[];
-    this._toBeMoved = elements;
+    const { _edgeless } = this;
+    const { clipboardController } = _edgeless;
+
+    const data = JSON.parse(
+      JSON.stringify(await prepareClipboardData(this._toBeMoved, _edgeless.std))
+    );
+
+    const [elements, blocks] =
+      await clipboardController.createElementsFromClipboardData(
+        data as Record<string, unknown>[]
+      );
+
+    this._toBeMoved = [...elements, ...blocks];
     this._setSelectionState(
-      elements.map(el => el.id),
+      this._toBeMoved.map(el => el.id),
       false
     );
-  }
-
-  private async _cloneSelected(selected: Selectable) {
-    const { _edgeless, _surface } = this;
-    if (isNoteBlock(selected)) {
-      const noteService = _edgeless.getService(EdgelessBlockType.NOTE);
-      const id = _surface.addElement(
-        EdgelessBlockType.NOTE,
-        {
-          xywh: selected.xywh,
-          edgeless: selected.edgeless,
-          background: selected.background,
-          hidden: selected.hidden,
-        },
-        this._page.root?.id
-      );
-      const note = this._page.getBlockById(id);
-      assertExists(note);
-      const serializedBlock = (await getBlockClipboardInfo(selected)).json;
-      await noteService.json2Block(note, serializedBlock.children);
-      return _surface.pickById(id);
-    } else if (isFrameBlock(selected)) {
-      const frameService = _edgeless.getService(EdgelessBlockType.FRAME);
-      const json = frameService.block2Json(selected);
-      const id = this._surface.addElement(EdgelessBlockType.FRAME, {
-        xywh: json.xywh,
-        title: new Workspace.Y.Text(json.title),
-        background: json.background,
-      });
-      return _surface.pickById(id);
-    } else if (isImageBlock(selected)) {
-      const imageService = _edgeless.getService(EdgelessBlockType.IMAGE);
-      const json = imageService.block2Json(selected, []);
-      const id = this._surface.addElement(
-        EdgelessBlockType.IMAGE,
-        {
-          xywh: json.xywh,
-          sourceId: json.sourceId,
-          rotate: json.rotate,
-        },
-        this._surface.model
-      );
-      return _surface.pickById(id);
-    } else if (isBookmarkBlock(selected)) {
-      const bookmarkService = _edgeless.getService(EdgelessBlockType.BOOKMARK);
-      const json = bookmarkService.block2Json(selected, []);
-      const id = this._surface.addElement(
-        EdgelessBlockType.IMAGE,
-        {
-          xywh: json.xywh,
-          sourceId: json.sourceId,
-          rotate: json.rotate,
-        },
-        this._surface.model
-      );
-      return _surface.pickById(id);
-    } else {
-      const id = _surface.addElement(
-        selected.type,
-        selected.serialize() as unknown as Record<string, unknown>
-      );
-      return _surface.pickById(id);
-    }
   }
 
   private _addFrames() {
@@ -519,10 +459,24 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       dragType = DefaultModeDragType.AltCloning;
       await this._cloneContent();
     }
-
+    this._filterConnectedConnector();
     this._addFrames();
     // Set up drag state
     this.initializeDragState(e, dragType);
+  }
+
+  private _filterConnectedConnector() {
+    this._toBeMoved = this._toBeMoved.filter(ele => {
+      if (ele instanceof ConnectorElement && ele.source.id && ele.target.id) {
+        if (
+          !!this._toBeMoved.find(e => e.id === ele.source.id) &&
+          !!this._toBeMoved.find(e => e.id === ele.target.id)
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
   }
 
   private prepareMovedElements() {

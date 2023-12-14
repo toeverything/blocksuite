@@ -7,7 +7,7 @@ import type { TemplateResultType } from 'lit/directive-helpers.js';
 import type {
   BlockTransformContext,
   SerializedBlock,
-} from '../../_common/utils/types.js';
+} from '../../_common/types.js';
 import { json2block } from './json2block.js';
 
 // Breaking change introduced in lit@2.8.0
