@@ -1,8 +1,10 @@
+import conceptmap from './json/concept-map.json';
 import flowchart from './json/flow-chart.json';
 import ganttchart from './json/gantt-chart.json';
 import kanban from './json/kanban.json';
 import monthlycalendar from './json/monthly-calendar.json';
 import presentation from './json/presentation.json';
+import projectplanning from './json/project-planning.json';
 import stickers from './json/stickers.json';
 import storyboard from './json/storyboard.json';
 import type {
@@ -13,8 +15,16 @@ import type {
 
 export const templates: TemplateCategory[] = [
   {
+    name: 'Marketing',
+    templates: [storyboard],
+  },
+  {
     name: 'Project management',
-    templates: [kanban, storyboard, monthlycalendar, ganttchart, flowchart],
+    templates: [ganttchart, kanban, monthlycalendar, projectplanning],
+  },
+  {
+    name: 'Brainstorming',
+    templates: [flowchart, conceptmap],
   },
   {
     name: 'Presentation',
