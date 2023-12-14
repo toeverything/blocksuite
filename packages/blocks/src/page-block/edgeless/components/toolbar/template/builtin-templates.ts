@@ -1,12 +1,12 @@
-import conceptmap from './json/concept-map.json';
-import flowchart from './json/flow-chart.json';
-import ganttchart from './json/gantt-chart.json';
-import kanban from './json/kanban.json';
-import monthlycalendar from './json/monthly-calendar.json';
-import presentation from './json/presentation.json';
-import projectplanning from './json/project-planning.json';
-import stickers from './json/stickers.json';
-import storyboard from './json/storyboard.json';
+import conceptmap from './json/concept-map.json' assert { type: 'json' };
+import flowchart from './json/flow-chart.json' assert { type: 'json' };
+import ganttchart from './json/gantt-chart.json' assert { type: 'json' };
+import kanban from './json/kanban.json' assert { type: 'json' };
+import monthlycalendar from './json/monthly-calendar.json' assert { type: 'json' };
+import presentation from './json/presentation.json' assert { type: 'json' };
+import projectplanning from './json/project-planning.json' assert { type: 'json' };
+import stickers from './json/stickers.json' assert { type: 'json' };
+import storyboard from './json/storyboard.json' assert { type: 'json' };
 import type {
   Template,
   TemplateCategory,
