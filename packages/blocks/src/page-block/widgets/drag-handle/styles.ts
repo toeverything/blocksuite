@@ -1,7 +1,6 @@
 import { css } from 'lit';
 
-export const DRAG_HANDLE_HEIGHT = 24; // px
-export const DRAG_HANDLE_WIDTH = 16; // px
+import { DRAG_HANDLE_CONTAINER_WIDTH } from './config.js';
 
 export const styles = css`
   .affine-drag-handle-widget {
@@ -18,7 +17,7 @@ export const styles = css`
     position: absolute;
     display: flex;
     justify-content: center;
-    width: ${DRAG_HANDLE_WIDTH}px;
+    width: ${DRAG_HANDLE_CONTAINER_WIDTH}px;
     min-height: 12px;
     pointer-events: auto;
     user-select: none;

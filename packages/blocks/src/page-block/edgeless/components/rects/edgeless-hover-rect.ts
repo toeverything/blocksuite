@@ -43,7 +43,6 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
     if (this.rAfId) cancelAnimationFrame(this.rAfId);
 
     const hoverState = this.edgeless.tools.getHoverState();
-
     if (!hoverState) {
       this.rAfId = requestAnimationFrame(() => {
         this.rect.style.removeProperty('visibility');
@@ -51,6 +50,7 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
 
       return;
     }
+
     const { zoom } = this.edgeless.surface.viewport;
     const { rect } = hoverState;
     const element = hoverState.content;
@@ -75,13 +75,19 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
     this._disposables.add(
       this.edgeless.slots.hoverUpdated.on(() => this._refreshHoverRect())
     );
+
     this._disposables.add(
       this.edgeless.slots.viewportUpdated.on(() => this._refreshHoverRect())
     );
+
     this._disposables.add(
       this.edgeless.selectionManager.slots.updated.on(() =>
         this._refreshHoverRect()
       )
+    );
+
+    this._disposables.add(
+      this.edgeless.page.slots.blockUpdated.on(() => this._refreshHoverRect())
     );
   }
 

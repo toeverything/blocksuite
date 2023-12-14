@@ -49,7 +49,7 @@ async function generateClipboardInfo(
     childrenJson.push(json);
   }
 
-  const service = await getService(model.flavour);
+  const service = getService(model.flavour);
 
   const html = await service.block2html(model, {
     childText: childrenHtml.join(''),

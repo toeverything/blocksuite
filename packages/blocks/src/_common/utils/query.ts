@@ -411,6 +411,10 @@ function isEdgelessChildNote({ classList }: Element) {
   return classList.contains('edgeless-block-portal-note');
 }
 
+function isEdgelessChildImage({ classList }: Element) {
+  return classList.contains('edgeless-block-portal-image');
+}
+
 /**
  * Returns the closest block element by a point in the rect.
  *
@@ -697,6 +701,16 @@ export function getThemeMode(): 'light' | 'dark' {
 export function getHoveringNote(point: Point) {
   return (
     document.elementsFromPoint(point.x, point.y).find(isEdgelessChildNote) ||
+    null
+  );
+}
+
+/**
+ * Get hovering top level image with given a point in edgeless mode.
+ */
+export function getHoveringImage(point: Point) {
+  return (
+    document.elementsFromPoint(point.x, point.y).find(isEdgelessChildImage) ||
     null
   );
 }

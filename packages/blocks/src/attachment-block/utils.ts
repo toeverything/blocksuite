@@ -169,8 +169,8 @@ export async function uploadBlobForAttachment(
  */
 export async function addSiblingAttachmentBlock(
   file: File,
-  model: BaseBlockModel,
   maxFileSize: number,
+  model: BaseBlockModel,
   place: 'before' | 'after' = 'after'
 ): Promise<string | null> {
   if (file.size > maxFileSize) {

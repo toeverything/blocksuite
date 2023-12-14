@@ -394,7 +394,6 @@ export class Page extends Space<FlatBlockMap> {
     const childBlocksPerParent = new Map<BaseBlockModel, BaseBlockModel[]>();
     blocksToMove.forEach(block => {
       const parentBlock = this.getParent(block);
-
       if (!parentBlock) {
         throw new Error("Can't find parent block for the current block");
       }

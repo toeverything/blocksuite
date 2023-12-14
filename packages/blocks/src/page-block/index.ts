@@ -13,6 +13,7 @@ export {
 } from './edgeless/components/utils.js';
 export * from './edgeless/edgeless-page-block.js';
 export { type PageBlockModel, PageBlockSchema } from './page-model.js';
+export { PageService } from './page-service.js';
 export * from './types.js';
 export * from './utils/index.js';
 export * from './widgets/index.js';
