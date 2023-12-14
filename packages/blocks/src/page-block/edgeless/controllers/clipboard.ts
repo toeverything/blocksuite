@@ -317,15 +317,11 @@ export class EdgelessClipboardController extends PageClipboard {
     const { surface } = this;
     const noteIds = await Promise.all(
       notes.map(async ({ id, props, children }) => {
-        const { xywh, background } = props;
-        assertExists(xywh);
-
+        delete props.index;
+        assertExists(props.xywh);
         const noteId = this.surface.addElement(
           EdgelessBlockType.NOTE,
-          {
-            xywh,
-            background,
-          },
+          props,
           this.page.root?.id
         );
         const note = surface.pickById(noteId) as NoteBlockModel;
