@@ -233,6 +233,59 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           context.skipAllChildren();
           break;
         }
+        // TODO: move to Normal HTML Adapter as this is not notion specific
+        case 'img': {
+          if (!assets) {
+            break;
+          }
+          const image = o.node;
+          const imageURL =
+            typeof image?.properties.src === 'string'
+              ? image.properties.src
+              : '';
+          if (imageURL) {
+            let blobId = '';
+            if (!imageURL.startsWith('http')) {
+              assets.getAssets().forEach((_value, key) => {
+                const attachmentName = getAssetName(assets.getAssets(), key);
+                if (imageURL.includes(attachmentName)) {
+                  blobId = key;
+                }
+              });
+            } else {
+              const res = await fetch(imageURL);
+              const clonedRes = res.clone();
+              const name =
+                getFilenameFromContentDisposition(
+                  res.headers.get('Content-Disposition') ?? ''
+                ) ??
+                imageURL.split('/').at(-1) ??
+                'image' + res.headers.get('Content-Type')?.split('/').at(-1) ??
+                '.png';
+              const file = new File([await res.blob()], name);
+              blobId = await sha(await clonedRes.arrayBuffer());
+              assets?.getAssets().set(blobId, file);
+              assets?.writeToBlob(blobId);
+            }
+            context
+              .openNode(
+                {
+                  type: 'block',
+                  id: nanoid('block'),
+                  flavour: 'affine:image',
+                  props: {
+                    sourceId: blobId,
+                  },
+                  children: [],
+                },
+                'children'
+              )
+              .closeNode();
+            context.skipAllChildren();
+            break;
+          }
+          break;
+        }
         case 'pre': {
           const code = hastQuerySelector(o.node, 'code');
           if (!code) {
@@ -433,6 +486,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'children'
               )
               .closeNode();
+            context.skipAllChildren();
             break;
           }
           // Notion callout
@@ -455,6 +509,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'children'
               )
               .closeNode();
+            context.skipAllChildren();
             break;
           }
           // Notion bookmark
@@ -490,6 +545,8 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'children'
               )
               .closeNode();
+            context.skipAllChildren();
+            break;
           }
           if (!assets) {
             break;
@@ -542,6 +599,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'children'
               )
               .closeNode();
+            context.skipAllChildren();
             break;
           }
           // Notion embeded
@@ -603,6 +661,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'children'
               )
               .closeNode();
+            context.skipAllChildren();
             break;
           }
           break;
