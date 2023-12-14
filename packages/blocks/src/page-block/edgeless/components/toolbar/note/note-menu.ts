@@ -107,7 +107,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
             <edgeless-tool-icon-button
               .activeMode=${'background'}
               .iconContainerPadding=${2}
-              .tooltip=${'bookmark'}
+              .tooltip=${'Bookmark'}
               @click=${async () => {
                 const url = await toggleBookmarkCreateModal(this.edgeless.host);
                 if (!url) return;

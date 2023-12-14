@@ -75,6 +75,14 @@ export function isBookmarkBlock(
   );
 }
 
+export function isEmbeddedBlock(
+  element: BaseBlockModel | EdgelessElement | null
+): element is BookmarkBlockModel {
+  return (
+    !!element && 'flavour' in element && /affine:embed-*/.test(element.flavour)
+  );
+}
+
 export function isCanvasElement(
   selectable: Selectable | null
 ): selectable is CanvasElement {

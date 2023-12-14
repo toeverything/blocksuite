@@ -5,6 +5,7 @@ export type Template = {
   content: unknown;
   asserts?: Record<string, string>;
   preview: string;
+  version?: object;
 };
 
 export type TemplateCategory = {
