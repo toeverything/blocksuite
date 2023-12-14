@@ -51,6 +51,8 @@ export function getNextBlock(
   model: BaseBlockModel,
   map: Record<string, true> = {}
 ): BaseBlockModel | null {
+  const isPage = isPageMode(model.page);
+
   if (model.id in map) {
     throw new Error("Can't get next block! There's a loop in the block tree!");
   }
@@ -66,6 +68,11 @@ export function getNextBlock(
     if (nextSibling) {
       // Assert nextSibling is not possible to be `affine:page`
       if (matchFlavours(nextSibling, ['affine:note'])) {
+        // in edgeless mode, limit search for the next block within the same note
+        if (!isPage) {
+          return null;
+        }
+
         return getNextBlock(nextSibling);
       }
       return nextSibling;
@@ -92,6 +99,8 @@ export function getNextBlock(
  * NOTE: this method will just return blocks with `content` role
  */
 export function getPreviousBlock(model: BaseBlockModel): BaseBlockModel | null {
+  const isPage = isPageMode(model.page);
+
   const getPrev = (model: BaseBlockModel) => {
     const parent = model.page.getParent(model);
     if (!parent) return null;
@@ -104,6 +113,12 @@ export function getPreviousBlock(model: BaseBlockModel): BaseBlockModel | null {
       }
       return prev;
     }
+
+    // in edgeless mode, limit search for the previous block within the same note
+    if (!isPage && matchFlavours(parent, ['affine:note'])) {
+      return null;
+    }
+
     return parent;
   };
 
