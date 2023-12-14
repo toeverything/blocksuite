@@ -39,7 +39,7 @@
     "test:node": "node --experimental-specifier-resolution=node --loader ts-node/esm ./scripts/node-import-test.ts",
     "format": "prettier --write --cache packages tests",
     "build": "pnpm build:packages && pnpm build:playground",
-    "build:packages": "pnpm -r --filter=!@blocksuite/docs --filter=!@blocksuite/playground run build",
+    "build:packages": "pnpm --filter=@blocksuite/presets build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "build:docs": "pnpm --filter @blocksuite/docs build",
     "size:data": "node --loader ts-node/esm ./scripts/size-data.ts",

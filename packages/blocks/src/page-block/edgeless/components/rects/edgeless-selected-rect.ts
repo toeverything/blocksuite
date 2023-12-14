@@ -6,14 +6,14 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { stopPropagation } from '../../../../_common/utils/event.js';
-import { pickValues } from '../../../../_common/utils/iterable.js';
-import { clamp } from '../../../../_common/utils/math.js';
 import type {
   EdgelessElement,
   IPoint,
   Selectable,
-} from '../../../../_common/utils/types.js';
+} from '../../../../_common/types.js';
+import { stopPropagation } from '../../../../_common/utils/event.js';
+import { pickValues } from '../../../../_common/utils/iterable.js';
+import { clamp } from '../../../../_common/utils/math.js';
 import type { NoteBlockModel } from '../../../../models.js';
 import {
   CanvasElementType,

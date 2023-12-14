@@ -12,10 +12,10 @@ import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
   BLOCK_ID_ATTR as ATTR,
 } from '../consts.js';
+import { type AbstractEditor } from '../types.js';
 import { clamp } from './math.js';
 import { matchFlavours } from './model.js';
 import type { Point, Rect } from './rect.js';
-import { type AbstractEditor } from './types.js';
 
 const ATTR_SELECTOR = `[${ATTR}]`;
 

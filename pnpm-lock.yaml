@@ -450,6 +450,9 @@ importers:
 
   packages/presets:
     dependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../block-std
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks

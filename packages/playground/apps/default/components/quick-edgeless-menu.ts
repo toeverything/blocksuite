@@ -17,7 +17,7 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 
 import {
-  COLOR_VARIABLES,
+  ColorVariables,
   extractCssVariables,
   HtmlTransformer,
   MarkdownTransformer,
@@ -41,7 +41,7 @@ import { notify } from '../utils/notify';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
-COLOR_VARIABLES.forEach((key: string) => {
+ColorVariables.forEach((key: string) => {
   plate[key] = cssVariablesMap[key];
 });
 

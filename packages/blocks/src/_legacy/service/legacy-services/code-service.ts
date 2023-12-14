@@ -2,15 +2,15 @@ import type { TextRangePoint } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
+import type {
+  BlockTransformContext,
+  SerializedBlock,
+} from '../../../_common/types.js';
 import {
   getBlockComponentByModel,
   getInlineEditorByModel,
   getThemeMode,
 } from '../../../_common/utils/index.js';
-import type {
-  BlockTransformContext,
-  SerializedBlock,
-} from '../../../_common/utils/types.js';
 import type {
   CodeBlockModel,
   HighlightOptionsGetter,

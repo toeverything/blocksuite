@@ -4,7 +4,7 @@ import {
   type Connectable,
   type EdgelessElement,
   type Selectable,
-} from '../../_common/utils/types.js';
+} from '../../_common/types.js';
 import type { CanvasElementType } from '../../surface-block/index.js';
 import {
   almostEqual,

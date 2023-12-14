@@ -1,4 +1,4 @@
-import type { SerializedBlock } from '../../../_common/utils/types.js';
+import type { SerializedBlock } from '../../../_common/types.js';
 import type { AttachmentBlockModel } from '../../../attachment-block/attachment-model.js';
 import { cloneAttachmentProperties } from '../../../attachment-block/utils.js';
 import { BaseService } from '../service.js';

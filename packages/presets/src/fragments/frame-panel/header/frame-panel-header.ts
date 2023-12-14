@@ -4,7 +4,10 @@ import type {
   EdgelessPageBlockComponent,
   EdgelessTool,
 } from '@blocksuite/blocks';
-import { FILL_SCREEN_KEY, type NavigatorMode } from '@blocksuite/blocks';
+import {
+  EdgelessPresentationConsts,
+  type NavigatorMode,
+} from '@blocksuite/blocks';
 import { createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -142,7 +145,9 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
 
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode =
-      sessionStorage.getItem(FILL_SCREEN_KEY) === 'true' ? 'fill' : 'fit';
+      sessionStorage.getItem(EdgelessPresentationConsts.FillScreen) === 'true'
+        ? 'fill'
+        : 'fit';
   }
 
   private _clearEdgelessDisposables = () => {

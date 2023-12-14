@@ -29,8 +29,8 @@ import {
   StraightLineIcon,
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import { LineWidth } from '../../../../_common/types.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
-import { LineWidth } from '../../../../_common/utils/types.js';
 import type { CanvasElementType } from '../../../../surface-block/index.js';
 import {
   type ConnectorElement,

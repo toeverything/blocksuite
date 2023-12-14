@@ -1,4 +1,4 @@
-import type { EdgelessElement } from '../../_common/utils/types.js';
+import type { EdgelessElement } from '../../_common/types.js';
 import type { FrameBlockModel } from '../../models.js';
 import type { CanvasElement } from '../index.js';
 import { compare, getGroups } from './group-manager.js';

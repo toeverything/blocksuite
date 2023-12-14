@@ -1,5 +1,5 @@
 import { WebIcon16 } from '../../../_common/icons/text.js';
-import type { SerializedBlock } from '../../../_common/utils/types.js';
+import type { SerializedBlock } from '../../../_common/types.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import { BookmarkDefaultImage } from '../../../bookmark-block/components/bookmark-default-image.js';
 import { BaseService } from '../service.js';

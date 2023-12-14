@@ -1,16 +1,15 @@
 import { type Slot } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
-import type { CssVariableName } from '../../_common/theme/css-variables.js';
-import type { ServiceFlavour } from '../../_legacy/service/legacy-services/index.js';
-import type { DataViewDataType } from '../../database-block/common/data-view.js';
-import type { Cell } from '../../database-block/index.js';
-import type { Column } from '../../database-block/table/types.js';
-import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { ImageBlockModel } from '../../image-block/index.js';
-import type { BookmarkBlockModel } from '../../models.js';
-import type { NoteBlockModel } from '../../note-block/index.js';
-import { type ShapeStyle } from '../../surface-block/consts.js';
+import type { ServiceFlavour } from '../_legacy/service/legacy-services/index.js';
+import type { DataViewDataType } from '../database-block/common/data-view.js';
+import type { Cell } from '../database-block/index.js';
+import type { Column } from '../database-block/table/types.js';
+import type { FrameBlockModel } from '../frame-block/index.js';
+import type { ImageBlockModel } from '../image-block/index.js';
+import type { BookmarkBlockModel } from '../models.js';
+import type { NoteBlockModel } from '../note-block/index.js';
+import { type ShapeStyle } from '../surface-block/consts.js';
 import {
   type BrushElement,
   type CanvasElement,
@@ -18,12 +17,13 @@ import {
   type ConnectorMode,
   type GroupElement,
   type ShapeType,
-} from '../../surface-block/elements/index.js';
-import type { RefNodeSlots } from '../components/rich-text/inline/nodes/reference-node.js';
-import type { AffineTextAttributes } from '../components/rich-text/inline/types.js';
-import type { NavigatorMode } from '../edgeless/frame/consts.js';
-import type { BlockComponent } from './query.js';
-import type { Point } from './rect.js';
+} from '../surface-block/elements/index.js';
+import type { RefNodeSlots } from './components/rich-text/inline/nodes/reference-node.js';
+import type { AffineTextAttributes } from './components/rich-text/inline/types.js';
+import type { NavigatorMode } from './edgeless/frame/consts.js';
+import type { CssVariableName } from './theme/css-variables.js';
+import type { BlockComponent } from './utils/query.js';
+import type { Point } from './utils/rect.js';
 
 export type SelectionPosition = 'start' | 'end' | Point;
 

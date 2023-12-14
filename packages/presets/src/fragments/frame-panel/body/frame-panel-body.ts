@@ -6,7 +6,6 @@ import {
   type EdgelessPageBlockComponent,
   type FrameBlockModel,
   generateKeyBetween,
-  saveViewportToSession,
 } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { type EditorHost, WithDisposable } from '@blocksuite/lit';
@@ -242,10 +241,17 @@ export class FramePanelBody extends WithDisposable(LitElement) {
 
     if (!this.edgeless) {
       this.changeEditorMode('edgeless');
-      saveViewportToSession(this.page.id, {
+
+      const viewport = {
+        xywh: '', // FIXME
         referenceId: block.id,
-        padding: this.viewportPadding,
-      });
+        padding: this.viewportPadding as [number, number, number, number],
+      };
+      this.editorHost.std.command
+        .pipe()
+        .withHost()
+        .saveViewportToSession({ viewport })
+        .run();
     } else {
       this.edgeless.surface.viewport.setViewportByBound(
         bound,

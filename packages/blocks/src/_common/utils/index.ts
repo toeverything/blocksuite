@@ -8,6 +8,6 @@ export * from './rect.js';
 export * from './reordering.js';
 export * from './selection.js';
 // Compat with SSR
+export * from '../types.js';
 export * from './event.js';
 export * from './model.js';
-export * from './types.js';

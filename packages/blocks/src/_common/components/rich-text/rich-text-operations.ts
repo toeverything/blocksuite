@@ -22,8 +22,8 @@ import {
   focusBlockByModel,
   focusTitle,
 } from '../../../_common/utils/selection.js';
-import type { ExtendedModel } from '../../../_common/utils/types.js';
 import { type ListBlockModel, type PageBlockModel } from '../../../models.js';
+import type { ExtendedModel } from '../../types.js';
 
 /**
  * Whether the block supports rendering its children.
