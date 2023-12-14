@@ -34,7 +34,7 @@ describe('notion html to snapshot', () => {
           id: 'matchesReplaceMap[1]',
           flavour: 'affine:code',
           props: {
-            language: null,
+            language: 'Plain Text',
             text: {
               '$blocksuite:internal:text$': true,
               delta: [
