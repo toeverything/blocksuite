@@ -5,7 +5,7 @@ import type { BlockSnapshot, Page } from '@blocksuite/store';
 
 import { HtmlAdapter, ImageAdapter } from '../../_common/adapters/index.js';
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
-import { replaceIdMiddleware } from '../../_common/transformers/utils.js';
+import { replaceIdMiddleware } from '../../_common/transformers/middlewares.js';
 import { ClipboardAdapter } from './adapter.js';
 import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
 
