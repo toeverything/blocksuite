@@ -15,11 +15,18 @@ export class VText extends LitElement {
     'white-space': 'break-spaces',
   };
 
+  private parser = new DOMParser();
+
   override render() {
     // we need to avoid \n appearing before and after the span element, which will
     // cause the sync problem about the cursor position
+    const parsed = this.parser.parseFromString(
+      this.str.replace(/\s/g, '&nbsp;'),
+      'text/html'
+    );
+    const str = parsed.body.textContent || '';
     return html`<span style=${styleMap(this.styles)} data-v-text="true"
-      >${this.str}</span
+      >${str}</span
     >`;
   }
 
