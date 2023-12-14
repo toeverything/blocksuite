@@ -1,7 +1,13 @@
 import './template-panel.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { arrow, computePosition, offset } from '@floating-ui/dom';
+import {
+  arrow,
+  autoUpdate,
+  computePosition,
+  offset,
+  shift,
+} from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -59,14 +65,18 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
     requestAnimationFrame(() => {
       const arrowEl = panel.renderRoot.querySelector('.arrow') as HTMLElement;
 
-      computePosition(this, panel, {
-        placement: 'top',
-        middleware: [offset(20), arrow({ element: arrowEl })],
-      }).then(({ x, y, middlewareData }) => {
-        panel.style.left = `${x}px`;
-        panel.style.top = `${y}px`;
+      autoUpdate(this, panel, () => {
+        computePosition(this, panel, {
+          placement: 'top',
+          middleware: [offset(20), arrow({ element: arrowEl }), shift()],
+        }).then(({ x, y, middlewareData }) => {
+          panel.style.left = `${x}px`;
+          panel.style.top = `${y}px`;
 
-        arrowEl.style.left = `${middlewareData.arrow?.x ?? 0}px`;
+          arrowEl.style.left = `${
+            (middlewareData.arrow?.x ?? 0) - (middlewareData.shift?.x ?? 0)
+          }px`;
+        });
       });
     });
   }
