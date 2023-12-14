@@ -4,76 +4,23 @@ import type {
   BookmarkBlockModel,
   CodeBlockModel,
   DatabaseBlockModel,
-  DataViewBlockModel,
-  DividerBlockModel,
   ImageBlockModel,
   ListBlockModel,
   ParagraphBlockModel,
-  SurfaceRefBlockModel,
 } from '@blocksuite/blocks';
 import { BlocksUtils } from '@blocksuite/blocks';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import {
-  BlockPreviewIcon,
-  SmallHeading1Icon,
-  SmallHeading2Icon,
-  SmallHeading3Icon,
-  SmallHeading4Icon,
-  SmallHeading5Icon,
-  SmallHeading6Icon,
-  SmallTextIcon,
-} from '../_common/icons.js';
+import { placeholderMap, previewIconMap } from './config.js';
 
 type ValuesOf<T, K extends keyof T = keyof T> = T[K];
 
 function assertType<T>(value: unknown): asserts value is T {
   noop(value);
 }
-
-const paragraphIconMap: {
-  [key in ParagraphBlockModel['type']]: TemplateResult<1>;
-} = {
-  quote: BlockPreviewIcon,
-  text: SmallTextIcon,
-  h1: SmallHeading1Icon,
-  h2: SmallHeading2Icon,
-  h3: SmallHeading3Icon,
-  h4: SmallHeading4Icon,
-  h5: SmallHeading5Icon,
-  h6: SmallHeading6Icon,
-};
-
-const paragraphPlaceholderMap: {
-  [key in ParagraphBlockModel['type']]: string;
-} = {
-  quote: 'Quote',
-  text: 'Text Block',
-  h1: 'Heading 1',
-  h2: 'Heading 2',
-  h3: 'Heading 3',
-  h4: 'Heading 4',
-  h5: 'Heading 5',
-  h6: 'Heading 6',
-};
-
-const placeholderMap = {
-  code: 'Code Block',
-  bulleted: 'Bulleted List',
-  numbered: 'Numbered List',
-  toggle: 'Toggle List',
-  todo: 'Todo',
-  bookmark: 'Bookmark',
-  image: 'Image Block',
-  linkedPage: 'Linked Page',
-  database: 'Database',
-  attachment: 'Attachment',
-  surfaceRef: 'Surface Reference',
-  ...paragraphPlaceholderMap,
-};
 
 export class TOCBlockPreview extends WithDisposable(LitElement) {
   static override styles = css`
@@ -232,7 +179,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
           >
           ${!this.hidePreviewIcon
             ? html`<span class=${iconClass}
-                >${paragraphIconMap[block.type]}</span
+                >${previewIconMap[block.type]}</span
               >`
             : nothing}
         `;
@@ -247,7 +194,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
               : placeholderMap[block.type]}</span
           >
           ${!this.hidePreviewIcon
-            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}
+                >${previewIconMap[block.type]}</span
+              >`
             : nothing}
         `;
       case 'affine:bookmark':
@@ -257,7 +206,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
             >${block.title || block.url || placeholderMap['bookmark']}</span
           >
           ${!this.hidePreviewIcon
-            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}
+                >${previewIconMap['bookmark']}</span
+              >`
             : nothing}
         `;
       case 'affine:code':
@@ -267,7 +218,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
             >${block.language ?? placeholderMap['code']}</span
           >
           ${!this.hidePreviewIcon
-            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${previewIconMap['code']}</span>`
             : nothing}
         `;
       case 'affine:database':
@@ -279,7 +230,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
               : placeholderMap['database']}</span
           >
           ${!this.hidePreviewIcon
-            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${previewIconMap['table']}</span>`
             : nothing}
         `;
       case 'affine:image':
@@ -291,7 +242,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
               : placeholderMap['image']}</span
           >
           ${!this.hidePreviewIcon
-            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}>${previewIconMap['image']}</span>`
             : nothing}
         `;
       case 'affine:attachment':
@@ -303,28 +254,11 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
               : placeholderMap['attachment']}</span
           >
           ${!this.hidePreviewIcon
-            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
+            ? html`<span class=${iconClass}
+                >${previewIconMap['attachment']}</span
+              >`
             : nothing}
         `;
-      case 'affine:data-view':
-        assertType<DataViewBlockModel>(block);
-        return html`
-          <span class="text general">Database View</span>
-          ${!this.hidePreviewIcon
-            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
-            : nothing}
-        `;
-      case 'affine:divider':
-        assertType<DividerBlockModel>(block);
-        return html`
-          <span class="text general">Divider</span>
-          ${!this.hidePreviewIcon
-            ? html`<span class=${iconClass}>${BlockPreviewIcon}</span>`
-            : nothing}
-        `;
-      case 'affine:surface-ref':
-        assertType<SurfaceRefBlockModel>(block);
-        return nothing;
       default:
         return nothing;
     }
