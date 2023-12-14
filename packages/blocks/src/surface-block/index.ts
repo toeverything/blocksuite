@@ -1,3 +1,4 @@
+export * from './commands/index.js';
 export {
   type IBound,
   type IModelCoord,

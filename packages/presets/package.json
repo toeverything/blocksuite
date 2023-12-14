@@ -5,13 +5,14 @@
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
-    "build": "tsc --build tsconfig.build.json",
+    "build": "tsc --build tsconfig.build.json --verbose",
     "test": "vitest --run"
   },
   "keywords": [],
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/lit": "workspace:*",
