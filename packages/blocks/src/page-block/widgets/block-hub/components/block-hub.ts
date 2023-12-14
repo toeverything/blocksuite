@@ -612,7 +612,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         defaultNoteBlock
       );
     });
-    lastId && asyncFocusRichText(page, lastId);
+    lastId && (await asyncFocusRichText(page, lastId));
   };
 
   private _onClickOutside = (e: MouseEvent) => {

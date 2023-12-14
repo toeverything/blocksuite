@@ -116,12 +116,10 @@ async function initEmptyEditor({
       }
 
       if (noInit) {
-        workspace.meta.pageMetas.map(async meta => {
+        workspace.meta.pageMetas.forEach(meta => {
           const pageId = meta.id;
           const page = workspace.getPage(pageId);
-          if (page) {
-            await initPage(page);
-          }
+          if (page) initPage(page).catch(console.error);
         });
         workspace.slots.pageAdded.on(async pageId => {
           const page = workspace.getPage(pageId);
