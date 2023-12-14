@@ -245,8 +245,6 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     const bound = Bound.deserialize(block.xywh);
 
     if (!this.edgeless) {
-      this.changeEditorMode('edgeless');
-
       // When click frame card in page mode
       // Should switch to edgeless mode and set viewport to the frame
       const viewport = {
@@ -259,6 +257,8 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
         .withHost()
         .saveViewportToSession({ viewport })
         .run();
+
+      this.changeEditorMode('edgeless');
     } else {
       this.edgeless.surface.viewport.setViewportByBound(
         bound,
