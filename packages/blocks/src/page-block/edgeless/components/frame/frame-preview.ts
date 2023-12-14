@@ -125,12 +125,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   @query('.frame-preview-surface-container surface-ref-portal')
   blocksPortal!: SurfaceRefPortal;
 
-  override createRenderRoot() {
-    // Do not use shadow root, use the element itself as the render root.
-    // This will allow the element to use global styles.
-    return this;
-  }
-
   get surfaceRenderer() {
     return this._surfaceRenderer;
   }
