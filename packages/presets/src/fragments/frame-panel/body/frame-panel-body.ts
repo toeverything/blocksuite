@@ -247,8 +247,10 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     if (!this.edgeless) {
       this.changeEditorMode('edgeless');
 
+      // When click frame card in page mode
+      // Should switch to edgeless mode and set viewport to the frame
       const viewport = {
-        xywh: '', // FIXME
+        xywh: block.xywh,
         referenceId: block.id,
         padding: this.viewportPadding as [number, number, number, number],
       };
