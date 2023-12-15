@@ -3,20 +3,20 @@ export default {
   preview: 'https://cdn.affine.pro/templates/cover/monthly-calendar.png',
   type: 'template',
   assets: {
-    '3Awrv7sAQ3cHTsASaFAd5Y5BUEjD8qFfLQEvj1Zgwy4=':
-      'https://imagedelivery.net/S2JgHUJzW7ZzW77qOAfRfA/30f621a9-9d78-47df-5a11-febf50107d00/public',
-    'chxqd_X0VV-NrXrIOAlpqFqwfqR86Bzy8NTT1pbUFUM=':
-      'https://imagedelivery.net/S2JgHUJzW7ZzW77qOAfRfA/47a92a1a-0a2f-478a-ceae-9c98da653b00/public',
-    'lgFhx14co1LjjqQgiqfUUWxhz-14X1nSIolT_NNkhx4=':
-      'https://imagedelivery.net/S2JgHUJzW7ZzW77qOAfRfA/cd9964d8-e2b0-4be6-8d88-5efbf09de600/public',
-    'ls2DZ9NR8rjXZ3WM86wNBnVSZ5kO34avB7bR570FLHU=':
-      'https://imagedelivery.net/S2JgHUJzW7ZzW77qOAfRfA/3dbafd92-cd52-493c-834b-dd3dd32bf400/public',
-    'qmUcg2SDLyyoabxX89Of2QjSUzobJy9uHwhUSqi4yV4=':
-      'https://imagedelivery.net/S2JgHUJzW7ZzW77qOAfRfA/b32cdf4a-b425-4858-23e6-3543a9adcf00/public',
-    'Rwd6ofVQjyQZIYTpxYohFik92cAMrp40IfdCgo1MQJE=':
-      'https://imagedelivery.net/S2JgHUJzW7ZzW77qOAfRfA/2e4b0a67-22e4-4ac7-a639-4f7de8f04a00/public',
-    'SHcrGOvUgwA9HCpJj2W8QASwwlbQaIi39vV81k5DsSc=':
-      'https://imagedelivery.net/S2JgHUJzW7ZzW77qOAfRfA/02ae642c-8fef-4e62-fc49-9558976bbf00/public',
+    'WHCOR8R09TJ7Awru1kxZBvb3A7aAZdNN2JvUkW0P_VY=':
+      'https://cdn.affine.pro/templates/assets/3Awrv7sAQ3cHTsASaFAd5Y5BUEjD8qFfLQEvj1Zgwy4=.png',
+    'pfRNuE2FYppI-IZnJj28Vbj7wAJraa6cPtlz-xDgqgk=':
+      'https://cdn.affine.pro/templates/assets/chxqd_X0VV-NrXrIOAlpqFqwfqR86Bzy8NTT1pbUFUM_.png',
+    'bj5CO1PAn9WoCcikLfC-I7y1meYfcQYGiH4ssS73wBM=':
+      'https://cdn.affine.pro/templates/assets/lgFhx14co1LjjqQgiqfUUWxhz-14X1nSIolT_NNkhx4_.png',
+    'efvD5QWAVJ2fi3xSQuns2JMLudwvpJxAUcSGPLtCvv8=':
+      'https://cdn.affine.pro/templates/assets/ls2DZ9NR8rjXZ3WM86wNBnVSZ5kO34avB7bR570FLHU=.png',
+    'OBZvFNxrfRCCrUvwgt9tsIx0dbBOwz2NIahP3OgpwHE=':
+      'https://cdn.affine.pro/templates/assets/qmUcg2SDLyyoabxX89Of2QjSUzobJy9uHwhUSqi4yV4=.png',
+    'drvxbiVuSxmtX2JHqbsR28u-irFo2y7FetDWdSofGBQ=':
+      'https://cdn.affine.pro/templates/assets/Rwd6ofVQjyQZIYTpxYohFik92cAMrp40IfdCgo1MQJE_.png',
+    '4O1wLjFf9P0VHP1Gou2jNtqNzfV5BCaUqN1rOxjkl_A=':
+      'https://cdn.affine.pro/templates/assets/SHcrGOvUgwA9HCpJj2W8QASwwlbQaIi39vV81k5DsSc_.png',
   },
   content: {
     type: 'page',
@@ -590,7 +590,7 @@ export default {
               flavour: 'affine:image',
               props: {
                 caption: '',
-                sourceId: 'lgFhx14co1LjjqQgiqfUUWxhz-14X1nSIolT_NNkhx4=',
+                sourceId: 'bj5CO1PAn9WoCcikLfC-I7y1meYfcQYGiH4ssS73wBM=',
                 width: 0,
                 height: 0,
                 index: 'b0D',
@@ -605,7 +605,7 @@ export default {
               flavour: 'affine:image',
               props: {
                 caption: '',
-                sourceId: 'Rwd6ofVQjyQZIYTpxYohFik92cAMrp40IfdCgo1MQJE=',
+                sourceId: 'drvxbiVuSxmtX2JHqbsR28u-irFo2y7FetDWdSofGBQ=',
                 width: 0,
                 height: 0,
                 index: 'b0M',
@@ -620,7 +620,7 @@ export default {
               flavour: 'affine:image',
               props: {
                 caption: '',
-                sourceId: 'chxqd_X0VV-NrXrIOAlpqFqwfqR86Bzy8NTT1pbUFUM=',
+                sourceId: 'pfRNuE2FYppI-IZnJj28Vbj7wAJraa6cPtlz-xDgqgk=',
                 width: 0,
                 height: 0,
                 index: 'b0V',
@@ -635,7 +635,7 @@ export default {
               flavour: 'affine:image',
               props: {
                 caption: '',
-                sourceId: 'SHcrGOvUgwA9HCpJj2W8QASwwlbQaIi39vV81k5DsSc=',
+                sourceId: '4O1wLjFf9P0VHP1Gou2jNtqNzfV5BCaUqN1rOxjkl_A=',
                 width: 0,
                 height: 0,
                 index: 'b0H',
@@ -650,7 +650,7 @@ export default {
               flavour: 'affine:image',
               props: {
                 caption: '',
-                sourceId: 'qmUcg2SDLyyoabxX89Of2QjSUzobJy9uHwhUSqi4yV4=',
+                sourceId: 'OBZvFNxrfRCCrUvwgt9tsIx0dbBOwz2NIahP3OgpwHE=',
                 width: 0,
                 height: 0,
                 index: 'b0T',
@@ -665,7 +665,7 @@ export default {
               flavour: 'affine:image',
               props: {
                 caption: '',
-                sourceId: 'ls2DZ9NR8rjXZ3WM86wNBnVSZ5kO34avB7bR570FLHU=',
+                sourceId: 'efvD5QWAVJ2fi3xSQuns2JMLudwvpJxAUcSGPLtCvv8=',
                 width: 0,
                 height: 0,
                 index: 'b0Y',
@@ -699,7 +699,7 @@ export default {
               flavour: 'affine:image',
               props: {
                 caption: '',
-                sourceId: 'Rwd6ofVQjyQZIYTpxYohFik92cAMrp40IfdCgo1MQJE=',
+                sourceId: 'drvxbiVuSxmtX2JHqbsR28u-irFo2y7FetDWdSofGBQ=',
                 width: 0,
                 height: 0,
                 index: 'av',
@@ -714,7 +714,7 @@ export default {
               flavour: 'affine:image',
               props: {
                 caption: '',
-                sourceId: '3Awrv7sAQ3cHTsASaFAd5Y5BUEjD8qFfLQEvj1Zgwy4=',
+                sourceId: 'WHCOR8R09TJ7Awru1kxZBvb3A7aAZdNN2JvUkW0P_VY=',
                 width: 0,
                 height: 0,
                 index: 'ao',
@@ -729,7 +729,7 @@ export default {
               flavour: 'affine:image',
               props: {
                 caption: '',
-                sourceId: 'lgFhx14co1LjjqQgiqfUUWxhz-14X1nSIolT_NNkhx4=',
+                sourceId: 'bj5CO1PAn9WoCcikLfC-I7y1meYfcQYGiH4ssS73wBM=',
                 width: 0,
                 height: 0,
                 index: 'b0fl',
