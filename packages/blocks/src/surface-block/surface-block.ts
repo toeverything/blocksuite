@@ -16,6 +16,7 @@ import { getThemePropertyValue } from '../_common/theme/utils.js';
 import {
   type EdgelessElement,
   type ReorderingAction,
+  requestConnectedFrame,
   type Selectable,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
@@ -46,6 +47,7 @@ import {
   isCanvasElementType,
 } from './elements/edgeless-element.js';
 import { GROUP_ROOT } from './elements/group/consts.js';
+import type { IGroup } from './elements/group/types.js';
 import {
   ConnectorElement,
   ElementCtors,
@@ -73,6 +75,7 @@ import {
   generateNKeysBetween,
   normalizeWheelDeltaY,
 } from './utils/index.js';
+import { loadingSort } from './utils/sort.js';
 import { serializeXYWH } from './utils/xywh.js';
 
 type id = string;
@@ -535,37 +538,65 @@ export class SurfaceBlockComponent extends BlockElement<
   private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
     // skip empty event
     if (event.changes.keys.size === 0) return;
-    const connectors: {
+    const deplayed: {
       change: (typeof event)['changes']['keys'] extends Map<string, infer V>
         ? V
         : never;
       id: string;
+      deps: string[];
     }[] = [];
+
     event.keysChanged.forEach(id => {
       const change = event.changes.keys.get(id);
+
       if (!change) {
         console.error('invalid event', event);
         return;
       }
 
-      const elementYMap = this._yContainer.get(id) as Y.Map<unknown>;
-      if (change.action === 'add' && elementYMap?.get('type') === 'connector') {
-        const source = elementYMap.get('source') as IConnector['source'];
-        const target = elementYMap.get('target') as IConnector['target'];
+      const element = this._yContainer.get(id) as Y.Map<unknown>;
+      if (change.action === 'add') {
+        const type = element?.get('type');
 
-        if (
-          (!source?.id || this._elements.has(source.id)) &&
-          (!target?.id || this._elements.has(target.id))
-        ) {
-          this._onYEvent(change, id);
-        } else {
-          connectors.push({ change, id });
+        if (type === 'group') {
+          const children = element.get('children') as IGroup['children'];
+          const deps: string[] = [];
+
+          children.forEach((_, childId) => deps.push(childId));
+          deplayed.push({ change, id, deps });
+
+          return;
         }
+
+        if (type === 'connector') {
+          const source = element.get('source') as IConnector['source'];
+          const target = element.get('target') as IConnector['target'];
+
+          const deps: string[] = [source.id, target.id].filter(
+            val => val
+          ) as string[];
+
+          if (deps.length > 0) {
+            deplayed.push({ change, id, deps });
+            return;
+          }
+        }
+
+        this._onYEvent(change, id);
       } else {
         this._onYEvent(change, id);
       }
     });
-    connectors.forEach(({ change, id }) => this._onYEvent(change, id));
+
+    loadingSort(deplayed).forEach(({ change, id, deps }) => {
+      if (deps.every(id => this.pickById(id))) {
+        this._onYEvent(change, id);
+      } else {
+        requestConnectedFrame(() => {
+          this._onYEvent(change, id);
+        }, this);
+      }
+    });
   };
 
   private _onYEvent = (
