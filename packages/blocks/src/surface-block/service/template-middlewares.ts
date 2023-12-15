@@ -1,6 +1,7 @@
 import { assertExists, assertType } from '@blocksuite/global/utils';
 import { type BlockSnapshot, type SnapshotReturn } from '@blocksuite/store';
 
+import type { IConnector } from '../index.js';
 import { Bound } from '../utils/bound.js';
 import { generateElementId } from '../utils/index.js';
 import type { SlotBlockPayload, TemplateJob } from './template.js';
@@ -118,6 +119,8 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
 
 export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
   return (job: TemplateJob) => {
+    if (job.type !== 'template') return;
+
     let templateBound: Bound | null = null;
     let offset: {
       x: number;
@@ -142,6 +145,7 @@ export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
       }
     });
 
+    const ignoreType = ['group', 'connector'];
     const changePosition = (blockJson: BlockSnapshot) => {
       assertExists(templateBound);
 
@@ -160,6 +164,12 @@ export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
         Object.entries(
           blockJson.props.elements as Record<string, Record<string, unknown>>
         ).forEach(([_, val]) => {
+          const type = val['type'] as string;
+
+          if (ignoreType.includes(type) && val['xywh']) {
+            delete val['xywh'];
+          }
+
           if (val['xywh']) {
             const bound = Bound.deserialize(val['xywh'] as string);
 
@@ -170,7 +180,50 @@ export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
               bound.h
             ).serialize();
           }
+
+          if (type === 'connector') {
+            (['target', 'source'] as const).forEach(prop => {
+              const propVal = val[prop];
+              assertType<IConnector['target']>(propVal);
+
+              if (propVal['id'] || !propVal['position']) return;
+              const pos = propVal['position'];
+
+              propVal['position'] = [pos[0] + offset.x, pos[1] + offset.y];
+            });
+          }
         });
+      }
+    };
+  };
+};
+
+export const createStickerMiddleware = (
+  center: {
+    x: number;
+    y: number;
+  },
+  getIndex: () => string
+) => {
+  return (job: TemplateJob) => {
+    job.slots.beforeInsert.on(blockData => {
+      if (blockData.type === 'block') {
+        changeInserPosition(blockData.data.blockJson);
+      }
+    });
+
+    const changeInserPosition = (blockJson: BlockSnapshot) => {
+      if (blockJson.flavour === 'affine:image' && blockJson.props.xywh) {
+        const bound = Bound.deserialize(blockJson.props['xywh'] as string);
+
+        blockJson.props['xywh'] = new Bound(
+          center.x - bound.w / 2,
+          center.y - bound.h / 2,
+          bound.w,
+          bound.h
+        ).serialize();
+
+        blockJson.props.index = getIndex();
       }
     };
   };

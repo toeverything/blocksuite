@@ -1,8 +1,7 @@
-import type { Template } from '../builtin-templates.js';
-
-export const kanban: Template = {
-  name: 'kanban',
-  preview: '',
+export default {
+  name: 'Kanban',
+  preview: 'https://cdn.affine.pro/templates/cover/kanban.png',
+  type: 'template',
   content: {
     type: 'page',
     meta: {

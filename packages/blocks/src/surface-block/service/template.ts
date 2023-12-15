@@ -8,7 +8,7 @@ import {
   type SnapshotReturn,
 } from '@blocksuite/store';
 
-import { Bound, getCommonBound } from '../index.js';
+import { Bound, getCommonBound, type IConnector } from '../index.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { SurfaceBlockTransformer } from '../surface-transformer.js';
 import { replaceIdMiddleware } from './template-middlewares.js';
@@ -30,7 +30,9 @@ type MergeBlockFlavour = (typeof MERGE_BLOCK)[number];
 /**
  * Template type will affect the inserting behaviour
  */
-type TemplateType = 'edgeless-template' | 'sticker';
+const TEMPLATE_TYPES = ['template', 'sticker'] as const;
+
+type TemplateType = (typeof TEMPLATE_TYPES)[number];
 
 export type SlotBlockPayload = {
   type: 'block';
@@ -51,14 +53,14 @@ export type SlotPayload =
 
 export type TemplateJobConfig = {
   model: SurfaceBlockModel;
-  type: TemplateType;
+  type: string;
   middlewares: ((job: TemplateJob) => void)[];
 };
 
 export class TemplateJob {
   static create(options: {
     model: SurfaceBlockModel;
-    type: TemplateType;
+    type: string;
     middlewares: ((job: TemplateJob) => void)[];
   }) {
     return new TemplateJob(options);
@@ -84,7 +86,9 @@ export class TemplateJob {
   constructor({ model, type, middlewares }: TemplateJobConfig) {
     this.job = new Job({ workspace: model.page.workspace, middlewares: [] });
     this.model = model;
-    this.type = type;
+    this.type = TEMPLATE_TYPES.includes(type as TemplateType)
+      ? (type as TemplateType)
+      : 'template';
 
     middlewares.forEach(middleware => middleware(this));
     TemplateJob.middlewares.forEach(middleware => middleware(this));
@@ -147,11 +151,30 @@ export class TemplateJob {
       }
 
       if (block.flavour === 'affine:surface') {
+        const ignoreType = ['connector', 'group'];
+
         Object.entries(
           block.props.elements as Record<string, Record<string, unknown>>
         ).forEach(([_, val]) => {
-          if (val['xywh']) {
+          const type = val['type'] as string;
+
+          if (val['xywh'] && !ignoreType.includes(type)) {
             bounds.push(Bound.deserialize(val['xywh'] as string));
+          }
+
+          if (type === 'connector') {
+            (['target', 'source'] as const).forEach(prop => {
+              const propVal = val[prop];
+              assertType<IConnector['source']>(propVal);
+
+              if (propVal['id'] || !propVal['position']) return;
+
+              const pos = propVal['position'];
+
+              if (pos) {
+                bounds.push(new Bound(pos[0], pos[1], 0, 0));
+              }
+            });
           }
         });
       }
