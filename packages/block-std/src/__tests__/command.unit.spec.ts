@@ -39,7 +39,7 @@ describe('CommandManager', () => {
 
   test('can add and execute a command', () => {
     const command1: Command = vi.fn((ctx, next) => next());
-    const command2: Command = vi.fn((ctx, next) => {});
+    const command2: Command = vi.fn((_ctx, _next) => {});
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
 
@@ -76,7 +76,7 @@ describe('CommandManager', () => {
 
   test('skip commands if there is a command failed before them (`next` not executed)', () => {
     const command1: Command = vi.fn((ctx, next) => next());
-    const command2: Command = vi.fn((ctx, next) => {});
+    const command2: Command = vi.fn((_ctx, _next) => {});
     const command3: Command = vi.fn((ctx, next) => next());
 
     commandManager.add('command1', command1);
@@ -100,7 +100,7 @@ describe('CommandManager', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const command1: Command = vi.fn((ctx, next) => next());
-    const command2: Command = vi.fn((ctx, next) => {
+    const command2: Command = vi.fn((_ctx, _next) => {
       throw new Error('command2 failed');
     });
     const command3: Command = vi.fn((ctx, next) => next());
@@ -187,8 +187,8 @@ describe('CommandManager', () => {
   });
 
   test('should not continue with the rest of the chain if all commands in `try` fail', () => {
-    const command1: Command = vi.fn((ctx, next) => {});
-    const command2: Command = vi.fn((ctx, next) => {});
+    const command1: Command = vi.fn((_ctx, _next) => {});
+    const command2: Command = vi.fn((_ctx, _next) => {});
     const command3: Command = vi.fn((ctx, next) => next());
 
     commandManager.add('command1', command1);
@@ -209,7 +209,7 @@ describe('CommandManager', () => {
 
   test('should not re-execute previous commands in the chain before `try`', () => {
     const command1: Command = vi.fn((ctx, next) => next());
-    const command2: Command = vi.fn((ctx, next) => {});
+    const command2: Command = vi.fn((_ctx, _next) => {});
     const command3: Command = vi.fn((ctx, next) => next());
 
     commandManager.add('command1', command1);
@@ -229,7 +229,7 @@ describe('CommandManager', () => {
   });
 
   test('should continue with the rest of the chain if one command in `try` succeeds', () => {
-    const command1: Command = vi.fn((ctx, next) => {});
+    const command1: Command = vi.fn((_ctx, _next) => {});
     const command2: Command = vi.fn((ctx, next) => next());
     const command3: Command = vi.fn((ctx, next) => next());
 
@@ -303,7 +303,7 @@ describe('CommandManager', () => {
   });
 
   test('should continue with the rest of the chain if at least one command in `tryAll` succeeds', () => {
-    const command1: Command = vi.fn((ctx, next) => {});
+    const command1: Command = vi.fn((_ctx, _next) => {});
     const command2: Command = vi.fn((ctx, next) => next());
     const command3: Command = vi.fn((ctx, next) => next());
 
@@ -344,8 +344,8 @@ describe('CommandManager', () => {
   });
 
   test('should not continue with the rest of the chain if all commands in `tryAll` fail', () => {
-    const command1: Command = vi.fn((ctx, next) => {});
-    const command2: Command = vi.fn((ctx, next) => {});
+    const command1: Command = vi.fn((_ctx, _next) => {});
+    const command2: Command = vi.fn((_ctx, _next) => {});
     const command3: Command = vi.fn((ctx, next) => next());
 
     commandManager.add('command1', command1);
@@ -414,7 +414,7 @@ describe('CommandManager', () => {
   test('should not re-execute commands before `tryAll` after executing `tryAll`', () => {
     const command1: Command = vi.fn((ctx, next) => next());
     const command2: Command = vi.fn((ctx, next) => next());
-    const command3: Command = vi.fn((ctx, next) => {});
+    const command3: Command = vi.fn((_ctx, _next) => {});
     const command4: Command = vi.fn((ctx, next) => next());
 
     commandManager.add('command1', command1);

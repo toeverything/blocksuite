@@ -45,7 +45,7 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
 
     this.onChange(checked);
     if (checked) {
-      playCheckAnimation(this._checkbox, { left: -2 });
+      playCheckAnimation(this._checkbox, { left: -2 }).catch(console.error);
     }
     return false;
   }

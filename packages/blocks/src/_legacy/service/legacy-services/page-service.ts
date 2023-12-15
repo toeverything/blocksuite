@@ -101,7 +101,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     const noteModel = focusedBlockModel.page.getBlockById(noteId);
     assertExists(noteModel);
     const service = getService('affine:note');
-    service.json2Block(noteModel, pastedBlocks);
+    service.json2Block(noteModel, pastedBlocks).catch(console.error);
     // TODO: if page is not empty
   }
 }

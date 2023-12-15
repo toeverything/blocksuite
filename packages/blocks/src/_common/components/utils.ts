@@ -109,7 +109,7 @@ export const createKeydownObserver = ({
       (!isControlledKeyboardEvent(e) && e.key.length === 1) ||
       e.isComposing
     ) {
-      updateQuery();
+      updateQuery().catch(console.error);
       return;
     }
 
@@ -122,7 +122,7 @@ export const createKeydownObserver = ({
         if (!query.length) {
           abortController.abort();
         }
-        updateQuery();
+        updateQuery().catch(console.error);
         return;
       }
       case 'Enter': {
@@ -183,9 +183,15 @@ export const createKeydownObserver = ({
   );
 
   // Fix composition input
-  target.addEventListener('input', updateQuery, {
-    signal: abortController.signal,
-  });
+  target.addEventListener(
+    'input',
+    () => {
+      updateQuery().catch(console.error);
+    },
+    {
+      signal: abortController.signal,
+    }
+  );
 
   if (onEsc) {
     const escListener = (e: KeyboardEvent) => {

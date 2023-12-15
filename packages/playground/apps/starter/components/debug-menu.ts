@@ -261,7 +261,7 @@ export class DebugMenu extends ShadowlessElement {
         await new Promise(resolve => {
           setTimeout(resolve, 500);
         });
-        readSelectionFromURL();
+        readSelectionFromURL().catch(console.error);
         return;
       }
       const url = new URL(window.location.toString());
@@ -274,7 +274,7 @@ export class DebugMenu extends ShadowlessElement {
         return;
       }
     };
-    readSelectionFromURL();
+    readSelectionFromURL().catch(console.error);
   }
 
   override disconnectedCallback() {
@@ -347,11 +347,11 @@ export class DebugMenu extends ShadowlessElement {
       return result;
     }
 
-    const genTree = (deep: number = 0): TreeNode => {
+    const _genTree = (deep: number = 0): TreeNode => {
       const count = Math.floor(Math.random() * 10) - deep - 2;
       const children: TreeNode[] = [];
       for (let i = 0; i < count; i++) {
-        children.push(genTree(deep + 1));
+        children.push(_genTree(deep + 1));
       }
       return {
         text: makeid(Math.random() * 200 + 30),
@@ -395,19 +395,19 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.contentParser.exportPdf();
+    this.contentParser.exportPdf().catch(console.error);
   }
 
   private _exportHtml() {
-    HtmlTransformer.exportPage(this.page);
+    HtmlTransformer.exportPage(this.page).catch(console.error);
   }
 
   private async _exportMarkDown() {
-    MarkdownTransformer.exportPage(this.page);
+    MarkdownTransformer.exportPage(this.page).catch(console.error);
   }
 
   private _exportPng() {
-    this.contentParser.exportPng();
+    this.contentParser.exportPng().catch(console.error);
   }
 
   private async _exportSnapshot() {

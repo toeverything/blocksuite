@@ -154,47 +154,50 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       inlineEditor.slots.inlineRangeUpdated.on(([inlineRange, sync]) => {
         if (!inlineRange || !sync) return;
 
-        inlineEditor.waitForUpdate().then(() => {
-          if (!inlineEditor.mounted) return;
+        inlineEditor
+          .waitForUpdate()
+          .then(() => {
+            if (!inlineEditor.mounted) return;
 
-          // get newest inline range
-          const inlineRange = inlineEditor.getInlineRange();
-          if (!inlineRange) return;
+            // get newest inline range
+            const inlineRange = inlineEditor.getInlineRange();
+            if (!inlineRange) return;
 
-          const range = inlineEditor.toDomRange(inlineRange);
-          if (!range) return;
+            const range = inlineEditor.toDomRange(inlineRange);
+            if (!range) return;
 
-          // scroll container is window
-          if (this.enableAutoScrollVertically) {
-            const rangeRect = range.getBoundingClientRect();
+            // scroll container is window
+            if (this.enableAutoScrollVertically) {
+              const rangeRect = range.getBoundingClientRect();
 
-            if (rangeRect.top < 0) {
-              this.scrollIntoView({ block: 'start' });
-            } else if (rangeRect.bottom > window.innerHeight) {
-              this.scrollIntoView({ block: 'end' });
+              if (rangeRect.top < 0) {
+                this.scrollIntoView({ block: 'start' });
+              } else if (rangeRect.bottom > window.innerHeight) {
+                this.scrollIntoView({ block: 'end' });
+              }
             }
-          }
 
-          // scroll container is `inlineEditorContainer`
-          if (this.enableAutoScrollHorizontally) {
-            const containerRect =
-              this.inlineEditorContainer.getBoundingClientRect();
-            const rangeRect = range.getBoundingClientRect();
+            // scroll container is `inlineEditorContainer`
+            if (this.enableAutoScrollHorizontally) {
+              const containerRect =
+                this.inlineEditorContainer.getBoundingClientRect();
+              const rangeRect = range.getBoundingClientRect();
 
-            let scrollLeft = this.inlineEditorContainer.scrollLeft;
-            if (
-              rangeRect.left + rangeRect.width >
-              containerRect.left + containerRect.width
-            ) {
-              scrollLeft +=
-                rangeRect.left +
-                rangeRect.width -
-                (containerRect.left + containerRect.width) +
-                2;
+              let scrollLeft = this.inlineEditorContainer.scrollLeft;
+              if (
+                rangeRect.left + rangeRect.width >
+                containerRect.left + containerRect.width
+              ) {
+                scrollLeft +=
+                  rangeRect.left +
+                  rangeRect.width -
+                  (containerRect.left + containerRect.width) +
+                  2;
+              }
+              this.inlineEditorContainer.scrollLeft = scrollLeft;
             }
-            this.inlineEditorContainer.scrollLeft = scrollLeft;
-          }
-        });
+          })
+          .catch(console.error);
       })
     );
 
@@ -334,16 +337,18 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       this.disposables.addFromEvent(this, 'paste', this._onPaste);
     }
 
-    this.updateComplete.then(() => {
-      this._unmount();
-      this._init();
+    this.updateComplete
+      .then(() => {
+        this._unmount();
+        this._init();
 
-      this.disposables.add({
-        dispose: () => {
-          this._unmount();
-        },
-      });
-    });
+        this.disposables.add({
+          dispose: () => {
+            this._unmount();
+          },
+        });
+      })
+      .catch(console.error);
   }
 
   override updated() {

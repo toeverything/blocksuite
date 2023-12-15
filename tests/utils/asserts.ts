@@ -15,9 +15,9 @@ import {
   BLOCK_ID_ATTR,
   NOTE_WIDTH,
 } from '../../packages/blocks/src/_common/consts.js';
+import type { CssVariableName } from '../../packages/blocks/src/_common/theme/css-variables.js';
 import type {
   AffineInlineEditor,
-  CssVariableName,
   NoteBlockModel,
   PageBlockModel,
   RichText,

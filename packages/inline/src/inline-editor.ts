@@ -217,7 +217,7 @@ export class InlineEditor<
 
     this._mounted = true;
     this.slots.mounted.emit();
-    this._deltaService.render();
+    this._deltaService.render().catch(console.error);
   }
 
   unmount() {
@@ -230,7 +230,7 @@ export class InlineEditor<
   }
 
   requestUpdate(syncInlineRange = true): void {
-    this._deltaService.render(syncInlineRange);
+    this._deltaService.render(syncInlineRange).catch(console.error);
   }
 
   async waitForUpdate() {
@@ -359,7 +359,7 @@ export class InlineEditor<
 
   rerenderWholeEditor() {
     render(nothing, this.rootElement);
-    this._deltaService.render();
+    this._deltaService.render().catch(console.error);
   }
 
   private _onYTextChange = () => {
@@ -369,9 +369,9 @@ export class InlineEditor<
       );
     }
 
-    Promise.resolve().then(() => {
-      this.deltaService.render();
-    });
+    Promise.resolve()
+      .then(() => this.deltaService.render())
+      .catch(console.error);
   };
 
   private _transact(fn: () => void): void {

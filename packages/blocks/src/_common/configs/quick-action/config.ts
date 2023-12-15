@@ -33,7 +33,7 @@ export const quickActionConfig: QuickActionConfig[] = [
     showWhen: () => true,
     enabledWhen: () => true,
     action: host => {
-      copyBlocksInPage(host);
+      copyBlocksInPage(host).catch(console.error);
       toast('Copied to clipboard');
     },
   },

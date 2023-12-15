@@ -63,12 +63,14 @@ export class EdgelessTemplateButton extends WithDisposable(LitElement) {
       computePosition(this, panel, {
         placement: 'top',
         middleware: [offset(20), arrow({ element: arrowEl })],
-      }).then(({ x, y, middlewareData }) => {
-        panel.style.left = `${x}px`;
-        panel.style.top = `${y}px`;
+      })
+        .then(({ x, y, middlewareData }) => {
+          panel.style.left = `${x}px`;
+          panel.style.top = `${y}px`;
 
-        arrowEl.style.left = `${middlewareData.arrow?.x ?? 0}px`;
-      });
+          arrowEl.style.left = `${middlewareData.arrow?.x ?? 0}px`;
+        })
+        .catch(console.error);
     });
   }
 

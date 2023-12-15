@@ -22,7 +22,7 @@ const prevDir = path.resolve('temp/size-prev');
 let output = '## Size Report\n\n';
 const sizeHeaders = ['Size', 'Gzip', 'Brotli'];
 
-run();
+run().catch(console.error);
 
 async function run() {
   await renderBundles();

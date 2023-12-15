@@ -112,7 +112,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this, 'drag', this._onDrag);
     disposables.addFromEvent(this, 'dragend', this._onDragEnd);
     disposables.addFromEvent(this._host, 'dragover', this._onDragOver);
-    disposables.addFromEvent(this._host, 'drop', this._onDrop);
+    disposables.addFromEvent(this._host, 'drop', (e: DragEvent) => {
+      this._onDrop(e).catch(console.error);
+    });
     disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
 
     if (IS_FIREFOX) {
@@ -131,7 +133,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._blockHubCards.forEach(card => {
       disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
       disposables.addFromEvent(card, 'mouseup', this._onCardMouseUp);
-      disposables.addFromEvent(card, 'click', e => this._onClickCard(e, card));
+      disposables.addFromEvent(card, 'click', e => {
+        this._onClickCard(e, card).catch(console.error);
+      });
     });
 
     for (const blockHubMenu of this._blockHubMenus) {
@@ -512,7 +516,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     if (this._isPageMode) {
       if (focusId) {
-        asyncFocusRichText(page, focusId);
+        asyncFocusRichText(page, focusId)?.catch(console.error);
       }
       return;
     }
@@ -608,7 +612,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         defaultNoteBlock
       );
     });
-    lastId && asyncFocusRichText(page, lastId);
+    lastId && (await asyncFocusRichText(page, lastId));
   };
 
   private _onClickOutside = (e: MouseEvent) => {

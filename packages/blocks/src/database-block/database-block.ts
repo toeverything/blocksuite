@@ -132,7 +132,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
             name: 'Copy',
             select: () => {
               const slice = Slice.fromModels(this.page, [this.model]);
-              this.std.clipboard.copySlice(slice);
+              this.std.clipboard.copySlice(slice).catch(console.error);
             },
           },
           // {

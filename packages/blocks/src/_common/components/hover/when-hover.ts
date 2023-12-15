@@ -69,7 +69,7 @@ export const whenHover = (
 
   let id = 0;
   let resId = 0;
-  const onHoverChange = async (e: Event) => {
+  const onHoverChange = (async (e: Event) => {
     const curId = id++;
     for (const middleware of middlewares) {
       const go = await middleware({
@@ -77,13 +77,10 @@ export const whenHover = (
         floatingElement,
         referenceElement,
       });
-      if (!go) {
-        return;
-      }
+      if (!go) return;
     }
-    if (curId < resId)
-      // ignore expired event
-      return;
+    // ignore expired event
+    if (curId < resId) return;
     resId = curId;
     if (e.type === 'mouseover') {
       whenHoverChange(true, e);
@@ -94,7 +91,7 @@ export const whenHover = (
       return;
     }
     console.error('Unknown event type in whenHover', e);
-  };
+  }) as (e: Event) => void;
 
   const addHoverListener = (element?: Element) => {
     if (!element) return;
@@ -111,6 +108,7 @@ export const whenHover = (
       signal: abortController.signal,
     });
   };
+
   const removeHoverListener = (element?: Element) => {
     if (!element) return;
     element.removeEventListener('mouseover', onHoverChange);

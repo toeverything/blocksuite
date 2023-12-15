@@ -8,7 +8,6 @@ import {
 import {
   enterPlaygroundRoom,
   initEmptyEdgelessState,
-  waitNextFrame,
 } from 'utils/actions/misc.js';
 
 import { test } from '../utils/playwright.js';

@@ -293,12 +293,14 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     // TODO: replace this dom operation
     const rootEl = document.querySelector('editor-host');
     assertExists(rootEl);
-    rootEl.std.clipboard.writeToClipboard(async items => {
-      return {
-        ...items,
-        [TEXT]: data,
-      };
-    });
+    rootEl.std.clipboard
+      .writeToClipboard(async items => {
+        return {
+          ...items,
+          [TEXT]: data,
+        };
+      })
+      .catch(console.error);
 
     const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
     if (savedRange) {

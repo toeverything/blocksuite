@@ -103,7 +103,7 @@ export class EdgelessClipboardController extends PageClipboard {
         const elements = surfaceSelection.elements;
         if (elements.length === 0) return false;
 
-        this._onCopy(ctx, surfaceSelection);
+        this._onCopy(ctx, surfaceSelection).catch(console.error);
         return;
       },
       { global: true }
@@ -112,7 +112,7 @@ export class EdgelessClipboardController extends PageClipboard {
     this.host.handleEvent(
       'paste',
       ctx => {
-        this._onPaste(ctx);
+        this._onPaste(ctx).catch(console.error);
       },
       { global: true }
     );
@@ -163,13 +163,15 @@ export class EdgelessClipboardController extends PageClipboard {
       return;
     }
 
-    this.std.clipboard.writeToClipboard(async _items => {
-      const data = await prepareClipboardData(elements, this.std);
-      return {
-        ..._items,
-        [BLOCKSUITE_SURFACE]: JSON.stringify(data),
-      };
-    });
+    this.std.clipboard
+      .writeToClipboard(async _items => {
+        const data = await prepareClipboardData(elements, this.std);
+        return {
+          ..._items,
+          [BLOCKSUITE_SURFACE]: JSON.stringify(data),
+        };
+      })
+      .catch(console.error);
   };
 
   private _onPaste = async (_context: UIEventStateContext) => {
@@ -207,7 +209,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const json = this.std.clipboard.readFromClipboard(data);
     const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
-    this._pasteShapesAndBlocks(elementsRawData);
+    this._pasteShapesAndBlocks(elementsRawData).catch(console.error);
   };
 
   private _onCut = (_context: UIEventStateContext) => {
@@ -217,7 +219,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const event = _context.get('clipboardState').event;
     event.preventDefault();
 
-    this._onCopy(_context, state);
+    this._onCopy(_context, state).catch(console.error);
     if (state.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
       if (isCanvasElementWithText(elements[0])) return;
@@ -603,12 +605,14 @@ export class EdgelessClipboardController extends PageClipboard {
       );
       assertExists(blob);
 
-      this.std.clipboard.writeToClipboard(async _items => {
-        return {
-          ..._items,
-          [IMAGE_PNG]: blob,
-        };
-      });
+      this.std.clipboard
+        .writeToClipboard(async _items => {
+          return {
+            ..._items,
+            [IMAGE_PNG]: blob,
+          };
+        })
+        .catch(console.error);
     }
   }
 

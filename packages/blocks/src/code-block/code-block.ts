@@ -165,13 +165,16 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     if (this._highlighter) {
       const loadedLangs = this._highlighter.getLoadedLanguages();
       if (!loadedLangs.includes(lang.id as Lang)) {
-        this._highlighter.loadLanguage(lang).then(() => {
-          const richText = this.querySelector('rich-text');
-          const inlineEditor = richText?.inlineEditor;
-          if (inlineEditor) {
-            inlineEditor.requestUpdate();
-          }
-        });
+        this._highlighter
+          .loadLanguage(lang)
+          .then(() => {
+            const richText = this.querySelector('rich-text');
+            const inlineEditor = richText?.inlineEditor;
+            if (inlineEditor) {
+              inlineEditor.requestUpdate();
+            }
+          })
+          .catch(console.error);
       }
       return;
     }
@@ -264,7 +267,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     });
 
     this._disposables.add(
-      listenToThemeChange(this, async () => {
+      listenToThemeChange(this, () => {
         if (!this._highlighter) return;
         const richText = this.querySelector('rich-text');
         const inlineEditor = richText?.inlineEditor;
@@ -437,7 +440,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       const lang = getStandardLanguage(this.model.language);
       this._perviousLanguage = lang ?? PLAIN_TEXT_REGISTRATION;
       if (lang) {
-        this._startHighlight(lang);
+        this._startHighlight(lang).catch(console.error);
       } else {
         this._highlighter = null;
       }

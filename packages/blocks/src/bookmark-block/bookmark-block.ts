@@ -138,14 +138,14 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     this._isInSurface = parent?.flavour === 'affine:surface';
 
     if (!this.model.description) {
-      refreshBookmarkUrlData(this);
+      refreshBookmarkUrlData(this).catch(console.error);
     }
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
         this.edgelessOrDocBookmark?.requestUpdate();
         if (key === 'url') {
-          refreshBookmarkUrlData(this);
+          refreshBookmarkUrlData(this).catch(console.error);
         }
       })
     );

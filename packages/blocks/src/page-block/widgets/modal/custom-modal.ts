@@ -6,7 +6,7 @@ import { repeat } from 'lit/directives/repeat.js';
 type ModalButton = {
   text: string;
   type?: 'primary';
-  onClick: () => void;
+  onClick: () => Promise<void> | void;
 };
 
 type ModalOptions = {

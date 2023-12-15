@@ -583,15 +583,17 @@ export class EdgelessPageBlockComponent extends BlockElement<
         editing: false,
       });
       // Waiting dom updated, `note mask` is removed
-      this.updateComplete.then(() => {
-        if (blockId) {
-          asyncFocusRichText(this.page, blockId);
-        } else if (point) {
-          // Cannot reuse `handleNativeRangeClick` directly here,
-          // since `retargetClick` will re-target to pervious editor
-          handleNativeRangeAtPoint(point.x, point.y);
-        }
-      });
+      this.updateComplete
+        .then(() => {
+          if (blockId) {
+            asyncFocusRichText(this.page, blockId)?.catch(console.error);
+          } else if (point) {
+            // Cannot reuse `handleNativeRangeClick` directly here,
+            // since `retargetClick` will re-target to pervious editor
+            handleNativeRangeAtPoint(point.x, point.y);
+          }
+        })
+        .catch(console.error);
     });
   }
 
@@ -690,9 +692,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
     const fontLoader = this.service?.fontLoader;
     assertExists(fontLoader);
 
-    fontLoader.ready.then(() => {
-      this.surface.refresh();
-    });
+    fontLoader.ready
+      .then(() => {
+        this.surface.refresh();
+      })
+      .catch(console.error);
   }
 
   private _initReadonlyListener() {
@@ -744,9 +748,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     );
 
     if (this.pageBlockContainer.isUpdatePending) {
-      this.pageBlockContainer.updateComplete.then(() =>
-        appendIndexedCanvasToPortal()
-      );
+      this.pageBlockContainer.updateComplete
+        .then(() => appendIndexedCanvasToPortal())
+        .catch(console.error);
     } else {
       appendIndexedCanvasToPortal();
     }
@@ -875,7 +879,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     };
 
     if (this.surface.isUpdatePending) {
-      this.surface.updateComplete.then(run);
+      this.surface.updateComplete.then(run).catch(console.error);
     } else {
       run();
     }

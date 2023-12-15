@@ -254,7 +254,7 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
         ),
         rootElement
       );
-    } catch (error) {
+    } catch (_) {
       // Lit may be crashed by IME input and we need to rerender whole editor for it
       this.editor.rerenderWholeEditor();
       await this.editor.waitForUpdate();

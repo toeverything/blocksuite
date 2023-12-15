@@ -317,7 +317,7 @@ export class TemplateJob {
 
     const modelDataList = await this._jsonToModelData(template.blocks);
 
-    this._insertToPage(modelDataList);
+    this._insertToPage(modelDataList).catch(console.error);
 
     return templateBound;
   }

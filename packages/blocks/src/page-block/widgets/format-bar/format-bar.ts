@@ -303,11 +303,13 @@ export class AffineFormatBarWidget extends WidgetElement {
                   padding: 6,
                 }),
               ],
-            }).then(({ x, y }) => {
-              formatQuickBarElement.style.display = 'flex';
-              formatQuickBarElement.style.top = `${y}px`;
-              formatQuickBarElement.style.left = `${x}px`;
-            });
+            })
+              .then(({ x, y }) => {
+                formatQuickBarElement.style.display = 'flex';
+                formatQuickBarElement.style.top = `${y}px`;
+                formatQuickBarElement.style.left = `${x}px`;
+              })
+              .catch(console.error);
           },
           {
             // follow edgeless viewport update
@@ -356,11 +358,13 @@ export class AffineFormatBarWidget extends WidgetElement {
                   padding: 6,
                 }),
               ],
-            }).then(({ x, y }) => {
-              formatQuickBarElement.style.display = 'flex';
-              formatQuickBarElement.style.top = `${y}px`;
-              formatQuickBarElement.style.left = `${x}px`;
-            });
+            })
+              .then(({ x, y }) => {
+                formatQuickBarElement.style.display = 'flex';
+                formatQuickBarElement.style.top = `${y}px`;
+                formatQuickBarElement.style.left = `${x}px`;
+              })
+              .catch(console.error);
           },
           {
             // follow edgeless viewport update

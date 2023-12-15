@@ -21,7 +21,12 @@ export type onDropProps = {
 
 export type FileDropOptions = {
   flavour: string;
-  onDrop?: ({ files, targetModel, place, point }: onDropProps) => void;
+  onDrop?: ({
+    files,
+    targetModel,
+    place,
+    point,
+  }: onDropProps) => Promise<boolean> | void;
 };
 
 export class FileDropManager {
@@ -105,7 +110,7 @@ export class FileDropManager {
     this._indicator.rect = rect;
   };
 
-  private _onDrop = async (event: DragEvent) => {
+  private _onDrop = (event: DragEvent) => {
     const { onDrop } = this._fileDropOptions;
     if (!onDrop) return;
 
@@ -124,7 +129,9 @@ export class FileDropManager {
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
 
-    onDrop({ files: [...droppedFiles], targetModel, place, point });
+    onDrop({ files: [...droppedFiles], targetModel, place, point })?.catch(
+      console.error
+    );
 
     this._indicator.reset();
   };

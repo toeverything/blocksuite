@@ -95,12 +95,14 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
           padding: -20,
         }),
       ],
-    }).then(({ x, y }) => {
-      Object.assign(this.addColumnButton.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
+    })
+      .then(({ x, y }) => {
+        Object.assign(this.addColumnButton.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+        });
+      })
+      .catch(console.error);
   };
 
   private _onAddColumn = () => {

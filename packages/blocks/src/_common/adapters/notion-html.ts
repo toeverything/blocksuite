@@ -266,7 +266,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               const file = new File([await res.blob()], name);
               blobId = await sha(await clonedRes.arrayBuffer());
               assets?.getAssets().set(blobId, file);
-              assets?.writeToBlob(blobId);
+              await assets?.writeToBlob(blobId);
             }
             context
               .openNode(
@@ -584,7 +584,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               const file = new File([await res.blob()], name);
               blobId = await sha(await clonedRes.arrayBuffer());
               assets?.getAssets().set(blobId, file);
-              assets?.writeToBlob(blobId);
+              await assets?.writeToBlob(blobId);
             }
             context
               .openNode(
@@ -643,7 +643,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               type = file.type;
               blobId = await sha(await resCloned.arrayBuffer());
               assets?.getAssets().set(blobId, file);
-              assets?.writeToBlob(blobId);
+              await assets?.writeToBlob(blobId);
             }
             context
               .openNode(
