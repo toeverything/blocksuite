@@ -542,7 +542,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       getStandardLanguage(this.model.language) ?? PLAIN_TEXT_REGISTRATION;
     const curLanguageDisplayName = curLanguage.displayName ?? curLanguage.id;
     return html`<div
-      class="lang-list-wrapper"
+      class="lang-list-wrapper caret-ignore"
       style="${this._showLangList ? 'visibility: visible;' : ''}"
     >
       <icon-button
