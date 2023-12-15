@@ -58,6 +58,7 @@ module.exports = {
   ],
   ignorePatterns: [
     'tests/snapshots/*',
+    '__snapshots__/*',
     'packages/store/dist/*',
     'packages/lit/dist/*',
     'packages/blocks/dist/*',
