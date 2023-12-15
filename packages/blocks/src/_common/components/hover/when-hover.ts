@@ -69,7 +69,7 @@ export const whenHover = (
 
   let id = 0;
   let resId = 0;
-  const onHoverChange = async (e: Event) => {
+  const onHoverChange = (async (e: Event) => {
     const curId = id++;
     for (const middleware of middlewares) {
       const go = await middleware({
@@ -77,13 +77,10 @@ export const whenHover = (
         floatingElement,
         referenceElement,
       });
-      if (!go) {
-        return;
-      }
+      if (!go) return;
     }
-    if (curId < resId)
-      // ignore expired event
-      return;
+    // ignore expired event
+    if (curId < resId) return;
     resId = curId;
     if (e.type === 'mouseover') {
       whenHoverChange(true, e);
@@ -94,7 +91,7 @@ export const whenHover = (
       return;
     }
     console.error('Unknown event type in whenHover', e);
-  };
+  }) as (e: Event) => void;
 
   const addHoverListener = (element?: Element) => {
     if (!element) return;
@@ -102,35 +99,20 @@ export const whenHover = (
     const alreadyHover = element.matches(':hover');
     if (alreadyHover && !abortController.signal.aborted) {
       // When the element is already hovered, we need to trigger the callback manually
-      onHoverChange(new MouseEvent('mouseover')).catch(console.error);
+      onHoverChange(new MouseEvent('mouseover'));
     }
-    element.addEventListener(
-      'mouseover',
-      (e: Event) => {
-        onHoverChange(e).catch(console.error);
-      },
-      {
-        signal: abortController.signal,
-      }
-    );
-    element.addEventListener(
-      'mouseleave',
-      (e: Event) => {
-        onHoverChange(e).catch(console.error);
-      },
-      {
-        signal: abortController.signal,
-      }
-    );
+    element.addEventListener('mouseover', onHoverChange, {
+      signal: abortController.signal,
+    });
+    element.addEventListener('mouseleave', onHoverChange, {
+      signal: abortController.signal,
+    });
   };
+
   const removeHoverListener = (element?: Element) => {
     if (!element) return;
-    element.removeEventListener('mouseover', (e: Event) => {
-      onHoverChange(e).catch(console.error);
-    });
-    element.removeEventListener('mouseleave', (e: Event) => {
-      onHoverChange(e).catch(console.error);
-    });
+    element.removeEventListener('mouseover', onHoverChange);
+    element.removeEventListener('mouseleave', onHoverChange);
   };
 
   const setReference = (element?: Element) => {
