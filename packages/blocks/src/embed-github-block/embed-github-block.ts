@@ -14,6 +14,13 @@ export class EmbedGithubBlock extends EmbedBlockElement<EmbedGithubBlockModel> {
       background: var(--affine-background-primary-color);
       border: 1px solid var(--affine-border-color);
       padding: 12px;
+    }
+    affine-embed-github-block {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    * + affine-embed-github-block {
       margin-top: 12px;
     }
   `;
