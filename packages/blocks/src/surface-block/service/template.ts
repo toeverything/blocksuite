@@ -8,7 +8,7 @@ import {
   type SnapshotReturn,
 } from '@blocksuite/store';
 
-import { Bound, getCommonBound } from '../index.js';
+import { Bound, getCommonBound, type IConnector } from '../index.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { SurfaceBlockTransformer } from '../surface-transformer.js';
 import { replaceIdMiddleware } from './template-middlewares.js';
@@ -151,11 +151,30 @@ export class TemplateJob {
       }
 
       if (block.flavour === 'affine:surface') {
+        const ignoreType = ['connector', 'group'];
+
         Object.entries(
           block.props.elements as Record<string, Record<string, unknown>>
         ).forEach(([_, val]) => {
-          if (val['xywh']) {
+          const type = val['type'] as string;
+
+          if (val['xywh'] && !ignoreType.includes(type)) {
             bounds.push(Bound.deserialize(val['xywh'] as string));
+          }
+
+          if (type === 'connector') {
+            (['target', 'source'] as const).forEach(prop => {
+              const propVal = val[prop];
+              assertType<IConnector['source']>(propVal);
+
+              if (propVal['id'] || !propVal['position']) return;
+
+              const pos = propVal['position'];
+
+              if (pos) {
+                bounds.push(new Bound(pos[0], pos[1], 0, 0));
+              }
+            });
           }
         });
       }
