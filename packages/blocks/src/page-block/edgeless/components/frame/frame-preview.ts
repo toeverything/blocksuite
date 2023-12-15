@@ -485,21 +485,30 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       })}
     >
       <div
-        class="frame-preview-surface-viewport"
         style=${styleMap({
-          width: `${width}px`,
-          height: `${height}px`,
-          aspectRatio: `${width} / ${height}`,
+          backgroundColor: referencedModel.background
+            ? `var(${referencedModel.background})`
+            : 'var(--affine-platte-transparent)',
+          borderRadius: '4px',
         })}
       >
-        <surface-ref-portal
-          .page=${this.page}
-          .host=${this.host}
-          .containerModel=${referencedModel}
-          .renderModel=${this.host.renderModel}
-        ></surface-ref-portal>
-        <div class="frame-preview-surface-canvas-container">
-          <!-- attach canvas here -->
+        <div
+          class="frame-preview-surface-viewport"
+          style=${styleMap({
+            width: `${width}px`,
+            height: `${height}px`,
+            aspectRatio: `${width} / ${height}`,
+          })}
+        >
+          <surface-ref-portal
+            .page=${this.page}
+            .host=${this.host}
+            .containerModel=${referencedModel}
+            .renderModel=${this.host.renderModel}
+          ></surface-ref-portal>
+          <div class="frame-preview-surface-canvas-container">
+            <!-- attach canvas here -->
+          </div>
         </div>
       </div>
     </div>`;
