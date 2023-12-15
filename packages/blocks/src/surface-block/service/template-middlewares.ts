@@ -1,6 +1,7 @@
 import { assertExists, assertType } from '@blocksuite/global/utils';
 import { type BlockSnapshot, type SnapshotReturn } from '@blocksuite/store';
 
+import type { IConnector } from '../index.js';
 import { Bound } from '../utils/bound.js';
 import { generateElementId } from '../utils/index.js';
 import type { SlotBlockPayload, TemplateJob } from './template.js';
@@ -144,6 +145,7 @@ export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
       }
     });
 
+    const ignoreType = ['group', 'connector'];
     const changePosition = (blockJson: BlockSnapshot) => {
       assertExists(templateBound);
 
@@ -162,6 +164,12 @@ export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
         Object.entries(
           blockJson.props.elements as Record<string, Record<string, unknown>>
         ).forEach(([_, val]) => {
+          const type = val['type'] as string;
+
+          if (ignoreType.includes(type) && val['xywh']) {
+            delete val['xywh'];
+          }
+
           if (val['xywh']) {
             const bound = Bound.deserialize(val['xywh'] as string);
 
@@ -171,6 +179,18 @@ export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
               bound.w,
               bound.h
             ).serialize();
+          }
+
+          if (type === 'connector') {
+            (['target', 'source'] as const).forEach(prop => {
+              const propVal = val[prop];
+              assertType<IConnector['target']>(propVal);
+
+              if (propVal['id'] || !propVal['position']) return;
+              const pos = propVal['position'];
+
+              propVal['position'] = [pos[0] + offset.x, pos[1] + offset.y];
+            });
           }
         });
       }
