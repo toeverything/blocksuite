@@ -135,7 +135,7 @@ export async function uploadBlobForImage(
   setImageLoading(blockId, true);
   const storage = page.blob;
   let sourceId = '';
-  let imageBlock: BaseBlockModel | null;
+  let imageBlock: BaseBlockModel | null = null;
   try {
     imageBlock = page.getBlockById(blockId);
     if (!imageBlock) {
@@ -214,7 +214,7 @@ export function addSiblingImageBlock(
   return blockIds;
 }
 
-export function addImageBlock(
+export function addImageBlocks(
   files: File[],
   maxFileSize: number,
   page: Page,

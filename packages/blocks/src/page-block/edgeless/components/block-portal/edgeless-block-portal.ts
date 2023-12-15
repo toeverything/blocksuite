@@ -288,8 +288,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                 xywh: serializeXYWH(x, y, w, Math.round(newModelHeight)),
               });
             } else {
-              page.updateBlock(model, {
-                xywh: serializeXYWH(x, y, w, Math.round(newModelHeight)),
+              page.withoutTransact(() => {
+                page.updateBlock(model, {
+                  xywh: serializeXYWH(x, y, w, Math.round(newModelHeight)),
+                });
               });
             }
           }

@@ -29,7 +29,7 @@ import { getServiceOrRegister } from '../../../../_legacy/service/index.js';
 import { toggleBookmarkCreateModal } from '../../../../bookmark-block/components/index.js';
 import { ImageService } from '../../../../image-block/image-service.js';
 import {
-  addImageBlock,
+  addImageBlocks,
   addSiblingImageBlock,
 } from '../../../../image-block/utils.js';
 import { DocPageBlockComponent } from '../../../../page-block/doc/doc-page-block.js';
@@ -586,7 +586,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       assertInstanceOf(imageService, ImageService);
       const maxFileSize = imageService.maxFileSize;
 
-      const blockIds = addImageBlock(
+      const blockIds = addImageBlocks(
         imageFiles,
         maxFileSize,
         page,
