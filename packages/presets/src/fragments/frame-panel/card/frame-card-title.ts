@@ -1,8 +1,8 @@
 import { type FrameBlockModel, stopPropagation } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Y } from '@blocksuite/store';
-import { css, html, LitElement, type PropertyValues } from 'lit';
+import { css, html, type PropertyValues } from 'lit';
 import { property, query } from 'lit/decorators.js';
 
 import { FrameCardTitleEditor } from './frame-card-title-editor.js';
@@ -54,7 +54,7 @@ const styles = css`
   }
 `;
 
-export class FrameCardTitle extends WithDisposable(LitElement) {
+export class FrameCardTitle extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
