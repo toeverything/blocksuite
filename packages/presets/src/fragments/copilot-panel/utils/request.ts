@@ -68,6 +68,19 @@ export const askGPT4V = async (
   });
   return result.choices[0].message.content;
 };
+export const embeddings = async (textList: string[]) => {
+  const apiKey = getGPTAPIKey();
+  const openai = new OpenAI({
+    apiKey: apiKey,
+    dangerouslyAllowBrowser: true,
+  });
+  const result = await openai.embeddings.create({
+    input: textList,
+    model: 'text-embedding-ada-002',
+    encoding_format: 'float',
+  });
+  return result.data.map(v => v.embedding);
+};
 const getGPTAPIKey = () => {
   const apiKey = APIKeys.GPTAPIKey;
   if (!apiKey) {
@@ -99,4 +112,20 @@ export const askGPT3_5turbo = async (
     max_tokens: 4096,
   });
   return result.choices[0].message;
+};
+export const askGPT3_5turbo_1106 = async (
+  messages: Array<OpenAI.ChatCompletionMessageParam>
+) => {
+  const apiKey = getGPTAPIKey();
+  const openai = new OpenAI({
+    apiKey: apiKey,
+    dangerouslyAllowBrowser: true,
+  });
+  const result = await openai.chat.completions.create({
+    messages,
+    model: 'gpt-3.5-turbo-1106',
+    temperature: 0,
+    max_tokens: 4096,
+  });
+  return result.choices[0].message.content;
 };
