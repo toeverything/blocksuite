@@ -18,7 +18,7 @@ export type DatabaseBlockProps = {
   columns: Array<Column>;
 };
 
-type SerializedCells = {
+export type SerializedCells = {
   // row
   [key: string]: {
     // column
