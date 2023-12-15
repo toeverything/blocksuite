@@ -71,6 +71,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     .surface-layer {
       position: absolute;
     }
+
+    .affine-edgeless-layer edgeless-frames-container {
+      position: relative;
+      z-index: 1;
+    }
   `;
 
   static renderPortal(

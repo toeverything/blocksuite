@@ -1,27 +1,40 @@
-import { templates } from './templates.js';
+import type {
+  Template,
+  TemplateCategory,
+  TemplateManager,
+} from './template-type.js';
+import conceptmap from './templates/concept-map.js';
+import flowchart from './templates/flow-chart.js';
+import ganttchart from './templates/gantt-chart.js';
+import kanban from './templates/kanban.js';
+import monthlycalendar from './templates/monthly-calendar.js';
+import presentation from './templates/presentation.js';
+import projectplanning from './templates/project-planning.js';
+import stickers from './templates/stickers.js';
+import storyboard from './templates/storyboard.js';
 
-export type Template = {
-  name: string;
-  content: unknown;
-  asserts?: Record<string, string>;
-  preview: string;
-  version?: object;
-};
-
-export type TemplateCategory = {
-  name: string;
-  templates: Template[];
-};
-
-interface TemplateManager {
-  list(category?: string): Template[];
-
-  categories(): string[];
-
-  search(keyword: string, category?: string): Template[];
-
-  extend(category: string, templates: Template[]): void;
-}
+export const templates: TemplateCategory[] = [
+  {
+    name: 'Marketing',
+    templates: [storyboard],
+  },
+  {
+    name: 'Project management',
+    templates: [ganttchart, kanban, monthlycalendar, projectplanning],
+  },
+  {
+    name: 'Brainstorming',
+    templates: [flowchart, conceptmap],
+  },
+  {
+    name: 'Presentation',
+    templates: [presentation],
+  },
+  {
+    name: 'Paws and pals',
+    templates: stickers as unknown as Template[],
+  },
+];
 
 export const builtInTemplates = {
   list: (category?: string) => {
@@ -45,7 +58,7 @@ export const builtInTemplates = {
       }
 
       categroy.templates.forEach(template => {
-        template.name.includes(keyword) && candidates.push(template);
+        template.name?.includes(keyword) && candidates.push(template);
       });
     });
 

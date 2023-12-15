@@ -1,9 +1,8 @@
-import type { Template } from '../builtin-templates.js';
-
-export const storyboard: Template = {
-  name: 'storyboard',
-  preview: '',
-  asserts: {
+export default {
+  name: 'Storyboard',
+  preview: 'https://cdn.affine.pro/templates/cover/storyboard.png',
+  type: 'template',
+  assets: {
     'pQzvckPjmd0QPBOYJj0lRAezTAl43BtaWqVFZkydgzQ=':
       'https://imagedelivery.net/S2JgHUJzW7ZzW77qOAfRfA/a5aa36ec-a2e1-4d7f-dd00-ee621f34f500/public',
     '4rOMygicmDxT3mgVjW1-PtavNtg1TGpkNReRIwRy0fQ=':
@@ -391,7 +390,7 @@ export const storyboard: Template = {
                   'affine:surface:text': true,
                   delta: [
                     {
-                      insert: 'Stoardboard',
+                      insert: 'Storyboard',
                     },
                   ],
                 },
