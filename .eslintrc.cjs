@@ -58,16 +58,11 @@ module.exports = {
     'plugin:lit/recommended',
   ],
   ignorePatterns: [
+    '**/dist/*',
+    '**/node_modules/*',
+    '**/*.cjs',
     'tests/snapshots/*',
     '__snapshots__/*',
-    'packages/store/dist/*',
-    'packages/lit/dist/*',
-    'packages/blocks/dist/*',
-    'packages/presets/dist/*',
-    'packages/global/dist/*',
-    'packages/playground/dist/assets/*',
-    'packages/inline/dist/*',
-    'packages/block-std/dist/*',
   ],
   overrides: [
     {
