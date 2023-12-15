@@ -524,7 +524,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                       )
                       .filter(Boolean)
                       .join(',');
-
                     r = createAstCell([{ type: 'text', value }]);
                     break;
                   }
