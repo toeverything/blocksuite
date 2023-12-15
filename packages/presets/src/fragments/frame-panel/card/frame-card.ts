@@ -8,9 +8,9 @@ import {
 } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
-import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -110,7 +110,7 @@ const styles = css`
   }
 `;
 
-export class FrameCard extends WithDisposable(LitElement) {
+export class FrameCard extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
