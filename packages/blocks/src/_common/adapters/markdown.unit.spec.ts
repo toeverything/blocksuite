@@ -1038,7 +1038,12 @@ hhh
             'block:O8dpIDiP7-': {
               columnId: 'block:O8dpIDiP7-',
               value: {
-                _yText: 'test1',
+                '$blocksuite:internal:text$': true,
+                delta: [
+                  {
+                    insert: 'test2',
+                  },
+                ],
               },
             },
             'block:U8lPD59MkF': {
@@ -1058,7 +1063,12 @@ hhh
             'block:O8dpIDiP7-': {
               columnId: 'block:O8dpIDiP7-',
               value: {
-                _yText: 'test2',
+                '$blocksuite:internal:text$': true,
+                delta: [
+                  {
+                    insert: 'test1',
+                  },
+                ],
               },
             },
             'block:5cglrBmAr3': {
@@ -1206,7 +1216,7 @@ hhh
       ],
     };
 
-    const md = `| Title  | Status      | Date       | Number | Progress | MultiSelect | RichText         | Link               | Checkbox |\n| ------ | ----------- | ---------- | ------ | -------- | ----------- | ---------------- | ------------------ | -------- |\n| Task 1 | TODO        | 2023-12-15 | 1      | 65       | test1,test2 | \\[object Object] | https://google.com | true     |\n| Task 2 | In Progress | 2023-12-20 |        |          |             | \\[object Object] |                    |          |\n`;
+    const md = `| Title  | Status      | Date       | Number | Progress | MultiSelect | RichText | Link               | Checkbox |\n| ------ | ----------- | ---------- | ------ | -------- | ----------- | -------- | ------------------ | -------- |\n| Task 1 | TODO        | 2023-12-15 | 1      | 65       | test1,test2 | test2    | https://google.com | true     |\n| Task 2 | In Progress | 2023-12-20 |        |          |             | test1    |                    |          |\n`;
     const mdAdapter = new MarkdownAdapter();
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,

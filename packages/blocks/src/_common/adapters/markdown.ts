@@ -461,84 +461,90 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             type: 'tableCell',
             children,
           });
-          const mdAstCells = Array.prototype.map.call(children, v =>
-            Array.prototype.map.call(columns, col => {
-              const cell = cells[v.id]?.[col.id];
-              let r;
-              if (cell || col.type === 'title') {
-                switch (col.type) {
-                  case 'link':
-                  case 'progress':
-                  case 'number':
-                    r = createAstCell([
-                      {
-                        type: 'text',
-                        value: cell.value,
-                      },
-                    ]);
-                    break;
-                  case 'rich-text':
-                    r = createAstCell([
-                      {
-                        type: 'text',
-                        value: cell.value?.toString(),
-                      },
-                    ]);
-                    break;
-                  case 'title':
-                    r = createAstCell([
-                      {
-                        type: 'text',
-                        value: v.props.text.delta
-                          .map((v: { insert: string }) => v.insert)
-                          .join(''),
-                      },
-                    ]);
-                    break;
-                  case 'date':
-                    r = createAstCell([
-                      {
-                        type: 'text',
-                        value: format(
-                          new Date(cell.value as number),
-                          'yyyy-MM-dd'
-                        ),
-                      },
-                    ]);
-                    break;
-                  case 'select': {
-                    const value = col.data.options.find(
-                      (opt: Record<string, string>) => opt.id === cell.value
-                    )?.value;
-                    r = createAstCell([{ type: 'text', value }]);
-                    break;
+          const mdAstCells = Array.prototype.map.call(
+            children,
+            (v: BlockSnapshot) =>
+              Array.prototype.map.call(columns, col => {
+                const cell = cells[v.id]?.[col.id];
+                let r;
+                if (cell || col.type === 'title') {
+                  switch (col.type) {
+                    case 'link':
+                    case 'progress':
+                    case 'number':
+                      r = createAstCell([
+                        {
+                          type: 'text',
+                          value: cell.value,
+                        },
+                      ]);
+                      break;
+                    case 'rich-text':
+                      r = createAstCell([
+                        {
+                          type: 'text',
+                          value: (cell.value as { delta: DeltaInsert[] }).delta
+                            .map(v => v.insert)
+                            .join(),
+                        },
+                      ]);
+                      break;
+                    case 'title':
+                      r = createAstCell([
+                        {
+                          type: 'text',
+                          value: (
+                            v.props.text as { delta: DeltaInsert[] }
+                          ).delta
+                            .map(v => v.insert)
+                            .join(''),
+                        },
+                      ]);
+                      break;
+                    case 'date':
+                      r = createAstCell([
+                        {
+                          type: 'text',
+                          value: format(
+                            new Date(cell.value as number),
+                            'yyyy-MM-dd'
+                          ),
+                        },
+                      ]);
+                      break;
+                    case 'select': {
+                      const value = col.data.options.find(
+                        (opt: Record<string, string>) => opt.id === cell.value
+                      )?.value;
+                      r = createAstCell([{ type: 'text', value }]);
+                      break;
+                    }
+                    case 'multi-select': {
+                      const value = Array.prototype.map
+                        .call(
+                          cell.value,
+                          val =>
+                            col.data.options.find(
+                              (opt: Record<string, string>) => val === opt.id
+                            ).value
+                        )
+                        .filter(Boolean)
+                        .join(',');
+                      r = createAstCell([{ type: 'text', value }]);
+                      break;
+                    }
+                    case 'checkbox': {
+                      r = createAstCell([{ type: 'text', value: cell.value }]);
+                      break;
+                    }
+                    default:
+                      r = createAstCell([{ type: 'text', value: '' }]);
                   }
-                  case 'multi-select': {
-                    const value = Array.prototype.map
-                      .call(
-                        cell.value,
-                        val =>
-                          col.data.options.find(
-                            (opt: Record<string, string>) => val === opt.id
-                          ).value
-                      )
-                      .filter(Boolean)
-                      .join(',');
-                    r = createAstCell([{ type: 'text', value }]);
-                    break;
-                  }
-                  case 'checkbox': {
-                    r = createAstCell([{ type: 'text', value: cell.value }]);
-                    break;
-                  }
-                  default:
-                    r = createAstCell([{ type: 'text', value: '' }]);
+                } else {
+                  r = createAstCell([{ type: 'text', value: '' }]);
                 }
-              } else {
-                r = createAstCell([{ type: 'text', value: '' }]);
-              }
-              return r;
-            })
+                return r;
+              })
           );
 
           // Handle first row.
