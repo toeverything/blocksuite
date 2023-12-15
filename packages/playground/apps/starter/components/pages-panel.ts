@@ -1,4 +1,4 @@
-import { createPage } from '@blocksuite/blocks';
+import { createDefaultPage } from '@blocksuite/blocks';
 import { CloseIcon } from '@blocksuite/blocks/_common/icons';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
@@ -113,5 +113,5 @@ export class PagesPanel extends WithDisposable(ShadowlessElement) {
 
 function createPageBlock(workspace: Workspace) {
   const id = workspace.idGenerator('page');
-  createPage(workspace, { id }).catch(console.error);
+  createDefaultPage(workspace, { id }).catch(console.error);
 }
