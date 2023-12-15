@@ -12,13 +12,13 @@ import {
 } from '../../../_common/icons/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { turnImageIntoCardView } from '../../../attachment-block/utils.js';
+import type { ImageBlockModel } from '../../../image-block/index.js';
+import { openLeditsEditor } from '../../../image-block/ledits/main.js';
 import {
   copyImage,
   downloadImage,
   focusCaption,
-} from '../../../image-block/image/utils.js';
-import { type ImageBlockModel } from '../../../image-block/index.js';
-import { openLeditsEditor } from '../../../image-block/ledits/main.js';
+} from '../../../image-block/utils.js';
 
 export function ImageOptionsTemplate({
   ref: containerRef,

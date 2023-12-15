@@ -192,7 +192,7 @@ test('popup menu should follow position of image when scrolling', async ({
 
   const menu = page.locator('.affine-embed-editing-state-container');
 
-  expect(menu).toBeVisible();
+  await expect(menu).toBeVisible();
 
   await page.evaluate(
     async ([rect]) => {

@@ -52,38 +52,44 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   override firstUpdated(): void {
     const dispatcher = this.edgeless.dispatcher;
     assertExists(dispatcher);
-    this.updateComplete.then(() => {
-      this.inlineEditor.selectAll();
+    this.updateComplete
+      .then(() => {
+        this.inlineEditor.selectAll();
 
-      this.inlineEditor.slots.updated.on(() => {
-        this.requestUpdate();
-      });
-
-      this.disposables.add(
-        dispatcher.add('keyDown', ctx => {
-          const state = ctx.get('keyboardState');
-          if (state.raw.key === 'Enter' && !state.raw.isComposing) {
-            this._unmount();
-            return true;
-          }
-          requestAnimationFrame(() => {
-            this.requestUpdate();
-          });
-          return false;
-        })
-      );
-      this.disposables.add(
-        this.edgeless.slots.viewportUpdated.on(() => {
+        this.inlineEditor.slots.updated.on(() => {
           this.requestUpdate();
-        })
-      );
+        });
 
-      this.disposables.add(dispatcher.add('click', () => true));
-      this.disposables.add(dispatcher.add('doubleClick', () => true));
-      this.disposables.addFromEvent(this.inlineEditorContainer, 'blur', () => {
-        this._unmount();
-      });
-    });
+        this.disposables.add(
+          dispatcher.add('keyDown', ctx => {
+            const state = ctx.get('keyboardState');
+            if (state.raw.key === 'Enter' && !state.raw.isComposing) {
+              this._unmount();
+              return true;
+            }
+            requestAnimationFrame(() => {
+              this.requestUpdate();
+            });
+            return false;
+          })
+        );
+        this.disposables.add(
+          this.edgeless.slots.viewportUpdated.on(() => {
+            this.requestUpdate();
+          })
+        );
+
+        this.disposables.add(dispatcher.add('click', () => true));
+        this.disposables.add(dispatcher.add('doubleClick', () => true));
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'blur',
+          () => {
+            this._unmount();
+          }
+        );
+      })
+      .catch(console.error);
   }
 
   private _unmount() {
@@ -107,6 +113,8 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       transformOrigin: 'top left',
       borderRadius: '4px',
       width: 'fit-content',
+      maxHeight: '30px',
+      lineHeight: '20px',
       padding: '4px 10px',
       fontSize: '14px',
       position: 'absolute',

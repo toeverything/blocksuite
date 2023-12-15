@@ -12,7 +12,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
 
-import type { TopLevelBlockModel } from '../_common/utils/types.js';
+import type { TopLevelBlockModel } from '../_common/types.js';
 import type { FrameBlockModel } from '../models.js';
 import { getBlocksInFrame } from '../page-block/edgeless/frame-manager.js';
 import { EdgelessBlockType } from '../surface-block/edgeless-types.js';
@@ -99,13 +99,15 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
     zoom: number;
   }) => {
     this.requestUpdate();
-    this.updateComplete.then(() => {
-      this.portal?.style.setProperty(
-        'transform',
-        `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
-      );
-      this.portal?.style.setProperty('transform-origin', '0 0');
-    });
+    this.updateComplete
+      .then(() => {
+        this.portal?.style.setProperty(
+          'transform',
+          `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
+        );
+        this.portal?.style.setProperty('transform-origin', '0 0');
+      })
+      .catch(console.error);
   };
 
   override render() {

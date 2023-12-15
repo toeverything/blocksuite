@@ -18,6 +18,7 @@
   "scripts": {
     "typedoc": "pnpm -C ../.. build:packages && typedoc --options ../../typedoc.json",
     "dev": "pnpm run typedoc && vitepress dev --port 5200",
+    "dev:nobuild": "vitepress dev --port 5200",
     "build": "pnpm run typedoc && vitepress build",
     "build:vercel": "pnpm run typedoc && vitepress build",
     "preview": "pnpm run typedoc && vitepress preview"

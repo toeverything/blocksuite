@@ -87,9 +87,11 @@ export const formatTextCommand: Command<
         }
       });
 
-      Promise.all(selectedBlocks.map(el => el.updateComplete)).then(() => {
-        host.rangeManager?.syncTextSelectionToRange(textSelection);
-      });
+      Promise.all(selectedBlocks.map(el => el.updateComplete))
+        .then(() => {
+          host.rangeManager?.syncTextSelectionToRange(textSelection);
+        })
+        .catch(console.error);
 
       next();
     })

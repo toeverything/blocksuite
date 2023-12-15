@@ -26,10 +26,12 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.updateComplete.then(() => {
-      this.titleInput.focus();
-      this.titleInput.setSelectionRange(0, this.titleInput.value.length);
-    });
+    this.updateComplete
+      .then(() => {
+        this.titleInput.focus();
+        this.titleInput.setSelectionRange(0, this.titleInput.value.length);
+      })
+      .catch(console.error);
 
     this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
   }

@@ -19,11 +19,14 @@ import {
 import { nanoid } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import { sha } from '@blocksuite/store';
-import type { Heading, Root, RootContentMap } from 'mdast';
+import format from 'date-fns/format';
+import type { Heading, Root, RootContentMap, TableRow } from 'mdast';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
+import type { SerializedCells } from '../../database-block/database-model.js';
+import type { Column } from '../../database-block/types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { remarkGfm } from './gfm.js';
 
@@ -82,7 +85,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       assets
     );
     return {
-      file: this._astToMardown(ast),
+      file: this._astToMarkdown(ast),
       assetsIds,
     };
   }
@@ -104,9 +107,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         assets
       );
       sliceAssetsIds.push(...assetsIds);
-      buffer += this._astToMardown(ast);
+      buffer += this._astToMarkdown(ast);
     }
-    const markdown = buffer;
+    const markdown =
+      buffer.match(/\n/g)?.length === 1 ? buffer.trimEnd() : buffer;
     return {
       file: markdown,
       assetsIds: sliceAssetsIds,
@@ -444,6 +448,134 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               'children'
             )
             .closeNode();
+          break;
+        }
+        case 'affine:database': {
+          const rows: TableRow[] = [];
+          const columns = o.node.props.columns as Array<Column>;
+          const children = o.node.children;
+          const cells = o.node.props.cells as SerializedCells;
+          const createAstCell = (
+            children: Record<string, string | undefined | unknown>[]
+          ) => ({
+            type: 'tableCell',
+            children,
+          });
+          const mdAstCells = Array.prototype.map.call(
+            children,
+            (v: BlockSnapshot) =>
+              Array.prototype.map.call(columns, col => {
+                const cell = cells[v.id]?.[col.id];
+                let r;
+                if (cell || col.type === 'title') {
+                  switch (col.type) {
+                    case 'link':
+                    case 'progress':
+                    case 'number':
+                      r = createAstCell([
+                        {
+                          type: 'text',
+                          value: cell.value,
+                        },
+                      ]);
+                      break;
+                    case 'rich-text':
+                      r = createAstCell([
+                        {
+                          type: 'text',
+                          value: (cell.value as { delta: DeltaInsert[] }).delta
+                            .map(v => v.insert)
+                            .join(),
+                        },
+                      ]);
+                      break;
+                    case 'title':
+                      r = createAstCell([
+                        {
+                          type: 'text',
+                          value: (
+                            v.props.text as { delta: DeltaInsert[] }
+                          ).delta
+                            .map(v => v.insert)
+                            .join(''),
+                        },
+                      ]);
+                      break;
+                    case 'date':
+                      r = createAstCell([
+                        {
+                          type: 'text',
+                          value: format(
+                            new Date(cell.value as number),
+                            'yyyy-MM-dd'
+                          ),
+                        },
+                      ]);
+                      break;
+                    case 'select': {
+                      const value = col.data.options.find(
+                        (opt: Record<string, string>) => opt.id === cell.value
+                      )?.value;
+                      r = createAstCell([{ type: 'text', value }]);
+                      break;
+                    }
+                    case 'multi-select': {
+                      const value = Array.prototype.map
+                        .call(
+                          cell.value,
+                          val =>
+                            col.data.options.find(
+                              (opt: Record<string, string>) => val === opt.id
+                            ).value
+                        )
+                        .filter(Boolean)
+                        .join(',');
+                      r = createAstCell([{ type: 'text', value }]);
+                      break;
+                    }
+                    case 'checkbox': {
+                      r = createAstCell([{ type: 'text', value: cell.value }]);
+                      break;
+                    }
+                    default:
+                      r = createAstCell([{ type: 'text', value: '' }]);
+                  }
+                } else {
+                  r = createAstCell([{ type: 'text', value: '' }]);
+                }
+                return r;
+              })
+          );
+
+          // Handle first row.
+          if (Array.isArray(columns)) {
+            rows.push({
+              type: 'tableRow',
+              children: Array.prototype.map.call(columns, v =>
+                createAstCell([
+                  {
+                    type: 'text',
+                    value: v.name,
+                  },
+                ])
+              ) as [],
+            });
+          }
+
+          // Handle 2-... rows
+          Array.prototype.forEach.call(mdAstCells, children => {
+            rows.push({ type: 'tableRow', children });
+          });
+
+          context
+            .openNode({
+              type: 'table',
+              children: rows,
+            })
+            .closeNode();
+
+          context.skipAllChildren();
+          break;
         }
       }
     });
@@ -662,7 +794,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             );
             blobId = await sha(await clonedRes.arrayBuffer());
             assets?.getAssets().set(blobId, file);
-            assets?.writeToBlob(blobId);
+            await assets?.writeToBlob(blobId);
           }
           context
             .openNode(
@@ -788,7 +920,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return walker.walk(markdown, snapshot);
   };
 
-  private _astToMardown(ast: Root) {
+  private _astToMarkdown(ast: Root) {
     return unified()
       .use(remarkGfm)
       .use(remarkStringify, {

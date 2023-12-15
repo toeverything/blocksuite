@@ -394,7 +394,6 @@ export class Page extends Space<FlatBlockMap> {
     const childBlocksPerParent = new Map<BaseBlockModel, BaseBlockModel[]>();
     blocksToMove.forEach(block => {
       const parentBlock = this.getParent(block);
-
       if (!parentBlock) {
         throw new Error("Can't find parent block for the current block");
       }
@@ -790,7 +789,7 @@ export class Page extends Space<FlatBlockMap> {
     }
   }
 
-  override async load(initFn?: () => void) {
+  override async load(initFn?: () => Promise<void> | void) {
     await super.load();
     if (!this._docLoaded) {
       this.trySyncFromExistingDoc();

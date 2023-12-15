@@ -11,6 +11,7 @@ import type { Y } from '@blocksuite/store';
 import { Text, Workspace } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { z } from 'zod';
 
 import { onVBeforeinput, onVCompositionEnd } from './inline/hooks.js';
@@ -28,20 +29,34 @@ interface RichTextStackItem {
 @customElement('rich-text')
 export class RichText extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .affine-rich-text {
+    rich-text {
+      display: block;
+      height: 100%;
+      width: 100%;
+    }
+
+    .inline-editor {
       height: 100%;
       width: 100%;
       outline: none;
       cursor: text;
     }
 
-    v-line {
+    rich-text .nowrap-lines {
+      overflow-x: auto;
+    }
+
+    rich-text v-line {
       scroll-margin-top: 50px;
       scroll-margin-bottom: 30px;
     }
+
+    rich-text .nowrap-lines v-text span {
+      white-space: pre !important;
+    }
   `;
 
-  @query('.affine-rich-text')
+  @query('.inline-editor')
   private _inlineEditorContainer!: HTMLDivElement;
   get inlineEditorContainer() {
     assertExists(this._inlineEditorContainer);
@@ -79,6 +94,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   enableAutoScrollHorizontally = true;
   @property({ attribute: false })
   enableMarkdownShortcut = true;
+  @property({ attribute: false })
+  wrapText = true;
 
   // `enableMarkdownShortcut` will be overwritten to false and
   // `attributesSchema` will be overwritten to `z.object({})` if `enableFormat` is false.
@@ -89,8 +106,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   get inlineEditor() {
     return this._inlineEditor;
   }
-
-  private _lastScrollLeft = 0;
 
   private _init() {
     if (this._inlineEditor) {
@@ -139,48 +154,50 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       inlineEditor.slots.inlineRangeUpdated.on(([inlineRange, sync]) => {
         if (!inlineRange || !sync) return;
 
-        inlineEditor.waitForUpdate().then(() => {
-          if (!inlineEditor.mounted) return;
+        inlineEditor
+          .waitForUpdate()
+          .then(() => {
+            if (!inlineEditor.mounted) return;
 
-          // get newest inline range
-          const inlineRange = inlineEditor.getInlineRange();
-          if (!inlineRange) return;
+            // get newest inline range
+            const inlineRange = inlineEditor.getInlineRange();
+            if (!inlineRange) return;
 
-          const range = inlineEditor.toDomRange(inlineRange);
-          if (!range) return;
+            const range = inlineEditor.toDomRange(inlineRange);
+            if (!range) return;
 
-          // scroll container is window
-          if (this.enableAutoScrollVertically) {
-            const rangeRect = range.getBoundingClientRect();
+            // scroll container is window
+            if (this.enableAutoScrollVertically) {
+              const rangeRect = range.getBoundingClientRect();
 
-            if (rangeRect.top < 0) {
-              this.scrollIntoView({ block: 'start' });
-            } else if (rangeRect.bottom > window.innerHeight) {
-              this.scrollIntoView({ block: 'end' });
-            }
-          }
-
-          // scroll container is rich-text
-          if (this.enableAutoScrollHorizontally) {
-            // make sure the result of moveX is expected
-            this.scrollLeft = 0;
-            const thisRect = this.getBoundingClientRect();
-            const rangeRect = range.getBoundingClientRect();
-            let moveX = 0;
-            if (
-              rangeRect.left + rangeRect.width >
-              thisRect.left + thisRect.width
-            ) {
-              moveX =
-                rangeRect.left +
-                rangeRect.width -
-                (thisRect.left + thisRect.width);
-              moveX = Math.max(this._lastScrollLeft, moveX);
+              if (rangeRect.top < 0) {
+                this.scrollIntoView({ block: 'start' });
+              } else if (rangeRect.bottom > window.innerHeight) {
+                this.scrollIntoView({ block: 'end' });
+              }
             }
 
-            this.scrollLeft = moveX;
-          }
-        });
+            // scroll container is `inlineEditorContainer`
+            if (this.enableAutoScrollHorizontally) {
+              const containerRect =
+                this.inlineEditorContainer.getBoundingClientRect();
+              const rangeRect = range.getBoundingClientRect();
+
+              let scrollLeft = this.inlineEditorContainer.scrollLeft;
+              if (
+                rangeRect.left + rangeRect.width >
+                containerRect.left + containerRect.width
+              ) {
+                scrollLeft +=
+                  rangeRect.left +
+                  rangeRect.width -
+                  (containerRect.left + containerRect.width) +
+                  2;
+              }
+              this.inlineEditorContainer.scrollLeft = scrollLeft;
+            }
+          })
+          .catch(console.error);
       })
     );
 
@@ -320,20 +337,18 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       this.disposables.addFromEvent(this, 'paste', this._onPaste);
     }
 
-    this.updateComplete.then(() => {
-      this._unmount();
-      this._init();
+    this.updateComplete
+      .then(() => {
+        this._unmount();
+        this._init();
 
-      this.disposables.add({
-        dispose: () => {
-          this._unmount();
-        },
-      });
-    });
-
-    this.disposables.addFromEvent(this, 'scroll', () => {
-      this._lastScrollLeft = this.scrollLeft;
-    });
+        this.disposables.add({
+          dispose: () => {
+            this._unmount();
+          },
+        });
+      })
+      .catch(console.error);
   }
 
   override updated() {
@@ -343,7 +358,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    return html`<div class="affine-rich-text inline-editor"></div>`;
+    const classes = classMap({
+      'inline-editor': true,
+      'nowrap-lines': !this.wrapText,
+    });
+
+    return html`<div class=${classes}></div>`;
   }
 }
 

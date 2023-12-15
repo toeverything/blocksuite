@@ -84,7 +84,7 @@ export class EditorWithAI {
       alert('Please select some shapes first');
       return;
     }
-    canvas?.toBlob(async blob => {
+    canvas.toBlob(blob => {
       if (blob) {
         const prompt =
           (
@@ -92,13 +92,16 @@ export class EditorWithAI {
               'copilot-panel-edit-image-prompt'
             ) as HTMLInputElement
           )?.value ?? '';
-        const b64 = await editImage(prompt, canvas);
-        if (!b64) {
-          return;
-        }
-        const imgFile = jpegBase64ToFile(b64, 'img');
-        const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
-        edgelessPage.addImages([imgFile]);
+        editImage(prompt, canvas)
+          ?.then(b64 => {
+            if (!b64) {
+              return;
+            }
+            const imgFile = jpegBase64ToFile(b64, 'img');
+            const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
+            edgelessPage.addImages([imgFile]).catch(console.error);
+          })
+          .catch(console.error);
       }
     });
   };

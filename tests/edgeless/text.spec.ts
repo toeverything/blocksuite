@@ -22,7 +22,7 @@ async function assertTextFont(page: Page, font: string) {
   const fontPanel = page.locator('edgeless-font-family-panel');
   const isFontPanelShow = await fontPanel.isVisible();
   if (!isFontPanelShow) {
-    if (!fontButton.isVisible())
+    if (!(await fontButton.isVisible()))
       throw new Error('edgeless change text toolbar is not visible');
 
     await fontButton.click();

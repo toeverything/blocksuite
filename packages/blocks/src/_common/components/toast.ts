@@ -55,7 +55,7 @@ export const toast = (message: string, duration = 2500) => {
   const styles = `
     max-width: 480px;
     text-align: center;
-    baseTheme: ${baseTheme.fontSansFamily};
+    font-family: ${baseTheme.fontSansFamily};
     font-size: var(--affine-font-sm);
     padding: 6px 12px;
     margin: 10px 0 0 0;
@@ -86,22 +86,25 @@ export const toast = (message: string, duration = 2500) => {
   }; // satisfies KeyframeAnimationOptions;
   element.animate(fadeIn, options);
 
-  setTimeout(async () => {
+  setTimeout(() => {
     const fadeOut = fadeIn.reverse();
     const animation = element.animate(fadeOut, options);
-    await animation.finished;
-    element.style.maxHeight = '0';
-    element.style.margin = '0';
-    element.style.padding = '0';
-    element.addEventListener(
-      'transitionend',
-      () => {
-        element.remove();
-      },
-      {
-        once: true,
-      }
-    );
+    animation.finished
+      .then(() => {
+        element.style.maxHeight = '0';
+        element.style.margin = '0';
+        element.style.padding = '0';
+        element.addEventListener(
+          'transitionend',
+          () => {
+            element.remove();
+          },
+          {
+            once: true,
+          }
+        );
+      })
+      .catch(console.error);
   }, duration);
   return element;
 };

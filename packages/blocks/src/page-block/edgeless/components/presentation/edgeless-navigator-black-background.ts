@@ -2,7 +2,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { BLACK_BACKGROUND_KEY } from '../../../../_common/edgeless/frame/consts.js';
+import { EdgelessPresentationConsts as PresentationConsts } from '../../../../_common/edgeless/frame/consts.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -33,8 +33,8 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
   private _blackBackground = false;
 
   private _tryLoadBlackBackground() {
-    const blackBackground = sessionStorage.getItem(BLACK_BACKGROUND_KEY);
-    this._blackBackground = blackBackground !== 'false';
+    const value = sessionStorage.getItem(PresentationConsts.BlackBackground);
+    this._blackBackground = value !== 'false';
   }
 
   override firstUpdated() {
@@ -49,7 +49,7 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
       edgeless.slots.navigatorSettingUpdated.on(({ blackBackground }) => {
         if (blackBackground !== undefined) {
           sessionStorage.setItem(
-            BLACK_BACKGROUND_KEY,
+            PresentationConsts.BlackBackground,
             blackBackground.toString()
           );
 

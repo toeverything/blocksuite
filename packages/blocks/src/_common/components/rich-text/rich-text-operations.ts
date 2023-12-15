@@ -22,8 +22,9 @@ import {
   focusBlockByModel,
   focusTitle,
 } from '../../../_common/utils/selection.js';
-import type { ExtendedModel } from '../../../_common/utils/types.js';
-import { type ListBlockModel, type PageBlockModel } from '../../../models.js';
+import type { ListBlockModel } from '../../../list-block/index.js';
+import type { PageBlockModel } from '../../../page-block/index.js';
+import type { ExtendedModel } from '../../types.js';
 
 /**
  * Whether the block supports rendering its children.
@@ -83,7 +84,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
         asyncFocusRichText(page, nextModel.id, {
           index: nextModel.text.yText.length,
           length: 0,
-        });
+        })?.catch(console.error);
         return;
       }
 
@@ -97,7 +98,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     }
 
     const id = page.addBlock(flavour, blockProps, newParent, newBlockIndex);
-    asyncFocusRichText(page, id);
+    asyncFocusRichText(page, id)?.catch(console.error);
     return;
   }
   const index = parent.children.indexOf(model);
@@ -133,7 +134,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     }
   }
 
-  asyncFocusRichText(page, id);
+  asyncFocusRichText(page, id)?.catch(console.error);
 }
 
 export function handleBlockSplit(
@@ -224,7 +225,7 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     } as Partial<ListBlockModel>);
   }
 
-  asyncSetInlineRange(model, { index: offset, length: 0 });
+  asyncSetInlineRange(model, { index: offset, length: 0 }).catch(console.error);
 }
 
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
@@ -309,7 +310,7 @@ export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
       page.updateBlock(sibling, {});
     });
 
-  asyncSetInlineRange(model, { index: offset, length: 0 });
+  asyncSetInlineRange(model, { index: offset, length: 0 }).catch(console.error);
 }
 
 export function handleMultiBlockOutdent(page: Page, models: BaseBlockModel[]) {
@@ -408,7 +409,7 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
     .forEach(sibling => page.updateBlock(sibling, {}));
 
   const id = page.addBlock('affine:paragraph', blockProps, parent, index);
-  asyncFocusRichText(page, id);
+  asyncFocusRichText(page, id)?.catch(console.error);
   return true;
 }
 
@@ -590,7 +591,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
     asyncSetInlineRange(previousSibling, {
       index: lengthBeforeJoin,
       length: 0,
-    });
+    }).catch(console.error);
     return true;
   }
 

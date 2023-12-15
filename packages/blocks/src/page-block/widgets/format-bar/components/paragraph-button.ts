@@ -122,10 +122,12 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
           padding: 6,
         }),
       ],
-    }).then(({ x, y }) => {
-      panel.style.left = `${x}px`;
-      panel.style.top = `${y}px`;
-    });
+    })
+      .then(({ x, y }) => {
+        panel.style.left = `${x}px`;
+        panel.style.top = `${y}px`;
+      })
+      .catch(console.error);
   });
 
   const paragraphPanel = ParagraphPanel({

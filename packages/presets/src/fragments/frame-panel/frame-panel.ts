@@ -3,9 +3,13 @@ import './body/frame-panel-body.js';
 
 import { FramePreview } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { type EditorHost, WithDisposable } from '@blocksuite/lit';
+import {
+  type EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, type PropertyValues, unsafeCSS } from 'lit';
+import { css, html, type PropertyValues, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../index.js';
@@ -17,7 +21,7 @@ import { FramePanelHeader } from './header/frame-panel-header.js';
 import { FramesSettingMenu } from './header/frames-setting-menu.js';
 
 const styles = css`
-  :host {
+  frame-panel {
     display: block;
     width: 100%;
     height: 100%;
@@ -25,7 +29,6 @@ const styles = css`
 
   .frame-panel-container {
     background-color: var(--affine-background-primary-color);
-    /* padding: 0 16px; */
     box-sizing: border-box;
 
     display: flex;
@@ -34,7 +37,7 @@ const styles = css`
 
     height: 100%;
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    padding: 0 8px;
+    padding: 8px;
   }
 
   .frame-panel-body {
@@ -42,15 +45,34 @@ const styles = css`
     flex-grow: 1;
     width: 100%;
 
-    overflow-y: scroll;
+    overflow: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: transparent transparent; /* For Firefox */
   }
 
   .frame-panel-body::-webkit-scrollbar {
     width: 4px;
   }
+
+  .frame-panel-body::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+  }
+
+  .frame-panel-body:hover::-webkit-scrollbar-thumb {
+    background-color: var(--affine-black-30);
+  }
+
+  .frame-panel-body::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .frame-panel-body::-webkit-scrollbar-corner {
+    display: none;
+  }
 `;
 
-export class FramePanel extends WithDisposable(LitElement) {
+export class FramePanel extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -87,16 +109,18 @@ export class FramePanel extends WithDisposable(LitElement) {
     this._editorDisposables = new DisposableGroup();
     this._editorDisposables.add(
       this.editor.slots.pageModeSwitched.on(() => {
-        this.editor.updateComplete.then(() => {
-          this.requestUpdate();
-        });
+        this.editor.updateComplete
+          .then(() => this.requestUpdate())
+          .catch(console.error);
       })
     );
     this._editorDisposables.add(
       this.editor.slots.pageUpdated.on(() => {
-        this.editor.updateComplete.then(() => {
-          this.requestUpdate();
-        });
+        this.editor.updateComplete
+          .then(() => {
+            this.requestUpdate();
+          })
+          .catch(console.error);
       })
     );
   }

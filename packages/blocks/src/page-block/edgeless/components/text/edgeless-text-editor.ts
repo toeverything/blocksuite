@@ -300,9 +300,9 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           VERTICAL_PADDING + BORDER_WIDTH
         }px`;
       case 'center':
-        return `${BORDER_WIDTH}px, -${VERTICAL_PADDING + BORDER_WIDTH}px`;
+        return `0, -${VERTICAL_PADDING + BORDER_WIDTH}px`;
       case 'right':
-        return `${HORIZONTAL_PADDING + BORDER_WIDTH * 3}px, -${
+        return `${HORIZONTAL_PADDING + BORDER_WIDTH}px, -${
           VERTICAL_PADDING + BORDER_WIDTH
         }px`;
     }
@@ -324,64 +324,66 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     const { dispatcher } = this.edgeless;
     assertExists(dispatcher);
 
-    this.updateComplete.then(() => {
-      this.inlineEditor.slots.updated.on(() => {
-        this._updateRect();
-        this.requestUpdate();
-      });
-
-      this.disposables.add(
-        edgeless.slots.elementUpdated.on(({ id }) => {
-          if (id === element.id) this.requestUpdate();
-        })
-      );
-      this.disposables.add(
-        edgeless.surface.viewport.slots.viewportUpdated.on(() => {
+    this.updateComplete
+      .then(() => {
+        this.inlineEditor.slots.updated.on(() => {
+          this._updateRect();
           this.requestUpdate();
-        })
-      );
-      this.disposables.add(dispatcher.add('click', () => true));
-      this.disposables.add(dispatcher.add('doubleClick', () => true));
-      this.disposables.add(() => {
+        });
+
+        this.disposables.add(
+          edgeless.slots.elementUpdated.on(({ id }) => {
+            if (id === element.id) this.requestUpdate();
+          })
+        );
+        this.disposables.add(
+          edgeless.surface.viewport.slots.viewportUpdated.on(() => {
+            this.requestUpdate();
+          })
+        );
+        this.disposables.add(dispatcher.add('click', () => true));
+        this.disposables.add(dispatcher.add('doubleClick', () => true));
+        this.disposables.add(() => {
+          edgeless.localRecord.update(element.id, {
+            display: true,
+          });
+
+          if (element.text.length === 0) {
+            deleteElements(edgeless.surface, [element]);
+          }
+
+          edgeless.selectionManager.setSelection({
+            elements: [],
+            editing: false,
+          });
+        });
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'blur',
+          () => !this._keeping && this.remove()
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'compositionstart',
+          () => {
+            this._isComposition = true;
+            this.requestUpdate();
+          }
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'compositionend',
+          () => {
+            this._isComposition = false;
+            this.requestUpdate();
+          }
+        );
+
         edgeless.localRecord.update(element.id, {
-          display: true,
+          display: false,
         });
-
-        if (element.text.length === 0) {
-          deleteElements(edgeless.surface, [element]);
-        }
-
-        edgeless.selectionManager.setSelection({
-          elements: [],
-          editing: false,
-        });
-      });
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'blur',
-        () => !this._keeping && this.remove()
-      );
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'compositionstart',
-        () => {
-          this._isComposition = true;
-          this.requestUpdate();
-        }
-      );
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'compositionend',
-        () => {
-          this._isComposition = false;
-          this.requestUpdate();
-        }
-      );
-
-      edgeless.localRecord.update(element.id, {
-        display: false,
-      });
-    });
+      })
+      .catch(console.error);
   }
 
   override async getUpdateComplete(): Promise<boolean> {

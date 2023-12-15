@@ -3,7 +3,7 @@ import type { TextRangePoint } from '@blocksuite/block-std';
 import type {
   BlockTransformContext,
   SerializedBlock,
-} from '../../../_common/utils/types.js';
+} from '../../../_common/types.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/paragraph-model.js';
 import { json2block } from '../json2block.js';
 import { BaseService } from '../service.js';

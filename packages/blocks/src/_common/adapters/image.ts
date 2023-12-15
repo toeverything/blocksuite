@@ -72,7 +72,7 @@ export class ImageAdapter extends BaseAdapter<Image> {
     for (const item of payload.file) {
       const blobId = await sha(await item.arrayBuffer());
       payload.assets?.getAssets().set(blobId, item);
-      payload.assets?.writeToBlob(blobId);
+      await payload.assets?.writeToBlob(blobId);
       content.push({
         type: 'block',
         flavour: 'affine:image',

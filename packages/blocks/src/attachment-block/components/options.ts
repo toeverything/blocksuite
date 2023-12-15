@@ -30,7 +30,7 @@ export function AttachmentOptionsTemplate({
 }: {
   anchor: HTMLElement;
   model: AttachmentBlockModel;
-  downloadAttachment: (model: AttachmentBlockModel) => void;
+  downloadAttachment: (model: AttachmentBlockModel) => void | Promise<void>;
   showCaption: () => void;
   abortController: AbortController;
   ref?: RefOrCallback;

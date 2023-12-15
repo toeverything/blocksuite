@@ -296,7 +296,7 @@ export async function assertDatabaseSearching(
 }
 
 export async function focusDatabaseSearch(page: Page) {
-  (await getDatabaseMouse(page)).mouseOver();
+  await (await getDatabaseMouse(page)).mouseOver();
 
   const searchExpand = page.locator('.search-container-expand');
   const count = await searchExpand.count();

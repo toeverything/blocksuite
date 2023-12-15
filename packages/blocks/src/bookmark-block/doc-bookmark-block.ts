@@ -6,10 +6,7 @@ import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { HoverController } from '../_common/components/hover/controller.js';
-import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
-import { captureEventTarget } from '../page-block/widgets/drag-handle/utils.js';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
-import { BookmarkBlockSchema } from './bookmark-model.js';
 import type { BookmarkCaption } from './components/bookmark-caption.js';
 import type {
   MenuActionCallback,
@@ -38,51 +35,26 @@ export class DocBookmarkBlockComponent extends WithDisposable(
 
   override connectedCallback() {
     super.connectedCallback();
-    this._registerDragHandleOption();
 
     this.disposables.add(
       this.root.selection.slots.changed.on(() => this.requestUpdate())
     );
   }
 
-  private _registerDragHandleOption = () => {
-    this._disposables.add(
-      AffineDragHandleWidget.registerOption({
-        flavour: BookmarkBlockSchema.model.flavour,
-        onDragStart: (state, startDragging) => {
-          // Check if start dragging from the image block
-          const target = captureEventTarget(state.raw.target);
-          const docBookmarkBlock = target?.closest('affine-doc-bookmark');
-          if (!docBookmarkBlock) return false;
-
-          // If start dragging from the bookmark element
-          // Set selection and take over dragStart event to start dragging
-          this.root.selection.set([
-            this.root.selection.getInstance('block', {
-              path: docBookmarkBlock.block.path,
-            }),
-          ]);
-          startDragging([docBookmarkBlock.block], state);
-          return true;
-        },
-      })
-    );
-  };
-
   private _optionsAbortController?: AbortController;
   private _onToolbarSelected: ToolbarActionCallback & MenuActionCallback =
     type => {
       if (type === 'caption') {
         this.captionElement.display = true;
-        this.captionElement.updateComplete.then(() => {
-          this.captionElement.input.focus();
-        });
+        this.captionElement.updateComplete
+          .then(() => this.captionElement.input.focus())
+          .catch(console.error);
       }
       if (type === 'edit') {
         toggleBookmarkEditModal(this.block);
       }
       if (type === 'reload') {
-        refreshBookmarkUrlData(this.block);
+        refreshBookmarkUrlData(this.block).catch(console.error);
       }
       this._optionsAbortController?.abort();
     };

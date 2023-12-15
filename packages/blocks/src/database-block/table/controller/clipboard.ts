@@ -3,7 +3,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
-import type { TableViewSelection } from '../../../_common/utils/types.js';
+import type { TableViewSelection } from '../../../_common/types.js';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
@@ -30,7 +30,7 @@ export class TableClipboardController implements ReactiveController {
         const tableSelection = this.host.selectionController.selection;
         if (!tableSelection) return false;
 
-        this._onCopy(ctx, tableSelection);
+        this._onCopy(ctx, tableSelection).catch(console.error);
         return true;
       })
     );
@@ -40,7 +40,7 @@ export class TableClipboardController implements ReactiveController {
         const tableSelection = this.host.selectionController.selection;
         if (!tableSelection) return false;
 
-        this._onCut(ctx, tableSelection);
+        this._onCut(ctx, tableSelection).catch(console.error);
         return true;
       })
     );
@@ -49,7 +49,7 @@ export class TableClipboardController implements ReactiveController {
       this.host.handleEvent('paste', ctx => {
         if (this.readonly) return false;
 
-        this._onPaste(ctx);
+        this._onPaste(ctx).catch(console.error);
         return true;
       })
     );
@@ -74,13 +74,15 @@ export class TableClipboardController implements ReactiveController {
     // For database paste outside(raw text).
     const cellsValue = copyCellsValue(tableSelection, data, view, isCut);
     const formatValue = cellsValue.map(value => value.join('\t')).join('\n');
-    this.std.clipboard.writeToClipboard(async items => {
-      return {
-        ...items,
-        [TEXT]: formatValue,
-        [BLOCKSUITE_DATABASE]: JSON.stringify(copiedValues),
-      };
-    });
+    this.std.clipboard
+      .writeToClipboard(async items => {
+        return {
+          ...items,
+          [TEXT]: formatValue,
+          [BLOCKSUITE_DATABASE]: JSON.stringify(copiedValues),
+        };
+      })
+      .catch(console.error);
 
     return true;
   };
@@ -89,7 +91,7 @@ export class TableClipboardController implements ReactiveController {
     _context: UIEventStateContext,
     tableSelection: TableViewSelection
   ) => {
-    this._onCopy(_context, tableSelection, true);
+    this._onCopy(_context, tableSelection, true).catch(console.error);
   };
 
   private _onPaste = async (_context: UIEventStateContext) => {

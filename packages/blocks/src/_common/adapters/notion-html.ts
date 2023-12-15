@@ -43,6 +43,7 @@ type NotionHtmlToSliceSnapshotPayload = {
 type NotionHtmlToPageSnapshotPayload = {
   file: NotionHtml;
   assets?: AssetsManager;
+  pageId?: string;
   pageMap?: Map<string, string>;
 };
 
@@ -113,7 +114,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     return {
       type: 'page',
       meta: {
-        id: nanoid('page'),
+        id: payload.pageId ?? nanoid('page'),
         title: hastGetTextContent(titleAst, 'Untitled'),
         createDate: +new Date(),
         tags: [],
@@ -233,6 +234,59 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           context.skipAllChildren();
           break;
         }
+        // TODO: move to Normal HTML Adapter as this is not notion specific
+        case 'img': {
+          if (!assets) {
+            break;
+          }
+          const image = o.node;
+          const imageURL =
+            typeof image?.properties.src === 'string'
+              ? image.properties.src
+              : '';
+          if (imageURL) {
+            let blobId = '';
+            if (!imageURL.startsWith('http')) {
+              assets.getAssets().forEach((_value, key) => {
+                const attachmentName = getAssetName(assets.getAssets(), key);
+                if (imageURL.includes(attachmentName)) {
+                  blobId = key;
+                }
+              });
+            } else {
+              const res = await fetch(imageURL);
+              const clonedRes = res.clone();
+              const name =
+                getFilenameFromContentDisposition(
+                  res.headers.get('Content-Disposition') ?? ''
+                ) ??
+                imageURL.split('/').at(-1) ??
+                'image' + res.headers.get('Content-Type')?.split('/').at(-1) ??
+                '.png';
+              const file = new File([await res.blob()], name);
+              blobId = await sha(await clonedRes.arrayBuffer());
+              assets?.getAssets().set(blobId, file);
+              await assets?.writeToBlob(blobId);
+            }
+            context
+              .openNode(
+                {
+                  type: 'block',
+                  id: nanoid('block'),
+                  flavour: 'affine:image',
+                  props: {
+                    sourceId: blobId,
+                  },
+                  children: [],
+                },
+                'children'
+              )
+              .closeNode();
+            context.skipAllChildren();
+            break;
+          }
+          break;
+        }
         case 'pre': {
           const code = hastQuerySelector(o.node, 'code');
           if (!code) {
@@ -249,7 +303,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 id: nanoid('block'),
                 flavour: 'affine:code',
                 props: {
-                  language: null,
+                  language: 'Plain Text',
                   text: {
                     '$blocksuite:internal:text$': true,
                     delta: this._hastToDelta(codeText, { trim: false }),
@@ -325,7 +379,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               {
                 type: 'block',
                 id: nanoid('block'),
-                flavour: 'affine:heading',
+                flavour: 'affine:paragraph',
                 props: {
                   type: o.node.tagName,
                   text: {
@@ -433,6 +487,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'children'
               )
               .closeNode();
+            context.skipAllChildren();
             break;
           }
           // Notion callout
@@ -455,6 +510,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'children'
               )
               .closeNode();
+            context.skipAllChildren();
             break;
           }
           // Notion bookmark
@@ -490,6 +546,8 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'children'
               )
               .closeNode();
+            context.skipAllChildren();
+            break;
           }
           if (!assets) {
             break;
@@ -526,7 +584,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               const file = new File([await res.blob()], name);
               blobId = await sha(await clonedRes.arrayBuffer());
               assets?.getAssets().set(blobId, file);
-              assets?.writeToBlob(blobId);
+              await assets?.writeToBlob(blobId);
             }
             context
               .openNode(
@@ -542,6 +600,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'children'
               )
               .closeNode();
+            context.skipAllChildren();
             break;
           }
           // Notion embeded
@@ -584,7 +643,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               type = file.type;
               blobId = await sha(await resCloned.arrayBuffer());
               assets?.getAssets().set(blobId, file);
-              assets?.writeToBlob(blobId);
+              await assets?.writeToBlob(blobId);
             }
             context
               .openNode(
@@ -603,6 +662,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 'children'
               )
               .closeNode();
+            context.skipAllChildren();
             break;
           }
           break;
@@ -771,10 +831,14 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               'hast:table:column'
             );
           context.setGlobalContextStack('hast:table:column', []);
+          const children = context.getGlobalContextStack<BlockSnapshot>(
+            'hast:table:children'
+          );
+          context.setGlobalContextStack('hast:table:children', []);
           const cells = Object.create(null);
           context
             .getGlobalContextStack<BlocksuiteTableRow>('hast:table:rows')
-            .map(row => {
+            .map((row, i) => {
               Object.keys(row).forEach(columnId => {
                 if (
                   columns.find(column => column.id === columnId)?.type ===
@@ -783,7 +847,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   row[columnId].value = (row[columnId].value as string[])[0];
                 }
               });
-              cells[nanoid('unknown')] = row;
+              cells[children.at(i)?.id ?? nanoid('block')] = row;
             });
           context.setGlobalContextStack('hast:table:cells', []);
           context.openNode(
@@ -822,10 +886,6 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             },
             'children'
           );
-          const children = context.getGlobalContextStack<BlockSnapshot>(
-            'hast:table:children'
-          );
-          context.setGlobalContextStack('hast:table:children', []);
           children.forEach(child => {
             context.openNode(child, 'children').closeNode();
           });
@@ -928,6 +988,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                         pageId,
                       },
                     };
+                    delta.insert = ' ';
                     return delta;
                   }
                 }

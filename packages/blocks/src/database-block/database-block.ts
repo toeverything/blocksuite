@@ -132,7 +132,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
             name: 'Copy',
             select: () => {
               const slice = Slice.fromModels(this.page, [this.model]);
-              this.std.clipboard.copySlice(slice);
+              this.std.clipboard.copySlice(slice).catch(console.error);
             },
           },
           // {
@@ -216,7 +216,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           }
           return false;
         },
-        onDragEnd: (state, draggingElements) => {
+        onDragEnd: ({ state, draggingElements }) => {
           const target = state.raw.target;
           const view = this.view;
           if (

@@ -18,13 +18,9 @@ import {
   isCssVariable,
 } from '../_common/theme/css-variables.js';
 import { getThemePropertyValue } from '../_common/theme/utils.js';
-import { saveViewportToSession } from '../_common/utils/edgeless.js';
+import type { EdgelessElement, TopLevelBlockModel } from '../_common/types.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import { buildPath, getEditorContainer } from '../_common/utils/query.js';
-import type {
-  EdgelessElement,
-  TopLevelBlockModel,
-} from '../_common/utils/types.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
@@ -69,6 +65,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     .affine-surface-ref {
       position: relative;
       user-select: none;
+      margin: 10px 0;
     }
 
     .surface-empty-placeholder {
@@ -155,8 +152,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     }
 
     .surface-viewport.frame {
-      border-radius: 8px;
-      border: 2px solid var(--affine-black-30);
+      border-radius: 2px;
+      border: 1px solid var(--affine-black-30);
     }
 
     .surface-canvas-container {
@@ -193,10 +190,10 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
       width: 100%;
       padding: 8px 16px;
-      border: 1px solid #f1f1f1;
+      border: 1px solid var(--affine-border-color);
       gap: 14px;
 
-      background: #fff;
+      background: var(--affine-background-primary-color);
 
       font-size: 12px;
     }
@@ -381,9 +378,11 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
             });
           }
 
-          this.updateComplete.then(() => {
-            this._refreshViewport();
-          });
+          this.updateComplete
+            .then(() => {
+              this._refreshViewport();
+            })
+            .catch(console.error);
         });
       }
 
@@ -479,15 +478,17 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     // trigger a rerender to update element's size
     // and set viewport after element's size has been updated
     this.requestUpdate();
-    this.updateComplete.then(() => {
-      this._surfaceRenderer.onResize();
-      this._surfaceRenderer.setViewportByBound(
-        Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
-      );
+    this.updateComplete
+      .then(() => {
+        this._surfaceRenderer.onResize();
+        this._surfaceRenderer.setViewportByBound(
+          Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
+        );
 
-      // update portal transform
-      this.blocksPortal?.setViewport(this._surfaceRenderer);
-    });
+        // update portal transform
+        this.blocksPortal?.setViewport(this._surfaceRenderer);
+      })
+      .catch(console.error);
   }
 
   private _syncFromExistingContainer(elementsMap: Y.Map<Y.Map<unknown>>) {
@@ -788,11 +789,13 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   showCaption() {
     this._showCaption = true;
 
-    this.updateComplete.then(() => {
-      (
-        this.renderRoot.querySelector('.caption-input') as HTMLInputElement
-      )?.focus();
-    });
+    this.updateComplete
+      .then(() => {
+        (
+          this.renderRoot.querySelector('.caption-input') as HTMLInputElement
+        )?.focus();
+      })
+      .catch(console.error);
   }
 
   viewInEdgeless() {
@@ -802,10 +805,17 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
     if (editorContainer.mode !== 'edgeless') {
       editorContainer.mode = 'edgeless';
-      saveViewportToSession(this.page.id, {
+
+      const viewport = {
+        xywh: '', // FIXME
         referenceId: this.model.reference,
-        padding: [60, 20, 20, 20],
-      });
+        padding: [60, 20, 20, 20] as [number, number, number, number],
+      };
+      this.std.command
+        .pipe()
+        .withHost()
+        .saveViewportToSession({ viewport })
+        .run();
     }
 
     this.selection.update(selections => {

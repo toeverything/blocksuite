@@ -24,7 +24,9 @@ export class EdgelessBlockPortalImage extends EdgelessPortalBase<ImageBlockModel
     };
 
     return html`
-      <div style=${styleMap(style)}>${this.renderModel(model)}</div>
+      <div class="edgeless-block-portal-image" style=${styleMap(style)}>
+        ${this.renderModel(model)}
+      </div>
     `;
   }
 }

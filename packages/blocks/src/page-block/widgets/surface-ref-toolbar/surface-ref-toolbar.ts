@@ -14,8 +14,8 @@ import {
   DeleteIcon,
   DownloadIcon,
 } from '../../../_common/icons/text.js';
+import type { EdgelessElement } from '../../../_common/types.js';
 import { downloadBlob } from '../../../_common/utils/filesys.js';
-import type { EdgelessElement } from '../../../_common/utils/types.js';
 import {
   type SurfaceRefBlockComponent,
   type SurfaceRefBlockModel,

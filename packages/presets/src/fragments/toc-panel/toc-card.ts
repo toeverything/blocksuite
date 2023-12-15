@@ -132,7 +132,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     }
 
     .card-preview.page toc-block-preview:hover {
-      color: var(--affine-blue-500);
+      color: var(--affine-brand-color);
     }
   `;
 

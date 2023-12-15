@@ -1,6 +1,6 @@
 import type { Workspace } from '@blocksuite/store';
 
-export async function createPage(
+export async function createDefaultPage(
   workspace: Workspace,
   options: { id?: string; title?: string } = {}
 ) {

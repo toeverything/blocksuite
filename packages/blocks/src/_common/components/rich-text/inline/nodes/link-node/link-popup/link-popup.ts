@@ -122,11 +122,13 @@ export class LinkPopup extends WithDisposable(LitElement) {
           padding: 6,
         }),
       ],
-    }).then(({ x, y }) => {
-      if (!this.popupContainer) return;
-      this.popupContainer.style.left = `${x}px`;
-      this.popupContainer.style.top = `${y}px`;
-    });
+    })
+      .then(({ x, y }) => {
+        if (!this.popupContainer) return;
+        this.popupContainer.style.left = `${x}px`;
+        this.popupContainer.style.top = `${y}px`;
+      })
+      .catch(console.error);
   }
 
   get blockElement() {
@@ -251,11 +253,13 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _createTemplate() {
-    this.updateComplete.then(() => {
-      this.linkInput?.focus();
+    this.updateComplete
+      .then(() => {
+        this.linkInput?.focus();
 
-      this._updateConfirmBtn();
-    });
+        this._updateConfirmBtn();
+      })
+      .catch(console.error);
 
     return html`<div class="affine-link-popover">
       <input
@@ -276,7 +280,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       <div
         class="affine-link-preview"
         @click=${() => {
-          navigator.clipboard.writeText(this.currentLink);
+          navigator.clipboard.writeText(this.currentLink).catch(console.error);
           toast('Copied link to clipboard');
           this.remove();
         }}
@@ -324,16 +328,18 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _editTemplate() {
-    this.updateComplete.then(() => {
-      assertExists(this.textInput);
-      this.textInput.value = this.currentText;
-      assertExists(this.linkInput);
-      this.linkInput.value = this.currentLink;
+    this.updateComplete
+      .then(() => {
+        assertExists(this.textInput);
+        this.textInput.value = this.currentText;
+        assertExists(this.linkInput);
+        this.linkInput.value = this.currentLink;
 
-      this.textInput.select();
+        this.textInput.select();
 
-      this._updateConfirmBtn();
-    });
+        this._updateConfirmBtn();
+      })
+      .catch(console.error);
 
     return html`<div class="affine-link-edit-popover">
       <div class="affine-edit-text-area">

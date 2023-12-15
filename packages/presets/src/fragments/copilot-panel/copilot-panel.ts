@@ -122,7 +122,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       parentBlock.model.id,
       firstIndex
     );
-    setTimeout(async () => {
+    setTimeout(() => {
       const parentPath = firstBlock.parentPath;
       const selections = models
         .map(model => [...parentPath, model.id])
@@ -152,7 +152,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       lastIndex + 1
     );
 
-    setTimeout(async () => {
+    setTimeout(() => {
       const parentPath = lastBlock.parentPath;
       const selections = models
         .map(model => [...parentPath, model.id])

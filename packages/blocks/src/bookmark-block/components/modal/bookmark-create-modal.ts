@@ -23,11 +23,13 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.updateComplete.then(() => {
-      requestAnimationFrame(() => {
-        this.input.focus();
-      });
-    });
+    this.updateComplete
+      .then(() => {
+        requestAnimationFrame(() => {
+          this.input.focus();
+        });
+      })
+      .catch(console.error);
     this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
   }
 

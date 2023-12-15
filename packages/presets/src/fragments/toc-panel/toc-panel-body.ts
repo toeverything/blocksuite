@@ -432,7 +432,6 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     );
   }
 
-  // TODO: add highlight to the block, and remove it after 1s
   private _scrollToBlock(e: ClickBlockEvent) {
     if (this._isEdgelessMode() || !this.editorHost) return;
 
@@ -445,9 +444,27 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     if (!blockElement) return;
 
     blockElement.scrollIntoView({
-      behavior: 'smooth',
+      behavior: 'instant',
       block: 'center',
       inline: 'center',
+    });
+
+    requestAnimationFrame(() => {
+      const blockRect = blockElement.getBoundingClientRect();
+      const { top, left, width, height } = blockRect;
+      const { top: offsetY, left: offsetX } = pageBlock.viewport;
+      const highlightMask = document.createElement('div');
+      highlightMask.style.position = 'absolute';
+      highlightMask.style.top = `${top - offsetY}` + 'px';
+      highlightMask.style.left = `${left - offsetX}` + 'px';
+      highlightMask.style.width = `${width}` + 'px';
+      highlightMask.style.height = `${height}` + 'px';
+      highlightMask.style.background = 'var(--affine-hover-color)';
+      highlightMask.style.borderRadius = '4px';
+      pageBlock.appendChild(highlightMask);
+      setTimeout(() => {
+        pageBlock.removeChild(highlightMask);
+      }, 1000);
     });
   }
 

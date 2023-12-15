@@ -281,7 +281,7 @@ export class DocPageBlockComponent extends BlockElement<
         this._getDefaultNoteBlock(),
         0
       );
-      asyncFocusRichText(page, newFirstParagraphId);
+      asyncFocusRichText(page, newFirstParagraphId)?.catch(console.error);
       return;
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
@@ -290,7 +290,7 @@ export class DocPageBlockComponent extends BlockElement<
         matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
       );
       if (firstText) {
-        asyncFocusRichText(page, firstText.id);
+        asyncFocusRichText(page, firstText.id)?.catch(console.error);
       } else {
         const newFirstParagraphId = page.addBlock(
           'affine:paragraph',
@@ -298,7 +298,7 @@ export class DocPageBlockComponent extends BlockElement<
           defaultNote,
           0
         );
-        asyncFocusRichText(page, newFirstParagraphId);
+        asyncFocusRichText(page, newFirstParagraphId)?.catch(console.error);
       }
       return;
     } else if (e.key === 'Tab') {

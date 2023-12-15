@@ -1,7 +1,4 @@
 /* eslint-disable no-control-regex */
-import type { BlobManager } from '@blocksuite/store';
-
-import { globalCSS } from './exporter-style.js';
 
 // Context: Lean towards breaking out any localizable content into constants so it's
 // easier to track content we may need to localize in the future. (i18n)
@@ -43,88 +40,11 @@ export const FileExporter = {
 
     document.body.removeChild(element);
   },
-  exportTextFile(filename: string, text: string, mimeType: string) {
-    FileExporter.exportFile(
-      filename,
-      'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text)
-    );
-  },
-  async exportHtml(
-    title: string | undefined,
-    pageId: string,
-    htmlContent: string,
-    blobMap: Map<string, string>,
-    blobs: BlobManager
-  ) {
-    const JSZip = (await import('jszip')).default;
-
-    const pageTitle = title?.trim() ?? UNTITLED_PAGE_NAME;
-    const zipFile = new JSZip();
-    for (const [key, value] of blobMap) {
-      const blob = await blobs.get(key);
-      blob && zipFile.file(value, blob);
-    }
-    zipFile.file(
-      `${pageTitle}|${pageId}.html`,
-      wrapHtmlWithHtmlDocumentText(pageTitle, htmlContent)
-    );
-
-    const blob = await zipFile.generateAsync({ type: 'blob' });
-    const fileURL = URL.createObjectURL(blob);
-    FileExporter.exportFile(`${pageTitle}|HTML.zip`, fileURL);
-    URL.revokeObjectURL(fileURL);
-  },
-  async exportHtmlAsMarkdown(
-    title: string | undefined,
-    pageId: string,
-    markdownContent: string,
-    blobMap: Map<string, string>,
-    blobs: BlobManager
-  ) {
-    const JSZip = (await import('jszip')).default;
-
-    const pageTitle = title?.trim() ?? UNTITLED_PAGE_NAME;
-    const zipFile = new JSZip();
-    for (const [key, value] of blobMap) {
-      const blob = await blobs.get(key);
-      blob && zipFile.file(value, blob);
-    }
-    zipFile.file(`${pageTitle}|${pageId}.md`, markdownContent);
-
-    const blob = await zipFile.generateAsync({ type: 'blob' });
-    const fileURL = URL.createObjectURL(blob);
-    FileExporter.exportFile(`${pageTitle}|MarkDown.zip`, fileURL);
-    URL.revokeObjectURL(fileURL);
-  },
   exportPng(pageTitle: string | undefined, dataURL: string) {
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
     FileExporter.exportFile(title + '.png', dataURL);
   },
 };
-
-/** @internal surround plain html content in a document with head and basic styles */
-function wrapHtmlWithHtmlDocumentText(pageTitle: string, htmlContent: string) {
-  // Question: Why not embed css directly into html?
-  const htmlCss = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-<style>
-  ${globalCSS}
-</style>`;
-  // Question: Do we really need the extra div container?
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>${pageTitle}</title>
-  ${htmlCss}
-</head>
-<body>
-<div style="box-sizing: border-box;margin:0 auto; padding: 0 var(--affine-editor-side-padding); max-width: var(--affine-editor-width);">
-${htmlContent}
-</div>
-</body>
-</html>
-`;
-}
 
 function getSafeFileName(string: string) {
   const replacement = ' ';

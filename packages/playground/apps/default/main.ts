@@ -165,4 +165,4 @@ async function main() {
   await initWorkspace(workspace);
 }
 
-main();
+main().catch(console.error);

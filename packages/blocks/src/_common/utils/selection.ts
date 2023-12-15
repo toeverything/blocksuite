@@ -4,6 +4,7 @@ import { type InlineRange, type VLine } from '@blocksuite/inline';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
+import type { SelectionPosition } from '../types.js';
 import { matchFlavours } from './model.js';
 import {
   asyncGetRichTextByModel,
@@ -12,7 +13,6 @@ import {
   getDocPageByElement,
 } from './query.js';
 import { Rect } from './rect.js';
-import type { SelectionPosition } from './types.js';
 
 declare global {
   interface Document {
@@ -232,7 +232,7 @@ export function focusBlockByModel(
   assertExists(element);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
-    focusRichText(editableContainer, position, zoom);
+    focusRichText(editableContainer, position, zoom).catch(console.error);
   }
 }
 

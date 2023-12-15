@@ -1,11 +1,15 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import { type EditorHost, WithDisposable } from '@blocksuite/lit';
+import {
+  type EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/lit';
 import type { Page, Y } from '@blocksuite/store';
-import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { FILL_SCREEN_KEY } from '../../../../_common/edgeless/frame/consts.js';
+import { EdgelessPresentationConsts as PresentationConsts } from '../../../../_common/edgeless/frame/consts.js';
 import {
   type CssVariableName,
   isCssVariable,
@@ -14,7 +18,7 @@ import { getThemePropertyValue } from '../../../../_common/theme/utils.js';
 import type {
   EdgelessElement,
   TopLevelBlockModel,
-} from '../../../../_common/utils/types.js';
+} from '../../../../_common/types.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { ConnectorElement } from '../../../../surface-block/elements/connector/connector-element.js';
@@ -49,7 +53,7 @@ const styles = css`
     position: relative;
   }
 
-  .surface-container {
+  .frame-preview-surface-container {
     position: relative;
     display: flex;
     align-items: center;
@@ -58,7 +62,7 @@ const styles = css`
     overflow: hidden;
   }
 
-  .surface-viewport {
+  .frame-preview-surface-viewport {
     max-width: 100%;
     box-sizing: border-box;
     margin: 0 auto;
@@ -68,7 +72,7 @@ const styles = css`
     user-select: none;
   }
 
-  .surface-canvas-container {
+  .frame-preview-surface-canvas-container {
     height: 100%;
     width: 100%;
     position: relative;
@@ -76,7 +80,7 @@ const styles = css`
 `;
 
 @customElement('frame-preview')
-export class FramePreview extends WithDisposable(LitElement) {
+export class FramePreview extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -115,10 +119,10 @@ export class FramePreview extends WithDisposable(LitElement) {
   private _pageDisposables: DisposableGroup | null = null;
   private _frameDisposables: DisposableGroup | null = null;
 
-  @query('.surface-canvas-container')
+  @query('.frame-preview-surface-canvas-container')
   container!: HTMLDivElement;
 
-  @query('surface-ref-portal')
+  @query('.frame-preview-surface-container surface-ref-portal')
   blocksPortal!: SurfaceRefPortal;
 
   get surfaceRenderer() {
@@ -201,14 +205,16 @@ export class FramePreview extends WithDisposable(LitElement) {
     // trigger a rerender to update element's size
     // and set viewport after element's size has been updated
     this.requestUpdate();
-    this.updateComplete.then(() => {
-      this._surfaceRenderer.onResize();
-      this._surfaceRenderer.setViewportByBound(
-        Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
-      );
+    this.updateComplete
+      .then(() => {
+        this._surfaceRenderer.onResize();
+        this._surfaceRenderer.setViewportByBound(
+          Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
+        );
 
-      this.blocksPortal?.setViewport(this._surfaceRenderer);
-    });
+        this.blocksPortal?.setViewport(this._surfaceRenderer);
+      })
+      .catch(console.error);
   }
 
   private getModel(id: string): RefElement | null {
@@ -356,7 +362,7 @@ export class FramePreview extends WithDisposable(LitElement) {
   };
 
   private _tryLoadFillScreen() {
-    const fillScreen = sessionStorage.getItem(FILL_SCREEN_KEY);
+    const fillScreen = sessionStorage.getItem(PresentationConsts.FillScreen);
     this.fillScreen = fillScreen === 'true';
   }
 
@@ -474,28 +480,37 @@ export class FramePreview extends WithDisposable(LitElement) {
   private _renderSurfaceContent(referencedModel: FrameBlockModel) {
     const { width, height } = this._getViewportWH(referencedModel);
     return html`<div
-      class="surface-container"
+      class="frame-preview-surface-container"
       style=${styleMap({
         width: `${this.surfaceWidth}px`,
         height: `${this.surfaceHeight}px`,
       })}
     >
       <div
-        class="surface-viewport"
         style=${styleMap({
-          width: `${width}px`,
-          height: `${height}px`,
-          aspectRatio: `${width} / ${height}`,
+          backgroundColor: referencedModel.background
+            ? `var(${referencedModel.background})`
+            : 'var(--affine-platte-transparent)',
+          borderRadius: '4px',
         })}
       >
-        <surface-ref-portal
-          .page=${this.page}
-          .host=${this.host}
-          .containerModel=${referencedModel}
-          .renderModel=${this.host.renderModel}
-        ></surface-ref-portal>
-        <div class="surface-canvas-container">
-          <!-- attach canvas here -->
+        <div
+          class="frame-preview-surface-viewport"
+          style=${styleMap({
+            width: `${width}px`,
+            height: `${height}px`,
+            aspectRatio: `${width} / ${height}`,
+          })}
+        >
+          <surface-ref-portal
+            .page=${this.page}
+            .host=${this.host}
+            .containerModel=${referencedModel}
+            .renderModel=${this.host.renderModel}
+          ></surface-ref-portal>
+          <div class="frame-preview-surface-canvas-container">
+            <!-- attach canvas here -->
+          </div>
         </div>
       </div>
     </div>`;

@@ -30,7 +30,9 @@ type MergeBlockFlavour = (typeof MERGE_BLOCK)[number];
 /**
  * Template type will affect the inserting behaviour
  */
-type TemplateType = 'edgeless-template' | 'sticker';
+const TEMPLATE_TYPES = ['template', 'sticker'] as const;
+
+type TemplateType = (typeof TEMPLATE_TYPES)[number];
 
 export type SlotBlockPayload = {
   type: 'block';
@@ -51,14 +53,14 @@ export type SlotPayload =
 
 export type TemplateJobConfig = {
   model: SurfaceBlockModel;
-  type: TemplateType;
+  type: string;
   middlewares: ((job: TemplateJob) => void)[];
 };
 
 export class TemplateJob {
   static create(options: {
     model: SurfaceBlockModel;
-    type: TemplateType;
+    type: string;
     middlewares: ((job: TemplateJob) => void)[];
   }) {
     return new TemplateJob(options);
@@ -84,7 +86,9 @@ export class TemplateJob {
   constructor({ model, type, middlewares }: TemplateJobConfig) {
     this.job = new Job({ workspace: model.page.workspace, middlewares: [] });
     this.model = model;
-    this.type = type;
+    this.type = TEMPLATE_TYPES.includes(type as TemplateType)
+      ? (type as TemplateType)
+      : 'template';
 
     middlewares.forEach(middleware => middleware(this));
     TemplateJob.middlewares.forEach(middleware => middleware(this));
@@ -317,7 +321,7 @@ export class TemplateJob {
 
     const modelDataList = await this._jsonToModelData(template.blocks);
 
-    this._insertToPage(modelDataList);
+    this._insertToPage(modelDataList).catch(console.error);
 
     return templateBound;
   }

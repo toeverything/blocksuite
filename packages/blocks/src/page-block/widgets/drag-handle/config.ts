@@ -2,18 +2,27 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
-import type { Rect } from '../../../_common/utils/index.js';
+import type { Point, Rect } from '../../../_common/utils/index.js';
+import type { DragPreview } from './components/drag-preview.js';
 
-export const DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT = 24;
-export const DRAG_HANDLE_OFFSET_LEFT = 2;
-export const LIST_DRAG_HANDLE_OFFSET_LEFT = 18;
+export const DRAG_HANDLE_CONTAINER_HEIGHT = 24;
+export const DRAG_HANDLE_CONTAINER_WIDTH = 16;
+export const DRAG_HANDLE_CONTAINER_WIDTH_TOP_LEVEL = 8;
+export const DRAG_HANDLE_CONTAINER_OFFSET_LEFT = 2;
+export const DRAG_HANDLE_CONTAINER_OFFSET_LEFT_LIST = 18;
+export const DRAG_HANDLE_CONTAINER_OFFSET_LEFT_TOP_LEVEL = 5;
+export const DRAG_HANDLE_CONTAINER_PADDING = 8;
+
 export const DRAG_HANDLE_GRABBER_HEIGHT = 12;
 export const DRAG_HANDLE_GRABBER_WIDTH = 4;
+export const DRAG_HANDLE_GRABBER_WIDTH_HOVERED = 2;
 export const DRAG_HANDLE_GRABBER_BORDER_RADIUS = 4;
 export const DRAG_HANDLE_GRABBER_MARGIN = 4;
+
+export const HOVER_AREA_RECT_PADDING_TOP_LEVEL = 6;
+
 export const NOTE_CONTAINER_PADDING = 24;
 export const DRAG_HOVER_RECT_PADDING = 4;
-export const HOVER_DRAG_HANDLE_GRABBER_WIDTH = 2;
 
 export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
 
@@ -24,23 +33,35 @@ export type DropResult = {
   dropType: DropType;
 };
 
-export type DragHandleOption = {
-  flavour: string;
-  onDragStart?: (
+export type OnDragStartProps = {
+  state: PointerEventState;
+  startDragging: (
+    blockElements: BlockElement[],
     state: PointerEventState,
-    startDragging: (
-      blockElements: BlockElement[],
-      state: PointerEventState
-    ) => void
-  ) => boolean;
+    dragPreview?: HTMLElement,
+    dragPreviewOffset?: Point
+  ) => void;
+  anchorBlockId: string;
+  anchorBlockPath: string[] | null;
+};
+
+export type OnDragEndProps = {
+  state: PointerEventState;
+  draggingElements: BlockElement[];
+  dropBlockId: string;
+  dropType: DropType | null;
+  dragPreview: DragPreview;
+};
+
+export type DragHandleOption = {
+  flavour: string | RegExp;
+  edgeless?: boolean;
+  onDragStart?: (props: OnDragStartProps) => boolean;
   onDragMove?: (
     state: PointerEventState,
     draggingElements?: BlockElement[]
   ) => boolean;
-  onDragEnd?: (
-    state: PointerEventState,
-    draggingElements: BlockElement[]
-  ) => boolean;
+  onDragEnd?: (props: OnDragEndProps) => boolean;
 };
 
 export class DragHandleOptionsRunner {
@@ -50,20 +71,30 @@ export class DragHandleOptionsRunner {
     return Array.from(this.optionMap.keys());
   }
 
+  getOption(flavour: string): DragHandleOption | undefined {
+    return this.options.find(option => {
+      if (typeof option.flavour === 'string') {
+        return option.flavour === flavour;
+      } else {
+        return option.flavour.test(flavour);
+      }
+    });
+  }
+
   register(option: DragHandleOption): Disposable {
     const currentOption =
-      this.getExistingOptionWithSameFlavour(option) || option;
+      this._getExistingOptionWithSameFlavour(option) || option;
     const count = this.optionMap.get(currentOption) || 0;
     this.optionMap.set(currentOption, count + 1);
 
     return {
       dispose: () => {
-        this.decreaseOptionCount(currentOption);
+        this._decreaseOptionCount(currentOption);
       },
     };
   }
 
-  private getExistingOptionWithSameFlavour(
+  private _getExistingOptionWithSameFlavour(
     option: DragHandleOption
   ): DragHandleOption | undefined {
     return Array.from(this.optionMap.keys()).find(
@@ -71,7 +102,7 @@ export class DragHandleOptionsRunner {
     );
   }
 
-  private decreaseOptionCount(option: DragHandleOption) {
+  private _decreaseOptionCount(option: DragHandleOption) {
     const count = this.optionMap.get(option) || 0;
     if (count > 1) {
       this.optionMap.set(option, count - 1);

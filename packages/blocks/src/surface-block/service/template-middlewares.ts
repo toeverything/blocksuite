@@ -118,6 +118,8 @@ export const replaceIdMiddleware = (job: TemplateJob) => {
 
 export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
   return (job: TemplateJob) => {
+    if (job.type !== 'template') return;
+
     let templateBound: Bound | null = null;
     let offset: {
       x: number;
@@ -171,6 +173,37 @@ export const createInsertPlaceMiddleware = (targetPlace: Bound) => {
             ).serialize();
           }
         });
+      }
+    };
+  };
+};
+
+export const createStickerMiddleware = (
+  center: {
+    x: number;
+    y: number;
+  },
+  getIndex: () => string
+) => {
+  return (job: TemplateJob) => {
+    job.slots.beforeInsert.on(blockData => {
+      if (blockData.type === 'block') {
+        changeInserPosition(blockData.data.blockJson);
+      }
+    });
+
+    const changeInserPosition = (blockJson: BlockSnapshot) => {
+      if (blockJson.flavour === 'affine:image' && blockJson.props.xywh) {
+        const bound = Bound.deserialize(blockJson.props['xywh'] as string);
+
+        blockJson.props['xywh'] = new Bound(
+          center.x - bound.w / 2,
+          center.y - bound.h / 2,
+          bound.w,
+          bound.h
+        ).serialize();
+
+        blockJson.props.index = getIndex();
       }
     };
   };

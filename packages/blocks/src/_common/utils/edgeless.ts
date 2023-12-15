@@ -2,7 +2,7 @@ function buildViewportKey(pageId: string) {
   return 'blocksuite:' + pageId + ':edgelessViewport';
 }
 
-type ViewportData =
+type SerializedViewport =
   | {
       x: number;
       y: number;
@@ -16,11 +16,16 @@ type ViewportData =
       padding?: [number, number, number, number];
     };
 
-export function saveViewportToSession(pageId: string, viewport: ViewportData) {
+export function saveViewportToSession(
+  pageId: string,
+  viewport: SerializedViewport
+) {
   sessionStorage.setItem(buildViewportKey(pageId), JSON.stringify(viewport));
 }
 
-export function getViewportFromSession(pageId: string): ViewportData | null {
+export function getViewportFromSession(
+  pageId: string
+): SerializedViewport | null {
   try {
     const storedViewport = sessionStorage.getItem(buildViewportKey(pageId));
     return storedViewport ? JSON.parse(storedViewport) : null;

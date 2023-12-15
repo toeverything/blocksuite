@@ -77,37 +77,39 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       this.requestUpdate();
     });
 
-    this.updateComplete.then(() => {
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'focus',
-        this._onTitleFocus
-      );
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'blur',
-        this._onTitleBlur
-      );
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'compositionstart',
-        () => {
-          this.isComposing = true;
-        }
-      );
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'compositionend',
-        () => {
-          this.isComposing = false;
-        }
-      );
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'keydown',
-        this._onKeyDown
-      );
-    });
+    this.updateComplete
+      .then(() => {
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'focus',
+          this._onTitleFocus
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'blur',
+          this._onTitleBlur
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'compositionstart',
+          () => {
+            this.isComposing = true;
+          }
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'compositionend',
+          () => {
+            this.isComposing = false;
+          }
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'keydown',
+          this._onKeyDown
+        );
+      })
+      .catch(console.error);
   }
 
   override async getUpdateComplete(): Promise<boolean> {

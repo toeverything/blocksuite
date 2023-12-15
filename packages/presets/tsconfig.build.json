@@ -6,5 +6,21 @@
     "noEmit": false
   },
   "include": ["./src"],
-  "exclude": [""]
+  "references": [
+    {
+      "path": "../global"
+    },
+    {
+      "path": "../store"
+    },
+    {
+      "path": "../block-std"
+    },
+    {
+      "path": "../lit"
+    },
+    {
+      "path": "../blocks"
+    }
+  ]
 }

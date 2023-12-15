@@ -20,10 +20,6 @@ import { toast } from '../../_common/components/toast.js';
 import { BLOCK_ID_ATTR } from '../../_common/consts.js';
 import { listenToThemeChange } from '../../_common/theme/utils.js';
 import {
-  getViewportFromSession,
-  saveViewportToSession,
-} from '../../_common/utils/edgeless.js';
-import {
   type EdgelessElement,
   type EdgelessTool,
   Point,
@@ -47,6 +43,7 @@ import type { ImageBlockProps } from '../../image-block/image-model.js';
 import { ImageService } from '../../image-block/image-service.js';
 import type { FrameBlockModel, ImageBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
+import type { SerializedViewport } from '../../surface-block/commands/session.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
@@ -586,15 +583,17 @@ export class EdgelessPageBlockComponent extends BlockElement<
         editing: false,
       });
       // Waiting dom updated, `note mask` is removed
-      this.updateComplete.then(() => {
-        if (blockId) {
-          asyncFocusRichText(this.page, blockId);
-        } else if (point) {
-          // Cannot reuse `handleNativeRangeClick` directly here,
-          // since `retargetClick` will re-target to pervious editor
-          handleNativeRangeAtPoint(point.x, point.y);
-        }
-      });
+      this.updateComplete
+        .then(() => {
+          if (blockId) {
+            asyncFocusRichText(this.page, blockId)?.catch(console.error);
+          } else if (point) {
+            // Cannot reuse `handleNativeRangeClick` directly here,
+            // since `retargetClick` will re-target to pervious editor
+            handleNativeRangeAtPoint(point.x, point.y);
+          }
+        })
+        .catch(console.error);
     });
   }
 
@@ -693,9 +692,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
     const fontLoader = this.service?.fontLoader;
     assertExists(fontLoader);
 
-    fontLoader.ready.then(() => {
-      this.surface.refresh();
-    });
+    fontLoader.ready
+      .then(() => {
+        this.surface.refresh();
+      })
+      .catch(console.error);
   }
 
   private _initReadonlyListener() {
@@ -747,9 +748,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     );
 
     if (this.pageBlockContainer.isUpdatePending) {
-      this.pageBlockContainer.updateComplete.then(() =>
-        appendIndexedCanvasToPortal()
-      );
+      this.pageBlockContainer.updateComplete
+        .then(() => appendIndexedCanvasToPortal())
+        .catch(console.error);
     } else {
       appendIndexedCanvasToPortal();
     }
@@ -778,43 +779,52 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _saveViewportLocalRecord() {
-    const { viewport } = this.surface;
-    saveViewportToSession(this.page.id, {
-      x: viewport.center.x,
-      y: viewport.center.y,
-      zoom: viewport.zoom,
-    });
+    const viewport = {
+      centerX: this.surface.viewport.center.x,
+      centerY: this.surface.viewport.center.y,
+      zoom: this.surface.viewport.zoom,
+    };
+    this.std.command
+      .pipe()
+      .withHost()
+      .saveViewportToSession({ viewport })
+      .run();
   }
 
-  private _getSavedViewport() {
-    const { viewport } = this.surface;
-    const viewportData = getViewportFromSession(this.page.id);
+  private _getSavedViewport(): SerializedViewport | null {
+    let result: SerializedViewport | null = null;
 
-    if (!viewportData) return null;
+    this.std.command
+      .pipe()
+      .withHost()
+      .getViewportFromSession()
+      .inline(({ storedViewport }) => {
+        if (!storedViewport) {
+          result = null;
+          return;
+        }
 
-    if ('referenceId' in viewportData) {
-      const block = this.surface.pickById(
-        viewportData.referenceId
-      ) as EdgelessElement;
+        if ('referenceId' in storedViewport) {
+          const block = this.surface.pickById(
+            storedViewport.referenceId
+          ) as EdgelessElement;
 
-      if (block) {
-        viewport.setViewportByBound(
-          Bound.deserialize(block.xywh),
-          viewportData.padding
-        );
-        return { xywh: block.xywh, padding: viewportData.padding };
-      }
+          if (block) {
+            this.surface.viewport.setViewportByBound(
+              Bound.deserialize(block.xywh),
+              storedViewport.padding
+            );
+            result = storedViewport;
+          } else {
+            result = null;
+          }
+        } else {
+          result = storedViewport;
+        }
+      })
+      .run();
 
-      return null;
-    } else {
-      const { zoom, x, y } = viewportData;
-
-      return {
-        zoom,
-        centerX: x,
-        centerY: y,
-      };
-    }
+    return result;
   }
 
   public getFitToScreenData(
@@ -869,7 +879,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     };
 
     if (this.surface.isUpdatePending) {
-      this.surface.updateComplete.then(run);
+      this.surface.updateComplete.then(run).catch(console.error);
     } else {
       run();
     }

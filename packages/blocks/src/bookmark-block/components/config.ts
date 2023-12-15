@@ -93,7 +93,7 @@ type MoreOperation = {
     model: BookmarkBlockModel,
     callback?: MenuActionCallback,
     element?: BookmarkOperationMenu
-  ) => void;
+  ) => Promise<void> | void;
   showWhen?: (model: BookmarkBlockModel) => boolean;
   disableWhen?: (model: BookmarkBlockModel) => boolean;
   divider?: boolean;

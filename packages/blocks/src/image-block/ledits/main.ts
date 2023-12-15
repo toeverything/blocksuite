@@ -51,12 +51,15 @@ export function openLeditsEditor(
           }
 
           const blobManager = model.page.blob;
-          blobManager.set(newBlob).then(sourceId => {
-            model.page.updateBlock(model, {
-              sourceId,
-            });
-            modal.close();
-          });
+          blobManager
+            .set(newBlob)
+            .then(sourceId => {
+              model.page.updateBlock(model, {
+                sourceId,
+              });
+              modal.close();
+            })
+            .catch(console.error);
         },
       },
     ],

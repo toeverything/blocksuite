@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
-import { type EdgelessElement } from '../../../_common/utils/types.js';
+import { type EdgelessElement } from '../../../_common/types.js';
 import { CLIPBOARD_MIMETYPE } from '../../../_legacy/clipboard/utils/pure.js';
 import { ContentParser } from '../../../content-parser.js';
 import { isTopLevelBlock } from '../../../page-block/edgeless/utils/query.js';

@@ -101,7 +101,7 @@ export async function clickTestOperationsMenuItem(page: Page, name: string) {
 }
 
 export async function switchReadonly(page: Page) {
-  page.evaluate(() => {
+  await page.evaluate(() => {
     const defaultPage = document.querySelector(
       'affine-doc-page'
     ) as HTMLElement & {

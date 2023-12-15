@@ -310,8 +310,8 @@ export function createLitPortal({
     ) {
       abortController.abort();
     }
-    computePosition(referenceElement, portalRoot, options).then(
-      positionReturn => {
+    computePosition(referenceElement, portalRoot, options)
+      .then(positionReturn => {
         const { x, y } = positionReturn;
         // Use transform maybe cause overlay-mask offset issue
         // portalRoot.style.transform = `translate(${x}px, ${y}px)`;
@@ -321,8 +321,8 @@ export function createLitPortal({
           portalRoot.style.visibility = visibility;
         }
         positionSlot.emit(positionReturn);
-      }
-    );
+      })
+      .catch(console.error);
   };
   if (!computePositionOptions.autoUpdate) {
     update();

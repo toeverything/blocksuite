@@ -2,12 +2,12 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
-import { matchFlavours } from '../../_common/utils/model.js';
 import type {
   EdgelessElement,
   Selectable,
   TopLevelBlockModel,
-} from '../../_common/utils/types.js';
+} from '../../_common/types.js';
+import { matchFlavours } from '../../_common/utils/model.js';
 import type {
   FrameBlockModel,
   NoteBlockModel,

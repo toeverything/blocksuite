@@ -192,18 +192,20 @@ export async function json2block(
     asyncSetInlineRange(lastMergedModel, {
       index: lastMergedModelRangeIndex ?? 0,
       length: 0,
-    });
+    }).catch(console.error);
   } else {
     if (lastMergedModel) {
-      asyncGetBlockComponentByModel(lastMergedModel).then(element => {
-        if (element) {
-          const selectionManager = element.host.selection;
-          const blockSelection = selectionManager?.getInstance('block', {
-            path: element.path ?? [],
-          });
-          selectionManager.set([blockSelection]);
-        }
-      });
+      asyncGetBlockComponentByModel(lastMergedModel)
+        .then(element => {
+          if (element) {
+            const selectionManager = element.host.selection;
+            const blockSelection = selectionManager?.getInstance('block', {
+              path: element.path ?? [],
+            });
+            selectionManager.set([blockSelection]);
+          }
+        })
+        .catch(console.error);
     }
   }
 
@@ -292,12 +294,14 @@ export async function addSerializedBlocks(
   for (const { model, json } of pendingModels) {
     const flavour = model.flavour as keyof BlockModels;
     const service = getService(flavour);
-    service.onBlockPasted(model, {
-      views: json.databaseProps?.views,
-      rowIds: json.databaseProps?.rowIds,
-      cells: json.databaseProps?.cells,
-      columns: json.databaseProps?.columns,
-    });
+    service
+      .onBlockPasted(model, {
+        views: json.databaseProps?.views,
+        rowIds: json.databaseProps?.rowIds,
+        cells: json.databaseProps?.cells,
+        columns: json.databaseProps?.columns,
+      })
+      .catch(console.error);
   }
 
   return addedBlockIds;

@@ -116,16 +116,18 @@ export class AffineLink extends ShadowlessElement {
       setTimeout(() => {
         resolve();
       }, 500);
-    }).then(() => {
-      const model = getModelByElement(this);
-      if (this._isLinkHover && !model.page.readonly) return;
-      if (!this._isLinkPopupHover) {
-        if (this._popup) {
-          this._popup.remove();
-          this._popup = null;
+    })
+      .then(() => {
+        const model = getModelByElement(this);
+        if (this._isLinkHover && !model.page.readonly) return;
+        if (!this._isLinkPopupHover) {
+          if (this._popup) {
+            this._popup.remove();
+            this._popup = null;
+          }
         }
-      }
-    });
+      })
+      .catch(console.error);
   }
 
   // Workaround for links not working in contenteditable div

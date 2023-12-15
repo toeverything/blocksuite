@@ -6,7 +6,7 @@ import { TagsIcon } from '../../../_common/icons/tags.js';
 import type {
   BlockTransformContext,
   SerializedBlock,
-} from '../../../_common/utils/types.js';
+} from '../../../_common/types.js';
 import type { PageBlockModel } from '../../../page-block/page-model.js';
 import { BaseService } from '../service.js';
 import { getService } from '../singleton.js';
@@ -101,7 +101,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     const noteModel = focusedBlockModel.page.getBlockById(noteId);
     assertExists(noteModel);
     const service = getService('affine:note');
-    service.json2Block(noteModel, pastedBlocks);
+    service.json2Block(noteModel, pastedBlocks).catch(console.error);
     // TODO: if page is not empty
   }
 }

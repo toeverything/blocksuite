@@ -26,8 +26,7 @@ import { customElement, state } from 'lit/decorators.js';
 
 import { toast } from '../../../../_common/components/toast.js';
 import {
-  FILL_SCREEN_KEY,
-  HIDE_TOOLBAR_KEY,
+  EdgelessPresentationConsts as PresentationConsts,
   type NavigatorMode,
 } from '../../../../_common/edgeless/frame/consts.js';
 import {
@@ -39,9 +38,9 @@ import {
   NavigatorExitFullScreenIcon,
   NavigatorFullScreenIcon,
 } from '../../../../_common/icons/index.js';
+import type { EdgelessTool } from '../../../../_common/types.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { getImageFilesFromLocal } from '../../../../_common/utils/filesys.js';
-import type { EdgelessTool } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import { Bound, clamp } from '../../../../surface-block/index.js';
@@ -251,14 +250,16 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode =
-      sessionStorage.getItem(FILL_SCREEN_KEY) === 'true' ? 'fill' : 'fit';
+      sessionStorage.getItem(PresentationConsts.FillScreen) === 'true'
+        ? 'fill'
+        : 'fit';
   }
 
   override firstUpdated() {
     const { _disposables, edgeless } = this;
     const { slots, page } = edgeless;
 
-    const hideToolbar = sessionStorage.getItem(HIDE_TOOLBAR_KEY);
+    const hideToolbar = sessionStorage.getItem(PresentationConsts.HideToolbar);
     this._hideToolbar = hideToolbar === 'true';
 
     edgeless.bindHotKey(
@@ -410,14 +411,17 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this.edgeless.slots.navigatorSettingUpdated.emit({
         hideToolbar: this._hideToolbar,
       });
-      sessionStorage.setItem(HIDE_TOOLBAR_KEY, this._hideToolbar.toString());
+      sessionStorage.setItem(
+        PresentationConsts.HideToolbar,
+        this._hideToolbar.toString()
+      );
     }
   }
 
   private _toggleFullScreen() {
     if (document.fullscreenElement) {
       this._timer && clearTimeout(this._timer);
-      document.exitFullscreen();
+      document.exitFullscreen().catch(console.error);
     } else {
       launchIntoFullscreen(this.edgeless.editorContainer);
       this._timer = setTimeout(() => {

@@ -11,14 +11,18 @@ import {
 } from '../../../../../_common/utils/event.js';
 import { type IBound } from '../../../../../surface-block/consts.js';
 import type { TemplateJob } from '../../../../../surface-block/service/template.js';
-import { createInsertPlaceMiddleware } from '../../../../../surface-block/service/template-middlewares.js';
+import {
+  createInsertPlaceMiddleware,
+  createStickerMiddleware,
+} from '../../../../../surface-block/service/template-middlewares.js';
 import {
   Bound,
   getCommonBound,
 } from '../../../../../surface-block/utils/bound.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import { builtInTemplates, type Template } from './builtin-templates.js';
-import { ArrowIcon, Preview } from './icon.js';
+import { builtInTemplates } from './builtin-templates.js';
+import { ArrowIcon, defaultPreview } from './icon.js';
+import type { Template } from './template-type.js';
 
 @customElement('edgeless-templates-panel')
 export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
@@ -36,6 +40,9 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       border-radius: 12px;
       background-color: var(--affine-background-overlay-panel-color);
       box-shadow: 0px 10px 80px 0px rgba(0, 0, 0, 0.2);
+
+      display: flex;
+      flex-direction: column;
     }
 
     .search-bar {
@@ -43,6 +50,8 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       font-size: 18px;
       color: var(--affine-secondary);
       border-bottom: 1px solid var(--affine-divider-color);
+
+      flex-shrink: 0;
     }
 
     .search-input {
@@ -60,10 +69,11 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
     .template-categories {
       display: flex;
-      flex-direction: column;
       padding: 6px 8px;
       gap: 4px;
       overflow-x: scroll;
+
+      flex-shrink: 0;
     }
 
     .category-entry {
@@ -76,6 +86,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       flex-grow: 0;
       width: fit-content;
       padding: 4px 9px;
+      cursor: pointer;
     }
 
     .category-entry.selected,
@@ -91,6 +102,9 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       align-content: flex-start;
       gap: 10px 20px;
       flex-wrap: wrap;
+
+      flex-grow: 1;
+      overflow-y: scroll;
     }
 
     .template-item {
@@ -152,6 +166,13 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       transform: translate(-50%, -50%);
     }
 
+    .template-item img.template-preview {
+      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
     .arrow {
       bottom: 0;
       position: absolute;
@@ -172,11 +193,22 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  get categoryCacheKey() {
+    return `blocksuite:${this.edgeless.page.id}:templateTool`;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
 
-    this._currentCategory = EdgelessTemplatePanel.templates.categories()[0];
+    this._currentCategory =
+      this._getLocalSelectedCategory() ??
+      EdgelessTemplatePanel.templates.categories()[0];
     this.addEventListener('keydown', stopPropagation, false);
+    this._disposables.add(() => {
+      if (this._currentCategory) {
+        sessionStorage.setItem(this.categoryCacheKey, this._currentCategory);
+      }
+    });
   }
 
   override firstUpdated() {
@@ -189,32 +221,55 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
         this._closePanel();
       });
     }, this);
+    this._disposables.addFromEvent(this, 'click', stopPropagation);
+    this._disposables.addFromEvent(this, 'wheel', stopPropagation);
+  }
+
+  private _getLocalSelectedCategory() {
+    return sessionStorage.getItem(this.categoryCacheKey) ?? undefined;
+  }
+
+  private _createTemplateJob(type: string) {
+    const middlewares: ((job: TemplateJob) => void)[] = [];
+    const surface = this.edgeless.surface;
+
+    if (type === 'template') {
+      const currentContentBound = getCommonBound(
+        (
+          surface.blocks.map(block => Bound.deserialize(block.xywh)) as IBound[]
+        ).concat(surface.getElements())
+      );
+
+      if (currentContentBound) {
+        currentContentBound.x +=
+          currentContentBound.w + 20 / surface.viewport.zoom;
+        middlewares.push(createInsertPlaceMiddleware(currentContentBound));
+      }
+    }
+
+    if (type === 'sticker') {
+      middlewares.push(
+        createStickerMiddleware(surface.viewport.center, () =>
+          surface.layer.generateIndex('common', 'block')
+        )
+      );
+    }
+
+    return this.edgeless.surface.service!.TemplateJob.create({
+      model: this.edgeless.surfaceBlockModel,
+      type,
+      middlewares,
+    });
   }
 
   private async _insertTemplate(template: Template) {
     this._loadingTemplate = template;
 
+    const templateJob = this._createTemplateJob(template.type);
     const surface = this.edgeless.surface;
-    const currentContentBound = getCommonBound(
-      (
-        surface.blocks.map(block => Bound.deserialize(block.xywh)) as IBound[]
-      ).concat(surface.getElements())
-    );
-    const middlewares: ((job: TemplateJob) => void)[] = [];
-
-    if (currentContentBound) {
-      currentContentBound.x +=
-        currentContentBound.w + 20 / surface.viewport.zoom;
-      middlewares.push(createInsertPlaceMiddleware(currentContentBound));
-    }
 
     try {
-      const templateJob = this.edgeless.surface.service!.TemplateJob.create({
-        model: this.edgeless.surfaceBlockModel,
-        type: 'edgeless-template',
-        middlewares,
-      });
-      const { asserts: assets } = template;
+      const { assets } = template;
 
       if (assets) {
         await Promise.all(
@@ -228,7 +283,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
       const insertedBound = await templateJob.insertTemplate(template.content);
 
-      if (insertedBound) {
+      if (insertedBound && template.type === 'template') {
         const padding = 20 / surface.viewport.zoom;
         surface.viewport.setViewportByBound(
           insertedBound,
@@ -275,6 +330,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
                 class="category-entry ${this._currentCategory === cate
                   ? 'selected'
                   : ''}"
+                @click=${() => (this._currentCategory = cate)}
               >
                 ${cate}
               </div>`;
@@ -294,13 +350,20 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
                   data-hover-text="Add"
                   @click=${() => this._insertTemplate(template)}
                 >
-                  ${Preview}
+                  ${template.preview
+                    ? html`<img
+                        src="${template.preview}"
+                        class="template-preview"
+                      />`
+                    : defaultPreview}
                   ${template === this._loadingTemplate
                     ? html`<affine-template-loading></affine-template-loading>`
                     : nothing}
-                  <affine-tooltip .offset=${12} tip-position="top">
-                    ${template.name}
-                  </affine-tooltip>
+                  ${template.name
+                    ? html`<affine-tooltip .offset=${12} tip-position="top">
+                        ${template.name}
+                      </affine-tooltip>`
+                    : nothing}
                 </div>
               `;
             }

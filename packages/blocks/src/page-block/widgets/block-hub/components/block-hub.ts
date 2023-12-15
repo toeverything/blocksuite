@@ -7,7 +7,6 @@ import { customElement, query, queryAll, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { DragIndicator } from '../../../../_common/components/drag-indicator.js';
-import { toast } from '../../../../_common/components/toast.js';
 import { BlockHubIcon, CrossIcon } from '../../../../_common/icons/index.js';
 import {
   asyncFocusRichText,
@@ -26,14 +25,13 @@ import {
   Rect,
   stopPropagation,
 } from '../../../../_common/utils/index.js';
-import { humanFileSize } from '../../../../_common/utils/math.js';
 import { getServiceOrRegister } from '../../../../_legacy/service/index.js';
 import { toggleBookmarkCreateModal } from '../../../../bookmark-block/components/index.js';
-import {
-  addSiblingImageBlock,
-  uploadBlobForImage,
-} from '../../../../image-block/image/utils.js';
 import { ImageService } from '../../../../image-block/image-service.js';
+import {
+  addImageBlock,
+  addSiblingImageBlock,
+} from '../../../../image-block/utils.js';
 import { DocPageBlockComponent } from '../../../../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../../../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../../../page-block/text-selection/utils.js';
@@ -114,7 +112,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this, 'drag', this._onDrag);
     disposables.addFromEvent(this, 'dragend', this._onDragEnd);
     disposables.addFromEvent(this._host, 'dragover', this._onDragOver);
-    disposables.addFromEvent(this._host, 'drop', this._onDrop);
+    disposables.addFromEvent(this._host, 'drop', (e: DragEvent) => {
+      this._onDrop(e).catch(console.error);
+    });
     disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
 
     if (IS_FIREFOX) {
@@ -133,7 +133,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._blockHubCards.forEach(card => {
       disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
       disposables.addFromEvent(card, 'mouseup', this._onCardMouseUp);
-      disposables.addFromEvent(card, 'click', e => this._onClickCard(e, card));
+      disposables.addFromEvent(card, 'click', e => {
+        this._onClickCard(e, card).catch(console.error);
+      });
     });
 
     for (const blockHubMenu of this._blockHubMenus) {
@@ -463,24 +465,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       lastType !== 'database'
     ) {
       const imageFiles = await getImageFilesFromLocal();
+
       const imageService = this._host.spec.getService('affine:image');
       assertExists(imageService);
       assertInstanceOf(imageService, ImageService);
       const maxFileSize = imageService.maxFileSize;
-      const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
-      if (isSizeExceeded) {
-        toast(
-          `You can only upload files less than ${humanFileSize(
-            maxFileSize,
-            true,
-            0
-          )}`
-        );
-      } else {
-        imageFiles.forEach(file => {
-          addSiblingImageBlock(page, file, lastModelState.model);
-        });
-      }
+
+      addSiblingImageBlock(imageFiles, maxFileSize, lastModelState.model);
     } else if (props.flavour === 'affine:bookmark') {
       const url = await toggleBookmarkCreateModal(this._host);
       url &&
@@ -525,7 +516,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     if (this._isPageMode) {
       if (focusId) {
-        asyncFocusRichText(page, focusId);
+        asyncFocusRichText(page, focusId)?.catch(console.error);
       }
       return;
     }
@@ -589,30 +580,20 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     // TO DO: fix image loading state for blockhub
     if (data.flavour === 'affine:image' && data.type === 'image') {
       const imageFiles = await getImageFilesFromLocal();
+
       const imageService = this._host.spec.getService('affine:image');
       assertExists(imageService);
       assertInstanceOf(imageService, ImageService);
       const maxFileSize = imageService.maxFileSize;
-      const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
-      if (isSizeExceeded) {
-        toast(
-          `You can only upload files less than ${humanFileSize(
-            maxFileSize,
-            true,
-            0
-          )}`
-        );
-      } else {
-        imageFiles.forEach(file => {
-          const blockId = page.addBlock(
-            'affine:image',
-            { flavour: 'affine:image', size: file.size },
-            defaultNoteBlock
-          );
-          uploadBlobForImage(page, blockId, file);
-          lastId = blockId;
-        });
-      }
+
+      const blockIds = addImageBlock(
+        imageFiles,
+        maxFileSize,
+        page,
+        defaultNoteBlock
+      );
+
+      lastId = blockIds[blockIds.length - 1];
     } else if (data.flavour === 'affine:bookmark') {
       const url = await toggleBookmarkCreateModal(this._host);
       url &&
@@ -631,7 +612,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         defaultNoteBlock
       );
     });
-    lastId && asyncFocusRichText(page, lastId);
+    lastId && (await asyncFocusRichText(page, lastId));
   };
 
   private _onClickOutside = (e: MouseEvent) => {

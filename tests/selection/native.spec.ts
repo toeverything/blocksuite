@@ -865,11 +865,11 @@ test('drag to select tagged text, and copy', async ({ page }) => {
   await dragBetweenIndices(page, [0, 1], [0, 3], undefined, undefined, {
     steps: 20,
   });
-  page.keyboard.press(`${SHORT_KEY}+B`);
+  await page.keyboard.press(`${SHORT_KEY}+B`);
   await dragBetweenIndices(page, [0, 0], [0, 5], undefined, undefined, {
     steps: 20,
   });
-  page.keyboard.press(`${SHORT_KEY}+C`);
+  await page.keyboard.press(`${SHORT_KEY}+C`);
   const textOne = await getSelectedTextByInlineEditor(page);
   expect(textOne).toBe('12345');
 });
@@ -885,7 +885,7 @@ test('drag to select tagged text, and input character', async ({ page }) => {
   await dragBetweenIndices(page, [0, 1], [0, 3], undefined, undefined, {
     steps: 20,
   });
-  page.keyboard.press(`${SHORT_KEY}+B`);
+  await page.keyboard.press(`${SHORT_KEY}+B`);
   await dragBetweenIndices(page, [0, 0], [0, 5], undefined, undefined, {
     steps: 20,
   });
@@ -970,7 +970,7 @@ test('should delete line with content after divider not lose content', async ({
   await type(page, '123');
   await assertDivider(page, 1);
   // Jump to line start
-  page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
   await waitNextFrame(page);
   await pressBackspace(page);
   await assertDivider(page, 0);

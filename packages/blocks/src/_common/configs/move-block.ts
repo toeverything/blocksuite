@@ -50,11 +50,13 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
           previousSiblingModel,
           true
         );
-        blockElement.updateComplete.then(() => {
-          const rangeManager = blockElement.host.rangeManager;
-          assertExists(rangeManager);
-          rangeManager.syncTextSelectionToRange(textSelection);
-        });
+        blockElement.updateComplete
+          .then(() => {
+            const rangeManager = blockElement.host.rangeManager;
+            assertExists(rangeManager);
+            rangeManager.syncTextSelectionToRange(textSelection);
+          })
+          .catch(console.error);
         return true;
       }
       const blockSelection = getBlockSelectionBySide(blockElement, true);
@@ -98,12 +100,14 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
         if (!parentModel) return;
 
         page.moveBlocks([currentModel], parentModel, nextSiblingModel, false);
-        blockElement.updateComplete.then(() => {
-          // `textSelection` will not change so we need wo sync it manually
-          const rangeManager = blockElement.host.rangeManager;
-          assertExists(rangeManager);
-          rangeManager.syncTextSelectionToRange(textSelection);
-        });
+        blockElement.updateComplete
+          .then(() => {
+            // `textSelection` will not change so we need wo sync it manually
+            const rangeManager = blockElement.host.rangeManager;
+            assertExists(rangeManager);
+            rangeManager.syncTextSelectionToRange(textSelection);
+          })
+          .catch(console.error);
         return true;
       }
       const blockSelection = getBlockSelectionBySide(blockElement, true);

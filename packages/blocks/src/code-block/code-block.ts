@@ -112,32 +112,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       color: var(--affine-text-secondary-color);
     }
 
-    .affine-code-block-container affine-code-line span v-text {
-      display: inline;
-    }
-
-    .affine-code-block-container affine-code-line span {
-      white-space: pre;
-    }
-
     .affine-code-block-container.wrap #line-numbers {
       top: calc(var(--affine-line-height) + 4px);
     }
 
     .affine-code-block-container.wrap #line-numbers > div {
       margin-top: calc(var(--top, 0) / 1 - var(--affine-line-height));
-    }
-
-    .affine-code-block-container.wrap v-line > div {
-      display: block;
-    }
-
-    .affine-code-block-container.wrap affine-code-line span {
-      white-space: break-spaces;
-    }
-
-    .affine-code-block-container .inline-editor::-webkit-scrollbar {
-      display: none;
     }
 
     .code-block-option {
@@ -185,13 +165,16 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     if (this._highlighter) {
       const loadedLangs = this._highlighter.getLoadedLanguages();
       if (!loadedLangs.includes(lang.id as Lang)) {
-        this._highlighter.loadLanguage(lang).then(() => {
-          const richText = this.querySelector('rich-text');
-          const inlineEditor = richText?.inlineEditor;
-          if (inlineEditor) {
-            inlineEditor.requestUpdate();
-          }
-        });
+        this._highlighter
+          .loadLanguage(lang)
+          .then(() => {
+            const richText = this.querySelector('rich-text');
+            const inlineEditor = richText?.inlineEditor;
+            if (inlineEditor) {
+              inlineEditor.requestUpdate();
+            }
+          })
+          .catch(console.error);
       }
       return;
     }
@@ -284,7 +267,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     });
 
     this._disposables.add(
-      listenToThemeChange(this, async () => {
+      listenToThemeChange(this, () => {
         if (!this._highlighter) return;
         const richText = this.querySelector('rich-text');
         const inlineEditor = richText?.inlineEditor;
@@ -457,7 +440,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       const lang = getStandardLanguage(this.model.language);
       this._perviousLanguage = lang ?? PLAIN_TEXT_REGISTRATION;
       if (lang) {
-        this._startHighlight(lang);
+        this._startHighlight(lang).catch(console.error);
       } else {
         this._highlighter = null;
       }
@@ -606,6 +589,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           .inlineRangeProvider=${this._inlineRangeProvider}
           .enableClipboard=${false}
           .enableUndoRedo=${false}
+          .wrapText=${this._wrap}
         >
         </rich-text>
       </div>

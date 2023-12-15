@@ -24,7 +24,9 @@ export class EdgelessBlockPortalEmbed extends EdgelessPortalBase<EmbedBlockModel
     };
 
     return html`
-      <div style=${styleMap(style)}>${this.renderModel(model)}</div>
+      <div class="edgeless-block-portal-embed" style=${styleMap(style)}>
+        ${this.renderModel(model)}
+      </div>
     `;
   }
 }

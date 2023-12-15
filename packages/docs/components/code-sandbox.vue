@@ -2,7 +2,7 @@
   <!-- 'code-options' is a build-in prop, do not edit it -->
   <Sandbox
     :rtl="rtl"
-    :template="template"
+    :template="'vanilla-ts'"
     :light-theme="lightTheme"
     :dark-theme="darkTheme"
     :options="{
@@ -16,13 +16,7 @@
       deps: {
         yjs: 'latest',
         '@toeverything/theme': 'latest',
-        '@blocksuite/block-std': 'nightly',
-        '@blocksuite/blocks': 'nightly',
         '@blocksuite/presets': 'nightly',
-        '@blocksuite/global': 'nightly',
-        '@blocksuite/lit': 'nightly',
-        '@blocksuite/store': 'nightly',
-        '@blocksuite/inline': 'nightly',
       },
     }"
     :code-options="codeOptions"

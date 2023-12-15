@@ -7,8 +7,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { RemoteCursor } from '../../../_common/icons/edgeless.js';
+import type { Selectable } from '../../../_common/types.js';
 import { pickValues } from '../../../_common/utils/iterable.js';
-import type { Selectable } from '../../../_common/utils/types.js';
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import {
   getSelectedRect,
