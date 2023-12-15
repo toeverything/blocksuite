@@ -1,6 +1,6 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
-export type SurfaceRefProps = {
+type SurfaceRefProps = {
   reference: string;
   caption?: string;
   refFlavour?: string;

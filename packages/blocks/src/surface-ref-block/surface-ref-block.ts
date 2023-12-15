@@ -41,7 +41,7 @@ import { getSurfaceBlock, noContentPlaceholder } from './utils.js';
 
 noop(SurfaceRefPortal);
 
-export const REF_LABEL_ICON = {
+const REF_LABEL_ICON = {
   'affine:frame': FrameIcon,
   DEFAULT_NOTE_HEIGHT: EdgelessModeIcon,
 } as Record<string, TemplateResult>;

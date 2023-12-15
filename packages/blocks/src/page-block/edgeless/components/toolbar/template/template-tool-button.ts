@@ -11,8 +11,8 @@ import {
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { EdgelessTool } from '../../../../../_common/types.js';
 import { once } from '../../../../../_common/utils/event.js';
-import type { EdgelessTool } from '../../../../../index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { renderIcon } from './icon.js';
 import type { EdgelessTemplatePanel } from './template-panel.js';

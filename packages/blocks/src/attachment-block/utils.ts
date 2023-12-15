@@ -117,7 +117,7 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
  *
  * @internal
  */
-export async function uploadBlobForAttachment(
+async function uploadBlobForAttachment(
   page: Page,
   attachmentModelId: string,
   blob: Blob

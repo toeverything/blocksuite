@@ -16,7 +16,6 @@ import type {
   CanvasElementType,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
   type ColorEvent,
   type EdgelessColorPanel,
@@ -99,9 +98,6 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
-
-  @property({ attribute: false })
-  slots!: EdgelessSelectionSlots;
 
   @state()
   private _showPopper = false;

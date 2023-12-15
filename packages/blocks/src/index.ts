@@ -8,7 +8,6 @@ import './frame-block/index.js';
 import './divider-block/index.js';
 import './code-block/affine-code-line.js';
 import './image-block/index.js';
-import './surface-block/index.js';
 import './database-block/index.js';
 import './surface-ref-block/index.js';
 
@@ -17,8 +16,10 @@ import { matchFlavours } from './_common/utils/index.js';
 import { splitElements } from './page-block/edgeless/utils/clipboard-utils.js';
 
 export * from './_common/adapters/index.js';
-export * from './_common/components/index.js';
-export { NOTE_WIDTH } from './_common/consts.js';
+export {
+  type AffineInlineEditor,
+  RichText,
+} from './_common/components/index.js';
 export {
   EdgelessPresentationConsts as EdgelessPresentationConsts,
   type NavigatorMode,
@@ -35,8 +36,9 @@ export {
   ThemeObserver,
 } from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
-export * from './_common/types.js';
-export { on, once, stopPropagation } from './_common/utils/event.js';
+export { type AbstractEditor } from './_common/types.js';
+// export * from './_common/types.js';
+export { on, once } from './_common/utils/event.js';
 export { createDefaultPage } from './_common/utils/init.js';
 export type { BlockModels } from './_common/utils/model.js';
 export { getThemeMode } from './_common/utils/query.js';
@@ -60,9 +62,18 @@ export * from './models.js';
 export * from './note-block/index.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
-export * from './surface-block/index.js';
-export * from './surface-block/surface-block.js';
-export * from './surface-block/surface-model.js';
+export {
+  Bound,
+  CanvasElementType,
+  ConnectorEndpointStyle,
+  ConnectorMode,
+  EdgelessBlockType,
+  generateKeyBetween,
+  ShapeStyle,
+  StrokeStyle,
+} from './surface-block/index.js';
+export { SurfaceBlockComponent } from './surface-block/surface-block.js';
+export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
 
