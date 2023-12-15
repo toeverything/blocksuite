@@ -452,10 +452,11 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     requestAnimationFrame(() => {
       const blockRect = blockElement.getBoundingClientRect();
       const { top, left, width, height } = blockRect;
+      const { top: offsetY, left: offsetX } = pageBlock.viewport;
       const highlightMask = document.createElement('div');
       highlightMask.style.position = 'absolute';
-      highlightMask.style.top = `${top}` + 'px';
-      highlightMask.style.left = `${left}` + 'px';
+      highlightMask.style.top = `${top - offsetY}` + 'px';
+      highlightMask.style.left = `${left - offsetX}` + 'px';
       highlightMask.style.width = `${width}` + 'px';
       highlightMask.style.height = `${height}` + 'px';
       highlightMask.style.background = 'var(--affine-hover-color)';
