@@ -450,10 +450,19 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     });
 
     requestAnimationFrame(() => {
-      const initColor = blockElement.style.color;
-      blockElement.style.color = 'var(--affine-brand-color)';
+      const blockRect = blockElement.getBoundingClientRect();
+      const { top, left, width, height } = blockRect;
+      const highlightMask = document.createElement('div');
+      highlightMask.style.position = 'absolute';
+      highlightMask.style.top = `${top}` + 'px';
+      highlightMask.style.left = `${left}` + 'px';
+      highlightMask.style.width = `${width}` + 'px';
+      highlightMask.style.height = `${height}` + 'px';
+      highlightMask.style.background = 'var(--affine-hover-color)';
+      highlightMask.style.borderRadius = '4px';
+      pageBlock.appendChild(highlightMask);
       setTimeout(() => {
-        blockElement.style.color = initColor;
+        pageBlock.removeChild(highlightMask);
       }, 1000);
     });
   }
