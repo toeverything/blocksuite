@@ -1297,6 +1297,13 @@ test('press arrow up in the second line should move caret to the first line', as
   await pressArrowUp(page);
   await type(page, '0');
   await pressArrowUp(page);
+
+  // workaround for selection manager
+  // selection within the note uses direct document selection
+  // selection from one note to another or to title uses selection manager
+  // giving wait for selection manager to sync up with document selection
+  await page.waitForTimeout(100);
+
   await pressArrowUp(page);
   // At title
   await type(page, '1');
