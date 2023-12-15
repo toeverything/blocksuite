@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css, html, nothing } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -16,15 +16,6 @@ const FRAME_OFFSET = 8;
 
 @customElement('edgeless-frame-title')
 export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
-  static override styles = [
-    css`
-      edgeless-frames-container {
-        position: relative;
-        z-index: 1;
-      }
-    `,
-  ];
-
   isInner = false;
 
   @state()
