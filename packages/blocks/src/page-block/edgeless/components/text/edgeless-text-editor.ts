@@ -300,9 +300,9 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           VERTICAL_PADDING + BORDER_WIDTH
         }px`;
       case 'center':
-        return `${BORDER_WIDTH}px, -${VERTICAL_PADDING + BORDER_WIDTH}px`;
+        return `0, -${VERTICAL_PADDING + BORDER_WIDTH}px`;
       case 'right':
-        return `${HORIZONTAL_PADDING + BORDER_WIDTH * 3}px, -${
+        return `${HORIZONTAL_PADDING + BORDER_WIDTH}px, -${
           VERTICAL_PADDING + BORDER_WIDTH
         }px`;
     }

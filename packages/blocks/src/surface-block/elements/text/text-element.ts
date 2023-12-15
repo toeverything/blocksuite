@@ -206,16 +206,16 @@ export class TextElement extends SurfaceElement<IText> {
         ctx.font = font;
         ctx.fillStyle = computedValue(color);
         ctx.textAlign = textAlign;
-
         ctx.textBaseline = 'ideographic';
 
-        // 0.5 is a "magic number" used to align the text rendered on the canvas with the text in the DOM.
-        // This approach is employed until a better or proper handling method is discovered.
+        // 0.5 comes from v-line padding
+        const offset =
+          textAlign === 'center' ? 0 : textAlign === 'right' ? -0.5 : 0.5;
+
         ctx.fillText(
           str,
-          // 1 comes from v-line padding
-          horizontalOffset + beforeTextWidth + 1,
-          (lineIndex + 1) * lineHeightPx + 0.5
+          horizontalOffset + beforeTextWidth + offset,
+          (lineIndex + 1) * lineHeightPx
         );
 
         beforeTextWidth += getTextWidth(str, font);
