@@ -49,7 +49,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
-import type { ChatWithWorkspacePanel } from './chat-with-workspace';
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomTOCOutlinePanel } from './custom-toc-outline-panel.js';
@@ -220,8 +219,6 @@ export class DebugMenu extends ShadowlessElement {
   leftSidePanel!: LeftSidePanel;
   @property({ attribute: false })
   pagesPanel!: PagesPanel;
-  @property({ attribute: false })
-  chatWithWorkspacePanel!: ChatWithWorkspacePanel;
 
   @state()
   private _connected = true;
@@ -338,9 +335,6 @@ export class DebugMenu extends ShadowlessElement {
   }
   private _togglePagesPanel() {
     this.leftSidePanel.toggle(this.pagesPanel);
-  }
-  private _toggleChatWithWorkspacePanel() {
-    this.sidePanel.toggle(this.chatWithWorkspacePanel);
   }
 
   private _createMindMap() {
@@ -489,7 +483,9 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private async _exportSnapshot() {
-    const file = await ZipTransformer.exportPages(this.workspace, [this.page]);
+    const file = await ZipTransformer.exportPages(this.workspace, [
+      ...this.workspace.pages.values(),
+    ]);
     const url = URL.createObjectURL(file);
     const a = document.createElement('a');
     a.setAttribute('href', url);
@@ -796,9 +792,6 @@ export class DebugMenu extends ShadowlessElement {
           </sl-tooltip>
           <sl-button size="small" @click=${this._togglePagesPanel}>
             Pages
-          </sl-button>
-          <sl-button size="small" @click=${this._toggleChatWithWorkspacePanel}>
-            Chat with workspace
           </sl-button>
         </div>
       </div>

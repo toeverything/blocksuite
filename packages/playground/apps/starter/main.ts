@@ -13,7 +13,6 @@ import { CopilotPanel } from '@blocksuite/presets';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
 
-import { ChatWithWorkspacePanel } from './components/chat-with-workspace';
 import { CustomFramePanel } from './components/custom-frame-panel';
 import { CustomTOCOutlinePanel } from './components/custom-toc-outline-panel.js';
 import { DebugMenu } from './components/debug-menu.js';
@@ -55,7 +54,6 @@ function subscribePage(workspace: Workspace) {
     const sidePanel = new SidePanel();
     const leftSidePanel = new LeftSidePanel();
     const pagesPanel = new PagesPanel();
-    const chatWithWorkspacePanel = new ChatWithWorkspacePanel();
 
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
@@ -67,13 +65,11 @@ function subscribePage(workspace: Workspace) {
     debugMenu.sidePanel = sidePanel;
     debugMenu.leftSidePanel = leftSidePanel;
     debugMenu.pagesPanel = pagesPanel;
-    debugMenu.chatWithWorkspacePanel = chatWithWorkspacePanel;
 
     tocOutlinePanel.editor = editor;
     copilotPanelPanel.editor = editor;
     framePanel.editor = editor;
     pagesPanel.editor = editor;
-    chatWithWorkspacePanel.editor = editor;
 
     document.body.appendChild(debugMenu);
     document.body.appendChild(tocOutlinePanel);
