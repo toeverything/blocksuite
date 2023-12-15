@@ -538,7 +538,7 @@ export class SurfaceBlockComponent extends BlockElement<
   private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
     // skip empty event
     if (event.changes.keys.size === 0) return;
-    const deplayed: {
+    const defered: {
       change: (typeof event)['changes']['keys'] extends Map<string, infer V>
         ? V
         : never;
@@ -563,7 +563,7 @@ export class SurfaceBlockComponent extends BlockElement<
           const deps: string[] = [];
 
           children.forEach((_, childId) => deps.push(childId));
-          deplayed.push({ change, id, deps });
+          defered.push({ change, id, deps });
 
           return;
         }
@@ -577,7 +577,7 @@ export class SurfaceBlockComponent extends BlockElement<
           ) as string[];
 
           if (deps.length > 0) {
-            deplayed.push({ change, id, deps });
+            defered.push({ change, id, deps });
             return;
           }
         }
@@ -588,7 +588,7 @@ export class SurfaceBlockComponent extends BlockElement<
       }
     });
 
-    loadingSort(deplayed).forEach(({ change, id, deps }) => {
+    loadingSort(defered).forEach(({ change, id, deps }) => {
       if (deps.every(id => this.pickById(id))) {
         this._onYEvent(change, id);
       } else {
