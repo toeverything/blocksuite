@@ -724,7 +724,11 @@ export class DebugMenu extends ShadowlessElement {
               <sl-icon name="stars"></sl-icon>
             </sl-button>
           </sl-tooltip>
-          <sl-button size="small" @click=${this._togglePagesPanel}>
+          <sl-button
+            data-testid="pages-button"
+            size="small"
+            @click=${this._togglePagesPanel}
+          >
             Pages
           </sl-button>
         </div>

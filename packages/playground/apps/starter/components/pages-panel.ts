@@ -115,3 +115,9 @@ function createPageBlock(workspace: Workspace) {
   const id = workspace.idGenerator('page');
   createDefaultPage(workspace, { id }).catch(console.error);
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'pages-panel': PagesPanel;
+  }
+}

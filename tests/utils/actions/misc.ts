@@ -20,6 +20,7 @@ import {
   type InlineRootElement,
 } from '../../../packages/inline/src/index.js';
 import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
+import type { PagesPanel } from '../../../packages/playground/apps/starter/components/pages-panel.js';
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
@@ -103,10 +104,16 @@ async function initEmptyEditor({
         if (multiEditor) createEditor();
 
         const debugMenu: DebugMenu = document.createElement('debug-menu');
+        const pagesPanel: PagesPanel = document.createElement('pages-panel');
+        pagesPanel.editor = editor;
         debugMenu.workspace = workspace;
         debugMenu.editor = editor;
+        debugMenu.pagesPanel = pagesPanel;
+        const leftSidePanel = document.createElement('left-side-panel');
+        debugMenu.leftSidePanel = leftSidePanel;
         debugMenu.contentParser = new window.ContentParser(page);
         document.body.appendChild(debugMenu);
+        document.body.appendChild(leftSidePanel);
         window.debugMenu = debugMenu;
         window.editor = editor;
         window.page = page;
