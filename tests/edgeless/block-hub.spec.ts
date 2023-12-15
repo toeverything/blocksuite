@@ -107,7 +107,7 @@ test.skip('click blank area do not remvoe database in edgeless', async ({
   await click(page, { x: 50, y: 50 });
 
   const database = page.locator('affine-database');
-  expect(database).toBeVisible();
+  await expect(database).toBeVisible();
   const tagColumn = page.locator('.affine-database-column').nth(1);
   expect(await tagColumn.innerText()).toBe('Status');
   const defaultRows = page.locator('.affine-database-block-row');

@@ -82,14 +82,16 @@ export function createButtonPopper(
           fallbackPlacements: ['bottom'],
         }),
       ],
-    }).then(({ x, y }) => {
-      Object.assign(popperElement.style, {
-        position: 'absolute',
-        zIndex: 1,
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
+    })
+      .then(({ x, y }) => {
+        Object.assign(popperElement.style, {
+          position: 'absolute',
+          zIndex: 1,
+          left: `${x}px`,
+          top: `${y}px`,
+        });
+      })
+      .catch(console.error);
   }
 
   const show = () => {
@@ -299,7 +301,7 @@ export function getResizeLabel(target: HTMLElement) {
 
 export function launchIntoFullscreen(element: Element) {
   if (element.requestFullscreen) {
-    element.requestFullscreen();
+    element.requestFullscreen().catch(console.error);
   } else if (
     'mozRequestFullScreen' in element &&
     element.mozRequestFullScreen instanceof Function

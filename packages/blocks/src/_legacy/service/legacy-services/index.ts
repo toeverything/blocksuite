@@ -59,23 +59,15 @@ export type BlockServiceInstanceByKey<Key extends Flavour> =
 
 export function getServiceOrRegister<Key extends Flavour>(
   flavour: Key
-): BlockServiceInstanceByKey<Key> | Promise<BlockServiceInstanceByKey<Key>>;
-export function getServiceOrRegister(
-  flavour: string
-): BaseService | Promise<BaseService>;
-export function getServiceOrRegister(
-  flavour: string
-): BaseService | Promise<BaseService> {
-  const service = services.get(flavour);
+): BlockServiceInstanceByKey<Key>;
+export function getServiceOrRegister(flavour: string): BaseService;
+export function getServiceOrRegister(flavour: string): BaseService {
+  let service = services.get(flavour);
   if (!service) {
     const Constructor =
       blockService[flavour as keyof BlockService] ?? BaseService;
-    const result = registerService(flavour, Constructor);
-    if (result instanceof Promise) {
-      return result.then(() => services.get(flavour) as BaseService);
-    } else {
-      return services.get(flavour) as BaseService;
-    }
+    registerService(flavour, Constructor);
+    service = services.get(flavour);
   }
   return service as BaseService;
 }

@@ -214,7 +214,7 @@ export class KeymapController implements ReactiveController {
   private _onBlockUp = (cmd: BlockSuite.CommandChain) => {
     return cmd
       .getBlockSelections()
-      .inline<'currentSelectionPath'>(async (ctx, next) => {
+      .inline<'currentSelectionPath'>((ctx, next) => {
         const currentBlockSelections = ctx.currentBlockSelections;
         assertExists(currentBlockSelections);
         const blockSelection = currentBlockSelections.at(0);
@@ -247,7 +247,7 @@ export class KeymapController implements ReactiveController {
         return next();
       })
       .getTextSelection()
-      .inline<'currentSelectionPath'>(async (ctx, next) => {
+      .inline<'currentSelectionPath'>((ctx, next) => {
         const textSelection = ctx.currentTextSelection;
         assertExists(textSelection);
         return next({ currentSelectionPath: textSelection.from.path });
@@ -709,7 +709,7 @@ export class KeymapController implements ReactiveController {
                       to: null,
                     }),
                   ]);
-                });
+                }).catch(console.error);
 
                 next();
               })

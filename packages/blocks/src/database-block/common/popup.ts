@@ -12,12 +12,14 @@ export const createDatabasePopup = (
   target.parentElement?.append(content);
   computePosition(target, content, {
     middleware: [autoPlacement()],
-  }).then(({ x, y }) => {
-    Object.assign(content.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-    });
-  });
+  })
+    .then(({ x, y }) => {
+      Object.assign(content.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    })
+    .catch(console.error);
   onClickOutside(
     content,
     () => {

@@ -149,12 +149,14 @@ export class PageClipboard {
       .getBlockIndex()
       .inline((ctx, next) => {
         assertExists(ctx.parentBlock);
-        this._std.clipboard.paste(
-          e,
-          this._std.page,
-          ctx.parentBlock.model.id,
-          ctx.blockIndex ? ctx.blockIndex + 1 : undefined
-        );
+        this._std.clipboard
+          .paste(
+            e,
+            this._std.page,
+            ctx.parentBlock.model.id,
+            ctx.blockIndex ? ctx.blockIndex + 1 : undefined
+          )
+          .catch(console.error);
 
         return next();
       })
@@ -170,7 +172,9 @@ export class PageClipboard {
     this._std.command
       .pipe()
       .inline((_ctx, next) => {
-        this._std.clipboard.pasteBlockSnapshot(snapshot, page, parent, index);
+        this._std.clipboard
+          .pasteBlockSnapshot(snapshot, page, parent, index)
+          .catch(console.error);
 
         return next();
       })

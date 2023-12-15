@@ -114,7 +114,7 @@ export const popSideDetail = (ops: {
           },
         }),
       ],
-    });
+    }).catch(console.error);
   });
   const close = () => {
     modal.remove();

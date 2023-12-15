@@ -73,7 +73,10 @@ const FRAME_ACTIONS: Action[] = [
   { icon: MoreDeleteIcon, name: 'Delete', type: 'delete' },
 ];
 
-function Actions(actions: Action[], onClick: (action: Action) => void) {
+function Actions(
+  actions: Action[],
+  onClick: (action: Action) => Promise<void> | void
+) {
   return repeat(
     actions,
     action => action.type,

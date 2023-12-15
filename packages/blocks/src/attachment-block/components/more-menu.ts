@@ -21,7 +21,7 @@ export const MoreMenu = ({
 }: {
   ref?: Ref<HTMLDivElement>;
   model: AttachmentBlockModel;
-  downloadAttachment: (model: AttachmentBlockModel) => void;
+  downloadAttachment: (model: AttachmentBlockModel) => Promise<void> | void;
   abortController: AbortController;
 }) => {
   const readonly = model.page.readonly;

@@ -46,15 +46,15 @@ export class DocBookmarkBlockComponent extends WithDisposable(
     type => {
       if (type === 'caption') {
         this.captionElement.display = true;
-        this.captionElement.updateComplete.then(() => {
-          this.captionElement.input.focus();
-        });
+        this.captionElement.updateComplete
+          .then(() => this.captionElement.input.focus())
+          .catch(console.error);
       }
       if (type === 'edit') {
         toggleBookmarkEditModal(this.block);
       }
       if (type === 'reload') {
-        refreshBookmarkUrlData(this.block);
+        refreshBookmarkUrlData(this.block).catch(console.error);
       }
       this._optionsAbortController?.abort();
     };

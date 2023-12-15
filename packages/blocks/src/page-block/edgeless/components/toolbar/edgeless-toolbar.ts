@@ -421,7 +421,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private _toggleFullScreen() {
     if (document.fullscreenElement) {
       this._timer && clearTimeout(this._timer);
-      document.exitFullscreen();
+      document.exitFullscreen().catch(console.error);
     } else {
       launchIntoFullscreen(this.edgeless.editorContainer);
       this._timer = setTimeout(() => {

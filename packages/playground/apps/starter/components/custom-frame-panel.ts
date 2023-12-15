@@ -1,11 +1,11 @@
-import { WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import { registerFramePanelComponents } from '@blocksuite/presets';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('custom-frame-panel')
-export class CustomFramePanel extends WithDisposable(LitElement) {
+export class CustomFramePanel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .custom-frame-container {
       position: absolute;
@@ -45,9 +45,9 @@ export class CustomFramePanel extends WithDisposable(LitElement) {
 
     this.disposables.add(
       this.editor.slots.pageModeSwitched.on(() => {
-        this.editor.updateComplete.then(() => {
-          this.requestUpdate();
-        });
+        this.editor.updateComplete
+          .then(() => this.requestUpdate())
+          .catch(console.error);
       })
     );
   }

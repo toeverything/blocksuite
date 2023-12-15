@@ -25,12 +25,12 @@ const styles = css`
 
   .frame-panel-header {
     display: flex;
-    width: calc(100% - 4px);
+    width: 100%;
     height: 36px;
     align-items: center;
     justify-content: space-between;
     box-sizing: border-box;
-    padding-left: 12px;
+    padding: 0 8px;
   }
 
   .all-frames-setting {
@@ -39,7 +39,7 @@ const styles = css`
     gap: 8px;
     width: 100px;
     height: 24px;
-    margin: 8px 0;
+    margin: 8px 4px;
   }
 
   .all-frames-setting-button svg {
@@ -82,7 +82,7 @@ const styles = css`
     height: 28px;
     padding: 4px 8px;
     border-radius: 8px;
-    margin: 4px;
+    margin: 4px 0;
     border: 1px solid var(--affine-border-color);
     background: var(--affine-white);
   }
@@ -135,12 +135,14 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
 
   private _enterPresentationMode = () => {
     if (!this.edgeless) this.changeEditorMode('edgeless');
-    this.edgeless?.updateComplete.then(() => {
-      this.setEdgelessTool({
-        type: 'frameNavigator',
-        mode: this._navigatorMode,
-      });
-    });
+    this.edgeless?.updateComplete
+      .then(() => {
+        this.setEdgelessTool({
+          type: 'frameNavigator',
+          mode: this._navigatorMode,
+        });
+      })
+      .catch(console.error);
   };
 
   private _tryLoadNavigatorStateLocalRecord() {

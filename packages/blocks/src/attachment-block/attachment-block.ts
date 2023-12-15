@@ -69,7 +69,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
             this._captionInput.focus();
           });
         },
-        downloadAttachment: this._downloadAttachment.bind(this),
+        downloadAttachment: this._downloadAttachment,
         abortController,
       }),
       computePosition: {
@@ -86,7 +86,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     if (this.model.caption) {
       this._showCaption = true;
     }
-    this._checkBlob();
+    this._checkBlob().catch(console.error);
     this._registerDragHandleOption();
 
     // Workaround for https://github.com/toeverything/blocksuite/issues/4724
@@ -101,7 +101,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
           URL.revokeObjectURL(this._blobUrl);
           this._blobUrl = undefined;
         }
-        this._checkBlob();
+        this._checkBlob().catch(console.error);
       }
     });
 
@@ -158,7 +158,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   /**
    * Check if the blob is available. It is necessary since the block may be copied from another workspace.
    */
-  private async _checkBlob() {
+  private _checkBlob = async () => {
     const sourceId = this.model.sourceId;
     if (!sourceId) return;
     try {
@@ -168,7 +168,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       if (allowEmbed(this.model)) {
         this._blobUrl = URL.createObjectURL(blob);
       }
-    } catch (error) {
+    } catch (_) {
       this._error = true;
       console.warn(
         'The attachment is unavailable since the blob is missing!',
@@ -176,17 +176,17 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         sourceId
       );
     }
-  }
+  };
 
-  private _focusAttachment() {
+  private _focusAttachment = () => {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.getInstance('block', {
       path: this.path,
     });
     selectionManager.setGroup('note', [blockSelection]);
-  }
+  };
 
-  private async _downloadAttachment() {
+  private _downloadAttachment = async () => {
     if (this._isDownloading) {
       toast('Download in progress...');
       return;
@@ -208,22 +208,22 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     } finally {
       this._isDownloading = false;
     }
-  }
+  };
 
-  private _onBlur() {
+  private _onBlur = () => {
     if (!this.model.caption) {
       this._showCaption = false;
     }
-  }
+  };
 
-  private _onInput(e: InputEvent) {
+  private _onInput = (e: InputEvent) => {
     const caption = (e.target as HTMLInputElement).value;
     this.model.page.updateBlock(this.model, {
       caption,
     } satisfies Partial<AttachmentBlockProps>);
-  }
+  };
 
-  private _attachmentTail(isError: boolean) {
+  private _attachmentTail = (isError: boolean) => {
     return html`
       <div class="affine-attachment-banner">
         ${isError ? ErrorBanner() : AttachmentBanner()}
@@ -235,9 +235,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
           ></affine-block-selection>`
         : null}
     `;
-  }
+  };
 
-  private _captionTemplate() {
+  private _captionTemplate = () => {
     return html`<input
       ?hidden=${!this._showCaption}
       .disabled=${this.model.page.readonly}
@@ -248,7 +248,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       @blur=${this._onBlur}
       @pointerdown=${stopPropagation}
     />`;
-  }
+  };
 
   override render() {
     const isLoading = isAttachmentLoading(this.model.id);

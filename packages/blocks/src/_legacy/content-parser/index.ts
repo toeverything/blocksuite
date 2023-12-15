@@ -105,7 +105,7 @@ export class ContentParser {
 
     const promise = new Promise((resolve, reject) => {
       let count = 0;
-      const checkReactRender = setInterval(async () => {
+      const checkReactRender = setInterval(() => {
         try {
           this._checkCanContinueToCanvas(pathname, pageMode);
         } catch (e) {
@@ -573,7 +573,7 @@ export class ContentParser {
 
     assertExists(insertBlockModel);
     const { getServiceOrRegister } = await import('../service/index.js');
-    const service = await getServiceOrRegister(insertBlockModel.flavour);
+    const service = getServiceOrRegister(insertBlockModel.flavour);
 
     await service.json2Block(insertBlockModel, blocks);
   }

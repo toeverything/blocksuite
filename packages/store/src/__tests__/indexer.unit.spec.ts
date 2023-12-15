@@ -80,8 +80,6 @@ describe('workspace.search works', () => {
       noteId
     );
 
-    const id = page.id;
-
     requestIdleCallback(() => {
       queueMicrotask(() => {
         expect(workspace.search('处理器')).toStrictEqual(expected1);

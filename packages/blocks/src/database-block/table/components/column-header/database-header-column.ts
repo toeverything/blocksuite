@@ -328,13 +328,15 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             hide: () => !this.column.duplicate || this.column.type === 'title',
             select: () => {
               this.column.duplicate?.();
-              Promise.resolve().then(() => {
-                const next = this.nextElementSibling;
-                if (next instanceof DatabaseHeaderColumn) {
-                  next.editTitle();
-                  next.scrollIntoView();
-                }
-              });
+              Promise.resolve()
+                .then(() => {
+                  const next = this.nextElementSibling;
+                  if (next instanceof DatabaseHeaderColumn) {
+                    next.editTitle();
+                    next.scrollIntoView();
+                  }
+                })
+                .catch(console.error);
             },
           },
           {
@@ -346,13 +348,15 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                 id: this.column.id,
                 before: true,
               });
-              Promise.resolve().then(() => {
-                const pre = this.previousElementSibling;
-                if (pre instanceof DatabaseHeaderColumn) {
-                  pre.editTitle();
-                  pre.scrollIntoView();
-                }
-              });
+              Promise.resolve()
+                .then(() => {
+                  const pre = this.previousElementSibling;
+                  if (pre instanceof DatabaseHeaderColumn) {
+                    pre.editTitle();
+                    pre.scrollIntoView();
+                  }
+                })
+                .catch(console.error);
             },
           },
           {
@@ -364,13 +368,15 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                 id: this.column.id,
                 before: false,
               });
-              Promise.resolve().then(() => {
-                const next = this.nextElementSibling;
-                if (next instanceof DatabaseHeaderColumn) {
-                  next.editTitle();
-                  next.scrollIntoView();
-                }
-              });
+              Promise.resolve()
+                .then(() => {
+                  const next = this.nextElementSibling;
+                  if (next instanceof DatabaseHeaderColumn) {
+                    next.editTitle();
+                    next.scrollIntoView();
+                  }
+                })
+                .catch(console.error);
             },
           },
           {

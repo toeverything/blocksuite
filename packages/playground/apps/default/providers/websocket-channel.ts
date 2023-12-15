@@ -71,10 +71,14 @@ export async function initCollaborationSocket(
     ws.addEventListener('close', removeProvider);
     ws.addEventListener('error', removeProvider);
 
-    notify('Collaboration socket has connected', 'success');
+    notify('Collaboration socket has connected', 'success').catch(
+      console.error
+    );
     return true;
   } else {
-    notify('Collaboration socket connection failed', 'warning');
+    notify('Collaboration socket connection failed', 'warning').catch(
+      console.error
+    );
   }
 
   return false;

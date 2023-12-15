@@ -236,40 +236,42 @@ class PasteTr {
     const lastModel = this.std.page.getBlockById(this.lastSnapshot.id);
     assertExists(lastModel);
 
-    host.updateComplete.then(() => {
-      const target = parentBlockElement.querySelector<BlockElement>(
-        `[${host.blockIdAttr}="${lastModel.id}"]`
-      );
-      assertExists(target);
-      if (!lastModel.text) {
-        if (matchFlavours(lastModel, ['affine:image'])) {
-          const selection = this.std.selection.getInstance('image', {
+    host.updateComplete
+      .then(() => {
+        const target = parentBlockElement.querySelector<BlockElement>(
+          `[${host.blockIdAttr}="${lastModel.id}"]`
+        );
+        assertExists(target);
+        if (!lastModel.text) {
+          if (matchFlavours(lastModel, ['affine:image'])) {
+            const selection = this.std.selection.getInstance('image', {
+              path: target.path,
+            });
+            this.std.selection.setGroup('note', [selection]);
+            return;
+          }
+          const selection = this.std.selection.getInstance('block', {
             path: target.path,
           });
           this.std.selection.setGroup('note', [selection]);
           return;
         }
-        const selection = this.std.selection.getInstance('block', {
-          path: target.path,
+        const selection = this.std.selection.getInstance('text', {
+          from: {
+            path: target.path,
+            index:
+              this.firstSnapshot === this.lastSnapshot
+                ? lastModel.text
+                  ? lastModel.text.length - this.lastIndex
+                  : 0
+                : this.lastIndex,
+            length: 0,
+          },
+          to: null,
         });
         this.std.selection.setGroup('note', [selection]);
-        return;
-      }
-      const selection = this.std.selection.getInstance('text', {
-        from: {
-          path: target.path,
-          index:
-            this.firstSnapshot === this.lastSnapshot
-              ? lastModel.text
-                ? lastModel.text.length - this.lastIndex
-                : 0
-              : this.lastIndex,
-          length: 0,
-        },
-        to: null,
-      });
-      this.std.selection.setGroup('note', [selection]);
-    });
+      })
+      .catch(console.error);
   };
 
   merge() {

@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`model to snapshot 1`] = `
+{
+  "flavour": "page",
+  "id": "0",
+  "props": {
+    "count": 3,
+    "items": [
+      {
+        "content": {
+          "$blocksuite:internal:text$": true,
+          "delta": [
+            {
+              "insert": "item 1",
+            },
+          ],
+        },
+        "id": 0,
+      },
+      {
+        "content": {
+          "$blocksuite:internal:text$": true,
+          "delta": [
+            {
+              "insert": "item 2",
+            },
+          ],
+        },
+        "id": 1,
+      },
+      {
+        "content": {
+          "$blocksuite:internal:text$": true,
+          "delta": [
+            {
+              "insert": "item 3",
+            },
+          ],
+        },
+        "id": 2,
+      },
+    ],
+    "style": {
+      "color": "red",
+    },
+    "title": {
+      "$blocksuite:internal:text$": true,
+      "delta": [
+        {
+          "insert": "page title",
+        },
+      ],
+    },
+  },
+}
+`;

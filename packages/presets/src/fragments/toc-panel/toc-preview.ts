@@ -150,16 +150,18 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   }
 
   override updated() {
-    this.updateComplete.then(() => {
-      if (
-        BlocksUtils.matchFlavours(this.block, [
-          'affine:paragraph',
-          'affine:list',
-        ])
-      ) {
-        this._setTextDisposables(this.block);
-      }
-    });
+    this.updateComplete
+      .then(() => {
+        if (
+          BlocksUtils.matchFlavours(this.block, [
+            'affine:paragraph',
+            'affine:list',
+          ])
+        ) {
+          this._setTextDisposables(this.block);
+        }
+      })
+      .catch(console.error);
   }
 
   renderBlockByFlavour() {

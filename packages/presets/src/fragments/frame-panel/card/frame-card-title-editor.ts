@@ -5,11 +5,19 @@ import type {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { html } from 'lit';
+import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+const styles = css`
+  frame-card-title-editor rich-text .nowrap-lines::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
 export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
+  static override styles = styles;
+
   @query('rich-text')
   richText!: RichText;
 
@@ -43,40 +51,50 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override firstUpdated(): void {
-    this.updateComplete.then(() => {
-      this.titleContentElement.style.display = 'none';
+    this.updateComplete
+      .then(() => {
+        this.titleContentElement.style.display = 'none';
 
-      this.inlineEditor.selectAll();
+        this.inlineEditor.selectAll();
 
-      this.inlineEditor.slots.updated.on(() => {
-        this.requestUpdate();
-      });
+        this.inlineEditor.slots.updated.on(() => {
+          this.requestUpdate();
+        });
 
-      this.disposables.addFromEvent(this.inlineEditorContainer, 'blur', () => {
-        this._unmount();
-      });
-      this.disposables.addFromEvent(this.inlineEditorContainer, 'click', e => {
-        e.stopPropagation();
-      });
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'dblclick',
-        e => {
-          e.stopPropagation();
-        }
-      );
-
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'keydown',
-        e => {
-          e.stopPropagation();
-          if (e.key === 'Enter' && !this._isComposing) {
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'blur',
+          () => {
             this._unmount();
           }
-        }
-      );
-    });
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'click',
+          e => {
+            e.stopPropagation();
+          }
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'dblclick',
+          e => {
+            e.stopPropagation();
+          }
+        );
+
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'keydown',
+          e => {
+            e.stopPropagation();
+            if (e.key === 'Enter' && !this._isComposing) {
+              this._unmount();
+            }
+          }
+        );
+      })
+      .catch(console.error);
   }
 
   private _unmount() {
@@ -94,25 +112,27 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
       maxHeight: '20px',
       width: 'fit-content',
       height: '20px',
-      fontSize: '12px',
+      fontSize: 'var(--affine-font-sm)',
       lineHeight: '20px',
       position: 'absolute',
       left: `${this.left}px`,
       top: '0px',
       minWidth: '8px',
       background: 'var(--affine-background-primary-color)',
+      border: '1px solid var(--affine-primary-color)',
       color: 'var(--affine-text-primary-color)',
       boxShadow: '0px 0px 0px 2px rgba(30, 150, 235, 0.30)',
       zIndex: '1',
       display: 'block',
-      overflowY: 'hidden',
-      overflowX: 'auto',
     });
     return html`<rich-text
       .yText=${this.frameModel.title.yText}
       .enableFormat=${false}
-      .enableAutoScrollHorizontally=${false}
+      .enableAutoScrollHorizontally=${true}
       .enableAutoScrollVertically=${false}
+      .enableUndoRedo=${false}
+      .enableMarkdownShortcut=${false}
+      .wrapText=${false}
       style=${inlineEditorStyle}
     ></rich-text>`;
   }

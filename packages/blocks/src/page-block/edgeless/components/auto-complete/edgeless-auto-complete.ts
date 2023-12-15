@@ -217,9 +217,9 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       }
     });
 
-    this._disposables.addFromEvent(document, 'pointerup', async e => {
+    this._disposables.addFromEvent(document, 'pointerup', e => {
       if (!this._isMoving) {
-        await this._generateElementOnClick(type);
+        this._generateElementOnClick(type);
       } else if (connector && !connector.target.id) {
         this.edgeless.selectionManager.clear();
         this._createAutoCompletePanel(e, connector);

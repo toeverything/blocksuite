@@ -730,7 +730,7 @@ test.describe('toggle list', () => {
 
     await toggleIcon.click();
     await expect(prefixes).toHaveCount(2);
-    assertStoreMatchJSX(
+    await assertStoreMatchJSX(
       page,
       `
 <affine:note
@@ -777,7 +777,7 @@ test.describe('toggle list', () => {
 
     await toggleIcon.click();
     await expect(prefixes).toHaveCount(3);
-    assertStoreMatchJSX(
+    await assertStoreMatchJSX(
       page,
       `
 <affine:note
