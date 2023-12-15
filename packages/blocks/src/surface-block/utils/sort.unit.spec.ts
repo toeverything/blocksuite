@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { loadingSort } from './sort';
+import { loadingSort } from './sort.js';
 
 describe('loadingSort', () => {
   it('should sort correctly', () => {
