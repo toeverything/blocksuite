@@ -10,6 +10,10 @@ import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
+import {
+  deserializeXYWH,
+  serializeXYWH,
+} from '../../../../../surface-block/utils/xywh.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const ACTIVE_NOTE_EXTRA_PADDING = 20;
@@ -32,15 +36,30 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
         this.requestUpdate();
       })
     );
+
+    const maskDOM = this.renderRoot!.querySelector('.affine-note-mask');
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        if (!this.model.edgeless.collapse) {
+          const [x, y, w] = deserializeXYWH(this.model.xywh);
+          this.model.xywh = serializeXYWH(x, y, w, entry.contentRect.height);
+        }
+      }
+    });
+
+    this.model.stash('xywh');
+    observer.observe(maskDOM!);
+
+    this._disposables.add(() => {
+      this.model.pop('xywh');
+      observer.disconnect();
+    });
   }
 
   override render() {
-    if (
+    const selected =
       this.edgeless.selectionManager.state.editing &&
-      this.edgeless.selectionManager.state.elements.includes(this.model.id)
-    ) {
-      return nothing;
-    }
+      this.edgeless.selectionManager.state.elements.includes(this.model.id);
 
     const style = {
       position: 'absolute',
@@ -49,7 +68,7 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
       bottom: '0',
       right: '0',
       zIndex: '1',
-      pointerEvents: 'auto',
+      pointerEvents: selected ? 'none' : 'auto',
     };
     return html`
       <div class="affine-note-mask" style=${styleMap(style)}></div>
