@@ -150,7 +150,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
           color: color ?? 'black',
           lineWidth: lineWidth ?? LineWidth.Thin,
         });
-      } catch (e) {
+      } catch (_) {
         noop();
       }
     }

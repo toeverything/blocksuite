@@ -81,16 +81,20 @@ export class TOCPanel extends WithDisposable(LitElement) {
     this._editorDisposables = new DisposableGroup();
     this._editorDisposables.add(
       this.editor.slots.pageModeSwitched.on(() => {
-        this.editor.updateComplete.then(() => {
-          this.requestUpdate();
-        });
+        this.editor.updateComplete
+          .then(() => {
+            this.requestUpdate();
+          })
+          .catch(console.error);
       })
     );
     this._editorDisposables.add(
       this.editor.slots.pageUpdated.on(() => {
-        this.editor.updateComplete.then(() => {
-          this.requestUpdate();
-        });
+        this.editor.updateComplete
+          .then(() => {
+            this.requestUpdate();
+          })
+          .catch(console.error);
       })
     );
   }

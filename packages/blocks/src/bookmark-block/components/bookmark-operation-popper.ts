@@ -63,7 +63,7 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
             text=${label}
             ?disabled=${disableWhen(this.model)}
             @click=${() => {
-              action(this.model, this.onSelected, this);
+              action(this.model, this.onSelected, this)?.catch(console.error);
             }}
           >
             ${icon}

@@ -46,11 +46,13 @@ export function addNote(
       });
 
       // Waiting dom updated, `note mask` is removed
-      edgeless.updateComplete.then(() => {
-        // Cannot reuse `handleNativeRangeClick` directly here,
-        // since `retargetClick` will re-target to pervious editor
-        handleNativeRangeAtPoint(event.raw.clientX, event.raw.clientY);
-      });
+      edgeless.updateComplete
+        .then(() => {
+          // Cannot reuse `handleNativeRangeClick` directly here,
+          // since `retargetClick` will re-target to pervious editor
+          handleNativeRangeAtPoint(event.raw.clientX, event.raw.clientY);
+        })
+        .catch(console.error);
     }
   });
 }

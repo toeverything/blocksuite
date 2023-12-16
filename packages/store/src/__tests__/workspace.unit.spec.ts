@@ -121,7 +121,7 @@ describe('basic', () => {
 
   it('init with provider', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace({
+    new Workspace({
       ...options,
       providerCreators: [
         vi.fn((id, doc, config): PassiveDocProvider => {

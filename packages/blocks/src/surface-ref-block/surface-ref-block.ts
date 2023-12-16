@@ -65,6 +65,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     .affine-surface-ref {
       position: relative;
       user-select: none;
+      margin: 10px 0;
     }
 
     .surface-empty-placeholder {
@@ -151,8 +152,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     }
 
     .surface-viewport.frame {
-      border-radius: 8px;
-      border: 2px solid var(--affine-black-30);
+      border-radius: 2px;
+      border: 1px solid var(--affine-black-30);
     }
 
     .surface-canvas-container {
@@ -189,10 +190,10 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
       width: 100%;
       padding: 8px 16px;
-      border: 1px solid #f1f1f1;
+      border: 1px solid var(--affine-border-color);
       gap: 14px;
 
-      background: #fff;
+      background: var(--affine-background-primary-color);
 
       font-size: 12px;
     }
@@ -377,9 +378,11 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
             });
           }
 
-          this.updateComplete.then(() => {
-            this._refreshViewport();
-          });
+          this.updateComplete
+            .then(() => {
+              this._refreshViewport();
+            })
+            .catch(console.error);
         });
       }
 
@@ -475,15 +478,17 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     // trigger a rerender to update element's size
     // and set viewport after element's size has been updated
     this.requestUpdate();
-    this.updateComplete.then(() => {
-      this._surfaceRenderer.onResize();
-      this._surfaceRenderer.setViewportByBound(
-        Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
-      );
+    this.updateComplete
+      .then(() => {
+        this._surfaceRenderer.onResize();
+        this._surfaceRenderer.setViewportByBound(
+          Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
+        );
 
-      // update portal transform
-      this.blocksPortal?.setViewport(this._surfaceRenderer);
-    });
+        // update portal transform
+        this.blocksPortal?.setViewport(this._surfaceRenderer);
+      })
+      .catch(console.error);
   }
 
   private _syncFromExistingContainer(elementsMap: Y.Map<Y.Map<unknown>>) {
@@ -784,11 +789,13 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   showCaption() {
     this._showCaption = true;
 
-    this.updateComplete.then(() => {
-      (
-        this.renderRoot.querySelector('.caption-input') as HTMLInputElement
-      )?.focus();
-    });
+    this.updateComplete
+      .then(() => {
+        (
+          this.renderRoot.querySelector('.caption-input') as HTMLInputElement
+        )?.focus();
+      })
+      .catch(console.error);
   }
 
   viewInEdgeless() {

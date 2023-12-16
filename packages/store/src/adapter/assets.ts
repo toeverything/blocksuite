@@ -29,7 +29,7 @@ export class MemoryBlobManager {
     blobs.forEach(blobId => {
       const ref = this._blobsRef.get(blobId);
       if (!ref || ref <= 0) {
-        this.delete(blobId);
+        this.delete(blobId).catch(console.error);
         this._blobsRef.delete(blobId);
       }
     });

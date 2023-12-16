@@ -22,9 +22,14 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
         file => !file.type.startsWith('image/')
       );
 
-      attachmentFiles.forEach(file =>
-        addSiblingAttachmentBlock(file, this.maxFileSize, targetModel, place)
-      );
+      attachmentFiles.forEach(file => {
+        addSiblingAttachmentBlock(
+          file,
+          this.maxFileSize,
+          targetModel,
+          place
+        ).catch(console.error);
+      });
       return true;
     },
   };

@@ -58,20 +58,17 @@ export class ClipboardAdapter extends BaseAdapter<string> {
     const assets = payload.assets;
     assertExists(assets);
     const map = assets.getAssets();
-    const blobs = await Array.from(map.entries()).reduce(
-      async (acc, [id, blob]) => {
+    const blobs: Record<string, FileSnapshot> = {};
+    await Promise.all(
+      Array.from(map.entries()).map(async ([id, blob]) => {
         const content = encode(await blob.arrayBuffer());
         const file: FileSnapshot = {
           name: (blob as File).name,
           type: blob.type,
           content,
         };
-        return {
-          ...acc,
-          [id]: file,
-        };
-      },
-      Promise.resolve({} as Record<string, FileSnapshot>)
+        blobs[id] = file;
+      })
     );
     return {
       file: JSON.stringify({

@@ -195,7 +195,7 @@ export async function fillLine(page: Page, toNext = false) {
       [, nextHeight] = await getCursorBlockIdAndHeight(page);
     } while (nextHeight === height);
     if (!toNext) {
-      page.keyboard.press('Backspace');
+      await page.keyboard.press('Backspace');
     }
   }
 }

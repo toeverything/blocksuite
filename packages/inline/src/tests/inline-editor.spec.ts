@@ -101,7 +101,7 @@ test('basic input', async ({ page }) => {
   await press(page, 'Enter');
   await type(page, 'bbb');
 
-  page.waitForTimeout(100);
+  await page.waitForTimeout(100);
 
   expect(await editorA.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
   expect(await editorB.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
@@ -297,8 +297,8 @@ test('basic styles', async ({ page }) => {
 
   await setInlineRichTextRange(page, { index: 2, length: 3 });
 
-  editorABold.click();
-  page.waitForTimeout(100);
+  await editorABold.click();
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -315,8 +315,8 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorAItalic.click();
-  page.waitForTimeout(100);
+  await editorAItalic.click();
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -334,8 +334,8 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorAUnderline.click();
-  page.waitForTimeout(100);
+  await editorAUnderline.click();
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -354,8 +354,8 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorAStrike.click();
-  page.waitForTimeout(100);
+  await editorAStrike.click();
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -375,8 +375,8 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorACode.click();
-  page.waitForTimeout(100);
+  await editorACode.click();
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -397,10 +397,10 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorAUndo.click({
+  await editorAUndo.click({
     clickCount: 5,
   });
-  page.waitForTimeout(100);
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -408,10 +408,10 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorARedo.click({
+  await editorARedo.click({
     clickCount: 5,
   });
-  page.waitForTimeout(100);
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -432,8 +432,8 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorABold.click();
-  page.waitForTimeout(100);
+  await editorABold.click();
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -453,8 +453,8 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorAItalic.click();
-  page.waitForTimeout(100);
+  await editorAItalic.click();
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -473,8 +473,8 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorAUnderline.click();
-  page.waitForTimeout(100);
+  await editorAUnderline.click();
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -492,8 +492,8 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorAStrike.click();
-  page.waitForTimeout(100);
+  await editorAStrike.click();
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -510,8 +510,8 @@ test('basic styles', async ({ page }) => {
     },
   ]);
 
-  editorACode.click();
-  page.waitForTimeout(100);
+  await editorACode.click();
+  await page.waitForTimeout(100);
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
     {
@@ -551,7 +551,7 @@ test('overlapping styles', async ({ page }) => {
   ]);
 
   await setInlineRichTextRange(page, { index: 1, length: 3 });
-  editorABold.click();
+  await editorABold.click();
 
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
@@ -570,7 +570,7 @@ test('overlapping styles', async ({ page }) => {
   ]);
 
   await setInlineRichTextRange(page, { index: 7, length: 3 });
-  editorABold.click();
+  await editorABold.click();
 
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
@@ -598,7 +598,7 @@ test('overlapping styles', async ({ page }) => {
   ]);
 
   await setInlineRichTextRange(page, { index: 3, length: 5 });
-  editorAItalic.click();
+  await editorAItalic.click();
 
   delta = await getDeltaFromInlineRichText(page);
   expect(delta).toEqual([
@@ -642,7 +642,7 @@ test('overlapping styles', async ({ page }) => {
     },
   ]);
 
-  editorAUndo.click({
+  await editorAUndo.click({
     clickCount: 3,
   });
   delta = await getDeltaFromInlineRichText(page);
@@ -652,7 +652,7 @@ test('overlapping styles', async ({ page }) => {
     },
   ]);
 
-  editorARedo.click({
+  await editorARedo.click({
     clickCount: 3,
   });
   delta = await getDeltaFromInlineRichText(page);
@@ -757,7 +757,7 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
-  assertSelection(page, 0, 8);
+  await assertSelection(page, 0, 8);
 
   /**
    * |abc
@@ -767,7 +767,7 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
   await page.keyboard.down('Shift');
   await press(page, 'ArrowUp');
   await press(page, 'ArrowUp');
-  assertSelection(page, 0, 0, 8);
+  await assertSelection(page, 0, 0, 8);
 
   /**
    * a|bc
@@ -775,7 +775,7 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
    * |ghi
    */
   await press(page, 'ArrowRight');
-  assertSelection(page, 0, 1, 7);
+  await assertSelection(page, 0, 1, 7);
   await press(page, 'Backspace');
   await page.waitForTimeout(100);
 
@@ -868,11 +868,11 @@ test('embed', async ({ page }) => {
 
   await press(page, 'ArrowLeft');
   await page.waitForTimeout(100);
-  page.keyboard.down('Shift');
+  await page.keyboard.down('Shift');
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
-  page.keyboard.up('Shift');
+  await page.keyboard.up('Shift');
   await page.waitForTimeout(100);
   await assertSelection(page, 0, 1, 3);
 

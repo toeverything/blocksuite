@@ -1,3 +1,5 @@
+import './chat-with-workspace.js';
+
 import {
   type EditorHost,
   ShadowlessElement,
@@ -120,7 +122,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       parentBlock.model.id,
       firstIndex
     );
-    setTimeout(async () => {
+    setTimeout(() => {
       const parentPath = firstBlock.parentPath;
       const selections = models
         .map(model => [...parentPath, model.id])
@@ -150,7 +152,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       lastIndex + 1
     );
 
-    setTimeout(async () => {
+    setTimeout(() => {
       const parentPath = lastBlock.parentPath;
       const selections = models
         .map(model => [...parentPath, model.id])
@@ -306,6 +308,11 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       <div>${this._ResultArea()}</div>
     </div>`;
   };
+  workspace = () => {
+    return html` <chat-with-workspace-panel
+      .editor="${this.editor}"
+    ></chat-with-workspace-panel>`;
+  };
   edgeless = () => {
     return html`
       <div class="copilot-panel-action-button" @click="${this.api.makeItReal}">
@@ -358,6 +365,9 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     },
     edgeless: {
       render: this.edgeless,
+    },
+    workspace: {
+      render: this.workspace,
     },
   };
   @state()

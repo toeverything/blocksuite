@@ -407,7 +407,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
   override render() {
     if (!this.expanded) {
       return html`
-        <div class="meta-data" @click="${this._toggle}">
+        <div class="meta-data caret-ignore" @click="${this._toggle}">
           <div class="meta-data-content">
             ${this.renderBacklinkInline()} ${this.renderTagsInline()}
           </div>
@@ -416,7 +416,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
       `;
     }
 
-    return html` <div class="meta-data-expanded">
+    return html` <div class="meta-data-expanded caret-ignore">
       <div class="meta-data-expanded-title" @click="${this._toggle}">
         <div>Page info</div>
         <div class="close">${ArrowDownSmallIcon}</div>

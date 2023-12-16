@@ -35,4 +35,12 @@ export class SidePanel extends ShadowlessElement {
   protected override render(): unknown {
     return html``;
   }
+
+  toggle(ele: HTMLElement) {
+    if (this.currentContent !== ele) {
+      this.showContent(ele);
+    } else {
+      this.hideContent();
+    }
+  }
 }

@@ -5,21 +5,22 @@ import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import lz from 'lz-string';
 
+import type { CssVariableName } from '../../../packages/blocks/src/_common/theme/css-variables.js';
 import type { ClipboardItem } from '../../../packages/blocks/src/_legacy/clipboard/clipboard-item.js';
 import type { RichText } from '../../../packages/blocks/src/index.js';
 import {
-  type CssVariableName,
   type DatabaseBlockModel,
   type ListType,
   type PageBlockModel,
   type ThemeObserver,
 } from '../../../packages/blocks/src/index.js';
-import { assertExists, sleep } from '../../../packages/global/src/utils.js';
+import { assertExists } from '../../../packages/global/src/utils.js';
 import {
   type InlineRange,
   type InlineRootElement,
 } from '../../../packages/inline/src/index.js';
 import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
+import type { PagesPanel } from '../../../packages/playground/apps/starter/components/pages-panel.js';
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
@@ -72,11 +73,11 @@ async function initEmptyEditor({
   multiEditor?: boolean;
 }) {
   await page.evaluate(
-    ([flags, noInit, multiEditor]) => {
+    async ([flags, noInit, multiEditor]) => {
       const { workspace } = window;
 
       async function initPage(page: ReturnType<typeof workspace.createPage>) {
-        page.load();
+        await page.load();
         for (const [key, value] of Object.entries(flags)) {
           page.awarenessStore.setFlag(key as keyof typeof flags, value);
         }
@@ -103,10 +104,16 @@ async function initEmptyEditor({
         if (multiEditor) createEditor();
 
         const debugMenu: DebugMenu = document.createElement('debug-menu');
+        const pagesPanel: PagesPanel = document.createElement('pages-panel');
+        pagesPanel.editor = editor;
         debugMenu.workspace = workspace;
         debugMenu.editor = editor;
+        debugMenu.pagesPanel = pagesPanel;
+        const leftSidePanel = document.createElement('left-side-panel');
+        debugMenu.leftSidePanel = leftSidePanel;
         debugMenu.contentParser = new window.ContentParser(page);
         document.body.appendChild(debugMenu);
+        document.body.appendChild(leftSidePanel);
         window.debugMenu = debugMenu;
         window.editor = editor;
         window.page = page;
@@ -119,20 +126,18 @@ async function initEmptyEditor({
         workspace.meta.pageMetas.forEach(meta => {
           const pageId = meta.id;
           const page = workspace.getPage(pageId);
-          if (page) {
-            initPage(page);
-          }
+          if (page) initPage(page).catch(console.error);
         });
-        workspace.slots.pageAdded.on(pageId => {
+        workspace.slots.pageAdded.on(async pageId => {
           const page = workspace.getPage(pageId);
           if (!page) {
             throw new Error(`Failed to get page ${pageId}`);
           }
-          initPage(page);
+          await initPage(page);
         });
       } else {
         const page = workspace.createPage({ id: 'page:home' });
-        initPage(page);
+        await initPage(page);
       }
     },
     [flags, noInit, multiEditor] as const
@@ -835,9 +840,9 @@ export async function importMarkdown(
   data: string
 ) {
   await page.evaluate(
-    ({ data, focusedBlockId }) => {
+    async ({ data, focusedBlockId }) => {
       const contentParser = new window.ContentParser(window.page);
-      contentParser.importMarkdown(data, focusedBlockId);
+      await contentParser.importMarkdown(data, focusedBlockId);
     },
     { data, focusedBlockId }
   );

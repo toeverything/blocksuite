@@ -39,7 +39,10 @@ export function updateBlockElementType(
     if (!model) {
       throw new Error('Failed to get model after merge code block!');
     }
-    asyncSetInlineRange(model, { index: model.text?.length ?? 0, length: 0 });
+    asyncSetInlineRange(model, {
+      index: model.text?.length ?? 0,
+      length: 0,
+    }).catch(console.error);
     return [model];
   }
   if (flavour === 'affine:divider') {
@@ -58,7 +61,7 @@ export function updateBlockElementType(
     if (!nextSibling) {
       nextSiblingId = page.addBlock('affine:paragraph', {}, parent);
     }
-    asyncFocusRichText(page, nextSiblingId);
+    asyncFocusRichText(page, nextSiblingId)?.catch(console.error);
     const newModel = page.getBlockById(id);
     if (!newModel) {
       throw new Error('Failed to get model after add divider block!');
@@ -106,9 +109,11 @@ export function updateBlockElementType(
         : null,
     });
 
-    Promise.all(allTextUpdated).then(() => {
-      selectionManager.setGroup('note', [newTextSelection]);
-    });
+    Promise.all(allTextUpdated)
+      .then(() => {
+        selectionManager.setGroup('note', [newTextSelection]);
+      })
+      .catch(console.error);
     return newModels;
   }
 

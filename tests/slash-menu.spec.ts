@@ -195,7 +195,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await type(page, '/');
     await expect(slashMenu).toBeVisible();
 
-    page.keyboard.press(`${SHORT_KEY}+N`);
+    await page.keyboard.press(`${SHORT_KEY}+N`);
     await expect(slashMenu).toBeVisible();
 
     const slashItems = slashMenu.locator('icon-button');
@@ -204,7 +204,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(maybeActivatedItem).toHaveAttribute('hover', 'true');
     await assertRichTexts(page, ['/']);
 
-    page.keyboard.press(`${SHORT_KEY}+P`);
+    await page.keyboard.press(`${SHORT_KEY}+P`);
     await expect(slashMenu).toBeVisible();
 
     const maybeActivatedItem2 = slashItems.nth(0);
@@ -220,10 +220,10 @@ test.describe('slash menu should show and hide correctly', () => {
     await type(page, '/');
     await expect(slashMenu).toBeVisible();
 
-    page.keyboard.press(SHORT_KEY);
+    await page.keyboard.press(SHORT_KEY);
     await expect(slashMenu).toBeVisible();
 
-    page.keyboard.press('Shift');
+    await page.keyboard.press('Shift');
     await expect(slashMenu).toBeVisible();
   });
 
@@ -234,7 +234,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await type(page, '/');
     await expect(slashMenu).toBeVisible();
 
-    page.keyboard.press(`${SHORT_KEY}+A`);
+    await page.keyboard.press(`${SHORT_KEY}+A`);
     await expect(slashMenu).not.toBeVisible();
     await assertRichTexts(page, ['/']);
 
@@ -610,7 +610,7 @@ test('should insert database', async ({ page }) => {
   await assertBlockCount(page, 'database', 1);
 
   const database = page.locator('affine-database');
-  expect(database).toBeVisible();
+  await expect(database).toBeVisible();
   const tagColumn = page.locator('.affine-database-column').nth(1);
   expect(await tagColumn.innerText()).toBe('Status');
   const defaultRows = page.locator('.affine-database-block-row');

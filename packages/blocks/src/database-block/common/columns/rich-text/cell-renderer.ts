@@ -198,9 +198,9 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       this._handleKeyDown
     );
 
-    this._richTextElement?.updateComplete.then(() => {
-      this.inlineEditor.focusEnd();
-    });
+    this._richTextElement?.updateComplete
+      .then(() => this.inlineEditor.focusEnd())
+      .catch(console.error);
   }
 
   private _initYText = (text?: string) => {

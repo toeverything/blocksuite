@@ -51,7 +51,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
       if (this.model.checked) {
         const checkEl = this.querySelector('.affine-list-block__todo-prefix');
         assertExists(checkEl);
-        playCheckAnimation(checkEl);
+        playCheckAnimation(checkEl).catch(console.error);
       }
       return;
     }
@@ -77,15 +77,17 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   }
 
   private _updateFollowingListSiblings() {
-    this.updateComplete.then(() => {
-      let current: BlockElement | undefined = this as BlockElement;
-      while (current && current.tagName == 'AFFINE-LIST') {
-        current.requestUpdate();
-        current = this.std.view.findNext(current.path, () => {
-          return true;
-        })?.view as BlockElement;
-      }
-    });
+    this.updateComplete
+      .then(() => {
+        let current: BlockElement | undefined = this as BlockElement;
+        while (current && current.tagName == 'AFFINE-LIST') {
+          current.requestUpdate();
+          current = this.std.view.findNext(current.path, () => {
+            return true;
+          })?.view as BlockElement;
+        }
+      })
+      .catch(console.error);
   }
 
   override connectedCallback() {

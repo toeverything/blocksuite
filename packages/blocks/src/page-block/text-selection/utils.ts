@@ -13,15 +13,14 @@ export function caretFromPoint(
 ): { node: Node; offset: number } | undefined {
   let caret: { node: Node; offset: number } | undefined = undefined;
 
-  // hide all widget modals
-  const widgetsEls = Array.from(
-    document.querySelectorAll('[data-widget-id]')
-  ) as HTMLElement[];
-  const prevWidgetElDisplayState = widgetsEls.map(
-    widgetsEl => widgetsEl.style.display
-  );
-  widgetsEls.forEach(widgetsEl => {
-    widgetsEl.style.display = 'none';
+  // hide all widget modals, caret-ignore elements
+  const elements = [
+    ...document.querySelectorAll('[data-widget-id]'),
+    ...document.querySelectorAll('.caret-ignore'),
+  ] as HTMLElement[];
+  const prevDisplayState = elements.map(element => element.style.display);
+  elements.forEach(element => {
+    element.style.display = 'none';
   });
 
   // @ts-ignore
@@ -43,9 +42,9 @@ export function caretFromPoint(
     }
   }
 
-  // restore all widget modals
-  widgetsEls.forEach((widgetsEl, i) => {
-    widgetsEl.style.display = prevWidgetElDisplayState[i];
+  // restore all elements
+  elements.forEach((element, i) => {
+    element.style.display = prevDisplayState[i];
   });
 
   return caret;

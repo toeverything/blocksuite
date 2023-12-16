@@ -17,7 +17,7 @@ function getDebugMenu(page: Page) {
       name: 'Test Operations',
     }),
 
-    addNewPageBtn: debugMenu.locator('sl-tooltip[content="Add New Page"]'),
+    pagesBtn: debugMenu.getByTestId('pages-button'),
   };
 }
 
@@ -64,8 +64,11 @@ export async function addNoteByClick(page: Page) {
 }
 
 export async function addNewPage(page: Page) {
-  const { addNewPageBtn } = getDebugMenu(page);
-  await addNewPageBtn.click();
+  const { pagesBtn } = getDebugMenu(page);
+  if (!(await page.locator('pages-panel').isVisible())) {
+    await pagesBtn.click();
+  }
+  await page.locator('.new-page-button').click();
   const pageMetas = await page.evaluate(() => {
     const { workspace } = window;
     return workspace.meta.pageMetas;
@@ -101,7 +104,7 @@ export async function clickTestOperationsMenuItem(page: Page, name: string) {
 }
 
 export async function switchReadonly(page: Page) {
-  page.evaluate(() => {
+  await page.evaluate(() => {
     const defaultPage = document.querySelector(
       'affine-doc-page'
     ) as HTMLElement & {

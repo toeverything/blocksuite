@@ -458,12 +458,14 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
               }),
               offset(4),
             ],
-          }).then(({ x, y }) => {
-            Object.assign(subMenu.style, {
-              left: `${x}px`,
-              top: `${y}px`,
-            });
-          });
+          })
+            .then(({ x, y }) => {
+              Object.assign(subMenu.style, {
+                left: `${x}px`,
+                top: `${y}px`,
+              });
+            })
+            .catch(console.error);
           this.subMenu = subMenu;
         });
       };
@@ -711,23 +713,27 @@ export const createPopup = (
   autoUpdate(target, content, () => {
     computePosition(target, content, {
       middleware: options?.middleware ?? [shift({ crossAxis: true })],
-    }).then(({ x, y }) => {
-      Object.assign(content.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
+    })
+      .then(({ x, y }) => {
+        Object.assign(content.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+        });
+      })
+      .catch(console.error);
   });
   modal.append(content);
 
   computePosition(target, content, {
     middleware: options?.middleware ?? [shift({ crossAxis: true })],
-  }).then(({ x, y }) => {
-    Object.assign(content.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-    });
-  });
+  })
+    .then(({ x, y }) => {
+      Object.assign(content.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    })
+    .catch(console.error);
 
   modal.onmousedown = ev => {
     if (ev.target === modal) {

@@ -525,7 +525,7 @@ function mergePath(points: IVec[]) {
           almostEqual(cur[1], next[1], 0.02),
         true
       );
-    } catch (e) {
+    } catch (_) {
       console.log(points);
       console.log(result);
     }

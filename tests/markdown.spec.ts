@@ -189,7 +189,7 @@ test('markdown shortcut', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test.describe('markdown inline-text', async () => {
+test.describe('markdown inline-text', () => {
   test.beforeEach(async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);

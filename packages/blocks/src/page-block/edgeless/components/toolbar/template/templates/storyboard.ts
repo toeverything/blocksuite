@@ -1,15 +1,13 @@
-import type { Template } from '../builtin-templates.js';
-
-export const storyboard: Template = {
-  name: 'storyboard',
-  preview: '',
-  asserts: {
-    'pQzvckPjmd0QPBOYJj0lRAezTAl43BtaWqVFZkydgzQ=':
-      'https://imagedelivery.net/S2JgHUJzW7ZzW77qOAfRfA/a5aa36ec-a2e1-4d7f-dd00-ee621f34f500/public',
-    '4rOMygicmDxT3mgVjW1-PtavNtg1TGpkNReRIwRy0fQ=':
-      'https://imagedelivery.net/S2JgHUJzW7ZzW77qOAfRfA/8b7b54ae-b5ae-442f-5733-6fa35d935e00/public',
+export default {
+  name: 'Storyboard',
+  preview: 'https://cdn.affine.pro/templates/cover/storyboard.png',
+  type: 'template',
+  assets: {
+    'WRka6R7pvS4AKqYQRl5aBeIkQqLGkNOpB_iVroJQKtc=':
+      'https://cdn.affine.pro/templates/assets/pQzvckPjmd0QPBOYJj0lRAezTAl43BtaWqVFZkydgzQ=.png',
+    'NuuYD2-GljLA2H_qI0-ipdeB7YHgwkn_e05G--V8F6M=':
+      'https://cdn.affine.pro/templates/assets/4rOMygicmDxT3mgVjW1-PtavNtg1TGpkNReRIwRy0fQ=.png',
   },
-  version: {},
   content: {
     type: 'page',
     meta: {
@@ -391,7 +389,7 @@ export const storyboard: Template = {
                   'affine:surface:text': true,
                   delta: [
                     {
-                      insert: 'Stoardboard',
+                      insert: 'Storyboard',
                     },
                   ],
                 },
@@ -738,7 +736,7 @@ export const storyboard: Template = {
               flavour: 'affine:image',
               props: {
                 caption: '',
-                sourceId: 'pQzvckPjmd0QPBOYJj0lRAezTAl43BtaWqVFZkydgzQ=',
+                sourceId: 'WRka6R7pvS4AKqYQRl5aBeIkQqLGkNOpB_iVroJQKtc=',
                 width: 0,
                 height: 0,
                 index: 'ah',
@@ -753,7 +751,7 @@ export const storyboard: Template = {
               flavour: 'affine:image',
               props: {
                 caption: '',
-                sourceId: '4rOMygicmDxT3mgVjW1-PtavNtg1TGpkNReRIwRy0fQ=',
+                sourceId: 'NuuYD2-GljLA2H_qI0-ipdeB7YHgwkn_e05G--V8F6M=',
                 width: 0,
                 height: 0,
                 index: 'aal',

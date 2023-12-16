@@ -34,7 +34,7 @@ export type LinkedPageItem = {
   icon: TemplateResult<1>;
   // suffix?: TemplateResult<1>;
   // disabled?: boolean;
-  action: () => void;
+  action: () => Promise<void> | void;
 };
 
 export type LinkedPageGroup = {

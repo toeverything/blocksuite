@@ -16,6 +16,8 @@ import { Job, Workspace } from '@blocksuite/store';
 import { CustomFramePanel } from './components/custom-frame-panel';
 import { CustomTOCOutlinePanel } from './components/custom-toc-outline-panel.js';
 import { DebugMenu } from './components/debug-menu.js';
+import { LeftSidePanel } from './components/left-side-panel';
+import { PagesPanel } from './components/pages-panel';
 import { SidePanel } from './components/side-panel';
 import type { InitFn } from './data';
 import {
@@ -50,6 +52,8 @@ function subscribePage(workspace: Workspace) {
     const framePanel = new CustomFramePanel();
     const copilotPanelPanel = new CopilotPanel();
     const sidePanel = new SidePanel();
+    const leftSidePanel = new LeftSidePanel();
+    const pagesPanel = new PagesPanel();
 
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
@@ -59,14 +63,18 @@ function subscribePage(workspace: Workspace) {
     debugMenu.framePanel = framePanel;
     debugMenu.copilotPanel = copilotPanelPanel;
     debugMenu.sidePanel = sidePanel;
+    debugMenu.leftSidePanel = leftSidePanel;
+    debugMenu.pagesPanel = pagesPanel;
 
     tocOutlinePanel.editor = editor;
     copilotPanelPanel.editor = editor;
     framePanel.editor = editor;
+    pagesPanel.editor = editor;
 
     document.body.appendChild(debugMenu);
     document.body.appendChild(tocOutlinePanel);
     document.body.appendChild(sidePanel);
+    document.body.appendChild(leftSidePanel);
     document.body.appendChild(framePanel);
 
     window.editor = editor;
@@ -155,4 +163,4 @@ async function main() {
   document.body.prepend(exampleList);
 }
 
-main();
+main().catch(console.error);

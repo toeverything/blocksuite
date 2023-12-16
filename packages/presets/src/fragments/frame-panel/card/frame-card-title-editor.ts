@@ -51,40 +51,50 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override firstUpdated(): void {
-    this.updateComplete.then(() => {
-      this.titleContentElement.style.display = 'none';
+    this.updateComplete
+      .then(() => {
+        this.titleContentElement.style.display = 'none';
 
-      this.inlineEditor.selectAll();
+        this.inlineEditor.selectAll();
 
-      this.inlineEditor.slots.updated.on(() => {
-        this.requestUpdate();
-      });
+        this.inlineEditor.slots.updated.on(() => {
+          this.requestUpdate();
+        });
 
-      this.disposables.addFromEvent(this.inlineEditorContainer, 'blur', () => {
-        this._unmount();
-      });
-      this.disposables.addFromEvent(this.inlineEditorContainer, 'click', e => {
-        e.stopPropagation();
-      });
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'dblclick',
-        e => {
-          e.stopPropagation();
-        }
-      );
-
-      this.disposables.addFromEvent(
-        this.inlineEditorContainer,
-        'keydown',
-        e => {
-          e.stopPropagation();
-          if (e.key === 'Enter' && !this._isComposing) {
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'blur',
+          () => {
             this._unmount();
           }
-        }
-      );
-    });
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'click',
+          e => {
+            e.stopPropagation();
+          }
+        );
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'dblclick',
+          e => {
+            e.stopPropagation();
+          }
+        );
+
+        this.disposables.addFromEvent(
+          this.inlineEditorContainer,
+          'keydown',
+          e => {
+            e.stopPropagation();
+            if (e.key === 'Enter' && !this._isComposing) {
+              this._unmount();
+            }
+          }
+        );
+      })
+      .catch(console.error);
   }
 
   private _unmount() {

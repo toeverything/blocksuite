@@ -1,8 +1,7 @@
-import type { Template } from '../builtin-templates.js';
-
-export const ganttChart: Template = {
-  name: 'gantt chart',
-  preview: '',
+export default {
+  name: 'Gantt chart',
+  preview: 'https://cdn.affine.pro/templates/cover/gantt-chart.png',
+  type: 'template',
   content: {
     type: 'page',
     meta: {

@@ -867,7 +867,9 @@ export class AffineDragHandleWidget extends WidgetElement<
         !this._isHoverDragHandleVisible) &&
       !this._isDragHandleHovered
     ) {
-      this._showDragHandleOnHoverBlock(this._anchorBlockPath);
+      this._showDragHandleOnHoverBlock(this._anchorBlockPath).catch(
+        console.error
+      );
       this._lastHoveredBlockPath = this._anchorBlockPath;
     }
   };
@@ -936,7 +938,9 @@ export class AffineDragHandleWidget extends WidgetElement<
     ) {
       selection.clear(['block']);
       this._dragHoverRect = null;
-      this._showDragHandleOnHoverBlock(this._anchorBlockPath);
+      this._showDragHandleOnHoverBlock(this._anchorBlockPath).catch(
+        console.error
+      );
       return;
     }
 
@@ -945,7 +949,9 @@ export class AffineDragHandleWidget extends WidgetElement<
     assertExists(blockElement);
 
     if (selectedBlocks.length > 1) {
-      this._showDragHandleOnHoverBlock(this._anchorBlockPath);
+      this._showDragHandleOnHoverBlock(this._anchorBlockPath).catch(
+        console.error
+      );
     }
 
     this._setSelectedBlocks([blockElement]);
@@ -1303,7 +1309,9 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (this.dragging) return;
 
     if (!this._anchorBlockPath) return;
-    this._showDragHandleOnHoverBlock(this._anchorBlockPath);
+    this._showDragHandleOnHoverBlock(this._anchorBlockPath).catch(
+      console.error
+    );
   };
 
   private _handleEdgelessToolUpdated = (newTool: EdgelessTool) => {

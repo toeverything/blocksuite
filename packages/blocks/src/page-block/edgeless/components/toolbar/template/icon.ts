@@ -2138,7 +2138,7 @@ export function renderIcon(expandingStyle: boolean) {
   `;
 }
 
-export const Preview = html`
+export const defaultPreview = html`
   <svg
     width="85"
     height="50"

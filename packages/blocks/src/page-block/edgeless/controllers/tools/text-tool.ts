@@ -78,7 +78,7 @@ export class TextToolController extends EdgelessToolController<TextTool> {
           type: 'text',
           color: color ?? GET_DEFAULT_TEXT_COLOR(),
         });
-      } catch (e) {
+      } catch (_) {
         noop();
       }
     }

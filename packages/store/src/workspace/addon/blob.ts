@@ -28,7 +28,7 @@ export const blob = addOnFactory<keyof BlobAddon>(
             let found = false;
             let count = 0;
             return new Promise(res => {
-              this._storages.forEach(storage =>
+              this._storages.forEach(storage => {
                 storage.crud
                   .get(id)
                   .then(result => {
@@ -45,8 +45,8 @@ export const blob = addOnFactory<keyof BlobAddon>(
                     if (++count === this._storages.length && !found) {
                       res(null);
                     }
-                  })
-              );
+                  });
+              });
             });
           },
           set: async (value, key) => {
@@ -72,7 +72,7 @@ export const blob = addOnFactory<keyof BlobAddon>(
             blobs.forEach(blobId => {
               const ref = this._blobsRef.get(blobId);
               if (!ref || ref <= 0) {
-                this.blob.delete(blobId);
+                this.blob.delete(blobId).catch(console.error);
                 this._blobsRef.delete(blobId);
               }
             });

@@ -1,8 +1,7 @@
-import type { Template } from '../builtin-templates.js';
-
-export const flowChart: Template = {
-  name: 'flow chart',
-  preview: '',
+export default {
+  name: 'Flow chart',
+  preview: 'https://cdn.affine.pro/templates/cover/flow-chart.png',
+  type: 'template',
   content: {
     type: 'page',
     meta: {

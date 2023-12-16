@@ -789,7 +789,7 @@ export class Page extends Space<FlatBlockMap> {
     }
   }
 
-  override async load(initFn?: () => void) {
+  override async load(initFn?: () => Promise<void> | void) {
     await super.load();
     if (!this._docLoaded) {
       this.trySyncFromExistingDoc();

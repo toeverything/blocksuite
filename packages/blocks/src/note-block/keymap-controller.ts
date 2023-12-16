@@ -100,7 +100,6 @@ export class KeymapController implements ReactiveController {
         // text selection - case 1: move cursor down within the same block
         cmd.moveCursorVertically({ forward: false }),
 
-        // text selection - case 2: move cursor down to the next block
         cmd
           .getNextBlock({
             filter: block => !!block.model.text,
@@ -108,17 +107,13 @@ export class KeymapController implements ReactiveController {
           .inline<'focusBlock'>((ctx, next) =>
             next({ focusBlock: ctx.nextBlock })
           )
-          .moveCursorVertically({ forward: false }),
+          .try(cmd => [
+            // text selection - case 2: move cursor down to the next block
+            cmd.moveCursorVertically({ forward: false }),
 
-        // text selection - case 3: move cursor to the next block start
-        cmd
-          .getNextBlock({
-            filter: block => !!block.model.text,
-          })
-          .inline<'focusBlock'>((ctx, next) =>
-            next({ focusBlock: ctx.nextBlock })
-          )
-          .moveCursorToBlock({ tail: false }),
+            // text selection - case 3: move cursor to the next block start
+            cmd.moveCursorToBlock({ tail: false }),
+          ]),
 
         // text selection - case 4: move cursor to the current block end
         cmd.moveCursorToBlock({ tail: true }),
@@ -186,7 +181,6 @@ export class KeymapController implements ReactiveController {
         // text selection - case 1: move cursor up within the same block
         cmd.moveCursorVertically({ forward: true }),
 
-        // text selection - case 2: move cursor up to the previous block
         cmd
           .getPrevBlock({
             filter: block => !!block.model.text,
@@ -194,17 +188,13 @@ export class KeymapController implements ReactiveController {
           .inline<'focusBlock'>((ctx, next) =>
             next({ focusBlock: ctx.prevBlock })
           )
-          .moveCursorVertically({ forward: true }),
+          .try(cmd => [
+            // text selection - case 2: move cursor up to the previous block
+            cmd.moveCursorVertically({ forward: true }),
 
-        // text selection - case 3: move cursor to the previous block end
-        cmd
-          .getPrevBlock({
-            filter: block => !!block.model.text,
-          })
-          .inline<'focusBlock'>((ctx, next) =>
-            next({ focusBlock: ctx.prevBlock })
-          )
-          .moveCursorToBlock({ tail: true }),
+            // text selection - case 3: move cursor to the previous block end
+            cmd.moveCursorToBlock({ tail: true }),
+          ]),
 
         // text selection - case 4: move cursor to the current block start
         cmd.moveCursorToBlock({ tail: false }),
@@ -214,7 +204,7 @@ export class KeymapController implements ReactiveController {
   private _onBlockUp = (cmd: BlockSuite.CommandChain) => {
     return cmd
       .getBlockSelections()
-      .inline<'currentSelectionPath'>(async (ctx, next) => {
+      .inline<'currentSelectionPath'>((ctx, next) => {
         const currentBlockSelections = ctx.currentBlockSelections;
         assertExists(currentBlockSelections);
         const blockSelection = currentBlockSelections.at(0);
@@ -247,7 +237,7 @@ export class KeymapController implements ReactiveController {
         return next();
       })
       .getTextSelection()
-      .inline<'currentSelectionPath'>(async (ctx, next) => {
+      .inline<'currentSelectionPath'>((ctx, next) => {
         const textSelection = ctx.currentTextSelection;
         assertExists(textSelection);
         return next({ currentSelectionPath: textSelection.from.path });
@@ -315,7 +305,6 @@ export class KeymapController implements ReactiveController {
         // text selection - case 1: change selection downwards within the same block
         cmd.changeTextSelectionVertically({ upward: false }),
 
-        // text selection - case 2: change selection downwards to the next block
         cmd
           .getNextBlock({
             filter: block => !!block.model.text,
@@ -323,17 +312,13 @@ export class KeymapController implements ReactiveController {
           .inline((ctx, next) => {
             return next({ focusBlock: ctx.nextBlock });
           })
-          .changeTextSelectionVertically({ upward: false }),
+          .try(cmd => [
+            // text selection - case 2: change selection downwards to the next block
+            cmd.changeTextSelectionVertically({ upward: false }),
 
-        // text selection - case 3: change selection downwards to the next block start
-        cmd
-          .getNextBlock({
-            filter: block => !!block.model.text,
-          })
-          .inline((ctx, next) => {
-            return next({ focusBlock: ctx.nextBlock });
-          })
-          .changeTextSelectionToBlockStartEnd({ tail: false }),
+            // text selection - case 3: change selection downwards to the next block start
+            cmd.changeTextSelectionToBlockStartEnd({ tail: false }),
+          ]),
 
         // text selection - case 4: change selection to the current block end
         cmd.changeTextSelectionToBlockStartEnd({ tail: true }),
@@ -412,7 +397,7 @@ export class KeymapController implements ReactiveController {
       .try(cmd => [
         // text selection - case 1: change selection upwards within the same block
         cmd.changeTextSelectionVertically({ upward: true }),
-        // text selection - case 2: change selection upwards to the previous block
+
         cmd
           .getPrevBlock({
             filter: block => !!block.model.text,
@@ -420,16 +405,14 @@ export class KeymapController implements ReactiveController {
           .inline((ctx, next) => {
             return next({ focusBlock: ctx.prevBlock });
           })
-          .changeTextSelectionVertically({ upward: true }),
-        // text selection - case 3: change selection upwards to the previous block end
-        cmd
-          .getPrevBlock({
-            filter: block => !!block.model.text,
-          })
-          .inline((ctx, next) => {
-            return next({ focusBlock: ctx.prevBlock });
-          })
-          .changeTextSelectionToBlockStartEnd({ tail: true }),
+          .try(cmd => [
+            // text selection - case 2: change selection upwards to the previous block
+            cmd.changeTextSelectionVertically({ upward: true }),
+
+            // text selection - case 3: change selection upwards to the previous block end
+            cmd.changeTextSelectionToBlockStartEnd({ tail: true }),
+          ]),
+
         // text selection - case 4: change selection to the current block start
         cmd.changeTextSelectionToBlockStartEnd({ tail: false }),
       ])
@@ -709,7 +692,7 @@ export class KeymapController implements ReactiveController {
                       to: null,
                     }),
                   ]);
-                });
+                }).catch(console.error);
 
                 next();
               })

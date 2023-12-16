@@ -205,14 +205,16 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     // trigger a rerender to update element's size
     // and set viewport after element's size has been updated
     this.requestUpdate();
-    this.updateComplete.then(() => {
-      this._surfaceRenderer.onResize();
-      this._surfaceRenderer.setViewportByBound(
-        Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
-      );
+    this.updateComplete
+      .then(() => {
+        this._surfaceRenderer.onResize();
+        this._surfaceRenderer.setViewportByBound(
+          Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
+        );
 
-      this.blocksPortal?.setViewport(this._surfaceRenderer);
-    });
+        this.blocksPortal?.setViewport(this._surfaceRenderer);
+      })
+      .catch(console.error);
   }
 
   private getModel(id: string): RefElement | null {

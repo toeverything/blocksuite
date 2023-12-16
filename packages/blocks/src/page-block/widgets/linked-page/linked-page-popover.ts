@@ -121,7 +121,9 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       onConfirm: () => {
         this.abortController.abort();
         cleanSpecifiedTail(this.model, this.triggerKey + this._query);
-        this._flattenActionList[this._activatedItemIndex].action();
+        this._flattenActionList[this._activatedItemIndex]
+          .action()
+          ?.catch(console.error);
       },
       onEsc: () => {
         this.abortController.abort();
@@ -169,7 +171,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
                       this.model,
                       this.triggerKey + this._query
                     );
-                    action();
+                    action()?.catch(console.error);
                   }}
                   @mousemove=${() => {
                     // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
