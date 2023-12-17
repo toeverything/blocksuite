@@ -712,8 +712,8 @@ test('input continuous spaces', async ({ page }) => {
 
   await type(page, 'abc   def');
 
-  expect(await editorA.innerText()).toBe('abc   def');
-  expect(await editorB.innerText()).toBe('abc   def');
+  expect(await editorA.innerText()).toBe('abc\u00A0\u00A0\u00A0def');
+  expect(await editorB.innerText()).toBe('abc\u00A0\u00A0\u00A0def');
 
   await focusInlineRichText(page);
   await page.waitForTimeout(100);
@@ -724,8 +724,8 @@ test('input continuous spaces', async ({ page }) => {
 
   await press(page, 'Enter');
 
-  expect(await editorA.innerText()).toBe('abc  \n' + ' def');
-  expect(await editorB.innerText()).toBe('abc  \n' + ' def');
+  expect(await editorA.innerText()).toBe('abc\u00A0\u00A0\n' + '\u00A0def');
+  expect(await editorB.innerText()).toBe('abc\u00A0\u00A0\n' + '\u00A0def');
 });
 
 test('select from the start of line using shift+arrow', async ({ page }) => {
