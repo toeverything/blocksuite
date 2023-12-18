@@ -78,8 +78,6 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     assertExists(this._draggingElementId);
     assertExists(this._draggingPathPoints);
 
-    const { lineWidth } = this.tool;
-
     let pointX = e.point.x;
     let pointY = e.point.y;
     const holdingShiftKey = e.keys.shift || this._edgeless.tools.shiftKey;
@@ -109,12 +107,16 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
     this._edgeless.surface.updateElement(this._draggingElementId, {
       points,
-      lineWidth,
     });
   }
 
   onContainerDragEnd() {
-    this._draggingElement?.pop('points');
+    if (this._draggingElement) {
+      const { _draggingElement } = this;
+      this._page.transact(() => {
+        _draggingElement.pop('points');
+      });
+    }
     this._draggingElement = null;
     this._draggingElementId = null;
     this._draggingPathPoints = null;

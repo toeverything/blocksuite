@@ -146,9 +146,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
       updates.xywh = transformed.bound.serialize();
     }
 
-    for (const key in updates) {
-      this.yMap.set(key, updates[key as keyof IBrush] as IBrush[keyof IBrush]);
-    }
+    super.applyUpdate(updates);
   }
   override containedByBounds(bounds: Bound) {
     const points = getPointsFromBoundsWithRotation(this);
