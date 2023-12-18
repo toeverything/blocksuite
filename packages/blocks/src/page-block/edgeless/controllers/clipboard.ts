@@ -328,8 +328,8 @@ export class EdgelessClipboardController extends PageClipboard {
         if (id) oldToNewIdMap.set(id, noteId);
         assertExists(note);
 
-        children.forEach(child => {
-          this.onBlockSnapshotPaste(child, this.page, note.id, 0);
+        children.forEach((child, index) => {
+          this.onBlockSnapshotPaste(child, this.page, note.id, index);
         });
         return noteId;
       })
