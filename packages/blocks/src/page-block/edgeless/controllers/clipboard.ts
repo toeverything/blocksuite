@@ -25,7 +25,12 @@ import {
   getEditorContainer,
   isPageMode,
 } from '../../../_common/utils/query.js';
+import { isUrlInClipboard } from '../../../_common/utils/url.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import {
+  EdgelessBookmarkHeight,
+  EdgelessBookmarkWidth,
+} from '../../../bookmark-block/edgeless-bookmark-block.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
@@ -41,6 +46,7 @@ import {
 import { compare } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
+import { Vec } from '../../../surface-block/utils/vec.js';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -203,6 +209,33 @@ export class EdgelessClipboardController extends PageClipboard {
         file.type.startsWith('image/')
       );
       await this.host.addImages(imageFiles);
+
+      return;
+    }
+
+    if (isUrlInClipboard(data)) {
+      const url = data.getData('text/plain');
+      const { lastMousePos } = this.toolManager;
+      const [x, y] = this.surface.toModelCoord(lastMousePos.x, lastMousePos.y);
+      const id = this.surface.addElement(
+        EdgelessBlockType.BOOKMARK,
+        {
+          xywh: Bound.fromCenter(
+            Vec.toVec({
+              x,
+              y,
+            }),
+            EdgelessBookmarkWidth.horizontal,
+            EdgelessBookmarkHeight.horizontal
+          ).serialize(),
+          url,
+        },
+        this.surface.model.id
+      );
+      this.selectionManager.setSelection({
+        editing: false,
+        elements: [id],
+      });
 
       return;
     }
