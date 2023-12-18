@@ -1,4 +1,4 @@
-import { type FrameBlockModel, stopPropagation } from '@blocksuite/blocks';
+import { type FrameBlockModel } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Y } from '@blocksuite/store';
@@ -125,13 +125,15 @@ export class FrameCardTitle extends WithDisposable(ShadowlessElement) {
     return html`<div class="frame-card-title-container">
       <div
         class="card-index"
-        @click=${stopPropagation}
-        @dblclick=${stopPropagation}
+        @click=${(e: MouseEvent) => e.stopPropagation()}
+        @dblclick=${(e: MouseEvent) => e.stopPropagation()}
       >
         ${this.cardIndex + 1}
       </div>
       <div class="card-title">
-        <span @click=${stopPropagation} @dblclick=${this._mountTitleEditor}
+        <span
+          @click=${(e: MouseEvent) => e.stopPropagation()}
+          @dblclick=${this._mountTitleEditor}
           >${this.frame.title}</span
         >
       </div>

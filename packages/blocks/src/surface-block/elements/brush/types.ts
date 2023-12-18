@@ -1,4 +1,4 @@
-import type { LineWidth } from '../../../index.js';
+import type { LineWidth } from '../../../_common/types.js';
 import type { CanvasElementType } from '../edgeless-element.js';
 import type {
   ISurfaceElement,

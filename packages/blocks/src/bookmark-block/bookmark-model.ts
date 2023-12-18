@@ -1,7 +1,6 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/index.js';
-import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 export type BookmarkBlockType = 'horizontal' | 'list' | 'vertical' | 'cube';
@@ -43,7 +42,7 @@ export type BookmarkBlockProps = {
 } & BookmarkBlockUrlData &
   BookmarkBlockEdgelessProps;
 
-export const defaultBookmarkProps: BookmarkBlockProps = {
+const defaultBookmarkProps: BookmarkBlockProps = {
   style: 'horizontal',
   url: '',
   caption: null,
@@ -71,6 +70,4 @@ export const BookmarkBlockSchema = defineBlockSchema({
 
 export class BookmarkBlockModel extends selectable<BookmarkBlockProps>(
   BaseBlockModel
-) {
-  override flavour!: EdgelessBlockType.BOOKMARK;
-}
+) {}

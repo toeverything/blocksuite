@@ -13,7 +13,6 @@ import type {
   NoteBlockModel,
   SurfaceBlockModel,
 } from '../../models.js';
-import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import type { Renderer } from '../../surface-block/index.js';
 import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
@@ -53,7 +52,7 @@ export class EdgelessFrameManager {
   }
 
   get frames() {
-    return this._edgeless.surface.getBlocks(EdgelessBlockType.FRAME);
+    return this._edgeless.surface.getBlocks('affine:frame');
   }
 
   selectFrame(eles: Selectable[]) {
@@ -109,7 +108,7 @@ export class EdgelessFrameManager {
       bound = bound.expand(0, offset);
     }
     const id = surface.addElement(
-      EdgelessBlockType.FRAME,
+      'affine:frame',
       {
         title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
         xywh: bound.serialize(),

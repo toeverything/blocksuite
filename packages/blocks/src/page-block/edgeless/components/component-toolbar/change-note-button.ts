@@ -24,7 +24,6 @@ import { matchFlavours } from '../../../../_common/utils/model.js';
 import { type NoteBlockModel } from '../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { type ColorEvent, ColorUnit } from '../panel/color-panel.js';
 import {
   LineStylesPanel,
@@ -171,9 +170,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
-
-  @property({ attribute: false })
-  slots!: EdgelessSelectionSlots;
 
   @state()
   private _queryCache = false;

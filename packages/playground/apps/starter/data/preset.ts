@@ -1,4 +1,3 @@
-import { serializeXYWH } from '@blocksuite/blocks';
 import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
@@ -34,7 +33,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
     // Add note block inside page block
     const noteId = page.addBlock(
       'affine:note',
-      { xywh: serializeXYWH(0, 100, 800, 640) },
+      { xywh: '[0, 100, 800, 640]' },
       pageBlockId
     );
 

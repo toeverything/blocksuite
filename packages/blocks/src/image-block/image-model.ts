@@ -1,7 +1,6 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import { type SerializedXYWH } from '../surface-block/index.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 
@@ -40,6 +39,4 @@ export const ImageBlockSchema = defineBlockSchema({
 
 export class ImageBlockModel extends selectable<ImageBlockProps>(
   BaseBlockModel
-) {
-  override flavour!: EdgelessBlockType.IMAGE;
-}
+) {}

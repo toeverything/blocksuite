@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
-import type { SerializedBlock } from '../../index.js';
+import type { SerializedBlock } from '../../_common/types.js';
 import type { ContentParser, ContextedContentParser } from './index.js';
 import {
   BaseParser,

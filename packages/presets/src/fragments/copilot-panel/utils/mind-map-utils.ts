@@ -2,7 +2,6 @@ import {
   ConnectorEndpointStyle,
   ConnectorMode,
   ShapeStyle,
-  type ShapeType,
   StrokeStyle,
 } from '@blocksuite/blocks';
 
@@ -32,7 +31,7 @@ export interface MindMap {
 }
 
 export const DEFAULT_SHAPE_PROPS = {
-  shapeType: 'rect' as ShapeType,
+  shapeType: 'rect',
   strokeColor: '--affine-palette-line-black',
   fillColor: '--affine-palette-shape-navy',
   filled: false,
