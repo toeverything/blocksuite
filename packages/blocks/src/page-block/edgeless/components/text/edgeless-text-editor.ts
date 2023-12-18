@@ -62,6 +62,12 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       word-break: keep-all !important;
       overflow-wrap: normal !important;
     }
+
+    /* We cannot add styles directly from the top, as this would cause a shift in the inline elements inside. */
+    /* https://github.com/toeverything/blocksuite/issues/5723 */
+    .edgeless-text-editor rich-text v-text {
+      text-align: var(--text-align);
+    }
   `;
 
   @query('rich-text')
@@ -421,9 +427,10 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           ? '50%'
           : `calc(100% - ${EdgelessTextEditor.HORIZONTAL_PADDING}px)`;
 
+    this.style.setProperty('--text-align', textAlign);
+
     return html`<div
       style=${styleMap({
-        textAlign,
         fontFamily: wrapFontFamily(fontFamily),
         minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
         maxWidth: hasMaxWidth ? `${w}px` : 'none',

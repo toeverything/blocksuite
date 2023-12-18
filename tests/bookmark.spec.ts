@@ -25,6 +25,17 @@ import { scoped, test } from './utils/playwright.js';
 
 const inputUrl = 'http://localhost';
 
+test.beforeEach(async ({ page }) => {
+  await page.route(
+    'https://affine-worker.toeverything.workers.dev/api/linkPreview',
+    async route => {
+      await route.fulfill({
+        json: {},
+      });
+    }
+  );
+});
+
 const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
