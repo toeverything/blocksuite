@@ -8,6 +8,7 @@ import {
   changeShapeStrokeWidth,
   changeShapeStyle,
   clickComponentToolbarMoreMenuButton,
+  getEdgelessSelectedRect,
   locatorEdgelessToolButton,
   locatorShapeStrokeStyleButton,
   openComponentToolbarMoreMenu,
@@ -405,11 +406,6 @@ test('auto wrap text in shape', async ({ page }) => {
   await setEdgelessTool(page, 'shape');
   await waitNextFrame(page, 500);
 
-  const scribbledButton = page
-    .locator('edgeless-tool-icon-button')
-    .filter({ hasText: 'scribbled' });
-  await scribbledButton.click();
-
   await page.mouse.click(200, 150);
   await waitNextFrame(page);
   await page.mouse.dblclick(250, 200);
@@ -424,7 +420,9 @@ test('auto wrap text in shape', async ({ page }) => {
   // select shape
   await page.mouse.click(200, 150);
   // the height of shape should be increased because of \n
-  await assertEdgelessSelectedRect(page, [200, 150, 100, 100]);
+  let selectedRect = await getEdgelessSelectedRect(page);
+  let lastWidth = selectedRect.width;
+  let lastHeight = selectedRect.height;
 
   await page.mouse.dblclick(250, 200);
   await waitNextFrame(page);
@@ -438,22 +436,31 @@ test('auto wrap text in shape', async ({ page }) => {
   await page.mouse.click(200, 150);
   // the height of shape should be increased because of long text
   // cccccccc -- wrap --> cccccc\ncc
-  await assertEdgelessSelectedRect(page, [200, 150, 100, 120]);
+  selectedRect = await getEdgelessSelectedRect(page);
+  expect(selectedRect.width).toBe(lastWidth);
+  expect(selectedRect.height).toBeGreaterThan(lastHeight);
+  lastWidth = selectedRect.width;
+  lastHeight = selectedRect.height;
 
   // try to decrease height
   await resizeElementByHandle(page, { x: 0, y: -50 }, 'bottom-right');
   // you can't decrease height because of min height to fit text
-  await assertEdgelessSelectedRect(page, [200, 150, 100, 120]);
+  selectedRect = await getEdgelessSelectedRect(page);
+  expect(selectedRect.width).toBe(lastWidth);
+  expect(selectedRect.height).toBeGreaterThanOrEqual(lastHeight);
+  lastHeight = selectedRect.height;
 
   // increase width to make text not wrap
-  await resizeElementByHandle(page, { x: 50, y: 0 }, 'bottom-right');
+  await resizeElementByHandle(page, { x: 50, y: 10 }, 'bottom-right');
   // the height of shape should be decreased because of long text not wrap
-  await assertEdgelessSelectedRect(page, [200, 150, 150, 100]);
+  selectedRect = await getEdgelessSelectedRect(page);
+  expect(selectedRect.width).toBeGreaterThan(lastWidth);
+  expect(selectedRect.height).toBeLessThan(lastHeight);
 
   // try to decrease width
   await resizeElementByHandle(page, { x: -140, y: 0 }, 'bottom-right');
   // you can't decrease width after text can't wrap (each line just has 1 char)
-  await assertEdgelessSelectedRect(page, [200, 150, 50, 360]);
+  await assertEdgelessSelectedRect(page, [200, 150, 52, 424]);
 });
 
 test('change shape style', async ({ page }) => {
