@@ -1,4 +1,4 @@
-import { DEFAULT_ROUGHNESS } from '../../../surface-block/index.js';
+import { DEFAULT_ROUGHNESS } from '../../../surface-block/consts.js';
 
 export const NOTE_MIN_WIDTH = 364;
 export const NOTE_MIN_HEIGHT = 78;

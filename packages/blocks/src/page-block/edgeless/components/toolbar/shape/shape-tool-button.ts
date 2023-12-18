@@ -19,12 +19,12 @@ import type {
   EdgelessTool,
   ShapeToolState,
 } from '../../../../../_common/utils/index.js';
-import { ShapeStyle } from '../../../../../surface-block/index.js';
-import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
-} from '../../component-toolbar/change-shape-button.js';
+} from '../../../../../surface-block/elements/shape/consts.js';
+import { ShapeStyle } from '../../../../../surface-block/index.js';
+import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';

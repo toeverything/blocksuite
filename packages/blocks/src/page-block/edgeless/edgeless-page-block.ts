@@ -42,7 +42,6 @@ import {
 import type { ImageBlockProps } from '../../image-block/image-model.js';
 import { ImageService } from '../../image-block/image-service.js';
 import type { FrameBlockModel, ImageBlockModel } from '../../models.js';
-import type { NoteBlockModel } from '../../note-block/index.js';
 import type { SerializedViewport } from '../../surface-block/commands/session.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
@@ -100,27 +99,6 @@ type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
 
 const { NOTE, IMAGE, FRAME, BOOKMARK } = EdgelessBlockType;
 
-export interface EdgelessSelectionSlots {
-  hoverUpdated: Slot;
-  viewportUpdated: Slot<{ zoom: number; center: IVec }>;
-  selectedRectUpdated: Slot<{
-    type: 'move' | 'select' | 'resize';
-    delta?: {
-      x: number;
-      y: number;
-    };
-    dragging?: boolean;
-  }>;
-  edgelessToolUpdated: Slot<EdgelessTool>;
-  reorderingElements: Slot<ReorderingAction<Selectable>>;
-  pressShiftKeyUpdated: Slot<boolean>;
-  cursorUpdated: Slot<string>;
-  copyAsPng: Slot<{
-    notes: NoteBlockModel[];
-    shapes: CanvasElement[];
-  }>;
-  readonlyUpdated: Slot<boolean>;
-}
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent extends BlockElement<
   PageBlockModel,

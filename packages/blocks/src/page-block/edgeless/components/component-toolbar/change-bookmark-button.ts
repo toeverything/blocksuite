@@ -10,7 +10,6 @@ import { toggleBookmarkEditModal } from '../../../../bookmark-block/components/i
 import type { BookmarkBlockComponent } from '../../../../index.js';
 import type { BookmarkBlockModel } from '../../../../models.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-change-bookmark-button')
 export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
@@ -28,9 +27,6 @@ export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
-
-  @property({ attribute: false })
-  slots!: EdgelessSelectionSlots;
 
   override render() {
     return html`<div class="change-bookmark-container">

@@ -2,17 +2,19 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import type { FrameBlockModel, GroupElement } from '../../../index.js';
+import type { FrameBlockModel } from '../../../frame-block/index.js';
 import {
   CanvasTextFontFamily,
   CanvasTextFontStyle,
   CanvasTextFontWeight,
 } from '../../../surface-block/consts.js';
-import { ShapeElement, ShapeStyle } from '../../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
+  type GroupElement,
   type IModelCoord,
+  ShapeElement,
+  ShapeStyle,
   TextElement,
 } from '../../../surface-block/index.js';
 import {

@@ -1,11 +1,8 @@
 import type { Y } from '@blocksuite/store';
 
-import type {
-  CanvasElementLocalRecordValues,
-  EdgelessElement,
-  GroupElement,
-} from '../../index.js';
+import type { EdgelessElement } from '../../_common/types.js';
 import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
+import type { CanvasElementLocalRecordValues, GroupElement } from '../index.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import { Bound } from '../utils/bound.js';

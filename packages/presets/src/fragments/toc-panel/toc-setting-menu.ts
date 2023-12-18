@@ -1,4 +1,3 @@
-import { stopPropagation } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -67,7 +66,7 @@ export class TOCNotesSettingMenu extends WithDisposable(LitElement) {
   override render() {
     return html`<div
       class="notes-setting-menu-container"
-      @click=${stopPropagation}
+      @click=${(e: MouseEvent) => e.stopPropagation()}
     >
       <div class="notes-setting-menu-item">
         <div class="setting-label">Settings</div>

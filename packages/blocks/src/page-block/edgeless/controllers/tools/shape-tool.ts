@@ -7,15 +7,15 @@ import type {
 } from '../../../../_common/utils/index.js';
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
 import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+} from '../../../../surface-block/elements/shape/consts.js';
+import {
   Bound,
   CanvasElementType,
   ShapeStyle,
   StrokeStyle,
 } from '../../../../surface-block/index.js';
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from '../../components/component-toolbar/change-shape-button.js';
 import { isTransparent } from '../../components/panel/color-panel.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
 import {
