@@ -9,7 +9,7 @@ export {
   ZOOM_STEP,
 } from './consts.js';
 export { GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
-export { EdgelessBlockType } from './edgeless-types.js';
+export { type EdgelessBlockType } from './edgeless-types.js';
 export {
   type Connection,
   ConnectorEndpoint,

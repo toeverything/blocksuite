@@ -19,7 +19,6 @@ import type {
   NoteBlockComponent,
   NoteBlockModel,
 } from '../../../../index.js';
-import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -299,7 +298,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     const { sliceVerticalPos } = this._lastPosition;
     const [x, , width] = deserializeXYWH(xywh);
     const newNoteId = this.edgelessPage.surface.addElement(
-      EdgelessBlockType.NOTE,
+      'affine:note',
       {
         background,
         xywh: serializeXYWH(

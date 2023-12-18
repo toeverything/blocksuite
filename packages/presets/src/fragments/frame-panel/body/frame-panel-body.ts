@@ -2,7 +2,6 @@ import '../card/frame-card.js';
 
 import {
   Bound,
-  EdgelessBlockType,
   type EdgelessPageBlockComponent,
   type FrameBlockModel,
   generateKeyBetween,
@@ -34,8 +33,6 @@ type FrameListItem = {
   // card index
   cardIndex: number;
 };
-
-const { FRAME } = EdgelessBlockType;
 
 const styles = css`
   .frame-list-container {
@@ -123,7 +120,9 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
   private _lastEdgelessPageId = '';
 
   get frames() {
-    const frames = this.page.getBlockByFlavour(FRAME) as FrameBlockModel[];
+    const frames = this.page.getBlockByFlavour(
+      'affine:frame'
+    ) as FrameBlockModel[];
     return frames.sort(this.compare);
   }
 
@@ -151,7 +150,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     this._pageDisposables = new DisposableGroup();
     this._pageDisposables.add(
       page.slots.blockUpdated.on(({ flavour }) => {
-        if (flavour === FRAME) {
+        if (flavour === 'affine:frame') {
           requestAnimationFrame(() => {
             this._updateFrames();
           });

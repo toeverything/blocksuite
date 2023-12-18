@@ -12,7 +12,6 @@ import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
-import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import {
   Bound,
   type CanvasElement,
@@ -38,20 +37,14 @@ export function isTopLevelBlock(
 export function isNoteBlock(
   element: BaseBlockModel | EdgelessElement | null
 ): element is NoteBlockModel {
-  return (
-    !!element &&
-    'flavour' in element &&
-    element.flavour === EdgelessBlockType.NOTE
-  );
+  return !!element && 'flavour' in element && element.flavour === 'affine:note';
 }
 
 export function isFrameBlock(
   element: BaseBlockModel | EdgelessElement | null
 ): element is FrameBlockModel {
   return (
-    !!element &&
-    'flavour' in element &&
-    element.flavour === EdgelessBlockType.FRAME
+    !!element && 'flavour' in element && element.flavour === 'affine:frame'
   );
 }
 
@@ -59,9 +52,7 @@ export function isImageBlock(
   element: BaseBlockModel | EdgelessElement | null
 ): element is ImageBlockModel {
   return (
-    !!element &&
-    'flavour' in element &&
-    element.flavour === EdgelessBlockType.IMAGE
+    !!element && 'flavour' in element && element.flavour === 'affine:image'
   );
 }
 
@@ -69,9 +60,7 @@ export function isBookmarkBlock(
   element: BaseBlockModel | EdgelessElement | null
 ): element is BookmarkBlockModel {
   return (
-    !!element &&
-    'flavour' in element &&
-    element.flavour === EdgelessBlockType.BOOKMARK
+    !!element && 'flavour' in element && element.flavour === 'affine:bookmark'
   );
 }
 
