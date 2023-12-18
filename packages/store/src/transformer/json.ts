@@ -41,7 +41,13 @@ export function fromJSON(value: unknown): unknown {
     }
     if (Reflect.has(value, TEXT_UNIQ_IDENTIFIER)) {
       const yText = new Y.Text();
-      yText.applyDelta(Reflect.get(value, 'delta'));
+      const deltas = Reflect.get(value, 'delta');
+      for (const delta of deltas) {
+        if (delta.insert) {
+          delta.insert = delta.insert.replaceAll('\r\n', '\n');
+        }
+      }
+      yText.applyDelta(deltas);
       return new Text(yText);
     }
     return Object.fromEntries(

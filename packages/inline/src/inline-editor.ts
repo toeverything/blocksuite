@@ -173,7 +173,7 @@ export class InlineEditor<
 
     if (yText.toString().includes('\r')) {
       throw new Error(
-        'yText must not contain \r because it will break the range synchronization'
+        'yText must not contain "\\r" because it will break the range synchronization'
       );
     }
 
@@ -365,7 +365,7 @@ export class InlineEditor<
   private _onYTextChange = () => {
     if (this.yText.toString().includes('\r')) {
       throw new Error(
-        'yText must not contain \r because it will break the range synchronization'
+        'yText must not contain "\\r" because it will break the range synchronization'
       );
     }
 
