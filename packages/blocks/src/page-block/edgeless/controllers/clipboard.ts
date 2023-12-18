@@ -42,9 +42,9 @@ import { compare } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import type { IVec } from '../../../surface-block/utils/vec.js';
-import { deserializeXYWH } from '../../../surface-block/utils/xywh.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { deleteElements } from '../utils/crud.js';
 import {
   isBookmarkBlock,
@@ -400,32 +400,6 @@ export class EdgelessClipboardController extends PageClipboard {
     return bookmarkIds;
   }
 
-  private _getOldCommonBound(
-    canvasElements: CanvasElement[],
-    blocks: TopLevelBlockModel[]
-  ) {
-    const commonBound = getCommonBound(
-      [...canvasElements, ...blocks]
-        .map(({ xywh }) => {
-          if (!xywh) {
-            return;
-          }
-          const [x, y, w, h] =
-            typeof xywh === 'string' ? deserializeXYWH(xywh) : xywh;
-
-          return {
-            x,
-            y,
-            w,
-            h,
-          };
-        })
-        .filter(b => !!b) as Bound[]
-    );
-    assertExists(commonBound);
-    return commonBound;
-  }
-
   private _emitSelectionChangeAfterPaste(
     canvasElementIds: string[],
     blockIds: string[]
@@ -507,7 +481,8 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const [modelX, modelY] = pasteCenter;
 
-    const oldCommonBound = this._getOldCommonBound(elements, [
+    const oldCommonBound = edgelessElementsBound([
+      ...elements,
       ...notes,
       ...frames,
       ...images,
