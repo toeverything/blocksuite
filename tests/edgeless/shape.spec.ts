@@ -448,10 +448,11 @@ test('auto wrap text in shape', async ({ page }) => {
   selectedRect = await getEdgelessSelectedRect(page);
   expect(selectedRect.width).toBe(lastWidth);
   expect(selectedRect.height).toBeGreaterThanOrEqual(lastHeight);
+  lastWidth = selectedRect.width;
   lastHeight = selectedRect.height;
 
   // increase width to make text not wrap
-  await resizeElementByHandle(page, { x: 50, y: 10 }, 'bottom-right');
+  await resizeElementByHandle(page, { x: 50, y: -10 }, 'bottom-right');
   // the height of shape should be decreased because of long text not wrap
   selectedRect = await getEdgelessSelectedRect(page);
   expect(selectedRect.width).toBeGreaterThan(lastWidth);
