@@ -9,32 +9,27 @@ import type {
   IElementCreateProps,
 } from './elements/edgeless-element.js';
 
-export enum EdgelessBlockType {
-  FRAME = 'affine:frame',
-  NOTE = 'affine:note',
-  IMAGE = 'affine:image',
-  BOOKMARK = 'affine:bookmark',
-}
-
 export type EdgelessBlockModelMap = {
-  [EdgelessBlockType.FRAME]: FrameBlockModel;
-  [EdgelessBlockType.NOTE]: NoteBlockModel;
-  [EdgelessBlockType.IMAGE]: ImageBlockModel;
-  [EdgelessBlockType.BOOKMARK]: BookmarkBlockModel;
+  ['affine:frame']: FrameBlockModel;
+  ['affine:note']: NoteBlockModel;
+  ['affine:image']: ImageBlockModel;
+  ['affine:bookmark']: BookmarkBlockModel;
 };
 
-export enum EdgelessElementType {
-  FRAME = 'affine:frame',
-  NOTE = 'affine:note',
-  IMAGE = 'affine:image',
-  BOOKMARK = 'affine:bookmark',
-  SHAPE = 'shape',
-  BRUSH = 'brush',
-  CONNECTOR = 'connector',
-  TEXT = 'text',
-  GROUP = 'group',
-  DEBUG = 'debug',
-}
+export type EdgelessBlockType =
+  | 'affine:frame'
+  | 'affine:note'
+  | 'affine:image'
+  | 'affine:bookmark';
+
+export type EdgelessElementType =
+  | EdgelessBlockType
+  | 'shape'
+  | 'brush'
+  | 'connector'
+  | 'text'
+  | 'group'
+  | 'debug';
 
 export type IEdgelessElementCreateProps<T extends EdgelessElementType> =
   T extends CanvasElementType

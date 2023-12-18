@@ -15,13 +15,13 @@ import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
 import type { TopLevelBlockModel } from '../_common/types.js';
 import type { FrameBlockModel } from '../models.js';
 import { getBlocksInFrame } from '../page-block/edgeless/frame-manager.js';
-import { EdgelessBlockType } from '../surface-block/edgeless-types.js';
+import { type EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type { GroupElement } from '../surface-block/elements/group/group-element.js';
 import { compare } from '../surface-block/managers/group-manager.js';
 
 const portalMap = {
-  [EdgelessBlockType.NOTE]: 'surface-ref-note-portal',
-  [EdgelessBlockType.IMAGE]: 'surface-ref-image-portal',
+  ['affine:note']: 'surface-ref-note-portal',
+  ['affine:image']: 'surface-ref-image-portal',
 } as Record<EdgelessBlockType, string>;
 
 @customElement('surface-ref-portal')
@@ -69,10 +69,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
 
     topLevelBlocks = topLevelBlocks
       .sort(compare)
-      .filter(
-        model =>
-          (model.flavour as EdgelessBlockType) !== EdgelessBlockType.FRAME
-      );
+      .filter(model => (model.flavour as EdgelessBlockType) !== 'affine:frame');
 
     return repeat(
       topLevelBlocks,

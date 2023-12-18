@@ -6,7 +6,6 @@ import {
   DEFAULT_NOTE_COLOR,
   NOTE_SHADOWS,
 } from '../_common/edgeless/note/consts.js';
-import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import { type SerializedXYWH, StrokeStyle } from '../surface-block/index.js';
 
 export const NoteBlockSchema = defineBlockSchema({
@@ -68,6 +67,4 @@ type NoteEdgelessProps = {
   collapsedHeight?: number;
 };
 
-export class NoteBlockModel extends selectable<NoteProps>(BaseBlockModel) {
-  override flavour!: EdgelessBlockType.NOTE;
-}
+export class NoteBlockModel extends selectable<NoteProps>(BaseBlockModel) {}

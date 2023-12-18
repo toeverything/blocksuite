@@ -8,6 +8,7 @@ import {
   getBlockComponentByModel,
   getEditorContainer,
   isPageMode,
+  matchFlavours,
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
@@ -17,7 +18,6 @@ import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../page-block/edgeless/utils/query.js';
 import type { IBound } from '../../surface-block/consts.js';
-import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import type { SurfaceElement } from '../../surface-block/elements/surface-element.js';
 import type { Renderer } from '../../surface-block/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
@@ -276,7 +276,7 @@ export class ContentParser {
     // TODO: refactor of this part
     const blocks = nodes ?? edgeless?.getSortedElementsByBound(bound) ?? [];
     for (const block of blocks) {
-      if (block.flavour === 'affine:image') {
+      if (matchFlavours(block, ['affine:image'])) {
         if (!block.sourceId) return;
 
         const blob = await block.page.blob.get(block.sourceId);
@@ -312,7 +312,7 @@ export class ContentParser {
         );
       }
 
-      if (block.flavour === EdgelessBlockType.FRAME) {
+      if (matchFlavours(block, ['affine:frame'])) {
         const blocksInsideFrame = getBlocksInFrame(this._page, block, false);
         const frameBound = Bound.deserialize(block.xywh);
 

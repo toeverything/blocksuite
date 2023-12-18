@@ -5,13 +5,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { FrameBlockModel } from '../../../../../frame-block/index.js';
-import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
-const { FRAME } = EdgelessBlockType;
 const FRAME_OFFSET = 8;
 
 @customElement('edgeless-frame-title')
@@ -203,7 +201,7 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
 
     _disposables.add(
       this.edgeless.surface.page.slots.blockUpdated.on(({ flavour }) => {
-        if (flavour === FRAME) {
+        if (flavour === 'affine:frame') {
           this.requestUpdate();
         }
       })

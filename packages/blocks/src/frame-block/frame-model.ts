@@ -5,7 +5,6 @@ import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import { getBlockComponentByPath } from '../_common/utils/index.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
-import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import {
   Bound,
   type HitTestOptions,
@@ -42,7 +41,6 @@ export const FrameBlockSchema = defineBlockSchema({
 export class FrameBlockModel extends selectable<FrameBlockProps>(
   BaseBlockModel
 ) {
-  override flavour!: EdgelessBlockType.FRAME;
   override batch = FRAME_BATCH;
   override hitTest(x: number, y: number, _: HitTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
