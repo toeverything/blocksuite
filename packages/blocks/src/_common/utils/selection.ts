@@ -1,6 +1,7 @@
 import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { type InlineRange, type VLine } from '@blocksuite/inline';
+import type { EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
@@ -9,7 +10,7 @@ import { matchFlavours } from './model.js';
 import {
   asyncGetRichTextByModel,
   getBlockComponentByModel,
-  getDocPage,
+  getDocPageByEditorHost,
   getDocPageByElement,
 } from './query.js';
 import { Rect } from './rect.js';
@@ -155,19 +156,19 @@ async function setNewTop(y: number, editableContainer: Element, zoom = 1) {
 /**
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
-export function focusTitle(page: Page, index = Infinity, len = 0) {
+export function focusTitle(editorHost: EditorHost, index = Infinity, len = 0) {
   // TODO support SelectionPosition
-  const pageComponent = getDocPage(page);
-  if (!pageComponent) {
+  const docPageComponent = getDocPageByEditorHost(editorHost);
+  if (!docPageComponent) {
     throw new Error("Can't find page component!");
   }
-  if (!pageComponent.titleInlineEditor) {
+  if (!docPageComponent.titleInlineEditor) {
     throw new Error("Can't find title inline editor!");
   }
-  if (index > pageComponent.titleInlineEditor.yText.length) {
-    index = pageComponent.titleInlineEditor.yText.length;
+  if (index > docPageComponent.titleInlineEditor.yText.length) {
+    index = docPageComponent.titleInlineEditor.yText.length;
   }
-  pageComponent.titleInlineEditor.setInlineRange({ index, length: len });
+  docPageComponent.titleInlineEditor.setInlineRange({ index, length: len });
 }
 
 async function focusRichText(

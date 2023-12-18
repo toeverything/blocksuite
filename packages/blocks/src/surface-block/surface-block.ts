@@ -15,6 +15,7 @@ import {
 import { getThemePropertyValue } from '../_common/theme/utils.js';
 import {
   type EdgelessElement,
+  isInsideEdgelessEditor,
   type ReorderingAction,
   requestConnectedFrame,
   type Selectable,
@@ -177,7 +178,7 @@ export class SurfaceBlockComponent extends BlockElement<
   }
 
   private get _isEdgeless() {
-    return !!this.host.querySelector('affine-edgeless-page');
+    return isInsideEdgelessEditor(this.host);
   }
 
   getBlocks<T extends EdgelessBlockType>(
