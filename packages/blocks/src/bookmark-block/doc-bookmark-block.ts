@@ -1,7 +1,7 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -22,6 +22,9 @@ export class DocBookmarkBlockComponent extends WithDisposable(
   @property({ attribute: false })
   block!: BookmarkBlockComponent;
 
+  @state()
+  private _showCaption = false;
+
   @query('bookmark-caption')
   captionElement!: BookmarkCaption;
 
@@ -35,6 +38,9 @@ export class DocBookmarkBlockComponent extends WithDisposable(
 
   override connectedCallback() {
     super.connectedCallback();
+    if (!!this.model.caption && this.model.caption.length > 0) {
+      this._showCaption = true;
+    }
 
     this.disposables.add(
       this.root.selection.slots.changed.on(() => this.requestUpdate())
@@ -45,8 +51,8 @@ export class DocBookmarkBlockComponent extends WithDisposable(
   private _onToolbarSelected: ToolbarActionCallback & MenuActionCallback =
     type => {
       if (type === 'caption') {
-        this.captionElement.display = true;
-        this.captionElement.updateComplete
+        this._showCaption = true;
+        this.updateComplete
           .then(() => this.captionElement.input.focus())
           .catch(console.error);
       }
@@ -94,7 +100,12 @@ export class DocBookmarkBlockComponent extends WithDisposable(
       <bookmark-card .bookmark=${this.block}></bookmark-card>
       <bookmark-caption
         .bookmark=${this.block}
-        .display=${!!this.model.caption && this.model.caption.length > 0}
+        .display=${this._showCaption}
+        @blur=${() => {
+          if (!this.model.caption) {
+            this._showCaption = false;
+          }
+        }}
       ></bookmark-caption>
       ${this.block.selected?.is('block')
         ? html`<affine-block-selection></affine-block-selection>`
