@@ -405,7 +405,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _onDragStart = () => {
     this.edgeless.slots.elementResizeStart.emit();
     this.setToolbarVisible(false);
-    this._updateResizeManagerState(false);
+    this._updateResizeManagerState(true);
   };
 
   private _onDragMove = (
