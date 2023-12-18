@@ -7,7 +7,6 @@ import {
   type IPoint,
 } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
 
@@ -40,7 +39,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
       const frames = surface.frame.frames;
 
       const id = surface.addElement(
-        EdgelessBlockType.FRAME,
+        'affine:frame',
         {
           title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
           xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),

@@ -20,6 +20,18 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import { test } from './utils/playwright.js';
+
+test.beforeEach(async ({ page }) => {
+  await page.route(
+    'https://affine-worker.toeverything.workers.dev/api/linkPreview',
+    async route => {
+      await route.fulfill({
+        json: {},
+      });
+    }
+  );
+});
+
 test('export html title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);

@@ -6,7 +6,6 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { type EdgelessTool } from '../../../../../_common/utils/index.js';
-import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 
@@ -114,7 +113,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                       item.wh[1]
                     );
                     const id = edgeless.surface.addElement(
-                      EdgelessBlockType.FRAME,
+                      'affine:frame',
                       {
                         title: new Workspace.Y.Text(
                           `Frame ${frames.length + 1}`

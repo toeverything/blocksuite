@@ -3,6 +3,7 @@ import { generateKeyBetween } from 'fractional-indexing';
 
 import { type EdgelessElement } from '../../_common/types.js';
 import { last, nToLast } from '../../_common/utils/iterable.js';
+import { matchFlavours } from '../../_common/utils/model.js';
 import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../image-block/image-model.js';
@@ -106,7 +107,7 @@ export class LayerManager {
     elements.forEach(element => {
       if (element instanceof SurfaceElement) {
         this.canvasElements.push(element);
-      } else if (element.flavour === 'affine:frame') {
+      } else if (matchFlavours(element, ['affine:frame'])) {
         this.frames.push(element);
       } else {
         this.blocksGrid.add(element);
@@ -496,7 +497,7 @@ export class LayerManager {
           child => child && this._updateLayer(child)
         );
       }
-    } else if (element.flavour === 'affine:frame') {
+    } else if (matchFlavours(element, ['affine:frame'])) {
       updateArray(this.frames, element);
     } else {
       updateType = 'block';
@@ -526,7 +527,7 @@ export class LayerManager {
           child => child && this._updateLayer(child)
         );
       }
-    } else if (element.flavour === 'affine:frame') {
+    } else if (matchFlavours(element, ['affine:frame'])) {
       insertToOrderedArray(this.frames, element);
     } else {
       insertType = 'block';
@@ -547,7 +548,7 @@ export class LayerManager {
     if (element instanceof SurfaceElement) {
       deleteType = 'canvas';
       removeFromOrderedArray(this.canvasElements, element);
-    } else if (element.flavour === 'affine:frame') {
+    } else if (matchFlavours(element, ['affine:frame'])) {
       removeFromOrderedArray(this.frames, element);
     } else {
       deleteType = 'block';
@@ -691,7 +692,5 @@ export class LayerManager {
           return generateKeyBetween(pre2?.index ?? null, pre.index);
         }
     }
-
-    return element.index;
   }
 }

@@ -32,8 +32,8 @@ import {
 import type { SurfaceBlockComponent } from '../../../../index.js';
 import type { FrameBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
-import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import type { GroupElement } from '../../../../surface-block/index.js';
+import { type EdgelessBlockType } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
 import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect.js';
@@ -43,13 +43,11 @@ export type AutoConnectElement =
   | FrameBlockModel
   | GroupElement;
 
-const { NOTE, IMAGE, FRAME, BOOKMARK } = EdgelessBlockType;
-
 const portalMap = new Map<EdgelessBlockType | RegExp, string>([
-  [FRAME, 'edgeless-block-portal-frame'],
-  [NOTE, 'edgeless-block-portal-note'],
-  [IMAGE, 'edgeless-block-portal-image'],
-  [BOOKMARK, 'edgeless-block-portal-bookmark'],
+  ['affine:frame', 'edgeless-block-portal-frame'],
+  ['affine:note', 'edgeless-block-portal-note'],
+  ['affine:image', 'edgeless-block-portal-image'],
+  ['affine:bookmark', 'edgeless-block-portal-bookmark'],
   [/affine:embed-*/, 'edgeless-block-portal-embed'],
 ]);
 
@@ -191,7 +189,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   private _updateReference() {
     const { _surfaceRefReferenceSet, edgeless } = this;
-    edgeless.surface.getBlocks(NOTE).forEach(note => {
+    edgeless.surface.getBlocks('affine:note').forEach(note => {
       note.children.forEach(model => {
         if (matchFlavours(model, ['affine:surface-ref'])) {
           _surfaceRefReferenceSet.add(model.reference);
@@ -262,7 +260,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       page.slots.blockUpdated.on(({ type, flavour }) => {
         if (
           (type === 'add' || type === 'delete') &&
-          (flavour === 'affine:surface-ref' || flavour === NOTE)
+          (flavour === 'affine:surface-ref' || flavour === 'affine:note')
         ) {
           requestConnectedFrame(() => {
             this._updateReference();
@@ -303,7 +301,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     if (!surface) return nothing;
 
-    const notes = surface.getBlocks([NOTE]);
+    const notes = surface.getBlocks(['affine:note']);
     const layers = surface.layer.layers;
     const autoConnectedBlocks = new Map<AutoConnectElement, number>();
 

@@ -33,12 +33,9 @@ import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.j
 import type { IBound } from './consts.js';
 import {
   type EdgelessBlockModelMap,
-  EdgelessBlockType,
+  type EdgelessElementType,
 } from './edgeless-types.js';
-import {
-  EdgelessElementType,
-  type IEdgelessElementCreateProps,
-} from './edgeless-types.js';
+import { type IEdgelessElementCreateProps } from './edgeless-types.js';
 import {
   type HitTestOptions,
   type ICanvasElementType,
@@ -56,6 +53,7 @@ import {
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import type { CanvasElementType, IConnector, IVec } from './index.js';
+import type { EdgelessBlockType } from './index.js';
 import {
   compare,
   EdgelessGroupManager,
@@ -79,8 +77,6 @@ import { loadingSort } from './utils/sort.js';
 import { serializeXYWH } from './utils/xywh.js';
 
 type id = string;
-
-const { NOTE, IMAGE, FRAME, BOOKMARK } = EdgelessBlockType;
 
 export type IndexedCanvasUpdateEvent = CustomEvent<{
   content: HTMLCanvasElement[];
@@ -200,7 +196,7 @@ export class SurfaceBlockComponent extends BlockElement<
 
     return flavours.reduce<TopLevelBlockModel[]>((pre, flavour) => {
       const parent: BaseBlockModel =
-        flavour === EdgelessBlockType.NOTE ? this.edgeless.model : this.model;
+        flavour === 'affine:note' ? this.edgeless.model : this.model;
 
       return pre.concat(
         parent.children.filter(
@@ -224,17 +220,21 @@ export class SurfaceBlockComponent extends BlockElement<
   get blocks() {
     return [
       ...this.getBlocks(/affine:embed-*/),
-      ...this.getBlocks(FRAME),
-      ...this.getBlocks(NOTE),
-      ...this.getBlocks(IMAGE),
-      ...this.getBlocks(BOOKMARK),
+      ...this.getBlocks('affine:frame'),
+      ...this.getBlocks('affine:note'),
+      ...this.getBlocks('affine:image'),
+      ...this.getBlocks('affine:bookmark'),
     ];
   }
 
   get sortedBlocks() {
     return [
-      ...this.getBlocks(FRAME).sort(this.compare),
-      ...[...this.getBlocks(NOTE), ...this.getBlocks(IMAGE)].sort(this.compare),
+      ...this.getBlocks('affine:frame').sort(this.compare),
+      ...[
+        ...this.getBlocks('affine:note'),
+        ...this.getBlocks('affine:image'),
+        ...this.getBlocks('affine:bookmark'),
+      ].sort(this.compare),
     ];
   }
 
@@ -340,7 +340,10 @@ export class SurfaceBlockComponent extends BlockElement<
       elements = this.group
         .getRootElements(
           isTopLevelBlock(element)
-            ? [...this.getBlocks(NOTE), ...this.getBlocks(IMAGE)]
+            ? [
+                ...this.getBlocks('affine:note'),
+                ...this.getBlocks('affine:image'),
+              ]
             : this.getElements()
         )
         .sort(this.compare);
@@ -680,7 +683,7 @@ export class SurfaceBlockComponent extends BlockElement<
     type: T,
     properties: IElementCreateProps<T>
   ): id;
-  addElement<K extends EdgelessBlockType>(
+  addElement<K extends EdgelessElementType>(
     type: K,
     properties: Partial<BlockProps & Omit<BlockProps, 'flavour'>>,
     parent?: BaseBlockModel | string | null,
@@ -727,7 +730,7 @@ export class SurfaceBlockComponent extends BlockElement<
       return id;
     } else {
       const index =
-        type === EdgelessElementType.FRAME
+        type === 'affine:frame'
           ? this.layer.generateIndex('frame')
           : this.layer.generateIndex('common', 'block');
       return this.page.addBlock(

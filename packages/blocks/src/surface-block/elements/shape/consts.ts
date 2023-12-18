@@ -1,3 +1,4 @@
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import { DEFAULT_ROUGHNESS, ShapeStyle, StrokeStyle } from '../../consts.js';
 import {
   CanvasElementType,
@@ -41,3 +42,33 @@ export interface GeneralShapeOptions {
   strokeStyle: StrokeStyle;
   radius?: number;
 }
+export const FILL_COLORS: CssVariableName[] = [
+  '--affine-palette-shape-yellow',
+  '--affine-palette-shape-orange',
+  '--affine-palette-shape-tangerine',
+  '--affine-palette-shape-red',
+  '--affine-palette-shape-magenta',
+  '--affine-palette-shape-purple',
+  '--affine-palette-shape-green',
+  '--affine-palette-shape-blue',
+  '--affine-palette-shape-navy',
+  '--affine-palette-shape-black',
+  '--affine-palette-shape-white',
+  '--affine-palette-transparent',
+];
+export const DEFAULT_SHAPE_FILL_COLOR = FILL_COLORS[0];
+export const STROKE_COLORS: CssVariableName[] = [
+  '--affine-palette-line-yellow',
+  '--affine-palette-line-orange',
+  '--affine-palette-line-tangerine',
+  '--affine-palette-line-red',
+  '--affine-palette-line-magenta',
+  '--affine-palette-line-purple',
+  '--affine-palette-line-green',
+  '--affine-palette-line-blue',
+  '--affine-palette-line-navy',
+  '--affine-palette-line-black',
+  '--affine-palette-line-white',
+  '--affine-palette-transparent',
+];
+export const DEFAULT_SHAPE_STROKE_COLOR = STROKE_COLORS[0];

@@ -6,6 +6,10 @@ import type {
   ShapeTool,
 } from '../../../../_common/utils/index.js';
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
+import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+} from '../../../../surface-block/elements/shape/consts.js';
 import type { ShapeElement } from '../../../../surface-block/index.js';
 import {
   Bound,
@@ -13,10 +17,6 @@ import {
   ShapeStyle,
   StrokeStyle,
 } from '../../../../surface-block/index.js';
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from '../../components/component-toolbar/change-shape-button.js';
 import { isTransparent } from '../../components/panel/color-panel.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
 import {

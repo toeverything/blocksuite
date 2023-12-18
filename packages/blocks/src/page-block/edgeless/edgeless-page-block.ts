@@ -41,14 +41,13 @@ import {
 import type { ImageBlockProps } from '../../image-block/image-model.js';
 import { ImageService } from '../../image-block/image-service.js';
 import type { FrameBlockModel, ImageBlockModel } from '../../models.js';
-import type { NoteBlockModel } from '../../note-block/index.js';
 import type { SerializedViewport } from '../../surface-block/commands/session.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
-import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
   Bound,
   type CanvasElement,
   clamp,
+  type EdgelessBlockType,
   getCommonBound,
   type IBound,
   intersects,
@@ -82,6 +81,7 @@ import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { EdgelessToolsManager } from './services/tools-manager.js';
+import { edgelessElementsBound } from './utils/bound-utils.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_OFFSET_X,
@@ -94,29 +94,6 @@ import { getCursorMode, isCanvasElement, isFrameBlock } from './utils/query.js';
 
 type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
 
-const { NOTE, IMAGE, FRAME, BOOKMARK } = EdgelessBlockType;
-
-export interface EdgelessSelectionSlots {
-  hoverUpdated: Slot;
-  viewportUpdated: Slot<{ zoom: number; center: IVec }>;
-  selectedRectUpdated: Slot<{
-    type: 'move' | 'select' | 'resize';
-    delta?: {
-      x: number;
-      y: number;
-    };
-    dragging?: boolean;
-  }>;
-  edgelessToolUpdated: Slot<EdgelessTool>;
-  reorderingElements: Slot<ReorderingAction<Selectable>>;
-  pressShiftKeyUpdated: Slot<boolean>;
-  cursorUpdated: Slot<string>;
-  copyAsPng: Slot<{
-    notes: NoteBlockModel[];
-    shapes: CanvasElement[];
-  }>;
-  readonlyUpdated: Slot<boolean>;
-}
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent extends BlockElement<
   PageBlockModel,
@@ -358,7 +335,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       slots.elementRemoved.on(({ element }) => {
         if (isFrameBlock(element)) {
           const frames = this.page.getBlockByFlavour(
-            FRAME
+            'affine:frame'
           ) as FrameBlockModel[];
           this.frames = frames
             .filter(frame => frame.id !== element.id)
@@ -369,7 +346,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _updateFrames() {
-    const frames = this.page.getBlockByFlavour(FRAME) as FrameBlockModel[];
+    const frames = this.page.getBlockByFlavour(
+      'affine:frame'
+    ) as FrameBlockModel[];
     this.frames = frames.sort(compare);
   }
 
@@ -416,7 +395,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     } = options;
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
     return this.surface.addElement(
-      NOTE,
+      'affine:note',
       {
         xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
       },
@@ -478,7 +457,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     point = this.surface.toModelCoord(point[0], point[1]);
     const bound = new Bound(point[0], point[1], options.width, options.height);
     return this.surface.addElement(
-      IMAGE,
+      'affine:image',
       { ...model, xywh: bound.serialize() },
       this.surface.model
     );
@@ -526,7 +505,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
         SURFACE_IMAGE_CARD_HEIGHT
       );
       const blockId = this.surface.addElement(
-        IMAGE,
+        'affine:image',
         {
           size: file.size,
           xywh: bound.serialize(),
@@ -569,7 +548,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
    * Not supports surface elements.
    */
   setSelection(noteId: string, _active = true, blockId: string, point?: Point) {
-    const noteBlock = this.surface.getBlocks(NOTE).find(b => b.id === noteId);
+    const noteBlock = this.surface
+      .getBlocks('affine:note')
+      .find(b => b.id === noteId);
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
@@ -593,20 +574,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   getElementsBound(): IBound | null {
-    const bounds = [];
-
-    Object.values(EdgelessBlockType).forEach(edgelessBlock => {
-      this.surface.getBlocks(edgelessBlock).forEach(block => {
-        bounds.push(Bound.deserialize(block.xywh));
-      });
-    });
-
-    const surfaceElementsBound = this.surface.getElementsBound();
-    if (surfaceElementsBound) {
-      bounds.push(surfaceElementsBound);
-    }
-
-    return getCommonBound(bounds);
+    const { surface } = this;
+    return edgelessElementsBound([...surface.getElements(), ...surface.blocks]);
   }
 
   override update(changedProperties: Map<string, unknown>) {
@@ -842,14 +811,17 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._disposables.add(
       this.page.slots.blockUpdated.on(event => {
         if (
-          ![IMAGE, NOTE, FRAME, BOOKMARK].includes(
-            event.flavour as EdgelessBlockType
-          ) &&
+          ![
+            'affine:image',
+            'affine:note',
+            'affine:frame',
+            'affine:bookmark',
+          ].includes(event.flavour as EdgelessBlockType) &&
           !/affine:embed-*/.test(event.flavour)
         )
           return;
 
-        if (event.flavour === IMAGE) {
+        if (event.flavour === 'affine:image') {
           const parent =
             event.type === 'delete'
               ? this.page.getParent(event.model)
