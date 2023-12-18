@@ -7,6 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
+import { almostEqual } from '../../../../../_common/utils/math.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
@@ -41,13 +42,16 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
     const observer = new ResizeObserver(entries => {
       for (const entry of entries) {
         if (!this.model.edgeless.collapse) {
-          const [x, y, w] = deserializeXYWH(this.model.xywh);
+          const [x, y, w, h] = deserializeXYWH(this.model.xywh);
+
+          if (almostEqual(h, entry.contentRect.height)) return;
+
+          this.model.stash('xywh');
           this.model.xywh = serializeXYWH(x, y, w, entry.contentRect.height);
         }
       }
     });
 
-    this.model.stash('xywh');
     observer.observe(maskDOM!);
 
     this._disposables.add(() => {

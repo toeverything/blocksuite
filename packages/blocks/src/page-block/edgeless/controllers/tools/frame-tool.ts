@@ -48,17 +48,21 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
         surface.model
       );
       this._frame = surface.pickById(id) as FrameBlockModel;
+      this._frame.stash('xywh');
       return;
     }
     assertExists(this._frame);
 
-    this._edgeless.updateElementInLocal(this._frame.id, {
+    this._surface.updateElement(this._frame.id, {
       xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
     });
   }
   override onContainerDragEnd(): void {
     if (this._frame) {
-      this._edgeless.applyLocalRecord([this._frame.id]);
+      const frame = this._frame;
+      this._page.transact(() => {
+        frame.pop('xywh');
+      });
       this._edgeless.tools.setEdgelessTool({ type: 'default' });
       this._edgeless.selectionManager.setSelection({
         elements: [this._frame.id],

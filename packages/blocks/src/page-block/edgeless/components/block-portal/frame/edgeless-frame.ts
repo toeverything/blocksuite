@@ -106,9 +106,7 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
     const { edgeless, frame: model, _isNavigator } = this;
     const { surface } = edgeless;
     const { zoom } = surface.viewport;
-    const bound = Bound.deserialize(
-      (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
-    );
+    const bound = Bound.deserialize(model.xywh);
     this.isInner = surface.frame.frames.some(frame => {
       if (frame.id === model.id) return false;
       if (Bound.deserialize(frame.xywh).contains(bound)) {
@@ -167,9 +165,7 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
 class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
   override render() {
     const { model, index, surface } = this;
-    const bound = Bound.deserialize(
-      (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
-    );
+    const bound = Bound.deserialize(model.xywh);
     const { zoom } = surface.viewport;
     const style = styleMap({
       position: 'absolute',

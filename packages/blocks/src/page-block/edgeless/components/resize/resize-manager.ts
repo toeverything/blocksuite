@@ -91,6 +91,10 @@ export class HandleResizeManager {
     return this._dragging;
   }
 
+  get rotation() {
+    return this._rotate;
+  }
+
   get currentRect() {
     return this._currentRect;
   }

@@ -6,10 +6,7 @@ import type {
   CanvasTextFontWeight,
 } from '../../consts.js';
 import type { CanvasElementType } from '../edgeless-element.js';
-import {
-  type ISurfaceElement,
-  type ISurfaceElementLocalRecord,
-} from '../surface-element.js';
+import { type ISurfaceElement } from '../surface-element.js';
 
 export interface IText extends ISurfaceElement {
   type: CanvasElementType.TEXT;
@@ -33,9 +30,4 @@ export interface ITextDelta {
   attributes?: {
     [k: string]: unknown;
   };
-}
-
-export interface ITextLocalRecord extends ISurfaceElementLocalRecord {
-  fontSize: number;
-  hasMaxWidth: boolean;
 }

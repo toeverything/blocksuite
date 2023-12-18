@@ -21,7 +21,7 @@ export class EdgelessPortalBase<
   edgeless!: EdgelessPageBlockComponent;
 
   protected renderModel(model: T) {
-    return this.surface.host.renderModel(this.surface.unwrap(model));
+    return this.surface.host.renderModel(model);
   }
 
   override connectedCallback(): void {

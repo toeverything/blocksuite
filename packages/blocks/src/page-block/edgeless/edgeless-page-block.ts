@@ -32,7 +32,6 @@ import {
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
-import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
 import { humanFileSize } from '../../_common/utils/math.js';
 import { getService } from '../../_legacy/service/index.js';
 import {
@@ -49,10 +48,8 @@ import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
   Bound,
   type CanvasElement,
-  type CanvasElementLocalRecordValues,
   clamp,
   getCommonBound,
-  GroupElement,
   type IBound,
   intersects,
   type IVec,
@@ -83,7 +80,6 @@ import {
 import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
-import { LocalRecordManager } from './services/local-record-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { EdgelessToolsManager } from './services/tools-manager.js';
 import {
@@ -246,7 +242,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;
-  localRecord!: LocalRecordManager<CanvasElementLocalRecordValues>;
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
@@ -614,48 +609,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return getCommonBound(bounds);
   }
 
-  updateElementInLocal(
-    elementId: string,
-    record: Partial<CanvasElementLocalRecordValues>
-  ) {
-    this.localRecord.update(elementId, record);
-  }
-
-  applyLocalRecord(elements: string[]) {
-    if (!this.surface) return;
-
-    const elementsSet = new Set(elements);
-
-    this.localRecord.each((id, record) => {
-      if (!elementsSet.has(id) || !this.surface.pickById(id)) return;
-
-      const element =
-        this.page.getBlockById(id) ??
-        (this.surface.pickById(id) as EdgelessElement);
-
-      if (element instanceof GroupElement) {
-        this.applyLocalRecord(element.childElements.map(e => e.id));
-        return;
-      }
-
-      const updateProps: Record<string, unknown> = {};
-      let flag = false;
-
-      Object.keys(record).forEach(key => {
-        if (key in element) {
-          flag = true;
-          updateProps[key] = record[key as keyof typeof record];
-          delete record[key as keyof typeof record];
-        }
-      });
-
-      if (!flag) return;
-
-      this.localRecord.update(id, record);
-      this.surface.updateElement(id, updateProps);
-    });
-  }
-
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('edgelessTool')) {
       this.tools.edgelessTool = this.edgelessTool;
@@ -885,33 +838,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }
   }
 
-  private _initLocalRecordManager() {
-    this.localRecord = new LocalRecordManager<CanvasElementLocalRecordValues>();
-    this.localRecord.slots.updated.on(({ id, data }) => {
-      const element = this.surface.pickById(id);
-
-      if (!element) return;
-
-      const changedProps = pick(
-        data.new,
-        keys(data.new).filter(key => key in element)
-      );
-
-      if (!isEmpty(changedProps)) {
-        this.slots.elementUpdated.emit({
-          id,
-          props: changedProps,
-        });
-      }
-
-      this.surface.refresh();
-    });
-
-    this.disposables.add(() => {
-      this.localRecord.destroy();
-    });
-  }
-
   private _initElementSlot() {
     this._disposables.add(
       this.page.slots.blockUpdated.on(event => {
@@ -975,7 +901,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);
     this.tools = new EdgelessToolsManager(this, this.host.event);
-    this._initLocalRecordManager();
   }
 
   override disconnectedCallback() {

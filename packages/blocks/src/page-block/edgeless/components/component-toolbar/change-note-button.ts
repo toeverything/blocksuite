@@ -227,7 +227,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   }
 
   private _setNoteHidden(note: NoteBlockModel, hidden: boolean) {
-    note = this.surface.unwrap(note);
     this.page.updateBlock(note, { hidden });
 
     const noteParent = this.page.getParent(note);

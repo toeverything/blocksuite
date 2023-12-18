@@ -1,6 +1,6 @@
 import { BrushElement } from './brush/brush-element.js';
 import { BrushElementDefaultProps } from './brush/consts.js';
-import type { IBrush, IBrushLocalRecord } from './brush/types.js';
+import type { IBrush } from './brush/types.js';
 import { ConnectorElement } from './connector/connector-element.js';
 import { ConnectorElementDefaultProps } from './connector/consts.js';
 import { type IConnector } from './connector/types.js';
@@ -10,17 +10,13 @@ import type {
 } from './edgeless-element.js';
 import { GroupElementDefaultProps } from './group/consts.js';
 import { GroupElement } from './group/group-element.js';
-import type { IGroupLocalRecord } from './group/types.js';
 import { ShapeElementDefaultProps } from './shape/consts.js';
 import { ShapeElement } from './shape/shape-element.js';
-import type { IShape, IShapeLocalRecord } from './shape/types.js';
-import type {
-  ISurfaceElementLocalRecord,
-  SurfaceElement,
-} from './surface-element.js';
+import type { IShape } from './shape/types.js';
+import type { SurfaceElement } from './surface-element.js';
 import { TextElementDefaultProps } from './text/consts.js';
 import { TextElement } from './text/text-element.js';
-import type { IText, ITextLocalRecord } from './text/types.js';
+import type { IText } from './text/types.js';
 
 // eslint-disable-next-line simple-import-sort/exports
 export { BrushElement } from './brush/brush-element.js';
@@ -46,17 +42,6 @@ export type CanvasElement =
   | ConnectorElement
   | SurfaceElement
   | GroupElement;
-
-export type ICanvasElementLocalRecord = {
-  shape: IShapeLocalRecord;
-  brush: IBrushLocalRecord;
-  connector: ISurfaceElementLocalRecord;
-  text: ITextLocalRecord;
-  group: IGroupLocalRecord;
-};
-
-export type CanvasElementLocalRecordValues =
-  ICanvasElementLocalRecord[keyof ICanvasElementLocalRecord];
 
 export const ElementCtors = {
   brush: BrushElement,

@@ -404,6 +404,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _onDragStart = () => {
     this.edgeless.slots.elementResizeStart.emit();
+    this.selection.elements.forEach(el => {
+      if (this._resizeManager.rotation) {
+        el.stash('rotate' as 'xywh');
+      } else {
+        el.stash('xywh');
+      }
+    });
     this.setToolbarVisible(false);
     this._updateResizeManagerState(false);
   };
@@ -439,7 +446,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         this._isNoteHeightLimit = bound.h === NOTE_MIN_HEIGHT ? true : false;
 
         props.xywh = bound.serialize();
-        edgeless.updateElementInLocal(element.id, props);
+        edgeless.surface.updateElement(element.id, props);
       } else if (isImageBlock(element) || isBookmarkBlock(element)) {
         const curBound = Bound.deserialize(element.xywh);
         if (
@@ -454,7 +461,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           bound.w = (curBound.w / curBound.h) * bound.h;
         }
 
-        edgeless.updateElementInLocal(element.id, {
+        edgeless.surface.updateElement(element.id, {
           xywh: bound.serialize(),
         });
       } else {
@@ -467,7 +474,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             bound = normalizeTextBound(element, bound, true);
             // If the width of the text element has been changed by dragging,
             // We need to set hasMaxWidth to true for wrapping the text
-            edgeless.updateElementInLocal(id, {
+            edgeless.surface.updateElement(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
               hasMaxWidth: true,
@@ -476,7 +483,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             p = bound.h / element.h;
             // const newFontsize = element.fontSize * p;
             // bound = normalizeTextBound(element, bound, false, newFontsize);
-            edgeless.updateElementInLocal(id, {
+
+            edgeless.surface.updateElement(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
             });
@@ -485,7 +493,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           if (element instanceof ShapeElement) {
             bound = normalizeShapeBound(element, bound);
           }
-          edgeless.updateElementInLocal(id, {
+          edgeless.surface.updateElement(id, {
             xywh: bound.serialize(),
           });
         }
@@ -522,8 +530,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _onDragEnd = () => {
-    const selectedElements = this.edgeless.selectionManager.state.elements;
-    this.edgeless.applyLocalRecord(selectedElements);
+    this.page.transact(() => {
+      this.selection.elements.forEach(el => {
+        if (this._resizeManager.rotation) {
+          el.pop('rotate' as 'xywh');
+        } else {
+          el.pop('xywh');
+        }
+      });
+    });
 
     this._isNoteWidthLimit = false;
     this._isNoteHeightLimit = false;

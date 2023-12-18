@@ -6,6 +6,7 @@ import type {
   ShapeTool,
 } from '../../../../_common/utils/index.js';
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
+import type { ShapeElement } from '../../../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
@@ -36,6 +37,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     shapeStyle: ShapeStyle.Scribbled,
   };
 
+  private _draggingElement: ShapeElement | null = null;
   private _draggingElementId: string | null = null;
 
   // shape overlay
@@ -116,6 +118,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const id = this._addNewShape(e, 0, 0);
 
     this._draggingElementId = id;
+    this._draggingElement = this._surface.pickById(id) as ShapeElement;
 
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
@@ -133,8 +136,12 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerDragEnd() {
-    if (this._draggingElementId) {
-      this._edgeless.applyLocalRecord([this._draggingElementId as string]);
+    if (this._draggingElement) {
+      const draggingElement = this._draggingElement;
+
+      this._page.transact(() => {
+        draggingElement.pop('xywh');
+      });
     }
 
     const id = this._draggingElementId;
@@ -153,6 +160,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       }
     }
 
+    this._draggingElement = null;
     this._draggingElementId = null;
     this._draggingArea = null;
 
@@ -204,7 +212,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const bound = new Bound(x, y, w, h);
 
-    this._edgeless.updateElementInLocal(id, {
+    this._surface.updateElement(id, {
       xywh: bound.serialize(),
     });
   }

@@ -70,10 +70,8 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   }
 
   override render() {
-    const { model, surface, _isNavigator } = this;
-    const bound = Bound.deserialize(
-      (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
-    );
+    const { model, _isNavigator } = this;
+    const bound = Bound.deserialize(model.xywh);
 
     return html`
       <div

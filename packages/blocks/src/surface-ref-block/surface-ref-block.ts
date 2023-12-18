@@ -521,7 +521,6 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
-      getLocalRecord: () => undefined,
       onElementUpdated: ({ id }) => {
         const element = this.getModel(id);
 
@@ -533,7 +532,6 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         }
       },
       removeElement: () => {},
-      updateElementLocalRecord: () => {},
       pickById: id => this.getModel(id),
       getGroupParent: getGroupParent,
       setGroupParent: setGroupParent,
@@ -596,8 +594,6 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, {
         onElementUpdated() {},
-        getLocalRecord: () => undefined,
-        updateElementLocalRecord: () => {},
         pickById: id => this.getModel(id),
         getGroupParent: getGroupParent,
         setGroupParent: setGroupParent,

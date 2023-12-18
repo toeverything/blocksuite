@@ -18,9 +18,9 @@ import {
   getLineWidth,
   truncateTextByWidth,
 } from '../text/utils.js';
-import type { IGroup, IGroupLocalRecord } from './types.js';
+import type { IGroup } from './types.js';
 
-export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
+export class GroupElement extends SurfaceElement<IGroup> {
   // The children and id are cached since when removing the group,
   // the ymap will be removed first, which will make the following operation
   // unable to find the children and id.
@@ -31,6 +31,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   private _padding = [0, 0];
   private _radius = 0;
   protected override _connectable = false;
+  protected override _localProps = ['showTitle', 'display', 'opacity'];
 
   override containedByBounds(bound: Bound): boolean {
     return bound.contains(Bound.deserialize(this.xywh));
@@ -46,7 +47,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
 
     const { options } = this;
 
-    options.updateElementLocalRecord(this.id, { showTitle: true });
+    this.showTitle = true;
 
     this._children.forEach(ele => {
       options.setGroupParent(ele, this);
@@ -90,6 +91,14 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
         return prev.unite(ele!.elementBound);
       }, options.pickById(children[0])!.elementBound);
     return bound.serialize();
+  }
+
+  get showTitle() {
+    return (this._stashedValues.get('showTitle') ?? true) as boolean;
+  }
+
+  set showTitle(val: boolean) {
+    this._stashedValues.set('showTitle', val);
   }
 
   get title() {
@@ -194,7 +203,8 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     this._padding = padding;
     this._radius = radius;
 
-    if (!this.getLocalRecord()?.showTitle) return;
+    if (!this.showTitle) return;
+
     ctx.beginPath();
     ctx.roundRect(
       0,
