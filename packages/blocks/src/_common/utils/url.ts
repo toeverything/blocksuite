@@ -139,3 +139,8 @@ export function isStrictUrl(str: string) {
   }
   return false;
 }
+
+export function isUrlInClipboard(clipboardData: DataTransfer) {
+  const url = clipboardData.getData('text/plain');
+  return isValidUrl(url);
+}
