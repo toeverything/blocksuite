@@ -43,7 +43,7 @@ export type BookmarkBlockProps = {
 } & BookmarkBlockUrlData &
   BookmarkBlockEdgelessProps;
 
-export const defaultBookmarkProps: BookmarkBlockProps = {
+const defaultBookmarkProps: BookmarkBlockProps = {
   style: 'horizontal',
   url: '',
   caption: null,

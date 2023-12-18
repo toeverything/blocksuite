@@ -21,6 +21,10 @@ import type { CssVariableName } from '../../../../_common/theme/css-variables.js
 import { LineWidth, type ShapeTool } from '../../../../_common/types.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import { CanvasTextFontFamily } from '../../../../surface-block/consts.js';
+import {
+  FILL_COLORS,
+  STROKE_COLORS,
+} from '../../../../surface-block/elements/shape/consts.js';
 import type { CanvasElementType } from '../../../../surface-block/index.js';
 import {
   type ShapeElement,
@@ -28,7 +32,6 @@ import {
   StrokeStyle,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
   SHAPE_FILL_COLOR_BLACK,
   SHAPE_TEXT_COLOR_PURE_BLACK,
@@ -122,38 +125,6 @@ function getMostCommonShapeStyle(elements: ShapeElement[]): ShapeStyle {
   const max = maxBy(Object.entries(roughnesses), ([_k, count]) => count);
   return max ? (max[0] as ShapeStyle) : ShapeStyle.Scribbled;
 }
-
-const FILL_COLORS: CssVariableName[] = [
-  '--affine-palette-shape-yellow',
-  '--affine-palette-shape-orange',
-  '--affine-palette-shape-tangerine',
-  '--affine-palette-shape-red',
-  '--affine-palette-shape-magenta',
-  '--affine-palette-shape-purple',
-  '--affine-palette-shape-green',
-  '--affine-palette-shape-blue',
-  '--affine-palette-shape-navy',
-  '--affine-palette-shape-black',
-  '--affine-palette-shape-white',
-  '--affine-palette-transparent',
-];
-export const DEFAULT_SHAPE_FILL_COLOR = FILL_COLORS[0];
-
-const STROKE_COLORS: CssVariableName[] = [
-  '--affine-palette-line-yellow',
-  '--affine-palette-line-orange',
-  '--affine-palette-line-tangerine',
-  '--affine-palette-line-red',
-  '--affine-palette-line-magenta',
-  '--affine-palette-line-purple',
-  '--affine-palette-line-green',
-  '--affine-palette-line-blue',
-  '--affine-palette-line-navy',
-  '--affine-palette-line-black',
-  '--affine-palette-line-white',
-  '--affine-palette-transparent',
-];
-export const DEFAULT_SHAPE_STROKE_COLOR = STROKE_COLORS[0];
 
 @customElement('edgeless-change-shape-button')
 export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
@@ -269,9 +240,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
-
-  @property({ attribute: false })
-  slots!: EdgelessSelectionSlots;
 
   @state()
   private _showPopper = false;
@@ -590,7 +558,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
                 .elements=${this.elements}
                 .elementType=${'shape'}
                 .surface=${this.surface}
-                .slots=${this.slots}
               ></edgeless-change-text-menu>`
           : nothing}
       </div>

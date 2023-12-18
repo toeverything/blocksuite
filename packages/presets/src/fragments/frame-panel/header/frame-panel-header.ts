@@ -1,9 +1,6 @@
 import './frames-setting-menu.js';
 
-import type {
-  EdgelessPageBlockComponent,
-  EdgelessTool,
-} from '@blocksuite/blocks';
+import type { EdgelessPageBlockComponent } from '@blocksuite/blocks';
 import {
   EdgelessPresentationConsts,
   type NavigatorMode,
@@ -129,15 +126,11 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   private _navigatorMode: NavigatorMode = 'fit';
   private _edgelessDisposables: DisposableGroup | null = null;
 
-  setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless?.tools.setEdgelessTool(edgelessTool);
-  };
-
   private _enterPresentationMode = () => {
     if (!this.edgeless) this.changeEditorMode('edgeless');
     this.edgeless?.updateComplete
       .then(() => {
-        this.setEdgelessTool({
+        this.edgeless?.tools.setEdgelessTool({
           type: 'frameNavigator',
           mode: this._navigatorMode,
         });

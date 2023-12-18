@@ -1,14 +1,4 @@
 import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from '@blocksuite/blocks';
-import {
-  DEFAULT_ROUGHNESS,
-  serializeXYWH,
-  type ShapeType,
-  StrokeStyle,
-} from '@blocksuite/blocks';
-import {
   Boxed,
   nanoid,
   native2Y,
@@ -58,17 +48,15 @@ export const heavyWhiteboard: InitFn = async (
           xywh: `[${x},${y},100,100]`,
           seed: Math.floor(Math.random() * 2 ** 31),
 
-          shapeType: SHAPE_TYPES[
-            Math.floor(Math.random() * 40) % 4
-          ] as ShapeType,
+          shapeType: SHAPE_TYPES[Math.floor(Math.random() * 40) % 4],
 
           radius: 0,
           filled: false,
-          fillColor: DEFAULT_SHAPE_FILL_COLOR,
+          fillColor: '--affine-palette-shape-yellow',
           strokeWidth: 4,
-          strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-          strokeStyle: StrokeStyle.Solid,
-          roughness: DEFAULT_ROUGHNESS,
+          strokeColor: '--affine-palette-line-yellow',
+          strokeStyle: 'solid',
+          roughness: 1.4,
         },
         { deep: false }
       );
@@ -87,7 +75,7 @@ export const heavyWhiteboard: InitFn = async (
       const noteId = page.addBlock(
         'affine:note',
         {
-          xywh: serializeXYWH(x, y, 100, 50),
+          xywh: `[${x}, ${y}, 100, 50]`,
         },
         pageBlockId
       );

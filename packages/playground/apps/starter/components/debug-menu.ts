@@ -24,7 +24,6 @@ import {
   FontFamilyVariables,
   HtmlTransformer,
   MarkdownTransformer,
-  NOTE_WIDTH,
   SizeVariables,
   StyleVariables,
   type SurfaceBlockComponent,
@@ -394,7 +393,7 @@ export class DebugMenu extends ShadowlessElement {
     this.page.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},${NOTE_WIDTH},95]`;
+    const xywh = `[0,${count * 60},800,95]`;
 
     const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
     this.page.addBlock('affine:paragraph', {}, noteId);

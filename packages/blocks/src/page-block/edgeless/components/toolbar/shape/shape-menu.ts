@@ -11,12 +11,12 @@ import {
 } from '../../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
 import type { EdgelessTool } from '../../../../../_common/utils/index.js';
+import { DEFAULT_SHAPE_FILL_COLOR } from '../../../../../surface-block/elements/shape/consts.js';
 import {
   ShapeStyle,
   type ShapeType,
 } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import { DEFAULT_SHAPE_FILL_COLOR } from '../../component-toolbar/change-shape-button.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import {
   LINE_COLOR_PREFIX,

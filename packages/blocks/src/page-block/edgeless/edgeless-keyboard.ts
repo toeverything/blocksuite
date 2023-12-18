@@ -7,6 +7,10 @@ import {
   type ShapeToolState,
 } from '../../_common/types.js';
 import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+} from '../../surface-block/elements/shape/consts.js';
+import {
   Bound,
   ConnectorElement,
   ConnectorMode,
@@ -14,10 +18,6 @@ import {
   ShapeStyle,
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from './components/component-toolbar/change-shape-button.js';
 import { GET_DEFAULT_LINE_COLOR } from './components/panel/color-panel.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import {

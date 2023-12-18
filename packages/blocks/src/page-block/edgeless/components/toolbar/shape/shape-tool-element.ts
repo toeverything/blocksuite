@@ -11,6 +11,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+} from '../../../../../surface-block/elements/shape/consts.js';
+import {
   Bound,
   CanvasElementType,
   ShapeStyle,
@@ -19,10 +23,6 @@ import {
 } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from '../../component-toolbar/change-shape-button.js';
 
 export type ShapeName = ShapeType | 'roundedRect';
 

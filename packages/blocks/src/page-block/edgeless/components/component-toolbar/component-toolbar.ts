@@ -137,7 +137,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           .elements=${shapeElements}
           .page=${this.page}
           .surface=${this.surface}
-          .slots=${this.slots}
         >
         </edgeless-change-shape-button>`
       : nothing;
@@ -150,7 +149,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           .elements=${brushElements}
           .page=${this.page}
           .surface=${this.surface}
-          .slots=${this.slots}
         >
         </edgeless-change-brush-button>`
       : nothing;
@@ -173,7 +171,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       ? html`<edgeless-change-note-button
           .notes=${notes}
           .surface=${this.surface}
-          .slots=${this.slots}
         >
         </edgeless-change-note-button>`
       : nothing;
@@ -186,7 +183,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
             .bookmark=${bookmarks[0]}
             .page=${this.page}
             .surface=${this.surface}
-            .slots=${this.slots}
           ></edgeless-change-bookmark-button>
         `
       : nothing;
@@ -198,7 +194,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           .texts=${textElements}
           .page=${this.page}
           .surface=${this.surface}
-          .slots=${this.slots}
         >
         </edgeless-change-text-button>`
       : nothing;

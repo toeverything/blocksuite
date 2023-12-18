@@ -34,7 +34,6 @@ import {
   type TextElement,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';
 import {
   type ColorEvent,
@@ -150,9 +149,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
-
-  @property({ attribute: false })
-  slots!: EdgelessSelectionSlots;
 
   @state()
   private _textColorPopperShow = false;
