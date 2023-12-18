@@ -359,9 +359,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       JSON.stringify(await prepareClipboardData(this._toBeMoved, _edgeless.std))
     );
 
+    const bound = edgelessElementsBound(this._toBeMoved);
     const [elements, blocks] =
       await clipboardController.createElementsFromClipboardData(
-        data as Record<string, unknown>[]
+        data as Record<string, unknown>[],
+        bound.center
       );
 
     this._toBeMoved = [...elements, ...blocks];
@@ -465,6 +467,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       ele.stash('xywh');
     });
 
+    // Connector needs to be updated first
+    this._toBeMoved.sort((a, _) => (a instanceof ConnectorElement ? -1 : 1));
     this._addFrames();
     // Set up drag state
     this.initializeDragState(e, dragType);
