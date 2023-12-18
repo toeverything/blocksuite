@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type {
   ClientRectObject,
@@ -668,7 +667,7 @@ declare global {
     'affine-menu': MenuComponent<unknown>;
   }
 }
-export const createModal = (container: HTMLElement) => {
+export const createModal = (container: HTMLElement = document.body) => {
   const div = document.createElement('div');
   div.style.position = 'fixed';
   div.style.left = '0';
@@ -706,10 +705,7 @@ export const createPopup = (
     middleware?: Array<Middleware | null | undefined | false>;
   }
 ) => {
-  const host = document.querySelector('editor-host');
-  assertExists(host);
-
-  const modal = createModal(host);
+  const modal = createModal();
   autoUpdate(target, content, () => {
     computePosition(target, content, {
       middleware: options?.middleware ?? [shift({ crossAxis: true })],

@@ -252,8 +252,8 @@ export function getLitRoot() {
 export function getViewportElement(editorHost: EditorHost) {
   if (isInsideDocEditor(editorHost)) return null;
   const page = editorHost.page;
-  assertExists(page);
-  const pageComponent = getBlockComponentByModel(page.root);
+  assertExists(page.root);
+  const pageComponent = editorHost.view.viewFromPath('block', [page.root.id]);
 
   if (
     !pageComponent ||

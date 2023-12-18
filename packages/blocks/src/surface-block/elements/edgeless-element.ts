@@ -1,3 +1,5 @@
+import type { EditorHost } from '@blocksuite/lit';
+
 import type { Bound, IVec, PointLocation, SerializedXYWH } from '../index.js';
 import type { SurfaceBlockComponent } from '../surface-block.js';
 import type { IBrush } from './brush/types.js';
@@ -41,6 +43,7 @@ export interface IEdgelessElement {
     x: number,
     y: number,
     options: HitTestOptions,
+    editorHost: EditorHost,
     surface?: SurfaceBlockComponent
   ): boolean;
   boxSelect(bound: Bound): boolean;

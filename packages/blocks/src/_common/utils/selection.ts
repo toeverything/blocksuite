@@ -9,7 +9,7 @@ import type { SelectionPosition } from '../types.js';
 import { matchFlavours } from './model.js';
 import {
   asyncGetRichTextByModel,
-  getBlockComponentByModel,
+  buildPath,
   getDocPageByEditorHost,
   getDocPageByElement,
 } from './query.js';
@@ -215,6 +215,7 @@ async function focusRichText(
  * @deprecated Use `selectionManager.set` instead.
  */
 export function focusBlockByModel(
+  editorHost: EditorHost,
   model: BaseBlockModel,
   position: SelectionPosition = 'end',
   zoom = 1
@@ -224,12 +225,12 @@ export function focusBlockByModel(
   }
 
   assertExists(model.page.root);
-  const pageBlock = getBlockComponentByModel(
-    model.page.root
-  ) as DocPageBlockComponent;
+  const pageBlock = editorHost.view.viewFromPath('block', [
+    model.page.root.id,
+  ]) as DocPageBlockComponent;
   assertExists(pageBlock);
 
-  const element = getBlockComponentByModel(model);
+  const element = editorHost.view.viewFromPath('block', buildPath(model));
   assertExists(element);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {

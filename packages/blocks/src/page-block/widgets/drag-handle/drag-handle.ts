@@ -17,8 +17,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import {
+  buildPath,
   type EdgelessTool,
-  getBlockComponentByModel,
   getBlockElementsExcludeSubtrees,
   getCurrentNativeRange,
   getModelByBlockComponent,
@@ -1123,7 +1123,9 @@ export class AffineDragHandleWidget extends WidgetElement<
       assertExists(parent);
       // Need to update selection when moving blocks successfully
       // Because the block path may be changed after moving
-      const parentElement = getBlockComponentByModel(parent);
+      const parentElement = this._getBlockElementFromViewStore(
+        buildPath(parent)
+      );
       if (parentElement) {
         const newSelectedBlocks = selectedBlocks
           .map(block => parentElement.path.concat(block.id))

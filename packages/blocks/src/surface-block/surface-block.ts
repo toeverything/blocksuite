@@ -877,13 +877,13 @@ export class SurfaceBlockComponent extends BlockElement<
     const pickBlock = () => {
       const candidates = this.layer.blocksGrid.search(hitTestBound);
       const picked = candidates.filter(element =>
-        element.hitTest(x, y, options)
+        element.hitTest(x, y, options, this.host)
       );
       return picked as EdgelessElement[];
     };
     const pickFrames = () => {
       return this.layer.frames.filter(frame =>
-        frame.hitTest(x, y, options)
+        frame.hitTest(x, y, options, this.host)
       ) as EdgelessElement[];
     };
 

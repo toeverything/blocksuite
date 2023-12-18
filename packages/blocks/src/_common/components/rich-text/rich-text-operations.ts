@@ -510,11 +510,12 @@ function handleParagraphOrListSibling(
 }
 
 function handleEmbedDividerCodeSibling(
-  page: Page,
+  editorHost: EditorHost,
   model: ExtendedModel,
   previousSibling: ExtendedModel,
   parent: ExtendedModel
 ) {
+  const page = model.page;
   if (matchFlavours(previousSibling, ['affine:divider'])) {
     page.deleteBlock(previousSibling);
     return true;
@@ -531,7 +532,7 @@ function handleEmbedDividerCodeSibling(
   )
     return false;
 
-  focusBlockByModel(previousSibling);
+  focusBlockByModel(editorHost, previousSibling);
   if (!model.text?.length) {
     page.captureSync();
     page.deleteBlock(model, {
@@ -544,7 +545,7 @@ function handleEmbedDividerCodeSibling(
 function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
   const page = model.page;
   const text = model.text;
-  const titleElement = document.querySelector(
+  const titleElement = editorHost.querySelector(
     '.affine-doc-page-block-title'
   ) as HTMLTextAreaElement | null;
   // Probably no title, e.g. in edgeless mode
@@ -608,12 +609,17 @@ function handleParagraphDeleteActions(
   // TODO handle in block service
   if (matchFlavours(parent, ['affine:database'])) {
     page.deleteBlock(model);
-    focusBlockByModel(previousSibling);
+    focusBlockByModel(editorHost, previousSibling);
     return true;
   } else if (matchFlavours(parent, ['affine:note'])) {
     return (
       handleParagraphOrListSibling(page, model, previousSibling, parent) ||
-      handleEmbedDividerCodeSibling(page, model, previousSibling, parent) ||
+      handleEmbedDividerCodeSibling(
+        editorHost,
+        model,
+        previousSibling,
+        parent
+      ) ||
       handleUnknownBlockBackspace(previousSibling)
     );
   }
@@ -758,7 +764,7 @@ function handleParagraphBlockForwardDelete(
         ])
       )
         return false;
-      focusBlockByModel(firstChild);
+      focusBlockByModel(editorHost, firstChild);
       return true;
     }
     function handleEmbedDividerCodeSibling(nextSibling: ExtendedModel | null) {
@@ -772,7 +778,7 @@ function handleParagraphBlockForwardDelete(
         !matchFlavours(nextSibling, ['affine:image', 'affine:code'])
       )
         return false;
-      focusBlockByModel(nextSibling);
+      focusBlockByModel(editorHost, nextSibling);
       return true;
     }
     return (

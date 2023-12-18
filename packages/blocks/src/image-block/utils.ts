@@ -1,11 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Buffer } from 'buffer';
 
 import { humanFileSize } from '../_common/utils/math.js';
 import { toast } from './../_common/components/toast.js';
 import { downloadBlob } from './../_common/utils/filesys.js';
-import { getBlockComponentByModel } from './../_common/utils/query.js';
+import { buildPath } from './../_common/utils/query.js';
 import { ImageBlockModel, type ImageBlockProps } from './image-model.js';
 
 async function getImageBlob(model: ImageBlockModel) {
@@ -97,8 +98,8 @@ export async function downloadImage(model: ImageBlockModel) {
   downloadBlob(blob, 'image');
 }
 
-export function focusCaption(model: BaseBlockModel) {
-  const blockEle = getBlockComponentByModel(model);
+export function focusCaption(editorHost: EditorHost, model: BaseBlockModel) {
+  const blockEle = editorHost.view.viewFromPath('block', buildPath(model));
   assertExists(blockEle);
   const dom = blockEle.querySelector(
     '.affine-embed-wrapper-caption'

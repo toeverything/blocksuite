@@ -2,10 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
 import type { Erasable, IPoint } from '../../../../_common/utils/index.js';
-import {
-  type EraserTool,
-  getBlockComponentByModel,
-} from '../../../../_common/utils/index.js';
+import { buildPath, type EraserTool } from '../../../../_common/utils/index.js';
 import {
   Bound,
   getStroke,
@@ -111,7 +108,10 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
           linePolygonIntersects(this._prevPoint, currentPoint, bound.points)
         ) {
           this._eraseTargets.add(erasable);
-          const ele = getBlockComponentByModel(erasable);
+          const ele = this._edgeless.host.view.viewFromPath(
+            'block',
+            buildPath(erasable)
+          );
           ele && ((<HTMLElement>ele).style.opacity = '0.3');
         }
       } else {
@@ -128,7 +128,10 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   override beforeModeSwitch() {
     this._eraseTargets.forEach(erasable => {
       if (isTopLevelBlock(erasable)) {
-        const ele = getBlockComponentByModel(erasable);
+        const ele = this._edgeless.host.view.viewFromPath(
+          'block',
+          buildPath(erasable)
+        );
         ele && ((<HTMLElement>ele).style.opacity = '1');
       } else {
         this._edgeless.localRecord.update(erasable.id, { opacity: 1 });

@@ -20,6 +20,7 @@ export class AffineImageToolbarWidget extends WidgetElement<ImageBlockComponent>
       if (!imageContainer) return null;
       return {
         template: ImageOptionsTemplate({
+          editorHost: this.host,
           model: imageBlock.model,
           blob: imageBlock.blob,
           abortController,
