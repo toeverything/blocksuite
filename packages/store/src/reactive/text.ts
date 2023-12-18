@@ -16,19 +16,21 @@ export type DeltaOperation = {
 export class Text {
   private readonly _yText: Y.Text;
 
-  constructor(input?: Y.Text | string) {
+  constructor(input?: Y.Text | string | DeltaInsert[]) {
     if (typeof input === 'string') {
-      this._yText = new Y.Text(input);
+      const text = input.replaceAll('\r\n', '\n');
+      this._yText = new Y.Text(text);
     } else if (input instanceof Y.Text) {
-      const deltas = input.toDelta();
-      input.delete(0, input.length);
-      for (const delta of deltas) {
+      this._yText = input;
+    } else if (input instanceof Array) {
+      for (const delta of input) {
         if (delta.insert) {
           delta.insert = delta.insert.replaceAll('\r\n', '\n');
         }
       }
-      input.applyDelta(deltas);
-      this._yText = input;
+      const yText = new Y.Text();
+      yText.applyDelta(input);
+      this._yText = yText;
     } else {
       this._yText = new Y.Text();
     }

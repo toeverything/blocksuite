@@ -1,5 +1,3 @@
-import * as Y from 'yjs';
-
 import { NATIVE_UNIQ_IDENTIFIER, TEXT_UNIQ_IDENTIFIER } from '../consts.js';
 import { Boxed } from '../reactive/boxed.js';
 import { isPureObject } from '../reactive/index.js';
@@ -40,9 +38,7 @@ export function fromJSON(value: unknown): unknown {
       return new Boxed(Reflect.get(value, 'value'));
     }
     if (Reflect.has(value, TEXT_UNIQ_IDENTIFIER)) {
-      const yText = new Y.Text();
-      yText.applyDelta(Reflect.get(value, 'delta'));
-      return new Text(yText);
+      return new Text(Reflect.get(value, 'delta'));
     }
     return Object.fromEntries(
       Object.entries(value).map(([key, value]) => {
