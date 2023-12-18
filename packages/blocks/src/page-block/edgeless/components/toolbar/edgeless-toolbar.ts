@@ -42,13 +42,10 @@ import type { EdgelessTool } from '../../../../_common/types.js';
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { getImageFilesFromLocal } from '../../../../_common/utils/filesys.js';
 import type { FrameBlockModel } from '../../../../index.js';
-import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import { Bound, clamp } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isFrameBlock } from '../../utils/query.js';
 import { launchIntoFullscreen } from '../utils.js';
-
-const { FRAME } = EdgelessBlockType;
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {
@@ -305,7 +302,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     );
     _disposables.add(
       page.slots.blockUpdated.on(({ flavour, type }) => {
-        if (flavour === FRAME && type !== 'update') {
+        if (flavour === 'affine:frame' && type !== 'update') {
           requestAnimationFrame(() => {
             this._updateFrames();
           });

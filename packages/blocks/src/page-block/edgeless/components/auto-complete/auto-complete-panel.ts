@@ -13,7 +13,6 @@ import {
   SmallNoteIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { FontFamilyIcon } from '../../../../_common/icons/text.js';
-import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import {
   Bound,
   type CanvasElementType,
@@ -317,7 +316,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       NOTE_BACKGROUND_COLOR_MAP.get(fillColor) ?? DEFAULT_NOTE_BACKGROUND_COLOR;
 
     const id = surface.addElement(
-      EdgelessBlockType.NOTE,
+      'affine:note',
       {
         xywh: serializeXYWH(...xywh),
         background: backgroundColor,
@@ -353,7 +352,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const { surface } = edgeless;
     const frameIndex = surface.frame.frames.length + 1;
     const id = edgeless.surface.addElement(
-      EdgelessBlockType.FRAME,
+      'affine:frame',
       {
         title: new Workspace.Y.Text(`Frame ${frameIndex}`),
         xywh: serializeXYWH(...xywh),

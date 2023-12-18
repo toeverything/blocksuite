@@ -66,7 +66,6 @@ export {
   CanvasElementType,
   ConnectorEndpointStyle,
   ConnectorMode,
-  EdgelessBlockType,
   generateKeyBetween,
   ShapeStyle,
   StrokeStyle,

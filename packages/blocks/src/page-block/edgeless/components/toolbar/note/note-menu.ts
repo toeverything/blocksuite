@@ -12,7 +12,6 @@ import {
   EdgelessBookmarkHeight,
   EdgelessBookmarkWidth,
 } from '../../../../../bookmark-block/edgeless-bookmark-block.js';
-import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
 import { Bound } from '../../../../../surface-block/utils/bound.js';
 import { Vec } from '../../../../../surface-block/utils/vec.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
@@ -114,7 +113,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
 
                 const center = Vec.toVec(this.edgeless.surface.viewport.center);
                 this.edgeless.surface.addElement(
-                  EdgelessBlockType.BOOKMARK,
+                  'affine:bookmark',
                   {
                     url,
                     xywh: Bound.fromCenter(
