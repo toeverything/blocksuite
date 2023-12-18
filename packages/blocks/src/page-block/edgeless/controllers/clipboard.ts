@@ -20,8 +20,7 @@ import type {
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
-  getBlockComponentByModel,
-  getBlockComponentByPath,
+  buildPath,
   getEditorContainer,
   isPageMode,
 } from '../../../_common/utils/query.js';
@@ -140,9 +139,9 @@ export class EdgelessClipboardController extends PageClipboard {
         current = current.page.getParent(current);
       }
 
-      return getBlockComponentByPath(path);
+      return this.std.view.viewFromPath('block', path);
     } else {
-      return getBlockComponentByModel(model);
+      return this.std.view.viewFromPath('block', buildPath(model));
     }
   }
 

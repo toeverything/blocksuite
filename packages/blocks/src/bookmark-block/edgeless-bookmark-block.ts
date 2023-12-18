@@ -4,6 +4,7 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { getEdgelessPageByElement } from '../_common/utils/query.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 import type {
@@ -37,7 +38,7 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
   }
 
   get edgeless() {
-    const edgeless = this.closest('affine-edgeless-page');
+    const edgeless = getEdgelessPageByElement(this);
     assertExists(edgeless);
     return edgeless;
   }

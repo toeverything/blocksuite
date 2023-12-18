@@ -144,13 +144,13 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   private _surfaceRefReferenceSet = new Set<string>();
 
   private _initNoteHeightUpdate() {
-    const { page } = this.edgeless;
+    const { page, host } = this.edgeless;
     assertExists(page.root);
 
     const resetNoteResizeObserver = throttle(
       () => {
         requestConnectedFrame(() => {
-          this._noteResizeObserver.resetListener(page);
+          this._noteResizeObserver.resetListener(host);
         }, this);
       },
       16,
@@ -255,12 +255,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   override firstUpdated() {
     this._updateReference();
     const { _disposables, edgeless } = this;
-    const { page } = edgeless;
+    const { page, host } = edgeless;
 
     this._initNoteHeightUpdate();
 
     requestConnectedFrame(() => {
-      this._noteResizeObserver.resetListener(page);
+      this._noteResizeObserver.resetListener(host);
     }, this);
 
     _disposables.add(this._noteResizeObserver);

@@ -114,7 +114,7 @@ export class ContentParser {
         }
         const root = this._page.root;
         const pageBlock = root ? getBlockComponentByModel(root) : null;
-        const imageCard = document.querySelector('affine-image-block-card');
+        const imageCard = pageBlock?.querySelector('affine-image-block-card');
         const isReady =
           !imageCard || imageCard.getAttribute('imageState') === '0';
         if (pageBlock && isReady) {

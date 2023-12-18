@@ -17,12 +17,13 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import {
+  buildPath,
   type EdgelessTool,
-  getBlockComponentByModel,
   getBlockElementsExcludeSubtrees,
   getCurrentNativeRange,
   getModelByBlockComponent,
-  isPageMode,
+  isInsideDocEditor,
+  isInsideEdgelessEditor,
   matchFlavours,
   Point,
   Rect,
@@ -142,7 +143,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   get anchorEdgelessElement(): TopLevelBlockModel | null {
-    if (isPageMode(this.page) || !this._anchorBlockId) return null;
+    if (isInsideDocEditor(this.host) || !this._anchorBlockId) return null;
     const { surface } = this.pageBlockElement as EdgelessPageBlockComponent;
     const edgelessElement = surface.pickById(this._anchorBlockId);
     return isTopLevelBlock(edgelessElement) ? edgelessElement : null;
@@ -161,7 +162,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   getDropResult = (state: PointerEventState): DropResult | null => {
     const point = getContainerOffsetPoint(state);
     const closestBlockElement = getClosestBlockByPoint(
-      this.page,
+      this.host,
       this.pageBlockElement,
       point
     );
@@ -263,13 +264,13 @@ export class AffineDragHandleWidget extends WidgetElement<
   ) => {
     const point = getContainerOffsetPoint(state);
     const closestNoteBlock = getClosestNoteBlock(
-      this.page,
+      this.host,
       this.pageBlockElement,
       point
     );
     if (
       !closestNoteBlock ||
-      isOutOfNoteBlock(this.page, closestNoteBlock, point, this.scale)
+      isOutOfNoteBlock(this.host, closestNoteBlock, point, this.scale)
     ) {
       this.resetDropResult();
     } else {
@@ -585,7 +586,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   }
 
   private _showDragHandleOnTopLevelBlocks() {
-    if (isPageMode(this.page)) return;
+    if (isInsideDocEditor(this.host)) return;
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
 
     if (!this._anchorBlockPath) return;
@@ -708,7 +709,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   private _getHoverAreaRectTopLevelBlock(
     edgelessElement: TopLevelBlockModel
   ): Rect | null {
-    if (isPageMode(this.page)) return null;
+    if (isInsideDocEditor(this.host)) return null;
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
 
     const rect = getSelectedRect([edgelessElement]);
@@ -755,7 +756,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     // When current page is edgeless page
     // We need to remain surface selection and set editing as true
-    if (!isPageMode(this.page)) {
+    if (isInsideEdgelessEditor(this.host)) {
       const surfaceElementId = noteId ? noteId : getNoteId(blockElements[0]);
       const surfaceSelection = selection.getInstance(
         'surface',
@@ -777,7 +778,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   private _canEditing = (noteBlock: BlockElement) => {
     if (noteBlock.page.id !== this.page.id) return false;
 
-    if (isPageMode(this.page)) return true;
+    if (isInsideDocEditor(this.host)) return true;
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
 
     const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
@@ -788,7 +789,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   };
 
   private _checkTopLevelBlockSelection = () => {
-    if (this.page.readonly || isPageMode(this.page)) {
+    if (this.page.readonly || isInsideDocEditor(this.host)) {
       this._hide();
       return;
     }
@@ -839,7 +840,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const point = getContainerOffsetPoint(state);
     const closestBlockElement = getClosestBlockByPoint(
-      this.page,
+      this.host,
       this.pageBlockElement,
       point
     );
@@ -894,14 +895,14 @@ export class AffineDragHandleWidget extends WidgetElement<
     // When pointer out of note block hover area or inside database, should hide drag handle
     const point = getContainerOffsetPoint(state);
     const closestNoteBlock = getClosestNoteBlock(
-      this.page,
+      this.host,
       this.pageBlockElement,
       point
     ) as BlockElement | null;
     if (
       closestNoteBlock &&
       this._canEditing(closestNoteBlock) &&
-      !isOutOfNoteBlock(this.page, closestNoteBlock, point, this.scale)
+      !isOutOfNoteBlock(this.host, closestNoteBlock, point, this.scale)
     ) {
       this._pointerMoveOnBlock(state);
       return true;
@@ -1122,7 +1123,9 @@ export class AffineDragHandleWidget extends WidgetElement<
       assertExists(parent);
       // Need to update selection when moving blocks successfully
       // Because the block path may be changed after moving
-      const parentElement = getBlockComponentByModel(parent);
+      const parentElement = this._getBlockElementFromViewStore(
+        buildPath(parent)
+      );
       if (parentElement) {
         const newSelectedBlocks = selectedBlocks
           .map(block => parentElement.path.concat(block.id))
@@ -1229,7 +1232,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     // call default drag end handler if no option return true
     this._onDragEnd(state);
-    if (!isPageMode(this.page)) this._checkTopLevelBlockSelection();
+    if (isInsideEdgelessEditor(this.host)) this._checkTopLevelBlockSelection();
     return true;
   };
 
@@ -1366,7 +1369,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       this._onDragHandlePointerLeave
     );
 
-    if (isPageMode(this.page)) {
+    if (isInsideDocEditor(this.host)) {
       const docPage = this.pageBlockElement as DocPageBlockComponent;
 
       this._disposables.add(

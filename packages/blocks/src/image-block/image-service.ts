@@ -1,11 +1,15 @@
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 
 import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
-import { isPageMode, matchFlavours } from '../_common/utils/index.js';
+import {
+  isInsideEdgelessEditor,
+  matchFlavours,
+} from '../_common/utils/index.js';
 import type { DocPageBlockComponent } from '../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import type { ImageBlockModel } from './image-model.js';
@@ -34,7 +38,7 @@ export class ImageService extends BlockService<ImageBlockModel> {
 
       if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
         addSiblingImageBlock(imageFiles, this.maxFileSize, targetModel, place);
-      } else if (!isPageMode(this.page)) {
+      } else if (isInsideEdgelessEditor(this.std.host as EditorHost)) {
         const edgelessPage = this
           .pageBlockComponent as EdgelessPageBlockComponent;
         await edgelessPage.addImages(imageFiles, point);

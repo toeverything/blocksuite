@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
@@ -17,8 +18,6 @@ import {
 import {
   asyncFocusRichText,
   asyncSetInlineRange,
-} from '../../../_common/utils/selection.js';
-import {
   focusBlockByModel,
   focusTitle,
 } from '../../../_common/utils/selection.js';
@@ -371,12 +370,13 @@ export function handleRemoveAllIndentForMultiBlocks(
 
 // When deleting at line end of a code block,
 // do nothing
-function handleCodeBlockForwardDelete(_page: Page, model: ExtendedModel) {
+function handleCodeBlockForwardDelete(model: ExtendedModel) {
   if (!matchFlavours(model, ['affine:code'])) return false;
   return true;
 }
 
-function handleDatabaseBlockForwardDelete(page: Page, model: ExtendedModel) {
+function handleDatabaseBlockForwardDelete(model: ExtendedModel) {
+  const page = model.page;
   if (!isInsideBlockByFlavour(page, model, 'affine:database')) return false;
 
   return true;
@@ -384,7 +384,8 @@ function handleDatabaseBlockForwardDelete(page: Page, model: ExtendedModel) {
 
 // When deleting at line start of a list block,
 // switch it to normal paragraph block.
-function handleListBlockBackspace(page: Page, model: ExtendedModel) {
+function handleListBlockBackspace(model: ExtendedModel) {
+  const page = model.page;
   if (!matchFlavours(model, ['affine:list'])) return false;
 
   const parent = page.getParent(model);
@@ -427,8 +428,12 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
     - Line8
 - Line9
  */
-function handleListBlockForwardDelete(page: Page, model: ExtendedModel) {
+function handleListBlockForwardDelete(
+  editorHost: EditorHost,
+  model: ExtendedModel
+) {
   if (!matchFlavours(model, ['affine:list'])) return false;
+  const page = model.page;
   const firstChild = model.firstChild();
   if (firstChild) {
     model.text?.join(firstChild.text as Text);
@@ -456,7 +461,7 @@ function handleListBlockForwardDelete(page: Page, model: ExtendedModel) {
         return true;
       }
     } else {
-      const nextBlock = getNextBlock(model);
+      const nextBlock = getNextBlock(editorHost, model);
       if (!nextBlock) {
         // do nothing
         return true;
@@ -505,11 +510,12 @@ function handleParagraphOrListSibling(
 }
 
 function handleEmbedDividerCodeSibling(
-  page: Page,
+  editorHost: EditorHost,
   model: ExtendedModel,
   previousSibling: ExtendedModel,
   parent: ExtendedModel
 ) {
+  const page = model.page;
   if (matchFlavours(previousSibling, ['affine:divider'])) {
     page.deleteBlock(previousSibling);
     return true;
@@ -526,7 +532,7 @@ function handleEmbedDividerCodeSibling(
   )
     return false;
 
-  focusBlockByModel(previousSibling);
+  focusBlockByModel(editorHost, previousSibling);
   if (!model.text?.length) {
     page.captureSync();
     page.deleteBlock(model, {
@@ -536,9 +542,10 @@ function handleEmbedDividerCodeSibling(
   return true;
 }
 
-function handleNoPreviousSibling(page: Page, model: ExtendedModel) {
+function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
+  const page = model.page;
   const text = model.text;
-  const titleElement = document.querySelector(
+  const titleElement = editorHost.querySelector(
     '.affine-doc-page-block-title'
   ) as HTMLTextAreaElement | null;
   // Probably no title, e.g. in edgeless mode
@@ -564,16 +571,20 @@ function handleNoPreviousSibling(page: Page, model: ExtendedModel) {
   } else {
     text?.clear();
   }
-  focusTitle(page, title.length - textLength);
+  focusTitle(editorHost, title.length - textLength);
   return true;
 }
 
-function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
+function handleParagraphDeleteActions(
+  editorHost: EditorHost,
+  model: ExtendedModel
+) {
+  const page = model.page;
   const parent = page.getParent(model);
   if (!parent) return false;
-  const previousSibling = getPreviousBlock(model);
+  const previousSibling = getPreviousBlock(editorHost, model);
   if (!previousSibling) {
-    return handleNoPreviousSibling(page, model);
+    return handleNoPreviousSibling(editorHost, model);
   } else if (
     matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
   ) {
@@ -598,19 +609,28 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   // TODO handle in block service
   if (matchFlavours(parent, ['affine:database'])) {
     page.deleteBlock(model);
-    focusBlockByModel(previousSibling);
+    focusBlockByModel(editorHost, previousSibling);
     return true;
   } else if (matchFlavours(parent, ['affine:note'])) {
     return (
       handleParagraphOrListSibling(page, model, previousSibling, parent) ||
-      handleEmbedDividerCodeSibling(page, model, previousSibling, parent) ||
+      handleEmbedDividerCodeSibling(
+        editorHost,
+        model,
+        previousSibling,
+        parent
+      ) ||
       handleUnknownBlockBackspace(previousSibling)
     );
   }
   return false;
 }
 
-function handleParagraphBlockBackspace(page: Page, model: ExtendedModel) {
+function handleParagraphBlockBackspace(
+  editorHost: EditorHost,
+  model: ExtendedModel
+) {
+  const page = model.page;
   if (!matchFlavours(model, ['affine:paragraph'])) return false;
 
   // When deleting at line start of a paragraph block,
@@ -632,7 +652,7 @@ function handleParagraphBlockBackspace(page: Page, model: ExtendedModel) {
   // - line1
   //   - line2|aaa
   //   - line3
-  const isHandled = handleParagraphDeleteActions(page, model);
+  const isHandled = handleParagraphDeleteActions(editorHost, model);
   if (isHandled) return true;
 
   // Before press backspace
@@ -648,7 +668,11 @@ function handleParagraphBlockBackspace(page: Page, model: ExtendedModel) {
   return true;
 }
 
-function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
+function handleParagraphBlockForwardDelete(
+  editorHost: EditorHost,
+  model: ExtendedModel
+) {
+  const page = model.page;
   function handleParagraphOrList(
     page: Page,
     model: ExtendedModel,
@@ -676,7 +700,7 @@ function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
           return true;
         }
       } else {
-        const nextBlock = getNextBlock(model);
+        const nextBlock = getNextBlock(editorHost, model);
         if (
           !nextBlock ||
           !matchFlavours(nextBlock, ['affine:paragraph', 'affine:list'])
@@ -719,7 +743,7 @@ function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
       page.deleteBlock(firstChild);
       return true;
     }
-    const nextBlock = getNextBlock(model);
+    const nextBlock = getNextBlock(editorHost, model);
     if (!firstChild && !nextBlock) return true;
     return (
       handleParagraphOrListChild(page, model, firstChild) ||
@@ -740,7 +764,7 @@ function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
         ])
       )
         return false;
-      focusBlockByModel(firstChild);
+      focusBlockByModel(editorHost, firstChild);
       return true;
     }
     function handleEmbedDividerCodeSibling(nextSibling: ExtendedModel | null) {
@@ -754,7 +778,7 @@ function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
         !matchFlavours(nextSibling, ['affine:image', 'affine:code'])
       )
         return false;
-      focusBlockByModel(nextSibling);
+      focusBlockByModel(editorHost, nextSibling);
       return true;
     }
     return (
@@ -794,10 +818,13 @@ function handleUnknownBlockForwardDelete(model: ExtendedModel) {
   );
 }
 
-export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
+export function handleLineStartBackspace(
+  editorHost: EditorHost,
+  model: ExtendedModel
+) {
   if (
-    handleListBlockBackspace(page, model) ||
-    handleParagraphBlockBackspace(page, model)
+    handleListBlockBackspace(model) ||
+    handleParagraphBlockBackspace(editorHost, model)
   ) {
     return;
   }
@@ -805,13 +832,16 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   handleUnknownBlockBackspace(model);
 }
 
-export function handleLineEndForwardDelete(page: Page, model: ExtendedModel) {
+export function handleLineEndForwardDelete(
+  editorHost: EditorHost,
+  model: ExtendedModel
+) {
   if (
-    handleCodeBlockForwardDelete(page, model) ||
-    handleListBlockForwardDelete(page, model) ||
-    handleParagraphBlockForwardDelete(page, model)
+    handleCodeBlockForwardDelete(model) ||
+    handleListBlockForwardDelete(editorHost, model) ||
+    handleParagraphBlockForwardDelete(editorHost, model)
   ) {
-    handleDatabaseBlockForwardDelete(page, model);
+    handleDatabaseBlockForwardDelete(model);
     return;
   }
   handleUnknownBlockForwardDelete(model);

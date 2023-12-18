@@ -8,7 +8,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../_common/consts.js';
 import {
   buildPath,
-  getBlockComponentByPath,
   getModelByBlockComponent,
   getRectByBlockElement,
   Point,
@@ -125,6 +124,10 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     return this.edgelessPage?.surface?.viewport.zoom ?? 1;
   }
 
+  get editorHost() {
+    return this.edgelessPage.host;
+  }
+
   private _updateVisibility(e: PointerEventState) {
     const block = this.selection.elements[0];
 
@@ -145,7 +148,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   private _getEditingState(e: PointerEventState, block: NoteBlockModel) {
-    const noteBlockElement = getBlockComponentByPath(
+    const noteBlockElement = this.editorHost.view.viewFromPath(
+      'block',
       buildPath(block)
     ) as NoteBlockComponent;
 

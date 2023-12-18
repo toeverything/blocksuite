@@ -21,12 +21,14 @@ import {
 } from '../../../image-block/utils.js';
 
 export function ImageOptionsTemplate({
+  editorHost,
   ref: containerRef,
   model,
   blob,
   abortController,
   host,
 }: {
+  editorHost: EditorHost;
   ref?: RefOrCallback;
   model: ImageBlockModel;
   blob?: Blob;
@@ -90,7 +92,7 @@ export function ImageOptionsTemplate({
         <icon-button
           size="32px"
           ?hidden=${readonly}
-          @click=${() => focusCaption(model)}
+          @click=${() => focusCaption(editorHost, model)}
         >
           ${CaptionIcon}
           <affine-tooltip tip-position="right">Caption</affine-tooltip>
