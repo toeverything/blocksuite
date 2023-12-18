@@ -20,6 +20,14 @@ export class Text {
     if (typeof input === 'string') {
       this._yText = new Y.Text(input);
     } else if (input instanceof Y.Text) {
+      const deltas = input.toDelta();
+      input.delete(0, input.length);
+      for (const delta of deltas) {
+        if (delta.insert) {
+          delta.insert = delta.insert.replaceAll('\r\n', '\n');
+        }
+      }
+      input.applyDelta(deltas);
       this._yText = input;
     } else {
       this._yText = new Y.Text();
