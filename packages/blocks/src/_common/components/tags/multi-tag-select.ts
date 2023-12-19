@@ -455,6 +455,7 @@ declare global {
     'affine-multi-tag-select': MultiTagSelect;
   }
 }
+
 export const popTagSelect = (
   target: HTMLElement,
   ops: {

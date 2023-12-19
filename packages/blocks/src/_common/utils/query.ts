@@ -376,11 +376,14 @@ export function getModelByElement(element: Element): BaseBlockModel {
   return getModelByBlockComponent(closestBlock);
 }
 
-export function isInsidePageTitle(element: unknown): boolean {
-  const editor = document.querySelector('affine-editor-container');
-  const titleElement = (editor ?? document).querySelector(
-    '[data-block-is-title="true"]'
-  );
+export function isInsidePageTitle(
+  editorHost: EditorHost,
+  element: unknown
+): boolean {
+  const docPageElement = getDocPageByEditorHost(editorHost);
+  if (!docPageElement) return false;
+
+  const titleElement = docPageElement.titleContainer;
   if (!titleElement) return false;
 
   return titleElement.contains(element as Node);

@@ -186,7 +186,7 @@ export class EdgelessToolsManager {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
-        !isInsidePageTitle(event.raw.target) &&
+        !isInsidePageTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
         !isInsideEdgelessTextEditor(event.raw.target)
       ) {
@@ -198,7 +198,7 @@ export class EdgelessToolsManager {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
-        !isInsidePageTitle(event.raw.target) &&
+        !isInsidePageTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
         !isInsideEdgelessTextEditor(event.raw.target)
       ) {
@@ -210,7 +210,7 @@ export class EdgelessToolsManager {
       this._dragging = false;
       const event = ctx.get('pointerState');
       if (
-        !isInsidePageTitle(event.raw.target) &&
+        !isInsidePageTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
         !isInsideEdgelessTextEditor(event.raw.target)
       ) {
@@ -236,7 +236,7 @@ export class EdgelessToolsManager {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
-        !isInsidePageTitle(event.raw.target) &&
+        !isInsidePageTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
         !isInsideEdgelessTextEditor(event.raw.target)
       ) {

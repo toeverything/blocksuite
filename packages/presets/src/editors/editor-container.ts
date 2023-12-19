@@ -120,7 +120,11 @@ export class AffineEditorContainer
     if (this.mode === 'page') {
       setTimeout(() => {
         if (this.autofocus) {
-          this._docPage?.titleInlineEditor.focusEnd();
+          if (this._docPage?.titleInlineEditor) {
+            this._docPage?.titleInlineEditor.focusEnd();
+          } else {
+            this._docPage?.focusFirstParagraph();
+          }
         }
       });
     }

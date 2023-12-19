@@ -1,34 +1,52 @@
-import { WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
-import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
-
 import {
+  getPageByEditorHost,
   popTagSelect,
   type SelectTag,
-} from '../../../../_common/components/tags/multi-tag-select.js';
+} from '@blocksuite/blocks';
 import {
   ArrowDownSmallIcon,
   DualLinkIcon16,
   PlusIcon,
   TagsIcon,
-} from '../../../../_common/icons/index.js';
-import type { PageBlockComponent } from '../../../../index.js';
+} from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Page } from '@blocksuite/store';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, nothing, unsafeCSS } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import type { Ref } from 'lit/directives/ref.js';
+import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
+import { BacklinkButton } from './backlink-popover.js';
 import {
   type BacklinkData,
   DEFAULT_PAGE_NAME,
   listenBacklinkList,
-} from '../utils.js';
-import { BacklinkButton } from './backlink-popover.js';
+} from './utils.js';
 
-@customElement('affine-page-meta-data')
-export class PageMetaData extends WithDisposable(LitElement) {
+const PAGE_BLOCK_CHILD_PADDING = 24;
+
+@customElement('page-meta')
+export class PageMeta extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    :host {
+    page-meta {
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      display: block;
+      box-sizing: border-box;
+      max-width: var(--affine-editor-width);
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: var(
+        --affine-editor-side-padding,
+        ${PAGE_BLOCK_CHILD_PADDING}px
+      );
+      padding-right: var(
+        --affine-editor-side-padding,
+        ${PAGE_BLOCK_CHILD_PADDING}px
+      );
     }
 
     .meta-data {
@@ -238,18 +256,25 @@ export class PageMetaData extends WithDisposable(LitElement) {
     }
   `;
 
-  private _page!: Page;
-  private _pageElement!: PageBlockComponent;
+  @property({ attribute: false })
+  page!: Page;
 
-  constructor(page: Page, pageElement: PageBlockComponent) {
-    super();
+  @property({ attribute: false })
+  editorHostRef!: Ref<EditorHost>;
 
-    this._page = page;
-    this._pageElement = pageElement;
-  }
+  @state()
+  backlinkList!: BacklinkData[];
+
+  @state()
+  showSelect = false;
+
+  @state()
+  expanded = false;
+
+  private _editorHost!: EditorHost;
 
   get meta() {
-    return this._page.workspace.meta;
+    return this.page.workspace.meta;
   }
 
   get options() {
@@ -258,7 +283,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
 
   set options(tags: SelectTag[]) {
     this.tags = this.tags.filter(v => tags.find(x => x.id === v));
-    this._page.workspace.meta.setProperties({
+    this.page.workspace.meta.setProperties({
       ...this.meta.properties,
       tags: {
         ...this.meta.properties.tags,
@@ -268,35 +293,18 @@ export class PageMetaData extends WithDisposable(LitElement) {
   }
 
   get tags() {
-    return this._page.meta.tags ?? [];
+    return this.page.meta.tags ?? [];
   }
 
   set tags(tags: string[]) {
-    this._page.meta.tags = tags;
+    this.page.meta.tags = tags;
   }
 
-  @state()
-  backlinkList!: BacklinkData[];
+  private _toggle = () => {
+    this.expanded = !this.expanded;
+  };
 
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this._disposables.add(
-      listenBacklinkList(this._pageElement, list => {
-        this.backlinkList = list;
-      })
-    );
-    this._disposables.add(
-      this.meta.pageMetasUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
-  @state()
-  showSelect = false;
-
-  _selectTags = () => {
+  private _selectTags = () => {
     this._disposables.add({
       dispose: popTagSelect(this.shadowRoot?.querySelector('.tags') ?? this, {
         value: this.tags,
@@ -307,12 +315,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
     });
   };
 
-  private renderBacklinkInline = () => {
-    const backlinkButton = new BacklinkButton(this.backlinkList);
-    return backlinkButton;
-  };
-
-  private renderTagsInline = () => {
+  private _renderTagsInline = () => {
     const tags = this.tags;
     const optionMap = Object.fromEntries(this.options.map(v => [v.id, v]));
     return html` <div class="tags-inline">
@@ -337,14 +340,12 @@ export class PageMetaData extends WithDisposable(LitElement) {
     </div>`;
   };
 
-  @state()
-  expanded = false;
-
-  private _toggle = () => {
-    this.expanded = !this.expanded;
+  private _renderBacklinkInline = () => {
+    const backlinkButton = new BacklinkButton(this.backlinkList);
+    return backlinkButton;
   };
 
-  private renderBacklinkExpanded = () => {
+  private _renderBacklinkExpanded = () => {
     const backlinkList = this.backlinkList;
     if (!backlinkList.length) {
       return null;
@@ -368,7 +369,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
     </div>`;
   };
 
-  private renderTagsExpanded = () => {
+  private _renderTagsExpanded = () => {
     const optionMap = Object.fromEntries(this.options.map(v => [v.id, v]));
 
     return html` <div class="meta-data-expanded-item">
@@ -387,14 +388,16 @@ export class PageMetaData extends WithDisposable(LitElement) {
                 backgroundColor: tag.color,
               });
               const click = () => {
-                this._pageElement.slots.tagClicked.emit({ tagId: tag.id });
+                const pageElement = getPageByEditorHost(this._editorHost);
+                assertExists(pageElement);
+                pageElement.slots.tagClicked.emit({ tagId: tag.id });
               };
               return html` <div class="tag" @click=${click} style=${style}>
                 ${tag.value}
               </div>`;
             }
           )}
-          ${this._page.readonly
+          ${this.page.readonly
             ? nothing
             : html`<div class="add-tag" @click="${this._selectTags}">
                 ${PlusIcon}
@@ -404,26 +407,53 @@ export class PageMetaData extends WithDisposable(LitElement) {
     </div>`;
   };
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    assertExists(this.editorHostRef.value);
+    this._editorHost = this.editorHostRef.value;
+
+    this._disposables.add(
+      listenBacklinkList(this.page, this._editorHost, list => {
+        this.backlinkList = list;
+      })
+    );
+
+    this._disposables.add(
+      this.meta.pageMetasUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
+
   override render() {
     if (!this.expanded) {
       return html`
         <div class="meta-data caret-ignore" @click="${this._toggle}">
           <div class="meta-data-content">
-            ${this.renderBacklinkInline()} ${this.renderTagsInline()}
+            ${this._renderBacklinkInline()} ${this._renderTagsInline()}
           </div>
           <div class="expand">${ArrowDownSmallIcon}</div>
         </div>
       `;
     }
 
-    return html` <div class="meta-data-expanded caret-ignore">
-      <div class="meta-data-expanded-title" @click="${this._toggle}">
-        <div>Page info</div>
-        <div class="close">${ArrowDownSmallIcon}</div>
+    return html`
+      <div class="meta-data-expanded caret-ignore">
+        <div class="meta-data-expanded-title" @click="${this._toggle}">
+          <div>Page info</div>
+          <div class="close">${ArrowDownSmallIcon}</div>
+        </div>
+        <div class="meta-data-expanded-content">
+          ${this._renderBacklinkExpanded()} ${this._renderTagsExpanded()}
+        </div>
       </div>
-      <div class="meta-data-expanded-content">
-        ${this.renderBacklinkExpanded()} ${this.renderTagsExpanded()}
-      </div>
-    </div>`;
+    `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'page-meta': PageMeta;
   }
 }

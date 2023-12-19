@@ -27,7 +27,6 @@ import {
 } from '../page-block/index.js';
 import { PageBlockSchema } from '../page-block/page-model.js';
 import { AFFINE_DOC_DRAGGING_AREA_WIDGET } from '../page-block/widgets/doc-dragging-area/doc-dragging-area.js';
-import { AFFINE_DOC_PAGE_META_DATA } from '../page-block/widgets/doc-page-meta-data/doc-page-meta-data.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../page-block/widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../page-block/widgets/drag-handle/drag-handle.js';
 import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../page-block/widgets/edgeless-remote-selection/index.js';
@@ -49,9 +48,6 @@ const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
       // [AFFINE_BLOCK_HUB_WIDGET]: literal`${unsafeStatic(
       //   AFFINE_BLOCK_HUB_WIDGET
       // )}`,
-      [AFFINE_DOC_PAGE_META_DATA]: literal`${unsafeStatic(
-        AFFINE_DOC_PAGE_META_DATA
-      )}`,
       [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}`,
       [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
         AFFINE_SLASH_MENU_WIDGET

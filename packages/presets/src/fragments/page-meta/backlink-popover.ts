@@ -1,13 +1,11 @@
+import { DualLinkIcon16, scrollbarStyle } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import { scrollbarStyle } from '../../../../_common/components/utils.js';
-import { DualLinkIcon16 } from '../../../../_common/icons/text.js';
-import { stopPropagation } from '../../../../_common/utils/event.js';
-import type { BacklinkData } from '../utils.js';
-import { DEFAULT_PAGE_NAME } from '../utils.js';
+import type { BacklinkData } from './utils.js';
+import { DEFAULT_PAGE_NAME } from './utils.js';
 
 @customElement('backlink-button')
 export class BacklinkButton extends WithDisposable(LitElement) {
@@ -129,7 +127,10 @@ export class BacklinkButton extends WithDisposable(LitElement) {
 }
 
 function backlinkPopover(backlinks: BacklinkData[]) {
-  return html` <div class="backlink-popover" @click=${stopPropagation}>
+  return html`<div
+    class="backlink-popover"
+    @click=${(e: MouseEvent) => e.stopPropagation()}
+  >
     <div class="menu">
       <div class="group-title">Linked to this page</div>
       <div class="group" style="overflow-y: scroll; max-height: 372px;">

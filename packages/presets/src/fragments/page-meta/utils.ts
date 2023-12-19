@@ -1,10 +1,13 @@
-import type { Disposable } from '@blocksuite/global/utils';
-import type { PageMeta } from '@blocksuite/store';
+import type { AffineTextAttributes } from '@blocksuite/blocks';
+import {
+  getPageByEditorHost,
+  LinkedPageIcon,
+  PageIcon,
+} from '@blocksuite/blocks';
+import { assertExists, type Disposable } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
+import type { Page, PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
-
-import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
-import { LinkedPageIcon, PageIcon } from '../../../_common/icons/index.js';
-import type { PageBlockComponent } from '../../types.js';
 
 export const DEFAULT_PAGE_NAME = 'Untitled';
 
@@ -21,13 +24,13 @@ export type BacklinkData = BackLink &
   };
 
 export function listenBacklinkList(
-  pageElement: PageBlockComponent,
+  page: Page,
+  editorHost: EditorHost,
   cb: (list: BacklinkData[]) => void
 ): Disposable {
   const metaMap = Object.fromEntries(
-    pageElement.page.workspace.meta.pageMetas.map(v => [v.id, v])
+    page.workspace.meta.pageMetas.map(v => [v.id, v])
   );
-  const page = pageElement.page;
 
   const toData = (backlink: BackLink): BacklinkData => {
     const pageMeta = metaMap[backlink.pageId];
@@ -39,11 +42,10 @@ export function listenBacklinkList(
       ...pageMeta,
       icon: backlink.type === 'LinkedPage' ? LinkedPageIcon : PageIcon,
       jump: () => {
-        if (backlink.pageId === page.id) {
-          // On the current page, no need to jump
-          // TODO jump to block
-          return;
-        }
+        if (backlink.pageId === page.id) return;
+
+        const pageElement = getPageByEditorHost(editorHost);
+        assertExists(pageElement);
         pageElement.slots.pageLinkClicked.emit({
           pageId: backlink.pageId,
           blockId: backlink.blockId,

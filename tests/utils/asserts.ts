@@ -143,7 +143,7 @@ export async function assertEmpty(page: Page) {
 
 export async function assertTitle(page: Page, text: string) {
   const editor = getEditorLocator(page);
-  const inlineEditor = editor.locator('[data-block-is-title="true"]').first();
+  const inlineEditor = editor.locator('.doc-title-container').first();
   const vText = inlineEditorInnerTextToString(await inlineEditor.innerText());
   expect(vText).toBe(text);
 }
@@ -250,7 +250,7 @@ export async function assertImageOption(page: Page) {
 }
 
 export async function assertPageTitleFocus(page: Page) {
-  const locator = page.locator('.affine-doc-page-block-title').nth(0);
+  const locator = page.locator('.doc-title-container').nth(0);
   await expect(locator).toBeFocused();
 }
 
