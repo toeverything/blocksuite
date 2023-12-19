@@ -1,4 +1,4 @@
-// import '../fragments/page-meta/page-meta';
+import '../fragments/page-meta/page-meta';
 import '../fragments/doc-title/doc-title';
 
 import { DocEditorBlockSpecs } from '@blocksuite/blocks';
@@ -42,6 +42,7 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
         }
       </style>
       <doc-title .page=${this.page} .editorHostRef=${this.host}></doc-title>
+      <page-meta .page=${this.page} .editorHostRef=${this.host}></page-meta>
       <editor-host
         ${ref(this.host)}
         .page=${this.page}
@@ -56,5 +57,3 @@ declare global {
     'doc-editor': DocEditor;
   }
 }
-
-//<page-meta .page=${this.page} .editorHostRef=${this.host}></page-meta>

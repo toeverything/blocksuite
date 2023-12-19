@@ -11,10 +11,10 @@ import {
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { Ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -30,10 +30,13 @@ import {
 const PAGE_BLOCK_CHILD_PADDING = 24;
 
 @customElement('page-meta')
-export class PageMeta extends WithDisposable(ShadowlessElement) {
+export class PageMeta extends WithDisposable(LitElement) {
   static override styles = css`
-    page-meta {
+    .page-meta-container {
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      font-size: var(--affine-font-base);
+      line-height: var(--affine-line-height);
+      color: var(--affine-text-primary-color);
       display: block;
       box-sizing: border-box;
       max-width: var(--affine-editor-width);
@@ -429,23 +432,27 @@ export class PageMeta extends WithDisposable(ShadowlessElement) {
   override render() {
     if (!this.expanded) {
       return html`
-        <div class="meta-data caret-ignore" @click="${this._toggle}">
-          <div class="meta-data-content">
-            ${this._renderBacklinkInline()} ${this._renderTagsInline()}
+        <div class="page-meta-container caret-ignore">
+          <div class="meta-data caret-ignore" @click="${this._toggle}">
+            <div class="meta-data-content">
+              ${this._renderBacklinkInline()} ${this._renderTagsInline()}
+            </div>
+            <div class="expand">${ArrowDownSmallIcon}</div>
           </div>
-          <div class="expand">${ArrowDownSmallIcon}</div>
         </div>
       `;
     }
 
     return html`
-      <div class="meta-data-expanded caret-ignore">
-        <div class="meta-data-expanded-title" @click="${this._toggle}">
-          <div>Page info</div>
-          <div class="close">${ArrowDownSmallIcon}</div>
-        </div>
-        <div class="meta-data-expanded-content">
-          ${this._renderBacklinkExpanded()} ${this._renderTagsExpanded()}
+      <div class="page-meta-container caret-ignore">
+        <div class="meta-data-expanded caret-ignore">
+          <div class="meta-data-expanded-title" @click="${this._toggle}">
+            <div>Page info</div>
+            <div class="close">${ArrowDownSmallIcon}</div>
+          </div>
+          <div class="meta-data-expanded-content">
+            ${this._renderBacklinkExpanded()} ${this._renderTagsExpanded()}
+          </div>
         </div>
       </div>
     `;
