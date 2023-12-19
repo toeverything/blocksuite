@@ -31,7 +31,7 @@ export class GroupElement extends SurfaceElement<IGroup> {
   private _padding = [0, 0];
   private _radius = 0;
   protected override _connectable = false;
-  protected override _localProps = ['showTitle', 'display', 'opacity'];
+  protected override _localProps = ['showTitle', 'display', 'opacity', 'xywh'];
 
   override containedByBounds(bound: Bound): boolean {
     return bound.contains(Bound.deserialize(this.xywh));

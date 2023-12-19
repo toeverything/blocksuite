@@ -557,6 +557,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._dragEndCallback.forEach(cb => cb());
     });
 
+    this._dragEndCallback = [];
     this._isNoteWidthLimit = false;
     this._isNoteHeightLimit = false;
 

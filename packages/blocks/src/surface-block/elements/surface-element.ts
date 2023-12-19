@@ -144,7 +144,8 @@ export abstract class SurfaceElement<
   get rotate() {
     return (
       (this._stashedValues.get('rotate') as T['rotate']) ??
-      (this.yMap.get('rotate') as T['rotate'])
+      (this.yMap.get('rotate') as T['rotate']) ??
+      0
     );
   }
 
