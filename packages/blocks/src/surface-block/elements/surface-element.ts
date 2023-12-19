@@ -195,6 +195,7 @@ export abstract class SurfaceElement<
         this.yMap.set(key, updates[key] as T[keyof T]);
       }
     }
+    this.renderer?.refresh();
   }
 
   deserializeXYWH(): XYWH {
@@ -240,6 +241,7 @@ export abstract class SurfaceElement<
   }
 
   stash(key: string) {
+    if (this._stashedValues.has(key)) return;
     this._stashedValues.set(key, this.yMap.get(key));
   }
 
