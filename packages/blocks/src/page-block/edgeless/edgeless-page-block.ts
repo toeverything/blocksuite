@@ -895,7 +895,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
         )
           return;
 
-        if (event.flavour === 'affine:image') {
+        if (
+          event.flavour === 'affine:image' ||
+          event.flavour === 'affine:bookmark'
+        ) {
           const parent =
             event.type === 'delete'
               ? this.page.getParent(event.model)
