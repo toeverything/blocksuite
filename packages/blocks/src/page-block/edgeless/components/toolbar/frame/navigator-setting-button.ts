@@ -35,7 +35,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
       justify-content: space-between;
       align-items: center;
       height: 28px;
-      width: 254px;
+      width: 204px;
     }
 
     .text {
@@ -48,7 +48,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   `;
 
   @state()
-  blackBackground = true;
+  blackBackground = false;
 
   @property({ attribute: false })
   popperShow = false;
@@ -77,11 +77,11 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
     const blackBackground = sessionStorage.getItem(
       PresentationConsts.BlackBackground
     );
-    this.blackBackground = blackBackground !== 'false';
+    this.blackBackground = blackBackground === 'true';
   }
 
   private _onBlackBackgroundChange = (checked: boolean) => {
-    this.blackBackground = !checked;
+    this.blackBackground = checked;
     this.edgeless.slots.navigatorSettingUpdated.emit({
       blackBackground: this.blackBackground,
     });
@@ -118,23 +118,23 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
         }}
       >
         <div class="item-container">
-          <div class="text title">Settings</div>
+          <div class="text title">Playback Settings</div>
         </div>
         <div class="item-container">
-          <div class="text">Hide toolbar while presenting</div>
+          <div class="text">Dark background</div>
+          <toggle-switch
+            .on=${this.blackBackground}
+            .onChange=${this._onBlackBackgroundChange}
+          >
+          </toggle-switch>
+        </div>
+        <div class="item-container">
+          <div class="text">Hide toolbar</div>
           <toggle-switch
             .on=${this.hideToolbar}
             .onChange=${(checked: boolean) => {
               this.onHideToolbarChange && this.onHideToolbarChange(checked);
             }}
-          >
-          </toggle-switch>
-        </div>
-        <div class="item-container">
-          <div class="text">Hide background while presenting</div>
-          <toggle-switch
-            .on=${!this.blackBackground}
-            .onChange=${this._onBlackBackgroundChange}
           >
           </toggle-switch>
         </div>
