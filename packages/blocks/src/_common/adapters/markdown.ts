@@ -19,7 +19,7 @@ import {
 import { nanoid } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import { sha } from '@blocksuite/store';
-import format from 'date-fns/format';
+import format from 'date-fns/format/index.js';
 import type { Heading, Root, RootContentMap, TableRow } from 'mdast';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';

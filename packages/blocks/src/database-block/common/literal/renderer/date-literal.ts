@@ -1,4 +1,4 @@
-import format from 'date-fns/format';
+import format from 'date-fns/format/index.js';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
