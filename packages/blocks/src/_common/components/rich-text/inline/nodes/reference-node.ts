@@ -2,6 +2,8 @@ import type { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type DeltaInsert,
+  INLINE_ROOT_ATTR,
+  type InlineRootElement,
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
@@ -79,6 +81,14 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     pageId: '0',
   };
 
+  get inlineRoot() {
+    const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
+      `[${INLINE_ROOT_ATTR}]`
+    );
+    assertExists(inlineRoot);
+    return inlineRoot;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     if (this.delta.insert !== REFERENCE_NODE) {
@@ -95,6 +105,13 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     this._updateRefMeta(page);
     this._disposables.add(
       page.workspace.slots.pagesUpdated.on(() => this._updateRefMeta(page))
+    );
+
+    // observe yText update
+    this.disposables.add(
+      this.inlineRoot.inlineEditor.slots.updated.on(() =>
+        this._updateRefMeta(page)
+      )
     );
   }
 
