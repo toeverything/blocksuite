@@ -419,9 +419,6 @@ importers:
       merge:
         specifier: ^2.1.1
         version: 2.1.1
-      ses:
-        specifier: ^0.18.8
-        version: 0.18.8
       tweakpane:
         specifier: ^4.0.1
         version: 4.0.1
@@ -1233,10 +1230,6 @@ packages:
       search-insights: 2.13.0
     transitivePeerDependencies:
       - '@algolia/client-search'
-
-  /@endo/env-options@0.1.4:
-    resolution: {integrity: sha512-Ol8ct0aW8VK1ZaqntnUJfrYT59P6Xn36XPbHzkqQhsYkpudKDn5ILYEwGmSO/Ff+XJjv/pReNI0lhOyyrDa9mg==}
-    dev: false
 
   /@esbuild/android-arm64@0.18.20:
     resolution: {integrity: sha512-Nz4rJcchGDtENV0eMKUNa6L12zz2zBDXuhj/Vjh18zGqB44Bi7MBMSXjgunJgjRhCmKOjnPuZp4Mb6OKqtMHLQ==}
@@ -7190,12 +7183,6 @@ packages:
     dependencies:
       lru-cache: 6.0.0
     dev: true
-
-  /ses@0.18.8:
-    resolution: {integrity: sha512-kOH1AhJc6gWDXKURKeU1w7iFUdImAegAljVvBg5EUBgNqjH4bxcEsGVUadVEPtA2PVRMyQp1fiSMDwEZkQNj1g==}
-    dependencies:
-      '@endo/env-options': 0.1.4
-    dev: false
 
   /set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
