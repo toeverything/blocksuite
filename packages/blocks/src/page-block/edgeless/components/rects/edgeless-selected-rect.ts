@@ -1,6 +1,7 @@
 import '../connector/connector-handle.js';
 import '../auto-complete/edgeless-auto-complete.js';
 
+import type { Disposable } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -326,6 +327,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _resizeManager: HandleResizeManager;
   private _cursorRotate = 0;
+  private _propDiposables: Disposable[] = [];
 
   constructor() {
     super();
@@ -669,7 +671,23 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._updateSelectedRect();
   };
 
+  private _initSelectedSlot = () => {
+    this._propDiposables.forEach(diposable => diposable.dispose());
+    this._propDiposables = [];
+
+    this.selection.elements.forEach(element => {
+      if ('flavour' in element) {
+        this._propDiposables.push(
+          element.propsUpdated.on(() => {
+            this._updateOnElementChange(element.id);
+          })
+        );
+      }
+    });
+  };
+
   private _updateOnSelectionChange = () => {
+    this._initSelectedSlot();
     this._updateSelectedRect();
     this._updateResizeManagerState(true);
     // Reset the cursor
@@ -689,7 +707,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   override firstUpdated() {
-    const { _disposables, page, slots, selection, edgeless } = this;
+    const { _disposables, slots, selection, edgeless } = this;
 
     _disposables.add(
       // viewport zooming / scrolling
@@ -713,12 +731,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
 
     _disposables.add(
-      page.slots.blockUpdated.on(data => {
-        this._updateOnElementChange(data);
-      })
-    );
-
-    _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
     );
 
@@ -728,6 +740,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _disposables.add(
       edgeless.slots.elementResizeEnd.on(() => (this._isResizing = false))
     );
+    _disposables.add(() => {
+      this._propDiposables.forEach(diposable => diposable.dispose());
+    });
   }
 
   private _canAutoComplete() {
