@@ -73,6 +73,8 @@ export class Block {
   }
 
   stash = (prop: string) => {
+    if (this._stashed.has(prop)) return;
+
     this._stashed.add(prop);
     // @ts-ignore
     this.model[prop] = y2Native(this.yBlock.get(`prop:${prop}`), {
@@ -223,8 +225,9 @@ export class Block {
           model.keys.includes(p)
         ) {
           if (this._stashed.has(p)) {
+            const result = Reflect.set(target, p, value, receiver);
             this.options.onChange?.(this, p, value);
-            return Reflect.set(target, p, value, receiver);
+            return result;
           }
 
           const yValue = native2Y(value);
