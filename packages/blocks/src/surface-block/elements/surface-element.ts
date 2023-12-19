@@ -249,12 +249,11 @@ export abstract class SurfaceElement<
   pop(key: string) {
     if (this._localProps.includes(key)) return;
 
-    const value = this._stashedValues.get(key);
+    if (this._stashedValues.has(key)) {
+      const value = this._stashedValues.get(key);
 
-    if (value) {
+      this._stashedValues.delete(key);
       this.yMap.set(key, value);
     }
-
-    this._stashedValues.delete(key);
   }
 }

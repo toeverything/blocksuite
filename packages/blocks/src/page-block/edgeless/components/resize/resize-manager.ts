@@ -92,7 +92,7 @@ export class HandleResizeManager {
   }
 
   get rotation() {
-    return this._rotate;
+    return this._rotation;
   }
 
   get currentRect() {

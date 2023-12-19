@@ -408,6 +408,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _onDragStart = () => {
     const rotation = this._resizeManager.rotation;
 
+    this._dragEndCallback = [];
     this.edgeless.slots.elementResizeStart.emit();
     this.selection.elements.forEach(el => {
       el.stash('xywh');
