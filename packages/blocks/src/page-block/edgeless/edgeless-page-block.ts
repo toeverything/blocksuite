@@ -895,15 +895,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
         )
           return;
 
-        if (event.flavour === 'affine:image') {
-          const parent =
-            event.type === 'delete'
-              ? this.page.getParent(event.model)
-              : this.page.getParent(this.page.getBlockById(event.id)!);
-
-          if (parent && parent.id !== this.surfaceBlockModel.id) {
-            return;
-          }
+        const parent =
+          event.type === 'delete'
+            ? this.page.getParent(event.model)
+            : this.page.getParent(this.page.getBlockById(event.id)!);
+        if (!parent || parent.id !== this.surfaceBlockModel.id) {
+          return;
         }
 
         switch (event.type) {
