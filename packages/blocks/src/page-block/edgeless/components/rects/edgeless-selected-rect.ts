@@ -328,6 +328,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _resizeManager: HandleResizeManager;
   private _cursorRotate = 0;
   private _propDiposables: Disposable[] = [];
+  private _dragEndCallback: (() => void)[] = [];
 
   constructor() {
     super();
@@ -405,13 +406,33 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   private _onDragStart = () => {
+    const rotation = this._resizeManager.rotation;
+
     this.edgeless.slots.elementResizeStart.emit();
     this.selection.elements.forEach(el => {
-      if (this._resizeManager.rotation) {
+      el.stash('xywh');
+
+      if (rotation) {
         el.stash('rotate' as 'xywh');
-      } else {
-        el.stash('xywh');
       }
+
+      if (el instanceof TextElement && !rotation) {
+        el.stash('fontSize');
+        el.stash('hasMaxWidth');
+      }
+
+      this._dragEndCallback.push(() => {
+        el.pop('xywh');
+
+        if (rotation) {
+          el.pop('rotate' as 'xywh');
+        }
+
+        if (el instanceof TextElement && !rotation) {
+          el.pop('fontSize');
+          el.pop('hasMaxWidth');
+        }
+      });
     });
     this.setToolbarVisible(false);
     this._updateResizeManagerState(true);
@@ -533,13 +554,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _onDragEnd = () => {
     this.page.transact(() => {
-      this.selection.elements.forEach(el => {
-        if (this._resizeManager.rotation) {
-          el.pop('rotate' as 'xywh');
-        } else {
-          el.pop('xywh');
-        }
-      });
+      this._dragEndCallback.forEach(cb => cb());
     });
 
     this._isNoteWidthLimit = false;

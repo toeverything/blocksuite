@@ -65,6 +65,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     const element = this._surface.pickById(id) as BrushElement;
 
     element.stash('points');
+    element.stash('xywh');
 
     this._lastPoint = [e.point.x, e.point.y];
     this._draggingElementId = id;
@@ -115,6 +116,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       const { _draggingElement } = this;
       this._page.transact(() => {
         _draggingElement.pop('points');
+        _draggingElement.pop('xywh');
       });
     }
     this._draggingElement = null;

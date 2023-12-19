@@ -119,7 +119,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     this._draggingElementId = id;
     this._draggingElement = this._surface.pickById(id) as ShapeElement;
-
+    this._draggingElement.stash('xywh');
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
       end: new DOMPoint(e.x, e.y),

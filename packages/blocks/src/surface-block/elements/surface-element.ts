@@ -130,10 +130,10 @@ export abstract class SurfaceElement<
   }
 
   get xywh() {
-    const xywh = this._stashedValues.has('xywh')
-      ? (this._stashedValues.get('xywh') as T['xywh'])
-      : (this.yMap.get('xywh') as T['xywh']);
-    return xywh;
+    return (
+      (this._stashedValues.get('xywh') as T['xywh']) ??
+      (this.yMap.get('xywh') as T['xywh'])
+    );
   }
 
   get seed() {
@@ -142,10 +142,10 @@ export abstract class SurfaceElement<
   }
 
   get rotate() {
-    const rotate = this._stashedValues.has('rotate')
-      ? (this._stashedValues.get('rotate') as T['rotate'])
-      : (this.yMap.get('rotate') as T['rotate']);
-    return rotate ?? 0;
+    return (
+      (this._stashedValues.get('rotate') as T['rotate']) ??
+      (this.yMap.get('rotate') as T['rotate'])
+    );
   }
 
   get batch() {
