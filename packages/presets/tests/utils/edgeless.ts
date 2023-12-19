@@ -75,11 +75,12 @@ export function addNote(page: Page, props: Record<string, any> = {}) {
   const noteId = page.addBlock(
     'affine:note',
     {
-      xywh: '[0, 0, 100, 100]',
+      xywh: '[0, 0, 800, 100]',
       ...props,
     },
     page.root
   );
+
   page.addBlock('affine:paragraph', {}, noteId);
 
   return noteId;
