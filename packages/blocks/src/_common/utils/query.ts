@@ -5,6 +5,7 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
+import type { PageBlockComponent } from '../../index.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
@@ -166,6 +167,30 @@ export function buildPath(model: BaseBlockModel | null): string[] {
   return path;
 }
 
+export function getPageByElement(element: Element): PageBlockComponent | null {
+  const docPageElement = getDocPageByElement(element);
+  if (docPageElement) return docPageElement;
+
+  const edgelessPageElement = getEdgelessPageByElement(element);
+  if (edgelessPageElement) return edgelessPageElement;
+
+  return null;
+}
+
+export function getPageByEditorHost(
+  editorHost: EditorHost
+): PageBlockComponent | null {
+  if (isInsideDocEditor(editorHost)) {
+    return getDocPageByEditorHost(editorHost);
+  }
+
+  if (isInsideEdgelessEditor(editorHost)) {
+    return getEdgelessPageByEditorHost(editorHost);
+  }
+
+  return null;
+}
+
 /** If it's not in the page mode, it will return `null` directly
  * Use `getDocPageByElement` or `getDocPageByEditorHost` instead.
  * @deprecated
@@ -250,7 +275,7 @@ export function getLitRoot() {
  * ```
  */
 export function getViewportElement(editorHost: EditorHost) {
-  if (isInsideDocEditor(editorHost)) return null;
+  if (!isInsideDocEditor(editorHost)) return null;
   const page = editorHost.page;
   assertExists(page.root);
   const pageComponent = editorHost.view.viewFromPath('block', [page.root.id]);

@@ -10,12 +10,12 @@ import type { Page, PageMeta } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { DocPageBlockComponent } from '../../../../../page-block/doc/doc-page-block.js';
+import type { PageBlockComponent } from '../../../../../index.js';
 import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/index.js';
 import {
   getClosestBlockElementByElement,
-  getDocPageByElement,
   getModelByElement,
+  getPageByElement,
 } from '../../../../utils/index.js';
 import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from '../../consts.js';
 import type { AffineTextAttributes } from '../types.js';
@@ -127,9 +127,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const targetPageId = refMeta.id;
     const root = model.page.root;
     assertExists(root);
-    const docPageElement = getDocPageByElement(this) as DocPageBlockComponent;
-    assertExists(docPageElement);
-    docPageElement.slots.pageLinkClicked.emit({ pageId: targetPageId });
+    const pageElement = getPageByElement(this) as PageBlockComponent;
+    assertExists(pageElement);
+    pageElement.slots.pageLinkClicked.emit({ pageId: targetPageId });
   }
 
   override render() {
