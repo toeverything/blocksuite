@@ -11,7 +11,7 @@ const styles = css`
     display: block;
     box-sizing: border-box;
     padding: 8px;
-    width: 290px;
+    width: 220px;
   }
 
   .frames-setting-menu-container {
@@ -51,7 +51,7 @@ const styles = css`
   }
 
   .frames-setting-menu-item .action-label {
-    width: 204px;
+    width: 138px;
     height: 20px;
     padding: 0 4px;
     font-size: 12px;
@@ -90,13 +90,13 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     );
     const fillScreen = sessionStorage.getItem(PresentationConsts.FillScreen);
     const hideToolbar = sessionStorage.getItem(PresentationConsts.HideToolbar);
-    this.blackBackground = blackBackground !== 'false';
+    this.blackBackground = blackBackground === 'true';
     this.fillScreen = fillScreen === 'true';
     this.hideToolbar = hideToolbar === 'true';
   }
 
   private _onBlackBackgroundChange = (checked: boolean) => {
-    this.blackBackground = !checked;
+    this.blackBackground = checked;
     this.edgeless?.slots.navigatorSettingUpdated.emit({
       blackBackground: this.blackBackground,
     });
@@ -187,20 +187,20 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
         <div class="setting-label">Playback Settings</div>
       </div>
       <div class="frames-setting-menu-item action">
-        <div class="action-label">Hide toolbar while presenting</div>
+        <div class="action-label">Dark background</div>
         <div class="toggle-button">
           <toggle-switch
-            .on=${this.hideToolbar}
-            .onChange=${this._onHideToolBarChange}
+            .on=${this.blackBackground}
+            .onChange=${this._onBlackBackgroundChange}
           ></toggle-switch>
         </div>
       </div>
       <div class="frames-setting-menu-item action">
-        <div class="action-label">Hide background while presenting</div>
+        <div class="action-label">Hide toolbar</div>
         <div class="toggle-button">
           <toggle-switch
-            .on=${!this.blackBackground}
-            .onChange=${this._onBlackBackgroundChange}
+            .on=${this.hideToolbar}
+            .onChange=${this._onHideToolBarChange}
           ></toggle-switch>
         </div>
       </div>
