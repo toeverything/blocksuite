@@ -88,12 +88,14 @@ export class Block {
               return Reflect.get(target, p, receiver);
             },
             set: (target, p, value, receiver) => {
+              const result = Reflect.set(target, p, value, receiver);
               this.options.onChange?.(this, prop, value);
-              return Reflect.set(target, p, value, receiver);
+              return result;
             },
             deleteProperty: (target, p) => {
+              const result = Reflect.deleteProperty(target, p);
               this.options.onChange?.(this, prop, undefined);
-              return Reflect.deleteProperty(target, p);
+              return result;
             },
           });
         }
@@ -107,12 +109,14 @@ export class Block {
               if (Number.isNaN(index)) {
                 return Reflect.set(target, p, value, receiver);
               }
+              const result = Reflect.set(target, p, value, receiver);
               this.options.onChange?.(this, prop, value);
-              return Reflect.set(target, p, value, receiver);
+              return result;
             },
             deleteProperty: (target, p) => {
+              const result = Reflect.deleteProperty(target, p);
               this.options.onChange?.(this, p as string, undefined);
-              return Reflect.deleteProperty(target, p);
+              return result;
             },
           });
         }

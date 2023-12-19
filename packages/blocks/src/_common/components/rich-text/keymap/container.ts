@@ -31,7 +31,7 @@ import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
 export const bindContainerHotkey = (blockElement: BlockElement) => {
   const selection = blockElement.host.selection;
   const model = blockElement.model;
-  const root = blockElement.host;
+  const editorHost = blockElement.host;
   const leftBrackets = bracketPairs.map(pair => pair.left);
 
   const _selectBlock = () => {
@@ -202,7 +202,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
 
       const state = ctx.get('keyboardState');
-      hardEnter(model, inlineRange, inlineEditor, state.raw);
+      hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw);
       _preventDefault(ctx);
 
       return true;
@@ -214,7 +214,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       const inlineEditor = _getInlineEditor();
       const inlineRange = inlineEditor.getInlineRange();
       assertExists(inlineRange);
-      hardEnter(model, inlineRange, inlineEditor, state.raw, true);
+      hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw, true);
       _preventDefault(ctx);
 
       return true;
@@ -247,7 +247,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       )
         return;
 
-      const textModels = getSelectedContentModels(root, ['text']);
+      const textModels = getSelectedContentModels(editorHost, ['text']);
       if (textModels.length === 1) {
         const inlineEditor = _getInlineEditor();
         const inilneRange = inlineEditor.getInlineRange();
@@ -258,7 +258,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return true;
       }
 
-      const models = getSelectedContentModels(root, ['text', 'block']);
+      const models = getSelectedContentModels(editorHost, ['text', 'block']);
       handleMultiBlockIndent(blockElement.page, models);
       return true;
     },
@@ -276,7 +276,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       );
       if (!page) return;
 
-      const textModels = getSelectedContentModels(root, ['text']);
+      const textModels = getSelectedContentModels(editorHost, ['text']);
       if (textModels.length === 1) {
         const inlineEditor = _getInlineEditor();
         const inlineRange = inlineEditor.getInlineRange();
@@ -289,7 +289,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return true;
       }
 
-      const models = getSelectedContentModels(root, ['text', 'block']);
+      const models = getSelectedContentModels(editorHost, ['text', 'block']);
       handleRemoveAllIndentForMultiBlocks(blockElement.page, models);
       return true;
     },
@@ -307,7 +307,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       );
       if (!page) return;
 
-      const textModels = getSelectedContentModels(root, ['text']);
+      const textModels = getSelectedContentModels(editorHost, ['text']);
       if (textModels.length === 1) {
         const inlineEditor = _getInlineEditor();
         const inlineRange = inlineEditor.getInlineRange();
@@ -318,7 +318,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return true;
       }
 
-      const models = getSelectedContentModels(root, ['text', 'block']);
+      const models = getSelectedContentModels(editorHost, ['text', 'block']);
       handleMultiBlockOutdent(blockElement.page, models);
       return true;
     },
@@ -326,7 +326,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!blockElement.selected?.is('text')) return;
       const state = ctx.get('keyboardState');
       const inlineEditor = _getInlineEditor();
-      if (!onBackspace(model, state.raw, inlineEditor)) {
+      if (!onBackspace(editorHost, model, state.raw, inlineEditor)) {
         _preventDefault(ctx);
       }
 
@@ -369,7 +369,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
         _preventDefault(ctx);
 
-        config.action(root);
+        config.action(editorHost);
         return true;
       },
     });
@@ -395,7 +395,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     if (!blockElement.selected?.is('text')) return;
     const state = ctx.get('keyboardState');
     const inlineEditor = _getInlineEditor();
-    if (!onForwardDelete(model, state.raw, inlineEditor)) {
+    if (!onForwardDelete(editorHost, model, state.raw, inlineEditor)) {
       _preventDefault(ctx);
     }
     return true;

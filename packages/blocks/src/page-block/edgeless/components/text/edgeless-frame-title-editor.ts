@@ -5,7 +5,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import { getBlockComponentByPath } from '../../../../_common/utils/index.js';
 import type {
   FrameBlockComponent,
   FrameBlockModel,
@@ -25,6 +24,10 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  get editorHost() {
+    return this.edgeless.host;
+  }
+
   get inlineEditor() {
     assertExists(this.richText.inlineEditor);
     return this.richText.inlineEditor;
@@ -35,7 +38,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
   get frameBlock() {
     assertExists(this.frameModel.page.root);
-    const block = getBlockComponentByPath([
+    const block = this.editorHost.view.viewFromPath('block', [
       this.frameModel.page.root.id,
       this.frameModel.id,
     ]) as FrameBlockComponent | null;

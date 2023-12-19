@@ -7,7 +7,10 @@ import { html, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 
-import { matchFlavours } from '../_common/utils/index.js';
+import {
+  getEdgelessPageByElement,
+  matchFlavours,
+} from '../_common/utils/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
 import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
 import {
@@ -141,7 +144,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       const insideDragHandle = !!element?.closest('affine-drag-handle-widget');
       if (!insideDragHandle) return false;
 
-      const edgelessPage = blockComponent.closest('affine-edgeless-page');
+      const edgelessPage = getEdgelessPageByElement(blockComponent);
       const scale = edgelessPage ? edgelessPage.surface.viewport.zoom : 1;
       const width = blockComponent.getBoundingClientRect().width;
 

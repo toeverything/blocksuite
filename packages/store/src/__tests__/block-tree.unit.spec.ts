@@ -155,3 +155,48 @@ test('stash and pop', async () => {
   expect(onPropsUpdated).toBeCalledTimes(11);
   expect(onPropsUpdated).toHaveBeenNthCalledWith(11, { key: 'style' });
 });
+
+test('always get latest value in onChange', async () => {
+  const options = createTestOptions();
+  const workspace = new Workspace(options);
+
+  const page = workspace.createPage({ id: 'home' });
+  await page.load();
+
+  page.addBlock('page');
+
+  const root = page.root as PageBlockModel;
+
+  expect(root).not.toBeNull();
+
+  let value: unknown;
+  root.propsUpdated.on(({ key }) => {
+    value = root[key];
+  });
+
+  root.count = 1;
+  expect(value).toBe(1);
+
+  root.stash('count');
+
+  root.count = 2;
+  expect(value).toBe(2);
+
+  root.pop('count');
+
+  root.count = 3;
+  expect(value).toBe(3);
+
+  root.style.color = 'blue';
+  expect(value).toEqual({ color: 'blue' });
+
+  root.stash('style');
+  root.style = { color: 'red' };
+  expect(value).toEqual({ color: 'red' });
+  root.style.color = 'green';
+  expect(value).toEqual({ color: 'green' });
+
+  root.pop('style');
+  root.style.color = 'yellow';
+  expect(value).toEqual({ color: 'yellow' });
+});

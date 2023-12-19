@@ -1,13 +1,13 @@
 import type { BlockSelection, UIEventHandler } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import type { ReactiveController } from 'lit';
 import type { ReactiveControllerHost } from 'lit';
 
 import { moveBlockConfigs } from '../_common/configs/move-block.js';
 import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
-import { getBlockComponentByModel } from '../_common/utils/index.js';
+import { buildPath } from '../_common/utils/index.js';
 import { onModelElementUpdated } from '../page-block/utils/callback.js';
 import { updateBlockElementType } from '../page-block/utils/operations/element/block-level.js';
 import { ensureBlockInContainer } from './utils.js';
@@ -679,20 +679,27 @@ export class KeymapController implements ReactiveController {
                 }
 
                 const [codeModel] = newModels;
-                onModelElementUpdated(codeModel, () => {
-                  const codeElement = getBlockComponentByModel(codeModel);
-                  assertExists(codeElement);
-                  this._std.selection.setGroup('note', [
-                    this._std.selection.getInstance('text', {
-                      from: {
-                        path: codeElement.path,
-                        index: 0,
-                        length: codeModel.text?.length ?? 0,
-                      },
-                      to: null,
-                    }),
-                  ]);
-                }).catch(console.error);
+                onModelElementUpdated(
+                  this._std.host as EditorHost,
+                  codeModel,
+                  () => {
+                    const codeElement = this._std.view.viewFromPath(
+                      'block',
+                      buildPath(codeModel)
+                    );
+                    assertExists(codeElement);
+                    this._std.selection.setGroup('note', [
+                      this._std.selection.getInstance('text', {
+                        from: {
+                          path: codeElement.path,
+                          index: 0,
+                          length: codeModel.text?.length ?? 0,
+                        },
+                        to: null,
+                      }),
+                    ]);
+                  }
+                ).catch(console.error);
 
                 next();
               })

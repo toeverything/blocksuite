@@ -1,9 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import { getBlockComponentByPath } from '../_common/utils/index.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import {
   Bound,
@@ -42,12 +42,17 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(
   BaseBlockModel
 ) {
   override batch = FRAME_BATCH;
-  override hitTest(x: number, y: number, _: HitTestOptions): boolean {
+  override hitTest(
+    x: number,
+    y: number,
+    _: HitTestOptions,
+    editorHost: EditorHost
+  ): boolean {
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointOnBound([x, y]);
     if (hit) return true;
     assertExists(this.page.root);
-    const block = getBlockComponentByPath([
+    const block = editorHost.view.viewFromPath('block', [
       this.page.root?.id,
       this.id,
     ]) as FrameBlockComponent;

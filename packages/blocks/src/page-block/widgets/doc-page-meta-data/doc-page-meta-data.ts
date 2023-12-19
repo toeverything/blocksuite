@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
 import { customElement } from 'lit/decorators.js';
 
-import { getDocPage } from '../../../_common/utils/query.js';
+import { getDocPageByEditorHost } from '../../../_common/utils/query.js';
 import { PageMetaData } from './components/meta-data.js';
 
 export const AFFINE_DOC_PAGE_META_DATA = 'affine-page-meta-data-widget';
@@ -14,10 +14,10 @@ export class DocPageMetaDataWidget extends WidgetElement {
 
     this.host.updateComplete
       .then(() => {
-        const pageElement = getDocPage(this.page);
-        assertExists(pageElement);
+        const docPageElement = getDocPageByEditorHost(this.host);
+        assertExists(docPageElement);
 
-        const pageMetaData = new PageMetaData(this.page, pageElement);
+        const pageMetaData = new PageMetaData(this.page, docPageElement);
 
         const pageTitleContainer = this.host.querySelector(
           '.affine-doc-page-block-title-container'

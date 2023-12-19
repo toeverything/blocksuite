@@ -1,11 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import {
-  asyncGetBlockComponentByModel,
   asyncGetRichTextByModel,
+  buildPath,
 } from '../../_common/utils/query.js';
 
 export async function onModelTextUpdated(
@@ -30,11 +30,19 @@ export async function onModelTextUpdated(
 // If you want to wait for the text elements,
 // please use `onModelTextUpdated`.
 export async function onModelElementUpdated(
+  editorHost: EditorHost,
   model: BaseBlockModel,
   callback: (blockElement: BlockElement) => void
 ) {
-  const element = await asyncGetBlockComponentByModel(model);
-  if (element) {
-    callback(element);
-  }
+  const page = model.page;
+  assertExists(page.root);
+
+  const pageBlockElement = editorHost.view.viewFromPath('block', [
+    page.root.id,
+  ]);
+  if (!pageBlockElement) return;
+  await pageBlockElement.updateComplete;
+
+  const element = editorHost.view.viewFromPath('block', buildPath(model));
+  if (element) callback(element);
 }

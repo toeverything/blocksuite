@@ -1,10 +1,10 @@
 import { Slot, throttle } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { EditorHost } from '@blocksuite/lit';
 
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import { almostEqual } from '../../../_common/utils/math.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
-import { getBlockComponentByModel } from '../../../_common/utils/query.js';
+import { buildPath } from '../../../_common/utils/query.js';
 
 export class NoteResizeObserver {
   private _observer: ResizeObserver;
@@ -55,14 +55,20 @@ export class NoteResizeObserver {
     }
   };
 
-  resetListener(page: Page) {
+  resetListener(editorHost: EditorHost) {
+    const page = editorHost.page;
     const unCachedKeys = new Set(this._cachedElements.keys());
     page.root?.children.forEach(model => {
       if (!matchFlavours(model, ['affine:note'])) return;
 
       const blockId = model.id;
       unCachedKeys.delete(blockId);
-      const blockElement = getBlockComponentByModel(model);
+
+      const blockElement = editorHost.view.viewFromPath(
+        'block',
+        buildPath(model)
+      );
+
       const container = blockElement?.querySelector(
         '.affine-note-block-container'
       );

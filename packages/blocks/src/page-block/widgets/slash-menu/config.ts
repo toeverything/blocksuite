@@ -27,7 +27,6 @@ import {
 } from '../../../_common/icons/index.js';
 import {
   createDefaultPage,
-  getBlockComponentByModel,
   getCurrentNativeRange,
   getImageFilesFromLocal,
   getInlineEditorByModel,
@@ -205,12 +204,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         name: 'Link Page',
         alias: ['dual link'],
         icon: DualLinkIcon,
-        showWhen: model => {
-          assertExists(model.page.root);
-          const pageBlock = getBlockComponentByModel(model.page.root);
-          assertExists(pageBlock);
+        showWhen: (_, pageElement) => {
           const linkedPageWidgetEle =
-            pageBlock.widgetElements['affine-linked-page-widget'];
+            pageElement.widgetElements['affine-linked-page-widget'];
           if (!linkedPageWidgetEle) return false;
           if (!('showLinkedPage' in linkedPageWidgetEle)) {
             console.warn(
@@ -220,13 +216,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return true;
         },
-        action: ({ model }) => {
+        action: ({ model, pageElement }) => {
           const triggerKey = '@';
           insertContent(model, triggerKey);
           assertExists(model.page.root);
-          const pageBlock = getBlockComponentByModel(model.page.root);
           const widgetEle =
-            pageBlock?.widgetElements['affine-linked-page-widget'];
+            pageElement.widgetElements['affine-linked-page-widget'];
           assertExists(widgetEle);
           // We have checked the existence of showLinkedPage method in the showWhen
           const linkedPageWidget = widgetEle as AffineLinkedPageWidget;

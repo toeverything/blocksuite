@@ -414,7 +414,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     });
     this.setToolbarVisible(false);
-    this._updateResizeManagerState(false);
+    this._updateResizeManagerState(true);
   };
 
   private _onDragMove = (
