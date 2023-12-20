@@ -179,6 +179,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
       themes: [LIGHT_THEME, DARK_THEME],
       langs: [lang],
+      paths: {
+        // TODO: use local path
+        wasm: 'https://cdn.jsdelivr.net/npm/shiki/dist',
+        themes: 'https://cdn.jsdelivr.net/',
+        languages: 'https://cdn.jsdelivr.net/npm/shiki/languages',
+      },
     });
 
     const richText = this.querySelector('rich-text');

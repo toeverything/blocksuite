@@ -227,13 +227,9 @@ export class Clipboard {
 
       await Promise.all(
         adapterKeys.map(async type => {
-          try {
-            const item = await this._getClipboardItem(slice, type);
-            if (typeof item === 'string') {
-              items[type] = item;
-            }
-          } catch {
-            // skip
+          const item = await this._getClipboardItem(slice, type);
+          if (typeof item === 'string') {
+            items[type] = item;
           }
         })
       );
