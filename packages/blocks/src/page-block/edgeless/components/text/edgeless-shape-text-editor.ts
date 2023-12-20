@@ -81,9 +81,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     const dispatcher = this.edgeless.dispatcher;
     assertExists(dispatcher);
 
-    this.edgeless.localRecord.update(this.element.id, {
-      textDisplay: false,
-    });
+    this.element.textDisplay = false;
 
     this.disposables.add(
       this.edgeless.slots.viewportUpdated.on(() => {
@@ -137,9 +135,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     this._resizeObserver?.disconnect();
     this._resizeObserver = null;
 
-    this.edgeless.localRecord.update(this.element.id, {
-      textDisplay: true,
-    });
+    this.element.textDisplay = true;
 
     this.remove();
     this.edgeless.selectionManager.setSelection({

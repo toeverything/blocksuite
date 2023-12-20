@@ -12,7 +12,7 @@ import '../../components/auto-connect/edgeless-auto-connect-line.js';
 import '../component-toolbar/component-toolbar.js';
 import '../presentation/edgeless-navigator-black-background.js';
 
-import { assertExists, throttle } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, nothing } from 'lit';
@@ -21,10 +21,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import {
-  EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
-  EDGELESS_BLOCK_CHILD_PADDING,
-} from '../../../../_common/consts.js';
 import {
   delayCallback,
   requestConnectedFrame,
@@ -37,14 +33,8 @@ import type { SurfaceBlockComponent } from '../../../../index.js';
 import type { FrameBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type { GroupElement } from '../../../../surface-block/index.js';
-import {
-  almostEqual,
-  Bound,
-  type EdgelessBlockType,
-  serializeXYWH,
-} from '../../../../surface-block/index.js';
+import { type EdgelessBlockType } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { NoteResizeObserver } from '../../utils/note-resize-observer.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
 import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect.js';
 
@@ -139,36 +129,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   private _cancelRestoreWillchange: (() => void) | null = null;
 
-  private _noteResizeObserver = new NoteResizeObserver();
-
   private _surfaceRefReferenceSet = new Set<string>();
-
-  private _initNoteHeightUpdate() {
-    const { page, host } = this.edgeless;
-    assertExists(page.root);
-
-    const resetNoteResizeObserver = throttle(
-      () => {
-        requestConnectedFrame(() => {
-          this._noteResizeObserver.resetListener(host);
-        }, this);
-      },
-      16,
-      { leading: true }
-    );
-
-    this._disposables.add(
-      page.root.childrenUpdated.on(resetNoteResizeObserver)
-    );
-
-    this._disposables.add(
-      page.slots.blockUpdated.on(({ flavour }) => {
-        if (flavour === 'affine:note') {
-          resetNoteResizeObserver();
-        }
-      })
-    );
-  }
 
   get isDragging() {
     return this.selectedRect.dragging;
@@ -255,49 +216,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   override firstUpdated() {
     this._updateReference();
     const { _disposables, edgeless } = this;
-    const { page, host } = edgeless;
-
-    this._initNoteHeightUpdate();
-
-    requestConnectedFrame(() => {
-      this._noteResizeObserver.resetListener(host);
-    }, this);
-
-    _disposables.add(this._noteResizeObserver);
-
-    _disposables.add(
-      this._noteResizeObserver.slots.resize.on(resizedNotes => {
-        resizedNotes.forEach(([domRect], id) => {
-          if (page.readonly) return;
-
-          const model = edgeless.surface.pickById(id) as NoteBlockModel;
-          const { xywh } = model;
-          const { x, y, w, h } = Bound.deserialize(xywh);
-
-          // ResizeObserver is not effected by CSS transform, so don't deal with viewport zoom.
-          const newModelHeight =
-            domRect.height +
-            EDGELESS_BLOCK_CHILD_PADDING * 2 +
-            (model.hidden ? EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2 : 0);
-
-          if (!almostEqual(newModelHeight, h)) {
-            if (this.isDragging && edgeless.selectionManager.isSelected(id)) {
-              edgeless.updateElementInLocal(model.id, {
-                xywh: serializeXYWH(x, y, w, Math.round(newModelHeight)),
-              });
-            } else {
-              page.withoutTransact(() => {
-                page.updateBlock(model, {
-                  xywh: serializeXYWH(x, y, w, Math.round(newModelHeight)),
-                });
-              });
-            }
-          }
-        });
-
-        edgeless.slots.selectedRectUpdated.emit({ type: 'resize' });
-      })
-    );
+    const { page } = edgeless;
 
     let rAqId: number | null = null;
     _disposables.add(

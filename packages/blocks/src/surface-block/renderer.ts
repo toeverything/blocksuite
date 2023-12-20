@@ -474,9 +474,8 @@ export class Renderer implements SurfaceViewport {
     for (const element of elements) {
       ctx.save();
 
-      const localRecord = element.localRecord;
-      const display = localRecord?.display ?? true;
-      const opacity = localRecord?.opacity ?? 1;
+      const display = element.display ?? true;
+      const opacity = element.opacity ?? 1;
       if (intersects(getBoundsWithRotation(element), bound) && display) {
         ctx.globalAlpha = opacity;
         const dx = element.x - bound.x;

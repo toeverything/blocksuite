@@ -186,9 +186,9 @@ export class SurfaceBlockComponent extends BlockElement<
   ): TopLevelBlockModel[] {
     if (flavours instanceof RegExp) {
       const regexp = flavours;
-      const models = this.model.children
-        .filter(child => regexp.test(child.flavour))
-        .map(x => this.edgeless.localRecord.wrap(x));
+      const models = this.model.children.filter(child =>
+        regexp.test(child.flavour)
+      );
 
       return models as TopLevelBlockModel[];
     }
@@ -200,11 +200,9 @@ export class SurfaceBlockComponent extends BlockElement<
         flavour === 'affine:note' ? this.edgeless.model : this.model;
 
       return pre.concat(
-        parent.children
-          .filter(child => child.flavour === flavour)
-          .map(child =>
-            this.edgeless.localRecord.wrap(child)
-          ) as EdgelessBlockModelMap[T][]
+        parent.children.filter(
+          child => child.flavour === flavour
+        ) as EdgelessBlockModelMap[T][]
       );
     }, []);
   }
@@ -325,11 +323,7 @@ export class SurfaceBlockComponent extends BlockElement<
 
     _disposables.add(
       edgeless.slots.elementRemoved.on(({ element }) => {
-        this.layer.delete(
-          ('flavour' in element
-            ? this.edgeless.localRecord.wrap(element)
-            : element) as EdgelessElement
-        );
+        this.layer.delete(element);
       })
     );
 
@@ -511,14 +505,8 @@ export class SurfaceBlockComponent extends BlockElement<
     const { edgeless } = this;
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
-      getLocalRecord: id => {
-        return edgeless.localRecord.get(id);
-      },
       onElementUpdated: update => {
         edgeless.slots.elementUpdated.emit(update);
-      },
-      updateElementLocalRecord: (id, record) => {
-        edgeless.localRecord.update(id, record);
       },
       pickById: id => this.pickById(id),
       getGroupParent: (element: string | EdgelessElement) => {
@@ -620,14 +608,8 @@ export class SurfaceBlockComponent extends BlockElement<
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, {
-        getLocalRecord: id => {
-          return edgeless.localRecord.get(id);
-        },
         onElementUpdated: update => {
           edgeless.slots.elementUpdated.emit(update);
-        },
-        updateElementLocalRecord: (id, record) => {
-          edgeless.localRecord.update(id, record);
         },
         pickById: id => this.pickById(id),
         getGroupParent: (element: string | EdgelessElement) => {
@@ -658,7 +640,6 @@ export class SurfaceBlockComponent extends BlockElement<
       }
       element.unmount();
       this._elements.delete(id);
-      this.edgeless.localRecord.delete(id);
       this.edgeless.slots.elementRemoved.emit({ id, element });
     }
   };
@@ -776,7 +757,7 @@ export class SurfaceBlockComponent extends BlockElement<
     }
     const element = this.pickById(id);
     if (isTopLevelBlock(element)) {
-      this.page.updateBlock(this.unwrap(element), properties);
+      this.page.updateBlock(element, properties);
     } else {
       this.transact(() => {
         const element = this._elements.get(id);
@@ -798,7 +779,7 @@ export class SurfaceBlockComponent extends BlockElement<
     }
     const element = this.pickById(id);
     if (isTopLevelBlock(element)) {
-      this.page.deleteBlock(this.unwrap(element));
+      this.page.deleteBlock(element);
     } else {
       this.transact(() => {
         this._yContainer.delete(id);
@@ -837,9 +818,7 @@ export class SurfaceBlockComponent extends BlockElement<
 
     const block = this.page.getBlockById(id);
 
-    return block
-      ? (this.edgeless.localRecord.wrap(block) as EdgelessElement)
-      : null;
+    return block as EdgelessElement | null;
   }
 
   pickTop(
@@ -943,16 +922,6 @@ export class SurfaceBlockComponent extends BlockElement<
         this.getGroupParent(element.id) === GROUP_ROOT
     );
     return picked;
-  }
-
-  /**
-   * Block model retrieved from the surface block will be wrapped with local record.
-   * You can use this function to unwrap them to get real model
-   * @param block
-   * @returns
-   */
-  unwrap<T extends BaseBlockModel>(block: T) {
-    return this.edgeless.localRecord.unwrap(block) as T;
   }
 
   getSortedCanvasElementsWithViewportBounds() {

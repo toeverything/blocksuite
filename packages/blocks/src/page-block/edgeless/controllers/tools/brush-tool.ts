@@ -6,6 +6,7 @@ import type {
   EdgelessTool,
 } from '../../../../_common/utils/index.js';
 import { LineWidth } from '../../../../_common/utils/index.js';
+import type { BrushElement } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
   type IVec,
@@ -20,6 +21,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     lineWidth: 4,
   };
 
+  private _draggingElement: BrushElement | null = null;
   private _draggingElementId: string | null = null;
   protected _draggingPathPoints: number[][] | null = null;
   private _lastPoint: IVec | null = null;
@@ -60,8 +62,14 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       lineWidth,
     });
 
+    const element = this._surface.pickById(id) as BrushElement;
+
+    element.stash('points');
+    element.stash('xywh');
+
     this._lastPoint = [e.point.x, e.point.y];
     this._draggingElementId = id;
+    this._draggingElement = element;
     this._draggingPathPoints = points;
   }
 
@@ -70,8 +78,6 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
     assertExists(this._draggingElementId);
     assertExists(this._draggingPathPoints);
-
-    const { lineWidth } = this.tool;
 
     let pointX = e.point.x;
     let pointY = e.point.y;
@@ -100,17 +106,20 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     this._lastPoint = [pointX, pointY];
     this._draggingPathPoints = points;
 
-    this._edgeless.updateElementInLocal(this._draggingElementId, {
+    this._edgeless.surface.updateElement(this._draggingElementId, {
       points,
-      lineWidth,
     });
   }
 
   onContainerDragEnd() {
-    if (this._draggingElementId) {
-      this._edgeless.applyLocalRecord([this._draggingElementId]);
+    if (this._draggingElement) {
+      const { _draggingElement } = this;
+      this._page.transact(() => {
+        _draggingElement.pop('points');
+        _draggingElement.pop('xywh');
+      });
     }
-
+    this._draggingElement = null;
     this._draggingElementId = null;
     this._draggingPathPoints = null;
     this._lastPoint = null;

@@ -73,6 +73,8 @@ export class Block {
   }
 
   stash = (prop: string) => {
+    if (this._stashed.has(prop)) return;
+
     this._stashed.add(prop);
     // @ts-ignore
     this.model[prop] = y2Native(this.yBlock.get(`prop:${prop}`), {

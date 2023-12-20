@@ -189,7 +189,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       surface.connector.updateXYWH(selected, bound);
     }
 
-    this._edgeless.updateElementInLocal(selected.id, {
+    this._surface.updateElement(selected.id, {
       xywh: bound.serialize(),
     });
   }
@@ -203,7 +203,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.x += delta[0];
     bound.y += delta[1];
 
-    this._edgeless.updateElementInLocal(block.id, {
+    this._surface.updateElement(block.id, {
       xywh: bound.serialize(),
     });
   }
@@ -463,6 +463,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
     this._filterConnectedConnector();
 
+    this._toBeMoved.forEach(ele => {
+      ele.stash('xywh');
+    });
+
     // Connector needs to be updated first
     this._toBeMoved.sort((a, _) => (a instanceof ConnectorElement ? -1 : 1));
     this._addFrames();
@@ -608,7 +612,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerDragEnd() {
-    this._edgeless.applyLocalRecord(this._toBeMoved.map(ele => ele.id));
+    this._page.transact(() => {
+      this._toBeMoved.forEach(el => {
+        el.pop('xywh');
+      });
+    });
 
     if (this._lock) {
       this._page.captureSync();

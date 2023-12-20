@@ -32,7 +32,7 @@ export function deleteElements(
       const children = surface.page.root?.children ?? [];
       // FIXME: should always keep at least 1 note
       if (children.length > 1) {
-        surface.page.deleteBlock(surface.unwrap(element));
+        surface.page.deleteBlock(element);
       }
     } else {
       surface.removeElement(element.id);

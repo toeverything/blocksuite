@@ -258,7 +258,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
-      getLocalRecord: () => undefined,
       onElementUpdated: ({ id }) => {
         const element = this.getModel(id);
 
@@ -270,7 +269,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
         }
       },
       removeElement: () => {},
-      updateElementLocalRecord: () => {},
       pickById: id => this.getModel(id),
       getGroupParent: getGroupParent,
       setGroupParent: setGroupParent,
@@ -333,8 +331,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, {
         onElementUpdated() {},
-        getLocalRecord: () => undefined,
-        updateElementLocalRecord: () => {},
         pickById: id => this.getModel(id),
         getGroupParent: getGroupParent,
         setGroupParent: setGroupParent,
