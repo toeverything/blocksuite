@@ -132,7 +132,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       const blockComponent = anchorComponent as ImageBlockComponent;
       const isInSurface = blockComponent.isInSurface;
       if (!isInSurface) {
-        this.std.selection.setGroup('block', [
+        this.std.selection.set([
           this.std.selection.getInstance('block', {
             path: blockComponent.path,
           }),

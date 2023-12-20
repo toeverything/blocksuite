@@ -81,7 +81,7 @@ export class EmbedBlockElement<
       const blockComponent = anchorComponent as this;
       const isInSurface = blockComponent.isInSurface;
       if (!isInSurface) {
-        this.host.selection.setGroup('block', [
+        this.host.selection.set([
           this.host.selection.getInstance('block', {
             path: blockComponent.path,
           }),
