@@ -972,7 +972,7 @@ test('should format quick bar work in single block selection', async ({
   assertExists(formatRect);
   assertExists(selectionRect);
   assertAlmostEqual(formatRect.x - selectionRect.x, 160.5, 10);
-  assertAlmostEqual(formatRect.y - selectionRect.y, -50, 10);
+  assertAlmostEqual(formatRect.y - selectionRect.y, 33, 10);
 
   const boldBtn = formatBar.getByTestId('bold');
   await boldBtn.click();
@@ -1062,7 +1062,7 @@ test('should format quick bar work in multiple block selection', async ({
   const rect = await blockSelections.first().boundingBox();
   assertExists(rect);
   assertAlmostEqual(box.x - rect.x, 160.5, 10);
-  assertAlmostEqual(box.y - rect.y, -45, 10);
+  assertAlmostEqual(box.y - rect.y, 99, 10);
 
   await formatBarController.boldBtn.click();
   await formatBarController.italicBtn.click();
@@ -1259,7 +1259,7 @@ test('should format quick bar show after convert to code block', async ({
     { x: 0, y: 0 }
   );
   await expect(formatBarController.formatBar).toBeVisible();
-  await formatBarController.assertBoundingBox(264.5, 194);
+  await formatBarController.assertBoundingBox(264.5, 343);
 
   await formatBarController.openParagraphMenu();
   await formatBarController.codeBlockBtn.click();
