@@ -10,6 +10,7 @@ import {
   EventService,
   RangeService,
 } from './services/index.js';
+import { InlineTextService } from './services/text.js';
 import type {
   DeltaInsert,
   InlineRange,
@@ -20,7 +21,6 @@ import {
   nativePointToTextPoint,
   textPointToDomPoint,
 } from './utils/index.js';
-import { intersectInlineRange } from './utils/inline-range.js';
 import { getTextNodesFromElement } from './utils/text.js';
 
 export type InlineRootElement<
@@ -63,6 +63,9 @@ export class InlineEditor<
   private _deltaService: DeltaService<TextAttributes> =
     new DeltaService<TextAttributes>(this);
 
+  private _textService: InlineTextService<TextAttributes> =
+    new InlineTextService<TextAttributes>(this);
+
   private _hooksService: InlineHookService<TextAttributes>;
 
   private _mounted = false;
@@ -70,12 +73,14 @@ export class InlineEditor<
   readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
   readonly inlineRangeProvider: InlineRangeProvider | null;
 
-  slots: {
-    mounted: Slot;
-    unmounted: Slot;
-    updated: Slot;
-    inlineRangeUpdated: Slot<InlineRangeUpdatedProp>;
-    rangeUpdated: Slot<Range>;
+  readonly slots = {
+    mounted: new Slot(),
+    unmounted: new Slot(),
+    textChange: new Slot(),
+    render: new Slot(),
+    renderComplete: new Slot(),
+    inlineRangeUpdate: new Slot<InlineRangeUpdatedProp>(),
+    inlineRangeApply: new Slot<Range>(),
   };
 
   get yText() {
@@ -154,6 +159,14 @@ export class InlineEditor<
   mapDeltasInInlineRange = this.deltaService.mapDeltasInInlineRange;
   isNormalizedDeltaSelected = this.deltaService.isNormalizedDeltaSelected;
 
+  // Expose text service API
+  deleteText = this._textService.deleteText;
+  insertText = this._textService.insertText;
+  insertLineBreak = this._textService.insertLineBreak;
+  formatText = this._textService.formatText;
+  resetText = this._textService.resetText;
+  setText = this._textService.setText;
+
   // Expose hook service API
   get hooks() {
     return this._hooksService.hooks;
@@ -187,20 +200,12 @@ export class InlineEditor<
     this._hooksService = new InlineHookService(this, hooks);
     this.inlineRangeProvider = inlineRangeProvider;
 
-    this.slots = {
-      mounted: new Slot(),
-      unmounted: new Slot(),
-      updated: new Slot(),
-      inlineRangeUpdated: new Slot<InlineRangeUpdatedProp>(),
-      rangeUpdated: new Slot<Range>(),
-    };
-
     if (inlineRangeProvider) {
       inlineRangeProvider.inlineRangeUpdated.on(prop => {
-        this.slots.inlineRangeUpdated.emit(prop);
+        this.slots.inlineRangeUpdate.emit(prop);
       });
     }
-    this.slots.inlineRangeUpdated.on(this.rangeService.onInlineRangeUpdated);
+    this.slots.inlineRangeUpdate.on(this.rangeService.onInlineRangeUpdated);
   }
 
   mount(rootElement: HTMLElement) {
@@ -247,119 +252,18 @@ export class InlineEditor<
     return this._isReadonly;
   }
 
-  deleteText(inlineRange: InlineRange): void {
-    this._transact(() => {
-      this.yText.delete(inlineRange.index, inlineRange.length);
-    });
-  }
-
-  insertText(
-    inlineRange: InlineRange,
-    text: string,
-    attributes: TextAttributes = {} as TextAttributes
-  ): void {
-    if (this._attributeService.marks) {
-      attributes = { ...attributes, ...this._attributeService.marks };
-    }
-    const normalizedAttributes =
-      this._attributeService.normalizeAttributes(attributes);
-
-    if (!text || !text.length) {
-      throw new Error('text must not be empty');
-    }
-
-    this._transact(() => {
-      this.yText.delete(inlineRange.index, inlineRange.length);
-      this.yText.insert(inlineRange.index, text, normalizedAttributes);
-    });
-  }
-
-  insertLineBreak(inlineRange: InlineRange): void {
-    this._transact(() => {
-      this.yText.delete(inlineRange.index, inlineRange.length);
-      this.yText.insert(inlineRange.index, '\n');
-    });
-  }
-
-  formatText(
-    inlineRange: InlineRange,
-    attributes: TextAttributes,
-    options: {
-      match?: (delta: DeltaInsert, deltaInlineRange: InlineRange) => boolean;
-      mode?: 'replace' | 'merge';
-    } = {}
-  ): void {
-    const { match = () => true, mode = 'merge' } = options;
-    const deltas = this._deltaService.getDeltasByInlineRange(inlineRange);
-
-    deltas
-      .filter(([delta, deltaInlineRange]) => match(delta, deltaInlineRange))
-      .forEach(([_delta, deltaInlineRange]) => {
-        const normalizedAttributes =
-          this._attributeService.normalizeAttributes(attributes);
-        if (!normalizedAttributes) return;
-
-        const targetInlineRange = intersectInlineRange(
-          inlineRange,
-          deltaInlineRange
-        );
-        if (!targetInlineRange) return;
-
-        if (mode === 'replace') {
-          this.resetText(targetInlineRange);
-        }
-
-        this._transact(() => {
-          this.yText.format(
-            targetInlineRange.index,
-            targetInlineRange.length,
-            normalizedAttributes
-          );
-        });
-      });
-  }
-
-  resetText(inlineRange: InlineRange): void {
-    const coverDeltas: DeltaInsert[] = [];
-    for (
-      let i = inlineRange.index;
-      i <= inlineRange.index + inlineRange.length;
-      i++
-    ) {
-      const delta = this.getDeltaByRangeIndex(i);
-      if (delta) {
-        coverDeltas.push(delta);
-      }
-    }
-
-    const unset = Object.fromEntries(
-      coverDeltas.flatMap(delta =>
-        delta.attributes
-          ? Object.keys(delta.attributes).map(key => [key, null])
-          : []
-      )
-    );
-
-    this._transact(() => {
-      this.yText.format(inlineRange.index, inlineRange.length, {
-        ...unset,
-      });
-    });
-  }
-
-  setText(
-    text: string,
-    attributes: TextAttributes = {} as TextAttributes
-  ): void {
-    this._transact(() => {
-      this.yText.delete(0, this.yText.length);
-      this.yText.insert(0, text, attributes);
-    });
-  }
-
   rerenderWholeEditor() {
     render(nothing, this.rootElement);
     this._deltaService.render().catch(console.error);
+  }
+
+  transact(fn: () => void): void {
+    const doc = this.yText.doc;
+    if (!doc) {
+      throw new Error('yText is not attached to a doc');
+    }
+
+    doc.transact(fn, doc.clientID);
   }
 
   private _onYTextChange = () => {
@@ -369,19 +273,12 @@ export class InlineEditor<
       );
     }
 
+    this.slots.textChange.emit();
+
     Promise.resolve()
       .then(() => this.deltaService.render())
       .catch(console.error);
   };
-
-  private _transact(fn: () => void): void {
-    const doc = this.yText.doc;
-    if (!doc) {
-      throw new Error('yText is not attached to a doc');
-    }
-
-    doc.transact(fn, doc.clientID);
-  }
 
   private _bindYTextObserver() {
     this.yText.observe(this._onYTextChange);

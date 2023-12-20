@@ -45,7 +45,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
 
         this.group.showTitle = false;
 
-        this.inlineEditor.slots.updated.on(() => {
+        this.inlineEditor.slots.renderComplete.on(() => {
           this.requestUpdate();
         });
 

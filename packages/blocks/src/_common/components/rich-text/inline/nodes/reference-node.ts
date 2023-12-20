@@ -109,7 +109,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
     // observe yText update
     this.disposables.add(
-      this.inlineRoot.inlineEditor.slots.updated.on(() =>
+      this.inlineRoot.inlineEditor.slots.textChange.on(() =>
         this._updateRefMeta(page)
       )
     );

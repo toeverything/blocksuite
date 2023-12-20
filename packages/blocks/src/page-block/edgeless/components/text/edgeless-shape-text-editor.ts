@@ -109,7 +109,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         this.inlineEditor.focusEnd();
 
         this.disposables.add(
-          this.inlineEditor.slots.updated.on(() => {
+          this.inlineEditor.slots.renderComplete.on(() => {
             this._updateHeight();
           })
         );
