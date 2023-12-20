@@ -24,28 +24,46 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
   override render() {
     return html`
       <style>
-        doc-editor * {
-          box-sizing: border-box;
-        }
         doc-editor {
-          display: block;
           position: relative;
+          display: block;
+          height: 100%;
           font-family: var(--affine-font-family);
           background: var(--affine-background-primary-color);
         }
+
+        doc-editor * {
+          box-sizing: border-box;
+        }
+
         @media print {
           doc-editor {
             height: auto;
           }
         }
+
+        .affine-doc-viewport {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          overflow-x: hidden;
+          overflow-y: auto;
+        }
+
+        editor-host {
+          flex-grow: 1;
+        }
       </style>
-      <doc-title .page=${this.page} .editorHostRef=${this.host}></doc-title>
-      <page-meta .page=${this.page} .editorHostRef=${this.host}></page-meta>
-      <editor-host
-        ${ref(this.host)}
-        .page=${this.page}
-        .specs=${this.specs}
-      ></editor-host>
+      <div class="affine-doc-viewport">
+        <doc-title .page=${this.page} .editorHostRef=${this.host}></doc-title>
+        <page-meta .page=${this.page} .editorHostRef=${this.host}></page-meta>
+        <editor-host
+          ${ref(this.host)}
+          .page=${this.page}
+          .specs=${this.specs}
+        ></editor-host>
+      </div>
     `;
   }
 }

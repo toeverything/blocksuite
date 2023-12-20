@@ -1,5 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { Slot } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import { BlockElement } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
@@ -60,15 +60,11 @@ export class DocPageBlockComponent extends BlockElement<
   DocPageBlockWidgetName
 > {
   static override styles = css`
-    .affine-doc-viewport {
-      position: relative;
-      overflow-x: hidden;
-    }
-
     .affine-doc-page-block-container {
       display: flex;
       flex-direction: column;
       width: 100%;
+      height: 100%;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
@@ -118,9 +114,6 @@ export class DocPageBlockComponent extends BlockElement<
 
   clipboardController = new PageClipboard(this);
 
-  @query('.affine-doc-viewport')
-  viewportElement!: HTMLDivElement;
-
   @query('.affine-doc-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
@@ -138,6 +131,14 @@ export class DocPageBlockComponent extends BlockElement<
     }>(),
     viewportUpdated: new Slot<PageViewport>(),
   };
+
+  get viewportElement(): HTMLDivElement {
+    const viewportElement = this.host.closest(
+      '.affine-doc-viewport'
+    ) as HTMLDivElement | null;
+    assertExists(viewportElement);
+    return viewportElement;
+  }
 
   get viewport(): PageViewport {
     if (!this.viewportElement) {
@@ -429,9 +430,7 @@ export class DocPageBlockComponent extends BlockElement<
     )}`;
 
     return html`
-      <div class="affine-doc-viewport">
-        <div class="affine-doc-page-block-container">${content} ${widgets}</div>
-      </div>
+      <div class="affine-doc-page-block-container">${content} ${widgets}</div>
     `;
   }
 }
