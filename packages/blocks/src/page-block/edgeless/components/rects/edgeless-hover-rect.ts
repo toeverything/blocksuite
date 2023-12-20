@@ -2,6 +2,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import { requestConnectedFrame } from '../../../../_common/utils/event.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isNoteBlock } from '../../utils/query.js';
 
@@ -42,21 +43,22 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
   private _refreshHoverRect = () => {
     if (this.rAfId) cancelAnimationFrame(this.rAfId);
 
-    const hoverState = this.edgeless.tools.getHoverState();
-    if (!hoverState) {
-      this.rAfId = requestAnimationFrame(() => {
-        this.rect.style.removeProperty('visibility');
-      });
+    this.rAfId = requestConnectedFrame(() => {
+      const hoverState = this.edgeless.tools.getHoverState();
 
-      return;
-    }
+      if (!hoverState) {
+        this.rAfId = requestAnimationFrame(() => {
+          this.rect.style.removeProperty('visibility');
+        });
 
-    const { zoom } = this.edgeless.surface.viewport;
-    const { rect } = hoverState;
-    const element = hoverState.content;
-    const isNote = isNoteBlock(element);
+        return;
+      }
 
-    this.rAfId = requestAnimationFrame(() => {
+      const { zoom } = this.edgeless.surface.viewport;
+      const { rect } = hoverState;
+      const element = hoverState.content;
+      const isNote = isNoteBlock(element);
+
       this.rect.style.visibility = 'visible';
       this.rect.style.transform = `translate(${rect.x}px, ${rect.y}px)`;
       this.rect.style.width = `${rect.width}px`;
@@ -68,7 +70,7 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
         ? 'var(--affine-hover-color)'
         : '';
       this.rAfId = null;
-    });
+    }, this);
   };
 
   protected override firstUpdated() {
