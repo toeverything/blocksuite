@@ -53,10 +53,17 @@ export function CodeOptionTemplate({
       <icon-button
         size="32px"
         data-testid="copy-button"
-        @click=${async () => {
+        @click=${() => {
           const slice = Slice.fromModels(model.page, [model]);
-          await anchor.std.clipboard.copySlice(slice);
-          toast('Copied to clipboard');
+          anchor.std.clipboard
+            .copySlice(slice)
+            .then(() => {
+              toast('Copied to clipboard');
+            })
+            .catch(e => {
+              toast('Copied failed, something went wrong');
+              console.error(e);
+            });
         }}
       >
         ${CopyIcon}
