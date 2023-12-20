@@ -34,6 +34,7 @@ export default ({ mode }) => {
             'tests',
             fileURLToPath(new URL('.', import.meta.url)),
             'templates',
+            'builtin-templates',
           ],
           forceBuildInstrument: true,
         }),
