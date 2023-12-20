@@ -8,6 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { RemoteCursor } from '../../../_common/icons/edgeless.js';
 import type { Selectable } from '../../../_common/types.js';
+import { requestConnectedFrame } from '../../../_common/utils/event.js';
 import { pickValues } from '../../../_common/utils/iterable.js';
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import {
@@ -210,10 +211,15 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
     _disposables.add(
       this.selection.slots.remoteCursorUpdated.on(this._updateRemoteCursor)
     );
+
+    let rAqId: number | null = null;
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(() => {
-        this._updateTransform();
-        this.requestUpdate();
+        if (rAqId) return;
+        rAqId = requestConnectedFrame(() => {
+          this._updateTransform();
+          rAqId = null;
+        }, this);
       })
     );
 
