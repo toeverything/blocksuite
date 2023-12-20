@@ -155,7 +155,7 @@ export class AffineFormatBarWidget extends WidgetElement {
           assertExists(range);
           const e = ctx.get('pointerState');
           const rangeRect = range.getBoundingClientRect();
-          if (e.y < rangeRect.top + rangeRect.height / 2) {
+          if (e.raw.y < rangeRect.top + rangeRect.height / 2) {
             this._placement = 'top';
           } else {
             this._placement = 'bottom';
@@ -167,7 +167,7 @@ export class AffineFormatBarWidget extends WidgetElement {
             return;
           }
           const blockRect = blockElement.getBoundingClientRect();
-          if (e.y < blockRect.bottom) {
+          if (e.raw.y < blockRect.bottom) {
             this._placement = 'top';
           } else {
             this._placement = 'bottom';
