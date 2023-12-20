@@ -12,17 +12,17 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
     return this.editor.yText;
   }
 
-  deleteText(inlineRange: InlineRange): void {
+  deleteText = (inlineRange: InlineRange): void => {
     this.transact(() => {
       this.yText.delete(inlineRange.index, inlineRange.length);
     });
-  }
+  };
 
-  insertText(
+  insertText = (
     inlineRange: InlineRange,
     text: string,
     attributes: TextAttributes = {} as TextAttributes
-  ): void {
+  ): void => {
     if (this.editor.attributeService.marks) {
       attributes = { ...attributes, ...this.editor.attributeService.marks };
     }
@@ -37,23 +37,23 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
       this.yText.delete(inlineRange.index, inlineRange.length);
       this.yText.insert(inlineRange.index, text, normalizedAttributes);
     });
-  }
+  };
 
-  insertLineBreak(inlineRange: InlineRange): void {
+  insertLineBreak = (inlineRange: InlineRange): void => {
     this.transact(() => {
       this.yText.delete(inlineRange.index, inlineRange.length);
       this.yText.insert(inlineRange.index, '\n');
     });
-  }
+  };
 
-  formatText(
+  formatText = (
     inlineRange: InlineRange,
     attributes: TextAttributes,
     options: {
       match?: (delta: DeltaInsert, deltaInlineRange: InlineRange) => boolean;
       mode?: 'replace' | 'merge';
     } = {}
-  ): void {
+  ): void => {
     const { match = () => true, mode = 'merge' } = options;
     const deltas = this.editor.deltaService.getDeltasByInlineRange(inlineRange);
 
@@ -82,9 +82,9 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
           );
         });
       });
-  }
+  };
 
-  resetText(inlineRange: InlineRange): void {
+  resetText = (inlineRange: InlineRange): void => {
     const coverDeltas: DeltaInsert[] = [];
     for (
       let i = inlineRange.index;
@@ -110,15 +110,15 @@ export class InlineTextService<TextAttributes extends BaseTextAttributes> {
         ...unset,
       });
     });
-  }
+  };
 
-  setText(
+  setText = (
     text: string,
     attributes: TextAttributes = {} as TextAttributes
-  ): void {
+  ): void => {
     this.transact(() => {
       this.yText.delete(0, this.yText.length);
       this.yText.insert(0, text, attributes);
     });
-  }
+  };
 }
