@@ -137,7 +137,7 @@ export class AffineSlashMenuWidget extends WidgetElement {
     if (matchFlavours(model, ['affine:code'])) return;
     const inlineEditor = getInlineEditorByModel(model);
     if (!inlineEditor) return;
-    inlineEditor.slots.rangeUpdated.once(() => {
+    inlineEditor.slots.inlineRangeApply.once(() => {
       const pageElement = this.blockElement;
       if (!isPageComponent(pageElement)) {
         throw new Error('SlashMenuWidget should be used in PageBlock');

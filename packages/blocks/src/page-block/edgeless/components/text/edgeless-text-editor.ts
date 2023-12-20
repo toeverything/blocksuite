@@ -332,7 +332,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
     this.updateComplete
       .then(() => {
-        this.inlineEditor.slots.updated.on(() => {
+        this.inlineEditor.slots.renderComplete.on(() => {
           this._updateRect();
           this.requestUpdate();
         });

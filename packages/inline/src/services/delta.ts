@@ -6,32 +6,17 @@ import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaInsert } from '../types.js';
 import type { DeltaEntry, InlineRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
-import { deltaInsertsToChunks, renderElement } from '../utils/index.js';
+import {
+  deltaInsertsToChunks,
+  renderElement,
+  transformDeltasToEmbedDeltas,
+} from '../utils/index.js';
 
 export class DeltaService<TextAttributes extends BaseTextAttributes> {
   constructor(public readonly editor: InlineEditor<TextAttributes>) {}
 
   get deltas() {
     return this.editor.yText.toDelta() as DeltaInsert<TextAttributes>[];
-  }
-
-  get normalizedDeltas() {
-    // According to our regulations, the length of each "embed" node should only be 1.
-    // Therefore, if the length of an "embed" type node is greater than 1,
-    // we will divide it into multiple parts.
-    const result: DeltaInsert<TextAttributes>[] = [];
-    for (const delta of this.deltas) {
-      if (this.editor.isEmbed(delta)) {
-        const dividedDeltas = [...delta.insert].map(subInsert => ({
-          insert: subInsert,
-          attributes: delta.attributes,
-        }));
-        result.push(...dividedDeltas);
-      } else {
-        result.push(delta);
-      }
-    }
-    return result;
   }
 
   mapDeltasInInlineRange = <Result>(
@@ -43,7 +28,9 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
     ) => Result,
     normalize = false
   ) => {
-    const deltas = normalize ? this.normalizedDeltas : this.deltas;
+    const deltas = normalize
+      ? transformDeltasToEmbedDeltas(this.editor, this.deltas)
+      : this.deltas;
     const result: Result[] = [];
 
     deltas.reduce((rangeIndex, delta, deltaIndex) => {
@@ -202,9 +189,14 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
   render = async (syncInlineRange = true) => {
     if (!this.editor.mounted) return;
 
+    this.editor.slots.render.emit();
+
     const rootElement = this.editor.rootElement;
 
-    const normalizedDeltas = this.normalizedDeltas;
+    const normalizedDeltas = transformDeltasToEmbedDeltas(
+      this.editor,
+      this.deltas
+    );
     const chunks = deltaInsertsToChunks(normalizedDeltas);
 
     let normalizedDeltaIndex = 0;
@@ -268,6 +260,6 @@ export class DeltaService<TextAttributes extends BaseTextAttributes> {
       this.editor.rangeService.syncInlineRange();
     }
 
-    this.editor.slots.updated.emit();
+    this.editor.slots.renderComplete.emit();
   };
 }

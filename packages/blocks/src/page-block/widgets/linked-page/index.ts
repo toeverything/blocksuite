@@ -151,7 +151,7 @@ export class AffineLinkedPageWidget extends WidgetElement {
     if (!matchedKey) return;
 
     const primaryTriggerKey = this.options.triggerKeys[0];
-    inlineEditor.slots.rangeUpdated.once(() => {
+    inlineEditor.slots.inlineRangeApply.once(() => {
       if (this.options.convertTriggerKey && primaryTriggerKey !== matchedKey) {
         // Convert to the primary trigger key
         // e.g. [[ -> @
@@ -169,7 +169,7 @@ export class AffineLinkedPageWidget extends WidgetElement {
           index: startIdxBeforeMatchKey + primaryTriggerKey.length,
           length: 0,
         });
-        inlineEditor.slots.rangeUpdated.once(() => {
+        inlineEditor.slots.inlineRangeApply.once(() => {
           this.showLinkedPage(model, primaryTriggerKey);
         });
         return;

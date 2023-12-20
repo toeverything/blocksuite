@@ -57,7 +57,7 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
 
         this.inlineEditor.selectAll();
 
-        this.inlineEditor.slots.updated.on(() => {
+        this.inlineEditor.slots.renderComplete.on(() => {
           this.requestUpdate();
         });
 

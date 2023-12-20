@@ -263,7 +263,7 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
       return;
     }
 
-    this.editor.slots.inlineRangeUpdated.emit([inlineRange, sync]);
+    this.editor.slots.inlineRangeUpdate.emit([inlineRange, sync]);
   };
 
   focusEnd = (): void => {
@@ -364,6 +364,6 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
     selection.removeAllRanges();
     selection.addRange(newRange);
-    this.editor.slots.rangeUpdated.emit(newRange);
+    this.editor.slots.inlineRangeApply.emit(newRange);
   };
 }

@@ -169,7 +169,7 @@ export class TestRichText extends ShadowlessElement {
     });
     this._container.addEventListener('keydown', keydownHandler);
 
-    this.inlineEditor.slots.updated.on(() => {
+    this.inlineEditor.slots.textChange.on(() => {
       const el = this.querySelector('.y-text');
       if (el) {
         const text = this.inlineEditor.yText.toDelta();
@@ -178,7 +178,7 @@ export class TestRichText extends ShadowlessElement {
         el.replaceChildren(span);
       }
     });
-    this.inlineEditor.slots.inlineRangeUpdated.on(() => {
+    this.inlineEditor.slots.inlineRangeUpdate.on(() => {
       const el = this.querySelector('.v-range');
       if (el) {
         const inlineRange = this.inlineEditor.getInlineRange();

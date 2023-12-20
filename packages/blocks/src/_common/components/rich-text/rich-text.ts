@@ -151,7 +151,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
     // init auto scroll
     inlineEditor.disposables.add(
-      inlineEditor.slots.inlineRangeUpdated.on(([inlineRange, sync]) => {
+      inlineEditor.slots.inlineRangeUpdate.on(([inlineRange, sync]) => {
         if (!inlineRange || !sync) return;
 
         inlineEditor

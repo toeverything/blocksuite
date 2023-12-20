@@ -59,7 +59,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       .then(() => {
         this.inlineEditor.selectAll();
 
-        this.inlineEditor.slots.updated.on(() => {
+        this.inlineEditor.slots.renderComplete.on(() => {
           this.requestUpdate();
         });
 
