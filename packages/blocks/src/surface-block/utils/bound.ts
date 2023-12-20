@@ -260,7 +260,7 @@ export class Bound implements IBound {
     );
   }
 
-  isPointOnBound([x, y]: IVec, tolerance = 4) {
+  isPointNearBound([x, y]: IVec, tolerance = 0.01) {
     return (
       Math.abs(x - this.minX) < tolerance ||
       Math.abs(x - this.maxX) < tolerance ||
