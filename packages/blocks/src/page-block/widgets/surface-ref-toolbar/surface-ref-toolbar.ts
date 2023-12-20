@@ -1,6 +1,6 @@
 import { WidgetElement } from '@blocksuite/lit';
 import { offset, shift } from '@floating-ui/dom';
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -80,6 +80,8 @@ function SurfaceRefToolbarOptions(options: {
   const readonly = model.page.readonly;
   const hasValidReference = !!blockElement.referenceModel;
 
+  if (readonly) return nothing;
+
   return html`
     <style>
       :host {
@@ -122,7 +124,7 @@ function SurfaceRefToolbarOptions(options: {
 
     <div class="surface-ref-toolbar-container">
       <icon-button
-        ?hidden=${!hasValidReference}
+        ?hidden=${!hasValidReference || readonly}
         class="view-in-edgeless-button"
         text="View in Edgeless"
         width="fit-content"
@@ -131,6 +133,7 @@ function SurfaceRefToolbarOptions(options: {
       </icon-button>
       <div
         class="divider"
+        ?hidden=${readonly}
         style=${styleMap({
           display: hasValidReference ? undefined : 'none',
         })}
