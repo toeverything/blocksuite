@@ -225,6 +225,10 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
           top: 0,
           left: 0,
         };
+        this._initialContainerOffset = {
+          x: 0,
+          y: 0,
+        };
         this._lastPointerState = null;
       },
       {

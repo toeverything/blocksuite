@@ -187,7 +187,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       const inlineEditor = _getInlineEditor();
       const inlineRange = inlineEditor.getInlineRange();
-      assertExists(inlineRange);
+      if (!inlineRange) return;
 
       if (
         !tryConvertBlock(
