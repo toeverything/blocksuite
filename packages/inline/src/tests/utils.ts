@@ -14,7 +14,7 @@ export async function type(page: Page, content: string) {
 
 export async function press(page: Page, content: string) {
   await page.keyboard.press(content, { delay: 50 });
-  await page.waitForTimeout(100);
+  await page.waitForTimeout(200);
 }
 
 export async function enterInlineEditorPlayground(page: Page) {
