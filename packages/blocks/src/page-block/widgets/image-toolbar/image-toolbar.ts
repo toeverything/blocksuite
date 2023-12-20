@@ -1,5 +1,5 @@
 import { WidgetElement } from '@blocksuite/lit';
-import { offset, shift } from '@floating-ui/dom';
+import { limitShift, offset, shift } from '@floating-ui/dom';
 import { customElement } from 'lit/decorators.js';
 
 import { HoverController } from '../../../_common/components/hover/controller.js';
@@ -41,6 +41,7 @@ export class AffineImageToolbarWidget extends WidgetElement<ImageBlockComponent>
                 bottom: 12,
                 right: 12,
               },
+              limiter: limitShift(),
             }),
           ],
           autoUpdate: true,
