@@ -33,7 +33,7 @@ export default ({ mode }) => {
             'node_modules',
             'tests',
             fileURLToPath(new URL('.', import.meta.url)),
-            'templates',
+            'templates/',
             'builtin-templates',
           ],
           forceBuildInstrument: true,
