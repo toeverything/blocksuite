@@ -164,12 +164,12 @@ class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
   override render() {
     const { model, index, surface } = this;
     const bound = Bound.deserialize(model.xywh);
-    const { zoom } = surface.viewport;
+    const { translateX, translateY, zoom } = surface.viewport;
     const style = styleMap({
       position: 'absolute',
       zIndex: `${index}`,
-      transform: `translate(${bound.x * zoom}px, ${
-        bound.y * zoom
+      transform: `translate(${translateX + bound.x * zoom}px, ${
+        translateY + bound.y * zoom
       }px) scale(${zoom})`,
       transformOrigin: '0px 0px',
     });

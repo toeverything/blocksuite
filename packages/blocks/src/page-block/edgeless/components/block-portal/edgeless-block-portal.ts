@@ -20,10 +20,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import {
-  delayCallback,
-  requestConnectedFrame,
-} from '../../../../_common/utils/event.js';
+import { requestConnectedFrame } from '../../../../_common/utils/event.js';
 import {
   matchFlavours,
   type TopLevelBlockModel,
@@ -126,37 +123,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @state()
   private _isResizing = false;
 
-  private _cancelRestoreWillchange: (() => void) | null = null;
-
   private _surfaceRefReferenceSet = new Set<string>();
 
   get isDragging() {
     return this.selectedRect.dragging;
-  }
-
-  private _updateCanvasViewport() {
-    const { surface } = this.edgeless;
-    const { translateX, translateY } = surface.viewport;
-
-    this.canvasSlot.style.setProperty(
-      '--canvas-translate-x-offset',
-      `${-translateX}px`
-    );
-    this.canvasSlot.style.setProperty(
-      '--canvas-translate-y-offset',
-      `${-translateY}px`
-    );
-  }
-
-  aboutToChangeViewport() {
-    if (this._cancelRestoreWillchange) this._cancelRestoreWillchange();
-    if (!this.layer.style.willChange)
-      this.layer.style.setProperty('will-change', 'transform');
-
-    this._cancelRestoreWillchange = delayCallback(() => {
-      this.layer.style.removeProperty('will-change');
-      this._cancelRestoreWillchange = null;
-    }, 150);
   }
 
   refreshLayerViewport = () => {
@@ -172,7 +142,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
     this.layer.style.setProperty('transform', this._getLayerViewport());
-    this._updateCanvasViewport();
   };
 
   setSlotContent(children: HTMLElement[]) {
@@ -184,8 +153,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         );
       });
     this.canvasSlot.replaceChildren(...children);
-
-    this._updateCanvasViewport();
   }
 
   private _getLayerViewport(negative = false) {
@@ -227,20 +194,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     this._updateReference();
     const { _disposables, edgeless } = this;
     const { page } = edgeless;
-
-    let rAqId: number | null = null;
-    _disposables.add(
-      edgeless.slots.viewportUpdated.on(() => {
-        this.aboutToChangeViewport();
-
-        if (rAqId) return;
-
-        rAqId = requestConnectedFrame(() => {
-          this.refreshLayerViewport();
-          rAqId = null;
-        }, this);
-      })
-    );
 
     _disposables.add(
       edgeless.surface.layer.slots.layerUpdated.on(() => {
@@ -344,12 +297,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           .elementsMap=${autoConnectedBlocks}
         >
         </edgeless-auto-connect-line>
-        <div
-          class="affine-edgeless-layer"
-          style=${styleMap({
-            transform: this._getLayerViewport(),
-          })}
-        >
+        <div class="affine-edgeless-layer">
           <edgeless-frames-container
             .surface=${surface}
             .edgeless=${edgeless}
