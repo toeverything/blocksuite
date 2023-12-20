@@ -26,9 +26,10 @@ export interface PageViewport {
   top: number;
   scrollLeft: number;
   scrollTop: number;
+  scrollWidth: number;
   scrollHeight: number;
-  clientHeight: number;
   clientWidth: number;
+  clientHeight: number;
 }
 
 const PAGE_BLOCK_CHILD_PADDING = 24;
@@ -147,23 +148,31 @@ export class DocPageBlockComponent extends BlockElement<
         top: 0,
         scrollLeft: 0,
         scrollTop: 0,
+        scrollWidth: 0,
         scrollHeight: 0,
-        clientHeight: 0,
         clientWidth: 0,
+        clientHeight: 0,
       };
     }
 
-    const { clientHeight, clientWidth, scrollHeight, scrollLeft, scrollTop } =
-      this.viewportElement;
+    const {
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    } = this.viewportElement;
     const { top, left } = this.viewportElement.getBoundingClientRect();
     return {
       top,
       left,
-      clientHeight,
-      clientWidth,
-      scrollHeight,
       scrollLeft,
       scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
     };
   }
 
