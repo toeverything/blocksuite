@@ -50,6 +50,7 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
           height: 100%;
           overflow-x: hidden;
           overflow-y: auto;
+          user-select: none;
         }
 
         editor-host {
