@@ -161,6 +161,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       y: number;
     };
   };
+  private _highlightMask: HTMLDivElement | null = null;
+  private _highlightTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   get viewportPadding(): [number, number, number, number] {
     return this.fitPadding
@@ -194,6 +196,12 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     }
 
     this._clearPageDisposables();
+    this._highlightMask?.remove();
+    this._highlightMask = null;
+    if (this._highlightTimeoutId) {
+      clearTimeout(this._highlightTimeoutId);
+      this._highlightTimeoutId = null;
+    }
   }
 
   private _clearPageDisposables() {
@@ -453,17 +461,32 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       const blockRect = blockElement.getBoundingClientRect();
       const { top, left, width, height } = blockRect;
       const { top: offsetY, left: offsetX } = pageBlock.viewport;
-      const highlightMask = document.createElement('div');
-      highlightMask.style.position = 'absolute';
-      highlightMask.style.top = `${top - offsetY}` + 'px';
-      highlightMask.style.left = `${left - offsetX}` + 'px';
-      highlightMask.style.width = `${width}` + 'px';
-      highlightMask.style.height = `${height}` + 'px';
-      highlightMask.style.background = 'var(--affine-hover-color)';
-      highlightMask.style.borderRadius = '4px';
-      pageBlock.appendChild(highlightMask);
-      setTimeout(() => {
-        pageBlock.removeChild(highlightMask);
+
+      if (!this._highlightMask) {
+        this._highlightMask = document.createElement('div');
+        pageBlock.appendChild(this._highlightMask);
+      }
+
+      Object.assign(this._highlightMask.style, {
+        position: 'absolute',
+        top: `${top - offsetY}px`,
+        left: `${left - offsetX}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+        background: 'var(--affine-hover-color)',
+        borderRadius: '4px',
+        display: 'block',
+      });
+
+      // Clear the previous timeout if it exists
+      if (this._highlightTimeoutId !== null) {
+        clearTimeout(this._highlightTimeoutId);
+      }
+
+      this._highlightTimeoutId = setTimeout(() => {
+        if (this._highlightMask) {
+          this._highlightMask.style.display = 'none';
+        }
       }, 1000);
     });
   }
