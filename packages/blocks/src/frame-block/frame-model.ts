@@ -49,7 +49,7 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(
     editorHost: EditorHost
   ): boolean {
     const bound = Bound.deserialize(this.xywh);
-    const hit = bound.isPointOnBound([x, y]);
+    const hit = bound.isPointOnBound([x, y], 5);
     if (hit) return true;
     assertExists(this.page.root);
     const block = editorHost.view.viewFromPath('block', [
