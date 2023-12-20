@@ -3,6 +3,7 @@ import type {
   TemplateCategory,
   TemplateManager,
 } from './template-type.js';
+import fourpmarketingmatrix from './templates/4p-marketing-matrix.js';
 import businessproposal from './templates/business-proposal.js';
 import conceptmap from './templates/concept-map.js';
 import dataanalysis from './templates/data-analysis.js';
@@ -12,13 +13,15 @@ import kanban from './templates/kanban.js';
 import monthlycalendar from './templates/monthly-calendar.js';
 import projectplanning from './templates/project-planning.js';
 import simplepresentation from './templates/simple-presentation.js';
+import smartprinciples from './templates/smart-principles.js';
 import stickers from './templates/stickers.js';
 import storyboard from './templates/storyboard.js';
+import swot from './templates/swot.js';
 
 export const templates: TemplateCategory[] = [
   {
     name: 'Marketing',
-    templates: [storyboard],
+    templates: [storyboard, fourpmarketingmatrix],
   },
   {
     name: 'Project management',
@@ -26,7 +29,7 @@ export const templates: TemplateCategory[] = [
   },
   {
     name: 'Brainstorming',
-    templates: [flowchart, conceptmap],
+    templates: [swot, flowchart, conceptmap, smartprinciples],
   },
   {
     name: 'Presentation',
