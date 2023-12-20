@@ -5,7 +5,6 @@ import './bookmark/edgeless-bookmark.js';
 import './frame/edgeless-frame.js';
 import './embed/edgeless-embed.js';
 import '../rects/edgeless-selected-rect.js';
-import '../rects/edgeless-hover-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
 import '../../components/auto-connect/edgeless-index-label.js';
 import '../../components/auto-connect/edgeless-auto-connect-line.js';
@@ -136,12 +135,17 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   }
 
   private _updateCanvasViewport() {
-    Array.from(this.canvasSlot.children).forEach(canvas => {
-      (canvas as HTMLCanvasElement).style.setProperty(
-        'transform',
-        this._getLayerViewport(true)
-      );
-    });
+    const { surface } = this.edgeless;
+    const { translateX, translateY } = surface.viewport;
+
+    this.canvasSlot.style.setProperty(
+      '--canvas-translate-x-offset',
+      `${-translateX}px`
+    );
+    this.canvasSlot.style.setProperty(
+      '--canvas-translate-y-offset',
+      `${-translateY}px`
+    );
   }
 
   aboutToChangeViewport() {
@@ -173,7 +177,13 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   setSlotContent(children: HTMLElement[]) {
     if (this.canvasSlot.children.length !== children.length)
-      this.canvasSlot.replaceChildren(...children);
+      children.forEach(canvas => {
+        canvas.style.setProperty(
+          'transform',
+          `translate3d(var(--canvas-translate-x-offset), var(--canvas-translate-y-offset), 0)`
+        );
+      });
+    this.canvasSlot.replaceChildren(...children);
 
     this._updateCanvasViewport();
   }
@@ -395,11 +405,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             })}
         </div>
       </div>
-      ${this._isResizing
-        ? nothing
-        : html`
-            <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>
-          `}
       <edgeless-dragging-area-rect
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>

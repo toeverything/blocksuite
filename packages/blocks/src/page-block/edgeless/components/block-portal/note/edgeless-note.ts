@@ -1,7 +1,7 @@
 import '../../note-slicer/index.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { html, nothing } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -21,6 +21,12 @@ const ACTIVE_NOTE_EXTRA_PADDING = 20;
 
 @customElement('edgeless-note-mask')
 export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    .affine-note-mask:hover {
+      background-color: var(--affine-hover-color);
+    }
+  `;
+
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
@@ -73,7 +79,11 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
       right: '0',
       zIndex: '1',
       pointerEvents: selected ? 'none' : 'auto',
+      borderRadius: `${
+        this.model.edgeless.style.borderRadius * this.surface.viewport.zoom
+      }px`,
     };
+
     return html`
       <div class="affine-note-mask" style=${styleMap(style)}></div>
     `;
