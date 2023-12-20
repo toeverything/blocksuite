@@ -33,6 +33,8 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     }
   `;
 
+  static enable = true;
+
   private _remoteColorManager: RemoteColorManager | null = null;
 
   private _remoteSelections: Array<{
@@ -61,6 +63,9 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    if (!AffineDocRemoteSelectionWidget.enable) return;
+
     this.disposables.add(
       this._selectionManager.slots.remoteChanged.on(
         throttle((remoteSelections: Map<number, BaseSelection[]>) => {
@@ -239,7 +244,10 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
   }
 
   override render() {
-    if (this._remoteSelections.length === 0) {
+    if (
+      this._remoteSelections.length === 0 ||
+      !AffineDocRemoteSelectionWidget.enable
+    ) {
       return nothing;
     }
 

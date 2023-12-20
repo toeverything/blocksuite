@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
 import type { UserInfo } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -21,6 +21,7 @@ export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET =
 
 @customElement(AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET)
 export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlockComponent> {
+  static enable = true;
   static override styles = css`
     :host {
       pointer-events: none;
@@ -189,6 +190,8 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
   override connectedCallback() {
     super.connectedCallback();
 
+    if (!EdgelessRemoteSelectionWidget.enable) return;
+
     const { _disposables, surface, page, edgeless } = this;
 
     pickValues(edgeless.slots, [
@@ -223,6 +226,8 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
   }
 
   override render() {
+    if (!EdgelessRemoteSelectionWidget.enable) return nothing;
+
     const { _remoteRects, _remoteCursors, _remoteColorManager } = this;
     assertExists(_remoteColorManager);
     const { zoom } = this.surface.viewport;
