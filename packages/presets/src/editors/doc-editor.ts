@@ -29,9 +29,7 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
         }
         doc-editor {
           display: block;
-          height: 100%;
           position: relative;
-          overflow: hidden;
           font-family: var(--affine-font-family);
           background: var(--affine-background-primary-color);
         }

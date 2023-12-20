@@ -63,8 +63,6 @@ export class DocPageBlockComponent extends BlockElement<
     .affine-doc-viewport {
       position: relative;
       overflow-x: hidden;
-      overflow-y: auto;
-      height: 100%;
     }
 
     .affine-doc-page-block-container {
