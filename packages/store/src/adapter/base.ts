@@ -107,7 +107,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
   walk = async (oNode: ONode, tNode: TNode) => {
     this.context.openNode(tNode);
     await this._visit({ node: oNode, parent: null, prop: null, index: null });
-    assertEquals(this.context.stack.length, 1);
+    assertEquals(this.context.stack.length, 1, 'There are unclosed nodes');
     return this.context.currentNode();
   };
 
