@@ -23,9 +23,10 @@ import {
 } from '@blocksuite/store';
 import type { ElementContent, Root, Text } from 'hast';
 import rehypeStringify from 'rehype-stringify';
-import { getHighlighter, type IThemedToken, type Lang } from 'shiki';
+import { type IThemedToken, type Lang } from 'shiki';
 import { unified } from 'unified';
 
+import { getHighLighter } from '../../code-block/utils/high-lighter.js';
 import {
   highlightCache,
   type highlightCacheKey,
@@ -550,26 +551,25 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       ];
     }
     const lang = rawLang as Lang;
-    const highlighter = await getHighlighter({
-      theme: 'light-plus',
+    const highlighter = await getHighLighter({
       langs: [lang],
     });
     const cacheKey: highlightCacheKey = `${delta.insert}-${rawLang}-light`;
     const cache = highlightCache.get(cacheKey);
 
-    let tokens: IThemedToken[] = [
-      {
-        content: delta.insert,
-      },
-    ];
+    let tokens: IThemedToken[];
     if (cache) {
       tokens = cache;
     } else {
-      tokens = highlighter.codeToThemedTokens(
-        delta.insert,
-        lang,
-        'light-plus'
-      )[0];
+      tokens = highlighter
+        .codeToThemedTokens(delta.insert, lang)
+        .reduce((acc, cur, index) => {
+          if (index === 0) {
+            return cur;
+          }
+
+          return [...acc, { content: '\n', color: 'inherit' }, ...cur];
+        }, []);
       highlightCache.set(cacheKey, tokens);
     }
 

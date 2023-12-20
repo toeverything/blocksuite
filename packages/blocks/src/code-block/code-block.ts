@@ -15,12 +15,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import {
-  getHighlighter,
-  type Highlighter,
-  type ILanguageRegistration,
-  type Lang,
-} from 'shiki';
+import { type Highlighter, type ILanguageRegistration, type Lang } from 'shiki';
 import { z } from 'zod';
 
 import { HoverController } from '../_common/components/index.js';
@@ -42,6 +37,7 @@ import {
   LIGHT_THEME,
   PLAIN_TEXT_REGISTRATION,
 } from './utils/consts.js';
+import { getHighLighter } from './utils/high-lighter.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
@@ -179,7 +175,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       return;
     }
     const mode = getThemeMode();
-    this._highlighter = await getHighlighter({
+    this._highlighter = await getHighLighter({
       theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
       themes: [LIGHT_THEME, DARK_THEME],
       langs: [lang],
