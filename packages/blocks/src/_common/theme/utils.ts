@@ -1,15 +1,12 @@
-import { assertExists } from '@blocksuite/global/utils';
-
 import type { CssVariableName, CssVariablesMap } from './css-variables.js';
 import type { ThemeObserver } from './theme-observer.js';
 
 function getClosestEditorContainer(element: Element) {
-  const container = element.closest(
-    'affine-editor-container'
-  ) as unknown as Element & {
-    themeObserver: ThemeObserver;
-  };
-  assertExists(container);
+  const container = element.closest('affine-editor-container') as unknown as
+    | (Element & {
+        themeObserver: ThemeObserver;
+      })
+    | null;
   return container;
 }
 
@@ -18,6 +15,7 @@ export function listenToThemeChange(
   callback: (cssVariables: CssVariablesMap) => void
 ) {
   const container = getClosestEditorContainer(currentELement);
+  if (!container) return;
   return container.themeObserver.on(callback);
 }
 
@@ -26,5 +24,6 @@ export function getThemePropertyValue(
   name: CssVariableName
 ) {
   const container = getClosestEditorContainer(currentELement);
+  if (!container) return;
   return container.themeObserver.cssVariables?.[name];
 }

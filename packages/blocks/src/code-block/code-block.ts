@@ -271,7 +271,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       };
     });
 
-    this._disposables.add(
+    this._disposables.add(() =>
       listenToThemeChange(this, () => {
         if (!this._highlighter) return;
         const richText = this.querySelector('rich-text');
