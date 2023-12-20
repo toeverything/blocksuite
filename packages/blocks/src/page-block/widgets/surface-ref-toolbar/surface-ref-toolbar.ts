@@ -1,6 +1,6 @@
 import { WidgetElement } from '@blocksuite/lit';
 import { offset, shift } from '@floating-ui/dom';
-import { html, nothing } from 'lit';
+import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -79,8 +79,6 @@ function SurfaceRefToolbarOptions(options: {
   const { blockElement, model, abortController } = options;
   const readonly = model.page.readonly;
   const hasValidReference = !!blockElement.referenceModel;
-
-  if (readonly) return nothing;
 
   return html`
     <style>
