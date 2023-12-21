@@ -4,11 +4,15 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { requestConnectedFrame } from '../../../../../_common/utils/event.js';
+import {
+  requestConnectedFrame,
+  stopPropagation,
+} from '../../../../../_common/utils/event.js';
 import type { FrameBlockModel } from '../../../../../frame-block/index.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import { mountFrameTitleEditor } from '../../../utils/text.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const FRAME_OFFSET = 8;
@@ -40,6 +44,18 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
           elements: [this.frame.id],
           editing: false,
         });
+      }
+    }, this);
+  }
+
+  private _editTitle() {
+    requestConnectedFrame(() => {
+      if (
+        (this.edgeless.selectionManager.state.elements.length === 0 ||
+          this.edgeless.selectionManager.isSelected(this.frame.id)) &&
+        !this.frame.page.readonly
+      ) {
+        mountFrameTitleEditor(this.frame, this.edgeless);
       }
     }, this);
   }
@@ -144,6 +160,9 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
             })}
             class="affine-frame-title"
             @click=${this._selectByTitle}
+            @dblclick=${this._editTitle}
+            @pointerup=${stopPropagation}
+            @pointerdown=${stopPropagation}
           >
             ${text}
           </div>`

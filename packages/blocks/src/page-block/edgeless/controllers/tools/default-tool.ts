@@ -32,7 +32,6 @@ import {
 } from '../../utils/query.js';
 import {
   addText,
-  mountFrameTitleEditor,
   mountGroupTitleEditor,
   mountShapeTextEditor,
   mountTextElementEditor,
@@ -303,10 +302,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
       if (selected instanceof ShapeElement) {
         mountShapeTextEditor(selected, this._edgeless);
-        return;
-      }
-      if (isFrameBlock(selected)) {
-        mountFrameTitleEditor(selected, this._edgeless);
         return;
       }
       if (
