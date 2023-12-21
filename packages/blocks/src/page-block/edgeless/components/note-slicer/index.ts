@@ -216,18 +216,21 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     }
 
     const edgelessRect = this.edgelessPage.getBoundingClientRect();
+    const { translateX, translateY } = this.edgelessPage.surface.viewport;
     const shouldTransition = note === this._noteModel;
     const noteContainer = noteElement.closest(
       '.edgeless-block-portal-note'
     ) as HTMLElement;
     assertExists(noteContainer);
     const [baseX, baseY, noteWidth] = deserializeXYWH(note.xywh);
-    const transformX = baseX * this._zoom;
+    const transformX = baseX * this._zoom + translateX;
     const transformY =
       this.edgelessPage.surface.toModelCoord(
         gapRect.x - edgelessRect.x,
         gapRect.y - edgelessRect.y + gapRect.height / 2
-      )[1] * this._zoom;
+      )[1] *
+        this._zoom +
+      translateY;
     const sliceVerticalPos =
       baseY + upperBlockElement.offsetHeight + upperBlockElement.offsetTop;
 
