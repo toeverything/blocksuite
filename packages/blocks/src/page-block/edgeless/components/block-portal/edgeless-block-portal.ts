@@ -143,6 +143,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       `${translateX}px ${translateY}px`
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
+    this.layer.style.setProperty('transform', this._getLayerViewport());
+    this.canvasSlot.style.setProperty(
+      '--canvas-transform-offset',
+      this._getLayerViewport(true)
+    );
   };
 
   private _applyWillChangeProp = () => {
@@ -162,6 +167,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   setSlotContent(children: HTMLElement[]) {
     if (this.canvasSlot.children.length !== children.length) {
+      children.forEach(child => {
+        child.style.setProperty('transform', 'var(--canvas-transform-offset)');
+      });
       this.canvasSlot.replaceChildren(...children);
     }
   }
@@ -190,6 +198,17 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     } else {
       this._showAutoConnect = false;
     }
+  }
+
+  private _getLayerViewport(negative = false) {
+    const { surface } = this.edgeless;
+    const { translateX, translateY, zoom } = surface.viewport;
+
+    if (negative) {
+      return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
+    }
+
+    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
   }
 
   override firstUpdated() {

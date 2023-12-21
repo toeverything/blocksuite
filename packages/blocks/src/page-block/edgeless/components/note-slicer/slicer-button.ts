@@ -90,7 +90,9 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
     const button = this._button;
 
     requestAnimationFrame(() => {
-      button.style.transform = `translate3d(-${150}%, 0, 0)`;
+      button.style.transform = `translate3d(-${150}%, 0, 0) scale(${
+        1 / this.zoom
+      })`;
     });
 
     button.addEventListener('transitionend', this._popupExternalButton, {

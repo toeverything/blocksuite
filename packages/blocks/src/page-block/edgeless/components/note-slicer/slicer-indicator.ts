@@ -10,6 +10,9 @@ export class NoteSlicerIndicator extends WithDisposable(LitElement) {
   @property({ attribute: false })
   offset!: number;
 
+  @property({ attribute: false })
+  zoom!: number;
+
   static override styles = css`
     :host {
       visibility: hidden;
@@ -32,8 +35,8 @@ export class NoteSlicerIndicator extends WithDisposable(LitElement) {
       this.style.visibility = 'visible';
 
       requestAnimationFrame(() => {
-        this.style.transform = `translate(${this.offset}px, 0)`;
-        this.style.width = `${this.width}px`;
+        this.style.transform = `translate(${this.offset * this.zoom}px, 0)`;
+        this.style.width = `${this.width * this.zoom}px`;
       });
     });
   }

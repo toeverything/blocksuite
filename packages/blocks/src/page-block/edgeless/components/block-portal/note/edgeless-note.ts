@@ -201,7 +201,6 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   override render() {
     const { model, surface, index } = this;
-    const { translateX, translateY, zoom } = surface.viewport;
     const { xywh, background, hidden, edgeless } = model;
     const { borderRadius, borderSize, borderStyle, shadowType } =
       edgeless.style;
@@ -213,9 +212,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       zIndex: `${index}`,
       width: `${bound.w}px`,
       height: collapse ? `${bound.h}px` : 'inherit',
-      transform: `translate(${bound.x * zoom + translateX}px, ${
-        bound.y * zoom + translateY
-      }px) scale(${zoom})`,
+      left: `${bound.x}px`,
+      top: `${bound.y}px`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       boxSizing: 'border-box',
       borderRadius: borderRadius + 'px',

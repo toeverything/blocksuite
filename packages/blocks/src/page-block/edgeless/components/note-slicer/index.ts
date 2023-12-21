@@ -6,6 +6,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../_common/consts.js';
+import { requestConnectedFrame } from '../../../../_common/utils/event.js';
 import {
   buildPath,
   getModelByBlockComponent,
@@ -216,21 +217,17 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     }
 
     const edgelessRect = this.edgelessPage.getBoundingClientRect();
-    const { translateX, translateY } = this.edgelessPage.surface.viewport;
     const shouldTransition = note === this._noteModel;
     const noteContainer = noteElement.closest(
       '.edgeless-block-portal-note'
     ) as HTMLElement;
     assertExists(noteContainer);
     const [baseX, baseY, noteWidth] = deserializeXYWH(note.xywh);
-    const transformX = baseX * this._zoom + translateX;
-    const transformY =
-      this.edgelessPage.surface.toModelCoord(
-        gapRect.x - edgelessRect.x,
-        gapRect.y - edgelessRect.y + gapRect.height / 2
-      )[1] *
-        this._zoom +
-      translateY;
+    const transformX = baseX * this._zoom;
+    const transformY = this.edgelessPage.surface.toModelCoord(
+      gapRect.x - edgelessRect.x,
+      gapRect.y - edgelessRect.y + gapRect.height / 2
+    )[1];
     const sliceVerticalPos =
       baseY + upperBlockElement.offsetHeight + upperBlockElement.offsetTop;
 
@@ -257,7 +254,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       sliceVerticalPos,
     };
 
-    requestAnimationFrame(() => {
+    requestConnectedFrame(() => {
       if (this.style.display === 'block' && shouldTransition) {
         this.style.transition = 'transform .2s ease-in-out';
       } else {
@@ -265,9 +262,11 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         this.style.removeProperty('transition');
       }
 
-      this.style.transform = `translate3d(${transformX}px, ${transformY}px, 0) translate3d(0, -50%, 0)`;
+      this.style.transform = `translate3d(${transformX}px, ${transformY}px, 0) translate3d(0, -50%, 0) scale(${
+        1 / this._zoom
+      })`;
       this.style.zIndex = noteContainer.style.zIndex;
-    });
+    }, this);
   }
 
   private _hide() {
@@ -332,8 +331,9 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
     return html`<div class="affine-note-slicer-container">
       <note-slicer-indicator
-        .offset=${EDGELESS_BLOCK_CHILD_PADDING * this._zoom}
-        .width=${(this._lastPosition?.width ?? 0) * this._zoom}
+        .zoom=${this._zoom}
+        .offset=${EDGELESS_BLOCK_CHILD_PADDING}
+        .width=${this._lastPosition?.width ?? 0}
       ></note-slicer-indicator>
       <note-slicer-button
         .zoom=${this._zoom}

@@ -12,17 +12,15 @@ export class EdgelessBlockPortalImage extends EdgelessPortalBase<ImageBlockModel
   override portalContainer!: HTMLDivElement;
 
   override render() {
-    const { model, index, surface } = this;
+    const { model, index } = this;
     const bound = Bound.deserialize(model.xywh);
-    const { translateX, translateY, zoom } = surface.viewport;
     const style = {
       position: 'absolute',
       zIndex: `${index}`,
       width: `${bound.w}px`,
       height: `${bound.h}px`,
-      transform: `translate(${translateX + bound.x * zoom}px, ${
-        translateY + bound.y * zoom
-      }px) scale(${zoom})`,
+      left: `${bound.x}px`,
+      top: `${bound.y}px`,
       transformOrigin: '0 0',
     };
 

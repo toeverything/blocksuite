@@ -158,15 +158,13 @@ class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
   override portalContainer!: HTMLDivElement;
 
   override render() {
-    const { model, index, surface } = this;
+    const { model, index } = this;
     const bound = Bound.deserialize(model.xywh);
-    const { translateX, translateY, zoom } = surface.viewport;
     const style = styleMap({
       position: 'absolute',
       zIndex: `${index}`,
-      transform: `translate(${translateX + bound.x * zoom}px, ${
-        translateY + bound.y * zoom
-      }px) scale(${zoom})`,
+      left: `${bound.x}px`,
+      top: `${bound.y}px`,
       transformOrigin: '0px 0px',
     });
 
