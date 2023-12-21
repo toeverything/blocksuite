@@ -862,7 +862,7 @@ export class SurfaceBlockComponent extends BlockElement<
     };
     const pickFrames = () => {
       return this.layer.frames.filter(frame =>
-        frame.hitTest(x, y, options, this.host)
+        frame.hitTest(x, y, options)
       ) as EdgelessElement[];
     };
 
