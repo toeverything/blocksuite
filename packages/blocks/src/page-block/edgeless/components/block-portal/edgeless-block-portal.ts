@@ -125,6 +125,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   private _surfaceRefReferenceSet = new Set<string>();
 
+  private _clearWillChangeId: null | ReturnType<typeof setTimeout> = null;
+
   get isDragging() {
     return this.selectedRect.dragging;
   }
@@ -141,27 +143,27 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       `${translateX}px ${translateY}px`
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
-    this.layer.style.setProperty('transform', this._getLayerViewport());
+  };
+
+  private _applyWillChangeProp = () => {
+    if (this._clearWillChangeId) clearTimeout(this._clearWillChangeId);
+
+    this._clearWillChangeId = setTimeout(() => {
+      this.layer?.style.removeProperty('will-change');
+      this._clearWillChangeId = null;
+    }, 100);
+
+    if (this.layer.style.getPropertyValue('will-change') !== 'content') {
+      requestConnectedFrame(() => {
+        this.layer.style.setProperty('will-change', 'content');
+      }, this);
+    }
   };
 
   setSlotContent(children: HTMLElement[]) {
-    if (this.canvasSlot.children.length !== children.length)
-      children.forEach(canvas => {
-        canvas.style.setProperty(
-          'transform',
-          `translate3d(var(--canvas-translate-x-offset), var(--canvas-translate-y-offset), 0)`
-        );
-      });
-    this.canvasSlot.replaceChildren(...children);
-  }
-
-  private _getLayerViewport(negative = false) {
-    const { surface } = this.edgeless;
-    const { translateX, translateY } = surface.viewport;
-
-    return `translate(${negative ? -translateX : translateX}px, ${
-      negative ? -translateY : translateY
-    }px)`;
+    if (this.canvasSlot.children.length !== children.length) {
+      this.canvasSlot.replaceChildren(...children);
+    }
   }
 
   private _updateReference() {
@@ -194,6 +196,20 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     this._updateReference();
     const { _disposables, edgeless } = this;
     const { page } = edgeless;
+
+    let rAqId: number | null = null;
+    _disposables.add(
+      edgeless.slots.viewportUpdated.on(() => {
+        this._applyWillChangeProp();
+
+        if (rAqId) return;
+
+        rAqId = requestConnectedFrame(() => {
+          this.refreshLayerViewport();
+          rAqId = null;
+        }, this);
+      })
+    );
 
     _disposables.add(
       edgeless.surface.layer.slots.layerUpdated.on(() => {
