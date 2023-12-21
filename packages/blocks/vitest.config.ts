@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
+    globalSetup: '../../scripts/vitest-global.ts',
     include: ['src/**/*.unit.spec.ts'],
     testTimeout: 500,
     coverage: {
