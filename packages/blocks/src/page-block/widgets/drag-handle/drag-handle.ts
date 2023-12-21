@@ -475,9 +475,10 @@ export class AffineDragHandleWidget extends WidgetElement<
   private get _viewportOffset() {
     if (this.blockElement instanceof EdgelessPageBlockComponent) {
       const pageBlock = this.blockElement;
+      const rect = pageBlock.getBoundingClientRect();
       return {
-        left: -pageBlock.surface.viewport.left,
-        top: -pageBlock.surface.viewport.top,
+        left: -rect.left,
+        top: -rect.top,
       };
     } else {
       const pageBlock = this.blockElement;
@@ -610,10 +611,9 @@ export class AffineDragHandleWidget extends WidgetElement<
       left -
       (DRAG_HANDLE_CONTAINER_WIDTH_TOP_LEVEL +
         DRAG_HANDLE_CONTAINER_OFFSET_LEFT_TOP_LEVEL) *
-        this.scale +
-      this._viewportOffset.left;
+        this.scale;
 
-    const posTop = top + this._viewportOffset.top;
+    const posTop = top;
 
     container.style.transition = 'none';
     container.style.paddingTop = `0px`;
@@ -726,11 +726,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     top -= padding;
     right += padding;
     bottom += padding;
-
-    left += this._viewportOffset.left;
-    top += this._viewportOffset.top;
-    right += this._viewportOffset.left;
-    bottom += this._viewportOffset.top;
 
     return new Rect(left, top, right, bottom);
   }
