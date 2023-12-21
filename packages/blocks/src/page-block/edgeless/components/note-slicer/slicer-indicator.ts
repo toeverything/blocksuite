@@ -2,6 +2,8 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { requestConnectedFrame } from '../../../../_common/utils/event.js';
+
 @customElement('note-slicer-indicator')
 export class NoteSlicerIndicator extends WithDisposable(LitElement) {
   @property({ attribute: false })
@@ -31,14 +33,16 @@ export class NoteSlicerIndicator extends WithDisposable(LitElement) {
   `;
 
   show() {
-    requestAnimationFrame(() => {
+    requestConnectedFrame(() => {
       this.style.visibility = 'visible';
 
-      requestAnimationFrame(() => {
-        this.style.transform = `translate(${this.offset * this.zoom}px, 0)`;
+      requestConnectedFrame(() => {
+        this.style.transform = `translate(${
+          this.offset * this.zoom - 20
+        }px, 0)`;
         this.style.width = `${this.width * this.zoom}px`;
-      });
-    });
+      }, this);
+    }, this);
   }
 
   reset() {

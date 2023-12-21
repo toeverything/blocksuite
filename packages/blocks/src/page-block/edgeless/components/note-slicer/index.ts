@@ -136,6 +136,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       this._hide();
       return;
     }
+
     if (isNoteBlock(block)) {
       const editingState = this._getEditingState(e, block);
       if (editingState) {
@@ -281,7 +282,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     this._lastPointerState = null;
   }
 
-  private _onPopup() {
+  private _increaseZIndex() {
     this.style.zIndex = (Number(this.style.zIndex) + 1).toString();
   }
 
@@ -330,17 +331,17 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     if (!this._lastPosition) return nothing;
 
     return html`<div class="affine-note-slicer-container">
+      <note-slicer-button
+        .zoom=${this._zoom}
+        @showindicator=${this._showIndicator}
+        @slice=${this._sliceNote}
+        @increasezindex=${this._increaseZIndex}
+      ></note-slicer-button>
       <note-slicer-indicator
         .zoom=${this._zoom}
         .offset=${EDGELESS_BLOCK_CHILD_PADDING}
         .width=${this._lastPosition?.width ?? 0}
       ></note-slicer-indicator>
-      <note-slicer-button
-        .zoom=${this._zoom}
-        @showindicator=${this._showIndicator}
-        @slice=${this._sliceNote}
-        @popup=${this._onPopup}
-      ></note-slicer-button>
     </div> `;
   }
 }
