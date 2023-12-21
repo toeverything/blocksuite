@@ -63,6 +63,7 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
       color: var(--affine-placeholder-color);
       position: absolute;
       opacity: 0.5;
+      pointer-events: none;
     }
 
     .doc-title-container:disabled {
@@ -72,6 +73,9 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   page!: Page;
+
+  @state()
+  private _isReadonly = false;
 
   @state()
   private _isComposing = false;
@@ -124,76 +128,18 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  // private _initTitleInlineEditor() {
-  //   const title = this._pageModel.title;
-  //   this._titleInlineEditor = new InlineEditor(title.yText);
-  //   this._titleInlineEditor.mount(this._titleContainer);
-  //
-  //   this._titleInlineEditor.disposables.addFromEvent(
-  //     this._titleContainer,
-  //     'copy',
-  //     this._onTitleCopy
-  //   );
-  //   this._titleInlineEditor.disposables.addFromEvent(
-  //     this._titleContainer,
-  //     'paste',
-  //     this._onTitlePaste
-  //   );
-  //
-  //   this._titleInlineEditor.setReadonly(this.page.readonly);
-  // }
-
-  // private _onTitleCopy = (event: ClipboardEvent) => {
-  //   event.stopPropagation();
-
-  //   const inlineEditor = this._titleInlineEditor;
-  //   const inlineRange = inlineEditor.getInlineRange();
-  //   if (!inlineRange) return;
-
-  //   const toBeCopiedText = inlineEditor.yText
-  //     .toString()
-  //     .substring(inlineRange.index, inlineRange.index + inlineRange.length);
-  //   event.clipboardData?.setData('text/plain', toBeCopiedText);
-  // };
-
-  // private _onTitlePaste = (event: ClipboardEvent) => {
-  //   event.stopPropagation();
-
-  //   const inlineEditor = this._titleInlineEditor;
-  //   const inlineRange = inlineEditor.getInlineRange();
-  //   if (!inlineRange) return;
-
-  //   const data = event.clipboardData?.getData('text/plain');
-  //   if (data) {
-  //     const text = data.replace(/(\r\n|\r|\n)/g, '\n');
-  //     inlineEditor.insertText(inlineRange, text);
-  //     inlineEditor.setInlineRange({
-  //       index: inlineRange.index + text.length,
-  //       length: 0,
-  //     });
-  //   }
-  // };
-
-  // private _initReadonlyListener() {
-  //   let readonly = this.page.readonly;
-  //   this._disposables.add(
-  //     this.page.awarenessStore.slots.update.on(() => {
-  //       assertExists(this._titleInlineEditor);
-  //       if (readonly !== this.page.readonly) {
-  //         readonly = this.page.readonly;
-  //         this._titleInlineEditor.setReadonly(readonly);
-  //       }
-  //     })
-  //   );
-  // }
-
-  // override firstUpdated() {
-  //   this._initTitleInlineEditor();
-  //   this._initReadonlyListener();
-  // }
-
   override connectedCallback() {
     super.connectedCallback();
+
+    this._isReadonly = this.page.readonly;
+    this._disposables.add(
+      this.page.awarenessStore.slots.update.on(() => {
+        if (this._isReadonly !== this.page.readonly) {
+          this._isReadonly = this.page.readonly;
+          this.requestUpdate();
+        }
+      })
+    );
 
     this._disposables.addFromEvent(this, 'keydown', this._onTitleKeyDown);
 
@@ -203,6 +149,7 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
       'compositionstart',
       () => (this._isComposing = true)
     );
+
     this._disposables.addFromEvent(
       this,
       'compositionend',
@@ -227,8 +174,9 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
       >
         <rich-text
           .yText=${this._pageModel.title.yText}
-          .undoManager=${this._pageModel.page.history}
-          .readonly=${this._pageModel.page.readonly}
+          .undoManager=${this.page.history}
+          .readonly=${this.page.readonly}
+          .enableFormat=${false}
         ></rich-text>
       </div>
     `;
