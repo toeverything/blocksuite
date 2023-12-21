@@ -1,4 +1,5 @@
 import type {
+  AffineTextAttributes,
   AttachmentBlockModel,
   BlockModels,
   BookmarkBlockModel,
@@ -10,10 +11,12 @@ import type {
 } from '@blocksuite/blocks';
 import { BlocksUtils } from '@blocksuite/blocks';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
+import type { DeltaInsert } from '@blocksuite/inline';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
+import { SmallLinkedPageIcon } from '../_common/icons.js';
 import { placeholderMap, previewIconMap } from './config.js';
 
 type ValuesOf<T, K extends keyof T = keyof T> = T[K];
@@ -65,6 +68,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
 
       font-size: var(--affine-font-sm);
       line-height: 24px;
+      height: 24px;
     }
 
     .text.general,
@@ -105,6 +109,36 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     .toc-block-preview:not(:has(span)) {
       display: none;
     }
+
+    .text span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .linked-page-preview svg {
+      width: 1.1em;
+      height: 1.1em;
+      vertical-align: middle;
+      font-size: inherit;
+      margin-bottom: 0.1em;
+    }
+
+    .linked-page-text {
+      font-size: inherit;
+      border-bottom: 0.5px solid var(--affine-divider-color);
+      white-space: break-spaces;
+      margin-right: 2px;
+    }
+
+    .linked-page-preview.unavailable svg {
+      color: var(--affine-text-disable-color);
+    }
+
+    .linked-page-preview.unavailable .linked-page-text {
+      color: var(--affine-text-disable-color);
+      text-decoration: line-through;
+    }
   `;
 
   @property({ attribute: false })
@@ -140,6 +174,42 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     this.requestUpdate();
   };
 
+  private _TextBlockPreview(block: ParagraphBlockModel | ListBlockModel) {
+    const deltas: DeltaInsert<AffineTextAttributes>[] =
+      block.text.yText.toDelta();
+    if (!deltas?.length) return nothing;
+    const iconClass = this.disabledIcon ? 'icon disabled' : 'icon';
+
+    const previewText = deltas.map(delta => {
+      if (delta.attributes?.reference) {
+        // If linked page, render linked page icon and the page title.
+        const refAttribute = delta.attributes.reference;
+        const refMeta = block.page.workspace.meta.pageMetas.find(
+          page => page.id === refAttribute.pageId
+        );
+        const unavailable = !refMeta;
+        const title = unavailable ? 'Deleted page' : refMeta.title;
+        return html`<span
+          class="linked-page-preview ${unavailable ? 'unavailable' : ''}"
+          >${SmallLinkedPageIcon}
+          <span class="linked-page-text"
+            >${title.length ? title : 'Untitled'}</span
+          ></span
+        >`;
+      } else {
+        // If not linked page, render the text.
+        return delta.insert.toString().trim().length > 0
+          ? html`<span>${delta.insert.toString()}</span>`
+          : nothing;
+      }
+    });
+
+    return html`<span class="text subtype ${block.type}">${previewText}</span>
+      ${!this.hidePreviewIcon
+        ? html`<span class=${iconClass}>${previewIconMap[block.type]}</span>`
+        : nothing}`;
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
   }
@@ -171,36 +241,10 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     switch (block.flavour as keyof BlockModels) {
       case 'affine:paragraph':
         assertType<ParagraphBlockModel>(block);
-        if (!block.text.toString().trim().length) return nothing;
-
-        return html`
-          <span class="text subtype ${block.type}"
-            >${block.text.toString().length
-              ? block.text.toString()
-              : placeholderMap[block.type]}</span
-          >
-          ${!this.hidePreviewIcon
-            ? html`<span class=${iconClass}
-                >${previewIconMap[block.type]}</span
-              >`
-            : nothing}
-        `;
+        return this._TextBlockPreview(block);
       case 'affine:list':
         assertType<ListBlockModel>(block);
-        if (!block.text.toString().trim().length) return nothing;
-
-        return html`
-          <span class="text general"
-            >${block.text.toString().length
-              ? block.text.toString()
-              : placeholderMap[block.type]}</span
-          >
-          ${!this.hidePreviewIcon
-            ? html`<span class=${iconClass}
-                >${previewIconMap[block.type]}</span
-              >`
-            : nothing}
-        `;
+        return this._TextBlockPreview(block);
       case 'affine:bookmark':
         assertType<BookmarkBlockModel>(block);
         return html`

@@ -18,6 +18,7 @@ import { splitElements } from './page-block/edgeless/utils/clipboard-utils.js';
 export * from './_common/adapters/index.js';
 export {
   type AffineInlineEditor,
+  type AffineTextAttributes,
   RichText,
 } from './_common/components/index.js';
 export {
