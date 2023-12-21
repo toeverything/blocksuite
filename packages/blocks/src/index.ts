@@ -12,8 +12,10 @@ import './database-block/index.js';
 import './surface-ref-block/index.js';
 
 import { mindMap } from './_common/mind-map/index.js';
-import { matchFlavours } from './_common/utils/index.js';
+import { matchFlavours, Point } from './_common/utils/index.js';
 import { splitElements } from './page-block/edgeless/utils/clipboard-utils.js';
+import { isCanvasElement } from './page-block/edgeless/utils/query.js';
+import { deserializeXYWH } from './surface-block/index.js';
 
 export * from './_common/adapters/index.js';
 export {
@@ -80,6 +82,9 @@ export const BlocksUtils = {
   splitElements,
   matchFlavours,
   mindMap,
+  deserializeXYWH,
+  isCanvasElement,
+  Point,
 };
 
 const env: Record<string, unknown> =

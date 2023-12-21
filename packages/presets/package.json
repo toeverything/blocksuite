@@ -17,6 +17,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@fal-ai/serverless-client": "^0.7.3",
     "@toeverything/theme": "^0.7.27",
     "lit": "^3.1.0",
     "openai": "^4.20.1"

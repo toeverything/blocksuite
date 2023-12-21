@@ -1,5 +1,6 @@
-import './chat-with-workspace.js';
+import './chat-with-workspace/chat-with-workspace.js';
 
+import { FrameBlockModel } from '@blocksuite/blocks';
 import {
   type EditorHost,
   ShadowlessElement,
@@ -11,12 +12,17 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineEditorContainer } from '../../index.js';
-import { GPTAPI, type GPTAPIPayloadMap } from './actions/index.js';
-import { EditorWithAI } from './api.js';
 import { LANGUAGE, TONE } from './config.js';
-import { APIKeys } from './utils/api-keys.js';
+import { EditorWithAI } from './edgeless/api.js';
+import { GPTAPI, type GPTAPIPayloadMap } from './text/index.js';
+import { CopilotConfig } from './utils/copilot-config.js';
 import { insertFromMarkdown } from './utils/markdown-utils.js';
-import { getSelectedBlocks, stopPropagation } from './utils/selection-utils.js';
+import {
+  getSelectedBlocks,
+  getSelectedTextContent,
+  getSurfaceElementFromEditor,
+  stopPropagation,
+} from './utils/selection-utils.js';
 
 @customElement('copilot-panel')
 export class CopilotPanel extends WithDisposable(ShadowlessElement) {
@@ -97,6 +103,11 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
 
   public override connectedCallback() {
     super.connectedCallback();
+    this.disposables.add(
+      getSurfaceElementFromEditor(this.editor).model.childrenUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
   }
 
   private async _replace() {
@@ -188,12 +199,23 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   config = () => {
     const changeGPTAPIKey = (e: Event) => {
       if (e.target instanceof HTMLInputElement) {
-        APIKeys.GPTAPIKey = e.target.value;
+        CopilotConfig.GPTAPIKey = e.target.value;
+        saveToLocalstorage();
       }
     };
     const changeFalAPIKey = (e: Event) => {
       if (e.target instanceof HTMLInputElement) {
-        APIKeys.FalAPIKey = e.target.value;
+        CopilotConfig.FalAPIKey = e.target.value;
+        saveToLocalstorage();
+      }
+    };
+    const saveToLocalstorage = () => {
+      const checked = (this.querySelector('#save') as HTMLInputElement).checked;
+      if (checked) {
+        CopilotConfig.SaveToLocalStorage = checked;
+        localStorage.setItem('APIKeys', JSON.stringify(CopilotConfig));
+      } else {
+        localStorage.removeItem('APIKeys');
       }
     };
     return html`
@@ -203,7 +225,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
           class="copilot-panel-key-input"
           type="text"
           @keydown="${stopPropagation}"
-          .value="${APIKeys.GPTAPIKey}"
+          .value="${CopilotConfig.GPTAPIKey}"
           @input="${changeGPTAPIKey}"
         />
         <div class="copilot-panel-setting-title">Fal API Key</div>
@@ -211,9 +233,20 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
           class="copilot-panel-key-input"
           type="text"
           @keydown="${stopPropagation}"
-          .value="${APIKeys.FalAPIKey}"
+          .value="${CopilotConfig.FalAPIKey}"
           @input="${changeFalAPIKey}"
         />
+        <label
+          style="margin-top: 18px;display:flex;align-items:center;cursor: pointer;color: var(--affine-text-secondary-color)"
+        >
+          <input
+            .checked="${CopilotConfig.SaveToLocalStorage}"
+            @change="${saveToLocalstorage}"
+            id="save"
+            type="checkbox"
+          />
+          <div>save to localstorage</div>
+        </label>
       </div>
     `;
   };
@@ -226,11 +259,19 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       this.payload = { type: e.target.value as keyof GPTAPIPayloadMap };
     }
   };
+  textCompletion = async <K extends keyof GPTAPIPayloadMap>(
+    key: K,
+    payload: Omit<GPTAPIPayloadMap[K], 'input'>
+  ) => {
+    const input = await getSelectedTextContent(this.root);
+    if (!input) {
+      alert('Please select some text first');
+      return;
+    }
+    return GPTAPI[key]({ input, ...payload } as never);
+  };
   ask = async () => {
-    const result = await this.api?.textCompletion(
-      this.payload.type,
-      this.payload
-    );
+    const result = await this.textCompletion(this.payload.type, this.payload);
     this._result = result ?? '';
   };
   extraPayload: Record<keyof GPTAPIPayloadMap, () => TemplateResult | null> = {
@@ -314,6 +355,18 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     ></chat-with-workspace-panel>`;
   };
   edgeless = () => {
+    const frames = getSurfaceElementFromEditor(
+      this.editor
+    ).model.children.filter(
+      v => v instanceof FrameBlockModel
+    ) as FrameBlockModel[];
+    const changeFromFrame = (e: Event) => {
+      this.api.fromFrame = (e.target as HTMLSelectElement).value;
+    };
+    const toggleAutoGen = () => {
+      this.api.toggleAutoGen();
+      this.requestUpdate();
+    };
     return html`
       <div class="copilot-panel-action-button" @click="${this.api.makeItReal}">
         Make It Real
@@ -334,7 +387,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       <div class="copilot-panel-action-description">
         Type prompt to create an image.
       </div>
-      <div class="copilot-panel-action-button" @click="${this.api.showMeImage}">
+      <div class="copilot-panel-action-button" @click="${this.api.editImage}">
         Edit Image
       </div>
       <input
@@ -354,6 +407,23 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
         HTML Block Test
       </div>
       <div class="copilot-panel-action-description">Generate a html block</div>
+      <div @click="${toggleAutoGen}" class="copilot-panel-action-button">
+        ${this.api.autoGen ? 'Stop auto gen image' : 'Start auto gen image'}
+      </div>
+      <div class="copilot-panel-action-description">
+        <div>
+          Based on the shapes in frame
+          <select .value="${this.api.fromFrame}" @change="${changeFromFrame}">
+            <option value="">None</option>
+            ${frames.map(v => {
+              return html`<option .value="${v.id}">
+                ${v.title.toString()}
+              </option>`;
+            })}
+          </select>
+        </div>
+        <div>Generate images to all connected frames</div>
+      </div>
     `;
   };
   panels = {
