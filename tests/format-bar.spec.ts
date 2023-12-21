@@ -10,6 +10,7 @@ import {
   focusRichText,
   focusTitle,
   getBoundingBox,
+  getEditorHostLocator,
   getSelectionRect,
   initEmptyParagraphState,
   initImageState,
@@ -829,7 +830,9 @@ test('should format quick bar show when double click text', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-  await page.dblclick('rich-text', {
+  const editorHost = getEditorHostLocator(page);
+  const richText = editorHost.locator('rich-text').nth(0);
+  await richText.dblclick({
     position: { x: 10, y: 10 },
   });
   const { formatBar } = getFormatBar(page);
@@ -846,7 +849,11 @@ test('should format quick bar not show at readonly mode', async ({ page }) => {
   const { formatBar } = getFormatBar(page);
   await expect(formatBar).not.toBeVisible();
 
-  await page.dblclick('rich-text', { position: { x: 10, y: 10 } });
+  const editorHost = getEditorHostLocator(page);
+  const richText = editorHost.locator('rich-text').nth(0);
+  await richText.dblclick({
+    position: { x: 10, y: 10 },
+  });
   await expect(formatBar).not.toBeVisible();
 });
 
@@ -899,7 +906,8 @@ test('should format quick bar position correct at the start of second line', asy
     return paragraphId;
   });
   // await focusRichText(page);
-  const locator = page.locator('.inline-editor').nth(0);
+  const editorHost = getEditorHostLocator(page);
+  const locator = editorHost.locator('.inline-editor').nth(0);
   const textBox = await locator.boundingBox();
   if (!textBox) {
     throw new Error("Can't get bounding box");
@@ -1420,7 +1428,8 @@ test('should show format-quick-bar and select all text of the block when triple 
   await focusRichText(page);
   await type(page, 'hello world');
 
-  const locator = page.locator('.inline-editor').nth(0);
+  const editorHost = getEditorHostLocator(page);
+  const locator = editorHost.locator('.inline-editor').nth(0);
   const textBox = await locator.boundingBox();
   if (!textBox) {
     throw new Error("Can't get bounding box");

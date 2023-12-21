@@ -256,7 +256,7 @@ export async function assertImageOption(page: Page) {
 }
 
 export async function assertPageTitleFocus(page: Page) {
-  const locator = page.locator('.doc-title-container').nth(0);
+  const locator = page.locator('doc-title .inline-editor').nth(0);
   await expect(locator).toBeFocused();
 }
 
@@ -346,7 +346,7 @@ export async function assertTextFormat(
   resultObj: unknown
 ) {
   const actual = await page.evaluate(
-    ({ richTextIndex, index }) => {
+    ({ richTextIndex, index, currentEditorIndex }) => {
       const editorHost =
         document.querySelectorAll('editor-host')[currentEditorIndex];
       const richText = editorHost.querySelectorAll('rich-text')[richTextIndex];
@@ -390,9 +390,7 @@ export async function assertRichTextModelType(
 
 export async function assertTextFormats(page: Page, resultObj: unknown[]) {
   const actual = await page.evaluate(index => {
-    const editorHost = document.querySelectorAll('affine-editor-container')[
-      index
-    ];
+    const editorHost = document.querySelectorAll('editor-host')[index];
     const elements = editorHost.querySelectorAll('rich-text');
     return Array.from(elements).map(el => {
       const inlineEditor = el.inlineEditor;
