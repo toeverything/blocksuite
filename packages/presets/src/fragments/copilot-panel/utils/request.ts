@@ -52,7 +52,6 @@ export const createImageGenerator = () => {
     });
   };
 };
-export const ask110602490_lcm_sd15_i2i_realtime = createImageGenerator();
 export type Uploadable = OpenAI.Images.ImageEditParams['image'];
 export const askDallE3 = async (
   prompt: string,
@@ -89,7 +88,7 @@ export const ask110602490_lcm_sd15_i2i = async (
     {
       method: 'post',
       headers: {
-        Authorization: apiKey,
+        Authorization: `key ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
