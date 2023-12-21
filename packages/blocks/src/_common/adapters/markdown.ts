@@ -635,7 +635,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 id: nanoid('block'),
                 flavour: 'affine:paragraph',
                 props: {
-                  language: null,
+                  type: 'text',
                   text: {
                     '$blocksuite:internal:text$': true,
                     delta: [

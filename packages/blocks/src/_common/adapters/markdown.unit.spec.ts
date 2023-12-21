@@ -2054,4 +2054,45 @@ hhh
     });
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
+
+  test('html tag', async () => {
+    const markdown = `<aaa>\n`;
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:paragraph',
+          props: {
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: '<aaa>',
+                },
+              ],
+            },
+            type: 'text',
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const mdAdapter = new MarkdownAdapter();
+    const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+      file: markdown,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
 });
