@@ -786,49 +786,51 @@ export class AffineDragHandleWidget extends WidgetElement<
     );
   };
 
-  private _checkTopLevelBlockSelection = throttle(
-    () => {
-      if (this.page.readonly || isInsideDocEditor(this.host)) {
-        this._hide();
-        return;
-      }
+  private _checkTopLevelBlockSelection = () => {
+    if (this.page.readonly || isInsideDocEditor(this.host)) {
+      this._hide();
+      return;
+    }
 
-      const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
-      const selection = edgelessPage.selectionManager;
-      const selectedElements = selection.elements;
-      if (selection.editing || selectedElements.length !== 1) {
-        this._hide();
-        return;
-      }
+    const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
+    const selection = edgelessPage.selectionManager;
+    const selectedElements = selection.elements;
+    if (selection.editing || selectedElements.length !== 1) {
+      this._hide();
+      return;
+    }
 
-      const selectedElement = selectedElements[0];
-      if (!isTopLevelBlock(selectedElement)) {
-        this._hide();
-        return;
-      }
+    const selectedElement = selectedElements[0];
+    if (!isTopLevelBlock(selectedElement)) {
+      this._hide();
+      return;
+    }
 
-      const flavour = selectedElement.flavour;
-      const dragHandleOptions = this.optionRunner.getOption(flavour);
-      if (!dragHandleOptions || !dragHandleOptions.edgeless) {
-        this._hide();
-        return;
-      }
+    const flavour = selectedElement.flavour;
+    const dragHandleOptions = this.optionRunner.getOption(flavour);
+    if (!dragHandleOptions || !dragHandleOptions.edgeless) {
+      this._hide();
+      return;
+    }
 
-      // FIXME: this is a workaround for the bug that the path of selected element is not correct
-      // ref: Github issues #5623, #5624
-      const blockElement = this.pageBlockElement.querySelector(
-        `[${BLOCK_ID_ATTR}="${selectedElement.id}"]`
-      ) as BlockElement | null;
-      if (!blockElement) {
-        this._hide();
-        return;
-      }
+    // FIXME: this is a workaround for the bug that the path of selected element is not correct
+    // ref: Github issues #5623, #5624
+    const blockElement = this.pageBlockElement.querySelector(
+      `[${BLOCK_ID_ATTR}="${selectedElement.id}"]`
+    ) as BlockElement | null;
+    if (!blockElement) {
+      this._hide();
+      return;
+    }
 
-      this._anchorBlockId = selectedElement.id;
-      this._anchorBlockPath = blockElement.path;
+    this._anchorBlockId = selectedElement.id;
+    this._anchorBlockPath = blockElement.path;
 
-      this._showDragHandleOnTopLevelBlocks();
-    },
+    this._showDragHandleOnTopLevelBlocks();
+  };
+
+  private _throttledCheckTopLevelBlockSelection = throttle(
+    this._checkTopLevelBlockSelection,
     200,
     { trailing: true }
   );
@@ -875,43 +877,45 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
   };
 
-  private _pointerMoveHandler = throttle(
-    (ctx => {
-      if (this.page.readonly || this.dragging) {
-        this._hide();
-        return;
-      }
-      if (this._isTopLevelDragHandleVisible) return;
-
-      const state = ctx.get('pointerState');
-      const { target } = state.raw;
-      const element = captureEventTarget(target);
-      // When pointer not on block or on dragging, should do nothing
-      if (!element) return;
-
-      // When pointer on drag handle, should do nothing
-      if (element.closest('.affine-drag-handle-container')) return;
-
-      // TODO: need to optimize
-      // When pointer out of note block hover area or inside database, should hide drag handle
-      const point = getContainerOffsetPoint(state);
-      const closestNoteBlock = getClosestNoteBlock(
-        this.host,
-        this.pageBlockElement,
-        point
-      ) as BlockElement | null;
-      if (
-        closestNoteBlock &&
-        this._canEditing(closestNoteBlock) &&
-        !isOutOfNoteBlock(this.host, closestNoteBlock, point, this.scale)
-      ) {
-        this._pointerMoveOnBlock(state);
-        return true;
-      }
-
+  private _pointerMoveHandler: UIEventHandler = ctx => {
+    if (this.page.readonly || this.dragging) {
       this._hide();
-      return false;
-    }) as UIEventHandler,
+      return;
+    }
+    if (this._isTopLevelDragHandleVisible) return;
+
+    const state = ctx.get('pointerState');
+    const { target } = state.raw;
+    const element = captureEventTarget(target);
+    // When pointer not on block or on dragging, should do nothing
+    if (!element) return;
+
+    // When pointer on drag handle, should do nothing
+    if (element.closest('.affine-drag-handle-container')) return;
+
+    // TODO: need to optimize
+    // When pointer out of note block hover area or inside database, should hide drag handle
+    const point = getContainerOffsetPoint(state);
+    const closestNoteBlock = getClosestNoteBlock(
+      this.host,
+      this.pageBlockElement,
+      point
+    ) as BlockElement | null;
+    if (
+      closestNoteBlock &&
+      this._canEditing(closestNoteBlock) &&
+      !isOutOfNoteBlock(this.host, closestNoteBlock, point, this.scale)
+    ) {
+      this._pointerMoveOnBlock(state);
+      return true;
+    }
+
+    this._hide();
+    return false;
+  };
+
+  private _throttledPointerMoveHandler = throttle(
+    this._pointerMoveHandler,
     1000 / 60,
     { trailing: true }
   );
@@ -1222,7 +1226,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       ) {
         this._hide(true);
         if (isInsideEdgelessEditor(this.host)) {
-          this._checkTopLevelBlockSelection();
+          this._throttledCheckTopLevelBlockSelection();
         }
         return true;
       }
@@ -1230,7 +1234,8 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     // call default drag end handler if no option return true
     this._onDragEnd(state);
-    if (isInsideEdgelessEditor(this.host)) this._checkTopLevelBlockSelection();
+    if (isInsideEdgelessEditor(this.host))
+      this._throttledCheckTopLevelBlockSelection();
     return true;
   };
 
@@ -1315,7 +1320,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   private _handleEdgelessToolUpdated = (newTool: EdgelessTool) => {
     if (newTool.type === 'default') {
-      this._checkTopLevelBlockSelection();
+      this._throttledCheckTopLevelBlockSelection();
     } else {
       this._hide();
     }
@@ -1410,19 +1415,19 @@ export class AffineDragHandleWidget extends WidgetElement<
 
       this._disposables.add(
         edgelessPage.selectionManager.slots.updated.on(() => {
-          this._checkTopLevelBlockSelection();
+          this._throttledCheckTopLevelBlockSelection();
         })
       );
 
       this._disposables.add(
         edgelessPage.slots.readonlyUpdated.on(() => {
-          this._checkTopLevelBlockSelection();
+          this._throttledCheckTopLevelBlockSelection();
         })
       );
 
       this._disposables.add(
         edgelessPage.slots.draggingAreaUpdated.on(() => {
-          this._checkTopLevelBlockSelection();
+          this._throttledCheckTopLevelBlockSelection();
         })
       );
 
@@ -1434,7 +1439,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
       this._disposables.add(
         edgelessPage.slots.elementResizeEnd.on(() => {
-          this._checkTopLevelBlockSelection();
+          this._throttledCheckTopLevelBlockSelection();
         })
       );
     }
@@ -1442,7 +1447,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.handleEvent('pointerMove', this._pointerMoveHandler);
+    this.handleEvent('pointerMove', this._throttledPointerMoveHandler);
     this.handleEvent('click', this._clickHandler);
     this.handleEvent('dragStart', this._dragStartHandler);
     this.handleEvent('dragMove', this._dragMoveHandler);
