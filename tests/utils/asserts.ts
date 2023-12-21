@@ -377,7 +377,7 @@ export async function assertRichTextModelType(
   index = 0
 ) {
   const actual = await page.evaluate(
-    ({ index, BLOCK_ID_ATTR }) => {
+    ({ index, BLOCK_ID_ATTR, currentEditorIndex }) => {
       const editorHost =
         document.querySelectorAll('editor-host')[currentEditorIndex];
       const richText = editorHost.querySelectorAll('rich-text')[index];
