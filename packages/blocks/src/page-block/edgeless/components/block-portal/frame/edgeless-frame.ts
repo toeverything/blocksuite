@@ -1,9 +1,10 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { requestConnectedFrame } from '../../../../../_common/utils/event.js';
 import type { FrameBlockModel } from '../../../../../frame-block/index.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
@@ -28,29 +29,20 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @query('.affine-frame-title')
-  private _titleElement?: HTMLElement;
-
-  get titleBound() {
-    if (!this._titleElement) return new Bound();
-    const { viewport } = this.edgeless.surface;
-    const { zoom } = viewport;
-    const rect = viewport.boundingClientRect;
-    const bound = Bound.fromDOMRect(this._titleElement.getBoundingClientRect());
-    bound.x -= rect.x;
-    bound.y -= rect.y;
-    bound.h += FRAME_OFFSET;
-    bound.h /= zoom;
-    bound.w /= zoom;
-    const [x, y] = viewport.toModelCoord(bound.x, bound.y);
-    bound.x = x;
-    bound.y = y;
-    return bound;
-  }
-
   private _updateElement = () => {
     this.requestUpdate();
   };
+
+  private _selectByTitle() {
+    requestConnectedFrame(() => {
+      if (this.edgeless.selectionManager.state.elements.length === 0) {
+        this.edgeless.selectionManager.setSelection({
+          elements: [this.frame.id],
+          editing: false,
+        });
+      }
+    }, this);
+  }
 
   override firstUpdated() {
     const { _disposables, edgeless } = this;
@@ -151,6 +143,7 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
               border: isInner ? '1px solid var(--affine-border-color)' : 'none',
             })}
             class="affine-frame-title"
+            @click=${this._selectByTitle}
           >
             ${text}
           </div>`
