@@ -1,15 +1,15 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type { InlineEditor } from '@blocksuite/inline';
 import { BlockElement } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EditingState } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
+  getDocTitleInlineEditor,
   matchFlavours,
 } from '../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
@@ -102,12 +102,6 @@ export class DocPageBlockComponent extends BlockElement<
       }
     }
   `;
-
-  @property({ attribute: false })
-  titleContainer: HTMLElement | null = null;
-
-  @property({ attribute: false })
-  titleInlineEditor: InlineEditor | null = null;
 
   keyboardManager: PageKeyboardManager | null = null;
 
@@ -290,11 +284,14 @@ export class DocPageBlockComponent extends BlockElement<
               ])
           );
           return true;
-        } else if (this.titleInlineEditor) {
-          this.titleInlineEditor.focusEnd();
-          return true;
+        } else {
+          const titleInlineEditor = getDocTitleInlineEditor(this.host);
+          if (titleInlineEditor) {
+            titleInlineEditor.focusEnd();
+            return true;
+          }
+          return;
         }
-        return;
       },
       ArrowDown: () => {
         const view = this.host.view;

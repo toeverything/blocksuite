@@ -9,17 +9,17 @@ import {
   EdgelessEditorBlockSpecs,
   ThemeObserver,
 } from '@blocksuite/blocks';
-import { noop, Slot } from '@blocksuite/global/utils';
+import { assertExists, noop, Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 
-import { DocEditor } from './doc-editor.js';
+import { AffineDocEditor } from './affine-doc-editor.js';
 import { EdgelessEditor } from './edgeless-editor.js';
 
-noop(DocEditor);
+noop(AffineDocEditor);
 noop(EdgelessEditor);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -120,8 +120,13 @@ export class AffineEditorContainer
     if (this.mode === 'page') {
       setTimeout(() => {
         if (this.autofocus) {
-          if (this._docPage?.titleInlineEditor) {
-            this._docPage?.titleInlineEditor.focusEnd();
+          const docTitle = this.querySelector('doc-title');
+          if (docTitle) {
+            const richText = docTitle.querySelector('rich-text');
+            assertExists(richText);
+            const inlineEditor = richText.inlineEditor;
+            assertExists(inlineEditor);
+            inlineEditor.focusEnd();
           } else {
             this._docPage?.focusFirstParagraph();
           }
@@ -155,10 +160,10 @@ export class AffineEditorContainer
     return html`${keyed(
       this.model.id,
       this.mode === 'page'
-        ? html`<doc-editor
+        ? html`<affine-doc-editor
             .page=${this.page}
             .specs=${this.docSpecs}
-          ></doc-editor>`
+          ></affine-doc-editor>`
         : html`<edgeless-editor
             .page=${this.page}
             .specs=${this.edgelessSpecs}

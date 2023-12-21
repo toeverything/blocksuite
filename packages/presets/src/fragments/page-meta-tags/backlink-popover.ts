@@ -4,8 +4,7 @@ import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import type { BacklinkData } from './utils.js';
-import { DEFAULT_PAGE_NAME } from './utils.js';
+import { type BacklinkData, DEFAULT_PAGE_NAME } from './utils.js';
 
 @customElement('backlink-button')
 export class BacklinkButton extends WithDisposable(LitElement) {

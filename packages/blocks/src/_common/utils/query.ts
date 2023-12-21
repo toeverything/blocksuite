@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { InlineEditor } from '@blocksuite/inline';
 import { INLINE_ROOT_ATTR } from '@blocksuite/inline';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
@@ -376,16 +377,30 @@ export function getModelByElement(element: Element): BaseBlockModel {
   return getModelByBlockComponent(closestBlock);
 }
 
+export function getDocTitleByEditorHost(
+  editorHost: EditorHost
+): HTMLElement | null {
+  const docViewport = editorHost.closest('.affine-doc-viewport');
+  if (!docViewport) return null;
+  return docViewport.querySelector('doc-title');
+}
+
+export function getDocTitleInlineEditor(
+  editorHost: EditorHost
+): InlineEditor | null {
+  const docTitle = getDocTitleByEditorHost(editorHost);
+  if (!docTitle) return null;
+  const titleRichText = docTitle.querySelector<RichText>('rich-text');
+  assertExists(titleRichText);
+  return titleRichText.inlineEditor;
+}
+
 export function isInsidePageTitle(
   editorHost: EditorHost,
   element: unknown
 ): boolean {
-  const docPageElement = getDocPageByEditorHost(editorHost);
-  if (!docPageElement) return false;
-
-  const titleElement = docPageElement.titleContainer;
+  const titleElement = getDocTitleByEditorHost(editorHost);
   if (!titleElement) return false;
-
   return titleElement.contains(element as Node);
 }
 

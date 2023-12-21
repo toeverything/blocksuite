@@ -496,6 +496,7 @@ export const popTagSelect = (
   });
   return remove;
 };
+
 const middleware: Middleware = {
   name: 'middleware',
   fn: async state => {

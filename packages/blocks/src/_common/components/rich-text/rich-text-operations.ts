@@ -10,7 +10,7 @@ import {
   matchFlavours,
 } from '../../../_common/utils/model.js';
 import {
-  getDocPageByEditorHost,
+  getDocTitleByEditorHost,
   getInlineEditorByModel,
   getNextBlock,
   getPreviousBlock,
@@ -545,10 +545,9 @@ function handleEmbedDividerCodeSibling(
 function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
   const page = model.page;
   const text = model.text;
-  const docPageElement = getDocPageByEditorHost(editorHost);
-  assertExists(docPageElement);
-  const titleElement =
-    docPageElement.titleContainer as HTMLTextAreaElement | null;
+  const titleElement = getDocTitleByEditorHost(
+    editorHost
+  ) as HTMLTextAreaElement | null;
   // Probably no title, e.g. in edgeless mode
   if (!titleElement) return false;
 

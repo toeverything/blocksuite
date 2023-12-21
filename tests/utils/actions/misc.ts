@@ -146,6 +146,11 @@ async function initEmptyEditor({
 export const getEditorLocator = (page: Page) => {
   return page.locator('affine-editor-container').nth(currentEditorIndex);
 };
+
+export const getEditorHostLocator = (page: Page) => {
+  return page.locator('editor-host').nth(currentEditorIndex);
+};
+
 export const getBlockHub = (page: Page) => {
   return page.locator('affine-block-hub').nth(currentEditorIndex);
 };
@@ -509,8 +514,8 @@ export async function initEmptyDatabaseWithParagraphState(
 }
 
 export async function initDatabaseRow(page: Page) {
-  const editor = getEditorLocator(page);
-  const addRow = editor.locator('.data-view-table-group-add-row');
+  const editorHost = getEditorHostLocator(page);
+  const addRow = editorHost.locator('.data-view-table-group-add-row');
   await addRow.click();
 }
 
@@ -526,12 +531,12 @@ export async function initDatabaseDynamicRowWithData(
   addRow = false,
   index = 0
 ) {
-  const editor = getEditorLocator(page);
+  const editorHost = getEditorHostLocator(page);
   if (addRow) {
     await initDatabaseRow(page);
   }
   await focusDatabaseTitle(page);
-  const lastRow = editor.locator('.affine-database-block-row').last();
+  const lastRow = editorHost.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
   await waitNextFrame(page);
@@ -594,7 +599,7 @@ export async function focusRichText(
   options?: FocusRichTextOptions
 ) {
   await page.mouse.move(0, 0);
-  const editor = getEditorLocator(page);
+  const editor = getEditorHostLocator(page);
   const locator = editor.locator(RICH_TEXT_SELECTOR).nth(i);
   // need to set `force` to true when clicking on `affine-selected-blocks`
   await locator.click({ force: true, position: options?.clickPosition });
@@ -602,9 +607,10 @@ export async function focusRichText(
 
 export async function focusRichTextEnd(page: Page, i = 0) {
   await page.evaluate(
-    ([i]) => {
-      const editor = document.querySelectorAll('affine-editor-container')[i];
-      const richTexts = Array.from(editor.querySelectorAll('rich-text'));
+    ([i, currentEditorIndex]) => {
+      const editorHost =
+        document.querySelectorAll('editor-host')[currentEditorIndex];
+      const richTexts = Array.from(editorHost.querySelectorAll('rich-text'));
 
       richTexts[i].inlineEditor?.focusEnd();
     },
@@ -775,8 +781,10 @@ export async function setInlineRangeInInlineEditor(
   i = 0
 ) {
   await page.evaluate(
-    ({ i, inlineRange }) => {
-      const inlineEditor = document.querySelectorAll<InlineRootElement>(
+    ({ i, inlineRange, currentEditorIndex }) => {
+      const editorHost =
+        document.querySelectorAll('editor-host')[currentEditorIndex];
+      const inlineEditor = editorHost.querySelectorAll<InlineRootElement>(
         '[data-v-root="true"]'
       )[i]?.inlineEditor;
       if (!inlineEditor) {
@@ -784,7 +792,7 @@ export async function setInlineRangeInInlineEditor(
       }
       inlineEditor.setInlineRange(inlineRange);
     },
-    { i, inlineRange }
+    { i, inlineRange, currentEditorIndex }
   );
   await waitNextFrame(page);
 }
@@ -923,16 +931,24 @@ export async function setSelection(
   focusOffset: number
 ) {
   await page.evaluate(
-    ({ anchorBlockId, anchorOffset, focusBlockId, focusOffset }) => {
+    ({
+      anchorBlockId,
+      anchorOffset,
+      focusBlockId,
+      focusOffset,
+      currentEditorIndex,
+    }) => {
       /* eslint-disable @typescript-eslint/no-non-null-assertion */
-      const anchorRichText = document.querySelector<RichText>(
+      const editorHost =
+        document.querySelectorAll('editor-host')[currentEditorIndex];
+      const anchorRichText = editorHost.querySelector<RichText>(
         `[data-block-id="${anchorBlockId}"] rich-text`
       )!;
       const anchorRichTextRange = anchorRichText.inlineEditor!.toDomRange({
         index: anchorOffset,
         length: 0,
       })!;
-      const focusRichText = document.querySelector<RichText>(
+      const focusRichText = editorHost.querySelector<RichText>(
         `[data-block-id="${focusBlockId}"] rich-text`
       )!;
       const focusRichTextRange = focusRichText.inlineEditor!.toDomRange({
@@ -954,7 +970,13 @@ export async function setSelection(
       sl.removeAllRanges();
       sl.addRange(range);
     },
-    { anchorBlockId, anchorOffset, focusBlockId, focusOffset }
+    {
+      anchorBlockId,
+      anchorOffset,
+      focusBlockId,
+      focusOffset,
+      currentEditorIndex,
+    }
   );
 }
 
@@ -1060,8 +1082,10 @@ export async function getIndexCoordinate(
   coordOffSet: { x: number; y: number } = { x: 0, y: 0 }
 ) {
   const coord = await page.evaluate(
-    ({ richTextIndex, vIndex, coordOffSet }) => {
-      const richText = document.querySelectorAll('rich-text')[
+    ({ richTextIndex, vIndex, coordOffSet, currentEditorIndex }) => {
+      const editorHost =
+        document.querySelectorAll('editor-host')[currentEditorIndex];
+      const richText = editorHost.querySelectorAll('rich-text')[
         richTextIndex
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any;
@@ -1079,6 +1103,7 @@ export async function getIndexCoordinate(
       richTextIndex,
       vIndex,
       coordOffSet,
+      currentEditorIndex,
     }
   );
   return coord;
@@ -1091,19 +1116,25 @@ export function inlineEditorInnerTextToString(innerText: string): string {
 export async function focusTitle(page: Page) {
   // click to ensure editor is active
   await page.mouse.move(0, 0);
-  const editor = getEditorLocator(page);
+  const editor = getEditorHostLocator(page);
   const locator = editor.locator('affine-doc-page').first();
   // need to set `force` to true when clicking on `affine-selected-blocks`
   await locator.click({ force: true });
   // avoid trigger double click
   await page.waitForTimeout(500);
   await page.evaluate(i => {
-    const defaultPageComponent =
-      document.querySelectorAll('affine-doc-page')[i];
-    if (!defaultPageComponent) {
-      throw new Error('default page component not found');
+    const docTitle = document.querySelectorAll('doc-title')[i];
+    if (!docTitle) {
+      throw new Error('Doc title component not found');
     }
-    defaultPageComponent.titleInlineEditor.focusEnd();
+    const docTitleRichText = docTitle.querySelector('rich-text');
+    if (!docTitleRichText) {
+      throw new Error('Doc title rich text component not found');
+    }
+    if (!docTitleRichText.inlineEditor) {
+      throw new Error('Doc title inline editor not found');
+    }
+    docTitleRichText.inlineEditor.focusEnd();
   }, currentEditorIndex);
   await waitNextFrame(page);
 }

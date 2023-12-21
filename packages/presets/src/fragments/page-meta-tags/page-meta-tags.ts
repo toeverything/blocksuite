@@ -1,5 +1,6 @@
 import {
-  getPageByEditorHost,
+  LinkedPageIcon,
+  PageIcon,
   popTagSelect,
   type SelectTag,
 } from '@blocksuite/blocks';
@@ -10,27 +11,24 @@ import {
   TagsIcon,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import type { Ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { BacklinkButton } from './backlink-popover.js';
 import {
+  type BackLink,
   type BacklinkData,
   DEFAULT_PAGE_NAME,
-  listenBacklinkList,
+  PAGE_BLOCK_CHILD_PADDING,
 } from './utils.js';
 
-const PAGE_BLOCK_CHILD_PADDING = 24;
-
-@customElement('page-meta')
-export class PageMeta extends WithDisposable(LitElement) {
+@customElement('page-meta-tags')
+export class PageMetaTags extends WithDisposable(LitElement) {
   static override styles = css`
     .page-meta-container {
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
@@ -262,9 +260,6 @@ export class PageMeta extends WithDisposable(LitElement) {
   @property({ attribute: false })
   page!: Page;
 
-  @property({ attribute: false })
-  editorHostRef!: Ref<EditorHost>;
-
   @state()
   backlinkList!: BacklinkData[];
 
@@ -274,7 +269,13 @@ export class PageMeta extends WithDisposable(LitElement) {
   @state()
   expanded = false;
 
-  private _editorHost!: EditorHost;
+  get docPageElement() {
+    const docViewport = this.closest('.affine-doc-viewport');
+    assertExists(docViewport);
+    const docPageElement = docViewport.querySelector('affine-doc-page');
+    assertExists(docPageElement);
+    return docPageElement;
+  }
 
   get meta() {
     return this.page.workspace.meta;
@@ -301,6 +302,61 @@ export class PageMeta extends WithDisposable(LitElement) {
 
   set tags(tags: string[]) {
     this.page.meta.tags = tags;
+  }
+
+  private _listenBacklinkList = () => {
+    const metaMap = Object.fromEntries(
+      this.page.workspace.meta.pageMetas.map(v => [v.id, v])
+    );
+
+    const toData = (backlink: BackLink): BacklinkData => {
+      const pageMeta = metaMap[backlink.pageId];
+      if (!pageMeta) {
+        console.warn('Unexpected page meta not found', backlink.pageId);
+      }
+      return {
+        ...backlink,
+        ...pageMeta,
+        icon: backlink.type === 'LinkedPage' ? LinkedPageIcon : PageIcon,
+        jump: () => {
+          if (backlink.pageId === this.page.id) return;
+
+          this.docPageElement.slots.pageLinkClicked.emit({
+            pageId: backlink.pageId,
+            blockId: backlink.blockId,
+          });
+        },
+      };
+    };
+
+    const backlinkIndexer = this.page.workspace.indexer.backlink;
+
+    const getList = () => {
+      return backlinkIndexer
+        .getBacklink(this.page.id)
+        .filter(v => v.type === 'LinkedPage')
+        .map(toData);
+    };
+
+    this.backlinkList = getList();
+
+    this._disposables.add(
+      backlinkIndexer.slots.indexUpdated.on(() => {
+        this.backlinkList = getList();
+      })
+    );
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this._listenBacklinkList();
+
+    this._disposables.add(
+      this.meta.pageMetasUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
   }
 
   private _toggle = () => {
@@ -391,9 +447,7 @@ export class PageMeta extends WithDisposable(LitElement) {
                 backgroundColor: tag.color,
               });
               const click = () => {
-                const pageElement = getPageByEditorHost(this._editorHost);
-                assertExists(pageElement);
-                pageElement.slots.tagClicked.emit({ tagId: tag.id });
+                this.docPageElement.slots.tagClicked.emit({ tagId: tag.id });
               };
               return html` <div class="tag" @click=${click} style=${style}>
                 ${tag.value}
@@ -409,25 +463,6 @@ export class PageMeta extends WithDisposable(LitElement) {
       </div>
     </div>`;
   };
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    assertExists(this.editorHostRef.value);
-    this._editorHost = this.editorHostRef.value;
-
-    this._disposables.add(
-      listenBacklinkList(this.page, this._editorHost, list => {
-        this.backlinkList = list;
-      })
-    );
-
-    this._disposables.add(
-      this.meta.pageMetasUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
 
   override render() {
     if (!this.expanded) {
@@ -461,6 +496,6 @@ export class PageMeta extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'page-meta': PageMeta;
+    'page-meta-tags': PageMetaTags;
   }
 }
