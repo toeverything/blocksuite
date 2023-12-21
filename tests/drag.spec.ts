@@ -777,7 +777,7 @@ test('should create preview when dragging', async ({ page }) => {
     undefined,
     async () => {
       await expect(dragPreview).toBeVisible();
-      await expect(dragPreview.locator('.affine-block-element')).toHaveCount(2);
+      await expect(dragPreview.locator('[data-block-id]')).toHaveCount(2);
     }
   );
 });
