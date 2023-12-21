@@ -20,6 +20,7 @@ import {
   type BookmarkBlockModel,
   BookmarkBlockSchema,
 } from './bookmark-model.js';
+import type { BookmarkService } from './bookmark-service.js';
 import type { DocBookmarkBlockComponent } from './doc-bookmark-block.js';
 import type { EdgelessBookmarkBlockComponent } from './edgeless-bookmark-block.js';
 import {
@@ -29,7 +30,10 @@ import {
 import { refreshBookmarkUrlData } from './utils.js';
 
 @customElement('affine-bookmark')
-export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
+export class BookmarkBlockComponent extends BlockElement<
+  BookmarkBlockModel,
+  BookmarkService
+> {
   @property({ attribute: false })
   loading = false;
 

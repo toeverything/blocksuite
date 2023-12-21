@@ -154,8 +154,14 @@ export class AffineEditorContainer
     return html`${keyed(
       this.model.id,
       this.mode === 'page'
-        ? html`<doc-editor .page=${this.page}></doc-editor>`
-        : html`<edgeless-editor .page=${this.page}></edgeless-editor>`
+        ? html`<doc-editor
+            .page=${this.page}
+            .specs=${this.docSpecs}
+          ></doc-editor>`
+        : html`<edgeless-editor
+            .page=${this.page}
+            .specs=${this.edgelessSpecs}
+          ></edgeless-editor>`
     )}`;
   }
 }

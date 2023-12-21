@@ -4,6 +4,7 @@ import { literal, unsafeStatic } from 'lit/static-html.js';
 // import { AFFINE_BLOCK_HUB_WIDGET } from '../_common/widgets/block-hub/index.js';
 import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
 import { AttachmentService } from '../attachment-block/attachment-service.js';
+import { BookmarkService } from '../bookmark-block/bookmark-service.js';
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
 import { DataViewBlockSchema } from '../data-view-block/index.js';
@@ -173,6 +174,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     view: {
       component: literal`affine-bookmark`,
     },
+    service: BookmarkService,
   },
   {
     schema: AttachmentBlockSchema,
