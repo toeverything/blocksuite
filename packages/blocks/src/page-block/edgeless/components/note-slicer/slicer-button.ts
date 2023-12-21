@@ -4,6 +4,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { CutIcon } from '../../../../_common/icons/index.js';
+import { requestConnectedFrame } from '../../../../_common/utils/event.js';
 
 const buttonStyle = css`
   .slicer-button {
@@ -27,7 +28,7 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
     css`
       .slicer-button {
         transform-origin: center center;
-        transition: transform 0.1s ease-out;
+        transition: transform 0.12s ease-in-out;
       }
     `,
   ];
@@ -38,64 +39,67 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
   @query('.slicer-button')
   private _button!: HTMLButtonElement;
 
-  private _externalButton: PopupNoteSlicerButton | null = null;
+  private _popButton!: PopupNoteSlicerButton;
+
+  private _active: boolean = false;
 
   private get _defaultTransform() {
     return `translate3d(-50%, 0, 0)`;
   }
 
-  private _createExternalButton() {
-    if (this._externalButton) return this._externalButton;
+  private _getPopupButton() {
+    if (!this._popButton) {
+      this._popButton = new PopupNoteSlicerButton();
+      this._popButton.addEventListener(
+        'click',
+        () => {
+          this._dispatchSliceEvent();
+        },
+        false
+      );
+    }
 
-    const externalButton = document.createElement(
-      'affine-note-slicer-popupbutton'
-    ) as PopupNoteSlicerButton;
-
-    this._externalButton = externalButton;
-    document.body.appendChild(externalButton);
-    this._disposables.addFromEvent(
-      externalButton,
-      'click',
-      this._dispatchSliceEvent
-    );
-    this._disposables.add(() => {
-      document.body.removeChild(externalButton);
-      this._externalButton = null;
-    });
-
-    return externalButton;
+    return this._popButton;
   }
 
-  private _popupExternalButton = () => {
-    this._dispatchPopupEvent();
-
-    const externalButton = this._createExternalButton();
-
-    requestAnimationFrame(() => {
-      const rect = this._button.getBoundingClientRect();
-
-      this._button.style.visibility = 'hidden';
-      externalButton.show(rect);
-      externalButton.addEventListener(
-        'transitionend',
-        () => {
-          this._dispatchShowIndicatorEvent();
-        },
-        { once: true }
-      );
-    });
-  };
-
   private _slideout() {
+    if (this._active) return;
+
+    this._active = true;
+
     const button = this._button;
 
-    requestAnimationFrame(() => {
+    requestConnectedFrame(() => {
       button.style.transform = `translate3d(-${150}%, 0, 0)`;
-    });
+    }, this);
 
-    button.addEventListener('transitionend', this._popupExternalButton, {
-      once: true,
-    });
+    button.addEventListener(
+      'transitionend',
+      () => {
+        requestConnectedFrame(() => {
+          button.style.transform = `translate3d(-50%, 0, 0) scale(${1.3})`;
+        }, this);
+
+        this._increaseZIndex();
+        button.addEventListener(
+          'transitionend',
+          () => {
+            const rect = this._button.getBoundingClientRect();
+
+            this._getPopupButton().show(rect, 1.3);
+            this._dispatchShowIndicatorEvent();
+          },
+          { once: true }
+        );
+      },
+      { once: true }
+    );
+  }
+
+  private _increaseZIndex() {
+    const e = new CustomEvent('increasezindex');
+
+    this.dispatchEvent(e);
   }
 
   private _dispatchShowIndicatorEvent() {
@@ -110,24 +114,11 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
     this.dispatchEvent(e);
   };
 
-  private _dispatchPopupEvent = () => {
-    const e = new CustomEvent('popup');
-
-    this.dispatchEvent(e);
-  };
-
-  private _popup() {
-    this._slideout();
-  }
-
   reset() {
-    this._button.removeEventListener(
-      'transitionend',
-      this._popupExternalButton
-    );
+    this._active = false;
     this._button.style.removeProperty('visibility');
     this._button.style.transform = this._defaultTransform;
-    this._externalButton?.reset();
+    this._popButton?.reset();
   }
 
   override render() {
@@ -136,7 +127,8 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
       style=${styleMap({
         transform: this._defaultTransform,
       })}
-      @mouseenter=${this._popup}
+      @mouseenter=${this._slideout}
+      @click=${this._dispatchSliceEvent}
     >
       ${CutIcon}
     </button>`;
@@ -154,33 +146,22 @@ export class PopupNoteSlicerButton extends WithDisposable(LitElement) {
         left: 0;
         top: 0;
         z-index: calc(var(--affine-z-index-popover, 0) + 2);
-        transform-origin: center center;
+        transform-origin: left top;
       }
     `,
   ];
 
-  private _rafId = 0;
+  show(rect: DOMRect, scale: number) {
+    document.body.appendChild(this);
 
-  show(rect: DOMRect) {
     this.style.display = 'block';
-    this.style.transform = `translate3d(${rect.x}px, ${rect.y}px, 0)`;
-
-    const rafId = requestAnimationFrame(() => {
-      this.style.transition = `transform 0.1s 0.1s ease-in-out`;
-      this.style.transform = `translate3d(${rect.x + rect.width}px, ${
-        rect.y
-      }px, 0) scale(1.2)`;
-
-      if (rafId === this._rafId) this._rafId = 0;
-    });
-    this._rafId = rafId;
+    this.style.transform = `translate3d(${rect.x}px, ${rect.y}px, 0) scale(${scale})`;
   }
 
   reset() {
-    this._rafId && cancelAnimationFrame(this._rafId);
+    this.remove();
     this.style.removeProperty('display');
     this.style.removeProperty('transform');
-    this.style.removeProperty('transition');
   }
 
   override render() {

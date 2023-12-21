@@ -22,12 +22,6 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     );
   }
 
-  get titleBound() {
-    const title = this.titleElement;
-    if (!title) return new Bound();
-    return title.titleBound;
-  }
-
   get isInner() {
     const title = this.titleElement;
     if (!title) return false;

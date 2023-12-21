@@ -1,5 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
@@ -10,7 +8,6 @@ import {
   type HitTestOptions,
   type SerializedXYWH,
 } from '../surface-block/index.js';
-import type { FrameBlockComponent } from './frame-block.js';
 
 type FrameBlockProps = {
   title: Text;
@@ -42,23 +39,10 @@ export class FrameBlockModel extends selectable<FrameBlockProps>(
   BaseBlockModel
 ) {
   override batch = FRAME_BATCH;
-  override hitTest(
-    x: number,
-    y: number,
-    _: HitTestOptions,
-    editorHost: EditorHost
-  ): boolean {
+  override hitTest(x: number, y: number, _: HitTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
-    const hit = bound.isPointNearBound([x, y], 5);
-    if (hit) return true;
-    assertExists(this.page.root);
-    const block = editorHost.view.viewFromPath('block', [
-      this.page.root?.id,
-      this.id,
-    ]) as FrameBlockComponent;
-    if (!block) return false;
-    const titleBound = block.titleBound;
-    return titleBound.isPointInBound([x, y], 0);
+
+    return bound.isPointNearBound([x, y], 5);
   }
 
   override boxSelect(seclectedBound: Bound): boolean {

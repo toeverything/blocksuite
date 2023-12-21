@@ -1,7 +1,7 @@
 import '../../note-slicer/index.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { html, nothing } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -21,6 +21,12 @@ const ACTIVE_NOTE_EXTRA_PADDING = 20;
 
 @customElement('edgeless-note-mask')
 export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    .affine-note-mask:hover {
+      background-color: var(--affine-hover-color);
+    }
+  `;
+
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
@@ -73,7 +79,11 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
       right: '0',
       zIndex: '1',
       pointerEvents: selected ? 'none' : 'auto',
+      borderRadius: `${
+        this.model.edgeless.style.borderRadius * this.surface.viewport.zoom
+      }px`,
     };
+
     return html`
       <div class="affine-note-mask" style=${styleMap(style)}></div>
     `;
@@ -128,14 +138,6 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     );
 
     _disposables.add(
-      edgeless.slots.hoverUpdated.on(() => {
-        this._isHover =
-          edgeless.tools.getHoverState()?.content === this.model &&
-          edgeless.selectionManager.elements.includes(this.model);
-      })
-    );
-
-    _disposables.add(
       edgeless.selectionManager.slots.updated.on(() => {
         if (edgeless.selectionManager.elements.includes(this.model)) {
           this._isHover =
@@ -145,12 +147,23 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     );
   }
 
+  private _hovered() {
+    if (
+      !this._isHover &&
+      this.edgeless.selectionManager.isSelected(this.model.id)
+    ) {
+      this._isHover = true;
+    }
+  }
+
+  private _leaved() {
+    if (this._isHover) {
+      this._isHover = false;
+    }
+  }
+
   private get _isShowCollapsedContent() {
-    return (
-      this.model.edgeless.collapse &&
-      (this._isResizing || this._isHover) &&
-      this.edgeless.selectionManager.elements.includes(this.model)
-    );
+    return this.model.edgeless.collapse && (this._isResizing || this._isHover);
   }
 
   private _collapsedContent() {
@@ -188,7 +201,6 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   override render() {
     const { model, surface, index } = this;
-    const { zoom } = surface.viewport;
     const { xywh, background, hidden, edgeless } = model;
     const { borderRadius, borderSize, borderStyle, shadowType } =
       edgeless.style;
@@ -200,9 +212,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       zIndex: `${index}`,
       width: `${bound.w}px`,
       height: collapse ? `${bound.h}px` : 'inherit',
-      transform: `translate(${bound.x * zoom}px, ${
-        bound.y * zoom
-      }px) scale(${zoom})`,
+      left: `${bound.x}px`,
+      top: `${bound.y}px`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       boxSizing: 'border-box',
       borderRadius: borderRadius + 'px',
@@ -242,6 +253,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         class="edgeless-block-portal-note"
         style=${styleMap(style)}
         data-model-height="${bound.h}"
+        @mouseleave=${this._leaved}
+        @mousemove=${this._hovered}
       >
         <div class="note-background" style=${styleMap(backgroundStyle)}></div>
         <div

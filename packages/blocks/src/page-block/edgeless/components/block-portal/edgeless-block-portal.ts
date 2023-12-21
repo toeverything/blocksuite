@@ -5,7 +5,6 @@ import './bookmark/edgeless-bookmark.js';
 import './frame/edgeless-frame.js';
 import './embed/edgeless-embed.js';
 import '../rects/edgeless-selected-rect.js';
-import '../rects/edgeless-hover-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
 import '../../components/auto-connect/edgeless-index-label.js';
 import '../../components/auto-connect/edgeless-auto-connect-line.js';
@@ -21,10 +20,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import {
-  delayCallback,
-  requestConnectedFrame,
-} from '../../../../_common/utils/event.js';
+import { requestConnectedFrame } from '../../../../_common/utils/event.js';
 import {
   matchFlavours,
   type TopLevelBlockModel,
@@ -127,32 +123,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @state()
   private _isResizing = false;
 
-  private _cancelRestoreWillchange: (() => void) | null = null;
-
   private _surfaceRefReferenceSet = new Set<string>();
+
+  private _clearWillChangeId: null | ReturnType<typeof setTimeout> = null;
 
   get isDragging() {
     return this.selectedRect.dragging;
-  }
-
-  private _updateCanvasViewport() {
-    Array.from(this.canvasSlot.children).forEach(canvas => {
-      (canvas as HTMLCanvasElement).style.setProperty(
-        'transform',
-        this._getLayerViewport(true)
-      );
-    });
-  }
-
-  aboutToChangeViewport() {
-    if (this._cancelRestoreWillchange) this._cancelRestoreWillchange();
-    if (!this.layer.style.willChange)
-      this.layer.style.setProperty('will-change', 'transform');
-
-    this._cancelRestoreWillchange = delayCallback(() => {
-      this.layer.style.removeProperty('will-change');
-      this._cancelRestoreWillchange = null;
-    }, 150);
   }
 
   refreshLayerViewport = () => {
@@ -168,23 +144,34 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
     this.layer.style.setProperty('transform', this._getLayerViewport());
-    this._updateCanvasViewport();
+    this.canvasSlot.style.setProperty(
+      '--canvas-transform-offset',
+      this._getLayerViewport(true)
+    );
+  };
+
+  private _applyWillChangeProp = () => {
+    if (this._clearWillChangeId) clearTimeout(this._clearWillChangeId);
+
+    this._clearWillChangeId = setTimeout(() => {
+      this.layer?.style.removeProperty('will-change');
+      this._clearWillChangeId = null;
+    }, 100);
+
+    if (this.layer.style.getPropertyValue('will-change') !== 'content') {
+      requestConnectedFrame(() => {
+        this.layer.style.setProperty('will-change', 'content');
+      }, this);
+    }
   };
 
   setSlotContent(children: HTMLElement[]) {
-    if (this.canvasSlot.children.length !== children.length)
+    if (this.canvasSlot.children.length !== children.length) {
+      children.forEach(child => {
+        child.style.setProperty('transform', 'var(--canvas-transform-offset)');
+      });
       this.canvasSlot.replaceChildren(...children);
-
-    this._updateCanvasViewport();
-  }
-
-  private _getLayerViewport(negative = false) {
-    const { surface } = this.edgeless;
-    const { translateX, translateY } = surface.viewport;
-
-    return `translate(${negative ? -translateX : translateX}px, ${
-      negative ? -translateY : translateY
-    }px)`;
+    }
   }
 
   private _updateReference() {
@@ -213,6 +200,17 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     }
   }
 
+  private _getLayerViewport(negative = false) {
+    const { surface } = this.edgeless;
+    const { translateX, translateY, zoom } = surface.viewport;
+
+    if (negative) {
+      return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
+    }
+
+    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
+  }
+
   override firstUpdated() {
     this._updateReference();
     const { _disposables, edgeless } = this;
@@ -221,7 +219,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     let rAqId: number | null = null;
     _disposables.add(
       edgeless.slots.viewportUpdated.on(() => {
-        this.aboutToChangeViewport();
+        this._applyWillChangeProp();
 
         if (rAqId) return;
 
@@ -334,12 +332,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           .elementsMap=${autoConnectedBlocks}
         >
         </edgeless-auto-connect-line>
-        <div
-          class="affine-edgeless-layer"
-          style=${styleMap({
-            transform: this._getLayerViewport(),
-          })}
-        >
+        <div class="affine-edgeless-layer">
           <edgeless-frames-container
             .surface=${surface}
             .edgeless=${edgeless}
@@ -395,11 +388,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             })}
         </div>
       </div>
-      ${this._isResizing
-        ? nothing
-        : html`
-            <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>
-          `}
       <edgeless-dragging-area-rect
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>

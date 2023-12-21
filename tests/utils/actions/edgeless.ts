@@ -282,13 +282,6 @@ export async function assertEdgelessTool(page: Page, mode: EdgelessTool) {
   expect(type).toEqual(mode);
 }
 
-export async function getEdgelessHoverRect(page: Page) {
-  const hoverRect = page.locator('.affine-edgeless-hover-rect');
-  const box = await hoverRect.boundingBox();
-  if (!box) throw new Error('Missing edgeless hover rect');
-  return box;
-}
-
 export async function getEdgelessBlockChild(page: Page) {
   const block = page.locator('.edgeless-block-portal-note');
   const blockBox = await block.boundingBox();

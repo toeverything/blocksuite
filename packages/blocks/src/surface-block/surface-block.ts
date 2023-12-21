@@ -846,7 +846,7 @@ export class SurfaceBlockComponent extends BlockElement<
       w: options.expand,
       h: options.expand,
     };
-    const pickSurface = () => {
+    const pickCanvasElement = () => {
       const candidates = this._renderer.gridManager.search(hitTestBound);
       const picked = candidates.filter(element =>
         element.hitTest(x, y, options)
@@ -861,22 +861,25 @@ export class SurfaceBlockComponent extends BlockElement<
       return picked as EdgelessElement[];
     };
     const pickFrames = () => {
-      return this.layer.frames.filter(frame =>
-        frame.hitTest(x, y, options, this.host)
+      const candidates = this.layer.framesGrid.search(hitTestBound);
+
+      return candidates.filter(frame =>
+        frame.hitTest(x, y, options)
       ) as EdgelessElement[];
     };
 
-    const frames = pickFrames();
-    const results = pickSurface().concat(pickBlock());
+    let results = pickCanvasElement().concat(pickBlock());
 
     // FIXME: optimization on ordered element
     results.sort(compare);
 
-    if (results.length === 0) {
-      return options.all ? frames : last(frames) ?? null;
+    if (options.all || results.length === 0) {
+      const frames = pickFrames();
+
+      results = frames.concat(results);
     }
 
-    return options.all ? frames.concat(results) : last(results) ?? null;
+    return (options.all ? results : last(results)) ?? null;
   }
 
   pickTopWithGroup(point: IVec, options?: HitTestOptions) {

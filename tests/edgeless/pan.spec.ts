@@ -6,7 +6,6 @@ import {
 } from '../utils/actions/edgeless.js';
 import {
   addBasicRectShapeElement,
-  defaultTool,
   dragBetweenCoords,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
@@ -15,7 +14,7 @@ import {
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
-  assertEdgelessHoverRect,
+  assertEdgelessSelectedRect,
   assertHasClass,
   assertNotHasClass,
   assertRichTexts,
@@ -45,8 +44,8 @@ test('pan tool basic', async ({ page }) => {
   );
   await setEdgelessTool(page, 'default');
 
-  await page.mouse.move(start.x + 25, start.y + 25);
-  await assertEdgelessHoverRect(page, [120, 120, 100, 100]);
+  await page.mouse.click(start.x + 25, start.y + 25);
+  await assertEdgelessSelectedRect(page, [120, 120, 100, 100]);
 });
 
 test('pan tool shortcut', async ({ page }) => {
@@ -58,8 +57,8 @@ test('pan tool shortcut', async ({ page }) => {
   const end = { x: 200, y: 200 };
   await addBasicRectShapeElement(page, start, end);
 
-  await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 
   await page.keyboard.down('Space');
   const defaultButton = locatorEdgelessToolButton(page, 'pan', false);
@@ -77,11 +76,8 @@ test('pan tool shortcut', async ({ page }) => {
     }
   );
 
-  await defaultTool(page);
-
-  await page.mouse.move(start.x + 25, start.y + 25);
   await page.keyboard.up('Space');
-  await assertEdgelessHoverRect(page, [120, 120, 100, 100]);
+  await assertEdgelessSelectedRect(page, [120, 120, 100, 100]);
 });
 
 test('pan tool shortcut when user is editing', async ({ page }) => {
