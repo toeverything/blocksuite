@@ -153,17 +153,12 @@ export async function assertInlineEditorDeltas(
   deltas: unknown[],
   i = 0
 ) {
-  const actual = await page.evaluate(
-    ([i, currentEditorIndex]) => {
-      const editorHost =
-        document.querySelectorAll('editor-host')[currentEditorIndex];
-      const inlineRoot = editorHost.querySelectorAll<InlineRootElement>(
-        '[data-v-root="true"]'
-      )[i];
-      return inlineRoot.inlineEditor.yTextDeltas;
-    },
-    [i, currentEditorIndex]
-  );
+  const actual = await page.evaluate(i => {
+    const inlineRoot = document.querySelectorAll<InlineRootElement>(
+      '[data-v-root="true"]'
+    )[i];
+    return inlineRoot.inlineEditor.yTextDeltas;
+  }, i);
   expect(actual).toEqual(deltas);
 }
 

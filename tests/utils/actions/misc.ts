@@ -781,10 +781,8 @@ export async function setInlineRangeInInlineEditor(
   i = 0
 ) {
   await page.evaluate(
-    ({ i, inlineRange, currentEditorIndex }) => {
-      const editorHost =
-        document.querySelectorAll('editor-host')[currentEditorIndex];
-      const inlineEditor = editorHost.querySelectorAll<InlineRootElement>(
+    ({ i, inlineRange }) => {
+      const inlineEditor = document.querySelectorAll<InlineRootElement>(
         '[data-v-root="true"]'
       )[i]?.inlineEditor;
       if (!inlineEditor) {
@@ -792,7 +790,7 @@ export async function setInlineRangeInInlineEditor(
       }
       inlineEditor.setInlineRange(inlineRange);
     },
-    { i, inlineRange, currentEditorIndex }
+    { i, inlineRange }
   );
   await waitNextFrame(page);
 }
