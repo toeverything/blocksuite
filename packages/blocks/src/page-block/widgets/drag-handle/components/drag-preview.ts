@@ -17,12 +17,10 @@ export class DragPreview extends ShadowlessElement {
   override render() {
     return html`<style>
       affine-drag-preview {
-        --x: 0px;
-        --y: 0px;
-        height: auto;
-        display: block;
-        position: absolute;
         box-sizing: border-box;
+        position: absolute;
+        display: block;
+        height: auto;
         font-family: ${baseTheme.fontSansFamily};
         font-size: var(--affine-font-base);
         line-height: var(--affine-line-height);
@@ -30,37 +28,16 @@ export class DragPreview extends ShadowlessElement {
         font-weight: 400;
         top: 0;
         left: 0;
+        transform-origin: 0 0;
         opacity: 0.5;
-        cursor: none;
         user-select: none;
         pointer-events: none;
         caret-color: transparent;
-        transform-origin: 0 0;
         z-index: 3;
       }
 
-      affine-drag-preview > .affine-block-element {
-        pointer-events: none;
-        background-color: transparent;
-      }
-
-      affine-drag-preview > .affine-block-element:first-child > *:first-child {
-        margin-top: 0;
-      }
-
       .affine-drag-preview-grabbing * {
-        cursor: grabbing;
-      }
-
-      affine-drag-preview.grabbing:after {
-        content: '';
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 24px;
-        height: 24px;
-        transform: translate(var(--x), var(--y));
+        cursor: grabbing !important;
       }
     </style>`;
   }
