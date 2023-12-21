@@ -2,7 +2,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
-import { type SurfaceBlockComponent } from '../../../../index.js';
+import { type SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 export class EdgelessPortalBase<
