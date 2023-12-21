@@ -92,6 +92,7 @@ export class LayerManager {
   }[];
 
   blocksGrid = new GridManager<IndexableBlock>();
+  framesGrid = new GridManager<FrameBlockModel>();
 
   constructor(elements?: EdgelessElement[]) {
     if (elements) {
@@ -108,6 +109,7 @@ export class LayerManager {
       if (element instanceof SurfaceElement) {
         this.canvasElements.push(element);
       } else if (matchFlavours(element, ['affine:frame'])) {
+        this.framesGrid.add(element);
         this.frames.push(element);
       } else {
         this.blocksGrid.add(element);
@@ -499,6 +501,7 @@ export class LayerManager {
       }
     } else if (matchFlavours(element, ['affine:frame'])) {
       updateArray(this.frames, element);
+      this.framesGrid.add(element);
     } else {
       updateType = 'block';
       updateArray(this.blocks, element);
@@ -529,6 +532,7 @@ export class LayerManager {
       }
     } else if (matchFlavours(element, ['affine:frame'])) {
       insertToOrderedArray(this.frames, element);
+      this.framesGrid.add(element);
     } else {
       insertType = 'block';
       insertToOrderedArray(this.blocks, element);
@@ -550,6 +554,7 @@ export class LayerManager {
       removeFromOrderedArray(this.canvasElements, element);
     } else if (matchFlavours(element, ['affine:frame'])) {
       removeFromOrderedArray(this.frames, element);
+      this.framesGrid.remove(element);
     } else {
       deleteType = 'block';
       removeFromOrderedArray(this.blocks, element);
