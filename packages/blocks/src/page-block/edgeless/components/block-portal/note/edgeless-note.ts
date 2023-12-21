@@ -138,14 +138,6 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     );
 
     _disposables.add(
-      edgeless.slots.hoverUpdated.on(() => {
-        this._isHover =
-          edgeless.tools.getHoverState()?.content === this.model &&
-          edgeless.selectionManager.elements.includes(this.model);
-      })
-    );
-
-    _disposables.add(
       edgeless.selectionManager.slots.updated.on(() => {
         if (edgeless.selectionManager.elements.includes(this.model)) {
           this._isHover =
@@ -155,12 +147,23 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     );
   }
 
+  private _hovered() {
+    if (
+      !this._isHover &&
+      this.edgeless.selectionManager.isSelected(this.model.id)
+    ) {
+      this._isHover = true;
+    }
+  }
+
+  private _leaved() {
+    if (this._isHover) {
+      this._isHover = false;
+    }
+  }
+
   private get _isShowCollapsedContent() {
-    return (
-      this.model.edgeless.collapse &&
-      (this._isResizing || this._isHover) &&
-      this.edgeless.selectionManager.elements.includes(this.model)
-    );
+    return this.model.edgeless.collapse && (this._isResizing || this._isHover);
   }
 
   private _collapsedContent() {
@@ -250,6 +253,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         class="edgeless-block-portal-note"
         style=${styleMap(style)}
         data-model-height="${bound.h}"
+        @mouseleave=${this._leaved}
+        @mousemove=${this._hovered}
       >
         <div class="note-background" style=${styleMap(backgroundStyle)}></div>
         <div
