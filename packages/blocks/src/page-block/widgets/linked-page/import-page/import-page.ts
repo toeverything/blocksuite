@@ -73,6 +73,7 @@ export async function importNotion(workspace: Workspace, file: File) {
           const doc = new DOMParser().parseFromString(text, 'text/html');
           const pageBody = doc.querySelector('.page-body');
           if (pageBody && pageBody.children.length == 0) {
+            // Skip empty pages
             continue;
           }
         }
