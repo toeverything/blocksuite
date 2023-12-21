@@ -20,9 +20,7 @@ const getFalAPIKey = () => {
   }
   return apiKey;
 };
-fal.config({
-  credentials: getFalAPIKey(),
-});
+
 export const createImageGenerator = () => {
   const connection = fal.realtime.connect('110602490-lcm-sd15-i2i', {
     onResult: result => {
@@ -40,7 +38,9 @@ export const createImageGenerator = () => {
   let id = 0;
   return (prompt: string, img: string) => {
     return new Promise<string>(res => {
-      console.log('ask110602490_lcm_sd15_i2i_realtime', prompt);
+      fal.config({
+        credentials: getFalAPIKey(),
+      });
       connection.send({
         request_id: `${id++}`,
         prompt,
