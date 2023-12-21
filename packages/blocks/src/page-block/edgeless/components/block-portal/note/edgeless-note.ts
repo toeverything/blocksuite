@@ -92,6 +92,9 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 
 @customElement('edgeless-block-portal-note')
 export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> {
+  @query('.edgeless-block-portal-note')
+  override portalContainer!: HTMLDivElement;
+
   @state()
   private _editing = false;
 

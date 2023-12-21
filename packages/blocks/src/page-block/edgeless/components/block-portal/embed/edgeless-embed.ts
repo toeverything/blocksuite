@@ -1,4 +1,4 @@
-import { customElement } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -8,6 +8,9 @@ import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 @customElement('edgeless-block-portal-embed')
 export class EdgelessBlockPortalEmbed extends EdgelessPortalBase<EmbedBlockModel> {
+  @query('.edgeless-block-portal-embed')
+  override portalContainer!: HTMLDivElement;
+
   override render() {
     const { model, index, surface } = this;
     const bound = Bound.deserialize(model.xywh);
