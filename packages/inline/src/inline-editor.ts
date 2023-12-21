@@ -49,6 +49,7 @@ export class InlineEditor<
 
   private readonly _yText: Y.Text;
   private _rootElement: InlineRootElement<TextAttributes> | null = null;
+  private _eventSource: HTMLElement | null = null;
   private _isReadonly = false;
 
   private _eventService: EventService<TextAttributes> =
@@ -102,6 +103,11 @@ export class InlineEditor<
   get rootElement() {
     assertExists(this._rootElement);
     return this._rootElement;
+  }
+
+  get eventSource() {
+    assertExists(this._eventSource);
+    return this._eventSource;
   }
 
   get eventService() {
@@ -208,12 +214,14 @@ export class InlineEditor<
     this.slots.inlineRangeUpdate.on(this.rangeService.onInlineRangeUpdated);
   }
 
-  mount(rootElement: HTMLElement) {
+  mount(rootElement: HTMLElement, eventSource: HTMLElement = rootElement) {
     const inlineRoot = rootElement as InlineRootElement<TextAttributes>;
     inlineRoot.inlineEditor = this;
     this._rootElement = inlineRoot;
+    this._eventSource = eventSource;
     render(nothing, this._rootElement);
     this._rootElement.contentEditable = 'true';
+    this._eventSource.contentEditable = 'true';
     this._rootElement.dataset.vRoot = 'true';
 
     this._bindYTextObserver();
