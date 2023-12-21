@@ -1,7 +1,9 @@
+import { assertExists } from '@blocksuite/global/utils';
+
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 import type { BookmarkBlockUrlData } from './bookmark-model.js';
 
-interface LinkPreviewResponseData {
+interface AffineLinkPreviewResponseData {
   url: string;
   title?: string;
   siteName?: string;
@@ -14,7 +16,11 @@ interface LinkPreviewResponseData {
   favicons?: string[];
 }
 
-async function queryUrlData(
+export type QueryUrlData = (
+  url: string
+) => Promise<Partial<BookmarkBlockUrlData>>;
+
+export async function queryUrlDataFromAffineWorker(
   url: string
 ): Promise<Partial<BookmarkBlockUrlData>> {
   if (
@@ -41,7 +47,7 @@ async function queryUrlData(
   } else {
     const response = await fetch(
       // https://github.com/toeverything/affine-workers/tree/main/packages/link-preview
-      'https://affine-worker.toeverything.workers.dev/api/linkPreview',
+      'https://affine-worker.toeverything.workers.dev/api/worker/linkPreview',
       {
         method: 'POST',
         headers: {
@@ -53,7 +59,7 @@ async function queryUrlData(
       }
     ).catch(() => null);
     if (!response || !response.ok) return {};
-    const data: LinkPreviewResponseData = await response.json();
+    const data: AffineLinkPreviewResponseData = await response.json();
     return {
       title: data.title,
       description: data.description,
@@ -69,6 +75,8 @@ export async function refreshBookmarkUrlData(
 ) {
   bookmarkElement.loading = true;
 
+  const queryUrlData = bookmarkElement.service?.queryUrlData;
+  assertExists(queryUrlData);
   const metaData = await queryUrlData(bookmarkElement.model.url);
 
   const {
