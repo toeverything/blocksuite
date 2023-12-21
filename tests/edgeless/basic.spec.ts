@@ -9,7 +9,7 @@ import {
   decreaseZoomLevel,
   deleteAll,
   edgelessCommonSetup,
-  getEdgelessHoverRect,
+  getEdgelessSelectedRect,
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
@@ -25,7 +25,6 @@ import {
   addBasicRectShapeElement,
   captureHistory,
   clickView,
-  dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
@@ -35,7 +34,8 @@ import {
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
-  assertEdgelessHoverRect,
+  assertEdgelessNonSelectedRect,
+  assertEdgelessSelectedRect,
   assertEdgelessSelectedRectModel,
   assertNoteXYWH,
   assertRichTextInlineRange,
@@ -74,28 +74,26 @@ test('can zoom viewport', async ({ page }) => {
   await zoomResetByKeyboard(page);
 
   await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 91]);
-  await page.mouse.move(CENTER_X, CENTER_Y);
 
+  await page.mouse.click(CENTER_X, CENTER_Y);
   const original = [80, 402.5, NOTE_WIDTH, 91];
-  await assertEdgelessHoverRect(page, original);
+  await assertEdgelessSelectedRect(page, original);
   await assertZoomLevel(page, 100);
 
   await decreaseZoomLevel(page);
   await assertZoomLevel(page, 75);
   await decreaseZoomLevel(page);
   await assertZoomLevel(page, 50);
-  await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const box = await getEdgelessHoverRect(page);
+  const box = await getEdgelessSelectedRect(page);
   const zoomed = [box.x, box.y, original[2] * 0.5, original[3] * 0.5];
-  await assertEdgelessHoverRect(page, zoomed);
+  await assertEdgelessSelectedRect(page, zoomed);
 
   await increaseZoomLevel(page);
   await assertZoomLevel(page, 75);
   await increaseZoomLevel(page);
   await assertZoomLevel(page, 100);
-  await page.mouse.move(CENTER_X, CENTER_Y);
-  await assertEdgelessHoverRect(page, original);
+  await assertEdgelessSelectedRect(page, original);
 });
 
 test('zoom by mouse', async ({ page }) => {
@@ -107,17 +105,16 @@ test('zoom by mouse', async ({ page }) => {
   await assertZoomLevel(page, 100);
 
   await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 91]);
-  await page.mouse.move(CENTER_X, CENTER_Y);
 
+  await page.mouse.click(CENTER_X, CENTER_Y);
   const original = [80, 402.5, NOTE_WIDTH, 91];
-  await assertEdgelessHoverRect(page, original);
+  await assertEdgelessSelectedRect(page, original);
 
   await zoomByMouseWheel(page, 0, 125);
-  await page.mouse.move(CENTER_X, CENTER_Y);
   await assertZoomLevel(page, 75);
 
   const zoomed = [172.5, 414.375, original[2] * 0.75, original[3] * 0.75];
-  await assertEdgelessHoverRect(page, zoomed);
+  await assertEdgelessSelectedRect(page, zoomed);
 });
 
 test('option/alt mouse drag duplicate a new element', async ({ page }) => {
@@ -159,16 +156,11 @@ test('should cancel select when the selected point is outside the current select
 
   // select the first rect
   await page.mouse.click(110, 150);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 
-  await dragBetweenCoords(
-    page,
-    { x: 350, y: 350 },
-    { x: 350, y: 450 },
-    { steps: 0 }
-  );
-
-  await page.mouse.move(110, 150);
-  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+  // click outside the selected rect
+  await page.mouse.click(200, 200);
+  await assertEdgelessNonSelectedRect(page);
 });
 
 test('the tooltip of more button should be hidden when the action menu is shown', async ({
@@ -183,7 +175,7 @@ test('the tooltip of more button should be hidden when the action menu is shown'
   await addBasicBrushElement(page, start, end);
 
   await page.mouse.click(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
+  await assertEdgelessSelectedRect(page, [98, 98, 104, 104]);
 
   const moreButton = locatorEdgelessComponentToolButton(page, 'more');
   await expect(moreButton).toBeVisible();

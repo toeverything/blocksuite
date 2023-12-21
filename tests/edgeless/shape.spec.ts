@@ -34,8 +34,6 @@ import {
 import {
   assertEdgelessCanvasText,
   assertEdgelessColorSameWithHexColor,
-  assertEdgelessHoverRect,
-  assertEdgelessNonHoverRect,
   assertEdgelessNonSelectedRect,
   assertEdgelessSelectedRect,
   assertExists,
@@ -104,9 +102,6 @@ test('delete shape by component-toolbar', async ({ page }) => {
   await openComponentToolbarMoreMenu(page);
   await clickComponentToolbarMoreMenuButton(page, 'delete');
   await assertEdgelessNonSelectedRect(page);
-
-  await page.mouse.move(110, 110);
-  await assertEdgelessNonHoverRect(page);
 });
 
 //FIXME: need a way to test hand-drawn-like style
@@ -259,8 +254,8 @@ test('hovering on shape should not have effect on underlying block', async ({
   await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
   await setEdgelessTool(page, 'default');
 
-  await page.mouse.move(x + 10, y + 10);
-  await assertEdgelessHoverRect(page, [x, y, 100, 100]);
+  await page.mouse.click(x + 10, y + 10);
+  await assertEdgelessSelectedRect(page, [x, y, 100, 100]);
 });
 
 test('shape element should not move when the selected state is inactive', async ({
@@ -280,7 +275,7 @@ test('shape element should not move when the selected state is inactive', async 
     { steps: 2 }
   );
 
-  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 });
 
 test('change shape stroke width', async ({ page }) => {
@@ -298,8 +293,8 @@ test('change shape stroke width', async ({ page }) => {
 
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
   await changeShapeStrokeWidth(page);
-  await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [100, 150, 100, 100]);
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await assertEdgelessSelectedRect(page, [100, 150, 100, 100]);
 
   await waitNextFrame(page);
 

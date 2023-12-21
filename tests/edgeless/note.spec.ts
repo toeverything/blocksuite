@@ -45,7 +45,6 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertBlockCount,
-  assertEdgelessHoverRect,
   assertEdgelessNonSelectedRect,
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
@@ -278,8 +277,8 @@ test('dragging un-selected note', async ({ page }) => {
   if (!noteBox) {
     throw new Error('Missing edgeless affine-note');
   }
-  await page.mouse.move(noteBox.x + 5, noteBox.y + 5);
-  await assertEdgelessHoverRect(page, [
+  await page.mouse.click(noteBox.x + 5, noteBox.y + 5);
+  await assertEdgelessSelectedRect(page, [
     noteBox.x,
     noteBox.y,
     noteBox.width,
@@ -288,13 +287,12 @@ test('dragging un-selected note', async ({ page }) => {
 
   await dragBetweenCoords(
     page,
-    { x: noteBox.x + 5, y: noteBox.y + 5 },
-    { x: noteBox.x + 5, y: noteBox.y + 25 },
+    { x: noteBox.x + 10, y: noteBox.y + 15 },
+    { x: noteBox.x + 10, y: noteBox.y + 35 },
     { steps: 10 }
   );
 
-  await page.mouse.move(noteBox.x + 35, noteBox.y + 35);
-  await assertEdgelessHoverRect(page, [
+  await assertEdgelessSelectedRect(page, [
     noteBox.x,
     noteBox.y + 20,
     noteBox.width,

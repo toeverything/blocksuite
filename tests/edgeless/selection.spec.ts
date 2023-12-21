@@ -20,7 +20,6 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertBlockCount,
-  assertEdgelessHoverRect,
   assertEdgelessSelectedRect,
   assertSelectionInNote,
 } from '../utils/asserts.js';
@@ -81,12 +80,12 @@ test('select multiple shapes and translate', async ({ page }) => {
   await actions.zoomResetByKeyboard(page);
 
   await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
+  await page.mouse.click(110, 110);
+  await assertEdgelessSelectedRect(page, [98, 98, 104, 104]);
 
   await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });
-  await page.mouse.move(220, 120);
-  await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
+  await page.mouse.click(220, 120);
+  await assertEdgelessSelectedRect(page, [210, 110, 100, 100]);
 
   await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
   await assertEdgelessSelectedRect(page, [86, 86, 236, 136]);
@@ -94,11 +93,11 @@ test('select multiple shapes and translate', async ({ page }) => {
   await dragBetweenCoords(page, { x: 120, y: 120 }, { x: 150, y: 150 });
   await assertEdgelessSelectedRect(page, [116, 116, 236, 136]);
 
-  await page.mouse.move(160, 160);
-  await assertEdgelessHoverRect(page, [128, 128, 104, 104]);
+  await page.mouse.click(160, 160);
+  await assertEdgelessSelectedRect(page, [128, 128, 104, 104]);
 
-  await page.mouse.move(250, 150);
-  await assertEdgelessHoverRect(page, [240, 140, 100, 100]);
+  await page.mouse.click(250, 150);
+  await assertEdgelessSelectedRect(page, [240, 140, 100, 100]);
 });
 
 test('selection box of shape element sync on fast dragging', async ({
@@ -162,8 +161,8 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   await actions.zoomResetByKeyboard(page);
 
   await addBasicRectShapeElement(page, { x: 200, y: 100 }, { x: 300, y: 200 });
-  await page.mouse.move(210, 110);
-  await assertEdgelessHoverRect(page, [200, 100, 100, 100]);
+  await page.mouse.click(210, 110);
+  await assertEdgelessSelectedRect(page, [200, 100, 100, 100]);
 
   const selectedRectClass = '.affine-edgeless-selected-rect';
 
