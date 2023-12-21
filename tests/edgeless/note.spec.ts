@@ -490,7 +490,7 @@ test.describe('note slicer', () => {
       .locator('affine-note-slicer-popupbutton')
       .boundingBox();
     assertRectExist(popupButtonRect);
-    expect(popupButtonRect.width / buttonRect.width).toBeCloseTo(1.2);
+    expect(popupButtonRect.width / buttonRect.width).toBeCloseTo(1.3);
   });
 
   test('note slicer should has right z-index', async ({ page }) => {

@@ -156,8 +156,6 @@ export class PopupNoteSlicerButton extends WithDisposable(LitElement) {
 
     this.style.display = 'block';
     this.style.transform = `translate3d(${rect.x}px, ${rect.y}px, 0) scale(${scale})`;
-    this.style.width = `${rect.width}px`;
-    this.style.height = `${rect.height}px`;
   }
 
   reset() {
