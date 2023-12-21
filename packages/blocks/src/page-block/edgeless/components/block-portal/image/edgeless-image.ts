@@ -1,4 +1,4 @@
-import { customElement, query } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -8,9 +8,6 @@ import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 @customElement('edgeless-block-portal-image')
 export class EdgelessBlockPortalImage extends EdgelessPortalBase<ImageBlockModel> {
-  @query('.edgeless-block-portal-image')
-  override portalContainer!: HTMLDivElement;
-
   override render() {
     const { model, index } = this;
     const bound = Bound.deserialize(model.xywh);

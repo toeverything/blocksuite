@@ -1,6 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -154,9 +154,6 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
 
 @customElement('edgeless-block-portal-frame')
 class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
-  @query('.edgeless-block-portal-frame')
-  override portalContainer!: HTMLDivElement;
-
   override render() {
     const { model, index } = this;
     const bound = Bound.deserialize(model.xywh);

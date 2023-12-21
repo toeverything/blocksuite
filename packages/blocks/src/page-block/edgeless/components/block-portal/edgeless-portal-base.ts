@@ -20,8 +20,6 @@ export class EdgelessPortalBase<
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  protected portalContainer!: HTMLDivElement;
-
   protected renderModel(model: T) {
     return this.surface.host.renderModel(model);
   }
