@@ -1,4 +1,4 @@
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -87,7 +87,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       position: absolute;
       z-index: 1;
       left: 8px;
-      height: 53px;
+      height: 30px;
       border: 1px solid var(--affine-border-color);
       box-shadow: var(--affine-menu-shadow);
       background-color: var(--affine-white);
@@ -104,9 +104,6 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       width: 90%;
     }
   `;
-  @state()
-  canvas: HTMLCanvasElement[] = [];
-
   @state()
   private _curIndex = -1;
 
@@ -130,31 +127,6 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
 
   override firstUpdated() {
     this._bindEvent();
-
-    Promise.all(
-      this.frames.map(frame =>
-        this.edgeless.clipboardController.toCanvas([frame], [])
-      )
-    )
-      .then(canvas => {
-        this.canvas = canvas.map(canva =>
-          this._createScaledCanvas(
-            canva ? canva : document.createElement('canvas')
-          )
-        );
-      })
-      .catch(console.error);
-  }
-
-  private _createScaledCanvas(canva: HTMLCanvasElement) {
-    const scaledCanvas = document.createElement('canvas');
-    scaledCanvas.width = 70;
-    scaledCanvas.height = 45;
-
-    const ctx = scaledCanvas.getContext('2d');
-    assertExists(ctx);
-    ctx.drawImage(canva, 0, 0, scaledCanvas.width, scaledCanvas.height);
-    return scaledCanvas;
   }
 
   private _bindEvent() {
@@ -235,10 +207,6 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
           });
           this.edgeless.page.captureSync();
 
-          const canvas = this.canvas;
-          const canva = canvas.splice(index, 1);
-          canvas.splice(newIndex, 0, canva[0]);
-          this.canvas = canvas;
           this.updateFrames();
           this.requestUpdate();
         }
@@ -251,9 +219,6 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
 
   override render() {
     const frame = this.frames[this._curIndex];
-    const canva = frame
-      ? this._createScaledCanvas(this.canvas[this._curIndex])
-      : nothing;
 
     return html`
       <div
@@ -267,7 +232,6 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
             <div class="item draggable" id=${frame.id} index=${index}>
               <div class="drag-indicator"></div>
               <div class="index">${index + 1}</div>
-              <div class="image">${this.canvas[index]}</div>
               <div class="title">${frame.title.toString()}</div>
             </div>
           `
@@ -277,7 +241,6 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
           ${frame
             ? html`<div class="drag-indicator"></div>
                 <div class="index">${this._curIndex + 1}</div>
-                <div class="image">${canva}</div>
                 <div class="title">${frame.title.toString()}</div>`
             : nothing}
         </div>

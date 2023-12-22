@@ -1,9 +1,6 @@
 import { type Slot } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
-import type { DataViewDataType } from '../database-block/common/data-view.js';
-import type { Cell } from '../database-block/index.js';
-import type { Column } from '../database-block/table/types.js';
 import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
 import type { BookmarkBlockModel } from '../models.js';
@@ -18,7 +15,6 @@ import {
   type ShapeType,
 } from '../surface-block/elements/index.js';
 import type { RefNodeSlots } from './components/rich-text/inline/nodes/reference-node.js';
-import type { AffineTextAttributes } from './components/rich-text/inline/types.js';
 import type { NavigatorMode } from './edgeless/frame/consts.js';
 import type { CssVariableName } from './theme/css-variables.js';
 import type { BlockComponent } from './utils/query.js';
@@ -244,55 +240,6 @@ export type EdgelessTool =
   | EraserTool
   | FrameTool
   | FrameNavigatorTool;
-
-/** @deprecated */
-export type SerializedBlock = {
-  id?: string;
-  flavour: string;
-  type?: string;
-  text?: {
-    insert?: string;
-    delete?: number;
-    retain?: number;
-    attributes?: AffineTextAttributes;
-  }[];
-  rawText?: {
-    insert: string;
-    delete?: number;
-    retain?: number;
-  }[];
-  checked?: boolean;
-  children: SerializedBlock[];
-  sourceId?: string;
-  caption?: string;
-  name?: string;
-  size?: number;
-  width?: number;
-  height?: number;
-  language?: string;
-  databaseProps?: {
-    id: string;
-    title: string;
-    rowIds: string[];
-    cells: Record<string, Record<string, Cell>>;
-    columns: Column[];
-    views?: DataViewDataType[];
-  };
-  // note block
-  xywh?: string;
-  // bookmark block
-  style?: string;
-  title?: string;
-  description?: string;
-  icon?: string;
-  image?: string;
-  url?: string;
-  crawled?: boolean;
-  background?: string;
-  rotate?: number;
-  hidden?: boolean;
-  edgeless?: Record<string, Record<string, unknown> | unknown>;
-};
 
 export type EmbedBlockDoubleClickData = {
   blockId: string;

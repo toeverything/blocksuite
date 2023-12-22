@@ -112,6 +112,26 @@ export function getLineWidth(text: string, font: string): number {
   return width;
 }
 
+export function getTextRect(
+  text: string,
+  fontFamily: string,
+  fontSize: number
+): { w: number; h: number } {
+  const ctx = getMeasureCtx();
+  const font = `${fontSize}px "${fontFamily}"`;
+
+  if (font !== ctx.font) ctx.font = font;
+
+  const metrics = ctx.measureText(text);
+  const lineHeight =
+    metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+
+  return {
+    w: metrics.width,
+    h: lineHeight,
+  };
+}
+
 export function getTextWidth(text: string, font: string): number {
   const lines = splitIntoLines(text);
   let width = 0;

@@ -17,7 +17,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       padding: 12px;
       align-items: flex-start;
       gap: 12px;
-      grid-template-columns: minmax(0, 1fr) 140px;
+      grid-template-columns: minmax(0, 1fr) 204px;
 
       border-radius: 8px;
       border: 1px solid var(--affine-background-tertiary-color, #eee);
@@ -27,8 +27,8 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-bookmark-banner {
-      width: 140px;
-      height: 101px;
+      width: 204px;
+      height: 102px;
 
       border-radius: 4px 4px 0 0;
       opacity: var(--add, 1);

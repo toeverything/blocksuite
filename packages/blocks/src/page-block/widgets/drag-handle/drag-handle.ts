@@ -833,12 +833,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     this._showDragHandleOnTopLevelBlocks();
   };
 
-  private _throttledCheckTopLevelBlockSelection = throttle(
-    this._checkTopLevelBlockSelection,
-    200,
-    { trailing: true }
-  );
-
   /**
    * When pointer move on block, should show drag handle
    * And update hover block id and path
@@ -920,8 +914,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   private _throttledPointerMoveHandler = throttle(
     this._pointerMoveHandler,
-    1000 / 60,
-    { trailing: true }
+    1000 / 60
   );
 
   /**
@@ -1230,7 +1223,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       ) {
         this._hide(true);
         if (isInsideEdgelessEditor(this.host)) {
-          this._throttledCheckTopLevelBlockSelection();
+          this._checkTopLevelBlockSelection();
         }
         return true;
       }
@@ -1238,8 +1231,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     // call default drag end handler if no option return true
     this._onDragEnd(state);
-    if (isInsideEdgelessEditor(this.host))
-      this._throttledCheckTopLevelBlockSelection();
+    if (isInsideEdgelessEditor(this.host)) this._checkTopLevelBlockSelection();
     return true;
   };
 
@@ -1324,7 +1316,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   private _handleEdgelessToolUpdated = (newTool: EdgelessTool) => {
     if (newTool.type === 'default') {
-      this._throttledCheckTopLevelBlockSelection();
+      this._checkTopLevelBlockSelection();
     } else {
       this._hide();
     }
@@ -1419,19 +1411,19 @@ export class AffineDragHandleWidget extends WidgetElement<
 
       this._disposables.add(
         edgelessPage.selectionManager.slots.updated.on(() => {
-          this._throttledCheckTopLevelBlockSelection();
+          this._checkTopLevelBlockSelection();
         })
       );
 
       this._disposables.add(
         edgelessPage.slots.readonlyUpdated.on(() => {
-          this._throttledCheckTopLevelBlockSelection();
+          this._checkTopLevelBlockSelection();
         })
       );
 
       this._disposables.add(
         edgelessPage.slots.draggingAreaUpdated.on(() => {
-          this._throttledCheckTopLevelBlockSelection();
+          this._checkTopLevelBlockSelection();
         })
       );
 
@@ -1443,7 +1435,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
       this._disposables.add(
         edgelessPage.slots.elementResizeEnd.on(() => {
-          this._throttledCheckTopLevelBlockSelection();
+          this._checkTopLevelBlockSelection();
         })
       );
     }

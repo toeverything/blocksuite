@@ -13,6 +13,13 @@
       "args": ["run", "${relativeFile}"],
       "smartStep": true,
       "console": "integratedTerminal"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug Playground",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "url": "http://localhost:5173/starter/?init"
     }
   ]
 }
