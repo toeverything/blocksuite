@@ -26,7 +26,6 @@ import {
   getInlineSelectionIndex,
   getInlineSelectionText,
   getRichTextBoundingBox,
-  importMarkdown,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseWithParagraphState,
   initEmptyEdgelessState,
@@ -359,22 +358,20 @@ test(scoped`split block when paste`, async ({ page }) => {
 
 test(scoped`import markdown`, async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await resetHistory(page);
   const clipData = `# text
 # h1
 `;
-  await importMarkdown(page, noteId, clipData);
+  await pasteContent(page, { 'text/plain': clipData });
   await page.waitForTimeout(100);
   await assertRichTexts(page, ['text', 'h1', '']);
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 });
-// FIXME
+
 test(scoped`copy clipItems format`, async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await captureHistory(page);
 
@@ -385,7 +382,7 @@ test(scoped`copy clipItems format`, async ({ page }) => {
       - dd
 `;
 
-  await importMarkdown(page, noteId, clipData);
+  await pasteContent(page, { 'text/plain': clipData });
   await page.waitForTimeout(100);
   await setSelection(page, 4, 1, 5, 1);
   await assertClipItems(page, 'text/plain', 'bc');
