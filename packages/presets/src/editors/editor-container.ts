@@ -7,7 +7,6 @@ import type {
 import {
   DocEditorBlockSpecs,
   EdgelessEditorBlockSpecs,
-  getServiceOrRegister,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { noop, Slot } from '@blocksuite/global/utils';
@@ -118,8 +117,6 @@ export class AffineEditorContainer
   }
 
   override firstUpdated() {
-    //FIXME: refactor to a better solution
-    getServiceOrRegister('affine:code');
     if (this.mode === 'page') {
       setTimeout(() => {
         if (this.autofocus) {
