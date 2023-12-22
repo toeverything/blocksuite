@@ -19,15 +19,6 @@ import type { Renderer } from '../../surface-block/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 
-export type FetchFileHandler = (
-  fileName: string
-) => Promise<Blob | null | undefined>;
-
-export type TextStyleHandler = (
-  element: HTMLElement,
-  styles: Record<string, unknown>
-) => void;
-
 type Html2CanvasFunction = typeof import('html2canvas').default;
 
 export class ContentParser {
