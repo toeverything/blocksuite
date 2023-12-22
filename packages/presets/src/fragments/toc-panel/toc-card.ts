@@ -75,7 +75,6 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
     .card-preview.edgeless:hover {
       background: var(--affine-hover-color);
-      cursor: pointer;
     }
 
     .card-number-container {
@@ -109,6 +108,14 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       user-select: none;
       color: var(--affine-text-primary-color);
+    }
+
+    .card-preview.edgeless .card-content:hover {
+      cursor: pointer;
+    }
+
+    .card-preview.edgeless .card-number-container:hover {
+      cursor: grab;
     }
 
     .card-container.placeholder {
@@ -223,7 +230,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
   private _dispatchDragEvent(e: MouseEvent) {
     e.preventDefault();
-    if (e.button !== 0) return;
+    if (e.button !== 0 || this.editorMode === 'page') return;
 
     const { clientX: startX, clientY: startY } = e;
     const disposeDragStart = on(this.ownerDocument, 'mousemove', e => {

@@ -16,7 +16,6 @@ import {
   initThreeParagraphs,
   pasteByKeyboard,
   pressArrowDown,
-  pressArrowRight,
   pressArrowUp,
   pressEnter,
   scrollToBottom,
@@ -817,7 +816,7 @@ test('should format quick bar be able to copy', async ({ page }) => {
   await copyBtn.click();
   await assertRichTextInlineRange(page, 1, 0, 3);
 
-  await pressArrowRight(page, 1);
+  await focusRichText(page, 1);
   await pasteByKeyboard(page);
   await waitNextFrame(page);
 

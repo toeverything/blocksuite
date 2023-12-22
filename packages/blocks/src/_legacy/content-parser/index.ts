@@ -1,9 +1,6 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { nanoid } from '@blocksuite/store';
-import { marked } from 'marked';
 
-import { getTagColor } from '../../_common/components/tags/colors.js';
 import {
   getBlockComponentByModel,
   getEditorContainer,
@@ -22,40 +19,37 @@ import type { SurfaceElement } from '../../surface-block/elements/surface-elemen
 import type { Renderer } from '../../surface-block/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
-import type {
-  FetchFileHandler,
-  TableParseHandler,
-  TableTitleColumnHandler,
-  TextStyleHandler,
-} from './parse-base.js';
-import { MarkdownParser } from './parse-markdown.js';
-import { NotionHtmlParser } from './parse-notion-html.js';
-import type { SelectedBlock } from './types.js';
+
+export type FetchFileHandler = (
+  fileName: string
+) => Promise<Blob | null | undefined>;
+
+export type TextStyleHandler = (
+  element: HTMLElement,
+  styles: Record<string, unknown>
+) => void;
+
+export type TableParseHandler = (
+  element: Element
+) => Promise<SerializedBlock[] | null>;
+
+export type TableTitleColumnHandler = (
+  element: Element
+) => Promise<SerializedBlock[] | null>;
 
 type Html2CanvasFunction = typeof import('html2canvas').default;
-type ParseContext = 'Markdown' | 'NotionHtml';
 
 export type ParseHtml2BlockHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...args: any[]
 ) => Promise<SerializedBlock[] | null>;
 
-export type ContextedContentParser = {
-  context: string;
-  getParserHtmlText2Block: (name: string) => ParseHtml2BlockHandler;
-};
-
 export class ContentParser {
   private _page: Page;
   readonly slots = {
     beforeHtml2Block: new Slot<Element>(),
   };
-  private _parsers: Record<string, ParseHtml2BlockHandler> = {};
   private _imageProxyEndpoint?: string;
-  private _markdownParser: MarkdownParser;
-  private _notionHtmlParser: NotionHtmlParser;
-  private urlPattern =
-    /(?<=\s|^)https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)(?=\s|$)/g;
 
   constructor(
     page: Page,
@@ -79,24 +73,6 @@ export class ContentParser {
       this._imageProxyEndpoint =
         'https://workers.toeverything.workers.dev/proxy/image';
     }
-    this._markdownParser = new MarkdownParser(
-      this,
-      page,
-      options.fetchFileHandler,
-      options.textStyleHandler,
-      options.tableParseHandler,
-      options.tableTitleColumnHandler
-    );
-    this._notionHtmlParser = new NotionHtmlParser(
-      this,
-      page,
-      options.fetchFileHandler,
-      options.textStyleHandler,
-      options.tableParseHandler,
-      options.tableTitleColumnHandler
-    );
-    this._markdownParser.registerParsers();
-    this._notionHtmlParser.registerParsers();
   }
 
   private async _checkReady() {
@@ -503,412 +479,5 @@ export class ContentParser {
       (root as PageBlockModel).title.toString() + '.pdf',
       pdfBase64
     );
-  }
-
-  public async block2Html(
-    blocks: SelectedBlock[],
-    blobMap: Map<string, string>
-  ): Promise<string> {
-    let htmlText = '';
-    for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
-      htmlText =
-        htmlText +
-        (await this._getHtmlInfoBySelectionInfo(blocks[currentIndex], blobMap));
-    }
-    return htmlText;
-  }
-
-  public async block2markdown(
-    blocks: SelectedBlock[],
-    blobMap: Map<string, string>
-  ): Promise<string> {
-    let markdownText = '';
-    for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
-      const block = blocks[currentIndex];
-      const text = await this._getMarkdownInfoBySelectionInfo(block, blobMap);
-      markdownText += (currentIndex !== 0 ? '\r\n\r\n' : '') + text;
-    }
-    return markdownText;
-  }
-
-  public async htmlText2Block(
-    html: string,
-    // TODO: for now, we will use notion html as default context
-    context: ParseContext = 'NotionHtml'
-  ): Promise<SerializedBlock[]> {
-    const htmlEl = document.createElement('html');
-    htmlEl.innerHTML = html;
-    htmlEl.querySelector('head')?.remove();
-    this.slots.beforeHtml2Block.emit(htmlEl);
-    return this._convertHtml2Blocks(htmlEl, context);
-  }
-
-  public async markdown2Block(text: string): Promise<SerializedBlock[]> {
-    const md2html = this._markdown2Html(text);
-    return this.htmlText2Block(md2html, 'Markdown');
-  }
-
-  public async importMarkdown(text: string, insertPositionId: string) {
-    const md2html = this._markdown2Html(text);
-    const blocks = await this.htmlText2Block(md2html, 'Markdown');
-
-    await this.importBlocks(blocks, insertPositionId);
-
-    this._importMetaDataFromHtml(md2html);
-  }
-
-  public async importHtml(text: string, insertPositionId: string) {
-    const blocks = await this.htmlText2Block(text, 'NotionHtml');
-
-    await this.importBlocks(blocks, insertPositionId);
-
-    this._importMetaDataFromHtml(text);
-  }
-
-  public async importBlocks(
-    blocks: SerializedBlock[],
-    insertPositionId: string
-  ) {
-    const insertBlockModel = this._page.getBlockById(insertPositionId);
-
-    assertExists(insertBlockModel);
-    const { getServiceOrRegister } = await import('../service/index.js');
-    const service = getServiceOrRegister(insertBlockModel.flavour);
-
-    await service.json2Block(insertBlockModel, blocks);
-  }
-
-  public registerParserHtmlText2Block(
-    name: string,
-    handler: ParseHtml2BlockHandler
-  ) {
-    this._parsers[name] = handler;
-  }
-
-  public withContext(context: ParseContext): ContextedContentParser {
-    return {
-      get context() {
-        return context;
-      },
-      getParserHtmlText2Block: (name: string): ParseHtml2BlockHandler => {
-        return this._parsers[context + name] || null;
-      },
-    };
-  }
-
-  public getParserHtmlText2Block(name: string): ParseHtml2BlockHandler {
-    return this._parsers[name] || null;
-  }
-
-  public text2blocks(text: string): SerializedBlock[] {
-    return text
-      .replaceAll('\r\n', '\n')
-      .split('\n')
-      .map((str: string) => {
-        const splitText = str.split(this.urlPattern);
-        const urls = str.match(this.urlPattern);
-        const result = [];
-
-        for (let i = 0; i < splitText.length; i++) {
-          if (splitText[i]) {
-            result.push({ insert: splitText[i] });
-          }
-          if (urls && urls[i]) {
-            result.push({ insert: urls[i], attributes: { link: urls[i] } });
-          }
-        }
-
-        return {
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: result,
-          children: [],
-        };
-      });
-  }
-
-  public getSelectedBlock(model: BaseBlockModel): SelectedBlock {
-    if (model.flavour === 'affine:page') {
-      return {
-        model,
-        children: model.children
-          .filter(child => child.flavour === 'affine:note')
-          .map(child => this.getSelectedBlock(child)),
-      };
-    }
-    return {
-      model,
-      children: model.children.map(child => this.getSelectedBlock(child)),
-    };
-  }
-
-  private async _getHtmlInfoBySelectionInfo(
-    block: SelectedBlock,
-    blobMap: Map<string, string>
-  ): Promise<string> {
-    const model = block.model;
-    const children: string[] = [];
-    for (
-      let currentIndex = 0;
-      currentIndex < block.children.length;
-      currentIndex++
-    ) {
-      const childText = await this._getHtmlInfoBySelectionInfo(
-        block.children[currentIndex],
-        blobMap
-      );
-      childText && children.push(childText);
-    }
-    const { getServiceOrRegister } = await import('../service/index.js');
-    const service = await getServiceOrRegister(model.flavour);
-
-    const text = await service.block2html(
-      model,
-      {
-        childText: children.join(''),
-        begin: block.startPos,
-        end: block.endPos,
-      },
-      blobMap
-    );
-    return text;
-  }
-
-  private async _getMarkdownInfoBySelectionInfo(
-    selectedBlock: SelectedBlock,
-    blobMap: Map<string, string>,
-    level: number = 1
-  ): Promise<string> {
-    let markdownText = '';
-    const { getServiceOrRegister } = await import('../service/index.js');
-    const model = selectedBlock.model;
-    const service = await getServiceOrRegister(model.flavour);
-    markdownText = await service.block2markdown(
-      model,
-      {
-        begin: selectedBlock.startPos,
-        end: selectedBlock.endPos,
-      },
-      blobMap
-    );
-    if (model.flavour === 'affine:list') {
-      markdownText = ' '.repeat(4 * (level - 1)) + markdownText;
-    }
-
-    let childLevel = model.flavour === 'affine:list' ? level + 1 : 1;
-    for (
-      let currentIndex = 0;
-      currentIndex < selectedBlock.children.length;
-      currentIndex++
-    ) {
-      const curChild = selectedBlock.children[currentIndex];
-      if (curChild.model.flavour !== 'affine:list') {
-        childLevel = 1;
-      }
-
-      const childText = await this._getMarkdownInfoBySelectionInfo(
-        curChild,
-        blobMap,
-        childLevel
-      );
-
-      if (childText) {
-        markdownText +=
-          (curChild.model.flavour !== 'affine:note' ? '\r\n\r\n' : '') +
-          childText;
-      }
-    }
-    return markdownText;
-  }
-
-  private async _convertHtml2Blocks(
-    element: Element,
-    context: ParseContext
-  ): Promise<SerializedBlock[]> {
-    const openBlockPromises = Array.from(element.children).map(
-      async childElement => {
-        if (childElement.tagName === 'STYLE') {
-          return [];
-        }
-        return (
-          (await this.withContext(context).getParserHtmlText2Block(
-            'NodeParser'
-          )?.(childElement)) || []
-        );
-      }
-    );
-
-    const results: Array<SerializedBlock[]> = [];
-    for (const item of openBlockPromises) {
-      results.push(await item);
-    }
-
-    return results.flat().filter(v => v);
-  }
-
-  private _markdown2Html(text: string): string {
-    const underline = {
-      name: 'underline',
-      level: 'inline',
-      start(src: string) {
-        return src.indexOf('~');
-      },
-      tokenizer(src: string) {
-        const rule = /^~([^~]+)~/;
-        const match = rule.exec(src);
-        if (match) {
-          return {
-            type: 'underline',
-            raw: match[0], // This is the text that you want your token to consume from the source
-            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
-          };
-        }
-        return;
-      },
-      renderer(token: marked.Tokens.Generic) {
-        return `<u>${token.text}</u>`;
-      },
-    };
-    const inlineCode = {
-      name: 'inlineCode',
-      level: 'inline',
-      start(src: string) {
-        return src.indexOf('`');
-      },
-      tokenizer(src: string) {
-        const rule = /^(?:`)(`{2,}?|[^`]+)(?:`)$/g;
-        const match = rule.exec(src);
-        if (match) {
-          return {
-            type: 'inlineCode',
-            raw: match[0], // This is the text that you want your token to consume from the source
-            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
-          };
-        }
-        return;
-      },
-      renderer(token: marked.Tokens.Generic) {
-        return `<code>${token.text}</code>`;
-      },
-    };
-
-    const pageMetaTags = {
-      name: 'pageMetaTags',
-      level: 'block',
-      start(src: string) {
-        return src.indexOf('Tags: ');
-      },
-      tokenizer(src: string) {
-        const rule = /^Tags: (.*)$/g;
-        const match = rule.exec(src);
-        if (match) {
-          return {
-            type: 'pageMetaTags',
-            raw: match[0], // This is the text that you want your token to consume from the source
-            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
-          };
-        }
-        return;
-      },
-      renderer(token: marked.Tokens.Generic) {
-        return `<div class='page-meta-data'>
-          <div class='value'>
-            <div class='tags'>
-              ${(token.text as string)
-                .split(',')
-                .map(tag => {
-                  return `<div class='tag'>${tag}</div>`;
-                })
-                .join('')}
-            </div>
-          </div>
-        </div>`;
-      },
-    };
-
-    const walkTokens = (token: marked.Token) => {
-      // fix: https://github.com/toeverything/blocksuite/issues/3304
-      if (
-        token.type === 'list_item' &&
-        token.tokens.length > 0 &&
-        token.tokens[0].type === 'list' &&
-        token.tokens[0].items.length === 1
-      ) {
-        const fistItem = token.tokens[0].items[0];
-        if (
-          fistItem.tokens.length === 0 ||
-          (fistItem.tokens.length === 1 && fistItem.tokens[0].type === 'text')
-        ) {
-          // transform list_item to text
-          const newToken =
-            fistItem.tokens.length === 1
-              ? (fistItem.tokens[0] as marked.Tokens.Text)
-              : ({
-                  raw: '',
-                  text: '',
-                  type: 'text',
-                  tokens: [],
-                } as marked.Tokens.Text);
-          const preText = fistItem.raw.substring(
-            0,
-            fistItem.raw.length - fistItem.text.length
-          );
-          newToken.raw = preText + newToken.raw;
-          newToken.text = preText + newToken.text;
-          newToken.tokens = newToken.tokens || [];
-          newToken.tokens.unshift({
-            type: 'text',
-            text: preText,
-            raw: preText,
-          });
-          token.tokens[0] = newToken;
-        }
-      }
-    };
-    marked.use({
-      extensions: [underline, inlineCode, pageMetaTags],
-      walkTokens,
-    });
-    const md2html = marked.parse(text);
-    return md2html;
-  }
-
-  private _importMetaDataFromHtml(text: string) {
-    const pageMetaData = this._getMetaDataFromhtmlText(text);
-    const tags = pageMetaData.tags.map(tag => {
-      return {
-        id: nanoid('unknown'),
-        value: tag.trim(),
-        color: getTagColor(),
-      };
-    });
-    this._page.meta.tags.push(...tags.map(tag => tag.id));
-    this._page.workspace.meta.setProperties({
-      ...this._page.workspace.meta.properties,
-      tags: {
-        ...this._page.workspace.meta.properties.tags,
-        options: tags,
-      },
-    });
-
-    // Make sure the title is synced with the model
-    const pageMetaTitle = this._page.meta.title;
-    const pageModelTitle = (this._page.root as PageBlockModel).title.toString();
-    if (pageMetaTitle !== pageModelTitle) {
-      this._page.workspace.setPageMeta(this._page.id, {
-        title: pageModelTitle,
-      });
-    }
-  }
-
-  private _getMetaDataFromhtmlText(html: string) {
-    const htmlEl = document.createElement('html');
-    htmlEl.innerHTML = html;
-    const tags = htmlEl.querySelectorAll('.page-meta-data .tags .tag');
-    return {
-      tags: Array.from(tags)
-        .map(tag => tag.textContent ?? '')
-        .filter(tag => tag !== ''),
-    };
   }
 }

@@ -1,7 +1,6 @@
 import * as blocks from '@blocksuite/blocks';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import * as globalUtils from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
 import * as editor from '@blocksuite/presets';
 import { AffineEditorContainer } from '@blocksuite/presets';
 import type {
@@ -77,43 +76,6 @@ if (isE2E) {
       editor,
     }),
   });
-}
-
-async function initWithMarkdownContent(
-  workspace: Workspace,
-  url: URL,
-  pageId: string
-) {
-  const { empty: emptyInit } = await import('./data/index.js');
-
-  emptyInit(workspace, pageId);
-  const page = workspace.getPage(pageId);
-  assertExists(page);
-  assertExists(page.root);
-  const content = await fetch(url).then(res => res.text());
-  const contentParser = new window.ContentParser(page);
-  return contentParser.importMarkdown(content, page.root.id);
-}
-
-function isValidUrl(urlLike: string) {
-  let url;
-  try {
-    url = new URL(urlLike);
-  } catch (_) {
-    return false;
-  }
-  return url.protocol === 'http:' || url.protocol === 'https:';
-}
-
-export async function tryInitExternalContent(
-  workspace: Workspace,
-  initParam: string,
-  pageId: string
-) {
-  if (isValidUrl(initParam)) {
-    const url = new URL(initParam);
-    await initWithMarkdownContent(workspace, url, pageId);
-  }
 }
 
 /**

@@ -1,7 +1,6 @@
 import { type Slot } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
-import type { ServiceFlavour } from '../_legacy/service/legacy-services/index.js';
 import type { DataViewDataType } from '../database-block/common/data-view.js';
 import type { Cell } from '../database-block/index.js';
 import type { Column } from '../database-block/table/types.js';
@@ -207,7 +206,17 @@ export type PanTool = {
   panning: boolean;
 };
 
-export type NoteChildrenFlavour = ServiceFlavour;
+export type NoteChildrenFlavour =
+  | 'affine:paragraph'
+  | 'affine:list'
+  | 'affine:code'
+  | 'affine:divider'
+  | 'affine:database'
+  | 'affine:data-view'
+  | 'affine:image'
+  | 'affine:bookmark'
+  | 'affine:attachment'
+  | 'affine:surface-ref';
 
 export type NoteTool = {
   type: 'note';

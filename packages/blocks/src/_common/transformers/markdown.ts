@@ -32,3 +32,35 @@ export async function exportPage(page: Page) {
   }
   download(downloadBlob, name);
 }
+
+type ImportMarkdownOptions = {
+  page: Page;
+  markdown: string;
+  noteId: string;
+};
+
+export async function importMarkdown({
+  page,
+  markdown,
+  noteId,
+}: ImportMarkdownOptions) {
+  const job = new Job({ workspace: page.workspace });
+  const adapter = new MarkdownAdapter();
+  const snapshot = await adapter.toSliceSnapshot({
+    file: markdown,
+    assets: job.assetsManager,
+    blockVersions: page.workspace.meta.blockVersions!,
+    pageVersion: page.workspace.meta.pageVersion!,
+    workspaceVersion: page.workspace.meta.workspaceVersion!,
+    workspaceId: page.workspace.id,
+    pageId: page.id,
+  });
+
+  const blocks = snapshot.content.flatMap(x => x.children);
+
+  for (const block of blocks) {
+    await job.snapshotToBlock(block, page, noteId);
+  }
+
+  return;
+}
