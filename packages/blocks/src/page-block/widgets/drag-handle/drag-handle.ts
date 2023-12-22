@@ -787,6 +787,10 @@ export class AffineDragHandleWidget extends WidgetElement<
   };
 
   private _checkTopLevelBlockSelection = () => {
+    if (!this.isConnected) {
+      return;
+    }
+
     if (this.page.readonly || isInsideDocEditor(this.host)) {
       this._hide();
       return;
