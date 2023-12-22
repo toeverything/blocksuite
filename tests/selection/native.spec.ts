@@ -2012,3 +2012,27 @@ test('click to select divided', async ({ page }) => {
   await pressForwardDelete(page);
   await assertDivider(page, 0);
 });
+
+test('auto-scroll when creating a new paragraph-block by pressing enter', async ({
+  page,
+}) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/4547',
+  });
+
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await pressEnter(page, 50);
+
+  const scrollTop = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-doc-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    return viewport.scrollTop;
+  });
+  expect(scrollTop).toBeGreaterThan(1000);
+});
