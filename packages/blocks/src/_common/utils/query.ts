@@ -395,7 +395,7 @@ export function getDocTitleInlineEditor(
   return titleRichText.inlineEditor;
 }
 
-export function isInsidePageTitle(
+export function isInsideDocTitle(
   editorHost: EditorHost,
   element: unknown
 ): boolean {

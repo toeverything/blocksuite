@@ -11,8 +11,8 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 import {
   type EdgelessTool,
   isDatabaseInput,
+  isInsideDocTitle,
   isInsideEdgelessTextEditor,
-  isInsidePageTitle,
   isMiddleButtonPressed,
   isPinchEvent,
   Point,
@@ -186,7 +186,7 @@ export class EdgelessToolsManager {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
-        !isInsidePageTitle(this.container.host, event.raw.target) &&
+        !isInsideDocTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
         !isInsideEdgelessTextEditor(event.raw.target)
       ) {
@@ -198,7 +198,7 @@ export class EdgelessToolsManager {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
-        !isInsidePageTitle(this.container.host, event.raw.target) &&
+        !isInsideDocTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
         !isInsideEdgelessTextEditor(event.raw.target)
       ) {
@@ -210,7 +210,7 @@ export class EdgelessToolsManager {
       this._dragging = false;
       const event = ctx.get('pointerState');
       if (
-        !isInsidePageTitle(this.container.host, event.raw.target) &&
+        !isInsideDocTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
         !isInsideEdgelessTextEditor(event.raw.target)
       ) {
@@ -236,7 +236,7 @@ export class EdgelessToolsManager {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
-        !isInsidePageTitle(this.container.host, event.raw.target) &&
+        !isInsideDocTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
         !isInsideEdgelessTextEditor(event.raw.target)
       ) {

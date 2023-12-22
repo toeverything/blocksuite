@@ -250,7 +250,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   private _createDropIndicator = () => {
     if (!this.dropIndicator) {
       this.dropIndicator = new DropIndicator();
-      document.body.append(this.dropIndicator);
+      this.pageBlockElement.append(this.dropIndicator);
     }
   };
 
