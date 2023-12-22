@@ -37,14 +37,12 @@ type ImportMarkdownOptions = {
   page: Page;
   markdown: string;
   noteId: string;
-  index?: number;
 };
 
 export async function importMarkdown({
   page,
   markdown,
   noteId,
-  index,
 }: ImportMarkdownOptions) {
   const job = new Job({ workspace: page.workspace });
   const adapter = new MarkdownAdapter();
@@ -58,18 +56,11 @@ export async function importMarkdown({
     pageId: page.id,
   });
 
-  await Promise.all(
-    snapshot.content
-      .flatMap(x => x.children)
-      .map(async (block, i) => {
-        await job.snapshotToBlock(
-          block,
-          page,
-          noteId,
-          index != null ? index + i : undefined
-        );
-      })
-  );
+  const blocks = snapshot.content.flatMap(x => x.children);
+
+  for (const block of blocks) {
+    await job.snapshotToBlock(block, page, noteId);
+  }
 
   return;
 }
