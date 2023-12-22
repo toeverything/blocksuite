@@ -38,24 +38,17 @@ export type TableTitleColumnHandler = (
 ) => Promise<SerializedBlock[] | null>;
 
 type Html2CanvasFunction = typeof import('html2canvas').default;
-type ParseContext = 'Markdown' | 'NotionHtml';
 
 export type ParseHtml2BlockHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...args: any[]
 ) => Promise<SerializedBlock[] | null>;
 
-export type ContextedContentParser = {
-  context: string;
-  getParserHtmlText2Block: (name: string) => ParseHtml2BlockHandler;
-};
-
 export class ContentParser {
   private _page: Page;
   readonly slots = {
     beforeHtml2Block: new Slot<Element>(),
   };
-  private _parsers: Record<string, ParseHtml2BlockHandler> = {};
   private _imageProxyEndpoint?: string;
 
   constructor(
@@ -486,23 +479,5 @@ export class ContentParser {
       (root as PageBlockModel).title.toString() + '.pdf',
       pdfBase64
     );
-  }
-
-  public registerParserHtmlText2Block(
-    name: string,
-    handler: ParseHtml2BlockHandler
-  ) {
-    this._parsers[name] = handler;
-  }
-
-  public withContext(context: ParseContext): ContextedContentParser {
-    return {
-      get context() {
-        return context;
-      },
-      getParserHtmlText2Block: (name: string): ParseHtml2BlockHandler => {
-        return this._parsers[context + name] || null;
-      },
-    };
   }
 }
