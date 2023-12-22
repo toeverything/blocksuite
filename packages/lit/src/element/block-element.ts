@@ -1,4 +1,4 @@
-import type { BlockService, BlockSuiteViewSpec } from '@blocksuite/block-std';
+import type { BlockService } from '@blocksuite/block-std';
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
@@ -190,13 +190,5 @@ export class BlockElement<
 
   override render(): unknown {
     return null;
-  }
-}
-
-declare global {
-  namespace BlockSuite {
-    interface View {
-      block: BlockSuiteViewSpec<BlockElement>;
-    }
   }
 }
