@@ -840,6 +840,8 @@ export class SurfaceBlockComponent extends BlockElement<
     }
   ): EdgelessElement[] | EdgelessElement | null {
     options.expand ??= 10;
+    options.zoom = this.renderer.zoom;
+
     const hitTestBound = {
       x: x - options.expand / 2,
       y: y - options.expand / 2,
@@ -861,9 +863,7 @@ export class SurfaceBlockComponent extends BlockElement<
       return picked as EdgelessElement[];
     };
     const pickFrames = () => {
-      const candidates = this.layer.framesGrid.search(hitTestBound);
-
-      return candidates.filter(frame =>
+      return this.layer.frames.filter(frame =>
         frame.hitTest(x, y, options)
       ) as EdgelessElement[];
     };
