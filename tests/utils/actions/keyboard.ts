@@ -74,9 +74,11 @@ export async function pressArrowUp(page: Page, count = 1) {
   }
 }
 
-export async function pressEnter(page: Page) {
+export async function pressEnter(page: Page, count = 1) {
   // avoid flaky test by simulate real user input
-  await page.keyboard.press('Enter', { delay: 50 });
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press('Enter', { delay: 50 });
+  }
 }
 
 export async function pressEnterWithShortkey(page: Page) {
