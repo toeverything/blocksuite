@@ -26,7 +26,6 @@ import {
   defaultMode,
   initParam,
   isE2E,
-  tryInitExternalContent,
 } from './utils.js';
 
 const options = createWorkspaceOptions();
@@ -107,9 +106,6 @@ export async function initPageContentByParam(
     page?.resetHistory();
     return;
   }
-
-  // Try to load base64 content or markdown content from url
-  await tryInitExternalContent(workspace, param, pageId);
 }
 
 async function main() {
