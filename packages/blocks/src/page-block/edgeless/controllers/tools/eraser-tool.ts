@@ -2,10 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
 import type { Erasable, IPoint } from '../../../../_common/utils/index.js';
-import {
-  type EraserTool,
-  getBlockComponentByModel,
-} from '../../../../_common/utils/index.js';
+import { buildPath, type EraserTool } from '../../../../_common/utils/index.js';
 import {
   Bound,
   getStroke,
@@ -102,7 +99,6 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
 
   override onContainerDragMove(e: PointerEventState): void {
     const currentPoint = this.toModelCoord(e.point);
-    const edgeless = this._edgeless;
     this._erasables.forEach(erasable => {
       if (this._eraseTargets.has(erasable)) return;
       if (isTopLevelBlock(erasable)) {
@@ -111,13 +107,16 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
           linePolygonIntersects(this._prevPoint, currentPoint, bound.points)
         ) {
           this._eraseTargets.add(erasable);
-          const ele = getBlockComponentByModel(erasable);
+          const ele = this._edgeless.host.view.viewFromPath(
+            'block',
+            buildPath(erasable)
+          );
           ele && ((<HTMLElement>ele).style.opacity = '0.3');
         }
       } else {
         if (erasable.intersectWithLine(this._prevPoint, currentPoint)) {
           this._eraseTargets.add(erasable);
-          edgeless.localRecord.update(erasable.id, { opacity: 0.3 });
+          erasable.opacity = 0.3;
         }
       }
     });
@@ -128,10 +127,13 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   override beforeModeSwitch() {
     this._eraseTargets.forEach(erasable => {
       if (isTopLevelBlock(erasable)) {
-        const ele = getBlockComponentByModel(erasable);
+        const ele = this._edgeless.host.view.viewFromPath(
+          'block',
+          buildPath(erasable)
+        );
         ele && ((<HTMLElement>ele).style.opacity = '1');
       } else {
-        this._edgeless.localRecord.update(erasable.id, { opacity: 1 });
+        erasable.opacity = 1;
       }
     });
     this._reset();

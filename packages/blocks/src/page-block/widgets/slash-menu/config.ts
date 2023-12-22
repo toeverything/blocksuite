@@ -27,7 +27,6 @@ import {
 } from '../../../_common/icons/index.js';
 import {
   createDefaultPage,
-  getBlockComponentByModel,
   getCurrentNativeRange,
   getImageFilesFromLocal,
   getInlineEditorByModel,
@@ -36,10 +35,10 @@ import {
   resetNativeSelection,
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
-import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
 import { toggleBookmarkCreateModal } from '../../../bookmark-block/components/modal/bookmark-create-modal.js';
+import type { DatabaseService } from '../../../database-block/database-service.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { ImageService } from '../../../image-block/image-service.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
@@ -205,12 +204,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         name: 'Link Page',
         alias: ['dual link'],
         icon: DualLinkIcon,
-        showWhen: model => {
-          assertExists(model.page.root);
-          const pageBlock = getBlockComponentByModel(model.page.root);
-          assertExists(pageBlock);
+        showWhen: (_, pageElement) => {
           const linkedPageWidgetEle =
-            pageBlock.widgetElements['affine-linked-page-widget'];
+            pageElement.widgetElements['affine-linked-page-widget'];
           if (!linkedPageWidgetEle) return false;
           if (!('showLinkedPage' in linkedPageWidgetEle)) {
             console.warn(
@@ -220,13 +216,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return true;
         },
-        action: ({ model }) => {
+        action: ({ model, pageElement }) => {
           const triggerKey = '@';
           insertContent(model, triggerKey);
           assertExists(model.page.root);
-          const pageBlock = getBlockComponentByModel(model.page.root);
           const widgetEle =
-            pageBlock?.widgetElements['affine-linked-page-widget'];
+            pageElement.widgetElements['affine-linked-page-widget'];
           assertExists(widgetEle);
           // We have checked the existence of showLinkedPage method in the showWhen
           const linkedPageWidget = widgetEle as AffineLinkedPageWidget;
@@ -398,7 +393,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             pageElement.page.getParent(model),
             index + 1
           );
-          const service = await getServiceOrRegister('affine:database');
+          const service = pageElement.std.spec.getService(
+            'affine:database'
+          ) as DatabaseService;
           service.initDatabaseBlock(
             pageElement.page,
             model,
@@ -434,7 +431,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             pageElement.page.getParent(model),
             index + 1
           );
-          const service = await getServiceOrRegister('affine:database');
+          const service = pageElement.std.spec.getService(
+            'affine:database'
+          ) as DatabaseService;
           service.initDatabaseBlock(
             pageElement.page,
             model,

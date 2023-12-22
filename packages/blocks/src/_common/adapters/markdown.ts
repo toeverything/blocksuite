@@ -19,7 +19,7 @@ import {
 import { nanoid } from '@blocksuite/store';
 import { ASTWalker, BaseAdapter } from '@blocksuite/store';
 import { sha } from '@blocksuite/store';
-import format from 'date-fns/format';
+import format from 'date-fns/format/index.js';
 import type { Heading, Root, RootContentMap, TableRow } from 'mdast';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
@@ -627,6 +627,31 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     );
     walker.setEnter(async (o, context) => {
       switch (o.node.type) {
+        case 'html': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:paragraph',
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: o.node.value,
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
         case 'code': {
           context
             .openNode(

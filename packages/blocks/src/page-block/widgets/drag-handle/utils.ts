@@ -4,8 +4,8 @@ import {
   type PointerEventState,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BlockElement, EditorHost } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
   type BlockComponent,
@@ -15,7 +15,7 @@ import {
   getDropRectByPoint,
   getHoveringNote,
   getRectByBlockElement,
-  isPageMode,
+  isInsideDocEditor,
   matchFlavours,
   Point,
   Rect,
@@ -125,7 +125,7 @@ export const getContainerOffsetPoint = (state: PointerEventState) => {
 };
 
 export const isOutOfNoteBlock = (
-  page: Page,
+  editorHost: EditorHost,
   noteBlock: Element,
   point: Point,
   scale: number
@@ -134,7 +134,7 @@ export const isOutOfNoteBlock = (
   const rect = noteBlock.getBoundingClientRect();
   const padding = NOTE_CONTAINER_PADDING * scale;
   return rect
-    ? isPageMode(page)
+    ? isInsideDocEditor(editorHost)
       ? point.y < rect.top ||
         point.y > rect.bottom ||
         point.x > rect.right + padding
@@ -146,21 +146,21 @@ export const isOutOfNoteBlock = (
 };
 
 export const getClosestNoteBlock = (
-  page: Page,
+  editorHost: EditorHost,
   pageBlock: BlockComponent,
   point: Point
 ) => {
-  return isPageMode(page)
+  return isInsideDocEditor(editorHost)
     ? findClosestBlockElement(pageBlock, point, 'affine-note')
     : getHoveringNote(point)?.querySelector('affine-note');
 };
 
 export const getClosestBlockByPoint = (
-  page: Page,
+  editorHost: EditorHost,
   pageBlock: BlockComponent,
   point: Point
 ) => {
-  const closestNoteBlock = getClosestNoteBlock(page, pageBlock, point);
+  const closestNoteBlock = getClosestNoteBlock(editorHost, pageBlock, point);
   if (!closestNoteBlock || closestNoteBlock.closest('.affine-surface-ref'))
     return null;
   const noteRect = Rect.fromDOM(closestNoteBlock);
@@ -416,12 +416,8 @@ export function convertDragPreviewEdgelessToDoc({
     : parentBlock.children.indexOf(targetBlock);
 
   const blockModel = blockComponent.model;
-  const blockProps = getBlockProps(blockModel);
-  delete blockProps.width;
-  delete blockProps.height;
-  delete blockProps.xywh;
-  delete blockProps.zIndex;
-
+  const { width, height, xywh, rotate, zIndex, ...blockProps } =
+    getBlockProps(blockModel);
   page.addBlock(blockModel.flavour, blockProps, parentBlock, parentIndex);
   page.deleteBlock(blockModel);
   return true;

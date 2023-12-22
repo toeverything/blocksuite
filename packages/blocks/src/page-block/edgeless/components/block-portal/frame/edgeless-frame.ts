@@ -1,17 +1,20 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import {
+  requestConnectedFrame,
+  stopPropagation,
+} from '../../../../../_common/utils/event.js';
 import type { FrameBlockModel } from '../../../../../frame-block/index.js';
-import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import { mountFrameTitleEditor } from '../../../utils/text.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
-const { FRAME } = EdgelessBlockType;
 const FRAME_OFFSET = 8;
 
 @customElement('edgeless-frame-title')
@@ -30,29 +33,32 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @query('.affine-frame-title')
-  private _titleElement?: HTMLElement;
-
-  get titleBound() {
-    if (!this._titleElement) return new Bound();
-    const { viewport } = this.edgeless.surface;
-    const { zoom } = viewport;
-    const rect = viewport.boundingClientRect;
-    const bound = Bound.fromDOMRect(this._titleElement.getBoundingClientRect());
-    bound.x -= rect.x;
-    bound.y -= rect.y;
-    bound.h += FRAME_OFFSET;
-    bound.h /= zoom;
-    bound.w /= zoom;
-    const [x, y] = viewport.toModelCoord(bound.x, bound.y);
-    bound.x = x;
-    bound.y = y;
-    return bound;
-  }
-
   private _updateElement = () => {
     this.requestUpdate();
   };
+
+  private _selectByTitle() {
+    requestConnectedFrame(() => {
+      if (this.edgeless.selectionManager.state.elements.length === 0) {
+        this.edgeless.selectionManager.setSelection({
+          elements: [this.frame.id],
+          editing: false,
+        });
+      }
+    }, this);
+  }
+
+  private _editTitle() {
+    requestConnectedFrame(() => {
+      if (
+        (this.edgeless.selectionManager.state.elements.length === 0 ||
+          this.edgeless.selectionManager.isSelected(this.frame.id)) &&
+        !this.frame.page.readonly
+      ) {
+        mountFrameTitleEditor(this.frame, this.edgeless);
+      }
+    }, this);
+  }
 
   override firstUpdated() {
     const { _disposables, edgeless } = this;
@@ -106,9 +112,7 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
     const { edgeless, frame: model, _isNavigator } = this;
     const { surface } = edgeless;
     const { zoom } = surface.viewport;
-    const bound = Bound.deserialize(
-      (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
-    );
+    const bound = Bound.deserialize(model.xywh);
     this.isInner = surface.frame.frames.some(frame => {
       if (frame.id === model.id) return false;
       if (Bound.deserialize(frame.xywh).contains(bound)) {
@@ -155,6 +159,10 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
               border: isInner ? '1px solid var(--affine-border-color)' : 'none',
             })}
             class="affine-frame-title"
+            @click=${this._selectByTitle}
+            @dblclick=${this._editTitle}
+            @pointerup=${stopPropagation}
+            @pointerdown=${stopPropagation}
           >
             ${text}
           </div>`
@@ -166,21 +174,21 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
 @customElement('edgeless-block-portal-frame')
 class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
   override render() {
-    const { model, index, surface } = this;
-    const bound = Bound.deserialize(
-      (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
-    );
-    const { zoom } = surface.viewport;
+    const { model, index } = this;
+    const bound = Bound.deserialize(model.xywh);
     const style = styleMap({
       position: 'absolute',
       zIndex: `${index}`,
-      transform: `translate(${bound.x * zoom}px, ${
-        bound.y * zoom
-      }px) scale(${zoom})`,
+      left: `${bound.x}px`,
+      top: `${bound.y}px`,
       transformOrigin: '0px 0px',
     });
 
-    return html` <div style=${style}>${this.renderModel(model)}</div> `;
+    return html`
+      <div class="edgeless-block-portal-frame" style=${style}>
+        ${this.renderModel(model)}
+      </div>
+    `;
   }
 }
 
@@ -203,7 +211,7 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
 
     _disposables.add(
       this.edgeless.surface.page.slots.blockUpdated.on(({ flavour }) => {
-        if (flavour === FRAME) {
+        if (flavour === 'affine:frame') {
           this.requestUpdate();
         }
       })

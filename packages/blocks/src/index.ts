@@ -20,6 +20,7 @@ import { deserializeXYWH } from './surface-block/index.js';
 export * from './_common/adapters/index.js';
 export {
   type AffineInlineEditor,
+  type AffineTextAttributes,
   RichText,
 } from './_common/components/index.js';
 export {
@@ -43,8 +44,6 @@ export { on, once } from './_common/utils/event.js';
 export { createDefaultPage } from './_common/utils/init.js';
 export type { BlockModels } from './_common/utils/model.js';
 export { getThemeMode } from './_common/utils/query.js';
-export { getServiceOrRegister } from './_legacy/service/index.js';
-export type { BaseService } from './_legacy/service/service.js';
 export * from './_specs/_specs.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
@@ -68,7 +67,6 @@ export {
   CanvasElementType,
   ConnectorEndpointStyle,
   ConnectorMode,
-  EdgelessBlockType,
   generateKeyBetween,
   ShapeStyle,
   StrokeStyle,

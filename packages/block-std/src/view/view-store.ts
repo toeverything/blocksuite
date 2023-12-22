@@ -325,7 +325,9 @@ export class ViewStore {
 
 declare global {
   namespace BlockSuite {
-    interface View {}
+    type View = {
+      [P in keyof NodeViewType]: BlockSuiteViewSpec<NodeViewType[P]>;
+    };
 
     type ViewType = keyof View;
   }

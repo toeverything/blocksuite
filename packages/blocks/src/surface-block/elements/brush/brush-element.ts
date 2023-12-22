@@ -16,7 +16,7 @@ import { PointLocation } from '../../utils/point-location.js';
 import { type IVec, Vec } from '../../utils/vec.js';
 import type { HitTestOptions } from '../edgeless-element.js';
 import { SurfaceElement } from '../surface-element.js';
-import type { IBrush, IBrushLocalRecord } from './types.js';
+import type { IBrush } from './types.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
   return getStroke(points, {
@@ -39,9 +39,8 @@ export class BrushElement extends SurfaceElement<IBrush> {
 
   /* Brush mouse coords relative to left-top corner */
   get points() {
-    const points =
-      (this.localRecord as IBrushLocalRecord)?.points ??
-      (this.yMap.get('points') as IBrush['points']);
+    const points = (this._stashedValues.get('points') ??
+      this.yMap.get('points')) as IBrush['points'];
     return points;
   }
 
@@ -51,9 +50,8 @@ export class BrushElement extends SurfaceElement<IBrush> {
   }
 
   get lineWidth() {
-    const lineWidth =
-      (this.localRecord as IBrushLocalRecord)?.lineWidth ??
-      (this.yMap.get('lineWidth') as IBrush['lineWidth']);
+    const lineWidth = (this._stashedValues.get('lineWidth') ??
+      this.yMap.get('lineWidth')) as IBrush['lineWidth'];
     return lineWidth;
   }
 
@@ -148,9 +146,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
       updates.xywh = transformed.bound.serialize();
     }
 
-    for (const key in updates) {
-      this.yMap.set(key, updates[key as keyof IBrush] as IBrush[keyof IBrush]);
-    }
+    super.applyUpdate(updates);
   }
   override containedByBounds(bounds: Bound) {
     const points = getPointsFromBoundsWithRotation(this);

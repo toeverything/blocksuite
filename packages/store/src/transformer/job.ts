@@ -342,9 +342,10 @@ export class Job {
       pageId,
       workspaceId,
     } = slice.data;
-    const contentSnapshot = await Promise.all(
-      content.map(block => this._blockToSnapshot(block))
-    );
+    const contentSnapshot = [];
+    for (const block of content) {
+      contentSnapshot.push(await this.blockToSnapshot(block));
+    }
     const snapshot: SliceSnapshot = {
       type: 'slice',
       workspaceId,
@@ -383,11 +384,12 @@ export class Job {
       workspaceId,
       pageId,
     } = snapshot;
-    const contentBlocks = await Promise.all(
-      content.map((block, i) =>
-        this._snapshotToBlock(block, page, parent, (index ?? 0) + i)
-      )
-    );
+    const contentBlocks = [];
+    for (const [i, block] of content.entries()) {
+      contentBlocks.push(
+        await this._snapshotToBlock(block, page, parent, (index ?? 0) + i)
+      );
+    }
     const slice = new Slice({
       content: contentBlocks,
       blockVersions,

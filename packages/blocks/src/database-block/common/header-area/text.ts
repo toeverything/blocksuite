@@ -82,8 +82,8 @@ const styles = css`
 
 export const addHistoryToInlineEditor = (inlineEditor: InlineEditor) => {
   let range: Range | null = null;
-  inlineEditor.slots.rangeUpdated.on(inlineRange => {
-    range = inlineRange;
+  inlineEditor.slots.inlineRangeApply.on(currentRange => {
+    range = currentRange;
   });
   const undoManager = new Workspace.Y.UndoManager(inlineEditor.yText, {
     trackedOrigins: new Set([inlineEditor.yText.doc?.clientID]),
@@ -167,7 +167,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     );
     inlineEditor.focusEnd();
     this._disposables.add(
-      inlineEditor.slots.inlineRangeUpdated.on(([range]) => {
+      inlineEditor.slots.inlineRangeUpdate.on(([range]) => {
         if (range) {
           if (!this.isEditing) {
             this.selectCurrentCell(true);

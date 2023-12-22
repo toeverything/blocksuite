@@ -25,6 +25,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
   }
 
   mount = () => {
+    const eventSource = this.editor.eventSource;
     const rootElement = this.editor.rootElement;
 
     if (!this.inlineRangeProvider) {
@@ -36,24 +37,24 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     }
 
     this.editor.disposables.addFromEvent(
-      rootElement,
+      eventSource,
       'beforeinput',
       this._onBeforeInput
     );
     this.editor.disposables.addFromEvent(
-      rootElement,
+      eventSource,
       'compositionstart',
       this._onCompositionStart
     );
     this.editor.disposables.addFromEvent(
-      rootElement,
+      eventSource,
       'compositionend',
       (event: CompositionEvent) => {
         this._onCompositionEnd(event).catch(console.error);
       }
     );
     this.editor.disposables.addFromEvent(
-      rootElement,
+      eventSource,
       'keydown',
       this._onKeyDown
     );

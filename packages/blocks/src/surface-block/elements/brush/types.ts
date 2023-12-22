@@ -1,9 +1,5 @@
-import type { LineWidth } from '../../../_common/types.js';
 import type { CanvasElementType } from '../edgeless-element.js';
-import type {
-  ISurfaceElement,
-  ISurfaceElementLocalRecord,
-} from '../surface-element.js';
+import type { ISurfaceElement } from '../surface-element.js';
 
 export interface IBrush extends ISurfaceElement {
   type: CanvasElementType.BRUSH;
@@ -12,9 +8,4 @@ export interface IBrush extends ISurfaceElement {
   points: number[][];
   color: string;
   lineWidth: number;
-}
-
-export interface IBrushLocalRecord extends ISurfaceElementLocalRecord {
-  points?: number[][];
-  lineWidth?: LineWidth;
 }

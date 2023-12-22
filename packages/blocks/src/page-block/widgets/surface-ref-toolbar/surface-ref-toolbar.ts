@@ -122,7 +122,7 @@ function SurfaceRefToolbarOptions(options: {
 
     <div class="surface-ref-toolbar-container">
       <icon-button
-        ?hidden=${!hasValidReference}
+        ?hidden=${!hasValidReference || readonly}
         class="view-in-edgeless-button"
         text="View in Edgeless"
         width="fit-content"
@@ -131,6 +131,7 @@ function SurfaceRefToolbarOptions(options: {
       </icon-button>
       <div
         class="divider"
+        ?hidden=${readonly}
         style=${styleMap({
           display: hasValidReference ? undefined : 'none',
         })}

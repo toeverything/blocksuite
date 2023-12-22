@@ -37,6 +37,26 @@ export function getArrowPoints(
   };
 }
 
+export function getCircleCenterPoint(
+  points: PointLocation[],
+  radius = 5,
+  mode: ConnectorMode,
+  bezierParameters: BezierCurveParameters,
+  endPoint: ConnectorEndpoint = ConnectorEndpoint.Rear
+) {
+  const anchorPoint = getPointWithTangent(
+    points,
+    mode,
+    endPoint,
+    bezierParameters
+  );
+
+  const unit = Vec.mul(anchorPoint.tangent, -1);
+  const angle = endPoint === ConnectorEndpoint.Front ? Math.PI : 0;
+
+  return Vec.add(Vec.mul(Vec.rot(unit, angle), radius), anchorPoint);
+}
+
 export function getPointWithTangent(
   points: PointLocation[],
   mode: ConnectorMode,
@@ -51,12 +71,19 @@ export function getPointWithTangent(
   const pointToAnchor = points[pointToAnchorIndex];
 
   const clone = anchorPoint.clone();
-  clone.tangent =
-    mode !== ConnectorMode.Curve
-      ? endPoint === ConnectorEndpoint.Rear
+  let tangent;
+  if (mode !== ConnectorMode.Curve) {
+    tangent =
+      endPoint === ConnectorEndpoint.Rear
         ? Vec.tangent(anchorPoint, pointToAnchor)
-        : Vec.tangent(pointToAnchor, anchorPoint)
-      : getBezierTangent(bezierParameters, 1) ?? [];
+        : Vec.tangent(pointToAnchor, anchorPoint);
+  } else {
+    tangent =
+      endPoint === ConnectorEndpoint.Rear
+        ? getBezierTangent(bezierParameters, 1)
+        : getBezierTangent(bezierParameters, 0);
+  }
+  clone.tangent = tangent ?? [];
 
   return clone;
 }
@@ -240,17 +267,15 @@ export function renderCircle(
     rough,
   } = options;
   const radius = 5 * (strokeWidth / 2);
-  const anchorPoint = getPointWithTangent(points, mode, end, bezierParameters);
-  let cx = anchorPoint[0];
-  let cy = anchorPoint[1];
-  if (end === ConnectorEndpoint.Rear) {
-    // need to calculate the center point according to the tangent
-    cx -= anchorPoint.tangent[0] * radius;
-    cy -= anchorPoint.tangent[1] * radius;
-  } else {
-    cx += anchorPoint.tangent[0] * radius;
-    cy += anchorPoint.tangent[1] * radius;
-  }
+  const centerPoint = getCircleCenterPoint(
+    points,
+    radius,
+    mode,
+    bezierParameters,
+    end
+  );
+  const cx = centerPoint[0];
+  const cy = centerPoint[1];
 
   if (rough) {
     // radius + 2 when render rough circle to avoid connector line cross the circle and make it looks bad

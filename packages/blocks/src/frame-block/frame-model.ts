@@ -1,17 +1,13 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
-import { getBlockComponentByPath } from '../_common/utils/index.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
-import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import {
   Bound,
   type HitTestOptions,
   type SerializedXYWH,
 } from '../surface-block/index.js';
-import type { FrameBlockComponent } from './frame-block.js';
 
 type FrameBlockProps = {
   title: Text;
@@ -42,20 +38,11 @@ export const FrameBlockSchema = defineBlockSchema({
 export class FrameBlockModel extends selectable<FrameBlockProps>(
   BaseBlockModel
 ) {
-  override flavour!: EdgelessBlockType.FRAME;
   override batch = FRAME_BATCH;
   override hitTest(x: number, y: number, _: HitTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
-    const hit = bound.isPointOnBound([x, y]);
-    if (hit) return true;
-    assertExists(this.page.root);
-    const block = getBlockComponentByPath([
-      this.page.root?.id,
-      this.id,
-    ]) as FrameBlockComponent;
-    if (!block) return false;
-    const titleBound = block.titleBound;
-    return titleBound.isPointInBound([x, y], 0);
+
+    return bound.isPointNearBound([x, y], 5);
   }
 
   override boxSelect(seclectedBound: Bound): boolean {

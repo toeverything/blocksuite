@@ -21,7 +21,7 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertEdgelessColorSameWithHexColor,
-  assertEdgelessHoverRect,
+  assertEdgelessSelectedRect,
   assertSameColor,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -62,15 +62,15 @@ test('resize brush element', async ({ page }) => {
   const end = { x: 200, y: 200 };
   await addBasicBrushElement(page, start, end);
 
-  await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await assertEdgelessSelectedRect(page, [98, 98, 104, 104]);
 
   await page.mouse.click(start.x + 5, start.y + 5);
   const delta = { x: 20, y: 40 };
   await resizeElementByHandle(page, delta, 'top-left', 10);
 
-  await page.mouse.move(start.x + 25, start.y + 45);
-  await assertEdgelessHoverRect(page, [118, 138, 84, 64]);
+  await page.mouse.click(start.x + 25, start.y + 45);
+  await assertEdgelessSelectedRect(page, [118, 138, 84, 64]);
 });
 
 test('add brush element with color', async ({ page }) => {
@@ -165,41 +165,35 @@ test('change brush element size by component-toolbar', async ({ page }) => {
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 6);
 
-  await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [99, 99, 102, 102]);
+  await assertEdgelessSelectedRect(page, [99, 99, 102, 102]);
 
   // change to line width 10
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 5);
 
-  await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
+  await assertEdgelessSelectedRect(page, [98, 98, 104, 104]);
 
   // change to line width 8
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 4);
 
-  await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [97, 97, 106, 106]);
+  await assertEdgelessSelectedRect(page, [97, 97, 106, 106]);
 
   // change to line width 6
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 3);
 
-  await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [96, 96, 108, 108]);
+  await assertEdgelessSelectedRect(page, [96, 96, 108, 108]);
 
   // change to line width 4
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 2);
 
-  await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [95, 95, 110, 110]);
+  await assertEdgelessSelectedRect(page, [95, 95, 110, 110]);
 
   // change to line width 2
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 1);
 
-  await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [94, 94, 112, 112]);
+  await assertEdgelessSelectedRect(page, [94, 94, 112, 112]);
 });

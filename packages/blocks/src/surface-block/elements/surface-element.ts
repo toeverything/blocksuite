@@ -2,7 +2,7 @@ import type { Y } from '@blocksuite/store';
 
 import type { EdgelessElement } from '../../_common/types.js';
 import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
-import type { CanvasElementLocalRecordValues, GroupElement } from '../index.js';
+import type { GroupElement } from '../index.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import { Bound } from '../utils/bound.js';
@@ -32,17 +32,10 @@ export interface ISurfaceElement {
   batch: string | null;
 }
 
-export interface ISurfaceElementLocalRecord {
-  display?: boolean;
-  opacity?: number;
-  xywh?: SerializedXYWH;
-}
-
 export type ComputedValue = (value: string) => string;
 
 export abstract class SurfaceElement<
   T extends ISurfaceElement = ISurfaceElement,
-  L extends ISurfaceElementLocalRecord = ISurfaceElementLocalRecord,
 > implements IEdgelessElement
 {
   containedByBounds(_: Bound): boolean {
@@ -69,15 +62,10 @@ export abstract class SurfaceElement<
   yMap: Y.Map<unknown>;
 
   protected options: {
-    getLocalRecord: (id: string) => CanvasElementLocalRecordValues | undefined;
     onElementUpdated: (update: {
       id: string;
       props: Record<string, unknown>;
     }) => void;
-    updateElementLocalRecord: (
-      id: string,
-      record: Record<string, unknown>
-    ) => void;
     pickById: (id: string) => EdgelessElement | null;
     getGroupParent: (element: string | EdgelessElement) => GroupElement;
     setGroupParent: (element: string, group: GroupElement) => void;
@@ -86,6 +74,8 @@ export abstract class SurfaceElement<
   };
   protected renderer: Renderer | null = null;
   protected _connectable = true;
+  protected _stashedValues: Map<string, unknown> = new Map();
+  protected _localProps: string[] = ['display', 'opacity'];
 
   computedValue: ComputedValue = v => v;
 
@@ -108,6 +98,22 @@ export abstract class SurfaceElement<
 
   init() {}
 
+  get display() {
+    return (this._stashedValues.get('display') as boolean) ?? true;
+  }
+
+  set display(val: boolean) {
+    this._stashedValues.set('display', val);
+  }
+
+  get opacity() {
+    return (this._stashedValues.get('opacity') as number) ?? 1;
+  }
+
+  set opacity(val: number) {
+    this._stashedValues.set('opacity', val);
+  }
+
   get id() {
     const id = this.yMap.get('id') as T['id'];
     return id;
@@ -124,8 +130,10 @@ export abstract class SurfaceElement<
   }
 
   get xywh() {
-    const xywh = this.localRecord?.xywh ?? (this.yMap.get('xywh') as T['xywh']);
-    return xywh;
+    return (
+      (this._stashedValues.get('xywh') as T['xywh']) ??
+      (this.yMap.get('xywh') as T['xywh'])
+    );
   }
 
   get seed() {
@@ -134,8 +142,11 @@ export abstract class SurfaceElement<
   }
 
   get rotate() {
-    const rotate = this.yMap.get('rotate') as T['rotate'];
-    return rotate ?? 0;
+    return (
+      (this._stashedValues.get('rotate') as T['rotate']) ??
+      (this.yMap.get('rotate') as T['rotate']) ??
+      0
+    );
   }
 
   get batch() {
@@ -169,22 +180,23 @@ export abstract class SurfaceElement<
     return h;
   }
 
-  get localRecord() {
-    return this.options.getLocalRecord(this.id);
-  }
-
   get connectable() {
     return this._connectable;
   }
 
-  getLocalRecord(): L {
-    return this.options.getLocalRecord(this.id) as L;
-  }
-
   applyUpdate(updates: Partial<T>) {
     for (const key in updates) {
-      this.yMap.set(key, updates[key] as T[keyof T]);
+      if (this._stashedValues.has(key)) {
+        this._stashedValues.set(key, updates[key] as T[keyof T]);
+        this.options.onElementUpdated({
+          id: this.id,
+          props: { [key]: updates[key] },
+        });
+      } else {
+        this.yMap.set(key, updates[key] as T[keyof T]);
+      }
     }
+    this.renderer?.refresh();
   }
 
   deserializeXYWH(): XYWH {
@@ -227,5 +239,21 @@ export abstract class SurfaceElement<
 
   render(_ctx: CanvasRenderingContext2D, _matrix: DOMMatrix, _rc: RoughCanvas) {
     return;
+  }
+
+  stash(key: string) {
+    if (this._stashedValues.has(key)) return;
+    this._stashedValues.set(key, this.yMap.get(key));
+  }
+
+  pop(key: string) {
+    if (this._localProps.includes(key)) return;
+
+    if (this._stashedValues.has(key)) {
+      const value = this._stashedValues.get(key);
+
+      this._stashedValues.delete(key);
+      this.yMap.set(key, value);
+    }
   }
 }

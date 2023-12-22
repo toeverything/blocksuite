@@ -22,12 +22,6 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     );
   }
 
-  get titleBound() {
-    const title = this.titleElement;
-    if (!title) return new Bound();
-    return title.titleBound;
-  }
-
   get isInner() {
     const title = this.titleElement;
     if (!title) return false;
@@ -70,10 +64,8 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   }
 
   override render() {
-    const { model, surface, _isNavigator } = this;
-    const bound = Bound.deserialize(
-      (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
-    );
+    const { model, _isNavigator } = this;
+    const bound = Bound.deserialize(model.xywh);
 
     return html`
       <div

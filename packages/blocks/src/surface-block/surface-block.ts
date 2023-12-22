@@ -15,6 +15,7 @@ import {
 import { getThemePropertyValue } from '../_common/theme/utils.js';
 import {
   type EdgelessElement,
+  isInsideEdgelessEditor,
   type ReorderingAction,
   requestConnectedFrame,
   type Selectable,
@@ -33,12 +34,9 @@ import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.j
 import type { IBound } from './consts.js';
 import {
   type EdgelessBlockModelMap,
-  EdgelessBlockType,
+  type EdgelessElementType,
 } from './edgeless-types.js';
-import {
-  EdgelessElementType,
-  type IEdgelessElementCreateProps,
-} from './edgeless-types.js';
+import { type IEdgelessElementCreateProps } from './edgeless-types.js';
 import {
   type HitTestOptions,
   type ICanvasElementType,
@@ -56,6 +54,7 @@ import {
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import type { CanvasElementType, IConnector, IVec } from './index.js';
+import type { EdgelessBlockType } from './index.js';
 import {
   compare,
   EdgelessGroupManager,
@@ -79,8 +78,6 @@ import { loadingSort } from './utils/sort.js';
 import { serializeXYWH } from './utils/xywh.js';
 
 type id = string;
-
-const { NOTE, IMAGE, FRAME, BOOKMARK } = EdgelessBlockType;
 
 export type IndexedCanvasUpdateEvent = CustomEvent<{
   content: HTMLCanvasElement[];
@@ -181,7 +178,7 @@ export class SurfaceBlockComponent extends BlockElement<
   }
 
   private get _isEdgeless() {
-    return !!this.host.querySelector('affine-edgeless-page');
+    return isInsideEdgelessEditor(this.host);
   }
 
   getBlocks<T extends EdgelessBlockType>(
@@ -189,9 +186,9 @@ export class SurfaceBlockComponent extends BlockElement<
   ): TopLevelBlockModel[] {
     if (flavours instanceof RegExp) {
       const regexp = flavours;
-      const models = this.model.children
-        .filter(child => regexp.test(child.flavour))
-        .map(x => this.edgeless.localRecord.wrap(x));
+      const models = this.model.children.filter(child =>
+        regexp.test(child.flavour)
+      );
 
       return models as TopLevelBlockModel[];
     }
@@ -200,14 +197,12 @@ export class SurfaceBlockComponent extends BlockElement<
 
     return flavours.reduce<TopLevelBlockModel[]>((pre, flavour) => {
       const parent: BaseBlockModel =
-        flavour === EdgelessBlockType.NOTE ? this.edgeless.model : this.model;
+        flavour === 'affine:note' ? this.edgeless.model : this.model;
 
       return pre.concat(
-        parent.children
-          .filter(child => child.flavour === flavour)
-          .map(child =>
-            this.edgeless.localRecord.wrap(child)
-          ) as EdgelessBlockModelMap[T][]
+        parent.children.filter(
+          child => child.flavour === flavour
+        ) as EdgelessBlockModelMap[T][]
       );
     }, []);
   }
@@ -226,17 +221,21 @@ export class SurfaceBlockComponent extends BlockElement<
   get blocks() {
     return [
       ...this.getBlocks(/affine:embed-*/),
-      ...this.getBlocks(FRAME),
-      ...this.getBlocks(NOTE),
-      ...this.getBlocks(IMAGE),
-      ...this.getBlocks(BOOKMARK),
+      ...this.getBlocks('affine:frame'),
+      ...this.getBlocks('affine:note'),
+      ...this.getBlocks('affine:image'),
+      ...this.getBlocks('affine:bookmark'),
     ];
   }
 
   get sortedBlocks() {
     return [
-      ...this.getBlocks(FRAME).sort(this.compare),
-      ...[...this.getBlocks(NOTE), ...this.getBlocks(IMAGE)].sort(this.compare),
+      ...this.getBlocks('affine:frame').sort(this.compare),
+      ...[
+        ...this.getBlocks('affine:note'),
+        ...this.getBlocks('affine:image'),
+        ...this.getBlocks('affine:bookmark'),
+      ].sort(this.compare),
     ];
   }
 
@@ -324,11 +323,7 @@ export class SurfaceBlockComponent extends BlockElement<
 
     _disposables.add(
       edgeless.slots.elementRemoved.on(({ element }) => {
-        this.layer.delete(
-          ('flavour' in element
-            ? this.edgeless.localRecord.wrap(element)
-            : element) as EdgelessElement
-        );
+        this.layer.delete(element);
       })
     );
 
@@ -346,7 +341,10 @@ export class SurfaceBlockComponent extends BlockElement<
       elements = this.group
         .getRootElements(
           isTopLevelBlock(element)
-            ? [...this.getBlocks(NOTE), ...this.getBlocks(IMAGE)]
+            ? [
+                ...this.getBlocks('affine:note'),
+                ...this.getBlocks('affine:image'),
+              ]
             : this.getElements()
         )
         .sort(this.compare);
@@ -507,14 +505,8 @@ export class SurfaceBlockComponent extends BlockElement<
     const { edgeless } = this;
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
-      getLocalRecord: id => {
-        return edgeless.localRecord.get(id);
-      },
       onElementUpdated: update => {
         edgeless.slots.elementUpdated.emit(update);
-      },
-      updateElementLocalRecord: (id, record) => {
-        edgeless.localRecord.update(id, record);
       },
       pickById: id => this.pickById(id),
       getGroupParent: (element: string | EdgelessElement) => {
@@ -616,14 +608,8 @@ export class SurfaceBlockComponent extends BlockElement<
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, {
-        getLocalRecord: id => {
-          return edgeless.localRecord.get(id);
-        },
         onElementUpdated: update => {
           edgeless.slots.elementUpdated.emit(update);
-        },
-        updateElementLocalRecord: (id, record) => {
-          edgeless.localRecord.update(id, record);
         },
         pickById: id => this.pickById(id),
         getGroupParent: (element: string | EdgelessElement) => {
@@ -654,7 +640,6 @@ export class SurfaceBlockComponent extends BlockElement<
       }
       element.unmount();
       this._elements.delete(id);
-      this.edgeless.localRecord.delete(id);
       this.edgeless.slots.elementRemoved.emit({ id, element });
     }
   };
@@ -699,7 +684,7 @@ export class SurfaceBlockComponent extends BlockElement<
     type: T,
     properties: IElementCreateProps<T>
   ): id;
-  addElement<K extends EdgelessBlockType>(
+  addElement<K extends EdgelessElementType>(
     type: K,
     properties: Partial<BlockProps & Omit<BlockProps, 'flavour'>>,
     parent?: BaseBlockModel | string | null,
@@ -746,7 +731,7 @@ export class SurfaceBlockComponent extends BlockElement<
       return id;
     } else {
       const index =
-        type === EdgelessElementType.FRAME
+        type === 'affine:frame'
           ? this.layer.generateIndex('frame')
           : this.layer.generateIndex('common', 'block');
       return this.page.addBlock(
@@ -772,7 +757,7 @@ export class SurfaceBlockComponent extends BlockElement<
     }
     const element = this.pickById(id);
     if (isTopLevelBlock(element)) {
-      this.page.updateBlock(this.unwrap(element), properties);
+      this.page.updateBlock(element, properties);
     } else {
       this.transact(() => {
         const element = this._elements.get(id);
@@ -794,7 +779,7 @@ export class SurfaceBlockComponent extends BlockElement<
     }
     const element = this.pickById(id);
     if (isTopLevelBlock(element)) {
-      this.page.deleteBlock(this.unwrap(element));
+      this.page.deleteBlock(element);
     } else {
       this.transact(() => {
         this._yContainer.delete(id);
@@ -833,9 +818,7 @@ export class SurfaceBlockComponent extends BlockElement<
 
     const block = this.page.getBlockById(id);
 
-    return block
-      ? (this.edgeless.localRecord.wrap(block) as EdgelessElement)
-      : null;
+    return block as EdgelessElement | null;
   }
 
   pickTop(
@@ -863,7 +846,7 @@ export class SurfaceBlockComponent extends BlockElement<
       w: options.expand,
       h: options.expand,
     };
-    const pickSurface = () => {
+    const pickCanvasElement = () => {
       const candidates = this._renderer.gridManager.search(hitTestBound);
       const picked = candidates.filter(element =>
         element.hitTest(x, y, options)
@@ -873,27 +856,30 @@ export class SurfaceBlockComponent extends BlockElement<
     const pickBlock = () => {
       const candidates = this.layer.blocksGrid.search(hitTestBound);
       const picked = candidates.filter(element =>
-        element.hitTest(x, y, options)
+        element.hitTest(x, y, options, this.host)
       );
       return picked as EdgelessElement[];
     };
     const pickFrames = () => {
-      return this.layer.frames.filter(frame =>
+      const candidates = this.layer.framesGrid.search(hitTestBound);
+
+      return candidates.filter(frame =>
         frame.hitTest(x, y, options)
       ) as EdgelessElement[];
     };
 
-    const frames = pickFrames();
-    const results = pickSurface().concat(pickBlock());
+    let results = pickCanvasElement().concat(pickBlock());
 
     // FIXME: optimization on ordered element
     results.sort(compare);
 
-    if (results.length === 0) {
-      return options.all ? frames : last(frames) ?? null;
+    if (options.all || results.length === 0) {
+      const frames = pickFrames();
+
+      results = frames.concat(results);
     }
 
-    return options.all ? frames.concat(results) : last(results) ?? null;
+    return (options.all ? results : last(results)) ?? null;
   }
 
   pickTopWithGroup(point: IVec, options?: HitTestOptions) {
@@ -939,16 +925,6 @@ export class SurfaceBlockComponent extends BlockElement<
         this.getGroupParent(element.id) === GROUP_ROOT
     );
     return picked;
-  }
-
-  /**
-   * Block model retrieved from the surface block will be wrapped with local record.
-   * You can use this function to unwrap them to get real model
-   * @param block
-   * @returns
-   */
-  unwrap<T extends BaseBlockModel>(block: T) {
-    return this.edgeless.localRecord.unwrap(block) as T;
   }
 
   getSortedCanvasElementsWithViewportBounds() {

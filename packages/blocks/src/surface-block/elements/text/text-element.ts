@@ -15,7 +15,7 @@ import {
 import { PointLocation } from '../../utils/point-location.js';
 import { type IVec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
-import type { IText, ITextDelta, ITextLocalRecord } from './types.js';
+import type { IText, ITextDelta } from './types.js';
 import {
   charWidth,
   deltaInsertsToChunks,
@@ -50,10 +50,8 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   get fontSize() {
-    return (
-      (this.localRecord as ITextLocalRecord)?.fontSize ??
-      (this.yMap.get('fontSize') as IText['fontSize'])
-    );
+    return (this._stashedValues.get('fontSize') ??
+      this.yMap.get('fontSize')) as IText['fontSize'];
   }
 
   get fontFamily() {
@@ -79,10 +77,8 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   get hasMaxWidth() {
-    return (
-      (this.localRecord as ITextLocalRecord)?.hasMaxWidth ??
-      (this.yMap.get('hasMaxWidth') as IText['hasMaxWidth'])
-    );
+    return (this._stashedValues.get('hasMaxWidth') ??
+      this.yMap.get('hasMaxWidth')) as IText['hasMaxWidth'];
   }
 
   get font() {

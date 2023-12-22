@@ -7,7 +7,6 @@ import type {
 import {
   DocEditorBlockSpecs,
   EdgelessEditorBlockSpecs,
-  getServiceOrRegister,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { noop, Slot } from '@blocksuite/global/utils';
@@ -118,8 +117,6 @@ export class AffineEditorContainer
   }
 
   override firstUpdated() {
-    //FIXME: refactor to a better solution
-    getServiceOrRegister('affine:code');
     if (this.mode === 'page') {
       setTimeout(() => {
         if (this.autofocus) {
@@ -154,8 +151,14 @@ export class AffineEditorContainer
     return html`${keyed(
       this.model.id,
       this.mode === 'page'
-        ? html`<doc-editor .page=${this.page}></doc-editor>`
-        : html`<edgeless-editor .page=${this.page}></edgeless-editor>`
+        ? html`<doc-editor
+            .page=${this.page}
+            .specs=${this.docSpecs}
+          ></doc-editor>`
+        : html`<edgeless-editor
+            .page=${this.page}
+            .specs=${this.edgelessSpecs}
+          ></edgeless-editor>`
     )}`;
   }
 }

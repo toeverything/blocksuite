@@ -40,16 +40,37 @@ export function wrapFontFamily(fontFamily: CanvasTextFontFamily): string {
   return `"${fontFamily}"`;
 }
 
+const cachedFontFamily = new Map<
+  string,
+  {
+    fontSize: number;
+    lineHeight: number;
+  }
+>();
 export function getLineHeight(
   fontFamily: CanvasTextFontFamily,
   fontSize: number
 ) {
   const ctx = getMeasureCtx();
+  const wrappedFontFamily = wrapFontFamily(fontFamily);
 
+  if (cachedFontFamily.has(wrappedFontFamily)) {
+    const cache = cachedFontFamily.get(wrappedFontFamily)!;
+    return (fontSize / cache.fontSize) * cache.lineHeight;
+  }
+
+  const font = `${fontSize}px ${wrapFontFamily(fontFamily)}`;
   ctx.font = `${fontSize}px ${wrapFontFamily(fontFamily)}`;
   const textMetrcs = ctx.measureText('M');
+  const lineHeight =
+    textMetrcs.fontBoundingBoxAscent + textMetrcs.fontBoundingBoxDescent;
 
-  return textMetrcs.fontBoundingBoxAscent + textMetrcs.fontBoundingBoxDescent;
+  // cached when font property does not fallback
+  if (font === ctx.font) {
+    cachedFontFamily.set(wrappedFontFamily, { fontSize, lineHeight });
+  }
+
+  return lineHeight;
 }
 
 export function getFontString({
@@ -85,7 +106,7 @@ export function splitIntoLines(text: string): string[] {
 
 export function getLineWidth(text: string, font: string): number {
   const ctx = getMeasureCtx();
-  ctx.font = font;
+  if (font !== ctx.font) ctx.font = font;
   const width = ctx.measureText(text).width;
 
   return width;

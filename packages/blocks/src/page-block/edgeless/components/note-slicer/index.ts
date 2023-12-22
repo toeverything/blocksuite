@@ -6,9 +6,9 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../_common/consts.js';
+import { requestConnectedFrame } from '../../../../_common/utils/event.js';
 import {
   buildPath,
-  getBlockComponentByPath,
   getModelByBlockComponent,
   getRectByBlockElement,
   Point,
@@ -19,7 +19,6 @@ import type {
   NoteBlockComponent,
   NoteBlockModel,
 } from '../../../../index.js';
-import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -126,6 +125,10 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     return this.edgelessPage?.surface?.viewport.zoom ?? 1;
   }
 
+  get editorHost() {
+    return this.edgelessPage.host;
+  }
+
   private _updateVisibility(e: PointerEventState) {
     const block = this.selection.elements[0];
 
@@ -133,6 +136,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       this._hide();
       return;
     }
+
     if (isNoteBlock(block)) {
       const editingState = this._getEditingState(e, block);
       if (editingState) {
@@ -146,7 +150,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   private _getEditingState(e: PointerEventState, block: NoteBlockModel) {
-    const noteBlockElement = getBlockComponentByPath(
+    const noteBlockElement = this.editorHost.view.viewFromPath(
+      'block',
       buildPath(block)
     ) as NoteBlockComponent;
 
@@ -220,11 +225,10 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     assertExists(noteContainer);
     const [baseX, baseY, noteWidth] = deserializeXYWH(note.xywh);
     const transformX = baseX * this._zoom;
-    const transformY =
-      this.edgelessPage.surface.toModelCoord(
-        gapRect.x - edgelessRect.x,
-        gapRect.y - edgelessRect.y + gapRect.height / 2
-      )[1] * this._zoom;
+    const transformY = this.edgelessPage.surface.toModelCoord(
+      gapRect.x - edgelessRect.x,
+      gapRect.y - edgelessRect.y + gapRect.height / 2
+    )[1];
     const sliceVerticalPos =
       baseY + upperBlockElement.offsetHeight + upperBlockElement.offsetTop;
 
@@ -251,7 +255,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       sliceVerticalPos,
     };
 
-    requestAnimationFrame(() => {
+    requestConnectedFrame(() => {
       if (this.style.display === 'block' && shouldTransition) {
         this.style.transition = 'transform .2s ease-in-out';
       } else {
@@ -259,9 +263,11 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         this.style.removeProperty('transition');
       }
 
-      this.style.transform = `translate3d(${transformX}px, ${transformY}px, 0) translate3d(0, -50%, 0)`;
+      this.style.transform = `translate3d(${transformX}px, ${transformY}px, 0) translate3d(0, -50%, 0) scale(${
+        1 / this._zoom
+      })`;
       this.style.zIndex = noteContainer.style.zIndex;
-    });
+    }, this);
   }
 
   private _hide() {
@@ -276,7 +282,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     this._lastPointerState = null;
   }
 
-  private _onPopup() {
+  private _increaseZIndex() {
     this.style.zIndex = (Number(this.style.zIndex) + 1).toString();
   }
 
@@ -299,7 +305,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     const { sliceVerticalPos } = this._lastPosition;
     const [x, , width] = deserializeXYWH(xywh);
     const newNoteId = this.edgelessPage.surface.addElement(
-      EdgelessBlockType.NOTE,
+      'affine:note',
       {
         background,
         xywh: serializeXYWH(
@@ -325,16 +331,17 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     if (!this._lastPosition) return nothing;
 
     return html`<div class="affine-note-slicer-container">
-      <note-slicer-indicator
-        .offset=${EDGELESS_BLOCK_CHILD_PADDING * this._zoom}
-        .width=${(this._lastPosition?.width ?? 0) * this._zoom}
-      ></note-slicer-indicator>
       <note-slicer-button
         .zoom=${this._zoom}
         @showindicator=${this._showIndicator}
         @slice=${this._sliceNote}
-        @popup=${this._onPopup}
+        @increasezindex=${this._increaseZIndex}
       ></note-slicer-button>
+      <note-slicer-indicator
+        .zoom=${this._zoom}
+        .offset=${EDGELESS_BLOCK_CHILD_PADDING}
+        .width=${this._lastPosition?.width ?? 0}
+      ></note-slicer-indicator>
     </div> `;
   }
 }

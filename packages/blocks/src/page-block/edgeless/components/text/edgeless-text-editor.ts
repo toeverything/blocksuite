@@ -332,7 +332,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
     this.updateComplete
       .then(() => {
-        this.inlineEditor.slots.updated.on(() => {
+        this.inlineEditor.slots.renderComplete.on(() => {
           this._updateRect();
           this.requestUpdate();
         });
@@ -350,9 +350,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         this.disposables.add(dispatcher.add('click', () => true));
         this.disposables.add(dispatcher.add('doubleClick', () => true));
         this.disposables.add(() => {
-          edgeless.localRecord.update(element.id, {
-            display: true,
-          });
+          element.display = true;
 
           if (element.text.length === 0) {
             deleteElements(edgeless.surface, [element]);
@@ -385,9 +383,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           }
         );
 
-        edgeless.localRecord.update(element.id, {
-          display: false,
-        });
+        element.display = false;
       })
       .catch(console.error);
   }

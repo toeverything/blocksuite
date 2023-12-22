@@ -2,6 +2,7 @@ import '../_common/components/rich-text/rich-text.js';
 
 import { DisposableGroup } from '@blocksuite/global/utils';
 import type { InlineRangeProvider } from '@blocksuite/inline';
+import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, type TemplateResult } from 'lit';
@@ -16,7 +17,7 @@ import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import {
   getThemeMode,
-  isPageMode,
+  isInsideEdgelessEditor,
   matchFlavours,
 } from '../_common/utils/index.js';
 import type { BlockHub } from '../page-block/widgets/block-hub/components/block-hub.js';
@@ -32,12 +33,16 @@ interface Style {
   [name: string]: string;
 }
 
-function TipsPlaceholder(model: BaseBlockModel, tipsPos: Style) {
+function TipsPlaceholder(
+  editorHost: EditorHost,
+  model: BaseBlockModel,
+  tipsPos: Style
+) {
   if (!matchFlavours(model, ['affine:paragraph'])) {
     throw new Error("TipsPlaceholder can't be used for this model");
   }
   if (model.type === 'text') {
-    if (!isPageMode(model.page)) {
+    if (isInsideEdgelessEditor(editorHost)) {
       return html`<div class="tips-placeholder" style=${styleMap(tipsPos)}>
         Type '/' for commands
       </div> `;
@@ -273,7 +278,11 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       };
     }
 
-    this._tipsPlaceholderTemplate = TipsPlaceholder(this.model, this.tipsPos);
+    this._tipsPlaceholderTemplate = TipsPlaceholder(
+      this.host,
+      this.model,
+      this.tipsPos
+    );
   };
 
   private _onFocusIn = () => {

@@ -4,8 +4,9 @@ import {
   DisposableGroup,
   throttle,
 } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
 import { isControlledKeyboardEvent } from '../../../_common/utils/event.js';
@@ -20,6 +21,7 @@ import { getMenus, type LinkedPageOptions } from './config.js';
 import { LinkedPagePopover } from './linked-page-popover.js';
 
 export function showLinkedPagePopover({
+  editorHost,
   model,
   range,
   container = document.body,
@@ -27,6 +29,7 @@ export function showLinkedPagePopover({
   options,
   triggerKey,
 }: {
+  editorHost: EditorHost;
   model: BaseBlockModel;
   range: Range;
   container?: HTMLElement;
@@ -55,7 +58,7 @@ export function showLinkedPagePopover({
     linkedPage.updatePosition(position);
   }, 10);
   disposables.addFromEvent(window, 'resize', updatePosition);
-  const scrollContainer = getViewportElement(model.page);
+  const scrollContainer = getViewportElement(editorHost);
   if (scrollContainer) {
     // Note: in edgeless mode, the scroll container is not exist!
     disposables.addFromEvent(scrollContainer, 'scroll', updatePosition, {
@@ -98,15 +101,16 @@ export class AffineLinkedPageWidget extends WidgetElement {
     this.handleEvent('keyDown', this._onKeyDown);
   }
 
-  public showLinkedPage(model: BaseBlockModel, triggerKey: string) {
+  public showLinkedPage = (model: BaseBlockModel, triggerKey: string) => {
     const curRange = getCurrentNativeRange();
     showLinkedPagePopover({
+      editorHost: this.host,
       model,
       range: curRange,
       options: this.options,
       triggerKey,
     });
-  }
+  };
 
   private _onKeyDown = (ctx: UIEventStateContext) => {
     const eventState = ctx.get('keyboardState');
@@ -147,7 +151,7 @@ export class AffineLinkedPageWidget extends WidgetElement {
     if (!matchedKey) return;
 
     const primaryTriggerKey = this.options.triggerKeys[0];
-    inlineEditor.slots.rangeUpdated.once(() => {
+    inlineEditor.slots.inlineRangeApply.once(() => {
       if (this.options.convertTriggerKey && primaryTriggerKey !== matchedKey) {
         // Convert to the primary trigger key
         // e.g. [[ -> @
@@ -165,7 +169,7 @@ export class AffineLinkedPageWidget extends WidgetElement {
           index: startIdxBeforeMatchKey + primaryTriggerKey.length,
           length: 0,
         });
-        inlineEditor.slots.rangeUpdated.once(() => {
+        inlineEditor.slots.inlineRangeApply.once(() => {
           this.showLinkedPage(model, primaryTriggerKey);
         });
         return;

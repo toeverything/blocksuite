@@ -11,7 +11,6 @@ import type { RichText } from '../../../packages/blocks/src/index.js';
 import {
   type DatabaseBlockModel,
   type ListType,
-  type PageBlockModel,
   type ThemeObserver,
 } from '../../../packages/blocks/src/index.js';
 import { assertExists } from '../../../packages/global/src/utils.js';
@@ -834,20 +833,6 @@ export async function pasteBlocks(page: Page, json: unknown) {
   });
 }
 
-export async function importMarkdown(
-  page: Page,
-  focusedBlockId: string,
-  data: string
-) {
-  await page.evaluate(
-    async ({ data, focusedBlockId }) => {
-      const contentParser = new window.ContentParser(window.page);
-      await contentParser.importMarkdown(data, focusedBlockId);
-    },
-    { data, focusedBlockId }
-  );
-}
-
 export async function getClipboardHTML(page: Page) {
   const dataInClipboard = await page.evaluate(async () => {
     function format(node: HTMLElement, level: number) {
@@ -1246,52 +1231,6 @@ export async function getCurrentThemeCSSPropertyValue(
         .themeObserver.cssVariables?.[property];
     }, property);
   return value;
-}
-
-export async function transformMarkdown(page: Page, data: string) {
-  const promiseResult = await page.evaluate(
-    ({ data }) => {
-      const contentParser = new window.ContentParser(window.page);
-      return contentParser.markdown2Block(data);
-    },
-    { data }
-  );
-  return promiseResult;
-}
-
-export async function transformHtml(page: Page, data: string) {
-  const promiseResult = await page.evaluate(
-    ({ data }) => {
-      const contentParser = new window.ContentParser(window.page);
-      return contentParser.htmlText2Block(data, 'NotionHtml');
-    },
-    { data }
-  );
-  return promiseResult;
-}
-
-export async function export2Html(page: Page) {
-  const promiseResult = await page.evaluate(() => {
-    const contentParser = new window.ContentParser(window.page);
-    const root = window.page.root as PageBlockModel;
-    return contentParser.block2Html(
-      [contentParser.getSelectedBlock(root)],
-      new Map()
-    );
-  });
-  return promiseResult;
-}
-
-export async function export2markdown(page: Page) {
-  const promiseResult = await page.evaluate(() => {
-    const contentParser = new window.ContentParser(window.page);
-    const root = window.page.root as PageBlockModel;
-    return contentParser.block2markdown(
-      [contentParser.getSelectedBlock(root)],
-      new Map()
-    );
-  });
-  return promiseResult;
 }
 
 export async function getCopyClipItemsInPage(page: Page) {

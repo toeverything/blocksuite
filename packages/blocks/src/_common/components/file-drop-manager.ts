@@ -1,12 +1,13 @@
 import type { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
   calcDropTarget,
   getClosestBlockElementByPoint,
   getModelByBlockComponent,
-  isPageMode,
+  isInsideDocEditor,
   matchFlavours,
   Point,
 } from '../../_common/utils/index.js';
@@ -57,8 +58,8 @@ export class FileDropManager {
     }
   }
 
-  get isPageMode(): boolean {
-    return isPageMode(this._blockService.page);
+  get editorHost(): EditorHost {
+    return this._blockService.std.host as EditorHost;
   }
 
   get type(): 'before' | 'after' {
@@ -74,7 +75,7 @@ export class FileDropManager {
 
     let targetModel = this._indicator.dropResult?.modelState.model || null;
 
-    if (!targetModel && this.isPageMode) {
+    if (!targetModel && isInsideDocEditor(this.editorHost)) {
       const lastNote = pageBlock.children[pageBlock.children.length - 1];
       if (!matchFlavours(lastNote, ['affine:note'])) {
         throw new Error('The last block is not a note block.');

@@ -20,7 +20,11 @@ import {
 import { getThemePropertyValue } from '../_common/theme/utils.js';
 import type { EdgelessElement, TopLevelBlockModel } from '../_common/types.js';
 import { stopPropagation } from '../_common/utils/event.js';
-import { buildPath, getEditorContainer } from '../_common/utils/query.js';
+import {
+  buildPath,
+  getEditorContainer,
+  isInsideDocEditor,
+} from '../_common/utils/query.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
@@ -521,7 +525,6 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
-      getLocalRecord: () => undefined,
       onElementUpdated: ({ id }) => {
         const element = this.getModel(id);
 
@@ -533,7 +536,6 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         }
       },
       removeElement: () => {},
-      updateElementLocalRecord: () => {},
       pickById: id => this.getModel(id),
       getGroupParent: getGroupParent,
       setGroupParent: setGroupParent,
@@ -596,8 +598,6 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, {
         onElementUpdated() {},
-        getLocalRecord: () => undefined,
-        updateElementLocalRecord: () => {},
         pickById: id => this.getModel(id),
         getGroupParent: getGroupParent,
         setGroupParent: setGroupParent,
@@ -825,7 +825,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   private _shouldRender() {
     return (
-      !!this.host.querySelector('affine-doc-page') &&
+      isInsideDocEditor(this.host) &&
       this.parentElement &&
       !this.parentElement.closest('affine-surface-ref')
     );

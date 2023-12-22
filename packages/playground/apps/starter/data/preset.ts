@@ -1,3 +1,4 @@
+import { MarkdownTransformer } from '@blocksuite/blocks';
 import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
@@ -38,9 +39,12 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
     );
 
     // Import preset markdown content inside note block
-    const contentParser = new window.ContentParser(page);
+    await MarkdownTransformer.importMarkdown({
+      page,
+      noteId,
+      markdown: presetMarkdown,
+    });
 
-    await contentParser.importMarkdown(presetMarkdown, noteId);
     page.resetHistory();
   });
 };

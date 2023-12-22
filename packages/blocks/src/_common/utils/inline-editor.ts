@@ -7,7 +7,7 @@ export function clearMarksOnDiscontinuousInput(
   inlineEditor: InlineEditor
 ): void {
   let inlineRange = inlineEditor.getInlineRange();
-  const dispose = inlineEditor.slots.inlineRangeUpdated.on(([r, s]) => {
+  const dispose = inlineEditor.slots.inlineRangeUpdate.on(([r, s]) => {
     if (
       inlineRange &&
       r &&

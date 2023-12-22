@@ -4,6 +4,7 @@ import {
   KEYBOARD_ALLOW_DEFAULT,
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
+import type { EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
@@ -42,6 +43,7 @@ export function onSoftEnter(
 }
 
 export function hardEnter(
+  editorHost: EditorHost,
   model: BaseBlockModel,
   range: InlineRange,
   /**
@@ -76,7 +78,7 @@ export function hardEnter(
     // After
     // - list
     // |   <-- will replace with a new text block
-    handleLineStartBackspace(page, model);
+    handleLineStartBackspace(editorHost, model);
     return KEYBOARD_PREVENT_DEFAULT;
   }
   if (isEmptyList && isLastChild) {
@@ -158,6 +160,7 @@ function isSoftEnterable(model: BaseBlockModel) {
 }
 
 export function onBackspace(
+  editorHost: EditorHost,
   model: BaseBlockModel,
   e: KeyboardEvent,
   inlineEditor: AffineInlineEditor
@@ -167,7 +170,7 @@ export function onBackspace(
       return KEYBOARD_ALLOW_DEFAULT;
     }
     e.stopPropagation();
-    handleLineStartBackspace(model.page, model);
+    handleLineStartBackspace(editorHost, model);
     return KEYBOARD_PREVENT_DEFAULT;
   }
   e.stopPropagation();
@@ -175,13 +178,14 @@ export function onBackspace(
 }
 
 export function onForwardDelete(
+  editorHost: EditorHost,
   model: BaseBlockModel,
   e: KeyboardEvent,
   inlineEditor: AffineInlineEditor
 ) {
   e.stopPropagation();
   if (isCollapsedAtBlockEnd(inlineEditor)) {
-    handleLineEndForwardDelete(model.page, model);
+    handleLineEndForwardDelete(editorHost, model);
     return KEYBOARD_PREVENT_DEFAULT;
   }
   return KEYBOARD_ALLOW_DEFAULT;

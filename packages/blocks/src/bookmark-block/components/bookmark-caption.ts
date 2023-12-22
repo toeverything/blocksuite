@@ -45,9 +45,7 @@ export class BookmarkCaption extends WithDisposable(ShadowlessElement) {
   }
 
   private _onInputBlur() {
-    if (this.caption.length === 0) {
-      this.display = false;
-    }
+    this.dispatchEvent(new CustomEvent('blur', { bubbles: true }));
   }
 
   override render() {

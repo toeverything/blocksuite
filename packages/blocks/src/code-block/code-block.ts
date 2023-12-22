@@ -9,18 +9,19 @@ import {
   type InlineRootElement,
 } from '@blocksuite/inline';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
-import { autoPlacement, offset, shift, size } from '@floating-ui/dom';
+import {
+  autoPlacement,
+  limitShift,
+  offset,
+  shift,
+  size,
+} from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import {
-  getHighlighter,
-  type Highlighter,
-  type ILanguageRegistration,
-  type Lang,
-} from 'shiki';
+import { type Highlighter, type ILanguageRegistration, type Lang } from 'shiki';
 import { z } from 'zod';
 
 import { HoverController } from '../_common/components/index.js';
@@ -31,17 +32,18 @@ import { PAGE_HEADER_HEIGHT } from '../_common/consts.js';
 import { ArrowDownIcon } from '../_common/icons/index.js';
 import { listenToThemeChange } from '../_common/theme/utils.js';
 import { getThemeMode } from '../_common/utils/index.js';
-import { getService } from '../_legacy/service/index.js';
-import type { CodeBlockModel } from './code-model.js';
+import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { LangList } from './components/lang-list.js';
 import { getStandardLanguage } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import {
   DARK_THEME,
+  FALLBACK_LANG,
   LIGHT_THEME,
   PLAIN_TEXT_REGISTRATION,
 } from './utils/consts.js';
+import { getHighLighter } from './utils/high-lighter.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
@@ -148,6 +150,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     return this.model.page.readonly;
   }
 
+  highlightOptionsGetter: HighlightOptionsGetter = null;
+
   readonly attributesSchema = z.object({});
   readonly getAttributeRenderer = () =>
     getCodeLineRenderer(() => ({
@@ -179,7 +183,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       return;
     }
     const mode = getThemeMode();
-    this._highlighter = await getHighlighter({
+    this._highlighter = await getHighLighter({
       theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
       themes: [LIGHT_THEME, DARK_THEME],
       langs: [lang],
@@ -244,6 +248,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
             bottom: 12,
             right: 12,
           },
+          limiter: limitShift(),
         }),
       ],
       autoUpdate: true,
@@ -259,7 +264,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     // set highlight options getter used by "exportToHtml"
-    getService('affine:code').setHighlightOptionsGetter(() => {
+    this.setHighlightOptionsGetter(() => {
       return {
         lang: this._perviousLanguage.id as Lang,
         highlighter: this._highlighter,
@@ -463,6 +468,18 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._wrap = container.classList.toggle('wrap');
   }
 
+  setHighlightOptionsGetter(fn: HighlightOptionsGetter) {
+    this.highlightOptionsGetter = fn;
+  }
+
+  setLang(lang: string | null) {
+    const standardLang = lang ? getStandardLanguage(lang) : null;
+    const langName = standardLang?.id ?? FALLBACK_LANG;
+    this.page.updateBlock(this.model, {
+      language: langName,
+    });
+  }
+
   private _onClickLangBtn() {
     if (this.readonly) return;
     if (this._langListAbortController) return;
@@ -483,7 +500,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         const langList = new LangList();
         langList.currentLanguageId = this._perviousLanguage.id as Lang;
         langList.onSelectLanguage = (lang: ILanguageRegistration | null) => {
-          getService('affine:code').setLang(this.model, lang ? lang.id : null);
+          this.setLang(lang ? lang.id : null);
           abortController.abort();
         };
         langList.onClose = () => abortController.abort();

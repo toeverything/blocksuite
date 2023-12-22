@@ -101,7 +101,7 @@ describe('snapshot to html', () => {
     };
 
     const html = template(
-      `<pre><code class="code-python"><span style="word-wrap: break-word; color: #AF00DB;">import</span><span style="word-wrap: break-word; color: #000000;"> this</span></code></pre>`
+      `<pre><code class="code-python"><span style="word-wrap: break-word; color: #81A1C1;">import</span><span style="word-wrap: break-word; color: #D8DEE9FF;"> this</span></code></pre>`
     );
 
     const htmlAdapter = new HtmlAdapter();

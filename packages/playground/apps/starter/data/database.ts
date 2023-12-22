@@ -1,5 +1,4 @@
 import type { ListType, ParagraphType } from '@blocksuite/blocks';
-import { getServiceOrRegister } from '@blocksuite/blocks';
 import { checkboxPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/checkbox/define';
 import { datePureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/date/define';
 import { linkPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/link/define';
@@ -7,6 +6,7 @@ import { multiSelectColumnConfig } from '@blocksuite/blocks/database-block/commo
 import { numberPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/number/define';
 import { progressPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/progress/define';
 import { richTextPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/rich-text/define';
+import type { DatabaseService } from '@blocksuite/blocks/database-block/database-service';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import { assertExists } from '@blocksuite/global/utils';
 import { Text, type Workspace } from '@blocksuite/store';
@@ -39,7 +39,12 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
       },
       noteId
     );
-    const service = await getServiceOrRegister('affine:database');
+
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
+    const service = window.host.std.spec.getService(
+      'affine:database'
+    ) as DatabaseService;
     service.initDatabaseBlock(page, model, databaseId, 'table', true);
     const database = page.getBlockById(databaseId) as DatabaseBlockModel;
     database.addColumn(

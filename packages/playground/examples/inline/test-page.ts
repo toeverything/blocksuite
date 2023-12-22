@@ -143,7 +143,9 @@ export class TestRichText extends ShadowlessElement {
   undoManager!: Y.UndoManager;
 
   override firstUpdated() {
-    this.inlineEditor.mount(this._container);
+    this.contentEditable = 'true';
+    this.style.outline = 'none';
+    this.inlineEditor.mount(this._container, this);
 
     const keydownHandler = createInlineKeyDownHandler(this.inlineEditor, {
       inputRule: {
@@ -167,9 +169,9 @@ export class TestRichText extends ShadowlessElement {
         },
       },
     });
-    this._container.addEventListener('keydown', keydownHandler);
+    this.addEventListener('keydown', keydownHandler);
 
-    this.inlineEditor.slots.updated.on(() => {
+    this.inlineEditor.slots.textChange.on(() => {
       const el = this.querySelector('.y-text');
       if (el) {
         const text = this.inlineEditor.yText.toDelta();
@@ -178,7 +180,7 @@ export class TestRichText extends ShadowlessElement {
         el.replaceChildren(span);
       }
     });
-    this.inlineEditor.slots.inlineRangeUpdated.on(() => {
+    this.inlineEditor.slots.inlineRangeUpdate.on(() => {
       const el = this.querySelector('.v-range');
       if (el) {
         const inlineRange = this.inlineEditor.getInlineRange();
@@ -232,8 +234,8 @@ export class TestRichText extends ShadowlessElement {
         }
       </style>
       <div class="rich-text-container"></div>
-      <div class="v-range"></div>
-      <div class="y-text"></div>`;
+      <div contenteditable="false" class="v-range"></div>
+      <div contenteditable="false" class="y-text"></div>`;
   }
 }
 

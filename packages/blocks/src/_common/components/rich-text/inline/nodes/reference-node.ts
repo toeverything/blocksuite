@@ -2,6 +2,8 @@ import type { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type DeltaInsert,
+  INLINE_ROOT_ATTR,
+  type InlineRootElement,
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
@@ -10,12 +12,12 @@ import type { Page, PageMeta } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { DocPageBlockComponent } from '../../../../../page-block/doc/doc-page-block.js';
+import type { PageBlockComponent } from '../../../../../index.js';
 import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/index.js';
 import {
-  getBlockComponentByModel,
   getClosestBlockElementByElement,
   getModelByElement,
+  getPageByElement,
 } from '../../../../utils/index.js';
 import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from '../../consts.js';
 import type { AffineTextAttributes } from '../types.js';
@@ -79,6 +81,14 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     pageId: '0',
   };
 
+  get inlineRoot() {
+    const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
+      `[${INLINE_ROOT_ATTR}]`
+    );
+    assertExists(inlineRoot);
+    return inlineRoot;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     if (this.delta.insert !== REFERENCE_NODE) {
@@ -95,6 +105,13 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     this._updateRefMeta(page);
     this._disposables.add(
       page.workspace.slots.pagesUpdated.on(() => this._updateRefMeta(page))
+    );
+
+    // observe yText update
+    this.disposables.add(
+      this.inlineRoot.inlineEditor.slots.textChange.on(() =>
+        this._updateRefMeta(page)
+      )
     );
   }
 
@@ -127,9 +144,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const targetPageId = refMeta.id;
     const root = model.page.root;
     assertExists(root);
-    const element = getBlockComponentByModel(root) as DocPageBlockComponent;
-    assertExists(element);
-    element.slots.pageLinkClicked.emit({ pageId: targetPageId });
+    const pageElement = getPageByElement(this) as PageBlockComponent;
+    assertExists(pageElement);
+    pageElement.slots.pageLinkClicked.emit({ pageId: targetPageId });
   }
 
   override render() {

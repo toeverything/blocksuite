@@ -32,9 +32,7 @@ import {
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
-import { isEmpty, keys, pick } from '../../_common/utils/iterable.js';
 import { humanFileSize } from '../../_common/utils/math.js';
-import { getService } from '../../_legacy/service/index.js';
 import {
   SURFACE_IMAGE_CARD_HEIGHT,
   SURFACE_IMAGE_CARD_WIDTH,
@@ -44,14 +42,12 @@ import { ImageService } from '../../image-block/image-service.js';
 import type { FrameBlockModel, ImageBlockModel } from '../../models.js';
 import type { SerializedViewport } from '../../surface-block/commands/session.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
-import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
   Bound,
   type CanvasElement,
-  type CanvasElementLocalRecordValues,
   clamp,
+  type EdgelessBlockType,
   getCommonBound,
-  GroupElement,
   type IBound,
   intersects,
   type IVec,
@@ -82,9 +78,9 @@ import {
 import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
-import { LocalRecordManager } from './services/local-record-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { EdgelessToolsManager } from './services/tools-manager.js';
+import { edgelessElementsBound } from './utils/bound-utils.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_OFFSET_X,
@@ -96,8 +92,6 @@ import { xywhArrayToObject } from './utils/convert.js';
 import { getCursorMode, isCanvasElement, isFrameBlock } from './utils/query.js';
 
 type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
-
-const { NOTE, IMAGE, FRAME, BOOKMARK } = EdgelessBlockType;
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent extends BlockElement<
@@ -220,11 +214,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   fontLoader!: FontLoader;
 
-  getService = getService;
-
   selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;
-  localRecord!: LocalRecordManager<CanvasElementLocalRecordValues>;
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
@@ -341,7 +332,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       slots.elementRemoved.on(({ element }) => {
         if (isFrameBlock(element)) {
           const frames = this.page.getBlockByFlavour(
-            FRAME
+            'affine:frame'
           ) as FrameBlockModel[];
           this.frames = frames
             .filter(frame => frame.id !== element.id)
@@ -352,7 +343,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _updateFrames() {
-    const frames = this.page.getBlockByFlavour(FRAME) as FrameBlockModel[];
+    const frames = this.page.getBlockByFlavour(
+      'affine:frame'
+    ) as FrameBlockModel[];
     this.frames = frames.sort(compare);
   }
 
@@ -399,7 +392,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     } = options;
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
     return this.surface.addElement(
-      NOTE,
+      'affine:note',
       {
         xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
       },
@@ -461,7 +454,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     point = this.surface.toModelCoord(point[0], point[1]);
     const bound = new Bound(point[0], point[1], options.width, options.height);
     return this.surface.addElement(
-      IMAGE,
+      'affine:image',
       { ...model, xywh: bound.serialize() },
       this.surface.model
     );
@@ -509,7 +502,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
         SURFACE_IMAGE_CARD_HEIGHT
       );
       const blockId = this.surface.addElement(
-        IMAGE,
+        'affine:image',
         {
           size: file.size,
           xywh: bound.serialize(),
@@ -552,7 +545,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
    * Not supports surface elements.
    */
   setSelection(noteId: string, _active = true, blockId: string, point?: Point) {
-    const noteBlock = this.surface.getBlocks(NOTE).find(b => b.id === noteId);
+    const noteBlock = this.surface
+      .getBlocks('affine:note')
+      .find(b => b.id === noteId);
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
@@ -576,62 +571,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   getElementsBound(): IBound | null {
-    const bounds = [];
-
-    Object.values(EdgelessBlockType).forEach(edgelessBlock => {
-      this.surface.getBlocks(edgelessBlock).forEach(block => {
-        bounds.push(Bound.deserialize(block.xywh));
-      });
-    });
-
-    const surfaceElementsBound = this.surface.getElementsBound();
-    if (surfaceElementsBound) {
-      bounds.push(surfaceElementsBound);
-    }
-
-    return getCommonBound(bounds);
-  }
-
-  updateElementInLocal(
-    elementId: string,
-    record: Partial<CanvasElementLocalRecordValues>
-  ) {
-    this.localRecord.update(elementId, record);
-  }
-
-  applyLocalRecord(elements: string[]) {
-    if (!this.surface) return;
-
-    const elementsSet = new Set(elements);
-
-    this.localRecord.each((id, record) => {
-      if (!elementsSet.has(id) || !this.surface.pickById(id)) return;
-
-      const element =
-        this.page.getBlockById(id) ??
-        (this.surface.pickById(id) as EdgelessElement);
-
-      if (element instanceof GroupElement) {
-        this.applyLocalRecord(element.childElements.map(e => e.id));
-        return;
-      }
-
-      const updateProps: Record<string, unknown> = {};
-      let flag = false;
-
-      Object.keys(record).forEach(key => {
-        if (key in element) {
-          flag = true;
-          updateProps[key] = record[key as keyof typeof record];
-          delete record[key as keyof typeof record];
-        }
-      });
-
-      if (!flag) return;
-
-      this.localRecord.update(id, record);
-      this.surface.updateElement(id, updateProps);
-    });
+    const { surface } = this;
+    return edgelessElementsBound([...surface.getElements(), ...surface.blocks]);
   }
 
   override update(changedProperties: Map<string, unknown>) {
@@ -863,45 +804,24 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }
   }
 
-  private _initLocalRecordManager() {
-    this.localRecord = new LocalRecordManager<CanvasElementLocalRecordValues>();
-    this.localRecord.slots.updated.on(({ id, data }) => {
-      const element = this.surface.pickById(id);
-
-      if (!element) return;
-
-      const changedProps = pick(
-        data.new,
-        keys(data.new).filter(key => key in element)
-      );
-
-      if (!isEmpty(changedProps)) {
-        this.slots.elementUpdated.emit({
-          id,
-          props: changedProps,
-        });
-      }
-
-      this.surface.refresh();
-    });
-
-    this.disposables.add(() => {
-      this.localRecord.destroy();
-    });
-  }
-
   private _initElementSlot() {
     this._disposables.add(
       this.page.slots.blockUpdated.on(event => {
         if (
-          ![IMAGE, NOTE, FRAME, BOOKMARK].includes(
-            event.flavour as EdgelessBlockType
-          ) &&
+          ![
+            'affine:image',
+            'affine:note',
+            'affine:frame',
+            'affine:bookmark',
+          ].includes(event.flavour as EdgelessBlockType) &&
           !/affine:embed-*/.test(event.flavour)
         )
           return;
 
-        if (event.flavour === IMAGE) {
+        if (
+          event.flavour === 'affine:image' ||
+          event.flavour === 'affine:bookmark'
+        ) {
           const parent =
             event.type === 'delete'
               ? this.page.getParent(event.model)
@@ -953,7 +873,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);
     this.tools = new EdgelessToolsManager(this, this.host.event);
-    this._initLocalRecordManager();
   }
 
   override disconnectedCallback() {

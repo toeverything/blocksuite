@@ -13,10 +13,7 @@ import type { Bound } from '../../utils/bound.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
 import type { CanvasElementType, HitTestOptions } from '../edgeless-element.js';
-import type {
-  ISurfaceElement,
-  ISurfaceElementLocalRecord,
-} from '../surface-element.js';
+import type { ISurfaceElement } from '../surface-element.js';
 import type { SHAPE_TEXT_FONT_SIZE } from './consts.js';
 import type { ShapeElement } from './shape-element.js';
 
@@ -48,12 +45,6 @@ export interface IShape extends ISurfaceElement {
   // outdated, use `fontWeight` and `fontStyle` instead
   // bold?: boolean;
   // italic?: boolean;
-}
-
-export interface IShapeLocalRecord extends ISurfaceElementLocalRecord {
-  // used to control the render of the shape text because we
-  // need to hide the text in canvas when we are editing the text
-  textDisplay?: boolean;
 }
 
 export interface ShapeMethods {

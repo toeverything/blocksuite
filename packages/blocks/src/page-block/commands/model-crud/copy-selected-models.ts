@@ -5,11 +5,10 @@ import { Slice } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
 
-export const copySelectedModelsCommand: Command<
-  'selectedModels' | 'onCopy',
-  never,
-  { event: ClipboardEvent }
-> = (ctx, next) => {
+export const copySelectedModelsCommand: Command<'selectedModels' | 'onCopy'> = (
+  ctx,
+  next
+) => {
   const models = ctx.selectedModels;
   assertExists(
     models,
@@ -40,7 +39,7 @@ export const copySelectedModelsCommand: Command<
   const slice = Slice.fromModels(ctx.std.page, models);
 
   ctx.std.clipboard
-    .copy(ctx.event, slice)
+    .copy(slice)
     .then(() => ctx.onCopy?.())
     .catch(console.error);
   return next();

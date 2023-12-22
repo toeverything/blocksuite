@@ -992,7 +992,13 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                     return delta;
                   }
                 }
-                delta.attributes = { ...delta.attributes, link: href };
+                if (href.startsWith('http')) {
+                  delta.attributes = {
+                    ...delta.attributes,
+                    link: href,
+                  };
+                  return delta;
+                }
                 return delta;
               })
             );

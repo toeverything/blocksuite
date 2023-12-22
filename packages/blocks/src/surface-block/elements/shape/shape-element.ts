@@ -21,9 +21,19 @@ import {
 } from '../text/utils.js';
 import { SHAPE_TEXT_FONT_SIZE, SHAPE_TEXT_PADDING } from './consts.js';
 import { ShapeMethodsMap } from './shapes/index.js';
-import type { IShape, IShapeLocalRecord } from './types.js';
+import type { IShape } from './types.js';
 
-export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
+export class ShapeElement extends SurfaceElement<IShape> {
+  protected override _localProps = ['textDisplay', 'opacity', 'display'];
+
+  get textDisplay() {
+    return (this._stashedValues.get('textDisplay') ?? true) as boolean;
+  }
+
+  set textDisplay(val: boolean) {
+    this._stashedValues.set('textDisplay', val);
+  }
+
   get shapeType() {
     const shapeType = this.yMap.get('shapeType') as IShape['shapeType'];
     return shapeType;
@@ -215,8 +225,7 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
   ) {
     const { render } = ShapeMethodsMap[this.shapeType];
     render(ctx, matrix, rc, this);
-    const record = this.getLocalRecord();
-    if (record?.textDisplay ?? true) {
+    if (this.textDisplay ?? true) {
       this._renderText(ctx);
     }
   }

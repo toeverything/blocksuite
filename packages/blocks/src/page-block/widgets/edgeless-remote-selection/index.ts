@@ -1,13 +1,14 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
 import type { UserInfo } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { RemoteCursor } from '../../../_common/icons/edgeless.js';
 import type { Selectable } from '../../../_common/types.js';
+import { requestConnectedFrame } from '../../../_common/utils/event.js';
 import { pickValues } from '../../../_common/utils/iterable.js';
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import {
@@ -21,6 +22,7 @@ export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET =
 
 @customElement(AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET)
 export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlockComponent> {
+  static enable = true;
   static override styles = css`
     :host {
       pointer-events: none;
@@ -173,7 +175,8 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
   private _updateOnElementChange = (element: string | { id: string }) => {
     const id = typeof element === 'string' ? element : element.id;
 
-    if (this.selection.isSelectedByRemote(id)) this._updateRemoteRects();
+    if (this.isConnected && this.selection.isSelectedByRemote(id))
+      this._updateRemoteRects();
   };
 
   private _updateTransform() {
@@ -187,6 +190,8 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
 
   override connectedCallback() {
     super.connectedCallback();
+
+    if (!EdgelessRemoteSelectionWidget.enable) return;
 
     const { _disposables, surface, page, edgeless } = this;
 
@@ -206,10 +211,15 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
     _disposables.add(
       this.selection.slots.remoteCursorUpdated.on(this._updateRemoteCursor)
     );
+
+    let rAqId: number | null = null;
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(() => {
-        this._updateTransform();
-        this.requestUpdate();
+        if (rAqId) return;
+        rAqId = requestConnectedFrame(() => {
+          this._updateTransform();
+          rAqId = null;
+        }, this);
       })
     );
 
@@ -222,6 +232,8 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
   }
 
   override render() {
+    if (!EdgelessRemoteSelectionWidget.enable) return nothing;
+
     const { _remoteRects, _remoteCursors, _remoteColorManager } = this;
     assertExists(_remoteColorManager);
     const { zoom } = this.surface.viewport;

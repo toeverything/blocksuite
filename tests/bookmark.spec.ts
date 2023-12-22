@@ -27,7 +27,7 @@ const inputUrl = 'http://localhost';
 
 test.beforeEach(async ({ page }) => {
   await page.route(
-    'https://affine-worker.toeverything.workers.dev/api/linkPreview',
+    'https://affine-worker.toeverything.workers.dev/api/worker/linkPreview',
     async route => {
       await route.fulfill({
         json: {},

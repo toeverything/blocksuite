@@ -20,17 +20,20 @@ import type {
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
-  getBlockComponentByModel,
-  getBlockComponentByPath,
+  buildPath,
   getEditorContainer,
   isPageMode,
 } from '../../../_common/utils/query.js';
+import { isUrlInClipboard } from '../../../_common/utils/url.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import {
+  EdgelessBookmarkHeight,
+  EdgelessBookmarkWidth,
+} from '../../../bookmark-block/edgeless-bookmark-block.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
-import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
 import { CanvasElementType } from '../../../surface-block/elements/edgeless-element.js';
@@ -41,7 +44,7 @@ import {
 import { compare } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
-import type { IVec } from '../../../surface-block/utils/vec.js';
+import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
 import { PageClipboard } from '../../clipboard/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
@@ -136,9 +139,9 @@ export class EdgelessClipboardController extends PageClipboard {
         current = current.page.getParent(current);
       }
 
-      return getBlockComponentByPath(path);
+      return this.std.view.viewFromPath('block', path);
     } else {
-      return getBlockComponentByModel(model);
+      return this.std.view.viewFromPath('block', buildPath(model));
     }
   }
 
@@ -201,6 +204,33 @@ export class EdgelessClipboardController extends PageClipboard {
         file.type.startsWith('image/')
       );
       await this.host.addImages(imageFiles);
+
+      return;
+    }
+
+    if (isUrlInClipboard(data)) {
+      const url = data.getData('text/plain');
+      const { lastMousePos } = this.toolManager;
+      const [x, y] = this.surface.toModelCoord(lastMousePos.x, lastMousePos.y);
+      const id = this.surface.addElement(
+        'affine:bookmark',
+        {
+          xywh: Bound.fromCenter(
+            Vec.toVec({
+              x,
+              y,
+            }),
+            EdgelessBookmarkWidth.horizontal,
+            EdgelessBookmarkHeight.horizontal
+          ).serialize(),
+          url,
+        },
+        this.surface.model.id
+      );
+      this.selectionManager.setSelection({
+        editing: false,
+        elements: [id],
+      });
 
       return;
     }
@@ -320,7 +350,7 @@ export class EdgelessClipboardController extends PageClipboard {
         delete props.index;
         assertExists(props.xywh);
         const noteId = this.surface.addElement(
-          EdgelessBlockType.NOTE,
+          'affine:note',
           props,
           this.page.root?.id
         );
@@ -342,7 +372,7 @@ export class EdgelessClipboardController extends PageClipboard {
       frames.map(async ({ props }) => {
         const { xywh, title, background } = props;
         const frameId = this.surface.addElement(
-          EdgelessBlockType.FRAME,
+          'affine:frame',
           {
             xywh,
             background,
@@ -361,7 +391,7 @@ export class EdgelessClipboardController extends PageClipboard {
       images.map(async ({ props }) => {
         const { xywh, sourceId, rotate } = props;
         const imageId = this.surface.addElement(
-          EdgelessBlockType.IMAGE,
+          'affine:image',
           {
             xywh,
             sourceId,
@@ -381,7 +411,7 @@ export class EdgelessClipboardController extends PageClipboard {
         const { xywh, style, url, caption, description, icon, image, title } =
           props;
         const bookmarkId = this.surface.addElement(
-          EdgelessBlockType.BOOKMARK,
+          'affine:bookmark',
           {
             xywh,
             style,
@@ -734,7 +764,7 @@ export class EdgelessClipboardController extends PageClipboard {
     for (const nodeElement of nodeElements) {
       await _drawTopLevelBlock(nodeElement);
 
-      if (nodeElement.flavour === EdgelessBlockType.FRAME) {
+      if (matchFlavours(nodeElement, ['affine:frame'])) {
         const blocksInsideFrame: TopLevelBlockModel[] = [];
         this.surface.frame
           .getElementsInFrame(nodeElement, false)

@@ -2,7 +2,7 @@ import type * as Y from 'yjs';
 
 import { VElement } from '../components/v-element.js';
 import type { InlineRange } from '../types.js';
-import { isInEmbedElement } from './guard.js';
+import { isInEmbedElement } from './embed.js';
 import {
   nativePointToTextPoint,
   textPointToDomPoint,
@@ -306,13 +306,14 @@ export function inlineRangeToDomRange(
     if (!nextSibling) {
       throw new Error('failed to find nextSibling sibling of an embed element');
     }
+
+    const texts = getTextNodesFromElement(nextSibling);
     if (nextSibling instanceof VElement) {
-      const texts = getTextNodesFromElement(nextSibling);
       startText = texts[texts.length - 1];
       anchorOffset = calculateTextLength(startText);
     } else {
       // nextSibling is a gap
-      startText = nextSibling.childNodes.item(1) as Text;
+      startText = texts[0];
       anchorOffset = 0;
     }
   }
@@ -328,15 +329,9 @@ export function inlineRangeToDomRange(
       throw new Error('failed to find nextSibling sibling of an embed element');
     }
 
-    if (nextSibling instanceof VElement) {
-      const texts = getTextNodesFromElement(nextSibling);
-      endText = texts[0];
-      focusOffset = 0;
-    } else {
-      // nextSibling is a gap
-      endText = nextSibling.childNodes.item(1) as Text;
-      focusOffset = 0;
-    }
+    const texts = getTextNodesFromElement(nextSibling);
+    endText = texts[0];
+    focusOffset = 0;
   }
 
   const range = document.createRange();

@@ -15,18 +15,18 @@ import {
   type DroppingType,
   type EditingState,
   getClosestBlockElementByPoint,
-  getDocPage,
-  getEdgelessPage,
+  getDocPageByEditorHost,
+  getEdgelessPageByEditorHost,
   getHoveringNote,
   getImageFilesFromLocal,
   getModelByBlockComponent,
-  isPageMode,
+  isInsideDocEditor,
   Point,
   Rect,
   stopPropagation,
 } from '../../../../_common/utils/index.js';
-import { getServiceOrRegister } from '../../../../_legacy/service/index.js';
 import { toggleBookmarkCreateModal } from '../../../../bookmark-block/components/index.js';
+import type { DatabaseService } from '../../../../database-block/database-service.js';
 import { ImageService } from '../../../../image-block/image-service.js';
 import {
   addImageBlocks,
@@ -95,13 +95,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _lastDraggingFlavour: string | null = null;
   private _timer: number | null = null;
   private _rafID: number = 0;
-  private _host: EditorHost;
+  private _editorHost: EditorHost;
 
   static override styles = styles;
 
   constructor(host: EditorHost) {
     super();
-    this._host = host;
+    this._editorHost = host;
   }
 
   override connectedCallback() {
@@ -111,15 +111,15 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this, 'dragstart', this._onDragStart);
     disposables.addFromEvent(this, 'drag', this._onDrag);
     disposables.addFromEvent(this, 'dragend', this._onDragEnd);
-    disposables.addFromEvent(this._host, 'dragover', this._onDragOver);
-    disposables.addFromEvent(this._host, 'drop', (e: DragEvent) => {
+    disposables.addFromEvent(this._editorHost, 'dragover', this._onDragOver);
+    disposables.addFromEvent(this._editorHost, 'drop', (e: DragEvent) => {
       this._onDrop(e).catch(console.error);
     });
     disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
 
     if (IS_FIREFOX) {
       disposables.addFromEvent(
-        this._host,
+        this._editorHost,
         'dragover',
         this._onDragOverDocument
       );
@@ -201,14 +201,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     if (!this._expanded) this._hideCardList();
   }
 
-  private get _isPageMode() {
-    return isPageMode(this._host.page);
-  }
-
   private get _pageBlockElement() {
-    const pageElement = this._isPageMode
-      ? (getDocPage(this._host.page) as DocPageBlockComponent)
-      : (getEdgelessPage(this._host.page) as EdgelessPageBlockComponent);
+    const pageElement = isInsideDocEditor(this._editorHost)
+      ? (getDocPageByEditorHost(this._editorHost) as DocPageBlockComponent)
+      : (getEdgelessPageByEditorHost(
+          this._editorHost
+        ) as EdgelessPageBlockComponent);
     return pageElement;
   }
 
@@ -221,9 +219,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       scale: number;
     };
 
-    if (this._isPageMode) {
+    if (isInsideDocEditor(this._editorHost)) {
       const closestNoteBlock = getClosestNoteBlock(
-        this._host.page,
+        this._editorHost,
         this._pageBlockElement,
         point
       );
@@ -356,7 +354,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       if (x >= min.x && x <= max.x && y >= min.y) {
         const lastBlock = this._pageBlockElement.model.lastChild();
         if (lastBlock) {
-          const lastElement = this._host.view.viewFromPath('block', [
+          const lastElement = this._editorHost.view.viewFromPath('block', [
             lastBlock.id,
           ]);
           element = lastElement;
@@ -444,7 +442,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     assertExists(e.dataTransfer);
     if (!e.dataTransfer.getData('affine/block-hub')) return;
 
-    const page = this._host.page;
+    const page = this._editorHost.page;
     const point = this._indicator?.rect?.min ?? new Point(e.clientX, e.clientY);
     const lastModelState = this._lastDroppingTarget;
     const lastType = this._lastDroppingType;
@@ -466,14 +464,14 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     ) {
       const imageFiles = await getImageFilesFromLocal();
 
-      const imageService = this._host.spec.getService('affine:image');
+      const imageService = this._editorHost.spec.getService('affine:image');
       assertExists(imageService);
       assertInstanceOf(imageService, ImageService);
       const maxFileSize = imageService.maxFileSize;
 
       addSiblingImageBlock(imageFiles, maxFileSize, lastModelState.model);
     } else if (props.flavour === 'affine:bookmark') {
-      const url = await toggleBookmarkCreateModal(this._host);
+      const url = await toggleBookmarkCreateModal(this._editorHost);
       url &&
         models.push({
           flavour: 'affine:bookmark',
@@ -507,14 +505,14 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
       // database init basic structure
       if (isDatabase) {
-        const service = await getServiceOrRegister<'affine:database'>(
-          props.flavour
-        );
-        service.initDatabaseBlock(page, model, focusId, 'table');
+        const service = this._pageBlockElement.std.spec?.getService(
+          'affine:database'
+        ) as DatabaseService;
+        service.initDatabaseBlock(page, model, model.id, 'table');
       }
     }
 
-    if (this._isPageMode) {
+    if (isInsideDocEditor(this._editorHost)) {
       if (focusId) {
         asyncFocusRichText(page, focusId)?.catch(console.error);
       }
@@ -522,12 +520,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
 
     // In edgeless mode.
-    const pageBlock = getEdgelessPage(page);
-    assertExists(pageBlock);
+    const pageBlockElement = this
+      ._pageBlockElement as EdgelessPageBlockComponent;
 
     let noteId;
     if (focusId && parentModel) {
-      const targetNoteBlock = this._host.view.viewFromPath(
+      const targetNoteBlock = this._editorHost.view.viewFromPath(
         'block',
         buildPath(parentModel)
       );
@@ -535,7 +533,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       noteId = targetNoteBlock.model.id;
     } else {
       // Creates new note block on blank area.
-      const result = pageBlock.addNewNote(
+      const result = pageBlockElement.addNewNote(
         models,
         point,
         isDatabase ? { width: 752 } : undefined
@@ -545,13 +543,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       const model = page.getBlockById(focusId);
       assertExists(model);
       if (isDatabase) {
-        const service = await getServiceOrRegister<'affine:database'>(
-          props.flavour
-        );
+        const service = pageBlockElement.std.spec?.getService(
+          'affine:database'
+        ) as DatabaseService;
         service.initDatabaseBlock(page, model, model.id, 'table');
       }
     }
-    pageBlock.setSelection(noteId, true, focusId, point);
+    pageBlockElement.setSelection(noteId, true, focusId, point);
   };
 
   private _onClickCard = async (
@@ -567,7 +565,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       flavour: blockHubElement.getAttribute('affine-flavour') ?? '',
       type: affineType ?? undefined,
     };
-    const page = this._host.page;
+    const page = this._editorHost.page;
     const models = [];
 
     const defaultNoteBlock =
@@ -581,7 +579,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     if (data.flavour === 'affine:image' && data.type === 'image') {
       const imageFiles = await getImageFilesFromLocal();
 
-      const imageService = this._host.spec.getService('affine:image');
+      const imageService = this._editorHost.spec.getService('affine:image');
       assertExists(imageService);
       assertInstanceOf(imageService, ImageService);
       const maxFileSize = imageService.maxFileSize;
@@ -595,7 +593,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
       lastId = blockIds[blockIds.length - 1];
     } else if (data.flavour === 'affine:bookmark') {
-      const url = await toggleBookmarkCreateModal(this._host);
+      const url = await toggleBookmarkCreateModal(this._editorHost);
       url &&
         models.push({
           flavour: 'affine:bookmark',
@@ -667,7 +665,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     const classes = classMap({
       'icon-expanded': this._expanded,
-      'new-icon-in-edgeless': !this._isPageMode && !this._expanded,
+      'new-icon-in-edgeless':
+        !isInsideDocEditor(this._editorHost) && !this._expanded,
       'new-icon': true,
     });
 

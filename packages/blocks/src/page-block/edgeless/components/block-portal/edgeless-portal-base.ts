@@ -2,7 +2,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
-import type { SurfaceBlockComponent } from '../../../../index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 export class EdgelessPortalBase<
@@ -21,17 +21,11 @@ export class EdgelessPortalBase<
   edgeless!: EdgelessPageBlockComponent;
 
   protected renderModel(model: T) {
-    return this.surface.host.renderModel(this.surface.unwrap(model));
+    return this.surface.host.renderModel(model);
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
-
-    this._disposables.add(
-      this.edgeless.slots.viewportUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
 
     this._disposables.add(
       this.model.propsUpdated.on(event => {

@@ -32,7 +32,6 @@ import {
 } from '../../utils/query.js';
 import {
   addText,
-  mountFrameTitleEditor,
   mountGroupTitleEditor,
   mountShapeTextEditor,
   mountTextElementEditor,
@@ -189,7 +188,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       surface.connector.updateXYWH(selected, bound);
     }
 
-    this._edgeless.updateElementInLocal(selected.id, {
+    this._surface.updateElement(selected.id, {
       xywh: bound.serialize(),
     });
   }
@@ -203,7 +202,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.x += delta[0];
     bound.y += delta[1];
 
-    this._edgeless.updateElementInLocal(block.id, {
+    this._surface.updateElement(block.id, {
       xywh: bound.serialize(),
     });
   }
@@ -305,10 +304,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         mountShapeTextEditor(selected, this._edgeless);
         return;
       }
-      if (isFrameBlock(selected)) {
-        mountFrameTitleEditor(selected, this._edgeless);
-        return;
-      }
       if (
         selected instanceof GroupElement &&
         selected.titleBound.containsPoint([modelX, modelY])
@@ -359,9 +354,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       JSON.stringify(await prepareClipboardData(this._toBeMoved, _edgeless.std))
     );
 
+    const bound = edgelessElementsBound(this._toBeMoved);
     const [elements, blocks] =
       await clipboardController.createElementsFromClipboardData(
-        data as Record<string, unknown>[]
+        data as Record<string, unknown>[],
+        bound.center
       );
 
     this._toBeMoved = [...elements, ...blocks];
@@ -460,6 +457,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       await this._cloneContent();
     }
     this._filterConnectedConnector();
+
+    this._toBeMoved.forEach(ele => {
+      ele.stash('xywh');
+    });
+
+    // Connector needs to be updated first
+    this._toBeMoved.sort((a, _) => (a instanceof ConnectorElement ? -1 : 1));
     this._addFrames();
     // Set up drag state
     this.initializeDragState(e, dragType);
@@ -603,7 +607,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerDragEnd() {
-    this._edgeless.applyLocalRecord(this._toBeMoved.map(ele => ele.id));
+    this._page.transact(() => {
+      this._toBeMoved.forEach(el => {
+        el.pop('xywh');
+      });
+    });
 
     if (this._lock) {
       this._page.captureSync();

@@ -62,7 +62,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   }
 
   override willUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('preset')) {
+    if (changedProperties.has('specs')) {
       this.std.spec.applySpecs(this.specs);
     }
     super.willUpdate(changedProperties);

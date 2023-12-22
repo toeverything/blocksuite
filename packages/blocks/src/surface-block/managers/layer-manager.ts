@@ -3,6 +3,7 @@ import { generateKeyBetween } from 'fractional-indexing';
 
 import { type EdgelessElement } from '../../_common/types.js';
 import { last, nToLast } from '../../_common/utils/iterable.js';
+import { matchFlavours } from '../../_common/utils/model.js';
 import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../image-block/image-model.js';
@@ -91,6 +92,7 @@ export class LayerManager {
   }[];
 
   blocksGrid = new GridManager<IndexableBlock>();
+  framesGrid = new GridManager<FrameBlockModel>();
 
   constructor(elements?: EdgelessElement[]) {
     if (elements) {
@@ -106,7 +108,8 @@ export class LayerManager {
     elements.forEach(element => {
       if (element instanceof SurfaceElement) {
         this.canvasElements.push(element);
-      } else if (element.flavour === 'affine:frame') {
+      } else if (matchFlavours(element, ['affine:frame'])) {
+        this.framesGrid.add(element);
         this.frames.push(element);
       } else {
         this.blocksGrid.add(element);
@@ -496,8 +499,9 @@ export class LayerManager {
           child => child && this._updateLayer(child)
         );
       }
-    } else if (element.flavour === 'affine:frame') {
+    } else if (matchFlavours(element, ['affine:frame'])) {
       updateArray(this.frames, element);
+      this.framesGrid.add(element);
     } else {
       updateType = 'block';
       updateArray(this.blocks, element);
@@ -526,8 +530,9 @@ export class LayerManager {
           child => child && this._updateLayer(child)
         );
       }
-    } else if (element.flavour === 'affine:frame') {
+    } else if (matchFlavours(element, ['affine:frame'])) {
       insertToOrderedArray(this.frames, element);
+      this.framesGrid.add(element);
     } else {
       insertType = 'block';
       insertToOrderedArray(this.blocks, element);
@@ -547,8 +552,9 @@ export class LayerManager {
     if (element instanceof SurfaceElement) {
       deleteType = 'canvas';
       removeFromOrderedArray(this.canvasElements, element);
-    } else if (element.flavour === 'affine:frame') {
+    } else if (matchFlavours(element, ['affine:frame'])) {
       removeFromOrderedArray(this.frames, element);
+      this.framesGrid.remove(element);
     } else {
       deleteType = 'block';
       removeFromOrderedArray(this.blocks, element);
@@ -691,7 +697,5 @@ export class LayerManager {
           return generateKeyBetween(pre2?.index ?? null, pre.index);
         }
     }
-
-    return element.index;
   }
 }

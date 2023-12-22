@@ -467,6 +467,6 @@ test('yText should not contain \r', () => {
   expect(() => {
     new InlineEditor(yText);
   }).toThrow(
-    'yText must not contain \r because it will break the range synchronization'
+    'yText must not contain "\\r" because it will break the range synchronization'
   );
 });

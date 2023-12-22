@@ -5,7 +5,6 @@ import type { EditorHost } from '@blocksuite/lit';
 import { html, type TemplateResult } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
-import { copyBlocksInPage } from '../../../_legacy/clipboard/utils/commons.js';
 import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { createSimplePortal } from '../../components/portal.js';
 import { toast } from '../../components/toast.js';
@@ -33,8 +32,17 @@ export const quickActionConfig: QuickActionConfig[] = [
     showWhen: () => true,
     enabledWhen: () => true,
     action: host => {
-      copyBlocksInPage(host).catch(console.error);
-      toast('Copied to clipboard');
+      host.std.command
+        .pipe()
+        .withHost()
+        .getSelectedModels()
+        .with({
+          onCopy: () => {
+            toast('Copied to clipboard');
+          },
+        })
+        .copySelectedModels()
+        .run();
     },
   },
   {
