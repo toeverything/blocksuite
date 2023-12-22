@@ -147,25 +147,6 @@ export class Text {
     });
   }
 
-  /**
-   * @deprecated Use {@link insert} or {@link applyDelta} instead.
-   */
-  insertList(insertTexts: DeltaOperation[], index: number) {
-    if (!insertTexts.length) {
-      return;
-    }
-    this._transact(() => {
-      for (let i = insertTexts.length - 1; i >= 0; i--) {
-        this._yText.insert(
-          index,
-          (insertTexts[i].insert as string) || '',
-          // eslint-disable-next-line @typescript-eslint/ban-types
-          insertTexts[i].attributes as Object | undefined
-        );
-      }
-    });
-  }
-
   join(other: Text) {
     if (!other.toDelta().length) {
       return;

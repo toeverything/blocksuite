@@ -2,7 +2,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
 import { type EdgelessElement } from '../../../_common/types.js';
-import { CLIPBOARD_MIMETYPE } from '../../../_legacy/clipboard/utils/pure.js';
 import { ContentParser } from '../../../content-parser.js';
 import { isTopLevelBlock } from '../../../page-block/edgeless/utils/query.js';
 import type { Renderer } from '../../../surface-block/renderer.js';
@@ -38,7 +37,7 @@ export const edgelessToBlob = async (
       return new Promise((resolve, reject) => {
         canvas.toBlob(
           blob => (blob ? resolve(blob) : reject(null)),
-          CLIPBOARD_MIMETYPE.IMAGE_PNG
+          'image/png'
         );
       });
     });
