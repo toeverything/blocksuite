@@ -416,12 +416,8 @@ export function convertDragPreviewEdgelessToDoc({
     : parentBlock.children.indexOf(targetBlock);
 
   const blockModel = blockComponent.model;
-  const blockProps = getBlockProps(blockModel);
-  delete blockProps.width;
-  delete blockProps.height;
-  delete blockProps.xywh;
-  delete blockProps.zIndex;
-
+  const { width, height, xywh, rotate, zIndex, ...blockProps } =
+    getBlockProps(blockModel);
   page.addBlock(blockModel.flavour, blockProps, parentBlock, parentIndex);
   page.deleteBlock(blockModel);
   return true;

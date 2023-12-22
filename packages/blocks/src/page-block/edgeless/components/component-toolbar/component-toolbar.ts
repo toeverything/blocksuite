@@ -383,7 +383,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return html` <style>
         :host {
           position: absolute;
-          z-index: 1;
+          z-index: 3;
           left: ${this.left}px;
           top: ${this.top}px;
         }
