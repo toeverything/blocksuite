@@ -1,6 +1,5 @@
 import {
   BlocksUtils,
-  EdgelessBlockType,
   EmbedHtmlBlockModel,
   EmbedHtmlBlockSpec,
   FrameBlockModel,
@@ -205,7 +204,7 @@ export class EditorWithAI {
             const sourceId = await this.editor.page.workspace.blob.set(imgFile);
             if (!image) {
               image = surface.addElement(
-                EdgelessBlockType.IMAGE,
+                'affine:image',
                 {
                   size: imgFile.size,
                   xywh: model.xywh,
