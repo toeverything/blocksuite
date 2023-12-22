@@ -61,28 +61,33 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
   };
 
-  private _isRangeCompletelyInRoot = () => {
+  private _isRangeCompletelyInEventSource = () => {
     const selectionRoot = findDocumentOrShadowRoot(this.editor);
     const selection = selectionRoot.getSelection();
     if (!selection || selection.rangeCount === 0) return false;
     const range = selection.getRangeAt(0);
 
-    const rootElement = this.editor.rootElement;
-    const rootRange = document.createRange();
-    rootRange.selectNode(rootElement);
+    const eventSource = this.editor.eventSource;
+    const eventSourceRange = document.createRange();
+    eventSourceRange.selectNode(eventSource);
 
     if (
       range.startContainer.compareDocumentPosition(range.endContainer) &
       Node.DOCUMENT_POSITION_FOLLOWING
     ) {
       return (
-        rootRange.comparePoint(range.startContainer, range.startOffset) >= 0 &&
-        rootRange.comparePoint(range.endContainer, range.endOffset) <= 0
+        eventSourceRange.comparePoint(
+          range.startContainer,
+          range.startOffset
+        ) >= 0 &&
+        eventSourceRange.comparePoint(range.endContainer, range.endOffset) <= 0
       );
     } else {
       return (
-        rootRange.comparePoint(range.endContainer, range.startOffset) >= 0 &&
-        rootRange.comparePoint(range.startContainer, range.endOffset) <= 0
+        eventSourceRange.comparePoint(range.endContainer, range.startOffset) >=
+          0 &&
+        eventSourceRange.comparePoint(range.startContainer, range.endOffset) <=
+          0
       );
     }
   };
@@ -179,7 +184,8 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     this.editor.rerenderWholeEditor();
     await this.editor.waitForUpdate();
 
-    if (this.editor.isReadonly || !this._isRangeCompletelyInRoot()) return;
+    if (this.editor.isReadonly || !this._isRangeCompletelyInEventSource())
+      return;
 
     const inlineRange = this.editor.getInlineRange();
     if (!inlineRange) return;
@@ -264,7 +270,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     if (
       this.editor.isReadonly ||
       this._isComposing ||
-      !this._isRangeCompletelyInRoot()
+      !this._isRangeCompletelyInEventSource()
     )
       return;
 
