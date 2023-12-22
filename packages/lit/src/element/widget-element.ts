@@ -1,5 +1,4 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
-import type { BlockSuiteViewSpec } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import { LitElement } from 'lit';
@@ -75,13 +74,5 @@ export class WidgetElement<
 
   override render(): unknown {
     return null;
-  }
-}
-
-declare global {
-  namespace BlockSuite {
-    interface View {
-      widget: BlockSuiteViewSpec<WidgetElement>;
-    }
   }
 }
