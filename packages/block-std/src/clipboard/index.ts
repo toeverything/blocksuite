@@ -108,12 +108,7 @@ export class Clipboard {
     return null;
   };
 
-  copy = async (event: ClipboardEvent, slice: Slice) => {
-    const data = event.clipboardData;
-    if (!data) {
-      return;
-    }
-
+  copy = async (slice: Slice) => {
     return this.copySlice(slice);
   };
 

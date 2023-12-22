@@ -90,27 +90,27 @@ export class PageClipboard {
     });
   };
 
-  private _copySelected = (event: ClipboardEvent, onCopy?: () => void) => {
+  private _copySelected = (onCopy?: () => void) => {
     return this._std.command
       .pipe()
       .withHost()
       .with({ onCopy })
       .getSelectedModels()
-      .copySelectedModels({ event });
+      .copySelectedModels();
   };
 
   public onPageCopy: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
-    this._copySelected(e).run();
+    this._copySelected().run();
   };
 
   public onPageCut: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
-    this._copySelected(e, () => {
+    this._copySelected(() => {
       this._std.command
         .pipe()
         .withHost()
