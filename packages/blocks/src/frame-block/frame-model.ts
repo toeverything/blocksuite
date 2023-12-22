@@ -3,6 +3,7 @@ import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
+import { getTextRect } from '../surface-block/elements/text/utils.js';
 import {
   Bound,
   type HitTestOptions,
@@ -38,11 +39,26 @@ export const FrameBlockSchema = defineBlockSchema({
 export class FrameBlockModel extends selectable<FrameBlockProps>(
   BaseBlockModel
 ) {
+  static PADDING = [8, 10];
+
   override batch = FRAME_BATCH;
   override hitTest(x: number, y: number, _: HitTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
+    const hit = bound.isPointNearBound([x, y], 5);
+    const zoom = _.zoom ?? 1;
 
-    return bound.isPointNearBound([x, y], 5);
+    if (hit) return true;
+
+    const titleRect = getTextRect(this.title.toString(), 'Inter', 14);
+
+    titleRect.w = (titleRect.w + FrameBlockModel.PADDING[1] * 2) / zoom;
+    titleRect.h = (titleRect.h + FrameBlockModel.PADDING[0] * 2) / zoom;
+
+    bound.y -= titleRect.h;
+    bound.w = titleRect.w;
+    bound.h = titleRect.h;
+
+    return bound.isPointInBound([x, y]);
   }
 
   override boxSelect(seclectedBound: Bound): boolean {
