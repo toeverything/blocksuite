@@ -152,3 +152,20 @@ export function requestConnectedFrame(
     if (element.isConnected) callback();
   });
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function withRequestConnectedFrame<T extends (...args: any[]) => any>(
+  func: T
+): T {
+  let raqId: number | undefined = undefined;
+  return new Proxy(func, {
+    apply(target, thisArg, args) {
+      if (raqId === undefined) {
+        raqId = requestConnectedFrame(() => {
+          target.apply(thisArg, args);
+          raqId = undefined;
+        });
+      }
+    },
+  });
+}
