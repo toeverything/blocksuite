@@ -33,7 +33,6 @@ import {
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
-import { getService } from '../../_legacy/service/index.js';
 import {
   SURFACE_IMAGE_CARD_HEIGHT,
   SURFACE_IMAGE_CARD_WIDTH,
@@ -214,8 +213,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   surface!: SurfaceBlockComponent;
 
   fontLoader!: FontLoader;
-
-  getService = getService;
 
   selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;

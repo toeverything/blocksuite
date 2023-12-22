@@ -25,8 +25,8 @@ import {
   Rect,
   stopPropagation,
 } from '../../../../_common/utils/index.js';
-import { getServiceOrRegister } from '../../../../_legacy/service/index.js';
 import { toggleBookmarkCreateModal } from '../../../../bookmark-block/components/index.js';
+import type { DatabaseService } from '../../../../database-block/database-service.js';
 import { ImageService } from '../../../../image-block/image-service.js';
 import {
   addImageBlocks,
@@ -505,10 +505,10 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
       // database init basic structure
       if (isDatabase) {
-        const service = await getServiceOrRegister<'affine:database'>(
-          props.flavour
-        );
-        service.initDatabaseBlock(page, model, focusId, 'table');
+        const service = this._pageBlockElement.std.spec?.getService(
+          'affine:database'
+        ) as DatabaseService;
+        service.initDatabaseBlock(page, model, model.id, 'table');
       }
     }
 
@@ -543,9 +543,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       const model = page.getBlockById(focusId);
       assertExists(model);
       if (isDatabase) {
-        const service = await getServiceOrRegister<'affine:database'>(
-          props.flavour
-        );
+        const service = pageBlockElement.std.spec?.getService(
+          'affine:database'
+        ) as DatabaseService;
         service.initDatabaseBlock(page, model, model.id, 'table');
       }
     }
