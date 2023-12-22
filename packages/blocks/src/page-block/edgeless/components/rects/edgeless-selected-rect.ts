@@ -14,7 +14,7 @@ import type {
 } from '../../../../_common/types.js';
 import {
   stopPropagation,
-  withRequestConnectedFrame,
+  withSingleAnimationFrame,
 } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
@@ -624,7 +624,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.slots.cursorUpdated.emit(cursor);
   };
 
-  private _updateSelectedRect = withRequestConnectedFrame(() => {
+  private _updateSelectedRect = withSingleAnimationFrame(() => {
     const { surface, zoom, selection } = this;
 
     const elements = selection.elements;
@@ -655,7 +655,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       top: top - padding,
       rotate,
     };
-  });
+  }, this);
 
   /**
    * @param refresh indicate whether to completely refresh the state of resize manager, otherwise only update the position

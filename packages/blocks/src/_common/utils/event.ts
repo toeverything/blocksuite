@@ -153,9 +153,13 @@ export function requestConnectedFrame(
   });
 }
 
+/**
+ * A wrapper around `requestConnectedFrame` that only calls at most once in one frame
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withRequestConnectedFrame<T extends (...args: any[]) => any>(
-  func: T
+export function withSingleAnimationFrame<T extends (...args: any[]) => any>(
+  func: T,
+  element?: HTMLElement
 ): T {
   let raqId: number | undefined = undefined;
   return new Proxy(func, {
@@ -164,7 +168,7 @@ export function withRequestConnectedFrame<T extends (...args: any[]) => any>(
         raqId = requestConnectedFrame(() => {
           target.apply(thisArg, args);
           raqId = undefined;
-        });
+        }, element);
       }
     },
   });
