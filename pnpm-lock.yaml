@@ -465,6 +465,9 @@ importers:
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store
+      '@fal-ai/serverless-client':
+        specifier: ^0.7.3
+        version: 0.7.3
       '@toeverything/theme':
         specifier: ^0.7.27
         version: 0.7.27
@@ -1623,6 +1626,14 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
+  /@fal-ai/serverless-client@0.7.3:
+    resolution: {integrity: sha512-YnYS0so73NaTye/cbhONE/Wzs5PqDt+bQySyAeLL35+HkWOZVjDKOtxqxAJwObZrsxSiHUM7I2WHpKNbrm5Hiw==}
+    engines: {node: '>=18.0.0'}
+    dependencies:
+      '@msgpack/msgpack': 3.0.0-beta2
+      robot3: 0.4.1
+    dev: false
+
   /@floating-ui/core@1.5.1:
     resolution: {integrity: sha512-QgcKYwzcc8vvZ4n/5uklchy8KVdjJwcOeI+HnnTNclJjs2nYsy23DOCf+sSV1kBwD9yDAoVKCkv/gEPzgQU3Pw==}
     dependencies:
@@ -1797,6 +1808,11 @@ packages:
     dependencies:
       call-bind: 1.0.5
     dev: true
+
+  /@msgpack/msgpack@3.0.0-beta2:
+    resolution: {integrity: sha512-y+l1PNV0XDyY8sM3YtuMLK5vE3/hkfId+Do8pLo/OPxfxuFAUwcGz3oiiUuV46/aBpwTzZ+mRWVMtlSKbradhw==}
+    engines: {node: '>= 14'}
+    dev: false
 
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -7067,6 +7083,10 @@ packages:
     dependencies:
       glob: 7.2.3
     dev: true
+
+  /robot3@0.4.1:
+    resolution: {integrity: sha512-hzjy826lrxzx8eRgv80idkf8ua1JAepRc9Efdtj03N3KNJuznQCPlyCJ7gnUmDFwZCLQjxy567mQVKmdv2BsXQ==}
+    dev: false
 
   /rollup@3.29.4:
     resolution: {integrity: sha512-oWzmBZwvYrU0iJHtDmhsm662rC15FRXmcjCk1xD771dFDx5jJ02ufAQQTn0etB2emNk4J9EZg/yWKpsn9BWGRw==}

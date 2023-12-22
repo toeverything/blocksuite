@@ -6,7 +6,6 @@ import { expect } from '@playwright/test';
 import lz from 'lz-string';
 
 import type { CssVariableName } from '../../../packages/blocks/src/_common/theme/css-variables.js';
-import type { ClipboardItem } from '../../../packages/blocks/src/_legacy/clipboard/clipboard-item.js';
 import type { RichText } from '../../../packages/blocks/src/index.js';
 import {
   type DatabaseBlockModel,
@@ -1234,7 +1233,7 @@ export async function getCurrentThemeCSSPropertyValue(
 }
 
 export async function getCopyClipItemsInPage(page: Page) {
-  const clipItems: ClipboardItem[] = await page.evaluate(() => {
+  const clipItems = await page.evaluate(() => {
     return document
       .getElementsByTagName('affine-doc-page')[0]
       .clipboard['_copyBlocksInPage']();

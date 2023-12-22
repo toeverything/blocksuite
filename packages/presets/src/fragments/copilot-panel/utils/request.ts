@@ -1,8 +1,57 @@
 import { assertExists } from '@blocksuite/global/utils';
+import * as fal from '@fal-ai/serverless-client';
 import { OpenAI } from 'openai';
 
-import { APIKeys } from './api-keys.js';
+import { CopilotConfig } from './copilot-config.js';
 
+const getGPTAPIKey = () => {
+  const apiKey = CopilotConfig.GPTAPIKey;
+  if (!apiKey) {
+    alert('Please enter your API key first.');
+    throw new Error('Please enter your API key first.');
+  }
+  return apiKey;
+};
+const getFalAPIKey = () => {
+  const apiKey = CopilotConfig.FalAPIKey;
+  if (!apiKey) {
+    alert('Please enter your API key first.');
+    assertExists(apiKey, 'Please enter your API key first.');
+  }
+  return apiKey;
+};
+
+export const createImageGenerator = () => {
+  const connection = fal.realtime.connect('110602490-lcm-sd15-i2i', {
+    onResult: result => {
+      const fn = requestMap.get(result.request_id);
+      if (fn) {
+        fn(result.images[0].url);
+        requestMap.delete(result.request_id);
+      }
+    },
+    onError: error => {
+      console.error(error);
+    },
+  });
+  const requestMap = new Map<string, (img: string) => void>();
+  let id = 0;
+  return (prompt: string, img: string) => {
+    return new Promise<string>(res => {
+      fal.config({
+        credentials: getFalAPIKey(),
+      });
+      connection.send({
+        request_id: `${id++}`,
+        prompt,
+        sync_mode: true,
+        enable_safety_checks: false,
+        image_url: img,
+      });
+      requestMap.set(id.toString(), res);
+    });
+  };
+};
 export type Uploadable = OpenAI.Images.ImageEditParams['image'];
 export const askDallE3 = async (
   prompt: string,
@@ -39,7 +88,7 @@ export const ask110602490_lcm_sd15_i2i = async (
     {
       method: 'post',
       headers: {
-        Authorization: apiKey,
+        Authorization: `key ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -47,6 +96,7 @@ export const ask110602490_lcm_sd15_i2i = async (
         prompt: prompt,
         sync_mode: true,
         seed: 42,
+        enable_safety_checks: false,
       }),
     }
   ).then(res => res.json());
@@ -81,22 +131,7 @@ export const embeddings = async (textList: string[]) => {
   });
   return result.data.map(v => v.embedding);
 };
-const getGPTAPIKey = () => {
-  const apiKey = APIKeys.GPTAPIKey;
-  if (!apiKey) {
-    alert('Please enter your API key first.');
-    throw new Error('Please enter your API key first.');
-  }
-  return apiKey;
-};
-const getFalAPIKey = () => {
-  const apiKey = APIKeys.FalAPIKey;
-  if (!apiKey) {
-    alert('Please enter your API key first.');
-    assertExists(apiKey, 'Please enter your API key first.');
-  }
-  return apiKey;
-};
+
 export const askGPT3_5turbo = async (
   messages: Array<OpenAI.ChatCompletionMessageParam>
 ) => {
