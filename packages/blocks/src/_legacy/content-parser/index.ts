@@ -1,4 +1,4 @@
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import {
@@ -6,7 +6,6 @@ import {
   getEditorContainer,
   isPageMode,
   matchFlavours,
-  type SerializedBlock,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import type { PageBlockModel } from '../../models.js';
@@ -29,26 +28,10 @@ export type TextStyleHandler = (
   styles: Record<string, unknown>
 ) => void;
 
-export type TableParseHandler = (
-  element: Element
-) => Promise<SerializedBlock[] | null>;
-
-export type TableTitleColumnHandler = (
-  element: Element
-) => Promise<SerializedBlock[] | null>;
-
 type Html2CanvasFunction = typeof import('html2canvas').default;
-
-export type ParseHtml2BlockHandler = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ...args: any[]
-) => Promise<SerializedBlock[] | null>;
 
 export class ContentParser {
   private _page: Page;
-  readonly slots = {
-    beforeHtml2Block: new Slot<Element>(),
-  };
   private _imageProxyEndpoint?: string;
 
   constructor(
@@ -56,10 +39,6 @@ export class ContentParser {
     options: {
       /** API endpoint used for cross-domain image export */
       imageProxyEndpoint?: string;
-      fetchFileHandler?: FetchFileHandler;
-      textStyleHandler?: TextStyleHandler;
-      tableParseHandler?: TableParseHandler;
-      tableTitleColumnHandler?: TableTitleColumnHandler;
     } = {}
   ) {
     this._page = page;
