@@ -100,6 +100,8 @@ export class EmbedBlockElement<
       assertExists(embedPortal);
       const dragPreviewEl = embedPortal.cloneNode() as HTMLElement;
       dragPreviewEl.style.transform = '';
+      dragPreviewEl.style.left = '0';
+      dragPreviewEl.style.top = '0';
       render(
         blockComponent.host.renderModel(blockComponent.model),
         dragPreviewEl
