@@ -106,6 +106,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
     .more-actions-container {
       display: none;
+      position: absolute;
       width: 164px;
       padding: 8px;
       justify-content: center;
