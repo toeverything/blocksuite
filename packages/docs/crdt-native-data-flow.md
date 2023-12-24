@@ -1,4 +1,4 @@
-# Unidirectional Data Flow
+# CRDT-Native Data Flow
 
 To make the editor logic based on BlockSuite intuitive and collaboration-ready, there is one major goal in BlockSuite: **Regardless of whether it is in a multi-user collaboration state, the application-layer code based on BlockSuite should be unaware of it**.
 
@@ -26,7 +26,7 @@ As an alternative, BlockSuite chooses to directly use the CRDT model as the sing
 
 This design can be represented by the following diagram:
 
-![unidirectional-data-flow](./images/unidirectional-data-flow.png)
+![crdt-native-data-flow](./images/crdt-native-data-flow.png)
 
 The advantage of this approach is that the application-layer code can **completely ignore whether updates to the block model come from local editing, history stack, or collaboration with other users**. Just subscribing to model update events is adequate.
 
@@ -66,9 +66,7 @@ In a typical editor, besides the block tree mentioned above, this data flow also
 - Per-user selection state and more user metadata.
 - Local state that are not synchronized with other users.
 
-These states may not be recorded in history, but their
-
-A more comprehensive real-world data flow works in this manner:
+These states can also be properly modeled in BlockSuite. Though they are not modeled using CRDT underlying the block tree, they still share the same data-driven event flow. A more comprehensive real-world data flow works in this manner:
 
 ![block-std-data-flow](./images/block-std-data-flow.png)
 
