@@ -5,6 +5,7 @@ import type {
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
+import type { RoleType } from '@blocksuite/store';
 
 import type { ImageSelection } from '../../../image-block/image-selection.js';
 
@@ -19,10 +20,11 @@ export const getSelectedBlocksCommand: Command<
     blockSelections?: BlockSelection[];
     imageSelections?: ImageSelection[];
     filter?: (el: BlockElement) => boolean;
-    types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[];
+    types?: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[];
+    roles?: RoleType[];
   }
 > = (ctx, next) => {
-  const { host, types } = ctx;
+  const { host, types = ['block', 'text', 'image'], roles = ['content'] } = ctx;
   assertExists(
     host,
     '`host` is required, you need to use `withHost` command before adding this command to the pipeline.'
@@ -40,8 +42,7 @@ export const getSelectedBlocksCommand: Command<
     const selectedBlockElements = rangeManager.getSelectedBlockElementsByRange(
       range,
       {
-        match: (el: BlockElement) =>
-          el.model.role === 'content' || el.model.role === 'root',
+        match: (el: BlockElement) => roles.includes(el.model.role),
         mode: 'flat',
       }
     );

@@ -5,10 +5,10 @@ import type { EditorHost } from '@blocksuite/lit';
 import { html, type TemplateResult } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
-import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { createSimplePortal } from '../../components/portal.js';
 import { toast } from '../../components/toast.js';
 import { CopyIcon, DatabaseTableViewIcon20 } from '../../icons/index.js';
+import { getChainWithHost } from '../../utils/command.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface QuickActionConfig {
@@ -53,11 +53,13 @@ export const quickActionConfig: QuickActionConfig[] = [
     icon: DatabaseTableViewIcon20,
     hotkey: `Mod-g`,
     showWhen: host => {
-      const selectedModels = getSelectedContentModels(host, ['text', 'block']);
+      const selectedModels = host.command.getChainCtx(
+        getChainWithHost(host.std).getSelectedModels({
+          types: ['block', 'text'],
+        })
+      ).selectedModels;
+      if (!selectedModels || selectedModels.length === 0) return false;
 
-      if (selectedModels.length === 0) {
-        return false;
-      }
       const firstBlock = selectedModels[0];
       assertExists(firstBlock);
       if (matchFlavours(firstBlock, ['affine:database'])) {
@@ -67,11 +69,12 @@ export const quickActionConfig: QuickActionConfig[] = [
       return true;
     },
     enabledWhen: host => {
-      const selectedModels = getSelectedContentModels(host, ['text', 'block']);
-
-      if (selectedModels.length === 0) {
-        return false;
-      }
+      const selectedModels = host.command.getChainCtx(
+        getChainWithHost(host.std).getSelectedModels({
+          types: ['block', 'text'],
+        })
+      ).selectedModels;
+      if (!selectedModels || selectedModels.length === 0) return false;
 
       return selectedModels.every(block =>
         DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)

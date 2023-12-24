@@ -6,12 +6,12 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { DataViewTypes } from '../../../database-block/common/data-view.js';
 import type { DatabaseBlockModel } from '../../../database-block/database-model.js';
-import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { DatabaseSearchClose } from '../../icons/database.js';
 import {
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
 } from '../../icons/text.js';
+import { getChainWithHost } from '../../utils/command.js';
 
 interface DatabaseView {
   type: DataViewTypes;
@@ -163,12 +163,12 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
   }
 
   private _convertToDatabase(viewType: DataViewTypes) {
-    const selectedModels = getSelectedContentModels(this.host, [
-      'text',
-      'block',
-    ]);
-
-    if (selectedModels.length === 0) return;
+    const selectedModels = this.host.command.getChainCtx(
+      getChainWithHost(this.host.std).getSelectedModels({
+        types: ['block', 'text'],
+      })
+    ).selectedModels;
+    if (!selectedModels || selectedModels.length === 0) return;
 
     this.page.captureSync();
 
