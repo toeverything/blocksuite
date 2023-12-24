@@ -58,7 +58,7 @@ type Cmds = {
   [cmdSymbol]: Command[];
 };
 // eslint-disable-next-line @typescript-eslint/ban-types
-type Chain<In extends object = {}> = CommonMethods<In> & {
+export type Chain<In extends object = {}> = CommonMethods<In> & {
   [K in keyof BlockSuite.Commands]: (
     data: MakeOptionalIfEmpty<
       Omit1<InDataOfCommand<BlockSuite.Commands[K]>, In>
@@ -221,6 +221,16 @@ export class CommandManager {
     }
 
     return createChain(methods, []);
+  };
+  getChainCtx = <T extends BlockSuite.CommandData>(chain: Chain<T>) => {
+    const ctx = {} as T;
+    chain
+      .inline((chainCtx, next) => {
+        Object.assign(ctx, chainCtx);
+        next();
+      })
+      .run();
+    return ctx;
   };
 }
 
