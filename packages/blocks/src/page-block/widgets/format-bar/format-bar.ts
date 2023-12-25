@@ -156,8 +156,7 @@ export class AffineFormatBarWidget extends WidgetElement {
           assertExists(range);
           targetRect = range.getBoundingClientRect();
         } else if (this.displayType === 'block') {
-          const blockElement =
-            this._selectedBlockElements[this._selectedBlockElements.length - 1];
+          const blockElement = this._selectedBlockElements[0];
           if (!blockElement) return;
           targetRect = blockElement.getBoundingClientRect();
         } else {
