@@ -2,7 +2,7 @@ import '../../../../_common/components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -29,30 +29,19 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .edgeless-text-editor {
       position: absolute;
+      top: 0;
+      left: 0;
       z-index: 10;
-      margin-right: -100%;
+      margin: 0;
       border: ${EdgelessTextEditor.BORDER_WIDTH}px solid
         var(--affine-primary-color, #1e96eb);
-      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
       border-radius: 4px;
+      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
       padding: ${EdgelessTextEditor.VERTICAL_PADDING}px
         ${EdgelessTextEditor.HORIZONTAL_PADDING}px;
       line-height: initial;
       overflow: visible;
       box-sizing: content-box;
-      left: 0;
-      top: 0;
-    }
-
-    .edgeless-text-editor-empty::before {
-      content: 'Type from here';
-      font-size: var(--font-size);
-      text-align: var(--text-align);
-      width: calc(100% - 2 * ${EdgelessTextEditor.HORIZONTAL_PADDING}px);
-      position: absolute;
-      pointer-events: none;
-      color: var(--affine-text-disable-color);
-      white-space: nowrap;
     }
 
     .edgeless-text-editor .inline-editor-container {
@@ -65,12 +54,6 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       white-space: pre !important;
       word-break: keep-all !important;
       overflow-wrap: normal !important;
-    }
-
-    /* We cannot add styles directly from the top, as this would cause a shift in the inline elements inside. */
-    /* https://github.com/toeverything/blocksuite/issues/5723 */
-    .edgeless-text-editor rich-text v-line {
-      text-align: var(--text-align);
     }
   `;
 
@@ -94,59 +77,30 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   private _keeping = false;
   private _isComposition = false;
 
+  private _renderPlaceholder() {
+    if (this.element.text.length === 0 && !this._isComposition) {
+      return html`<div
+        class="edgeless-text-editor-placeholder"
+        style=${styleMap({
+          fontSize: this.element.fontSize + 'px',
+          pointerEvents: `none`,
+          color: `var(--affine-text-disable-color)`,
+          whiteSpace: `nowrap`,
+          textAlign: this.element.textAlign,
+        })}
+      >
+        Type from here
+      </div>`;
+    }
+
+    return nothing;
+  }
+
   setKeeping(keeping: boolean) {
     this._keeping = keeping;
   }
 
-  getCoordsOnRightAlign(
-    rect: { w: number; h: number; r: number; x: number; y: number },
-    w1: number,
-    h1: number
-  ): { x: number; y: number } {
-    const centerX = rect.x + rect.w / 2;
-    const centerY = rect.y + rect.h / 2;
-
-    let deltaXPrime =
-      (rect.w / 2) * Math.cos(rect.r) - (-rect.h / 2) * Math.sin(rect.r);
-    let deltaYPrime =
-      (rect.w / 2) * Math.sin(rect.r) + (-rect.h / 2) * Math.cos(rect.r);
-
-    const vX = centerX + deltaXPrime;
-    const vY = centerY + deltaYPrime;
-
-    deltaXPrime = (w1 / 2) * Math.cos(rect.r) - (-h1 / 2) * Math.sin(rect.r);
-    deltaYPrime = (w1 / 2) * Math.sin(rect.r) + (-h1 / 2) * Math.cos(rect.r);
-
-    const newCenterX = vX - deltaXPrime;
-    const newCenterY = vY - deltaYPrime;
-
-    return { x: newCenterX - w1 / 2, y: newCenterY - h1 / 2 };
-  }
-
-  getCoordsOnCenterAlign(
-    rect: { w: number; h: number; r: number; x: number; y: number },
-    w1: number,
-    h1: number
-  ): { x: number; y: number } {
-    const centerX = rect.x + rect.w / 2;
-    const centerY = rect.y + rect.h / 2;
-
-    let deltaXPrime = 0;
-    let deltaYPrime = (-rect.h / 2) * Math.cos(rect.r);
-
-    const vX = centerX + deltaXPrime;
-    const vY = centerY + deltaYPrime;
-
-    deltaXPrime = 0;
-    deltaYPrime = (-h1 / 2) * Math.cos(rect.r);
-
-    const newCenterX = vX - deltaXPrime;
-    const newCenterY = vY - deltaYPrime;
-
-    return { x: newCenterX - w1 / 2, y: newCenterY - h1 / 2 };
-  }
-
-  getCoordsOnLeftAlign(
+  getCoords(
     rect: { w: number; h: number; r: number; x: number; y: number },
     w1: number,
     h1: number
@@ -181,64 +135,20 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     const newHeight = this.inlineEditorContainer.scrollHeight;
     const bound = new Bound(element.x, element.y, newWidth, newHeight);
     const { x, y, w, h, rotate } = element;
+    const newPos = this.getCoords(
+      {
+        x,
+        y,
+        w,
+        h,
+        r: toRadian(rotate),
+      },
+      newWidth,
+      newHeight
+    );
 
-    switch (element.textAlign) {
-      case 'left':
-        {
-          const newPos = this.getCoordsOnLeftAlign(
-            {
-              x,
-              y,
-              w,
-              h,
-              r: toRadian(rotate),
-            },
-            newWidth,
-            newHeight
-          );
-
-          bound.x = newPos.x;
-          bound.y = newPos.y;
-        }
-        break;
-      case 'center':
-        {
-          const newPos = this.getCoordsOnCenterAlign(
-            {
-              x,
-              y,
-              w,
-              h,
-              r: toRadian(rotate),
-            },
-            newWidth,
-            newHeight
-          );
-
-          bound.x = newPos.x;
-          bound.y = newPos.y;
-        }
-        break;
-      case 'right':
-        {
-          const newPos = this.getCoordsOnRightAlign(
-            {
-              x,
-              y,
-              w,
-              h,
-              r: toRadian(rotate),
-            },
-            newWidth,
-            newHeight
-          );
-
-          bound.x = newPos.x;
-          bound.y = newPos.y;
-        }
-        break;
-    }
-
+    bound.x = newPos.x;
+    bound.y = newPos.y;
     edgeless.surface.updateElement(element.id, {
       xywh: bound.serialize(),
     });
@@ -252,8 +162,9 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   getPaddingOffset() {
     const { VERTICAL_PADDING, HORIZONTAL_PADDING, BORDER_WIDTH } =
       EdgelessTextEditor;
-    return `-${HORIZONTAL_PADDING + BORDER_WIDTH}px, -${
-      VERTICAL_PADDING + BORDER_WIDTH
+    const { zoom } = this.edgeless.surface.viewport;
+    return `-${(HORIZONTAL_PADDING + BORDER_WIDTH) * zoom}px, -${
+      (VERTICAL_PADDING + BORDER_WIDTH) * zoom
     }px`;
   }
 
@@ -338,7 +249,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const { zoom, translateX, translateY } = this.edgeless.surface.viewport;
+    const { translateX, translateY, zoom } = this.edgeless.surface.viewport;
+    const [x, y] = this.getVisualPosition(this.element);
     const {
       fontFamily,
       fontSize,
@@ -348,44 +260,51 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       w,
       hasMaxWidth,
     } = this.element;
-    const [x, y] = this.getVisualPosition(this.element);
     const paddingOffset = this.getPaddingOffset();
     const rect = getSelectedRect([this.element]);
-    const isEmpty = !this.element.text.length && !this._isComposition;
     const transformOperation = [
       `translate(${translateX}px, ${translateY}px)`,
       `translate(${x * zoom}px, ${y * zoom}px)`,
+      `translate(${paddingOffset})`,
       `scale(${zoom})`,
       `rotate(${rotate}deg)`,
-      `translate(${paddingOffset})`,
     ];
 
-    this.style.setProperty('--font-size', `${fontSize}px`);
-    this.style.setProperty('--text-align', textAlign);
+    const placeholder = this._renderPlaceholder();
+    const hasPlaceholder = placeholder !== nothing;
 
     return html`<div
       style=${styleMap({
         fontFamily: wrapFontFamily(fontFamily),
-        minWidth: hasMaxWidth ? `${rect.width}px` : '200px',
+        minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
         maxWidth: hasMaxWidth ? `${w}px` : 'none',
         fontSize: `${fontSize}px`,
         fontWeight,
+        textAlign,
         transform: transformOperation.join(' '),
         transformOrigin: 'left top',
         color: isCssVariable(this.element.color)
           ? `var(${this.element.color})`
           : this.element.color,
       })}
-      class=${`edgeless-text-editor ${
-        isEmpty ? 'edgeless-text-editor-empty' : ''
-      }`}
+      class="edgeless-text-editor"
     >
       <rich-text
         .yText=${this.element.text}
         .enableFormat=${false}
         .enableAutoScrollHorizontally=${false}
         .enableAutoScrollVertically=${false}
+        style=${hasPlaceholder
+          ? styleMap({
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              padding: `${EdgelessTextEditor.VERTICAL_PADDING}px
+        ${EdgelessTextEditor.HORIZONTAL_PADDING}px`,
+            })
+          : nothing}
       ></rich-text>
+      ${placeholder}
     </div>`;
   }
 }
