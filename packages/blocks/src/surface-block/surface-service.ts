@@ -1,5 +1,5 @@
 import { BlockService } from '@blocksuite/block-std';
-import { assertExists, noop, Slot } from '@blocksuite/global/utils';
+import { noop, Slot } from '@blocksuite/global/utils';
 import { isPlainObject, merge, recursive } from 'merge';
 
 import type { NavigatorMode } from '../_common/edgeless/frame/consts.js';
@@ -13,7 +13,6 @@ import {
   GET_DEFAULT_LINE_COLOR,
   GET_DEFAULT_TEXT_COLOR,
 } from '../page-block/edgeless/components/panel/color-panel.js';
-import { isTopLevelBlock } from '../page-block/edgeless/utils/query.js';
 import {
   getViewportFromSessionCommand,
   saveViewportToSessionCommand,
@@ -136,7 +135,6 @@ export class SurfaceService extends BlockService<SurfaceBlockModel> {
       .add('saveViewportToSession', saveViewportToSessionCommand);
 
     this._tryLoadLastProps();
-    this._initSlots();
   }
 
   private _getSurfaceView() {
@@ -162,23 +160,6 @@ export class SurfaceService extends BlockService<SurfaceBlockModel> {
 
   private _saveLastProps() {
     sessionStorage.setItem(SESSION_PROP_KEY, JSON.stringify(this.lastProps));
-  }
-
-  private _initSlots() {
-    // temporary plan for surface block not ready
-    requestAnimationFrame(() => {
-      const surface = this._getSurfaceView();
-      surface.edgeless.slots.elementUpdated.on(({ id, props = {} }) => {
-        const element = surface.pickById(id);
-        assertExists(element, 'element must exist');
-        this.recordLastProps(
-          (isTopLevelBlock(element)
-            ? element.flavour
-            : element.type) as EdgelessElementType,
-          props
-        );
-      });
-    });
   }
 
   private _extractProps(

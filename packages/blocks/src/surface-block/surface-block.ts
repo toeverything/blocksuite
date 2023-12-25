@@ -302,6 +302,13 @@ export class SurfaceBlockComponent extends BlockElement<
         const element = this.pickById(id);
         assertExists(element);
 
+        this.service?.recordLastProps(
+          (isTopLevelBlock(element)
+            ? element.flavour
+            : element.type) as EdgelessElementType,
+          props as Record<string, unknown>
+        );
+
         if (element instanceof ConnectorElement) {
           this.connector.updatePath(element);
         }
