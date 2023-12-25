@@ -146,7 +146,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       });
 
       inlineEditor.disposables.addFromEvent(
-        this.inlineEditorContainer,
+        this.inlineEventSource ?? this.inlineEditorContainer,
         'keydown',
         keyDownHandler
       );
