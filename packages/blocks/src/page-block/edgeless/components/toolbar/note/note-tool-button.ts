@@ -3,12 +3,11 @@ import './note-menu.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
 import { ArrowUpIcon, NoteIcon } from '../../../../../_common/icons/index.js';
-import type { EdgelessTool } from '../../../../../_common/utils/index.js';
+import type { NoteTool } from '../../../../../_common/utils/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
@@ -30,79 +29,97 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgelessTool!: EdgelessTool;
-
-  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
+  active = false;
+
+  @state()
+  childFlavour: NoteTool['childFlavour'] = 'affine:paragraph';
+
+  @state()
+  childType = 'text';
+
+  @state()
+  tip = 'Text';
 
   private _noteMenu: MenuPopper<EdgelessNoteMenu> | null = null;
+  private _states = ['childFlavour', 'childType', 'tip'] as const;
 
   private _toggleNoteMenu() {
     if (this._noteMenu) {
-      this._noteMenu.dispose();
-      this._noteMenu = null;
+      this._disposeMenu();
+      this.requestUpdate();
     } else {
+      this.edgeless.tools.setEdgelessTool({
+        type: 'affine:note',
+        childFlavour: this.childFlavour,
+        childType: this.childType,
+        tip: this.tip,
+      });
       this._noteMenu = createPopper('edgeless-note-menu', this, {
         x: 110,
         y: -40,
       });
-      this._noteMenu.element.edgelessTool = this.edgelessTool;
+
       this._noteMenu.element.edgeless = this.edgeless;
+      this._noteMenu.element.childFlavour = this.childFlavour;
+      this._noteMenu.element.childType = this.childType;
+      this._noteMenu.element.tip = this.tip;
+      this._noteMenu.element.onChange = (
+        props: Partial<{
+          childFlavour: NoteTool['childFlavour'];
+          childType: string | null;
+          tip: string;
+        }>
+      ) => {
+        this._states.forEach(key => {
+          if (props[key] != undefined) {
+            Object.assign(this, { [key]: props[key] });
+          }
+        });
+        this.edgeless.slots.edgelessToolUpdated.emit({
+          type: 'affine:note',
+          childFlavour: this.childFlavour,
+          childType: this.childType,
+          tip: this.tip,
+        });
+      };
     }
   }
 
-  override updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('edgelessTool')) {
-      if (this.edgelessTool.type !== 'note') {
-        this._noteMenu?.dispose();
-        this._noteMenu = null;
-      }
-      if (this._noteMenu) {
-        this._noteMenu.element.edgelessTool = this.edgelessTool;
-        this._noteMenu.element.edgeless = this.edgeless;
-      }
-    }
+  private _disposeMenu() {
+    this._noteMenu?.dispose();
+    this._noteMenu = null;
   }
 
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(newTool => {
-        if (newTool.type !== 'note') {
-          this._noteMenu?.dispose();
-          this._noteMenu = null;
+        if (newTool.type !== 'affine:note') {
+          this._disposeMenu();
         }
       })
     );
   }
 
   override disconnectedCallback() {
-    this._noteMenu?.dispose();
-    this._noteMenu = null;
+    this._disposeMenu();
     super.disconnectedCallback();
   }
 
   override render() {
-    const type = this.edgelessTool?.type;
-    const arrowColor = type === 'note' ? 'currentColor' : '#77757D';
+    const { active } = this;
+    const arrowColor = active ? 'currentColor' : '#77757D';
     return html`
       <edgeless-tool-icon-button
         class="edgeless-note-button"
         .tooltip=${this._noteMenu ? '' : getTooltipWithShortcut('Note', 'N')}
         .tooltipOffset=${17}
-        .active=${type === 'note'}
+        .active=${active}
         .iconContainerPadding=${8}
         @click=${() => {
-          this.setEdgelessTool({
-            type: 'note',
-            background: DEFAULT_NOTE_COLOR,
-            childFlavour: 'affine:paragraph',
-            childType: 'text',
-            tip: 'Text',
-          });
           this._toggleNoteMenu();
         }}
       >

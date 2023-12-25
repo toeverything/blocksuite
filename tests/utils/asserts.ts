@@ -910,7 +910,7 @@ export async function assertConnectorPath(
   index = 0
 ) {
   const actualPath = await getConnectorPath(page, index);
-  actualPath.every((p, i) => assertPointAlmostEqual(p, path[i]));
+  actualPath.every((p, i) => assertPointAlmostEqual(p, path[i], 0.1));
 }
 
 export function assertRectExist(

@@ -31,7 +31,7 @@ import {
   isTopLevelBlock,
 } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
-import type { IBound } from './consts.js';
+import { type IBound } from './consts.js';
 import {
   type EdgelessBlockModelMap,
   type EdgelessElementType,
@@ -53,8 +53,8 @@ import {
   GroupElement,
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
-import type { CanvasElementType, IConnector, IVec } from './index.js';
 import type { EdgelessBlockType } from './index.js';
+import { type CanvasElementType, type IConnector, type IVec } from './index.js';
 import {
   compare,
   EdgelessGroupManager,
@@ -699,6 +699,17 @@ export class SurfaceBlockComponent extends BlockElement<
     if (this.page.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }
+
+    const saved: Record<string, unknown> = {};
+    Object.entries(properties).forEach(([key, value]) => {
+      if (key === 'text') {
+        saved[key] = value;
+        delete properties[key];
+      }
+    });
+    this.service!.applyLastProps(type, properties);
+    Object.assign(properties, saved);
+
     if (isCanvasElementType(type)) {
       const id = generateElementId();
 

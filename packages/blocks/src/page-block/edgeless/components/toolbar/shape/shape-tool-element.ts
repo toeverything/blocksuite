@@ -9,17 +9,12 @@ import {
 } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../../../_common/utils/index.js';
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from '../../../../../surface-block/elements/shape/consts.js';
+import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
+import type { ShapeStyle } from '../../../../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
-  ShapeStyle,
   type ShapeType,
-  StrokeStyle,
 } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
@@ -90,14 +85,23 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property({ attribute: false })
-  setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
-
   @query('#shape-tool-element')
   private _shapeElement!: HTMLElement;
 
   @query('#backup-shape-element')
   private _backupShapeElement!: HTMLElement;
+
+  @property({ attribute: false })
+  shapeType!: ShapeName;
+
+  @property({ attribute: false })
+  fillColor!: CssVariableName;
+
+  @property({ attribute: false })
+  shapeStyle!: ShapeStyle;
+
+  @property({ attribute: false })
+  strokeColor!: CssVariableName;
 
   private _transformMap: TransformMap = {
     z1: { x: 0, y: 5, scale: 1.1, origin: '50% 100%' },
@@ -169,7 +173,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
       return;
     }
     this._dragging = false;
-    this.setEdgelessTool({ type: 'default' });
+    this.edgeless.tools.setEdgelessTool({ type: 'default' });
     if (this._isOutside) {
       const rect = this._shapeElement.getBoundingClientRect();
       this._backupShapeElement.style.setProperty('transition', 'none');
@@ -222,15 +226,6 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
     }).catch(console.error);
   };
 
-  @state()
-  private _fillColor: string = DEFAULT_SHAPE_FILL_COLOR;
-
-  @state()
-  private _strokeColor: string = DEFAULT_SHAPE_STROKE_COLOR;
-
-  @state()
-  private _shapeStyle: ShapeStyle = ShapeStyle.General;
-
   private _addShape = (coord: Coord, padding: Coord) => {
     const width = 100;
     const height = 100;
@@ -245,13 +240,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
     this.edgeless.surface.addElement(CanvasElementType.SHAPE, {
       shapeType: this.shape.name === 'roundedRect' ? 'rect' : this.shape.name,
       xywh: xywh,
-      strokeColor: this._strokeColor,
-      fillColor: this._fillColor,
-      filled: true,
       radius: this.shape.name === 'roundedRect' ? 0.1 : 0,
-      strokeWidth: 4,
-      strokeStyle: StrokeStyle.Solid,
-      shapeStyle: this._shapeStyle,
     });
   };
 
@@ -261,17 +250,6 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
     this._disposables.addFromEvent(window, 'touchmove', this._touchMove);
     this._disposables.addFromEvent(window, 'mouseup', this._onMouseUp);
     this._disposables.addFromEvent(window, 'touchend', this._onTouchEnd);
-  }
-
-  override firstUpdated() {
-    const key = 'blocksuite:' + this.edgeless.page.id + ':edgelessShape';
-    const shapeData = sessionStorage.getItem(key);
-    if (shapeData) {
-      const shapeToolState = JSON.parse(shapeData);
-      this._fillColor = shapeToolState.fillColor;
-      this._strokeColor = shapeToolState.strokeColor;
-      this._shapeStyle = shapeToolState.shapeStyle;
-    }
   }
 
   override updated(changedProperties: PropertyValues<this>) {
@@ -299,9 +277,6 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
       if (newTool.type !== 'shape') {
         return;
       }
-      this._fillColor = newTool.fillColor;
-      this._strokeColor = newTool.strokeColor;
-      this._shapeStyle = newTool.shapeStyle;
     });
   }
 

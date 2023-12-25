@@ -77,12 +77,16 @@ export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export {
   Bound,
+  type BrushElement,
   CanvasElementType,
+  type ConnectorElement,
   ConnectorEndpointStyle,
   ConnectorMode,
   generateKeyBetween,
+  type ShapeElement,
   ShapeStyle,
   StrokeStyle,
+  type TextElement,
 } from './surface-block/index.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';

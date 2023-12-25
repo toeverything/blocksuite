@@ -6,11 +6,6 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
-import type {
-  EdgelessTool,
-  LineWidth,
-} from '../../../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
@@ -36,50 +31,34 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgelessTool!: EdgelessTool;
-
-  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  private _setBrushColor = (color: CssVariableName) => {
-    if (this.edgelessTool.type !== 'brush') return;
+  @property({ attribute: false })
+  color!: string;
 
-    const { lineWidth } = this.edgelessTool;
-    this.edgeless.slots.edgelessToolUpdated.emit({
-      type: 'brush',
-      color,
-      lineWidth,
-    });
-  };
+  @property({ attribute: false })
+  lineWidth!: number;
 
-  private _setLineWidth = (lineWidth: LineWidth) => {
-    if (this.edgelessTool.type !== 'brush') return;
-
-    const { color } = this.edgelessTool;
-    this.edgeless.slots.edgelessToolUpdated.emit({
-      type: 'brush',
-      color,
-      lineWidth,
-    });
-  };
+  @property({ attribute: false })
+  onChange!: (props: Record<string, unknown>) => void;
 
   override render() {
-    if (this.edgelessTool.type !== 'brush') return nothing;
+    if (this.edgeless.edgelessTool.type !== 'brush') return nothing;
 
-    const { color, lineWidth } = this.edgelessTool;
-
+    const { color, lineWidth } = this;
     return html`
       <edgeless-slide-menu>
         <div class="menu-content">
           <edgeless-line-width-panel
             .selectedSize=${lineWidth}
-            @select=${(e: LineWidthEvent) => this._setLineWidth(e.detail)}
+            @select=${(e: LineWidthEvent) =>
+              this.onChange({ lineWidth: e.detail })}
           >
           </edgeless-line-width-panel>
           <menu-divider .vertical=${true}></menu-divider>
           <edgeless-one-row-color-panel
             .value=${color}
-            @select=${(e: ColorEvent) => this._setBrushColor(e.detail)}
+            @select=${(e: ColorEvent) => this.onChange({ color: e.detail })}
           ></edgeless-one-row-color-panel>
         </div>
       </edgeless-slide-menu>

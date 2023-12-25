@@ -1,24 +1,14 @@
 import { IS_MAC } from '@blocksuite/global/env';
 
-import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
-import {
-  type EdgelessTool,
-  LineWidth,
-  type ShapeToolState,
-} from '../../_common/types.js';
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from '../../surface-block/elements/shape/consts.js';
+import { type EdgelessTool } from '../../_common/types.js';
 import {
   Bound,
   ConnectorElement,
   ConnectorMode,
   GroupElement,
-  ShapeStyle,
+  type ShapeType,
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
-import { GET_DEFAULT_LINE_COLOR } from './components/panel/color-panel.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
@@ -41,31 +31,33 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         t: () => {
           this._setEdgelessTool(pageElement, {
             type: 'text',
-            color: GET_DEFAULT_LINE_COLOR(),
           });
         },
         l: () => {
+          pageElement.surface.service?.recordLastProps('connector', {
+            mode: ConnectorMode.Straight,
+          });
           this._setEdgelessTool(pageElement, {
             type: 'connector',
             mode: ConnectorMode.Straight,
-            color: GET_DEFAULT_LINE_COLOR(),
-            strokeWidth: LineWidth.LINE_WIDTH_TWO,
           });
         },
         x: () => {
+          pageElement.surface.service?.recordLastProps('connector', {
+            mode: ConnectorMode.Orthogonal,
+          });
           this._setEdgelessTool(pageElement, {
             type: 'connector',
             mode: ConnectorMode.Orthogonal,
-            color: GET_DEFAULT_LINE_COLOR(),
-            strokeWidth: LineWidth.LINE_WIDTH_TWO,
           });
         },
         c: () => {
+          pageElement.surface.service?.recordLastProps('connector', {
+            mode: ConnectorMode.Curve,
+          });
           this._setEdgelessTool(pageElement, {
             type: 'connector',
             mode: ConnectorMode.Curve,
-            color: GET_DEFAULT_LINE_COLOR(),
-            strokeWidth: LineWidth.LINE_WIDTH_TWO,
           });
         },
         h: () => {
@@ -76,8 +68,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         n: () => {
           this._setEdgelessTool(pageElement, {
-            type: 'note',
-            background: DEFAULT_NOTE_COLOR,
+            type: 'affine:note',
             childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
             childType: DEFAULT_NOTE_CHILD_TYPE,
             tip: DEFAULT_NOTE_TIP,
@@ -86,8 +77,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         p: () => {
           this._setEdgelessTool(pageElement, {
             type: 'brush',
-            color: GET_DEFAULT_LINE_COLOR(),
-            lineWidth: LineWidth.Thin,
           });
         },
         e: () => {
@@ -96,15 +85,10 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         s: () => {
-          const shapeToolLocalState = this._tryLoadShapeLocalState();
+          const attributes = pageElement.surface.service?.lastProps.shape ?? {};
           this._setEdgelessTool(pageElement, {
             type: 'shape',
-            shape: shapeToolLocalState?.shape ?? 'rect',
-            fillColor:
-              shapeToolLocalState?.fillColor ?? DEFAULT_SHAPE_FILL_COLOR,
-            strokeColor:
-              shapeToolLocalState?.strokeColor ?? DEFAULT_SHAPE_STROKE_COLOR,
-            shapeStyle: shapeToolLocalState?.shapeStyle ?? ShapeStyle.General,
+            shapeType: attributes.shapeType as ShapeType,
           });
         },
         f: () => {
@@ -283,17 +267,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
     edgeless.selectionManager.clear();
     edgeless.selectionManager.setSelection(edgeless.selectionManager.state);
-  }
-
-  private _tryLoadShapeLocalState(): ShapeToolState | null {
-    const key = 'blocksuite:' + this.pageElement.page.id + ':edgelessShape';
-    const shapeData = sessionStorage.getItem(key);
-    let shapeToolState = null;
-    if (shapeData) {
-      shapeToolState = JSON.parse(shapeData);
-    }
-
-    return shapeToolState;
   }
 
   private _setEdgelessTool(

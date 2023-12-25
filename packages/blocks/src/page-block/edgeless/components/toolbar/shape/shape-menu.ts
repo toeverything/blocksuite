@@ -10,12 +10,8 @@ import {
   ScribbledStyleIcon,
 } from '../../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
-import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import { DEFAULT_SHAPE_FILL_COLOR } from '../../../../../surface-block/elements/shape/consts.js';
-import {
-  ShapeStyle,
-  type ShapeType,
-} from '../../../../../surface-block/index.js';
+import { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import {
@@ -24,6 +20,7 @@ import {
   SHAPE_SUBMENU_WIDTH,
   ShapeComponentConfig,
 } from './shape-menu-config.js';
+import type { ShapeName } from './shape-tool-element.js';
 
 @customElement('edgeless-shape-menu')
 export class EdgelessShapeMenu extends WithDisposable(LitElement) {
@@ -54,68 +51,61 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
       margin: 0 9px;
     }
   `;
-  @property({ attribute: false })
-  edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  private _setShapeType = (shape: ShapeType | 'roundedRect') => {
-    if (this.edgelessTool.type !== 'shape') return;
+  @property({ attribute: false })
+  shapeType!: ShapeName;
 
-    const { fillColor, strokeColor, shapeStyle } = this.edgelessTool;
-    this.edgeless.slots.edgelessToolUpdated.emit({
-      type: 'shape',
-      shape,
-      fillColor,
-      strokeColor,
-      shapeStyle,
-    });
-  };
+  @property({ attribute: false })
+  fillColor!: CssVariableName;
+
+  @property({ attribute: false })
+  shapeStyle!: ShapeStyle;
+
+  @property({ attribute: false })
+  strokeColor!: CssVariableName;
+
+  @property({ attribute: false })
+  onChange!: (props: Record<string, unknown>) => void;
 
   private _setStrokeColor = (strokeColor: CssVariableName) => {
-    if (this.edgelessTool.type !== 'shape') return;
+    if (this.edgeless.edgelessTool.type !== 'shape') return;
 
-    const { shape, shapeStyle } = this.edgelessTool;
-    let { fillColor } = this.edgelessTool;
+    const { shapeStyle } = this;
+
+    const props: Record<string, unknown> = { strokeColor };
     if (shapeStyle === ShapeStyle.General) {
-      fillColor = strokeColor.replace(LINE_COLOR_PREFIX, SHAPE_COLOR_PREFIX);
+      props.fillColor = strokeColor.replace(
+        LINE_COLOR_PREFIX,
+        SHAPE_COLOR_PREFIX
+      );
     }
-
-    this.edgeless.slots.edgelessToolUpdated.emit({
-      type: 'shape',
-      shape,
-      fillColor,
-      strokeColor,
-      shapeStyle,
-    });
+    this.onChange(props);
   };
 
   private _setShapeStyle = (shapeStyle: ShapeStyle) => {
-    if (this.edgelessTool.type !== 'shape') return;
+    if (this.edgeless.edgelessTool.type !== 'shape') return;
 
-    const { shape, strokeColor } = this.edgelessTool;
+    const { strokeColor } = this;
 
-    let { fillColor } = this.edgelessTool;
+    let fillColor;
     if (shapeStyle === ShapeStyle.General) {
       fillColor = strokeColor.replace(LINE_COLOR_PREFIX, SHAPE_COLOR_PREFIX);
     } else {
       fillColor = DEFAULT_SHAPE_FILL_COLOR;
     }
-
-    this.edgeless.slots.edgelessToolUpdated.emit({
-      type: 'shape',
-      shape,
-      fillColor,
-      strokeColor,
+    this.onChange({
       shapeStyle,
+      fillColor,
     });
   };
 
   override render() {
-    if (this.edgelessTool.type !== 'shape') return nothing;
+    if (this.edgeless.edgelessTool.type !== 'shape') return nothing;
 
-    const { shape, strokeColor, shapeStyle } = this.edgelessTool;
+    const { shapeType, strokeColor, shapeStyle } = this;
 
     return html`
       <div class="shape-menu-container">
@@ -152,11 +142,11 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
                   return html`
                     <edgeless-tool-icon-button
                       .tooltip=${tooltip}
-                      .active=${shape === name}
+                      .active=${shapeType === name}
                       .activeMode=${'background'}
                       .iconContainerPadding=${2}
                       @click=${() => {
-                        this._setShapeType(name);
+                        this.onChange({ shapeType: name });
                       }}
                     >
                       ${shapeStyle === ShapeStyle.General

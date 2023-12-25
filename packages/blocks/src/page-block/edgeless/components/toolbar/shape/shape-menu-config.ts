@@ -15,7 +15,7 @@ import {
 import type { ShapeTool } from '../../../../../_common/utils/index.js';
 
 type Config = {
-  name: ShapeTool['shape'];
+  name: ShapeTool['shapeType'];
   generalIcon: TemplateResult<1>;
   scribbledIcon: TemplateResult<1>;
   tooltip: string;
@@ -58,7 +58,7 @@ export const ShapeComponentConfig: Config[] = [
     tooltip: 'Rounded rectangle',
     disabled: false,
   },
-];
+] as const;
 
 export const ShapeComponentConfigMap = ShapeComponentConfig.reduce(
   (acc, config) => {

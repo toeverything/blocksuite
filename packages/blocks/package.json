@@ -52,6 +52,7 @@
     "sortablejs": "^1.15.1",
     "unified": "^11.0.4",
     "webfontloader": "^1.6.28",
+    "merge": "^2.1.1",
     "zod": "^3.22.4"
   },
   "exports": {

@@ -21,7 +21,6 @@ import {
   Vec,
 } from '../../../../surface-block/index.js';
 import { getElementsFromGroup } from '../../../../surface-block/managers/group-manager.js';
-import { GET_DEFAULT_TEXT_COLOR } from '../../components/panel/color-panel.js';
 import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
@@ -281,13 +280,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       expand: 10,
     });
     if (!selected) {
-      const key = 'blocksuite:' + this._edgeless.page.id + ':edgelessText';
-      const textData = sessionStorage.getItem(key);
-      const color =
-        textData && JSON.parse(textData).color
-          ? JSON.parse(textData).color
-          : GET_DEFAULT_TEXT_COLOR();
-      addText(this._edgeless, e, color);
+      addText(this._edgeless, e);
       return;
     } else {
       const [modelX, modelY] = this._edgeless.surface.viewport.toModelCoord(
