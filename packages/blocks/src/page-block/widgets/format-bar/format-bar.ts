@@ -156,20 +156,21 @@ export class AffineFormatBarWidget extends WidgetElement {
           assertExists(range);
           targetRect = range.getBoundingClientRect();
         } else if (this.displayType === 'block') {
-          const blockElement = this._selectedBlockElements[0];
+          const blockElement =
+            this._selectedBlockElements[this._selectedBlockElements.length - 1];
           if (!blockElement) return;
           targetRect = blockElement.getBoundingClientRect();
         } else {
           return;
         }
 
-        const editorHostRect = this.host.getBoundingClientRect();
+        const { top: editorHostTop, bottom: editorHostBottom } =
+          this.host.getBoundingClientRect();
         const e = ctx.get('pointerState');
-
-        if (targetRect.top - editorHostRect.top < 50) {
-          this._placement = 'bottom';
-        } else if (editorHostRect.bottom - targetRect.bottom < 50) {
+        if (editorHostBottom - targetRect.bottom < 50) {
           this._placement = 'top';
+        } else if (targetRect.top - Math.max(editorHostTop, 0) < 50) {
+          this._placement = 'bottom';
         } else if (e.raw.y < targetRect.top + targetRect.height / 2) {
           this._placement = 'top';
         } else {
