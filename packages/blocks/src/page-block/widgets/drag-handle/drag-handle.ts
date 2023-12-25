@@ -62,7 +62,6 @@ import {
   containChildBlock,
   getClosestBlockByPoint,
   getClosestNoteBlock,
-  getContainerOffsetPoint,
   getDragHandleContainerHeight,
   getDragHandleLeftPadding,
   getNoteId,
@@ -163,7 +162,7 @@ export class AffineDragHandleWidget extends WidgetElement<
    * When dragging, should update indicator position and target drop block id
    */
   private _getDropResult = (state: PointerEventState): DropResult | null => {
-    const point = getContainerOffsetPoint(state);
+    const point = new Point(state.raw.x, state.raw.y);
     const closestBlockElement = getClosestBlockByPoint(
       this.host,
       this.pageBlockElement,
@@ -222,12 +221,6 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     if (result) {
       rect = result.rect;
-      if (rect) {
-        rect.left = rect.left - state.containerOffset.x;
-        rect.top = rect.top - state.containerOffset.y;
-        rect.right = rect.right - state.containerOffset.x;
-        rect.bottom = rect.bottom - state.containerOffset.y;
-      }
       dropType = result.dropType;
     }
 
@@ -257,7 +250,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   private _createDropIndicator = () => {
     if (!this.dropIndicator) {
       this.dropIndicator = new DropIndicator();
-      this.blockElement.append(this.dropIndicator);
+      this.pageBlockElement.append(this.dropIndicator);
     }
   };
 
@@ -265,7 +258,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     state: PointerEventState,
     shouldAutoScroll: boolean = false
   ) => {
-    const point = getContainerOffsetPoint(state);
+    const point = new Point(state.raw.x, state.raw.y);
     const closestNoteBlock = getClosestNoteBlock(
       this.host,
       this.pageBlockElement,
@@ -285,7 +278,10 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (this.pageBlockElement instanceof DocPageBlockComponent) {
       if (!shouldAutoScroll) return;
 
-      const result = autoScroll(this.pageBlockElement.viewportElement, state.y);
+      const result = autoScroll(
+        this.pageBlockElement.viewportElement,
+        state.raw.y
+      );
       if (!result) {
         this._clearRaf();
         return;
@@ -324,8 +320,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     state: PointerEventState
   ) => {
     const { top, left } = blockElements[0].getBoundingClientRect();
-    const point = getContainerOffsetPoint(state);
-    const previewOffset = new Point(point.x - left, point.y - top);
+    const previewOffset = new Point(state.raw.x - left, state.raw.y - top);
     return previewOffset;
   };
 
@@ -350,8 +345,8 @@ export class AffineDragHandleWidget extends WidgetElement<
       });
 
       const offset = this._calculatePreviewOffset(blockElements, state);
-      const posX = state.x - offset.x;
-      const posY = state.y - offset.y;
+      const posX = state.raw.x - offset.x;
+      const posY = state.raw.y - offset.y;
 
       dragPreview = new DragPreview(offset);
       dragPreview.style.width = `${width / this.scale}px`;
@@ -366,8 +361,8 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (!this.dragPreview) return;
 
     const dragPreviewOffset = this.dragPreview.offset;
-    const posX = state.x - dragPreviewOffset.x;
-    const posY = state.y - dragPreviewOffset.y;
+    const posX = state.raw.x - dragPreviewOffset.x;
+    const posY = state.raw.y - dragPreviewOffset.y;
     this.dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this.scale})`;
   };
 
@@ -840,7 +835,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   private _pointerMoveOnBlock = (state: PointerEventState) => {
     if (this._isTopLevelDragHandleVisible) return;
 
-    const point = getContainerOffsetPoint(state);
+    const point = new Point(state.raw.x, state.raw.y);
     const closestBlockElement = getClosestBlockByPoint(
       this.host,
       this.pageBlockElement,
@@ -893,7 +888,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     // TODO: need to optimize
     // When pointer out of note block hover area or inside database, should hide drag handle
-    const point = getContainerOffsetPoint(state);
+    const point = new Point(state.raw.x, state.raw.y);
     const closestNoteBlock = getClosestNoteBlock(
       this.host,
       this.pageBlockElement,
@@ -1070,7 +1065,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       assertInstanceOf(edgelessPage, EdgelessPageBlockComponent);
 
       const newNoteId = edgelessPage.addNoteWithPoint(
-        new Point(state.x, state.y)
+        new Point(state.raw.x, state.raw.y)
       );
       const newNoteBlock = this.page.getBlockById(newNoteId);
       assertExists(newNoteBlock);
@@ -1375,6 +1370,10 @@ export class AffineDragHandleWidget extends WidgetElement<
       this._dragHandleContainer,
       'pointerleave',
       this._onDragHandlePointerLeave
+    );
+
+    this._disposables.addFromEvent(this.host, 'pointerleave', () =>
+      this._hide()
     );
 
     if (isInsideDocEditor(this.host)) {

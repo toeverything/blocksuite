@@ -16,7 +16,10 @@ import {
   pressTab,
   type,
 } from './utils/actions/index.js';
-import { getBoundingClientRect } from './utils/actions/misc.js';
+import {
+  getBoundingClientRect,
+  getEditorHostLocator,
+} from './utils/actions/misc.js';
 import {
   assertBlockChildrenIds,
   assertRichTexts,
@@ -804,7 +807,8 @@ test('should drag and drop blocks under block-level selection', async ({
   const blockSelections = page.locator('affine-block-selection');
   await expect(blockSelections).toHaveCount(2);
 
-  const editors = page.locator('rich-text');
+  const editorHost = getEditorHostLocator(page);
+  const editors = editorHost.locator('rich-text');
   const editorRect0 = await editors.nth(0).boundingBox();
   const editorRect2 = await editors.nth(2).boundingBox();
   if (!editorRect0 || !editorRect2) {
@@ -853,7 +857,8 @@ test('should trigger click event on editor container when clicking on blocks und
   await expect(blockSelections).toHaveCount(2);
   await expect(page.locator('*:focus')).toHaveCount(0);
 
-  const editors = page.locator('rich-text');
+  const editorHost = getEditorHostLocator(page);
+  const editors = editorHost.locator('rich-text');
   const editorRect0 = await editors.nth(0).boundingBox();
   if (!editorRect0) {
     throw new Error();
@@ -880,7 +885,8 @@ test('should get to selected block when dragging unselected block', async ({
   await type(page, '456');
   await assertRichTexts(page, ['123', '456']);
 
-  const editors = page.locator('rich-text');
+  const editorHost = getEditorHostLocator(page);
+  const editors = editorHost.locator('rich-text');
   const editorRect0 = await editors.nth(0).boundingBox();
   const editorRect1 = await editors.nth(1).boundingBox();
 
@@ -922,7 +928,8 @@ test('should clear the currently selected block when clicked again', async ({
   await type(page, '456');
   await assertRichTexts(page, ['123', '456']);
 
-  const editors = page.locator('rich-text');
+  const editorHost = getEditorHostLocator(page);
+  const editors = editorHost.locator('rich-text');
   const editorRect0 = await editors.nth(0).boundingBox();
   const editorRect1 = await editors.nth(1).boundingBox();
 
@@ -1009,7 +1016,8 @@ test('should support moving blocks from multiple notes', async ({ page }) => {
   const blockSelections = page.locator('affine-block-selection');
   await expect(blockSelections).toHaveCount(2);
 
-  const editors = page.locator('rich-text');
+  const editorHost = getEditorHostLocator(page);
+  const editors = editorHost.locator('rich-text');
   const editorRect1 = await editors.nth(1).boundingBox();
   const editorRect3 = await editors.nth(3).boundingBox();
   if (!editorRect1 || !editorRect3) {

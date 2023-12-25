@@ -143,7 +143,7 @@ export async function assertEmpty(page: Page) {
 
 export async function assertTitle(page: Page, text: string) {
   const editor = getEditorLocator(page);
-  const inlineEditor = editor.locator('[data-block-is-title="true"]').first();
+  const inlineEditor = editor.locator('.doc-title-container').first();
   const vText = inlineEditorInnerTextToString(await inlineEditor.innerText());
   expect(vText).toBe(text);
 }
@@ -167,12 +167,17 @@ export async function assertRichTextInlineDeltas(
   deltas: unknown[],
   i = 0
 ) {
-  const actual = await page.evaluate(i => {
-    const inlineRoot = document.querySelectorAll<InlineRootElement>(
-      'rich-text [data-v-root="true"]'
-    )[i];
-    return inlineRoot.inlineEditor.yTextDeltas;
-  }, i);
+  const actual = await page.evaluate(
+    ([i, currentEditorIndex]) => {
+      const editorHost =
+        document.querySelectorAll('editor-host')[currentEditorIndex];
+      const inlineRoot = editorHost.querySelectorAll<InlineRootElement>(
+        'rich-text [data-v-root="true"]'
+      )[i];
+      return inlineRoot.inlineEditor.yTextDeltas;
+    },
+    [i, currentEditorIndex]
+  );
   expect(actual).toEqual(deltas);
 }
 
@@ -187,10 +192,11 @@ export async function assertTextContain(page: Page, text: string, i = 0) {
 }
 
 export async function assertRichTexts(page: Page, texts: string[]) {
-  const actualTexts = await page.evaluate(index => {
-    const editor = document.querySelectorAll('affine-editor-container')[index];
+  const actualTexts = await page.evaluate(currentEditorIndex => {
+    const editorHost =
+      document.querySelectorAll('editor-host')[currentEditorIndex];
     const richTexts = Array.from(
-      editor?.querySelectorAll<RichText>('rich-text') ?? []
+      editorHost?.querySelectorAll<RichText>('rich-text') ?? []
     );
     return richTexts.map(richText => {
       const editor = richText.inlineEditor as AffineInlineEditor;
@@ -250,7 +256,7 @@ export async function assertImageOption(page: Page) {
 }
 
 export async function assertPageTitleFocus(page: Page) {
-  const locator = page.locator('.affine-doc-page-block-title').nth(0);
+  const locator = page.locator('doc-title .inline-editor').nth(0);
   await expect(locator).toBeFocused();
 }
 
@@ -293,11 +299,10 @@ export async function assertRichTextInlineRange(
   rangeLength = 0
 ) {
   const actual = await page.evaluate(
-    ([richTextIndex, index]) => {
-      const editor = document.querySelectorAll('affine-editor-container')[
-        index
-      ];
-      const richText = editor?.querySelectorAll('rich-text')[richTextIndex];
+    ([richTextIndex, currentEditorIndex]) => {
+      const editorHost =
+        document.querySelectorAll('editor-host')[currentEditorIndex];
+      const richText = editorHost?.querySelectorAll('rich-text')[richTextIndex];
       const inlineEditor = richText.inlineEditor;
       return inlineEditor?.getInlineRange();
     },
@@ -341,8 +346,10 @@ export async function assertTextFormat(
   resultObj: unknown
 ) {
   const actual = await page.evaluate(
-    ({ richTextIndex, index }) => {
-      const richText = document.querySelectorAll('rich-text')[richTextIndex];
+    ({ richTextIndex, index, currentEditorIndex }) => {
+      const editorHost =
+        document.querySelectorAll('editor-host')[currentEditorIndex];
+      const richText = editorHost.querySelectorAll('rich-text')[richTextIndex];
       const inlineEditor = richText.inlineEditor;
       if (!inlineEditor) {
         throw new Error('Inline editor is undefined');
@@ -354,7 +361,7 @@ export async function assertTextFormat(
       });
       return result;
     },
-    { richTextIndex, index }
+    { richTextIndex, index, currentEditorIndex }
   );
   expect(actual).toEqual(resultObj);
 }
@@ -365,8 +372,10 @@ export async function assertRichTextModelType(
   index = 0
 ) {
   const actual = await page.evaluate(
-    ({ index, BLOCK_ID_ATTR }) => {
-      const richText = document.querySelectorAll('rich-text')[index];
+    ({ index, BLOCK_ID_ATTR, currentEditorIndex }) => {
+      const editorHost =
+        document.querySelectorAll('editor-host')[currentEditorIndex];
+      const richText = editorHost.querySelectorAll('rich-text')[index];
       const blockElement = richText.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
 
       if (!blockElement) {
@@ -374,15 +383,15 @@ export async function assertRichTextModelType(
       }
       return (blockElement.model as BaseBlockModel<{ type: string }>).type;
     },
-    { index, BLOCK_ID_ATTR }
+    { index, BLOCK_ID_ATTR, currentEditorIndex }
   );
   expect(actual).toEqual(type);
 }
 
 export async function assertTextFormats(page: Page, resultObj: unknown[]) {
   const actual = await page.evaluate(index => {
-    const editor = document.querySelectorAll('affine-editor-container')[index];
-    const elements = editor?.querySelectorAll('rich-text');
+    const editorHost = document.querySelectorAll('editor-host')[index];
+    const elements = editorHost.querySelectorAll('rich-text');
     return Array.from(elements).map(el => {
       const inlineEditor = el.inlineEditor;
       if (!inlineEditor) {

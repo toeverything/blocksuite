@@ -15,6 +15,7 @@ import {
   focusTitle,
   getCenterPosition,
   getCursorBlockIdAndHeight,
+  getEditorHostLocator,
   getIndexCoordinate,
   getInlineSelectionIndex,
   getInlineSelectionText,
@@ -1934,7 +1935,8 @@ test('should not scroll page when mouse is click down', async ({ page }) => {
   await scrollToTop(page);
   await focusRichText(page, 0);
 
-  const longText = page.locator('rich-text').nth(10);
+  const editorHost = getEditorHostLocator(page);
+  const longText = editorHost.locator('rich-text').nth(10);
   const rect = await longText.boundingBox();
   if (!rect) throw new Error();
   await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);

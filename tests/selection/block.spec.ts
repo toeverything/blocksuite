@@ -520,7 +520,7 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
     page,
     {
       x: container.right + 1,
-      y: 1,
+      y: container.top + 1,
     },
     {
       x: container.right - 1,

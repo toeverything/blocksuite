@@ -14,6 +14,7 @@
   "dependencies": {
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/inline": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/lit": "workspace:*",

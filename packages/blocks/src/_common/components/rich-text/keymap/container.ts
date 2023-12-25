@@ -179,12 +179,13 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       return;
     },
     Enter: ctx => {
-      if (blockElement.selected?.is('block')) {
-        return _selectText(false);
-      }
-      if (!blockElement.selected?.is('text')) {
-        return;
-      }
+      if (blockElement.selected?.is('block')) return _selectText(false);
+
+      const target = ctx.get('defaultState').event.target as Node;
+      if (!blockElement.host.contains(target)) return;
+
+      if (!blockElement.selected?.is('text')) return;
+
       blockElement.model.page.captureSync();
 
       const inlineEditor = _getInlineEditor();

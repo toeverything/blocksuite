@@ -18,15 +18,28 @@ import { isCanvasElement } from './page-block/edgeless/utils/query.js';
 import { deserializeXYWH } from './surface-block/index.js';
 
 export * from './_common/adapters/index.js';
+export type {
+  AffineInlineEditor,
+  AffineTextAttributes,
+  SelectTag,
+} from './_common/components/index.js';
 export {
-  type AffineInlineEditor,
-  type AffineTextAttributes,
+  popTagSelect,
   RichText,
+  scrollbarStyle,
 } from './_common/components/index.js';
 export {
   EdgelessPresentationConsts as EdgelessPresentationConsts,
   type NavigatorMode,
 } from './_common/edgeless/frame/consts.js';
+export {
+  ArrowDownSmallIcon,
+  DualLinkIcon16,
+  LinkedPageIcon,
+  PageIcon,
+  PlusIcon,
+  TagsIcon,
+} from './_common/icons/index.js';
 export * from './_common/test-utils/test-utils.js';
 export {
   ColorVariables,

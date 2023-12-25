@@ -1,14 +1,15 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import { InlineEditor } from '@blocksuite/inline';
 import { BlockElement } from '@blocksuite/lit';
+import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import type { EditingState } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
+  getDocTitleInlineEditor,
   matchFlavours,
 } from '../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
@@ -25,9 +26,10 @@ export interface PageViewport {
   top: number;
   scrollLeft: number;
   scrollTop: number;
+  scrollWidth: number;
   scrollHeight: number;
-  clientHeight: number;
   clientWidth: number;
+  clientHeight: number;
 }
 
 const PAGE_BLOCK_CHILD_PADDING = 24;
@@ -59,17 +61,11 @@ export class DocPageBlockComponent extends BlockElement<
   DocPageBlockWidgetName
 > {
   static override styles = css`
-    .affine-doc-viewport {
-      position: relative;
-      overflow-x: hidden;
-      overflow-y: auto;
-      height: 100%;
-    }
-
     .affine-doc-page-block-container {
       display: flex;
       flex-direction: column;
       width: 100%;
+      height: 100%;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
@@ -96,36 +92,6 @@ export class DocPageBlockComponent extends BlockElement<
       }
     }
 
-    .affine-doc-page-block-title {
-      width: 100%;
-      font-size: 40px;
-      line-height: 50px;
-      font-weight: 700;
-      outline: none;
-      resize: none;
-      border: 0;
-      font-family: inherit;
-      color: inherit;
-      cursor: text;
-      padding: 38px 0;
-    }
-
-    .affine-doc-page-block-title-empty::before {
-      content: 'Title';
-      color: var(--affine-placeholder-color);
-      position: absolute;
-      opacity: 0.5;
-    }
-
-    .affine-doc-page-block-title:disabled {
-      background-color: transparent;
-    }
-
-    /*
-    .affine-doc-page-block-title-container {
-    }
-    */
-
     .affine-block-element {
       display: block;
     }
@@ -142,12 +108,6 @@ export class DocPageBlockComponent extends BlockElement<
   gesture: Gesture | null = null;
 
   clipboardController = new PageClipboard(this);
-
-  @state()
-  private _isComposing = false;
-
-  @query('.affine-doc-viewport')
-  viewportElement!: HTMLDivElement;
 
   @query('.affine-doc-page-block-container')
   pageBlockContainer!: HTMLDivElement;
@@ -167,13 +127,12 @@ export class DocPageBlockComponent extends BlockElement<
     viewportUpdated: new Slot<PageViewport>(),
   };
 
-  @query('.affine-doc-page-block-title')
-  private _titleContainer!: HTMLElement;
-  private _titleInlineEditor: InlineEditor | null = null;
-
-  get titleInlineEditor() {
-    assertExists(this._titleInlineEditor);
-    return this._titleInlineEditor;
+  get viewportElement(): HTMLDivElement {
+    const viewportElement = this.host.closest(
+      '.affine-doc-viewport'
+    ) as HTMLDivElement | null;
+    assertExists(viewportElement);
+    return viewportElement;
   }
 
   get viewport(): PageViewport {
@@ -183,65 +142,32 @@ export class DocPageBlockComponent extends BlockElement<
         top: 0,
         scrollLeft: 0,
         scrollTop: 0,
+        scrollWidth: 0,
         scrollHeight: 0,
-        clientHeight: 0,
         clientWidth: 0,
+        clientHeight: 0,
       };
     }
 
-    const { clientHeight, clientWidth, scrollHeight, scrollLeft, scrollTop } =
-      this.viewportElement;
+    const {
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    } = this.viewportElement;
     const { top, left } = this.viewportElement.getBoundingClientRect();
     return {
       top,
       left,
-      clientHeight,
-      clientWidth,
-      scrollHeight,
       scrollLeft,
       scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
     };
-  }
-
-  private _initTitleInlineEditor() {
-    const { model } = this;
-    const title = model.title;
-
-    this._titleInlineEditor = new InlineEditor(title.yText);
-    this._titleInlineEditor.mount(this._titleContainer);
-    this._titleInlineEditor.disposables.addFromEvent(
-      this._titleContainer,
-      'keydown',
-      this._onTitleKeyDown
-    );
-    this._titleInlineEditor.disposables.addFromEvent(
-      this._titleContainer,
-      'paste',
-      this._onTitlePaste
-    );
-    this._titleInlineEditor.disposables.addFromEvent(
-      this._titleContainer,
-      'copy',
-      this._onTitleCopy
-    );
-
-    // Workaround for inline editor to skip composition event
-    this._disposables.addFromEvent(
-      this._titleContainer,
-      'compositionstart',
-      () => (this._isComposing = true)
-    );
-    this._disposables.addFromEvent(
-      this._titleContainer,
-      'compositionend',
-      () => (this._isComposing = false)
-    );
-
-    this.model.title.yText.observe(() => {
-      this._updateTitleInMeta();
-      this.requestUpdate();
-    });
-    this._titleInlineEditor.setReadonly(this.page.readonly);
   }
 
   private _createDefaultNoteBlock() {
@@ -256,94 +182,6 @@ export class DocPageBlockComponent extends BlockElement<
       this.page.root?.children.find(child => child.flavour === 'affine:note') ??
       this._createDefaultNoteBlock()
     );
-  }
-
-  private _updateTitleInMeta = () => {
-    this.page.workspace.setPageMeta(this.page.id, {
-      title: this.model.title.toString(),
-    });
-  };
-
-  private _onTitleKeyDown = (e: KeyboardEvent) => {
-    if (e.isComposing || this.page.readonly) return;
-    const hasContent = !this.page.isEmpty;
-    const { page, model } = this;
-
-    if (e.key === 'Enter' && hasContent && !e.isComposing) {
-      e.preventDefault();
-      assertExists(this._titleInlineEditor);
-      const inlineRange = this._titleInlineEditor.getInlineRange();
-      assertExists(inlineRange);
-      const right = model.title.split(inlineRange.index);
-      const newFirstParagraphId = page.addBlock(
-        'affine:paragraph',
-        { text: right },
-        this._getDefaultNoteBlock(),
-        0
-      );
-      asyncFocusRichText(page, newFirstParagraphId)?.catch(console.error);
-      return;
-    } else if (e.key === 'ArrowDown' && hasContent) {
-      e.preventDefault();
-      const defaultNote = this._getDefaultNoteBlock();
-      const firstText = defaultNote?.children.find(block =>
-        matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
-      );
-      if (firstText) {
-        asyncFocusRichText(page, firstText.id)?.catch(console.error);
-      } else {
-        const newFirstParagraphId = page.addBlock(
-          'affine:paragraph',
-          {},
-          defaultNote,
-          0
-        );
-        asyncFocusRichText(page, newFirstParagraphId)?.catch(console.error);
-      }
-      return;
-    } else if (e.key === 'Tab') {
-      e.preventDefault();
-    }
-  };
-
-  private _onTitleCopy = (event: ClipboardEvent) => {
-    event.stopPropagation();
-
-    const inlineEditor = this._titleInlineEditor;
-    if (!inlineEditor) return;
-    const inlineRange = inlineEditor.getInlineRange();
-    if (!inlineRange) return;
-
-    const toBeCopiedText = inlineEditor.yText
-      .toString()
-      .substring(inlineRange.index, inlineRange.index + inlineRange.length);
-    event.clipboardData?.setData('text/plain', toBeCopiedText);
-  };
-
-  private _onTitlePaste = (event: ClipboardEvent) => {
-    event.stopPropagation();
-    const inlineEditor = this._titleInlineEditor;
-    if (!inlineEditor) return;
-    const inlineRange = inlineEditor.getInlineRange();
-    if (!inlineRange) return;
-
-    const data = event.clipboardData?.getData('text/plain');
-    if (data) {
-      const text = data.replace(/(\r\n|\r|\n)/g, '\n');
-      inlineEditor.insertText(inlineRange, text);
-      inlineEditor.setInlineRange({
-        index: inlineRange.index + text.length,
-        length: 0,
-      });
-    }
-  };
-
-  override updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('model')) {
-      if (this.model && !this._titleInlineEditor) {
-        this._initTitleInlineEditor();
-      }
-    }
   }
 
   private _initViewportResizeEffect() {
@@ -361,22 +199,35 @@ export class DocPageBlockComponent extends BlockElement<
     resizeObserver.observe(this.viewportElement);
   }
 
-  private _initReadonlyListener() {
-    const page = this.page;
-
-    let readonly = page.readonly;
-    this._disposables.add(
-      page.awarenessStore.slots.update.on(() => {
-        if (readonly !== page.readonly) {
-          readonly = page.readonly;
-          this._titleInlineEditor?.setReadonly(readonly);
-        }
-      })
+  prependParagraphWithText = (text: Text) => {
+    const newFirstParagraphId = this.page.addBlock(
+      'affine:paragraph',
+      { text },
+      this._getDefaultNoteBlock(),
+      0
     );
-  }
+    asyncFocusRichText(this.page, newFirstParagraphId)?.catch(console.error);
+  };
+
+  focusFirstParagraph = () => {
+    const defaultNote = this._getDefaultNoteBlock();
+    const firstText = defaultNote?.children.find(block =>
+      matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
+    );
+    if (firstText) {
+      asyncFocusRichText(this.page, firstText.id)?.catch(console.error);
+    } else {
+      const newFirstParagraphId = this.page.addBlock(
+        'affine:paragraph',
+        {},
+        defaultNote,
+        0
+      );
+      asyncFocusRichText(this.page, newFirstParagraphId)?.catch(console.error);
+    }
+  };
 
   override firstUpdated() {
-    this._initReadonlyListener();
     this._initViewportResizeEffect();
   }
 
@@ -388,25 +239,6 @@ export class DocPageBlockComponent extends BlockElement<
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);
-    // filter cut event in page title
-    this.handleEvent('cut', ctx => {
-      const { event } = ctx.get('defaultState');
-      const element =
-        event.target instanceof HTMLElement
-          ? event.target
-          : event.target instanceof Node
-            ? event.target.parentElement
-            : null;
-      if (!element) {
-        return;
-      }
-
-      if (element.closest('[data-block-is-title]')) {
-        return true;
-      }
-
-      return;
-    });
 
     this.bindHotKey({
       ArrowUp: () => {
@@ -452,23 +284,14 @@ export class DocPageBlockComponent extends BlockElement<
               ])
           );
           return true;
+        } else {
+          const titleInlineEditor = getDocTitleInlineEditor(this.host);
+          if (titleInlineEditor) {
+            titleInlineEditor.focusEnd();
+            return true;
+          }
+          return;
         }
-
-        selection.update(selList =>
-          selList
-            .filter(sel => !sel.is('text') && !sel.is('block'))
-            .concat([
-              selection.getInstance('text', {
-                from: {
-                  path: this.path,
-                  index: this.model.title.length,
-                  length: 0,
-                },
-                to: null,
-              }),
-            ])
-        );
-        return true;
       },
       ArrowDown: () => {
         const view = this.host.view;
@@ -598,17 +421,6 @@ export class DocPageBlockComponent extends BlockElement<
   }
 
   override render() {
-    const isEmpty =
-      (!this.model.title || !this.model.title.length) && !this._isComposing;
-    const title = html`
-      <div
-        data-block-is-title="true"
-        class="affine-doc-page-block-title ${isEmpty
-          ? 'affine-doc-page-block-title-empty'
-          : ''}"
-      ></div>
-    `;
-
     const content = html`${repeat(
       this.model.children.filter(
         child => !(matchFlavours(child, ['affine:note']) && child.hidden)
@@ -624,12 +436,7 @@ export class DocPageBlockComponent extends BlockElement<
     )}`;
 
     return html`
-      <div class="affine-doc-viewport">
-        <div class="affine-doc-page-block-container">
-          <div class="affine-doc-page-block-title-container">${title}</div>
-          ${content} ${widgets}
-        </div>
-      </div>
+      <div class="affine-doc-page-block-container">${content} ${widgets}</div>
     `;
   }
 }
