@@ -71,7 +71,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       );
       this.richText.style.minHeight = `${containerHeight}px`;
     }
-    this.edgeless.selectionManager.setSelection({
+    this.edgeless.selectionManager.set({
       elements: [this.element.id],
       editing: true,
     });
@@ -138,7 +138,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     this.element.textDisplay = true;
 
     this.remove();
-    this.edgeless.selectionManager.setSelection({
+    this.edgeless.selectionManager.set({
       elements: [],
       editing: false,
     });

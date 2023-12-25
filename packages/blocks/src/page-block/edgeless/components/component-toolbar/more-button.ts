@@ -195,7 +195,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     deleteElements(this.surface, this.selection.elements);
 
-    this.selection.setSelection({
+    this.selection.set({
       elements: [],
       editing: false,
     });

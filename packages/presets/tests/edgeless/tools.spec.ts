@@ -43,7 +43,7 @@ describe('default tool', () => {
 
     click(edgeless.host, { x: 0, y: 50 });
 
-    expect(edgeless.selectionManager.state.elements).toEqual([id]);
+    expect(edgeless.selectionManager.selections[0]).toEqual([id]);
   });
 
   test('element drag moving', async () => {
@@ -80,7 +80,7 @@ describe('default tool', () => {
     await wait();
 
     click(edgeless.host, { x: 50, y: 50 });
-    expect(edgeless.selectionManager.state.elements).toEqual([noteId]);
+    expect(edgeless.selectionManager.selections[0]).toEqual([noteId]);
     drag(edgeless.host, { x: 50, y: 50 }, { x: 150, y: 150 });
     await wait();
 

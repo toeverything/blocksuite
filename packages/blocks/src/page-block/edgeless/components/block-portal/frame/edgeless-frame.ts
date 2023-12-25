@@ -4,15 +4,10 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  requestConnectedFrame,
-  stopPropagation,
-} from '../../../../../_common/utils/event.js';
 import type { FrameBlockModel } from '../../../../../frame-block/index.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import { mountFrameTitleEditor } from '../../../utils/text.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const FRAME_OFFSET = 8;
@@ -36,29 +31,6 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
   private _updateElement = () => {
     this.requestUpdate();
   };
-
-  private _selectByTitle() {
-    requestConnectedFrame(() => {
-      if (this.edgeless.selectionManager.state.elements.length === 0) {
-        this.edgeless.selectionManager.setSelection({
-          elements: [this.frame.id],
-          editing: false,
-        });
-      }
-    }, this);
-  }
-
-  private _editTitle() {
-    requestConnectedFrame(() => {
-      if (
-        (this.edgeless.selectionManager.state.elements.length === 0 ||
-          this.edgeless.selectionManager.isSelected(this.frame.id)) &&
-        !this.frame.page.readonly
-      ) {
-        mountFrameTitleEditor(this.frame, this.edgeless);
-      }
-    }, this);
-  }
 
   override firstUpdated() {
     const { _disposables, edgeless } = this;
@@ -87,8 +59,11 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
     );
 
     _disposables.add(
-      edgeless.selectionManager.slots.updated.on(({ editing, elements }) => {
-        if (elements[0] === this.frame.id && editing) {
+      edgeless.selectionManager.slots.updated.on(() => {
+        if (
+          edgeless.selectionManager.selectedIds[0] === this.frame.id &&
+          edgeless.selectionManager.editing
+        ) {
           this._editing = true;
         } else {
           this._editing = false;
@@ -159,10 +134,6 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
               border: isInner ? '1px solid var(--affine-border-color)' : 'none',
             })}
             class="affine-frame-title"
-            @click=${this._selectByTitle}
-            @dblclick=${this._editTitle}
-            @pointerup=${stopPropagation}
-            @pointerdown=${stopPropagation}
           >
             ${text}
           </div>`

@@ -100,11 +100,11 @@ export class EdgelessClipboardController extends PageClipboard {
     this.host.handleEvent(
       'copy',
       ctx => {
-        const surfaceSelection = this.selectionManager.state;
-        const elements = surfaceSelection.elements;
-        if (elements.length === 0) return false;
+        const { selections, selectedIds } = this.selectionManager;
 
-        this._onCopy(ctx, surfaceSelection).catch(console.error);
+        if (selectedIds.length === 0) return false;
+
+        this._onCopy(ctx, selections).catch(console.error);
         return;
       },
       { global: true }
@@ -147,7 +147,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
   private _onCopy = async (
     _context: UIEventStateContext,
-    surfaceSelection: SurfaceSelection
+    surfaceSelection: SurfaceSelection[]
   ) => {
     const event = _context.get('clipboardState').raw;
     event.preventDefault();
@@ -156,8 +156,9 @@ export class EdgelessClipboardController extends PageClipboard {
       this.surface,
       this.selectionManager.elements
     );
+
     // when note active, handle copy like page mode
-    if (surfaceSelection.editing) {
+    if (surfaceSelection[0] && surfaceSelection[0].editing) {
       // use build-in copy handler in rich-text when copy in surface text element
       if (isCanvasElementWithText(elements[0])) return;
       this.onPageCopy(_context);
@@ -185,8 +186,9 @@ export class EdgelessClipboardController extends PageClipboard {
     const event = _context.get('clipboardState').raw;
     event.preventDefault();
 
-    const { state, elements } = this.selectionManager;
-    if (state.editing) {
+    const { selections, elements } = this.selectionManager;
+
+    if (selections[0].editing) {
       // use build-in paste handler in rich-text when paste in surface text element
       if (isCanvasElementWithText(elements[0])) return;
       this.onPagePaste(_context);
@@ -227,7 +229,7 @@ export class EdgelessClipboardController extends PageClipboard {
         },
         this.surface.model.id
       );
-      this.selectionManager.setSelection({
+      this.selectionManager.set({
         editing: false,
         elements: [id],
       });
@@ -241,14 +243,16 @@ export class EdgelessClipboardController extends PageClipboard {
   };
 
   private _onCut = (_context: UIEventStateContext) => {
-    const { state, elements } = this.selectionManager;
-    if (state.elements.length === 0) return;
+    const { selections, elements } = this.selectionManager;
+
+    if (elements.length === 0) return;
 
     const event = _context.get('clipboardState').event;
     event.preventDefault();
 
-    this._onCopy(_context, state).catch(console.error);
-    if (state.editing) {
+    this._onCopy(_context, selections).catch(console.error);
+
+    if (selections[0].editing) {
       // use build-in cut handler in rich-text when cut in surface text element
       if (isCanvasElementWithText(elements[0])) return;
       this.onPageCut(_context);
@@ -259,7 +263,7 @@ export class EdgelessClipboardController extends PageClipboard {
       deleteElements(this.surface, elements);
     });
 
-    this.selectionManager.setSelection({
+    this.selectionManager.set({
       editing: false,
       elements: [],
     });
@@ -441,7 +445,7 @@ export class EdgelessClipboardController extends PageClipboard {
       }),
     ];
 
-    this.selectionManager.setSelection({
+    this.selectionManager.set({
       editing: false,
       elements: newSelected,
     });

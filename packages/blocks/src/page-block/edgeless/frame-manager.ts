@@ -119,7 +119,7 @@ export class EdgelessFrameManager {
     _edgeless.page.captureSync();
     assertExists(frameModel);
     surface.fitToViewport(bound);
-    _edgeless.selectionManager.setSelection({
+    _edgeless.selectionManager.set({
       elements: [frameModel.id],
       editing: false,
     });

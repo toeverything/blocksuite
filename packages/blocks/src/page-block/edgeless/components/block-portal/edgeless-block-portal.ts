@@ -269,8 +269,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      edgeless.selectionManager.slots.updated.on(e => {
-        if (e.elements.length === 0 || e.editing) {
+      edgeless.selectionManager.slots.updated.on(() => {
+        const selection = edgeless.selectionManager;
+
+        if (selection.selectedIds.length === 0 || selection.editing) {
           this._toolbarVisible = false;
         } else {
           this._toolbarVisible = true;

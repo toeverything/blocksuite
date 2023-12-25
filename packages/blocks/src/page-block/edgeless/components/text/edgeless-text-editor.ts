@@ -356,7 +356,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
             deleteElements(edgeless.surface, [element]);
           }
 
-          edgeless.selectionManager.setSelection({
+          edgeless.selectionManager.set({
             elements: [],
             editing: false,
           });

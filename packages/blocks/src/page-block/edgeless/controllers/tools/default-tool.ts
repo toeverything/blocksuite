@@ -100,11 +100,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   get state() {
-    return this.selection.state;
-  }
-
-  get isActive() {
-    return this.selection.state.editing;
+    return this.selection.selections;
   }
 
   private _pick(x: number, y: number, options?: HitTestOptions) {
@@ -123,24 +119,26 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _setSelectionState(elements: string[], editing: boolean) {
-    this.selection.setSelection({
+    this.selection.set({
       elements,
       editing,
     });
   }
 
   private _handleClickOnSelected(element: Selectable, e: PointerEventState) {
-    const { elements, editing } = this.state;
+    const { selectedIds, selections } = this.selection;
+    const editing = selections[0]?.editing ?? false;
+
     // click the inner area of active text and note element
-    if (editing && elements.length === 1 && elements[0] === element.id) {
+    if (selectedIds.length === 1 && selectedIds[0] === element.id && editing) {
       return;
     }
 
     // handle single note block click
-    if (!e.keys.shift && elements.length === 1 && isNoteBlock(element)) {
+    if (!e.keys.shift && selectedIds.length === 1 && isNoteBlock(element)) {
       if (
-        (elements[0] === element.id && !editing) ||
-        (editing && elements[0] !== element.id)
+        (selectedIds[0] === element.id && !editing) ||
+        (editing && selectedIds[0] !== element.id)
       ) {
         // issue #1809
         // If the previously selected element is a noteBlock and is in an active state,
@@ -153,20 +151,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
     }
 
-    // hold shift key to multi select or de-select element
-    if (e.keys.shift) {
-      const selections = [...elements];
-      if (elements.includes(element.id)) {
-        this._setSelectionState(
-          selections.filter(id => id !== element.id),
-          false
-        );
-      } else {
-        this._setSelectionState([...selections, element.id], false);
-      }
-    } else {
-      this._setSelectionState([element.id], false);
-    }
+    this.selection.set({
+      // hold shift key to multi select or de-select element
+      elements: e.keys.shift
+        ? this.selection.has(element.id)
+          ? selectedIds.filter(id => id !== element.id)
+          : [...selectedIds, element.id]
+        : [element.id],
+      editing: false,
+    });
   }
 
   private _handleSurfaceDragMove(
@@ -331,7 +324,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _determineDragType(e: PointerEventState): DefaultModeDragType {
     // Is dragging started from current selected rect
     if (this._isInSelectedRect(e.x, e.y)) {
-      return this.state.editing
+      return this.selection.editing
         ? DefaultModeDragType.NativeEditing
         : DefaultModeDragType.ContentMoving;
     } else {
@@ -618,7 +611,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._lock = false;
     }
 
-    if (this.isActive) {
+    if (this.selection.editing) {
       return;
     }
     const { surface } = this._edgeless;

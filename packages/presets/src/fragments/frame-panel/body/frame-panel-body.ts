@@ -233,7 +233,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       this._selected = [id];
     }
 
-    this.edgeless?.selectionManager.setSelection({
+    this.edgeless?.selectionManager.set({
       elements: this._selected,
       editing: false,
     });
@@ -339,7 +339,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     }
 
     this._selected = [];
-    this.edgeless?.selectionManager.setSelection({
+    this.edgeless?.selectionManager.set({
       elements: this._selected,
       editing: false,
     });
@@ -411,7 +411,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
     if (_changedProperties.has('edgeless') && this.edgeless) {
       // after switch to edgeless mode, should update the selection
       if (this.edgeless.model.id === this._lastEdgelessPageId) {
-        this.edgeless.selectionManager.setSelection({
+        this.edgeless.selectionManager.set({
           elements: this._selected,
           editing: false,
         });

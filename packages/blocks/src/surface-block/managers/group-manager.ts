@@ -156,7 +156,7 @@ export class EdgelessGroupManager {
       this.addChild(parent, groupId);
     }
 
-    selectionManager.setSelection({
+    selectionManager.set({
       editing: false,
       elements: [groupId],
     });
@@ -207,7 +207,7 @@ export class EdgelessGroupManager {
         this.addChild(parent, element.id);
       });
     }
-    selectionManager.setSelection({
+    selectionManager.set({
       editing: false,
       elements: elements.map(ele => ele.id),
     });

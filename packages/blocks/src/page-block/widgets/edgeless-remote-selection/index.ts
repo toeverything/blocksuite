@@ -175,7 +175,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
   private _updateOnElementChange = (element: string | { id: string }) => {
     const id = typeof element === 'string' ? element : element.id;
 
-    if (this.isConnected && this.selection.isSelectedByRemote(id))
+    if (this.isConnected && this.selection.hasRemote(id))
       this._updateRemoteRects();
   };
 
