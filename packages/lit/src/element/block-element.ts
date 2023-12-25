@@ -141,7 +141,10 @@ export class BlockElement<
         : options?.flavour
           ? this.model.flavour
           : undefined,
-      path: options?.global || options?.flavour ? undefined : this.path,
+      path:
+        options?.global || options?.flavour
+          ? undefined
+          : this.rootBlockElement.path,
     };
     this._disposables.add(this.host.event.bindHotkey(keymap, config));
   }
