@@ -700,15 +700,7 @@ export class SurfaceBlockComponent extends BlockElement<
       throw new Error('Cannot add element in readonly mode');
     }
 
-    const saved: Record<string, unknown> = {};
-    Object.entries(properties).forEach(([key, value]) => {
-      if (key === 'text') {
-        saved[key] = value;
-        delete properties[key];
-      }
-    });
     this.service!.applyLastProps(type, properties);
-    Object.assign(properties, saved);
 
     if (isCanvasElementType(type)) {
       const id = generateElementId();
