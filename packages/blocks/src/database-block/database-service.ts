@@ -10,8 +10,6 @@ export class DatabaseService extends BlockService<DatabaseBlockModel> {
   override mounted(): void {
     super.mounted();
     this.selectionManager.register(DatabaseSelection);
-
-    this.handleEvent('selectionChange', () => true);
   }
 
   initDatabaseBlock(
