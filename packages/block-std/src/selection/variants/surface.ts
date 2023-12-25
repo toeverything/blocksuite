@@ -41,8 +41,8 @@ export class SurfaceSelection extends BaseSelection {
   override toJSON(): Record<string, unknown> {
     return {
       type: 'surface',
+      path: this.path,
       elements: this.elements,
-      blockId: this.blockId,
       editing: this.editing,
     };
   }

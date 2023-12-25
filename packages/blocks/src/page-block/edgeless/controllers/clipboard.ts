@@ -188,7 +188,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const { selections, elements } = this.selectionManager;
 
-    if (selections[0].editing) {
+    if (selections[0]?.editing) {
       // use build-in paste handler in rich-text when paste in surface text element
       if (isCanvasElementWithText(elements[0])) return;
       this.onPagePaste(_context);
@@ -252,7 +252,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     this._onCopy(_context, selections).catch(console.error);
 
-    if (selections[0].editing) {
+    if (selections[0]?.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
       if (isCanvasElementWithText(elements[0])) return;
       this.onPageCut(_context);

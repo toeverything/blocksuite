@@ -883,7 +883,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   };
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
-    if (this.page.readonly || this.dragging) {
+    if (this.page.readonly || this.dragging || !this.isConnected) {
       this._hide();
       return;
     }
