@@ -34,43 +34,21 @@ The advantage of this approach is that the application-layer code can **complete
 In BlockSuite, we generally refer to the block instances that users manipulate through the `page` API as _block models_, but the true source of the state of these models comes from their underlying CRDT data structure, which is usually referred to as _YBlock_ in our documentation.
 :::
 
-## Case Study
+## Unidirectional Update Flow
 
-As an example, suppose the current block tree structure is as follows:
+Besides the block tree that uses CRDT as its single source of truth, BlockSuite also manages shared states that do not require a history of changes, such as the awareness state of each user's cursor position. Additionally, some user metadata may not be shared among all users.
 
-```
-PageBlock
-  NoteBlock
-    ParagraphBlock 0
-    ParagraphBlock 1
-    ParagraphBlock 2
-```
+In BlockSuite, the management of these state types follows a consistent, unidirectional pattern, enabling an intuitive one-way update flow that efficiently translates state changes into visual updates.
 
-Now user A selects `ParagraphBlock 2` and presses the delete key to delete it. At this point, `page.deleteBlock` should be called to delete this block model instance:
+The complete state update process in BlockSuite involves several distinct steps, particularly when handling editor-related UI interactions:
 
-```ts
-const blockModel = page.root.children[0].children[2];
-page.deleteBlock(blockModel);
-```
-
-At this point, BlockSuite will not directly modify the block tree under `page.root`, but will instead firstly modify the underlying YBlock. After the CRDT state is changed, Yjs will generate the corresponding `Y.Event` data structure, which contains all the incremental state changes in this update (similar to patches in git and virtual DOM). BlockSuite will always use this as the basis to synchronize the block models, then trigger the corresponding slot events for UI updates.
-
-In this example, as the parent of `ParagraphBlock 2`, the `model.childrenUpdated` slot event of `NoteBlock` will be triggered. This will enable the corresponding component in the UI framework component tree to refresh itself. Since each child block has an ID, this is very conducive to combining the common list key optimizations in UI frameworks, achieving on-demand block component updates.
-
-But the real power lies in the fact that if this block tree is being concurrently edited by multiple people, when user B performs a similar operation, the corresponding update will be encoded by Yjs and distributed by the provider. When User A receives and applies the update from User B, the same state update pipeline as local editing will be triggered. **This makes it unnecessary for the application to make any additional modifications or adaptations for collaboration scenarios, inherently gaining real-time collaboration capabilities**.
-
-## Modeling Editor State
-
-In a typical editor, besides the block tree mentioned above, this data flow also applies to:
-
-- Per-user selection state and more user metadata.
-- Local state that are not synchronized with other users.
-
-These states can also be properly modeled in BlockSuite. Though they are not modeled using CRDT underlying the block tree, they still share the same data-driven event flow. A more comprehensive real-world data flow works in this manner:
+1. **UI Event Handling**: View components generate UI events like clicks and drags, initiating corresponding callbacks. In BlockSuite, it is recommended to model and reuse these interactions using commands.
+2. **State Manipulation via Commands**: Commands can manipulate the editor state to accomplish UI updates.
+3. **State-Driven View Updates**: Upon state changes, slot events are used to notify and update view components accordingly.
 
 ![block-std-data-flow](./images/block-std-data-flow.png)
 
-For the new concepts involved, see [command](./command-api), [view](./block-view) and [event](./event-api) sections for more information.
+This update mechanism is depicted in the diagram above. Concepts such as [command](./command-api), [view](./block-view) and [event](./event-api) are further elaborated in other documentation sections for detailed understanding.
 
 ## Summary
 
