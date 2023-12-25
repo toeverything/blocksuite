@@ -11,7 +11,8 @@ try {
     FalAPIKey: result.FalAPIKey,
     SaveToLocalStorage: result.SaveToLocalStorage,
   };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 } catch (e) {
-  console.log(e);
+  //
 }
 export const CopilotConfig = keys;

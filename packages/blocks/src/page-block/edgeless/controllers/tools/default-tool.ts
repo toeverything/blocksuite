@@ -249,7 +249,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     if (selected) {
       this._handleClickOnSelected(selected, e);
-    } else {
+    } else if (!e.keys.shift) {
       this._setNoneSelectionState();
     }
 
@@ -387,7 +387,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _updateSelectingState = () => {
-    const { surface } = this._edgeless;
+    const { surface, tools, selectionManager } = this._edgeless;
     const { viewport } = surface;
     const startX = this._dragStartModelCoord[0];
     const startY = this._dragStartModelCoord[1];
@@ -404,7 +404,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const bound = new Bound(x, y, w, h);
 
     const elements = surface.pickByBound(bound);
-    this._setSelectionState([...elements.map(element => element.id)], false);
+
+    const set = new Set(
+      tools.shiftKey ? [...elements, ...selectionManager.elements] : elements
+    );
+
+    this._setSelectionState(
+      Array.from(set).map(element => element.id),
+      false
+    );
 
     // Record the last model coordinate for dragging area updating
     this._dragLastModelCoord = [curX, curY];

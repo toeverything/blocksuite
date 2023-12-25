@@ -38,14 +38,11 @@ function testClickOnBlankArea(
   state: PointerEventState,
   viewportWidth: number,
   pageWidth: number,
-  pageStyle: CSSStyleDeclaration
+  paddingLeft: number,
+  paddingRight: number
 ) {
-  const blankLeft =
-    viewportWidth - pageWidth + parseFloat(pageStyle.paddingLeft);
-  const blankRight =
-    (viewportWidth - pageWidth) / 2 +
-    pageWidth -
-    parseFloat(pageStyle.paddingRight);
+  const blankLeft = (viewportWidth - pageWidth) / 2 + paddingLeft;
+  const blankRight = (viewportWidth - pageWidth) / 2 + pageWidth - paddingRight;
 
   if (state.raw.clientX < blankLeft || state.raw.clientX > blankRight) {
     return true;
@@ -351,11 +348,15 @@ export class DocPageBlockComponent extends BlockElement<
         return;
       }
 
+      const { paddingLeft, paddingRight } = window.getComputedStyle(
+        this.pageBlockContainer
+      );
       const isClickOnBlankArea = testClickOnBlankArea(
         event,
         this.viewport.clientWidth,
         this.pageBlockContainer.clientWidth,
-        window.getComputedStyle(this.pageBlockContainer)
+        parseFloat(paddingLeft),
+        parseFloat(paddingRight)
       );
       if (isClickOnBlankArea) return;
 

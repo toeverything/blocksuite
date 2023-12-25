@@ -12,7 +12,10 @@ import type {
   IPoint,
   Selectable,
 } from '../../../../_common/types.js';
-import { stopPropagation } from '../../../../_common/utils/event.js';
+import {
+  batchToAnimationFrame,
+  stopPropagation,
+} from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
 import type { NoteBlockModel } from '../../../../models.js';
@@ -621,7 +624,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.slots.cursorUpdated.emit(cursor);
   };
 
-  private _updateSelectedRect() {
+  private _updateSelectedRect = batchToAnimationFrame(() => {
     const { surface, zoom, selection } = this;
 
     const elements = selection.elements;
@@ -652,7 +655,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       top: top - padding,
       rotate,
     };
-  }
+  }, this);
 
   /**
    * @param refresh indicate whether to completely refresh the state of resize manager, otherwise only update the position

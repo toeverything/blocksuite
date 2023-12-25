@@ -1,6 +1,3 @@
-import '../fragments/doc-title/doc-title';
-import '../fragments/page-meta-tags/page-meta-tags';
-
 import { DocEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';

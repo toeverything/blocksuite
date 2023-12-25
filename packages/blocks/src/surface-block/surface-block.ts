@@ -927,12 +927,6 @@ export class SurfaceBlockComponent extends BlockElement<
     return picked;
   }
 
-  getSortedCanvasElementsWithViewportBounds() {
-    return this.pickByBound(this.viewport.viewportBounds)
-      .filter(e => !isTopLevelBlock(e))
-      .sort(this.compare);
-  }
-
   dispose() {
     this._yContainer.unobserve(this._onYContainer);
   }
