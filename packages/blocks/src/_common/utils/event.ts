@@ -157,7 +157,7 @@ export function requestConnectedFrame(
  * A wrapper around `requestConnectedFrame` that only calls at most once in one frame
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withSingleAnimationFrame<T extends (...args: any[]) => any>(
+export function batchToAnimationFrame<T extends (...args: any[]) => any>(
   func: T,
   element?: HTMLElement
 ): T {

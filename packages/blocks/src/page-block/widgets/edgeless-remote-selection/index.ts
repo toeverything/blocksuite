@@ -8,7 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { RemoteCursor } from '../../../_common/icons/edgeless.js';
 import type { Selectable } from '../../../_common/types.js';
-import { withSingleAnimationFrame } from '../../../_common/utils/event.js';
+import { batchToAnimationFrame } from '../../../_common/utils/event.js';
 import { pickValues } from '../../../_common/utils/iterable.js';
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import {
@@ -179,7 +179,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
       this._updateRemoteRects();
   };
 
-  private _updateTransform = withSingleAnimationFrame(() => {
+  private _updateTransform = batchToAnimationFrame(() => {
     const { translateX, translateY } = this.edgeless.surface.viewport;
 
     this.style.setProperty(

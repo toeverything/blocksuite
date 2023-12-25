@@ -21,8 +21,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
 import {
+  batchToAnimationFrame,
   requestConnectedFrame,
-  withSingleAnimationFrame,
 } from '../../../../_common/utils/event.js';
 import {
   matchFlavours,
@@ -134,7 +134,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     return this.selectedRect.dragging;
   }
 
-  refreshLayerViewport = withSingleAnimationFrame(() => {
+  refreshLayerViewport = batchToAnimationFrame(() => {
     if (!this.edgeless || !this.edgeless.surface) return;
 
     const { surface } = this.edgeless;
