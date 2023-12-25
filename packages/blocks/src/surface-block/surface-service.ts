@@ -45,8 +45,10 @@ function deepAssign(
   source: Record<string, unknown>
 ) {
   Object.keys(source).forEach(key => {
+    if (source[key] === undefined) return;
     if (!(key in target)) target[key] = undefined;
-    if (target[key] !== undefined || source[key] === undefined) return;
+    if (target[key] !== undefined) return;
+
     if (isPlainObject(source[key])) {
       target[key] = target[key] ?? {};
       deepAssign(
@@ -205,12 +207,14 @@ export class SurfaceService extends BlockService<SurfaceBlockModel> {
     targetProps: Record<string, unknown>
   ) {
     const props = this.lastProps[type];
+    if (!props) return;
+
     const overrideProps = this._extractProps(
       targetProps,
       this.lastProps[type] as Record<string, unknown>
     );
-
     if (Object.keys(overrideProps).length === 0) return;
+
     merge(props, overrideProps);
     this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
     this._saveLastProps();
