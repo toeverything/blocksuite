@@ -17,7 +17,6 @@ import { PageClipboard } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
-import { Gesture } from '../text-selection/gesture.js';
 import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
 import type { DocPageService } from './doc-page-service.js';
 
@@ -101,8 +100,6 @@ export class DocPageBlockComponent extends BlockElement<
   `;
 
   keyboardManager: PageKeyboardManager | null = null;
-
-  gesture: Gesture | null = null;
 
   clipboardController = new PageClipboard(this);
 
@@ -234,7 +231,6 @@ export class DocPageBlockComponent extends BlockElement<
 
     this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
-    this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);
 
     this.bindHotKey({
@@ -356,7 +352,6 @@ export class DocPageBlockComponent extends BlockElement<
     super.disconnectedCallback();
     this.clipboardController.hostDisconnected();
     this._disposables.dispose();
-    this.gesture = null;
     this.keyboardManager = null;
   }
 

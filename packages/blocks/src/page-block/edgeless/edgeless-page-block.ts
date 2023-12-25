@@ -64,7 +64,6 @@ import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { SurfaceService } from '../../surface-block/surface-service.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { PageBlockModel } from '../page-model.js';
-import { Gesture } from '../text-selection/gesture.js';
 import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
 import type { EdgelessPageBlockWidgetName } from '../types.js';
 import type { EdgelessBlockPortalContainer } from './components/block-portal/edgeless-block-portal.js';
@@ -144,8 +143,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   };
 
   keyboardManager: EdgelessPageKeyboardManager | null = null;
-
-  gesture: Gesture | null = null;
 
   mouseRoot!: HTMLElement;
 
@@ -852,7 +849,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._updateFrames();
     this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
-    this.gesture = new Gesture(this);
     this.keyboardManager = new EdgelessPageKeyboardManager(this);
 
     this.handleEvent('selectionChange', () => {
@@ -883,7 +879,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
       this._resizeObserver = null;
     }
 
-    this.gesture = null;
     this.keyboardManager = null;
 
     this.tools.clear();
