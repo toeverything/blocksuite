@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
@@ -84,6 +85,8 @@ export class SlashMenu extends WithDisposable(LitElement) {
       );
       return;
     }
+    const inlineEditor = richText.inlineEditor;
+    assertExists(inlineEditor, 'RichText InlineEditor not found');
 
     /**
      * Handle arrow key
@@ -96,7 +99,8 @@ export class SlashMenu extends WithDisposable(LitElement) {
      *   and if the following key is not the backspace key, the slash menu will be closed
      */
     createKeydownObserver({
-      target: richText,
+      target: inlineEditor.eventSource,
+      inlineEditor,
       abortController: this.abortController,
       interceptor: (e, next) => {
         if (e.key === '/') {

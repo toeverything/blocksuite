@@ -14,6 +14,7 @@ import {
   hasNativeSelection,
   resetNativeSelection,
 } from '../../../_common/utils/index.js';
+import type { DatabaseBlockComponent } from '../../database-block.js';
 import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';
@@ -130,6 +131,12 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
   @property({ attribute: false })
   showIcon = false;
 
+  get rootBlockElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    return databaseBlock?.rootBlockElement;
+  }
+
   get titleColumn() {
     const columnId = this.view.header.titleColumn;
     assertExists(columnId);
@@ -152,7 +159,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     this.inlineEditor = inlineEditor;
     inlineEditor.setAttributeSchema(affineTextAttributes);
     inlineEditor.setAttributeRenderer(affineAttributeRenderer);
-    inlineEditor.mount(container);
+    inlineEditor.mount(container, this.rootBlockElement);
     return inlineEditor;
   }
 

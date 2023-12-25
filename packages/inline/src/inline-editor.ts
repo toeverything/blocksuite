@@ -221,7 +221,9 @@ export class InlineEditor<
     this._eventSource = eventSource;
     render(nothing, this._rootElement);
     this._rootElement.contentEditable = 'true';
+    this._rootElement.style.outline = 'none';
     this._eventSource.contentEditable = 'true';
+    this._eventSource.style.outline = 'none';
     this._rootElement.dataset.vRoot = 'true';
 
     this._bindYTextObserver();

@@ -599,6 +599,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         <div id="line-numbers"></div>
         <rich-text
           .yText=${this.model.text.yText}
+          .inlineEventSource=${this.rootBlockElement}
           .undoManager=${this.model.page.history}
           .attributesSchema=${this.attributesSchema}
           .attributeRenderer=${this.getAttributeRenderer()}

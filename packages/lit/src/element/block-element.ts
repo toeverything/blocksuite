@@ -77,6 +77,15 @@ export class BlockElement<
       .map(child => child.view as BlockElement);
   }
 
+  get rootBlockElement() {
+    const rootElement = this.host.view.viewFromPath(
+      'block',
+      this.path.slice(0, 1)
+    );
+    assertExists(rootElement);
+    return rootElement;
+  }
+
   get flavour(): string {
     return this.model.flavour;
   }

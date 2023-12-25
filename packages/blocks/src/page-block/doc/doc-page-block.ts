@@ -1,4 +1,4 @@
-import type { PointerEventState } from '@blocksuite/block-std';
+import { PathFinder, type PointerEventState } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
@@ -245,93 +245,32 @@ export class DocPageBlockComponent extends BlockElement<
           sel => sel.is('text') || sel.is('block')
         );
         if (!sel) return;
-        const focus = view.findPrev(sel.path, (nodeView, _index, parent) => {
-          if (nodeView.type === 'block' && parent.view === this) {
-            return true;
+        const focusNote = view.findPrev(
+          sel.path,
+          (nodeView, _index, parent) => {
+            if (nodeView.type === 'block' && parent.view === this) {
+              return true;
+            }
+            return;
           }
-          return;
-        });
-        if (!focus) return;
+        );
+        if (!focusNote) return;
         const notes = this.childBlockElements.filter(
           el => el.model.flavour === 'affine:note'
         );
-        const index = notes.indexOf(focus.view as BlockElement);
-        if (index !== 0) {
-          const prev = notes[index - 1];
-          const lastNoteChild = sel.is('text')
-            ? prev.childBlockElements.reverse().find(el => !!el.model.text)
-            : prev.childBlockElements.at(-1);
-          if (!lastNoteChild) return;
-          selection.update(selList =>
-            selList
-              .filter(sel => !sel.is('text') && !sel.is('block'))
-              .concat([
-                sel.is('text')
-                  ? selection.getInstance('text', {
-                      from: {
-                        path: lastNoteChild.path,
-                        index: lastNoteChild.model.text?.length ?? 0,
-                        length: 0,
-                      },
-                      to: null,
-                    })
-                  : selection.getInstance('block', {
-                      path: lastNoteChild.path,
-                    }),
-              ])
-          );
-          return true;
-        } else {
-          const titleInlineEditor = getDocTitleInlineEditor(this.host);
-          if (titleInlineEditor) {
-            titleInlineEditor.focusEnd();
-            return true;
-          }
+        const index = notes.indexOf(focusNote.view as BlockElement);
+        if (index !== 0) return;
+
+        const firstNoteChild = focusNote.children[0];
+        if (
+          !firstNoteChild ||
+          !PathFinder.equals(firstNoteChild.path, sel.path)
+        )
           return;
-        }
-      },
-      ArrowDown: () => {
-        const view = this.host.view;
-        const selection = this.host.selection;
-        const sel = selection.value.find(
-          sel => sel.is('text') || sel.is('block')
-        );
-        if (!sel) return;
-        const focus = view.findPrev(sel.path, (nodeView, _index, parent) => {
-          if (nodeView.type === 'block' && parent.view === this) {
-            return true;
-          }
-          return;
-        });
-        if (!focus) return;
-        const notes = this.childBlockElements.filter(
-          el => el.model.flavour === 'affine:note'
-        );
-        const index = notes.indexOf(focus.view as BlockElement);
-        if (index < notes.length - 1) {
-          const prev = notes[index + 1];
-          const firstNoteChild = sel.is('text')
-            ? prev.childBlockElements.find(x => !!x.model.text)
-            : prev.childBlockElements.at(0);
-          if (!firstNoteChild) return;
-          selection.update(selList =>
-            selList
-              .filter(sel => !sel.is('text') && !sel.is('block'))
-              .concat([
-                sel.is('text')
-                  ? selection.getInstance('text', {
-                      from: {
-                        path: firstNoteChild.path,
-                        index: 0,
-                        length: 0,
-                      },
-                      to: null,
-                    })
-                  : selection.getInstance('block', {
-                      path: firstNoteChild.path,
-                    }),
-              ])
-          );
+
+        const titleInlineEditor = getDocTitleInlineEditor(this.host);
+        if (titleInlineEditor) {
+          titleInlineEditor.focusEnd();
           return true;
         }
         return;

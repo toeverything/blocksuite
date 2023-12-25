@@ -160,6 +160,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
           ${this._toggleTemplate(collapsed)} ${listIcon}
           <rich-text
             .yText=${this.model.text.yText}
+            .inlineEventSource=${this.rootBlockElement}
             .undoManager=${this.model.page.history}
             .attributeRenderer=${this.attributeRenderer}
             .attributesSchema=${this.attributesSchema}

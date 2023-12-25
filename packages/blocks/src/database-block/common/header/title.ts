@@ -6,6 +6,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { RichText } from '../../../_common/components/rich-text/rich-text.js';
+import type { DatabaseBlockComponent } from '../../database-block.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
@@ -69,6 +70,11 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   }
   get inlineEditorContainer() {
     return this.inlineEditor.rootElement;
+  }
+  get rootBlockElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    return databaseBlock?.rootBlockElement;
   }
 
   override firstUpdated() {
@@ -149,6 +155,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     return html`<div class="affine-database-title">
       <rich-text
         .yText=${this.titleText.yText}
+        .inlineEventSource=${this.rootBlockElement}
         .enableFormat=${false}
         .readonly=${this.readonly}
         class="${classList}"

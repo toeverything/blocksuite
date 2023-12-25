@@ -13,6 +13,7 @@ import {
   affineTextAttributes,
 } from '../../../../_common/components/rich-text/inline/types.js';
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
+import type { DatabaseBlockComponent } from '../../../database-block.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';
@@ -115,6 +116,12 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     return inlineEditor;
   }
 
+  get rootBlockElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    return databaseBlock?.rootBlockElement;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     if (!this.value || typeof this.value === 'string') {
@@ -130,6 +137,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   override render() {
     return html`<rich-text
       .yText=${this.value}
+      .inlineEventSource=${this.rootBlockElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
       .readonly=${true}
@@ -181,6 +189,12 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     const inlineEditor = this._richTextElement.inlineEditor;
     assertExists(inlineEditor);
     return inlineEditor;
+  }
+
+  get rootBlockElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    return databaseBlock?.rootBlockElement;
   }
 
   override connectedCallback() {
@@ -295,6 +309,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   override render() {
     return html`<rich-text
       .yText=${this.value}
+      .inlineEventSource=${this.rootBlockElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
       class="affine-database-rich-text inline-editor"

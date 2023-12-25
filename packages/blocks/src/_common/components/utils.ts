@@ -1,4 +1,5 @@
 import { assertExists, sleep } from '@blocksuite/global/utils';
+import type { InlineEditor } from '@blocksuite/inline';
 import { BaseBlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 
@@ -6,10 +7,10 @@ import { isControlledKeyboardEvent } from '../../_common/utils/event.js';
 import { getInlineEditorByModel } from '../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../_common/utils/selection.js';
 import type { AffineInlineEditor } from './rich-text/inline/types.js';
-import type { RichText } from './rich-text/rich-text.js';
 
 export const createKeydownObserver = ({
   target,
+  inlineEditor,
   onUpdateQuery,
   onMove,
   onConfirm,
@@ -17,7 +18,8 @@ export const createKeydownObserver = ({
   interceptor = (_, next) => next(),
   abortController,
 }: {
-  target: RichText;
+  target: HTMLElement;
+  inlineEditor: InlineEditor;
   onUpdateQuery: (val: string) => void;
   onMove: (step: 1 | -1) => void;
   onConfirm: () => void;
@@ -26,11 +28,6 @@ export const createKeydownObserver = ({
   abortController: AbortController;
 }) => {
   let query = '';
-  const inlineEditor = target.inlineEditor;
-  assertExists(
-    inlineEditor,
-    'Failed to observer keyboard! Inline editor does not exist.'
-  );
   const startIndex = inlineEditor?.getInlineRange()?.index ?? 0;
 
   const updateQuery = async () => {

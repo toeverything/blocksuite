@@ -72,6 +72,9 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   attributeRenderer?: AttributeRenderer;
 
   @property({ attribute: false })
+  inlineEventSource?: HTMLElement;
+
+  @property({ attribute: false })
   readonly = false;
 
   @property({ attribute: false })
@@ -197,7 +200,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    inlineEditor.mount(this.inlineEditorContainer);
+    inlineEditor.mount(this.inlineEditorContainer, this.inlineEventSource);
     inlineEditor.setReadonly(this.readonly);
   }
 

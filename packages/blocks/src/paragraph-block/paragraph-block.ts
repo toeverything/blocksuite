@@ -353,6 +353,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
           ${tipsPlaceholderTemplate}
           <rich-text
             .yText=${this.model.text.yText}
+            .inlineEventSource=${this.rootBlockElement}
             .undoManager=${this.model.page.history}
             .attributesSchema=${this.attributesSchema}
             .attributeRenderer=${this.attributeRenderer}
