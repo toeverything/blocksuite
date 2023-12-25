@@ -224,7 +224,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     ) as HTMLElement;
     assertExists(noteContainer);
     const [baseX, baseY, noteWidth] = deserializeXYWH(note.xywh);
-    const transformX = baseX * this._zoom;
+    const transformX = baseX;
     const transformY = this.edgelessPage.surface.toModelCoord(
       gapRect.x - edgelessRect.x,
       gapRect.y - edgelessRect.y + gapRect.height / 2

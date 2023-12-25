@@ -1,70 +1,69 @@
 import { DocEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
-import { EditorHost, ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
-noop(EditorHost);
+import { DocTitle } from '../fragments/doc-title/doc-title.js';
+import { PageMetaTags } from '../fragments/page-meta-tags/page-meta-tags.js';
+import { DocEditor } from './doc-editor.js';
 
-@customElement('doc-editor')
-export class DocEditor extends WithDisposable(ShadowlessElement) {
+noop(DocTitle);
+noop(PageMetaTags);
+noop(DocEditor);
+
+@customElement('affine-doc-editor')
+export class AffineDocEditor extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   page!: Page;
 
   @property({ attribute: false })
   specs = DocEditorBlockSpecs;
 
-  @property({ type: Boolean })
-  hasViewport = true;
-
-  host: Ref<EditorHost> = createRef<EditorHost>();
-
   override render() {
     return html`
       <style>
-        doc-editor {
+        affine-doc-editor {
           display: block;
           height: 100%;
+          overflow: hidden;
           font-family: var(--affine-font-family);
           background: var(--affine-background-primary-color);
         }
 
-        doc-editor * {
+        affine-doc-editor * {
           box-sizing: border-box;
         }
 
         @media print {
-          doc-editor {
+          affine-doc-editor {
             height: auto;
           }
         }
 
         .affine-doc-viewport {
           position: relative;
+          display: flex;
+          flex-direction: column;
           height: 100%;
           overflow-x: hidden;
           overflow-y: auto;
           user-select: none;
         }
 
-        .doc-editor-container {
-          display: block;
-          height: 100%;
-          user-select: none;
+        doc-editor {
+          flex-grow: 1;
         }
       </style>
-      <div
-        class=${this.hasViewport
-          ? 'affine-doc-viewport'
-          : 'doc-editor-container'}
-      >
-        <editor-host
-          ${ref(this.host)}
+      <div class="affine-doc-viewport">
+        <doc-title .page=${this.page}></doc-title>
+        <page-meta-tags .page=${this.page}></page-meta-tags>
+        <doc-editor
           .page=${this.page}
           .specs=${this.specs}
-        ></editor-host>
+          .hasViewport=${false}
+        ></doc-editor>
       </div>
     `;
   }
@@ -72,6 +71,6 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'doc-editor': DocEditor;
+    'affine-doc-editor': AffineDocEditor;
   }
 }

@@ -35,8 +35,7 @@ export const saveViewportToSessionCommand: Command<
 
 export const getViewportFromSessionCommand: Command<
   'host',
-  'storedViewport',
-  object
+  'storedViewport'
 > = (ctx, next) => {
   const pageId = ctx.host?.page.id;
   if (!pageId) return;

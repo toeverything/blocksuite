@@ -10,8 +10,8 @@ import {
   matchFlavours,
 } from '../../../_common/utils/model.js';
 import {
+  getDocTitleByEditorHost,
   getInlineEditorByModel,
-  getModelByElement,
   getNextBlock,
   getPreviousBlock,
 } from '../../../_common/utils/query.js';
@@ -545,13 +545,13 @@ function handleEmbedDividerCodeSibling(
 function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
   const page = model.page;
   const text = model.text;
-  const titleElement = editorHost.querySelector(
-    '.affine-doc-page-block-title'
+  const titleElement = getDocTitleByEditorHost(
+    editorHost
   ) as HTMLTextAreaElement | null;
   // Probably no title, e.g. in edgeless mode
   if (!titleElement) return false;
 
-  const pageModel = getModelByElement(titleElement) as PageBlockModel;
+  const pageModel = model.page.root as PageBlockModel;
   const title = pageModel.title;
 
   page.captureSync();

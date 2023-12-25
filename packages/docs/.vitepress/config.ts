@@ -55,11 +55,11 @@ export default defineConfig({
       {
         text: 'Editor In-Depth',
         items: [
+          { text: '🚧 Design Philosophy' },
           {
-            text: 'Unidirectional Data Flow',
-            link: '/unidirectional-data-flow',
+            text: 'CRDT-Native Data Flow',
+            link: '/crdt-native-data-flow',
           },
-          { text: '🚧 Hybrid Graphics Rendering' },
         ],
       },
       {

@@ -2,6 +2,7 @@
 
 import type {
   BlockSpec,
+  CommandManager,
   SelectionManager,
   SpecStore,
   UIEventDispatcher,
@@ -44,6 +45,10 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   std!: BlockSuite.Std;
 
   rangeManager: RangeManager | null = null;
+
+  get command(): CommandManager {
+    return this.std.command;
+  }
 
   get event(): UIEventDispatcher {
     return this.std.event;

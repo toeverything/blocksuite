@@ -54,7 +54,7 @@ In the realm of server-based applications, developers can still harness the powe
 In addition to this, CRDT also offers the following benefits to application developers as a state management tool:
 
 - **Out-of-the-box history tracking**: CRDT allows for simple traversal between historical states, similar to `git checkout`, without the need for complex state management primitives.
-- **Incremental UI updates**: The data model of CRDT already provides the ability to diff like the virtual DOM, enabling a clear [one-way data flow](./unidirectional-data-flow) based on patches from state updates.
+- **Incremental UI updates**: The data model of CRDT already provides the ability to diff like the virtual DOM, enabling a clear [one-way data flow](./crdt-native-data-flow) based on patches from state updates.
 - **Pluggable data synchronization**: The synchronization of CRDT binary across different network protocols can be handled by [providers](./data-persistence#provider-based-persistence), eliminating the need for explicit network operations (such as sending HTTP requests) in the application logic. Simply connect to a provider, and the synchronization is taken care of!
 
 By fully implementing its data layer with CRDT, BlockSuite not only provides real-time collaboration capabilities, but also comes with the advantages mentioned above, facilitating the development of collaborative applications.

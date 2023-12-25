@@ -6,8 +6,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { AffineEditorContainer } from '../../editors/index.js';
-import { askGPT3_5turbo_1106, embeddings } from './utils/request.js';
+import type { AffineEditorContainer } from '../../../editors/index.js';
+import { askGPT3_5turbo_1106, embeddings } from '../utils/request.js';
 
 type EmbeddedPage = {
   id: string;

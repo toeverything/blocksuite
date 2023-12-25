@@ -27,6 +27,7 @@ export interface HitTestOptions {
   // we set `pierce` to false, shape element used this options in `hitTest` method
   pierce?: boolean;
   all?: boolean;
+  zoom?: number;
 }
 export interface IEdgelessElement {
   xywh: SerializedXYWH;
