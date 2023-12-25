@@ -13,6 +13,8 @@ import { affineTextAttributes } from '../_common/components/rich-text/inline/typ
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
+import { NoteBlockComponent } from '../note-block/note-block.js';
+import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import type { ListBlockModel } from './list-model.js';
 import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
@@ -62,6 +64,18 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   private _richTextElement?: RichText;
 
   private _inlineRangeProvider: InlineRangeProvider | null = null;
+
+  override get topContenteditableElement() {
+    if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
+      const note = this.std.view.findPrev(
+        this.path,
+        nodeView => nodeView.view instanceof NoteBlockComponent
+      );
+      assertExists(note);
+      return note.view as NoteBlockComponent;
+    }
+    return this.rootBlockElement;
+  }
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
@@ -160,7 +174,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
           ${this._toggleTemplate(collapsed)} ${listIcon}
           <rich-text
             .yText=${this.model.text.yText}
-            .inlineEventSource=${this.rootBlockElement}
+            .inlineEventSource=${this.topContenteditableElement}
             .undoManager=${this.model.page.history}
             .attributeRenderer=${this.attributeRenderer}
             .attributesSchema=${this.attributesSchema}

@@ -139,7 +139,6 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     });
     return html`<rich-text
       .yText=${this.frameModel.title.yText}
-      .inlineEventSource=${this.edgeless}
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
       .enableAutoScrollVertically=${false}

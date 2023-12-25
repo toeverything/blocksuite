@@ -131,10 +131,10 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
   @property({ attribute: false })
   showIcon = false;
 
-  get rootBlockElement() {
+  get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.rootBlockElement;
+    return databaseBlock?.topContenteditableElement;
   }
 
   get titleColumn() {
@@ -159,7 +159,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     this.inlineEditor = inlineEditor;
     inlineEditor.setAttributeSchema(affineTextAttributes);
     inlineEditor.setAttributeRenderer(affineAttributeRenderer);
-    inlineEditor.mount(container, this.rootBlockElement);
+    inlineEditor.mount(container, this.topContenteditableElement);
     return inlineEditor;
   }
 

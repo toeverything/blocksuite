@@ -119,7 +119,6 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
     });
     return html`<rich-text
       .yText=${this.group.title}
-      .inlineEventSource=${this.edgeless}
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
       .enableAutoScrollVertically=${false}

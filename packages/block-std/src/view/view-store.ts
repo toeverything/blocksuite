@@ -195,7 +195,7 @@ export class ViewStore {
       nodeView: NodeViewTree,
       index: number,
       parent: NodeViewTree
-    ) => undefined | null | true
+    ) => undefined | null | boolean
   ): NodeViewTree | null => {
     const getPrev = (path: string[]) => {
       const parent = this.getParent(path);

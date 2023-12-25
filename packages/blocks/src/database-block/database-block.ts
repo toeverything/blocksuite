@@ -7,7 +7,7 @@ import './common/filter/filter-bar.js';
 import './data-view.js';
 
 import { PathFinder } from '@blocksuite/block-std';
-import { Slot } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
@@ -26,6 +26,8 @@ import {
 } from '../_common/icons/index.js';
 import type { DataViewSelection } from '../_common/utils/index.js';
 import { Rect } from '../_common/utils/index.js';
+import { NoteBlockComponent } from '../note-block/note-block.js';
+import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
@@ -171,6 +173,18 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     return html`<div class="database-ops" @click="${this._clickDatabaseOps}">
       ${MoreHorizontalIcon}
     </div>`;
+  }
+
+  override get topContenteditableElement() {
+    if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
+      const note = this.std.view.findPrev(
+        this.path,
+        nodeView => nodeView.view instanceof NoteBlockComponent
+      );
+      assertExists(note);
+      return note.view as NoteBlockComponent;
+    }
+    return this.rootBlockElement;
   }
 
   override connectedCallback() {

@@ -1,6 +1,6 @@
 import '../_common/components/rich-text/rich-text.js';
 
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
@@ -20,6 +20,8 @@ import {
   isInsideEdgelessEditor,
   matchFlavours,
 } from '../_common/utils/index.js';
+import { NoteBlockComponent } from '../note-block/note-block.js';
+import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import type { BlockHub } from '../page-block/widgets/block-hub/components/block-hub.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 
@@ -221,6 +223,17 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
+  override get topContenteditableElement() {
+    if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
+      const note = this.std.view.findPrev(this.path, nodeView => {
+        return nodeView.view instanceof NoteBlockComponent;
+      });
+      assertExists(note);
+      return note.view as NoteBlockComponent;
+    }
+    return this.rootBlockElement;
+  }
+
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
     await this._richTextElement?.updateComplete;
@@ -353,7 +366,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
           ${tipsPlaceholderTemplate}
           <rich-text
             .yText=${this.model.text.yText}
-            .inlineEventSource=${this.rootBlockElement}
+            .inlineEventSource=${this.topContenteditableElement}
             .undoManager=${this.model.page.history}
             .attributesSchema=${this.attributesSchema}
             .attributeRenderer=${this.attributeRenderer}

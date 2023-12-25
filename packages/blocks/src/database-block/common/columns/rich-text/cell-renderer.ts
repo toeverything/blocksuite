@@ -116,10 +116,10 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     return inlineEditor;
   }
 
-  get rootBlockElement() {
+  get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.rootBlockElement;
+    return databaseBlock?.topContenteditableElement;
   }
 
   override connectedCallback() {
@@ -137,7 +137,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   override render() {
     return html`<rich-text
       .yText=${this.value}
-      .inlineEventSource=${this.rootBlockElement}
+      .inlineEventSource=${this.topContenteditableElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
       .readonly=${true}
@@ -191,10 +191,10 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     return inlineEditor;
   }
 
-  get rootBlockElement() {
+  get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.rootBlockElement;
+    return databaseBlock?.topContenteditableElement;
   }
 
   override connectedCallback() {
@@ -309,7 +309,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   override render() {
     return html`<rich-text
       .yText=${this.value}
-      .inlineEventSource=${this.rootBlockElement}
+      .inlineEventSource=${this.topContenteditableElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
       class="affine-database-rich-text inline-editor"

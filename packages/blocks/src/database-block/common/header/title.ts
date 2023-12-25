@@ -71,10 +71,10 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   get inlineEditorContainer() {
     return this.inlineEditor.rootElement;
   }
-  get rootBlockElement() {
+  get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.rootBlockElement;
+    return databaseBlock?.topContenteditableElement;
   }
 
   override firstUpdated() {
@@ -155,7 +155,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     return html`<div class="affine-database-title">
       <rich-text
         .yText=${this.titleText.yText}
-        .inlineEventSource=${this.rootBlockElement}
+        .inlineEventSource=${this.topContenteditableElement}
         .enableFormat=${false}
         .readonly=${this.readonly}
         class="${classList}"
