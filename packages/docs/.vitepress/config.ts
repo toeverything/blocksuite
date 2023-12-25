@@ -46,7 +46,6 @@ export default defineConfig({
       {
         text: 'Essentials',
         items: [
-          { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
           { text: 'Block Basics', link: '/block-basics' },
           { text: 'Data Persistence', link: '/data-persistence' },
           { text: '🚧 Customize Blocks' },
