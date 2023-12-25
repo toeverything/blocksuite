@@ -57,7 +57,6 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
       box-sizing: border-box;
-      padding: 2px 0;
     }
 
     .card-preview {
@@ -70,6 +69,9 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
       cursor: default;
       user-select: none;
+    }
+
+    .card-preview:has(.card-number-container) {
       padding: 4px 0px;
     }
 
@@ -91,7 +93,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       text-align: center;
       font-size: var(--affine-font-sm);
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      color: var(--light-brand-color, #1e96eb);
+      color: var(--affine-brand-color, #1e96eb);
       font-weight: 500;
       line-height: 14px;
       line-height: 20px;
@@ -132,6 +134,10 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       opacity: 0.9;
     }
 
+    .card-container[data-sortable='true'] {
+      padding: 2px 0;
+    }
+
     .card-container[data-invisible='true'] .card-number-container .card-number,
     .card-container[data-invisible='true'] .card-preview .card-content {
       color: var(--affine-text-disable-color);
@@ -160,6 +166,9 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   hidePreviewIcon!: boolean;
+
+  @property({ attribute: false })
+  enableNotesSorting!: boolean;
 
   @property({ attribute: false })
   status?: 'selected' | 'placeholder';
@@ -201,7 +210,10 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     this._clearNoteDisposables();
     this._noteDisposables = new DisposableGroup();
     this._noteDisposables.add(
-      this.note.childrenUpdated.on(() => this.requestUpdate())
+      this.note.childrenUpdated.on(() => {
+        console.log('children updated');
+        this.requestUpdate();
+      })
     );
     this._noteDisposables.add(
       this.note.propsUpdated.on(() => this.requestUpdate())
@@ -230,7 +242,12 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
   private _dispatchDragEvent(e: MouseEvent) {
     e.preventDefault();
-    if (e.button !== 0 || this.editorMode === 'page') return;
+    if (
+      e.button !== 0 ||
+      this.editorMode === 'page' ||
+      !this.enableNotesSorting
+    )
+      return;
 
     const { clientX: startX, clientY: startY } = e;
     const disposeDragStart = on(this.ownerDocument, 'mousemove', e => {
@@ -291,6 +308,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     return html`
       <div
         data-invisible="${this.invisible ? 'true' : 'false'}"
+        data-sortable="${this.enableNotesSorting ? 'true' : 'false'}"
         class="card-container ${this.status ?? ''} ${mode}"
       >
         <div
@@ -300,7 +318,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
           @dblclick=${this._dispatchFitViewEvent}
         >
         ${
-          this.showCardNumber
+          this.showCardNumber && this.enableNotesSorting
             ? html`<div class="card-number-container">
                 <span class="card-number">${this.number}</span>
                 <span class="card-divider"></span>
@@ -314,6 +332,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
                 .hidePreviewIcon=${this.hidePreviewIcon}
                 .disabledIcon=${this.invisible}
                 .cardNumber=${this.number}
+                .enableNotesSorting=${this.enableNotesSorting}
                 @click=${() => {
                   if (this.editorMode === 'edgeless' || this.invisible) return;
                   this._dispatchClickBlockEvent(block);

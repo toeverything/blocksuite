@@ -10,7 +10,7 @@ import { TOCNoteCard } from './toc-card.js';
 import { TOCPanelBody } from './toc-panel-body.js';
 import { TOCPanelHeader } from './toc-panel-header.js';
 import { TOCBlockPreview } from './toc-preview.js';
-import { TOCNotesSettingMenu } from './toc-setting-menu.js';
+import { TOCNotePreviewSettingMenu } from './toc-setting-menu.js';
 
 export class TOCPanel extends WithDisposable(LitElement) {
   static override styles = css`
@@ -44,7 +44,10 @@ export class TOCPanel extends WithDisposable(LitElement) {
   editor!: AffineEditorContainer;
 
   @property({ attribute: false })
-  hidePreviewIcon = false;
+  hidePreviewIcon = true;
+
+  @property({ attribute: false })
+  enableNotesSorting = false;
 
   @property({ attribute: false })
   fitPadding!: number[];
@@ -67,6 +70,11 @@ export class TOCPanel extends WithDisposable(LitElement) {
 
   private _toggleHidePreviewIcon = (on: boolean) => {
     this.hidePreviewIcon = on;
+  };
+
+  private _toggleNotesSorting = () => {
+    this.enableNotesSorting = !this.enableNotesSorting;
+    console.log('toggle notes sorting: ', this.enableNotesSorting);
   };
 
   private _editorDisposables: DisposableGroup | null = null;
@@ -119,16 +127,19 @@ export class TOCPanel extends WithDisposable(LitElement) {
       <div class="toc-panel-container">
         <toc-panel-header
           .hidePreviewIcon=${this.hidePreviewIcon}
+          .enableNotesSorting=${this.enableNotesSorting}
           .toggleHidePreviewIcon=${this._toggleHidePreviewIcon}
+          .toggleNotesSorting=${this._toggleNotesSorting}
         ></toc-panel-header>
         <toc-panel-body
           class="toc-panel-body"
           .page=${this.page}
           .fitPadding=${this.fitPadding}
           .edgeless=${this.edgeless}
-          .hidePreviewIcon=${this.hidePreviewIcon}
           .editorHost=${this.host}
           .mode=${this.mode}
+          .hidePreviewIcon=${this.hidePreviewIcon}
+          .enableNotesSorting=${this.enableNotesSorting}
         >
         </toc-panel-body>
       </div>
@@ -146,7 +157,7 @@ const componentsMap = {
   'toc-note-card': TOCNoteCard,
   'toc-block-preview': TOCBlockPreview,
   'toc-panel': TOCPanel,
-  'toc-notes-setting-menu': TOCNotesSettingMenu,
+  'toc-note-preview-setting-menu': TOCNotePreviewSettingMenu,
   'toc-panel-body': TOCPanelBody,
   'toc-panel-header': TOCPanelHeader,
 };

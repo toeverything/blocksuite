@@ -10,14 +10,14 @@ const styles = css`
     width: 220px;
   }
 
-  .notes-setting-menu-container {
+  .note-preview-setting-menu-container {
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
     width: 100%;
   }
 
-  .notes-setting-menu-item {
+  .note-preview-setting-menu-item {
     display: flex;
     box-sizing: border-box;
     width: 100%;
@@ -26,7 +26,7 @@ const styles = css`
     align-items: center;
   }
 
-  .notes-setting-menu-item .setting-label {
+  .note-preview-setting-menu-item .setting-label {
     font-family: sans-serif;
     font-size: 12px;
     font-weight: 500;
@@ -35,11 +35,11 @@ const styles = css`
     padding: 0 4px;
   }
 
-  .notes-setting-menu-item.action {
+  .note-preview-setting-menu-item.action {
     gap: 4px;
   }
 
-  .notes-setting-menu-item .action-label {
+  .note-preview-setting-menu-item .action-label {
     width: 138px;
     height: 20px;
     padding: 0 4px;
@@ -49,12 +49,12 @@ const styles = css`
     color: var(--affine-text-primary-color);
   }
 
-  .notes-setting-menu-item .toggle-button {
+  .note-preview-setting-menu-item .toggle-button {
     display: flex;
   }
 `;
 
-export class TOCNotesSettingMenu extends WithDisposable(LitElement) {
+export class TOCNotePreviewSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -65,13 +65,13 @@ export class TOCNotesSettingMenu extends WithDisposable(LitElement) {
 
   override render() {
     return html`<div
-      class="notes-setting-menu-container"
+      class="note-preview-setting-menu-container"
       @click=${(e: MouseEvent) => e.stopPropagation()}
     >
-      <div class="notes-setting-menu-item">
+      <div class="note-preview-setting-menu-item">
         <div class="setting-label">Settings</div>
       </div>
-      <div class="notes-setting-menu-item action">
+      <div class="note-preview-setting-menu-item action">
         <div class="action-label">Hide type icon</div>
         <div class="toggle-button">
           <toggle-switch
@@ -86,6 +86,6 @@ export class TOCNotesSettingMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'toc-notes-setting-menu': TOCNotesSettingMenu;
+    'toc-note-preview-setting-menu': TOCNotePreviewSettingMenu;
   }
 }

@@ -17,7 +17,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import { SmallLinkedPageIcon } from '../_common/icons.js';
-import { placeholderMap, previewIconMap } from './config.js';
+import { headingKeys, placeholderMap, previewIconMap } from './config.js';
 
 type ValuesOf<T, K extends keyof T = keyof T> = T[K];
 
@@ -148,6 +148,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   hidePreviewIcon!: boolean;
 
   @property({ attribute: false })
+  enableNotesSorting!: boolean;
+
+  @property({ attribute: false })
   disabledIcon = false;
 
   @property({ attribute: false })
@@ -237,6 +240,11 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   renderBlockByFlavour() {
     const { block } = this;
     const iconClass = this.disabledIcon ? 'icon disabled' : 'icon';
+
+    const isHeadingBlock =
+      BlocksUtils.matchFlavours(block, ['affine:paragraph']) &&
+      headingKeys.has(block.type);
+    if (!this.enableNotesSorting && !isHeadingBlock) return nothing;
 
     switch (block.flavour as keyof BlockModels) {
       case 'affine:paragraph':

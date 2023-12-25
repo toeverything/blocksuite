@@ -68,7 +68,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     .insert-indicator {
       height: 2px;
       border-radius: 1px;
-      background-color: var(--affine-blue-500);
+      background-color: var(--affine-brand-color);
+      border-radius: 1px;
       position: absolute;
       contain: layout size;
       width: 100%;
@@ -131,7 +132,10 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   insertIndex?: number;
 
   @property({ attribute: false })
-  hidePreviewIcon = false;
+  hidePreviewIcon!: boolean;
+
+  @property({ attribute: false })
+  enableNotesSorting!: boolean;
 
   /**
    * store the id of selected notes
@@ -520,6 +524,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
                   : undefined}
                 .showCardNumber=${this._notes.length > 1}
                 .hidePreviewIcon=${this.hidePreviewIcon}
+                .enableNotesSorting=${this.enableNotesSorting}
                 @select=${this._selectNote}
                 @drag=${this._drag}
                 @fitview=${this._fitToElement}
@@ -545,6 +550,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
                   .invisible=${true}
                   .showCardNumber=${false}
                   .hidePreviewIcon=${this.hidePreviewIcon}
+                  .enableNotesSorting=${this.enableNotesSorting}
                   @fitview=${this._fitToElement}
                 ></toc-note-card>
                 ${idx !== this._hiddenNotes.length - 1
