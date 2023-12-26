@@ -176,6 +176,8 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
 
   private _onCompositionEnd = async (event: CompositionEvent) => {
     this._isComposing = false;
+    if (!this.editor.rootElement.isConnected) return;
+
     this.editor.rerenderWholeEditor();
     await this.editor.waitForUpdate();
 
