@@ -244,19 +244,19 @@ class PasteTr {
         assertExists(target);
         if (!lastModel.text) {
           if (matchFlavours(lastModel, ['affine:image'])) {
-            const selection = this.std.selection.getInstance('image', {
+            const selection = this.std.selection.create('image', {
               path: target.path,
             });
             this.std.selection.setGroup('note', [selection]);
             return;
           }
-          const selection = this.std.selection.getInstance('block', {
+          const selection = this.std.selection.create('block', {
             path: target.path,
           });
           this.std.selection.setGroup('note', [selection]);
           return;
         }
-        const selection = this.std.selection.getInstance('text', {
+        const selection = this.std.selection.create('text', {
           from: {
             path: target.path,
             index:

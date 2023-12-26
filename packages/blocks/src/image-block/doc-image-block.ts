@@ -197,7 +197,7 @@ export class ImageBlockPageComponent extends BlockElement<ImageBlockModel> {
           .filter(sel => {
             return !['text', 'block', 'image'].includes(sel.type);
           })
-          .concat(selection.getInstance('image', { path: this.path }));
+          .concat(selection.create('image', { path: this.path }));
       });
       return true;
     });
@@ -238,7 +238,7 @@ export class ImageBlockPageComponent extends BlockElement<ImageBlockModel> {
           return selList
             .filter(sel => !sel.is('image'))
             .concat(
-              selection.getInstance('text', {
+              selection.create('text', {
                 from: {
                   path: this.parentPath.concat(blockId),
                   index: 0,
@@ -258,7 +258,7 @@ export class ImageBlockPageComponent extends BlockElement<ImageBlockModel> {
             const current =
               sel.is('image') && PathFinder.equals(sel.path, this.path);
             if (current) {
-              return selection.getInstance('block', { path: this.path });
+              return selection.create('block', { path: this.path });
             }
             return sel;
           });

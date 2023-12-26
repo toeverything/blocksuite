@@ -15,7 +15,7 @@ export const selectBlocksBetween: Command<
   // In same block
   if (PathFinder.equals(anchorBlock.path, focusBlock.path)) {
     const path = focusBlock.path;
-    selection.setGroup('note', [selection.getInstance('block', { path })]);
+    selection.setGroup('note', [selection.create('block', { path })]);
     return next();
   }
 
@@ -23,13 +23,9 @@ export const selectBlocksBetween: Command<
   const selections = [...selection.value];
   if (selections.every(sel => !PathFinder.equals(sel.path, focusBlock.path))) {
     if (tail) {
-      selections.push(
-        selection.getInstance('block', { path: focusBlock.path })
-      );
+      selections.push(selection.create('block', { path: focusBlock.path }));
     } else {
-      selections.unshift(
-        selection.getInstance('block', { path: focusBlock.path })
-      );
+      selections.unshift(selection.create('block', { path: focusBlock.path }));
     }
   }
 

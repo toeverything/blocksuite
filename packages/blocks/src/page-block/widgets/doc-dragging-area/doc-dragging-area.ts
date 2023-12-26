@@ -105,7 +105,7 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
       this._allBlocksWithRect,
       userRect
     ).map(blockPath => {
-      return this.host.selection.getInstance('block', {
+      return this.host.selection.create('block', {
         path: blockPath,
       });
     });
