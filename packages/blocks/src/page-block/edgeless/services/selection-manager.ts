@@ -129,6 +129,7 @@ export class EdgelessSelectionManager {
 
   equals(selection: SurfaceSelection[]) {
     let count = 0;
+    let editing = false;
     const exist = selection.every(sel => {
       const exist = sel.elements.every(id => this._selected.has(id));
 
@@ -136,10 +137,12 @@ export class EdgelessSelectionManager {
         count += sel.elements.length;
       }
 
+      if (sel.editing) editing = true;
+
       return exist;
     });
 
-    return exist && count === this._selected.size;
+    return exist && count === this._selected.size && editing === this.editing;
   }
 
   mount() {
