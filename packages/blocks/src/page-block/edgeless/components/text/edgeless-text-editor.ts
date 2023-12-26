@@ -33,6 +33,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     .edgeless-text-editor {
       box-sizing: content-box;
       position: absolute;
+      left: 0;
+      top: 0;
       z-index: 10;
       transform-origin: left top;
       border: ${EdgelessTextEditor.BORDER_WIDTH}px solid
@@ -239,21 +241,13 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     return Vec.rotWith([x, y], [x + w / 2, y + h / 2], toRadian(rotate));
   }
 
-  getEditorPos = () => {
-    const { translateX, translateY, zoom } = this.edgeless.surface.viewport;
-    const [visualX, visualY] = this.getVisualPosition(this.element);
+  getContainerOffset() {
     const { VERTICAL_PADDING, HORIZONTAL_PADDING, BORDER_WIDTH } =
       EdgelessTextEditor;
-    const { fontSize, fontFamily, rotate } = this.element;
-    const lineHeight = getLineHeight(fontFamily, fontSize);
-    return {
-      left: translateX + (visualX - HORIZONTAL_PADDING - BORDER_WIDTH) * zoom,
-      top: translateY + (visualY - VERTICAL_PADDING - BORDER_WIDTH) * zoom,
-      zoom,
-      rotate,
-      lineHeight,
-    };
-  };
+    return `-${HORIZONTAL_PADDING + BORDER_WIDTH}px, -${
+      VERTICAL_PADDING + BORDER_WIDTH
+    }px`;
+  }
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -341,26 +335,36 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const { left, top, zoom, rotate, lineHeight } = this.getEditorPos();
     const { text, fontFamily, fontSize, fontWeight, textAlign, color } =
       this.element;
-    const { hasMaxWidth, w } = this.element;
+    const { rotate, hasMaxWidth, w } = this.element;
+    const lineHeight = getLineHeight(fontFamily, fontSize);
     const rect = getSelectedRect([this.element]);
+
+    const { translateX, translateY, zoom } = this.edgeless.surface.viewport;
+    const [x, y] = this.getVisualPosition(this.element);
+    const containerOffset = this.getContainerOffset();
+    const transformOperation = [
+      `translate(${translateX}px, ${translateY}px)`,
+      `translate(${x * zoom}px, ${y * zoom}px)`,
+      `scale(${zoom})`,
+      `rotate(${rotate}deg)`,
+      `translate(${containerOffset})`,
+    ];
+
     const isEmpty = !text.length && !this._isComposition;
 
     return html`<div
       style=${styleMap({
-        left: `${left}px`,
-        top: `${top}px`,
-        transform: `scale(${zoom}) rotate(${rotate}deg)`,
+        transform: transformOperation.join(' '),
         minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
         maxWidth: hasMaxWidth ? `${w}px` : 'none',
         fontFamily: wrapFontFamily(fontFamily),
         fontSize: `${fontSize}px`,
         fontWeight,
-        lineHeight: `${lineHeight}px`,
         textAlign,
         color: isCssVariable(color) ? `var(${color})` : color,
+        lineHeight: `${lineHeight}px`,
       })}
       class="edgeless-text-editor"
     >
