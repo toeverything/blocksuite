@@ -1,67 +1,10 @@
-# Event API
+# Event
 
-BlockSuite constructs a block tree using `Workspace`, `Page`, and `Block`, which can be used for framework agnostic state management. Once the block tree nodes are bound to a framework, the block content can be rendered. It is also necessary to subscribe to corresponding events when blocks are updated, in order to refresh the UI framework on demand.
+This document introduces the handling of UI events, event flows within the block tree, and the implementation of hotkeys in BlockSuite.
 
-## Using Slots
+## Handling UI Events
 
-BlockSuite extensively uses `Slot` to manage events. You can think of it as a type-safe event emitter or a simplified RxJS [Observable](https://rxjs.dev/guide/observable):
-
-```ts
-import { Slot } from '@blocksuite/store';
-
-// Create a new slot
-const slot = new Slot<{ name: string }>();
-
-// Subscribe events
-slot.on(({ name }) => console.log(name));
-
-// Or alternatively only listen event once
-slot.once(({ name }) => console.log(name));
-
-// Emit the event
-slot.emit({ name: 'foo' });
-```
-
-To unsubscribe from the slot, simply use the return value of `slot.on()`:
-
-```ts
-const slot = new Slot();
-const disposable = slot.on(myHandler);
-
-// Dispose the subscription
-disposable.dispose();
-```
-
-## Subscribing Block Events
-
-Under the `page` instance, you can subscribe to common events using `page.slots`:
-
-```ts
-page.slots.ready.on(() => {
-  // The `page.root` should be ready to use at this moment
-  console.log('page ready!');
-});
-
-page.addBlock('affine:page');
-```
-
-Moreover, for any node in the block tree, events can be triggered when the node is updated:
-
-```ts
-const model = page.root[0];
-
-// Triggered when the `props` of the block model is updated
-model.propsUpdated.on(() => updateMyComponent());
-// Triggered when the `children` of the block model is updated
-model.childrenUpdated.on(() => updateMyComponent());
-```
-
-In the prebuilt AFFiNE editor, which is based on the [lit](https://lit.dev/) framework, the UI component of each block subscribes to its model updates using this pattern.
-
-## Event Dispatcher
-
-For UI events, such as `click`. We created a dispatcher to dispatch events.
-With the dispatcher, you can handle events in the block view implementation.
+For UI events such as `click` in editor, there is an underlying event dispatcher in `@blocksuite/block-std` to dispatch events. With the dispatcher, you can handle events in your [block view](./block-view) implementation in this manner:
 
 ```ts
 @customElements('my-block')
@@ -134,9 +77,7 @@ Then the console will only print:
 click1
 ```
 
-The event bubbling is implemented by event target.
-For the events that won't support bubbling,
-the event dispatcher will use block path to dispatch events to the parent block views.
+The event bubbling is implemented by event target. For the events that won't support bubbling, the event dispatcher will use [block path](#) to dispatch events to the parent block views.
 
 ### Event Scope
 
@@ -169,7 +110,7 @@ class MyBlock extends BlockElement<MyBlockModel> {
 }
 ```
 
-## Hotkey
+## Handling Hotkeys
 
 The hotkey is a special event that can be triggered by the keyboard.
 

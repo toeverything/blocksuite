@@ -90,4 +90,4 @@ In BlockSuite, the blocks can be also be categorized into two distinct roles:
 
 ## Defining New Block
 
-To define a new block flavour, you need to start with its spec, which describes the shape of the block. See [block spec](./block-spec-apis) for more comprehensive introduction!
+To define a new block flavour, you need to start with its spec, which describes the shape of the block. See [block spec](./block-spec) for more comprehensive introduction!

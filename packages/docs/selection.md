@@ -1,4 +1,4 @@
-# Selection API
+# Selection
 
 Selection is a very common concept in structure editors. It's used for representing the current cursor position or the current selected blocks.
 

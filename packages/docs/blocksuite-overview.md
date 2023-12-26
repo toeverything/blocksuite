@@ -36,7 +36,7 @@ These packages include:
 
 The above design ensures that BlockSuite is built for scalability. In addition to extending custom blocks, here are what you can also conveniently achieve with BlockSuite:
 
-- Writing type-safe complex editing logic based on the [command](./command-api) mechanism, similar to react hooks designed for document editing, contributing to the maintainability of complex editing applications.
+- Writing type-safe complex editing logic based on the [command](./command) mechanism, similar to react hooks designed for document editing, contributing to the maintainability of complex editing applications.
 - Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshots](./data-persistence#snapshot-api) and transformer mechanisms. This includes data conversion during import and export, as well as clipboard support.
 - Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the document's [provider](./data-persistence#realtime-provider-based-persistence) mechanism.
 - State scheduling across multiple documents and simultaneous use of a single document in multiple editors based on an opt-in workspace mechanism.

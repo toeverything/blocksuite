@@ -49,13 +49,13 @@ export default defineConfig({
           { text: 'Component Types', link: '/component-types' },
           { text: 'Block Basics', link: '/block-basics' },
           { text: 'Data Persistence', link: '/data-persistence' },
-          { text: '🚧 Customize Blocks' },
+          { text: 'Customize Blocks 🚧' },
         ],
       },
       {
         text: 'Editor In-Depth',
         items: [
-          { text: '🚧 Design Philosophy' },
+          { text: 'Design Philosophy 🚧' },
           {
             text: 'CRDT-Native Data Flow',
             link: '/crdt-native-data-flow',
@@ -65,19 +65,42 @@ export default defineConfig({
       {
         text: 'API Walkthrough',
         items: [
-          { text: 'Selection API', link: '/selection-api' },
-          { text: 'Event API', link: '/event-api' },
           {
-            text: 'Block Spec APIs',
-            link: '/block-spec-apis',
+            text: '<code>block-std</code>',
             items: [
-              { text: 'Block Schema', link: '/block-schema' },
-              { text: 'Block Service', link: '/block-service' },
-              { text: 'Block View', link: '/block-view' },
-              { text: 'Block Widgets', link: '/block-widgets' },
+              {
+                text: 'Block Spec',
+                link: '/block-spec',
+                items: [
+                  { text: 'Block Schema', link: '/block-schema' },
+                  { text: 'Block Service', link: '/block-service' },
+                  { text: 'Block View', link: '/block-view' },
+                  { text: 'Block Widgets', link: '/block-widgets' },
+                ],
+              },
+              {
+                text: 'Selection',
+                link: '/selection',
+                items: [{ text: 'Block Path 🚧' }],
+              },
+              { text: 'Event', link: '/event' },
+              { text: 'Command', link: '/command' },
             ],
           },
-          { text: 'Command API', link: '/command-api' },
+          {
+            text: '<code>store</code>',
+            items: [
+              { text: 'Page 🚧' },
+              { text: 'Workspace 🚧' },
+              { text: 'Slot', link: '/slot' },
+            ],
+          },
+          {
+            text: '<code>inline</code> 🚧',
+          },
+          {
+            text: '<code>lit</code> 🚧',
+          },
         ],
       },
       {
@@ -94,7 +117,7 @@ export default defineConfig({
             text: '@blocksuite/presets',
             link: '/api/@blocksuite/presets/index',
           },
-          // { text: '🚧 @blocksuite/blocks', link: '/api/@blocksuite/blocks/index' },
+          { text: '@blocksuite/blocks', link: '/api/@blocksuite/blocks/index' },
         ],
       },
       {

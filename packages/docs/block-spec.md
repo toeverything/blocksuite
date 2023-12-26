@@ -1,4 +1,4 @@
-# Block Spec APIs
+# Block Spec
 
 ::: info
 This document is preliminary and subject to refinement and updates for clarity and accuracy.
