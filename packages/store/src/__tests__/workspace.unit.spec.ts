@@ -16,7 +16,6 @@ import type {
 import { Generator, Schema, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-// Use manual per-module import/export to support vitest environment on Node.js
 import {
   NoteBlockSchema,
   PageBlockSchema,
