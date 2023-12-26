@@ -6,7 +6,7 @@ import {
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-@customElement('custom-navigation-panel')
+@customElement('custom-toc-outline-panel')
 export class CustomTOCOutlinePanel extends WithDisposable(LitElement) {
   static override styles = css`
     .custom-toc-outline-container {
