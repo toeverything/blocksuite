@@ -464,7 +464,12 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     requestAnimationFrame(() => {
       const blockRect = blockElement.getBoundingClientRect();
       const { top, left, width, height } = blockRect;
-      const { top: offsetY, left: offsetX } = pageBlock.viewport;
+      const {
+        top: offsetY,
+        left: offsetX,
+        scrollTop,
+        scrollLeft,
+      } = pageBlock.viewport;
 
       if (!this._highlightMask) {
         this._highlightMask = document.createElement('div');
@@ -473,8 +478,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
 
       Object.assign(this._highlightMask.style, {
         position: 'absolute',
-        top: `${top - offsetY}px`,
-        left: `${left - offsetX}px`,
+        top: `${top - offsetY + scrollTop}px`,
+        left: `${left - offsetX + scrollLeft}px`,
         width: `${width}px`,
         height: `${height}px`,
         background: 'var(--affine-hover-color)',
