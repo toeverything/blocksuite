@@ -113,7 +113,7 @@ export class SurfaceService extends BlockService<SurfaceBlockModel> {
       fontSize: 24,
       hasMaxWidth: false,
     },
-    ['affine:note']: {
+    'affine:note': {
       background: DEFAULT_NOTE_COLOR,
       hidden: false,
       edgeless: {

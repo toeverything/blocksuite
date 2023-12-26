@@ -20,8 +20,8 @@ import type { GroupElement } from '../surface-block/elements/group/group-element
 import { compare } from '../surface-block/managers/group-manager.js';
 
 const portalMap = {
-  ['affine:note']: 'surface-ref-note-portal',
-  ['affine:image']: 'surface-ref-image-portal',
+  'affine:note': 'surface-ref-note-portal',
+  'affine:image': 'surface-ref-image-portal',
 } as Record<EdgelessBlockType, string>;
 
 @customElement('surface-ref-portal')
