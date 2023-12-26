@@ -50,7 +50,7 @@ import type { Pane } from 'tweakpane';
 
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
-import type { CustomTOCOutlinePanel } from './custom-toc-outline-panel.js';
+import type { CustomOutlinePanel } from './custom-outline-panel.js';
 import type { LeftSidePanel } from './left-side-panel';
 import type { PagesPanel } from './pages-panel';
 import type { SidePanel } from './side-panel';
@@ -204,7 +204,7 @@ export class DebugMenu extends ShadowlessElement {
   contentParser!: ContentParser;
 
   @property({ attribute: false })
-  tocOutlinePanel!: CustomTOCOutlinePanel;
+  outlinePanel!: CustomOutlinePanel;
 
   @property({ attribute: false })
   framePanel!: CustomFramePanel;
@@ -321,8 +321,8 @@ export class DebugMenu extends ShadowlessElement {
     }
   }
 
-  private _toggleTOCOutlinePanel() {
-    this.tocOutlinePanel.toggleDisplay();
+  private _toggleOutlinePanel() {
+    this.outlinePanel.toggleDisplay();
   }
 
   private _toggleFramePanel() {
@@ -684,7 +684,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._switchOffsetMode}>
                 Switch Offset Mode
               </sl-menu-item>
-              <sl-menu-item @click=${this._toggleTOCOutlinePanel}>
+              <sl-menu-item @click=${this._toggleOutlinePanel}>
                 Toggle TOC Outline Panel
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleFramePanel}>
