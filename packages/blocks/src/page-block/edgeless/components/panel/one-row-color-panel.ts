@@ -13,7 +13,7 @@ export class EdgelessOneRowColorPanel extends EdgelessColorPanel {
       padding: 0 2px;
       gap: 18px;
       box-sizing: border-box;
-      background: var(--affine-popover-background);
+      background: var(--affine-background-overlay-panel-color);
     }
 
     ${colorContainerStyles}
