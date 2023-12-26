@@ -451,7 +451,9 @@ export class EdgelessToolsManager {
 
     if (
       type === 'default' &&
-      (Array.isArray(state) ? this.selection.isEmpty(state) : state.elements) &&
+      (Array.isArray(state)
+        ? this.selection.isEmpty(state)
+        : state.elements.length === 0) &&
       this.selection.lastState
     ) {
       state = this.selection.lastState;
