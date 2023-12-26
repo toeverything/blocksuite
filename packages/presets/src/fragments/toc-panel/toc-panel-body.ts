@@ -138,6 +138,9 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   @property({ attribute: false })
   enableNotesSorting!: boolean;
 
+  @property({ attribute: false })
+  toggleNotesSorting!: () => void;
+
   /**
    * store the id of selected notes
    */
@@ -181,6 +184,15 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     return this.mode === 'edgeless';
   }
 
+  private _clearHighlightMask() {
+    this._highlightMask?.remove();
+    this._highlightMask = null;
+    if (this._highlightTimeoutId) {
+      clearTimeout(this._highlightTimeoutId);
+      this._highlightTimeoutId = null;
+    }
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
   }
@@ -201,12 +213,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     }
 
     this._clearPageDisposables();
-    this._highlightMask?.remove();
-    this._highlightMask = null;
-    if (this._highlightTimeoutId) {
-      clearTimeout(this._highlightTimeoutId);
-      this._highlightTimeoutId = null;
-    }
+    this._clearHighlightMask();
   }
 
   private _clearPageDisposables() {
@@ -247,6 +254,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       this.edgeless &&
       this._isEdgelessMode()
     ) {
+      this._clearHighlightMask();
       if (_changedProperties.get('mode') === undefined) return;
 
       requestAnimationFrame(() => this._zoomToFit());
@@ -345,7 +353,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   }
 
   private _drag() {
-    if (!this._selected.length || !this.page.root) return;
+    if (!this._selected.length || !this._notes.length || !this.page.root)
+      return;
 
     this._dragging = true;
 
@@ -383,11 +392,11 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   }
 
   /*
-   * click at blank area to clear selection
+   * Click at blank area to clear selection
    */
-  private _clickBlank(e: MouseEvent) {
+  private _clickHandler(e: MouseEvent) {
     e.stopPropagation();
-    // check if click at toc-card, if not, set this._selected to empty
+    // check if click at toc-card, if so, do nothing
     if (
       (e.target as HTMLElement).closest('toc-note-card') ||
       this._selected.length === 0
@@ -402,8 +411,25 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     });
   }
 
+  /*
+   * Double click at blank area to disable notes sorting option
+   */
+  private _doubleClickHandler(e: MouseEvent) {
+    e.stopPropagation();
+    // check if click at toc-card, if so, do nothing
+    if (
+      (e.target as HTMLElement).closest('toc-note-card') ||
+      !this.enableNotesSorting
+    ) {
+      return;
+    }
+
+    this.toggleNotesSorting();
+  }
+
   override firstUpdated(): void {
-    this._disposables.addFromEvent(this, 'click', this._clickBlank);
+    this.disposables.addFromEvent(this, 'click', this._clickHandler);
+    this.disposables.addFromEvent(this, 'dblclick', this._doubleClickHandler);
   }
 
   private _zoomToFit() {

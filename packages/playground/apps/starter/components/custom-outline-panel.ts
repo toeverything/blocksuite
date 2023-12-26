@@ -6,10 +6,10 @@ import {
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-@customElement('custom-toc-outline-panel')
-export class CustomTOCOutlinePanel extends WithDisposable(LitElement) {
+@customElement('custom-outline-panel')
+export class CustomOutlinePanel extends WithDisposable(LitElement) {
   static override styles = css`
-    .custom-toc-outline-container {
+    .custom-outline-container {
       position: absolute;
       top: 0;
       right: 0;
@@ -52,9 +52,7 @@ export class CustomTOCOutlinePanel extends WithDisposable(LitElement) {
     return html`
       ${this._show
         ? html`
-            <div class="custom-toc-outline-container">
-              ${this._renderPanel()}
-            </div>
+            <div class="custom-outline-container">${this._renderPanel()}</div>
           `
         : null}
     `;
@@ -63,6 +61,6 @@ export class CustomTOCOutlinePanel extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'custom-toc-outline-panel': CustomTOCOutlinePanel;
+    'custom-outline-panel': CustomOutlinePanel;
   }
 }
