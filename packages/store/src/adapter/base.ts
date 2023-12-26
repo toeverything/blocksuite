@@ -46,7 +46,7 @@ export type ToSliceSnapshotPayload<Target> = {
 };
 
 export abstract class BaseAdapter<AdapterTarget = unknown> {
-  protected configs: Map<string, string> = new Map();
+  protected configs: Map<string, unknown> = new Map();
 
   abstract fromPageSnapshot(
     payload: FromPageSnapshotPayload
@@ -67,7 +67,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
     payload: ToSliceSnapshotPayload<AdapterTarget>
   ): Promise<SliceSnapshot>;
 
-  applyConfigs(configs: Map<string, string>) {
+  applyConfigs(configs: Map<string, unknown>) {
     this.configs = new Map([...configs]);
   }
 }

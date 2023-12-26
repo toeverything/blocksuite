@@ -810,7 +810,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             const res = await fetchImage(
               o.node.url,
               undefined,
-              this.configs.get('imageProxy')
+              this.configs.get('imageProxy') as string
             );
             const clonedRes = res.clone();
             const file = new File(

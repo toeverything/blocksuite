@@ -258,7 +258,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               const res = await fetchImage(
                 imageURL,
                 undefined,
-                this.configs.get('imageProxy')
+                this.configs.get('imageProxy') as string
               );
               const clonedRes = res.clone();
               const name =

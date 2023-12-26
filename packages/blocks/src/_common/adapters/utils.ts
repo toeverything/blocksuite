@@ -7,7 +7,7 @@ export const fetchImage = async (
     return fetch(url, init);
   }
   return fetch(proxy + '?url=' + encodeURIComponent(url), init).catch(() => {
-    console.warn('Failed to fetch image from proxy, fallback to origin url');
+    console.warn('Failed to fetch image from proxy, fallback to originial url');
     return fetch(url, init);
   });
 };
