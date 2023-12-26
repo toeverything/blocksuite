@@ -27,6 +27,7 @@ import {
   hastQuerySelector,
   type HtmlAST,
 } from './hast.js';
+import { fetchImage } from './utils.js';
 
 export type NotionHtml = string;
 
@@ -254,7 +255,11 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                 }
               });
             } else {
-              const res = await fetch(imageURL);
+              const res = await fetchImage(
+                imageURL,
+                undefined,
+                this.configs.get('imageProxy')
+              );
               const clonedRes = res.clone();
               const name =
                 getFilenameFromContentDisposition(

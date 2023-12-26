@@ -82,6 +82,7 @@ type JobMiddlewareOptions = {
   workspace: Workspace;
   assetsManager: AssetsManager;
   slots: JobSlots;
+  adapterConfigs: Map<string, string>;
 };
 
 export type JobMiddleware = (options: JobMiddlewareOptions) => void;
