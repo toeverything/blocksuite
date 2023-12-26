@@ -37,8 +37,11 @@
     }
   },
   "files": [
+    "src",
     "dist",
-    "index.d.ts"
+    "index.d.ts",
+    "!src/__tests__",
+    "!dist/__tests__"
   ],
   "dependencies": {
     "zod": "^3.22.4"

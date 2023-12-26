@@ -5,7 +5,7 @@
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
-    "build": "tsc --build tsconfig.build.json --verbose",
+    "build": "tsc --build --verbose",
     "test": "vitest --run"
   },
   "keywords": [],
@@ -40,7 +40,10 @@
     }
   },
   "files": [
+    "src",
     "dist",
-    "themes"
+    "themes",
+    "!src/__tests__",
+    "!dist/__tests__"
   ]
 }

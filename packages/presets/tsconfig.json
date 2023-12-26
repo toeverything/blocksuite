@@ -4,7 +4,7 @@
     "outDir": "./dist/",
     "noEmit": true
   },
-  "include": ["./src", "./tests"],
+  "include": ["./src"],
   "references": [
     {
       "path": "../global"

@@ -13,6 +13,12 @@
     "test": "pnpm test:unit && pnpm test:e2e"
   },
   "keywords": [],
+  "files": [
+    "src",
+    "dist",
+    "!src/__tests__",
+    "!dist/__tests__"
+  ],
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {

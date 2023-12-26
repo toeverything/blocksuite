@@ -42,6 +42,8 @@
   },
   "files": [
     "src",
-    "dist"
+    "dist",
+    "!src/__tests__",
+    "!dist/__tests__"
   ]
 }
