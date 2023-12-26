@@ -6,27 +6,29 @@ import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness.js';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
-// Use manual per-module import/export to support vitest environment on Node.js
-import { NOTE_WIDTH } from '../../../blocks/src/_common/consts.js';
-import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
-import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
-import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
-import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
-import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts';
-import type { BaseBlockModel, Page, PassiveDocProvider } from '../index.js';
+import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts.js';
+import type {
+  BaseBlockModel,
+  BlockSchemaType,
+  Page,
+  PassiveDocProvider,
+} from '../index.js';
 import { Generator, Schema, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
-import type { BlockSuiteDoc } from '../yjs';
-import { assertExists } from './test-utils-dom';
+import type { BlockSuiteDoc } from '../yjs/index.js';
+// Use manual per-module import/export to support vitest environment on Node.js
+import {
+  NoteBlockSchema,
+  PageBlockSchema,
+  ParagraphBlockSchema,
+} from './test-schema.js';
+import { assertExists } from './test-utils-dom.js';
 
 export const BlockSchemas = [
   ParagraphBlockSchema,
   PageBlockSchema,
-  ListBlockSchema,
   NoteBlockSchema,
-  DividerBlockSchema,
-];
+] as BlockSchemaType[];
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
@@ -43,6 +45,7 @@ const spaceMetaId = 'meta';
 function serializeWorkspace(doc: BlockSuiteDoc): Record<string, any> {
   const spaces = {};
   doc.spaces.forEach((subDoc, key) => {
+    // @ts-ignore
     spaces[key] = subDoc.toJSON();
   });
   const json = doc.toJSON();
@@ -104,8 +107,6 @@ describe('basic', () => {
         workspaceVersion: WORKSPACE_VERSION,
         pageVersion: PAGE_VERSION,
         blockVersions: {
-          'affine:divider': 1,
-          'affine:list': 1,
           'affine:note': 1,
           'affine:page': 2,
           'affine:paragraph': 1,
@@ -310,18 +311,6 @@ describe('addBlock', () => {
         'sys:children': ['2', '3', '4'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
-        'prop:index': 'a0',
-        'prop:hidden': false,
-        'prop:edgeless': {
-          style: {
-            borderRadius: 8,
-            borderSize: 4,
-            borderStyle: 'solid',
-            shadowType: '--affine-note-shadow-box',
-          },
-        },
       },
       '2': {
         'sys:children': [],
@@ -493,21 +482,9 @@ describe('deleteBlock', () => {
         'sys:id': '0',
       },
       '1': {
-        'prop:background': '--affine-background-secondary-color',
-        'prop:hidden': false,
-        'prop:index': 'a0',
-        'prop:xywh': '[0,0,800,95]',
         'sys:children': ['2', '3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:edgeless': {
-          style: {
-            borderRadius: 8,
-            borderSize: 4,
-            borderStyle: 'solid',
-            shadowType: '--affine-note-shadow-box',
-          },
-        },
       },
       '2': {
         'prop:text': '',
@@ -555,21 +532,9 @@ describe('deleteBlock', () => {
         'sys:id': '0',
       },
       '1': {
-        'prop:background': '--affine-background-secondary-color',
-        'prop:hidden': false,
-        'prop:index': 'a0',
-        'prop:xywh': '[0,0,800,95]',
         'sys:children': ['2'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:edgeless': {
-          style: {
-            borderRadius: 8,
-            borderSize: 4,
-            borderStyle: 'solid',
-            shadowType: '--affine-note-shadow-box',
-          },
-        },
       },
       '2': {
         'prop:text': '',
@@ -608,21 +573,9 @@ describe('deleteBlock', () => {
         'sys:id': '0',
       },
       '1': {
-        'prop:background': '--affine-background-secondary-color',
-        'prop:hidden': false,
-        'prop:index': 'a0',
-        'prop:xywh': '[0,0,800,95]',
         'sys:children': ['3', '4'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:edgeless': {
-          style: {
-            borderRadius: 8,
-            borderSize: 4,
-            borderStyle: 'solid',
-            shadowType: '--affine-note-shadow-box',
-          },
-        },
       },
       '3': {
         'prop:text': '',
@@ -660,21 +613,9 @@ describe('deleteBlock', () => {
         'sys:id': '0',
       },
       '1': {
-        'prop:background': '--affine-background-secondary-color',
-        'prop:hidden': false,
-        'prop:index': 'a0',
-        'prop:xywh': '[0,0,800,95]',
         'sys:children': ['2', '3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:edgeless': {
-          style: {
-            borderRadius: 8,
-            borderSize: 4,
-            borderStyle: 'solid',
-            shadowType: '--affine-note-shadow-box',
-          },
-        },
       },
       '2': {
         'prop:text': '',
@@ -727,21 +668,9 @@ describe('deleteBlock', () => {
         'sys:id': '0',
       },
       '1': {
-        'prop:background': '--affine-background-secondary-color',
-        'prop:hidden': false,
-        'prop:index': 'a0',
-        'prop:xywh': '[0,0,800,95]',
         'sys:children': ['3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:edgeless': {
-          style: {
-            borderRadius: 8,
-            borderSize: 4,
-            borderStyle: 'solid',
-            shadowType: '--affine-note-shadow-box',
-          },
-        },
       },
       '3': {
         'prop:text': '',
@@ -793,18 +722,6 @@ describe('deleteBlock', () => {
         'sys:children': ['2'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
-        'prop:index': 'a0',
-        'prop:hidden': false,
-        'prop:edgeless': {
-          style: {
-            borderRadius: 8,
-            borderSize: 4,
-            borderStyle: 'solid',
-            shadowType: '--affine-note-shadow-box',
-          },
-        },
       },
       '2': {
         'sys:children': [],
@@ -829,18 +746,6 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
-        'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
-        'prop:index': 'a0',
-        'prop:hidden': false,
-        'prop:edgeless': {
-          style: {
-            borderRadius: 8,
-            borderSize: 4,
-            borderStyle: 'solid',
-            shadowType: '--affine-note-shadow-box',
-          },
-        },
       },
     });
     assert.equal(root.children.length, 1);
@@ -938,21 +843,7 @@ describe('workspace.exportJSX works', () => {
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
       <affine:page>
-        <affine:note
-          prop:background="--affine-background-secondary-color"
-          prop:edgeless={
-            {
-              "style": {
-                "borderRadius": 8,
-                "borderSize": 4,
-                "borderStyle": "solid",
-                "shadowType": "--affine-note-shadow-box",
-              },
-            }
-          }
-          prop:hidden={false}
-          prop:index="a0"
-        >
+        <affine:note>
           <affine:paragraph
             prop:type="text"
           />

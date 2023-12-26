@@ -15,11 +15,11 @@ function delay(x: number) {
 export class TestEventBasedChannel implements EventBasedChannel {
   channel = new EventEmitter();
   constructor(public otherSide: TestEventBasedChannel) {}
-  on(callback) {
+  on(callback: (data: unknown) => void) {
     this.channel.addListener('message', callback);
     return () => this.channel.removeListener('message', callback);
   }
-  async send(data) {
+  async send(data: unknown) {
     await delay(25);
     this.otherSide.channel.emit('message', data);
   }
@@ -92,7 +92,7 @@ describe('async-call-rpc provider', () => {
     await delay(50);
 
     {
-      expect(awareness2.getStates().get(doc1.clientID).hello).toBe('world');
+      expect(awareness2.getStates().get(doc1.clientID)?.hello).toBe('world');
     }
   });
 });

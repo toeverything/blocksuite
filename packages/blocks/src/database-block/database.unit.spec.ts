@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import '../../../blocks/src/database-block/kanban/define';
-import '../../../blocks/src/database-block/table/define';
+import './kanban/define.js';
+import './table/define.js';
 
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Generator, Schema, Workspace } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { numberPureColumnConfig } from '../../../blocks/src/database-block/common/columns/number/define';
-import { richTextPureColumnConfig } from '../../../blocks/src/database-block/common/columns/rich-text/define';
-import { selectPureColumnConfig } from '../../../blocks/src/database-block/common/columns/select/define';
-import type { DatabaseBlockModel } from '../../../blocks/src/database-block/database-model.js';
-import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
-import type { Cell, Column } from '../../../blocks/src/database-block/types.js';
-import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
-import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
-import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import type { BaseBlockModel, Page } from '../index.js';
-import { Generator, Schema, Workspace } from '../index.js';
+import { NoteBlockSchema } from '../note-block/note-model.js';
+import { PageBlockSchema } from '../page-block/page-model.js';
+import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
+import { numberPureColumnConfig } from './common/columns/number/define.js';
+import { richTextPureColumnConfig } from './common/columns/rich-text/define.js';
+import { selectPureColumnConfig } from './common/columns/select/define.js';
+import type { DatabaseBlockModel } from './database-model.js';
+import { DatabaseBlockSchema } from './database-model.js';
+import type { Cell, Column } from './types.js';
 
 const AffineSchemas = [
   ParagraphBlockSchema,
