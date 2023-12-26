@@ -48,7 +48,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   `;
 
   @state()
-  blackBackground = false;
+  blackBackground = true;
 
   @property({ attribute: false })
   popperShow = false;
@@ -77,7 +77,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
     const blackBackground = sessionStorage.getItem(
       PresentationConsts.BlackBackground
     );
-    this.blackBackground = blackBackground === 'true';
+    this.blackBackground = blackBackground !== 'false';
   }
 
   private _onBlackBackgroundChange = (checked: boolean) => {
