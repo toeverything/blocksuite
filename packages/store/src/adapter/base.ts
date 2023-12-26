@@ -46,6 +46,8 @@ export type ToSliceSnapshotPayload<Target> = {
 };
 
 export abstract class BaseAdapter<AdapterTarget = unknown> {
+  protected configs: Map<string, unknown> = new Map();
+
   abstract fromPageSnapshot(
     payload: FromPageSnapshotPayload
   ): Promise<FromPageSnapshotResult<AdapterTarget>>;
@@ -64,6 +66,10 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
   abstract toSliceSnapshot(
     payload: ToSliceSnapshotPayload<AdapterTarget>
   ): Promise<SliceSnapshot>;
+
+  applyConfigs(configs: Map<string, unknown>) {
+    this.configs = new Map([...configs]);
+  }
 }
 
 type Keyof<T> = T extends unknown ? keyof T : never;
