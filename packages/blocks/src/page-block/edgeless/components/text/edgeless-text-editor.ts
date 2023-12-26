@@ -46,13 +46,13 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       overflow: visible;
     }
 
-    .edgeless-text-editor .inline-editor-container {
-      white-space: nowrap;
+    .edgeless-text-editor .inline-editor {
+      white-space: preserve nowrap;
       outline: none;
       width: fit-content;
     }
 
-    .edgeless-text-editor .inline-editor-container span {
+    .edgeless-text-editor .inline-editor span {
       white-space: pre !important;
       word-break: keep-all !important;
       overflow-wrap: normal !important;
@@ -335,18 +335,26 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const { text, fontFamily, fontSize, fontWeight, textAlign, color } =
-      this.element;
-    const { rotate, hasMaxWidth, w } = this.element;
+    const {
+      text,
+      fontFamily,
+      fontSize,
+      fontWeight,
+      color,
+      textAlign,
+      rotate,
+      hasMaxWidth,
+      w,
+    } = this.element;
     const lineHeight = getLineHeight(fontFamily, fontSize);
     const rect = getSelectedRect([this.element]);
 
     const { translateX, translateY, zoom } = this.edgeless.surface.viewport;
-    const [x, y] = this.getVisualPosition(this.element);
+    const [visualX, visualY] = this.getVisualPosition(this.element);
     const containerOffset = this.getContainerOffset();
     const transformOperation = [
       `translate(${translateX}px, ${translateY}px)`,
-      `translate(${x * zoom}px, ${y * zoom}px)`,
+      `translate(${visualX * zoom}px, ${visualY * zoom}px)`,
       `scale(${zoom})`,
       `rotate(${rotate}deg)`,
       `translate(${containerOffset})`,
@@ -362,8 +370,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         fontFamily: wrapFontFamily(fontFamily),
         fontSize: `${fontSize}px`,
         fontWeight,
-        textAlign,
         color: isCssVariable(color) ? `var(${color})` : color,
+        textAlign,
         lineHeight: `${lineHeight}px`,
       })}
       class="edgeless-text-editor"
