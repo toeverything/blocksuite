@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import * as fal from '@fal-ai/serverless-client';
 import { OpenAI } from 'openai';
 
-import { CopilotConfig } from './copilot-config.js';
+import { CopilotConfig } from '../copilot-service/copilot-config.js';
 
 const getGPTAPIKey = () => {
   const apiKey = CopilotConfig.GPTAPIKey;
@@ -133,9 +133,9 @@ export const embeddings = async (textList: string[]) => {
 };
 
 export const askGPT3_5turbo = async (
+  apiKey: string,
   messages: Array<OpenAI.ChatCompletionMessageParam>
 ) => {
-  const apiKey = getGPTAPIKey();
   const openai = new OpenAI({
     apiKey: apiKey,
     dangerouslyAllowBrowser: true,

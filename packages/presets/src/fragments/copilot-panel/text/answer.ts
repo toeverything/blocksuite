@@ -1,4 +1,5 @@
-import { askGPT3_5turbo } from '../utils/request.js';
+import { copilotConfig } from '../copilot-service/copilot-config.js';
+import { TextServiceKind } from '../copilot-service/service-base.js';
 
 export async function runAnswerAction({
   question,
@@ -7,7 +8,7 @@ export async function runAnswerAction({
   input: string;
   question: string;
 }) {
-  const result = await askGPT3_5turbo([
+  const result = await copilotConfig.getService(TextServiceKind).generateText([
     {
       role: 'system',
       content:
@@ -16,5 +17,5 @@ export async function runAnswerAction({
     { role: 'user', content: input },
     { role: 'user', content: question },
   ]);
-  return result.content;
+  return result;
 }

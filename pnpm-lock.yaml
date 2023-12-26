@@ -468,6 +468,9 @@ importers:
       '@fal-ai/serverless-client':
         specifier: ^0.7.3
         version: 0.7.3
+      '@floating-ui/dom':
+        specifier: ^1.5.3
+        version: 1.5.3
       '@toeverything/theme':
         specifier: ^0.7.27
         version: 0.7.27

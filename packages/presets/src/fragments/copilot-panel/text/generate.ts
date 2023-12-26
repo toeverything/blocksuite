@@ -1,8 +1,9 @@
-import { askGPT3_5turbo } from '../utils/request.js';
+import { copilotConfig } from '../copilot-service/copilot-config.js';
+import { TextServiceKind } from '../copilot-service/service-base.js';
 
 export async function runGenerateAction(payload: { input: string }) {
   const { input } = payload;
-  const result = await askGPT3_5turbo([
+  const result = await copilotConfig.getService(TextServiceKind).generateText([
     {
       role: 'system',
       content:
@@ -14,5 +15,5 @@ export async function runGenerateAction(payload: { input: string }) {
       content: 'Generate more content based on the current input.',
     },
   ]);
-  return result.content;
+  return result;
 }

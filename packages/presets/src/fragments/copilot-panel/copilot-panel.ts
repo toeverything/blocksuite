@@ -13,9 +13,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineEditorContainer } from '../../index.js';
 import { LANGUAGE, TONE } from './config.js';
+import { copilotConfig } from './copilot-service/copilot-config.js';
+import { CreateNewService } from './copilot-service/index.js';
+import { allKindService } from './copilot-service/service-base.js';
 import { EditorWithAI } from './edgeless/api.js';
 import { GPTAPI, type GPTAPIPayloadMap } from './text/index.js';
-import { CopilotConfig } from './utils/copilot-config.js';
 import { insertFromMarkdown } from './utils/markdown-utils.js';
 import {
   getSelectedBlocks,
@@ -40,6 +42,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       margin-bottom: 4px;
       color: var(--affine-text-secondary-color);
     }
+
     .copilot-panel-key-input {
       width: 100%;
       border: 1px solid var(--affine-border-color, #e3e2e4);
@@ -63,6 +66,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       justify-content: center;
       margin-top: 36px;
     }
+
     .copilot-panel-action-prompt {
       width: 100%;
       border: 1px solid var(--affine-border-color, #e3e2e4);
@@ -86,6 +90,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   editor!: AffineEditorContainer;
   editorWithAI?: EditorWithAI;
+
   get api() {
     if (!this.editorWithAI) {
       this.editorWithAI = new EditorWithAI(this.editor);
@@ -197,61 +202,60 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   }
 
   config = () => {
-    const changeGPTAPIKey = (e: Event) => {
-      if (e.target instanceof HTMLInputElement) {
-        CopilotConfig.GPTAPIKey = e.target.value;
-        saveToLocalstorage();
+    const changeService = (name: string) => (evt: Event) => {
+      if (evt.target instanceof HTMLSelectElement) {
+        console.log(name, evt.target.value);
+        copilotConfig.changeService(name, evt.target.value);
+        this.requestUpdate();
       }
     };
-    const changeFalAPIKey = (e: Event) => {
-      if (e.target instanceof HTMLInputElement) {
-        CopilotConfig.FalAPIKey = e.target.value;
-        saveToLocalstorage();
-      }
-    };
-    const saveToLocalstorage = () => {
-      const checked = (this.querySelector('#save') as HTMLInputElement).checked;
-      if (checked) {
-        CopilotConfig.SaveToLocalStorage = checked;
-        localStorage.setItem('APIKeys', JSON.stringify(CopilotConfig));
-      } else {
-        localStorage.removeItem('APIKeys');
+    const createNew = (type: string) => (e: Event) => {
+      if (e.target instanceof HTMLElement) {
+        const panel = new CreateNewService();
+        panel.type = type;
+        panel.onSave = config => {
+          copilotConfig.addService(config);
+          this.requestUpdate();
+          panel.remove();
+        };
+        document.body.appendChild(panel);
       }
     };
     return html`
       <div>
-        <div class="copilot-panel-setting-title">GPT API Key</div>
-        <input
-          class="copilot-panel-key-input"
-          type="text"
-          @keydown="${stopPropagation}"
-          .value="${CopilotConfig.GPTAPIKey}"
-          @input="${changeGPTAPIKey}"
-        />
-        <div class="copilot-panel-setting-title">Fal API Key</div>
-        <input
-          class="copilot-panel-key-input"
-          type="text"
-          @keydown="${stopPropagation}"
-          .value="${CopilotConfig.FalAPIKey}"
-          @input="${changeFalAPIKey}"
-        />
-        <label
-          style="margin-top: 18px;display:flex;align-items:center;cursor: pointer;color: var(--affine-text-secondary-color)"
-        >
-          <input
-            .checked="${CopilotConfig.SaveToLocalStorage}"
-            @change="${saveToLocalstorage}"
-            id="save"
-            type="checkbox"
-          />
-          <div>save to localstorage</div>
-        </label>
+        ${repeat(allKindService, v => {
+          console.log(
+            v.type,
+            copilotConfig.config.service,
+            copilotConfig.getConfigList(v.type)
+          );
+          return html`
+            <div>
+              <div class="copilot-panel-setting-title">${v.title}</div>
+              <div>
+                <select
+                  value="${copilotConfig.config.service[v.type] ?? ''}"
+                  @change="${changeService(v.type)}"
+                >
+                  <option value="null">None</option>
+                  ${copilotConfig.getConfigList(v.type).map(config => {
+                    return html` <option .value="${config.id}">
+                      ${config.name}
+                    </option>`;
+                  })}
+                </select>
+                <button @click="${createNew(v.type)}">create new</button>
+              </div>
+            </div>
+          `;
+        })}
       </div>
     `;
   };
   @state()
-  payload: { type: keyof GPTAPIPayloadMap } & Record<string, unknown> = {
+  payload: {
+    type: keyof GPTAPIPayloadMap;
+  } & Record<string, unknown> = {
     type: 'answer',
   };
   changeType = (e: Event) => {
@@ -282,7 +286,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
           console.log(this.payload);
         }
       };
-      return html`<div style="margin-top: 16px;">
+      return html` <div style="margin-top: 16px;">
         <input
           class="copilot-panel-action-prompt"
           type="text"
@@ -300,12 +304,12 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
           this.payload.language = e.target.value;
         }
       };
-      return html`<div style="margin-top: 16px;">
+      return html` <div style="margin-top: 16px;">
         <div style="display:flex;align-items:center;">
           <div style="margin-right: 4px;">Language:</div>
           <select @change="${change}">
             ${repeat(LANGUAGE, key => {
-              return html`<option>${key}</option>`;
+              return html` <option>${key}</option>`;
             })}
           </select>
         </div>
@@ -321,12 +325,12 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
           this.payload.tone = e.target.value;
         }
       };
-      return html`<div style="margin-top: 16px;">
+      return html` <div style="margin-top: 16px;">
         <div style="display:flex;align-items:center;">
           <div style="margin-right: 4px;">Tone:</div>
           <select @change="${change}">
             ${repeat(TONE, key => {
-              return html`<option>${key}</option>`;
+              return html` <option>${key}</option>`;
             })}
           </select>
         </div>
@@ -340,7 +344,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
         <div style="margin-right: 4px;">Action:</div>
         <select @change="${this.changeType}">
           ${repeat(Object.keys(GPTAPI), key => {
-            return html`<option>${key}</option>`;
+            return html` <option>${key}</option>`;
           })}
         </select>
       </div>
@@ -416,7 +420,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
           <select .value="${this.api.fromFrame}" @change="${changeFromFrame}">
             <option value="">None</option>
             ${frames.map(v => {
-              return html`<option .value="${v.id}">
+              return html` <option .value="${v.id}">
                 ${v.title.toString()}
               </option>`;
             })}
