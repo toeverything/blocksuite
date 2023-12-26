@@ -88,35 +88,128 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     this._keeping = keeping;
   }
 
-  private _updateRect = () => {
+  private _updateRect() {
     const edgeless = this.edgeless;
     const element = this.element;
+
     if (!edgeless || !element) return;
 
     const newWidth = this.inlineEditorContainer.scrollWidth;
     const newHeight = this.inlineEditorContainer.scrollHeight;
     const bound = new Bound(element.x, element.y, newWidth, newHeight);
     const { x, y, w, h, rotate } = element;
-    const newPos = this.getCoordinates(
-      {
-        x,
-        y,
-        w,
-        h,
-        r: toRadian(rotate),
-      },
-      newWidth,
-      newHeight
-    );
 
-    bound.x = newPos.x;
-    bound.y = newPos.y;
+    switch (element.textAlign) {
+      case 'left':
+        {
+          const newPos = this.getCoordsOnLeftAlign(
+            {
+              x,
+              y,
+              w,
+              h,
+              r: toRadian(rotate),
+            },
+            newWidth,
+            newHeight
+          );
+
+          bound.x = newPos.x;
+          bound.y = newPos.y;
+        }
+        break;
+      case 'center':
+        {
+          const newPos = this.getCoordsOnCenterAlign(
+            {
+              x,
+              y,
+              w,
+              h,
+              r: toRadian(rotate),
+            },
+            newWidth,
+            newHeight
+          );
+
+          bound.x = newPos.x;
+          bound.y = newPos.y;
+        }
+        break;
+      case 'right':
+        {
+          const newPos = this.getCoordsOnRightAlign(
+            {
+              x,
+              y,
+              w,
+              h,
+              r: toRadian(rotate),
+            },
+            newWidth,
+            newHeight
+          );
+
+          bound.x = newPos.x;
+          bound.y = newPos.y;
+        }
+        break;
+    }
+
     edgeless.surface.updateElement(element.id, {
       xywh: bound.serialize(),
     });
-  };
+  }
 
-  getCoordinates(
+  getCoordsOnRightAlign(
+    rect: { w: number; h: number; r: number; x: number; y: number },
+    w1: number,
+    h1: number
+  ): { x: number; y: number } {
+    const centerX = rect.x + rect.w / 2;
+    const centerY = rect.y + rect.h / 2;
+
+    let deltaXPrime =
+      (rect.w / 2) * Math.cos(rect.r) - (-rect.h / 2) * Math.sin(rect.r);
+    let deltaYPrime =
+      (rect.w / 2) * Math.sin(rect.r) + (-rect.h / 2) * Math.cos(rect.r);
+
+    const vX = centerX + deltaXPrime;
+    const vY = centerY + deltaYPrime;
+
+    deltaXPrime = (w1 / 2) * Math.cos(rect.r) - (-h1 / 2) * Math.sin(rect.r);
+    deltaYPrime = (w1 / 2) * Math.sin(rect.r) + (-h1 / 2) * Math.cos(rect.r);
+
+    const newCenterX = vX - deltaXPrime;
+    const newCenterY = vY - deltaYPrime;
+
+    return { x: newCenterX - w1 / 2, y: newCenterY - h1 / 2 };
+  }
+
+  getCoordsOnCenterAlign(
+    rect: { w: number; h: number; r: number; x: number; y: number },
+    w1: number,
+    h1: number
+  ): { x: number; y: number } {
+    const centerX = rect.x + rect.w / 2;
+    const centerY = rect.y + rect.h / 2;
+
+    let deltaXPrime = 0;
+    let deltaYPrime = (-rect.h / 2) * Math.cos(rect.r);
+
+    const vX = centerX + deltaXPrime;
+    const vY = centerY + deltaYPrime;
+
+    deltaXPrime = 0;
+    deltaYPrime = (-h1 / 2) * Math.cos(rect.r);
+
+    const newCenterX = vX - deltaXPrime;
+    const newCenterY = vY - deltaYPrime;
+
+    return { x: newCenterX - w1 / 2, y: newCenterY - h1 / 2 };
+  }
+
+  getCoordsOnLeftAlign(
     rect: { w: number; h: number; r: number; x: number; y: number },
     w1: number,
     h1: number
