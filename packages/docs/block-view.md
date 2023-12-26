@@ -109,4 +109,4 @@ class MyBlockView extends BlockElement<MyBlockModel> {
 }
 ```
 
-You can get the `std` instance from `this.std` to use the full power of [`block-std`](/core-packages#the-block-std-package).
+You can get the `std` instance from `this.std` to use the full power of [`block-std`](/api/@blocksuite/block-std/).
