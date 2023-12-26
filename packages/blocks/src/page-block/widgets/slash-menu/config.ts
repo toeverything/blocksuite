@@ -1,5 +1,5 @@
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
-import { Text, type Y } from '@blocksuite/store';
+import { Slice, Text, type Y } from '@blocksuite/store';
 
 import { REFERENCE_NODE } from '../../../_common/components/rich-text/consts.js';
 import { toast } from '../../../_common/components/toast.js';
@@ -27,12 +27,10 @@ import {
 } from '../../../_common/icons/index.js';
 import {
   createDefaultPage,
-  getCurrentNativeRange,
   getImageFilesFromLocal,
   getInlineEditorByModel,
   matchFlavours,
   openFileOrFiles,
-  resetNativeSelection,
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
@@ -44,7 +42,6 @@ import { ImageService } from '../../../image-block/image-service.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
 import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
-import { copyBlock } from '../../../page-block/doc/utils.js';
 import { onModelTextUpdated } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
@@ -564,11 +561,17 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       {
         name: 'Copy',
         icon: CopyIcon,
-        action: async ({ model }) => {
-          const curRange = getCurrentNativeRange();
-          await copyBlock(model);
-          resetNativeSelection(curRange);
-          toast('Copied to clipboard');
+        action: async ({ pageElement, model }) => {
+          const slice = Slice.fromModels(pageElement.std.page, [model]);
+
+          pageElement.std.clipboard
+            .copy(slice)
+            .then(() => {
+              toast('Copied to clipboard');
+            })
+            .catch(e => {
+              console.error(e);
+            });
         },
       },
       // {

@@ -15,6 +15,7 @@ import {
   focusTitle,
   getCenterPosition,
   getCursorBlockIdAndHeight,
+  getEditorHostLocator,
   getIndexCoordinate,
   getInlineSelectionIndex,
   getInlineSelectionText,
@@ -1934,7 +1935,8 @@ test('should not scroll page when mouse is click down', async ({ page }) => {
   await scrollToTop(page);
   await focusRichText(page, 0);
 
-  const longText = page.locator('rich-text').nth(10);
+  const editorHost = getEditorHostLocator(page);
+  const longText = editorHost.locator('rich-text').nth(10);
   const rect = await longText.boundingBox();
   if (!rect) throw new Error();
   await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
@@ -2011,4 +2013,28 @@ test('click to select divided', async ({ page }) => {
 
   await pressForwardDelete(page);
   await assertDivider(page, 0);
+});
+
+test('auto-scroll when creating a new paragraph-block by pressing enter', async ({
+  page,
+}) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/4547',
+  });
+
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await pressEnter(page, 50);
+
+  const scrollTop = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-doc-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    return viewport.scrollTop;
+  });
+  expect(scrollTop).toBeGreaterThan(1000);
 });

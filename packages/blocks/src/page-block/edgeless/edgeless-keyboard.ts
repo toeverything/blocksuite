@@ -198,18 +198,28 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         global: true,
       }
     );
-    this.pageElement.handleEvent('keyDown', ctx => {
-      const event = ctx.get('defaultState').event;
-      if (event instanceof KeyboardEvent) {
-        this._shift(event);
+    this.pageElement.handleEvent(
+      'keyDown',
+      ctx => {
+        const event = ctx.get('defaultState').event;
+        if (event instanceof KeyboardEvent) {
+          this._shift(event);
+        }
+      },
+      { global: true }
+    );
+    this.pageElement.handleEvent(
+      'keyUp',
+      ctx => {
+        const event = ctx.get('defaultState').event;
+        if (event instanceof KeyboardEvent) {
+          this._shift(event);
+        }
+      },
+      {
+        global: true,
       }
-    });
-    this.pageElement.handleEvent('keyUp', ctx => {
-      const event = ctx.get('defaultState').event;
-      if (event instanceof KeyboardEvent) {
-        this._shift(event);
-      }
-    });
+    );
     this._bindToggleHand();
   }
 

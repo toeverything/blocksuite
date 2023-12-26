@@ -53,7 +53,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       width: 100%;
     }
 
-    .panel-list .title {
+    .panel-list .hidden-title {
       width: 100%;
       font-size: 14px;
       line-height: 24px;
@@ -63,12 +63,14 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       height: 40px;
       box-sizing: border-box;
       padding: 6px 8px;
+      margin-top: 8px;
     }
 
     .insert-indicator {
       height: 2px;
       border-radius: 1px;
-      background-color: var(--affine-blue-500);
+      background-color: var(--affine-brand-color);
+      border-radius: 1px;
       position: absolute;
       contain: layout size;
       width: 100%;
@@ -131,7 +133,10 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   insertIndex?: number;
 
   @property({ attribute: false })
-  hidePreviewIcon = false;
+  showPreviewIcon!: boolean;
+
+  @property({ attribute: false })
+  enableNotesSorting!: boolean;
 
   /**
    * store the id of selected notes
@@ -460,7 +465,12 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     requestAnimationFrame(() => {
       const blockRect = blockElement.getBoundingClientRect();
       const { top, left, width, height } = blockRect;
-      const { top: offsetY, left: offsetX } = pageBlock.viewport;
+      const {
+        top: offsetY,
+        left: offsetX,
+        scrollTop,
+        scrollLeft,
+      } = pageBlock.viewport;
 
       if (!this._highlightMask) {
         this._highlightMask = document.createElement('div');
@@ -469,8 +479,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
 
       Object.assign(this._highlightMask.style, {
         position: 'absolute',
-        top: `${top - offsetY}px`,
-        left: `${left - offsetX}px`,
+        top: `${top - offsetY + scrollTop}px`,
+        left: `${left - offsetX + scrollLeft}px`,
         width: `${width}px`,
         height: `${height}px`,
         background: 'var(--affine-hover-color)',
@@ -519,7 +529,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
                     : 'selected'
                   : undefined}
                 .showCardNumber=${this._notes.length > 1}
-                .hidePreviewIcon=${this.hidePreviewIcon}
+                .showPreviewIcon=${this.showPreviewIcon}
+                .enableNotesSorting=${this.enableNotesSorting}
                 @select=${this._selectNote}
                 @drag=${this._drag}
                 @fitview=${this._fitToElement}
@@ -529,7 +540,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
           )
         : html`${nothing}`}
       ${this._hiddenNotes.length > 0
-        ? html`<div class="title">Hidden Contents</div>`
+        ? html`<div class="hidden-title">Hidden Contents</div>`
         : nothing}
       ${this._hiddenNotes.length
         ? repeat(
@@ -544,10 +555,12 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
                   .page=${this.page}
                   .invisible=${true}
                   .showCardNumber=${false}
-                  .hidePreviewIcon=${this.hidePreviewIcon}
+                  .showPreviewIcon=${this.showPreviewIcon}
+                  .enableNotesSorting=${this.enableNotesSorting}
                   @fitview=${this._fitToElement}
                 ></toc-note-card>
-                ${idx !== this._hiddenNotes.length - 1
+                ${idx !== this._hiddenNotes.length - 1 &&
+                this.enableNotesSorting
                   ? html`<div class="hidden-note-divider"><div></div></div>`
                   : nothing} `
           )

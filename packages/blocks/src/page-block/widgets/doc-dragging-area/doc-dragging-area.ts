@@ -39,13 +39,27 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
 
   private _dragging = false;
 
-  private _offset: {
+  private _initialScrollOffset: {
     top: number;
     left: number;
   } = {
     top: 0,
     left: 0,
   };
+
+  private _initialContainerOffset: {
+    x: number;
+    y: number;
+  } = {
+    x: 0,
+    y: 0,
+  };
+
+  private get _viewportElement() {
+    const pageBlock = this.blockElement;
+    assertExists(pageBlock);
+    return pageBlock.viewportElement;
+  }
 
   private get _allBlocksWithRect(): BlockInfo[] {
     const viewportElement = this._viewportElement;
@@ -72,27 +86,18 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
 
     const elements = getAllNodeFromTree();
 
-    const rootRect = this.host.getBoundingClientRect();
     return elements.map(element => {
       const bounding = element.getBoundingClientRect();
       return {
         element,
         rect: {
-          left: bounding.left + viewportElement.scrollLeft - rootRect.left,
-          top: bounding.top + viewportElement.scrollTop - rootRect.top,
+          left: bounding.left + viewportElement.scrollLeft,
+          top: bounding.top + viewportElement.scrollTop,
           width: bounding.width,
           height: bounding.height,
         },
       };
     });
-  }
-
-  private get _viewportElement() {
-    const pageBlock = this.blockElement;
-
-    assertExists(pageBlock);
-
-    return pageBlock.viewportElement;
   }
 
   private _selectBlocksByRect(userRect: Rect) {
@@ -120,13 +125,31 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
     shouldAutoScroll: boolean
   ) => {
     const { x, y } = state;
-
-    const { scrollTop, scrollLeft } = this._viewportElement;
     const { x: startX, y: startY } = state.start;
-    const left = Math.min(this._offset.left + startX, scrollLeft + x);
-    const top = Math.min(this._offset.top + startY, scrollTop + y);
-    const right = Math.max(this._offset.left + startX, scrollLeft + x);
-    const bottom = Math.max(this._offset.top + startY, scrollTop + y);
+
+    const { left: initScrollX, top: initScrollY } = this._initialScrollOffset;
+    const { scrollLeft, scrollTop, scrollWidth, scrollHeight } =
+      this._viewportElement;
+
+    const { x: initConX, y: initConY } = this._initialContainerOffset;
+    const { x: conX, y: conY } = state.containerOffset;
+
+    let left = Math.min(startX + initScrollX + initConX, x + scrollLeft + conX);
+    let right = Math.max(
+      startX + initScrollX + initConX,
+      x + scrollLeft + conX
+    );
+    let top = Math.min(startY + initScrollY + initConY, y + scrollTop + conY);
+    let bottom = Math.max(
+      startY + initScrollY + initConY,
+      y + scrollTop + conY
+    );
+
+    left = Math.max(left, conX);
+    right = Math.min(right, scrollWidth);
+    top = Math.max(top, conY);
+    bottom = Math.min(bottom, scrollHeight);
+
     const userRect = {
       left,
       top,
@@ -138,7 +161,7 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
     this._lastPointerState = state;
 
     if (shouldAutoScroll) {
-      const result = autoScroll(this._viewportElement, y);
+      const result = autoScroll(this._viewportElement, state.raw.y);
       if (!result) {
         this._clearRaf();
         return;
@@ -158,9 +181,13 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
         if (isDragArea(state)) {
           this._dragging = true;
           const viewportElement = this._viewportElement;
-          this._offset = {
+          this._initialScrollOffset = {
             left: viewportElement.scrollLeft,
             top: viewportElement.scrollTop,
+          };
+          this._initialContainerOffset = {
+            x: state.containerOffset.x,
+            y: state.containerOffset.y,
           };
           return true;
         }
@@ -193,9 +220,13 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
         this._clearRaf();
         this._dragging = false;
         this.rect = null;
-        this._offset = {
+        this._initialScrollOffset = {
           top: 0,
           left: 0,
+        };
+        this._initialContainerOffset = {
+          x: 0,
+          y: 0,
         };
         this._lastPointerState = null;
       },
@@ -220,9 +251,7 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
 
   override firstUpdated() {
     this._disposables.addFromEvent(this._viewportElement, 'scroll', () => {
-      if (!this._dragging || !this._lastPointerState) {
-        return;
-      }
+      if (!this._dragging || !this._lastPointerState) return;
 
       const state = this._lastPointerState;
       this._rafID = requestAnimationFrame(() => {

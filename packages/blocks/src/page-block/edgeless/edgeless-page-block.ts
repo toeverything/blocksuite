@@ -269,7 +269,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       })
     );
 
-    this._disposables.add(
+    this._disposables.add(() =>
       listenToThemeChange(this, () => this.surface.refresh())
     );
 

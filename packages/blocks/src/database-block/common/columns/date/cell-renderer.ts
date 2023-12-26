@@ -45,7 +45,6 @@ export class DateCell extends BaseCellRenderer<number> {
     }
     return html` <input
       type="date"
-      disabled
       value="${value}"
       class="affine-database-date date"
     />`;

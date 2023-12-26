@@ -20,7 +20,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import { requestConnectedFrame } from '../../../../_common/utils/event.js';
+import {
+  batchToAnimationFrame,
+  requestConnectedFrame,
+} from '../../../../_common/utils/event.js';
 import {
   matchFlavours,
   type TopLevelBlockModel,
@@ -131,7 +134,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     return this.selectedRect.dragging;
   }
 
-  refreshLayerViewport = () => {
+  refreshLayerViewport = batchToAnimationFrame(() => {
     if (!this.edgeless || !this.edgeless.surface) return;
 
     const { surface } = this.edgeless;
@@ -148,7 +151,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       '--canvas-transform-offset',
       this._getLayerViewport(true)
     );
-  };
+  }, this);
 
   private _applyWillChangeProp = () => {
     if (this._clearWillChangeId) clearTimeout(this._clearWillChangeId);
@@ -216,17 +219,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     const { _disposables, edgeless } = this;
     const { page } = edgeless;
 
-    let rAqId: number | null = null;
     _disposables.add(
       edgeless.slots.viewportUpdated.on(() => {
         this._applyWillChangeProp();
-
-        if (rAqId) return;
-
-        rAqId = requestConnectedFrame(() => {
-          this.refreshLayerViewport();
-          rAqId = null;
-        }, this);
+        this.refreshLayerViewport();
       })
     );
 

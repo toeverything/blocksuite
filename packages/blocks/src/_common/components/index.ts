@@ -8,3 +8,5 @@ export * from './rich-text/rich-text.js';
 export * from './toast.js';
 export * from './tooltip/index.js';
 import './portal.js';
+export { popTagSelect, type SelectTag } from './tags/multi-tag-select.js';
+export { scrollbarStyle } from './utils.js';

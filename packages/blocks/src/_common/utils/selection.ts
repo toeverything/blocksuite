@@ -10,8 +10,8 @@ import { matchFlavours } from './model.js';
 import {
   asyncGetRichTextByModel,
   buildPath,
-  getDocPageByEditorHost,
   getDocPageByElement,
+  getDocTitleInlineEditor,
 } from './query.js';
 import { Rect } from './rect.js';
 
@@ -158,17 +158,14 @@ async function setNewTop(y: number, editableContainer: Element, zoom = 1) {
  */
 export function focusTitle(editorHost: EditorHost, index = Infinity, len = 0) {
   // TODO support SelectionPosition
-  const docPageComponent = getDocPageByEditorHost(editorHost);
-  if (!docPageComponent) {
-    throw new Error("Can't find page component!");
+
+  const titleInlineEditor = getDocTitleInlineEditor(editorHost);
+  assertExists(titleInlineEditor);
+
+  if (index > titleInlineEditor.yText.length) {
+    index = titleInlineEditor.yText.length;
   }
-  if (!docPageComponent.titleInlineEditor) {
-    throw new Error("Can't find title inline editor!");
-  }
-  if (index > docPageComponent.titleInlineEditor.yText.length) {
-    index = docPageComponent.titleInlineEditor.yText.length;
-  }
-  docPageComponent.titleInlineEditor.setInlineRange({ index, length: len });
+  titleInlineEditor.setInlineRange({ index, length: len });
 }
 
 async function focusRichText(

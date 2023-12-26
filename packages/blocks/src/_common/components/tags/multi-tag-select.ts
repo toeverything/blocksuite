@@ -455,6 +455,7 @@ declare global {
     'affine-multi-tag-select': MultiTagSelect;
   }
 }
+
 export const popTagSelect = (
   target: HTMLElement,
   ops: {
@@ -495,6 +496,7 @@ export const popTagSelect = (
   });
   return remove;
 };
+
 const middleware: Middleware = {
   name: 'middleware',
   fn: async state => {

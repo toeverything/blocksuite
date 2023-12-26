@@ -51,7 +51,6 @@ export class PageClipboard {
       this._markdownAdapter,
       90
     );
-    this._std.clipboard.registerAdapter('text/html', this._htmlAdapter, 80);
     [
       'image/apng',
       'image/avif',
@@ -61,8 +60,9 @@ export class PageClipboard {
       'image/svg+xml',
       'image/webp',
     ].map(type =>
-      this._std.clipboard.registerAdapter(type, this._imageAdapter, 70)
+      this._std.clipboard.registerAdapter(type, this._imageAdapter, 80)
     );
+    this._std.clipboard.registerAdapter('text/html', this._htmlAdapter, 70);
     const copy = copyMiddleware(this._std);
     const paste = pasteMiddleware(this._std);
     this._std.clipboard.use(copy);
@@ -73,7 +73,6 @@ export class PageClipboard {
       dispose: () => {
         this._std.clipboard.unregisterAdapter(ClipboardAdapter.MIME);
         this._std.clipboard.unregisterAdapter('text/plain');
-        this._std.clipboard.unregisterAdapter('text/html');
         [
           'image/apng',
           'image/avif',
@@ -83,6 +82,7 @@ export class PageClipboard {
           'image/svg+xml',
           'image/webp',
         ].map(type => this._std.clipboard.unregisterAdapter(type));
+        this._std.clipboard.unregisterAdapter('text/html');
         this._std.clipboard.unuse(copy);
         this._std.clipboard.unuse(paste);
         this._std.clipboard.unuse(replaceIdMiddleware);

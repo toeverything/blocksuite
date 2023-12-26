@@ -16,33 +16,54 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   specs = DocEditorBlockSpecs;
 
+  @property({ type: Boolean })
+  hasViewport = true;
+
   host: Ref<EditorHost> = createRef<EditorHost>();
 
   override render() {
     return html`
       <style>
-        doc-editor * {
-          box-sizing: border-box;
-        }
         doc-editor {
-          display: block;
-          height: 100%;
-          position: relative;
-          overflow: hidden;
           font-family: var(--affine-font-family);
           background: var(--affine-background-primary-color);
         }
+
+        doc-editor * {
+          box-sizing: border-box;
+        }
+
         @media print {
           doc-editor {
             height: auto;
           }
         }
+
+        .affine-doc-viewport {
+          position: relative;
+          height: 100%;
+          overflow-x: hidden;
+          overflow-y: auto;
+          user-select: none;
+        }
+
+        .doc-editor-container {
+          display: block;
+          height: 100%;
+          user-select: none;
+        }
       </style>
-      <editor-host
-        ${ref(this.host)}
-        .page=${this.page}
-        .specs=${this.specs}
-      ></editor-host>
+      <div
+        class=${this.hasViewport
+          ? 'affine-doc-viewport'
+          : 'doc-editor-container'}
+      >
+        <editor-host
+          ${ref(this.host)}
+          .page=${this.page}
+          .specs=${this.specs}
+        ></editor-host>
+      </div>
     `;
   }
 }

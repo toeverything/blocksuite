@@ -46,7 +46,6 @@ export default defineConfig({
       {
         text: 'Essentials',
         items: [
-          { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
           { text: 'Block Basics', link: '/block-basics' },
           { text: 'Data Persistence', link: '/data-persistence' },
           { text: '🚧 Customize Blocks' },
@@ -55,11 +54,11 @@ export default defineConfig({
       {
         text: 'Editor In-Depth',
         items: [
+          { text: '🚧 Design Philosophy' },
           {
-            text: 'Unidirectional Data Flow',
-            link: '/unidirectional-data-flow',
+            text: 'CRDT-Native Data Flow',
+            link: '/crdt-native-data-flow',
           },
-          { text: '🚧 Hybrid Graphics Rendering' },
         ],
       },
       {

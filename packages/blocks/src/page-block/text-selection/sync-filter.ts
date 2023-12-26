@@ -24,8 +24,8 @@ export const pageRangeSyncFilter: RangeSyncFilter = {
         if (
           startBlock.model.flavour === 'affine:page' &&
           endBlock.model.flavour === 'affine:page' &&
-          startElement?.closest('[data-block-is-title="true"]') &&
-          endElement?.closest('[data-block-is-title="true"]')
+          startElement?.closest('.doc-title-container') &&
+          endElement?.closest('.doc-title-container')
         ) {
           return true;
         }

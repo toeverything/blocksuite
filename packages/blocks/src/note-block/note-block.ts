@@ -51,6 +51,8 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
       assertExists(notePortal);
       const dragPreviewEl = notePortal.cloneNode() as HTMLElement;
       dragPreviewEl.style.transform = '';
+      dragPreviewEl.style.left = '0';
+      dragPreviewEl.style.top = '0';
       const noteBackground = notePortal.querySelector('.note-background');
       assertExists(noteBackground);
       const noteBackgroundClone = noteBackground.cloneNode();

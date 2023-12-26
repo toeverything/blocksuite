@@ -81,7 +81,7 @@ export class EmbedBlockElement<
       const blockComponent = anchorComponent as this;
       const isInSurface = blockComponent.isInSurface;
       if (!isInSurface) {
-        this.host.selection.setGroup('block', [
+        this.host.selection.setGroup('note', [
           this.host.selection.getInstance('block', {
             path: blockComponent.path,
           }),
@@ -100,6 +100,8 @@ export class EmbedBlockElement<
       assertExists(embedPortal);
       const dragPreviewEl = embedPortal.cloneNode() as HTMLElement;
       dragPreviewEl.style.transform = '';
+      dragPreviewEl.style.left = '0';
+      dragPreviewEl.style.top = '0';
       render(
         blockComponent.host.renderModel(blockComponent.model),
         dragPreviewEl

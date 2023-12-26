@@ -150,28 +150,30 @@ export class AffineFormatBarWidget extends WidgetElement {
     // calculate placement
     this.disposables.add(
       this.host.event.add('pointerUp', ctx => {
+        let targetRect: DOMRect | null = null;
         if (this.displayType === 'text' || this.displayType === 'native') {
           const range = this.nativeRange;
           assertExists(range);
-          const e = ctx.get('pointerState');
-          const rangeRect = range.getBoundingClientRect();
-          if (e.y < rangeRect.top + rangeRect.height / 2) {
-            this._placement = 'top';
-          } else {
-            this._placement = 'bottom';
-          }
+          targetRect = range.getBoundingClientRect();
         } else if (this.displayType === 'block') {
-          const e = ctx.get('pointerState');
           const blockElement = this._selectedBlockElements[0];
-          if (!blockElement) {
-            return;
-          }
-          const blockRect = blockElement.getBoundingClientRect();
-          if (e.y < blockRect.bottom) {
-            this._placement = 'top';
-          } else {
-            this._placement = 'bottom';
-          }
+          if (!blockElement) return;
+          targetRect = blockElement.getBoundingClientRect();
+        } else {
+          return;
+        }
+
+        const { top: editorHostTop, bottom: editorHostBottom } =
+          this.host.getBoundingClientRect();
+        const e = ctx.get('pointerState');
+        if (editorHostBottom - targetRect.bottom < 50) {
+          this._placement = 'top';
+        } else if (targetRect.top - Math.max(editorHostTop, 0) < 50) {
+          this._placement = 'bottom';
+        } else if (e.raw.y < targetRect.top + targetRect.height / 2) {
+          this._placement = 'top';
+        } else {
+          this._placement = 'bottom';
         }
       })
     );

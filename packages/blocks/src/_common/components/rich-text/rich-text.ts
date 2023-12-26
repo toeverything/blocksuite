@@ -159,10 +159,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
           .then(() => {
             if (!inlineEditor.mounted) return;
 
-            // get newest inline range
-            const inlineRange = inlineEditor.getInlineRange();
-            if (!inlineRange) return;
-
             const range = inlineEditor.toDomRange(inlineRange);
             if (!range) return;
 

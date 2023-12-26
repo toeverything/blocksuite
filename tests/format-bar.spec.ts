@@ -10,6 +10,7 @@ import {
   focusRichText,
   focusTitle,
   getBoundingBox,
+  getEditorHostLocator,
   getSelectionRect,
   initEmptyParagraphState,
   initImageState,
@@ -829,7 +830,9 @@ test('should format quick bar show when double click text', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-  await page.dblclick('rich-text', {
+  const editorHost = getEditorHostLocator(page);
+  const richText = editorHost.locator('rich-text').nth(0);
+  await richText.dblclick({
     position: { x: 10, y: 10 },
   });
   const { formatBar } = getFormatBar(page);
@@ -846,7 +849,11 @@ test('should format quick bar not show at readonly mode', async ({ page }) => {
   const { formatBar } = getFormatBar(page);
   await expect(formatBar).not.toBeVisible();
 
-  await page.dblclick('rich-text', { position: { x: 10, y: 10 } });
+  const editorHost = getEditorHostLocator(page);
+  const richText = editorHost.locator('rich-text').nth(0);
+  await richText.dblclick({
+    position: { x: 10, y: 10 },
+  });
   await expect(formatBar).not.toBeVisible();
 });
 
@@ -899,7 +906,8 @@ test('should format quick bar position correct at the start of second line', asy
     return paragraphId;
   });
   // await focusRichText(page);
-  const locator = page.locator('.inline-editor').nth(0);
+  const editorHost = getEditorHostLocator(page);
+  const locator = editorHost.locator('.inline-editor').nth(0);
   const textBox = await locator.boundingBox();
   if (!textBox) {
     throw new Error("Can't get bounding box");
@@ -972,7 +980,7 @@ test('should format quick bar work in single block selection', async ({
   assertExists(formatRect);
   assertExists(selectionRect);
   assertAlmostEqual(formatRect.x - selectionRect.x, 160.5, 10);
-  assertAlmostEqual(formatRect.y - selectionRect.y, -50, 10);
+  assertAlmostEqual(formatRect.y - selectionRect.y, 33, 10);
 
   const boldBtn = formatBar.getByTestId('bold');
   await boldBtn.click();
@@ -1062,7 +1070,7 @@ test('should format quick bar work in multiple block selection', async ({
   const rect = await blockSelections.first().boundingBox();
   assertExists(rect);
   assertAlmostEqual(box.x - rect.x, 160.5, 10);
-  assertAlmostEqual(box.y - rect.y, -45, 10);
+  assertAlmostEqual(box.y - rect.y, 99, 10);
 
   await formatBarController.boldBtn.click();
   await formatBarController.italicBtn.click();
@@ -1259,7 +1267,7 @@ test('should format quick bar show after convert to code block', async ({
     { x: 0, y: 0 }
   );
   await expect(formatBarController.formatBar).toBeVisible();
-  await formatBarController.assertBoundingBox(264.5, 194);
+  await formatBarController.assertBoundingBox(264.5, 343);
 
   await formatBarController.openParagraphMenu();
   await formatBarController.codeBlockBtn.click();
@@ -1420,7 +1428,8 @@ test('should show format-quick-bar and select all text of the block when triple 
   await focusRichText(page);
   await type(page, 'hello world');
 
-  const locator = page.locator('.inline-editor').nth(0);
+  const editorHost = getEditorHostLocator(page);
+  const locator = editorHost.locator('.inline-editor').nth(0);
   const textBox = await locator.boundingBox();
   if (!textBox) {
     throw new Error("Can't get bounding box");
