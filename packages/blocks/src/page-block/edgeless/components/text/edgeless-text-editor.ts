@@ -8,7 +8,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
-import { wrapFontFamily } from '../../../../surface-block/elements/text/utils.js';
+import {
+  getLineHeight,
+  wrapFontFamily,
+} from '../../../../surface-block/elements/text/utils.js';
 import {
   Bound,
   type TextElement,
@@ -28,18 +31,17 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
   static override styles = css`
     .edgeless-text-editor {
+      box-sizing: content-box;
       position: absolute;
-      transform-origin: left top;
       z-index: 10;
+      transform-origin: left top;
       border: ${EdgelessTextEditor.BORDER_WIDTH}px solid
         var(--affine-primary-color, #1e96eb);
       border-radius: 4px;
       box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
       padding: ${EdgelessTextEditor.VERTICAL_PADDING}px
         ${EdgelessTextEditor.HORIZONTAL_PADDING}px;
-      line-height: initial;
       overflow: visible;
-      box-sizing: content-box;
     }
 
     .edgeless-text-editor .inline-editor-container {
@@ -149,11 +151,14 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     const [visualX, visualY] = this.getVisualPosition(this.element);
     const { VERTICAL_PADDING, HORIZONTAL_PADDING, BORDER_WIDTH } =
       EdgelessTextEditor;
+    const { fontSize, fontFamily, rotate } = this.element;
+    const lineHeight = getLineHeight(fontFamily, fontSize);
     return {
       left: translateX + (visualX - HORIZONTAL_PADDING - BORDER_WIDTH) * zoom,
       top: translateY + (visualY - VERTICAL_PADDING - BORDER_WIDTH) * zoom,
       zoom,
-      rotate: this.element.rotate,
+      rotate,
+      lineHeight,
     };
   };
 
@@ -243,7 +248,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const { left, top, zoom, rotate } = this.getEditorPos();
+    const { left, top, zoom, rotate, lineHeight } = this.getEditorPos();
     const { text, fontFamily, fontSize, fontWeight, textAlign, color } =
       this.element;
     const { hasMaxWidth, w } = this.element;
@@ -257,9 +262,10 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         transform: `scale(${zoom}) rotate(${rotate}deg)`,
         minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
         maxWidth: hasMaxWidth ? `${w}px` : 'none',
-        fontSize: `${fontSize}px`,
         fontFamily: wrapFontFamily(fontFamily),
+        fontSize: `${fontSize}px`,
         fontWeight,
+        lineHeight: `${lineHeight}px`,
         textAlign,
         color: isCssVariable(color) ? `var(${color})` : color,
       })}
