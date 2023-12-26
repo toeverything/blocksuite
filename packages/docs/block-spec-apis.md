@@ -1,19 +1,20 @@
 # Block Spec APIs
 
-::: warning
-This documentation is mostly written for BlockSuite maintainers. If you goal doesn't involve in contributing to the BlockSuite repository, here may not be the best place for getting started.
+::: info
+This document is preliminary and subject to refinement and updates for clarity and accuracy.
 :::
 
-In BlockSuite, blocks should be defined with certain kinds of shapes. Each shape is called a "block spec".
-The _spec_ means "specification", which includes a set of interfaces for defining blocks.
+In BlockSuite, a `BlockSpec` defines the structure and interactive elements for a specific block type within the editor. BlockSuite editors are typically composed entirely of block specs, with the top-level UI often implemented as a dedicated block, usually of the `affine:page` type.
 
 A block spec contains the following properties:
 
-- `schema`: The schema of the block. It represents the data structure of the block.
-- `service`: The service of the block. It represents the global business logic of the block.
-- `view`: The view of the block. It represents the UI of the block.
-  - `component`: The component of the block. It represents the UI component of the block.
-  - `widgets`: The widgets of the block. It represents the UI widgets of the block.
+- `schema`: Defines the structure and data types for the block's content.
+- `service`: Used for registering methods for specific actions and external invocations.
+- `view`: Represents the visual representation and layout of the block.
+  - `component`: The primary user interface element of the block.
+  - `widgets`: Additional interactive elements enhancing the block's functionality.
+
+![block-spec](./images/block-spec.png)
 
 ## Lit-Based Example
 
@@ -25,7 +26,7 @@ Here is a example of a lit-based block spec:
 import type { BlockSpec } from '@blocksuite/block-std';
 import { literal } from 'lit/static-html.js';
 
-const myBlock: BlockSpec = {
+const MyBlockSepc: BlockSpec = {
   schema: MyBlockSchema,
   service: MyBlockService,
   view: {

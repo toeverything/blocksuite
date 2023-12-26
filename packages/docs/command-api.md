@@ -1,7 +1,7 @@
 # Command API
 
-::: warning
-This documentation is mostly written for BlockSuite maintainers. If you goal doesn't involve in contributing to the BlockSuite repository, here may not be the best place for getting started.
+::: info
+This document is preliminary and subject to refinement and updates for clarity and accuracy.
 :::
 
 Commands are the reusable actions for triggering state updates. Inside a command, you can query different states of the editor, or perform operations to update them. With the command API, you can define chainable commands and execute them.
