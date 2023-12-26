@@ -46,10 +46,6 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       overflow: visible;
     }
 
-    .edgeless-text-editor .inline-editor * {
-      padding: 0 !important;
-    }
-
     .edgeless-text-editor .inline-editor {
       white-space: pre-wrap !important;
       outline: none;
