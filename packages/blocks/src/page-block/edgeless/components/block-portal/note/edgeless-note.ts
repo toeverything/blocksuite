@@ -68,8 +68,10 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const selected =
-      this.edgeless.selectionManager.state.editing &&
-      this.edgeless.selectionManager.state.elements.includes(this.model.id);
+      this.edgeless.selectionManager.has(this.model.id) &&
+      this.edgeless.selectionManager.selections.some(
+        sel => sel.elements.includes(this.model.id) && sel.editing
+      );
 
     const style = {
       position: 'absolute',
@@ -107,8 +109,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   private _handleEditingTransition() {
     const selection = this.surface.edgeless.selectionManager;
     this._disposables.add(
-      selection.slots.updated.on(({ elements, editing }) => {
-        if (elements.includes(this.model.id) && editing) {
+      selection.slots.updated.on(selections => {
+        if (selection.has(this.model.id) && selections?.[0].editing) {
           this._editing = true;
         } else {
           this._editing = false;
@@ -148,10 +150,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   }
 
   private _hovered() {
-    if (
-      !this._isHover &&
-      this.edgeless.selectionManager.isSelected(this.model.id)
-    ) {
+    if (!this._isHover && this.edgeless.selectionManager.has(this.model.id)) {
       this._isHover = true;
     }
   }

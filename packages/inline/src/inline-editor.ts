@@ -234,7 +234,9 @@ export class InlineEditor<
   }
 
   unmount() {
-    render(nothing, this.rootElement);
+    if (this.rootElement.isConnected) {
+      render(nothing, this.rootElement);
+    }
     this.rootElement.removeAttribute(INLINE_ROOT_ATTR);
     this._rootElement = null;
     this._mounted = false;
@@ -261,6 +263,7 @@ export class InlineEditor<
   }
 
   rerenderWholeEditor() {
+    if (!this.rootElement.isConnected) return;
     render(nothing, this.rootElement);
     this._deltaService.render().catch(console.error);
   }

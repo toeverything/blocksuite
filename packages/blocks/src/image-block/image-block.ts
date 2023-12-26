@@ -107,7 +107,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
     const selection = this.host.selection;
     selection.setGroup('note', [
-      selection.getInstance('block', { path: this.path }),
+      selection.create('block', { path: this.path }),
     ]);
   }
 
@@ -133,7 +133,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       const isInSurface = blockComponent.isInSurface;
       if (!isInSurface) {
         this.std.selection.setGroup('note', [
-          this.std.selection.getInstance('block', {
+          this.std.selection.create('block', {
             path: blockComponent.path,
           }),
         ]);

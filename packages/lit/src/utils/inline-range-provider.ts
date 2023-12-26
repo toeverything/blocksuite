@@ -74,7 +74,7 @@ export const getInlineRangeProvider: (
     if (!inlineRange) {
       selectionManager.clear(['text']);
     } else {
-      const textSelection = selectionManager.getInstance('text', {
+      const textSelection = selectionManager.create('text', {
         from: {
           path: element.path,
           index: inlineRange.index,

@@ -93,12 +93,12 @@ selection.update(current => yourLogic(current));
 
 The `set` method will override all current selections.
 
-You can create a new selection by using `getInstance` method.
+You can create a new selection by using `selection.create` method.
 
 ```ts
 const { selection } = std;
 
-const blockSelection = selection.getInstance('block', { path: [0, 1, 2] });
+const blockSelection = selection.create('block', { path: [0, 1, 2] });
 ```
 
 What if you want to pick some selections by `type` from the current selection model? We provide `pick` and `find` methods to help you.
@@ -214,7 +214,7 @@ std.selection.register(MySelection);
 Now you can use the `MySelection` in the selection model.
 
 ```ts
-const mySelection = std.selection.getInstance('mySelection', {
+const mySelection = std.selection.create('mySelection', {
   path: [0, 1, 2],
 });
 ```

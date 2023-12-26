@@ -137,7 +137,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       const parentPath = firstBlock.parentPath;
       const selections = models
         .map(model => [...parentPath, model.id])
-        .map(path => this.root.selection.getInstance('block', { path }));
+        .map(path => this.root.selection.create('block', { path }));
       this.root.selection.setGroup('note', selections);
     }, 0);
   }
@@ -167,7 +167,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       const parentPath = lastBlock.parentPath;
       const selections = models
         .map(model => [...parentPath, model.id])
-        .map(path => this.root.selection.getInstance('block', { path }));
+        .map(path => this.root.selection.create('block', { path }));
       this.root.selection.setGroup('note', selections);
     }, 0);
   }

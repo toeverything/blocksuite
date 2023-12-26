@@ -99,7 +99,7 @@ export class RangeManager {
       return null;
     }
 
-    const selection = selectionManager.getInstance('text', {
+    const selection = selectionManager.create('text', {
       from,
       to,
       isReverse: isRangeReversed,

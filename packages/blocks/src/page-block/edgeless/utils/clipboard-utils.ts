@@ -38,7 +38,7 @@ export async function duplicate(
   edgeless.surface.fitToViewport(totalBound);
 
   if (select) {
-    edgeless.selectionManager.setSelection({
+    edgeless.selectionManager.set({
       elements: newElements.map(e => e.id),
       editing: false,
     });

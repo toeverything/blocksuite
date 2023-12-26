@@ -389,7 +389,7 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
     if (!container) throw new Error('container not found');
 
     return {
-      id: container.selectionManager.state.elements[0],
+      id: container.selectionManager.selectedIds[0],
     };
   });
 
@@ -401,7 +401,7 @@ export async function exitEditing(page: Page) {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
 
-    container.selectionManager.setSelection({
+    container.selectionManager.set({
       elements: [],
       editing: false,
     });
