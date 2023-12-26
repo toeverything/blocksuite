@@ -204,7 +204,7 @@ export class DebugMenu extends ShadowlessElement {
   contentParser!: ContentParser;
 
   @property({ attribute: false })
-  navigationPanel!: CustomTOCOutlinePanel;
+  tocOutlinePanel!: CustomTOCOutlinePanel;
 
   @property({ attribute: false })
   framePanel!: CustomFramePanel;
@@ -321,8 +321,8 @@ export class DebugMenu extends ShadowlessElement {
     }
   }
 
-  private _toggleNavigationPanel() {
-    this.navigationPanel.toggleDisplay();
+  private _toggleTOCOutlinePanel() {
+    this.tocOutlinePanel.toggleDisplay();
   }
 
   private _toggleFramePanel() {
@@ -684,7 +684,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._switchOffsetMode}>
                 Switch Offset Mode
               </sl-menu-item>
-              <sl-menu-item @click=${this._toggleNavigationPanel}>
+              <sl-menu-item @click=${this._toggleTOCOutlinePanel}>
                 Toggle TOC Outline Panel
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleFramePanel}>

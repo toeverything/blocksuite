@@ -58,7 +58,7 @@ function subscribePage(workspace: Workspace) {
     debugMenu.editor = editor;
     debugMenu.mode = defaultMode;
     debugMenu.contentParser = contentParser;
-    debugMenu.navigationPanel = tocOutlinePanel;
+    debugMenu.tocOutlinePanel = tocOutlinePanel;
     debugMenu.framePanel = framePanel;
     debugMenu.copilotPanel = copilotPanelPanel;
     debugMenu.sidePanel = sidePanel;

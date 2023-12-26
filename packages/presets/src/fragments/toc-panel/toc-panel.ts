@@ -139,6 +139,7 @@ export class TOCPanel extends WithDisposable(LitElement) {
           .mode=${this.mode}
           .showPreviewIcon=${this.showPreviewIcon}
           .enableNotesSorting=${this.enableNotesSorting}
+          .toggleNotesSorting=${this._toggleNotesSorting}
         >
         </toc-panel-body>
       </div>
