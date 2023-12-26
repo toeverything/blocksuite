@@ -457,8 +457,6 @@ export class EdgelessToolsManager {
       state = this.selection.lastState;
     }
 
-    console.log(state);
-
     this.selection.set(state);
     this.container.slots.edgelessToolUpdated.emit(edgelessTool);
     this._controllers[lastType].afterModeSwitch(edgelessTool);
