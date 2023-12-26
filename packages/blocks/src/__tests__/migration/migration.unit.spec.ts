@@ -1,28 +1,27 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
+// normal import
+import { Schema, Workspace, type Y } from '@blocksuite/store';
 import { readFile } from 'fs/promises';
+import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { assert, describe, expect, test } from 'vitest';
-import * as Y from 'yjs';
 
-// Use manual per-module import/export to support vitest environment on Node.js
-import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
-import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
-import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
-import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
-import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
-import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import { SurfaceBlockSchema } from '../../../blocks/src/surface-block/surface-model.js';
-// normal import
-import { Schema } from '../schema/schema.js';
+import { DatabaseBlockSchema } from '../../database-block/database-model.js';
+import { FrameBlockSchema } from '../../frame-block/frame-model.js';
+import { ListBlockSchema } from '../../list-block/list-model.js';
+import { NoteBlockSchema } from '../../note-block/note-model.js';
+import { PageBlockSchema } from '../../page-block/page-model.js';
+import { ParagraphBlockSchema } from '../../paragraph-block/paragraph-model.js';
+import { SurfaceBlockSchema } from '../../surface-block/surface-model.js';
 
 async function loadBinary(name: string) {
-  const url = new URL(`./ydocs/${name}.ydoc`, import.meta.url);
-  const path = fileURLToPath(url);
+  const originPath = fileURLToPath(import.meta.url);
+  const path = join(originPath, `../ydocs/${name}.ydoc`);
   const buffer = await readFile(path);
   const update = new Uint8Array(buffer);
-  const doc = new Y.Doc();
-  Y.applyUpdate(doc, update);
+  const doc = new Workspace.Y.Doc();
+  Workspace.Y.applyUpdate(doc, update);
   return doc;
 }
 

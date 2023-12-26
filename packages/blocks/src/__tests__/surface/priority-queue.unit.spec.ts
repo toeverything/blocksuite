@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { PriorityQueue } from './priority-queue.js';
+import { PriorityQueue } from '../../surface-block/utils/priority-queue.js';
 
 describe('priority queue', () => {
   it('should dequeue the smallest item', () => {

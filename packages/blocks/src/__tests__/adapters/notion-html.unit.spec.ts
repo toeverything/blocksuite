@@ -5,8 +5,8 @@ import {
 } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
-import { nanoidReplacement } from '../test-utils/test-utils.js';
-import { NotionHtmlAdapter } from './notion-html.js';
+import { NotionHtmlAdapter } from '../../_common/adapters/notion-html.js';
+import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
 
 describe('notion html to snapshot', () => {
   test('code', async () => {

@@ -1,5 +1,7 @@
-import { Slot } from '@blocksuite/global/utils';
 import { describe, expect, test, vi } from 'vitest';
+
+import { Slot } from '../utils.js';
+
 describe('slot', () => {
   test('init', () => {
     const slot = new Slot();

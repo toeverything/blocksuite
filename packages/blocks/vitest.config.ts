@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     globalSetup: '../../scripts/vitest-global.ts',
-    include: ['src/**/*.unit.spec.ts'],
+    include: ['src/__tests__/**/*.unit.spec.ts'],
     testTimeout: 500,
     coverage: {
       provider: 'istanbul', // or 'c8'

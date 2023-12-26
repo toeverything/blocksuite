@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { loadingSort } from './sort.js';
+import { loadingSort } from '../../surface-block/utils/sort.js';
 
 describe('loadingSort', () => {
   it('should sort correctly', () => {

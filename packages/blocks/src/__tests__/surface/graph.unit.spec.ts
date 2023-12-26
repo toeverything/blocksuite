@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { Bound } from './bound.js';
-import { Graph } from './graph.js';
+import { Bound } from '../../surface-block/utils/bound.js';
+import { Graph } from '../../surface-block/utils/graph.js';
 
 describe('graph', () => {
   it('neighbors', () => {

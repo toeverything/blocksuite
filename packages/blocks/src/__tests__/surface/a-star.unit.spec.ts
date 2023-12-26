@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { AStarRunner } from './a-star.js';
-import { almostEqual } from './math-utils.js';
-import type { IVec } from './vec.js';
+import { AStarRunner } from '../../surface-block/utils/a-star.js';
+import { almostEqual } from '../../surface-block/utils/math-utils.js';
+import type { IVec } from '../../surface-block/utils/vec.js';
 
 function mergePath(points: IVec[]) {
   if (points.length === 0) return points;

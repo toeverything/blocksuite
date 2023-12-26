@@ -5,7 +5,7 @@
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
-    "build": "tsc --build tsconfig.build.json --verbose",
+    "build": "tsc --build --verbose",
     "test": "vitest --run"
   },
   "keywords": [],
@@ -16,7 +16,6 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/inline": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@fal-ai/serverless-client": "^0.7.3",
@@ -41,7 +40,10 @@
     }
   },
   "files": [
+    "src",
     "dist",
-    "themes"
+    "themes",
+    "!src/__tests__",
+    "!dist/__tests__"
   ]
 }

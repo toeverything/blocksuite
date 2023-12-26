@@ -1,10 +1,10 @@
-import { isEqual } from '@blocksuite/global/utils';
 import { describe, expect, test } from 'vitest';
+
+import { isEqual } from '../utils.js';
 
 describe('isEqual', () => {
   test('number', () => {
     expect(isEqual(1, 1)).toBe(true);
-    // @ts-expect-error
     expect(isEqual(1, 114514)).toBe(false);
     expect(isEqual(NaN, NaN)).toBe(true);
     expect(isEqual(0, -0)).toBe(false);
@@ -12,7 +12,6 @@ describe('isEqual', () => {
 
   test('string', () => {
     expect(isEqual('', '')).toBe(true);
-    // @ts-expect-error
     expect(isEqual('', ' ')).toBe(false);
   });
 

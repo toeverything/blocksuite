@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { getStandardLanguage } from './code-languages.js';
-import { FALLBACK_LANG } from './consts.js';
+import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
+import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
 
 describe('getStandardLanguage', () => {
   it('basic', () => {

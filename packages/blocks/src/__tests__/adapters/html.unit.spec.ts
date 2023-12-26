@@ -3,7 +3,7 @@ import { MemoryBlobManager } from '@blocksuite/store';
 import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
-import { HtmlAdapter } from './html.js';
+import { HtmlAdapter } from '../../_common/adapters/html.js';
 
 const template = (html: string) =>
   `

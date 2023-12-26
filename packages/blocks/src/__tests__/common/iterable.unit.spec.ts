@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { atLeastNMatches, countBy, groupBy, maxBy } from './iterable.js';
+import {
+  atLeastNMatches,
+  countBy,
+  groupBy,
+  maxBy,
+} from '../../_common/utils/iterable.js';
 
 describe('countBy', () => {
   it('basic', () => {

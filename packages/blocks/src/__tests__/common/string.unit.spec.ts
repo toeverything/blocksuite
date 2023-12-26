@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isFuzzyMatch } from './string.js';
+import { isFuzzyMatch } from '../../_common/utils/string.js';
 
 describe('fuzzyMatch', () => {
   it('basic case', () => {

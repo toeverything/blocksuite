@@ -5,7 +5,7 @@ import {
   getCommonBound,
   inflateBound,
   transformPointsToNewBound,
-} from './bound.js';
+} from '../../surface-block/utils/bound.js';
 
 describe('bound utils', () => {
   it('Bound basic', () => {

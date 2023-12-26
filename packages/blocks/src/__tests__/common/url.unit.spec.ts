@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { isValidUrl } from './url.js';
+import { isValidUrl } from '../../_common/utils/url.js';
 
 describe('isValidUrl: determining whether a URL is valid is very complicated', () => {
   test('basic case', () => {

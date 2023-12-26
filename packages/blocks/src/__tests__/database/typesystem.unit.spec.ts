@@ -8,7 +8,7 @@ import {
   tUnion,
   tUnknown,
   typesystem,
-} from '../typesystem.js';
+} from '../../database-block/logical/typesystem.js';
 
 export const tString = typesystem.defineData<{ value: string }>({
   name: 'String',

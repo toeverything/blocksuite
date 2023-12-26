@@ -82,7 +82,10 @@
     }
   },
   "files": [
+    "src",
     "dist",
+    "!src/__tests__",
+    "!dist/__tests__",
     "content-parser.d.ts",
     "content-parser.js",
     "models.d.ts",

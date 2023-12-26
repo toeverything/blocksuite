@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { Point } from './rect.js';
+import { Point } from '../../_common/utils/rect.js';
 
 describe('Point', () => {
   it('should return a min point', () => {

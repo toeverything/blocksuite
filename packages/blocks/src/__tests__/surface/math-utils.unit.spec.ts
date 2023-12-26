@@ -13,7 +13,7 @@ import {
   rotatePoints,
   toDegree,
   toRadian,
-} from './math-utils.js';
+} from '../../surface-block/utils/math-utils.js';
 
 describe('Line', () => {
   it('should intersect', () => {
