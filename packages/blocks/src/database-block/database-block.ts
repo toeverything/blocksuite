@@ -26,7 +26,7 @@ import {
 } from '../_common/icons/index.js';
 import type { DataViewSelection } from '../_common/utils/index.js';
 import { Rect } from '../_common/utils/index.js';
-import { NoteBlockComponent } from '../note-block/note-block.js';
+import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
 import {
@@ -177,12 +177,9 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
 
   override get topContenteditableElement() {
     if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
-      const note = this.std.view.findPrev(
-        this.path,
-        nodeView => nodeView.view instanceof NoteBlockComponent
-      );
+      const note = this.closest<NoteBlockComponent>('affine-note');
       assertExists(note);
-      return note.view as NoteBlockComponent;
+      return note;
     }
     return this.rootBlockElement;
   }

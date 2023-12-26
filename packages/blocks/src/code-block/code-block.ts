@@ -32,7 +32,7 @@ import { PAGE_HEADER_HEIGHT } from '../_common/consts.js';
 import { ArrowDownIcon } from '../_common/icons/index.js';
 import { listenToThemeChange } from '../_common/theme/utils.js';
 import { getThemeMode } from '../_common/utils/index.js';
-import { NoteBlockComponent } from '../note-block/note-block.js';
+import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
@@ -154,12 +154,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   override get topContenteditableElement() {
     if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
-      const note = this.std.view.findPrev(
-        this.path,
-        nodeView => nodeView.view instanceof NoteBlockComponent
-      );
+      const note = this.closest<NoteBlockComponent>('affine-note');
       assertExists(note);
-      return note.view as NoteBlockComponent;
+      return note;
     }
     return this.rootBlockElement;
   }

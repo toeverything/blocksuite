@@ -20,7 +20,7 @@ import {
   isInsideEdgelessEditor,
   matchFlavours,
 } from '../_common/utils/index.js';
-import { NoteBlockComponent } from '../note-block/note-block.js';
+import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import type { BlockHub } from '../page-block/widgets/block-hub/components/block-hub.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
@@ -225,11 +225,9 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
 
   override get topContenteditableElement() {
     if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
-      const note = this.std.view.findPrev(this.path, nodeView => {
-        return nodeView.view instanceof NoteBlockComponent;
-      });
+      const note = this.closest<NoteBlockComponent>('affine-note');
       assertExists(note);
-      return note.view as NoteBlockComponent;
+      return note;
     }
     return this.rootBlockElement;
   }
