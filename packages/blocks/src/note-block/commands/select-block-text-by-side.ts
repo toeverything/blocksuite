@@ -13,7 +13,7 @@ export const selectBlockTextBySide: Command<
   const { selection } = ctx.std;
 
   selection.setGroup('note', [
-    selection.getInstance('text', {
+    selection.create('text', {
       from: {
         path,
         index: tail ? focusBlock.model.text?.length ?? 0 : 0,

@@ -94,7 +94,7 @@ export function updateBlockElementType(
   const blockSelections = selectionManager.filter('block');
 
   if (textSelection) {
-    const newTextSelection = selectionManager.getInstance('text', {
+    const newTextSelection = selectionManager.create('text', {
       from: {
         path: textSelection.from.path.slice(0, -1).concat(firstNewModel.id),
         index: textSelection.from.index,
@@ -120,7 +120,7 @@ export function updateBlockElementType(
   if (blockSelections.length !== 0) {
     requestAnimationFrame(() => {
       const selections = newModels.map(model => {
-        return selectionManager.getInstance('block', {
+        return selectionManager.create('block', {
           path: blockSelections[0].path.slice(0, -1).concat(model.id),
         });
       });

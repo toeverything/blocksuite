@@ -71,7 +71,7 @@ export class PageKeyboardManager {
 
       if (selection) {
         this._selection.set([
-          this._selection.getInstance('text', {
+          this._selection.create('text', {
             from: {
               index: 0,
               length: 0,

@@ -779,7 +779,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   ) => {
     const { selection } = this.host;
     const selections = blockElements.map(blockElement =>
-      selection.getInstance('block', {
+      selection.create('block', {
         path: blockElement.path,
       })
     );
@@ -788,7 +788,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     // We need to remain surface selection and set editing as true
     if (isInsideEdgelessEditor(this.host)) {
       const surfaceElementId = noteId ? noteId : getNoteId(blockElements[0]);
-      const surfaceSelection = selection.getInstance(
+      const surfaceSelection = selection.create(
         'surface',
         blockElements[0]!.path,
         [surfaceElementId],

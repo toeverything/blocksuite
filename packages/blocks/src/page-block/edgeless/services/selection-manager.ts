@@ -255,7 +255,7 @@ export class EdgelessSelectionManager {
 
     if (elements.length > 0) {
       instances.push(
-        this._selection.getInstance(
+        this._selection.create(
           'surface',
           this.container.surface.path,
           elements,
@@ -267,7 +267,7 @@ export class EdgelessSelectionManager {
     if (blocks.length > 0) {
       instances = instances.concat(
         blocks.map(blockId =>
-          this._selection.getInstance(
+          this._selection.create(
             'surface',
             [this.container.page.root!.id, blockId],
             [blockId],
@@ -303,7 +303,7 @@ export class EdgelessSelectionManager {
   }
 
   setCursor(cursor: CursorSelection | CursorSelectionState) {
-    const instance = this._selection.getInstance('cursor', cursor.x, cursor.y);
+    const instance = this._selection.create('cursor', cursor.x, cursor.y);
 
     this._selection.setGroup('edgeless', [...this.selections, instance]);
   }
