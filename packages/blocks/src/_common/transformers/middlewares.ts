@@ -109,6 +109,6 @@ export const customImageProxyMiddleware = (
   };
 };
 
-export const officialImageProxyMiddleware = customImageProxyMiddleware(
+export const defaultImageProxyMiddleware = customImageProxyMiddleware(
   'https://workers.toeverything.workers.dev/proxy/image'
 );

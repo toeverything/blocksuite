@@ -17,7 +17,7 @@ import {
   NewIcon,
   NotionIcon,
 } from '../../../../_common/icons/index.js';
-import { officialImageProxyMiddleware } from '../../../../_common/transformers/middlewares.js';
+import { defaultImageProxyMiddleware } from '../../../../_common/transformers/middlewares.js';
 import { openFileOrFiles } from '../../../../_common/utils/index.js';
 import { styles } from './styles.js';
 
@@ -31,7 +31,7 @@ const SHOW_LOADING_SIZE = 1024 * 200;
 export async function importMarkDown(workspace: Workspace, text: string) {
   const job = new Job({
     workspace: workspace,
-    middlewares: [officialImageProxyMiddleware],
+    middlewares: [defaultImageProxyMiddleware],
   });
   const mdAdapter = new MarkdownAdapter();
   mdAdapter.applyConfigs(job.adapterConfigs);
@@ -43,7 +43,7 @@ export async function importMarkDown(workspace: Workspace, text: string) {
 export async function importHtml(workspace: Workspace, text: string) {
   const job = new Job({
     workspace: workspace,
-    middlewares: [officialImageProxyMiddleware],
+    middlewares: [defaultImageProxyMiddleware],
   });
   const htmlAdapter = new NotionHtmlAdapter();
   htmlAdapter.applyConfigs(job.adapterConfigs);
@@ -100,7 +100,7 @@ export async function importNotion(workspace: Workspace, file: File) {
     const pagePromises = Array.from(pageMap.keys()).map(async file => {
       const job = new Job({
         workspace: workspace,
-        middlewares: [officialImageProxyMiddleware],
+        middlewares: [defaultImageProxyMiddleware],
       });
       const htmlAdapter = new NotionHtmlAdapter();
       htmlAdapter.applyConfigs(job.adapterConfigs);

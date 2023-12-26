@@ -2,7 +2,7 @@ import type { Page } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 
 import { MarkdownAdapter } from '../adapters/index.js';
-import { officialImageProxyMiddleware } from './middlewares.js';
+import { defaultImageProxyMiddleware } from './middlewares.js';
 import { createAssetsArchive, download } from './utils.js';
 
 export async function exportPage(page: Page) {
@@ -47,7 +47,7 @@ export async function importMarkdown({
 }: ImportMarkdownOptions) {
   const job = new Job({
     workspace: page.workspace,
-    middlewares: [officialImageProxyMiddleware],
+    middlewares: [defaultImageProxyMiddleware],
   });
   const adapter = new MarkdownAdapter();
   adapter.applyConfigs(job.adapterConfigs);
