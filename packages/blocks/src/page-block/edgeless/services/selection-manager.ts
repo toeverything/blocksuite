@@ -1,15 +1,16 @@
 import type { CursorSelection } from '@blocksuite/block-std';
-import { SurfaceSelection } from '@blocksuite/block-std';
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+import type { SurfaceSelection } from '@blocksuite/block-std';
+import { assertType, DisposableGroup, Slot } from '@blocksuite/global/utils';
 
-import type { Selectable } from '../../../_common/utils/index.js';
+import type { EdgelessElement } from '../../../_common/types.js';
+import { groupBy } from '../../../_common/utils/iterable.js';
 import { GroupElement } from '../../../surface-block/elements/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 
 export interface EdgelessSelectionState {
   /**
-   * The selected elements. Could be note or canvas element
+   * The selected elements. Could be blocks or canvas elements
    */
   elements: string[];
 
@@ -29,55 +30,59 @@ export class EdgelessSelectionManager {
   disposable: DisposableGroup = new DisposableGroup();
 
   slots = {
-    updated: new Slot<SurfaceSelection>(),
+    updated: new Slot<SurfaceSelection[]>(),
     remoteUpdated: new Slot(),
 
     cursorUpdated: new Slot<CursorSelection>(),
     remoteCursorUpdated: new Slot(),
   };
 
-  lastState: SurfaceSelection | null = null;
-  state: SurfaceSelection = SurfaceSelection.fromJSON({
-    blockId: '',
-    editing: false,
-    elements: [],
-  });
-
+  lastState: SurfaceSelection[] = [];
+  selections: SurfaceSelection[] = [];
   cursor: CursorSelection | null = null;
 
   remoteCursor: Map<number, CursorSelection> = new Map();
   remoteSelection: Map<number, SurfaceSelection> = new Map();
-  private _activeGroup: GroupElement | null = null;
 
-  private _selectedElements: Set<string> = new Set();
-  private _remoteSelectedElements: Set<string> = new Set();
+  private _activeGroup: GroupElement | null = null;
+  private _selected: Set<string> = new Set();
+  private _selectedIds: string[] = [];
+  private _remoteSelected: Set<string> = new Set();
 
   get empty() {
-    return this.state.isEmpty();
-  }
-
-  get editing() {
-    return this.state.editing;
+    return (
+      this.selections.length === 0 ||
+      this.selections.every(sel => sel.elements.length === 0)
+    );
   }
 
   get activeGroup() {
     return this._activeGroup;
   }
 
-  set activeGroup(group: GroupElement | null) {
-    this._activeGroup = group;
+  get editing() {
+    return this.selections.some(sel => sel.editing);
   }
 
   /**
-   * Models of selected elements
+   * ids of the selected elements
+   */
+  get selectedIds() {
+    return this._selectedIds;
+  }
+
+  /**
+   * models of the selected elements
    */
   get elements() {
-    return this.state.elements.reduce((pre, id) => {
-      const element = this.container.surface.pickById(id);
+    const elements: EdgelessElement[] = [];
 
-      if (element && element.id) pre.push(element);
-      return pre;
-    }, [] as Selectable[]);
+    this._selectedIds.forEach(id => {
+      const el = this.container.surface.pickById(id);
+      el && elements.push(el);
+    });
+
+    return elements;
   }
 
   get firstElement() {
@@ -92,51 +97,81 @@ export class EdgelessSelectionManager {
     return this.container.host.selection;
   }
 
-  private _setState(selection: SurfaceSelection) {
-    this.lastState = this.state;
-    this.state = selection;
-    this._selectedElements = new Set(selection.elements);
+  constructor(container: EdgelessPageBlockComponent) {
+    this.container = container;
+    this.mount();
+  }
+
+  private _setState(selections: SurfaceSelection[]) {
+    this.lastState = this.selections;
+    this.selections = selections;
+    this._selected = new Set<string>();
+    this._selectedIds = [];
+
+    selections.forEach(sel =>
+      sel.elements.forEach(id => {
+        this._selected.add(id);
+        this._selectedIds.push(id);
+      })
+    );
   }
 
   private _setCursor(cursor: CursorSelection) {
     this.cursor = cursor;
   }
 
+  isEmpty(selections: SurfaceSelection[]) {
+    return (
+      selections.length === 0 ||
+      selections.every(sel => sel.elements.length === 0)
+    );
+  }
+
+  equals(selection: SurfaceSelection[]) {
+    let count = 0;
+    let editing = false;
+    const exist = selection.every(sel => {
+      const exist = sel.elements.every(id => this._selected.has(id));
+
+      if (exist) {
+        count += sel.elements.length;
+      }
+
+      if (sel.editing) editing = true;
+
+      return exist;
+    });
+
+    return exist && count === this._selected.size && editing === this.editing;
+  }
+
   mount() {
     this.disposable.add(
       this._selection.slots.changed.on(selections => {
-        const { cursor, surface } = selections.reduce(
-          (p, s) => {
-            if (s.is('surface')) {
-              p.surface = s as SurfaceSelection;
-            } else if (s.is('cursor')) {
-              p.cursor = s as CursorSelection;
-            }
+        const { cursor = [], surface = [] } = groupBy(selections, sel => {
+          if (sel.is('surface')) {
+            return 'surface';
+          } else if (sel.is('cursor')) {
+            return 'cursor';
+          }
 
-            return p;
-          },
-          {} as { surface?: SurfaceSelection; cursor?: CursorSelection }
-        );
+          return 'none';
+        });
 
-        if (cursor && !this.cursor?.equals(cursor)) {
-          this._setCursor(cursor);
-          this.slots.cursorUpdated.emit(cursor);
+        assertType<CursorSelection[]>(cursor);
+        assertType<SurfaceSelection[]>(surface);
+
+        if (cursor[0] && !this.cursor?.equals(cursor[0])) {
+          this._setCursor(cursor[0]);
+          this.slots.cursorUpdated.emit(cursor[0]);
         }
 
-        if (
-          (!surface && this.state.isEmpty()) ||
-          (surface && this.state.equals(surface))
-        )
+        if ((surface.length === 0 && this.empty) || this.equals(surface)) {
           return;
+        }
 
-        this._setState(
-          surface ??
-            SurfaceSelection.fromJSON({
-              elements: [],
-              editing: false,
-            })
-        );
-        this.slots.updated.emit(this.state);
+        this._setState(surface);
+        this.slots.updated.emit(this.selections);
       })
     );
 
@@ -180,42 +215,73 @@ export class EdgelessSelectionManager {
 
         this.remoteCursor = remoteCursors;
         this.remoteSelection = remoteSelection;
-        this._remoteSelectedElements = remoteSelectedElements;
+        this._remoteSelected = remoteSelectedElements;
         this.slots.remoteUpdated.emit();
         this.slots.remoteCursorUpdated.emit();
       })
     );
   }
 
-  constructor(container: EdgelessPageBlockComponent) {
-    this.container = container;
-    this.mount();
-  }
-
-  isSelectedByRemote(element: string) {
-    return this._remoteSelectedElements.has(element);
+  /**
+   * check if element is selected by remote peers
+   * @param element
+   */
+  hasRemote(element: string) {
+    return this._remoteSelected.has(element);
   }
 
   /**
-   * check if the element is selected by local user
+   * check if the element is selected in local
    * @param element
    */
-  isSelected(element: string) {
-    return this._selectedElements.has(element);
+  has(element: string) {
+    return this._selected.has(element);
   }
 
-  setSelection(selection: SurfaceSelection | EdgelessSelectionState) {
-    const { surface } = this.container;
-    const instance = this._selection.getInstance(
-      'surface',
-      selection.elements,
-      selection.editing
-    );
+  set(selection: EdgelessSelectionState | SurfaceSelection[]) {
+    if (Array.isArray(selection)) {
+      this._selection.setGroup(
+        'edgeless',
+        this.cursor ? [...selection, this.cursor] : selection
+      );
+      return;
+    }
 
-    this._selection.setGroup(
-      'edgeless',
-      this.cursor ? [instance, this.cursor] : [instance]
-    );
+    const { surface } = this.container;
+    const { blocks = [], elements = [] } = groupBy(selection.elements, id => {
+      return this.container.page.getBlockById(id) ? 'blocks' : 'elements';
+    });
+    let instances: (SurfaceSelection | CursorSelection)[] = [];
+
+    if (elements.length > 0) {
+      instances.push(
+        this._selection.getInstance(
+          'surface',
+          this.container.surface.path,
+          elements,
+          selection.editing
+        )
+      );
+    }
+
+    if (blocks.length > 0) {
+      instances = instances.concat(
+        blocks.map(blockId =>
+          this._selection.getInstance(
+            'surface',
+            [this.container.page.root!.id, blockId],
+            [blockId],
+            selection.editing
+          )
+        )
+      );
+    }
+
+    if (this.cursor) {
+      instances.push(this.cursor);
+    }
+
+    this._selection.setGroup('edgeless', instances);
 
     if (
       selection.elements.length === 1 &&
@@ -239,14 +305,13 @@ export class EdgelessSelectionManager {
   setCursor(cursor: CursorSelection | CursorSelectionState) {
     const instance = this._selection.getInstance('cursor', cursor.x, cursor.y);
 
-    this._selection.setGroup('edgeless', [this.state, instance]);
+    this._selection.setGroup('edgeless', [...this.selections, instance]);
   }
 
   clear() {
     this._selection.clear();
 
-    this.setSelection({
-      blockId: '',
+    this.set({
       elements: [],
       editing: false,
     });

@@ -98,7 +98,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
-    this.edgeless.selectionManager.setSelection({
+    this.edgeless.selectionManager.set({
       elements: [],
       editing: false,
     });

@@ -63,7 +63,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
         frame.pop('xywh');
       });
       this._edgeless.tools.setEdgelessTool({ type: 'default' });
-      this._edgeless.selectionManager.setSelection({
+      this._edgeless.selectionManager.set({
         elements: [this._frame.id],
         editing: false,
       });

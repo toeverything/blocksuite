@@ -435,8 +435,7 @@ export class EdgelessToolsManager {
 
   setEdgelessTool = (
     edgelessTool: EdgelessTool,
-    state: EdgelessSelectionState | SurfaceSelection = {
-      blockId: '',
+    state: EdgelessSelectionState | SurfaceSelection[] = {
       elements: [],
       editing: false,
     }
@@ -452,14 +451,16 @@ export class EdgelessToolsManager {
 
     if (
       type === 'default' &&
-      !state['elements'].length &&
+      (Array.isArray(state)
+        ? this.selection.isEmpty(state)
+        : state.elements.length === 0) &&
       this.selection.lastState
     ) {
       state = this.selection.lastState;
     }
 
+    this.selection.set(state);
     this.container.slots.edgelessToolUpdated.emit(edgelessTool);
-    this.selection.setSelection(state);
     this._controllers[lastType].afterModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };

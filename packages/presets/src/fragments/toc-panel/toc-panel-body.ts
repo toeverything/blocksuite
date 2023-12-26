@@ -338,7 +338,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       this._selected = [id];
     }
 
-    this.edgeless?.selectionManager.setSelection({
+    this.edgeless?.selectionManager.set({
       elements: this._selected,
       editing: false,
     });
@@ -396,7 +396,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     }
 
     this._selected = [];
-    this.edgeless?.selectionManager.setSelection({
+    this.edgeless?.selectionManager.set({
       elements: this._selected,
       editing: false,
     });

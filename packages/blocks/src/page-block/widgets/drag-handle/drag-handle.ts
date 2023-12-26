@@ -790,6 +790,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       const surfaceElementId = noteId ? noteId : getNoteId(blockElements[0]);
       const surfaceSelection = selection.getInstance(
         'surface',
+        blockElements[0]!.path,
         [surfaceElementId],
         true
       );
@@ -814,7 +815,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
     return (
       edgelessPage.selectionManager.editing &&
-      edgelessPage.selectionManager.state.elements[0] === noteBlockId
+      edgelessPage.selectionManager.selectedIds[0] === noteBlockId
     );
   };
 
@@ -908,7 +909,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   };
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
-    if (this.page.readonly || this.dragging) {
+    if (this.page.readonly || this.dragging || !this.isConnected) {
       this._hide();
       return;
     }
