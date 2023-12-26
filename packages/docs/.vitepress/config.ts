@@ -20,8 +20,8 @@ export default defineConfig({
       {
         text: 'Editors',
         items: [
-          { text: '🚧 DocEditor', link: '#' },
-          { text: '🚧 EdgelessEditor', link: '#' },
+          { text: '📝 DocEditor', link: '#' },
+          { text: '🎨 EdgelessEditor', link: '#' },
         ],
       },
       {
@@ -46,6 +46,7 @@ export default defineConfig({
       {
         text: 'Essentials',
         items: [
+          { text: 'Component Types', link: '/component-types' },
           { text: 'Block Basics', link: '/block-basics' },
           { text: 'Data Persistence', link: '/data-persistence' },
           { text: '🚧 Customize Blocks' },
