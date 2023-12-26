@@ -80,13 +80,13 @@ export class TOCPanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  hidePreviewIcon!: boolean;
+  showPreviewIcon!: boolean;
 
   @property({ attribute: false })
   enableNotesSorting!: boolean;
 
   @property({ attribute: false })
-  toggleHidePreviewIcon!: (on: boolean) => void;
+  toggleShowPreviewIcon!: (on: boolean) => void;
 
   @property({ attribute: false })
   toggleNotesSorting!: () => void;
@@ -151,8 +151,8 @@ export class TOCPanelHeader extends WithDisposable(LitElement) {
       </div>
       <div class="note-preview-setting-container">
         <toc-note-preview-setting-menu
-          .hideIcon=${this.hidePreviewIcon}
-          .toggleHideIcon=${this.toggleHidePreviewIcon}
+          .showPreviewIcon=${this.showPreviewIcon}
+          .toggleShowPreviewIcon=${this.toggleShowPreviewIcon}
         ></toc-note-preview-setting-menu>
       </div>`;
   }

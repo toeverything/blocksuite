@@ -165,7 +165,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
   number!: number;
 
   @property({ attribute: false })
-  hidePreviewIcon!: boolean;
+  showPreviewIcon!: boolean;
 
   @property({ attribute: false })
   enableNotesSorting!: boolean;
@@ -211,7 +211,6 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     this._noteDisposables = new DisposableGroup();
     this._noteDisposables.add(
       this.note.childrenUpdated.on(() => {
-        console.log('children updated');
         this.requestUpdate();
       })
     );
@@ -329,7 +328,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
             ${children.map(block => {
               return html`<toc-block-preview
                 .block=${block}
-                .hidePreviewIcon=${this.hidePreviewIcon}
+                .showPreviewIcon=${this.showPreviewIcon}
                 .disabledIcon=${this.invisible}
                 .cardNumber=${this.number}
                 .enableNotesSorting=${this.enableNotesSorting}

@@ -145,7 +145,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   block!: ValuesOf<BlockModels>;
 
   @property({ attribute: false })
-  hidePreviewIcon!: boolean;
+  showPreviewIcon!: boolean;
 
   @property({ attribute: false })
   enableNotesSorting!: boolean;
@@ -208,7 +208,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     });
 
     return html`<span class="text subtype ${block.type}">${previewText}</span>
-      ${!this.hidePreviewIcon
+      ${this.showPreviewIcon
         ? html`<span class=${iconClass}>${previewIconMap[block.type]}</span>`
         : nothing}`;
   }
@@ -259,7 +259,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
           <span class="text general"
             >${block.title || block.url || placeholderMap['bookmark']}</span
           >
-          ${!this.hidePreviewIcon
+          ${this.showPreviewIcon
             ? html`<span class=${iconClass}
                 >${previewIconMap['bookmark']}</span
               >`
@@ -271,7 +271,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
           <span class="text general"
             >${block.language ?? placeholderMap['code']}</span
           >
-          ${!this.hidePreviewIcon
+          ${this.showPreviewIcon
             ? html`<span class=${iconClass}>${previewIconMap['code']}</span>`
             : nothing}
         `;
@@ -283,7 +283,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
               ? block.title.toString()
               : placeholderMap['database']}</span
           >
-          ${!this.hidePreviewIcon
+          ${this.showPreviewIcon
             ? html`<span class=${iconClass}>${previewIconMap['table']}</span>`
             : nothing}
         `;
@@ -295,7 +295,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
               ? block.caption
               : placeholderMap['image']}</span
           >
-          ${!this.hidePreviewIcon
+          ${this.showPreviewIcon
             ? html`<span class=${iconClass}>${previewIconMap['image']}</span>`
             : nothing}
         `;
@@ -307,7 +307,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
               ? block.name
               : placeholderMap['attachment']}</span
           >
-          ${!this.hidePreviewIcon
+          ${this.showPreviewIcon
             ? html`<span class=${iconClass}
                 >${previewIconMap['attachment']}</span
               >`

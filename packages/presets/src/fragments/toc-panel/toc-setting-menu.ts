@@ -58,10 +58,10 @@ export class TOCNotePreviewSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  hideIcon = false;
+  showPreviewIcon!: boolean;
 
   @property({ attribute: false })
-  toggleHideIcon!: (on: boolean) => void;
+  toggleShowPreviewIcon!: (on: boolean) => void;
 
   override render() {
     return html`<div
@@ -72,11 +72,11 @@ export class TOCNotePreviewSettingMenu extends WithDisposable(LitElement) {
         <div class="setting-label">Settings</div>
       </div>
       <div class="note-preview-setting-menu-item action">
-        <div class="action-label">Hide type icon</div>
+        <div class="action-label">Show type icon</div>
         <div class="toggle-button">
           <toggle-switch
-            .on=${this.hideIcon}
-            .onChange=${this.toggleHideIcon}
+            .on=${this.showPreviewIcon}
+            .onChange=${this.toggleShowPreviewIcon}
           ></toggle-switch>
         </div>
       </div>

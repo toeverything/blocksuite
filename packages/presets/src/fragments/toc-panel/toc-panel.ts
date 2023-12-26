@@ -44,7 +44,7 @@ export class TOCPanel extends WithDisposable(LitElement) {
   editor!: AffineEditorContainer;
 
   @property({ attribute: false })
-  hidePreviewIcon = true;
+  showPreviewIcon = false;
 
   @property({ attribute: false })
   enableNotesSorting = false;
@@ -68,13 +68,12 @@ export class TOCPanel extends WithDisposable(LitElement) {
     return this.editor.mode;
   }
 
-  private _toggleHidePreviewIcon = (on: boolean) => {
-    this.hidePreviewIcon = on;
+  private _toggleShowPreviewIcon = (on: boolean) => {
+    this.showPreviewIcon = on;
   };
 
   private _toggleNotesSorting = () => {
     this.enableNotesSorting = !this.enableNotesSorting;
-    console.log('toggle notes sorting: ', this.enableNotesSorting);
   };
 
   private _editorDisposables: DisposableGroup | null = null;
@@ -126,9 +125,9 @@ export class TOCPanel extends WithDisposable(LitElement) {
     return html`
       <div class="toc-panel-container">
         <toc-panel-header
-          .hidePreviewIcon=${this.hidePreviewIcon}
+          .showPreviewIcon=${this.showPreviewIcon}
           .enableNotesSorting=${this.enableNotesSorting}
-          .toggleHidePreviewIcon=${this._toggleHidePreviewIcon}
+          .toggleShowPreviewIcon=${this._toggleShowPreviewIcon}
           .toggleNotesSorting=${this._toggleNotesSorting}
         ></toc-panel-header>
         <toc-panel-body
@@ -138,7 +137,7 @@ export class TOCPanel extends WithDisposable(LitElement) {
           .edgeless=${this.edgeless}
           .editorHost=${this.host}
           .mode=${this.mode}
-          .hidePreviewIcon=${this.hidePreviewIcon}
+          .showPreviewIcon=${this.showPreviewIcon}
           .enableNotesSorting=${this.enableNotesSorting}
         >
         </toc-panel-body>
