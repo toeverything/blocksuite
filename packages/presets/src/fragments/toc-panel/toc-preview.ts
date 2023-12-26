@@ -17,7 +17,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import { SmallLinkedPageIcon } from '../_common/icons.js';
-import { placeholderMap, previewIconMap } from './config.js';
+import { headingKeys, placeholderMap, previewIconMap } from './config.js';
 
 type ValuesOf<T, K extends keyof T = keyof T> = T[K];
 
@@ -145,7 +145,10 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   block!: ValuesOf<BlockModels>;
 
   @property({ attribute: false })
-  hidePreviewIcon!: boolean;
+  showPreviewIcon!: boolean;
+
+  @property({ attribute: false })
+  enableNotesSorting!: boolean;
 
   @property({ attribute: false })
   disabledIcon = false;
@@ -205,7 +208,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     });
 
     return html`<span class="text subtype ${block.type}">${previewText}</span>
-      ${!this.hidePreviewIcon
+      ${this.showPreviewIcon
         ? html`<span class=${iconClass}>${previewIconMap[block.type]}</span>`
         : nothing}`;
   }
@@ -238,6 +241,11 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     const { block } = this;
     const iconClass = this.disabledIcon ? 'icon disabled' : 'icon';
 
+    const isHeadingBlock =
+      BlocksUtils.matchFlavours(block, ['affine:paragraph']) &&
+      headingKeys.has(block.type);
+    if (!this.enableNotesSorting && !isHeadingBlock) return nothing;
+
     switch (block.flavour as keyof BlockModels) {
       case 'affine:paragraph':
         assertType<ParagraphBlockModel>(block);
@@ -251,7 +259,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
           <span class="text general"
             >${block.title || block.url || placeholderMap['bookmark']}</span
           >
-          ${!this.hidePreviewIcon
+          ${this.showPreviewIcon
             ? html`<span class=${iconClass}
                 >${previewIconMap['bookmark']}</span
               >`
@@ -263,7 +271,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
           <span class="text general"
             >${block.language ?? placeholderMap['code']}</span
           >
-          ${!this.hidePreviewIcon
+          ${this.showPreviewIcon
             ? html`<span class=${iconClass}>${previewIconMap['code']}</span>`
             : nothing}
         `;
@@ -275,7 +283,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
               ? block.title.toString()
               : placeholderMap['database']}</span
           >
-          ${!this.hidePreviewIcon
+          ${this.showPreviewIcon
             ? html`<span class=${iconClass}>${previewIconMap['table']}</span>`
             : nothing}
         `;
@@ -287,7 +295,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
               ? block.caption
               : placeholderMap['image']}</span
           >
-          ${!this.hidePreviewIcon
+          ${this.showPreviewIcon
             ? html`<span class=${iconClass}>${previewIconMap['image']}</span>`
             : nothing}
         `;
@@ -299,7 +307,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
               ? block.name
               : placeholderMap['attachment']}</span
           >
-          ${!this.hidePreviewIcon
+          ${this.showPreviewIcon
             ? html`<span class=${iconClass}
                 >${previewIconMap['attachment']}</span
               >`

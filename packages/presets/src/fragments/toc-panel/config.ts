@@ -74,3 +74,7 @@ export const placeholderMap = {
   attachment: 'Attachment',
   ...paragraphPlaceholderMap,
 };
+
+export const headingKeys = new Set(
+  Object.keys(paragraphPlaceholderMap).filter(key => key.startsWith('h'))
+);

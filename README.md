@@ -23,41 +23,46 @@
 
 ## Overview
 
-BlockSuite is an open-source toolkit for diverse content editing. It allows you to _compose_ your collaborative editing applications. This repository contains two essential parts:
+BlockSuite is a toolkit for building collaborative editing applications. It embraces the **_editor-agnostic_** approach to facilitate the development of more flexible, diverse, and scalable editable interfaces.
 
-- **A framework** for building block-based [structure editors](https://en.wikipedia.org/wiki/Structure_editor), providing foundational support for editor essentials such as [block schema](https://blocksuite.io/block-schema.html), [selection](https://blocksuite.io/selection-api.html), [rich text](https://github.com/toeverything/blocksuite/tree/master/packages/inline), [real-time collaboration](https://blocksuite.io/crdt-native-data-flow.html), and [UI component definition](https://blocksuite.io/block-view.html).
-- **Multiple first-party editors** capable of handling documents, whiteboards, and data grids. These editors are highly interoperable, and are already used by the [AFFiNE](https://github.com/toeverything/AFFiNE) project.
+In developing modern collaborative editing applications, the challenge lies not only in the internal implementation of the editor but also in the complex state management across many UI components. This means that the overall data flow of such applications should be consistently modeled and reused on a larger scale, reducing the interoperability cost between editor and non-editor components. **This is why BlockSuite completely separates the data model of collaborative content from the editor**. This allows any UI component, whether part of an editor or not, to simply **_attach_** to the same block tree document, **_composing_** a more flexible editing experience.
 
-By using BlockSuite, you can:
+![blocksuite-showcase-doc-edgeless-editors](./packages/docs/images/blocksuite-showcase-doc-edgeless-editors.jpg)
 
-- Reuse and extend block-based editors, like [document editor](https://try-blocksuite.vercel.app/starter/?init) and [whiteboard editor](https://try-blocksuite.vercel.app/).
-- Define custom blocks that could be shared across these editors.
-- Synchronize editor states over different providers (`IndexedDB`, `WebSocket`, `BroadcastChannel`, etc.) while automatically resolving merge conflicts.
-- Support document snapshot, clipboard, and interoperability with third-party formats through a universal data transforming model.
-- Fully construct your own block-based editor from scratch.
+Based on this concept, BlockSuite starts with a foundational block-based document model and independently implements a series of collaborative editing infrastructures, including editors. This means that with BlockSuite, you can choose to:
 
-The major packages in BlockSuite include the following:
+- Build a new editor from scratch based on the BlockSuite framework.
+- Or, reuse a variety of first-party editors based on BlockSuite right out of the box.
 
-- `@blocksuite/store`: CRDT-driven block state management, enabling editors to have built-in conflict resolution and time travel capabilities.
-- `@blocksuite/block-std`: The standard toolkit for working with editable blocks, including selections, events, services, commands and more.
-- `@blocksuite/lit`: The default view layer for rendering blocks and widgets as [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). It's built on top of [lit](https://lit.dev/) and the headless `block-std`, and could be replaced by alternative frameworks.
-- `@blocksuite/inline`: Atomic rich text _component_ used in BlockSuite. Every editable block could hold its own inline editor instances, leveraging the store to reconcile the block tree.
-- `@blocksuite/blocks`: Editable first-party blocks under the `affine` scope. The default AFFiNE editors are simply different implementations of the `affine:page` blocks.
-- `@blocksuite/presets`: The ready-to-use editors composed by blocks.
-- `@blocksuite/playground`: Default editor playground with local-first data persistence and real-time collaboration support.
+The BlockSuite project is structured around key packages, as illustrated in the diagram below:
 
-## Why BlockSuite?
+![blocksuite-package-overview.png](./packages/docs/images/blocksuite-package-overview.png)
 
-- 🧬 **CRDT-Native Collaboration**: At the heart of BlockSuite is its native use of CRDTs ([Conflict-free Replicated Data Types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)) as the single source of truth for data flow. This design sets it apart from traditional editors that often graft on real-time collaboration. By integrating CRDTs at its core, BlockSuite inherently supports advanced features like time travel (undo/redo) and automatic conflict resolution. This means smoother, more reliable collaborative editing without the need for additional layers or complex integrations.
-- 🧩 **Rich Text Orchestration Across Blocks**: BlockSuite diverges from the conventional monolithic rich text edit model. It enables each block to support its own atomic rich text component. This allows for granular control and flexibility in editing, which is especially powerful in complex documents where different sections require varied formatting and features.
-- 🎨 **Reusable Blocks Across Editors**: BlockSuite provides great interoperability of custom blocks across different editor types (document, whiteboard, etc.). This allows for a more consistent and efficient use of blocks, simplifying the development process by enabling the same block to function seamlessly in various editing environments.
-- 🔌 **Plug-and-Play Data Synchronization**: BlockSuite simplifies data synchronization with its provider-based approach. Connecting an editor instance to a provider automatically enables data synchronization. It supports incremental data sync, meaning only the changes are transmitted, enhancing efficiency and performance. It eliminates the need for explicit requests or complex synchronization logic, streamlining DX and ensuring data consistency across collaborative environments.
+These packages include:
+
+- An editor-agnostic collaborative editing framework, featuring:
+  - `@blocksuite/store`: A data layer for modeling collaborative document states. It is natively built on the CRDT library [Yjs](https://github.com/yjs/yjs), endowing all BlockSuite documents with built-in real-time collaboration and time-travel capabilities.
+  - `@blocksuite/inline`: Provides minimal rich text components for basic inline editing capabilities. BlockSuite allows the rich text content in different nodes of the block tree document to be split into many simple inline editors, making complex editable content conveniently composable. **This significantly reduces the complexity required to implement traditional rich text editing features**.
+  - `@blocksuite/block-std`: A standard library required for modeling complete UI editable blocks. Its capabilities cover the structure of block fields, events, selection, clipboard support, etc. Note that this package does not directly define UI components for blocks but defines an abstract layer for mapping the block tree to any web framework's component tree.
+  - `@blocksuite/lit`: An intermediate layer for adapting the block tree to the [lit](https://lit.dev/) framework component tree UI. It provides base components like `EditorHost` and `BlockElement` for specific block implementations to use. BlockSuite uses lit as the default framework because lit components are native web components, avoiding synchronization issues between the component tree and DOM tree during complex rich text editing.
+- A suite of editable components based on this framework, including:
+  - `@blocksuite/blocks`: Default block implementations for composing preset editors, including widgets belonging to each block.
+  - `@blocksuite/presets`: Plug-and-play editable components categorized into:
+    - `EditorPreset` with complete editing functionality, including the `DocEditor` with rich text editing capabilities, and the `EdgelessEditor` with whiteboard editing capabilities.
+    - `FragmentPreset` as auxiliary UI components. BlockSuite defines UI components that depend on document status outside of the editor as fragments (such as sidebars, panels, pop-ups, toolbars, etc.). They can have completely different lifecycles from the editor. Preset fragments include `CopilotPanel`, `FramePanel`, `OutlinePanel`, etc., mainly implemented to meet the needs of the [AFFiNE](https://github.com/toeverything/AFFiNE) project.
+
+The above design ensures that BlockSuite is built for scalability. In addition to extending custom blocks, here are what you can also conveniently achieve with BlockSuite:
+
+- Writing type-safe complex editing logic based on the [command](https://blocksuite.io/command-api.html) mechanism, similar to react hooks designed for document editing, contributing to the maintainability of complex editing applications.
+- Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshots](https://blocksuite.io/data-persistence.html#snapshot-api) and transformer mechanisms. This includes data conversion during import and export, as well as clipboard support.
+- Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the document's [provider](https://blocksuite.io/data-persistence.html#realtime-provider-based-persistence) mechanism.
+- State scheduling across multiple documents and simultaneous use of a single document in multiple editors based on an opt-in workspace mechanism.
 
 > 🚧 BlockSuite is currently in beta, with some extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
 
 ## Getting Started
 
-To learn how to start using BlockSuite, visit [blocksuite.io](https://blocksuite.io/quick-start.html).
+To try out BlockSuite, refer to the [Quick Start](https://blocksuite.io/quick-start.html) document and start with the preset editors in `@blocksuite/presets`.
 
 ## Resources
 
