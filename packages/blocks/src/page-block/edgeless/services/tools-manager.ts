@@ -10,9 +10,6 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 
 import {
   type EdgelessTool,
-  isDatabaseInput,
-  isInsideDocTitle,
-  isInsideEdgelessTextEditor,
   isMiddleButtonPressed,
   isPinchEvent,
   Point,
@@ -185,37 +182,16 @@ export class EdgelessToolsManager {
       this._dragging = true;
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
-      if (
-        !isInsideDocTitle(this.container.host, event.raw.target) &&
-        !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
       this._onContainerDragStart(event);
     });
     this._add('dragMove', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
-      if (
-        !isInsideDocTitle(this.container.host, event.raw.target) &&
-        !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
       this._onContainerDragMove(event);
     });
     this._add('dragEnd', ctx => {
       this._dragging = false;
       const event = ctx.get('pointerState');
-      if (
-        !isInsideDocTitle(this.container.host, event.raw.target) &&
-        !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
       this._onContainerDragEnd(event);
     });
     this._add('click', ctx => {
@@ -235,13 +211,6 @@ export class EdgelessToolsManager {
     this._add('pointerMove', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
-      if (
-        !isInsideDocTitle(this.container.host, event.raw.target) &&
-        !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
       this._onContainerPointerMove(event);
     });
     this._add('pointerDown', ctx => {
