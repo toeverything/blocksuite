@@ -389,7 +389,7 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
     if (!container) throw new Error('container not found');
 
     return {
-      id: container.selectionManager.state.elements[0],
+      id: container.selectionManager.selectedIds[0],
     };
   });
 
