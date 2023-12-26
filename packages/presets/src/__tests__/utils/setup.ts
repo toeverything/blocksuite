@@ -1,4 +1,4 @@
-import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models.js';
+import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import {
   type BlobStorage,
   type DocProviderCreator,
