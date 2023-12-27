@@ -58,7 +58,7 @@ The above design ensures that BlockSuite is built for scalability. In addition t
 - Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the document's [provider](https://blocksuite.io/data-persistence.html#realtime-provider-based-persistence) mechanism.
 - State scheduling across multiple documents and simultaneous use of a single document in multiple editors based on an opt-in workspace mechanism.
 
-> 🚧 BlockSuite is currently in beta, with some extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
+> 🚧 BlockSuite is currently in its early stage, with some extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
 
 ## Getting Started
 
