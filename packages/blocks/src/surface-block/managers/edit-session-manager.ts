@@ -31,9 +31,10 @@ import { TextAlign, TextVerticalAlign } from '../elements/consts.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
+  FillColorsSchema,
   SHAPE_TEXT_FONT_SIZE,
-  ShapeColorsSchema,
   ShapeType,
+  StrokeColorsSchema,
 } from '../elements/shape/consts.js';
 import type { SurfaceService } from '../surface-service.js';
 
@@ -65,8 +66,8 @@ const LastPropsSchema = z.object({
   }),
   shape: z.object({
     shapeType: ShapeTypeSchema,
-    fillColor: ShapeColorsSchema,
-    strokeColor: ShapeColorsSchema,
+    fillColor: FillColorsSchema,
+    strokeColor: StrokeColorsSchema,
     shapeStyle: ShapeStyleSchema,
     filled: z.boolean().optional(),
     strokeWidth: z.number().optional(),

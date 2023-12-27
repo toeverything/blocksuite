@@ -50,7 +50,7 @@ export interface GeneralShapeOptions {
   strokeStyle: StrokeStyle;
   radius?: number;
 }
-export const SHAPE_COLORS = [
+export const FILL_COLORS = [
   '--affine-palette-shape-yellow',
   '--affine-palette-shape-orange',
   '--affine-palette-shape-tangerine',
@@ -64,8 +64,9 @@ export const SHAPE_COLORS = [
   '--affine-palette-shape-white',
   '--affine-palette-transparent',
 ] as const;
+export const DEFAULT_SHAPE_FILL_COLOR = FILL_COLORS[0];
 
-export const ShapeColorsSchema = z.union([
+export const FillColorsSchema = z.union([
   z.literal('--affine-palette-shape-yellow'),
   z.literal('--affine-palette-shape-orange'),
   z.literal('--affine-palette-shape-tangerine'),
@@ -80,5 +81,34 @@ export const ShapeColorsSchema = z.union([
   z.literal('--affine-palette-transparent'),
 ]);
 
-export const DEFAULT_SHAPE_FILL_COLOR = SHAPE_COLORS[0];
-export const DEFAULT_SHAPE_STROKE_COLOR = SHAPE_COLORS[0];
+export const STROKE_COLORS = [
+  '--affine-palette-line-yellow',
+  '--affine-palette-line-orange',
+  '--affine-palette-line-tangerine',
+  '--affine-palette-line-red',
+  '--affine-palette-line-magenta',
+  '--affine-palette-line-purple',
+  '--affine-palette-line-green',
+  '--affine-palette-line-blue',
+  '--affine-palette-line-navy',
+  '--affine-palette-line-black',
+  '--affine-palette-line-white',
+  '--affine-palette-transparent',
+] as const;
+
+export const DEFAULT_SHAPE_STROKE_COLOR = STROKE_COLORS[0];
+
+export const StrokeColorsSchema = z.union([
+  z.literal('--affine-palette-line-yellow'),
+  z.literal('--affine-palette-line-orange'),
+  z.literal('--affine-palette-line-tangerine'),
+  z.literal('--affine-palette-line-red'),
+  z.literal('--affine-palette-line-magenta'),
+  z.literal('--affine-palette-line-purple'),
+  z.literal('--affine-palette-line-green'),
+  z.literal('--affine-palette-line-blue'),
+  z.literal('--affine-palette-line-navy'),
+  z.literal('--affine-palette-line-black'),
+  z.literal('--affine-palette-line-white'),
+  z.literal('--affine-palette-transparent'),
+]);
