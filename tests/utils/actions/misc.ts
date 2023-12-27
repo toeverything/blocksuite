@@ -1,25 +1,22 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type { ConsoleMessage, Locator, Page } from '@playwright/test';
-import { expect } from '@playwright/test';
-import lz from 'lz-string';
-
-import type { CssVariableName } from '../../../packages/blocks/src/_common/theme/css-variables.js';
-import type { RichText } from '../../../packages/blocks/src/index.js';
+import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
+import type { RichText } from '@blocks/index.js';
 import {
   type DatabaseBlockModel,
   type ListType,
   type ThemeObserver,
-} from '../../../packages/blocks/src/index.js';
-import { assertExists } from '../../../packages/global/src/utils.js';
-import {
-  type InlineRange,
-  type InlineRootElement,
-} from '../../../packages/inline/src/index.js';
-import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
-import type { PagesPanel } from '../../../packages/playground/apps/starter/components/pages-panel.js';
-import type { BaseBlockModel } from '../../../packages/store/src/index.js';
+} from '@blocks/index.js';
+import { assertExists } from '@global/utils.js';
+import { type InlineRange, type InlineRootElement } from '@inline/index.js';
+import type { DebugMenu } from '@playground/apps/starter/components/debug-menu.js';
+import type { PagesPanel } from '@playground/apps/starter/components/pages-panel.js';
+import type { ConsoleMessage, Locator, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
+import type { BaseBlockModel } from '@store/schema/index.js';
+import lz from 'lz-string';
+
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,

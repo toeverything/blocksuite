@@ -2,7 +2,6 @@ import './utils/declare-test-window.js';
 
 import { expect } from '@playwright/test';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { initDatabaseColumn } from './database/actions.js';
 import {
   activeNoteInEdgeless,
@@ -76,8 +75,7 @@ import {
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
-// eslint-disable-next-line no-empty-pattern
-test.beforeEach(async ({}, testInfo) => {
+test.beforeEach(async (_, testInfo) => {
   testInfo.snapshotSuffix = '';
 });
 

@@ -1,15 +1,11 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import type { ContentParser } from '../../packages/blocks/src/content-parser.js';
-import type { TestUtils } from '../../packages/blocks/src/index.js';
-import type { EditorHost } from '../../packages/lit/src/index.js';
-import type { DebugMenu } from '../../packages/playground/apps/starter/components/debug-menu.js';
-import type { AffineEditorContainer } from '../../packages/presets/src/index.js';
-import type {
-  BaseBlockModel,
-  Page,
-  Workspace,
-} from '../../packages/store/src/index.js';
-import type { DocProvider } from '../../packages/store/src/index.js';
+import type { ContentParser } from '@blocks/_legacy/content-parser/index.js';
+import type { TestUtils } from '@blocks/index.js';
+import type { EditorHost } from '@lit/element/index.js';
+import type { DebugMenu } from '@playground/apps/starter/components/debug-menu.js';
+import type { AffineEditorContainer } from '@presets/editors/index.js';
+import type { BaseBlockModel, Page, Workspace } from '@store/index.js';
+import type { DocProvider } from '@store/providers/type.js';
 
 declare global {
   interface Window {
