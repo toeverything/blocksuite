@@ -195,7 +195,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     this._index = this._index + 1;
     const element = elements[this._index];
     const bound = Bound.deserialize(element.xywh);
-    this.surface.edgeless.selectionManager.setSelection({
+    this.surface.edgeless.selectionManager.set({
       elements: [element.id],
       editing: false,
     });
@@ -208,7 +208,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     this._index = this._index - 1;
     const element = elements[this._index];
     const bound = Bound.deserialize(element.xywh);
-    this.surface.edgeless.selectionManager.setSelection({
+    this.surface.edgeless.selectionManager.set({
       elements: [element.id],
       editing: false,
     });

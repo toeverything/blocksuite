@@ -10,7 +10,11 @@ import {
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { assertExists, noop, Slot } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import {
+  type EditorHost,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -64,10 +68,10 @@ export class AffineEditorContainer
   @query('affine-edgeless-page')
   private _edgelessPage?: EdgelessPageBlockComponent;
 
-  get root() {
-    return this.mode === 'page'
-      ? this._docPage?.host
-      : this._edgelessPage?.host;
+  get host() {
+    return (
+      this.mode === 'page' ? this._docPage?.host : this._edgelessPage?.host
+    ) as EditorHost;
   }
 
   readonly themeObserver = new ThemeObserver();
@@ -85,7 +89,7 @@ export class AffineEditorContainer
 
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
-    const root = this.root;
+    const root = this.host;
     if (root) {
       await root.updateComplete;
     }

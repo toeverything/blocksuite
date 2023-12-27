@@ -2,6 +2,7 @@ import type { Page } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 
 import { MarkdownAdapter } from '../adapters/index.js';
+import { defaultImageProxyMiddleware } from './middlewares.js';
 import { createAssetsArchive, download } from './utils.js';
 
 export async function exportPage(page: Page) {
@@ -44,8 +45,12 @@ export async function importMarkdown({
   markdown,
   noteId,
 }: ImportMarkdownOptions) {
-  const job = new Job({ workspace: page.workspace });
+  const job = new Job({
+    workspace: page.workspace,
+    middlewares: [defaultImageProxyMiddleware],
+  });
   const adapter = new MarkdownAdapter();
+  adapter.applyConfigs(job.adapterConfigs);
   const snapshot = await adapter.toSliceSnapshot({
     file: markdown,
     assets: job.assetsManager,

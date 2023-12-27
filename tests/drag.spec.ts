@@ -1,7 +1,6 @@
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocks/_common/consts.js';
 import { expect } from '@playwright/test';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../packages/blocks/src/_common/consts.js';
 import {
   dragBetweenCoords,
   dragBetweenIndices,

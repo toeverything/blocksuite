@@ -48,7 +48,7 @@ The complete state update process in BlockSuite involves several distinct steps,
 
 ![block-std-data-flow](./images/block-std-data-flow.png)
 
-This update mechanism is depicted in the diagram above. Concepts such as [command](./command-api), [view](./block-view) and [event](./event-api) are further elaborated in other documentation sections for detailed understanding.
+This update mechanism is depicted in the diagram above. Concepts such as [command](./command), [view](./block-view) and [event](./event) are further elaborated in other documentation sections for detailed understanding.
 
 ## Summary
 

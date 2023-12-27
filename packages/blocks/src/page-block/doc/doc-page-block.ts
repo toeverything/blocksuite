@@ -124,12 +124,15 @@ export class DocPageBlockComponent extends BlockElement<
     viewportUpdated: new Slot<PageViewport>(),
   };
 
+  private _viewportElement: HTMLDivElement | null = null;
+
   get viewportElement(): HTMLDivElement {
-    const viewportElement = this.host.closest(
+    if (this._viewportElement) return this._viewportElement;
+    this._viewportElement = this.host.closest(
       '.affine-doc-viewport'
     ) as HTMLDivElement | null;
-    assertExists(viewportElement);
-    return viewportElement;
+    assertExists(this._viewportElement);
+    return this._viewportElement;
   }
 
   get viewport(): PageViewport {
@@ -267,7 +270,7 @@ export class DocPageBlockComponent extends BlockElement<
               .filter(sel => !sel.is('text') && !sel.is('block'))
               .concat([
                 sel.is('text')
-                  ? selection.getInstance('text', {
+                  ? selection.create('text', {
                       from: {
                         path: lastNoteChild.path,
                         index: lastNoteChild.model.text?.length ?? 0,
@@ -275,7 +278,7 @@ export class DocPageBlockComponent extends BlockElement<
                       },
                       to: null,
                     })
-                  : selection.getInstance('block', {
+                  : selection.create('block', {
                       path: lastNoteChild.path,
                     }),
               ])
@@ -319,7 +322,7 @@ export class DocPageBlockComponent extends BlockElement<
               .filter(sel => !sel.is('text') && !sel.is('block'))
               .concat([
                 sel.is('text')
-                  ? selection.getInstance('text', {
+                  ? selection.create('text', {
                       from: {
                         path: firstNoteChild.path,
                         index: 0,
@@ -327,7 +330,7 @@ export class DocPageBlockComponent extends BlockElement<
                       },
                       to: null,
                     })
-                  : selection.getInstance('block', {
+                  : selection.create('block', {
                       path: firstNoteChild.path,
                     }),
               ])
@@ -400,7 +403,7 @@ export class DocPageBlockComponent extends BlockElement<
 
       requestAnimationFrame(() => {
         this.host.selection.setGroup('note', [
-          this.host.selection.getInstance('text', {
+          this.host.selection.create('text', {
             from: {
               path: [this.model.id, noteId, paragraphId],
               index,

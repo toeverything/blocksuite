@@ -1,7 +1,7 @@
 # Block Schema
 
-::: warning
-This documentation is mostly written for BlockSuite maintainers. If you goal doesn't involve in contributing to the BlockSuite repository, here may not be the best place for getting started.
+::: info
+This document is preliminary and subject to refinement and updates for clarity and accuracy.
 :::
 
 In BlockSuite, all blocks should have a schema. The schema of the block describes the data structure of the block.

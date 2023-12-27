@@ -49,6 +49,11 @@ type HtmlToSliceSnapshotPayload = {
 export class HtmlAdapter extends BaseAdapter<Html> {
   private _notion = new NotionHtmlAdapter();
 
+  override applyConfigs(configs: Map<string, string>) {
+    this._notion.applyConfigs(configs);
+    super.applyConfigs(configs);
+  }
+
   override async fromPageSnapshot(
     payload: FromPageSnapshotPayload
   ): Promise<FromPageSnapshotResult<string>> {

@@ -1,14 +1,11 @@
-import { expect, type Locator, type Page } from '@playwright/test';
-
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type {
   RichTextCell,
   RichTextCellEditing,
-} from '../../packages/blocks/src/database-block/common/columns/rich-text/cell-renderer.js';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { ColumnType } from '../../packages/blocks/src/index.js';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { ZERO_WIDTH_SPACE } from '../../packages/inline/src/consts.js';
+} from '@blocks/database-block/common/columns/rich-text/cell-renderer.js';
+import type { ColumnType } from '@blocks/index.js';
+import { ZERO_WIDTH_SPACE } from '@inline/consts.js';
+import { expect, type Locator, type Page } from '@playwright/test';
+
 import {
   pressEnter,
   pressEscape,

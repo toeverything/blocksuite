@@ -1,5 +1,4 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, type PropertyValues, unsafeCSS } from 'lit';
@@ -57,7 +56,7 @@ export class TOCPanel extends WithDisposable(LitElement) {
   }
 
   get host() {
-    return this.editor.root as EditorHost;
+    return this.editor.host;
   }
 
   get edgeless() {
@@ -139,6 +138,7 @@ export class TOCPanel extends WithDisposable(LitElement) {
           .mode=${this.mode}
           .showPreviewIcon=${this.showPreviewIcon}
           .enableNotesSorting=${this.enableNotesSorting}
+          .toggleNotesSorting=${this._toggleNotesSorting}
         >
         </toc-panel-body>
       </div>

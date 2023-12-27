@@ -51,7 +51,7 @@ export const deleteTextCommand: Command<
   if (!to) {
     fromText.delete(from.index, from.length);
     ctx.std.selection.setGroup('note', [
-      ctx.std.selection.getInstance('text', {
+      ctx.std.selection.create('text', {
         from: {
           path: from.path,
           index: from.index,
@@ -81,7 +81,7 @@ export const deleteTextCommand: Command<
     });
 
   ctx.std.selection.setGroup('note', [
-    ctx.std.selection.getInstance('text', {
+    ctx.std.selection.create('text', {
       from: {
         path: to.path,
         index: to.index,

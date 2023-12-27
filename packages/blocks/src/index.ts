@@ -34,12 +34,14 @@ export {
 } from './_common/edgeless/frame/consts.js';
 export {
   ArrowDownSmallIcon,
+  CloseIcon,
   DualLinkIcon16,
   LinkedPageIcon,
   PageIcon,
   PlusIcon,
   TagsIcon,
 } from './_common/icons/index.js';
+export { type TreeNode } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export {
   ColorVariables,

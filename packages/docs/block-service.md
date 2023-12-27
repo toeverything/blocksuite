@@ -1,7 +1,7 @@
 # Block Service
 
-::: warning
-This documentation is mostly written for BlockSuite maintainers. If you goal doesn't involve in contributing to the BlockSuite repository, here may not be the best place for getting started.
+::: info
+This document is preliminary and subject to refinement and updates for clarity and accuracy.
 :::
 
 Each kind of block can register its own service, so as to define block-specific methods to be called during the editor lifecycle. The service is a class that extends the `BlockService` class:

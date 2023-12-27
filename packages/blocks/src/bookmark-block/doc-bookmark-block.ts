@@ -32,7 +32,7 @@ export class DocBookmarkBlockComponent extends WithDisposable(
     return this.block.model;
   }
 
-  get root() {
+  get host() {
     return this.block.host;
   }
 
@@ -43,7 +43,7 @@ export class DocBookmarkBlockComponent extends WithDisposable(
     }
 
     this.disposables.add(
-      this.root.selection.slots.changed.on(() => this.requestUpdate())
+      this.host.selection.slots.changed.on(() => this.requestUpdate())
     );
   }
 

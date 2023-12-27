@@ -1,5 +1,4 @@
 import { expect } from '@playwright/test';
-import { getFormatBar } from 'utils/query.js';
 
 import {
   dragBetweenCoords,
@@ -31,6 +30,7 @@ import {
   assertRowCount,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
+import { getFormatBar } from '../utils/query.js';
 import {
   assertColumnWidth,
   assertDatabaseCellRichTexts,

@@ -58,7 +58,7 @@ export class SelectionManager {
     return ctor.fromJSON(json);
   };
 
-  getInstance<T extends BlockSuite.SelectionType>(
+  create<T extends BlockSuite.SelectionType>(
     type: T,
     ...args: ConstructorParameters<BlockSuite.Selection[T]>
   ): BlockSuite.SelectionInstance[T] {
