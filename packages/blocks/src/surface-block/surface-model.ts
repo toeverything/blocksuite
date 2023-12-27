@@ -355,6 +355,12 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     this._elementModels.clear();
   }
 
+  getConnectors(id: string) {
+    return (this._elementToConnector.get(id) || []).map(
+      id => this.getElementById(id)!
+    );
+  }
+
   getGroup(id: string): ElementModel | null {
     return this._elementToGroup.has(id)
       ? this.getElementById(this._elementToGroup.get(id)!)
