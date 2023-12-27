@@ -2,7 +2,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { type LastProps } from '../../../../surface-block/managers/edit-session-storage.js';
+import { type LastProps } from '../../../../surface-block/managers/edit-session.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { type MenuPopper } from './common/create-popper.js';
 

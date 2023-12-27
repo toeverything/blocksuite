@@ -54,7 +54,7 @@ import {
   Vec,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
-import type { SerializedViewport } from '../../surface-block/managers/edit-session-storage.js';
+import type { SerializedViewport } from '../../surface-block/managers/edit-session.js';
 import { compare } from '../../surface-block/managers/group-manager.js';
 import type {
   IndexedCanvasUpdateEvent,
