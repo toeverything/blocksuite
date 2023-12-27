@@ -23,8 +23,6 @@ declare global {
       command3: Command;
       command4: Command;
     }
-
-    type Std = object;
   }
 }
 
@@ -33,12 +31,13 @@ describe('CommandManager', () => {
   let commandManager: CommandManager;
 
   beforeEach(() => {
+    // @ts-ignore
     std = {};
     commandManager = new CommandManager(std);
   });
 
   test('can add and execute a command', () => {
-    const command1: Command = vi.fn((ctx, next) => next());
+    const command1: Command = vi.fn((_ctx, next) => next());
     const command2: Command = vi.fn((_ctx, _next) => {});
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -53,9 +52,9 @@ describe('CommandManager', () => {
   });
 
   test('can chain multiple commands', () => {
-    const command1: Command = vi.fn((ctx, next) => next());
-    const command2: Command = vi.fn((ctx, next) => next());
-    const command3: Command = vi.fn((ctx, next) => next());
+    const command1: Command = vi.fn((_ctx, next) => next());
+    const command2: Command = vi.fn((_ctx, next) => next());
+    const command3: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -75,9 +74,9 @@ describe('CommandManager', () => {
   });
 
   test('skip commands if there is a command failed before them (`next` not executed)', () => {
-    const command1: Command = vi.fn((ctx, next) => next());
+    const command1: Command = vi.fn((_ctx, next) => next());
     const command2: Command = vi.fn((_ctx, _next) => {});
-    const command3: Command = vi.fn((ctx, next) => next());
+    const command3: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -99,11 +98,11 @@ describe('CommandManager', () => {
   test('can handle command failure', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const command1: Command = vi.fn((ctx, next) => next());
+    const command1: Command = vi.fn((_ctx, next) => next());
     const command2: Command = vi.fn((_ctx, _next) => {
       throw new Error('command2 failed');
     });
-    const command3: Command = vi.fn((ctx, next) => next());
+    const command3: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -124,7 +123,7 @@ describe('CommandManager', () => {
   });
 
   test('can pass data to command when calling a command', () => {
-    const command1: Command = vi.fn((ctx, next) => next());
+    const command1: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
 
@@ -141,7 +140,7 @@ describe('CommandManager', () => {
   });
 
   test('can add data to the command chain with `with` method', () => {
-    const command1: Command = vi.fn((ctx, next) => next());
+    const command1: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
 
@@ -159,7 +158,7 @@ describe('CommandManager', () => {
   });
 
   test('passes and updates context across commands', () => {
-    const command1: Command = vi.fn((ctx, next) =>
+    const command1: Command = vi.fn((_ctx, next) =>
       next({ commandData1: '123' })
     );
     const command2: Command<'commandData1'> = vi.fn((ctx, next) => {
@@ -178,7 +177,7 @@ describe('CommandManager', () => {
   });
 
   test('can execute an inline command', () => {
-    const inlineCommand: Command = vi.fn((ctx, next) => next());
+    const inlineCommand: Command = vi.fn((_ctx, next) => next());
 
     const success = commandManager.pipe().inline(inlineCommand).run();
 
@@ -189,7 +188,7 @@ describe('CommandManager', () => {
   test('should not continue with the rest of the chain if all commands in `try` fail', () => {
     const command1: Command = vi.fn((_ctx, _next) => {});
     const command2: Command = vi.fn((_ctx, _next) => {});
-    const command3: Command = vi.fn((ctx, next) => next());
+    const command3: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -208,9 +207,9 @@ describe('CommandManager', () => {
   });
 
   test('should not re-execute previous commands in the chain before `try`', () => {
-    const command1: Command = vi.fn((ctx, next) => next());
+    const command1: Command = vi.fn((_ctx, next) => next());
     const command2: Command = vi.fn((_ctx, _next) => {});
-    const command3: Command = vi.fn((ctx, next) => next());
+    const command3: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -230,8 +229,8 @@ describe('CommandManager', () => {
 
   test('should continue with the rest of the chain if one command in `try` succeeds', () => {
     const command1: Command = vi.fn((_ctx, _next) => {});
-    const command2: Command = vi.fn((ctx, next) => next());
-    const command3: Command = vi.fn((ctx, next) => next());
+    const command2: Command = vi.fn((_ctx, next) => next());
+    const command3: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -250,8 +249,8 @@ describe('CommandManager', () => {
   });
 
   test('should not execute any further commands in `try` after one succeeds', () => {
-    const command1: Command = vi.fn((ctx, next) => next());
-    const command2: Command = vi.fn((ctx, next) => next());
+    const command1: Command = vi.fn((_ctx, next) => next());
+    const command2: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -266,7 +265,7 @@ describe('CommandManager', () => {
   });
 
   test('should pass context correctly in `try` when a command succeeds', () => {
-    const command1: Command = vi.fn((ctx, next) =>
+    const command1: Command = vi.fn((_ctx, next) =>
       next({ commandData1: 'fromCommand1', commandData2: 'fromCommand1' })
     );
     const command2: Command<'commandData1' | 'commandData2'> = vi.fn(
@@ -304,8 +303,8 @@ describe('CommandManager', () => {
 
   test('should continue with the rest of the chain if at least one command in `tryAll` succeeds', () => {
     const command1: Command = vi.fn((_ctx, _next) => {});
-    const command2: Command = vi.fn((ctx, next) => next());
-    const command3: Command = vi.fn((ctx, next) => next());
+    const command2: Command = vi.fn((_ctx, next) => next());
+    const command3: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -324,9 +323,9 @@ describe('CommandManager', () => {
   });
 
   test('should execute all commands in `tryAll` even if one has already succeeded', () => {
-    const command1: Command = vi.fn((ctx, next) => next());
-    const command2: Command = vi.fn((ctx, next) => next());
-    const command3: Command = vi.fn((ctx, next) => next());
+    const command1: Command = vi.fn((_ctx, next) => next());
+    const command2: Command = vi.fn((_ctx, next) => next());
+    const command3: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -346,7 +345,7 @@ describe('CommandManager', () => {
   test('should not continue with the rest of the chain if all commands in `tryAll` fail', () => {
     const command1: Command = vi.fn((_ctx, _next) => {});
     const command2: Command = vi.fn((_ctx, _next) => {});
-    const command3: Command = vi.fn((ctx, next) => next());
+    const command3: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -365,7 +364,7 @@ describe('CommandManager', () => {
   });
 
   test('should pass context correctly in `tryAll` when at least one command succeeds', () => {
-    const command1: Command = vi.fn((ctx, next) =>
+    const command1: Command = vi.fn((_ctx, next) =>
       next({ commandData1: 'fromCommand1' })
     );
     const command2: Command<'commandData1'> = vi.fn((ctx, next) => {
@@ -412,10 +411,10 @@ describe('CommandManager', () => {
   });
 
   test('should not re-execute commands before `tryAll` after executing `tryAll`', () => {
-    const command1: Command = vi.fn((ctx, next) => next());
-    const command2: Command = vi.fn((ctx, next) => next());
+    const command1: Command = vi.fn((_ctx, next) => next());
+    const command2: Command = vi.fn((_ctx, next) => next());
     const command3: Command = vi.fn((_ctx, _next) => {});
-    const command4: Command = vi.fn((ctx, next) => next());
+    const command4: Command = vi.fn((_ctx, next) => next());
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);

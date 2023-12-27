@@ -100,3 +100,15 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
     }
   });
 };
+
+export const customImageProxyMiddleware = (
+  imageProxyURL: string
+): JobMiddleware => {
+  return ({ adapterConfigs }) => {
+    adapterConfigs.set('imageProxy', imageProxyURL);
+  };
+};
+
+export const defaultImageProxyMiddleware = customImageProxyMiddleware(
+  'https://workers.toeverything.workers.dev/proxy/image'
+);

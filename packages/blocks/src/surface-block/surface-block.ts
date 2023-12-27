@@ -12,7 +12,7 @@ import {
   type CssVariableName,
   isCssVariable,
 } from '../_common/theme/css-variables.js';
-import { getThemePropertyValue } from '../_common/theme/utils.js';
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import {
   type EdgelessElement,
   isInsideEdgelessEditor,
@@ -166,6 +166,8 @@ export class SurfaceBlockComponent extends BlockElement<
   private _lastTime = 0;
   private _cachedViewport = new Bound();
 
+  private readonly _themeObserver = new ThemeObserver();
+
   @query('edgeless-block-portal-container')
   portal!: EdgelessBlockPortalContainer;
 
@@ -263,12 +265,13 @@ export class SurfaceBlockComponent extends BlockElement<
     this._initEvents();
     this.layer.init([...this._elements.values(), ...this.blocks]);
     this.init();
+    this._initThemeObserver();
   }
 
   getCSSPropertyValue = (value: string) => {
-    const root = this.host;
     if (isCssVariable(value)) {
-      const cssValue = getThemePropertyValue(root, value as CssVariableName);
+      const cssValue =
+        this._themeObserver.cssVariables?.[value as CssVariableName];
       if (cssValue === undefined) {
         console.error(
           new Error(
@@ -344,6 +347,12 @@ export class SurfaceBlockComponent extends BlockElement<
       })
     );
   }
+
+  private _initThemeObserver = () => {
+    this._themeObserver.observe(document.documentElement);
+    this._themeObserver.on(() => this.requestUpdate());
+    this.disposables.add(() => this._themeObserver.dispose());
+  };
 
   private _getSortedSameGroupElements(element: EdgelessElement) {
     let elements: EdgelessElement[];

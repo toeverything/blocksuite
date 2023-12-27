@@ -41,6 +41,9 @@
     }
   },
   "files": [
-    "dist"
+    "src",
+    "dist",
+    "!src/__tests__",
+    "!dist/__tests__"
   ]
 }

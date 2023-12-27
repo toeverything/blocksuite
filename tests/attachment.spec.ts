@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
-import { moveToImage } from 'utils/actions/drag.js';
 
+import { moveToImage } from './utils/actions/drag.js';
 import {
   pressBackspace,
   pressEnter,

@@ -90,8 +90,6 @@ import {
 import { xywhArrayToObject } from './utils/convert.js';
 import { getCursorMode, isCanvasElement, isFrameBlock } from './utils/query.js';
 
-type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
-
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent extends BlockElement<
   PageBlockModel,
@@ -220,14 +218,17 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return this.service?.uiEventDispatcher;
   }
 
-  private _editorContainer: EdtitorContainer | null = null;
+  private _viewportElement: HTMLElement | null = null;
 
-  get editorContainer(): EdtitorContainer {
-    if (this._editorContainer) return this._editorContainer;
-    this._editorContainer = this.closest('affine-editor-container');
-    assertExists(this._editorContainer);
-    return this._editorContainer;
+  get viewportElement(): HTMLElement {
+    if (this._viewportElement) return this._viewportElement;
+    this._viewportElement = this.host.closest(
+      'edgeless-editor'
+    ) as HTMLElement | null;
+    assertExists(this._viewportElement);
+    return this._viewportElement;
   }
+
   private _resizeObserver: ResizeObserver | null = null;
 
   get surfaceBlockModel() {
@@ -532,7 +533,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     await Promise.all(uploadPromises);
 
     const blockIds = dropInfos.map(info => info.blockId);
-    this.selectionManager.setSelection({
+    this.selectionManager.set({
       elements: blockIds,
       editing: false,
     });
@@ -550,7 +551,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
-      this.selectionManager.setSelection({
+      this.selectionManager.set({
         elements: [noteBlock.id],
         editing: false,
       });
@@ -583,10 +584,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
-      this.selectionManager.setSelection(this.selectionManager.state);
+      this.selectionManager.set(this.selectionManager.selections);
     });
 
-    resizeObserver.observe(this.editorContainer);
+    resizeObserver.observe(this.viewportElement);
     this._resizeObserver = resizeObserver;
   }
 

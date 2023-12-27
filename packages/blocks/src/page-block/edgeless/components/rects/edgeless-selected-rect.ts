@@ -722,7 +722,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const id = typeof element === 'string' ? element : element.id;
 
-    if (this._resizeManager.bounds.has(id) || this.selection.isSelected(id))
+    if (this._resizeManager.bounds.has(id) || this.selection.has(id))
       this._updateSelectedRect();
   };
 

@@ -1,5 +1,4 @@
 import { expect, type Page } from '@playwright/test';
-import { captureHistory } from 'utils/actions/misc.js';
 
 import { clickView, dblclickView } from '../utils/actions/click.js';
 import {
@@ -24,6 +23,7 @@ import {
   type,
   undoByKeyboard,
 } from '../utils/actions/keyboard.js';
+import { captureHistory } from '../utils/actions/misc.js';
 import {
   assertCanvasElementsCount,
   assertEdgelessCanvasText,

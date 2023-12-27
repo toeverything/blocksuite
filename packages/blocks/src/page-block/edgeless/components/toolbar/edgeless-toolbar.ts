@@ -392,7 +392,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this._timer && clearTimeout(this._timer);
       document.exitFullscreen().catch(console.error);
     } else {
-      launchIntoFullscreen(this.edgeless.editorContainer);
+      launchIntoFullscreen(this.edgeless.viewportElement);
       this._timer = setTimeout(() => {
         this._currentFrameIndex = this._cachedIndex;
       }, 400);
@@ -584,6 +584,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
     const Content =
       type === 'frameNavigator' ? this._FrameNavigator : this._DefaultContent;
+
     return html`
       <style>
         .edgeless-toolbar-container {
@@ -603,6 +604,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         @dblclick=${stopPropagation}
         @mousedown=${stopPropagation}
         @pointerdown=${stopPropagation}
+        @mouseenter=${() => (this._mouseOnToolbar = true)}
         @mouseleave=${() => (this._mouseOnToolbar = false)}
       >
         ${Content}

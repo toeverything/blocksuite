@@ -103,12 +103,12 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 72px;
+      width: 60px;
       height: 24px;
     }
 
     .font-size-button-group .selected-font-size-label {
-      width: 52px;
+      width: 40px;
       height: 20px;
       line-height: 20px;
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
@@ -132,13 +132,13 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       stroke: none;
     }
 
-    .text-font-family-button {
-      font-family: var(--selected-font-family);
-    }
-
     component-toolbar-menu-divider {
       margin: 0 12px;
       height: 24px;
+    }
+
+    .text-color-button.shape {
+      margin-left: 12px;
     }
   `;
 
@@ -361,16 +361,14 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
-    if (this.elementType === 'text') {
-      this._colorSelectorPopper = createButtonPopper(
-        this._textColorButton,
-        this._textColorMenu,
-        ({ display }) => {
-          this._textColorPopperShow = display === 'show';
-        }
-      );
-      _disposables.add(this._colorSelectorPopper);
-    }
+    this._colorSelectorPopper = createButtonPopper(
+      this._textColorButton,
+      this._textColorMenu,
+      ({ display }) => {
+        this._textColorPopperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._colorSelectorPopper);
 
     this._textFontFamilyPopper = createButtonPopper(
       this._textFontFamilyButton,
@@ -409,11 +407,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     _disposables.add(this._textFontWeightAndStylePopper);
 
     super.firstUpdated(changedProperties);
-  }
-
-  override updated() {
-    const selectedFontFamily = this._getMostCommonFontFamily(this.elements);
-    this.style.setProperty('--selected-font-family', selectedFontFamily);
   }
 
   override render() {
@@ -464,7 +457,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         @click=${() => this._textFontFamilyPopper?.toggle()}
       >
         <div class="button-with-arrow-group">
-          <span>Aa</span>${SmallArrowDownIcon}
+          <span style=${`font-family:"${selectedFontFamily}";`}>Aa</span
+          >${SmallArrowDownIcon}
         </div>
       </edgeless-tool-icon-button>
       <div class="font-family-panel-container text-font-family">
@@ -474,6 +468,31 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
             this._setFontFamily(value)}
         ></edgeless-font-family-panel>
       </div>
+
+      ${this.elementType === 'shape'
+        ? html`<edgeless-tool-icon-button
+              class="text-color-button shape"
+              .tooltip=${this._textColorPopperShow ? '' : 'Text Color'}
+              .tipPosition=${'bottom'}
+              .active=${false}
+              .activeMode=${'background'}
+              .iconContainerPadding=${2}
+              @click=${() => this._colorSelectorPopper?.toggle()}
+            >
+              <div class="text-color-unit-container">
+                ${ColorUnit(selectedColor)}
+              </div>
+            </edgeless-tool-icon-button>
+            <div class="color-panel-container text-color">
+              <edgeless-color-panel
+                .value=${selectedColor}
+                .options=${LINE_COLORS}
+                @select=${(event: ColorEvent) => {
+                  this._setTextColor(event.detail);
+                }}
+              ></edgeless-color-panel>
+            </div>`
+        : nothing}
 
       <component-toolbar-menu-divider></component-toolbar-menu-divider>
 

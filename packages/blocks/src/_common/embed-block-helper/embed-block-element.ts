@@ -82,7 +82,7 @@ export class EmbedBlockElement<
       const isInSurface = blockComponent.isInSurface;
       if (!isInSurface) {
         this.host.selection.setGroup('note', [
-          this.host.selection.getInstance('block', {
+          this.host.selection.create('block', {
             path: blockComponent.path,
           }),
         ]);

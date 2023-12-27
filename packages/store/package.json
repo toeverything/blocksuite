@@ -61,7 +61,10 @@
     }
   },
   "files": [
+    "src",
     "dist",
-    "providers"
+    "providers",
+    "!src/__tests__",
+    "!dist/__tests__"
   ]
 }

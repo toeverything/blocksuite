@@ -36,6 +36,7 @@ export type JobConfig = {
 export class Job {
   private readonly _workspace: Workspace;
   private readonly _assetsManager: AssetsManager;
+  private readonly _adapterConfigs: Map<string, string> = new Map();
 
   private readonly _slots: JobSlots = {
     beforeImport: new Slot<BeforeImportPayload>(),
@@ -53,6 +54,7 @@ export class Job {
         slots: this._slots,
         assetsManager: this._assetsManager,
         workspace: this._workspace,
+        adapterConfigs: this._adapterConfigs,
       });
     });
   }
@@ -63,6 +65,10 @@ export class Job {
 
   get assets() {
     return this._assetsManager.getAssets();
+  }
+
+  get adapterConfigs() {
+    return this._adapterConfigs;
   }
 
   reset() {

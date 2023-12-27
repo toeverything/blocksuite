@@ -324,7 +324,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
           return selList
             .filter(sel => !sel.is('block'))
             .concat(
-              selection.getInstance('text', {
+              selection.create('text', {
                 from: {
                   path,
                   index: 0,
@@ -657,7 +657,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   private _focusBlock() {
     this.selection.update(() => {
-      return [this.selection.getInstance('block', { path: this.path })];
+      return [this.selection.create('block', { path: this.path })];
     });
   }
 

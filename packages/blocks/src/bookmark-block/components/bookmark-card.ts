@@ -173,7 +173,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
   private _onCardClick() {
     const selectionManager = this.bookmark.host.selection;
-    const blockSelection = selectionManager.getInstance('block', {
+    const blockSelection = selectionManager.create('block', {
       path: this.bookmark.path,
     });
     selectionManager.setGroup('note', [blockSelection]);

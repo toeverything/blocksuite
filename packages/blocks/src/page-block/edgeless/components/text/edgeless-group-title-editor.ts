@@ -85,7 +85,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
     this.group.showTitle = true;
-    this.edgeless.selectionManager.setSelection({
+    this.edgeless.selectionManager.set({
       elements: [this.group.id],
       editing: false,
     });

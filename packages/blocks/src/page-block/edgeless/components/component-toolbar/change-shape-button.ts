@@ -159,7 +159,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         fill: var(--affine-icon-color);
       }
 
-      .stroke-color-button {
+      .border-styles-button {
         margin-left: 12px;
       }
 
@@ -506,6 +506,8 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           </edgeless-color-panel>
         </div>
 
+        <component-toolbar-menu-divider></component-toolbar-menu-divider>
+
         <edgeless-tool-icon-button
           class="stroke-color-button"
           .tooltip=${this._showPopper ? '' : 'Border color'}
@@ -528,9 +530,8 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           </edgeless-color-panel>
         </div>
 
-        <component-toolbar-menu-divider></component-toolbar-menu-divider>
-
         <edgeless-tool-icon-button
+          class="border-styles-button"
           .tooltip=${this._showPopper ? '' : 'Border style'}
           .tipPosition=${'bottom'}
           .active=${false}

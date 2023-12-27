@@ -296,7 +296,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     });
 
     mountShapeTextEditor(surface.pickById(id) as ShapeElement, this.edgeless);
-    edgeless.selectionManager.setSelection({
+    edgeless.selectionManager.set({
       elements: [id],
       editing: true,
     });
@@ -332,7 +332,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     surface.updateElement<CanvasElementType.CONNECTOR>(this.connector.id, {
       target: { id, position },
     });
-    this.edgeless.selectionManager.setSelection({
+    this.edgeless.selectionManager.set({
       elements: [id],
       editing: true,
     });
@@ -367,7 +367,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     surface.updateElement<CanvasElementType.CONNECTOR>(this.connector.id, {
       target: { id, position },
     });
-    edgeless.selectionManager.setSelection({
+    edgeless.selectionManager.set({
       elements: [frame.id],
       editing: false,
     });
@@ -385,7 +385,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     surface.updateElement<CanvasElementType.CONNECTOR>(this.connector.id, {
       target: { id, position },
     });
-    this.edgeless.selectionManager.setSelection({
+    this.edgeless.selectionManager.set({
       elements: [id],
       editing: false,
     });

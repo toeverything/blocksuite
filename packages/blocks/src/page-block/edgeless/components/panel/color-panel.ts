@@ -85,7 +85,7 @@ function TransparentColor(hollowCircle = false) {
     left: '3px',
     top: '3.5px',
     borderRadius: '50%',
-    background: 'var(--affine-popover-background)',
+    background: 'var(--affine-background-overlay-panel-color)',
   };
 
   const mask = hollowCircle
@@ -207,7 +207,7 @@ export class EdgelessColorPanel extends LitElement {
       gap: 12px;
       box-sizing: border-box;
       width: 200px;
-      background: var(--affine-popover-background);
+      background: var(--affine-background-overlay-panel-color);
     }
 
     ${colorContainerStyles}

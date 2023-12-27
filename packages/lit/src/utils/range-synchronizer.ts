@@ -188,7 +188,7 @@ export class RangeSynchronizer {
         });
     });
 
-    const newSelection = this._selectionManager.getInstance('text', {
+    const newSelection = this._selectionManager.create('text', {
       from: {
         path: from.path,
         index: from.index + (event.data?.length ?? 0),

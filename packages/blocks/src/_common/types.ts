@@ -25,12 +25,6 @@ export interface IPoint {
   y: number;
 }
 
-export interface BlockTransformContext {
-  childText?: string;
-  begin?: number;
-  end?: number;
-}
-
 export interface EditingState {
   element: BlockComponent;
   model: BaseBlockModel;

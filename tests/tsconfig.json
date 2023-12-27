@@ -3,7 +3,18 @@
   "compilerOptions": {
     "baseUrl": ".",
     "noEmit": true,
-    "composite": false
+    "composite": false,
+    "paths": {
+      "@blocks/*": ["../packages/blocks/src/*"],
+      "@block-std/*": ["../packages/block-std/src/*"],
+      "@global/*": ["../packages/global/src/*"],
+      "@inline/*": ["../packages/inline/src/*"],
+      "@lit/*": ["../packages/lit/src/*"],
+      "@store/provider/*": ["../packages/store/provider/*"],
+      "@store/*": ["../packages/store/src/*"],
+      "@presets/*": ["../packages/presets/src/*"],
+      "@playground/*": ["../packages/playground/*"]
+    }
   },
   "include": ["**.spec.ts", "**.test.ts", "**/**.ts"]
 }

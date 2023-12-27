@@ -1,11 +1,7 @@
 import './chat-with-workspace/chat-with-workspace.js';
 
 import { FrameBlockModel } from '@blocksuite/blocks';
-import {
-  type EditorHost,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -97,8 +93,8 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     return this.editor.page;
   }
 
-  get root() {
-    return this.editor.root as EditorHost;
+  get host() {
+    return this.editor.host;
   }
 
   public override connectedCallback() {
@@ -113,7 +109,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   private async _replace() {
     if (!this._result) return;
 
-    const selectedBlocks = await getSelectedBlocks(this.root);
+    const selectedBlocks = await getSelectedBlocks(this.host);
     if (!selectedBlocks.length) return;
 
     const firstBlock = selectedBlocks[0];
@@ -128,7 +124,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     });
 
     const models = await insertFromMarkdown(
-      this.root,
+      this.host,
       this._result,
       parentBlock.model.id,
       firstIndex
@@ -137,15 +133,15 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       const parentPath = firstBlock.parentPath;
       const selections = models
         .map(model => [...parentPath, model.id])
-        .map(path => this.root.selection.getInstance('block', { path }));
-      this.root.selection.setGroup('note', selections);
+        .map(path => this.host.selection.create('block', { path }));
+      this.host.selection.setGroup('note', selections);
     }, 0);
   }
 
   private async _insertBelow() {
     if (!this._result) return;
 
-    const selectedBlocks = await getSelectedBlocks(this.root);
+    const selectedBlocks = await getSelectedBlocks(this.host);
     const blockLength = selectedBlocks.length;
     if (!blockLength) return;
 
@@ -157,7 +153,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     ) as number;
 
     const models = await insertFromMarkdown(
-      this.root,
+      this.host,
       this._result,
       parentBlock.model.id,
       lastIndex + 1
@@ -167,8 +163,8 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       const parentPath = lastBlock.parentPath;
       const selections = models
         .map(model => [...parentPath, model.id])
-        .map(path => this.root.selection.getInstance('block', { path }));
-      this.root.selection.setGroup('note', selections);
+        .map(path => this.host.selection.create('block', { path }));
+      this.host.selection.setGroup('note', selections);
     }, 0);
   }
 
@@ -263,7 +259,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     key: K,
     payload: Omit<GPTAPIPayloadMap[K], 'input'>
   ) => {
-    const input = await getSelectedTextContent(this.root);
+    const input = await getSelectedTextContent(this.host);
     if (!input) {
       alert('Please select some text first');
       return;

@@ -17,6 +17,7 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel';
 import './side-panel';
 
+import type { TreeNode } from '@blocksuite/blocks';
 import {
   BlocksUtils,
   ColorVariables,
@@ -29,7 +30,6 @@ import {
   type SurfaceBlockComponent,
   ZipTransformer,
 } from '@blocksuite/blocks';
-import type { TreeNode } from '@blocksuite/blocks/_common/mind-map/draw';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -50,10 +50,10 @@ import type { Pane } from 'tweakpane';
 
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
-import type { CustomTOCOutlinePanel } from './custom-toc-outline-panel.js';
-import type { LeftSidePanel } from './left-side-panel';
-import type { PagesPanel } from './pages-panel';
-import type { SidePanel } from './side-panel';
+import type { CustomOutlinePanel } from './custom-outline-panel.js';
+import type { LeftSidePanel } from './left-side-panel.js';
+import type { PagesPanel } from './pages-panel.js';
+import type { SidePanel } from './side-panel.js';
 
 export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
   const { page } = editor;
@@ -204,7 +204,7 @@ export class DebugMenu extends ShadowlessElement {
   contentParser!: ContentParser;
 
   @property({ attribute: false })
-  navigationPanel!: CustomTOCOutlinePanel;
+  outlinePanel!: CustomOutlinePanel;
 
   @property({ attribute: false })
   framePanel!: CustomFramePanel;
@@ -262,7 +262,7 @@ export class DebugMenu extends ShadowlessElement {
     super.connectedCallback();
 
     const readSelectionFromURL = async () => {
-      const root = this.editor.root;
+      const root = this.editor.host;
       if (!root) {
         await new Promise(resolve => {
           setTimeout(resolve, 500);
@@ -321,8 +321,8 @@ export class DebugMenu extends ShadowlessElement {
     }
   }
 
-  private _toggleNavigationPanel() {
-    this.navigationPanel.toggleDisplay();
+  private _toggleOutlinePanel() {
+    this.outlinePanel.toggleDisplay();
   }
 
   private _toggleFramePanel() {
@@ -363,7 +363,7 @@ export class DebugMenu extends ShadowlessElement {
         children,
       };
     };
-    const blocks = getSelectedBlocks(this.editor.root!);
+    const blocks = getSelectedBlocks(this.editor.host!);
     const toTreeNode = (block: BaseBlockModel): TreeNode => {
       return {
         text: block.text?.toString() ?? '',
@@ -480,7 +480,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _shareSelection() {
-    const selection = this.editor.root?.selection.value;
+    const selection = this.editor.host?.selection.value;
     if (!selection || selection.length === 0) {
       return;
     }
@@ -684,7 +684,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._switchOffsetMode}>
                 Switch Offset Mode
               </sl-menu-item>
-              <sl-menu-item @click=${this._toggleNavigationPanel}>
+              <sl-menu-item @click=${this._toggleOutlinePanel}>
                 Toggle TOC Outline Panel
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleFramePanel}>

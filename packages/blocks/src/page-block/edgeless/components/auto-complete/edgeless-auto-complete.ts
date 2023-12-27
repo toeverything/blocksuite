@@ -274,7 +274,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       });
     }
 
-    this.edgeless.selectionManager.setSelection({
+    this.edgeless.selectionManager.set({
       elements: [id],
       editing: true,
     });

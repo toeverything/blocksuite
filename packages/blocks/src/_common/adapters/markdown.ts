@@ -29,6 +29,7 @@ import type { SerializedCells } from '../../database-block/database-model.js';
 import type { Column } from '../../database-block/types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { remarkGfm } from './gfm.js';
+import { fetchImage } from './utils.js';
 
 export type Markdown = string;
 
@@ -806,7 +807,11 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               }
             });
           } else {
-            const res = await fetch(o.node.url);
+            const res = await fetchImage(
+              o.node.url,
+              undefined,
+              this.configs.get('imageProxy') as string
+            );
             const clonedRes = res.clone();
             const file = new File(
               [await res.blob()],

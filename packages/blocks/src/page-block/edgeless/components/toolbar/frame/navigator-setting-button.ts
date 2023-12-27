@@ -47,7 +47,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   `;
 
   @state()
-  blackBackground = false;
+  blackBackground = true;
 
   @property({ attribute: false })
   popperShow = false;
