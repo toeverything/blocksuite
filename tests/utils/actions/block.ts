@@ -1,9 +1,7 @@
+import type { Flavour } from '@blocks/models.js';
+import type { BlockElement } from '@lit/element/index.js';
 import type { Page } from '@playwright/test';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { Flavour } from '../../../packages/blocks/src/index.js';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { BlockElement } from '../../../packages/lit/src/index.js';
 import { waitNextFrame } from './misc.js';
 
 export async function updateBlockType(

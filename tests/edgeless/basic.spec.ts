@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-
+import { NOTE_WIDTH } from '@blocks/_common/consts.js';
+import { assertExists } from '@global/utils/index.js';
 import { expect } from '@playwright/test';
 
-import { NOTE_WIDTH } from '../../packages/blocks/src/_common/consts.js';
-import { assertExists } from '../../packages/global/src/utils.js';
 import {
   createShapeElement,
   decreaseZoomLevel,

@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { shiftClick } from 'utils/actions/edgeless.js';
 
 import { dragBetweenCoords } from '../utils/actions/drag.js';
+import { shiftClick } from '../utils/actions/edgeless.js';
 import {
   pressArrowDown,
   pressArrowLeft,
