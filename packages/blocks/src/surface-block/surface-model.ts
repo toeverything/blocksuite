@@ -344,7 +344,15 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
 
   override dispose(): void {
     super.dispose();
+
     this._disposables.forEach(dispose => dispose());
+
+    this.elementAdded.dispose();
+    this.elementRemoved.dispose();
+    this.elementUpdated.dispose();
+
+    this._elementModels.forEach(({ dispose }) => dispose());
+    this._elementModels.clear();
   }
 
   getGroup(id: string): ElementModel | null {
