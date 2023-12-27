@@ -764,7 +764,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _initViewport() {
     const run = () => {
       const viewport = this._getSavedViewport() ?? this.getFitToScreenData();
-      console.log('Initviewport', viewport);
       if ('xywh' in viewport) {
         const { xywh, padding } = viewport;
         const bound = Bound.deserialize(xywh);
@@ -854,8 +853,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   override disconnectedCallback() {
-    console.log('edgeless page block disconnected');
-
     super.disconnectedCallback();
     this.clipboardController.hostDisconnected();
     if (this._resizeObserver) {
