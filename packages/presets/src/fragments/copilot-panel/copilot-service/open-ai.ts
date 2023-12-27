@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { OpenAI } from 'openai';
 
+import { pngBase64ToFile } from '../edgeless/edit-image.js';
 import {
   createVendor,
   EmbeddingServiceKind,
@@ -82,13 +83,12 @@ Text2ImageServiceKind.implService({
         apiKey: apiKey,
         dangerouslyAllowBrowser: true,
       });
-      const result = await openai.completions.create({
+      const result = await openai.images.generate({
         prompt,
-        model: 'dalle-3',
-        temperature: 0,
-        max_tokens: 4096,
+        model: 'dall-e-3',
+        response_format: 'b64_json',
       });
-      return result.choices[0].text;
+      return pngBase64ToFile(result.data[0].b64_json ?? '', 'img');
     },
   }),
   vendor: openaiVendor,

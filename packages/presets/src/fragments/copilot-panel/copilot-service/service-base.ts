@@ -54,7 +54,7 @@ export const TextServiceKind = createServiceKind<{
 });
 
 export const Text2ImageServiceKind = createServiceKind<{
-  generateImage(prompt: string): Promise<string>;
+  generateImage(prompt: string): Promise<File>;
 }>({
   type: 'text-to-image-service',
   title: 'Text to image service',

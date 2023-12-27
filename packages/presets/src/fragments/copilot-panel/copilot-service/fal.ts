@@ -1,10 +1,12 @@
 import * as fal from '@fal-ai/serverless-client';
 import { html } from 'lit';
 
+import { jpegBase64ToFile } from '../edgeless/edit-image.js';
 import {
   createVendor,
   FastImage2ImageServiceKind,
   Image2ImageServiceKind,
+  Text2ImageServiceKind,
 } from './service-base.js';
 
 export const falVendor = createVendor<{
@@ -65,7 +67,7 @@ export const createImageGenerator = (apiKey: string) => {
   };
 };
 Image2ImageServiceKind.implService({
-  name: 'lcm-sd15-i2i',
+  name: '110602490-lcm-sd15-i2i',
   method: ({ apiKey }) => ({
     generateImage: async (prompt, image) => {
       const data = await fetch(
@@ -86,6 +88,24 @@ Image2ImageServiceKind.implService({
         }
       ).then(res => res.json());
       return data.images[0].url;
+    },
+  }),
+  vendor: falVendor,
+});
+Text2ImageServiceKind.implService({
+  name: '110602490-fast-sdxl',
+  method: ({ apiKey }) => ({
+    generateImage: async prompt => {
+      fal.config({
+        credentials: apiKey,
+      });
+      const result = (await fal.subscribe('110602490-fast-sdxl', {
+        input: {
+          prompt: prompt,
+          sync_mode: true,
+        },
+      })) as { images: { url: string }[] };
+      return jpegBase64ToFile(result.images[0].url, 'img');
     },
   }),
   vendor: falVendor,

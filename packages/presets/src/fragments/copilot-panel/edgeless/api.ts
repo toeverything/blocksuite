@@ -24,7 +24,7 @@ import {
   selectedToCanvas,
   selectedToPng,
 } from '../utils/selection-utils.js';
-import { editImage, jpegBase64ToFile, pngBase64ToFile } from './edit-image.js';
+import { editImage, jpegBase64ToFile } from './edit-image.js';
 import { genHtml } from './gen-html.js';
 
 export class EditorWithAI {
@@ -147,12 +147,11 @@ export class EditorWithAI {
       alert('Please enter some prompt first');
       return;
     }
-    const b64 = await copilotConfig
+    const file = await copilotConfig
       .getService('text to image', Text2ImageServiceKind)
       .generateImage(prompt);
-    if (b64) {
-      const imgFile = pngBase64ToFile(b64, 'img');
-      await edgelessPage.addImages([imgFile]);
+    if (file) {
+      await edgelessPage.addImages([file]);
     }
   };
   createImageFromFrame = async () => {
