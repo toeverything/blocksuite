@@ -1,22 +1,28 @@
 import type { TemplateResult } from 'lit';
+import type { OpenAI } from 'openai';
 
-export type ServiceImpl<M, Data> = {
+export type Vendor<Data> = {
   key: string;
-  method: (data: Data) => M;
+  color: string;
   initData: () => Data;
   renderConfigEditor: (data: Data, refresh: () => void) => TemplateResult;
+};
+export type ServiceImpl<M, Data> = {
+  name: string;
+  method: (data: Data) => M;
+  vendor: Vendor<Data>;
 };
 export type ServiceKind<M> = {
   type: string;
   title: string;
-  getImpl: (key: string) => ServiceImpl<M, unknown> | undefined;
+  getImpl: (implName: string) => ServiceImpl<M, unknown> | undefined;
   implList: ServiceImpl<M, unknown>[];
-  implService: <Data>(impl: {
-    key: string;
-    method: (data: Data) => M;
-    initData: () => Data;
-    renderConfigEditor: (data: Data, refresh: () => void) => TemplateResult;
-  }) => void;
+  implService: <Data>(impl: ServiceImpl<M, Data>) => void;
+};
+export const createVendor = <Data extends object>(
+  config: Vendor<Data>
+): Vendor<Data> => {
+  return config;
 };
 const createServiceKind = <M>(config: {
   type: string;
@@ -26,8 +32,8 @@ const createServiceKind = <M>(config: {
   return {
     type: config.type,
     title: config.title,
-    getImpl: key => {
-      return implList.find(v => v.key === key);
+    getImpl: implName => {
+      return implList.find(v => v.name === implName);
     },
     implList,
     implService: impl => {
@@ -64,10 +70,7 @@ export const EmbeddingServiceKind = createServiceKind<{
 
 export const Image2TextServiceKind = createServiceKind<{
   generateText(
-    messages: {
-      type: 'text' | 'image';
-      content: string;
-    }[]
+    messages: Array<OpenAI.ChatCompletionMessageParam>
   ): Promise<string>;
 }>({
   type: 'image-to-text-service',
@@ -80,13 +83,20 @@ export const Image2ImageServiceKind = createServiceKind<{
   type: 'image-to-image-service',
   title: 'Image to image service',
 });
+export const FastImage2ImageServiceKind = createServiceKind<{
+  createFastRequest(): (prompt: string, image: string) => Promise<string>;
+}>({
+  type: 'fast-image-to-image-service',
+  title: 'Fast image to image service',
+});
 
 export const allKindService = [
   TextServiceKind,
   Text2ImageServiceKind,
-  EmbeddingServiceKind,
   Image2TextServiceKind,
   Image2ImageServiceKind,
+  FastImage2ImageServiceKind,
+  EmbeddingServiceKind,
 ];
 export type AllServiceKind = (typeof allKindService)[number];
 
