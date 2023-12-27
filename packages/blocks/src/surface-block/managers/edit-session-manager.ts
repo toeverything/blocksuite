@@ -107,7 +107,7 @@ export type LastProps = z.infer<typeof LastPropsSchema>;
 
 const SESSION_PROP_KEY = 'blocksuite:prop:record';
 
-const SessionSchema = z.object({
+const SessionPropsSchema = z.object({
   viewport: z.union([
     z.object({
       centerX: z.number(),
@@ -129,9 +129,11 @@ const SessionSchema = z.object({
   remoteColor: z.string(),
 });
 
-export type SessionProps = z.infer<typeof SessionSchema>;
+export type SessionProps = z.infer<typeof SessionPropsSchema>;
 
-export type SerializedViewport = z.infer<typeof SessionSchema.shape.viewport>;
+export type SerializedViewport = z.infer<
+  typeof SessionPropsSchema.shape.viewport
+>;
 
 export class EditSessionManager {
   private _lastProps = {
@@ -276,7 +278,7 @@ export class EditSessionManager {
     try {
       const value = sessionStorage.getItem(this._getKey(key));
       if (!value) return;
-      return SessionSchema.shape[key].parse(
+      return SessionPropsSchema.shape[key].parse(
         JSON.parse(value)
       ) as SessionProps[T];
     } catch {
