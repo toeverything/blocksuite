@@ -1,7 +1,7 @@
 import '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement, RangeManager } from '@blocksuite/lit';
 import type { BlockProps } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Workspace, type Y } from '@blocksuite/store';
@@ -244,6 +244,9 @@ export class SurfaceBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+
     if (!this._isEdgeless) return;
     const { edgeless } = this;
     this.layer = new LayerManager();

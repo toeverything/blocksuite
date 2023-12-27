@@ -17,7 +17,6 @@ import { PageClipboard } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
-import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
 import type { DocPageService } from './doc-page-service.js';
 
 export interface PageViewport {
@@ -228,8 +227,6 @@ export class DocPageBlockComponent extends BlockElement<
   override connectedCallback() {
     super.connectedCallback();
     this.clipboardController.hostConnected();
-
-    this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
     this.keyboardManager = new PageKeyboardManager(this);
 

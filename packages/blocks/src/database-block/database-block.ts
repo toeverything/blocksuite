@@ -8,7 +8,7 @@ import './data-view.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement, RangeManager } from '@blocksuite/lit';
 import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -186,6 +186,9 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+
     this._disposables.add(
       this.selection.slots.changed.on(selections => {
         const databaseSelection = selections.find(

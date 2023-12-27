@@ -1,112 +1,65 @@
-import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import {
-  INLINE_ROOT_ATTR,
-  type InlineEditor,
-  type InlineRange,
-  type InlineRootElement,
-} from '@blocksuite/inline';
+import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 
 import type { BlockElement } from '../element/block-element.js';
 import type { EditorHost } from '../element/lit-host.js';
-import { RangeSynchronizer } from './range-synchronizer.js';
-
-type RangeSnapshot = {
-  startContainer: Node;
-  endContainer: Node;
-  startOffset: number;
-  endOffset: number;
-};
+import { RangeBinding } from './range-binding.js';
 
 /**
  * CRUD for Range and TextSelection
  */
 export class RangeManager {
-  readonly rangeSynchronizer = new RangeSynchronizer(this);
+  static rangeSyncExcludeAttr = 'data-range-sync-exclude';
+  static rangeQueryExcludeAttr = 'data-range-query-exclude';
+
+  readonly binding = new RangeBinding(this);
 
   constructor(public host: EditorHost) {}
 
   get value() {
-    return this._range;
+    const selection = document.getSelection();
+    assertExists(selection);
+    if (selection.rangeCount === 0) return null;
+    return selection.getRangeAt(0);
   }
 
-  private _range: Range | null = null;
-  private _isRangeReversed: boolean = false;
+  clear() {
+    const selection = document.getSelection();
+    assertExists(selection);
+    selection.removeAllRanges();
+  }
 
-  clearRange(sync = true) {
-    this._range = null;
-    this._isRangeReversed = false;
-    window.getSelection()?.removeAllRanges();
-    if (sync) {
-      this.host.selection.clear(['text']);
+  set(range: Range) {
+    const selection = document.getSelection();
+    assertExists(selection);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  syncTextSelectionToRange(selection: TextSelection) {
+    const range = this.textSelectionToRange(selection);
+    if (range) {
+      this.set(range);
+    } else {
+      this.clear();
     }
   }
 
-  renderRange(start: Range, end?: Range | null) {
-    const ranges = [start];
-    if (end) {
-      ranges.push(end);
-    }
-
-    const mergedRangeResult = this._mergeRanges(ranges);
-    this._range = mergedRangeResult?.range ?? null;
-    this._isRangeReversed = mergedRangeResult?.reversed ?? false;
-
-    this._renderRange();
-  }
-
-  syncTextSelectionToRange(selection: TextSelection | null) {
-    if (!selection) {
-      this.clearRange(false);
-      return;
-    }
-
-    const { from, to } = selection;
-    const fromBlock = this.host.view.viewFromPath('block', from.path);
-    if (!fromBlock) {
-      this.clearRange();
-      return;
-    }
-
-    const startRange = this.pointToRange(from);
-    const endRange = to ? this.pointToRange(to) : null;
-
-    if (!startRange) {
-      this.clearRange(false);
-      return;
-    }
-    this.renderRange(startRange, endRange);
-  }
-
-  syncRangeToTextSelection(range: Range | null, isRangeReversed: boolean) {
-    if (!range) {
-      this.clearRange();
-      return null;
-    }
-
+  syncRangeToTextSelection(range: Range, isRangeReversed: boolean) {
     const selectionManager = this.host.selection;
-    this._range = range;
-    this._isRangeReversed = isRangeReversed;
 
-    const { startContainer, endContainer } = range;
-    const from = this._nodeToPoint(startContainer);
-    const to = range.collapsed ? null : this._nodeToPoint(endContainer);
-    if (!from) {
-      if (selectionManager.find('text')) {
-        selectionManager.clear(['text']);
-      }
-      return null;
+    if (!range) {
+      selectionManager.clear(['text']);
+      return;
     }
 
-    const selection = selectionManager.create('text', {
-      from,
-      to,
-      isReverse: isRangeReversed,
-    });
-
-    selectionManager.setGroup('note', [selection]);
-    return selection;
+    const textSelection = this.rangeToTextSelection(range, isRangeReversed);
+    if (textSelection) {
+      selectionManager.set([textSelection]);
+    } else {
+      selectionManager.clear(['text']);
+    }
   }
 
   /**
@@ -134,7 +87,7 @@ export class RangeManager {
 
     let result = Array.from<BlockElement>(
       this.host.querySelectorAll(
-        `[${this.host.blockIdAttr}]:not([data-queryable="false"])`
+        `[${this.host.blockIdAttr}]:not([${RangeManager.rangeQueryExcludeAttr}="true"])`
       )
     ).filter(el => range.intersectsNode(el) && match(el));
 
@@ -142,13 +95,7 @@ export class RangeManager {
       return [];
     }
 
-    const rangeStartElement =
-      range.startContainer instanceof Element
-        ? range.startContainer
-        : range.startContainer.parentElement;
-    const firstElement = rangeStartElement?.closest(
-      `[${this.host.blockIdAttr}]`
-    );
+    const firstElement = this.getClosestBlock(range.startContainer);
     assertExists(firstElement);
 
     if (mode === 'flat') {
@@ -177,185 +124,124 @@ export class RangeManager {
   }
 
   textSelectionToRange(selection: TextSelection): Range | null {
-    const { from, to } = selection;
-    const fromBlock = this.host.view.viewFromPath('block', from.path);
-    if (!fromBlock) {
-      return null;
+    const { from, to, isReverse } = selection;
+
+    const fromInlineEditor = this.queryInlineEditorByPath(from.path);
+    if (!fromInlineEditor) return null;
+
+    if (selection.isInSameBlock()) {
+      return fromInlineEditor.toDomRange({
+        index: from.index,
+        length: from.length,
+      });
+    } else {
+      assertExists(to);
+      const toInlineEditor = this.queryInlineEditorByPath(to.path);
+      if (!toInlineEditor) return null;
+
+      const fromRange = fromInlineEditor.toDomRange({
+        index: from.index,
+        length: from.length,
+      });
+      const toRange = toInlineEditor.toDomRange({
+        index: to.index,
+        length: to.length,
+      });
+
+      if (!fromRange || !toRange) return null;
+
+      const range = document.createRange();
+      if (!isReverse) {
+        const startContainer = fromRange.startContainer;
+        const startOffset = fromRange.startOffset;
+        const endContainer = toRange.endContainer;
+        const endOffset = toRange.endOffset;
+        range.setStart(startContainer, startOffset);
+        range.setEnd(endContainer, endOffset);
+      } else {
+        const startContainer = toRange.endContainer;
+        const startOffset = toRange.endOffset;
+        const endContainer = fromRange.startContainer;
+        const endOffset = fromRange.startOffset;
+        range.setStart(startContainer, startOffset);
+        range.setEnd(endContainer, endOffset);
+      }
+      return range;
     }
-
-    const startRange = this.pointToRange(from);
-    const endRange = to ? this.pointToRange(to) : null;
-
-    if (!startRange) {
-      return null;
-    }
-
-    const ranges = [startRange];
-    if (endRange) {
-      ranges.push(endRange);
-    }
-
-    const mergedRangeResult = this._mergeRanges(ranges);
-    return mergedRangeResult?.range ?? null;
   }
 
-  pointToRange(point: TextRangePoint): Range | null {
-    const result = this._calculateInlineEditor(point);
-    if (!result) {
+  rangeToTextSelection(range: Range, reverse = false): TextSelection | null {
+    const { startContainer, endContainer } = range;
+
+    const startBlock = this.getClosestBlock(startContainer);
+    const endBlock = this.getClosestBlock(endContainer);
+    if (!startBlock || !endBlock) {
       return null;
     }
-    const [inlineEditor, inlineRange] = result;
 
-    return inlineEditor.toDomRange(inlineRange);
+    const startInlineEditor = this.getClosestInlineEditor(startContainer);
+    const endInlineEditor = this.getClosestInlineEditor(endContainer);
+    if (!startInlineEditor || !endInlineEditor) {
+      return null;
+    }
+
+    const startInlineRange = startInlineEditor.toInlineRange(range);
+    const endInlineRange = endInlineEditor.toInlineRange(range);
+    if (!startInlineRange || !endInlineRange) {
+      return null;
+    }
+
+    return this.host.selection.create('text', {
+      from: {
+        path: startBlock.path,
+        index: startInlineRange.index,
+        length: startInlineRange.length,
+      },
+      to:
+        startBlock === endBlock
+          ? null
+          : {
+              path: endBlock.path,
+              index: endInlineRange.index,
+              length: endInlineRange.length,
+            },
+      isReverse: reverse,
+    });
   }
 
-  private _calculateInlineEditor(
-    point: TextRangePoint
-  ): [InlineEditor, InlineRange] | null {
-    const block = this.host.view.viewFromPath('block', point.path);
-    if (!block) {
-      return null;
-    }
-    const inlineEditorRoot = block.querySelector<InlineRootElement>(
+  getClosestBlock(node: Node) {
+    const el = node instanceof Element ? node : node.parentElement;
+    if (!el) return null;
+    return el.closest<BlockElement>(
+      `[${this.host.blockIdAttr}]:not([${RangeManager.rangeSyncExcludeAttr}="true"])`
+    );
+  }
+  getClosestInlineEditor(node: Node) {
+    const el = node instanceof Element ? node : node.parentElement;
+    if (!el) return null;
+    const inlineRoot = el.closest<InlineRootElement>(`[${INLINE_ROOT_ATTR}]`);
+    if (!inlineRoot) return null;
+
+    // check range exclude attr
+    const closestBlock = this.getClosestBlock(inlineRoot);
+    if (!closestBlock) return null;
+
+    return inlineRoot.inlineEditor;
+  }
+
+  queryInlineEditorByPath(path: string[]) {
+    const block = this.host.view.viewFromPath('block', path);
+    if (!block) return null;
+
+    const inlineRoot = block.querySelector<InlineRootElement>(
       `[${INLINE_ROOT_ATTR}]`
     );
-    assertExists(
-      inlineEditorRoot,
-      `Cannot find inline editor element in block ${point.path.join(' > ')}}`
-    );
+    if (!inlineRoot) return null;
 
-    const maxLength = inlineEditorRoot.inlineEditor.yText.length;
-    const index = point.index >= maxLength ? maxLength : point.index;
-    const length =
-      index + point.length >= maxLength ? maxLength - index : point.length;
+    // check range exclude attr
+    const closestBlock = this.getClosestBlock(inlineRoot);
+    if (!closestBlock) return null;
 
-    return [
-      inlineEditorRoot.inlineEditor,
-      {
-        index,
-        length,
-      },
-    ];
-  }
-
-  private _nodeToPoint(node: Node) {
-    const inlineEditorElement = this._getNearestInlineEditor(node);
-    if (!inlineEditorElement) {
-      return null;
-    }
-    const block = this._getBlock(inlineEditorElement);
-    if (!block) {
-      return null;
-    }
-    const inlineRange = this._range
-      ? inlineEditorElement.inlineEditor.toInlineRange(this._range)
-      : null;
-    if (!inlineRange) {
-      return null;
-    }
-
-    return {
-      blockId: block.model.id,
-      path: block.path,
-      index: inlineRange.index,
-      length: inlineRange.length,
-    };
-  }
-
-  private _snapshotToRange(snapshot: RangeSnapshot): Range {
-    const range = document.createRange();
-    range.setStart(snapshot.startContainer, snapshot.startOffset);
-    range.setEnd(snapshot.endContainer, snapshot.endOffset);
-    return range;
-  }
-
-  private _mergeRanges(
-    ranges: RangeSnapshot[]
-  ): { range: Range; reversed: boolean } | null {
-    if (ranges.length === 0) {
-      return null;
-    }
-    if (ranges.length === 1) {
-      const [current] = ranges;
-      const range = document.createRange();
-      range.setStart(current.startContainer, current.startOffset);
-      range.setEnd(current.endContainer, current.endOffset);
-      return { range, reversed: false };
-    }
-
-    const [leftRangeSnapshot, rightRangeSnapshot] = ranges;
-    let leftRange = this._snapshotToRange(leftRangeSnapshot);
-    let rightRange = this._snapshotToRange(rightRangeSnapshot);
-
-    const restRanges = ranges.slice(2);
-    const result = leftRange.compareBoundaryPoints(
-      Range.END_TO_START,
-      rightRange
-    );
-    if (result > 0) {
-      [leftRange, rightRange] = [rightRange, leftRange];
-    }
-
-    while (restRanges.length > 0) {
-      const snapshot = restRanges.pop();
-      if (!snapshot) {
-        break;
-      }
-      const range = this._snapshotToRange(snapshot);
-      const left = range.compareBoundaryPoints(Range.START_TO_END, leftRange);
-      const right = range.compareBoundaryPoints(Range.END_TO_START, rightRange);
-      if (left < 0) {
-        leftRange = range;
-      }
-      if (right > 0) {
-        rightRange = range;
-      }
-    }
-
-    const range = document.createRange();
-    range.setStart(leftRange.startContainer, leftRange.startOffset);
-    range.setEnd(rightRange.endContainer, rightRange.endOffset);
-
-    leftRange.detach();
-    rightRange.detach();
-
-    return { range, reversed: result > 0 };
-  }
-
-  private _renderRange() {
-    const selection = document.getSelection();
-    if (!selection || !this._range) {
-      this.clearRange();
-      return;
-    }
-
-    selection.removeAllRanges();
-
-    if (this._isRangeReversed) {
-      const nextRange = document.createRange();
-      nextRange.setStart(this._range.endContainer, this._range.endOffset);
-      selection.addRange(nextRange);
-      selection.extend(this._range.startContainer, this._range.startOffset);
-    } else {
-      selection.addRange(this._range);
-    }
-  }
-
-  private _getNearestInlineEditor(node: Node) {
-    let element: Element | null;
-    if (node instanceof Element) {
-      element = node;
-    } else {
-      element = node.parentElement;
-    }
-    if (!element) {
-      return;
-    }
-
-    return element.closest(`[${INLINE_ROOT_ATTR}]`) as InlineRootElement;
-  }
-
-  private _getBlock(element: HTMLElement) {
-    return element.closest(`[${this.host.blockIdAttr}]`) as BlockElement;
+    return inlineRoot.inlineEditor;
   }
 }

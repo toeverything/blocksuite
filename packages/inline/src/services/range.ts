@@ -85,6 +85,12 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     return selection;
   }
 
+  getNativeRange(): Range | null {
+    const selection = this.getNativeSelection();
+    if (!selection) return null;
+    return selection.getRangeAt(0);
+  }
+
   getInlineRange = (): InlineRange | null => {
     if (this.inlineRangeProvider) {
       return this.inlineRangeProvider.getInlineRange();

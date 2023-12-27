@@ -71,6 +71,10 @@ export const getInlineRangeProvider: (
   };
 
   const setInlineRange = (inlineRange: InlineRange | null, sync = true) => {
+    // skip `setInlineRange` from `inlineEditor` when composing happens across blocks,
+    // selection will be updated in `range-binding`
+    if (rangeManager.binding.isComposing) return;
+
     if (!inlineRange) {
       selectionManager.clear(['text']);
     } else {
@@ -84,6 +88,7 @@ export const getInlineRangeProvider: (
       });
       selectionManager.setGroup('note', [textSelection]);
     }
+
     inlineRangeUpdatedSlot.emit([inlineRange, sync]);
   };
 

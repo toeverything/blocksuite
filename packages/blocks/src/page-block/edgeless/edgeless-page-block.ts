@@ -64,7 +64,6 @@ import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import type { SurfaceService } from '../../surface-block/surface-service.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { PageBlockModel } from '../page-model.js';
-import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
 import type { EdgelessPageBlockWidgetName } from '../types.js';
 import type { EdgelessBlockPortalContainer } from './components/block-portal/edgeless-block-portal.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
@@ -847,7 +846,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     super.connectedCallback();
     this.clipboardController.hostConnected();
     this._updateFrames();
-    this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
     this.keyboardManager = new EdgelessPageKeyboardManager(this);
 
