@@ -20,6 +20,7 @@ export class FontLoader {
           style,
         });
         document.fonts.add(fontFace);
+        fontFace.load().catch(console.error);
         return fontFace;
       })
     );
