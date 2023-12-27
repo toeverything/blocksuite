@@ -24,6 +24,7 @@ import {
   serializeXYWH,
   type ShapeElement,
   ShapeStyle,
+  ShapeType,
   TextElement,
   toDegree,
   Vec,
@@ -475,11 +476,11 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     });
     const shapeStyle = this.currentShape.shapeStyle;
     const currentShapeType =
-      this.currentShape.shapeType !== 'rect'
+      this.currentShape.shapeType !== ShapeType.Rect
         ? this.currentShape.shapeType
         : this.currentShape.radius
           ? 'roundedRect'
-          : 'rect';
+          : ShapeType.Rect;
 
     const shapeButtons = html`${ShapeComponentConfig.map(
       ({ name, generalIcon, scribbledIcon, tooltip }) => {

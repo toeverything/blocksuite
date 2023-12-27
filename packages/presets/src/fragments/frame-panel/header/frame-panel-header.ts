@@ -1,12 +1,13 @@
 import './frames-setting-menu.js';
 
-import type { EdgelessPageBlockComponent } from '@blocksuite/blocks';
-import {
-  EdgelessPresentationConsts,
-  type NavigatorMode,
+import type {
+  EdgelessPageBlockComponent,
+  SurfaceService,
 } from '@blocksuite/blocks';
+import { type NavigatorMode } from '@blocksuite/blocks';
 import { createButtonPopper } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
@@ -105,6 +106,9 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
+  editorHost!: EditorHost;
+
+  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent | null;
 
   @property({ attribute: false })
@@ -139,10 +143,11 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   };
 
   private _tryLoadNavigatorStateLocalRecord() {
-    this._navigatorMode =
-      sessionStorage.getItem(EdgelessPresentationConsts.FillScreen) === 'true'
-        ? 'fill'
-        : 'fit';
+    this._navigatorMode = (<SurfaceService>(
+      this.editorHost.spec.getService('affine:surface')
+    )).editSessionManager.getItem('presentFillScreen')
+      ? 'fill'
+      : 'fit';
   }
 
   private _clearEdgelessDisposables = () => {
@@ -218,7 +223,10 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
         </edgeless-tool-icon-button>
       </div>
       <div class="frames-setting-container">
-        <frames-setting-menu .edgeless=${this.edgeless}></frames-setting-menu>
+        <frames-setting-menu
+          .edgeless=${this.edgeless}
+          .editorHost=${this.editorHost}
+        ></frames-setting-menu>
       </div>
       <div class="presentation-button" @click=${this._enterPresentationMode}>
         ${SmallFrameNavigatorIcon}<span class="presentation-button-label"

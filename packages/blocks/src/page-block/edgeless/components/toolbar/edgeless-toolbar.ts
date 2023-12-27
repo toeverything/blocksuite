@@ -25,10 +25,7 @@ import {
 import { customElement, state } from 'lit/decorators.js';
 
 import { toast } from '../../../../_common/components/toast.js';
-import {
-  EdgelessPresentationConsts as PresentationConsts,
-  type NavigatorMode,
-} from '../../../../_common/edgeless/frame/consts.js';
+import { type NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
 import {
   EdgelessImageIcon,
   EdgelessTextIcon,
@@ -182,6 +179,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private _timer: ReturnType<typeof setTimeout> | null = null;
   private _cachedIndex = -1;
 
+  private get _service() {
+    return this.edgeless.surface.service;
+  }
+
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
     this.edgeless = edgeless;
@@ -247,7 +248,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode =
-      sessionStorage.getItem(PresentationConsts.FillScreen) === 'true'
+      this._service.editSessionManager.getItem('presentFillScreen') === true
         ? 'fill'
         : 'fit';
   }
@@ -256,8 +257,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { _disposables, edgeless } = this;
     const { slots, page } = edgeless;
 
-    const hideToolbar = sessionStorage.getItem(PresentationConsts.HideToolbar);
-    this._hideToolbar = hideToolbar === 'true';
+    this._hideToolbar =
+      !!this._service.editSessionManager.getItem('presentHideToolbar');
 
     edgeless.bindHotKey(
       {
@@ -379,9 +380,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this.edgeless.slots.navigatorSettingUpdated.emit({
         hideToolbar: this._hideToolbar,
       });
-      sessionStorage.setItem(
-        PresentationConsts.HideToolbar,
-        this._hideToolbar.toString()
+      this._service.editSessionManager.setItem(
+        'presentHideToolbar',
+        this._hideToolbar
       );
     }
   }

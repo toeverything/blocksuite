@@ -47,13 +47,13 @@ export enum CanvasTextFontFamily {
 }
 export const CANVAS_TEXT_FONT_FAMILY = Object.values(CanvasTextFontFamily);
 
-export const enum CanvasTextFontWeight {
+export enum CanvasTextFontWeight {
   Light = '300',
   Regular = '400',
   SemiBold = '600',
 }
 
-export const enum CanvasTextFontStyle {
+export enum CanvasTextFontStyle {
   Normal = 'normal',
   Italic = 'italic',
 }

@@ -221,9 +221,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
     this._updateTransform();
     this._updateRemoteRects();
 
-    this._remoteColorManager = new RemoteColorManager(
-      this.host.page.workspace.awarenessStore
-    );
+    this._remoteColorManager = new RemoteColorManager(this.host);
   }
 
   override render() {

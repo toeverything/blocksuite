@@ -10,11 +10,11 @@ import {
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
+import type { ShapeType } from '../../../../../surface-block/elements/shape/consts.js';
 import type { ShapeStyle } from '../../../../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
-  type ShapeType,
 } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';

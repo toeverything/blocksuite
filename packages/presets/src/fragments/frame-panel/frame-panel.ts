@@ -148,6 +148,7 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
       <frame-panel-header
         .edgeless=${this.edgeless}
         .changeEditorMode=${this._changeEditorMode}
+        .editorHost=${this.host}
       ></frame-panel-header>
       <frame-panel-body
         class="frame-panel-body"

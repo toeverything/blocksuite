@@ -19,6 +19,7 @@ import {
 import { PointLocation } from '../../../utils/point-location.js';
 import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../edgeless-element.js';
+import { ShapeType } from '../consts.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
 import { drawGeneralShape, hitTestOnShapeText } from '../utils.js';
@@ -65,7 +66,7 @@ export const DiamondMethods: ShapeMethods = {
     );
 
     if (shapeStyle === ShapeStyle.General) {
-      drawGeneralShape(ctx, 'diamond', {
+      drawGeneralShape(ctx, ShapeType.Diamond, {
         x: 0,
         y: 0,
         width: renderWidth,

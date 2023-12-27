@@ -2,7 +2,6 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { EdgelessPresentationConsts as PresentationConsts } from '../../../../_common/edgeless/frame/consts.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -30,11 +29,17 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  private get _service() {
+    return this.edgeless.surface.service;
+  }
+
   private _blackBackground = false;
 
   private _tryLoadBlackBackground() {
-    const value = sessionStorage.getItem(PresentationConsts.BlackBackground);
-    this._blackBackground = value !== 'false';
+    const value = this._service.editSessionManager.getItem(
+      'presentBlackBackground'
+    );
+    this._blackBackground = value ? value : true;
   }
 
   override firstUpdated() {
@@ -48,9 +53,9 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
     _disposables.add(
       edgeless.slots.navigatorSettingUpdated.on(({ blackBackground }) => {
         if (blackBackground !== undefined) {
-          sessionStorage.setItem(
-            PresentationConsts.BlackBackground,
-            blackBackground.toString()
+          this._service.editSessionManager.setItem(
+            'presentBlackBackground',
+            blackBackground
           );
 
           this._blackBackground = blackBackground;

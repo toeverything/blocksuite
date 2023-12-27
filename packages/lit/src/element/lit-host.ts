@@ -116,7 +116,6 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-
     this.std.unmount();
     this.rangeManager = null;
   }

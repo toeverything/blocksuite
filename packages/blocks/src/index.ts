@@ -28,10 +28,7 @@ export {
   RichText,
   scrollbarStyle,
 } from './_common/components/index.js';
-export {
-  EdgelessPresentationConsts as EdgelessPresentationConsts,
-  type NavigatorMode,
-} from './_common/edgeless/frame/consts.js';
+export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {
   ArrowDownSmallIcon,
   DualLinkIcon16,

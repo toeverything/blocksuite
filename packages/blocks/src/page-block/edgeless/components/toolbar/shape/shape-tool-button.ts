@@ -17,6 +17,7 @@ import {
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
+  ShapeType,
 } from '../../../../../surface-block/elements/shape/consts.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
@@ -26,11 +27,13 @@ import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';
 import type { Shape, ShapeName } from './shape-tool-element.js';
 
+const { Rect, Triangle, Ellipse, Diamond } = ShapeType;
+
 const shapes: Array<Shape> = [
-  { name: 'rect', svg: rectSvg },
-  { name: 'triangle', svg: triangleSvg },
-  { name: 'ellipse', svg: ellipseSvg },
-  { name: 'diamond', svg: diamondSvg },
+  { name: Rect, svg: rectSvg },
+  { name: Triangle, svg: triangleSvg },
+  { name: Ellipse, svg: ellipseSvg },
+  { name: Diamond, svg: diamondSvg },
   { name: 'roundedRect', svg: roundedSvg },
 ];
 
@@ -93,7 +96,7 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
   shapeStyle: ShapeStyle = ShapeStyle.Scribbled;
 
   @state()
-  shapeType: ShapeName = 'rect';
+  shapeType: ShapeName = Rect;
 
   @state()
   fillColor: string = DEFAULT_SHAPE_FILL_COLOR;
@@ -131,14 +134,14 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
         if (props.shapeType) {
           this._activeShape(props.shapeType as ShapeName);
         }
-        this.edgeless.surface.service?.recordLastProps(this._type, props);
+        this.surface.service.editSessionManager.record(this._type, props);
       };
     }
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.edgeless.surface.service?.slots.lastPropsUpdated.on(
+    this.surface.service.editSessionManager.slots.lastPropsUpdated.on(
       ({ type, props }) => {
         if (type === 'shape' && props.shapeType) {
           this._activeShape(props.shapeType as ShapeName);

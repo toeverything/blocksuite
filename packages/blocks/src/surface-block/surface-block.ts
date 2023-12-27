@@ -181,6 +181,10 @@ export class SurfaceBlockComponent extends BlockElement<
     return isInsideEdgelessEditor(this.host);
   }
 
+  override get service() {
+    return super.service as SurfaceService;
+  }
+
   getBlocks<T extends EdgelessBlockType>(
     flavours: T[] | T | RegExp
   ): TopLevelBlockModel[] {
@@ -302,7 +306,7 @@ export class SurfaceBlockComponent extends BlockElement<
         const element = this.pickById(id);
         assertExists(element);
 
-        this.service?.recordLastProps(
+        this.service!.editSessionManager.record(
           (isTopLevelBlock(element)
             ? element.flavour
             : element.type) as EdgelessElementType,
@@ -707,7 +711,7 @@ export class SurfaceBlockComponent extends BlockElement<
       throw new Error('Cannot add element in readonly mode');
     }
 
-    this.service!.applyLastProps(type, properties);
+    this.service!.editSessionManager.apply(type, properties);
 
     if (isCanvasElementType(type)) {
       const id = generateElementId();

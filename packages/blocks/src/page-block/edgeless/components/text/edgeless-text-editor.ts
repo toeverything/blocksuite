@@ -8,6 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
+import { TextAlign } from '../../../../surface-block/elements/consts.js';
 import { wrapFontFamily } from '../../../../surface-block/elements/text/utils.js';
 import {
   Bound,
@@ -18,6 +19,8 @@ import {
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
+
+const { Left, Center, Right } = TextAlign;
 
 @customElement('edgeless-text-editor')
 export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
@@ -256,22 +259,22 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
   getTransformOrigin(textAlign: TextElement['textAlign']) {
     switch (textAlign) {
-      case 'left':
+      case Left:
         return 'left top';
-      case 'center':
+      case Center:
         return 'center top';
-      case 'right':
+      case Right:
         return 'right top';
     }
   }
 
   getTransformOffset(textAlign: TextElement['textAlign']) {
     switch (textAlign) {
-      case 'left':
+      case Left:
         return '0%, 0%';
-      case 'center':
+      case Center:
         return '-50%, 0%';
-      case 'right':
+      case Right:
         return '-100%, 0%';
     }
   }
@@ -279,15 +282,15 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   getVisualPosition(element: TextElement) {
     const { x, y, w, h, rotate, textAlign } = element;
     switch (textAlign) {
-      case 'left':
+      case Left:
         return Vec.rotWith([x, y], [x + w / 2, y + h / 2], toRadian(rotate));
-      case 'center':
+      case Center:
         return Vec.rotWith(
           [x + w / 2, y],
           [x + w / 2, y + h / 2],
           toRadian(rotate)
         );
-      case 'right':
+      case Right:
         return Vec.rotWith(
           [x + w, y],
           [x + w / 2, y + h / 2],
@@ -301,13 +304,13 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       EdgelessTextEditor;
 
     switch (textAlign) {
-      case 'left':
+      case Left:
         return `-${HORIZONTAL_PADDING + BORDER_WIDTH}px, -${
           VERTICAL_PADDING + BORDER_WIDTH
         }px`;
-      case 'center':
+      case Center:
         return `0, -${VERTICAL_PADDING + BORDER_WIDTH}px`;
-      case 'right':
+      case Right:
         return `${HORIZONTAL_PADDING + BORDER_WIDTH}px, -${
           VERTICAL_PADDING + BORDER_WIDTH
         }px`;

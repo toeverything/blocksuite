@@ -2,15 +2,15 @@ import { WithDisposable } from '@blocksuite/lit';
 import { LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { EdgelessElementType } from '../../../../surface-block/edgeless-types.js';
+import { type LastProps } from '../../../../surface-block/managers/edit-session-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { type MenuPopper } from './common/create-popper.js';
 
 @customElement('edgeless-tool-button')
 export class EdgelessToolButton<
   Menu extends LitElement = LitElement,
-  Type extends EdgelessElementType = 'shape',
-  States extends readonly string[] = [],
+  Type extends keyof LastProps = 'shape',
+  States extends readonly (keyof LastProps[Type])[] = [],
 > extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -36,14 +36,21 @@ export class EdgelessToolButton<
     });
   }
 
+  protected get surface() {
+    return this.edgeless.surface;
+  }
+
+  protected get service() {
+    return this.surface.service;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
-    const { _disposables, edgeless } = this;
-    const { surface } = edgeless;
-    const { service } = surface;
-    if (!service) return;
-    const attributes: Record<string, unknown> =
-      service.lastProps[this._type] ?? {};
+    const { _disposables, edgeless, service } = this;
+    const { editSessionManager } = service;
+
+    const attributes = editSessionManager.getLastProps(this._type);
+
     this._states.forEach(key => {
       const value = attributes[key];
       if (value !== undefined) Object.assign(this, { [key]: value });
@@ -57,9 +64,10 @@ export class EdgelessToolButton<
       })
     );
     _disposables.add(
-      service.slots.lastPropsUpdated.on(({ type, props }) => {
+      editSessionManager.slots.lastPropsUpdated.on(({ type, props }) => {
         if (type === this._type) {
-          this._states.forEach(key => {
+          this._states.forEach(_key => {
+            const key = _key as string;
             if (props[key] != undefined) {
               Object.assign(this, { [key]: props[key] });
             }

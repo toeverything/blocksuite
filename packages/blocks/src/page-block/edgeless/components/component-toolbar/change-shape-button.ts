@@ -22,8 +22,8 @@ import { LineWidth, type ShapeTool } from '../../../../_common/types.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import { CanvasTextFontFamily } from '../../../../surface-block/consts.js';
 import {
-  FILL_COLORS,
-  STROKE_COLORS,
+  SHAPE_COLORS,
+  ShapeType,
 } from '../../../../surface-block/elements/shape/consts.js';
 import type { CanvasElementType } from '../../../../surface-block/index.js';
 import {
@@ -373,7 +373,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._shapePanel.slots.select.on(shapeType => {
         const updatedProps =
           shapeType === 'roundedRect'
-            ? ({ shapeType: 'rect', radius: 0.1 } as const)
+            ? ({ shapeType: ShapeType.Rect, radius: 0.1 } as const)
             : { shapeType, radius: 0 };
 
         this.page.captureSync();
@@ -429,9 +429,9 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     const selectedShape = getMostCommonShape(this.elements);
 
     const selectedFillColor =
-      getMostCommonFillColor(this.elements) ?? FILL_COLORS[0];
+      getMostCommonFillColor(this.elements) ?? SHAPE_COLORS[0];
     const selectedStrokeColor =
-      getMostCommonStrokeColor(this.elements) ?? STROKE_COLORS[0];
+      getMostCommonStrokeColor(this.elements) ?? SHAPE_COLORS[0];
     const selectedLineSize =
       getMostCommonLineSize(this.elements) ?? LineWidth.LINE_WIDTH_FOUR;
     const selectedLineStyle = getMostCommonLineStyle(this.elements) ?? 'solid';
@@ -500,7 +500,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         <div class="color-panel-container fill-color">
           <edgeless-color-panel
             .value=${selectedFillColor}
-            .options=${FILL_COLORS}
+            .options=${SHAPE_COLORS}
             @select=${(e: ColorEvent) => this._setShapeFillColor(e.detail)}
           >
           </edgeless-color-panel>
@@ -521,7 +521,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         <div class="color-panel-container stroke-color">
           <edgeless-color-panel
             .value=${selectedStrokeColor}
-            .options=${STROKE_COLORS}
+            .options=${SHAPE_COLORS}
             .hollowCircle=${true}
             @select=${(e: ColorEvent) => this._setShapeStrokeColor(e.detail)}
           >

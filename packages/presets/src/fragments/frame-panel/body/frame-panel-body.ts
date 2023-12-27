@@ -1,5 +1,6 @@
 import '../card/frame-card.js';
 
+import type { SurfaceService } from '@blocksuite/blocks';
 import {
   Bound,
   type EdgelessPageBlockComponent,
@@ -251,12 +252,11 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
         referenceId: block.id,
         padding: this.viewportPadding as [number, number, number, number],
       };
-      this.editorHost.std.command
-        .pipe()
-        .withHost()
-        .saveViewportToSession({ viewport })
-        .run();
 
+      const surfaceService = this.editorHost.spec.getService(
+        'affine:surface'
+      ) as SurfaceService;
+      surfaceService.editSessionManager.setItem('viewport', viewport);
       this.changeEditorMode('edgeless');
     } else {
       this.edgeless.surface.viewport.setViewportByBound(

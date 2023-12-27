@@ -25,6 +25,7 @@ import {
   getEditorContainer,
   isInsideDocEditor,
 } from '../_common/utils/query.js';
+import type { SurfaceService } from '../index.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
@@ -811,11 +812,9 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         referenceId: this.model.reference,
         padding: [60, 20, 20, 20] as [number, number, number, number],
       };
-      this.std.command
-        .pipe()
-        .withHost()
-        .saveViewportToSession({ viewport })
-        .run();
+      (<SurfaceService>(
+        this.std.spec.getService('affine:surface')
+      )).editSessionManager.setItem('viewport', viewport);
     }
 
     this.selection.update(selections => {

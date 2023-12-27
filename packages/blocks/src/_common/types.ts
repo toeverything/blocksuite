@@ -11,8 +11,8 @@ import {
   type ConnectorElement,
   type ConnectorMode,
   type GroupElement,
-  type ShapeType,
 } from '../surface-block/elements/index.js';
+import type { ShapeType } from '../surface-block/index.js';
 import type { RefNodeSlots } from './components/rich-text/inline/nodes/reference-node.js';
 import type { NavigatorMode } from './edgeless/frame/consts.js';
 import type { BlockComponent } from './utils/query.js';

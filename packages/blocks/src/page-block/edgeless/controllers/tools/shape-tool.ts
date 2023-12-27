@@ -6,11 +6,7 @@ import type {
   ShapeTool,
 } from '../../../../_common/utils/index.js';
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
-import type {
-  ShapeElement,
-  ShapeStyle,
-  ShapeType,
-} from '../../../../surface-block/index.js';
+import type { ShapeElement } from '../../../../surface-block/index.js';
 import { Bound, CanvasElementType } from '../../../../surface-block/index.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
 import {
@@ -257,21 +253,18 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     this.clearOverlay();
     const options = SHAPE_OVERLAY_OPTIONS;
     const computedStyle = getComputedStyle(this._edgeless);
-    const attributes = this._edgeless.surface.service?.lastProps.shape ?? {};
-    options.stroke = computedStyle.getPropertyValue(
-      attributes.strokeColor as string
-    );
-    options.fill = computedStyle.getPropertyValue(
-      attributes.fillColor as string
-    );
+    const attributes =
+      this._edgeless.surface.service.editSessionManager.getLastProps('shape');
+    options.stroke = computedStyle.getPropertyValue(attributes.strokeColor);
+    options.fill = computedStyle.getPropertyValue(attributes.fillColor);
     this._shapeOverlay = new ShapeOverlay(
       this._edgeless,
-      attributes.shapeType as ShapeType,
+      attributes.shapeType,
       options,
       {
-        shapeStyle: attributes.shapeStyle as ShapeStyle,
-        fillColor: attributes.fillColor as string,
-        strokeColor: attributes.strokeColor as string,
+        shapeStyle: attributes.shapeStyle,
+        fillColor: attributes.fillColor,
+        strokeColor: attributes.strokeColor,
       }
     );
     this._edgeless.surface.viewport.addOverlay(this._shapeOverlay);

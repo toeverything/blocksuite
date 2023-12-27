@@ -6,7 +6,6 @@ import {
   ConnectorElement,
   ConnectorMode,
   GroupElement,
-  type ShapeType,
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
@@ -34,7 +33,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         l: () => {
-          pageElement.surface.service?.recordLastProps('connector', {
+          pageElement.surface.service.editSessionManager.record('connector', {
             mode: ConnectorMode.Straight,
           });
           this._setEdgelessTool(pageElement, {
@@ -43,7 +42,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         x: () => {
-          pageElement.surface.service?.recordLastProps('connector', {
+          pageElement.surface.service.editSessionManager.record('connector', {
             mode: ConnectorMode.Orthogonal,
           });
           this._setEdgelessTool(pageElement, {
@@ -52,7 +51,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         c: () => {
-          pageElement.surface.service?.recordLastProps('connector', {
+          pageElement.surface.service.editSessionManager.record('connector', {
             mode: ConnectorMode.Curve,
           });
           this._setEdgelessTool(pageElement, {
@@ -85,10 +84,13 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         s: () => {
-          const attributes = pageElement.surface.service?.lastProps.shape ?? {};
+          const attributes =
+            pageElement.surface.service.editSessionManager.getLastProps(
+              'shape'
+            );
           this._setEdgelessTool(pageElement, {
             type: 'shape',
-            shapeType: attributes.shapeType as ShapeType,
+            shapeType: attributes.shapeType,
           });
         },
         f: () => {
