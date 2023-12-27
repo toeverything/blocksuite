@@ -52,7 +52,7 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override disconnectedCallback(): void {
-    const host = this.host.value;
+    const host = this.host;
     if (!host) return;
     const surfaceModel = host.page.getBlockByFlavour('affine:surface')[0];
     const surface = host.view.viewFromPath('block', [
