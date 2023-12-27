@@ -75,7 +75,8 @@ import {
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
-test.beforeEach(async (_, testInfo) => {
+test.beforeEach(async ({ page }, testInfo) => {
+  page;
   testInfo.snapshotSuffix = '';
 });
 
