@@ -1,4 +1,5 @@
 import './chat-with-workspace/chat-with-workspace.js';
+import './copilot-service/index.js';
 
 import { FrameBlockModel } from '@blocksuite/blocks';
 import {
@@ -15,7 +16,14 @@ import type { AffineEditorContainer } from '../../index.js';
 import { LANGUAGE, TONE } from './config.js';
 import { copilotConfig } from './copilot-service/copilot-config.js';
 import { CreateNewService } from './copilot-service/index.js';
-import { allKindService } from './copilot-service/service-base.js';
+import {
+  allKindService,
+  FastImage2ImageServiceKind,
+  Image2ImageServiceKind,
+  Image2TextServiceKind,
+  Text2ImageServiceKind,
+  TextServiceKind,
+} from './copilot-service/service-base.js';
 import { EditorWithAI } from './edgeless/api.js';
 import { GPTAPI, type GPTAPIPayloadMap } from './text/index.js';
 import { insertFromMarkdown } from './utils/markdown-utils.js';
@@ -25,6 +33,23 @@ import {
   getSurfaceElementFromEditor,
   stopPropagation,
 } from './utils/selection-utils.js';
+
+const AddCursorIcon = html`
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M6 12H18M12 6V18"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+`;
 
 @customElement('copilot-panel')
 export class CopilotPanel extends WithDisposable(ShadowlessElement) {
@@ -64,7 +89,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: 36px;
+      margin-top: 12px;
     }
 
     .copilot-panel-action-prompt {
@@ -81,6 +106,31 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       margin-bottom: 8px;
       margin-top: 4px;
       color: var(--affine-text-secondary-color);
+    }
+
+    .copilot-panel-add-vendor-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .copilot-panel-add-vendor-button:hover {
+      background-color: var(--affine-hover-color);
+    }
+
+    .copilot-panel-vendor-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      color: white;
+    }
+    .copilot-box {
+      margin-bottom: 64px;
     }
   `;
 
@@ -202,49 +252,46 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   }
 
   config = () => {
-    const changeService = (name: string) => (evt: Event) => {
-      if (evt.target instanceof HTMLSelectElement) {
-        console.log(name, evt.target.value);
-        copilotConfig.changeService(name, evt.target.value);
+    const createNew = (type: string) => () => {
+      const panel = new CreateNewService();
+      panel.type = type;
+      panel.onSave = config => {
+        copilotConfig.addVendor(config);
         this.requestUpdate();
-      }
-    };
-    const createNew = (type: string) => (e: Event) => {
-      if (e.target instanceof HTMLElement) {
-        const panel = new CreateNewService();
-        panel.type = type;
-        panel.onSave = config => {
-          copilotConfig.addService(config);
-          this.requestUpdate();
-          panel.remove();
-        };
-        document.body.appendChild(panel);
-      }
+        panel.remove();
+      };
+      document.body.appendChild(panel);
     };
     return html`
-      <div>
+      <div style="display:flex;flex-direction: column;gap: 32px;">
         ${repeat(allKindService, v => {
-          console.log(
-            v.type,
-            copilotConfig.config.service,
-            copilotConfig.getConfigList(v.type)
-          );
+          const list = copilotConfig.getVendorsByService(v);
           return html`
             <div>
-              <div class="copilot-panel-setting-title">${v.title}</div>
-              <div>
-                <select
-                  value="${copilotConfig.config.service[v.type] ?? ''}"
-                  @change="${changeService(v.type)}"
+              <div
+                class="copilot-panel-setting-title"
+                style="display:flex;justify-content:space-between;align-items:center;;color: var(--affine-text-primary-color);"
+              >
+                ${v.title}
+                <div
+                  @click="${createNew(v.type)}"
+                  class="copilot-panel-add-vendor-button"
                 >
-                  <option value="null">None</option>
-                  ${copilotConfig.getConfigList(v.type).map(config => {
-                    return html` <option .value="${config.id}">
-                      ${config.name}
-                    </option>`;
-                  })}
-                </select>
-                <button @click="${createNew(v.type)}">create new</button>
+                  ${AddCursorIcon}
+                </div>
+              </div>
+              <div style="display:flex;flex-wrap: wrap;padding: 4px;gap: 4px">
+                ${repeat(list, v => {
+                  const style = styleMap({
+                    backgroundColor: v.impl.vendor.color,
+                  });
+                  return html` <div
+                    style="${style}"
+                    class="copilot-panel-vendor-item"
+                  >
+                    ${v.vendor.name} ${v.impl.vendor.key} ${v.impl.name}
+                  </div>`;
+                })}
               </div>
             </div>
           `;
@@ -351,6 +398,22 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       ${this.extraPayload[this.payload.type]()}
       <div class="copilot-panel-action-button" @click="${this.ask}">Ask</div>
       <div>${this._ResultArea()}</div>
+
+      <div
+        style="display:flex;flex-direction: column;gap: 12px;margin-top: 12px;"
+      >
+        <div style="display:flex;gap: 8px;flex-direction: column">
+          <div
+            style="font-size: 12px;color:var(--affine-text-secondary-color);"
+          >
+            chat service:
+          </div>
+          <vendor-service-select
+            .featureKey="${'chat with workspace'}"
+            .service="${TextServiceKind}"
+          ></vendor-service-select>
+        </div>
+      </div>
     </div>`;
   };
   workspace = () => {
@@ -372,61 +435,123 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       this.requestUpdate();
     };
     return html`
-      <div class="copilot-panel-action-button" @click="${this.api.makeItReal}">
-        Make It Real
-      </div>
-      <div class="copilot-panel-action-description">
-        Select some shapes and text to generate html
-      </div>
-      <div class="copilot-panel-action-button" @click="${this.api.createImage}">
-        Create Image
-      </div>
-      <input
-        id="copilot-panel-create-image-prompt"
-        class="copilot-panel-action-prompt"
-        type="text"
-        @keydown="${stopPropagation}"
-        placeholder="Prompt"
-      />
-      <div class="copilot-panel-action-description">
-        Type prompt to create an image.
-      </div>
-      <div class="copilot-panel-action-button" @click="${this.api.editImage}">
-        Edit Image
-      </div>
-      <input
-        id="copilot-panel-edit-image-prompt"
-        class="copilot-panel-action-prompt"
-        type="text"
-        @keydown="${stopPropagation}"
-        placeholder="Prompt"
-      />
-      <div class="copilot-panel-action-description">
-        Select some shapes and type prompt to edit them.
-      </div>
-      <div
-        class="copilot-panel-action-button"
-        @click="${this.api.htmlBlockDemo}"
-      >
-        HTML Block Test
-      </div>
-      <div class="copilot-panel-action-description">Generate a html block</div>
-      <div @click="${toggleAutoGen}" class="copilot-panel-action-button">
-        ${this.api.autoGen ? 'Stop auto gen image' : 'Start auto gen image'}
-      </div>
-      <div class="copilot-panel-action-description">
-        <div>
-          Based on the shapes in frame
-          <select .value="${this.api.fromFrame}" @change="${changeFromFrame}">
-            <option value="">None</option>
-            ${frames.map(v => {
-              return html` <option .value="${v.id}">
-                ${v.title.toString()}
-              </option>`;
-            })}
-          </select>
+      <div class="copilot-box">
+        <div
+          class="copilot-panel-action-button"
+          @click="${this.api.makeItReal}"
+        >
+          Make It Real
         </div>
-        <div>Generate images to all connected frames</div>
+        <div class="copilot-panel-action-description">
+          Select some shapes and text to generate html
+        </div>
+        <div style="display:flex;gap: 8px;flex-direction: column">
+          <div
+            style="font-size: 12px;color:var(--affine-text-secondary-color);"
+          >
+            service:
+          </div>
+          <vendor-service-select
+            .featureKey="${'make it real'}"
+            .service="${Image2TextServiceKind}"
+          ></vendor-service-select>
+        </div>
+      </div>
+      <div class="copilot-box">
+        <div
+          class="copilot-panel-action-button"
+          @click="${this.api.createImage}"
+        >
+          Create Image
+        </div>
+        <input
+          id="copilot-panel-create-image-prompt"
+          class="copilot-panel-action-prompt"
+          type="text"
+          @keydown="${stopPropagation}"
+          placeholder="Prompt"
+        />
+        <div class="copilot-panel-action-description">
+          Type prompt to create an image.
+        </div>
+        <div style="display:flex;gap: 8px;flex-direction: column">
+          <div
+            style="font-size: 12px;color:var(--affine-text-secondary-color);"
+          >
+            service:
+          </div>
+          <vendor-service-select
+            .featureKey="${'text to image'}"
+            .service="${Text2ImageServiceKind}"
+          ></vendor-service-select>
+        </div>
+      </div>
+      <div class="copilot-box">
+        <div class="copilot-panel-action-button" @click="${this.api.editImage}">
+          Edit Image
+        </div>
+        <input
+          id="copilot-panel-edit-image-prompt"
+          class="copilot-panel-action-prompt"
+          type="text"
+          @keydown="${stopPropagation}"
+          placeholder="Prompt"
+        />
+        <div class="copilot-panel-action-description">
+          Select some shapes and type prompt to edit them.
+        </div>
+        <div style="display:flex;gap: 8px;flex-direction: column">
+          <div
+            style="font-size: 12px;color:var(--affine-text-secondary-color);"
+          >
+            service:
+          </div>
+          <vendor-service-select
+            .featureKey="${'edit image'}"
+            .service="${Image2ImageServiceKind}"
+          ></vendor-service-select>
+        </div>
+      </div>
+      <div class="copilot-box">
+        <div
+          class="copilot-panel-action-button"
+          @click="${this.api.htmlBlockDemo}"
+        >
+          HTML Block Test
+        </div>
+        <div class="copilot-panel-action-description">
+          Generate a html block
+        </div>
+      </div>
+      <div class="copilot-box">
+        <div @click="${toggleAutoGen}" class="copilot-panel-action-button">
+          ${this.api.autoGen ? 'Stop auto gen image' : 'Start auto gen image'}
+        </div>
+        <div class="copilot-panel-action-description">
+          <div>
+            Based on the shapes in frame
+            <select .value="${this.api.fromFrame}" @change="${changeFromFrame}">
+              <option value="">None</option>
+              ${frames.map(v => {
+                return html` <option .value="${v.id}">
+                  ${v.title.toString()}
+                </option>`;
+              })}
+            </select>
+          </div>
+          <div>Generate images to all connected frames</div>
+        </div>
+        <div style="display:flex;gap: 8px;flex-direction: column">
+          <div
+            style="font-size: 12px;color:var(--affine-text-secondary-color);"
+          >
+            service:
+          </div>
+          <vendor-service-select
+            .featureKey="${'real time image to image'}"
+            .service="${FastImage2ImageServiceKind}"
+          ></vendor-service-select>
+        </div>
       </div>
     `;
   };

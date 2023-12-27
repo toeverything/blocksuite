@@ -1,15 +1,27 @@
-import type { AllServiceKind, GetMethod } from './service-base.js';
+import type { AllServiceKind, GetMethod, ServiceImpl } from './service-base.js';
 
-export type ServiceConfig = {
+export type VendorConfig = {
   id: string;
-  type: string;
-  key: string;
+  vendorKey: string;
   name: string;
   data: unknown;
 };
+type ServiceType = string;
+export type ServiceConfigMap = Record<
+  ServiceType,
+  {
+    vendorId: string;
+    implName: string;
+  }
+>;
 export type CopilotConfigDataType = {
-  service: Record<string, string>;
-  serviceConfigList: ServiceConfig[];
+  feature: Record<string, ServiceConfigMap>;
+  vendors: VendorConfig[];
+};
+
+type VendorPack<T extends AllServiceKind> = {
+  vendor: VendorConfig;
+  impl: ServiceImpl<GetMethod<T>, unknown>;
 };
 
 export class CopilotConfig {
@@ -28,8 +40,8 @@ export class CopilotConfig {
     if (!this._config) {
       this._config = Object.assign(
         {
-          service: {},
-          serviceConfigList: [],
+          feature: {},
+          vendors: [],
         } satisfies CopilotConfigDataType,
         this.loadFromLocalStorage()
       ) as CopilotConfigDataType;
@@ -41,33 +53,70 @@ export class CopilotConfig {
     localStorage.setItem('copilotConfig', JSON.stringify(this.config));
   }
 
-  getConfigList(type: string): ServiceConfig[] {
-    return this.config.serviceConfigList.filter(config => config.type === type);
-  }
-
-  getConfig(id: string): ServiceConfig | undefined {
-    return this.config.serviceConfigList.find(config => config.id === id);
-  }
-
-  changeService(name: string, id: string) {
-    this.config.service[name] = id;
+  changeService(
+    featureKey: string,
+    serviceType: string,
+    vendorId: string,
+    implName: string
+  ) {
+    this.config.feature[featureKey] = this.config.feature[featureKey] ?? {};
+    this.config.feature[featureKey][serviceType] = {
+      vendorId,
+      implName,
+    };
     this.save();
   }
 
-  public addService(config: ServiceConfig) {
-    this.config.serviceConfigList.push(config);
+  public addVendor(config: VendorConfig) {
+    this.config.vendors.push(config);
     this.save();
   }
 
-  public getService<T extends AllServiceKind>(serviceKind: T): GetMethod<T> {
-    const id = this.config.service[serviceKind.type];
-    const config = this.config.serviceConfigList.find(v => v.id === id);
-    if (!config) {
-      throw new Error('no config');
+  public getVendor<T extends AllServiceKind>(
+    featureKey: string,
+    serviceKind: T
+  ): VendorPack<T> | undefined {
+    const config = this.config.feature[featureKey] ?? {};
+    const serviceConfig = config[serviceKind.type];
+    const vendor =
+      serviceConfig &&
+      this.config.vendors.find(v => v.id === serviceConfig.vendorId);
+    if (vendor) {
+      const impl = serviceKind.getImpl(serviceConfig.implName);
+      return {
+        vendor,
+        impl: impl as never,
+      };
+    } else {
+      return this.getVendorsByService(serviceKind)[0];
     }
-    const impl = serviceKind.getImpl(config.key);
-    const method = impl?.method(config.data as never);
+  }
+
+  public getService<T extends AllServiceKind>(
+    featureKey: string,
+    serviceKind: T
+  ): GetMethod<T> {
+    const vendorPack = this.getVendor(featureKey, serviceKind);
+    if (!vendorPack) {
+      throw new Error(`no vendor for ${serviceKind.type}`);
+    }
+    const method = vendorPack.impl.method(vendorPack.vendor.data);
     return method as GetMethod<T>;
+  }
+
+  getVendorsByService<T extends AllServiceKind>(
+    serviceKind: T
+  ): VendorPack<T>[] {
+    return this.config.vendors.flatMap(vendor => {
+      return serviceKind.implList
+        .filter(impl => impl.vendor.key === vendor.vendorKey)
+        .map(impl => {
+          return {
+            vendor: vendor,
+            impl: impl as never,
+          };
+        });
+    });
   }
 }
 

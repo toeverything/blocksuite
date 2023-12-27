@@ -1,5 +1,4 @@
-import { copilotConfig } from '../copilot-service/copilot-config.js';
-import { TextServiceKind } from '../copilot-service/service-base.js';
+import { getTextService } from './api.js';
 
 export async function runChangeToneAction({
   input,
@@ -8,7 +7,7 @@ export async function runChangeToneAction({
   input: string;
   tone: string;
 }) {
-  const result = await copilotConfig.getService(TextServiceKind).generateText([
+  const result = await getTextService().generateText([
     {
       role: 'system',
       content: 'You are assisting the user in writing high quality content.',

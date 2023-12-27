@@ -1,9 +1,8 @@
-import { copilotConfig } from '../copilot-service/copilot-config.js';
-import { TextServiceKind } from '../copilot-service/service-base.js';
+import { getTextService } from './api.js';
 
 export async function runGenerateAction(payload: { input: string }) {
   const { input } = payload;
-  const result = await copilotConfig.getService(TextServiceKind).generateText([
+  const result = await getTextService().generateText([
     {
       role: 'system',
       content:

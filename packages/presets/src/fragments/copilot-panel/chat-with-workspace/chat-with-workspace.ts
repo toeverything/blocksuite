@@ -7,7 +7,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineEditorContainer } from '../../../editors/index.js';
-import { askGPT3_5turbo_1106, embeddings } from '../utils/request.js';
+import { copilotConfig } from '../copilot-service/copilot-config.js';
+import {
+  EmbeddingServiceKind,
+  TextServiceKind,
+} from '../copilot-service/service-base.js';
 
 type EmbeddedPage = {
   id: string;
@@ -117,7 +121,9 @@ export class ChatWithWorkspacePanel extends WithDisposable(ShadowlessElement) {
     const value = this.value;
     this.history.push({ role: 'user', content: value, sources: [] });
     this.value = '';
-    const [result] = await embeddings([value]);
+    const [result] = await copilotConfig
+      .getService('chat with workspace', EmbeddingServiceKind)
+      .generateEmbeddings([value]);
     const list = this.syncedPages
       .flatMap(page => {
         return page.sections.map(section => ({
@@ -129,13 +135,15 @@ export class ChatWithWorkspacePanel extends WithDisposable(ShadowlessElement) {
       .sort((a, b) => a.distance - b.distance)
       .filter(v => v.distance < 0.7)
       .slice(0, 3);
-    const r = await askGPT3_5turbo_1106([
-      {
-        role: 'system',
-        content: `the background is:\n${list.map(v => v.text).join('\n')}`,
-      },
-      ...this.history.map(v => ({ role: v.role, content: v.content })),
-    ]);
+    const r = await copilotConfig
+      .getService('text completion', TextServiceKind)
+      .generateText([
+        {
+          role: 'system',
+          content: `the background is:\n${list.map(v => v.text).join('\n')}`,
+        },
+        ...this.history.map(v => ({ role: v.role, content: v.content })),
+      ]);
     const refs: Record<
       string,
       {
@@ -171,7 +179,9 @@ export class ChatWithWorkspacePanel extends WithDisposable(ShadowlessElement) {
         )
       )
     ).flat();
-    const vectors = await embeddings(list.map(v => v.text));
+    const vectors = await copilotConfig
+      .getService('chat with workspace', EmbeddingServiceKind)
+      .generateEmbeddings(list.map(v => v.text));
     list.forEach((v, i) => {
       const page = result[v.id] ?? (result[v.id] = { id: v.id, sections: [] });
       page.sections.push({ vector: vectors[i], text: v.text });
@@ -245,6 +255,32 @@ export class ChatWithWorkspacePanel extends WithDisposable(ShadowlessElement) {
         />
         <div @click="${this.ask}" class="send-button">
           <sl-icon name="stars"></sl-icon>
+        </div>
+      </div>
+      <div
+        style="display:flex;flex-direction: column;gap: 12px;margin-top: 12px;"
+      >
+        <div style="display:flex;gap: 8px;flex-direction: column">
+          <div
+            style="font-size: 12px;color:var(--affine-text-secondary-color);"
+          >
+            embedding service:
+          </div>
+          <vendor-service-select
+            .featureKey="${'chat with workspace'}"
+            .service="${EmbeddingServiceKind}"
+          ></vendor-service-select>
+        </div>
+        <div style="display:flex;gap: 8px;flex-direction: column">
+          <div
+            style="font-size: 12px;color:var(--affine-text-secondary-color);"
+          >
+            chat service:
+          </div>
+          <vendor-service-select
+            .featureKey="${'chat with workspace'}"
+            .service="${TextServiceKind}"
+          ></vendor-service-select>
         </div>
       </div>
     `;

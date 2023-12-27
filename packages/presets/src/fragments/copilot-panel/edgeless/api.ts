@@ -10,8 +10,12 @@ import type { EditorHost } from '@blocksuite/lit';
 import type { Workspace } from '@blocksuite/store';
 
 import type { AffineEditorContainer } from '../../../editors/index.js';
+import { copilotConfig } from '../copilot-service/copilot-config.js';
+import {
+  FastImage2ImageServiceKind,
+  Text2ImageServiceKind,
+} from '../copilot-service/service-base.js';
 import { demoScript } from '../demo-script.js';
-import { askDallE3, createImageGenerator } from '../utils/request.js';
 import {
   frameToCanvas,
   getEdgelessPageBlockFromEditor,
@@ -143,7 +147,9 @@ export class EditorWithAI {
       alert('Please enter some prompt first');
       return;
     }
-    const b64 = await askDallE3(prompt);
+    const b64 = await copilotConfig
+      .getService('text to image', Text2ImageServiceKind)
+      .generateImage(prompt);
     if (b64) {
       const imgFile = pngBase64ToFile(b64, 'img');
       await edgelessPage.addImages([imgFile]);
@@ -186,7 +192,12 @@ export class EditorWithAI {
             if (!target) {
               this.targets[model.id] = target = {
                 lastHash: '',
-                request: createImageGenerator(),
+                request: copilotConfig
+                  .getService(
+                    'real time image to image',
+                    FastImage2ImageServiceKind
+                  )
+                  .createFastRequest(),
               };
             }
             if (target.lastHash === hash) {
