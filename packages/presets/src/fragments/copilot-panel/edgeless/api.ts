@@ -5,8 +5,6 @@ import {
   FrameBlockModel,
   type ImageBlockProps,
 } from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
-import type { EditorHost } from '@blocksuite/lit';
 import type { Workspace } from '@blocksuite/store';
 
 import type { AffineEditorContainer } from '../../../editors/index.js';
@@ -53,9 +51,8 @@ export class EditorWithAI {
     return this.editor.page.workspace;
   }
 
-  get root(): EditorHost {
-    assertExists(this.editor.root);
-    return this.editor.root;
+  get host() {
+    return this.editor.host;
   }
 
   constructor(private editor: AffineEditorContainer) {}
