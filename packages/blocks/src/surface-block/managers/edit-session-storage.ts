@@ -90,7 +90,7 @@ const LastPropsSchema = z.object({
     fontSize: z.number(),
     hasMaxWidth: z.boolean(),
   }),
-  ['affine:note']: z.object({
+  'affine:note': z.object({
     background: NoteColorsSchema,
     hidden: z.boolean(),
     edgeless: z.object({
@@ -136,7 +136,7 @@ export type SerializedViewport = z.infer<
   typeof SessionPropsSchema.shape.viewport
 >;
 
-export class EditSessionManager {
+export class EditSessionStorage {
   private _lastProps = {
     connector: {
       rough: false,
@@ -165,7 +165,7 @@ export class EditSessionManager {
       fontSize: 24,
       hasMaxWidth: false,
     },
-    ['affine:note']: {
+    'affine:note': {
       background: DEFAULT_NOTE_COLOR,
       hidden: false,
       edgeless: {

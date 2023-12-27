@@ -134,14 +134,14 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
         if (props.shapeType) {
           this._activeShape(props.shapeType as ShapeName);
         }
-        this.surface.service.editSessionManager.record(this._type, props);
+        this.surface.service.editSession.record(this._type, props);
       };
     }
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.surface.service.editSessionManager.slots.lastPropsUpdated.on(
+    this.surface.service.editSession.slots.lastPropsUpdated.on(
       ({ type, props }) => {
         if (type === 'shape' && props.shapeType) {
           this._activeShape(props.shapeType as ShapeName);

@@ -309,7 +309,7 @@ export class SurfaceBlockComponent extends BlockElement<
         const element = this.pickById(id);
         assertExists(element);
 
-        this.service!.editSessionManager.record(
+        this.service!.editSession.record(
           (isTopLevelBlock(element)
             ? element.flavour
             : element.type) as EdgelessElementType,
@@ -720,7 +720,7 @@ export class SurfaceBlockComponent extends BlockElement<
       throw new Error('Cannot add element in readonly mode');
     }
 
-    this.service!.editSessionManager.apply(type, properties);
+    this.service!.editSession.apply(type, properties);
 
     if (isCanvasElementType(type)) {
       const id = generateElementId();

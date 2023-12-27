@@ -51,7 +51,7 @@ export class EdgelessTextToolButton extends EdgelessToolButton<
       this.attributeToMenu();
       this._menu.element.edgeless = this.edgeless;
       this._menu.element.onChange = (props: Record<string, unknown>) => {
-        this.service.editSessionManager.record(this._type, props);
+        this.service.editSession.record(this._type, props);
       };
     }
   }

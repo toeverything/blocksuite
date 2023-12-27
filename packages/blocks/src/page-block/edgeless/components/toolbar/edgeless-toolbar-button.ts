@@ -2,7 +2,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { type LastProps } from '../../../../surface-block/managers/edit-session-manager.js';
+import { type LastProps } from '../../../../surface-block/managers/edit-session-storage.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { type MenuPopper } from './common/create-popper.js';
 
@@ -47,9 +47,9 @@ export class EdgelessToolButton<
   override connectedCallback() {
     super.connectedCallback();
     const { _disposables, edgeless, service } = this;
-    const { editSessionManager } = service;
+    const { editSession } = service;
 
-    const attributes = editSessionManager.getLastProps(this._type);
+    const attributes = editSession.getLastProps(this._type);
 
     this._states.forEach(key => {
       const value = attributes[key];
@@ -64,7 +64,7 @@ export class EdgelessToolButton<
       })
     );
     _disposables.add(
-      editSessionManager.slots.lastPropsUpdated.on(({ type, props }) => {
+      editSession.slots.lastPropsUpdated.on(({ type, props }) => {
         if (type === this._type) {
           this._states.forEach(_key => {
             const key = _key as string;

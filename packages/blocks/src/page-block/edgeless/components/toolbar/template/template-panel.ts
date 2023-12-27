@@ -206,7 +206,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     this.addEventListener('keydown', stopPropagation, false);
     this._disposables.add(() => {
       if (this._currentCategory) {
-        this._service.editSessionManager.setItem(
+        this._service.editSession.setItem(
           'templateCache',
           this._currentCategory
         );
@@ -229,7 +229,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   }
 
   private _getLocalSelectedCategory() {
-    return this._service.editSessionManager.getItem('templateCache');
+    return this._service.editSession.getItem('templateCache');
   }
 
   private _createTemplateJob(type: string) {

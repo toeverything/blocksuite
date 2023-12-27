@@ -254,7 +254,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const options = SHAPE_OVERLAY_OPTIONS;
     const computedStyle = getComputedStyle(this._edgeless);
     const attributes =
-      this._edgeless.surface.service.editSessionManager.getLastProps('shape');
+      this._edgeless.surface.service.editSession.getLastProps('shape');
     options.stroke = computedStyle.getPropertyValue(attributes.strokeColor);
     options.fill = computedStyle.getPropertyValue(attributes.fillColor);
     this._shapeOverlay = new ShapeOverlay(

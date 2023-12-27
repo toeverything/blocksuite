@@ -91,15 +91,12 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
   }
 
   private _tryRestoreSettings() {
-    const { editSessionManager } = this._surfaceService;
-    const blackBackground = editSessionManager.getItem(
-      'presentBlackBackground'
-    );
+    const { editSession } = this._surfaceService;
+    const blackBackground = editSession.getItem('presentBlackBackground');
 
     this.blackBackground = blackBackground ? blackBackground : true;
-    this.fillScreen = editSessionManager.getItem('presentFillScreen') ?? false;
-    this.hideToolbar =
-      editSessionManager.getItem('presentHideToolbar') ?? false;
+    this.fillScreen = editSession.getItem('presentFillScreen') ?? false;
+    this.hideToolbar = editSession.getItem('presentHideToolbar') ?? false;
   }
 
   private _onBlackBackgroundChange = (checked: boolean) => {
@@ -114,7 +111,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless?.slots.navigatorSettingUpdated.emit({
       fillScreen: this.fillScreen,
     });
-    this._surfaceService.editSessionManager.setItem(
+    this._surfaceService.editSession.setItem(
       'presentFillScreen',
       this.fillScreen
     );
@@ -125,7 +122,7 @@ export class FramesSettingMenu extends WithDisposable(LitElement) {
     this.edgeless?.slots.navigatorSettingUpdated.emit({
       hideToolbar: this.hideToolbar,
     });
-    this._surfaceService.editSessionManager.setItem(
+    this._surfaceService.editSession.setItem(
       'presentHideToolbar',
       this.hideToolbar
     );

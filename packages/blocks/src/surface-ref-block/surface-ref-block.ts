@@ -814,7 +814,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       };
       (<SurfaceService>(
         this.std.spec.getService('affine:surface')
-      )).editSessionManager.setItem('viewport', viewport);
+      )).editSession.setItem('viewport', viewport);
     }
 
     this.selection.update(selections => {

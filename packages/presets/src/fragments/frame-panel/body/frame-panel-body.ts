@@ -256,7 +256,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
       const surfaceService = this.editorHost.spec.getService(
         'affine:surface'
       ) as SurfaceService;
-      surfaceService.editSessionManager.setItem('viewport', viewport);
+      surfaceService.editSession.setItem('viewport', viewport);
       this.changeEditorMode('edgeless');
     } else {
       this.edgeless.surface.viewport.setViewportByBound(

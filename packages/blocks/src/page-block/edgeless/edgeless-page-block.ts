@@ -54,7 +54,7 @@ import {
   Vec,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
-import type { SerializedViewport } from '../../surface-block/managers/edit-session-manager.js';
+import type { SerializedViewport } from '../../surface-block/managers/edit-session-storage.js';
 import { compare } from '../../surface-block/managers/group-manager.js';
 import type {
   IndexedCanvasUpdateEvent,
@@ -701,8 +701,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   private _getSavedViewport(): SerializedViewport | null {
     let result: SerializedViewport | null = null;
-    const storedViewport =
-      this.surface.service.editSessionManager.getItem('viewport');
+    const storedViewport = this.surface.service.editSession.getItem('viewport');
     if (!storedViewport) return null;
 
     if ('referenceId' in storedViewport) {

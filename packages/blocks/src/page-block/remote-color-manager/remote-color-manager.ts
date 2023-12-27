@@ -13,8 +13,7 @@ export class RemoteColorManager {
   }
 
   constructor(public readonly host: EditorHost) {
-    const sessionColor =
-      this.surfaceService.editSessionManager.getItem('remoteColor');
+    const sessionColor = this.surfaceService.editSession.getItem('remoteColor');
     if (sessionColor) {
       this.awareness.awareness.setLocalStateField('color', sessionColor);
       return;
@@ -22,7 +21,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awareness.awareness.setLocalStateField('color', pickColor);
-    this.surfaceService.editSessionManager.setItem('remoteColor', pickColor);
+    this.surfaceService.editSession.setItem('remoteColor', pickColor);
   }
 
   get(id: number) {
@@ -33,8 +32,7 @@ export class RemoteColorManager {
 
     if (id !== this.awareness.awareness.clientID) return null;
 
-    const sessionColor =
-      this.surfaceService.editSessionManager.getItem('remoteColor');
+    const sessionColor = this.surfaceService.editSession.getItem('remoteColor');
     if (sessionColor) {
       this.awareness.awareness.setLocalStateField('color', sessionColor);
       return sessionColor;
@@ -42,7 +40,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awareness.awareness.setLocalStateField('color', pickColor);
-    this.surfaceService.editSessionManager.setItem('remoteColor', pickColor);
+    this.surfaceService.editSession.setItem('remoteColor', pickColor);
     return pickColor;
   }
 }

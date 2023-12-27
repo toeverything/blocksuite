@@ -4,7 +4,7 @@ import { Slot } from '@blocksuite/global/utils';
 import type { NavigatorMode } from '../_common/edgeless/frame/consts.js';
 import { type EdgelessTool } from '../_common/types.js';
 import { buildPath } from '../_common/utils/query.js';
-import { EditSessionManager } from './managers/edit-session-manager.js';
+import { EditSessionStorage } from './managers/edit-session-storage.js';
 import { TemplateJob } from './service/template.js';
 import type { SurfaceBlockComponent } from './surface-block.js';
 import type { SurfaceBlockModel } from './surface-model.js';
@@ -16,11 +16,11 @@ export class SurfaceService extends BlockService<SurfaceBlockModel> {
     edgelessToolUpdated: new Slot<EdgelessTool>(),
   };
 
-  editSessionManager!: EditSessionManager;
+  editSession!: EditSessionStorage;
 
   override mounted(): void {
     super.mounted();
-    this.editSessionManager = new EditSessionManager(this);
+    this.editSession = new EditSessionStorage(this);
   }
 
   private get _surfaceView() {

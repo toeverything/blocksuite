@@ -145,7 +145,7 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode = (<SurfaceService>(
       this.editorHost.spec.getService('affine:surface')
-    )).editSessionManager.getItem('presentFillScreen')
+    )).editSession.getItem('presentFillScreen')
       ? 'fill'
       : 'fit';
   }

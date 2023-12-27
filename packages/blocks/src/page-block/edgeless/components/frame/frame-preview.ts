@@ -363,7 +363,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     ) as SurfaceService;
 
     this.fillScreen =
-      surfaceService.editSessionManager.getItem('presentFillScreen') ?? false;
+      surfaceService.editSession.getItem('presentFillScreen') ?? false;
   }
 
   private _getCSSPropertyValue = (value: string) => {
