@@ -17,6 +17,7 @@ import {
   NewIcon,
   NotionIcon,
 } from '../../../../_common/icons/index.js';
+import { defaultImageProxyMiddleware } from '../../../../_common/transformers/middlewares.js';
 import { openFileOrFiles } from '../../../../_common/utils/index.js';
 import { styles } from './styles.js';
 
@@ -30,8 +31,10 @@ const SHOW_LOADING_SIZE = 1024 * 200;
 export async function importMarkDown(workspace: Workspace, text: string) {
   const job = new Job({
     workspace: workspace,
+    middlewares: [defaultImageProxyMiddleware],
   });
   const mdAdapter = new MarkdownAdapter();
+  mdAdapter.applyConfigs(job.adapterConfigs);
   const snapshot = await mdAdapter.toPageSnapshot({ file: text });
   const page = await job.snapshotToPage(snapshot);
   return [page.id];
@@ -40,8 +43,10 @@ export async function importMarkDown(workspace: Workspace, text: string) {
 export async function importHtml(workspace: Workspace, text: string) {
   const job = new Job({
     workspace: workspace,
+    middlewares: [defaultImageProxyMiddleware],
   });
   const htmlAdapter = new NotionHtmlAdapter();
+  htmlAdapter.applyConfigs(job.adapterConfigs);
   const snapshot = await htmlAdapter.toPageSnapshot({ file: text });
   const page = await job.snapshotToPage(snapshot);
   return [page.id];
@@ -95,8 +100,10 @@ export async function importNotion(workspace: Workspace, file: File) {
     const pagePromises = Array.from(pageMap.keys()).map(async file => {
       const job = new Job({
         workspace: workspace,
+        middlewares: [defaultImageProxyMiddleware],
       });
       const htmlAdapter = new NotionHtmlAdapter();
+      htmlAdapter.applyConfigs(job.adapterConfigs);
       const snapshot = await htmlAdapter.toPageSnapshot({
         file: await zipFile.files[file].async('text'),
         pageId: pageMap.get(file),

@@ -1,14 +1,15 @@
 import { expect, test } from 'vitest';
 import * as Y from 'yjs';
 
-import { Text } from '../reactive';
+import { MemoryBlobManager } from '../adapter/index.js';
+import { Text } from '../reactive/index.js';
 import {
   defineBlockSchema,
   Schema,
   type SchemaToModel,
 } from '../schema/index.js';
-import { BaseBlockTransformer } from '../transformer';
-import { Generator, Workspace } from '../workspace';
+import { AssetsManager, BaseBlockTransformer } from '../transformer/index.js';
+import { Generator, Workspace } from '../workspace/index.js';
 
 const pageSchema = defineBlockSchema({
   flavour: 'page',
@@ -49,6 +50,8 @@ function createTestOptions() {
 }
 
 const transformer = new BaseBlockTransformer();
+const blobManager = new MemoryBlobManager();
+const assets = new AssetsManager({ blob: blobManager });
 
 test('model to snapshot', async () => {
   const options = createTestOptions();
@@ -61,6 +64,7 @@ test('model to snapshot', async () => {
   expect(root).not.toBeNull();
   const snapshot = await transformer.toSnapshot({
     model: root,
+    assets,
   });
   expect(snapshot).toMatchSnapshot();
 });
@@ -79,24 +83,33 @@ test('snapshot to model', async () => {
   expect(root).not.toBeNull();
   const snapshot = await transformer.toSnapshot({
     model: root,
+    assets,
   });
 
   const model = await transformer.fromSnapshot({
     json: snapshot,
+    assets,
+    children: [],
   });
   expect(model.flavour).toBe(root.flavour);
 
+  // @ts-ignore
   expect(model.props.title).toBeInstanceOf(Text);
 
+  // @ts-ignore
   map.set('title', model.props.title.yText);
+  // @ts-ignore
   expect(model.props.title.toString()).toBe('page title');
 
+  // @ts-ignore
   expect(model.props.style).toEqual({
     color: 'red',
   });
 
+  // @ts-ignore
   expect(model.props.count).toBe(3);
 
+  // @ts-ignore
   expect(model.props.items).toMatchObject([
     {
       id: 0,
@@ -109,6 +122,7 @@ test('snapshot to model', async () => {
     },
   ]);
 
+  // @ts-ignore
   model.props.items.forEach((item, index) => {
     expect(item.content).toBeInstanceOf(Text);
     const key = `item:${index}:content`;

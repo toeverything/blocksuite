@@ -236,9 +236,28 @@ export class AffineDragHandleWidget extends WidgetElement<
   };
 
   private _updateDropResult = (dropResult: DropResult | null) => {
+    assertExists(this.dropIndicator);
     this.dropBlockId = dropResult?.dropBlockId ?? '';
     this.dropType = dropResult?.dropType ?? null;
-    if (this.dropIndicator) this.dropIndicator.rect = dropResult?.rect ?? null;
+    if (dropResult?.rect) {
+      let { left, top } = dropResult.rect;
+      const { width, height } = dropResult.rect;
+      const pageBlockElement = this.pageBlockElement;
+      if (pageBlockElement instanceof DocPageBlockComponent) {
+        const {
+          left: offsetX,
+          top: offsetY,
+          scrollLeft,
+          scrollTop,
+        } = pageBlockElement.viewport;
+        left += scrollLeft - offsetX;
+        top += scrollTop - offsetY;
+      }
+      const rect = Rect.fromLWTH(left, width, top, height);
+      this.dropIndicator.rect = rect;
+    } else {
+      this.dropIndicator.rect = dropResult?.rect ?? null;
+    }
   };
 
   private _resetDropResult = () => {
@@ -361,12 +380,30 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (!this.dragPreview) return;
 
     const dragPreviewOffset = this.dragPreview.offset;
-    const posX = state.raw.x - dragPreviewOffset.x;
-    const posY = state.raw.y - dragPreviewOffset.y;
+    let posX = state.raw.x - dragPreviewOffset.x;
+    let posY = state.raw.y - dragPreviewOffset.y;
+    const pageBlockElement = this.pageBlockElement;
+    if (pageBlockElement instanceof DocPageBlockComponent) {
+      const { left, top, scrollLeft, scrollTop, scrollWidth, scrollHeight } =
+        pageBlockElement.viewport;
+      posX += scrollLeft - left;
+      posY += scrollTop - top;
+      const { width, height } = this.dragPreview.getBoundingClientRect();
+      if (posY < 0) {
+        posY = 0;
+      } else if (posY + height > scrollHeight) {
+        posY = scrollHeight - height;
+      }
+      if (posX < 0) {
+        posX = 0;
+      } else if (posX + width > scrollWidth) {
+        posX = scrollWidth - width;
+      }
+    }
     this.dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this.scale})`;
   };
 
-  private _updateDragPreviewOnZoom = () => {
+  private _updateDragPreviewOnViewportUpdate = () => {
     if (this.dragPreview && this.lastDragPointerState) {
       this._updateDragPreviewPosition(this.lastDragPointerState);
     }
@@ -742,7 +779,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   ) => {
     const { selection } = this.host;
     const selections = blockElements.map(blockElement =>
-      selection.getInstance('block', {
+      selection.create('block', {
         path: blockElement.path,
       })
     );
@@ -751,8 +788,9 @@ export class AffineDragHandleWidget extends WidgetElement<
     // We need to remain surface selection and set editing as true
     if (isInsideEdgelessEditor(this.host)) {
       const surfaceElementId = noteId ? noteId : getNoteId(blockElements[0]);
-      const surfaceSelection = selection.getInstance(
+      const surfaceSelection = selection.create(
         'surface',
+        blockElements[0]!.path,
         [surfaceElementId],
         true
       );
@@ -777,7 +815,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
     return (
       edgelessPage.selectionManager.editing &&
-      edgelessPage.selectionManager.state.elements[0] === noteBlockId
+      edgelessPage.selectionManager.selectedIds[0] === noteBlockId
     );
   };
 
@@ -871,7 +909,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   };
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
-    if (this.page.readonly || this.dragging) {
+    if (this.page.readonly || this.dragging || !this.isConnected) {
       this._hide();
       return;
     }
@@ -1029,9 +1067,11 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   private _onDragMove = (state: PointerEventState) => {
     this._clearRaf();
-    this.rafID = requestAnimationFrame(() =>
-      this._updateDropIndicator(state, true)
-    );
+
+    this.rafID = requestAnimationFrame(() => {
+      this._updateDragPreviewPosition(state);
+      this._updateDropIndicator(state, true);
+    });
     return true;
   };
 
@@ -1178,9 +1218,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     ctx.get('defaultState').event.preventDefault();
-
     const state = ctx.get('pointerState');
-    this._updateDragPreviewPosition(state);
 
     for (const option of this.optionRunner.options) {
       if (option.onDragMove?.(state, this.draggingElements)) {
@@ -1326,7 +1364,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   }) => {
     if (this.scale !== zoom) {
       this.scale = zoom;
-      this._updateDragPreviewOnZoom();
+      this._updateDragPreviewOnViewportUpdate();
     }
 
     if (this.center[0] !== center[0] && this.center[1] !== center[1]) {
@@ -1383,7 +1421,10 @@ export class AffineDragHandleWidget extends WidgetElement<
 
       const docPage = this.pageBlockElement as DocPageBlockComponent;
       this._disposables.add(
-        docPage.slots.viewportUpdated.on(() => this._hide())
+        docPage.slots.viewportUpdated.on(() => {
+          this._hide();
+          if (this.dropIndicator) this.dropIndicator.rect = null;
+        })
       );
 
       const viewportElement = docPage.viewportElement;

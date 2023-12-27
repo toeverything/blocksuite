@@ -36,7 +36,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     selection.update(selList => {
       return selList
         .filter(sel => !sel.is('text') && !sel.is('block'))
-        .concat(selection.getInstance('block', { path: this.path }));
+        .concat(selection.create('block', { path: this.path }));
     });
   }
 

@@ -5,7 +5,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
-import { SettingsIcon } from '../_common/icons.js';
+import { SettingsIcon, SortingIcon } from '../_common/icons.js';
 
 const styles = css`
   :host {
@@ -21,9 +21,17 @@ const styles = css`
   .toc-panel-header-container {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
     width: 100%;
     height: 100%;
+    box-sizing: border-box;
+    padding-right: 16px;
+  }
+
+  .note-setting-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .toc-panel-header-label {
@@ -35,16 +43,26 @@ const styles = css`
     color: var(--affine-text-secondary-color, #8e8d91);
   }
 
-  .notes-setting-button svg {
+  .note-sorting-button {
+    justify-self: end;
+  }
+
+  .note-setting-button svg,
+  .note-sorting-button svg {
     color: var(--affine-icon-secondary);
   }
 
-  .notes-setting-button:hover svg,
-  .notes-setting-button.active svg {
+  .note-setting-button:hover svg,
+  .note-setting-button.active svg,
+  .note-sorting-button:hover svg {
     color: var(--affine-icon-color);
   }
 
-  .notes-setting-container {
+  .note-sorting-button.active svg {
+    color: var(--affine-primary-color);
+  }
+
+  .note-preview-setting-container {
     display: none;
     justify-content: center;
     align-items: center;
@@ -53,7 +71,7 @@ const styles = css`
     border-radius: 8px;
   }
 
-  .notes-setting-container[data-show] {
+  .note-preview-setting-container[data-show] {
     display: flex;
   }
 `;
@@ -62,61 +80,80 @@ export class TOCPanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  hidePreviewIcon!: boolean;
+  showPreviewIcon!: boolean;
 
   @property({ attribute: false })
-  toggleHidePreviewIcon!: (on: boolean) => void;
+  enableNotesSorting!: boolean;
+
+  @property({ attribute: false })
+  toggleShowPreviewIcon!: (on: boolean) => void;
+
+  @property({ attribute: false })
+  toggleNotesSorting!: () => void;
 
   @state()
   private _settingPopperShow = false;
 
-  @query('.notes-setting-button')
-  private _notesSettingButton!: HTMLDivElement;
+  @query('.note-setting-button')
+  private _noteSettingButton!: HTMLDivElement;
 
-  @query('.notes-setting-container')
-  private _notesSettingMenu!: HTMLDivElement;
+  @query('.note-preview-setting-container')
+  private _notePreviewSettingMenu!: HTMLDivElement;
 
-  private _notesSettingMenuPopper: ReturnType<
+  private _notePreviewSettingMenuPopper: ReturnType<
     typeof createButtonPopper
   > | null = null;
 
   override firstUpdated() {
     const _disposables = this._disposables;
 
-    this._notesSettingMenuPopper = createButtonPopper(
-      this._notesSettingButton,
-      this._notesSettingMenu,
+    this._notePreviewSettingMenuPopper = createButtonPopper(
+      this._noteSettingButton,
+      this._notePreviewSettingMenu,
       ({ display }) => {
         this._settingPopperShow = display === 'show';
       },
       14,
       -90
     );
-    _disposables.add(this._notesSettingMenuPopper);
+    _disposables.add(this._notePreviewSettingMenuPopper);
   }
 
   override render() {
     return html`<div class="toc-panel-header-container">
-        <span class="toc-panel-header-label">Table of Contents</span>
+        <div class="note-setting-container">
+          <span class="toc-panel-header-label">Table of Contents</span>
+          <edgeless-tool-icon-button
+            class="note-setting-button ${this._settingPopperShow
+              ? 'active'
+              : ''}"
+            .tooltip=${this._settingPopperShow ? '' : 'Preview Settings'}
+            .tipPosition=${'left'}
+            .iconContainerPadding=${2}
+            .active=${this._settingPopperShow}
+            .activeMode=${'background'}
+            @click=${() => this._notePreviewSettingMenuPopper?.toggle()}
+          >
+            ${SettingsIcon}
+          </edgeless-tool-icon-button>
+        </div>
         <edgeless-tool-icon-button
-          class="notes-setting-button ${this._settingPopperShow
-            ? 'active'
-            : ''}"
-          .tooltip=${this._settingPopperShow ? '' : 'Settings'}
-          .tipPosition=${'top'}
-          .iconContainerPadding=${2}
-          .active=${this._settingPopperShow}
-          .activeMode=${'background'}
-          @click=${() => this._notesSettingMenuPopper?.toggle()}
+          class="note-sorting-button ${this.enableNotesSorting ? 'active' : ''}"
+          .tooltip=${'Note Sort Options'}
+          .tipPosition=${'left'}
+          .iconContainerPadding=${0}
+          .active=${this.enableNotesSorting}
+          .activeMode=${'color'}
+          @click=${() => this.toggleNotesSorting()}
         >
-          ${SettingsIcon}
+          ${SortingIcon}
         </edgeless-tool-icon-button>
       </div>
-      <div class="notes-setting-container">
-        <toc-notes-setting-menu
-          .hideIcon=${this.hidePreviewIcon}
-          .toggleHideIcon=${this.toggleHidePreviewIcon}
-        ></toc-notes-setting-menu>
+      <div class="note-preview-setting-container">
+        <toc-note-preview-setting-menu
+          .showPreviewIcon=${this.showPreviewIcon}
+          .toggleShowPreviewIcon=${this.toggleShowPreviewIcon}
+        ></toc-note-preview-setting-menu>
       </div>`;
   }
 }

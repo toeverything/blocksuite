@@ -84,4 +84,4 @@ In contrast, when you are using BlockSuite with providers, the application logic
 await page.load();
 ```
 
-In both cases, the `page.slots.ready` [slot](./event-api#using-slots) can be used to receive notifications upon the completion of block tree initialization.
+In both cases, the `page.slots.ready` [slot](./event#using-slots) can be used to receive notifications upon the completion of block tree initialization.

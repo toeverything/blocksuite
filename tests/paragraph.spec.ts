@@ -1281,7 +1281,7 @@ test('press arrow up in the second line should move caret to the first line', as
       title: new page.Text(),
     });
     const note = page.addBlock('affine:note', {}, pageId);
-    const delta = Array.from({ length: 120 }, (_, i) => {
+    const delta = Array.from({ length: 150 }, (_, i) => {
       return i % 2 === 0
         ? { insert: 'i', attributes: { italic: true } }
         : { insert: 'b', attributes: { bold: true } };
@@ -1293,9 +1293,13 @@ test('press arrow up in the second line should move caret to the first line', as
 
   // Focus the empty paragraph
   await focusRichText(page, 1);
+  await page.waitForTimeout(100);
+  await assertRichTexts(page, ['ib'.repeat(75), '']);
   await pressArrowUp(page);
   await pressArrowUp(page);
   await type(page, '0');
+  await assertTitle(page, '');
+  await assertRichTexts(page, ['0' + 'ib'.repeat(75), '']);
   await pressArrowUp(page);
 
   // workaround for selection manager
@@ -1308,6 +1312,7 @@ test('press arrow up in the second line should move caret to the first line', as
   // At title
   await type(page, '1');
   await assertTitle(page, '1');
+  await assertRichTexts(page, ['0' + 'ib'.repeat(75), '']);
 
   // At the first line of the first paragraph
   await pressArrowDown(page);
@@ -1316,7 +1321,7 @@ test('press arrow up in the second line should move caret to the first line', as
   await pressArrowRight(page);
   await type(page, '2');
 
-  await assertRichTexts(page, ['0' + 'ib'.repeat(60), '2']);
+  await assertRichTexts(page, ['0' + 'ib'.repeat(75), '2']);
 
   // Go to the start of the second paragraph
   await pressArrowLeft(page);
@@ -1324,7 +1329,7 @@ test('press arrow up in the second line should move caret to the first line', as
   await pressArrowDown(page);
   // Should be inserted at the start of the second paragraph
   await type(page, '3');
-  await assertRichTexts(page, ['0' + 'ib'.repeat(60), '32']);
+  await assertRichTexts(page, ['0' + 'ib'.repeat(75), '32']);
 });
 
 test('press arrow down in indent line should not move caret to the start of line', async ({

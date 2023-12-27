@@ -335,7 +335,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         if (from.index === 0 && from.length === 0) {
           state.raw.preventDefault();
           selectionManager.setGroup('note', [
-            selectionManager.getInstance('block', { path: this.path }),
+            selectionManager.create('block', { path: this.path }),
           ]);
           return true;
         }

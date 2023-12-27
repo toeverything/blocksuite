@@ -614,6 +614,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
     const Content =
       type === 'frameNavigator' ? this._FrameNavigator : this._DefaultContent;
+
     return html`
       <style>
         .edgeless-toolbar-container {
@@ -633,6 +634,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         @dblclick=${stopPropagation}
         @mousedown=${stopPropagation}
         @pointerdown=${stopPropagation}
+        @mouseenter=${() => (this._mouseOnToolbar = true)}
         @mouseleave=${() => (this._mouseOnToolbar = false)}
       >
         ${Content}

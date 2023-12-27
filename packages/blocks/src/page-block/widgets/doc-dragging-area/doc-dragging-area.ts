@@ -105,7 +105,7 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
       this._allBlocksWithRect,
       userRect
     ).map(blockPath => {
-      return this.host.selection.getInstance('block', {
+      return this.host.selection.create('block', {
         path: blockPath,
       });
     });
@@ -134,22 +134,21 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
     const { x: initConX, y: initConY } = this._initialContainerOffset;
     const { x: conX, y: conY } = state.containerOffset;
 
-    const left = Math.min(
-      startX + initScrollX + initConX,
-      x + scrollLeft + conX
-    );
-    const top = Math.min(startY + initScrollY + initConY, y + scrollTop + conY);
+    let left = Math.min(startX + initScrollX + initConX, x + scrollLeft + conX);
     let right = Math.max(
       startX + initScrollX + initConX,
       x + scrollLeft + conX
     );
+    let top = Math.min(startY + initScrollY + initConY, y + scrollTop + conY);
     let bottom = Math.max(
       startY + initScrollY + initConY,
       y + scrollTop + conY
     );
 
-    right = Math.min(right, scrollWidth - initScrollX);
-    bottom = Math.min(bottom, scrollHeight - initScrollY);
+    left = Math.max(left, conX);
+    right = Math.min(right, scrollWidth);
+    top = Math.max(top, conY);
+    bottom = Math.min(bottom, scrollHeight);
 
     const userRect = {
       left,

@@ -50,6 +50,14 @@ export class PageMetaTags extends WithDisposable(LitElement) {
       );
     }
 
+    /* Extra small devices (phones, 640px and down) */
+    @media screen and (max-width: 640px) {
+      .page-meta-container {
+        padding-left: ${PAGE_BLOCK_CHILD_PADDING}px;
+        padding-right: ${PAGE_BLOCK_CHILD_PADDING}px;
+      }
+    }
+
     .meta-data {
       border-radius: 8px;
       display: flex;

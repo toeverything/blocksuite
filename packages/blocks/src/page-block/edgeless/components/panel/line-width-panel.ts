@@ -33,7 +33,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     :host {
       display: flex;
       box-sizing: border-box;
-      background: var(--affine-popover-background);
+      background: var(--affine-background-overlay-panel-color);
     }
 
     .line-width-panel {

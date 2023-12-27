@@ -64,6 +64,7 @@ export class Clipboard {
     assertExists(adapterItem);
     const { adapter } = adapterItem;
     const snapshot = await job.sliceToSnapshot(slice);
+    adapter.applyConfigs(job.adapterConfigs);
     return (
       await adapter.fromSliceSnapshot({ snapshot, assets: job.assetsManager })
     ).file;
@@ -90,6 +91,7 @@ export class Clipboard {
       }
       if (item) {
         const job = this._getJob();
+        adapter.applyConfigs(job.adapterConfigs);
         const payload = {
           file: item,
           assets: job.assetsManager,

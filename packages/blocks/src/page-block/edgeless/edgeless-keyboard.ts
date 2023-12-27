@@ -143,7 +143,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
           ctx.get('defaultState').event.preventDefault();
           const { surface } = this.pageElement;
-          this.pageElement.selectionManager.setSelection({
+          this.pageElement.selectionManager.set({
             elements: [
               ...surface.group
                 .getRootElements(this.pageElement.surface.blocks)
@@ -249,12 +249,13 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _space(event: KeyboardEvent) {
     const edgeless = this.pageElement;
     const type = edgeless.edgelessTool.type;
-    const state = edgeless.selectionManager.state;
+    const selection = edgeless.selectionManager;
+
     if (type !== 'default' && type !== 'pan') {
       return;
     }
     if (event.type === 'keydown') {
-      if (type === 'pan' || (type === 'default' && state.editing)) {
+      if (type === 'pan' || (type === 'default' && selection.editing)) {
         return;
       }
       this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
@@ -282,7 +283,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     deleteElements(edgeless.surface, edgeless.selectionManager.elements);
 
     edgeless.selectionManager.clear();
-    edgeless.selectionManager.setSelection(edgeless.selectionManager.state);
+    edgeless.selectionManager.set(edgeless.selectionManager.selections);
   }
 
   private _tryLoadShapeLocalState(): ShapeToolState | null {

@@ -31,7 +31,7 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
 
     this.handleEvent('click', () => {
       this.host.selection.set([
-        this.host.selection.getInstance('block', {
+        this.host.selection.create('block', {
           path: this.path,
         }),
       ]);

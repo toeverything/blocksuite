@@ -37,7 +37,7 @@ export function fineTuneHmr({
         const modules = imports.map(i => i.n);
         const modulesEndsWithTs = modules
           .filter(Boolean)
-          .map(m => m.replace(/\.js$/, '.ts'));
+          .map(m => m!.replace(/\.js$/, '.ts'));
         const preamble = `
           if (import.meta.hot) {
             import.meta.hot.accept(${JSON.stringify(
@@ -55,6 +55,7 @@ export function fineTuneHmr({
           map: s.generateMap({ hires: true, source: id, includeContent: true }),
         };
       }
+      return;
     },
   };
 

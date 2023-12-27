@@ -1,16 +1,14 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
+import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
+import type { IPoint } from '@blocks/_common/types.js';
+import { type NoteBlockModel } from '@blocks/note-block/index.js';
+import type { IVec } from '@blocks/surface-block/index.js';
+import { assertExists, sleep } from '@global/utils/index.js';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
-import type { Bound } from 'utils/asserts.js';
 
-import {
-  type CssVariableName,
-  type IPoint,
-  type NoteBlockModel,
-} from '../../../packages/blocks/src/index.js';
-import { assertExists, sleep } from '../../../packages/global/src/utils.js';
+import type { Bound } from '../asserts.js';
 import { clickView } from './click.js';
 import { dragBetweenCoords } from './drag.js';
 import {
@@ -389,7 +387,7 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
     if (!container) throw new Error('container not found');
 
     return {
-      id: container.selectionManager.state.elements[0],
+      id: container.selectionManager.selectedIds[0],
     };
   });
 
@@ -401,7 +399,7 @@ export async function exitEditing(page: Page) {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
 
-    container.selectionManager.setSelection({
+    container.selectionManager.set({
       elements: [],
       editing: false,
     });
@@ -1128,7 +1126,7 @@ export async function getConnectorSourceConnection(page: Page) {
   });
 }
 
-export async function getConnectorPath(page: Page, index = 0) {
+export async function getConnectorPath(page: Page, index = 0): Promise<IVec[]> {
   return await page.evaluate(
     ([index]) => {
       const container = document.querySelector('affine-edgeless-page');

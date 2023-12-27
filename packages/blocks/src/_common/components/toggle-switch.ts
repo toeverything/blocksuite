@@ -35,7 +35,7 @@ const styles = css`
     background: var(--affine-white);
     border: 1px solid var(--affine-black-10);
     border-radius: 16px;
-    transition: 0.2s;
+    transition: 0.1s;
   }
 
   label.on {

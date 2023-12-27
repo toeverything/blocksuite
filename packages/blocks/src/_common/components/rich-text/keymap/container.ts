@@ -40,7 +40,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     selection.update(selList => {
       return selList.map(sel => {
         if (PathFinder.equals(sel.path, blockElement.path)) {
-          return selection.getInstance('block', { path: blockElement.path });
+          return selection.create('block', { path: blockElement.path });
         }
         return sel;
       });
@@ -55,7 +55,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     selection.update(selList => {
       return selList.map(sel => {
         if (PathFinder.equals(sel.path, blockElement.path)) {
-          return selection.getInstance('text', {
+          return selection.create('text', {
             from: {
               path: blockElement.path,
               index: start ? 0 : blockElement.model.text?.length ?? 0,
@@ -102,7 +102,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (!PathFinder.equals(sel.path, blockElement.path)) {
           return sel;
         }
-        return selection.getInstance('text', {
+        return selection.create('text', {
           from: {
             path: blockElement.path,
             index: 0,

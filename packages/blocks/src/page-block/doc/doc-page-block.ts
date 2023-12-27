@@ -335,7 +335,7 @@ export class DocPageBlockComponent extends BlockElement<
 
       requestAnimationFrame(() => {
         this.host.selection.setGroup('note', [
-          this.host.selection.getInstance('text', {
+          this.host.selection.create('text', {
             from: {
               path: [this.model.id, noteId, paragraphId],
               index,

@@ -14,7 +14,7 @@ import type { DocProvider, Page } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
 
 import { CustomFramePanel } from './components/custom-frame-panel';
-import { CustomTOCOutlinePanel } from './components/custom-toc-outline-panel.js';
+import { CustomOutlinePanel } from './components/custom-outline-panel.js';
 import { DebugMenu } from './components/debug-menu.js';
 import { LeftSidePanel } from './components/left-side-panel';
 import { PagesPanel } from './components/pages-panel';
@@ -47,7 +47,7 @@ function subscribePage(workspace: Workspace) {
     const editor = createEditor(page, app);
     const contentParser = new ContentParser(page);
     const debugMenu = new DebugMenu();
-    const tocOutlinePanel = new CustomTOCOutlinePanel();
+    const outlinePanel = new CustomOutlinePanel();
     const framePanel = new CustomFramePanel();
     const copilotPanelPanel = new CopilotPanel();
     const sidePanel = new SidePanel();
@@ -58,20 +58,20 @@ function subscribePage(workspace: Workspace) {
     debugMenu.editor = editor;
     debugMenu.mode = defaultMode;
     debugMenu.contentParser = contentParser;
-    debugMenu.navigationPanel = tocOutlinePanel;
+    debugMenu.outlinePanel = outlinePanel;
     debugMenu.framePanel = framePanel;
     debugMenu.copilotPanel = copilotPanelPanel;
     debugMenu.sidePanel = sidePanel;
     debugMenu.leftSidePanel = leftSidePanel;
     debugMenu.pagesPanel = pagesPanel;
 
-    tocOutlinePanel.editor = editor;
+    outlinePanel.editor = editor;
     copilotPanelPanel.editor = editor;
     framePanel.editor = editor;
     pagesPanel.editor = editor;
 
     document.body.appendChild(debugMenu);
-    document.body.appendChild(tocOutlinePanel);
+    document.body.appendChild(outlinePanel);
     document.body.appendChild(sidePanel);
     document.body.appendChild(leftSidePanel);
     document.body.appendChild(framePanel);

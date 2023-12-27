@@ -53,7 +53,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       width: 100%;
     }
 
-    .panel-list .title {
+    .panel-list .hidden-title {
       width: 100%;
       font-size: 14px;
       line-height: 24px;
@@ -63,12 +63,14 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       height: 40px;
       box-sizing: border-box;
       padding: 6px 8px;
+      margin-top: 8px;
     }
 
     .insert-indicator {
       height: 2px;
       border-radius: 1px;
-      background-color: var(--affine-blue-500);
+      background-color: var(--affine-brand-color);
+      border-radius: 1px;
       position: absolute;
       contain: layout size;
       width: 100%;
@@ -131,7 +133,13 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   insertIndex?: number;
 
   @property({ attribute: false })
-  hidePreviewIcon = false;
+  showPreviewIcon!: boolean;
+
+  @property({ attribute: false })
+  enableNotesSorting!: boolean;
+
+  @property({ attribute: false })
+  toggleNotesSorting!: () => void;
 
   /**
    * store the id of selected notes
@@ -176,6 +184,15 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     return this.mode === 'edgeless';
   }
 
+  private _clearHighlightMask() {
+    this._highlightMask?.remove();
+    this._highlightMask = null;
+    if (this._highlightTimeoutId) {
+      clearTimeout(this._highlightTimeoutId);
+      this._highlightTimeoutId = null;
+    }
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
   }
@@ -196,12 +213,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     }
 
     this._clearPageDisposables();
-    this._highlightMask?.remove();
-    this._highlightMask = null;
-    if (this._highlightTimeoutId) {
-      clearTimeout(this._highlightTimeoutId);
-      this._highlightTimeoutId = null;
-    }
+    this._clearHighlightMask();
   }
 
   private _clearPageDisposables() {
@@ -242,6 +254,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       this.edgeless &&
       this._isEdgelessMode()
     ) {
+      this._clearHighlightMask();
       if (_changedProperties.get('mode') === undefined) return;
 
       requestAnimationFrame(() => this._zoomToFit());
@@ -333,14 +346,15 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       this._selected = [id];
     }
 
-    this.edgeless?.selectionManager.setSelection({
+    this.edgeless?.selectionManager.set({
       elements: this._selected,
       editing: false,
     });
   }
 
   private _drag() {
-    if (!this._selected.length || !this.page.root) return;
+    if (!this._selected.length || !this._notes.length || !this.page.root)
+      return;
 
     this._dragging = true;
 
@@ -378,11 +392,11 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   }
 
   /*
-   * click at blank area to clear selection
+   * Click at blank area to clear selection
    */
-  private _clickBlank(e: MouseEvent) {
+  private _clickHandler(e: MouseEvent) {
     e.stopPropagation();
-    // check if click at toc-card, if not, set this._selected to empty
+    // check if click at toc-card, if so, do nothing
     if (
       (e.target as HTMLElement).closest('toc-note-card') ||
       this._selected.length === 0
@@ -391,14 +405,31 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     }
 
     this._selected = [];
-    this.edgeless?.selectionManager.setSelection({
+    this.edgeless?.selectionManager.set({
       elements: this._selected,
       editing: false,
     });
   }
 
+  /*
+   * Double click at blank area to disable notes sorting option
+   */
+  private _doubleClickHandler(e: MouseEvent) {
+    e.stopPropagation();
+    // check if click at toc-card, if so, do nothing
+    if (
+      (e.target as HTMLElement).closest('toc-note-card') ||
+      !this.enableNotesSorting
+    ) {
+      return;
+    }
+
+    this.toggleNotesSorting();
+  }
+
   override firstUpdated(): void {
-    this._disposables.addFromEvent(this, 'click', this._clickBlank);
+    this.disposables.addFromEvent(this, 'click', this._clickHandler);
+    this.disposables.addFromEvent(this, 'dblclick', this._doubleClickHandler);
   }
 
   private _zoomToFit() {
@@ -460,7 +491,12 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     requestAnimationFrame(() => {
       const blockRect = blockElement.getBoundingClientRect();
       const { top, left, width, height } = blockRect;
-      const { top: offsetY, left: offsetX } = pageBlock.viewport;
+      const {
+        top: offsetY,
+        left: offsetX,
+        scrollTop,
+        scrollLeft,
+      } = pageBlock.viewport;
 
       if (!this._highlightMask) {
         this._highlightMask = document.createElement('div');
@@ -469,8 +505,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
 
       Object.assign(this._highlightMask.style, {
         position: 'absolute',
-        top: `${top - offsetY}px`,
-        left: `${left - offsetX}px`,
+        top: `${top - offsetY + scrollTop}px`,
+        left: `${left - offsetX + scrollLeft}px`,
         width: `${width}px`,
         height: `${height}px`,
         background: 'var(--affine-hover-color)',
@@ -519,7 +555,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
                     : 'selected'
                   : undefined}
                 .showCardNumber=${this._notes.length > 1}
-                .hidePreviewIcon=${this.hidePreviewIcon}
+                .showPreviewIcon=${this.showPreviewIcon}
+                .enableNotesSorting=${this.enableNotesSorting}
                 @select=${this._selectNote}
                 @drag=${this._drag}
                 @fitview=${this._fitToElement}
@@ -529,7 +566,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
           )
         : html`${nothing}`}
       ${this._hiddenNotes.length > 0
-        ? html`<div class="title">Hidden Contents</div>`
+        ? html`<div class="hidden-title">Hidden Contents</div>`
         : nothing}
       ${this._hiddenNotes.length
         ? repeat(
@@ -544,10 +581,12 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
                   .page=${this.page}
                   .invisible=${true}
                   .showCardNumber=${false}
-                  .hidePreviewIcon=${this.hidePreviewIcon}
+                  .showPreviewIcon=${this.showPreviewIcon}
+                  .enableNotesSorting=${this.enableNotesSorting}
                   @fitview=${this._fitToElement}
                 ></toc-note-card>
-                ${idx !== this._hiddenNotes.length - 1
+                ${idx !== this._hiddenNotes.length - 1 &&
+                this.enableNotesSorting
                   ? html`<div class="hidden-note-divider"><div></div></div>`
                   : nothing} `
           )

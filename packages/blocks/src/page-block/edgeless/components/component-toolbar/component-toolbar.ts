@@ -227,7 +227,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   private _updateOnSelectedChange = (element: string | { id: string }) => {
     const id = typeof element === 'string' ? element : element.id;
-    if (this.selection.isSelected(id)) {
+    if (this.selection.has(id)) {
       this.requestUpdate();
     }
   };

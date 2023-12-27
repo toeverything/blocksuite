@@ -5,7 +5,10 @@ import type { BlockSnapshot, Page } from '@blocksuite/store';
 
 import { HtmlAdapter, ImageAdapter } from '../../_common/adapters/index.js';
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
-import { replaceIdMiddleware } from '../../_common/transformers/middlewares.js';
+import {
+  defaultImageProxyMiddleware,
+  replaceIdMiddleware,
+} from '../../_common/transformers/middlewares.js';
 import { ClipboardAdapter } from './adapter.js';
 import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
 
@@ -51,7 +54,6 @@ export class PageClipboard {
       this._markdownAdapter,
       90
     );
-    this._std.clipboard.registerAdapter('text/html', this._htmlAdapter, 80);
     [
       'image/apng',
       'image/avif',
@@ -61,19 +63,20 @@ export class PageClipboard {
       'image/svg+xml',
       'image/webp',
     ].map(type =>
-      this._std.clipboard.registerAdapter(type, this._imageAdapter, 70)
+      this._std.clipboard.registerAdapter(type, this._imageAdapter, 80)
     );
+    this._std.clipboard.registerAdapter('text/html', this._htmlAdapter, 70);
     const copy = copyMiddleware(this._std);
     const paste = pasteMiddleware(this._std);
     this._std.clipboard.use(copy);
     this._std.clipboard.use(paste);
     this._std.clipboard.use(replaceIdMiddleware);
+    this._std.clipboard.use(defaultImageProxyMiddleware);
 
     this._disposables.add({
       dispose: () => {
         this._std.clipboard.unregisterAdapter(ClipboardAdapter.MIME);
         this._std.clipboard.unregisterAdapter('text/plain');
-        this._std.clipboard.unregisterAdapter('text/html');
         [
           'image/apng',
           'image/avif',
@@ -83,9 +86,11 @@ export class PageClipboard {
           'image/svg+xml',
           'image/webp',
         ].map(type => this._std.clipboard.unregisterAdapter(type));
+        this._std.clipboard.unregisterAdapter('text/html');
         this._std.clipboard.unuse(copy);
         this._std.clipboard.unuse(paste);
         this._std.clipboard.unuse(replaceIdMiddleware);
+        this._std.clipboard.unuse(defaultImageProxyMiddleware);
       },
     });
   };

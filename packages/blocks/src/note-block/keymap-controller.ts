@@ -295,7 +295,7 @@ export class KeymapController implements ReactiveController {
           index + 1
         );
 
-        const sel = selection.getInstance('text', {
+        const sel = selection.create('text', {
           from: {
             path: element.parentPath.concat(blockId),
             index: 0,
@@ -333,7 +333,7 @@ export class KeymapController implements ReactiveController {
           )
       ) {
         blocks.push(
-          selection.getInstance('block', {
+          selection.create('block', {
             path: nodeView.path,
           })
         );
@@ -403,7 +403,7 @@ export class KeymapController implements ReactiveController {
                     );
                     assertExists(codeElement);
                     this._std.selection.setGroup('note', [
-                      this._std.selection.getInstance('text', {
+                      this._std.selection.create('text', {
                         from: {
                           path: codeElement.path,
                           index: 0,

@@ -1,7 +1,7 @@
 # Block View
 
-::: warning
-This documentation is mostly written for BlockSuite maintainers. If you goal doesn't involve in contributing to the BlockSuite repository, here may not be the best place for getting started.
+::: info
+This document is preliminary and subject to refinement and updates for clarity and accuracy.
 :::
 
 In BlockSuite, blocks can be rendered by any UI framework. A block should be rendered to a DOM element, and we use `view` to represent the renderer.
@@ -109,4 +109,4 @@ class MyBlockView extends BlockElement<MyBlockModel> {
 }
 ```
 
-You can get the `std` instance from `this.std` to use the full power of [`block-std`](/core-packages#the-block-std-package).
+You can get the `std` instance from `this.std` to use the full power of [`block-std`](/api/@blocksuite/block-std/).

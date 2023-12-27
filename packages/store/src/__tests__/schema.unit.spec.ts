@@ -3,18 +3,19 @@
 import { literal } from 'lit/static-html.js';
 import { describe, expect, it } from 'vitest';
 
-// Use manual per-module import/export to support vitest environment on Node.js
-import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
-import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
-import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
-import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
-import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 // import some blocks
 import { defineBlockSchema } from '../schema/base.js';
 import { SchemaValidateError } from '../schema/error.js';
 import { Schema } from '../schema/index.js';
 import { Workspace } from '../workspace/index.js';
 import { Generator } from '../workspace/store.js';
+import {
+  DividerBlockSchema,
+  ListBlockSchema,
+  NoteBlockSchema,
+  PageBlockSchema,
+  ParagraphBlockSchema,
+} from './test-schema.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;

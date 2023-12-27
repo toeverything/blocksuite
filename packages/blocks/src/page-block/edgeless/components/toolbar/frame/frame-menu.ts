@@ -126,7 +126,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                     const frame = edgeless.surface.pickById(id);
                     assertExists(frame);
                     edgeless.tools.setEdgelessTool({ type: 'default' });
-                    edgeless.selectionManager.setSelection({
+                    edgeless.selectionManager.set({
                       elements: [frame.id],
                       editing: false,
                     });

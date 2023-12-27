@@ -11,7 +11,7 @@ function addSpace(element: BlockElement, index: number) {
   element.model.text?.insert(' ', index);
   const currentText = element.selection.find('text');
   element.selection.setGroup('note', [
-    element.selection.getInstance('text', {
+    element.selection.create('text', {
       from: {
         path: element.path,
         index: (currentText?.from.index ?? 0) + 1,

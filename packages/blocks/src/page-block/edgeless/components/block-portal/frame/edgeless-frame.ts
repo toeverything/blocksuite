@@ -59,8 +59,11 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
     );
 
     _disposables.add(
-      edgeless.selectionManager.slots.updated.on(({ editing, elements }) => {
-        if (elements[0] === this.frame.id && editing) {
+      edgeless.selectionManager.slots.updated.on(() => {
+        if (
+          edgeless.selectionManager.selectedIds[0] === this.frame.id &&
+          edgeless.selectionManager.editing
+        ) {
           this._editing = true;
         } else {
           this._editing = false;

@@ -530,7 +530,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     await Promise.all(uploadPromises);
 
     const blockIds = dropInfos.map(info => info.blockId);
-    this.selectionManager.setSelection({
+    this.selectionManager.set({
       elements: blockIds,
       editing: false,
     });
@@ -548,7 +548,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
-      this.selectionManager.setSelection({
+      this.selectionManager.set({
         elements: [noteBlock.id],
         editing: false,
       });
@@ -581,7 +581,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
-      this.selectionManager.setSelection(this.selectionManager.state);
+      this.selectionManager.set(this.selectionManager.selections);
     });
 
     resizeObserver.observe(this.editorContainer);
