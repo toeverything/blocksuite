@@ -413,7 +413,7 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     }
 
     const id = props.id as string;
-    const elementModel = this._elementModels.get(id);
+    const elementModel = this.getElementById(id);
 
     if (!elementModel) {
       throw new Error(`Element ${id} is not found`);
