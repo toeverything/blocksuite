@@ -43,4 +43,4 @@ The above design ensures that BlockSuite is built for scalability. In addition t
 
 To try out BlockSuite, refer to the [Quick Start](./quick-start) document and start with the preset editors in `@blocksuite/presets`.
 
-> 🚧 BlockSuite is currently in beta, with some extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
+> 🚧 BlockSuite is currently in its early stage, with some extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
