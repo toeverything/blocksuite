@@ -1261,11 +1261,15 @@ export async function getCurrentThemeCSSPropertyValue(
   return value;
 }
 
+// FIXME(mirone): remove this function
 export async function getCopyClipItemsInPage(page: Page) {
   const clipItems = await page.evaluate(() => {
-    return document
-      .getElementsByTagName('affine-doc-page')[0]
-      .clipboard['_copyBlocksInPage']();
+    return (
+      document
+        .getElementsByTagName('affine-doc-page')[0]
+        // @ts-ignore
+        .clipboard['_copyBlocksInPage']()
+    );
   });
   return clipItems;
 }

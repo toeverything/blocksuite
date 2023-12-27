@@ -17,6 +17,7 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel';
 import './side-panel';
 
+import type { TreeNode } from '@blocksuite/blocks';
 import {
   BlocksUtils,
   ColorVariables,
@@ -29,7 +30,6 @@ import {
   type SurfaceBlockComponent,
   ZipTransformer,
 } from '@blocksuite/blocks';
-import type { TreeNode } from '@blocksuite/blocks/_common/mind-map/draw';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { assertExists } from '@blocksuite/global/utils';
 import {
@@ -51,9 +51,9 @@ import type { Pane } from 'tweakpane';
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';
-import type { LeftSidePanel } from './left-side-panel';
-import type { PagesPanel } from './pages-panel';
-import type { SidePanel } from './side-panel';
+import type { LeftSidePanel } from './left-side-panel.js';
+import type { PagesPanel } from './pages-panel.js';
+import type { SidePanel } from './side-panel.js';
 
 export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
   const { page } = editor;

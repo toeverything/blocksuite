@@ -1,5 +1,4 @@
-import { createDefaultPage } from '@blocksuite/blocks';
-import { CloseIcon } from '@blocksuite/blocks/_common/icons';
+import { CloseIcon, createDefaultPage } from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import type { Workspace } from '@blocksuite/store';

@@ -5,11 +5,9 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { Bound } from 'utils/asserts.js';
 
-import {
-  type CssVariableName,
-  type IPoint,
-  type NoteBlockModel,
-} from '../../../packages/blocks/src/index.js';
+import type { CssVariableName } from '../../../packages/blocks/src/_common/theme/css-variables.js';
+import type { IPoint } from '../../../packages/blocks/src/_common/types.js';
+import { type NoteBlockModel } from '../../../packages/blocks/src/index.js';
 import { assertExists, sleep } from '../../../packages/global/src/utils.js';
 import { clickView } from './click.js';
 import { dragBetweenCoords } from './drag.js';
