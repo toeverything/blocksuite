@@ -13,6 +13,7 @@ import {
 } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
+import type { CodeBlockModel } from '../../../models.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 
 const findLast = (snapshot: BlockSnapshot): BlockSnapshot => {
@@ -127,6 +128,10 @@ class PasteTr {
     const { firstTextSnapshot, fromDelta, toDelta } = this._getDeltas();
 
     this.firstSnapshot.flavour = this.fromPointState.model.flavour;
+    const toLanguage = (this.fromPointState.model as CodeBlockModel).language;
+    if (toLanguage !== 'Plain Text') {
+      this.firstSnapshot.props.language = toLanguage;
+    }
     const deltas: DeltaOperation[] = [...fromDelta];
     let i = 0;
     for (const blockSnapshot of this.snapshot.content) {
