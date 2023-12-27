@@ -3,21 +3,12 @@ import { type Y } from '@blocksuite/store';
 import type { SerializedXYWH } from '../index.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 
-function MagicProps(): {
-  new <Props>(): Props;
-} {
-  // @ts-ignore
-  return class {};
-}
-
 export type BaseProps = {
   xywh: SerializedXYWH;
 };
 
 // @ts-ignore
-export class ElementModel<
-  Props extends BaseProps = BaseProps,
-> extends MagicProps()<Props> {
+export class ElementModel<Props extends BaseProps = BaseProps> {
   private _stashed: Map<keyof Props, unknown>;
   yMap!: Y.Map<unknown>;
   surfaceModel!: SurfaceBlockModel;
@@ -27,10 +18,13 @@ export class ElementModel<
     model: SurfaceBlockModel,
     stashedStore: Map<unknown, unknown>
   ) {
-    super();
     this.yMap = yMap;
     this.surfaceModel = model;
     this._stashed = stashedStore as Map<keyof Props, unknown>;
+  }
+
+  get group() {
+    return this.surfaceModel.getGroup(this.id);
   }
 
   get type() {

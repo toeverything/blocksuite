@@ -9,6 +9,7 @@ import {
 } from '@blocksuite/store';
 
 import type { ElementModel } from './element-model/base.js';
+import type { GroupElementModel } from './element-model/group.js';
 import { createElementModel } from './element-model/index.js';
 import { generateElementId } from './index.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
@@ -148,8 +149,12 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     { dispose: () => void; model: ElementModel }
   > = new Map();
   private _disposables: Array<() => void> = [];
+  private _elementsToGroup: Map<string, string> = new Map();
 
-  elementUpdated = new Slot<{ id: string; props: Record<string, unknown> }>();
+  elementUpdated = new Slot<{
+    id: string;
+    props: Record<string, { oldValue: unknown }>;
+  }>();
   elementAdded = new Slot<{ id: string }>();
   elementRemoved = new Slot<{ id: string; model: ElementModel }>();
 
@@ -165,15 +170,12 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
   }
 
   private _init() {
+    this._initElementModels();
+    this._initGroup();
+  }
+
+  private _initElementModels() {
     const elementsYMap = this.elements.getValue()!;
-    const emitUpdatedSlot = (payload: {
-      id: string;
-      props: Record<string, unknown>;
-    }) => this.elementUpdated.emit(payload);
-    const createModel = (yMap: Y.Map<unknown>) =>
-      createElementModel(yMap, this, {
-        onChange: emitUpdatedSlot,
-      });
     const onElementsMapChange = (event: Y.YMapEvent<Y.Map<unknown>>) => {
       const { changes, keysChanged } = event;
 
@@ -184,7 +186,12 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
         switch (change?.action) {
           case 'add':
             if (!this._elementModels.has(id) && element) {
-              this._elementModels.set(id, createModel(element));
+              this._elementModels.set(
+                id,
+                createElementModel(element, this, {
+                  onChange: payload => this.elementUpdated.emit(payload),
+                })
+              );
               this.elementAdded.emit({ id });
             }
             break;
@@ -201,7 +208,12 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     };
 
     elementsYMap.forEach((val, key) => {
-      this._elementModels.set(key, createModel(val));
+      this._elementModels.set(
+        key,
+        createElementModel(val, this, {
+          onChange: payload => this.elementUpdated.emit(payload),
+        })
+      );
     });
     elementsYMap.observe(onElementsMapChange);
 
@@ -210,12 +222,62 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     });
   }
 
+  private _initGroup() {
+    this.elementModels.forEach(model => {
+      if (model.type === 'group') {
+        (model as GroupElementModel).childrenIds.forEach(childId => {
+          this._elementsToGroup.set(childId, model.id);
+        });
+      }
+    });
+
+    this.elementUpdated.on(({ id, props }) => {
+      const element = this.getElementById(id)!;
+
+      if (element.type === 'group' && props['children']) {
+        (props['children'].oldValue as Y.Map<boolean>).forEach((_, childId) => {
+          this._elementsToGroup.delete(childId);
+        });
+
+        (element as GroupElementModel).childrenIds.forEach(childId => {
+          this._elementsToGroup.set(childId, id);
+        });
+      }
+    });
+
+    this.elementAdded.on(id => {
+      const element = this.getElementById(id.id)!;
+
+      if (element.type === 'group') {
+        (element as GroupElementModel).childrenIds.forEach(childId => {
+          this._elementsToGroup.set(childId, id.id);
+        });
+      }
+    });
+
+    this.elementRemoved.on(id => {
+      const element = this.getElementById(id.id)!;
+
+      if (element.type === 'group') {
+        (element as GroupElementModel).childrenIds.forEach(childId => {
+          this._elementsToGroup.delete(childId);
+        });
+      }
+    });
+  }
+
   override dispose(): void {
     super.dispose();
     this._disposables.forEach(dispose => dispose());
   }
 
-  getElementById(id: string) {
+  getGroup(id: string): ElementModel | null {
+    return this._elementsToGroup.has(id)
+      ? this.getElementById(this._elementsToGroup.get(id)!)
+      : null;
+  }
+
+  getElementById(id: string): ElementModel | null {
     return this._elementModels.get(id)?.model ?? null;
   }
 
