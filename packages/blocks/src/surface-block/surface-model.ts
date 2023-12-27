@@ -9,6 +9,10 @@ import {
 } from '@blocksuite/store';
 
 import type { ElementModel } from './element-model/base.js';
+import type {
+  Connection,
+  ConnectorElementModel,
+} from './element-model/connector.js';
 import type { GroupElementModel } from './element-model/group.js';
 import { createElementModel } from './element-model/index.js';
 import { generateElementId } from './index.js';
@@ -149,7 +153,8 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     { dispose: () => void; model: ElementModel }
   > = new Map();
   private _disposables: Array<() => void> = [];
-  private _elementsToGroup: Map<string, string> = new Map();
+  private _elementToGroup: Map<string, string> = new Map();
+  private _elementToConnector: Map<string, string[]> = new Map();
 
   elementUpdated = new Slot<{
     id: string;
@@ -172,6 +177,7 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
   private _init() {
     this._initElementModels();
     this._initGroup();
+    this._initConnector();
   }
 
   private _initElementModels() {
@@ -199,6 +205,8 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
             if (this._elementModels.has(id)) {
               const { model, dispose } = this._elementModels.get(id)!;
               dispose();
+              this._elementToGroup.delete(id);
+              this._elementToConnector.delete(id);
               this._elementModels.delete(id);
               this.elementRemoved.emit({ id, model });
             }
@@ -226,7 +234,7 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     this.elementModels.forEach(model => {
       if (model.type === 'group') {
         (model as GroupElementModel).childrenIds.forEach(childId => {
-          this._elementsToGroup.set(childId, model.id);
+          this._elementToGroup.set(childId, model.id);
         });
       }
     });
@@ -236,11 +244,11 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
 
       if (element.type === 'group' && props['children']) {
         (props['children'].oldValue as Y.Map<boolean>).forEach((_, childId) => {
-          this._elementsToGroup.delete(childId);
+          this._elementToGroup.delete(childId);
         });
 
         (element as GroupElementModel).childrenIds.forEach(childId => {
-          this._elementsToGroup.set(childId, id);
+          this._elementToGroup.set(childId, id);
         });
       }
     });
@@ -250,7 +258,7 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
 
       if (element.type === 'group') {
         (element as GroupElementModel).childrenIds.forEach(childId => {
-          this._elementsToGroup.set(childId, id.id);
+          this._elementToGroup.set(childId, id.id);
         });
       }
     });
@@ -260,10 +268,78 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
 
       if (element.type === 'group') {
         (element as GroupElementModel).childrenIds.forEach(childId => {
-          this._elementsToGroup.delete(childId);
+          this._elementToGroup.delete(childId);
         });
       }
     });
+  }
+
+  private _initConnector() {
+    const addConnector = (targetId: string, connectorId: string) => {
+      const connectors = this._elementToConnector.get(targetId);
+
+      if (!connectors) {
+        this._elementToConnector.set(targetId, [connectorId]);
+      } else {
+        connectors.push(connectorId);
+      }
+    };
+    const removeConnector = (targetId: string, connectorId: string) => {
+      const connectors = this._elementToConnector.get(targetId);
+
+      if (!connectors) {
+        return;
+      }
+
+      const index = connectors.indexOf(connectorId);
+
+      if (index !== -1) {
+        connectors.splice(index, 1);
+      }
+
+      if (connectors.length === 0) {
+        this._elementToConnector.delete(targetId);
+      }
+    };
+    const updateConnectorMap = (
+      element: ElementModel,
+      type: 'add' | 'remove'
+    ) => {
+      if (element.type !== 'connector') return;
+
+      const connector = element as ConnectorElementModel;
+      const connected = [connector.source.id, connector.target.id];
+      const action = type === 'add' ? addConnector : removeConnector;
+
+      connected.forEach(id => {
+        id && action(id, connector.id);
+      });
+    };
+
+    this.elementModels.forEach(model => updateConnectorMap(model, 'add'));
+
+    this.elementUpdated.on(({ id, props }) => {
+      const element = this.getElementById(id)!;
+
+      if (element.type !== 'connector') return;
+
+      const oldConnected = [
+        (props['source']?.oldValue as Connection)?.id,
+        (props['target']?.oldValue as Connection)?.id,
+      ];
+
+      oldConnected.forEach(id => {
+        id && removeConnector(id, element.id);
+      });
+
+      updateConnectorMap(element, 'add');
+    });
+
+    this.elementAdded.on(id =>
+      updateConnectorMap(this.getElementById(id.id)!, 'add')
+    );
+
+    this.elementRemoved.on(({ model }) => updateConnectorMap(model, 'remove'));
   }
 
   override dispose(): void {
@@ -272,8 +348,8 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
   }
 
   getGroup(id: string): ElementModel | null {
-    return this._elementsToGroup.has(id)
-      ? this.getElementById(this._elementsToGroup.get(id)!)
+    return this._elementToGroup.has(id)
+      ? this.getElementById(this._elementToGroup.get(id)!)
       : null;
   }
 
