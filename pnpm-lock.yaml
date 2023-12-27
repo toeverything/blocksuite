@@ -456,9 +456,6 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
-      '@blocksuite/inline':
-        specifier: workspace:*
-        version: link:../inline
       '@blocksuite/lit':
         specifier: workspace:*
         version: link:../lit
