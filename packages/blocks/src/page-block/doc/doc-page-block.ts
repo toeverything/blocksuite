@@ -124,12 +124,15 @@ export class DocPageBlockComponent extends BlockElement<
     viewportUpdated: new Slot<PageViewport>(),
   };
 
+  private _viewportElement: HTMLDivElement | null = null;
+
   get viewportElement(): HTMLDivElement {
-    const viewportElement = this.host.closest(
+    if (this._viewportElement) return this._viewportElement;
+    this._viewportElement = this.host.closest(
       '.affine-doc-viewport'
     ) as HTMLDivElement | null;
-    assertExists(viewportElement);
-    return viewportElement;
+    assertExists(this._viewportElement);
+    return this._viewportElement;
   }
 
   get viewport(): PageViewport {

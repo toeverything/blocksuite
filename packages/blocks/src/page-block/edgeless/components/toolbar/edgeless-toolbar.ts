@@ -420,7 +420,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this._timer && clearTimeout(this._timer);
       document.exitFullscreen().catch(console.error);
     } else {
-      launchIntoFullscreen(this.edgeless.editorContainer);
+      launchIntoFullscreen(this.edgeless.viewportElement);
       this._timer = setTimeout(() => {
         this._currentFrameIndex = this._cachedIndex;
       }, 400);
