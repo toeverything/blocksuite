@@ -57,7 +57,7 @@ const LastPropsSchema = z.object({
     strokeStyle: StorkeStyleSchema,
     stroke: LineColorsSchema,
     strokeWidth: LineWidthSchema,
-    rough: z.boolean(),
+    rough: z.boolean().default(false),
     mode: z.number().optional(),
   }),
   brush: z.object({
@@ -104,49 +104,6 @@ const LastPropsSchema = z.object({
   }),
 });
 
-const defaultLastProps = {
-  connector: {
-    rough: false,
-    frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
-    rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
-    stroke: GET_DEFAULT_LINE_COLOR(),
-    strokeStyle: StrokeStyle.Solid,
-    strokeWidth: LineWidth.LINE_WIDTH_TWO,
-  },
-  brush: {
-    color: GET_DEFAULT_LINE_COLOR(),
-    lineWidth: LineWidth.Thin,
-  },
-  shape: {
-    shapeType: ShapeType.Rect,
-    fillColor: DEFAULT_SHAPE_FILL_COLOR,
-    strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-    shapeStyle: ShapeStyle.General,
-    filled: true,
-  },
-  text: {
-    color: GET_DEFAULT_TEXT_COLOR(),
-    fontFamily: CanvasTextFontFamily.Inter,
-    textAlign: TextAlign.Left,
-    fontWeight: CanvasTextFontWeight.Regular,
-    fontStyle: CanvasTextFontStyle.Normal,
-    fontSize: 24,
-    hasMaxWidth: false,
-  },
-  'affine:note': {
-    background: DEFAULT_NOTE_COLOR,
-    hidden: false,
-    edgeless: {
-      style: {
-        borderRadius: 8,
-        borderSize: 4,
-        borderStyle: StrokeStyle.Solid,
-        shadowType: NOTE_SHADOWS[1],
-      },
-    },
-  },
-} satisfies LastProps;
-
 export type LastProps = z.infer<typeof LastPropsSchema>;
 
 const SESSION_PROP_KEY = 'blocksuite:prop:record';
@@ -180,7 +137,48 @@ export type SerializedViewport = z.infer<
 >;
 
 export class EditSessionStorage {
-  private _lastProps: LastProps;
+  private _lastProps: LastProps = {
+    connector: {
+      frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
+      rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
+      stroke: GET_DEFAULT_LINE_COLOR(),
+      strokeStyle: StrokeStyle.Solid,
+      strokeWidth: LineWidth.LINE_WIDTH_TWO,
+      rough: false,
+    },
+    brush: {
+      color: GET_DEFAULT_LINE_COLOR(),
+      lineWidth: LineWidth.Thin,
+    },
+    shape: {
+      shapeType: ShapeType.Rect,
+      fillColor: DEFAULT_SHAPE_FILL_COLOR,
+      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+      shapeStyle: ShapeStyle.General,
+      filled: true,
+    },
+    text: {
+      color: GET_DEFAULT_TEXT_COLOR(),
+      fontFamily: CanvasTextFontFamily.Inter,
+      textAlign: TextAlign.Left,
+      fontWeight: CanvasTextFontWeight.Regular,
+      fontStyle: CanvasTextFontStyle.Normal,
+      fontSize: 24,
+      hasMaxWidth: false,
+    },
+    'affine:note': {
+      background: DEFAULT_NOTE_COLOR,
+      hidden: false,
+      edgeless: {
+        style: {
+          borderRadius: 8,
+          borderSize: 4,
+          borderStyle: StrokeStyle.Solid,
+          shadowType: NOTE_SHADOWS[1],
+        },
+      },
+    },
+  };
 
   slots = {
     lastPropsUpdated: new Slot<{
@@ -191,9 +189,9 @@ export class EditSessionStorage {
 
   constructor(private _service: SurfaceService) {
     const props = sessionStorage.getItem(SESSION_PROP_KEY);
-    this._lastProps = LastPropsSchema.parse(
-      props ? JSON.parse(props) : defaultLastProps
-    );
+    if (props) {
+      this._lastProps = LastPropsSchema.parse(JSON.parse(props));
+    }
   }
 
   private _extractProps(
