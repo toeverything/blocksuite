@@ -129,7 +129,7 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
         y: -40,
       });
       this._menu.element.edgeless = this.edgeless;
-      this.attributeToMenu();
+      this.updateMenu();
       this._menu.element.onChange = (props: Record<string, unknown>) => {
         if (props.shapeType) {
           this._activeShape(props.shapeType as ShapeName);
@@ -153,7 +153,7 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
   override updated(changedProperties: Map<string, unknown>) {
     if (this._states.some(key => changedProperties.has(key))) {
       if (this._menu) {
-        this.attributeToMenu();
+        this.updateMenu();
         this.edgeless.slots.edgelessToolUpdated.emit({
           type: this._type,
           shapeType: this.shapeType,

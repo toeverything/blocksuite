@@ -71,7 +71,7 @@ export class EdgelessBrushToolButton extends EdgelessToolButton<
         y: -40,
       });
       this._menu.element.edgeless = this.edgeless;
-      this.attributeToMenu();
+      this.updateMenu();
       this._menu.element.onChange = (props: Record<string, unknown>) => {
         surface.service.editSession.record(this._type, props);
       };
@@ -81,7 +81,7 @@ export class EdgelessBrushToolButton extends EdgelessToolButton<
   override updated(changedProperties: Map<string, unknown>) {
     if (this._states.some(key => changedProperties.has(key))) {
       if (this._menu) {
-        this.attributeToMenu();
+        this.updateMenu();
         this.edgeless.slots.edgelessToolUpdated.emit({
           type: this._type,
         });

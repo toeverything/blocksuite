@@ -48,7 +48,7 @@ export class EdgelessTextToolButton extends EdgelessToolButton<
         x: 130,
         y: -40,
       });
-      this.attributeToMenu();
+      this.updateMenu();
       this._menu.element.edgeless = this.edgeless;
       this._menu.element.onChange = (props: Record<string, unknown>) => {
         this.service.editSession.record(this._type, props);
@@ -59,7 +59,7 @@ export class EdgelessTextToolButton extends EdgelessToolButton<
   override updated(changedProperties: Map<string, unknown>) {
     if (this._states.some(key => changedProperties.has(key))) {
       if (this._menu) {
-        this.attributeToMenu();
+        this.updateMenu();
       }
     }
   }

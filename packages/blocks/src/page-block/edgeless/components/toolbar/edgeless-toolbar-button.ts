@@ -27,7 +27,7 @@ export class EdgelessToolButton<
     this._menu = null;
   }
 
-  protected attributeToMenu() {
+  protected updateMenu() {
     this._states.forEach(key => {
       if (this._menu) {
         // @ts-ignore
