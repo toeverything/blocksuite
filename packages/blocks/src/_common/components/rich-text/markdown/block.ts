@@ -83,7 +83,7 @@ export function tryConvertBlock(
 
     const codeBlock = page.getBlockById(codeId);
     assertExists(codeBlock);
-    asyncSetInlineRange(codeBlock, { index: 0, length: 0 }).catch(
+    asyncSetInlineRange(element.host, codeBlock, { index: 0, length: 0 }).catch(
       console.error
     );
 

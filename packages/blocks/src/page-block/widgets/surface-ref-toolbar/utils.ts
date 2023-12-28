@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 
 import { type EdgelessElement } from '../../../_common/types.js';
@@ -9,6 +10,7 @@ import { Bound } from '../../../surface-block/utils/bound.js';
 import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
 
 export const edgelessToBlob = async (
+  host: EditorHost,
   page: Page,
   options: {
     surfaceRefBlock: SurfaceRefBlockComponent;
@@ -18,7 +20,7 @@ export const edgelessToBlob = async (
   }
 ): Promise<Blob> => {
   const { edgelessElement, blockContainer } = options;
-  const parser = new ContentParser(page);
+  const parser = new ContentParser(host, page);
   const bound = Bound.deserialize(edgelessElement.xywh);
   const isBlock = isTopLevelBlock(edgelessElement);
 

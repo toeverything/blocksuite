@@ -10,7 +10,10 @@ import {
   MoreHorizontalIcon,
   NewEditIcon,
 } from '../../../_common/icons/index.js';
-import type { TableViewSelection } from '../../../_common/utils/index.js';
+import {
+  getPageByElement,
+  type TableViewSelection,
+} from '../../../_common/utils/index.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
 import { openDetail, popRowMenu } from './menu.js';
@@ -132,7 +135,8 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       },
       isEditing: false,
     };
-    popRowMenu(positionToVRect(e.x, e.y), this.rowId, selection);
+    const pageElement = getPageByElement(this);
+    popRowMenu(pageElement, positionToVRect(e.x, e.y), this.rowId, selection);
   };
 
   public override connectedCallback() {
@@ -206,7 +210,8 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               },
               isEditing: false,
             });
-            openDetail(this.rowId, this.selectionController);
+            const pageElement = getPageByElement(this);
+            openDetail(pageElement, this.rowId, this.selectionController);
           };
           const openMenu = (e: MouseEvent) => {
             if (!this.selectionController) {
@@ -224,7 +229,8 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               },
               isEditing: false,
             });
-            popRowMenu(ele, this.rowId, this.selectionController);
+            const pageElement = getPageByElement(this);
+            popRowMenu(pageElement, ele, this.rowId, this.selectionController);
           };
           return html`
             <div>

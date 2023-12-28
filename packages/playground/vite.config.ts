@@ -53,6 +53,18 @@ export default ({ mode }) => {
             __dirname,
             'examples/basic/edgeless/index.html'
           ),
+          'examples/multiple-editors/doc-doc': resolve(
+            __dirname,
+            'examples/multiple-editors/doc-doc/index.html'
+          ),
+          'examples/multiple-editors/doc-edgeless': resolve(
+            __dirname,
+            'examples/multiple-editors/doc-edgeless/index.html'
+          ),
+          'examples/multiple-editors/edgeless-edgeless': resolve(
+            __dirname,
+            'examples/multiple-editors/edgeless-edgeless/index.html'
+          ),
           'examples/inline': resolve(__dirname, 'examples/inline/index.html'),
           'examples/store': resolve(__dirname, 'examples/store/index.html'),
         },

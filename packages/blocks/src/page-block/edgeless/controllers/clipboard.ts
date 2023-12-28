@@ -4,6 +4,7 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import {
   type BlockSnapshot,
@@ -22,7 +23,7 @@ import { groupBy } from '../../../_common/utils/iterable.js';
 import {
   buildPath,
   getEditorContainer,
-  isPageMode,
+  isInsideDocEditor,
 } from '../../../_common/utils/query.js';
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
@@ -668,6 +669,7 @@ export class EdgelessClipboardController extends PageClipboard {
     nodes?: TopLevelBlockModel[],
     canvasElements: CanvasElement[] = []
   ): Promise<HTMLCanvasElement | undefined> {
+    const host = edgeless.host;
     const root = this.page.root;
     if (!root) return;
 
@@ -675,10 +677,10 @@ export class EdgelessClipboardController extends PageClipboard {
     if (!(html2canvas instanceof Function)) return;
 
     const pathname = location.pathname;
-    const pageMode = isPageMode(this.page);
+    const pageMode = isInsideDocEditor(host);
 
-    const editorContainer = getEditorContainer(this.page);
-    const container = document.querySelector(
+    const editorContainer = getEditorContainer(host);
+    const container = editorContainer.querySelector(
       '.affine-block-children-container'
     );
     if (!container) return;
@@ -786,7 +788,7 @@ export class EdgelessClipboardController extends PageClipboard {
         }
       }
 
-      this._checkCanContinueToCanvas(pathname, pageMode);
+      this._checkCanContinueToCanvas(host, pathname, pageMode);
     }
 
     const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(
@@ -798,8 +800,15 @@ export class EdgelessClipboardController extends PageClipboard {
     return canvas;
   }
 
-  private _checkCanContinueToCanvas(pathName: string, pageMode: boolean) {
-    if (location.pathname !== pathName || isPageMode(this.page) !== pageMode) {
+  private _checkCanContinueToCanvas(
+    host: EditorHost,
+    pathName: string,
+    pageMode: boolean
+  ) {
+    if (
+      location.pathname !== pathName ||
+      isInsideDocEditor(host) !== pageMode
+    ) {
       throw new Error('Unable to export content to canvas');
     }
   }

@@ -29,10 +29,11 @@ declare global {
 }
 
 export async function asyncSetInlineRange(
+  editorHost: EditorHost,
   model: BaseBlockModel,
   inlineRange: InlineRange
 ) {
-  const richText = await asyncGetRichTextByModel(model);
+  const richText = await asyncGetRichTextByModel(editorHost, model);
   if (!richText) {
     return;
   }
@@ -44,6 +45,7 @@ export async function asyncSetInlineRange(
 }
 
 export function asyncFocusRichText(
+  editorHost: EditorHost,
   page: Page,
   id: string,
   inlineRange: InlineRange = { index: 0, length: 0 }
@@ -51,7 +53,7 @@ export function asyncFocusRichText(
   const model = page.getBlockById(id);
   assertExists(model);
   if (matchFlavours(model, ['affine:divider'])) return;
-  return asyncSetInlineRange(model, inlineRange);
+  return asyncSetInlineRange(editorHost, model, inlineRange);
 }
 
 function caretRangeFromPoint(clientX: number, clientY: number): Range | null {

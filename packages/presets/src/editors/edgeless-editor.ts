@@ -36,6 +36,8 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
           overflow: hidden;
           font-family: var(--affine-font-family);
           background: var(--affine-background-primary-color);
+          container-name: viewport;
+          container-type: inline-size;
         }
         @media print {
           edgeless-editor {

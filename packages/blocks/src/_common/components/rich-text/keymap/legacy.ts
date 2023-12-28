@@ -89,7 +89,7 @@ export function hardEnter(
     // After
     // - line1
     // - | <-- will unindent the block
-    handleUnindent(page, model, range.index);
+    handleUnindent(editorHost, model, range.index);
     return KEYBOARD_PREVENT_DEFAULT;
   }
 
@@ -99,7 +99,7 @@ export function hardEnter(
     if (matchFlavours(model, ['affine:code'])) {
       if (shortKey) {
         // shortKey+Enter to exit the block
-        handleBlockEndEnter(page, model);
+        handleBlockEndEnter(editorHost, model);
         return KEYBOARD_PREVENT_DEFAULT;
       }
 
@@ -126,12 +126,12 @@ export function hardEnter(
     // - line1
     // - | <-- will unindent the block
     model.text.delete(range.index - 1, 1);
-    handleBlockEndEnter(page, model);
+    handleBlockEndEnter(editorHost, model);
     return KEYBOARD_PREVENT_DEFAULT;
   }
 
   if (isEnd || shortKey) {
-    handleBlockEndEnter(page, model);
+    handleBlockEndEnter(editorHost, model);
     return KEYBOARD_PREVENT_DEFAULT;
   }
 
@@ -141,7 +141,7 @@ export function hardEnter(
     return KEYBOARD_PREVENT_DEFAULT;
   }
 
-  handleBlockSplit(page, model, range.index, range.length)?.catch(
+  handleBlockSplit(editorHost, model, range.index, range.length)?.catch(
     console.error
   );
   return KEYBOARD_PREVENT_DEFAULT;

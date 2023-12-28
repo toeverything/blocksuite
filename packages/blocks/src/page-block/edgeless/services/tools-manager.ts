@@ -188,7 +188,7 @@ export class EdgelessToolsManager {
       if (
         !isInsideDocTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(event.raw.target)
+        !isInsideEdgelessTextEditor(this.container.host, event.raw.target)
       ) {
         event.raw.preventDefault();
       }
@@ -200,7 +200,7 @@ export class EdgelessToolsManager {
       if (
         !isInsideDocTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(event.raw.target)
+        !isInsideEdgelessTextEditor(this.container.host, event.raw.target)
       ) {
         event.raw.preventDefault();
       }
@@ -212,7 +212,7 @@ export class EdgelessToolsManager {
       if (
         !isInsideDocTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(event.raw.target)
+        !isInsideEdgelessTextEditor(this.container.host, event.raw.target)
       ) {
         event.raw.preventDefault();
       }
@@ -238,7 +238,7 @@ export class EdgelessToolsManager {
       if (
         !isInsideDocTitle(this.container.host, event.raw.target) &&
         !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(event.raw.target)
+        !isInsideEdgelessTextEditor(this.container.host, event.raw.target)
       ) {
         event.raw.preventDefault();
       }

@@ -55,6 +55,11 @@ export class RangeControl {
   };
 
   private _selectionChange = (event: Event) => {
+    // if (!this._checkSelectionSource()) {
+    //   this._dispatcher.std.selection.clear();
+    //   return;
+    // }
+
     const scope = this._buildScope('selectionChange');
 
     this._dispatcher.run('selectionChange', this._createContext(event), scope);
@@ -63,6 +68,19 @@ export class RangeControl {
   private _createContext(event: Event) {
     return UIEventStateContext.from(new UIEventState(event));
   }
+
+  // private _checkSelectionSource = () => {
+  //   const selection = document.getSelection();
+  //   if (!selection || !selection.rangeCount) return true;
+
+  //   const range = selection.getRangeAt(0);
+  //   if (!range) return true;
+
+  //   if (!this._dispatcher.std.host.contains(range.startContainer)) return false;
+  //   if (!this._dispatcher.std.host.contains(range.endContainer)) return false;
+
+  //   return true;
+  // };
 
   private _buildScope = (eventName: EventName) => {
     let scope: EventScope | undefined;
