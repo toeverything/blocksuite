@@ -1,7 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { JobMiddleware } from '@blocksuite/store';
+import type { DeltaOperation, JobMiddleware } from '@blocksuite/store';
 
 import type { DatabaseBlockModel } from '../../database-block/index.js';
+import type { ListBlockModel, ParagraphBlockModel } from '../../models.js';
 
 export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
   const idMap = new Map<string, string>();
@@ -18,10 +19,44 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
         }
       });
     }
+
+    // replace LinkedPage pageId with new id in paragraph blocks
+    if (
+      payload.type === 'block' &&
+      ['affine:paragraph', 'affine:list'].includes(payload.snapshot.flavour)
+    ) {
+      const model = payload.model as ParagraphBlockModel | ListBlockModel;
+      let prev = 0;
+      const delta: DeltaOperation[] = [];
+      for (const d of model.text.toDelta()) {
+        if (d.attributes?.reference?.pageId) {
+          if (prev > 0) {
+            delta.push({ retain: prev });
+          }
+          delta.push({
+            retain: d.insert?.length ?? 0,
+            attributes: {
+              reference: {
+                ...d.attributes.reference,
+                pageId: idMap.get(d.attributes.reference.pageId)!,
+              },
+            },
+          });
+          prev = 0;
+        } else {
+          prev += d.insert?.length ?? 0;
+        }
+      }
+      if (delta.length > 0) {
+        model.text.applyDelta(delta);
+      }
+    }
   });
   slots.beforeImport.on(payload => {
     if (payload.type === 'page') {
-      payload.snapshot.meta.id = workspace.idGenerator('page');
+      const newId = workspace.idGenerator('page');
+      idMap.set(payload.snapshot.meta.id, newId);
+      payload.snapshot.meta.id = newId;
       return;
     }
 
