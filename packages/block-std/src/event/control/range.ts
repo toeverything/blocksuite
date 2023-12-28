@@ -90,6 +90,8 @@ export class RangeControl {
       return;
 
     if (startElement.closest('.blocksuite-portal')) return;
+    if (startElement.closest('affine-menu')) return;
+    if (startElement.closest('affine-multi-tag-select')) return;
 
     const pageBlock = this._dispatcher.std.view.viewFromPath('block', [
       this._dispatcher.std.page.root?.id ?? '',
@@ -100,10 +102,12 @@ export class RangeControl {
     assertExists(viewport);
 
     if (!viewport.contains(range.startContainer)) {
+      console.log(startElement);
       this._dispatcher.focus = false;
       return;
     }
     if (!viewport.contains(range.endContainer)) {
+      console.log(startElement);
       this._dispatcher.focus = false;
       return;
     }
