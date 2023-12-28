@@ -57,7 +57,7 @@ const LastPropsSchema = z.object({
     strokeStyle: StorkeStyleSchema,
     stroke: LineColorsSchema,
     strokeWidth: LineWidthSchema,
-    rough: z.boolean().default(false),
+    rough: z.boolean(),
     mode: z.number().optional(),
   }),
   brush: z.object({
