@@ -46,9 +46,6 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
 
   rangeManager: RangeManager | null = null;
 
-  @property({ attribute: false })
-  dirty = false;
-
   get command(): CommandManager {
     return this.std.command;
   }
@@ -125,15 +122,6 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    if (this.dirty) {
-      this.updateComplete
-        .then(() => {
-          this.dirty = false;
-        })
-        .catch(console.error);
-      return nothing;
-    }
-
     const { root } = this.page;
     if (!root) return nothing;
 

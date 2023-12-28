@@ -2,6 +2,7 @@ import type { BaseSelection, TextSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
+import { BlockElement } from '../element/block-element.js';
 import type { RangeManager } from './range-manager.js';
 
 /**
@@ -183,6 +184,13 @@ export class RangeBinding {
     const blocks = this.rangeManager.getSelectedBlockElementsByRange(range, {
       mode: 'flat',
     });
+    const highestBlocks = this.rangeManager.getSelectedBlockElementsByRange(
+      range,
+      {
+        mode: 'highest',
+        match: block => block.model.role === 'content',
+      }
+    );
 
     const start = blocks.at(0);
     const end = blocks.at(-1);
@@ -195,8 +203,14 @@ export class RangeBinding {
     this._compositionStartCallback = async event => {
       this.isComposing = false;
 
-      this.host.dirty = true;
-      await this.host.updateComplete;
+      for (const highestBlock of highestBlocks) {
+        const parent = this.host.view.getParent(highestBlock.path)?.view;
+        if (!(parent instanceof BlockElement)) continue;
+
+        parent.dirty = true;
+        await parent.updateComplete;
+        await parent.updateComplete;
+      }
 
       this.host.page.transact(() => {
         endText.delete(0, to.length);
@@ -215,7 +229,6 @@ export class RangeBinding {
           });
       });
 
-      this.host.dirty = true;
       await this.host.updateComplete;
 
       const selection = this.selectionManager.create('text', {

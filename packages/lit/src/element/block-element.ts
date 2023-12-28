@@ -5,7 +5,7 @@ import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
+import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 import { WithDisposable } from '../with-disposable.js';
@@ -44,6 +44,9 @@ export class BlockElement<
 
   @property({ attribute: false })
   page!: Page;
+
+  @property({ attribute: false })
+  dirty = false;
 
   @state({
     hasChanged(value: BaseSelection | null, oldValue: BaseSelection | null) {
@@ -165,6 +168,27 @@ export class BlockElement<
     const result = await super.getUpdateComplete();
     await Promise.all(this.childBlockElements.map(el => el.updateComplete));
     return result;
+  }
+  protected override update(changedProperties: PropertyValues): void {
+    if (this.dirty) {
+      //@ts-ignore
+      this.__reflectingProperties &&= this.__reflectingProperties.forEach(p =>
+        //@ts-ignore
+        this.__propertyToAttribute(p, this[p as keyof this])
+      ) as undefined;
+      //@ts-ignore
+      this.__markUpdated();
+      //@ts-ignore
+      this.__childPart = render(nothing, this.renderRoot);
+
+      this.updateComplete
+        .then(() => {
+          this.dirty = false;
+        })
+        .catch(console.error);
+    } else {
+      super.update(changedProperties);
+    }
   }
 
   override connectedCallback() {
