@@ -130,7 +130,7 @@ const SessionPropsSchema = z.object({
   remoteColor: z.string(),
 });
 
-export type SessionProps = z.infer<typeof SessionPropsSchema>;
+type SessionProps = z.infer<typeof SessionPropsSchema>;
 
 export type SerializedViewport = z.infer<
   typeof SessionPropsSchema.shape.viewport
@@ -194,27 +194,6 @@ export class EditSessionStorage {
     }
   }
 
-  private _extractProps(
-    props: Record<string, unknown>,
-    ref: z.ZodObject<z.ZodRawShape>
-  ): Record<string, unknown> {
-    const result: Record<string, unknown> = {};
-
-    Object.entries(props).forEach(([key, value]) => {
-      if (!(key in ref.shape)) return;
-      if (isPlainObject(value)) {
-        result[key] = this._extractProps(
-          props[key] as Record<string, unknown>,
-          ref.shape[key] as z.ZodObject<z.ZodRawShape>
-        );
-      } else {
-        result[key] = value;
-      }
-    });
-
-    return result;
-  }
-
   getLastProps<T extends keyof LastProps>(type: T) {
     return this._lastProps[type] as LastProps[T];
   }
@@ -226,7 +205,7 @@ export class EditSessionStorage {
     if (!isLastPropType(type)) return;
 
     const props = this._lastProps[type];
-    const overrideProps = this._extractProps(
+    const overrideProps = extractProps(
       recordProps,
       LastPropsSchema.shape[type]
     );
@@ -280,9 +259,28 @@ export class EditSessionStorage {
   }
 }
 
-export function isLastPropType(
-  type: EdgelessElementType
-): type is keyof LastProps {
+function extractProps(
+  props: Record<string, unknown>,
+  ref: z.ZodObject<z.ZodRawShape>
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  Object.entries(props).forEach(([key, value]) => {
+    if (!(key in ref.shape)) return;
+    if (isPlainObject(value)) {
+      result[key] = extractProps(
+        props[key] as Record<string, unknown>,
+        ref.shape[key] as z.ZodObject<z.ZodRawShape>
+      );
+    } else {
+      result[key] = value;
+    }
+  });
+
+  return result;
+}
+
+function isLastPropType(type: EdgelessElementType): type is keyof LastProps {
   return Object.keys(LastPropsSchema.shape).includes(type);
 }
 
