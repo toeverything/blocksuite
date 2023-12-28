@@ -95,9 +95,7 @@ export class RangeControl {
         : range.endContainer.parentElement;
     if (!endElement) return;
 
-    if (startElement.closest('.blocksuite-portal')) return;
-    if (startElement.closest('.blocksuite-modal')) return;
-    if (startElement.closest('.default-toolbar')) return;
+    if (startElement.closest('.blocksuite-overlay')) return;
 
     if (!viewport.contains(startElement)) {
       // console.log(startElement);

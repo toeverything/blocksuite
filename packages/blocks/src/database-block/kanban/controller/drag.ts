@@ -162,7 +162,7 @@ const createDragPreview = (card: KanbanCard, x: number, y: number) => {
   kanbanCard.isFocus = true;
   kanbanCard.style.backgroundColor = 'var(--affine-background-primary-color)';
   div.append(kanbanCard);
-  div.className = 'with-data-view-css-variable';
+  div.className = 'with-data-view-css-variable blocksuite-overlay';
   div.style.width = `${card.getBoundingClientRect().width}px`;
   div.style.position = 'fixed';
   // div.style.pointerEvents = 'none';

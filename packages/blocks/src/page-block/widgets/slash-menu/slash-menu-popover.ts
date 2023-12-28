@@ -360,7 +360,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
       }
     );
 
-    return html`<div class="slash-menu-container">
+    return html`<div class="slash-menu-container blocksuite-overlay">
       <div
         class="overlay-mask"
         @click="${() => this.abortController.abort()}"

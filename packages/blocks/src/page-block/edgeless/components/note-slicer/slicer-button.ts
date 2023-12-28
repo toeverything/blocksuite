@@ -165,7 +165,9 @@ export class PopupNoteSlicerButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<button class="slicer-button">${CutIcon}</button>`;
+    return html`<button class="slicer-button blocksuite-overlay">
+      ${CutIcon}
+    </button>`;
   }
 }
 

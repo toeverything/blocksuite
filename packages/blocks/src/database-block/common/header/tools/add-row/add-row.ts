@@ -172,6 +172,7 @@ declare global {
 }
 const createDropPreview = () => {
   const div = document.createElement('div');
+  div.classList.add('blocksuite-overlay');
   div.setAttribute('data-is-drop-preview', 'true');
   div.style.pointerEvents = 'none';
   div.style.position = 'fixed';
@@ -195,6 +196,7 @@ const createDropPreview = () => {
 
 const createDragPreview = () => {
   const preview = new NewRecordPreview();
+  preview.classList.add('blocksuite-overlay');
   document.body.append(preview);
   return {
     display(x: number, y: number) {

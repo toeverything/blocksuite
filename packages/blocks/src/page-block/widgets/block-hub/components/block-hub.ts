@@ -674,7 +674,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     return html`
       <div
-        class="block-hub-menu-container"
+        class="block-hub-menu-container blocksuite-overlay"
         @pointerdown=${stopPropagation}
         ?expanded=${this._expanded}
         style="bottom: ${BOTTOM_OFFSET}px; right: ${RIGHT_OFFSET}px;"
