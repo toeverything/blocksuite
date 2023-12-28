@@ -98,16 +98,10 @@ export class RangeControl {
     if (startElement.closest('.blocksuite-overlay')) return;
 
     if (!viewport.contains(startElement)) {
-      // console.log(startElement);
-      throw new Error('startElement not in viewport');
-
       this._dispatcher.focus = false;
       return;
     }
     if (!viewport.contains(endElement)) {
-      // console.log(endElement);
-      throw new Error('startElement not in viewport');
-
       this._dispatcher.focus = false;
       return;
     }
