@@ -1,12 +1,15 @@
-import type { ShapeMethods, ShapeType } from '../types.js';
+import { ShapeType } from '../consts.js';
+import type { ShapeMethods } from '../types.js';
 import { DiamondMethods } from './diamond.js';
 import { EllipseMethods } from './ellipse.js';
 import { RectMethods } from './rect.js';
 import { TriangleMethods } from './triangle.js';
 
+const { Rect, Triangle, Ellipse, Diamond } = ShapeType;
+
 export const ShapeMethodsMap: Record<ShapeType, ShapeMethods> = {
-  rect: RectMethods,
-  triangle: TriangleMethods,
-  ellipse: EllipseMethods,
-  diamond: DiamondMethods,
+  [Rect]: RectMethods,
+  [Triangle]: TriangleMethods,
+  [Ellipse]: EllipseMethods,
+  [Diamond]: DiamondMethods,
 };

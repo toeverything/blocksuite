@@ -12,6 +12,7 @@ import {
 } from '../../../../_common/icons/index.js';
 import { handleNativeRangeAtPoint } from '../../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
+import type { ShapeType } from '../../../../surface-block/elements/shape/consts.js';
 import {
   type Bound,
   CanvasElementType,
@@ -24,7 +25,6 @@ import {
   type RoughCanvas,
   ShapeElement,
   ShapeMethodsMap,
-  type ShapeType,
   Vec,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';

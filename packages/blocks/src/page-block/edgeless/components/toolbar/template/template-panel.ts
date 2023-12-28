@@ -193,8 +193,8 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  get categoryCacheKey() {
-    return `blocksuite:${this.edgeless.page.id}:templateTool`;
+  private get _service() {
+    return this.edgeless.surface.service;
   }
 
   override connectedCallback(): void {
@@ -206,7 +206,10 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     this.addEventListener('keydown', stopPropagation, false);
     this._disposables.add(() => {
       if (this._currentCategory) {
-        sessionStorage.setItem(this.categoryCacheKey, this._currentCategory);
+        this._service.editSession.setItem(
+          'templateCache',
+          this._currentCategory
+        );
       }
     });
   }
@@ -226,7 +229,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   }
 
   private _getLocalSelectedCategory() {
-    return sessionStorage.getItem(this.categoryCacheKey) ?? undefined;
+    return this._service.editSession.getItem('templateCache');
   }
 
   private _createTemplateJob(type: string) {
@@ -255,7 +258,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       );
     }
 
-    return this.edgeless.surface.service!.TemplateJob.create({
+    return this.edgeless.surface.service.TemplateJob.create({
       model: this.edgeless.surfaceBlockModel,
       type,
       middlewares,

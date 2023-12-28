@@ -9,7 +9,6 @@ import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { EdgelessPresentationConsts as PresentationConsts } from '../../../../_common/edgeless/frame/consts.js';
 import {
   type CssVariableName,
   isCssVariable,
@@ -20,6 +19,7 @@ import type {
   TopLevelBlockModel,
 } from '../../../../_common/types.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
+import type { SurfaceService } from '../../../../index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { ConnectorElement } from '../../../../surface-block/elements/connector/connector-element.js';
 import type { CanvasElementType } from '../../../../surface-block/elements/edgeless-element.js';
@@ -358,8 +358,12 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   };
 
   private _tryLoadFillScreen() {
-    const fillScreen = sessionStorage.getItem(PresentationConsts.FillScreen);
-    this.fillScreen = fillScreen === 'true';
+    const surfaceService = this.host.spec.getService(
+      'affine:surface'
+    ) as SurfaceService;
+
+    this.fillScreen =
+      surfaceService.editSession.getItem('presentFillScreen') ?? false;
   }
 
   private _getCSSPropertyValue = (value: string) => {

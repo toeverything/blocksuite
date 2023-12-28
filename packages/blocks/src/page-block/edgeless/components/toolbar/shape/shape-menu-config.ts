@@ -13,9 +13,12 @@ import {
   TriangleIcon,
 } from '../../../../../_common/icons/index.js';
 import type { ShapeTool } from '../../../../../_common/utils/index.js';
+import { ShapeType } from '../../../../../surface-block/index.js';
+
+const { Rect, Ellipse, Triangle, Diamond } = ShapeType;
 
 type Config = {
-  name: ShapeTool['shape'];
+  name: ShapeTool['shapeType'];
   generalIcon: TemplateResult<1>;
   scribbledIcon: TemplateResult<1>;
   tooltip: string;
@@ -24,28 +27,28 @@ type Config = {
 
 export const ShapeComponentConfig: Config[] = [
   {
-    name: 'rect',
+    name: Rect,
     generalIcon: SquareIcon,
     scribbledIcon: ScribbledSquareIcon,
     tooltip: 'Square',
     disabled: false,
   },
   {
-    name: 'ellipse',
+    name: Ellipse,
     generalIcon: EllipseIcon,
     scribbledIcon: ScribbledEllipseIcon,
     tooltip: 'Ellipse',
     disabled: false,
   },
   {
-    name: 'diamond',
+    name: Diamond,
     generalIcon: DiamondIcon,
     scribbledIcon: ScribbledDiamondIcon,
     tooltip: 'Diamond',
     disabled: false,
   },
   {
-    name: 'triangle',
+    name: Triangle,
     generalIcon: TriangleIcon,
     scribbledIcon: ScribbledTriangleIcon,
     tooltip: 'Triangle',
@@ -58,7 +61,7 @@ export const ShapeComponentConfig: Config[] = [
     tooltip: 'Rounded rectangle',
     disabled: false,
   },
-];
+] as const;
 
 export const ShapeComponentConfigMap = ShapeComponentConfig.reduce(
   (acc, config) => {
