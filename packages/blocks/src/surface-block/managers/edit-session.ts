@@ -1,5 +1,5 @@
-import { noop, Slot } from '@blocksuite/global/utils';
-import { isPlainObject, merge, recursive } from 'merge';
+import { Slot } from '@blocksuite/global/utils';
+import { isPlainObject, recursive } from 'merge';
 import { z } from 'zod';
 
 import {
@@ -69,7 +69,7 @@ const LastPropsSchema = z.object({
     fillColor: FillColorsSchema,
     strokeColor: StrokeColorsSchema,
     shapeStyle: ShapeStyleSchema,
-    filled: z.boolean().optional(),
+    filled: z.boolean(),
     strokeWidth: z.number().optional(),
     strokeStyle: StorkeStyleSchema.optional(),
     color: z.string().optional(),
@@ -104,6 +104,49 @@ const LastPropsSchema = z.object({
   }),
 });
 
+const defaultLastProps = {
+  connector: {
+    rough: false,
+    frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
+    rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
+    stroke: GET_DEFAULT_LINE_COLOR(),
+    strokeStyle: StrokeStyle.Solid,
+    strokeWidth: LineWidth.LINE_WIDTH_TWO,
+  },
+  brush: {
+    color: GET_DEFAULT_LINE_COLOR(),
+    lineWidth: LineWidth.Thin,
+  },
+  shape: {
+    shapeType: ShapeType.Rect,
+    fillColor: DEFAULT_SHAPE_FILL_COLOR,
+    strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+    shapeStyle: ShapeStyle.General,
+    filled: true,
+  },
+  text: {
+    color: GET_DEFAULT_TEXT_COLOR(),
+    fontFamily: CanvasTextFontFamily.Inter,
+    textAlign: TextAlign.Left,
+    fontWeight: CanvasTextFontWeight.Regular,
+    fontStyle: CanvasTextFontStyle.Normal,
+    fontSize: 24,
+    hasMaxWidth: false,
+  },
+  'affine:note': {
+    background: DEFAULT_NOTE_COLOR,
+    hidden: false,
+    edgeless: {
+      style: {
+        borderRadius: 8,
+        borderSize: 4,
+        borderStyle: StrokeStyle.Solid,
+        shadowType: NOTE_SHADOWS[1],
+      },
+    },
+  },
+} satisfies LastProps;
+
 export type LastProps = z.infer<typeof LastPropsSchema>;
 
 const SESSION_PROP_KEY = 'blocksuite:prop:record';
@@ -137,47 +180,7 @@ export type SerializedViewport = z.infer<
 >;
 
 export class EditSessionStorage {
-  private _lastProps = {
-    connector: {
-      rough: false,
-      frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
-      rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
-      stroke: GET_DEFAULT_LINE_COLOR(),
-      strokeStyle: StrokeStyle.Solid,
-      strokeWidth: LineWidth.LINE_WIDTH_TWO,
-    },
-    brush: {
-      color: GET_DEFAULT_LINE_COLOR(),
-      lineWidth: LineWidth.Thin,
-    },
-    shape: {
-      shapeType: ShapeType.Rect,
-      fillColor: DEFAULT_SHAPE_FILL_COLOR,
-      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-      shapeStyle: ShapeStyle.General,
-    },
-    text: {
-      color: GET_DEFAULT_TEXT_COLOR(),
-      fontFamily: CanvasTextFontFamily.Inter,
-      textAlign: TextAlign.Left,
-      fontWeight: CanvasTextFontWeight.Regular,
-      fontStyle: CanvasTextFontStyle.Normal,
-      fontSize: 24,
-      hasMaxWidth: false,
-    },
-    'affine:note': {
-      background: DEFAULT_NOTE_COLOR,
-      hidden: false,
-      edgeless: {
-        style: {
-          borderRadius: 8,
-          borderSize: 4,
-          borderStyle: StrokeStyle.Solid,
-          shadowType: NOTE_SHADOWS[1],
-        },
-      },
-    },
-  } satisfies LastProps;
+  private _lastProps: LastProps;
 
   slots = {
     lastPropsUpdated: new Slot<{
@@ -187,19 +190,10 @@ export class EditSessionStorage {
   };
 
   constructor(private _service: SurfaceService) {
-    this._tryLoadLastProps();
-  }
-
-  private _tryLoadLastProps() {
     const props = sessionStorage.getItem(SESSION_PROP_KEY);
-    if (!props) return;
-
-    try {
-      const _props = LastPropsSchema.parse(JSON.parse(props));
-      recursive(this._lastProps, _props);
-    } catch {
-      noop();
-    }
+    this._lastProps = LastPropsSchema.parse(
+      props ? JSON.parse(props) : defaultLastProps
+    );
   }
 
   private _extractProps(
@@ -229,18 +223,18 @@ export class EditSessionStorage {
 
   record(
     type: EdgelessElementType,
-    targetProps: Partial<LastProps[keyof LastProps]>
+    recordProps: Partial<LastProps[keyof LastProps]>
   ) {
     if (!isLastPropType(type)) return;
 
     const props = this._lastProps[type];
     const overrideProps = this._extractProps(
-      targetProps,
+      recordProps,
       LastPropsSchema.shape[type]
     );
     if (Object.keys(overrideProps).length === 0) return;
 
-    merge(props, overrideProps);
+    recursive(props, overrideProps);
     this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
     sessionStorage.setItem(SESSION_PROP_KEY, JSON.stringify(this._lastProps));
   }
@@ -278,7 +272,7 @@ export class EditSessionStorage {
   getItem<T extends keyof SessionProps>(key: T) {
     try {
       const value = sessionStorage.getItem(this._getKey(key));
-      if (!value) return;
+      if (!value) return null;
       return SessionPropsSchema.shape[key].parse(
         JSON.parse(value)
       ) as SessionProps[T];
