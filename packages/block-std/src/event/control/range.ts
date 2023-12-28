@@ -1,3 +1,5 @@
+import { assertExists } from '@blocksuite/global/utils';
+
 import { UIEventState, UIEventStateContext } from '../base.js';
 import type {
   EventName,
@@ -55,10 +57,11 @@ export class RangeControl {
   };
 
   private _selectionChange = (event: Event) => {
-    // if (!this._checkSelectionSource()) {
-    //   this._dispatcher.std.selection.clear();
-    //   return;
-    // }
+    this._checkSelectionSource();
+    if (!this._dispatcher.focus) {
+      // this._dispatcher.std.selection.clear();
+      return;
+    }
 
     const scope = this._buildScope('selectionChange');
 
@@ -69,18 +72,44 @@ export class RangeControl {
     return UIEventStateContext.from(new UIEventState(event));
   }
 
-  // private _checkSelectionSource = () => {
-  //   const selection = document.getSelection();
-  //   if (!selection || !selection.rangeCount) return true;
+  private _checkSelectionSource = () => {
+    const selection = document.getSelection();
+    if (!selection || !selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
 
-  //   const range = selection.getRangeAt(0);
-  //   if (!range) return true;
+    const startElement =
+      range.startContainer instanceof Element
+        ? range.startContainer
+        : range.startContainer.parentElement;
+    if (!startElement) return;
 
-  //   if (!this._dispatcher.std.host.contains(range.startContainer)) return false;
-  //   if (!this._dispatcher.std.host.contains(range.endContainer)) return false;
+    if (
+      startElement === document.documentElement ||
+      startElement === document.body
+    )
+      return;
 
-  //   return true;
-  // };
+    if (startElement.closest('.blocksuite-portal')) return;
+
+    const pageBlock = this._dispatcher.std.view.viewFromPath('block', [
+      this._dispatcher.std.page.root?.id ?? '',
+    ]);
+    if (!pageBlock) return;
+    // @ts-ignore
+    const viewport = pageBlock.viewportElement;
+    assertExists(viewport);
+
+    if (!viewport.contains(range.startContainer)) {
+      this._dispatcher.focus = false;
+      return;
+    }
+    if (!viewport.contains(range.endContainer)) {
+      this._dispatcher.focus = false;
+      return;
+    }
+
+    this._dispatcher.focus = true;
+  };
 
   private _buildScope = (eventName: EventName) => {
     let scope: EventScope | undefined;

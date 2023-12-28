@@ -46,6 +46,8 @@ export class KeyboardControl {
   }
 
   private _down = (event: KeyboardEvent) => {
+    if (!this._dispatcher.focus) return;
+
     const keyboardEventState = new KeyboardEventState({
       event,
       composing: this.composition,
@@ -57,6 +59,8 @@ export class KeyboardControl {
   };
 
   private _up = (event: KeyboardEvent) => {
+    if (!this._dispatcher.focus) return;
+
     const keyboardEventState = new KeyboardEventState({
       event,
       composing: this.composition,
