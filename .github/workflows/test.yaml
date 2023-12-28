@@ -154,7 +154,7 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./.coverage/global/lcov.info,./.coverage/store/lcov.info
+          files: ./.coverage/block-std/lcov.info,./.coverage/blocks/lcov.info,./.coverage/global/lcov.info,./.coverage/inline/lcov.info,./.coverage/store/lcov.info
           flags: unittest
           name: blocksuite
           fail_ci_if_error: false

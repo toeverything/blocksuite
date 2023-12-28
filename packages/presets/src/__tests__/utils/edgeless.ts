@@ -12,7 +12,7 @@ import type { AffineEditorContainer } from '../../index.js';
 export function getSurface(page: Page, editor: AffineEditorContainer) {
   const surfaceModel = page.getBlockByFlavour('affine:surface');
 
-  return editor.root!.view.viewFromPath('block', [
+  return editor.host!.view.viewFromPath('block', [
     page.root!.id,
     surfaceModel[0]!.id,
   ]) as SurfaceBlockComponent;
@@ -33,7 +33,7 @@ export function getPageRootBlock(
   editor: AffineEditorContainer,
   _?: 'edgeless' | 'page'
 ) {
-  return editor.root!.view.viewFromPath('block', [page.root!.id]) as
+  return editor.host!.view.viewFromPath('block', [page.root!.id]) as
     | EdgelessPageBlockComponent
     | DocPageBlockComponent;
 }

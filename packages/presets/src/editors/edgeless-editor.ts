@@ -16,7 +16,11 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   specs = EdgelessEditorBlockSpecs;
 
-  host: Ref<EditorHost> = createRef<EditorHost>();
+  private _host: Ref<EditorHost> = createRef<EditorHost>();
+
+  get host() {
+    return this._host.value;
+  }
 
   override render() {
     return html`
@@ -39,7 +43,7 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
         }
       </style>
       <editor-host
-        ${ref(this.host)}
+        ${ref(this._host)}
         .page=${this.page}
         .specs=${this.specs}
       ></editor-host>

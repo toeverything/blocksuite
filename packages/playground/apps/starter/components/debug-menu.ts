@@ -262,7 +262,7 @@ export class DebugMenu extends ShadowlessElement {
     super.connectedCallback();
 
     const readSelectionFromURL = async () => {
-      const root = this.editor.root;
+      const root = this.editor.host;
       if (!root) {
         await new Promise(resolve => {
           setTimeout(resolve, 500);
@@ -363,7 +363,7 @@ export class DebugMenu extends ShadowlessElement {
         children,
       };
     };
-    const blocks = getSelectedBlocks(this.editor.root!);
+    const blocks = getSelectedBlocks(this.editor.host!);
     const toTreeNode = (block: BaseBlockModel): TreeNode => {
       return {
         text: block.text?.toString() ?? '',
@@ -480,7 +480,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _shareSelection() {
-    const selection = this.editor.root?.selection.value;
+    const selection = this.editor.host?.selection.value;
     if (!selection || selection.length === 0) {
       return;
     }
