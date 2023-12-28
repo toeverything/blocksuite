@@ -669,6 +669,7 @@ declare global {
 }
 export const createModal = (container: HTMLElement = document.body) => {
   const div = document.createElement('div');
+  div.classList.add('blocksuite-modal');
   div.style.position = 'fixed';
   div.style.left = '0';
   div.style.top = '0';

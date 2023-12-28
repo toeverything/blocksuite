@@ -95,8 +95,8 @@ export class RangeControl {
     if (!endElement) return;
 
     if (startElement.closest('.blocksuite-portal')) return;
-    if (startElement.closest('affine-menu')) return;
-    if (startElement.closest('affine-multi-tag-select')) return;
+    if (startElement.closest('.blocksuite-modal')) return;
+    if (startElement.closest('.default-toolbar')) return;
 
     const pageBlock = this._dispatcher.std.view.viewFromPath('block', [
       this._dispatcher.std.page.root?.id ?? '',
@@ -106,10 +106,12 @@ export class RangeControl {
     const viewport = pageBlock.viewportElement;
     assertExists(viewport);
     if (!viewport.contains(startElement)) {
+      // console.log(startElement);
       this._dispatcher.focus = false;
       return;
     }
     if (!viewport.contains(endElement)) {
+      // console.log(endElement);
       this._dispatcher.focus = false;
       return;
     }
