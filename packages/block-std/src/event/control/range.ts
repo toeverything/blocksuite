@@ -1,5 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
-
 import { UIEventState, UIEventStateContext } from '../base.js';
 import type {
   EventName,
@@ -73,6 +71,9 @@ export class RangeControl {
   }
 
   private _checkSelectionSource = () => {
+    const viewport = this._dispatcher.viewportElement;
+    if (!viewport) return;
+
     const selection = document.getSelection();
     if (!selection || !selection.rangeCount) return;
     const range = selection.getRangeAt(0);
@@ -98,20 +99,17 @@ export class RangeControl {
     if (startElement.closest('.blocksuite-modal')) return;
     if (startElement.closest('.default-toolbar')) return;
 
-    const pageBlock = this._dispatcher.std.view.viewFromPath('block', [
-      this._dispatcher.std.page.root?.id ?? '',
-    ]);
-    if (!pageBlock) return;
-    // @ts-ignore
-    const viewport = pageBlock.viewportElement;
-    assertExists(viewport);
     if (!viewport.contains(startElement)) {
       // console.log(startElement);
+      throw new Error('startElement not in viewport');
+
       this._dispatcher.focus = false;
       return;
     }
     if (!viewport.contains(endElement)) {
       // console.log(endElement);
+      throw new Error('startElement not in viewport');
+
       this._dispatcher.focus = false;
       return;
     }
