@@ -1,4 +1,5 @@
 import { BlockService } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/lit';
 
 import {
   FileDropManager,
@@ -62,6 +63,29 @@ export class PageService extends BlockService<PageBlockModel> {
       'dragover',
       this.fileDropManager.onDragOver
     );
+  }
+
+  get selectedBlocks() {
+    let result: BlockElement[] = [];
+    this.std.command
+      .pipe()
+      .withHost()
+      .tryAll(chain => [
+        chain.getTextSelection(),
+        chain.getImageSelections(),
+        chain.getBlockSelections(),
+      ])
+      .getSelectedBlocks()
+      .inline(({ selectedBlocks }) => {
+        if (!selectedBlocks) return;
+        result = selectedBlocks;
+      })
+      .run();
+    return result;
+  }
+
+  get selectedModels() {
+    return this.selectedBlocks.map(block => block.model);
   }
 
   loadFonts() {
