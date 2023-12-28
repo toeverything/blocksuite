@@ -143,7 +143,7 @@ export class BookmarkBlockComponent extends BlockElement<
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
-    if (!this.model.description) {
+    if (!this.model.description && !this.model.title) {
       refreshBookmarkUrlData(this).catch(console.error);
     }
 
