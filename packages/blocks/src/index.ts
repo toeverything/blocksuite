@@ -78,9 +78,12 @@ export * from './paragraph-block/index.js';
 export {
   Bound,
   CanvasElementType,
+  ConnectorElementModel,
   ConnectorEndpointStyle,
   ConnectorMode,
   generateKeyBetween,
+  GroupElementModel,
+  ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
 } from './surface-block/index.js';

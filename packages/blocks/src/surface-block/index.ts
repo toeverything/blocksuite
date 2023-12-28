@@ -10,6 +10,10 @@ export {
 } from './consts.js';
 export { GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
 export { type EdgelessBlockType } from './edgeless-types.js';
+export { ElementModel } from './element-model/base.js';
+export { ConnectorElementModel } from './element-model/connector.js';
+export { GroupElementModel } from './element-model/group.js';
+export { ShapeElementModel } from './element-model/shape.js';
 export {
   type Connection,
   ConnectorEndpoint,

@@ -7,9 +7,19 @@ export type BaseProps = {
   xywh: SerializedXYWH;
 };
 
-// @ts-ignore
-export class ElementModel<Props extends BaseProps = BaseProps> {
+export abstract class ElementModel<Props extends BaseProps = BaseProps> {
+  static default() {
+    return {
+      xywh: '[0, 0, 100, 100]',
+    };
+  }
+
+  static propsToYStruct(props: BaseProps) {
+    return props;
+  }
+
   private _stashed: Map<keyof Props, unknown>;
+
   yMap!: Y.Map<unknown>;
   surfaceModel!: SurfaceBlockModel;
 
@@ -23,12 +33,14 @@ export class ElementModel<Props extends BaseProps = BaseProps> {
     this._stashed = stashedStore as Map<keyof Props, unknown>;
   }
 
-  get group() {
-    return this.surfaceModel.getGroup(this.id);
+  abstract get type(): string;
+
+  get xywh() {
+    return this.yMap.get('xywh') as SerializedXYWH;
   }
 
-  get type() {
-    return this.yMap.get('type') as string;
+  get group() {
+    return this.surfaceModel.getGroup(this.id);
   }
 
   get id() {

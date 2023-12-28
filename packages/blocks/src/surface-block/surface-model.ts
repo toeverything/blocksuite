@@ -14,7 +14,11 @@ import type {
   ConnectorElementModel,
 } from './element-model/connector.js';
 import type { GroupElementModel } from './element-model/group.js';
-import { createElementModel } from './element-model/index.js';
+import {
+  createElementModel,
+  createYMapFromProps,
+  propsToYStruct,
+} from './element-model/index.js';
 import { generateElementId } from './index.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 
@@ -145,6 +149,7 @@ export const SurfaceBlockSchema = defineBlockSchema({
     }
   },
   transformer: () => new SurfaceBlockTransformer(),
+  toModel: () => new SurfaceBlockModel(),
 });
 
 export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
@@ -153,7 +158,9 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     { dispose: () => void; model: ElementModel }
   > = new Map();
   private _disposables: Array<() => void> = [];
+  private _groupToElements: Map<string, string[]> = new Map();
   private _elementToGroup: Map<string, string> = new Map();
+  private _connectorToElements: Map<string, string[]> = new Map();
   private _elementToConnector: Map<string, string[]> = new Map();
 
   elementUpdated = new Slot<{
@@ -161,7 +168,7 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     props: Record<string, { oldValue: unknown }>;
   }>();
   elementAdded = new Slot<{ id: string }>();
-  elementRemoved = new Slot<{ id: string; model: ElementModel }>();
+  elementRemoved = new Slot<{ id: string; type: string }>();
 
   get elementModels() {
     const models: ElementModel[] = [];
@@ -205,10 +212,10 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
             if (this._elementModels.has(id)) {
               const { model, dispose } = this._elementModels.get(id)!;
               dispose();
+              this.elementRemoved.emit({ id, type: model.type });
               this._elementToGroup.delete(id);
               this._elementToConnector.delete(id);
               this._elementModels.delete(id);
-              this.elementRemoved.emit({ id, model });
             }
             break;
         }
@@ -231,10 +238,36 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
   }
 
   private _initGroup() {
+    const addToGroup = (elementId: string, groupId: string) => {
+      this._elementToGroup.set(elementId, groupId);
+      this._groupToElements.set(
+        groupId,
+        (this._groupToElements.get(groupId) || []).concat(elementId)
+      );
+    };
+    const removeFromGroup = (elementId: string, groupId: string) => {
+      if (this._elementToGroup.has(elementId)) {
+        const group = this._elementToGroup.get(elementId)!;
+        if (group === groupId) {
+          this._elementToGroup.delete(elementId);
+        }
+      }
+
+      if (this._groupToElements.has(groupId)) {
+        const elements = this._groupToElements.get(groupId)!;
+        const index = elements.indexOf(elementId);
+
+        if (index !== -1) {
+          elements.splice(index, 1);
+          elements.length === 0 && this._groupToElements.delete(groupId);
+        }
+      }
+    };
+
     this.elementModels.forEach(model => {
       if (model.type === 'group') {
         (model as GroupElementModel).childrenIds.forEach(childId => {
-          this._elementToGroup.set(childId, model.id);
+          addToGroup(childId, model.id);
         });
       }
     });
@@ -244,32 +277,30 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
 
       if (element.type === 'group' && props['children']) {
         (props['children'].oldValue as Y.Map<boolean>).forEach((_, childId) => {
-          this._elementToGroup.delete(childId);
+          removeFromGroup(childId, id);
         });
 
         (element as GroupElementModel).childrenIds.forEach(childId => {
-          this._elementToGroup.set(childId, id);
+          addToGroup(childId, id);
         });
       }
     });
 
-    this.elementAdded.on(id => {
-      const element = this.getElementById(id.id)!;
+    this.elementAdded.on(({ id }) => {
+      const element = this.getElementById(id)!;
 
       if (element.type === 'group') {
         (element as GroupElementModel).childrenIds.forEach(childId => {
-          this._elementToGroup.set(childId, id.id);
+          addToGroup(childId, id);
         });
       }
     });
 
-    this.elementRemoved.on(id => {
-      const element = this.getElementById(id.id)!;
+    this.elementRemoved.on(({ id, type }) => {
+      if (type === 'group') {
+        const children = [...(this._groupToElements.get(id) || [])];
 
-      if (element.type === 'group') {
-        (element as GroupElementModel).childrenIds.forEach(childId => {
-          this._elementToGroup.delete(childId);
-        });
+        children.forEach(childId => removeFromGroup(childId, id));
       }
     });
   }
@@ -283,24 +314,35 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
       } else {
         connectors.push(connectorId);
       }
+
+      this._connectorToElements.set(
+        connectorId,
+        (this._connectorToElements.get(connectorId) || []).concat(targetId)
+      );
     };
     const removeConnector = (targetId: string, connectorId: string) => {
-      const connectors = this._elementToConnector.get(targetId);
+      if (this._elementToConnector.has(targetId)) {
+        const connectors = this._elementToConnector.get(targetId)!;
+        const index = connectors.indexOf(connectorId);
 
-      if (!connectors) {
-        return;
+        if (index !== -1) {
+          connectors.splice(index, 1);
+          connectors.length === 0 && this._elementToConnector.delete(targetId);
+        }
       }
 
-      const index = connectors.indexOf(connectorId);
+      if (this._connectorToElements.has(connectorId)) {
+        const elements = this._connectorToElements.get(connectorId)!;
+        const index = elements.indexOf(targetId);
 
-      if (index !== -1) {
-        connectors.splice(index, 1);
-      }
-
-      if (connectors.length === 0) {
-        this._elementToConnector.delete(targetId);
+        if (index !== -1) {
+          elements.splice(index, 1);
+          elements.length === 0 &&
+            this._connectorToElements.delete(connectorId);
+        }
       }
     };
+
     const updateConnectorMap = (
       element: ElementModel,
       type: 'add' | 'remove'
@@ -321,7 +363,8 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     this.elementUpdated.on(({ id, props }) => {
       const element = this.getElementById(id)!;
 
-      if (element.type !== 'connector') return;
+      if (element.type !== 'connector' || !props['source'] || !props['target'])
+        return;
 
       const oldConnected = [
         (props['source']?.oldValue as Connection)?.id,
@@ -339,7 +382,13 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
       updateConnectorMap(this.getElementById(id.id)!, 'add')
     );
 
-    this.elementRemoved.on(({ model }) => updateConnectorMap(model, 'remove'));
+    this.elementRemoved.on(({ id, type }) => {
+      if (type === 'connector') {
+        const connected = [...(this._connectorToElements.get(id) || [])];
+
+        connected.forEach(connectedId => removeConnector(connectedId, id));
+      }
+    });
   }
 
   override dispose(): void {
@@ -361,9 +410,11 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     );
   }
 
-  getGroup(id: string): ElementModel | null {
+  getGroup(id: string): GroupElementModel | null {
     return this._elementToGroup.has(id)
-      ? this.getElementById(this._elementToGroup.get(id)!)
+      ? (this.getElementById(
+          this._elementToGroup.get(id)!
+        ) as GroupElementModel)
       : null;
   }
 
@@ -377,24 +428,16 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     }
 
     const id = generateElementId();
-    const yMap = new Workspace.Y.Map();
 
     props.id = id;
 
-    Object.entries(props).forEach(([key, value]) => {
-      if (
-        (key === 'text' || key === 'title') &&
-        !(value instanceof Workspace.Y.Text)
-      ) {
-        yMap.set(key, new Workspace.Y.Text(value as string));
-      } else {
-        yMap.set(key, value);
-      }
-    });
+    const yMap = createYMapFromProps(props);
 
     this.page.transact(() => {
       this.elements.getValue()!.set(id, yMap);
     });
+
+    return id;
   }
 
   removeElement(id: string) {
@@ -407,12 +450,11 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     });
   }
 
-  updateElement(props: Record<string, unknown>) {
+  updateElement(id: string, props: Record<string, unknown>) {
     if (this.page.readonly) {
       throw new Error('Cannot update element in readonly mode');
     }
 
-    const id = props.id as string;
     const elementModel = this.getElementById(id);
 
     if (!elementModel) {
@@ -420,14 +462,10 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     }
 
     this.page.transact(() => {
+      props = propsToYStruct(elementModel.type, props);
       Object.entries(props).forEach(([key, value]) => {
-        if (key === 'text' && !(value instanceof Workspace.Y.Text)) {
-          // @ts-ignore
-          elementModel[key] = new Workspace.Y.Text(value as string);
-        } else {
-          // @ts-ignore
-          elementModel[key] = value;
-        }
+        // @ts-ignore
+        elementModel[key] = value;
       });
     });
   }

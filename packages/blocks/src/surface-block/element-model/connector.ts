@@ -30,6 +30,22 @@ type ConnectorElementProps = BaseProps & {
 };
 
 export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
+  static override default() {
+    return {
+      mode: ConnectorMode.Orthogonal,
+      strokeWidth: 4,
+      stroke: '#000000',
+      strokeStyle: 'solid',
+      roughness: DEFAULT_ROUGHNESS,
+      source: {},
+      target: {},
+    } as ConnectorElementProps;
+  }
+
+  get type() {
+    return 'connector';
+  }
+
   get mode() {
     return this.yMap.get('mode') as ConnectorElementProps['mode'];
   }
