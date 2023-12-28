@@ -170,6 +170,8 @@ export class BlockElement<
     return result;
   }
   protected override update(changedProperties: PropertyValues): void {
+    // In some cases, the DOM structure is directly modified, causing Lit to lose synchronization with the DOM structure.
+    // We can restore this state through the `dirty` property.
     if (this.dirty) {
       //@ts-ignore
       this.__reflectingProperties &&= this.__reflectingProperties.forEach(p =>

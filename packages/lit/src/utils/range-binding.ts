@@ -203,13 +203,17 @@ export class RangeBinding {
     this._compositionStartCallback = async event => {
       this.isComposing = false;
 
+      const parents: BlockElement[] = [];
       for (const highestBlock of highestBlocks) {
         const parent = this.host.view.getParent(highestBlock.path)?.view;
-        if (!(parent instanceof BlockElement)) continue;
+        if (!(parent instanceof BlockElement) || parents.includes(parent))
+          continue;
 
+        // Restore the DOM structure damaged by the composition
         parent.dirty = true;
         await parent.updateComplete;
         await parent.updateComplete;
+        parents.push(parent);
       }
 
       this.host.page.transact(() => {
