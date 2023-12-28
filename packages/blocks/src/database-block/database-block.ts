@@ -351,7 +351,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
       dispose: this.host.event.bindHotkey(hotkeys, {
-        path: this.path,
+        path: this.topContenteditableElement.path,
       }),
     };
   };
