@@ -82,12 +82,17 @@ export class RangeControl {
         ? range.startContainer
         : range.startContainer.parentElement;
     if (!startElement) return;
-
     if (
       startElement === document.documentElement ||
       startElement === document.body
     )
       return;
+
+    const endElement =
+      range.endContainer instanceof Element
+        ? range.endContainer
+        : range.endContainer.parentElement;
+    if (!endElement) return;
 
     if (startElement.closest('.blocksuite-portal')) return;
     if (startElement.closest('affine-menu')) return;
@@ -100,14 +105,11 @@ export class RangeControl {
     // @ts-ignore
     const viewport = pageBlock.viewportElement;
     assertExists(viewport);
-
-    if (!viewport.contains(range.startContainer)) {
-      console.log(startElement);
+    if (!viewport.contains(startElement)) {
       this._dispatcher.focus = false;
       return;
     }
-    if (!viewport.contains(range.endContainer)) {
-      console.log(startElement);
+    if (!viewport.contains(endElement)) {
       this._dispatcher.focus = false;
       return;
     }
