@@ -383,6 +383,7 @@ export class DocPageBlockComponent extends BlockElement<
         const last = lastNote.children.at(-1);
         if (
           !last ||
+          !last.text ||
           matchFlavours(last, [
             'affine:code',
             'affine:divider',
