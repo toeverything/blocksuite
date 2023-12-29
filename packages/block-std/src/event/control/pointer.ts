@@ -50,6 +50,8 @@ export class PointerControl {
   }
 
   private _down = (event: PointerEvent) => {
+    this._dispatcher.focus = true;
+
     if (
       this._lastPointerDownEvent &&
       event.timeStamp - this._lastPointerDownEvent.timeStamp < 500 &&
