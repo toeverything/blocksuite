@@ -14,11 +14,9 @@ export type TemplateCategory = {
 };
 
 export interface TemplateManager {
-  list(category?: string): Template[];
+  list(category: string): Promise<Template[]>;
 
-  categories(): string[];
+  categories(): Promise<string[]>;
 
-  search(keyword: string, category?: string): Template[];
-
-  extend(category: string, templates: Template[]): void;
+  search(keyword: string, category?: string): Promise<Template[]>;
 }

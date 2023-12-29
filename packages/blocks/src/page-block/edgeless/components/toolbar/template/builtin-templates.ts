@@ -1,46 +1,59 @@
-import type {
-  Template,
-  TemplateCategory,
-  TemplateManager,
-} from './template-type.js';
-import twohfivew from './templates/2h5w.js';
-import fourpmarketingmatrix from './templates/4p-marketing-matrix.js';
-import businessproposal from './templates/business-proposal.js';
-import conceptmap from './templates/concept-map.js';
-import dataanalysis from './templates/data-analysis.js';
-import fishbone from './templates/fishbone.js';
-import flowchart from './templates/flow-chart.js';
-import ganttchart from './templates/gantt-chart.js';
-import kanban from './templates/kanban.js';
-import monthlycalendar from './templates/monthly-calendar.js';
-import projectplanning from './templates/project-planning.js';
-import simplepresentation from './templates/simple-presentation.js';
-import smartprinciples from './templates/smart-principles.js';
-import stickers from './templates/stickers.js';
-import storyboard from './templates/storyboard.js';
-import swot from './templates/swot.js';
-import userjourney from './templates/user-journey.js';
+import { keys } from '../../../../../_common/utils/iterable.js';
+import type { Template, TemplateManager } from './template-type.js';
 
-export const templates: TemplateCategory[] = [
+export const templates = [
   {
     name: 'Marketing',
-    templates: [storyboard, fourpmarketingmatrix, userjourney],
+    templates: {
+      Storyboard: () =>
+        import('./templates/storyboard.js').then(val => val.default),
+      '4P Marketing Matrix': () =>
+        import('./templates/4p-marketing-matrix.js').then(val => val.default),
+      'User Journey Map': () =>
+        import('./templates/user-journey.js').then(val => val.default),
+    },
   },
   {
     name: 'Project management',
-    templates: [ganttchart, kanban, monthlycalendar, fishbone, projectplanning],
+    templates: {
+      Gantt: () =>
+        import('./templates/gantt-chart.js').then(val => val.default),
+      Kanban: () => import('./templates/kanban.js').then(val => val.default),
+      Calendar: () =>
+        import('./templates/monthly-calendar.js').then(val => val.default),
+      Fishbone: () =>
+        import('./templates/fishbone.js').then(val => val.default),
+      'Project Planning': () =>
+        import('./templates/project-planning.js').then(val => val.default),
+    },
   },
   {
     name: 'Brainstorming',
-    templates: [swot, twohfivew, flowchart, conceptmap, smartprinciples],
+    templates: {
+      SWOT: () => import('./templates/swot.js').then(val => val.default),
+      '2x5W': () => import('./templates/2h5w.js').then(val => val.default),
+      'Flow Chart': () =>
+        import('./templates/flow-chart.js').then(val => val.default),
+      'Concept Map': () =>
+        import('./templates/concept-map.js').then(val => val.default),
+      'SMART Principles': () =>
+        import('./templates/smart-principles.js').then(val => val.default),
+    },
   },
   {
     name: 'Presentation',
-    templates: [dataanalysis, simplepresentation, businessproposal],
+    templates: {
+      'Data Analysis': () =>
+        import('./templates/data-analysis.js').then(val => val.default),
+      'Simple Presentation': () =>
+        import('./templates/simple-presentation.js').then(val => val.default),
+      'Business Proposal': () =>
+        import('./templates/business-proposal.js').then(val => val.default),
+    },
   },
   {
     name: 'Paws and pals',
-    templates: stickers as unknown as Template[],
+    templates: () => import('./templates/stickers.js').then(val => val.default),
   },
 ];
 
@@ -63,43 +76,46 @@ function lcs(text1: string, text2: string) {
 }
 
 export const builtInTemplates = {
-  list: (category?: string) => {
-    if (category) {
-      return templates.find(cate => cate.name === category)?.templates ?? [];
-    }
+  list: async (category: string) => {
+    const cate = templates.find(cate => cate.name === category);
+    if (!cate) return [];
 
-    return templates.flatMap(cate => cate.templates);
+    return cate.templates instanceof Function
+      ? await cate.templates()
+      : // @ts-ignore
+        Promise.all(keys(cate.templates).map(key => cate.templates[key]()));
   },
 
-  categories: () => {
+  categories: async () => {
     return templates.map(cate => cate.name);
   },
 
-  search: (keyword: string, cateName?: string) => {
+  search: async (keyword: string, cateName?: string) => {
     const candidates: Template[] = [];
 
     keyword = keyword.trim().toLocaleLowerCase();
 
-    templates.forEach(categroy => {
-      if (cateName && cateName !== categroy.name) {
-        return;
-      }
+    await Promise.all(
+      templates.map(async categroy => {
+        if (cateName && cateName !== categroy.name) {
+          return;
+        }
 
-      categroy.templates.forEach(template => {
-        template.name &&
-          lcs(keyword, template.name.toLocaleLowerCase()) === keyword.length &&
-          candidates.push(template);
-      });
-    });
+        if (categroy.templates instanceof Function) {
+          return;
+        }
+
+        return keys(categroy.templates).map(async name => {
+          if (lcs(keyword, name.toLocaleLowerCase()) === keyword.length) {
+            // @ts-ignore
+            const template = await categroy.templates[name]();
+
+            candidates.push(template);
+          }
+        });
+      })
+    );
 
     return candidates;
-  },
-
-  extend: (cateName: string, templates: Template[]) => {
-    const categoryTemplates = builtInTemplates.list(cateName);
-
-    if (categoryTemplates) {
-      categoryTemplates.push(...templates);
-    }
   },
 } satisfies TemplateManager;
