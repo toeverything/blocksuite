@@ -31,7 +31,7 @@ export const templates = [
     name: 'Brainstorming',
     templates: {
       SWOT: () => import('./templates/swot.js').then(val => val.default),
-      '2x5W': () => import('./templates/2h5w.js').then(val => val.default),
+      '5W2H': () => import('./templates/2h5w.js').then(val => val.default),
       'Flow Chart': () =>
         import('./templates/flow-chart.js').then(val => val.default),
       'Concept Map': () =>
