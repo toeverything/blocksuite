@@ -68,7 +68,7 @@ export type EventScope = {
 export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
-  private static _focus = true;
+  focus = false;
 
   private _handlersMap = Object.fromEntries(
     eventNames.map((name): [EventName, Array<EventHandlerRunner>] => [name, []])
@@ -84,14 +84,6 @@ export class UIEventDispatcher {
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
     this._clipboardControl = new ClipboardControl(this);
-  }
-
-  get focus() {
-    return UIEventDispatcher._focus;
-  }
-
-  set focus(value) {
-    UIEventDispatcher._focus = value;
   }
 
   private _viewportElement: HTMLElement | null = null;
