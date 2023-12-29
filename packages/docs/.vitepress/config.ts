@@ -20,8 +20,8 @@ export default defineConfig({
       {
         text: 'Editors',
         items: [
-          { text: '📝 DocEditor', link: '#' },
-          { text: '🎨 EdgelessEditor', link: '#' },
+          { text: '📝 DocEditor', link: '/doc-editor' },
+          { text: '🎨 EdgelessEditor', link: '/edgeless-editor' },
         ],
       },
       {
@@ -47,7 +47,7 @@ export default defineConfig({
         text: 'Essentials',
         items: [
           { text: 'Component Types', link: '/component-types' },
-          { text: 'Block Basics', link: '/block-basics' },
+          { text: 'Working with Block Tree', link: '/working-with-block-tree' },
           { text: 'Data Persistence', link: '/data-persistence' },
           { text: 'Customize Blocks 🚧' },
         ],
@@ -81,7 +81,6 @@ export default defineConfig({
               {
                 text: 'Selection',
                 link: '/selection',
-                items: [{ text: 'Block Path 🚧' }],
               },
               { text: 'Event', link: '/event' },
               { text: 'Command', link: '/command' },

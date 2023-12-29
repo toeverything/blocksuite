@@ -14,7 +14,7 @@ hero:
       text: Get Started
       link: /blocksuite-overview
     - theme: alt
-      text: Visit Playground
+      text: Try Online
       link: https://try-blocksuite.vercel.app/starter/?init
 
 features:
