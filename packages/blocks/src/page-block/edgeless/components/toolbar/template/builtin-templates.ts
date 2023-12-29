@@ -19,7 +19,7 @@ export const templates = [
       Gantt: () =>
         import('./templates/gantt-chart.js').then(val => val.default),
       Kanban: () => import('./templates/kanban.js').then(val => val.default),
-      Calendar: () =>
+      'Montly Calendar': () =>
         import('./templates/monthly-calendar.js').then(val => val.default),
       Fishbone: () =>
         import('./templates/fishbone.js').then(val => val.default),
@@ -105,14 +105,16 @@ export const builtInTemplates = {
           return;
         }
 
-        return keys(categroy.templates).map(async name => {
-          if (lcs(keyword, name.toLocaleLowerCase()) === keyword.length) {
-            // @ts-ignore
-            const template = await categroy.templates[name]();
+        return Promise.all(
+          keys(categroy.templates).map(async name => {
+            if (lcs(keyword, name.toLocaleLowerCase()) === keyword.length) {
+              // @ts-ignore
+              const template = await categroy.templates[name]();
 
-            candidates.push(template);
-          }
-        });
+              candidates.push(template);
+            }
+          })
+        );
       })
     );
 
