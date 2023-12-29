@@ -676,6 +676,7 @@ export async function shiftClickView(page: Page, point: [number, number]) {
 }
 
 export async function deleteAll(page: Page) {
+  await clickView(page, [0, 0]);
   await selectAllByKeyboard(page);
   await pressBackspace(page);
 }
