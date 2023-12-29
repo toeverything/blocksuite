@@ -46,7 +46,7 @@ export class KeyboardControl {
   }
 
   private _down = (event: KeyboardEvent) => {
-    if (!this._dispatcher.focus) return;
+    if (!this._dispatcher.isActive) return;
 
     const keyboardEventState = new KeyboardEventState({
       event,
@@ -59,7 +59,7 @@ export class KeyboardControl {
   };
 
   private _up = (event: KeyboardEvent) => {
-    if (!this._dispatcher.focus) return;
+    if (!this._dispatcher.isActive) return;
 
     const keyboardEventState = new KeyboardEventState({
       event,

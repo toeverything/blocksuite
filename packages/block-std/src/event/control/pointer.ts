@@ -50,7 +50,7 @@ export class PointerControl {
   }
 
   private _down = (event: PointerEvent) => {
-    this._dispatcher.focus = true;
+    this._dispatcher.activate();
 
     if (
       this._lastPointerDownEvent &&
@@ -90,6 +90,7 @@ export class PointerControl {
   };
 
   private _up = (event: PointerEvent) => {
+    if (!this._dispatcher.isActive) return;
     const pointerEventState = new PointerEventState({
       event,
       rect: this._rect,

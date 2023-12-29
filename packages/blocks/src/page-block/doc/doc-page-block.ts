@@ -36,13 +36,16 @@ const PAGE_BLOCK_CHILD_PADDING = 24;
 
 function testClickOnBlankArea(
   state: PointerEventState,
+  viewportLeft: number,
   viewportWidth: number,
   pageWidth: number,
   paddingLeft: number,
   paddingRight: number
 ) {
-  const blankLeft = (viewportWidth - pageWidth) / 2 + paddingLeft;
-  const blankRight = (viewportWidth - pageWidth) / 2 + pageWidth - paddingRight;
+  const blankLeft =
+    viewportLeft + (viewportWidth - pageWidth) / 2 + paddingLeft;
+  const blankRight =
+    viewportLeft + (viewportWidth - pageWidth) / 2 + pageWidth - paddingRight;
 
   if (state.raw.clientX < blankLeft || state.raw.clientX > blankRight) {
     return true;
@@ -362,6 +365,7 @@ export class DocPageBlockComponent extends BlockElement<
       );
       const isClickOnBlankArea = testClickOnBlankArea(
         event,
+        this.viewport.left,
         this.viewport.clientWidth,
         this.pageBlockContainer.clientWidth,
         parseFloat(paddingLeft),

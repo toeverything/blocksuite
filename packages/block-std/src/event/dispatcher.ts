@@ -68,8 +68,6 @@ export type EventScope = {
 export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
-  focus = false;
-
   private _handlersMap = Object.fromEntries(
     eventNames.map((name): [EventName, Array<EventHandlerRunner>] => [name, []])
   ) as Record<EventName, Array<EventHandlerRunner>>;
@@ -85,6 +83,20 @@ export class UIEventDispatcher {
     this._rangeControl = new RangeControl(this);
     this._clipboardControl = new ClipboardControl(this);
   }
+
+  private static _activeDispatcher: UIEventDispatcher | null = null;
+
+  get isActive() {
+    return UIEventDispatcher._activeDispatcher === this;
+  }
+
+  activate = () => {
+    UIEventDispatcher._activeDispatcher = this;
+  };
+
+  deactivate = () => {
+    UIEventDispatcher._activeDispatcher = null;
+  };
 
   private _viewportElement: HTMLElement | null = null;
 
