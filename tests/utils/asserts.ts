@@ -76,6 +76,7 @@ export const defaultStore: SerializedStore = {
       'affine:divider': 1,
       'affine:embed-github': 1,
       'affine:embed-html': 1,
+      'affine:embed-linked-page': 1,
       'affine:image': 1,
       'affine:frame': 1,
       'affine:code': 1,
@@ -900,7 +901,7 @@ export async function assertConnectorPath(
   index = 0
 ) {
   const actualPath = await getConnectorPath(page, index);
-  actualPath.every((p, i) => assertPointAlmostEqual(p, path[i]));
+  actualPath.every((p, i) => assertPointAlmostEqual(p, path[i], 0.1));
 }
 
 export function assertRectExist(

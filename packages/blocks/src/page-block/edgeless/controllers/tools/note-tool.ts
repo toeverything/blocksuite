@@ -17,8 +17,7 @@ import { EdgelessToolController } from './index.js';
 
 export class NoteToolController extends EdgelessToolController<NoteTool> {
   readonly tool = <NoteTool>{
-    type: 'note',
-    background: '--affine-background-secondary-color',
+    type: 'affine:note',
     childFlavour: 'affine:paragraph',
     childType: 'text',
     tip: 'Text',
@@ -157,7 +156,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   }
 
   afterModeSwitch(newTool: EdgelessTool) {
-    if (newTool.type !== 'note') return;
+    if (newTool.type !== 'affine:note') return;
 
     this._noteOverlay = new NoteOverlay(this._edgeless);
     this._noteOverlay.text = newTool.tip;

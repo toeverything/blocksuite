@@ -10,10 +10,10 @@ import type {
 } from './elements/edgeless-element.js';
 
 export type EdgelessBlockModelMap = {
-  ['affine:frame']: FrameBlockModel;
-  ['affine:note']: NoteBlockModel;
-  ['affine:image']: ImageBlockModel;
-  ['affine:bookmark']: BookmarkBlockModel;
+  'affine:frame': FrameBlockModel;
+  'affine:note': NoteBlockModel;
+  'affine:image': ImageBlockModel;
+  'affine:bookmark': BookmarkBlockModel;
 };
 
 export type EdgelessBlockType =

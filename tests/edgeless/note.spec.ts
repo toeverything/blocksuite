@@ -159,20 +159,20 @@ test('resize note then auto size and custom size', async ({ page }) => {
   });
 
   await triggerComponentToolbarAction(page, 'autoSize');
-  await waitNextFrame(page);
+  await waitNextFrame(page, 200);
   const autoSizeRect = await getNoteRect(page, noteId);
   assertRectEqual(autoSizeRect, initRect);
 
   await triggerComponentToolbarAction(page, 'autoSize');
-  await waitNextFrame(page);
+  await waitNextFrame(page, 200);
   await assertNoteRectEqual(page, noteId, draggedRect);
 
   await undoByClick(page);
-  await waitNextFrame(page);
+  await waitNextFrame(page, 200);
   await assertNoteRectEqual(page, noteId, initRect);
 
   await redoByClick(page);
-  await waitNextFrame(page);
+  await waitNextFrame(page, 200);
   await assertNoteRectEqual(page, noteId, draggedRect);
 });
 

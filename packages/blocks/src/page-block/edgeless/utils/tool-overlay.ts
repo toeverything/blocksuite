@@ -275,7 +275,11 @@ export class ShapeOverlay extends ToolOverlay {
     edgeless: EdgelessPageBlockComponent,
     type: string,
     options: Options,
-    shapeStyle: ShapeStyle
+    style: {
+      shapeStyle: ShapeStyle;
+      fillColor: string;
+      strokeColor: string;
+    }
   ) {
     super(edgeless);
     const xywh = [
@@ -284,18 +288,19 @@ export class ShapeOverlay extends ToolOverlay {
       SHAPE_OVERLAY_WIDTH,
       SHAPE_OVERLAY_HEIGHT,
     ] as XYWH;
+    const { shapeStyle } = style;
     this.shape = ShapeFactory.createShape(xywh, type, options, shapeStyle);
     this.disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
         if (edgelessTool.type !== 'shape') return;
-        const shapeType = edgelessTool.shape;
-        const shapeStyle = edgelessTool.shapeStyle;
+        const shapeType = edgelessTool.shapeType;
+
         const computedStyle = getComputedStyle(edgeless);
         const strokeColor = computedStyle.getPropertyValue(
-          edgelessTool.strokeColor
+          style.strokeColor as string
         );
         const fillColor = computedStyle.getPropertyValue(
-          edgelessTool.fillColor
+          style.fillColor as string
         );
         const newOptions = {
           ...options,
@@ -354,7 +359,7 @@ export class NoteOverlay extends ToolOverlay {
     this.disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
         // when change note child type, update overlay text
-        if (edgelessTool.type !== 'note') return;
+        if (edgelessTool.type !== 'affine:note') return;
         this.text = this._getOverlayText(edgelessTool.tip);
         this.edgeless.surface.refresh();
       })

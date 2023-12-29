@@ -6,10 +6,7 @@ import {
   CanvasElementType,
   type Connection,
   type ConnectorElement,
-  DEFAULT_FRONT_END_POINT_STYLE,
-  DEFAULT_REAR_END_POINT_STYLE,
   type IVec,
-  StrokeStyle,
 } from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
 
@@ -47,18 +44,14 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     assertExists(this._source);
     assertExists(this._startPoint);
     this._page.captureSync();
-    const { mode, color, strokeWidth } = this.tool;
+    const { mode } = this.tool;
+
     const { _surface } = this;
     const id = _surface.addElement(CanvasElementType.CONNECTOR, {
-      stroke: color,
       mode,
       controllers: [],
-      strokeWidth,
-      strokeStyle: StrokeStyle.Solid,
       source: this._source,
       target: { position: this._startPoint },
-      frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
-      rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
     });
     this._connector = _surface.pickById(id) as unknown as ConnectorElement;
   }

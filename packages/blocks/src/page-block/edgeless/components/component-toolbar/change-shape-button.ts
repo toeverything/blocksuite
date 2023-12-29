@@ -23,6 +23,7 @@ import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import { CanvasTextFontFamily } from '../../../../surface-block/consts.js';
 import {
   FILL_COLORS,
+  ShapeType,
   STROKE_COLORS,
 } from '../../../../surface-block/elements/shape/consts.js';
 import type { CanvasElementType } from '../../../../surface-block/index.js';
@@ -56,34 +57,30 @@ const ICON_BUTTON_PADDING_TWO = 2;
 
 function getMostCommonShape(
   elements: ShapeElement[]
-): ShapeTool['shape'] | null {
+): ShapeTool['shapeType'] | null {
   const shapeTypes = countBy(elements, (ele: ShapeElement) => {
     return ele.shapeType === 'rect' && ele.radius
       ? 'roundedRect'
       : ele.shapeType;
   });
   const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
-  return max ? (max[0] as ShapeTool['shape']) : null;
+  return max ? (max[0] as ShapeTool['shapeType']) : null;
 }
 
-function getMostCommonFillColor(
-  elements: ShapeElement[]
-): ShapeTool['fillColor'] | null {
+function getMostCommonFillColor(elements: ShapeElement[]): string | null {
   const colors = countBy(elements, (ele: ShapeElement) => {
     return ele.filled ? ele.fillColor : '--affine-palette-transparent';
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
-  return max ? (max[0] as ShapeTool['fillColor']) : null;
+  return max ? (max[0] as string) : null;
 }
 
-function getMostCommonStrokeColor(
-  elements: ShapeElement[]
-): ShapeTool['fillColor'] | null {
+function getMostCommonStrokeColor(elements: ShapeElement[]): string | null {
   const colors = countBy(elements, (ele: ShapeElement) => {
     return ele.strokeColor;
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
-  return max ? (max[0] as ShapeTool['fillColor']) : null;
+  return max ? (max[0] as string) : null;
 }
 
 function getMostCommonLineSize(elements: ShapeElement[]): LineWidth {
@@ -377,7 +374,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       this._shapePanel.slots.select.on(shapeType => {
         const updatedProps =
           shapeType === 'roundedRect'
-            ? ({ shapeType: 'rect', radius: 0.1 } as const)
+            ? ({ shapeType: ShapeType.Rect, radius: 0.1 } as const)
             : { shapeType, radius: 0 };
 
         this.page.captureSync();

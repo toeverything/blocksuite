@@ -1,12 +1,19 @@
-import type { AwarenessStore } from '@blocksuite/store';
+import type { EditorHost } from '@blocksuite/lit';
 
+import type { SurfaceService } from '../../surface-block/surface-service.js';
 import { multiPlayersColor } from './color-picker.js';
 
-const REMOTE_COLOR_KEY = 'blocksuite:remote-color';
-
 export class RemoteColorManager {
-  constructor(public readonly awareness: AwarenessStore) {
-    const sessionColor = window.sessionStorage.getItem(REMOTE_COLOR_KEY);
+  private get awareness() {
+    return this.host.page.workspace.awarenessStore;
+  }
+
+  private get surfaceService() {
+    return this.host.spec.getService('affine:surface') as SurfaceService;
+  }
+
+  constructor(public readonly host: EditorHost) {
+    const sessionColor = this.surfaceService.editSession.getItem('remoteColor');
     if (sessionColor) {
       this.awareness.awareness.setLocalStateField('color', sessionColor);
       return;
@@ -14,7 +21,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awareness.awareness.setLocalStateField('color', pickColor);
-    window.sessionStorage.setItem(REMOTE_COLOR_KEY, pickColor);
+    this.surfaceService.editSession.setItem('remoteColor', pickColor);
   }
 
   get(id: number) {
@@ -25,7 +32,7 @@ export class RemoteColorManager {
 
     if (id !== this.awareness.awareness.clientID) return null;
 
-    const sessionColor = window.sessionStorage.getItem(REMOTE_COLOR_KEY);
+    const sessionColor = this.surfaceService.editSession.getItem('remoteColor');
     if (sessionColor) {
       this.awareness.awareness.setLocalStateField('color', sessionColor);
       return sessionColor;
@@ -33,7 +40,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awareness.awareness.setLocalStateField('color', pickColor);
-    window.sessionStorage.setItem(REMOTE_COLOR_KEY, pickColor);
+    this.surfaceService.editSession.setItem('remoteColor', pickColor);
     return pickColor;
   }
 }
