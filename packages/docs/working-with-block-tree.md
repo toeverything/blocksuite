@@ -43,7 +43,7 @@ This example establishes the block tree structure defaultly used in `@blocksuite
 Such a block tree structure is specific to the preset editors. At the framework level, `@blocksuite/store` does **NOT** process the "first-party" `affine:*` blocks in any special way. You are free to define blocks from different namespaces to be inserted into this block tree.
 :::
 
-All block operations on `page` are automatically recorded and can be reversed using `page.undo()` and `page.redo()`. By default, operations within a certain period are automatically merged into a single record. However, you can explicitly add a history record during operations by inserting `page.captureSync()` between block operations:
+All block operations on `page` are automatically recorded and can be reversed using [`page.undo()`](/api/@blocksuite/store/classes/Page.html#undo) and [`page.redo()`](/api/@blocksuite/store/classes/Page.html#redo). By default, operations within a certain period are automatically merged into a single record. However, you can explicitly add a history record during operations by inserting [`page.captureSync()`](/api/@blocksuite/store/classes/Page.html#capturesync) between block operations:
 
 ```ts
 const rootId = page.addBlock('affine:page');

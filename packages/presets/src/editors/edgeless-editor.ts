@@ -20,7 +20,7 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   private _host: Ref<EditorHost> = createRef<EditorHost>();
 
   get host() {
-    return this._host.value;
+    return this._host.value as EditorHost;
   }
 
   override render() {
