@@ -190,6 +190,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
         }, 4);
       }
     }
+    this.text = '';
   };
 
   private _createOption = () => {
