@@ -43,7 +43,7 @@ This example establishes the block tree structure defaultly used in `@blocksuite
 Such a block tree structure is specific to the preset editors. At the framework level, `@blocksuite/store` does **NOT** process the "first-party" `affine:*` blocks in any special way. You are free to define blocks from different namespaces to be inserted into this block tree.
 :::
 
-All block operations on `page` are automatically recorded and can be reversed using `page.undo()` and `page.redo()`. By default, operations within a certain period are automatically merged into a single record. However, you can explicitly add a history record during operations by inserting `page.captureSync()` between block operations:
+All block operations on `page` are automatically recorded and can be reversed using [`page.undo()`](/api/@blocksuite/store/classes/Page.html#undo) and [`page.redo()`](/api/@blocksuite/store/classes/Page.html#redo). By default, operations within a certain period are automatically merged into a single record. However, you can explicitly add a history record during operations by inserting [`page.captureSync()`](/api/@blocksuite/store/classes/Page.html#capturesync) between block operations:
 
 ```ts
 const rootId = page.addBlock('affine:page');
@@ -57,6 +57,32 @@ page.captureSync();
 
 This is particularly useful when adding multiple blocks at once but wishing to undo them individually.
 
-## Interacting with Block Tree
+## Block Tree in Editor
+
+To understand the common operations on the block tree in an editor environment, it's helpful to grasp the basic design of the editor. This can start with the following code snippet:
+
+```ts
+const { host } = editor;
+const { spec, selection, command } = host.std;
+```
+
+First, let's explain the newly introduced `host` and `std`, which are determined by the framework-agnostic architecture of BlockSuite:
+
+- In BlockSuite, the `editor` itself is usually quite lightweight, serving primarily to provide access to the `host`. The actual editable blocks are registered on `editor.host` - also known as the [`EditorHost`](/api/@blocksuite/lit/) component, which is a container for mounting block UI components. BlockSuite by default offers a host based on the [lit](https://lit.dev) framework. As long as there is a corresponding `host` implementation, you can use the component model of frameworks like react or vue to implement your BlockSuite editors.
+- Regardless of the framework used to implement `EditorHost`, they can access the same headless standard library designed for editable blocks through `host.std`. For example, `std.spec` contains all the registered [`BlockSpec`](./block-spec)s.
+
+::: tip
+We usually access `host.spec` instead of `host.std.spec` to simplify the code.
+:::
+
+As the runtime for the block tree, this is the mental model inside the `editor`:
+
+![editor-structure](./images/editor-structure.png)
+
+## Selecting Blocks
+
+TODO
+
+## Customizing Blocks
 
 TODO

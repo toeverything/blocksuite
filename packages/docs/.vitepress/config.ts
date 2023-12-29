@@ -47,9 +47,29 @@ export default defineConfig({
         text: 'Essentials',
         items: [
           { text: 'Component Types', link: '/component-types' },
-          { text: 'Working with Block Tree', link: '/working-with-block-tree' },
+          {
+            text: 'Working with Block Tree',
+            link: '/working-with-block-tree',
+            items: [
+              {
+                text: 'Block Tree Basics',
+                link: '/working-with-block-tree#block-tree-basics',
+              },
+              {
+                text: 'Block Tree in Editor',
+                link: '/working-with-block-tree#block-tree-in-editor',
+              },
+              {
+                text: 'Selecting Blocks 🚧',
+                link: '/working-with-block-tree#selecting-blocks',
+              },
+              {
+                text: 'Customizing Blocks 🚧',
+                link: '/working-with-block-tree#customizing-blocks',
+              },
+            ],
+          },
           { text: 'Data Persistence', link: '/data-persistence' },
-          { text: 'Customize Blocks 🚧' },
         ],
       },
       {
