@@ -57,7 +57,7 @@ export class RangeControl {
   private _selectionChange = (event: Event) => {
     this._checkSelectionSource();
     if (!this._dispatcher.focus) {
-      // this._dispatcher.std.selection.clear();
+      this._dispatcher.std.selection.clear();
       return;
     }
 
