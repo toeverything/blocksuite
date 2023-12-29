@@ -16,11 +16,13 @@ import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 
+import type { SurfaceBlockComponent } from '@blocksuite/blocks';
 import {
   ColorVariables,
   extractCssVariables,
   HtmlTransformer,
   MarkdownTransformer,
+  type SurfaceBlockModel,
   ZipTransformer,
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
@@ -334,6 +336,39 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this._setThemeMode(!this._dark);
   }
 
+  private _remapElementsColor() {
+    const surfaceModel = this.page.getBlockByFlavour(
+      'affine:surface'
+    )[0] as SurfaceBlockModel;
+    const path = [this.page.root?.id, surfaceModel?.id].filter(
+      val => val
+    ) as string[];
+    const surfaceBlock = this.editor.host.std.view.viewFromPath(
+      'block',
+      path
+    ) as SurfaceBlockComponent;
+    const elements = surfaceBlock.getElements();
+    const colorMap = this._dark
+      ? {
+          '--affine-palette-line-black': '--affine-palette-line-white',
+        }
+      : {
+          '--affine-palette-line-white': '--affine-palette-line-black',
+        };
+
+    elements.forEach(element => {
+      // @ts-ignore
+      if (element.color && colorMap[element.color]) {
+        surfaceBlock.updateElement(element.id, {
+          // @ts-ignore
+          color: colorMap[element.color],
+        });
+      }
+    });
+
+    surfaceBlock.refresh();
+  }
+
   private _darkModeChange = (e: MediaQueryListEvent) => {
     this._setThemeMode(!!e.matches);
   };
@@ -501,6 +536,13 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 </sl-menu-item>
                 <sl-menu-item @click=${this._toggleDarkMode}>
                   Toggle Dark Mode
+                  <sl-icon
+                    slot="prefix"
+                    name=${this._dark ? 'moon' : 'brightness-high'}
+                  ></sl-icon>
+                </sl-menu-item>
+                <sl-menu-item @click=${this._remapElementsColor}>
+                  Remap canvas elements color
                   <sl-icon
                     slot="prefix"
                     name=${this._dark ? 'moon' : 'brightness-high'}
