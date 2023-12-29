@@ -3,10 +3,12 @@ import type {
   TemplateCategory,
   TemplateManager,
 } from './template-type.js';
+import twohfivew from './templates/2h5w.js';
 import fourpmarketingmatrix from './templates/4p-marketing-matrix.js';
 import businessproposal from './templates/business-proposal.js';
 import conceptmap from './templates/concept-map.js';
 import dataanalysis from './templates/data-analysis.js';
+import fishbone from './templates/fishbone.js';
 import flowchart from './templates/flow-chart.js';
 import ganttchart from './templates/gantt-chart.js';
 import kanban from './templates/kanban.js';
@@ -17,19 +19,20 @@ import smartprinciples from './templates/smart-principles.js';
 import stickers from './templates/stickers.js';
 import storyboard from './templates/storyboard.js';
 import swot from './templates/swot.js';
+import userjourney from './templates/user-journey.js';
 
 export const templates: TemplateCategory[] = [
   {
     name: 'Marketing',
-    templates: [storyboard, fourpmarketingmatrix],
+    templates: [storyboard, fourpmarketingmatrix, userjourney],
   },
   {
     name: 'Project management',
-    templates: [ganttchart, kanban, monthlycalendar, projectplanning],
+    templates: [ganttchart, kanban, monthlycalendar, fishbone, projectplanning],
   },
   {
     name: 'Brainstorming',
-    templates: [swot, flowchart, conceptmap, smartprinciples],
+    templates: [swot, twohfivew, flowchart, conceptmap, smartprinciples],
   },
   {
     name: 'Presentation',
