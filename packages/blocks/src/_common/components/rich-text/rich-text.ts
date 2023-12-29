@@ -54,6 +54,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     rich-text .nowrap-lines v-text span {
       white-space: pre !important;
     }
+
+    rich-text .nowrap-lines v-element span {
+      white-space: pre !important;
+    }
   `;
 
   @query('.inline-editor')
