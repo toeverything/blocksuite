@@ -55,12 +55,9 @@ export class RangeControl {
   };
 
   private _selectionChange = (event: Event) => {
-    const prevIsActive = this._dispatcher.isActive;
     this._checkSelectionSource();
-    if (!this._dispatcher.isActive) {
-      if (prevIsActive) this._dispatcher.std.selection.clear();
-      return;
-    }
+
+    if (!this._dispatcher.isActive) return;
 
     const scope = this._buildScope('selectionChange');
 
@@ -84,11 +81,19 @@ export class RangeControl {
         ? range.startContainer
         : range.startContainer.parentElement;
     if (!startElement) return;
+
     if (
       startElement === document.documentElement ||
       startElement === document.body
     )
       return;
+
+    if (startElement.closest('.blocksuite-overlay')) return;
+
+    if (!viewport.contains(startElement)) {
+      this._dispatcher.deactivate();
+      return;
+    }
 
     const endElement =
       range.endContainer instanceof Element
@@ -96,14 +101,8 @@ export class RangeControl {
         : range.endContainer.parentElement;
     if (!endElement) return;
 
-    if (startElement.closest('.blocksuite-overlay')) return;
-    const prevIsActive = this._dispatcher.isActive;
-    if (!viewport.contains(startElement)) {
-      if (prevIsActive) this._dispatcher.deactivate();
-      return;
-    }
     if (!viewport.contains(endElement)) {
-      if (prevIsActive) this._dispatcher.deactivate();
+      this._dispatcher.deactivate();
       return;
     }
 

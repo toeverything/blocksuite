@@ -90,7 +90,6 @@ export class PointerControl {
   };
 
   private _up = (event: PointerEvent) => {
-    if (!this._dispatcher.isActive) return;
     const pointerEventState = new PointerEventState({
       event,
       rect: this._rect,

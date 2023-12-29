@@ -91,11 +91,18 @@ export class UIEventDispatcher {
   }
 
   activate = () => {
+    const prevDispatcher = UIEventDispatcher._activeDispatcher;
+    if (prevDispatcher === this) return;
     UIEventDispatcher._activeDispatcher = this;
+    prevDispatcher?.std.selection.clear();
   };
 
   deactivate = () => {
+    const prevDispatcher = UIEventDispatcher._activeDispatcher;
+    if (!prevDispatcher) return;
+    if (prevDispatcher !== this) return;
     UIEventDispatcher._activeDispatcher = null;
+    prevDispatcher.std.selection.clear();
   };
 
   private _viewportElement: HTMLElement | null = null;
