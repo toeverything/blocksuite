@@ -16,7 +16,6 @@ import { html, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import {
   buildPath,
   type EdgelessTool,
@@ -830,9 +829,9 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
-    const selection = edgelessPage.selectionManager;
-    const selectedElements = selection.elements;
-    if (selection.editing || selectedElements.length !== 1) {
+    const editing = edgelessPage.selectionManager.editing;
+    const selectedElements = edgelessPage.selectionManager.elements;
+    if (editing || selectedElements.length !== 1) {
       this._hide();
       return;
     }
@@ -850,18 +849,10 @@ export class AffineDragHandleWidget extends WidgetElement<
       return;
     }
 
-    // FIXME: this is a workaround for the bug that the path of selected element is not correct
-    // ref: Github issues #5623, #5624
-    const blockElement = this.pageBlockElement.querySelector(
-      `[${BLOCK_ID_ATTR}="${selectedElement.id}"]`
-    ) as BlockElement | null;
-    if (!blockElement) {
-      this._hide();
-      return;
-    }
+    const selections = edgelessPage.selectionManager.selections;
 
     this._anchorBlockId = selectedElement.id;
-    this._anchorBlockPath = blockElement.path;
+    this._anchorBlockPath = selections[0].path;
 
     this._showDragHandleOnTopLevelBlocks();
   };
