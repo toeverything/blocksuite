@@ -617,9 +617,10 @@ export class AffineDragHandleWidget extends WidgetElement<
     this._isHoverDragHandleVisible = true;
   };
 
-  private _showDragHandleOnTopLevelBlocks = () => {
+  private _showDragHandleOnTopLevelBlocks = async () => {
     if (isInsideDocEditor(this.host)) return;
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
+    await edgelessPage.surface.updateComplete;
 
     if (!this._anchorBlockPath) return;
     const blockElement = this.anchorBlockElement;
@@ -854,7 +855,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     this._anchorBlockId = selectedElement.id;
     this._anchorBlockPath = selections[0].path;
 
-    this._showDragHandleOnTopLevelBlocks();
+    this._showDragHandleOnTopLevelBlocks().catch(console.error);
   };
 
   /**
@@ -1364,7 +1365,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     if (this._isTopLevelDragHandleVisible) {
-      this._showDragHandleOnTopLevelBlocks();
+      this._showDragHandleOnTopLevelBlocks().catch(console.error);
       this._updateDragHoverRectTopLevelBlock();
     } else {
       this._hide();
