@@ -20,8 +20,8 @@ export default defineConfig({
       {
         text: 'Editors',
         items: [
-          { text: '📝 DocEditor', link: '/doc-editor' },
-          { text: '🎨 EdgelessEditor', link: '/edgeless-editor' },
+          { text: '📝 DocEditor', link: '/editors#doceditor' },
+          { text: '🎨 EdgelessEditor', link: '/editors#edgelesseditor' },
         ],
       },
       {
@@ -39,7 +39,7 @@ export default defineConfig({
       {
         text: 'Getting Started',
         items: [
-          { text: 'Introduction', link: '/blocksuite-overview' },
+          { text: 'Overview', link: '/blocksuite-overview' },
           { text: 'Quick Start', link: '/quick-start' },
         ],
       },
@@ -60,7 +60,7 @@ export default defineConfig({
                 link: '/working-with-block-tree#block-tree-in-editor',
               },
               {
-                text: 'Selecting Blocks 🚧',
+                text: 'Selecting Blocks',
                 link: '/working-with-block-tree#selecting-blocks',
               },
               {
