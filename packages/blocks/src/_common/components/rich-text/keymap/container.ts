@@ -120,6 +120,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       return;
     },
     Enter: ctx => {
+      _preventDefault(ctx);
+
       if (blockElement.selected?.is('block')) return _selectText(false);
 
       const target = ctx.get('defaultState').event.target as Node;
@@ -141,13 +143,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           inlineRange
         )
       ) {
-        _preventDefault(ctx);
         return true;
       }
 
       const state = ctx.get('keyboardState');
       hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw);
-      _preventDefault(ctx);
 
       return true;
     },
