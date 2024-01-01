@@ -170,7 +170,11 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     if (this.page.readonly) {
       return nothing;
     }
-    return html`<div class="database-ops" @click="${this._clickDatabaseOps}">
+    return html`<div
+      contenteditable="false"
+      class="database-ops"
+      @click="${this._clickDatabaseOps}"
+    >
       ${MoreHorizontalIcon}
     </div>`;
   }
@@ -296,7 +300,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     ></affine-database-title>`;
   };
   private renderReference = () => {
-    return html` <div></div>`;
+    return html`<div contenteditable="false"></div>`;
   };
 
   headerComponent = defineUniComponent(
@@ -314,6 +318,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
             ${this.renderReference()}
           </div>
           <div
+            contenteditable="false"
             style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
           >
             ${this.renderViews()} ${renderTools(view, viewMethods)}

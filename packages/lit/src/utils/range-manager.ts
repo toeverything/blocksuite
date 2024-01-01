@@ -28,6 +28,13 @@ export class RangeManager {
     const selection = document.getSelection();
     assertExists(selection);
     selection.removeAllRanges();
+
+    const topContenteditableElement = this.host.querySelector(
+      `[contenteditable="true"]`
+    );
+    if (topContenteditableElement instanceof HTMLElement) {
+      topContenteditableElement.blur();
+    }
   }
 
   set(range: Range) {
@@ -212,9 +219,11 @@ export class RangeManager {
   getClosestBlock(node: Node) {
     const el = node instanceof Element ? node : node.parentElement;
     if (!el) return null;
-    return el.closest<BlockElement>(
-      `[${this.host.blockIdAttr}]:not([${RangeManager.rangeSyncExcludeAttr}="true"])`
-    );
+    const block = el.closest<BlockElement>(`[${this.host.blockIdAttr}]`);
+    if (!block) return null;
+    if (block.getAttribute(RangeManager.rangeSyncExcludeAttr) === 'true')
+      return null;
+    return block;
   }
   getClosestInlineEditor(node: Node) {
     const el = node instanceof Element ? node : node.parentElement;

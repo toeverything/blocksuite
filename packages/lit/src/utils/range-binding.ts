@@ -55,30 +55,29 @@ export class RangeBinding {
   private _prevSelection: BaseSelection | null = null;
   private _onStdSelectionChanged = (selections: BaseSelection[]) => {
     // wait for lit updated
-    const rafId = requestAnimationFrame(() => {
-      const text =
-        selections.find((selection): selection is TextSelection =>
-          selection.is('text')
-        ) ?? null;
+    this.host.updateComplete
+      .then(() => {
+        const text =
+          selections.find((selection): selection is TextSelection =>
+            selection.is('text')
+          ) ?? null;
 
-      const eq =
-        text && this._prevSelection
-          ? text.equals(this._prevSelection)
-          : text === this._prevSelection;
-      if (eq) {
-        return;
-      }
+        const eq =
+          text && this._prevSelection
+            ? text.equals(this._prevSelection)
+            : text === this._prevSelection;
+        if (eq) {
+          return;
+        }
 
-      this._prevSelection = text;
-      if (text) {
-        this.rangeManager.syncTextSelectionToRange(text);
-      } else {
-        this.rangeManager.clear();
-      }
-    });
-    this.host.disposables.add(() => {
-      cancelAnimationFrame(rafId);
-    });
+        this._prevSelection = text;
+        if (text) {
+          this.rangeManager.syncTextSelectionToRange(text);
+        } else {
+          this.rangeManager.clear();
+        }
+      })
+      .catch(console.error);
   };
 
   private _onNativeSelectionChanged = async () => {

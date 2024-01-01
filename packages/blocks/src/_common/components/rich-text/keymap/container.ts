@@ -45,9 +45,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return sel;
       });
     });
-    blockElement
-      .querySelector<InlineRootElement>(`[${INLINE_ROOT_ATTR}]`)
-      ?.blur();
     return true;
   };
 

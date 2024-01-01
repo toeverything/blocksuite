@@ -262,7 +262,10 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
           `;
         }
       )}
-      <div class="database-cell add-column-button"></div>
+      <div
+        contenteditable="false"
+        class="database-cell add-column-button"
+      ></div>
     `;
   }
 }

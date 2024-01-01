@@ -123,7 +123,10 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   override render() {
     this.updateAddButton();
     return html`
-      <div class="affine-database-column-header database-row">
+      <div
+        contenteditable="false"
+        class="affine-database-column-header database-row"
+      >
         <div class="data-view-table-left-bar"></div>
         ${repeat(
           this.tableViewManager.columnManagerList,
