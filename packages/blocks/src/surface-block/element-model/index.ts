@@ -2,6 +2,7 @@ import { Workspace, type Y } from '@blocksuite/store';
 
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { ElementModel } from './base.js';
+import { BrushElementModel } from './brush.js';
 import { ConnectorElementModel } from './connector.js';
 import { GroupElementModel } from './group.js';
 import { ShapeElementModel } from './shape.js';
@@ -10,6 +11,7 @@ const elementsCtorMap = {
   group: GroupElementModel,
   connector: ConnectorElementModel,
   shape: ShapeElementModel,
+  brush: BrushElementModel,
 };
 
 export function createElementModel(
@@ -34,42 +36,12 @@ export function createElementModel(
     throw new Error(`Invalid element type: ${yMap.get('type')}`);
   }
 
-  const elementModel = new Ctor(yMap, model, stashed);
-  const proxy = new Proxy(elementModel as ElementModel, {
-    has(target, prop) {
-      return Reflect.has(target, prop);
-    },
-
-    get(target, prop) {
-      if (stashed.has(prop)) {
-        return stashed.get(prop);
-      }
-
-      return Reflect.get(target, prop);
-    },
-
-    set(target, prop, value) {
-      if (stashed.has(prop)) {
-        stashed.set(prop, value);
-        options.onChange({
-          id: elementModel.id,
-          props: {
-            [prop]: value,
-          },
-        });
-
-        return true;
-      }
-
-      target.yMap.set(prop as string, value);
-
-      return true;
-    },
-
-    getPrototypeOf() {
-      return ElementModel.prototype;
-    },
-  });
+  const elementModel = new Ctor({
+    yMap,
+    model,
+    stashedStore: stashed,
+    onchange: () => options.onChange({ id: elementModel.id, props: {} }),
+  }) as ElementModel;
   const dispose = onElementChange(yMap, props => {
     options.onChange({
       id: elementModel.id,
@@ -78,7 +50,7 @@ export function createElementModel(
   });
 
   return {
-    model: proxy,
+    model: elementModel,
     dispose,
   };
 }
@@ -121,13 +93,20 @@ export function propsToYStruct(type: string, props: Record<string, unknown>) {
     throw new Error(`Invalid element type: ${type}`);
   }
 
-  return (ctor.propsToYStruct ?? ElementModel.propsToYStruct)(
-    // @ts-ignore
-    Object.assign(ctor.default(), props)
-  );
+  // @ts-ignore
+  return (ctor.propsToYStruct ?? ElementModel.propsToYStruct)(props);
 }
 
-export function createYMapFromProps(props: Record<string, unknown>) {
+export function createModelFromProps(
+  props: Record<string, unknown>,
+  model: SurfaceBlockModel,
+  options: {
+    onChange: (payload: {
+      id: string;
+      props: Record<string, { oldValue: unknown }>;
+    }) => void;
+  }
+) {
   const type = props.type as string;
   const ctor = elementsCtorMap[type as keyof typeof elementsCtorMap];
 
@@ -136,12 +115,13 @@ export function createYMapFromProps(props: Record<string, unknown>) {
   }
 
   const yMap = new Workspace.Y.Map();
+  const elementModel = createElementModel(yMap, model, options);
 
-  props = propsToYStruct(type, Object.assign(ctor.default(), props));
+  props = propsToYStruct(type, props);
 
   Object.keys(props).forEach(key => {
     yMap.set(key, props[key]);
   });
 
-  return yMap;
+  return elementModel;
 }

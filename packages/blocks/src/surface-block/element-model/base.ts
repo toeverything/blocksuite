@@ -1,42 +1,70 @@
 import { type Y } from '@blocksuite/store';
 
-import type { SerializedXYWH } from '../index.js';
+import {
+  Bound,
+  deserializeXYWH,
+  getBoundsWithRotation,
+  type SerializedXYWH,
+} from '../index.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
+import { ymap } from './decorators.js';
 
 export type BaseProps = {
-  xywh: SerializedXYWH;
+  index: string;
 };
 
 export abstract class ElementModel<Props extends BaseProps = BaseProps> {
-  static default() {
-    return {
-      xywh: '[0, 0, 100, 100]',
-    };
-  }
-
-  static propsToYStruct(props: BaseProps) {
+  static propsToYStruct(props: Record<string, unknown>) {
     return props;
   }
 
   private _stashed: Map<keyof Props, unknown>;
+  protected _onchange?: (props: Record<string, { oldValue: unknown }>) => void;
 
   yMap!: Y.Map<unknown>;
   surfaceModel!: SurfaceBlockModel;
 
-  constructor(
-    yMap: Y.Map<unknown>,
-    model: SurfaceBlockModel,
-    stashedStore: Map<unknown, unknown>
-  ) {
-    this.yMap = yMap;
-    this.surfaceModel = model;
-    this._stashed = stashedStore as Map<keyof Props, unknown>;
-  }
+  abstract rotate: number;
+
+  abstract xywh: SerializedXYWH;
 
   abstract get type(): string;
 
-  get xywh() {
-    return this.yMap.get('xywh') as SerializedXYWH;
+  @ymap()
+  index: string = 'a0';
+
+  constructor(options: {
+    yMap: Y.Map<unknown>;
+    model: SurfaceBlockModel;
+    stashedStore: Map<unknown, unknown>;
+    onchange: (props: Record<string, { oldValue: unknown }>) => void;
+  }) {
+    const { yMap, model, stashedStore, onchange } = options;
+
+    this.yMap = yMap;
+    this.surfaceModel = model;
+    this._stashed = stashedStore as Map<keyof Props, unknown>;
+    this._onchange = onchange;
+  }
+
+  get deserializedXYWH() {
+    return deserializeXYWH(this.xywh);
+  }
+
+  get x() {
+    return this.deserializedXYWH[0];
+  }
+
+  get y() {
+    return this.deserializedXYWH[1];
+  }
+
+  get w() {
+    return this.deserializedXYWH[2];
+  }
+
+  get h() {
+    return this.deserializedXYWH[3];
   }
 
   get group() {
@@ -45,6 +73,14 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
 
   get id() {
     return this.yMap.get('id') as string;
+  }
+
+  get elementBound() {
+    if (this.rotate) {
+      return Bound.from(getBoundsWithRotation(this));
+    }
+
+    return Bound.deserialize(this.xywh);
   }
 
   stash(prop: keyof Props) {

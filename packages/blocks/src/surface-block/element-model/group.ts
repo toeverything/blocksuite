@@ -2,8 +2,10 @@ import type { Y } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
 import { keys } from '../../_common/utils/iterable.js';
+import { Bound, type SerializedXYWH } from '../index.js';
 import type { BaseProps } from './base.js';
 import { ElementModel } from './base.js';
+import { ymap } from './decorators.js';
 
 type GroupElementProps = BaseProps & {
   children: Y.Map<boolean>;
@@ -11,13 +13,6 @@ type GroupElementProps = BaseProps & {
 };
 
 export class GroupElementModel extends ElementModel<GroupElementProps> {
-  static override default() {
-    return {
-      children: new Workspace.Y.Map(),
-      title: new Workspace.Y.Text(),
-    } as GroupElementProps;
-  }
-
   static override propsToYStruct(props: GroupElementProps) {
     if (props.title && !(props.title instanceof Workspace.Y.Text)) {
       props.title = new Workspace.Y.Text(props.title);
@@ -36,16 +31,48 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     return props;
   }
 
+  @ymap()
+  children: Y.Map<boolean> = new Workspace.Y.Map<boolean>();
+
+  @ymap()
+  title: Y.Text = new Workspace.Y.Text();
+
+  get xywh() {
+    const childrenIds = this.childrenIds;
+
+    if (childrenIds.length === 0) return '[0,0,0,0]';
+
+    const bound: Bound = childrenIds
+      .map(
+        id =>
+          this.surfaceModel.getElementById(id) ??
+          this.surfaceModel.page.getBlockById(id)
+      )
+      .filter(el => el)
+      .reduce(
+        (prev, ele) => {
+          return prev.unite((ele as ElementModel).elementBound);
+        },
+        new Bound(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, 0, 0)
+      );
+
+    return bound.serialize();
+  }
+
+  set xywh(_: SerializedXYWH) {}
+
+  get rotate() {
+    return 0;
+  }
+
+  set rotate(_: number) {}
+
   get type() {
     return 'group';
   }
 
   get childrenIds() {
     return [...this.children.keys()];
-  }
-
-  get children() {
-    return this.yMap.get('children') as GroupElementProps['children'];
   }
 
   get childrenElements() {

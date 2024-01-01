@@ -16,7 +16,7 @@ import type {
 import type { GroupElementModel } from './element-model/group.js';
 import {
   createElementModel,
-  createYMapFromProps,
+  createModelFromProps,
   propsToYStruct,
 } from './element-model/index.js';
 import { generateElementId } from './index.js';
@@ -198,13 +198,15 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
 
         switch (change?.action) {
           case 'add':
-            if (!this._elementModels.has(id) && element) {
-              this._elementModels.set(
-                id,
-                createElementModel(element, this, {
-                  onChange: payload => this.elementUpdated.emit(payload),
-                })
-              );
+            if (element) {
+              if (!this._elementModels.has(id)) {
+                this._elementModels.set(
+                  id,
+                  createElementModel(element, this, {
+                    onChange: payload => this.elementUpdated.emit(payload),
+                  })
+                );
+              }
               this.elementAdded.emit({ id });
             }
             break;
@@ -431,10 +433,14 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
 
     props.id = id;
 
-    const yMap = createYMapFromProps(props);
+    const elementModel = createModelFromProps(props, this, {
+      onChange: payload => this.elementUpdated.emit(payload),
+    });
+
+    this._elementModels.set(id, elementModel);
 
     this.page.transact(() => {
-      this.elements.getValue()!.set(id, yMap);
+      this.elements.getValue()!.set(id, elementModel.model.yMap);
     });
 
     return id;

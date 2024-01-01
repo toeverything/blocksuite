@@ -1,6 +1,8 @@
 import { DEFAULT_ROUGHNESS } from '../consts.js';
+import type { SerializedXYWH } from '../index.js';
 import { type BaseProps, ElementModel } from './base.js';
 import type { StrokeStyle } from './common.js';
+import { local, ymap } from './decorators.js';
 
 export type PointStyle = 'None' | 'Arrow' | 'Triangle' | 'Circle' | 'Diamond';
 
@@ -30,70 +32,47 @@ type ConnectorElementProps = BaseProps & {
 };
 
 export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
-  static override default() {
-    return {
-      mode: ConnectorMode.Orthogonal,
-      strokeWidth: 4,
-      stroke: '#000000',
-      strokeStyle: 'solid',
-      roughness: DEFAULT_ROUGHNESS,
-      source: {},
-      target: {},
-    } as ConnectorElementProps;
-  }
-
   get type() {
     return 'connector';
   }
 
-  get mode() {
-    return this.yMap.get('mode') as ConnectorElementProps['mode'];
-  }
+  @local()
+  xywh: SerializedXYWH = '[0,0,0,0]';
 
-  get strokeWidth() {
-    return this.yMap.get('strokeWidth') as ConnectorElementProps['strokeWidth'];
-  }
+  @local()
+  rotate: number = 0;
 
-  get stroke() {
-    return this.yMap.get('stroke') as ConnectorElementProps['stroke'];
-  }
+  @ymap()
+  mode: ConnectorMode = ConnectorMode.Orthogonal;
 
-  get strokeStyle() {
-    return this.yMap.get('strokeStyle') as ConnectorElementProps['strokeStyle'];
-  }
+  @ymap()
+  strokeWidth: number = 4;
 
-  get roughness() {
-    return (
-      (this.yMap.get('roughness') as ConnectorElementProps['roughness']) ??
-      DEFAULT_ROUGHNESS
-    );
-  }
+  @ymap()
+  stroke: string = '#000000';
 
-  get rough() {
-    return (this.yMap.get('rough') as ConnectorElementProps['rough']) ?? false;
-  }
+  @ymap()
+  strokeStyle: StrokeStyle = 'solid';
 
-  get target() {
-    return this.yMap.get('target') as ConnectorElementProps['target'];
-  }
+  @ymap()
+  roughness: number = DEFAULT_ROUGHNESS;
 
-  get source() {
-    return this.yMap.get('source') as ConnectorElementProps['source'];
-  }
+  @ymap()
+  rough?: boolean;
 
-  get frontEndpointStyle() {
-    return (
-      (this.yMap.get(
-        'frontEndpointStyle'
-      ) as ConnectorElementProps['frontEndpointStyle']) ?? 'None'
-    );
-  }
+  @ymap()
+  source: Connection = {
+    position: [0, 0],
+  };
 
-  get rearEndpointStyle() {
-    return (
-      (this.yMap.get(
-        'rearEndpointStyle'
-      ) as ConnectorElementProps['rearEndpointStyle']) ?? 'Arrow'
-    );
-  }
+  @ymap()
+  target: Connection = {
+    position: [0, 0],
+  };
+
+  @ymap()
+  frontEndpointStyle?: PointStyle;
+
+  @ymap()
+  rearEndpointStyle?: PointStyle;
 }
