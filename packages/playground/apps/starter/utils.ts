@@ -141,3 +141,62 @@ export function createEditor(page: Page, element: HTMLElement) {
 
   return editor;
 }
+
+const toStyledEntry = (key: string, value: string) => {
+  return [
+    ['span', { style: 'color: #c0c0c0' }, ` ${key}`],
+    ['span', { style: 'color: #fff' }, `: `],
+    ['span', { style: 'color: rgb(92, 213, 251)' }, `'${value}'`],
+  ];
+};
+
+export const devtoolsFormatter = [
+  {
+    header: function (obj: unknown) {
+      if ('flavour' in (obj as store.BaseBlockModel)) {
+        globalUtils.assertType<store.BaseBlockModel>(obj);
+        return [
+          'span',
+          { style: 'font-weight: bolder;' },
+          ['span', { style: 'color: #fff' }, `Block {`],
+          ...toStyledEntry('flavour', obj.flavour),
+          ['span', { style: 'color: #fff' }, `,`],
+          ...toStyledEntry('id', obj.id),
+          ['span', { style: 'color: #fff' }, `}`],
+        ];
+      }
+
+      return null;
+    },
+    hasBody: (obj: unknown) => {
+      if ('flavour' in (obj as store.BaseBlockModel)) {
+        return true;
+      }
+
+      return null;
+    },
+    body: (obj: unknown) => {
+      if ('flavour' in (obj as store.BaseBlockModel)) {
+        globalUtils.assertType<store.BaseBlockModel>(obj);
+
+        // @ts-ignore
+        const { props } = obj.page._blockTree.getBlock(obj.id)._parseYBlock();
+
+        const propsArr = Object.entries(props).flatMap(([key]) => {
+          return [
+            // @ts-ignore
+            ...toStyledEntry(key, JSON.stringify(obj[key])),
+            ['div', {}, ''],
+          ];
+        });
+
+        return ['div', { style: 'padding-left: 1em' }, ...propsArr];
+      }
+
+      return null;
+    },
+  },
+];
+
+// @ts-ignore
+window.devtoolsFormatters = devtoolsFormatter;
