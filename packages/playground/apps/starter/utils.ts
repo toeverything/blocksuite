@@ -142,13 +142,13 @@ export function createEditor(page: Page, element: HTMLElement) {
   return editor;
 }
 
-const toStyledEntry = (key: string, value: string) => {
+function toStyledEntry(key: string, value: unknown) {
   return [
     ['span', { style: 'color: #c0c0c0' }, ` ${key}`],
     ['span', { style: 'color: #fff' }, `: `],
-    ['span', { style: 'color: rgb(92, 213, 251)' }, `'${value}'`],
+    ['span', { style: 'color: rgb(92, 213, 251)' }, `${JSON.stringify(value)}`],
   ];
-};
+}
 
 export const devtoolsFormatter = [
   {
@@ -185,7 +185,7 @@ export const devtoolsFormatter = [
         const propsArr = Object.entries(props).flatMap(([key]) => {
           return [
             // @ts-ignore
-            ...toStyledEntry(key, JSON.stringify(obj[key])),
+            ...toStyledEntry(key, obj[key]),
             ['div', {}, ''],
           ];
         });
