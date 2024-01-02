@@ -316,6 +316,7 @@ export class ImageBlockPageComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _onCaptionKeydown(e: KeyboardEvent) {
+    this.std.event.activate();
     if (e.isComposing) return;
     if (e.key === 'Enter') {
       e.stopPropagation();
