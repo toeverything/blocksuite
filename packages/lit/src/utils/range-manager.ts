@@ -63,7 +63,7 @@ export class RangeManager {
 
     const textSelection = this.rangeToTextSelection(range, isRangeReversed);
     if (textSelection) {
-      selectionManager.set([textSelection]);
+      selectionManager.setGroup('note', [textSelection]);
     } else {
       selectionManager.clear(['text']);
     }

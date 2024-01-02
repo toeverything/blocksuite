@@ -54,7 +54,14 @@ export function asyncFocusRichText(
   return asyncSetInlineRange(model, inlineRange);
 }
 
-function caretRangeFromPoint(clientX: number, clientY: number): Range | null {
+/**
+ * A wrapper for the browser's `caretPositionFromPoint` and `caretRangeFromPoint`,
+ * but adapted for different browsers.
+ */
+export function caretRangeFromPoint(
+  clientX: number,
+  clientY: number
+): Range | null {
   if (IS_FIREFOX) {
     const caret = document.caretPositionFromPoint(clientX, clientY);
     // TODO handle caret is covered by popup
