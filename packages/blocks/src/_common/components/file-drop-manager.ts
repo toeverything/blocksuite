@@ -1,7 +1,7 @@
 import type { BlockService } from '@blocksuite/block-std';
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 
 import {
   calcDropTarget,
@@ -16,7 +16,7 @@ import type { DragIndicator } from './drag-indicator.js';
 
 export type onDropProps = {
   files: File[];
-  targetModel: BaseBlockModel | null;
+  targetModel: BlockModel | null;
   place: 'before' | 'after';
   point: Point;
 };
@@ -72,7 +72,7 @@ export class FileDropManager {
       : 'before';
   }
 
-  get targetModel(): BaseBlockModel | null {
+  get targetModel(): BlockModel | null {
     const pageBlock = this._blockService.page.root;
     assertExists(pageBlock);
 

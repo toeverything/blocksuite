@@ -1,4 +1,4 @@
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { css, type TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -32,7 +32,7 @@ export class TitleDetailCell extends BaseCellRenderer<string> {
   }
 
   extra(): {
-    model: BaseBlockModel;
+    model: BlockModel;
     result: TemplateResult;
   } {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

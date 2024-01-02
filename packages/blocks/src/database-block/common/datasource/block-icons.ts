@@ -1,4 +1,4 @@
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 
@@ -173,7 +173,7 @@ const h6 = html`<svg
   />
 </svg> `;
 export const getIcon = (
-  model: BaseBlockModel & { type?: string }
+  model: BlockModel & { type?: string }
 ): TemplateResult => {
   if (model.flavour === 'affine:paragraph') {
     const type = model.type as ParagraphType;

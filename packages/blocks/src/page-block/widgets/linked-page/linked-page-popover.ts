@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
+import { type BlockModel } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -67,7 +67,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
   constructor(
     private editorHost: EditorHost,
-    private model: BaseBlockModel,
+    private model: BlockModel,
     private abortController = new AbortController()
   ) {
     super();

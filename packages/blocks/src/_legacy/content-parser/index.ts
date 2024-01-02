@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 
 import {
   getBlockComponentByModel,
@@ -185,7 +185,7 @@ export class ContentParser {
     edgeless?: EdgelessPageBlockComponent,
     nodes?: TopLevelBlockModel[],
     surfaces?: SurfaceElement[],
-    blockElementGetter: (model: BaseBlockModel) => Element | null = () => null,
+    blockElementGetter: (model: BlockModel) => Element | null = () => null,
     edgelessBackground?: {
       zoom: number;
     }

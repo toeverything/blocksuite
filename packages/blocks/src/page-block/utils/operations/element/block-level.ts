@@ -1,5 +1,5 @@
 import type { BlockElement } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
+import { type BlockModel } from '@blocksuite/store';
 
 import { assertFlavours } from '../../../../_common/utils/model.js';
 import {
@@ -69,7 +69,7 @@ export function updateBlockElementType(
     return [newModel];
   }
 
-  const newModels: BaseBlockModel[] = [];
+  const newModels: BlockModel[] = [];
   blockModels.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {

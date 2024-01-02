@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 
 import { type EditingState } from '../types.js';
 import { matchFlavours } from './model.js';
@@ -29,7 +29,7 @@ export type DropResult = {
  */
 export function calcDropTarget(
   point: Point,
-  model: BaseBlockModel,
+  model: BlockModel,
   element: Element,
   draggingElements: BlockComponent[] = [],
   scale: number = 1,

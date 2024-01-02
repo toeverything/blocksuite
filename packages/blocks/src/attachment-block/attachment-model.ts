@@ -1,4 +1,4 @@
-import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 /**
  * When the attachment is uploading, the `sourceId` is `undefined`.
@@ -57,4 +57,4 @@ export const AttachmentBlockSchema = defineBlockSchema({
   toModel: () => new AttachmentBlockModel(),
 });
 
-export class AttachmentBlockModel extends BaseBlockModel<AttachmentBlockProps> {}
+export class AttachmentBlockModel extends BlockModel<AttachmentBlockProps> {}

@@ -17,7 +17,7 @@ import type { BlockElement } from '@lit/element/index.js';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import { PAGE_VERSION, WORKSPACE_VERSION } from '@store/consts.js';
-import type { BaseBlockModel, SerializedStore } from '@store/index.js';
+import type { BlockModel, SerializedStore } from '@store/index.js';
 import type { JSXElement } from '@store/utils/jsx.js';
 import {
   format as prettyFormat,
@@ -372,7 +372,7 @@ export async function assertRichTextModelType(
       if (!blockElement) {
         throw new Error('blockElement is undefined');
       }
-      return (blockElement.model as BaseBlockModel<{ type: string }>).type;
+      return (blockElement.model as BlockModel<{ type: string }>).type;
     },
     { index, BLOCK_ID_ATTR, currentEditorIndex }
   );
@@ -417,7 +417,7 @@ export async function assertBlockChildrenIds(
     ({ blockId }) => {
       const element = document.querySelector(`[data-block-id="${blockId}"]`);
       // @ts-ignore
-      const model = element.model as BaseBlockModel;
+      const model = element.model as BlockModel;
       return model.children.map(child => child.id);
     },
     { blockId }
@@ -434,7 +434,7 @@ export async function assertBlockChildrenFlavours(
     ({ blockId }) => {
       const element = document.querySelector(`[data-block-id="${blockId}"]`);
       // @ts-ignore
-      const model = element.model as BaseBlockModel;
+      const model = element.model as BlockModel;
       return model.children.map(child => child.flavour);
     },
     { blockId }
@@ -469,7 +469,7 @@ export async function assertBlockType(
     ({ id }) => {
       const element = document.querySelector(`[data-block-id="${id}"]`);
       // @ts-ignore
-      const model = element.model as BaseBlockModel;
+      const model = element.model as BlockModel;
       // @ts-ignore
       return model.type;
     },
@@ -487,7 +487,7 @@ export async function assertBlockProps(
     ([id, props]) => {
       const element = document.querySelector(`[data-block-id="${id}"]`);
       // @ts-ignore
-      const model = element.model as BaseBlockModel;
+      const model = element.model as BlockModel;
       return Object.fromEntries(
         // @ts-ignore
         Object.keys(props).map(key => [key, (model[key] as unknown).toString()])

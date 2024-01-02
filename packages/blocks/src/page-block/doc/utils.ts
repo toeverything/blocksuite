@@ -1,12 +1,10 @@
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 
-export function getAllowSelectedBlocks(
-  model: BaseBlockModel
-): BaseBlockModel[] {
-  const result: BaseBlockModel[] = [];
+export function getAllowSelectedBlocks(model: BlockModel): BlockModel[] {
+  const result: BlockModel[] = [];
   const blocks = model.children.slice();
 
-  const dfs = (blocks: BaseBlockModel[]) => {
+  const dfs = (blocks: BlockModel[]) => {
     for (const block of blocks) {
       if (block.flavour !== 'affine:note') {
         result.push(block);

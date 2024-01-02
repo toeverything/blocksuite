@@ -1,6 +1,6 @@
 import type { Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { Slice } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../_common/utils/index.js';
@@ -15,7 +15,7 @@ export const copySelectedModelsCommand: Command<'selectedModels' | 'onCopy'> = (
     '`selectedModels` is required, you need to use `getSelectedModels` command before adding this command to the pipeline.'
   );
 
-  const traverse = (model: BaseBlockModel) => {
+  const traverse = (model: BlockModel) => {
     const isDatabase = matchFlavours(model, ['affine:database']);
     const children = isDatabase
       ? model.children
