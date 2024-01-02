@@ -1,7 +1,7 @@
 import { Slot } from '@blocksuite/global/utils';
 import type { MigrationRunner, Y } from '@blocksuite/store';
 import {
-  BaseBlockModel,
+  BlockModel,
   Boxed,
   defineBlockSchema,
   Text,
@@ -152,7 +152,7 @@ export const SurfaceBlockSchema = defineBlockSchema({
   toModel: () => new SurfaceBlockModel(),
 });
 
-export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
+export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   private _elementModels: Map<
     string,
     { dispose: () => void; model: ElementModel }
