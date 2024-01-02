@@ -108,6 +108,7 @@ export const affineInlineSpecs: InlineSpecs<AffineTextAttributes>[] = [
         .selected=${selected}
       ></affine-reference>`;
     },
+    embed: true,
   },
   {
     name: 'background',
