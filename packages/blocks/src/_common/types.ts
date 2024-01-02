@@ -1,5 +1,5 @@
 import { type Slot } from '@blocksuite/global/utils';
-import { type BaseBlockModel, type Page } from '@blocksuite/store';
+import { type BlockModel, type Page } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
@@ -27,7 +27,7 @@ export interface IPoint {
 
 export interface EditingState {
   element: BlockComponent;
-  model: BaseBlockModel;
+  model: BlockModel;
   rect: DOMRect;
 }
 
@@ -112,7 +112,7 @@ export type AbstractEditor = {
 } & HTMLElement;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ExtendedModel = BaseBlockModel & Record<string, any>;
+export type ExtendedModel = BlockModel & Record<string, any>;
 
 // blocks that would only appear under the edgeless container root
 export type TopLevelBlockModel =

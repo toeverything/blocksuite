@@ -340,7 +340,7 @@ export class ImageBlockPageComponent extends BlockElement<ImageBlockModel> {
         parent,
         index + 1
       );
-      asyncFocusRichText(model.page, id)?.catch(console.error);
+      asyncFocusRichText(this.host, model.page, id)?.catch(console.error);
     }
   }
 

@@ -1,4 +1,5 @@
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { EditorHost } from '@blocksuite/lit';
+import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
@@ -18,7 +19,7 @@ export type SlashMenuOptions = {
     items:
       | ((options: {
           pageElement: PageBlockComponent;
-          model: BaseBlockModel;
+          model: BlockModel;
         }) => SlashItem[])
       | SlashItem[];
   }[];
@@ -35,17 +36,14 @@ export type SlashItem = {
    */
   icon: TemplateResult<1>;
   suffix?: TemplateResult<1>;
-  showWhen?: (
-    model: BaseBlockModel,
-    pageElement: PageBlockComponent
-  ) => boolean;
+  showWhen?: (model: BlockModel, pageElement: PageBlockComponent) => boolean;
   disabled?: boolean;
   action: ({
     pageElement,
     model,
   }: {
     pageElement: PageBlockComponent;
-    model: BaseBlockModel;
+    model: BlockModel;
   }) => void | Promise<void>;
 };
 
@@ -61,14 +59,15 @@ export function collectGroupNames(menuItem: InternSlashItem[]) {
 }
 
 export function insertContent(
-  model: BaseBlockModel,
+  editorHost: EditorHost,
+  model: BlockModel,
   text: string,
   attributes?: AffineTextAttributes
 ) {
   if (!model.text) {
     throw new Error("Can't insert text! Text not found");
   }
-  const inlineEditor = getInlineEditorByModel(model);
+  const inlineEditor = getInlineEditorByModel(editorHost, model);
   if (!inlineEditor) {
     throw new Error("Can't insert text! Inline editor not found");
   }
@@ -91,11 +90,11 @@ export function formatDate(date: Date) {
   return strTime;
 }
 
-export function insideDatabase(model: BaseBlockModel) {
+export function insideDatabase(model: BlockModel) {
   return isInsideBlockByFlavour(model.page, model, 'affine:database');
 }
 
-export function insideDataView(model: BaseBlockModel) {
+export function insideDataView(model: BlockModel) {
   return isInsideBlockByFlavour(model.page, model, 'affine:data-view');
 }
 

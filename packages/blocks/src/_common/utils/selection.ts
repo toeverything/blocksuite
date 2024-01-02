@@ -2,7 +2,7 @@ import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { type InlineRange, type VLine } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { SelectionPosition } from '../types.js';
@@ -29,10 +29,11 @@ declare global {
 }
 
 export async function asyncSetInlineRange(
-  model: BaseBlockModel,
+  editorHost: EditorHost,
+  model: BlockModel,
   inlineRange: InlineRange
 ) {
-  const richText = await asyncGetRichTextByModel(model);
+  const richText = await asyncGetRichTextByModel(editorHost, model);
   if (!richText) {
     return;
   }
@@ -44,6 +45,7 @@ export async function asyncSetInlineRange(
 }
 
 export function asyncFocusRichText(
+  editorHost: EditorHost,
   page: Page,
   id: string,
   inlineRange: InlineRange = { index: 0, length: 0 }
@@ -51,7 +53,7 @@ export function asyncFocusRichText(
   const model = page.getBlockById(id);
   assertExists(model);
   if (matchFlavours(model, ['affine:divider'])) return;
-  return asyncSetInlineRange(model, inlineRange);
+  return asyncSetInlineRange(editorHost, model, inlineRange);
 }
 
 function caretRangeFromPoint(clientX: number, clientY: number): Range | null {
@@ -213,7 +215,7 @@ async function focusRichText(
  */
 export function focusBlockByModel(
   editorHost: EditorHost,
-  model: BaseBlockModel,
+  model: BlockModel,
   position: SelectionPosition = 'end',
   zoom = 1
 ) {

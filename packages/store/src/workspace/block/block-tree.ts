@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 import { native2Y } from '../../reactive/index.js';
-import type { BaseBlockModel, Schema } from '../../schema/index.js';
+import type { BlockModel, Schema } from '../../schema/index.js';
 import { internalPrimitives } from '../../schema/index.js';
 import type { Page } from '../page.js';
 import type { BlockOptions, YBlock } from './block.js';
@@ -75,7 +75,7 @@ export class BlockTree {
     };
 
     const yChildren = Y.Array.from(
-      (props.children ?? []).map((child: BaseBlockModel) => child.id)
+      (props.children ?? []).map((child: BlockModel) => child.id)
     );
     yBlock.set('sys:children', yChildren);
 

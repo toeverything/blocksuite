@@ -4,7 +4,7 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -35,7 +35,7 @@ interface Style {
 
 function TipsPlaceholder(
   editorHost: EditorHost,
-  model: BaseBlockModel,
+  model: BlockModel,
   tipsPos: Style
 ) {
   if (!matchFlavours(model, ['affine:paragraph'])) {

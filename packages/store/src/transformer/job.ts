@@ -1,7 +1,7 @@
 import { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { BaseBlockModel, BlockSchemaType } from '../schema/index.js';
+import type { BlockModel, BlockSchemaType } from '../schema/index.js';
 import type { PageMeta, Workspace } from '../workspace/index.js';
 import type { Page } from '../workspace/index.js';
 import type { PagesPropertiesMeta } from '../workspace/meta.js';
@@ -129,9 +129,7 @@ export class Job {
     });
   }
 
-  private async _blockToSnapshot(
-    model: BaseBlockModel
-  ): Promise<BlockSnapshot> {
+  private async _blockToSnapshot(model: BlockModel): Promise<BlockSnapshot> {
     this._slots.beforeExport.emit({
       type: 'block',
       model,
@@ -161,7 +159,7 @@ export class Job {
     return snapshot;
   }
 
-  blockToSnapshot = async (model: BaseBlockModel): Promise<BlockSnapshot> => {
+  blockToSnapshot = async (model: BlockModel): Promise<BlockSnapshot> => {
     const snapshot = await this._blockToSnapshot(model);
     BlockSnapshotSchema.parse(snapshot);
 
@@ -243,7 +241,7 @@ export class Job {
     page: Page,
     parent?: string,
     index?: number
-  ): Promise<BaseBlockModel> => {
+  ): Promise<BlockModel> => {
     BlockSnapshotSchema.parse(snapshot);
     const model = await this._snapshotToBlock(snapshot, page, parent, index);
 

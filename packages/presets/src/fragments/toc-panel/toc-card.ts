@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/blocks';
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import {
   css,
@@ -284,11 +284,11 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
   }
 
   // Need to consider the case that block not a child of a note
-  private _buildBlockPath(block: BaseBlockModel) {
+  private _buildBlockPath(block: BlockModel) {
     return [this.note.id, block.id];
   }
 
-  private _dispatchClickBlockEvent(block: BaseBlockModel) {
+  private _dispatchClickBlockEvent(block: BlockModel) {
     const event = new CustomEvent('clickblock', {
       detail: {
         blockPath: this._buildBlockPath(block),

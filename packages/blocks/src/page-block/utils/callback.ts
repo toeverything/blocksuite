@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
+import { type BlockModel } from '@blocksuite/store';
 
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import {
@@ -9,10 +9,11 @@ import {
 } from '../../_common/utils/query.js';
 
 export async function onModelTextUpdated(
-  model: BaseBlockModel,
+  editorHost: EditorHost,
+  model: BlockModel,
   callback?: (text: RichText) => void
 ) {
-  const richText = await asyncGetRichTextByModel(model);
+  const richText = await asyncGetRichTextByModel(editorHost, model);
   assertExists(richText, 'RichText is not ready yet.');
   await richText.updateComplete;
   const inlineEditor = richText.inlineEditor;
@@ -31,7 +32,7 @@ export async function onModelTextUpdated(
 // please use `onModelTextUpdated`.
 export async function onModelElementUpdated(
   editorHost: EditorHost,
-  model: BaseBlockModel,
+  model: BlockModel,
   callback: (blockElement: BlockElement) => void
 ) {
   const page = model.page;

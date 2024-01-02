@@ -33,7 +33,10 @@ const createToastContainer = () => {
     flex-direction: column-reverse;
     align-items: center;
   `;
-  const template = html`<div class="toast-container" style="${styles}"></div>`;
+  const template = html`<div
+    class="toast-container blocksuite-overlay"
+    style="${styles}"
+  ></div>`;
   const element = htmlToElement<HTMLDivElement>(template);
   const container = document.body.querySelector('affine-editor-container');
   assertExists(container);

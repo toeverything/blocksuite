@@ -39,7 +39,7 @@ import {
 } from '@blocksuite/lit';
 import type { CopilotPanel } from '@blocksuite/presets';
 import { AffineEditorContainer } from '@blocksuite/presets';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
@@ -364,7 +364,7 @@ export class DebugMenu extends ShadowlessElement {
       };
     };
     const blocks = getSelectedBlocks(this.editor.host!);
-    const toTreeNode = (block: BaseBlockModel): TreeNode => {
+    const toTreeNode = (block: BlockModel): TreeNode => {
       return {
         text: block.text?.toString() ?? '',
         children: block.children.map(toTreeNode),
@@ -618,7 +618,7 @@ export class DebugMenu extends ShadowlessElement {
           margin-right: 4px;
         }
       </style>
-      <div class="debug-menu default">
+      <div class="debug-menu default blocksuite-overlay">
         <div class="default-toolbar">
           <!-- undo/redo group -->
           <sl-button-group label="History">

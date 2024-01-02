@@ -38,7 +38,7 @@ export const BlockSchema = z.object({
       .args(z.custom<InternalPrimitives>())
       .returns(z.record(z.any()))
       .optional(),
-    toModel: z.function().args().returns(z.custom<BaseBlockModel>()).optional(),
+    toModel: z.function().args().returns(z.custom<BlockModel>()).optional(),
   }),
   transformer: z
     .function()
@@ -68,7 +68,7 @@ export type SchemaToModel<
       flavour: string;
     };
   },
-> = BaseBlockModel<PropsFromGetter<Schema['model']['props']>> &
+> = BlockModel<PropsFromGetter<Schema['model']['props']>> &
   ReturnType<Schema['model']['props']> & {
     flavour: Schema['model']['flavour'];
   };
@@ -83,7 +83,7 @@ export function defineBlockSchema<
     parent?: string[];
     children?: string[];
   }>,
-  Model extends BaseBlockModel<Props>,
+  Model extends BlockModel<Props>,
   Transformer extends BaseBlockTransformer<Props>,
 >(options: {
   flavour: Flavour;
@@ -132,7 +132,7 @@ export function defineBlockSchema({
     previousVersion: number,
     latestVersion: number
   ) => void;
-  toModel?: () => BaseBlockModel;
+  toModel?: () => BlockModel;
   transformer?: () => BaseBlockTransformer;
 }): BlockSchemaType {
   const schema = {
@@ -171,7 +171,7 @@ function MagicProps(): {
 }
 
 // @ts-ignore
-export class BaseBlockModel<
+export class BlockModel<
   Props extends object = object,
 > extends MagicProps()<Props> {
   flavour!: string;
@@ -205,7 +205,7 @@ export class BaseBlockModel<
       return [];
     }
 
-    const children: BaseBlockModel[] = [];
+    const children: BlockModel[] = [];
     block.forEach(id => {
       const child = this.page.getBlockById(id);
       if (!child) {
@@ -221,18 +221,18 @@ export class BaseBlockModel<
     return this.children.length === 0;
   }
 
-  firstChild(): BaseBlockModel | null {
+  firstChild(): BlockModel | null {
     return this.children[0] || null;
   }
 
-  lastChild(): BaseBlockModel | null {
+  lastChild(): BlockModel | null {
     if (!this.children.length) {
       return this;
     }
     return this.children[this.children.length - 1].lastChild();
   }
 
-  lastItem(): BaseBlockModel | null {
+  lastItem(): BlockModel | null {
     if (!this.children.length) {
       return this;
     }

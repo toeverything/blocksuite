@@ -38,7 +38,10 @@ import { AFFINE_SLASH_MENU_WIDGET } from '../page-block/widgets/slash-menu/index
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 import { SurfaceService } from '../surface-block/surface-service.js';
-import { SurfaceRefBlockSchema } from '../surface-ref-block/index.js';
+import {
+  SurfaceRefBlockSchema,
+  SurfaceRefBlockService,
+} from '../surface-ref-block/index.js';
 
 const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
@@ -182,6 +185,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   },
   {
     schema: SurfaceRefBlockSchema,
+    service: SurfaceRefBlockService,
     view: {
       component: literal`affine-surface-ref`,
       widgets: {

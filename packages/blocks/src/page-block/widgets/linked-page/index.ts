@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
 import { isControlledKeyboardEvent } from '../../../_common/utils/event.js';
@@ -30,7 +30,7 @@ export function showLinkedPagePopover({
   triggerKey,
 }: {
   editorHost: EditorHost;
-  model: BaseBlockModel;
+  model: BlockModel;
   range: Range;
   container?: HTMLElement;
   abortController?: AbortController;
@@ -40,7 +40,7 @@ export function showLinkedPagePopover({
   const disposables = new DisposableGroup();
   abortController.signal.addEventListener('abort', () => disposables.dispose());
 
-  const linkedPage = new LinkedPagePopover(model, abortController);
+  const linkedPage = new LinkedPagePopover(editorHost, model, abortController);
   linkedPage.options = options;
   linkedPage.triggerKey = triggerKey;
   // Mount
@@ -101,7 +101,7 @@ export class AffineLinkedPageWidget extends WidgetElement {
     this.handleEvent('keyDown', this._onKeyDown);
   }
 
-  public showLinkedPage = (model: BaseBlockModel, triggerKey: string) => {
+  public showLinkedPage = (model: BlockModel, triggerKey: string) => {
     const curRange = getCurrentNativeRange();
     showLinkedPagePopover({
       editorHost: this.host,
@@ -127,7 +127,7 @@ export class AffineLinkedPageWidget extends WidgetElement {
       return;
     }
     if (matchFlavours(model, this.options.ignoreBlockTypes)) return;
-    const inlineEditor = getInlineEditorByModel(model);
+    const inlineEditor = getInlineEditorByModel(this.host, model);
     if (!inlineEditor) return;
     const inlineRange = inlineEditor.getInlineRange();
     if (!inlineRange) return;

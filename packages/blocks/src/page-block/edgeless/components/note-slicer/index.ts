@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -73,7 +73,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   } | null = null;
 
   private _noteModel: NoteBlockModel | null = null;
-  private _blockModel: BaseBlockModel<object> | null = null;
+  private _blockModel: BlockModel<object> | null = null;
   private _lastPointerState: PointerEventState | null = null;
 
   override connectedCallback(): void {
@@ -204,7 +204,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     modelState: {
       note: NoteBlockModel;
       noteElement: NoteBlockComponent;
-      upperBlock: BaseBlockModel<object>;
+      upperBlock: BlockModel<object>;
       upperBlockElement: HTMLElement;
       gapRect: DOMRect;
     }

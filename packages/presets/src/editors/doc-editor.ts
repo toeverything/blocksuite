@@ -49,6 +49,8 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
           overflow-x: hidden;
           overflow-y: auto;
           user-select: none;
+          container-name: viewport;
+          container-type: inline-size;
         }
 
         .doc-editor-container {

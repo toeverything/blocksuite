@@ -1,13 +1,13 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
-export class EdgelessPortalBase<
-  T extends BaseBlockModel,
-> extends WithDisposable(ShadowlessElement) {
+export class EdgelessPortalBase<T extends BlockModel> extends WithDisposable(
+  ShadowlessElement
+) {
   @property({ attribute: false })
   index!: number;
 
