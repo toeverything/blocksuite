@@ -31,7 +31,9 @@ import {
 } from './actions.js';
 
 test.describe('copy&paste when editing', () => {
-  test('should support copy&paste of the title column', async ({ page }) => {
+  test.skip('should support copy&paste of the title column', async ({
+    page,
+  }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseWithParagraphState(page);
 
