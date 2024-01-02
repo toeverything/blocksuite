@@ -4,7 +4,7 @@ import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
 import { HtmlAdapter } from '../../_common/adapters/html.js';
-import { nanoidReplacement } from '../../index.js';
+import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
 
 const template = (html: string) =>
   `
