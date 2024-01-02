@@ -1,12 +1,9 @@
 import { type Y } from '@blocksuite/store';
 
-import {
-  Bound,
-  deserializeXYWH,
-  getBoundsWithRotation,
-  type SerializedXYWH,
-} from '../index.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
+import { Bound } from '../utils/bound.js';
+import { getBoundsWithRotation } from '../utils/math-utils.js';
+import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
 import { ymap } from './decorators.js';
 
 export type BaseProps = {

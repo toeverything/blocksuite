@@ -2,7 +2,8 @@ import type { Y } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
 import { keys } from '../../_common/utils/iterable.js';
-import { Bound, type SerializedXYWH } from '../index.js';
+import { Bound } from '../utils/bound.js';
+import { type SerializedXYWH } from '../utils/xywh.js';
 import type { BaseProps } from './base.js';
 import { ElementModel } from './base.js';
 import { ymap } from './decorators.js';
