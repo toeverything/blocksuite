@@ -321,7 +321,9 @@ export class ParagraphBlockComponent extends BlockElement<
     });
   };
 
-  private _onFocusOut = () => {
+  private _onFocusOut = async () => {
+    await this.host.updateComplete;
+
     this._isFocus = false;
     this._updatePlaceholder();
     // We should not observe text change when focus out
