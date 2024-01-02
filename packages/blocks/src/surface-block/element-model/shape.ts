@@ -51,7 +51,7 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   }
 
   @ymap()
-  xywh: SerializedXYWH = '[0,0,0,0]';
+  xywh: SerializedXYWH = '[0,0,100,100]';
 
   @ymap()
   rotate: number = 0;
@@ -66,13 +66,13 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   filled: boolean = false;
 
   @ymap()
-  fillColor: string = '#ffffff';
+  fillColor: string = '--affine-palette-shape-yellow';
 
   @ymap()
   strokeWidth: number = 4;
 
   @ymap()
-  strokeColor: string = '#000000';
+  strokeColor: string = '--affine-palette-line-yellow';
 
   @ymap()
   strokeStyle: StrokeStyle = 'solid';
@@ -110,7 +110,7 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   @ymap()
   textVerticalAlign?: 'top' | 'center' | 'bottom';
 
-  override get type() {
+  get type() {
     return 'shape';
   }
 }

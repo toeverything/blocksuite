@@ -6,15 +6,18 @@ import { BrushElementModel } from './brush.js';
 import { ConnectorElementModel } from './connector.js';
 import { GroupElementModel } from './group.js';
 import { ShapeElementModel } from './shape.js';
+import { TextElementModel } from './text.js';
 
 const elementsCtorMap = {
   group: GroupElementModel,
   connector: ConnectorElementModel,
   shape: ShapeElementModel,
   brush: BrushElementModel,
+  text: TextElementModel,
 };
 
 export function createElementModel(
+  type: string,
   yMap: Y.Map<unknown>,
   model: SurfaceBlockModel,
   options: {
@@ -28,9 +31,7 @@ export function createElementModel(
   dispose: () => void;
 } {
   const stashed = new Map<string | symbol, unknown>();
-  const Ctor =
-    elementsCtorMap[yMap.get('type') as keyof typeof elementsCtorMap] ??
-    ElementModel;
+  const Ctor = elementsCtorMap[type as keyof typeof elementsCtorMap];
 
   if (!Ctor) {
     throw new Error(`Invalid element type: ${yMap.get('type')}`);
@@ -108,14 +109,8 @@ export function createModelFromProps(
   }
 ) {
   const type = props.type as string;
-  const ctor = elementsCtorMap[type as keyof typeof elementsCtorMap];
-
-  if (!ctor) {
-    throw new Error(`Invalid element type: ${type}`);
-  }
-
   const yMap = new Workspace.Y.Map();
-  const elementModel = createElementModel(yMap, model, options);
+  const elementModel = createElementModel(type, yMap, model, options);
 
   props = propsToYStruct(type, props);
 

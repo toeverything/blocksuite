@@ -1,4 +1,8 @@
-import type { GroupElementModel, SurfaceBlockModel } from '@blocksuite/blocks';
+import type {
+  GroupElementModel,
+  ShapeElementModel,
+  SurfaceBlockModel,
+} from '@blocksuite/blocks';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
@@ -59,6 +63,31 @@ describe('elements management', () => {
   });
 });
 
+describe('element model', () => {
+  test('default value should work correctly', () => {
+    const id = model.addElement({
+      type: 'shape',
+    });
+
+    const element = model.getElementById(id)! as ShapeElementModel;
+
+    expect(element.index).toBe('a0');
+    expect(element.strokeColor).toBe('--affine-palette-line-yellow');
+    expect(element.strokeWidth).toBe(4);
+  });
+
+  test('defined prop should not be overwritten by default value', () => {
+    const id = model.addElement({
+      type: 'shape',
+      strokeColor: '#fff',
+    });
+
+    const element = model.getElementById(id)! as ShapeElementModel;
+
+    expect(element.strokeColor).toBe('#fff');
+  });
+});
+
 describe('group', () => {
   test('should get group', () => {
     const id = model.addElement({
@@ -77,6 +106,7 @@ describe('group', () => {
     });
     const group = model.getElementById(groupId);
 
+    expect(group).not.toBe(null);
     expect(model.getGroup(id)).toBe(group);
     expect(model.getGroup(id2)).toBe(group);
   });

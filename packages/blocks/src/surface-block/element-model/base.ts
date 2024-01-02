@@ -18,10 +18,14 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     return props;
   }
 
+  private _deferedInit!: {
+    key: string;
+    value: unknown;
+  }[];
   private _stashed: Map<keyof Props, unknown>;
   protected _onchange?: (props: Record<string, { oldValue: unknown }>) => void;
 
-  yMap!: Y.Map<unknown>;
+  yMap: Y.Map<unknown>;
   surfaceModel!: SurfaceBlockModel;
 
   abstract rotate: number;
@@ -45,6 +49,12 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     this.surfaceModel = model;
     this._stashed = stashedStore as Map<keyof Props, unknown>;
     this._onchange = onchange;
+
+    this._deferedInit?.forEach(({ key, value }) => {
+      // @ts-ignore
+      this.yMap.set(key, value);
+    });
+    this._deferedInit = [];
   }
 
   get deserializedXYWH() {

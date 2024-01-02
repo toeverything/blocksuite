@@ -1,15 +1,32 @@
 import type { ElementModel } from './base.js';
 
+const state = {
+  skip: false,
+};
+
+export function skipAssign(value: boolean): void {
+  state.skip = value;
+}
+
 export function ymap(): PropertyDecorator {
   return function yDecorator(target: unknown, prop: string | symbol) {
-    const yMap = (target as ElementModel).yMap;
-
     Object.defineProperty(target, prop, {
-      get() {
-        return yMap.get(prop as string);
+      get(this: ElementModel) {
+        return this.yMap.get(prop as string);
       },
-      set(val) {
-        yMap.set(prop as string, val);
+      set(this: ElementModel, val) {
+        if (state.skip) {
+          return;
+        }
+
+        if (this.yMap) {
+          this.yMap.set(prop as string, val);
+        } else {
+          // @ts-ignore
+          this._deferedInit = target._deferedInit ?? [];
+          // @ts-ignore
+          this._deferedInit.push({ key: prop as string, value: val });
+        }
       },
     });
   };
