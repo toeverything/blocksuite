@@ -1426,7 +1426,7 @@ export class AffineDragHandleWidget extends WidgetElement<
         'scrollend',
         this._updateDropIndicatorOnScroll
       );
-    } else {
+    } else if (isInsideEdgelessEditor(this.host)) {
       const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
 
       this._disposables.add(
