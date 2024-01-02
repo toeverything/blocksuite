@@ -2,10 +2,15 @@ import type { ElementModel } from './base.js';
 
 const state = {
   skip: false,
+  creating: false,
 };
 
-export function skipAssign(value: boolean): void {
-  state.skip = value;
+export function setCreateState(
+  creating: boolean,
+  skipFieldInit: boolean
+): void {
+  state.skip = skipFieldInit;
+  state.creating = creating;
 }
 
 export function ymap(): PropertyDecorator {
@@ -42,6 +47,7 @@ export function local(): PropertyDecorator {
         const oldValue = this._localStore.get(prop);
 
         this._localStore.set(prop, newVal);
+        if (state.creating) return;
         this._onchange?.({
           [prop]: {
             oldValue,

@@ -4,7 +4,7 @@ import type { SurfaceBlockModel } from '../surface-model.js';
 import { ElementModel } from './base.js';
 import { BrushElementModel } from './brush.js';
 import { ConnectorElementModel } from './connector.js';
-import { skipAssign } from './decorators.js';
+import { setCreateState } from './decorators.js';
 import { GroupElementModel } from './group.js';
 import { ShapeElementModel } from './shape.js';
 import { TextElementModel } from './text.js';
@@ -40,20 +40,17 @@ export function createElementModel(
     throw new Error(`Invalid element type: ${yMap.get('type')}`);
   }
 
-  if (options.skipFieldInit) {
-    skipAssign(true);
-  }
+  setCreateState(true, options.skipFieldInit ?? false);
 
   const elementModel = new Ctor({
     yMap,
     model,
     stashedStore: stashed,
-    onchange: () => options.onChange({ id, props: {} }),
+    onchange: props => options.onChange({ id, props }),
   }) as ElementModel;
 
-  if (options.skipFieldInit) {
-    skipAssign(false);
-  }
+  setCreateState(false, false);
+
   const dispose = onElementChange(yMap, props => {
     options.onChange({
       id,

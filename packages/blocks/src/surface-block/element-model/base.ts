@@ -96,7 +96,6 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
       return;
     }
 
-    const Ctor = Object.getPrototypeOf(this).constructor as typeof ElementModel;
     const curVal = this.yMap.get(prop as string);
 
     this._stashed.set(prop, curVal);
@@ -106,12 +105,9 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
       enumerable: true,
       get: () => this._stashed.get(prop),
       set: (value: unknown) => {
-        const converted = (Ctor.propsToYStruct ?? ElementModel.propsToYStruct)({
-          [prop]: value,
-        }) as Record<keyof Props, unknown>;
         const oldValue = this._stashed.get(prop);
 
-        this._stashed.set(prop, converted[prop]);
+        this._stashed.set(prop, value);
         this._onchange({ [prop]: { oldValue } });
       },
     });
