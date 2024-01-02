@@ -1,10 +1,22 @@
+import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { css, html, nothing, type TemplateResult } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { css, html } from 'lit';
+import { customElement, queryAsync, state } from 'lit/decorators.js';
 
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
 import { matchFlavours } from '../_common/utils/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
+import {
+  Bound,
+  deserializeXYWH,
+  getCommonBound,
+} from '../surface-block/index.js';
+import type {
+  SurfaceRefBlockModel,
+  SurfaceRefBlockService,
+} from '../surface-ref-block/index.js';
+import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
 import type { EmbedLinkedPageBlockModel } from './embed-linked-page-model.js';
 import type { EmbedLinkedPageBlockService } from './embed-linked-page-service.js';
 
@@ -24,8 +36,14 @@ export class EmbedLinkedPageBlock extends EmbedBlockElement<
   @state()
   private _loaded = false;
 
-  @state()
-  private _abstractCover: TemplateResult = html`${nothing}`;
+  private _mode: 'edgeless' | 'page' = 'page';
+
+  @queryAsync('.cover-container')
+  private _coverContainer!: Promise<HTMLDivElement>;
+
+  private _surfaceRefService!: SurfaceRefBlockService;
+
+  private _surfaceRefRenderer!: SurfaceRefRenderer;
 
   private get _linkedPage() {
     const page = this.std.workspace.getPage(this.model.pageId);
@@ -46,8 +64,10 @@ export class EmbedLinkedPageBlock extends EmbedBlockElement<
 
   private _load() {
     const onLoad = () => {
+      const pageId = this.model.pageId;
       this._loaded = true;
-      this._loadAbstractCover().catch(console.error);
+      this._mode = this._service.getPageMode(pageId);
+      this._prepareSurfaceRefRenderer();
     };
 
     if (this._loaded) return;
@@ -86,6 +106,51 @@ export class EmbedLinkedPageBlock extends EmbedBlockElement<
     return note;
   }
 
+  private _prepareSurfaceRefRenderer() {
+    const service = this.std.spec.getService(
+      'affine:surface-ref'
+    ) as SurfaceRefBlockService;
+    assertExists(service, `Surface ref service not found.`);
+    if (this._surfaceRefService !== service) {
+      this._surfaceRefService = service;
+    }
+    this._cleanUpSurfaceRefRenderer();
+
+    const surfaceRefService = this._surfaceRefService;
+    const surfaceRefRenderer = surfaceRefService.getRenderer(
+      `${PathFinder.id(this.path)}`,
+      this._linkedPage
+    );
+    this._surfaceRefRenderer = surfaceRefRenderer;
+
+    surfaceRefRenderer.slots.mounted.on(async () => {
+      if (this._mode === 'edgeless') {
+        await this._renderEdgelessAbstract();
+        return;
+      }
+
+      const note = this._getNoteFromPage();
+      const target = note.children.find(child =>
+        matchFlavours(child, ['affine:image', 'affine:surface-ref'])
+      );
+
+      if (!target) {
+        return;
+      }
+
+      switch (target.flavour) {
+        case 'affine:image':
+          await this._renderImageAbstract(target);
+          return;
+        case 'affine:surface-ref':
+          await this._renderSurfaceRefAbstract(target);
+          return;
+      }
+    });
+
+    surfaceRefRenderer.mount();
+  }
+
   private _getAbstractText() {
     const note = this._getNoteFromPage();
 
@@ -98,24 +163,44 @@ export class EmbedLinkedPageBlock extends EmbedBlockElement<
     return blockHasText.text!.toString();
   }
 
-  private async _loadAbstractCover() {
-    const pageId = this.model.pageId;
-    const mode = this._service.getPageMode(pageId);
-
-    if (mode === 'edgeless') {
-      // TODO: get cover from edgeless page
+  private async _addCover(cover: HTMLElement) {
+    const coverContainer = await this._coverContainer;
+    if (!coverContainer) {
       return;
     }
+    while (coverContainer.firstChild) {
+      coverContainer.removeChild(coverContainer.firstChild);
+    }
+    coverContainer.appendChild(cover);
+  }
 
-    const note = this._getNoteFromPage();
-    const image = note.children.find(child =>
-      matchFlavours(child, ['affine:image'])
+  private _cleanUpSurfaceRefRenderer() {
+    const surfaceRefService = this._surfaceRefService;
+    if (this._surfaceRefRenderer) {
+      surfaceRefService.removeRenderer(this._surfaceRefRenderer.id);
+    }
+  }
+
+  private async _renderEdgelessAbstract() {
+    const renderer = this._surfaceRefRenderer.surfaceRenderer;
+    const container = document.createElement('div');
+    await this._addCover(container);
+    renderer.attach(container);
+
+    // TODO: we may also need to get bounds of surface block's children
+    const bounds = Array.from(this._surfaceRefRenderer.elements.values()).map(
+      element => Bound.deserialize(element.xywh)
     );
-
-    if (!image) {
-      return;
+    const bound = getCommonBound(bounds);
+    if (bound) {
+      renderer.onResize();
+      renderer.setViewportByBound(bound);
     }
 
+    return;
+  }
+
+  private async _renderImageAbstract(image: BaseBlockModel) {
     const sourceId = (image as ImageBlockModel).sourceId;
     if (!sourceId) {
       return;
@@ -127,10 +212,32 @@ export class EmbedLinkedPageBlock extends EmbedBlockElement<
       return;
     }
     const url = URL.createObjectURL(blob);
-    this._abstractCover = html`<img src=${url} draggable="false" />`;
+    const $img = document.createElement('img');
+    $img.src = url;
+    await this._addCover($img);
   }
 
-  override connectedCallback() {
+  private async _renderSurfaceRefAbstract(surfaceRef: BaseBlockModel) {
+    const renderer = this._surfaceRefRenderer.surfaceRenderer;
+    const container = document.createElement('div');
+    await this._addCover(container);
+    renderer.attach(container);
+
+    const referenceId = (surfaceRef as SurfaceRefBlockModel).reference;
+    if (!referenceId) {
+      return;
+    }
+
+    const referencedModel = this._surfaceRefRenderer.getModel(referenceId);
+    if (!referencedModel) {
+      return;
+    }
+    const bound = Bound.fromXYWH(deserializeXYWH(referencedModel.xywh));
+    renderer.onResize();
+    renderer.setViewportByBound(bound);
+  }
+
+  override async connectedCallback() {
     super.connectedCallback();
     this._load();
     this.model.propsUpdated.on(({ key }) => {
@@ -139,6 +246,11 @@ export class EmbedLinkedPageBlock extends EmbedBlockElement<
         this._load();
       }
     });
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._cleanUpSurfaceRefRenderer();
   }
 
   override render(): unknown {
@@ -154,7 +266,7 @@ export class EmbedLinkedPageBlock extends EmbedBlockElement<
       return html`
         <h3>${page.meta.title}</h3>
         <p>${abstractText}</p>
-        ${this._abstractCover}
+        <div class="cover-container"></div>
       `;
     });
   }

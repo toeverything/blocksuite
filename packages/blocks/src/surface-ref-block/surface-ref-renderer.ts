@@ -40,10 +40,20 @@ export class SurfaceRefRenderer {
     surfaceRendererInit: new Slot(),
     surfaceRendererRefresh: new Slot(),
     surfaceModelChanged: new Slot<SurfaceBlockModel>(),
+    mounted: new Slot(),
+    unmounted: new Slot(),
   };
 
   get surfaceRenderer() {
     return this._surfaceRenderer;
+  }
+
+  get elements() {
+    return this._elements;
+  }
+
+  get connectorManager() {
+    return this._connectorManager;
   }
 
   constructor(
@@ -71,10 +81,12 @@ export class SurfaceRefRenderer {
 
     this._initSurfaceModel();
     this._initSurfaceRenderer();
+    this.slots.mounted.emit();
   }
 
   unmount() {
     this._disposables.dispose();
+    this.slots.unmounted.emit();
   }
 
   getModel(id: string): RefElement | null {
