@@ -204,6 +204,7 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
                   id,
                   createElementModel(
                     element.get('type') as string,
+                    element.get('id') as string,
                     element,
                     this,
                     {
@@ -233,10 +234,16 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
     elementsYMap.forEach((val, key) => {
       this._elementModels.set(
         key,
-        createElementModel(val.get('type') as string, val, this, {
-          onChange: payload => this.elementUpdated.emit(payload),
-          skipFieldInit: true,
-        })
+        createElementModel(
+          val.get('type') as string,
+          val.get('id') as string,
+          val,
+          this,
+          {
+            onChange: payload => this.elementUpdated.emit(payload),
+            skipFieldInit: true,
+          }
+        )
       );
     });
     elementsYMap.observe(onElementsMapChange);

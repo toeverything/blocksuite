@@ -19,6 +19,7 @@ const elementsCtorMap = {
 
 export function createElementModel(
   type: string,
+  id: string,
   yMap: Y.Map<unknown>,
   model: SurfaceBlockModel,
   options: {
@@ -47,7 +48,7 @@ export function createElementModel(
     yMap,
     model,
     stashedStore: stashed,
-    onchange: () => options.onChange({ id: elementModel.id, props: {} }),
+    onchange: () => options.onChange({ id, props: {} }),
   }) as ElementModel;
 
   if (options.skipFieldInit) {
@@ -55,7 +56,7 @@ export function createElementModel(
   }
   const dispose = onElementChange(yMap, props => {
     options.onChange({
-      id: elementModel.id,
+      id,
       props,
     });
   });
@@ -119,8 +120,14 @@ export function createModelFromProps(
   }
 ) {
   const type = props.type as string;
+  const id = props.id as string;
+
+  if (!id) {
+    throw new Error('Cannot find id in props');
+  }
+
   const yMap = new Workspace.Y.Map();
-  const elementModel = createElementModel(type, yMap, model, options);
+  const elementModel = createElementModel(type, id, yMap, model, options);
 
   props = propsToYStruct(type, props);
 
