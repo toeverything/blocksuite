@@ -116,21 +116,33 @@ export function createModelFromProps(
     }) => void;
   }
 ) {
-  const type = props.type as string;
-  const id = props.id as string;
+  const { type, id, ...rest } = props;
 
   if (!id) {
     throw new Error('Cannot find id in props');
   }
 
   const yMap = new Workspace.Y.Map();
-  const elementModel = createElementModel(type, id, yMap, model, options);
+  const elementModel = createElementModel(
+    type as string,
+    id as string,
+    yMap,
+    model,
+    options
+  );
 
-  props = propsToYStruct(type, props);
+  props = propsToYStruct(type as string, props);
 
-  Object.keys(props).forEach(key => {
-    yMap.set(key, props[key]);
+  yMap.set('type', type);
+  yMap.set('id', id);
+
+  Object.keys(rest).forEach(key => {
+    // @ts-ignore
+    elementModel.model[key] = props[key];
   });
+
+  // @ts-ignore
+  elementModel.model._preserved.clear();
 
   return elementModel;
 }

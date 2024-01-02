@@ -77,6 +77,7 @@ export * from './paragraph-block/index.js';
 export {
   Bound,
   type BrushElement,
+  BrushElementModel,
   CanvasElementType,
   type ConnectorElement,
   ConnectorElementModel,

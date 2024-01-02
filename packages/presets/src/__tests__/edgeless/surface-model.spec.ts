@@ -1,9 +1,10 @@
 import type {
+  BrushElementModel,
   GroupElementModel,
   ShapeElementModel,
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
-import { beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { wait } from '../utils/common.js';
 import { setupEditor } from '../utils/setup.js';
@@ -292,5 +293,70 @@ describe('stash/pop', () => {
     elementModel.pop('strokeWidth');
     expect(elementModel.strokeWidth).toBe(10);
     expect(elementModel.yMap.get('strokeWidth')).toBe(10);
+  });
+
+  test('assign stashed property should emit event', async () => {
+    const id = model.addElement({
+      type: 'shape',
+      strokeWidth: 4,
+    });
+    const elementModel = model.getElementById(id)! as ShapeElementModel;
+
+    elementModel.stash('strokeWidth');
+
+    const onchange = vi.fn();
+    model.elementUpdated.once(({ id }) => onchange(id));
+
+    elementModel.strokeWidth = 10;
+    expect(onchange).toHaveBeenCalledWith(id);
+  });
+});
+
+describe('derive prop', () => {
+  test('derived prop should work correctly', () => {
+    const id = model.addElement({
+      type: 'brush',
+      points: [
+        [0, 0],
+        [100, 100],
+        [120, 150],
+      ],
+    });
+    const elementModel = model.getElementById(id)! as BrushElementModel;
+
+    expect(elementModel.w).toBe(120 + elementModel.lineWidth);
+    expect(elementModel.h).toBe(150 + elementModel.lineWidth);
+  });
+});
+
+describe('local', () => {
+  test('local prop should work correctly', () => {
+    const id = model.addElement({
+      type: 'shape',
+    });
+    const elementModel = model.getElementById(id)! as BrushElementModel;
+
+    expect(elementModel.display).toBe(true);
+
+    elementModel.display = false;
+    expect(elementModel.display).toBe(false);
+
+    elementModel.opacity = 0.5;
+    expect(elementModel.opacity).toBe(0.5);
+  });
+
+  test('assign local property should emit event', () => {
+    const id = model.addElement({
+      type: 'shape',
+    });
+    const elementModel = model.getElementById(id)! as BrushElementModel;
+
+    const onchange = vi.fn();
+
+    model.elementUpdated.once(({ id }) => onchange(id));
+    elementModel.display = false;
+
+    expect(elementModel.display).toBe(false);
+    expect(onchange).toHaveBeenCalledWith(id);
   });
 });

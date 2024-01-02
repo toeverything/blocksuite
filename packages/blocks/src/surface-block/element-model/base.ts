@@ -4,7 +4,7 @@ import type { SurfaceBlockModel } from '../surface-model.js';
 import { Bound } from '../utils/bound.js';
 import { getBoundsWithRotation } from '../utils/math-utils.js';
 import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
-import { ymap } from './decorators.js';
+import { local, updateDerivedProp, ymap } from './decorators.js';
 
 export type BaseProps = {
   index: string;
@@ -15,13 +15,14 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     return props;
   }
 
-  private _deferedInit!: {
-    key: string;
-    value: unknown;
-  }[];
-  private _stashed: Map<keyof Props, unknown>;
+  /**
+   * When the ymap is not connected to the doc, the value cannot be accessed.
+   * But sometimes we need to access the value when creating the element model, those temporary values are stored here.
+   */
+  protected _preserved: Map<string, unknown> = new Map();
+  protected _stashed: Map<keyof Props, unknown>;
+  protected _local: Map<string | symbol, unknown> = new Map();
   protected _onchange: (props: Record<string, { oldValue: unknown }>) => void;
-  protected _localStore: Map<string | symbol, unknown> = new Map();
 
   yMap: Y.Map<unknown>;
   surfaceModel!: SurfaceBlockModel;
@@ -33,7 +34,13 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
   abstract get type(): string;
 
   @ymap()
-  index: string = 'a0';
+  index!: string;
+
+  @local()
+  display: boolean = true;
+
+  @local()
+  opacity: number = 1;
 
   constructor(options: {
     yMap: Y.Map<unknown>;
@@ -48,11 +55,9 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     this._stashed = stashedStore as Map<keyof Props, unknown>;
     this._onchange = onchange;
 
-    this._deferedInit?.forEach(({ key, value }) => {
-      // @ts-ignore
-      this.yMap.set(key, value);
-    });
-    this._deferedInit = [];
+    // base class property field is assigned before yMap is set
+    // so we need to manually assign the default value here
+    this.index = 'a0';
   }
 
   get deserializedXYWH() {
@@ -97,6 +102,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     }
 
     const curVal = this.yMap.get(prop as string);
+    const prototype = Object.getPrototypeOf(this);
 
     this._stashed.set(prop, curVal);
 
@@ -109,6 +115,8 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
 
         this._stashed.set(prop, value);
         this._onchange({ [prop]: { oldValue } });
+
+        updateDerivedProp(prototype, prop as string, this);
       },
     });
   }
