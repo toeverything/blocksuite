@@ -1,6 +1,6 @@
 import '../_common/components/rich-text/rich-text.js';
 
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
@@ -207,12 +207,6 @@ export class ParagraphBlockComponent extends BlockElement<
   @state()
   private _tipsPlaceholderTemplate = html``;
 
-  @state()
-  private _isComposing = false;
-
-  @state()
-  private _isFocus = false;
-
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;
     assertExists(inlineManager);
@@ -231,12 +225,14 @@ export class ParagraphBlockComponent extends BlockElement<
     return this.inlineManager.embedChecker;
   }
 
-  private _placeholderDisposables = new DisposableGroup();
-
   private _inlineRangeProvider: InlineRangeProvider | null = null;
 
   @query('rich-text')
   private _richTextElement?: RichText;
+
+  get inlineEditor() {
+    return this._richTextElement?.inlineEditor;
+  }
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
@@ -251,6 +247,10 @@ export class ParagraphBlockComponent extends BlockElement<
     bindContainerHotkey(this);
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
+
+    this.disposables.addFromEvent(document, 'selectionchange', () => {
+      this._updatePlaceholder();
+    });
   }
 
   override firstUpdated() {
@@ -270,13 +270,13 @@ export class ParagraphBlockComponent extends BlockElement<
   }
 
   private _updatePlaceholder = () => {
-    if (this.model.text.length !== 0 || this._isComposing) {
-      this._tipsPlaceholderTemplate = html``;
-      return;
-    }
+    if (!this.inlineEditor) return;
 
-    if (this.model.type === 'text' && !this._isFocus) {
-      // Text block placeholder only show when focus and empty
+    if (
+      this.model.text.length !== 0 ||
+      this.inlineEditor.isComposing ||
+      !this.selected
+    ) {
       this._tipsPlaceholderTemplate = html``;
       return;
     }
@@ -300,33 +300,6 @@ export class ParagraphBlockComponent extends BlockElement<
       this.model,
       this.tipsPos
     );
-  };
-
-  private _onFocusIn = () => {
-    this._isFocus = true;
-    this._updatePlaceholder();
-
-    this.model.text.yText.observe(this._updatePlaceholder);
-    this._placeholderDisposables.add(() =>
-      this.model.text.yText.unobserve(this._updatePlaceholder)
-    );
-    // Workaround for inline editor skips composition event
-    this._placeholderDisposables.addFromEvent(this, 'compositionstart', () => {
-      this._isComposing = true;
-      this._updatePlaceholder();
-    });
-    this._placeholderDisposables.addFromEvent(this, 'compositionend', () => {
-      this._isComposing = false;
-      this._updatePlaceholder();
-    });
-  };
-
-  private _onFocusOut = () => {
-    this._isFocus = false;
-    this._updatePlaceholder();
-    // We should not observe text change when focus out
-    this._placeholderDisposables.dispose();
-    this._placeholderDisposables = new DisposableGroup();
   };
 
   private isInDatabase = () => {
@@ -379,8 +352,6 @@ export class ParagraphBlockComponent extends BlockElement<
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}
-            @focusin=${this._onFocusIn}
-            @focusout=${this._onFocusOut}
             style=${styleMap({
               fontWeight: fontWeightMap?.[type]?.[getThemeMode()],
             })}
