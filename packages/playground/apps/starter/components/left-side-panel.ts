@@ -22,6 +22,7 @@ export class LeftSidePanel extends ShadowlessElement {
       this.currentContent.remove();
     }
     this.style.display = 'block';
+    ele.classList.add('blocksuite-overlay');
     this.currentContent = ele;
     this.append(ele);
   }

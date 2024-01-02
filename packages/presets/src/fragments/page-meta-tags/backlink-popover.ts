@@ -95,7 +95,6 @@ export class BacklinkButton extends WithDisposable(LitElement) {
     super.connectedCallback();
 
     this.tabIndex = 0;
-    this._disposables.addFromEvent(window, 'mousedown', this._onClickAway);
   }
 
   // Handle click outside
@@ -103,18 +102,18 @@ export class BacklinkButton extends WithDisposable(LitElement) {
     if (e.target === this) return;
     if (!this._showPopover) return;
     this._showPopover = false;
+    document.removeEventListener('mousedown', this._onClickAway);
   };
 
   onClick() {
     this._showPopover = !this._showPopover;
+    document.addEventListener('mousedown', this._onClickAway);
   }
 
   override render() {
     // Only show linked page backlinks
     const backlinks = this._backlinks;
-    if (!backlinks.length) {
-      return null;
-    }
+    if (!backlinks.length) return null;
 
     return html`
       <div class="btn" @click="${this.onClick}">

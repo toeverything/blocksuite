@@ -514,7 +514,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     if (isInsideDocEditor(this._editorHost)) {
       if (focusId) {
-        asyncFocusRichText(page, focusId)?.catch(console.error);
+        asyncFocusRichText(this._editorHost, page, focusId)?.catch(
+          console.error
+        );
       }
       return;
     }
@@ -610,7 +612,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         defaultNoteBlock
       );
     });
-    lastId && (await asyncFocusRichText(page, lastId));
+    lastId && (await asyncFocusRichText(this._editorHost, page, lastId));
   };
 
   private _onClickOutside = (e: MouseEvent) => {
@@ -672,7 +674,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
     return html`
       <div
-        class="block-hub-menu-container"
+        class="block-hub-menu-container blocksuite-overlay"
         @pointerdown=${stopPropagation}
         ?expanded=${this._expanded}
         style="bottom: ${BOTTOM_OFFSET}px; right: ${RIGHT_OFFSET}px;"

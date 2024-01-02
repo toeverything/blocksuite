@@ -8,16 +8,19 @@ import {
   MoveLeftIcon,
   MoveRightIcon,
 } from '../../../_common/icons/index.js';
+import type { PageBlockComponent } from '../../../page-block/types.js';
 import { popSideDetail } from '../../common/detail/layout.js';
 import type { TableSelectionController } from '../controller/selection.js';
 
 export const openDetail = (
+  pageElement: PageBlockComponent | null,
   rowId: string,
   selection: TableSelectionController
 ) => {
   const old = selection.selection;
   selection.selection = undefined;
   popSideDetail({
+    pageElement,
     view: selection.host.view,
     rowId: rowId,
     onClose: () => {
@@ -27,6 +30,7 @@ export const openDetail = (
 };
 
 export const popRowMenu = (
+  pageElement: PageBlockComponent | null,
   ele: ReferenceElement,
   rowId: string,
   selection: TableSelectionController
@@ -37,7 +41,7 @@ export const popRowMenu = (
       name: 'Expand Row',
       icon: ExpandFullIcon,
       select: () => {
-        openDetail(rowId, selection);
+        openDetail(pageElement, rowId, selection);
       },
     },
     // {

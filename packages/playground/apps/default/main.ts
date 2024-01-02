@@ -40,7 +40,7 @@ function subscribePage(workspace: Workspace) {
     const page = workspace.getPage(pageId) as Page;
 
     const editor = createEditor(page, app);
-    const contentParser = new ContentParser(page);
+    const contentParser = new ContentParser(editor.host, page);
     const quickEdgelessMenu = new QuickEdgelessMenu();
     quickEdgelessMenu.workspace = workspace;
     quickEdgelessMenu.editor = editor;

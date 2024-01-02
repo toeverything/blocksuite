@@ -442,7 +442,10 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   override render() {
     const panel = this.panels[this.currentPanel];
     return html`
-      <div style="display:flex;flex-direction: column;padding: 12px;">
+      <div
+        style="display:flex;flex-direction: column;padding: 12px;"
+        class="blocksuite-overlay"
+      >
         <div style="display:flex;align-items:center;justify-content:center;">
           <div
             style="display:flex;align-items:center;justify-content:center;cursor: pointer;user-select: none;width: max-content;padding: 4px; background-color: var(--affine-hover-color);border-radius: 12px;"

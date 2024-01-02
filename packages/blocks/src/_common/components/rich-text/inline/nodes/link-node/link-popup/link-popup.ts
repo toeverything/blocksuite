@@ -99,7 +99,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
       Object.values(domRects).forEach(domRect => {
         const mockSelection = document.createElement('div');
-        mockSelection.classList.add('mock-selection');
+        mockSelection.classList.add('mock-selection', 'blocksuite-overlay');
         mockSelection.style.left = `${domRect.left}px`;
         mockSelection.style.top = `${domRect.top}px`;
         mockSelection.style.width = `${domRect.width}px`;
@@ -383,7 +383,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
           : this._editTemplate();
 
     return html`
-      <div class="overlay-root">
+      <div class="overlay-root blocksuite-overlay">
         ${mask}
         <div class="popup-container" @keydown=${this._onKeydown}>
           ${popover}

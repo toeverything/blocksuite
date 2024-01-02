@@ -246,10 +246,26 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.addFromEvent(window, 'mousemove', this._onMouseMove);
-    this._disposables.addFromEvent(window, 'touchmove', this._touchMove);
-    this._disposables.addFromEvent(window, 'mouseup', this._onMouseUp);
-    this._disposables.addFromEvent(window, 'touchend', this._onTouchEnd);
+    this._disposables.addFromEvent(
+      this.edgeless.host,
+      'mousemove',
+      this._onMouseMove
+    );
+    this._disposables.addFromEvent(
+      this.edgeless.host,
+      'touchmove',
+      this._touchMove
+    );
+    this._disposables.addFromEvent(
+      this.edgeless.host,
+      'mouseup',
+      this._onMouseUp
+    );
+    this._disposables.addFromEvent(
+      this.edgeless.host,
+      'touchend',
+      this._onTouchEnd
+    );
   }
 
   override updated(changedProperties: PropertyValues<this>) {

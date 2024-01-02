@@ -14,6 +14,7 @@ import {
   zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
+  clickView,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
@@ -103,6 +104,8 @@ test.describe('zooming', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
+
+    await clickView(page, [0, 0]);
     await zoomResetByKeyboard(page);
 
     await zoomOutByKeyboard(page);
@@ -119,6 +122,8 @@ test.describe('zooming', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
+
+    await clickView(page, [0, 0]);
     await zoomResetByKeyboard(page);
     let zoom = await getZoomLevel(page);
     expect(zoom).toBe(100);
@@ -137,6 +142,8 @@ test.describe('zooming', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
+
+    await clickView(page, [0, 0]);
     await zoomResetByKeyboard(page);
 
     await zoomInByKeyboard(page);

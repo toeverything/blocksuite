@@ -61,7 +61,7 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    return html`<div class="bookmark-modal">
+    return html`<div class="bookmark-modal blocksuite-overlay">
       <div class="bookmark-modal-mask" @click=${this._onCancel}></div>
       <div class="bookmark-modal-wrapper" style="width:480px">
         <icon-button

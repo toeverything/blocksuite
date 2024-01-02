@@ -1,4 +1,4 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 
 import { PathFinder } from '../utils/index.js';
 import type { UIEventHandler } from './base.js';
@@ -82,6 +82,41 @@ export class UIEventDispatcher {
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
     this._clipboardControl = new ClipboardControl(this);
+  }
+
+  private static _activeDispatcher: UIEventDispatcher | null = null;
+
+  get isActive() {
+    return UIEventDispatcher._activeDispatcher === this;
+  }
+
+  activate = () => {
+    const prevDispatcher = UIEventDispatcher._activeDispatcher;
+    if (prevDispatcher === this) return;
+    UIEventDispatcher._activeDispatcher = this;
+    prevDispatcher?.std.selection.clear();
+  };
+
+  deactivate = () => {
+    const prevDispatcher = UIEventDispatcher._activeDispatcher;
+    if (!prevDispatcher) return;
+    if (prevDispatcher !== this) return;
+    UIEventDispatcher._activeDispatcher = null;
+    prevDispatcher.std.selection.clear();
+  };
+
+  private _viewportElement: HTMLElement | null = null;
+
+  get viewportElement() {
+    if (this._viewportElement) return this._viewportElement;
+    const pageElement = this.std.view.viewFromPath('block', [
+      this.std.page.root?.id ?? '',
+    ]);
+    assertExists(pageElement);
+    // @ts-ignore
+    this._viewportElement = pageElement.viewportElement as HTMLElement | null;
+    assertExists(this._viewportElement);
+    return this._viewportElement;
   }
 
   mount() {

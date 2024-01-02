@@ -112,13 +112,13 @@ export class EdgelessPageBlockComponent extends BlockElement<
       contain: size layout style;
     }
 
-    @media screen and (max-width: 1200px) {
+    @container viewport (width <= 1200px) {
       edgeless-zoom-toolbar {
         display: none;
       }
     }
 
-    @media screen and (min-width: 1200px) {
+    @container viewport (width >= 1200px) {
       zoom-bar-toggle-button {
         display: none;
       }
@@ -559,7 +559,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
       this.updateComplete
         .then(() => {
           if (blockId) {
-            asyncFocusRichText(this.page, blockId)?.catch(console.error);
+            asyncFocusRichText(this.host, this.page, blockId)?.catch(
+              console.error
+            );
           } else if (point) {
             // Cannot reuse `handleNativeRangeClick` directly here,
             // since `retargetClick` will re-target to pervious editor
