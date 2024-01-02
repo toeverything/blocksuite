@@ -847,6 +847,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                 'children'
               )
               .closeNode();
+            context.skipAllChildren();
           }
           break;
         }
@@ -959,6 +960,27 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                   text: {
                     '$blocksuite:internal:text$': true,
                     delta: this._hastToDelta(o.node),
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'br': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:paragraph',
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [],
                   },
                 },
                 children: [],
