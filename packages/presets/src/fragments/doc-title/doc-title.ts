@@ -51,7 +51,7 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
     }
 
     /* Extra small devices (phones, 640px and down) */
-    @media screen and (max-width: 640px) {
+    @container viewport (width <= 640px) {
       .doc-title-container {
         padding-left: ${PAGE_BLOCK_CHILD_PADDING}px;
         padding-right: ${PAGE_BLOCK_CHILD_PADDING}px;

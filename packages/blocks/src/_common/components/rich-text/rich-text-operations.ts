@@ -48,7 +48,11 @@ function supportsChildren(model: BaseBlockModel): boolean {
   return true;
 }
 
-export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
+export function handleBlockEndEnter(
+  editorHost: EditorHost,
+  model: ExtendedModel
+) {
+  const page = model.page;
   const parent = page.getParent(model);
   const nextSibling = page.getNextSibling(model);
   if (!parent) {
@@ -80,7 +84,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
 
       const nextModel = page.getNextSibling(newParent);
       if (nextModel && matchFlavours(nextModel, ['affine:paragraph'])) {
-        asyncFocusRichText(page, nextModel.id, {
+        asyncFocusRichText(editorHost, page, nextModel.id, {
           index: nextModel.text.yText.length,
           length: 0,
         })?.catch(console.error);
@@ -97,7 +101,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     }
 
     const id = page.addBlock(flavour, blockProps, newParent, newBlockIndex);
-    asyncFocusRichText(page, id)?.catch(console.error);
+    asyncFocusRichText(editorHost, page, id)?.catch(console.error);
     return;
   }
   const index = parent.children.indexOf(model);
@@ -133,11 +137,11 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     }
   }
 
-  asyncFocusRichText(page, id)?.catch(console.error);
+  asyncFocusRichText(editorHost, page, id)?.catch(console.error);
 }
 
 export function handleBlockSplit(
-  page: Page,
+  editorHost: EditorHost,
   model: ExtendedModel,
   splitIndex: number,
   splitLength: number
@@ -150,6 +154,8 @@ export function handleBlockSplit(
   // Example: "`a`[enter]" -> yText[<ContentFormat: Code>, "a", <ContentFormat: Code>]
   // In this case, we should not split the block.
   if (model.text.yText.length < splitIndex + splitLength) return;
+
+  const page = model.page;
 
   const parent = page.getParent(model);
   if (!parent) return;
@@ -171,7 +177,7 @@ export function handleBlockSplit(
     newParent,
     newBlockIndex
   );
-  return asyncFocusRichText(page, id);
+  return asyncFocusRichText(editorHost, page, id);
 }
 
 /**
@@ -190,7 +196,12 @@ export function handleBlockSplit(
  *     - ddd
  *     - eee
  */
-export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
+export function handleIndent(
+  editorHost: EditorHost,
+  model: ExtendedModel,
+  offset = 0
+) {
+  const page = model.page;
   const previousSibling = page.getPreviousSibling(model);
   if (!previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
@@ -224,11 +235,18 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     } as Partial<ListBlockModel>);
   }
 
-  asyncSetInlineRange(model, { index: offset, length: 0 }).catch(console.error);
+  asyncSetInlineRange(editorHost, model, { index: offset, length: 0 }).catch(
+    console.error
+  );
 }
 
-export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
+export function handleMultiBlockIndent(
+  editorHost: EditorHost,
+  models: BaseBlockModel[]
+) {
   if (!models.length) return;
+
+  const page = models[0].page;
 
   // Find the first model that can be indented
   let firstIndentIndex = -1;
@@ -254,7 +272,7 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
     // When parent is in the `indentModels`, it means the parent has been indented
     // And the model should be indented with its parent
     if (!indentModels.includes(parent)) {
-      handleIndent(page, model);
+      handleIndent(editorHost, model);
     }
   });
 }
@@ -275,7 +293,12 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
  *   - ddd
  *   - eee
  */
-export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
+export function handleUnindent(
+  editorHost: EditorHost,
+  model: ExtendedModel,
+  offset = 0
+) {
+  const page = model.page;
   const parent = page.getParent(model);
   if (!parent || parent.role !== 'content') {
     // Top most, can not unindent, do nothing
@@ -309,11 +332,17 @@ export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
       page.updateBlock(sibling, {});
     });
 
-  asyncSetInlineRange(model, { index: offset, length: 0 }).catch(console.error);
+  asyncSetInlineRange(editorHost, model, { index: offset, length: 0 }).catch(
+    console.error
+  );
 }
 
-export function handleMultiBlockOutdent(page: Page, models: BaseBlockModel[]) {
+export function handleMultiBlockOutdent(
+  editorHost: EditorHost,
+  models: BaseBlockModel[]
+) {
   if (!models.length) return;
+  const page = models[0].page;
 
   // Find the first model that can be unindented
   let firstOutdentIndex = -1;
@@ -337,33 +366,36 @@ export function handleMultiBlockOutdent(page: Page, models: BaseBlockModel[]) {
     const parent = page.getParent(model);
     assertExists(parent);
     if (!outdentModels.includes(parent)) {
-      handleUnindent(page, model);
+      handleUnindent(editorHost, model);
     }
   }
 }
 
 export function handleRemoveAllIndent(
-  page: Page,
+  editorHost: EditorHost,
   model: ExtendedModel,
   offset = 0
 ) {
+  const page = model.page;
   let parent = page.getParent(model);
   while (parent && !matchFlavours(parent, ['affine:note'])) {
-    handleUnindent(page, model, offset);
+    handleUnindent(editorHost, model, offset);
     parent = page.getParent(model);
   }
 }
 
 export function handleRemoveAllIndentForMultiBlocks(
-  page: Page,
+  editorHost: EditorHost,
   models: BaseBlockModel[]
 ) {
+  if (!models.length) return;
+  const page = models[0].page;
   for (let i = models.length - 1; i >= 0; i--) {
     const model = models[i];
     const parent = page.getParent(model);
     assertExists(parent);
     if (!matchFlavours(parent, ['affine:note'])) {
-      handleRemoveAllIndent(page, model);
+      handleRemoveAllIndent(editorHost, model);
     }
   }
 }
@@ -384,7 +416,10 @@ function handleDatabaseBlockForwardDelete(model: ExtendedModel) {
 
 // When deleting at line start of a list block,
 // switch it to normal paragraph block.
-function handleListBlockBackspace(model: ExtendedModel) {
+function handleListBlockBackspace(
+  editorHost: EditorHost,
+  model: ExtendedModel
+) {
   const page = model.page;
   if (!matchFlavours(model, ['affine:list'])) return false;
 
@@ -410,7 +445,7 @@ function handleListBlockBackspace(model: ExtendedModel) {
     .forEach(sibling => page.updateBlock(sibling, {}));
 
   const id = page.addBlock('affine:paragraph', blockProps, parent, index);
-  asyncFocusRichText(page, id)?.catch(console.error);
+  asyncFocusRichText(editorHost, page, id)?.catch(console.error);
   return true;
 }
 
@@ -487,11 +522,12 @@ function handleListBlockForwardDelete(
 }
 
 function handleParagraphOrListSibling(
-  page: Page,
+  editorHost: EditorHost,
   model: ExtendedModel,
   previousSibling: ExtendedModel,
   parent: ExtendedModel
 ) {
+  const page = model.page;
   if (!matchFlavours(previousSibling, ['affine:paragraph', 'affine:list']))
     return false;
 
@@ -501,7 +537,7 @@ function handleParagraphOrListSibling(
   page.deleteBlock(model, {
     bringChildrenTo: parent,
   });
-  const inlineEditor = getInlineEditorByModel(previousSibling);
+  const inlineEditor = getInlineEditorByModel(editorHost, previousSibling);
   inlineEditor?.setInlineRange({
     index: preTextLength,
     length: 0,
@@ -599,7 +635,7 @@ function handleParagraphDeleteActions(
     page.deleteBlock(model, {
       bringChildrenTo: parent,
     });
-    asyncSetInlineRange(previousSibling, {
+    asyncSetInlineRange(editorHost, previousSibling, {
       index: lengthBeforeJoin,
       length: 0,
     }).catch(console.error);
@@ -613,7 +649,12 @@ function handleParagraphDeleteActions(
     return true;
   } else if (matchFlavours(parent, ['affine:note'])) {
     return (
-      handleParagraphOrListSibling(page, model, previousSibling, parent) ||
+      handleParagraphOrListSibling(
+        editorHost,
+        model,
+        previousSibling,
+        parent
+      ) ||
       handleEmbedDividerCodeSibling(
         editorHost,
         model,
@@ -664,7 +705,7 @@ function handleParagraphBlockBackspace(
   // - line1
   //   - line2
   // - |aaa
-  handleUnindent(page, model);
+  handleUnindent(editorHost, model);
   return true;
 }
 
@@ -823,7 +864,7 @@ export function handleLineStartBackspace(
   model: ExtendedModel
 ) {
   if (
-    handleListBlockBackspace(model) ||
+    handleListBlockBackspace(editorHost, model) ||
     handleParagraphBlockBackspace(editorHost, model)
   ) {
     return;

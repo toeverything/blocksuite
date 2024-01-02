@@ -9,10 +9,11 @@ import {
 } from '../../_common/utils/query.js';
 
 export async function onModelTextUpdated(
+  editorHost: EditorHost,
   model: BaseBlockModel,
   callback?: (text: RichText) => void
 ) {
-  const richText = await asyncGetRichTextByModel(model);
+  const richText = await asyncGetRichTextByModel(editorHost, model);
   assertExists(richText, 'RichText is not ready yet.');
   await richText.updateComplete;
   const inlineEditor = richText.inlineEditor;

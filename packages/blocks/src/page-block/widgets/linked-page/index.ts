@@ -40,7 +40,7 @@ export function showLinkedPagePopover({
   const disposables = new DisposableGroup();
   abortController.signal.addEventListener('abort', () => disposables.dispose());
 
-  const linkedPage = new LinkedPagePopover(model, abortController);
+  const linkedPage = new LinkedPagePopover(editorHost, model, abortController);
   linkedPage.options = options;
   linkedPage.triggerKey = triggerKey;
   // Mount
@@ -127,7 +127,7 @@ export class AffineLinkedPageWidget extends WidgetElement {
       return;
     }
     if (matchFlavours(model, this.options.ignoreBlockTypes)) return;
-    const inlineEditor = getInlineEditorByModel(model);
+    const inlineEditor = getInlineEditorByModel(this.host, model);
     if (!inlineEditor) return;
     const inlineRange = inlineEditor.getInlineRange();
     if (!inlineRange) return;

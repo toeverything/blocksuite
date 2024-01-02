@@ -62,6 +62,10 @@ export class SlashMenu extends WithDisposable(LitElement) {
 
   abortController = new AbortController();
 
+  get host() {
+    return this.pageElement.host;
+  }
+
   /**
    * Does not include the slash character
    */
@@ -76,7 +80,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     });
     this._filterItems = this._updateItem('');
 
-    const richText = getRichTextByModel(this.model);
+    const richText = getRichTextByModel(this.host, this.model);
     if (!richText) {
       console.warn(
         'Slash Menu may not work properly! No rich text found for model',
@@ -254,7 +258,11 @@ export class SlashMenu extends WithDisposable(LitElement) {
     // Need to remove the search string
     // We must to do clean the slash string before we do the action
     // Otherwise, the action may change the model and cause the slash string to be changed
-    cleanSpecifiedTail(this.model, this.triggerKey + this._searchString);
+    cleanSpecifiedTail(
+      this.host,
+      this.model,
+      this.triggerKey + this._searchString
+    );
     this.abortController.abort();
 
     const { action } = this._filterItems[index];
@@ -352,7 +360,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
       }
     );
 
-    return html`<div class="slash-menu-container">
+    return html`<div class="slash-menu-container blocksuite-overlay">
       <div
         class="overlay-mask"
         @click="${() => this.abortController.abort()}"

@@ -604,7 +604,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
   viewInEdgeless() {
     if (!this._referencedModel) return;
 
-    const editorContainer = getEditorContainer(this.page);
+    const editorContainer = getEditorContainer(this.host);
 
     if (editorContainer.mode !== 'edgeless') {
       editorContainer.mode = 'edgeless';

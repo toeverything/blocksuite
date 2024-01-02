@@ -112,6 +112,7 @@ export class RangeSynchronizer {
   }
 
   private _onSelectionModelChanged = (selections: BaseSelection[]) => {
+    if (!this.host.event.isActive) return;
     // wait for lit updated
     const rafId = requestAnimationFrame(() => {
       const text =
