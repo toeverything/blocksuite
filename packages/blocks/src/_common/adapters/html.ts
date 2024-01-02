@@ -810,12 +810,24 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         case 'div': {
           if (
             // Check if it is a paragraph like div
-            hastGetElementChildren(o.node).every(
-              child => child.tagName === 'span'
+            o.parent?.type === 'element' &&
+            o.parent.tagName !== 'li' &&
+            (hastGetElementChildren(o.node).every(child =>
+              [
+                'span',
+                'strong',
+                'em',
+                'code',
+                'del',
+                'u',
+                'a',
+                'mark',
+                'br',
+              ].includes(child.tagName)
             ) ||
-            o.node.children
-              .map(child => child.type)
-              .every(type => type === 'text')
+              o.node.children
+                .map(child => child.type)
+                .every(type => type === 'text'))
           ) {
             context
               .openNode(
@@ -923,6 +935,27 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                 id: nanoid('block'),
                 flavour: 'affine:divider',
                 props: {},
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'br': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:paragraph',
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [],
+                  },
+                },
                 children: [],
               },
               'children'
