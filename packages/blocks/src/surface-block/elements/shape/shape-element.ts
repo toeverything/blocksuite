@@ -9,6 +9,7 @@ import type { Bound } from '../../utils/bound.js';
 import { isPointIn } from '../../utils/math-utils.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
+import { TextAlign } from '../consts.js';
 import type { HitTestOptions } from '../edgeless-element.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { ITextDelta } from '../text/types.js';
@@ -128,7 +129,7 @@ export class ShapeElement extends SurfaceElement<IShape> {
 
   get textAlign() {
     const textAlign =
-      (this.yMap.get('textAlign') as IShape['textAlign']) ?? 'center';
+      (this.yMap.get('textAlign') as IShape['textAlign']) ?? TextAlign.Center;
     return textAlign;
   }
 

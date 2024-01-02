@@ -30,7 +30,7 @@ test('new added frame should not affect layer', async () => {
   const surface = getSurface(window.page, window.editor);
 
   surface.addElement(
-    'affine:frame' as any,
+    'affine:frame',
     {
       xywh: '[0, 0, 100, 100]',
     },

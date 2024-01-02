@@ -3,7 +3,6 @@ import './surface-ref-portal';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, type Disposable, noop } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { type Y } from '@blocksuite/store';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -13,35 +12,24 @@ import {
   FrameIcon,
   MoreDeleteIcon,
 } from '../_common/icons/index.js';
-import {
-  type CssVariableName,
-  isCssVariable,
-} from '../_common/theme/css-variables.js';
-import { getThemePropertyValue } from '../_common/theme/utils.js';
-import type { EdgelessElement, TopLevelBlockModel } from '../_common/types.js';
+import type { EdgelessElement } from '../_common/types.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import {
   buildPath,
   getEditorContainer,
   isInsideDocEditor,
 } from '../_common/utils/query.js';
+import type { SurfaceService } from '../index.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
-import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
-import { type CanvasElementType } from '../surface-block/elements/edgeless-element.js';
-import type { SurfaceElement } from '../surface-block/elements/surface-element.js';
-import { ConnectorElement, ElementCtors } from '../surface-block/index.js';
-import {
-  getGroupParent,
-  setGroupParent,
-} from '../surface-block/managers/group-manager.js';
-import { LayerManager } from '../surface-block/managers/layer-manager.js';
-import { Renderer } from '../surface-block/renderer.js';
+import type { Renderer } from '../surface-block/renderer.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';
 import { SurfaceRefPortal } from './surface-ref-portal.js';
-import { getSurfaceBlock, noContentPlaceholder } from './utils.js';
+import type { SurfaceRefRenderer } from './surface-ref-renderer.js';
+import type { SurfaceRefBlockService } from './surface-ref-service.js';
+import { noContentPlaceholder } from './utils.js';
 
 noop(SurfaceRefPortal);
 
@@ -64,7 +52,10 @@ const NO_CONTENT_REASON = {
 type RefElement = Exclude<EdgelessElement, NoteBlockModel>;
 
 @customElement('affine-surface-ref')
-export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel> {
+export class SurfaceRefBlockComponent extends BlockElement<
+  SurfaceRefBlockModel,
+  SurfaceRefBlockService
+> {
   static override styles = css`
     .affine-surface-ref {
       position: relative;
@@ -262,15 +253,9 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   @state()
   private _showCaption: boolean = false;
 
+  private _surfaceRefRenderer!: SurfaceRefRenderer;
+
   private _referencedModel: RefElement | null = null;
-  private _surfaceRenderer = new Renderer({
-    layerManager: new LayerManager(),
-  });
-  private _connectorManager = new ConnectorPathGenerator({
-    pickById: id => this.getModel(id),
-    refresh: () => this._surfaceRenderer.refresh(),
-  });
-  private _elements = new Map<string, SurfaceElement>();
 
   @query('.surface-canvas-container')
   container!: HTMLDivElement;
@@ -279,7 +264,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   blocksPortal!: SurfaceRefPortal;
 
   get surfaceRenderer() {
-    return this._surfaceRenderer;
+    return this._surfaceRefRenderer.surfaceRenderer;
   }
 
   get referenceModel() {
@@ -289,11 +274,42 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   override connectedCallback() {
     super.connectedCallback();
     if (!this._shouldRender()) return;
+    const service = this.service;
+    assertExists(service, `Surface ref block must run with its service.`);
+    this._surfaceRefRenderer = service.getRenderer(PathFinder.id(this.path));
+    this._disposables.add(
+      this._surfaceRefRenderer.slots.surfaceModelChanged.on(model => {
+        this._surfaceModel = model;
+      })
+    );
+    this._disposables.add(
+      this._surfaceRefRenderer.slots.surfaceRendererRefresh.on(() => {
+        this.requestUpdate();
+      })
+    );
+    this._disposables.add(
+      this._surfaceRefRenderer.slots.surfaceRendererInit.on(() => {
+        let lastWidth = 0;
+        const observer = new ResizeObserver(entries => {
+          if (entries[0].contentRect.width !== lastWidth) {
+            lastWidth = entries[0].contentRect.width;
+            this._refreshViewport();
+          }
+        });
+        observer.observe(this);
+
+        this._disposables.add(() => observer.disconnect());
+      })
+    );
+    this._surfaceRefRenderer.mount();
     this._initHotkey();
-    this._initSurfaceModel();
     this._initReferencedModel();
     this._initSelection();
-    this._initSurfaceRenderer();
+  }
+
+  override disconnectedCallback() {
+    this.service?.removeRenderer(this._surfaceRefRenderer.id);
+    super.disconnectedCallback();
   }
 
   override updated() {
@@ -301,9 +317,13 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   }
 
   private _attachRenderer() {
-    if (this._surfaceRenderer.canvas.isConnected || !this.container) return;
+    if (
+      this._surfaceRefRenderer?.surfaceRenderer.canvas.isConnected ||
+      !this.container
+    )
+      return;
 
-    this._surfaceRenderer.attach(this.container);
+    this.surfaceRenderer.attach(this.container);
   }
 
   private _initHotkey() {
@@ -345,30 +365,14 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     });
   }
 
-  private _initSurfaceRenderer() {
-    let lastWidth = 0;
-    this.surfaceRenderer.layerManager.init([
-      ...this._elements.values(),
-      ...((this._surfaceModel?.children || []) as EdgelessElement[]),
-      ...(this.page.getBlockByFlavour('affine:note') as EdgelessElement[]),
-    ]);
-    const observer = new ResizeObserver(entries => {
-      if (entries[0].contentRect.width !== lastWidth) {
-        lastWidth = entries[0].contentRect.width;
-        this._refreshViewport();
-      }
-    });
-    observer.observe(this);
-
-    this._disposables.add(() => observer.disconnect());
-  }
-
   private _initReferencedModel() {
     let refWathcer: Disposable | null = null;
     const init = () => {
       refWathcer?.dispose();
 
-      const referencedModel = this.getModel(this.model.reference);
+      const referencedModel = this._surfaceRefRenderer.getModel(
+        this.model.reference
+      );
       this._referencedModel =
         referencedModel && 'xywh' in referencedModel ? referencedModel : null;
 
@@ -415,52 +419,6 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     });
   }
 
-  private _initSurfaceModel() {
-    const init = () => {
-      this._surfaceModel = getSurfaceBlock(this.page);
-
-      if (!this._surfaceModel) return;
-
-      const elementsMap = this._surfaceModel.elements.getValue() as Y.Map<
-        Y.Map<unknown>
-      >;
-      const onElementsChange = (event: Y.YMapEvent<Y.Map<unknown>>) => {
-        this._onElementsChange(event, elementsMap);
-      };
-      elementsMap.observe(onElementsChange);
-      this._disposables.add(() => elementsMap.unobserve(onElementsChange));
-
-      this._syncFromExistingContainer(elementsMap);
-    };
-
-    init();
-
-    if (!this._surfaceModel) {
-      this._disposables.add(
-        this.page.slots.blockUpdated.on(({ type }) => {
-          if (
-            type === 'add' &&
-            !this._surfaceModel &&
-            getSurfaceBlock(this.page)
-          ) {
-            init();
-          }
-        })
-      );
-    }
-  }
-
-  private _onElementUpdatedOrAdded(id: string) {
-    const element = this.getModel(id);
-
-    if (
-      element instanceof ConnectorElement &&
-      this._connectorManager.hasRelatedElement(element)
-    ) {
-      this._connectorManager.updatePath(element);
-    }
-  }
-
   private _initSelection() {
     const selection = this.host.selection;
     this._disposables.add(
@@ -484,170 +442,15 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     this.requestUpdate();
     this.updateComplete
       .then(() => {
-        this._surfaceRenderer.onResize();
-        this._surfaceRenderer.setViewportByBound(
+        this.surfaceRenderer.onResize();
+        this.surfaceRenderer.setViewportByBound(
           Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
         );
 
         // update portal transform
-        this.blocksPortal?.setViewport(this._surfaceRenderer);
+        this.blocksPortal?.setViewport(this.surfaceRenderer);
       })
       .catch(console.error);
-  }
-
-  private _syncFromExistingContainer(elementsMap: Y.Map<Y.Map<unknown>>) {
-    elementsMap.doc?.transact(() => {
-      const yConnectors: Y.Map<unknown>[] = [];
-      const yGroups: Y.Map<unknown>[] = [];
-      elementsMap.forEach(yElement => {
-        const type = yElement.get('type') as CanvasElementType;
-        if (type === 'connector') {
-          yConnectors.push(yElement);
-          return;
-        }
-        if (type === 'group') {
-          yGroups.push(yElement);
-          return;
-        }
-        this._createElementFromYMap(yElement);
-      });
-      yConnectors.forEach(yElement => {
-        this._createElementFromYMap(yElement);
-      });
-      yGroups.forEach(yElement => {
-        this._createElementFromYMap(yElement);
-      });
-    });
-  }
-
-  private _createElementFromYMap(yElement: Y.Map<unknown>) {
-    const type = yElement.get('type') as CanvasElementType;
-    const ElementCtor = ElementCtors[type];
-    assertExists(ElementCtor);
-    const element = new ElementCtor(yElement, {
-      onElementUpdated: ({ id }) => {
-        const element = this.getModel(id);
-
-        if (
-          element instanceof ConnectorElement &&
-          !this._connectorManager.hasRelatedElement(element)
-        ) {
-          this._connectorManager.updatePath(element);
-        }
-      },
-      removeElement: () => {},
-      pickById: id => this.getModel(id),
-      getGroupParent: getGroupParent,
-      setGroupParent: setGroupParent,
-    });
-    element.computedValue = this._getCSSPropertyValue;
-    element.mount(this._surfaceRenderer);
-    this._elements.set(element.id, element);
-    this._onElementUpdatedOrAdded(element.id);
-  }
-
-  private _onElementsChange = (
-    event: Y.YMapEvent<Y.Map<unknown>>,
-    elementsMap: Y.Map<Y.Map<unknown>>
-  ) => {
-    // skip empty event
-    if (event.changes.keys.size === 0) return;
-    const connectors: {
-      change: (typeof event)['changes']['keys'] extends Map<string, infer V>
-        ? V
-        : never;
-      id: string;
-    }[] = [];
-    event.keysChanged.forEach(id => {
-      const change = event.changes.keys.get(id);
-      if (!change) {
-        console.error('invalid event', event);
-        return;
-      }
-
-      if (
-        change.action === 'add' &&
-        elementsMap.get(id)?.get('type') === 'connector'
-      ) {
-        connectors.push({ change, id });
-        return;
-      } else {
-        this._onYEvent(change, id, elementsMap);
-      }
-    });
-    connectors.forEach(({ change, id }) =>
-      this._onYEvent(change, id, elementsMap)
-    );
-  };
-
-  private _onYEvent = (
-    type: Y.YMapEvent<Y.Map<unknown>>['changes']['keys'] extends Map<
-      string,
-      infer V
-    >
-      ? V
-      : never,
-    id: string,
-    elementsMap: Y.Map<Y.Map<unknown>>
-  ) => {
-    if (type.action === 'add') {
-      const yElement = elementsMap.get(id) as Y.Map<unknown>;
-      const type = yElement.get('type') as CanvasElementType;
-
-      const ElementCtor = ElementCtors[type];
-      assertExists(ElementCtor);
-      const element = new ElementCtor(yElement, {
-        onElementUpdated() {},
-        pickById: id => this.getModel(id),
-        getGroupParent: getGroupParent,
-        setGroupParent: setGroupParent,
-        removeElement: () => {},
-      });
-      element.computedValue = this._getCSSPropertyValue;
-      element.mount(this._surfaceRenderer);
-      this._elements.set(element.id, element);
-      this._onElementUpdatedOrAdded(element.id);
-    } else if (type.action === 'update') {
-      console.error('update event on yElements is not supported', event);
-    } else if (type.action === 'delete') {
-      const element = this._elements.get(id);
-
-      if (element) {
-        element.unmount();
-        this._elements.delete(id);
-      }
-    }
-
-    this._surfaceRenderer.refresh();
-    this.requestUpdate();
-  };
-
-  private _getCSSPropertyValue = (value: string) => {
-    const root = this.host;
-    if (isCssVariable(value)) {
-      const cssValue = getThemePropertyValue(root, value as CssVariableName);
-      if (cssValue === undefined) {
-        console.error(
-          new Error(
-            `All variables should have a value. Please check for any dirty data or variable renaming.Variable: ${value}`
-          )
-        );
-      }
-      return cssValue ?? value;
-    }
-
-    return value;
-  };
-
-  private getModel(id: string): RefElement | null {
-    return (
-      (this.page.getBlockById(id) as Exclude<
-        TopLevelBlockModel,
-        NoteBlockModel
-      >) ??
-      this._elements.get(id) ??
-      null
-    );
   }
 
   private _deleteThis() {
@@ -811,11 +614,9 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         referenceId: this.model.reference,
         padding: [60, 20, 20, 20] as [number, number, number, number],
       };
-      this.std.command
-        .pipe()
-        .withHost()
-        .saveViewportToSession({ viewport })
-        .run();
+      (<SurfaceService>(
+        this.std.spec.getService('affine:surface')
+      )).editSession.setItem('viewport', viewport);
     }
 
     this.selection.update(selections => {
@@ -834,7 +635,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   override render() {
     if (!this._shouldRender()) return nothing;
 
-    const { _surfaceModel, _referencedModel, _surfaceRenderer, model } = this;
+    const { _surfaceModel, _referencedModel, surfaceRenderer, model } = this;
     const noContent =
       !_surfaceModel || !_referencedModel || !_referencedModel.xywh;
 
@@ -850,7 +651,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       >
         ${noContent
           ? this._renderEmptyPlaceholder(model)
-          : this._renderSurfaceContent(_referencedModel, _surfaceRenderer)}
+          : this._renderSurfaceContent(_referencedModel, surfaceRenderer)}
         ${this._renderCaption()}
       </div>
       ${Object.values(this.widgets)}

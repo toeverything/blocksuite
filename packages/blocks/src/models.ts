@@ -22,6 +22,7 @@ import type { DividerBlockModel } from './divider-block/divider-model.js';
 import { DividerBlockSchema } from './divider-block/divider-model.js';
 import { EmbedGithubBlockSpec } from './embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from './embed-html-block/embed-html-spec.js';
+import { EmbedLinkedPageBlockSpec } from './embed-linked-page-block/index.js';
 import type { FrameBlockModel } from './frame-block/frame-model.js';
 import { FrameBlockSchema } from './frame-block/frame-model.js';
 import type { ImageBlockModel } from './image-block/image-model.js';
@@ -76,6 +77,7 @@ export const __unstableSchemas = [
   AttachmentBlockSchema,
   EmbedGithubBlockSpec.schema,
   EmbedHtmlBlockSpec.schema,
+  EmbedLinkedPageBlockSpec.schema,
 ] satisfies z.infer<typeof BlockSchema>[];
 
 // TODO support dynamic register

@@ -12,6 +12,12 @@ import type { Job } from '@blocksuite/store';
 import type { z } from 'zod';
 
 declare global {
+  type HTMLTemplate = [
+    string,
+    Record<string, unknown>,
+    ...(HTMLTemplate | string)[],
+  ];
+
   interface Window {
     editor: AffineEditorContainer;
     page: Page;
@@ -26,5 +32,11 @@ declare global {
 
     // TODO: remove this when provider support subdocument
     subdocProviders: Map<string, DocProvider[]>;
+
+    devtoolsFormatters: {
+      header: (obj: unknown, config: unknown) => null | HTMLTemplate;
+      hasBody: (obj: unknown, config: unknown) => boolean | null;
+      body: (obj: unknown, config: unknown) => null | HTMLTemplate;
+    }[];
   }
 }

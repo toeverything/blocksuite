@@ -31,7 +31,7 @@ import {
   isTopLevelBlock,
 } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
-import type { IBound } from './consts.js';
+import { type IBound } from './consts.js';
 import {
   type EdgelessBlockModelMap,
   type EdgelessElementType,
@@ -53,8 +53,8 @@ import {
   GroupElement,
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
-import type { CanvasElementType, IConnector, IVec } from './index.js';
 import type { EdgelessBlockType } from './index.js';
+import { type CanvasElementType, type IConnector, type IVec } from './index.js';
 import {
   compare,
   EdgelessGroupManager,
@@ -183,6 +183,10 @@ export class SurfaceBlockComponent extends BlockElement<
     return isInsideEdgelessEditor(this.host);
   }
 
+  override get service() {
+    return super.service as SurfaceService;
+  }
+
   getBlocks<T extends EdgelessBlockType>(
     flavours: T[] | T | RegExp
   ): TopLevelBlockModel[] {
@@ -304,6 +308,13 @@ export class SurfaceBlockComponent extends BlockElement<
       edgeless.slots.elementUpdated.on(({ id, props }) => {
         const element = this.pickById(id);
         assertExists(element);
+
+        this.service!.editSession.record(
+          (isTopLevelBlock(element)
+            ? element.flavour
+            : element.type) as EdgelessElementType,
+          props as Record<string, unknown>
+        );
 
         if (element instanceof ConnectorElement) {
           this.connector.updatePath(element);
@@ -708,6 +719,9 @@ export class SurfaceBlockComponent extends BlockElement<
     if (this.page.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }
+
+    this.service!.editSession.apply(type, properties);
+
     if (isCanvasElementType(type)) {
       const id = generateElementId();
 

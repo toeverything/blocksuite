@@ -12,7 +12,7 @@ The distinction between editors and fragments lies in their complexity and funct
 
 ## Blocks and Widgets
 
-To address the complexity and diversity of editing needs, BlockSuite architects its editors as assemblies of multiple editable blocks, termed [`BlockSpec`](./block-spec)s. Each BlockSpec encapsulates the data schema, view, service, and logic required to compose the editor. These BlockSpecs collectively define the editable components within the editor's environment.
+To address the complexity and diversity of editing needs, BlockSuite architects its editors as assemblies of multiple editable blocks, termed [`BlockSpec`](./block-spec)s. Each block spec encapsulates the data schema, view, service, and logic required to compose the editor. These block specs collectively define the editable components within the editor's environment.
 
 BlockSuite encourages the derivation of various block spec implementations from a single block model to enrich the editing experience. For instance, the root node of the block tree, the page block, is implemented differently for `DocEditor` and `EdgelessEditor` through `DocPageBlockSpec` and `EdgelessPageBlockSpec`, respectively. These serve as the top-level UI components for their respective editors.
 

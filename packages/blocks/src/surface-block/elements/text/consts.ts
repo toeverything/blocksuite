@@ -5,6 +5,7 @@ import {
   CanvasTextFontStyle,
   CanvasTextFontWeight,
 } from '../../consts.js';
+import { TextAlign } from '../consts.js';
 import {
   CanvasElementType,
   type IElementDefaultProps,
@@ -22,5 +23,5 @@ export const TextElementDefaultProps: IElementDefaultProps<'text'> = {
   fontFamily: CanvasTextFontFamily.Inter,
   fontWeight: CanvasTextFontWeight.Regular,
   fontStyle: CanvasTextFontStyle.Normal,
-  textAlign: 'center',
+  textAlign: TextAlign.Center,
 };

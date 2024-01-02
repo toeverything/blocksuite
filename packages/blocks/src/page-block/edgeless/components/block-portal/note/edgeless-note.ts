@@ -61,7 +61,10 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
     observer.observe(maskDOM!);
 
     this._disposables.add(() => {
-      this.model.pop('xywh');
+      // check if model still exist
+      if (this.model.page.getBlockById(this.model.id)) {
+        this.model.pop('xywh');
+      }
       observer.disconnect();
     });
   }

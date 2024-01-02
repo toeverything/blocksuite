@@ -1,24 +1,17 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type {
-  BrushTool,
-  EdgelessTool,
-} from '../../../../_common/utils/index.js';
-import { LineWidth } from '../../../../_common/utils/index.js';
+import type { BrushTool } from '../../../../_common/utils/index.js';
 import type { BrushElement } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
   type IVec,
 } from '../../../../surface-block/index.js';
-import { GET_DEFAULT_LINE_COLOR } from '../../components/panel/color-panel.js';
 import { EdgelessToolController } from './index.js';
 
 export class BrushToolController extends EdgelessToolController<BrushTool> {
   readonly tool = <BrushTool>{
     type: 'brush',
-    color: GET_DEFAULT_LINE_COLOR(),
-    lineWidth: 4,
   };
 
   private _draggingElement: BrushElement | null = null;
@@ -53,13 +46,10 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
-    const { color, lineWidth } = this.tool;
     const points = [[modelX, modelY]];
 
     const id = this._surface.addElement(CanvasElementType.BRUSH, {
       points,
-      color,
-      lineWidth,
     });
 
     const element = this._surface.pickById(id) as BrushElement;
@@ -143,26 +133,8 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     noop();
   }
 
-  afterModeSwitch(newTool: EdgelessTool) {
-    this._tryLoadBrushStateLocalRecord(newTool);
-  }
-
-  private _tryLoadBrushStateLocalRecord(tool: EdgelessTool) {
-    if (tool.type !== 'brush') return;
-    const key = 'blocksuite:' + this._edgeless.page.id + ':edgelessBrush';
-    const brushData = sessionStorage.getItem(key);
-    if (brushData) {
-      try {
-        const { color, lineWidth } = JSON.parse(brushData);
-        this._edgeless.slots.edgelessToolUpdated.emit({
-          type: 'brush',
-          color: color ?? 'black',
-          lineWidth: lineWidth ?? LineWidth.Thin,
-        });
-      } catch (_) {
-        noop();
-      }
-    }
+  afterModeSwitch() {
+    noop();
   }
 
   private _getStraightLineType(currentPoint: IVec) {
