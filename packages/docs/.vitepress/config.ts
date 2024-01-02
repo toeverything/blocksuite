@@ -46,6 +46,7 @@ export default defineConfig({
       {
         text: 'Essentials',
         items: [
+          { text: 'Component Types', link: '/component-types' },
           {
             text: 'Working with Block Tree',
             link: '/working-with-block-tree',
@@ -59,7 +60,7 @@ export default defineConfig({
                 link: '/working-with-block-tree#block-tree-in-editor',
               },
               {
-                text: 'Selecting Blocks',
+                text: 'Selecting Blocks 🚧',
                 link: '/working-with-block-tree#selecting-blocks',
               },
               {
@@ -74,7 +75,6 @@ export default defineConfig({
       {
         text: 'Editor In-Depth',
         items: [
-          { text: 'Component Types', link: '/component-types' },
           { text: 'Design Philosophy 🚧' },
           {
             text: 'CRDT-Native Data Flow',

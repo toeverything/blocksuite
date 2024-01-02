@@ -1,9 +1,11 @@
 # Quick Start
 
-The `@blocksuite/presets` package contains the prebuilt editors and opt-in additional UI components. Its `nightly` versions are released daily based on the master branch, which is also recommended for real world usage:
+The `@blocksuite/presets` package contains the prebuilt editors and opt-in additional UI components. Its `nightly` versions are released daily based on the master branch, which is also recommended for real world usage. You may also need to install `@blocksuite/store` explicitly for working with BlockSuite documents:
 
 ```sh
-pnpm i @blocksuite/presets@nightly
+pnpm install \
+  @blocksuite/presets@nightly \
+  @blocksuite/store@nightly
 ```
 
 Then you can use the prebuilt `DocEditor` out of the box, with an initialized `page` instance attached as its document model:
@@ -32,6 +34,6 @@ import { Text } from '@blocksuite/store';
 
 :::
 
-The `DocEditor` here is a standard web component that can also be reused with `<doc-editor>` HTML tag. All first-party components within BlockSuite are implemented as web components. Another `EdgelessEditor` also works similarly - simply attach the `editor` with a `page` and you are all set.
+The `DocEditor` here is a standard web component that can also be reused with `<doc-editor>` HTML tag. Another `EdgelessEditor` also works similarly - simply attach the `editor` with a `page` and you are all set.
 
-For the `page.getBlockByFlavour` and `page.updateBlock` APIs used here, please see next section for further details.
+For the `page.getBlockByFlavour` and `page.updateBlock` APIs used here, please see the [introduction](./working-with-block-tree#block-tree-basics) about block tree basics for further details.

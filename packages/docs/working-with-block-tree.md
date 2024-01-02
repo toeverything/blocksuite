@@ -39,6 +39,8 @@ This example creates a subset of the block tree hierarchy defaultly used in `@bl
 
 ![block-nesting](./images/block-nesting.png)
 
+As a document-centric framework, **you need to initialize a valid document structure before attaching it to editors**, which is also why it requires `init()` after `createEmptyPage()`. See [creating new block tree](./data-persistence#creating-new-block-tree) for more details.
+
 ::: info
 The block tree hierarchy is specific to the preset editors. At the framework level, `@blocksuite/store` does **NOT** treat the "first-party" `affine:*` blocks with any special way. Feel free to add blocks from different namespaces for the block tree!
 :::
@@ -68,7 +70,7 @@ const { spec, selection, command } = host.std;
 
 Firstly, let's explain the newly introduced `host` and `std`, which are determined by the framework-agnostic architecture of BlockSuite:
 
-- In BlockSuite, the `editor` itself is usually quite lightweight, serving primarily to provide access to the `host`. The actual editable blocks are registered on `editor.host` - also known as the [`EditorHost`](/api/@blocksuite/lit/) component, which is a container for mounting block UI components. BlockSuite by default offers a host based on the [lit](https://lit.dev) framework. As long as there is a corresponding `host` implementation, you can use the component model of frameworks like react or vue to implement your BlockSuite editors.
+- As [mentioned before](./component-types#composing-editors-by-blocks), the `editor.host` - also known as the [`EditorHost`](/api/@blocksuite/lit/) component, is a container for mounting block UI components. It handles the heavy lifting involved in mapping the **block tree** to the **component tree**.
 - Regardless of the framework used to implement `EditorHost`, they can access the same headless standard library designed for editable blocks through `host.std`. For example, `std.spec` contains all the registered [`BlockSpec`](./block-spec)s.
 
 ::: tip
