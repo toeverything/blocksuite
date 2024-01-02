@@ -14,14 +14,14 @@ import type {
   TopLevelBlockModel,
 } from '../../../../_common/types.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
-import type { SurfaceRefBlockService } from '../../../../index.js';
-import { type SurfaceService } from '../../../../index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import type { SurfaceBlockModel } from '../../../../surface-block/surface-model.js';
+import type { SurfaceService } from '../../../../surface-block/surface-service.js';
 import { Bound } from '../../../../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
 import type { SurfaceRefPortal } from '../../../../surface-ref-block/surface-ref-portal.js';
 import type { SurfaceRefRenderer } from '../../../../surface-ref-block/surface-ref-renderer.js';
+import type { SurfaceRefBlockService } from '../../../../surface-ref-block/surface-ref-service.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 type RefElement = Exclude<EdgelessElement, NoteBlockModel>;
