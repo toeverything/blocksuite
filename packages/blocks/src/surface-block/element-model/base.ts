@@ -24,6 +24,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
   }[];
   private _stashed: Map<keyof Props, unknown>;
   protected _onchange?: (props: Record<string, { oldValue: unknown }>) => void;
+  protected _localStore: Map<string | symbol, unknown> = new Map();
 
   yMap: Y.Map<unknown>;
   surfaceModel!: SurfaceBlockModel;

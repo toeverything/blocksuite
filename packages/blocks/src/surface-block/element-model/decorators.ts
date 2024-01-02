@@ -34,16 +34,19 @@ export function ymap(): PropertyDecorator {
 
 export function local(): PropertyDecorator {
   return function localDecorator(target: unknown, prop: string | symbol) {
-    // @ts-ignore
-    let value;
-
     Object.defineProperty(target, prop, {
-      get() {
-        // @ts-ignore
-        return value;
+      get(this: ElementModel) {
+        return this._localStore.get(prop);
       },
-      set(newVal) {
-        value = newVal;
+      set(this: ElementModel, newVal: unknown) {
+        const oldValue = this._localStore.get(prop);
+
+        this._localStore.set(prop, newVal);
+        this._onchange?.({
+          [prop]: {
+            oldValue,
+          },
+        });
       },
     });
   };
