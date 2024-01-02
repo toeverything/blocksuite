@@ -1,4 +1,4 @@
-export type { PageMeta } from './meta.js';
+export type { PageMeta, WorkspaceMeta } from './meta.js';
 export type { BlockProps } from './page.js';
 export { Page } from './page.js';
 export * from './space.js';
