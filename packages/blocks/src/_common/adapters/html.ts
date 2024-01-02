@@ -202,7 +202,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
   override async toSliceSnapshot(
     payload: HtmlToSliceSnapshotPayload
   ): Promise<SliceSnapshot> {
-    const notionHtmlAst = this._htmlToAst(payload.file);
+    const htmlAst = this._htmlToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
       id: nanoid('block'),
@@ -219,7 +219,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       type: 'slice',
       content: [
         await this._traverseHtml(
-          notionHtmlAst,
+          htmlAst,
           blockSnapshotRoot as BlockSnapshot,
           payload.assets
         ),
@@ -676,23 +676,6 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           context.skipAllChildren();
           break;
         }
-        case 'div': {
-          if (
-            o.parent?.type === 'element' &&
-            o.parent.tagName !== 'li' &&
-            Array.isArray(o.node.properties?.className)
-          ) {
-            if (
-              o.node.properties.className.includes(
-                'affine-block-children-container'
-              ) ||
-              o.node.properties.className.includes('indented')
-            ) {
-              context.closeNode();
-            }
-          }
-          break;
-        }
         case 'img': {
           if (!assets) {
             break;
@@ -824,6 +807,37 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           }
           break;
         }
+        case 'div': {
+          if (
+            // Check if it is a paragraph like div
+            !hastGetElementChildren(o.node)
+              .map(child => hastQuerySelector(child, 'div'))
+              .every(child => {
+                return !child;
+              })
+          ) {
+            break;
+          }
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:paragraph',
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: this._hastToDelta(o.node),
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
         case 'p': {
           context.openNode(
             {
@@ -949,6 +963,23 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         return;
       }
       switch (o.node.tagName) {
+        case 'div': {
+          if (
+            o.parent?.type === 'element' &&
+            o.parent.tagName !== 'li' &&
+            Array.isArray(o.node.properties?.className)
+          ) {
+            if (
+              o.node.properties.className.includes(
+                'affine-block-children-container'
+              ) ||
+              o.node.properties.className.includes('indented')
+            ) {
+              context.closeNode();
+            }
+          }
+          break;
+        }
         case 'blockquote': {
           context.setGlobalContext('hast:blockquote', false);
           break;
@@ -1223,7 +1254,8 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       if (
         typeof last.insert === 'string' &&
         typeof cur.insert === 'string' &&
-        isEqual(last.attributes, cur.attributes)
+        (isEqual(last.attributes, cur.attributes) ||
+          (last.attributes === undefined && cur.attributes === undefined))
       ) {
         last.insert += cur.insert;
         return acc;
