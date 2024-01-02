@@ -1,4 +1,4 @@
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 
 import { PathFinder } from '../utils/index.js';
 import type { UIEventHandler } from './base.js';
@@ -104,20 +104,6 @@ export class UIEventDispatcher {
     UIEventDispatcher._activeDispatcher = null;
     prevDispatcher.std.selection.clear();
   };
-
-  private _viewportElement: HTMLElement | null = null;
-
-  get viewportElement() {
-    if (this._viewportElement) return this._viewportElement;
-    const pageElement = this.std.view.viewFromPath('block', [
-      this.std.page.root?.id ?? '',
-    ]);
-    assertExists(pageElement);
-    // @ts-ignore
-    this._viewportElement = pageElement.viewportElement as HTMLElement | null;
-    assertExists(this._viewportElement);
-    return this._viewportElement;
-  }
 
   mount() {
     if (this.disposables.disposed) {
