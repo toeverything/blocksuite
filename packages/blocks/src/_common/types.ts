@@ -5,18 +5,16 @@ import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
 import type { BookmarkBlockModel } from '../models.js';
 import type { NoteBlockModel } from '../note-block/index.js';
-import { type ShapeStyle } from '../surface-block/consts.js';
 import {
   type BrushElement,
   type CanvasElement,
   type ConnectorElement,
   type ConnectorMode,
   type GroupElement,
-  type ShapeType,
 } from '../surface-block/elements/index.js';
+import type { ShapeType } from '../surface-block/index.js';
 import type { RefNodeSlots } from './components/rich-text/inline/nodes/reference-node.js';
 import type { NavigatorMode } from './edgeless/frame/consts.js';
-import type { CssVariableName } from './theme/css-variables.js';
 import type { BlockComponent } from './utils/query.js';
 import type { Point } from './utils/rect.js';
 
@@ -25,12 +23,6 @@ export type SelectionPosition = 'start' | 'end' | Point;
 export interface IPoint {
   x: number;
   y: number;
-}
-
-export interface BlockTransformContext {
-  childText?: string;
-  begin?: number;
-  end?: number;
 }
 
 export interface EditingState {
@@ -147,17 +139,7 @@ export type DefaultTool = {
 
 export type ShapeTool = {
   type: 'shape';
-  shape: ShapeType | 'roundedRect';
-  fillColor: CssVariableName;
-  strokeColor: CssVariableName;
-  shapeStyle: ShapeStyle;
-};
-
-export type ShapeToolState = {
-  shape: ShapeType | 'roundedRect';
-  fillColor: string;
-  strokeColor: string;
-  shapeStyle: ShapeStyle;
+  shapeType: ShapeType | 'roundedRect';
 };
 
 export enum LineWidth {
@@ -175,13 +157,10 @@ export enum LineWidth {
 
 export type TextTool = {
   type: 'text';
-  color: CssVariableName;
 };
 
 export type BrushTool = {
   type: 'brush';
-  color: CssVariableName;
-  lineWidth: LineWidth;
 };
 
 export type EraserTool = {
@@ -215,8 +194,7 @@ export type NoteChildrenFlavour =
   | 'affine:surface-ref';
 
 export type NoteTool = {
-  type: 'note';
-  background: CssVariableName;
+  type: 'affine:note';
   childFlavour: NoteChildrenFlavour;
   childType: string | null;
   tip: string;
@@ -225,8 +203,6 @@ export type NoteTool = {
 export type ConnectorTool = {
   type: 'connector';
   mode: ConnectorMode;
-  color: CssVariableName;
-  strokeWidth: LineWidth;
 };
 
 export type EdgelessTool =

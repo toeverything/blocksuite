@@ -87,7 +87,7 @@ export function getFontString({
   const lineHeight = getLineHeight(fontFamily, fontSize);
   return `${fontStyle} ${fontWeight} ${fontSize}px/${lineHeight}px ${wrapFontFamily(
     fontFamily
-  )}`.trim();
+  )}, sans-serif`.trim();
 }
 
 export function normalizeText(text: string): string {

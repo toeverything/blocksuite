@@ -25,10 +25,7 @@ import {
 import { customElement, state } from 'lit/decorators.js';
 
 import { toast } from '../../../../_common/components/toast.js';
-import {
-  EdgelessPresentationConsts as PresentationConsts,
-  type NavigatorMode,
-} from '../../../../_common/edgeless/frame/consts.js';
+import { type NavigatorMode } from '../../../../_common/edgeless/frame/consts.js';
 import {
   EdgelessImageIcon,
   EdgelessTextIcon,
@@ -182,6 +179,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private _timer: ReturnType<typeof setTimeout> | null = null;
   private _cachedIndex = -1;
 
+  private get _service() {
+    return this.edgeless.surface.service;
+  }
+
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
     this.edgeless = edgeless;
@@ -247,7 +248,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode =
-      sessionStorage.getItem(PresentationConsts.FillScreen) === 'true'
+      this._service.editSession.getItem('presentFillScreen') === true
         ? 'fill'
         : 'fit';
   }
@@ -256,8 +257,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { _disposables, edgeless } = this;
     const { slots, page } = edgeless;
 
-    const hideToolbar = sessionStorage.getItem(PresentationConsts.HideToolbar);
-    this._hideToolbar = hideToolbar === 'true';
+    this._hideToolbar =
+      !!this._service.editSession.getItem('presentHideToolbar');
 
     edgeless.bindHotKey(
       {
@@ -295,8 +296,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           this._toggleFullScreen();
         }
 
-        this._trySaveBrushStateLocalRecord();
-        this._trySaveTextStateLocalRecord();
         this.requestUpdate();
       })
     );
@@ -340,33 +339,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     this._tryLoadNavigatorStateLocalRecord();
   }
 
-  private _trySaveBrushStateLocalRecord = () => {
-    const edgelessTool = this.edgeless.tools.edgelessTool;
-    const { type } = edgelessTool;
-    if (type === 'brush') {
-      sessionStorage.setItem(
-        'blocksuite:' + this.edgeless.page.id + ':edgelessBrush',
-        JSON.stringify({
-          color: edgelessTool.color,
-          lineWidth: edgelessTool.lineWidth,
-        })
-      );
-    }
-  };
-
-  private _trySaveTextStateLocalRecord = () => {
-    const edgelessTool = this.edgeless.tools.edgelessTool;
-    const { type } = edgelessTool;
-    if (type === 'text') {
-      sessionStorage.setItem(
-        'blocksuite:' + this.edgeless.page.id + ':edgelessText',
-        JSON.stringify({
-          color: edgelessTool.color,
-        })
-      );
-    }
-  };
-
   private _moveToCurrentFrame() {
     const current = this._currentFrameIndex;
     const viewport = this.edgeless.surface.viewport;
@@ -408,9 +380,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this.edgeless.slots.navigatorSettingUpdated.emit({
         hideToolbar: this._hideToolbar,
       });
-      sessionStorage.setItem(
-        PresentationConsts.HideToolbar,
-        this._hideToolbar.toString()
+      this._service.editSession.setItem(
+        'presentHideToolbar',
+        this._hideToolbar
       );
     }
   }
@@ -420,7 +392,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this._timer && clearTimeout(this._timer);
       document.exitFullscreen().catch(console.error);
     } else {
-      launchIntoFullscreen(this.edgeless.editorContainer);
+      launchIntoFullscreen(this.edgeless.viewportElement);
       this._timer = setTimeout(() => {
         this._currentFrameIndex = this._cachedIndex;
       }, 400);
@@ -511,13 +483,14 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _Tools() {
+    const { edgelessTool } = this.edgeless;
+    const { type } = edgelessTool;
     return html`
       <div class="full-divider"></div>
       <div class="brush-and-eraser">
         <edgeless-brush-tool-button
-          .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
+          .active=${type === 'brush'}
         ></edgeless-brush-tool-button>
         <edgeless-eraser-tool-button
           .edgelessTool=${this.edgelessTool}
@@ -527,14 +500,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       </div>
       <div class="edgeless-toolbar-right-part">
         <edgeless-shape-tool-button
-          .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
+          .active=${type === 'shape'}
         ></edgeless-shape-tool-button>
         <edgeless-text-tool-button
-          .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
+          .active=${type === 'text'}
         >
           ${EdgelessTextIcon}
         </edgeless-text-tool-button>
@@ -555,7 +526,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private get _DefaultContent() {
-    const { page } = this.edgeless;
+    const { page, edgelessTool } = this.edgeless;
+    const { type } = edgelessTool;
 
     return html`<div class="edgeless-toolbar-left-part">
         <edgeless-default-tool-button
@@ -565,9 +537,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         ></edgeless-default-tool-button>
 
         <edgeless-connector-tool-button
-          .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
+          .active=${type === 'connector'}
         ></edgeless-connector-tool-button>
 
         ${page.readonly
@@ -598,9 +569,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         : html`
             <div class="short-divider"></div>
             <edgeless-note-tool-button
-              .edgelessTool=${this.edgelessTool}
               .edgeless=${this.edgeless}
-              .setEdgelessTool=${this.setEdgelessTool}
+              .active=${type === 'affine:note'}
             ></edgeless-note-tool-button>
           `}
       ${this._Tools()} `;

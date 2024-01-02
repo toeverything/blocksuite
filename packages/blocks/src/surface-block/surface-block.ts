@@ -12,7 +12,7 @@ import {
   type CssVariableName,
   isCssVariable,
 } from '../_common/theme/css-variables.js';
-import { getThemePropertyValue } from '../_common/theme/utils.js';
+import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import {
   type EdgelessElement,
   isInsideEdgelessEditor,
@@ -31,7 +31,7 @@ import {
   isTopLevelBlock,
 } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
-import type { IBound } from './consts.js';
+import { type IBound } from './consts.js';
 import {
   type EdgelessBlockModelMap,
   type EdgelessElementType,
@@ -53,8 +53,8 @@ import {
   GroupElement,
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
-import type { CanvasElementType, IConnector, IVec } from './index.js';
 import type { EdgelessBlockType } from './index.js';
+import { type CanvasElementType, type IConnector, type IVec } from './index.js';
 import {
   compare,
   EdgelessGroupManager,
@@ -166,6 +166,8 @@ export class SurfaceBlockComponent extends BlockElement<
   private _lastTime = 0;
   private _cachedViewport = new Bound();
 
+  private readonly _themeObserver = new ThemeObserver();
+
   @query('edgeless-block-portal-container')
   portal!: EdgelessBlockPortalContainer;
 
@@ -179,6 +181,10 @@ export class SurfaceBlockComponent extends BlockElement<
 
   private get _isEdgeless() {
     return isInsideEdgelessEditor(this.host);
+  }
+
+  override get service() {
+    return super.service as SurfaceService;
   }
 
   getBlocks<T extends EdgelessBlockType>(
@@ -259,12 +265,13 @@ export class SurfaceBlockComponent extends BlockElement<
     this._initEvents();
     this.layer.init([...this._elements.values(), ...this.blocks]);
     this.init();
+    this._initThemeObserver();
   }
 
   getCSSPropertyValue = (value: string) => {
-    const root = this.host;
     if (isCssVariable(value)) {
-      const cssValue = getThemePropertyValue(root, value as CssVariableName);
+      const cssValue =
+        this._themeObserver.cssVariables?.[value as CssVariableName];
       if (cssValue === undefined) {
         console.error(
           new Error(
@@ -302,6 +309,13 @@ export class SurfaceBlockComponent extends BlockElement<
         const element = this.pickById(id);
         assertExists(element);
 
+        this.service!.editSession.record(
+          (isTopLevelBlock(element)
+            ? element.flavour
+            : element.type) as EdgelessElementType,
+          props as Record<string, unknown>
+        );
+
         if (element instanceof ConnectorElement) {
           this.connector.updatePath(element);
         }
@@ -333,6 +347,12 @@ export class SurfaceBlockComponent extends BlockElement<
       })
     );
   }
+
+  private _initThemeObserver = () => {
+    this._themeObserver.observe(document.documentElement);
+    this._themeObserver.on(() => this.requestUpdate());
+    this.disposables.add(() => this._themeObserver.dispose());
+  };
 
   private _getSortedSameGroupElements(element: EdgelessElement) {
     let elements: EdgelessElement[];
@@ -699,6 +719,9 @@ export class SurfaceBlockComponent extends BlockElement<
     if (this.page.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }
+
+    this.service!.editSession.apply(type, properties);
+
     if (isCanvasElementType(type)) {
       const id = generateElementId();
 

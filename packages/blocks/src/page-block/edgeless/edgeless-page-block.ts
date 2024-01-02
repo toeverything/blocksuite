@@ -40,7 +40,6 @@ import {
 import type { ImageBlockProps } from '../../image-block/image-model.js';
 import { ImageService } from '../../image-block/image-service.js';
 import type { FrameBlockModel, ImageBlockModel } from '../../models.js';
-import type { SerializedViewport } from '../../surface-block/commands/session.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import {
   Bound,
@@ -55,13 +54,13 @@ import {
   Vec,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
+import type { SerializedViewport } from '../../surface-block/managers/edit-session.js';
 import { compare } from '../../surface-block/managers/group-manager.js';
 import type {
   IndexedCanvasUpdateEvent,
   SurfaceBlockComponent,
 } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import type { SurfaceService } from '../../surface-block/surface-service.js';
 import type { FontLoader } from '../font-loader/font-loader.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
@@ -90,8 +89,6 @@ import {
 } from './utils/consts.js';
 import { xywhArrayToObject } from './utils/convert.js';
 import { getCursorMode, isCanvasElement, isFrameBlock } from './utils/query.js';
-
-type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent extends BlockElement<
@@ -221,14 +218,17 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return this.service?.uiEventDispatcher;
   }
 
-  private _editorContainer: EdtitorContainer | null = null;
+  private _viewportElement: HTMLElement | null = null;
 
-  get editorContainer(): EdtitorContainer {
-    if (this._editorContainer) return this._editorContainer;
-    this._editorContainer = this.closest('affine-editor-container');
-    assertExists(this._editorContainer);
-    return this._editorContainer;
+  get viewportElement(): HTMLElement {
+    if (this._viewportElement) return this._viewportElement;
+    this._viewportElement = this.host.closest(
+      'edgeless-editor'
+    ) as HTMLElement | null;
+    assertExists(this._viewportElement);
+    return this._viewportElement;
   }
+
   private _resizeObserver: ResizeObserver | null = null;
 
   get surfaceBlockModel() {
@@ -273,7 +273,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       listenToThemeChange(this, () => this.surface.refresh())
     );
 
-    const surfaceService = this.surface.service as SurfaceService;
+    const surfaceService = this.surface.service;
     _disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         this.edgelessTool = edgelessTool;
@@ -587,7 +587,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       this.selectionManager.set(this.selectionManager.selections);
     });
 
-    resizeObserver.observe(this.editorContainer);
+    resizeObserver.observe(this.viewportElement);
     this._resizeObserver = resizeObserver;
   }
 
@@ -697,51 +697,28 @@ export class EdgelessPageBlockComponent extends BlockElement<
     });
   }
 
-  private _saveViewportLocalRecord() {
-    const viewport = {
-      centerX: this.surface.viewport.center.x,
-      centerY: this.surface.viewport.center.y,
-      zoom: this.surface.viewport.zoom,
-    };
-    this.std.command
-      .pipe()
-      .withHost()
-      .saveViewportToSession({ viewport })
-      .run();
-  }
+  private _saveViewportLocalRecord() {}
 
   private _getSavedViewport(): SerializedViewport | null {
     let result: SerializedViewport | null = null;
+    const storedViewport = this.surface.service.editSession.getItem('viewport');
+    if (!storedViewport) return null;
 
-    this.std.command
-      .pipe()
-      .withHost()
-      .getViewportFromSession()
-      .inline(({ storedViewport }) => {
-        if (!storedViewport) {
-          result = null;
-          return;
-        }
+    if ('referenceId' in storedViewport) {
+      const block = this.surface.pickById(storedViewport.referenceId);
 
-        if ('referenceId' in storedViewport) {
-          const block = this.surface.pickById(
-            storedViewport.referenceId
-          ) as EdgelessElement;
-
-          if (block) {
-            this.surface.viewport.setViewportByBound(
-              Bound.deserialize(block.xywh),
-              storedViewport.padding
-            );
-            result = storedViewport;
-          } else {
-            result = null;
-          }
-        } else {
-          result = storedViewport;
-        }
-      })
-      .run();
+      if (block) {
+        this.surface.viewport.setViewportByBound(
+          Bound.deserialize(block.xywh),
+          storedViewport.padding
+        );
+        result = storedViewport;
+      } else {
+        result = null;
+      }
+    } else {
+      result = storedViewport;
+    }
 
     return result;
   }
@@ -786,7 +763,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _initViewport() {
     const run = () => {
       const viewport = this._getSavedViewport() ?? this.getFitToScreenData();
-
       if ('xywh' in viewport) {
         const { xywh, padding } = viewport;
         const bound = Bound.deserialize(xywh);

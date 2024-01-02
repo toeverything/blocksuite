@@ -3,11 +3,7 @@ import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../../frame-block/index.js';
-import {
-  CanvasTextFontFamily,
-  CanvasTextFontStyle,
-  CanvasTextFontWeight,
-} from '../../../surface-block/consts.js';
+import { CanvasTextFontFamily } from '../../../surface-block/consts.js';
 import {
   Bound,
   CanvasElementType,
@@ -19,7 +15,6 @@ import {
 } from '../../../surface-block/index.js';
 import {
   GET_DEFAULT_LINE_COLOR,
-  GET_DEFAULT_TEXT_COLOR,
   isTransparent,
 } from '../components/panel/color-panel.js';
 import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
@@ -131,9 +126,7 @@ export function mountGroupTitleEditor(
 
 export function addText(
   edgeless: EdgelessPageBlockComponent,
-  event: PointerEventState,
-  color: string = GET_DEFAULT_TEXT_COLOR(),
-  fontFamily: CanvasTextFontFamily = CanvasTextFontFamily.Inter
+  event: PointerEventState
 ) {
   const [x, y] = edgeless.surface.viewport.toModelCoord(event.x, event.y);
   const selected = edgeless.surface.pickTop(x, y);
@@ -146,12 +139,6 @@ export function addText(
     const id = edgeless.surface.addElement(CanvasElementType.TEXT, {
       xywh: new Bound(modelX, modelY, 32, 32).serialize(),
       text: new Workspace.Y.Text(),
-      textAlign: 'left',
-      fontFamily,
-      fontWeight: CanvasTextFontWeight.Regular,
-      fontStyle: CanvasTextFontStyle.Normal,
-      fontSize: 24,
-      color: color,
     });
     edgeless.page.captureSync();
     const textElement = edgeless.surface.pickById(id);

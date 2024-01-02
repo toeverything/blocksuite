@@ -171,6 +171,7 @@ test('always get latest value in onChange', async () => {
 
   let value: unknown;
   root.propsUpdated.on(({ key }) => {
+    // @ts-ignore
     value = root[key];
   });
 

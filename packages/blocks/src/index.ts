@@ -28,18 +28,17 @@ export {
   RichText,
   scrollbarStyle,
 } from './_common/components/index.js';
-export {
-  EdgelessPresentationConsts as EdgelessPresentationConsts,
-  type NavigatorMode,
-} from './_common/edgeless/frame/consts.js';
+export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {
   ArrowDownSmallIcon,
+  CloseIcon,
   DualLinkIcon16,
   LinkedPageIcon,
   PageIcon,
   PlusIcon,
   TagsIcon,
 } from './_common/icons/index.js';
+export { type TreeNode } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export {
   ColorVariables,
@@ -77,15 +76,19 @@ export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export {
   Bound,
+  type BrushElement,
   CanvasElementType,
+  type ConnectorElement,
   ConnectorElementModel,
   ConnectorEndpointStyle,
   ConnectorMode,
   generateKeyBetween,
   GroupElementModel,
+  type ShapeElement,
   ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
+  type TextElement,
 } from './surface-block/index.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';

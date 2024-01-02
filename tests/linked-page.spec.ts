@@ -1,7 +1,8 @@
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
-import { addNewPage, switchToPage } from 'utils/actions/click.js';
-import { dragBetweenIndices } from 'utils/actions/drag.js';
+
+import { addNewPage, switchToPage } from './utils/actions/click.js';
+import { dragBetweenIndices } from './utils/actions/drag.js';
 import {
   copyByKeyboard,
   pasteByKeyboard,
@@ -12,7 +13,7 @@ import {
   selectAllByKeyboard,
   type,
   undoByKeyboard,
-} from 'utils/actions/keyboard.js';
+} from './utils/actions/keyboard.js';
 import {
   captureHistory,
   enterPlaygroundRoom,
@@ -20,13 +21,12 @@ import {
   focusTitle,
   initEmptyParagraphState,
   waitNextFrame,
-} from 'utils/actions/misc.js';
+} from './utils/actions/misc.js';
 import {
   assertRichTexts,
   assertStoreMatchJSX,
   assertTitle,
-} from 'utils/asserts.js';
-
+} from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
 function getLinkedPagePopover(page: Page) {

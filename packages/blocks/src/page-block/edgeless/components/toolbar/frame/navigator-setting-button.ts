@@ -6,7 +6,6 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { EdgelessPresentationConsts as PresentationConsts } from '../../../../../_common/edgeless/frame/consts.js';
 import { NavigatorSettingsIcon } from '../../../../../_common/icons/edgeless.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { createButtonPopper } from '../../utils.js';
@@ -65,6 +64,10 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  private get _service() {
+    return this.edgeless.surface.service;
+  }
+
   @query('.navigator-setting-button')
   private _navigatorSettingButton!: HTMLElement;
   @query('.navigator-setting-menu')
@@ -74,10 +77,10 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   > | null = null;
 
   private _tryRestoreSettings() {
-    const blackBackground = sessionStorage.getItem(
-      PresentationConsts.BlackBackground
+    const blackBackground = this._service.editSession.getItem(
+      'presentBlackBackground'
     );
-    this.blackBackground = blackBackground !== 'false';
+    this.blackBackground = blackBackground ? blackBackground : true;
   }
 
   private _onBlackBackgroundChange = (checked: boolean) => {

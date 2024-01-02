@@ -1,7 +1,7 @@
 # Block Widgets
 
-::: warning
-This documentation is mostly written for BlockSuite maintainers. If you goal doesn't involve in contributing to the BlockSuite repository, here may not be the best place for getting started.
+::: info
+This document is preliminary and subject to refinement and updates for clarity and accuracy.
 :::
 
 In BlockSuite, widgets are components that can be used to display helper UI elements of a block. Sometimes, you want to display a menu to provide some extra information or actions for a block. As another example, it's a common practice to display a toolbar when you select a block.

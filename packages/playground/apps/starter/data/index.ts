@@ -9,6 +9,7 @@ export * from './embed';
 export * from './empty';
 export * from './heavy';
 export * from './heavy-whiteboard';
+export * from './linked';
 export * from './multiple-editor';
 export * from './pending-structs';
 export * from './preset';

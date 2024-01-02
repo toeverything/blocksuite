@@ -1,15 +1,15 @@
 import { expect } from '@playwright/test';
+
 import {
   getNoteProps,
   locatorComponentToolbar,
   selectNoteInEdgeless,
   switchEditorMode,
-} from 'utils/actions/edgeless.js';
+} from '../utils/actions/edgeless.js';
 import {
   enterPlaygroundRoom,
   initEmptyEdgelessState,
-} from 'utils/actions/misc.js';
-
+} from '../utils/actions/misc.js';
 import { test } from '../utils/playwright.js';
 
 test('toolbar should appear when select note', async ({ page }) => {

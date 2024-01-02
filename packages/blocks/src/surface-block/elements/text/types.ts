@@ -5,6 +5,7 @@ import type {
   CanvasTextFontStyle,
   CanvasTextFontWeight,
 } from '../../consts.js';
+import type { TextAlign } from '../consts.js';
 import type { CanvasElementType } from '../edgeless-element.js';
 import { type ISurfaceElement } from '../surface-element.js';
 
@@ -17,7 +18,7 @@ export interface IText extends ISurfaceElement {
   fontFamily: CanvasTextFontFamily;
   fontWeight?: CanvasTextFontWeight;
   fontStyle?: CanvasTextFontStyle;
-  textAlign: 'left' | 'center' | 'right';
+  textAlign: TextAlign;
   hasMaxWidth?: boolean;
 
   // outdated, use `fontWeight` and `fontStyle` instead

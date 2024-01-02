@@ -37,7 +37,6 @@
     "yjs": "^13"
   },
   "exports": {
-    "./src/*": "./src/*.ts",
     ".": "./src/index.ts",
     "./providers/*": "./src/providers/*.ts"
   },
@@ -46,7 +45,6 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./src/*": "./dist/*.js",
       ".": {
         "types": "./dist/index.d.ts",
         "module": "./dist/index.js",
@@ -61,7 +59,10 @@
     }
   },
   "files": [
+    "src",
     "dist",
-    "providers"
+    "providers",
+    "!src/__tests__",
+    "!dist/__tests__"
   ]
 }

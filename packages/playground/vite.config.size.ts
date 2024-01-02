@@ -56,7 +56,7 @@ const config = mergeConfig(
 );
 
 config.build!.rollupOptions!.input = {
-  main: resolve(__dirname, 'examples/basic/index.html'),
+  main: resolve(__dirname, 'examples/basic/doc/index.html'),
 };
 
 export default config;

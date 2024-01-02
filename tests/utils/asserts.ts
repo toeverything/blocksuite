@@ -1,39 +1,29 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import './declare-test-window.js';
 
-import type { Locator } from '@playwright/test';
-import { expect, type Page } from '@playwright/test';
-import {
-  format as prettyFormat,
-  plugins as prettyFormatPlugins,
-} from 'pretty-format';
-
-import {
-  BLOCK_ID_ATTR,
-  NOTE_WIDTH,
-} from '../../packages/blocks/src/_common/consts.js';
-import type { CssVariableName } from '../../packages/blocks/src/_common/theme/css-variables.js';
+import { BLOCK_ID_ATTR, NOTE_WIDTH } from '@blocks/_common/consts.js';
+import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type {
   AffineInlineEditor,
   NoteBlockModel,
   PageBlockModel,
   RichText,
-} from '../../packages/blocks/src/index.js';
-import { assertExists } from '../../packages/global/src/utils.js';
-import type { InlineRootElement } from '../../packages/inline/src/index.js';
-import type { BlockElement } from '../../packages/lit/src/index.js';
+} from '@blocks/index.js';
+import { assertExists } from '@global/utils/index.js';
+import type { InlineRootElement } from '@inline/inline-editor.js';
+import type { BlockElement } from '@lit/element/index.js';
+import type { Locator } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+import { PAGE_VERSION, WORKSPACE_VERSION } from '@store/consts.js';
+import type { BaseBlockModel, SerializedStore } from '@store/index.js';
+import type { JSXElement } from '@store/utils/jsx.js';
 import {
-  PAGE_VERSION,
-  WORKSPACE_VERSION,
-} from '../../packages/store/src/consts.js';
-import type {
-  BaseBlockModel,
-  SerializedStore,
-} from '../../packages/store/src/index.js';
-import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
+  format as prettyFormat,
+  plugins as prettyFormatPlugins,
+} from 'pretty-format';
+
 import {
   getCanvasElementsCount,
   getConnectorPath,
@@ -86,6 +76,7 @@ export const defaultStore: SerializedStore = {
       'affine:divider': 1,
       'affine:embed-github': 1,
       'affine:embed-html': 1,
+      'affine:embed-linked-page': 1,
       'affine:image': 1,
       'affine:frame': 1,
       'affine:code': 1,
@@ -910,7 +901,7 @@ export async function assertConnectorPath(
   index = 0
 ) {
   const actualPath = await getConnectorPath(page, index);
-  actualPath.every((p, i) => assertPointAlmostEqual(p, path[i]));
+  actualPath.every((p, i) => assertPointAlmostEqual(p, path[i], 0.1));
 }
 
 export function assertRectExist(

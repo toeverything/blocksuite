@@ -9,7 +9,7 @@ export default defineConfig(_configEnv =>
       include: ['@blocksuite/blocks > buffer'],
     },
     test: {
-      include: ['tests/**/*.spec.ts'],
+      include: ['src/__tests__/**/*.spec.ts'],
       browser: {
         enabled: true,
         headless: true,
@@ -22,7 +22,7 @@ export default defineConfig(_configEnv =>
         interopDefault: true,
       },
       testTransformMode: {
-        web: ['tests/**/*.spec.ts'],
+        web: ['src/__tests__/**/*.spec.ts'],
       },
       alias: {
         '@blocksuite/blocks': path.resolve(

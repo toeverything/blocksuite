@@ -19,7 +19,11 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
   @property({ type: Boolean })
   hasViewport = true;
 
-  host: Ref<EditorHost> = createRef<EditorHost>();
+  private _host: Ref<EditorHost> = createRef<EditorHost>();
+
+  get host() {
+    return this._host.value as EditorHost;
+  }
 
   override render() {
     return html`
@@ -59,7 +63,7 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
           : 'doc-editor-container'}
       >
         <editor-host
-          ${ref(this.host)}
+          ${ref(this._host)}
           .page=${this.page}
           .specs=${this.specs}
         ></editor-host>

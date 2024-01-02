@@ -13,6 +13,7 @@ import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
+import { EmbedLinkedPageBlockSpec } from '../embed-linked-page-block/index.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
@@ -190,6 +191,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   },
   EmbedGithubBlockSpec,
   EmbedHtmlBlockSpec,
+  EmbedLinkedPageBlockSpec,
 ];
 
 export const DocEditorBlockSpecs: BlockSpec[] = [

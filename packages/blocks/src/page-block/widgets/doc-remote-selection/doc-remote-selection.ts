@@ -92,9 +92,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
       this.requestUpdate();
     });
 
-    this._remoteColorManager = new RemoteColorManager(
-      this.host.page.workspace.awarenessStore
-    );
+    this._remoteColorManager = new RemoteColorManager(this.host);
   }
 
   override disconnectedCallback() {

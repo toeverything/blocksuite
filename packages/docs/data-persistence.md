@@ -1,4 +1,4 @@
-# Data Persistence in BlockSuite
+# Data Persistence
 
 BlockSuite offers flexible solutions for real-time and non-real-time applications. This guide explores optimal ways to utilize data persistence features in BlockSuite.
 
@@ -84,4 +84,4 @@ In contrast, when you are using BlockSuite with providers, the application logic
 await page.load();
 ```
 
-In both cases, the `page.slots.ready` [slot](./event-api#using-slots) can be used to receive notifications upon the completion of block tree initialization.
+In both cases, the `page.slots.ready` [slot](./slot) can be used to receive notifications upon the completion of block tree initialization.

@@ -158,7 +158,7 @@ export class EdgelessToolsManager {
       shape: new ShapeToolController(this.container),
       brush: new BrushToolController(this.container),
       pan: new PanToolController(this.container),
-      note: new NoteToolController(this.container),
+      'affine:note': new NoteToolController(this.container),
       connector: new ConnectorToolController(this.container),
       eraser: new EraserToolController(this.container),
       frame: new FrameToolController(this.container),

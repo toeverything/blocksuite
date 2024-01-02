@@ -1,8 +1,4 @@
 import { expect, type Page } from '@playwright/test';
-import {
-  waitForInlineEditorStateUpdated,
-  waitNextFrame,
-} from 'utils/actions/misc.js';
 
 import { clickView } from '../utils/actions/click.js';
 import {
@@ -14,6 +10,10 @@ import {
   Shape,
   toViewCoord,
 } from '../utils/actions/edgeless.js';
+import {
+  waitForInlineEditorStateUpdated,
+  waitNextFrame,
+} from '../utils/actions/misc.js';
 import {
   assertEdgelessCanvasText,
   assertRichTexts,

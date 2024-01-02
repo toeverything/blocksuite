@@ -3,11 +3,7 @@ import './body/frame-panel-body.js';
 
 import { FramePreview } from '@blocksuite/blocks';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import {
-  type EditorHost,
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, type PropertyValues, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -86,7 +82,7 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
   }
 
   get host() {
-    return this.editor.root as EditorHost;
+    return this.editor.host;
   }
 
   get edgeless() {
@@ -148,6 +144,7 @@ export class FramePanel extends WithDisposable(ShadowlessElement) {
       <frame-panel-header
         .edgeless=${this.edgeless}
         .changeEditorMode=${this._changeEditorMode}
+        .editorHost=${this.host}
       ></frame-panel-header>
       <frame-panel-body
         class="frame-panel-body"

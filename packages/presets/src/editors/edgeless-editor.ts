@@ -1,3 +1,4 @@
+import type { SurfaceBlockComponent } from '@blocksuite/blocks';
 import { EdgelessEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { EditorHost, ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -16,7 +17,11 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   specs = EdgelessEditorBlockSpecs;
 
-  host: Ref<EditorHost> = createRef<EditorHost>();
+  private _host: Ref<EditorHost> = createRef<EditorHost>();
+
+  get host() {
+    return this._host.value as EditorHost;
+  }
 
   override render() {
     return html`
@@ -39,11 +44,30 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
         }
       </style>
       <editor-host
-        ${ref(this.host)}
+        ${ref(this._host)}
         .page=${this.page}
         .specs=${this.specs}
       ></editor-host>
     `;
+  }
+
+  override disconnectedCallback(): void {
+    const host = this.host;
+    if (!host) return;
+    const surfaceModel = host.page.getBlockByFlavour('affine:surface')[0];
+    const surface = host.view.viewFromPath('block', [
+      this.page.root!.id,
+      surfaceModel.id,
+    ]) as SurfaceBlockComponent;
+
+    if (!surface) return;
+
+    const { service, viewport } = surface;
+    service.editSession.setItem('viewport', {
+      centerX: viewport.centerX,
+      centerY: viewport.centerY,
+      zoom: viewport.zoom,
+    });
   }
 }
 
