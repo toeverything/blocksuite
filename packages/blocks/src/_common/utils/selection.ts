@@ -2,7 +2,7 @@ import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import { type InlineRange, type VLine } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { SelectionPosition } from '../types.js';
@@ -30,7 +30,7 @@ declare global {
 
 export async function asyncSetInlineRange(
   editorHost: EditorHost,
-  model: BaseBlockModel,
+  model: BlockModel,
   inlineRange: InlineRange
 ) {
   const richText = await asyncGetRichTextByModel(editorHost, model);
@@ -215,7 +215,7 @@ async function focusRichText(
  */
 export function focusBlockByModel(
   editorHost: EditorHost,
-  model: BaseBlockModel,
+  model: BlockModel,
   position: SelectionPosition = 'end',
   zoom = 1
 ) {

@@ -1,4 +1,4 @@
-import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { NOTE_WIDTH } from '../_common/consts.js';
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
@@ -67,4 +67,4 @@ type NoteEdgelessProps = {
   collapsedHeight?: number;
 };
 
-export class NoteBlockModel extends selectable<NoteProps>(BaseBlockModel) {}
+export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {}

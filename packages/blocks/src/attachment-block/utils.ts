@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import { type BaseBlockModel, type BlobManager } from '@blocksuite/store';
+import { type BlobManager, type BlockModel } from '@blocksuite/store';
 
 import { toast } from '../_common/components/toast.js';
 import { downloadBlob, withTempBlobData } from '../_common/utils/filesys.js';
@@ -170,7 +170,7 @@ async function uploadBlobForAttachment(
 export async function addSiblingAttachmentBlock(
   file: File,
   maxFileSize: number,
-  model: BaseBlockModel,
+  model: BlockModel,
   place: 'before' | 'after' = 'after'
 ): Promise<string | null> {
   if (file.size > maxFileSize) {

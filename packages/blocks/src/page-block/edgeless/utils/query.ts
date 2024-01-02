@@ -1,4 +1,4 @@
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { type Page } from '@blocksuite/store';
 
 import {
@@ -29,19 +29,19 @@ import { getElementsWithoutGroup } from '../../../surface-block/managers/group-m
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 
 export function isTopLevelBlock(
-  selectable: BaseBlockModel | Selectable | BaseBlockModel | null
+  selectable: BlockModel | Selectable | BlockModel | null
 ): selectable is TopLevelBlockModel {
   return !!selectable && 'flavour' in selectable;
 }
 
 export function isNoteBlock(
-  element: BaseBlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessElement | null
 ): element is NoteBlockModel {
   return !!element && 'flavour' in element && element.flavour === 'affine:note';
 }
 
 export function isFrameBlock(
-  element: BaseBlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessElement | null
 ): element is FrameBlockModel {
   return (
     !!element && 'flavour' in element && element.flavour === 'affine:frame'
@@ -49,7 +49,7 @@ export function isFrameBlock(
 }
 
 export function isImageBlock(
-  element: BaseBlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessElement | null
 ): element is ImageBlockModel {
   return (
     !!element && 'flavour' in element && element.flavour === 'affine:image'
@@ -57,7 +57,7 @@ export function isImageBlock(
 }
 
 export function isBookmarkBlock(
-  element: BaseBlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessElement | null
 ): element is BookmarkBlockModel {
   return (
     !!element && 'flavour' in element && element.flavour === 'affine:bookmark'
@@ -65,7 +65,7 @@ export function isBookmarkBlock(
 }
 
 export function isEmbeddedBlock(
-  element: BaseBlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessElement | null
 ): element is BookmarkBlockModel {
   return (
     !!element && 'flavour' in element && /affine:embed-*/.test(element.flavour)

@@ -1,4 +1,4 @@
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -61,7 +61,7 @@ export class Loader extends LitElement {
   `;
 
   @property({ attribute: false })
-  hostModel: BaseBlockModel | null = null;
+  hostModel: BlockModel | null = null;
 
   @property({ attribute: false })
   radius: string | number = '8px';

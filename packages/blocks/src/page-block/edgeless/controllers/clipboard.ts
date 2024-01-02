@@ -5,7 +5,7 @@ import type {
 } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import {
   type BlockSnapshot,
   fromJSON,
@@ -128,9 +128,9 @@ export class EdgelessClipboardController extends PageClipboard {
     );
   };
 
-  private _blockElmentGetter(model: BaseBlockModel) {
+  private _blockElmentGetter(model: BlockModel) {
     if (matchFlavours(model, ['affine:image', 'affine:frame'])) {
-      let current: BaseBlockModel | null = model;
+      let current: BlockModel | null = model;
       const path: string[] = [];
       while (current) {
         // Top level image render under page block not surface block

@@ -2,7 +2,7 @@ import type { TextRangePoint } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import type { EditorHost } from '@blocksuite/lit';
 import type {
-  BaseBlockModel,
+  BlockModel,
   BlockSnapshot,
   JobMiddleware,
   JobSlots,
@@ -13,7 +13,7 @@ import { matchFlavours } from '../../../_common/utils/index.js';
 const handlePoint = (
   point: TextRangePoint,
   snapshot: BlockSnapshot,
-  model: BaseBlockModel
+  model: BlockModel
 ) => {
   const { index, length } = point;
   if (matchFlavours(model, ['affine:page'])) {

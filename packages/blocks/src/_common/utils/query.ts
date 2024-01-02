@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import { INLINE_ROOT_ATTR } from '@blocksuite/inline';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
@@ -31,7 +31,7 @@ const STEPS = MAX_SPACE / 2 / 2;
 export type BlockComponent = BlockElement<any>;
 
 interface ContainerBlock {
-  model?: BaseBlockModel;
+  model?: BlockModel;
 }
 
 /**
@@ -51,9 +51,9 @@ interface ContainerBlock {
  */
 export function getNextBlock(
   editorHost: EditorHost,
-  model: BaseBlockModel,
+  model: BlockModel,
   map: Record<string, true> = {}
-): BaseBlockModel | null {
+): BlockModel | null {
   if (model.id in map) {
     throw new Error("Can't get next block! There's a loop in the block tree!");
   }
@@ -101,9 +101,9 @@ export function getNextBlock(
  */
 export function getPreviousBlock(
   editorHost: EditorHost,
-  model: BaseBlockModel
-): BaseBlockModel | null {
-  const getPrev = (model: BaseBlockModel) => {
+  model: BlockModel
+): BlockModel | null {
+  const getPrev = (model: BlockModel) => {
     const parent = model.page.getParent(model);
     if (!parent) return null;
 
@@ -128,8 +128,8 @@ export function getPreviousBlock(
   };
 
   const map: Record<string, true> = {};
-  const iterate: (model: BaseBlockModel) => BaseBlockModel | null = (
-    model: BaseBlockModel
+  const iterate: (model: BlockModel) => BlockModel | null = (
+    model: BlockModel
   ) => {
     if (model.id in map) {
       throw new Error(
@@ -158,7 +158,7 @@ export function getPreviousBlock(
  * If this function does not meet your needs, you may need to build path manually to satisfy your needs.
  * You should not modify this function.
  */
-export function buildPath(model: BaseBlockModel | null): string[] {
+export function buildPath(model: BlockModel | null): string[] {
   const path: string[] = [];
   let current = model;
   while (current) {
@@ -262,7 +262,7 @@ export function getViewportElement(editorHost: EditorHost) {
  */
 export function getBlockComponentByModel(
   editorHost: EditorHost,
-  model: BaseBlockModel | null
+  model: BlockModel | null
 ) {
   return getBlockComponentByPath(editorHost, buildPath(model));
 }
@@ -283,7 +283,7 @@ export function getBlockComponentByPath(
  */
 export async function asyncGetBlockComponentByModel(
   editorHost: EditorHost,
-  model: BaseBlockModel
+  model: BlockModel
 ): Promise<BlockComponent | null> {
   assertExists(model.page.root);
   const pageComponent = getPageByEditorHost(editorHost);
@@ -304,10 +304,7 @@ export async function asyncGetBlockComponentByModel(
 /**
  * @deprecated In most cases, you not need RichText, you can use {@link getInlineEditorByModel} instead.
  */
-export function getRichTextByModel(
-  editorHost: EditorHost,
-  model: BaseBlockModel
-) {
+export function getRichTextByModel(editorHost: EditorHost, model: BlockModel) {
   const blockComponent = editorHost.view.viewFromPath(
     'block',
     buildPath(model)
@@ -319,7 +316,7 @@ export function getRichTextByModel(
 
 export async function asyncGetRichTextByModel(
   editorHost: EditorHost,
-  model: BaseBlockModel
+  model: BlockModel
 ) {
   const blockComponent = await asyncGetBlockComponentByModel(editorHost, model);
   if (!blockComponent) return null;
@@ -331,7 +328,7 @@ export async function asyncGetRichTextByModel(
 
 export function getInlineEditorByModel(
   editorHost: EditorHost,
-  model: BaseBlockModel
+  model: BlockModel
 ) {
   if (matchFlavours(model, ['affine:database'])) {
     // Not support database model since it's may be have multiple inline editor instances.
@@ -345,7 +342,7 @@ export function getInlineEditorByModel(
 
 export async function asyncGetInlineEditorByModel(
   editorHost: EditorHost,
-  model: BaseBlockModel
+  model: BlockModel
 ) {
   if (matchFlavours(model, ['affine:database'])) {
     // Not support database model since it's may be have multiple inline editor instances.
@@ -356,7 +353,7 @@ export async function asyncGetInlineEditorByModel(
   return richText.inlineEditor;
 }
 
-export function getModelByElement(element: Element): BaseBlockModel {
+export function getModelByElement(element: Element): BlockModel {
   const closestBlock = element.closest(ATTR_SELECTOR);
   assertExists(closestBlock, 'Cannot find block element by element');
   return getModelByBlockComponent(closestBlock);
@@ -820,7 +817,7 @@ export enum DropFlags {
  */
 export function getDropRectByPoint(
   point: Point,
-  model: BaseBlockModel,
+  model: BlockModel,
   element: Element
 ): {
   rect: DOMRect;

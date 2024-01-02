@@ -153,8 +153,8 @@ function toStyledEntry(key: string, value: unknown) {
 export const devtoolsFormatter: typeof window.devtoolsFormatters = [
   {
     header: function (obj: unknown) {
-      if ('flavour' in (obj as store.BaseBlockModel)) {
-        globalUtils.assertType<store.BaseBlockModel>(obj);
+      if ('flavour' in (obj as store.BlockModel)) {
+        globalUtils.assertType<store.BlockModel>(obj);
         return [
           'span',
           { style: 'font-weight: bolder;' },
@@ -169,15 +169,15 @@ export const devtoolsFormatter: typeof window.devtoolsFormatters = [
       return null;
     },
     hasBody: (obj: unknown) => {
-      if ('flavour' in (obj as store.BaseBlockModel)) {
+      if ('flavour' in (obj as store.BlockModel)) {
         return true;
       }
 
       return null;
     },
     body: (obj: unknown) => {
-      if ('flavour' in (obj as store.BaseBlockModel)) {
-        globalUtils.assertType<store.BaseBlockModel>(obj);
+      if ('flavour' in (obj as store.BlockModel)) {
+        globalUtils.assertType<store.BlockModel>(obj);
 
         // @ts-ignore
         const { props } = obj.page._blockTree.getBlock(obj.id)._parseYBlock();

@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
 import { isControlledKeyboardEvent } from '../../../_common/utils/event.js';
@@ -30,7 +30,7 @@ export function showLinkedPagePopover({
   triggerKey,
 }: {
   editorHost: EditorHost;
-  model: BaseBlockModel;
+  model: BlockModel;
   range: Range;
   container?: HTMLElement;
   abortController?: AbortController;
@@ -101,7 +101,7 @@ export class AffineLinkedPageWidget extends WidgetElement {
     this.handleEvent('keyDown', this._onKeyDown);
   }
 
-  public showLinkedPage = (model: BaseBlockModel, triggerKey: string) => {
+  public showLinkedPage = (model: BlockModel, triggerKey: string) => {
     const curRange = getCurrentNativeRange();
     showLinkedPagePopover({
       editorHost: this.host,

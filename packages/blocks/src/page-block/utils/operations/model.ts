@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import { type BaseBlockModel, Text } from '@blocksuite/store';
+import { type BlockModel, Text } from '@blocksuite/store';
 
 import type { Flavour } from '../../../models.js';
 
@@ -10,7 +10,7 @@ import type { Flavour } from '../../../models.js';
  * just operate on data and will not involve in something about ui like selection reset.
  */
 
-export function mergeToCodeModel(models: BaseBlockModel[]) {
+export function mergeToCodeModel(models: BlockModel[]) {
   if (models.length === 0) {
     throw new Error('No models to merge');
   }
@@ -40,7 +40,7 @@ export function mergeToCodeModel(models: BaseBlockModel[]) {
 }
 
 export function transformModel(
-  model: BaseBlockModel,
+  model: BlockModel,
   flavour: Flavour,
   props?: Parameters<Page['addBlock']>[1]
 ) {
@@ -50,7 +50,7 @@ export function transformModel(
   const blockProps: {
     type?: string;
     text?: Text;
-    children?: BaseBlockModel[];
+    children?: BlockModel[];
   } = {
     text: model?.text?.clone(), // should clone before `deleteBlock`
     children: model.children,

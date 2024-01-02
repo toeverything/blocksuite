@@ -11,7 +11,7 @@ import {
   throttle,
 } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
+import { type BlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -403,11 +403,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   /**
    * Adds a new note with the given blocks and point.
-   * @param blocks Array<Partial<BaseBlockModel>>
+   * @param blocks Array<Partial<BlockModel>>
    * @param point Point
    */
   addNewNote(
-    blocks: Array<Partial<BaseBlockModel>>,
+    blocks: Array<Partial<BlockModel>>,
     point: Point,
     options?: {
       width?: number;
