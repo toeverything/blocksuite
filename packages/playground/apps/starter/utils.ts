@@ -150,7 +150,7 @@ function toStyledEntry(key: string, value: unknown) {
   ];
 }
 
-export const devtoolsFormatter = [
+export const devtoolsFormatter: typeof window.devtoolsFormatters = [
   {
     header: function (obj: unknown) {
       if ('flavour' in (obj as store.BaseBlockModel)) {
@@ -163,7 +163,7 @@ export const devtoolsFormatter = [
           ['span', { style: 'color: #fff' }, `,`],
           ...toStyledEntry('id', obj.id),
           ['span', { style: 'color: #fff' }, `}`],
-        ];
+        ] as HTMLTemplate;
       }
 
       return null;
@@ -187,7 +187,7 @@ export const devtoolsFormatter = [
             // @ts-ignore
             ...toStyledEntry(key, obj[key]),
             ['div', {}, ''],
-          ];
+          ] as HTMLTemplate[];
         });
 
         return ['div', { style: 'padding-left: 1em' }, ...propsArr];
@@ -198,5 +198,4 @@ export const devtoolsFormatter = [
   },
 ];
 
-// @ts-ignore
 window.devtoolsFormatters = devtoolsFormatter;
