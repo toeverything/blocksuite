@@ -11,13 +11,13 @@ import type {
 import type { Job } from '@blocksuite/store';
 import type { z } from 'zod';
 
-type HTMLTemplate = [
-  string,
-  Record<string, unknown>,
-  ...(HTMLTemplate | string)[],
-];
-
 declare global {
+  type HTMLTemplate = [
+    string,
+    Record<string, unknown>,
+    ...(HTMLTemplate | string)[],
+  ];
+
   interface Window {
     editor: AffineEditorContainer;
     page: Page;
