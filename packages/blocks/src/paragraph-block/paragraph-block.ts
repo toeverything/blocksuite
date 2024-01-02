@@ -1,6 +1,6 @@
 import '../_common/components/rich-text/rich-text.js';
 
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
@@ -10,8 +10,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import { affineAttributeRenderer } from '../_common/components/rich-text/inline/attribute-renderer.js';
-import { affineTextAttributes } from '../_common/components/rich-text/inline/types.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
@@ -22,6 +20,7 @@ import {
 } from '../_common/utils/index.js';
 import type { BlockHub } from '../page-block/widgets/block-hub/components/block-hub.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
+import type { ParagraphService } from './paragraph-service.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {
   // Call event.preventDefault() to keep the mouse event from being sent as well.
@@ -88,7 +87,10 @@ function TipsPlaceholder(
 }
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
+export class ParagraphBlockComponent extends BlockElement<
+  ParagraphBlockModel,
+  ParagraphService
+> {
   static override styles = css`
     .affine-paragraph-block-container {
       position: relative;
@@ -211,8 +213,23 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   @state()
   private _isFocus = false;
 
-  readonly attributesSchema = affineTextAttributes;
-  readonly attributeRenderer = affineAttributeRenderer;
+  get inlineManager() {
+    const inlineManager = this.service?.inlineManager;
+    assertExists(inlineManager);
+    return inlineManager;
+  }
+  get attributesSchema() {
+    return this.inlineManager.getSchema();
+  }
+  get attributeRenderer() {
+    return this.inlineManager.getRenderer();
+  }
+  get markdownShortcutHandler() {
+    return this.inlineManager.markdownShortcutHandler;
+  }
+  get embedChecker() {
+    return this.inlineManager.embedChecker;
+  }
 
   private _placeholderDisposables = new DisposableGroup();
 
@@ -356,6 +373,8 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
             .undoManager=${this.model.page.history}
             .attributesSchema=${this.attributesSchema}
             .attributeRenderer=${this.attributeRenderer}
+            .markdownShortcutHandler=${this.markdownShortcutHandler}
+            .embedChecker=${this.embedChecker}
             .readonly=${this.model.page.readonly}
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}

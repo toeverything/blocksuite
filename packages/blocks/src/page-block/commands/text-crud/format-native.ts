@@ -3,9 +3,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 import type { BlockElement } from '@blocksuite/lit';
 
-import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
+import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 import type { Flavour } from '../../../models.js';
 
 // for native range

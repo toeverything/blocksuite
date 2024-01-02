@@ -2,7 +2,7 @@ import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
+import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 import { isInsideBlockByFlavour } from '../../../_common/utils/index.js';
 import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
@@ -73,7 +73,7 @@ export function insertContent(
   }
   const inlineRange = inlineEditor.getInlineRange();
   const index = inlineRange ? inlineRange.index : model.text.length;
-  model.text.insert(text, index, attributes);
+  model.text.insert(text, index, attributes as Record<string, unknown>);
   // Update the caret to the end of the inserted text
   inlineEditor.setInlineRange({
     index: index + text.length,
