@@ -1,6 +1,6 @@
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, queryAsync, state } from 'lit/decorators.js';
 
@@ -200,7 +200,7 @@ export class EmbedLinkedPageBlock extends EmbedBlockElement<
     return;
   }
 
-  private async _renderImageAbstract(image: BaseBlockModel) {
+  private async _renderImageAbstract(image: BlockModel) {
     const sourceId = (image as ImageBlockModel).sourceId;
     if (!sourceId) {
       return;
@@ -217,7 +217,7 @@ export class EmbedLinkedPageBlock extends EmbedBlockElement<
     await this._addCover($img);
   }
 
-  private async _renderSurfaceRefAbstract(surfaceRef: BaseBlockModel) {
+  private async _renderSurfaceRefAbstract(surfaceRef: BlockModel) {
     const renderer = this._surfaceRefRenderer.surfaceRenderer;
     const container = document.createElement('div');
     await this._addCover(container);
