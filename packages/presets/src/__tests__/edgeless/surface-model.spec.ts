@@ -273,3 +273,24 @@ describe('connector', () => {
     expect(model.getConnectors(id2)).toEqual([]);
   });
 });
+
+describe('stash/pop', () => {
+  test('stash and pop should work correctly', () => {
+    const id = model.addElement({
+      type: 'shape',
+      strokeWidth: 4,
+    });
+    const elementModel = model.getElementById(id)! as ShapeElementModel;
+
+    expect(elementModel.strokeWidth).toBe(4);
+
+    elementModel.stash('strokeWidth');
+    elementModel.strokeWidth = 10;
+    expect(elementModel.strokeWidth).toBe(10);
+    expect(elementModel.yMap.get('strokeWidth')).toBe(4);
+
+    elementModel.pop('strokeWidth');
+    expect(elementModel.strokeWidth).toBe(10);
+    expect(elementModel.yMap.get('strokeWidth')).toBe(10);
+  });
+});

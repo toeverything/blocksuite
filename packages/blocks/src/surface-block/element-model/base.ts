@@ -20,7 +20,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     value: unknown;
   }[];
   private _stashed: Map<keyof Props, unknown>;
-  protected _onchange?: (props: Record<string, { oldValue: unknown }>) => void;
+  protected _onchange: (props: Record<string, { oldValue: unknown }>) => void;
   protected _localStore: Map<string | symbol, unknown> = new Map();
 
   yMap: Y.Map<unknown>;
@@ -96,7 +96,25 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
       return;
     }
 
-    this._stashed.set(prop, this.yMap.get(prop as string));
+    const Ctor = Object.getPrototypeOf(this).constructor as typeof ElementModel;
+    const curVal = this.yMap.get(prop as string);
+
+    this._stashed.set(prop, curVal);
+
+    Object.defineProperty(this, prop, {
+      configurable: true,
+      enumerable: true,
+      get: () => this._stashed.get(prop),
+      set: (value: unknown) => {
+        const converted = (Ctor.propsToYStruct ?? ElementModel.propsToYStruct)({
+          [prop]: value,
+        }) as Record<keyof Props, unknown>;
+        const oldValue = this._stashed.get(prop);
+
+        this._stashed.set(prop, converted[prop]);
+        this._onchange({ [prop]: { oldValue } });
+      },
+    });
   }
 
   pop(prop: keyof Props) {
@@ -106,6 +124,8 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
 
     const value = this._stashed.get(prop);
     this._stashed.delete(prop);
+    // @ts-ignore
+    delete this[prop];
     this.yMap.set(prop as string, value);
   }
 }
