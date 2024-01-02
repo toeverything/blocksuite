@@ -2,9 +2,9 @@ import {
   Bound,
   getBoundFromPoints,
   inflateBound,
-  type SerializedXYWH,
   transformPointsToNewBound,
-} from '../index.js';
+} from '../utils/bound.js';
+import { type SerializedXYWH } from '../utils/xywh.js';
 import { type BaseProps, ElementModel } from './base.js';
 import { derive, ymap } from './decorators.js';
 
