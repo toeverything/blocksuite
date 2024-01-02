@@ -4,6 +4,7 @@ import { AssetsManager } from '@blocksuite/store';
 import { describe, expect, test } from 'vitest';
 
 import { HtmlAdapter } from '../../_common/adapters/html.js';
+import { nanoidReplacement } from '../../index.js';
 
 const template = (html: string) =>
   `
@@ -816,5 +817,159 @@ describe('snapshot to html', () => {
       assets,
     });
     expect(target.file).toBe(html);
+  });
+});
+
+describe('html to snapshot', () => {
+  test('code', async () => {
+    const html = template(
+      `<pre><code class="code-python"><span style="word-wrap: break-word; color: #81A1C1;">import</span><span style="word-wrap: break-word; color: #D8DEE9FF;"> this</span></code></pre>`
+    );
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:code',
+          props: {
+            language: 'python',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'import this',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const htmlAdapter = new HtmlAdapter();
+    const rawBlockSnapshot = await htmlAdapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
+  test('paragraph', async () => {
+    const html = template(`<p>aaa</p><p>bbb</p><p>ccc</p><p>ddd</p><p>eee</p>`);
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: '--affine-background-secondary-color',
+        index: 'a0',
+        hidden: false,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[2]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'bbb',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[3]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'ccc',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[4]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'ddd',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[5]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'eee',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const htmlAdapter = new HtmlAdapter();
+    const rawBlockSnapshot = await htmlAdapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
 });
