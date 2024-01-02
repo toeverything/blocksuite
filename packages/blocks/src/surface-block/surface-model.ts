@@ -13,7 +13,6 @@ import type {
   Connection,
   ConnectorElementModel,
 } from './element-model/connector.js';
-import { skipAssign } from './element-model/decorators.js';
 import type { GroupElementModel } from './element-model/group.js';
 import {
   createElementModel,
@@ -201,7 +200,6 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
           case 'add':
             if (element) {
               if (!this._elementModels.has(id)) {
-                skipAssign(true);
                 this._elementModels.set(
                   id,
                   createElementModel(
@@ -210,10 +208,10 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
                     this,
                     {
                       onChange: payload => this.elementUpdated.emit(payload),
+                      skipFieldInit: true,
                     }
                   )
                 );
-                skipAssign(false);
               }
               this.elementAdded.emit({ id });
             }
@@ -232,16 +230,15 @@ export class SurfaceBlockModel extends BaseBlockModel<SurfaceBlockProps> {
       });
     };
 
-    skipAssign(true);
     elementsYMap.forEach((val, key) => {
       this._elementModels.set(
         key,
         createElementModel(val.get('type') as string, val, this, {
           onChange: payload => this.elementUpdated.emit(payload),
+          skipFieldInit: true,
         })
       );
     });
-    skipAssign(false);
     elementsYMap.observe(onElementsMapChange);
 
     this._disposables.push(() => {
