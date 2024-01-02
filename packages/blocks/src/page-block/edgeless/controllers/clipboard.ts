@@ -747,7 +747,16 @@ export class EdgelessClipboardController extends PageClipboard {
       block: TopLevelBlockModel,
       isInFrame = false
     ) => {
-      const blockElement = this._blockElmentGetter(block)?.parentElement;
+      let blockElement = this._blockElmentGetter(block)?.parentElement;
+      const blockPortalSelector = block.flavour.replace(
+        'affine:',
+        '.edgeless-block-portal-'
+      );
+      blockElement = blockElement?.closest(blockPortalSelector);
+      if (!blockElement) {
+        throw new Error('Could not find edgeless block portal.');
+      }
+
       const blockBound = Bound.deserialize(block.xywh);
       const canvasData = await html2canvas(
         blockElement as HTMLElement,
