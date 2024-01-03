@@ -1,30 +1,21 @@
-import { MarkdownAdapter } from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { Job, type Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { AffineEditorContainer } from '../../../editors/index.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import {
   EmbeddingServiceKind,
   TextServiceKind,
 } from '../copilot-service/service-base.js';
-import type { AILogic } from '../logic.js';
 
-type EmbeddedPage = {
-  id: string;
-  sections: {
-    vector: number[];
-    text: string;
-  }[];
-};
-
-@customElement('chat-with-workspace-panel')
-export class ChatWithWorkspacePanel extends WithDisposable(ShadowlessElement) {
+@customElement('chat-component')
+export class ChatComponent extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    chat-with-workspace-panel {
+    chat-component {
       margin-top: 12px;
       display: flex;
       flex-direction: column;
@@ -90,12 +81,9 @@ export class ChatWithWorkspacePanel extends WithDisposable(ShadowlessElement) {
       color: var(--affine-text-secondary-color);
     }
   `;
-
   @property({ attribute: false })
-  logic!: AILogic;
-  get editor() {
-    return this.logic.editor;
-  }
+  editor!: AffineEditorContainer;
+
   @state()
   history: {
     role: 'user' | 'assistant';
@@ -289,57 +277,3 @@ export class ChatWithWorkspacePanel extends WithDisposable(ShadowlessElement) {
     `;
   }
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'chat-with-workspace-panel': ChatWithWorkspacePanel;
-  }
-}
-
-const pageToMarkdown = async (page: Page) => {
-  const job = new Job({ workspace: page.workspace });
-  const snapshot = await job.pageToSnapshot(page);
-  const result = await new MarkdownAdapter().fromPageSnapshot({
-    snapshot,
-    assets: job.assetsManager,
-  });
-  return result.file;
-};
-const distance = (a: number[], b: number[]) => {
-  let sum = 0;
-  for (let i = 0; i < a.length; i++) {
-    sum += (a[i] - b[i]) ** 2;
-  }
-  return Math.sqrt(sum);
-};
-
-const split = (text: string, n: number) => {
-  const result: string[] = [];
-  while (text.length) {
-    result.push(text.slice(0, n));
-    text = text.slice(n);
-  }
-  return result;
-};
-const maxChunk = 300;
-const splitText = (text: string) => {
-  const data = text.split(/(?<=[\n。，.,])/).flatMap(s => {
-    if (s.length > maxChunk) {
-      return split(s, Math.ceil(s.length / maxChunk));
-    }
-    return [s];
-  });
-  const result: string[] = [];
-  let current = '';
-  for (const item of data) {
-    if (current.length + item.length > maxChunk) {
-      result.push(current);
-      current = '';
-    }
-    current += item;
-  }
-  if (current.length) {
-    result.push(current);
-  }
-  return result;
-};

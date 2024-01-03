@@ -25,7 +25,7 @@ import {
 import { editImage, jpegBase64ToFile } from './edit-image.js';
 import { genHtml } from './gen-html.js';
 
-export class EditorWithAI {
+export class AIEdgelessLogic {
   public fromFrame: string = '';
   private targets: Record<
     string,
