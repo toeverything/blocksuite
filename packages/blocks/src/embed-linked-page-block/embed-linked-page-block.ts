@@ -31,6 +31,21 @@ export class EmbedLinkedPageBlock extends EmbedBlockElement<
       width: 100%;
       height: 100%;
     }
+
+    affine-embed-linked-page-block .cover-container {
+      width: 204px;
+      height: 102px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    affine-embed-linked-page-block .cover-container img {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
   `;
 
   @state()
@@ -233,6 +248,7 @@ export class EmbedLinkedPageBlock extends EmbedBlockElement<
       return;
     }
     const bound = Bound.fromXYWH(deserializeXYWH(referencedModel.xywh));
+    console.log(Bound.fromXYWH(deserializeXYWH(referencedModel.xywh)));
     renderer.onResize();
     renderer.setViewportByBound(bound);
   }
