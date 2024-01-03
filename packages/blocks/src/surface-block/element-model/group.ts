@@ -6,7 +6,7 @@ import { Bound } from '../utils/bound.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
 import type { BaseProps } from './base.js';
 import { ElementModel } from './base.js';
-import { ymap } from './decorators.js';
+import { yfield } from './decorators.js';
 
 type GroupElementProps = BaseProps & {
   children: Y.Map<boolean>;
@@ -32,10 +32,10 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     return props;
   }
 
-  @ymap()
+  @yfield()
   children: Y.Map<boolean> = new Workspace.Y.Map<boolean>();
 
-  @ymap()
+  @yfield()
   title: Y.Text = new Workspace.Y.Text();
 
   get xywh() {

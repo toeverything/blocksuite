@@ -6,7 +6,7 @@ import {
 } from '../utils/bound.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
 import { type BaseProps, ElementModel } from './base.js';
-import { derive, ymap } from './decorators.js';
+import { derive, yfield } from './decorators.js';
 
 export type BrushProps = BaseProps & {
   /**
@@ -27,7 +27,7 @@ export class BrushElementModel extends ElementModel<BrushProps> {
       xywh: boundWidthLineWidth.serialize(),
     };
   })
-  @ymap()
+  @yfield()
   points: number[][] = [];
 
   @derive((instance: BrushElementModel) => {
@@ -45,16 +45,16 @@ export class BrushElementModel extends ElementModel<BrushProps> {
       points: transformed.points.map(p => [p.x, p.y]),
     };
   })
-  @ymap()
+  @yfield()
   xywh: SerializedXYWH = '[0,0,0,0]';
 
-  @ymap()
+  @yfield()
   rotate: number = 0;
 
-  @ymap()
+  @yfield()
   color: string = '#000000';
 
-  @ymap()
+  @yfield()
   lineWidth: number = 4;
 
   override get type() {

@@ -46,7 +46,7 @@ export function createElementModel(
     yMap,
     model,
     stashedStore: stashed,
-    onchange: props => options.onChange({ id, props }),
+    onChange: props => options.onChange({ id, props }),
   }) as ElementModel;
 
   setCreateState(false, false);

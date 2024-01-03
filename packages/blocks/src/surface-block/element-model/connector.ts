@@ -2,7 +2,7 @@ import { DEFAULT_ROUGHNESS } from '../consts.js';
 import type { SerializedXYWH } from '../index.js';
 import { type BaseProps, ElementModel } from './base.js';
 import type { StrokeStyle } from './common.js';
-import { local, ymap } from './decorators.js';
+import { local, yfield } from './decorators.js';
 
 export type PointStyle = 'None' | 'Arrow' | 'Triangle' | 'Circle' | 'Diamond';
 
@@ -42,37 +42,37 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   @local()
   rotate: number = 0;
 
-  @ymap()
+  @yfield()
   mode: ConnectorMode = ConnectorMode.Orthogonal;
 
-  @ymap()
+  @yfield()
   strokeWidth: number = 4;
 
-  @ymap()
+  @yfield()
   stroke: string = '#000000';
 
-  @ymap()
+  @yfield()
   strokeStyle: StrokeStyle = 'solid';
 
-  @ymap()
+  @yfield()
   roughness: number = DEFAULT_ROUGHNESS;
 
-  @ymap()
+  @yfield()
   rough?: boolean;
 
-  @ymap()
+  @yfield()
   source: Connection = {
     position: [0, 0],
   };
 
-  @ymap()
+  @yfield()
   target: Connection = {
     position: [0, 0],
   };
 
-  @ymap()
+  @yfield()
   frontEndpointStyle?: PointStyle;
 
-  @ymap()
+  @yfield()
   rearEndpointStyle?: PointStyle;
 }

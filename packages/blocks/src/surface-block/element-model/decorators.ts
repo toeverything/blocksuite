@@ -40,7 +40,7 @@ function yDecorator(prototype: unknown, prop: string | symbol) {
   });
 }
 
-export function ymap(): PropertyDecorator {
+export function yfield(): PropertyDecorator {
   return yDecorator;
 }
 
@@ -55,7 +55,7 @@ export function local(): PropertyDecorator {
 
         this._local.set(prop, newVal);
         if (state.creating) return;
-        this._onchange({
+        this._onChange({
           [prop]: {
             oldValue,
           },

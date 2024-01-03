@@ -4,7 +4,7 @@ import type { SurfaceBlockModel } from '../surface-model.js';
 import { Bound } from '../utils/bound.js';
 import { getBoundsWithRotation } from '../utils/math-utils.js';
 import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
-import { local, updateDerivedProp, ymap } from './decorators.js';
+import { local, updateDerivedProp, yfield } from './decorators.js';
 
 export type BaseProps = {
   index: string;
@@ -22,7 +22,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
   protected _preserved: Map<string, unknown> = new Map();
   protected _stashed: Map<keyof Props, unknown>;
   protected _local: Map<string | symbol, unknown> = new Map();
-  protected _onchange: (props: Record<string, { oldValue: unknown }>) => void;
+  protected _onChange: (props: Record<string, { oldValue: unknown }>) => void;
 
   yMap: Y.Map<unknown>;
   surfaceModel!: SurfaceBlockModel;
@@ -33,7 +33,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
 
   abstract get type(): string;
 
-  @ymap()
+  @yfield()
   index!: string;
 
   @local()
@@ -46,14 +46,14 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     yMap: Y.Map<unknown>;
     model: SurfaceBlockModel;
     stashedStore: Map<unknown, unknown>;
-    onchange: (props: Record<string, { oldValue: unknown }>) => void;
+    onChange: (props: Record<string, { oldValue: unknown }>) => void;
   }) {
-    const { yMap, model, stashedStore, onchange } = options;
+    const { yMap, model, stashedStore, onChange } = options;
 
     this.yMap = yMap;
     this.surfaceModel = model;
     this._stashed = stashedStore as Map<keyof Props, unknown>;
-    this._onchange = onchange;
+    this._onChange = onChange;
 
     // base class property field is assigned before yMap is set
     // so we need to manually assign the default value here
@@ -114,7 +114,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
         const oldValue = this._stashed.get(prop);
 
         this._stashed.set(prop, value);
-        this._onchange({ [prop]: { oldValue } });
+        this._onChange({ [prop]: { oldValue } });
 
         updateDerivedProp(prototype, prop as string, this);
       },

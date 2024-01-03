@@ -6,7 +6,7 @@ import { type BaseProps, ElementModel } from './base.js';
 import type { FontWeight } from './common.js';
 import { type FontStyle } from './common.js';
 import { type StrokeStyle } from './common.js';
-import { ymap } from './decorators.js';
+import { yfield } from './decorators.js';
 
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 export type ShapeStyle = 'General' | 'Scribbled';
@@ -50,64 +50,64 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
     return props;
   }
 
-  @ymap()
+  @yfield()
   xywh: SerializedXYWH = '[0,0,100,100]';
 
-  @ymap()
+  @yfield()
   rotate: number = 0;
 
-  @ymap()
+  @yfield()
   shapeType: ShapeType = 'rect';
 
-  @ymap()
+  @yfield()
   radius: number = 0;
 
-  @ymap()
+  @yfield()
   filled: boolean = false;
 
-  @ymap()
+  @yfield()
   fillColor: string = '--affine-palette-shape-yellow';
 
-  @ymap()
+  @yfield()
   strokeWidth: number = 4;
 
-  @ymap()
+  @yfield()
   strokeColor: string = '--affine-palette-line-yellow';
 
-  @ymap()
+  @yfield()
   strokeStyle: StrokeStyle = 'solid';
 
-  @ymap()
+  @yfield()
   shapeStyle: ShapeStyle = 'General';
 
-  @ymap()
+  @yfield()
   roughness: number = DEFAULT_ROUGHNESS;
 
-  @ymap()
+  @yfield()
   text?: Y.Text;
 
-  @ymap()
+  @yfield()
   color?: string;
 
-  @ymap()
+  @yfield()
   fontSize?: number;
 
-  @ymap()
+  @yfield()
   fontFamily?: string;
 
-  @ymap()
+  @yfield()
   fontWeight?: FontWeight;
 
-  @ymap()
+  @yfield()
   fontStyle?: FontStyle;
 
-  @ymap()
+  @yfield()
   textAlign?: 'left' | 'center' | 'right';
 
-  @ymap()
+  @yfield()
   textHorizontalAlign?: 'left' | 'center' | 'right';
 
-  @ymap()
+  @yfield()
   textVerticalAlign?: 'top' | 'center' | 'bottom';
 
   get type() {

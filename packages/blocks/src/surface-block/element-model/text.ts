@@ -3,7 +3,7 @@ import type { Y } from '@blocksuite/store';
 import type { SerializedXYWH } from '../index.js';
 import { type BaseProps, ElementModel } from './base.js';
 import type { FontFamily, FontStyle, FontWeight } from './common.js';
-import { ymap } from './decorators.js';
+import { yfield } from './decorators.js';
 
 export type TextElementProps = BaseProps & {
   text: Y.Text;
@@ -17,34 +17,34 @@ export type TextElementProps = BaseProps & {
 };
 
 export class TextElementModel extends ElementModel<TextElementProps> {
-  @ymap()
+  @yfield()
   xywh: SerializedXYWH = '[0,0,0,0]';
 
-  @ymap()
+  @yfield()
   rotate: number = 0;
 
-  @ymap()
+  @yfield()
   text!: Y.Text;
 
-  @ymap()
+  @yfield()
   color!: string;
 
-  @ymap()
+  @yfield()
   fontSize!: number;
 
-  @ymap()
+  @yfield()
   fontFamily!: FontFamily;
 
-  @ymap()
+  @yfield()
   fontWeight?: FontWeight;
 
-  @ymap()
+  @yfield()
   fontStyle?: FontStyle;
 
-  @ymap()
+  @yfield()
   textAlign!: 'left' | 'center' | 'right';
 
-  @ymap()
+  @yfield()
   hasMaxWidth?: boolean;
 
   get type() {
