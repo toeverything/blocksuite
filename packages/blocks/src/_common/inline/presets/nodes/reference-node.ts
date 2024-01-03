@@ -12,16 +12,16 @@ import type { Page, PageMeta } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { PageBlockComponent } from '../../../../../index.js';
-import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/index.js';
+import type { PageBlockComponent } from '../../../../page-block/types.js';
+import { FontLinkedPageIcon, FontPageIcon } from '../../../icons/text.js';
 import {
   getClosestBlockElementByElement,
   getModelByElement,
   getPageByElement,
-} from '../../../../utils/index.js';
-import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from '../../consts.js';
-import type { AffineTextAttributes } from '../types.js';
+} from '../../../utils/query.js';
+import type { AffineTextAttributes } from '../affine-inline-specs.js';
 import { affineTextStyles } from './affine-text.js';
+import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from './consts.js';
 
 export type RefNodeSlots = {
   pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;

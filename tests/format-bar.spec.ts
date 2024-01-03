@@ -1354,7 +1354,9 @@ test('should format quick bar show when double click button', async ({
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   const { formatBar, boldBtn } = getFormatBar(page);
   await expect(formatBar).toBeVisible();
-  await boldBtn.dblclick();
+  await boldBtn.dblclick({
+    delay: 100,
+  });
   await expect(formatBar).toBeVisible();
 });
 

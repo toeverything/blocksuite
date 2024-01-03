@@ -7,11 +7,11 @@ import {
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 
 import type { Flavour } from '../../../models.js';
+import { BLOCK_ID_ATTR } from '../../consts.js';
 import type {
   AffineInlineEditor,
   AffineTextAttributes,
-} from '../../components/rich-text/inline/types.js';
-import { BLOCK_ID_ATTR } from '../../consts.js';
+} from '../../inline/presets/affine-inline-specs.js';
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,

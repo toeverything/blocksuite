@@ -14,6 +14,9 @@ import type { BeforeinputHookCtx, CompositionEndHookCtx } from './hook.js';
 
 export class EventService<TextAttributes extends BaseTextAttributes> {
   private _isComposing = false;
+  get isComposing() {
+    return this._isComposing;
+  }
 
   private _previousAnchor: NativePoint | null = null;
   private _previousFocus: NativePoint | null = null;

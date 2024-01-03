@@ -5,13 +5,13 @@ import { html } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
 import { whenHover } from '../../../../../_common/components/hover/index.js';
-import type { AffineTextAttributes } from '../../../../../_common/components/rich-text/inline/types.js';
 import {
   ArrowDownIcon,
   HighLightDuotoneIcon,
   TextBackgroundDuotoneIcon,
   TextForegroundDuotoneIcon,
 } from '../../../../../_common/icons/index.js';
+import type { AffineTextAttributes } from '../../../../../_common/inline/presets/affine-inline-specs.js';
 import type { AffineFormatBarWidget } from '../../format-bar.js';
 import { backgroundConfig, foregroundConfig } from './consts.js';
 
