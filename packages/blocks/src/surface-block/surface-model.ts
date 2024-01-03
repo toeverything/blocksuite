@@ -447,6 +447,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     const id = generateElementId();
 
+    // @ts-ignore
     props.id = id;
 
     const elementModel = createModelFromProps(props, this, {
