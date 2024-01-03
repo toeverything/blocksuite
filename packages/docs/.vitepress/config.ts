@@ -60,8 +60,12 @@ export default defineConfig({
                 link: '/working-with-block-tree#block-tree-in-editor',
               },
               {
-                text: 'Selecting Blocks 🚧',
+                text: 'Selecting Blocks',
                 link: '/working-with-block-tree#selecting-blocks',
+              },
+              {
+                text: 'Services and Commands 🚧',
+                link: '/working-with-block-tree#services-and-commands',
               },
               {
                 text: 'Customizing Blocks 🚧',
