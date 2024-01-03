@@ -132,9 +132,11 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       const panel = new CreateNewService();
       panel.type = type;
       panel.onSave = config => {
+        console.log(config);
         copilotConfig.addVendor(config);
         this.requestUpdate();
         panel.remove();
+        console.log('asdd');
       };
       document.body.appendChild(panel);
     };

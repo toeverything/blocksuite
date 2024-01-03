@@ -13,14 +13,16 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { stopPropagation } from '../utils/selection-utils.js';
 import { copilotConfig, type VendorConfig } from './copilot-config.js';
 import { falVendor } from './fal.js';
+import { llama2Vendor } from './llama2.js';
 import { openaiVendor } from './open-ai.js';
 import {
   allKindService,
   type AllServiceKind,
   type ServiceImpl,
+  type Vendor,
 } from './service-base.js';
-
-export const allVendor = [openaiVendor, falVendor];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const allVendor: Vendor<any>[] = [openaiVendor, falVendor, llama2Vendor];
 
 @customElement('create-new-service')
 export class CreateNewService extends WithDisposable(ShadowlessElement) {
@@ -37,6 +39,7 @@ export class CreateNewService extends WithDisposable(ShadowlessElement) {
 
   changeKeyByEvent(e: Event) {
     const select = e.target as HTMLSelectElement;
+    console.log(select.value);
     this.changeKey(select.value);
   }
 
@@ -44,13 +47,9 @@ export class CreateNewService extends WithDisposable(ShadowlessElement) {
     return allKindService.find(v => v.type === this.type);
   }
 
-  get serviceImpl() {
-    return this.serviceKind?.getImpl(this.key);
-  }
-
   changeKey(key: string) {
     this.key = key;
-    this.data = this.serviceImpl?.vendor.initData();
+    this.data = allVendor.find(v => v.key === key)?.initData();
   }
 
   changeName(e: Event) {
@@ -59,12 +58,12 @@ export class CreateNewService extends WithDisposable(ShadowlessElement) {
   }
 
   save() {
-    if (!this.data || !this.serviceImpl) {
+    if (!this.data) {
       return;
     }
     this.onSave({
       id: nanoid('unknown'),
-      vendorKey: this.serviceImpl.vendor.key,
+      vendorKey: this.key,
       name: this.name,
       data: this.data,
     });
@@ -74,21 +73,30 @@ export class CreateNewService extends WithDisposable(ShadowlessElement) {
     this.remove();
   }
 
+  list() {
+    const set = new Set<Vendor<unknown>>();
+    allKindService
+      .find(v => v.type === this.type)
+      ?.implList.forEach(v => {
+        set.add(v.vendor);
+      });
+    return [...set];
+  }
+
   protected override render(): unknown {
-    const serviceKind = allKindService.find(v => v.type === this.type);
-    const list = serviceKind?.implList;
+    const list = this.list();
     if (!list) {
       requestAnimationFrame(() => {
         this.remove();
       });
       return;
     }
-    const current = serviceKind?.getImpl(this.key);
+    const current = allVendor.find(v => v.key === this.key);
     if (!current) {
       if (!list[0]) {
         return html` <div>no vendor</div>`;
       }
-      this.changeKey(list[0].name);
+      this.changeKey(list[0].key);
       requestAnimationFrame(() => {
         this.requestUpdate();
       });
@@ -104,15 +112,12 @@ export class CreateNewService extends WithDisposable(ShadowlessElement) {
           style="display:flex;flex-direction: column;background-color: white;border-radius: 8px;padding: 24px;gap: 12px;"
         >
           <div>
-            <select .value="${current.name}" @change="${this.changeKeyByEvent}">
+            <select .value="${current.key}" @change="${this.changeKeyByEvent}">
               ${repeat(
                 // @ts-ignore
                 list,
-                item => item.name,
-                item =>
-                  html` <option value="${item.vendor.key}">
-                    ${item.vendor.key}
-                  </option>`
+                item => item.key,
+                item => html` <option value="${item.key}">${item.key}</option>`
               )}
             </select>
           </div>
@@ -125,9 +130,7 @@ export class CreateNewService extends WithDisposable(ShadowlessElement) {
             />
           </div>
           <div>
-            ${current.vendor.renderConfigEditor(this.data, () =>
-              this.requestUpdate()
-            )}
+            ${current.renderConfigEditor(this.data, () => this.requestUpdate())}
           </div>
           <div>
             <button @click="${this.save}">保存</button>

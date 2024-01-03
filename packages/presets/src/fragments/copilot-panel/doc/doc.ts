@@ -11,6 +11,7 @@ import {
   getSelectedBlocks,
   getSelectedTextContent,
 } from '../utils/selection-utils.js';
+import { TextCompletionFeatureKey } from './api.js';
 import { GPTAPI, type GPTAPIPayloadMap } from './index.js';
 
 @customElement('copilot-doc-panel')
@@ -229,7 +230,7 @@ export class CopilotDocPanel extends WithDisposable(ShadowlessElement) {
             chat service:
           </div>
           <vendor-service-select
-            .featureKey="${'chat with workspace'}"
+            .featureKey="${TextCompletionFeatureKey}"
             .service="${TextServiceKind}"
           ></vendor-service-select>
         </div>
