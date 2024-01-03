@@ -1,7 +1,7 @@
-import { BaseBlockModel } from '../schema/base.js';
+import { BlockModel } from '../schema/base.js';
 
-function isBaseBlockModel(a: unknown): a is BaseBlockModel {
-  return a instanceof BaseBlockModel;
+function isBlockModel(a: unknown): a is BlockModel {
+  return a instanceof BlockModel;
 }
 
 /**
@@ -30,7 +30,7 @@ function initCustomFormatter() {
   // https://www.mattzeunert.com/2016/02/19/custom-chrome-devtools-object-formatters.html
   const formatter = {
     header(obj: unknown, config = { expand: false }) {
-      if (!isBaseBlockModel(obj) || config.expand) {
+      if (!isBlockModel(obj) || config.expand) {
         return null;
       }
       if (obj.text) {

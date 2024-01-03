@@ -1,7 +1,7 @@
 import type { Disposable } from '@blocksuite/global/utils';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { Text, type Y } from '@blocksuite/store';
 
 import { createUniComponentFromWebComponent } from '../../../_common/components/uni-component/uni-component.js';
@@ -133,7 +133,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return super.cellGetExtra(rowId, propertyId);
   }
 
-  private getModelById(rowId: string): BaseBlockModel | undefined {
+  private getModelById(rowId: string): BlockModel | undefined {
     return this._model.children[this._model.childMap.get(rowId) ?? -1];
   }
 

@@ -6,13 +6,14 @@ import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
-import { affineAttributeRenderer } from '../../../../_common/components/rich-text/inline/attribute-renderer.js';
+import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
+import { InlineManager } from '../../../../_common/inline/inline-manager.js';
 import {
   type AffineInlineEditor,
+  affineInlineSpecs,
   type AffineTextAttributes,
-  affineTextAttributes,
-} from '../../../../_common/components/rich-text/inline/types.js';
-import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
+} from '../../../../_common/inline/presets/affine-inline-specs.js';
+import { affineInlineMarkdownMatches } from '../../../../_common/inline/presets/markdown.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';
@@ -102,8 +103,13 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     }
   `;
 
-  readonly attributesSchema = affineTextAttributes;
-  readonly attributeRenderer = affineAttributeRenderer;
+  readonly inlineManager = new InlineManager();
+  get attributesSchema() {
+    return this.inlineManager.getSchema();
+  }
+  get attributeRenderer() {
+    return this.inlineManager.getRenderer();
+  }
 
   @query('rich-text')
   private _richTextElement?: RichText;
@@ -117,6 +123,10 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.inlineManager.registerSpecs(affineInlineSpecs);
+    this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
+
     if (!this.value || typeof this.value === 'string') {
       this._initYText(this.value);
     }
@@ -132,6 +142,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       .yText=${this.value}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
+      .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
       .readonly=${true}
       class="affine-database-rich-text inline-editor"
     ></rich-text>`;
@@ -170,8 +181,13 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     }
   `;
 
-  readonly attributesSchema = affineTextAttributes;
-  readonly attributeRenderer = affineAttributeRenderer;
+  readonly inlineManager = new InlineManager();
+  get attributesSchema() {
+    return this.inlineManager.getSchema();
+  }
+  get attributeRenderer() {
+    return this.inlineManager.getRenderer();
+  }
 
   @query('rich-text')
   private _richTextElement?: RichText;
@@ -185,6 +201,10 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.inlineManager.registerSpecs(affineInlineSpecs);
+    this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
+
     if (!this.value || typeof this.value === 'string') {
       this._initYText(this.value);
     }
@@ -297,6 +317,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
       .yText=${this.value}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
+      .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
       class="affine-database-rich-text inline-editor"
     ></rich-text>`;
   }

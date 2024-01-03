@@ -39,6 +39,8 @@ This example creates a subset of the block tree hierarchy defaultly used in `@bl
 
 ![block-nesting](./images/block-nesting.png)
 
+As a document-centric framework, **you need to initialize a valid document structure before attaching it to editors**, which is also why it requires `init()` after `createEmptyPage()`. See [creating new block tree](./data-persistence#creating-new-block-tree) for more details.
+
 ::: info
 The block tree hierarchy is specific to the preset editors. At the framework level, `@blocksuite/store` does **NOT** treat the "first-party" `affine:*` blocks with any special way. Feel free to add blocks from different namespaces for the block tree!
 :::
@@ -68,7 +70,7 @@ const { spec, selection, command } = host.std;
 
 Firstly, let's explain the newly introduced `host` and `std`, which are determined by the framework-agnostic architecture of BlockSuite:
 
-- In BlockSuite, the `editor` itself is usually quite lightweight, serving primarily to provide access to the `host`. The actual editable blocks are registered on `editor.host` - also known as the [`EditorHost`](/api/@blocksuite/lit/) component, which is a container for mounting block UI components. BlockSuite by default offers a host based on the [lit](https://lit.dev) framework. As long as there is a corresponding `host` implementation, you can use the component model of frameworks like react or vue to implement your BlockSuite editors.
+- As [mentioned before](./component-types#composing-editors-by-blocks), the `editor.host` - also known as the [`EditorHost`](/api/@blocksuite/lit/) component, is a container for mounting block UI components. It handles the heavy lifting involved in mapping the **block tree** to the **component tree**.
 - Regardless of the framework used to implement `EditorHost`, they can access the same headless standard library designed for editable blocks through `host.std`. For example, `std.spec` contains all the registered [`BlockSpec`](./block-spec)s.
 
 ::: tip
@@ -80,6 +82,55 @@ As the runtime for the block tree, this is the mental model inside the `editor`:
 ![editor-structure](./images/editor-structure.png)
 
 ## Selecting Blocks
+
+The essence of editor lies in allowing users to **dynamically select and modify** the data. In BlockSuite, you can use the `SelectionManager`, which is responsible for managing selections, through `std.selection` or `host.selection`. As an example, after selecting some blocks in the editor, you can execute the following code snippets line by line in the console:
+
+```ts
+// Get current selection state
+const cached = selection.value;
+
+// Clear current selection state
+selection.clear();
+
+// Recover the selection state from cache
+selection.set(cached);
+
+// Try setting only part of the selection
+selection.set([cached[0]]);
+```
+
+In `block-std`, BlockSuite implements several atomic selection types for `SelectionManager`, such as `TextSelection` and `BlockSelection`. The content currently selected by the user is automatically divided into these primitive selection data structures, recorded in the list returned by `selection.value`. Through `selection.set()`, you can also programmatically control the current selection state of the editor.
+
+This allows the selection manager to handle different types of selections, as shown in the following illustration, using the same API:
+
+![selection-types](./images/selection-types.png)
+
+In `selection.value`, different types of selection states can coexist simultaneously. Each selection object records at least the `id` and `path` of the corresponding selected block (i.e., the sequence of ids of all blocks from the root block to that block). Moreover, you can further categorize different types of selections using the `group` field. For example in `DocEditor`, both `TextSelection` and `BlockSelection` belong to the `note` group. Hence, the example structure of block selection in the above image is as follows:
+
+```ts
+[
+  {
+    type: 'block',
+    group: 'note',
+    path: ['page_id', 'note_id', 'paragraph_1_id'],
+  },
+  {
+    type: 'block',
+    group: 'note',
+    path: ['page_id', 'note_id', 'paragraph_2_id'],
+  },
+];
+```
+
+For the more complex native [selection](https://developer.mozilla.org/en-US/docs/Web/API/Selection), the `TextSelection` can be used to model it. It marks the start and end positions of the native selection in the block through the `from` and `to` fields, recording only the `index` and `length` of the inline text sequence in the respective block. This simplification is made possible by the architecture of BlockSuite, where editable blocks use `@blocksuite/inline` as the rich text editing component. Each block tree node's rich text content is rendered independently into different inline editors, eliminating nesting between rich text instances:
+
+![flat-inlines](./images/flat-inlines.png)
+
+Additionally, the entire `selection.value` object is isolated under the `clientId` scope of the current session. During collaborative editing, selection instances between different clients will be distributed in real-time (via [providers](./data-persistence#provider-based-persistence)), facilitating the implementation of UI states like remote cursors.
+
+For more advanced usage and details, please refer to the [`Selection`](./selection) documentation.
+
+## Services and Commands
 
 TODO
 

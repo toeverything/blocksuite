@@ -1,12 +1,12 @@
 import { assertExists, sleep } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import { BaseBlockModel } from '@blocksuite/store';
+import { BlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 
 import { isControlledKeyboardEvent } from '../../_common/utils/event.js';
 import { getInlineEditorByModel } from '../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../_common/utils/selection.js';
-import type { AffineInlineEditor } from './rich-text/inline/types.js';
+import type { AffineInlineEditor } from '../inline/presets/affine-inline-specs.js';
 import type { RichText } from './rich-text/rich-text.js';
 
 export const createKeydownObserver = ({
@@ -211,7 +211,7 @@ export const createKeydownObserver = ({
  */
 export function cleanSpecifiedTail(
   editorHost: EditorHost,
-  inlineEditorOrModel: AffineInlineEditor | BaseBlockModel,
+  inlineEditorOrModel: AffineInlineEditor | BlockModel,
   str: string
 ) {
   if (!str) {
@@ -219,7 +219,7 @@ export function cleanSpecifiedTail(
     return;
   }
   const inlineEditor =
-    inlineEditorOrModel instanceof BaseBlockModel
+    inlineEditorOrModel instanceof BlockModel
       ? getInlineEditorByModel(editorHost, inlineEditorOrModel)
       : inlineEditorOrModel;
   assertExists(inlineEditor, 'Inline editor not found');

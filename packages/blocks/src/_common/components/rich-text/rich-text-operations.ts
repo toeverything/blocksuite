@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
-import { type BaseBlockModel } from '@blocksuite/store';
+import { type BlockModel } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
 import type { BlockModelProps } from '../../../_common/utils/model.js';
@@ -28,7 +28,7 @@ import type { ExtendedModel } from '../../types.js';
 /**
  * Whether the block supports rendering its children.
  */
-function supportsChildren(model: BaseBlockModel): boolean {
+function supportsChildren(model: BlockModel): boolean {
   if (
     matchFlavours(model, [
       // 'affine:database',
@@ -73,7 +73,7 @@ export function handleBlockEndEnter(
   if (isInsideBlockByFlavour(page, model, 'affine:database')) {
     page.captureSync();
     const index = parent.children.findIndex(child => child.id === model.id);
-    let newParent: BaseBlockModel = parent;
+    let newParent: BlockModel = parent;
     let newBlockIndex = index + 1;
     const childrenLength = parent.children.length;
 
@@ -242,7 +242,7 @@ export function handleIndent(
 
 export function handleMultiBlockIndent(
   editorHost: EditorHost,
-  models: BaseBlockModel[]
+  models: BlockModel[]
 ) {
   if (!models.length) return;
 
@@ -250,7 +250,7 @@ export function handleMultiBlockIndent(
 
   // Find the first model that can be indented
   let firstIndentIndex = -1;
-  let previousSibling: BaseBlockModel | null = null;
+  let previousSibling: BlockModel | null = null;
   for (let i = 0; i < models.length; i++) {
     previousSibling = page.getPreviousSibling(models[i]);
     if (previousSibling && supportsChildren(previousSibling)) {
@@ -339,14 +339,14 @@ export function handleUnindent(
 
 export function handleMultiBlockOutdent(
   editorHost: EditorHost,
-  models: BaseBlockModel[]
+  models: BlockModel[]
 ) {
   if (!models.length) return;
   const page = models[0].page;
 
   // Find the first model that can be unindented
   let firstOutdentIndex = -1;
-  let firstParent: BaseBlockModel | null;
+  let firstParent: BlockModel | null;
   for (let i = 0; i < models.length; i++) {
     firstParent = page.getParent(models[i]);
     if (firstParent && !matchFlavours(firstParent, ['affine:note'])) {
@@ -386,7 +386,7 @@ export function handleRemoveAllIndent(
 
 export function handleRemoveAllIndentForMultiBlocks(
   editorHost: EditorHost,
-  models: BaseBlockModel[]
+  models: BlockModel[]
 ) {
   if (!models.length) return;
   const page = models[0].page;

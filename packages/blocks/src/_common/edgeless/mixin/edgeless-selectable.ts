@@ -1,5 +1,5 @@
 import type { Constructor } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 
 import { BLOCK_BATCH } from '../../../surface-block/batch.js';
 import {
@@ -24,9 +24,7 @@ export type EdgelessSelectableProps = {
 
 export function selectable<
   Props extends EdgelessSelectableProps,
-  T extends Constructor<BaseBlockModel<Props>> = Constructor<
-    BaseBlockModel<Props>
-  >,
+  T extends Constructor<BlockModel<Props>> = Constructor<BlockModel<Props>>,
 >(SuperClass: T) {
   class DerivedSelectableInEdgelessClass
     extends SuperClass
@@ -102,6 +100,6 @@ export function selectable<
   }
 
   return DerivedSelectableInEdgelessClass as Constructor<
-    BaseBlockModel<Props> & IEdgelessElement
+    BlockModel<Props> & IEdgelessElement
   >;
 }

@@ -8,7 +8,7 @@ import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts.js';
 import type {
-  BaseBlockModel,
+  BlockModel,
   BlockSchemaType,
   Page,
   PassiveDocProvider,
@@ -501,7 +501,7 @@ describe('deleteBlock', () => {
       },
     });
 
-    const deletedModel = page.getBlockById('1') as BaseBlockModel;
+    const deletedModel = page.getBlockById('1') as BlockModel;
     page.deleteBlock(deletedModel);
 
     assert.deepEqual(serializeWorkspace(page.rootDoc).spaces[spaceId].blocks, {
@@ -558,8 +558,8 @@ describe('deleteBlock', () => {
       },
     });
 
-    const deletedModel = page.getBlockById('2') as BaseBlockModel;
-    const deletedModelParent = page.getBlockById('1') as BaseBlockModel;
+    const deletedModel = page.getBlockById('2') as BlockModel;
+    const deletedModelParent = page.getBlockById('1') as BlockModel;
     page.deleteBlock(deletedModel, {
       bringChildrenTo: deletedModelParent,
     });
@@ -653,8 +653,8 @@ describe('deleteBlock', () => {
       },
     });
 
-    const deletedModel = page.getBlockById('2') as BaseBlockModel;
-    const moveToModel = page.getBlockById('3') as BaseBlockModel;
+    const deletedModel = page.getBlockById('2') as BlockModel;
+    const moveToModel = page.getBlockById('3') as BlockModel;
     page.deleteBlock(deletedModel, {
       bringChildrenTo: moveToModel,
     });
@@ -760,7 +760,7 @@ describe('getBlock', () => {
     page.addBlock('affine:paragraph', {}, noteId);
     page.addBlock('affine:paragraph', {}, noteId);
 
-    const text = page.getBlockById('3') as BaseBlockModel;
+    const text = page.getBlockById('3') as BlockModel;
     assert.equal(text.flavour, 'affine:paragraph');
     assert.equal(root.children[0].children.indexOf(text), 1);
 
@@ -776,9 +776,7 @@ describe('getBlock', () => {
     page.addBlock('affine:paragraph', {}, noteId);
     page.addBlock('affine:paragraph', {}, noteId);
 
-    const result = page.getParent(
-      root.children[0].children[1]
-    ) as BaseBlockModel;
+    const result = page.getParent(root.children[0].children[1]) as BlockModel;
     assert.equal(result, root.children[0]);
 
     const invalid = page.getParent(root);
@@ -795,7 +793,7 @@ describe('getBlock', () => {
 
     const result = page.getPreviousSibling(
       root.children[0].children[1]
-    ) as BaseBlockModel;
+    ) as BlockModel;
     assert.equal(result, root.children[0].children[0]);
 
     const invalid = page.getPreviousSibling(root.children[0].children[0]);

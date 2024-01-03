@@ -1,8 +1,8 @@
 import type { EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import type { AffineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
+import type { AffineTextAttributes } from '../../../_common/inline/presets/affine-inline-specs.js';
 import { isInsideBlockByFlavour } from '../../../_common/utils/index.js';
 import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
@@ -19,7 +19,7 @@ export type SlashMenuOptions = {
     items:
       | ((options: {
           pageElement: PageBlockComponent;
-          model: BaseBlockModel;
+          model: BlockModel;
         }) => SlashItem[])
       | SlashItem[];
   }[];
@@ -36,17 +36,14 @@ export type SlashItem = {
    */
   icon: TemplateResult<1>;
   suffix?: TemplateResult<1>;
-  showWhen?: (
-    model: BaseBlockModel,
-    pageElement: PageBlockComponent
-  ) => boolean;
+  showWhen?: (model: BlockModel, pageElement: PageBlockComponent) => boolean;
   disabled?: boolean;
   action: ({
     pageElement,
     model,
   }: {
     pageElement: PageBlockComponent;
-    model: BaseBlockModel;
+    model: BlockModel;
   }) => void | Promise<void>;
 };
 
@@ -63,7 +60,7 @@ export function collectGroupNames(menuItem: InternSlashItem[]) {
 
 export function insertContent(
   editorHost: EditorHost,
-  model: BaseBlockModel,
+  model: BlockModel,
   text: string,
   attributes?: AffineTextAttributes
 ) {
@@ -76,7 +73,7 @@ export function insertContent(
   }
   const inlineRange = inlineEditor.getInlineRange();
   const index = inlineRange ? inlineRange.index : model.text.length;
-  model.text.insert(text, index, attributes);
+  model.text.insert(text, index, attributes as Record<string, unknown>);
   // Update the caret to the end of the inserted text
   inlineEditor.setInlineRange({
     index: index + text.length,
@@ -93,11 +90,11 @@ export function formatDate(date: Date) {
   return strTime;
 }
 
-export function insideDatabase(model: BaseBlockModel) {
+export function insideDatabase(model: BlockModel) {
   return isInsideBlockByFlavour(model.page, model, 'affine:database');
 }
 
-export function insideDataView(model: BaseBlockModel) {
+export function insideDataView(model: BlockModel) {
   return isInsideBlockByFlavour(model.page, model, 'affine:data-view');
 }
 

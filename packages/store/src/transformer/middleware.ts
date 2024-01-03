@@ -1,6 +1,6 @@
 import type { Slot } from '@blocksuite/global/utils';
 
-import type { BaseBlockModel } from '../schema/index.js';
+import type { BlockModel } from '../schema/index.js';
 import type { Page, Workspace } from '../workspace/index.js';
 import type { AssetsManager } from './assets.js';
 import type { Slice } from './slice.js';
@@ -33,7 +33,7 @@ export type BeforeImportPayload =
 
 export type BeforeExportPayload =
   | {
-      model: BaseBlockModel;
+      model: BlockModel;
       type: 'block';
     }
   | {
@@ -52,7 +52,7 @@ export type FinalPayload =
   | {
       snapshot: BlockSnapshot;
       type: 'block';
-      model: BaseBlockModel;
+      model: BlockModel;
       parent?: string;
       index?: number;
     }

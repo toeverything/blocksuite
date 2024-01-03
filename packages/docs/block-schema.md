@@ -169,10 +169,10 @@ function doSomething(model: SchemaToModel<typeof MyBlockSchema>) {
 }
 ```
 
-You can also customize the model by extends the `BaseBlockModel` to provide more methods:
+You can also customize the model by extending the `BlockModel` to provide more methods:
 
 ```ts
-export class MyBlockModel extends BaseBlockModel<MyBlockProps> {
+export class MyBlockModel extends BlockModel<MyBlockProps> {
   levelUp() {
     this.level += 1;
   }

@@ -1,4 +1,4 @@
-import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import type { FilterGroup } from '../database-block/common/ast.js';
 import type { DataSourceConfig } from '../database-block/common/datasource/base.js';
@@ -19,7 +19,7 @@ type Props = {
   views: DataView[];
 };
 
-export class DataViewBlockModel extends BaseBlockModel<Props> {
+export class DataViewBlockModel extends BlockModel<Props> {
   constructor() {
     super();
     this.created.on(() => {

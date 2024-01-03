@@ -1800,7 +1800,8 @@ test('delete at the start of paragraph (multiple notes)', async ({ page }) => {
   await assertBlockCount(page, 'note', 2);
 
   await assertRichTexts(page, ['123', '456']);
-  await setSelection(page, 5, 0, 5, 0);
+  await focusRichText(page, 1);
+  await pressArrowLeft(page, 3);
   await pressBackspace(page);
   await assertRichTexts(page, ['123456']);
 });

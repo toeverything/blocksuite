@@ -4,7 +4,7 @@ import type { z } from 'zod';
 
 import { SYS_KEYS } from '../consts.js';
 import { native2Y } from '../reactive/index.js';
-import type { BaseBlockModel } from '../schema/base.js';
+import type { BlockModel } from '../schema/base.js';
 import { type BlockSchema } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
 import type { YBlock } from '../workspace/block/block.js';
@@ -26,7 +26,7 @@ export function assertValidChildren(
 
 export function syncBlockProps(
   schema: z.infer<typeof BlockSchema>,
-  model: BaseBlockModel,
+  model: BlockModel,
   yBlock: YBlock,
   props: Partial<BlockProps>
 ) {

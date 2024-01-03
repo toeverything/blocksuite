@@ -1,4 +1,4 @@
-import { type BaseBlockModel, Slice } from '@blocksuite/store';
+import { type BlockModel, Slice } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
@@ -20,7 +20,7 @@ export function CodeOptionTemplate({
 }: {
   ref?: RefOrCallback;
   anchor: CodeBlockComponent;
-  model: BaseBlockModel;
+  model: BlockModel;
   wrap: boolean;
   abortController: AbortController;
   onClickWrap: () => void;

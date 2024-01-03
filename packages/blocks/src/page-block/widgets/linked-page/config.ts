@@ -1,16 +1,16 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
-import { type BaseBlockModel, type PageMeta } from '@blocksuite/store';
+import { type BlockModel, type PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { REFERENCE_NODE } from '../../../_common/components/rich-text/consts.js';
 import { toast } from '../../../_common/components/toast.js';
 import {
   ImportIcon,
   NewPageIcon,
   PageIcon,
 } from '../../../_common/icons/index.js';
+import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import { createDefaultPage } from '../../../_common/utils/init.js';
 import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import { isFuzzyMatch } from '../../../_common/utils/string.js';
@@ -26,7 +26,7 @@ export type LinkedPageOptions = {
     query: string;
     page: Page;
     pageMetas: PageMeta[];
-    model: BaseBlockModel;
+    model: BlockModel;
   }) => LinkedPageGroup[];
 };
 
@@ -55,7 +55,7 @@ export function insertLinkedNode({
 }: {
   editorHost: EditorHost;
   pageId: string;
-  model: BaseBlockModel;
+  model: BlockModel;
 }) {
   const inlineEditor = getInlineEditorByModel(editorHost, model);
   assertExists(inlineEditor, 'Editor not found');
@@ -75,7 +75,7 @@ export const getMenus: (ctx: {
   query: string;
   page: Page;
   pageMetas: PageMeta[];
-  model: BaseBlockModel;
+  model: BlockModel;
 }) => LinkedPageGroup[] = ({ editorHost, query, page, model, pageMetas }) => {
   const pageName = query || DEFAULT_PAGE_NAME;
   const displayPageName =

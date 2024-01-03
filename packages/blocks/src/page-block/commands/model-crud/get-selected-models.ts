@@ -1,6 +1,6 @@
 import type { Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 
 export const getSelectedModelsCommand: Command<
   'host',
@@ -16,7 +16,7 @@ export const getSelectedModelsCommand: Command<
   );
 
   const types = ctx.types ?? ['block', 'text', 'image'];
-  const selectedModels: BaseBlockModel[] = [];
+  const selectedModels: BlockModel[] = [];
   host.std.command
     .pipe()
     .withHost()
@@ -41,7 +41,7 @@ export const getSelectedModelsCommand: Command<
 declare global {
   namespace BlockSuite {
     interface CommandData {
-      selectedModels?: BaseBlockModel[];
+      selectedModels?: BlockModel[];
     }
 
     interface Commands {

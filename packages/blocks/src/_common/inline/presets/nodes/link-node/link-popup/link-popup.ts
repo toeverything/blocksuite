@@ -6,17 +6,17 @@ import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { BLOCK_ID_ATTR } from '../../../../../../consts.js';
-import { BookmarkIcon } from '../../../../../../icons/edgeless.js';
+import type { IconButton } from '../../../../../components/button.js';
+import { toast } from '../../../../../components/toast.js';
+import { BLOCK_ID_ATTR } from '../../../../../consts.js';
+import { BookmarkIcon } from '../../../../../icons/edgeless.js';
 import {
   ConfirmIcon,
   EditIcon,
   UnlinkIcon,
-} from '../../../../../../icons/text.js';
-import { isValidUrl, normalizeUrl } from '../../../../../../utils/url.js';
-import type { IconButton } from '../../../../../button.js';
-import { toast } from '../../../../../toast.js';
-import type { AffineInlineEditor } from '../../../types.js';
+} from '../../../../../icons/text.js';
+import { isValidUrl, normalizeUrl } from '../../../../../utils/url.js';
+import type { AffineInlineEditor } from '../../../affine-inline-specs.js';
 import { linkPopupStyle } from './styles.js';
 
 @customElement('link-popup')
