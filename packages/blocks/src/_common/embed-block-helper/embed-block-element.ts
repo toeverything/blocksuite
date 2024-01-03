@@ -1,7 +1,7 @@
 import type { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html, render } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -19,7 +19,7 @@ import { type BlockModels, matchFlavours } from '../utils/index.js';
 
 export class EmbedBlockElement<
   Model extends
-    BaseBlockModel<EdgelessSelectableProps> = BaseBlockModel<EdgelessSelectableProps>,
+    BlockModel<EdgelessSelectableProps> = BlockModel<EdgelessSelectableProps>,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {

@@ -3,8 +3,6 @@ import { INLINE_ROOT_ATTR, type InlineRootElement } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
 import type { TemplateResult } from 'lit';
 
-import { toggleLinkPopup } from '../../components/rich-text/inline/nodes/link-node/link-popup/toggle-link-popup.js';
-import type { AffineTextAttributes } from '../../components/rich-text/inline/types.js';
 import {
   BoldIcon,
   CodeIcon,
@@ -13,6 +11,8 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from '../../icons/index.js';
+import type { AffineTextAttributes } from '../../inline/presets/affine-inline-specs.js';
+import { toggleLinkPopup } from '../../inline/presets/nodes/link-node/link-popup/toggle-link-popup.js';
 import { commonActiveWhen, handleCommonStyle } from './utils.js';
 
 export interface TextFormatConfig {

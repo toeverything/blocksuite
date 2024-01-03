@@ -12,7 +12,7 @@ import {
 import { getStandardLanguage } from '../../../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../../../code-block/utils/consts.js';
 import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
-import type { AffineInlineEditor } from '../inline/types.js';
+import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 import {
   convertToDivider,
   convertToList,
@@ -83,7 +83,7 @@ export function tryConvertBlock(
 
     const codeBlock = page.getBlockById(codeId);
     assertExists(codeBlock);
-    asyncSetInlineRange(codeBlock, { index: 0, length: 0 }).catch(
+    asyncSetInlineRange(element.host, codeBlock, { index: 0, length: 0 }).catch(
       console.error
     );
 

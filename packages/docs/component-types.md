@@ -4,7 +4,7 @@ After getting started, this section outlines the foundational editing components
 
 ## Editors and Fragments
 
-The previously mentioned `@blocksuite/presets` includes reusable editors like `DocEditor` and `EdgelessEditor`. Besides these editors, BlockSuite also defines **_fragments_** - UI components that are not editors but are dependent on the document's state. These fragments, such as sidebars, panels, and toolbars, may be independent in lifecycle from the editors, yet should work out-of-the-box when attached to the block tree.
+The `@blocksuite/presets` package includes reusable editors like `DocEditor` and `EdgelessEditor`. Besides these editors, BlockSuite also defines **_fragments_** - UI components that are not editors but are dependent on the document's state. These fragments, such as sidebars, panels, and toolbars, may be independent in lifecycle from the editors, yet should work out-of-the-box when attached to the block tree.
 
 The distinction between editors and fragments lies in their complexity and functionality. **Fragments typically offer more simplified capabilities, serving specific UI purposes, whereas editors provide comprehensive editing capabilities over the block tree**. Nevertheless, both editors and fragments shares similar tech stacks and [data flows](./crdt-native-data-flow).
 
@@ -19,6 +19,46 @@ BlockSuite encourages the derivation of various block spec implementations from 
 Within each block spec, there can be [`Widget`](./block-widgets)s specific to that block's implementation, enhancing interactivity within the editor. BlockSuite leverages this widget mechanism to register dynamic UI components such as drag handles and slash menus within the doc editor.
 
 ![component-types](./images/component-types.png)
+
+## Composing Editors by Blocks
+
+In BlockSuite, the `editor` is typically designed to be remarkably lightweight. The actual editable blocks are registered to the [`EditorHost`](/api/@blocksuite/lit/) component, which is a container for mounting block UI components.
+
+BlockSuite by default offers a host based on the [lit](https://lit.dev) framework. For example, this is a conceptually usable BlockSuite editor composed by [`BlockSpec`](./block-spec)s:
+
+```ts
+// Default BlockSuite editable blocks
+import { DocEditorBlockSpecs } from '@blocksuite/blocks';
+// The container for mounting block UI components
+import { EditorHost } from '@blocksuite/lit';
+// The store for working with block tree
+import { type Page } from '@blocksuite/store';
+
+// Standard lit framework primitives
+import { html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+
+@customElement('simple-doc-editor')
+export class SimpleDocEditor extends LitElement {
+  @property({ attribute: false })
+  page!: Page;
+
+  override render() {
+    return html`
+      <editor-host
+        .page=${this.page}
+        .specs=${DocEditorBlockSpecs}
+      ></editor-host>
+    `;
+  }
+}
+```
+
+As long as there is a corresponding `host` implementation, you can use the component model of frameworks like react or vue to implement your BlockSuite editors:
+
+![framework-agnostic](./images/framework-agnostic.png)
+
+Explore the [`DocEditor` source code](https://github.com/toeverything/blocksuite/blob/master/packages/presets/src/editors/doc-editor.ts) to see how this pattern allows composing minimal real-world editors.
 
 ## Summary
 

@@ -8,15 +8,13 @@ export function createEmptyPage() {
 
   return {
     page,
-    init() {
-      page
-        .load(() => {
-          const pageBlockId = page.addBlock('affine:page', {});
-          page.addBlock('affine:surface', {}, pageBlockId);
-          const noteId = page.addBlock('affine:note', {}, pageBlockId);
-          page.addBlock('affine:paragraph', {}, noteId);
-        })
-        .catch(console.error);
+    async init() {
+      await page.load(() => {
+        const pageBlockId = page.addBlock('affine:page', {});
+        page.addBlock('affine:surface', {}, pageBlockId);
+        const noteId = page.addBlock('affine:note', {}, pageBlockId);
+        page.addBlock('affine:paragraph', {}, noteId);
+      });
       return page;
     },
   };

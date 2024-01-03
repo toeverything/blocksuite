@@ -2,7 +2,7 @@ import './link-popup.js';
 
 import type { InlineRange } from '@blocksuite/inline';
 
-import type { AffineInlineEditor } from '../../../types.js';
+import type { AffineInlineEditor } from '../../../affine-inline-specs.js';
 import { LinkPopup } from './link-popup.js';
 
 export function toggleLinkPopup(

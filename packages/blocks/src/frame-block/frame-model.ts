@@ -1,5 +1,5 @@
 import type { Text } from '@blocksuite/store';
-import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
@@ -36,9 +36,7 @@ export const FrameBlockSchema = defineBlockSchema({
   },
 });
 
-export class FrameBlockModel extends selectable<FrameBlockProps>(
-  BaseBlockModel
-) {
+export class FrameBlockModel extends selectable<FrameBlockProps>(BlockModel) {
   static PADDING = [8, 10];
 
   override batch = FRAME_BATCH;

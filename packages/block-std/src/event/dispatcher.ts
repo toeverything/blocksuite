@@ -84,6 +84,27 @@ export class UIEventDispatcher {
     this._clipboardControl = new ClipboardControl(this);
   }
 
+  private static _activeDispatcher: UIEventDispatcher | null = null;
+
+  get isActive() {
+    return UIEventDispatcher._activeDispatcher === this;
+  }
+
+  activate = () => {
+    const prevDispatcher = UIEventDispatcher._activeDispatcher;
+    if (prevDispatcher === this) return;
+    UIEventDispatcher._activeDispatcher = this;
+    prevDispatcher?.std.selection.clear();
+  };
+
+  deactivate = () => {
+    const prevDispatcher = UIEventDispatcher._activeDispatcher;
+    if (!prevDispatcher) return;
+    if (prevDispatcher !== this) return;
+    UIEventDispatcher._activeDispatcher = null;
+    prevDispatcher.std.selection.clear();
+  };
+
   mount() {
     if (this.disposables.disposed) {
       this.disposables = new DisposableGroup();

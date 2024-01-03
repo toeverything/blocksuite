@@ -1,4 +1,4 @@
-import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import { type SerializedXYWH } from '../surface-block/index.js';
@@ -37,6 +37,4 @@ export const ImageBlockSchema = defineBlockSchema({
   toModel: () => new ImageBlockModel(),
 });
 
-export class ImageBlockModel extends selectable<ImageBlockProps>(
-  BaseBlockModel
-) {}
+export class ImageBlockModel extends selectable<ImageBlockProps>(BlockModel) {}

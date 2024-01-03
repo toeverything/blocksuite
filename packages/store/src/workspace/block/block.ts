@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 
 import { Boxed, type UnRecord, y2Native } from '../../reactive/index.js';
 import { createYProxy, native2Y } from '../../reactive/index.js';
-import { BaseBlockModel, internalPrimitives } from '../../schema/base.js';
+import { BlockModel, internalPrimitives } from '../../schema/base.js';
 import type { Schema } from '../../schema/index.js';
 
 export type YBlock = Y.Map<unknown>;
@@ -14,7 +14,7 @@ export type BlockOptions = Partial<{
 }>;
 
 export class Block {
-  readonly model: BaseBlockModel;
+  readonly model: BlockModel;
   readonly id: string;
   readonly flavour: string;
   readonly yChildren: Y.Array<string[]>;
@@ -209,7 +209,7 @@ export class Block {
     const schema = this.schema.flavourSchemaMap.get(this.flavour);
     assertExists(schema, `Cannot find schema for flavour ${this.flavour}`);
 
-    const model = schema.model.toModel?.() ?? new BaseBlockModel<object>();
+    const model = schema.model.toModel?.() ?? new BlockModel<object>();
     Object.assign(model, props);
 
     model.id = this.id;

@@ -2,7 +2,7 @@
 import '../../database-block/kanban/define.js';
 import '../../database-block/table/define.js';
 
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 import { Generator, Schema, Workspace } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -42,11 +42,11 @@ describe('DatabaseManager', () => {
   let page: Page;
   let db: DatabaseBlockModel;
 
-  let pageBlockId: BaseBlockModel['id'];
-  let noteBlockId: BaseBlockModel['id'];
-  let databaseBlockId: BaseBlockModel['id'];
-  let p1: BaseBlockModel['id'];
-  let p2: BaseBlockModel['id'];
+  let pageBlockId: BlockModel['id'];
+  let noteBlockId: BlockModel['id'];
+  let databaseBlockId: BlockModel['id'];
+  let p1: BlockModel['id'];
+  let p2: BlockModel['id'];
   let col1: Column['id'];
   let col2: Column['id'];
   let col3: Column['id'];

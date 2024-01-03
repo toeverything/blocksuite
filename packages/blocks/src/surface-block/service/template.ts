@@ -1,5 +1,5 @@
 import { assertExists, assertType, Slot } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Y } from '@blocksuite/store';
+import type { BlockModel, Y } from '@blocksuite/store';
 import {
   type BlockSnapshot,
   Job,
@@ -120,7 +120,7 @@ export class TemplateJob {
     });
   }
 
-  private _mergeProps(from: BlockSnapshot, to: BaseBlockModel) {
+  private _mergeProps(from: BlockSnapshot, to: BlockModel) {
     switch (from.flavour as MergeBlockFlavour) {
       case 'affine:page':
         break;
@@ -302,7 +302,7 @@ export class TemplateJob {
             json,
             this.model.page.getBlockById(
               this._getMergeBlockId(json)
-            ) as BaseBlockModel
+            ) as BlockModel
           );
           return;
         }

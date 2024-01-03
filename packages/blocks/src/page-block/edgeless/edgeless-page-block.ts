@@ -11,7 +11,7 @@ import {
   throttle,
 } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
+import { type BlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -110,13 +110,13 @@ export class EdgelessPageBlockComponent extends BlockElement<
       contain: size layout style;
     }
 
-    @media screen and (max-width: 1200px) {
+    @container viewport (width <= 1200px) {
       edgeless-zoom-toolbar {
         display: none;
       }
     }
 
-    @media screen and (min-width: 1200px) {
+    @container viewport (width >= 1200px) {
       zoom-bar-toggle-button {
         display: none;
       }
@@ -399,11 +399,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   /**
    * Adds a new note with the given blocks and point.
-   * @param blocks Array<Partial<BaseBlockModel>>
+   * @param blocks Array<Partial<BlockModel>>
    * @param point Point
    */
   addNewNote(
-    blocks: Array<Partial<BaseBlockModel>>,
+    blocks: Array<Partial<BlockModel>>,
     point: Point,
     options?: {
       width?: number;
@@ -555,7 +555,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
       this.updateComplete
         .then(() => {
           if (blockId) {
-            asyncFocusRichText(this.page, blockId)?.catch(console.error);
+            asyncFocusRichText(this.host, this.page, blockId)?.catch(
+              console.error
+            );
           } else if (point) {
             // Cannot reuse `handleNativeRangeClick` directly here,
             // since `retargetClick` will re-target to pervious editor
@@ -833,6 +835,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
       const el = this.surface.pickById(surface.elements[0]);
       if (isCanvasElement(el)) {
+        this.host.event.activate();
         return true;
       }
 

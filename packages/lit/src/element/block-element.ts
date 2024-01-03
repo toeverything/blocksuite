@@ -3,7 +3,7 @@ import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
 import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
@@ -14,7 +14,7 @@ import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';
 
 export class BlockElement<
-  Model extends BaseBlockModel = BaseBlockModel,
+  Model extends BlockModel = BlockModel,
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends WithDisposable(ShadowlessElement) {
@@ -156,11 +156,11 @@ export class BlockElement<
     this._disposables.add(this.host.event.bindHotkey(keymap, config));
   }
 
-  renderModel = (model: BaseBlockModel): TemplateResult => {
+  renderModel = (model: BlockModel): TemplateResult => {
     return this.host.renderModel(model);
   };
 
-  renderModelChildren = (model: BaseBlockModel): TemplateResult => {
+  renderModelChildren = (model: BlockModel): TemplateResult => {
     return this.host.renderModelChildren(model);
   };
 

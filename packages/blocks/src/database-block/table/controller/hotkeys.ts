@@ -1,5 +1,6 @@
 import type { ReactiveController } from 'lit';
 
+import { getPageByElement } from '../../../_common/utils/query.js';
 import { popRowMenu } from '../components/menu.js';
 import type { DataViewTable } from '../table-view.js';
 
@@ -229,7 +230,8 @@ export class TableHotkeysController implements ReactiveController {
           );
           if (cell) {
             context.get('keyboardState').raw.preventDefault();
-            popRowMenu(cell, cell.rowId, this.selectionController);
+            const pageElement = getPageByElement(cell);
+            popRowMenu(pageElement, cell, cell.rowId, this.selectionController);
           }
         },
       })

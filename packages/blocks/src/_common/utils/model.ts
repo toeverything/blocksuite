@@ -1,4 +1,4 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 
 import type {
   AttachmentBlockModel,
@@ -74,7 +74,7 @@ export function assertFlavours(model: { flavour: string }, allowed: string[]) {
 }
 
 export function matchFlavours<Key extends (keyof BlockModels)[]>(
-  model: BaseBlockModel | null,
+  model: BlockModel | null,
   expected: Key
 ): model is BlockModels[Key[number]] {
   return !!model && expected.includes(model.flavour as keyof BlockModels);
@@ -82,7 +82,7 @@ export function matchFlavours<Key extends (keyof BlockModels)[]>(
 
 export function isInsideBlockByFlavour(
   page: Page,
-  block: BaseBlockModel | string,
+  block: BlockModel | string,
   flavour: string
 ): boolean {
   const parent = page.getParent(block);

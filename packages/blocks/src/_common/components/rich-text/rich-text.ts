@@ -2,9 +2,11 @@ import { assertExists } from '@blocksuite/global/utils';
 import {
   type AttributeRenderer,
   createInlineKeyDownHandler,
+  type DeltaInsert,
   InlineEditor,
   type InlineRange,
   type InlineRangeProvider,
+  type KeyboardBindingContext,
 } from '@blocksuite/inline';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Y } from '@blocksuite/store';
@@ -14,12 +16,11 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { z } from 'zod';
 
-import { onVBeforeinput, onVCompositionEnd } from './inline/hooks.js';
-import {
-  type AffineInlineEditor,
-  type AffineTextAttributes,
-} from './inline/types.js';
-import { tryFormatInlineStyle } from './markdown/inline.js';
+import type {
+  AffineInlineEditor,
+  AffineTextAttributes,
+} from '../../inline/presets/affine-inline-specs.js';
+import { onVBeforeinput, onVCompositionEnd } from './hooks.js';
 
 interface RichTextStackItem {
   meta: Map<'richtext-v-range', InlineRange | null>;
@@ -76,6 +77,21 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   inlineEventSource?: HTMLElement;
 
   @property({ attribute: false })
+  markdownShortcutHandler?: <
+    TextAttributes extends AffineTextAttributes = AffineTextAttributes,
+  >(
+    context: KeyboardBindingContext<TextAttributes>,
+    undoManager: Y.UndoManager
+  ) => boolean;
+
+  @property({ attribute: false })
+  embedChecker: <
+    TextAttributes extends AffineTextAttributes = AffineTextAttributes,
+  >(
+    delta: DeltaInsert<TextAttributes>
+  ) => boolean = () => false;
+
+  @property({ attribute: false })
   readonly = false;
 
   @property({ attribute: false })
@@ -97,11 +113,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   enableAutoScrollHorizontally = true;
   @property({ attribute: false })
-  enableMarkdownShortcut = true;
-  @property({ attribute: false })
   wrapText = true;
 
-  // `enableMarkdownShortcut` will be overwritten to false and
   // `attributesSchema` will be overwritten to `z.object({})` if `enableFormat` is false.
   @property({ attribute: false })
   enableFormat = true;
@@ -117,13 +130,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     }
 
     if (!this.enableFormat) {
-      this.enableMarkdownShortcut = false;
       this.attributesSchema = z.object({});
     }
 
     // init inline editor
     this._inlineEditor = new InlineEditor<AffineTextAttributes>(this._yText, {
-      isEmbed: delta => !!delta.attributes?.reference,
+      isEmbed: delta => this.embedChecker(delta),
       hooks: {
         beforeinput: onVBeforeinput,
         compositionEnd: onVCompositionEnd,
@@ -138,11 +150,13 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     }
     const inlineEditor = this._inlineEditor;
 
-    if (this.enableMarkdownShortcut) {
+    const markdownShortcutHandler = this.markdownShortcutHandler;
+    if (markdownShortcutHandler) {
       const keyDownHandler = createInlineKeyDownHandler(inlineEditor, {
         inputRule: {
           key: [' ', 'Enter'],
-          handler: context => tryFormatInlineStyle(context, this.undoManager),
+          handler: context =>
+            markdownShortcutHandler(context, this.undoManager),
         },
       });
 

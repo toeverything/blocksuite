@@ -5,7 +5,7 @@ import './portal/note.js';
 
 import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 import { css, type TemplateResult } from 'lit';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -48,7 +48,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   portal!: HTMLDivElement;
 
   @property({ attribute: false })
-  renderModel!: (model: BaseBlockModel) => TemplateResult;
+  renderModel!: (model: BlockModel) => TemplateResult;
 
   private _getBlocksInChildren(model: GroupElement): TopLevelBlockModel[] {
     return Array.from(model.children.keys())

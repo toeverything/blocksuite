@@ -5,7 +5,7 @@ import {
   throttle,
 } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
 import {
@@ -33,7 +33,7 @@ function showSlashMenu({
   triggerKey,
 }: {
   pageElement: PageBlockComponent;
-  model: BaseBlockModel;
+  model: BlockModel;
   range: Range;
   container?: HTMLElement;
   abortController?: AbortController;
@@ -135,7 +135,7 @@ export class AffineSlashMenuWidget extends WidgetElement {
     }
 
     if (matchFlavours(model, ['affine:code'])) return;
-    const inlineEditor = getInlineEditorByModel(model);
+    const inlineEditor = getInlineEditorByModel(this.host, model);
     if (!inlineEditor) return;
     inlineEditor.slots.inlineRangeApply.once(() => {
       const pageElement = this.blockElement;

@@ -1,6 +1,6 @@
 import { MarkdownAdapter } from '@blocksuite/blocks';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { Job, type Slice } from '@blocksuite/store';
 
 export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
@@ -43,7 +43,7 @@ export async function insertFromMarkdown(
   const snapshots = (await markdownAdapter.toSliceSnapshot(payload)).content[0]
     .children;
 
-  const models: BaseBlockModel[] = [];
+  const models: BlockModel[] = [];
   snapshots.map(async (blockSnapshot, i) => {
     const model = await job.snapshotToBlock(
       blockSnapshot,

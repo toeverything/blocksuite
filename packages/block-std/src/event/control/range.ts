@@ -55,6 +55,8 @@ export class RangeControl {
   };
 
   private _selectionChange = (event: Event) => {
+    if (!this._dispatcher.isActive) return;
+
     const scope = this._buildScope('selectionChange');
 
     this._dispatcher.run('selectionChange', this._createContext(event), scope);

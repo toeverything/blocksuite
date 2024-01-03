@@ -11,12 +11,11 @@ import {
 } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
+import { type BlockModel } from '@blocksuite/store';
 import { html, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import {
   buildPath,
   type EdgelessTool,
@@ -486,7 +485,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     this._resetCursor();
   };
 
-  private _handleAnchorModelDisposables = (blockModel: BaseBlockModel) => {
+  private _handleAnchorModelDisposables = (blockModel: BlockModel) => {
     if (this._anchorModelDisposables) {
       this._anchorModelDisposables.dispose();
       this._anchorModelDisposables = null;
@@ -618,9 +617,10 @@ export class AffineDragHandleWidget extends WidgetElement<
     this._isHoverDragHandleVisible = true;
   };
 
-  private _showDragHandleOnTopLevelBlocks = () => {
+  private _showDragHandleOnTopLevelBlocks = async () => {
     if (isInsideDocEditor(this.host)) return;
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
+    await edgelessPage.surface.updateComplete;
 
     if (!this._anchorBlockPath) return;
     const blockElement = this.anchorBlockElement;
@@ -830,9 +830,9 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
-    const selection = edgelessPage.selectionManager;
-    const selectedElements = selection.elements;
-    if (selection.editing || selectedElements.length !== 1) {
+    const editing = edgelessPage.selectionManager.editing;
+    const selectedElements = edgelessPage.selectionManager.elements;
+    if (editing || selectedElements.length !== 1) {
       this._hide();
       return;
     }
@@ -850,20 +850,12 @@ export class AffineDragHandleWidget extends WidgetElement<
       return;
     }
 
-    // FIXME: this is a workaround for the bug that the path of selected element is not correct
-    // ref: Github issues #5623, #5624
-    const blockElement = this.pageBlockElement.querySelector(
-      `[${BLOCK_ID_ATTR}="${selectedElement.id}"]`
-    ) as BlockElement | null;
-    if (!blockElement) {
-      this._hide();
-      return;
-    }
+    const selections = edgelessPage.selectionManager.selections;
 
     this._anchorBlockId = selectedElement.id;
-    this._anchorBlockPath = blockElement.path;
+    this._anchorBlockPath = selections[0].path;
 
-    this._showDragHandleOnTopLevelBlocks();
+    this._showDragHandleOnTopLevelBlocks().catch(console.error);
   };
 
   /**
@@ -1050,7 +1042,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       .map(selection => {
         return this._getBlockElementFromViewStore(selection.path);
       })
-      .filter((element): element is BlockElement<BaseBlockModel> => !!element);
+      .filter((element): element is BlockElement<BlockModel> => !!element);
 
     // This could be skip if we can ensure that all selected blocks are on the same level
     // Which means not selecting parent block and child block at the same time
@@ -1092,7 +1084,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
       const selectedBlocks = getBlockElementsExcludeSubtrees(draggingElements)
         .map(element => getModelByBlockComponent(element))
-        .filter((x): x is BaseBlockModel => !!x);
+        .filter((x): x is BlockModel => !!x);
       if (selectedBlocks.length === 0) return false;
 
       const isSurfaceComponent = selectedBlocks.some(block => {
@@ -1126,7 +1118,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const selectedBlocks = getBlockElementsExcludeSubtrees(draggingElements)
       .map(element => getModelByBlockComponent(element))
-      .filter((x): x is BaseBlockModel => !!x);
+      .filter((x): x is BlockModel => !!x);
     if (!selectedBlocks.length) return false;
 
     const targetBlock = this.page.getBlockById(targetBlockId);
@@ -1373,7 +1365,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     if (this._isTopLevelDragHandleVisible) {
-      this._showDragHandleOnTopLevelBlocks();
+      this._showDragHandleOnTopLevelBlocks().catch(console.error);
       this._updateDragHoverRectTopLevelBlock();
     } else {
       this._hide();
@@ -1434,7 +1426,7 @@ export class AffineDragHandleWidget extends WidgetElement<
         'scrollend',
         this._updateDropIndicatorOnScroll
       );
-    } else {
+    } else if (isInsideEdgelessEditor(this.host)) {
       const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
 
       this._disposables.add(

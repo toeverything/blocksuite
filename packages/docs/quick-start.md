@@ -1,27 +1,39 @@
 # Quick Start
 
-The `@blocksuite/presets` package contains the prebuilt editors and opt-in additional UI components. Its `nightly` versions are released daily based on the master branch, which is also recommended for real world usage:
+The `@blocksuite/presets` package contains the prebuilt editors and opt-in additional UI components. Its `nightly` versions are released daily based on the master branch, which is also recommended for real world usage. You may also need to install `@blocksuite/store` explicitly for working with BlockSuite documents:
 
 ```sh
-pnpm i @blocksuite/presets@nightly
+pnpm install \
+  @blocksuite/presets@nightly \
+  @blocksuite/store@nightly
 ```
 
 Then you can use the prebuilt `DocEditor` out of the box, with an initialized `page` instance attached as its document model:
 
-::: code-sandbox {coderHeight=220 previewHeight=500}
+::: code-sandbox {coderHeight=420 previewHeight=300}
 
 ```ts /index.ts [active]
 import '@blocksuite/presets/themes/affine.css';
-import { createEmptyPage, DocEditor } from '@blocksuite/presets';
 
-const page = createEmptyPage().init();
-const editor = new DocEditor();
-editor.page = page;
-document.body.appendChild(editor);
+import { createEmptyPage, DocEditor } from '@blocksuite/presets';
+import { Text } from '@blocksuite/store';
+
+(async () => {
+  // Init editor with default block tree
+  const page = await createEmptyPage().init();
+  const editor = new DocEditor();
+  editor.page = page;
+  document.body.appendChild(editor);
+
+  // Update block node with some initial text content
+  const paragraphs = page.getBlockByFlavour('affine:paragraph');
+  const paragraph = paragraphs[0];
+  page.updateBlock(paragraph, { text: new Text('Hello World!') });
+})();
 ```
 
 :::
 
-The `DocEditor` here is a standard web component that can also be reused with `<doc-editor>` HTML tag. All first-party components within BlockSuite are implemented as web components. This approach not only ensures the stability of rich text editing by leveraging the native DOM component model, but also makes BlockSuite framework-agnostic.
+The `DocEditor` here is a standard web component that can also be reused with `<doc-editor>` HTML tag. Another `EdgelessEditor` also works similarly - simply attach the `editor` with a `page` and you are all set.
 
-You can also try replacing the `DocEditor` with the `EdgelessEditor` whiteboard in the same manner. In the subsequent sections, we will guide you through more fundamental components of BlockSuite.
+For the `page.getBlockByFlavour` and `page.updateBlock` APIs used here, please see the [introduction](./working-with-block-tree#block-tree-basics) about block tree basics for further details.

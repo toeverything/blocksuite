@@ -1,17 +1,15 @@
 import '../_common/components/rich-text/rich-text.js';
 
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRangeProvider } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import { affineAttributeRenderer } from '../_common/components/rich-text/inline/attribute-renderer.js';
-import { affineTextAttributes } from '../_common/components/rich-text/inline/types.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
@@ -24,6 +22,7 @@ import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import type { BlockHub } from '../page-block/widgets/block-hub/components/block-hub.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
+import type { ParagraphService } from './paragraph-service.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {
   // Call event.preventDefault() to keep the mouse event from being sent as well.
@@ -37,7 +36,7 @@ interface Style {
 
 function TipsPlaceholder(
   editorHost: EditorHost,
-  model: BaseBlockModel,
+  model: BlockModel,
   tipsPos: Style
 ) {
   if (!matchFlavours(model, ['affine:paragraph'])) {
@@ -90,7 +89,10 @@ function TipsPlaceholder(
 }
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
+export class ParagraphBlockComponent extends BlockElement<
+  ParagraphBlockModel,
+  ParagraphService
+> {
   static override styles = css`
     .affine-paragraph-block-container {
       position: relative;
@@ -207,16 +209,23 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   @state()
   private _tipsPlaceholderTemplate = html``;
 
-  @state()
-  private _isComposing = false;
-
-  @state()
-  private _isFocus = false;
-
-  readonly attributesSchema = affineTextAttributes;
-  readonly attributeRenderer = affineAttributeRenderer;
-
-  private _placeholderDisposables = new DisposableGroup();
+  get inlineManager() {
+    const inlineManager = this.service?.inlineManager;
+    assertExists(inlineManager);
+    return inlineManager;
+  }
+  get attributesSchema() {
+    return this.inlineManager.getSchema();
+  }
+  get attributeRenderer() {
+    return this.inlineManager.getRenderer();
+  }
+  get markdownShortcutHandler() {
+    return this.inlineManager.markdownShortcutHandler;
+  }
+  get embedChecker() {
+    return this.inlineManager.embedChecker;
+  }
 
   private _inlineRangeProvider: InlineRangeProvider | null = null;
 
@@ -232,6 +241,10 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     return this.rootBlockElement;
   }
 
+  get inlineEditor() {
+    return this._richTextElement?.inlineEditor;
+  }
+
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
     await this._richTextElement?.updateComplete;
@@ -245,6 +258,10 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     bindContainerHotkey(this);
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
+
+    this.disposables.addFromEvent(document, 'selectionchange', () => {
+      this._updatePlaceholder();
+    });
   }
 
   override firstUpdated() {
@@ -264,13 +281,13 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   }
 
   private _updatePlaceholder = () => {
-    if (this.model.text.length !== 0 || this._isComposing) {
-      this._tipsPlaceholderTemplate = html``;
-      return;
-    }
+    if (!this.inlineEditor) return;
 
-    if (this.model.type === 'text' && !this._isFocus) {
-      // Text block placeholder only show when focus and empty
+    if (
+      this.model.text.length !== 0 ||
+      this.inlineEditor.isComposing ||
+      !this.selected
+    ) {
       this._tipsPlaceholderTemplate = html``;
       return;
     }
@@ -294,33 +311,6 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       this.model,
       this.tipsPos
     );
-  };
-
-  private _onFocusIn = () => {
-    this._isFocus = true;
-    this._updatePlaceholder();
-
-    this.model.text.yText.observe(this._updatePlaceholder);
-    this._placeholderDisposables.add(() =>
-      this.model.text.yText.unobserve(this._updatePlaceholder)
-    );
-    // Workaround for inline editor skips composition event
-    this._placeholderDisposables.addFromEvent(this, 'compositionstart', () => {
-      this._isComposing = true;
-      this._updatePlaceholder();
-    });
-    this._placeholderDisposables.addFromEvent(this, 'compositionend', () => {
-      this._isComposing = false;
-      this._updatePlaceholder();
-    });
-  };
-
-  private _onFocusOut = () => {
-    this._isFocus = false;
-    this._updatePlaceholder();
-    // We should not observe text change when focus out
-    this._placeholderDisposables.dispose();
-    this._placeholderDisposables = new DisposableGroup();
   };
 
   private isInDatabase = () => {
@@ -368,12 +358,12 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
             .undoManager=${this.model.page.history}
             .attributesSchema=${this.attributesSchema}
             .attributeRenderer=${this.attributeRenderer}
+            .markdownShortcutHandler=${this.markdownShortcutHandler}
+            .embedChecker=${this.embedChecker}
             .readonly=${this.model.page.readonly}
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}
-            @focusin=${this._onFocusIn}
-            @focusout=${this._onFocusOut}
             style=${styleMap({
               fontWeight: fontWeightMap?.[type]?.[getThemeMode()],
             })}

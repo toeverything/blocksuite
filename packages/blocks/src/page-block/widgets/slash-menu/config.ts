@@ -1,7 +1,6 @@
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Slice, Text, type Y } from '@blocksuite/store';
 
-import { REFERENCE_NODE } from '../../../_common/components/rich-text/consts.js';
 import { toast } from '../../../_common/components/toast.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
@@ -25,6 +24,7 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '../../../_common/icons/index.js';
+import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import {
   createDefaultPage,
   getImageFilesFromLocal,
@@ -104,7 +104,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
                     );
                   }
                   const codeModel = newModels[0];
-                  onModelTextUpdated(codeModel, richText => {
+                  onModelTextUpdated(pageElement.host, codeModel, richText => {
                     const inlineEditor = richText.inlineEditor;
                     assertExists(inlineEditor);
                     inlineEditor.focusEnd();
@@ -123,13 +123,16 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       .map(({ name, icon, id }) => ({
         name,
         icon,
-        action: ({ model }) => {
+        action: ({ pageElement, model }) => {
           if (!model.text) {
             return;
           }
           const len = model.text.length;
           if (!len) {
-            const inlineEditor = getInlineEditorByModel(model);
+            const inlineEditor = getInlineEditorByModel(
+              pageElement.host,
+              model
+            );
             assertExists(
               inlineEditor,
               "Can't set style mark! Inline editor not found"
@@ -189,7 +192,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         icon: NewPageIcon,
         action: async ({ pageElement, model }) => {
           const newPage = await createDefaultPage(pageElement.page.workspace);
-          insertContent(model, REFERENCE_NODE, {
+          insertContent(pageElement.host, model, REFERENCE_NODE, {
             reference: {
               type: 'LinkedPage',
               pageId: newPage.id,
@@ -215,7 +218,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         },
         action: ({ model, pageElement }) => {
           const triggerKey = '@';
-          insertContent(model, triggerKey);
+          insertContent(pageElement.host, model, triggerKey);
           assertExists(model.page.root);
           const widgetEle =
             pageElement.widgetElements['affine-linked-page-widget'];
@@ -320,34 +323,34 @@ export const menuGroups: SlashMenuOptions['menus'] = [
       {
         name: 'Today',
         icon: TodayIcon,
-        action: ({ model }) => {
+        action: ({ pageElement, model }) => {
           const date = new Date();
-          insertContent(model, formatDate(date));
+          insertContent(pageElement.host, model, formatDate(date));
         },
       },
       {
         name: 'Tomorrow',
         icon: TomorrowIcon,
-        action: ({ model }) => {
+        action: ({ pageElement, model }) => {
           // yyyy-mm-dd
           const date = new Date();
           date.setDate(date.getDate() + 1);
-          insertContent(model, formatDate(date));
+          insertContent(pageElement.host, model, formatDate(date));
         },
       },
       {
         name: 'Yesterday',
         icon: YesterdayIcon,
-        action: ({ model }) => {
+        action: ({ pageElement, model }) => {
           const date = new Date();
           date.setDate(date.getDate() - 1);
-          insertContent(model, formatDate(date));
+          insertContent(pageElement.host, model, formatDate(date));
         },
       },
       {
         name: 'Now',
         icon: NowIcon,
-        action: ({ model }) => {
+        action: ({ pageElement, model }) => {
           // For example 7:13 pm
           // https://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
           const date = new Date();
@@ -357,7 +360,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           hours = hours % 12;
           hours = hours ? hours : 12; // the hour '0' should be '12'
           const strTime = hours + ':' + minutes + ' ' + amOrPm;
-          insertContent(model, strTime);
+          insertContent(pageElement.host, model, strTime);
         },
       },
     ],

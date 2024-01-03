@@ -178,6 +178,11 @@ export class InlineEditor<
     return this._hooksService.hooks;
   }
 
+  // Expose event service API
+  get isComposing() {
+    return this._eventService.isComposing;
+  }
+
   constructor(
     yText: InlineEditor['yText'],
     ops: {

@@ -1,6 +1,6 @@
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 
 import type { DataViewTypes } from './common/data-view.js';
 import { DatabaseSelection } from './common/selection.js';
@@ -14,7 +14,7 @@ export class DatabaseService extends BlockService<DatabaseBlockModel> {
 
   initDatabaseBlock(
     page: Page,
-    model: BaseBlockModel,
+    model: BlockModel,
     databaseId: string,
     viewType: DataViewTypes,
     isAppendNewRow = true

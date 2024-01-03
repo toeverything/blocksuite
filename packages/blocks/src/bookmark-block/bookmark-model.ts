@@ -1,4 +1,4 @@
-import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/index.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
@@ -69,5 +69,5 @@ export const BookmarkBlockSchema = defineBlockSchema({
 });
 
 export class BookmarkBlockModel extends selectable<BookmarkBlockProps>(
-  BaseBlockModel
+  BlockModel
 ) {}

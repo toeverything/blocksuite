@@ -200,7 +200,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const inlineEditor = _getInlineEditor();
         const inilneRange = inlineEditor.getInlineRange();
         assertExists(inilneRange);
-        handleIndent(model.page, model, inilneRange.index);
+        handleIndent(blockElement.host, model, inilneRange.index);
         _preventDefault(ctx);
 
         return true;
@@ -212,7 +212,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         })
       ).selectedModels;
       if (!models) return;
-      handleMultiBlockIndent(blockElement.page, models);
+      handleMultiBlockIndent(blockElement.host, models);
       return true;
     },
     'Mod-Backspace': ctx => {
@@ -239,7 +239,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const inlineRange = inlineEditor.getInlineRange();
         assertExists(inlineRange);
         if (inlineRange.index === 0) {
-          handleRemoveAllIndent(model.page, model, inlineRange.index);
+          handleRemoveAllIndent(blockElement.host, model, inlineRange.index);
           _preventDefault(ctx);
         }
 
@@ -252,7 +252,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         })
       ).selectedModels;
       if (!models) return;
-      handleRemoveAllIndentForMultiBlocks(blockElement.page, models);
+      handleRemoveAllIndentForMultiBlocks(blockElement.host, models);
       return true;
     },
     'Shift-Tab': ctx => {
@@ -278,7 +278,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const inlineEditor = _getInlineEditor();
         const inlineRange = inlineEditor.getInlineRange();
         assertExists(inlineRange);
-        handleUnindent(model.page, model, inlineRange.index);
+        handleUnindent(blockElement.host, model, inlineRange.index);
         _preventDefault(ctx);
 
         return true;
@@ -290,7 +290,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         })
       ).selectedModels;
       if (!models) return;
-      handleMultiBlockOutdent(blockElement.page, models);
+      handleMultiBlockOutdent(blockElement.host, models);
       return true;
     },
     Backspace: ctx => {
@@ -405,7 +405,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       title: pageName,
     })
       .then(page => {
-        insertLinkedNode({ model: blockElement.model, pageId: page.id });
+        insertLinkedNode({
+          editorHost: blockElement.host,
+          model: blockElement.model,
+          pageId: page.id,
+        });
       })
       .catch(e => console.error(e));
     return true;

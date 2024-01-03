@@ -1,10 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { EditorHost } from '@blocksuite/lit';
+import type { BlockModel, Page } from '@blocksuite/store';
 
 import {
   getBlockComponentByModel,
   getEditorContainer,
-  isPageMode,
+  isInsideDocEditor,
   matchFlavours,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
@@ -22,16 +23,19 @@ import { FileExporter } from './file-exporter/file-exporter.js';
 type Html2CanvasFunction = typeof import('html2canvas').default;
 
 export class ContentParser {
+  private _host: EditorHost;
   private _page: Page;
   private _imageProxyEndpoint?: string;
 
   constructor(
+    host: EditorHost,
     page: Page,
     options: {
       /** API endpoint used for cross-domain image export */
       imageProxyEndpoint?: string;
     } = {}
   ) {
+    this._host = host;
     this._page = page;
     this._imageProxyEndpoint = options?.imageProxyEndpoint;
     // FIXME: this hard-coded config should be removed, see https://github.com/toeverything/blocksuite/issues/3506
@@ -47,7 +51,7 @@ export class ContentParser {
 
   private async _checkReady() {
     const pathname = location.pathname;
-    const pageMode = isPageMode(this._page);
+    const pageMode = isInsideDocEditor(this._host);
 
     const promise = new Promise((resolve, reject) => {
       let count = 0;
@@ -59,7 +63,9 @@ export class ContentParser {
           reject(e);
         }
         const root = this._page.root;
-        const pageBlock = root ? getBlockComponentByModel(root) : null;
+        const pageBlock = root
+          ? getBlockComponentByModel(this._host, root)
+          : null;
         const imageCard = pageBlock?.querySelector('affine-image-block-card');
         const isReady =
           !imageCard || imageCard.getAttribute('imageState') === '0';
@@ -179,7 +185,7 @@ export class ContentParser {
     edgeless?: EdgelessPageBlockComponent,
     nodes?: TopLevelBlockModel[],
     surfaces?: SurfaceElement[],
-    blockElementGetter: (model: BaseBlockModel) => Element | null = () => null,
+    blockElementGetter: (model: BlockModel) => Element | null = () => null,
     edgelessBackground?: {
       zoom: number;
     }
@@ -188,15 +194,15 @@ export class ContentParser {
     if (!root) return;
 
     const pathname = location.pathname;
-    const pageMode = isPageMode(this._page);
-    const editorContainer = getEditorContainer(this._page);
+    const pageMode = isInsideDocEditor(this._host);
+    const editorContainer = getEditorContainer(this._host);
     const containerComputedStyle = window.getComputedStyle(editorContainer);
 
     const html2canvas = (element: HTMLElement) =>
       this._html2canvas(element, {
         backgroundColor: containerComputedStyle.backgroundColor,
       });
-    const container = document.querySelector(
+    const container = editorContainer.querySelector(
       '.affine-block-children-container'
     );
 
@@ -295,9 +301,9 @@ export class ContentParser {
     if (!(html2canvas instanceof Function)) return;
 
     const pathname = location.pathname;
-    const pageMode = isPageMode(this._page);
+    const pageMode = isInsideDocEditor(this._host);
 
-    const editorContainer = getEditorContainer(this._page);
+    const editorContainer = getEditorContainer(this._host);
     const pageContainer = editorContainer.querySelector(
       '.affine-doc-page-block-container'
     );
@@ -383,7 +389,10 @@ export class ContentParser {
   }
 
   private _checkCanContinueToCanvas(pathName: string, pageMode: boolean) {
-    if (location.pathname !== pathName || isPageMode(this._page) !== pageMode) {
+    if (
+      location.pathname !== pathName ||
+      isInsideDocEditor(this._host) !== pageMode
+    ) {
       throw new Error('Unable to export content to canvas');
     }
   }
@@ -391,13 +400,14 @@ export class ContentParser {
   private async _toCanvas(): Promise<HTMLCanvasElement | void> {
     await this._checkReady();
 
-    if (isPageMode(this._page)) {
+    if (isInsideDocEditor(this._host)) {
       return await this._docToCanvas();
     } else {
       const root = this._page.root;
       if (!root) return;
 
       const edgeless = getBlockComponentByModel(
+        this._host,
         root
       ) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();

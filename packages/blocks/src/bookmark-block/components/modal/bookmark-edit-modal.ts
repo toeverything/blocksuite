@@ -58,7 +58,7 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
     const title =
       this.bookmarkModel.title ?? this.bookmarkModel.title ?? 'Bookmark';
 
-    return html`<div class="bookmark-modal">
+    return html`<div class="bookmark-modal blocksuite-overlay">
       <div class="bookmark-modal-mask" @click=${() => this.remove()}></div>
       <div
         class="bookmark-modal-wrapper"

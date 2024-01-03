@@ -4,11 +4,11 @@ import type {
   HookContext,
 } from '@blocksuite/inline';
 
-import { isStrictUrl } from '../../../utils/url.js';
-import type { AffineTextAttributes } from './types.js';
+import type { AffineTextAttributes } from '../../inline/presets/affine-inline-specs.js';
+import { isStrictUrl } from '../../utils/url.js';
 
-const EDGE_IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
-const GLOBAL_IGNORED_ATTRIBUTES = ['reference'] as const;
+const EDGE_IGNORED_ATTRIBUTES = ['code'] as const;
+const GLOBAL_IGNORED_ATTRIBUTES = [] as const;
 
 const autoIdentifyLink = (ctx: HookContext<AffineTextAttributes>) => {
   // auto identify link only on pressing space
@@ -70,8 +70,11 @@ export const onVBeforeinput = (
 
   if (data && data.length > 0 && data !== '\n') {
     if (
-      deltas.length > 1 || // cursor is in the between of two deltas
-      (deltas.length === 1 && inlineRange.index !== 0) // cursor is in the end of line or in the middle of a delta
+      // cursor is in the between of two deltas
+      (deltas.length > 1 ||
+        // cursor is in the end of line or in the middle of a delta
+        (deltas.length === 1 && inlineRange.index !== 0)) &&
+      !inlineEditor.isEmbed(deltas[0][0]) // embeds should not be extended
     ) {
       // each new text inserted by inline editor will not contain any attributes,
       // but we want to keep the attributes of previous text or current text where the cursor is in

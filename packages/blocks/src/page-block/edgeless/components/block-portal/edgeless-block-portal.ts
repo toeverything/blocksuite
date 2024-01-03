@@ -13,7 +13,7 @@ import '../presentation/edgeless-navigator-black-background.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -245,7 +245,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      (page.root as BaseBlockModel).childrenUpdated.on(() => {
+      (page.root as BlockModel).childrenUpdated.on(() => {
         this.requestUpdate();
       })
     );

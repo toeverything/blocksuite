@@ -34,13 +34,16 @@ const PAGE_BLOCK_CHILD_PADDING = 24;
 
 function testClickOnBlankArea(
   state: PointerEventState,
+  viewportLeft: number,
   viewportWidth: number,
   pageWidth: number,
   paddingLeft: number,
   paddingRight: number
 ) {
-  const blankLeft = (viewportWidth - pageWidth) / 2 + paddingLeft;
-  const blankRight = (viewportWidth - pageWidth) / 2 + pageWidth - paddingRight;
+  const blankLeft =
+    viewportLeft + (viewportWidth - pageWidth) / 2 + paddingLeft;
+  const blankRight =
+    viewportLeft + (viewportWidth - pageWidth) / 2 + pageWidth - paddingRight;
 
   if (state.raw.clientX < blankLeft || state.raw.clientX > blankRight) {
     return true;
@@ -80,7 +83,7 @@ export class DocPageBlockComponent extends BlockElement<
     }
 
     /* Extra small devices (phones, 640px and down) */
-    @media screen and (max-width: 640px) {
+    @container viewport (width <= 640px) {
       .affine-doc-page-block-container {
         padding-left: ${PAGE_BLOCK_CHILD_PADDING}px;
         padding-right: ${PAGE_BLOCK_CHILD_PADDING}px;
@@ -202,7 +205,9 @@ export class DocPageBlockComponent extends BlockElement<
       this._getDefaultNoteBlock(),
       0
     );
-    asyncFocusRichText(this.page, newFirstParagraphId)?.catch(console.error);
+    asyncFocusRichText(this.host, this.page, newFirstParagraphId)?.catch(
+      console.error
+    );
   };
 
   focusFirstParagraph = () => {
@@ -211,7 +216,9 @@ export class DocPageBlockComponent extends BlockElement<
       matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
     );
     if (firstText) {
-      asyncFocusRichText(this.page, firstText.id)?.catch(console.error);
+      asyncFocusRichText(this.host, this.page, firstText.id)?.catch(
+        console.error
+      );
     } else {
       const newFirstParagraphId = this.page.addBlock(
         'affine:paragraph',
@@ -219,7 +226,9 @@ export class DocPageBlockComponent extends BlockElement<
         defaultNote,
         0
       );
-      asyncFocusRichText(this.page, newFirstParagraphId)?.catch(console.error);
+      asyncFocusRichText(this.host, this.page, newFirstParagraphId)?.catch(
+        console.error
+      );
     }
   };
 
@@ -288,6 +297,7 @@ export class DocPageBlockComponent extends BlockElement<
       );
       const isClickOnBlankArea = testClickOnBlankArea(
         event,
+        this.viewport.left,
         this.viewport.clientWidth,
         this.pageBlockContainer.clientWidth,
         parseFloat(paddingLeft),

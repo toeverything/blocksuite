@@ -7,8 +7,6 @@ import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { affineAttributeRenderer } from '../../../_common/components/rich-text/inline/attribute-renderer.js';
-import { affineTextAttributes } from '../../../_common/components/rich-text/inline/types.js';
 import {
   getCurrentNativeRange,
   hasNativeSelection,
@@ -157,8 +155,6 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     );
     const inlineEditor = new InlineEditor(yText);
     this.inlineEditor = inlineEditor;
-    inlineEditor.setAttributeSchema(affineTextAttributes);
-    inlineEditor.setAttributeRenderer(affineAttributeRenderer);
     inlineEditor.mount(container, this.topContenteditableElement);
     return inlineEditor;
   }
@@ -231,7 +227,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     if (!icon) {
       return;
     }
-    return html` <div class="data-view-header-area-icon">${icon}</div>`;
+    return html`<div class="data-view-header-area-icon">${icon}</div>`;
   }
 
   override render() {

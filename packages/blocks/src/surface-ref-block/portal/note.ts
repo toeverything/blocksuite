@@ -3,7 +3,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -26,7 +26,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   model!: NoteBlockModel;
 
   @property({ attribute: false })
-  renderModel!: (model: BaseBlockModel) => TemplateResult;
+  renderModel!: (model: BlockModel) => TemplateResult;
 
   override connectedCallback(): void {
     super.connectedCallback();
