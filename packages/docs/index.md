@@ -31,7 +31,7 @@ features:
     link: /crdt-native-data-flow
     linkText: Learn More
   - title: 🎨 Extensive Components
-    details: BlockSuite ships a comprehensive suite of editing components, assisting development with adaptable building blocks.
+    details: BlockSuite ships a comprehensive set of editing component presets, assisting development with adaptable building blocks.
     link: /component-types
     linkText: Learn More
 ---
