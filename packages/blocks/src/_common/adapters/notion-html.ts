@@ -1,3 +1,4 @@
+import { isEqual } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type {
   FromBlockSnapshotPayload,
@@ -300,7 +301,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           const codeText =
             code.children.length === 1 && code.children[0].type === 'text'
               ? code.children[0]
-              : code;
+              : { ...code, tag: 'div' };
           context
             .openNode(
               {
@@ -902,7 +903,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     return walker.walk(html, snapshot);
   };
 
-  private _hastToDelta = (
+  private _hastToDeltaSpreaded = (
     ast: HtmlAST,
     option: {
       trim?: boolean;
@@ -933,12 +934,12 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           }
           case 'span': {
             return ast.children.flatMap(child =>
-              this._hastToDelta(child, option)
+              this._hastToDeltaSpreaded(child, option)
             );
           }
           case 'strong': {
             return ast.children.flatMap(child =>
-              this._hastToDelta(child, option).map(delta => {
+              this._hastToDeltaSpreaded(child, option).map(delta => {
                 delta.attributes = { ...delta.attributes, bold: true };
                 return delta;
               })
@@ -946,7 +947,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           }
           case 'em': {
             return ast.children.flatMap(child =>
-              this._hastToDelta(child, option).map(delta => {
+              this._hastToDeltaSpreaded(child, option).map(delta => {
                 delta.attributes = { ...delta.attributes, italic: true };
                 return delta;
               })
@@ -954,7 +955,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           }
           case 'code': {
             return ast.children.flatMap(child =>
-              this._hastToDelta(child, option).map(delta => {
+              this._hastToDeltaSpreaded(child, option).map(delta => {
                 delta.attributes = { ...delta.attributes, code: true };
                 return delta;
               })
@@ -962,7 +963,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           }
           case 'del': {
             return ast.children.flatMap(child =>
-              this._hastToDelta(child, option).map(delta => {
+              this._hastToDeltaSpreaded(child, option).map(delta => {
                 delta.attributes = { ...delta.attributes, strike: true };
                 return delta;
               })
@@ -970,7 +971,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           }
           case 'u': {
             return ast.children.flatMap(child =>
-              this._hastToDelta(child, option).map(delta => {
+              this._hastToDeltaSpreaded(child, option).map(delta => {
                 delta.attributes = { ...delta.attributes, underline: true };
                 return delta;
               })
@@ -982,7 +983,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               return [];
             }
             return ast.children.flatMap(child =>
-              this._hastToDelta(child, option).map(delta => {
+              this._hastToDeltaSpreaded(child, option).map(delta => {
                 if (option.pageMap) {
                   const pageId = option.pageMap.get(decodeURIComponent(href));
                   if (pageId) {
@@ -1011,7 +1012,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           case 'mark': {
             // TODO: add support for highlight
             return ast.children.flatMap(child =>
-              this._hastToDelta(child, option).map(delta => {
+              this._hastToDeltaSpreaded(child, option).map(delta => {
                 delta.attributes = { ...delta.attributes };
                 return delta;
               })
@@ -1021,7 +1022,31 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
       }
     }
     return 'children' in ast
-      ? ast.children.flatMap(child => this._hastToDelta(child, option))
+      ? ast.children.flatMap(child => this._hastToDeltaSpreaded(child, option))
       : [];
+  };
+
+  private _hastToDelta = (
+    ast: HtmlAST,
+    option: {
+      trim?: boolean;
+      pageMap?: Map<string, string>;
+    } = { trim: true }
+  ): DeltaInsert<object>[] => {
+    return this._hastToDeltaSpreaded(ast, option).reduce((acc, cur) => {
+      if (acc.length === 0) {
+        return [cur];
+      }
+      const last = acc[acc.length - 1];
+      if (
+        typeof last.insert === 'string' &&
+        typeof cur.insert === 'string' &&
+        isEqual(last.attributes, cur.attributes)
+      ) {
+        last.insert += cur.insert;
+        return acc;
+      }
+      return [...acc, cur];
+    }, [] as DeltaInsert<object>[]);
   };
 }
