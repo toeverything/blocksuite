@@ -24,11 +24,11 @@ beforeEach(async () => {
 
 describe('elements management', () => {
   test('addElement should work correctly', () => {
-    model.addElement({
+    const id = model.addElement({
       type: 'shape',
     });
 
-    expect(model.elementModels.length).toBe(1);
+    expect(model.elementModels[0].id).toBe(id);
   });
 
   test('removeElement should work correctly', () => {
@@ -80,12 +80,28 @@ describe('element model', () => {
   test('defined prop should not be overwritten by default value', () => {
     const id = model.addElement({
       type: 'shape',
-      strokeColor: '#fff',
+      strokeColor: '--affine-palette-line-black',
     });
 
     const element = model.getElementById(id)! as ShapeElementModel;
 
-    expect(element.strokeColor).toBe('#fff');
+    expect(element.strokeColor).toBe('--affine-palette-line-black');
+  });
+
+  test('assign value to model property should update ymap directly', () => {
+    const id = model.addElement({
+      type: 'shape',
+    });
+
+    const element = model.getElementById(id)! as ShapeElementModel;
+
+    expect(element.yMap.get('strokeColor')).toBe(
+      '--affine-palette-line-yellow'
+    );
+
+    element.strokeColor = '--affine-palette-line-black';
+    expect(element.yMap.get('strokeColor')).toBe('--affine-palette-line-black');
+    expect(element.strokeColor).toBe('--affine-palette-line-black');
   });
 });
 
@@ -106,10 +122,14 @@ describe('group', () => {
       },
     });
     const group = model.getElementById(groupId);
+    const shape = model.getElementById(id)!;
+    const shape2 = model.getElementById(id2)!;
 
     expect(group).not.toBe(null);
     expect(model.getGroup(id)).toBe(group);
     expect(model.getGroup(id2)).toBe(group);
+    expect(shape.group).toBe(group);
+    expect(shape2.group).toBe(group);
   });
 
   test('should return null if group children are updated', () => {
@@ -161,6 +181,32 @@ describe('group', () => {
     expect(model._elementToGroup.get(id)).toBeUndefined();
     // @ts-ignore
     expect(model._elementToGroup.get(id2)).toBeUndefined();
+  });
+
+  test('children can be updated with a plain object', () => {
+    const id = model.addElement({
+      type: 'shape',
+    });
+    const id2 = model.addElement({
+      type: 'shape',
+    });
+
+    const groupId = model.addElement({
+      type: 'group',
+      children: {
+        [id]: true,
+        [id2]: true,
+      },
+    });
+    const group = model.getElementById(groupId) as GroupElementModel;
+
+    model.updateElement(groupId, {
+      children: {
+        [id]: false,
+      },
+    });
+
+    expect(group.childrenIds).toEqual([id]);
   });
 });
 
