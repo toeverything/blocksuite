@@ -438,7 +438,9 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     return this._elementModels.get(id)?.model ?? null;
   }
 
-  addElement(props: Record<string, unknown>) {
+  addElement<T extends object = Record<string, unknown>>(
+    props: Partial<T> & { type: string }
+  ) {
     if (this.page.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }
@@ -470,7 +472,10 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     });
   }
 
-  updateElement(id: string, props: Record<string, unknown>) {
+  updateElement<T extends object = Record<string, unknown>>(
+    id: string,
+    props: Partial<T>
+  ) {
     if (this.page.readonly) {
       throw new Error('Cannot update element in readonly mode');
     }
@@ -482,7 +487,10 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     }
 
     this.page.transact(() => {
-      props = propsToYStruct(elementModel.type, props);
+      props = propsToYStruct(
+        elementModel.type,
+        props as Record<string, unknown>
+      ) as T;
       Object.entries(props).forEach(([key, value]) => {
         // @ts-ignore
         elementModel[key] = value;
