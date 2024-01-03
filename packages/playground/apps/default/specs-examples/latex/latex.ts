@@ -21,8 +21,11 @@ const latexSpec: InlineSpecs<TextAttributesWithLatex> = {
   name: 'latex',
   schema: z.string().optional().nullable().catch(undefined),
   match: delta => !!delta.attributes?.latex,
-  renderer: delta => {
-    return html`<latex-node .delta=${delta}></latex-node>`;
+  renderer: (delta, selected) => {
+    return html`<latex-node
+      .delta=${delta}
+      .selected=${selected}
+    ></latex-node>`;
   },
   embed: true,
 };
