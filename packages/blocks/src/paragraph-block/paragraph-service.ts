@@ -15,11 +15,7 @@ export class ParagraphService<
 
   override mounted(): void {
     super.mounted();
-    (
-      this.inlineManager as unknown as InlineManager<AffineTextAttributes>
-    ).registerSpecs(affineInlineSpecs);
-    (
-      this.inlineManager as unknown as InlineManager<AffineTextAttributes>
-    ).registerMarkdownMatches(affineInlineMarkdownMatches);
+    this.inlineManager.registerSpecs(affineInlineSpecs);
+    this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
   }
 }

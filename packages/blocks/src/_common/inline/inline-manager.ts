@@ -22,22 +22,27 @@ export type InlineSpecs<
   embed?: boolean;
 };
 
+export type InlineMarkdownMatchAction<
+  // @ts-expect-error We allow to covariance for TextAttributes
+  in TextAttributes extends BaseTextAttributes = BaseTextAttributes,
+> = (props: {
+  inlineEditor: InlineEditor<TextAttributes>;
+  prefixText: string;
+  inlineRange: InlineRange;
+  pattern: RegExp;
+  undoManager: Y.UndoManager;
+}) => ReturnType<KeyboardBindingHandler>;
+
 export type InlineMarkdownMatch<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > = {
   name: string;
   pattern: RegExp;
-  action: (props: {
-    inlineEditor: InlineEditor<TextAttributes>;
-    prefixText: string;
-    inlineRange: InlineRange;
-    pattern: RegExp;
-    undoManager: Y.UndoManager;
-  }) => ReturnType<KeyboardBindingHandler>;
+  action: InlineMarkdownMatchAction<TextAttributes>;
 };
 
 export class InlineManager<
-  TextAttributes extends BaseTextAttributes = BaseTextAttributes,
+  in out TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
   private _specs: InlineSpecs<TextAttributes>[] = [];
   get specs() {
