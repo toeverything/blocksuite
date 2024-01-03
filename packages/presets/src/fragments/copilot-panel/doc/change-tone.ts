@@ -1,4 +1,4 @@
-import { askGPT3_5turbo } from '../utils/request.js';
+import { getTextService } from './api.js';
 
 export async function runChangeToneAction({
   input,
@@ -7,7 +7,7 @@ export async function runChangeToneAction({
   input: string;
   tone: string;
 }) {
-  const result = await askGPT3_5turbo([
+  const result = await getTextService().generateText([
     {
       role: 'system',
       content: 'You are assisting the user in writing high quality content.',
@@ -18,5 +18,5 @@ export async function runChangeToneAction({
       content: `Change the tone the of Markdown text to ${tone}, preserving the formatting, like bold, italic, link, highlight. Please be sure to only return the content.`,
     },
   ]);
-  return result.content;
+  return result;
 }

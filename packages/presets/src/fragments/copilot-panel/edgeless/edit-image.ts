@@ -1,10 +1,13 @@
-import { ask110602490_lcm_sd15_i2i } from '../utils/request.js';
+import { copilotConfig } from '../copilot-service/copilot-config.js';
+import { Image2ImageServiceKind } from '../copilot-service/service-base.js';
 
 export const editImage = (prompt: string, canvas?: HTMLCanvasElement) => {
   if (!canvas) {
     return;
   }
-  return ask110602490_lcm_sd15_i2i(prompt, canvas.toDataURL());
+  return copilotConfig
+    .getService('edit image', Image2ImageServiceKind)
+    .generateImage(prompt, canvas.toDataURL());
 };
 export const genMask = (width: number, height: number) => {
   const canvas = document.createElement('canvas');

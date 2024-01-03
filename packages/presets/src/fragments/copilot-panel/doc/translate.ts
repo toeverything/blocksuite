@@ -1,11 +1,11 @@
-import { askGPT3_5turbo } from '../utils/request.js';
+import { getTextService } from './api.js';
 
 export async function runTranslateAction(payload: {
   input: string;
   language: string;
 }) {
   const { input, language } = payload;
-  const completion = await askGPT3_5turbo([
+  const completion = await getTextService().generateText([
     {
       role: 'system',
       content: 'You are assisting the user in translating the content.',
@@ -17,5 +17,5 @@ export async function runTranslateAction(payload: {
     },
   ]);
 
-  return completion.content;
+  return completion;
 }
