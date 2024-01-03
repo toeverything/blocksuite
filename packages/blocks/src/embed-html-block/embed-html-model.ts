@@ -1,4 +1,4 @@
-import { BaseBlockModel } from '@blocksuite/store';
+import { BlockModel } from '@blocksuite/store';
 
 import { makeEmbedModel } from '../_common/embed-block-helper/index.js';
 
@@ -8,5 +8,5 @@ export type EmbedHtmlBlockProps = {
 };
 
 export class EmbedHtmlBlockModel extends makeEmbedModel<EmbedHtmlBlockProps>(
-  BaseBlockModel
+  BlockModel
 ) {}

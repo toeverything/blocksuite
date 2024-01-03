@@ -3,7 +3,7 @@ import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
 import { Text } from '../reactive/text.js';
-import type { BaseBlockModel } from '../schema/base.js';
+import type { BlockModel } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import { assertValidChildren, syncBlockProps } from '../utils/utils.js';
@@ -21,7 +21,7 @@ type FlatBlockMap = Record<string, YBlock>;
 export type BlockSysProps = {
   id: string;
   flavour: string;
-  children?: BaseBlockModel[];
+  children?: BlockModel[];
 };
 export type BlockProps = BlockSysProps & {
   [index: string]: unknown;
@@ -40,7 +40,7 @@ export class Page extends Space<FlatBlockMap> {
   private readonly _idGenerator: IdGenerator;
   private readonly _blockTree: BlockTree;
   private _history!: Y.UndoManager;
-  private _root: BaseBlockModel | null = null;
+  private _root: BlockModel | null = null;
   /** Indicate whether the underlying subdoc has been loaded. */
   private _docLoaded = false;
   /** Indicate whether the block tree is ready */
@@ -60,7 +60,7 @@ export class Page extends Space<FlatBlockMap> {
      * useful for internal block UI components to start subscribing following up events.
      * Note that at this moment, the whole block tree may not be fully initialized yet.
      */
-    rootAdded: new Slot<BaseBlockModel>(),
+    rootAdded: new Slot<BlockModel>(),
     rootDeleted: new Slot<string>(),
     blockUpdated: new Slot<
       | {
@@ -73,7 +73,7 @@ export class Page extends Space<FlatBlockMap> {
           id: string;
           flavour: string;
           parent: string;
-          model: BaseBlockModel;
+          model: BlockModel;
         }
       | {
           type: 'update';
@@ -195,7 +195,7 @@ export class Page extends Space<FlatBlockMap> {
     return this._idGenerator('block');
   }
 
-  getBlockById<Model extends BaseBlockModel = BaseBlockModel>(
+  getBlockById<Model extends BlockModel = BlockModel>(
     id: string
   ): Model | null {
     return (this._blockTree.getBlock(id)?.model as Model) ?? null;
@@ -210,12 +210,12 @@ export class Page extends Space<FlatBlockMap> {
       .map(x => x.model);
   }
 
-  getParent(target: BaseBlockModel | string): BaseBlockModel | null {
+  getParent(target: BlockModel | string): BlockModel | null {
     const root = this._root;
     const targetId = typeof target === 'string' ? target : target.id;
     if (!root || root.id === targetId) return null;
 
-    const findParent = (parentId: string): BaseBlockModel | null => {
+    const findParent = (parentId: string): BlockModel | null => {
       const parentModel = this.getBlockById(parentId);
       if (!parentModel) return null;
 
@@ -235,7 +235,7 @@ export class Page extends Space<FlatBlockMap> {
     return null;
   }
 
-  getPreviousSibling(block: BaseBlockModel) {
+  getPreviousSibling(block: BlockModel) {
     const parent = this.getParent(block);
     if (!parent) {
       return null;
@@ -249,7 +249,7 @@ export class Page extends Space<FlatBlockMap> {
     return parent.children[index - 1] ?? null;
   }
 
-  getPreviousSiblings(block: BaseBlockModel) {
+  getPreviousSiblings(block: BlockModel) {
     const parent = this.getParent(block);
     if (!parent) {
       return [];
@@ -263,7 +263,7 @@ export class Page extends Space<FlatBlockMap> {
     return parent.children.slice(0, index);
   }
 
-  getNextSibling(block: BaseBlockModel) {
+  getNextSibling(block: BlockModel) {
     const parent = this.getParent(block);
     if (!parent) {
       return null;
@@ -277,7 +277,7 @@ export class Page extends Space<FlatBlockMap> {
     return parent.children[index + 1] ?? null;
   }
 
-  getNextSiblings(block: BaseBlockModel) {
+  getNextSiblings(block: BlockModel) {
     const parent = this.getParent(block);
     if (!parent) {
       return [];
@@ -306,7 +306,7 @@ export class Page extends Space<FlatBlockMap> {
       flavour: string;
       blockProps?: Partial<BlockProps & Omit<BlockProps, 'flavour' | 'id'>>;
     }>,
-    parent?: BaseBlockModel | string | null,
+    parent?: BlockModel | string | null,
     parentIndex?: number
   ): string[] {
     const ids: string[] = [];
@@ -327,7 +327,7 @@ export class Page extends Space<FlatBlockMap> {
   addBlock(
     flavour: string,
     blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour'>> = {},
-    parent?: BaseBlockModel | string | null,
+    parent?: BlockModel | string | null,
     parentIndex?: number
   ): string {
     if (this.readonly) {
@@ -376,9 +376,9 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   moveBlocks(
-    blocksToMove: BaseBlockModel[],
-    newParent: BaseBlockModel,
-    targetSibling: BaseBlockModel | null = null,
+    blocksToMove: BlockModel[],
+    newParent: BlockModel,
+    targetSibling: BlockModel | null = null,
     shouldInsertBeforeSibling = true
   ) {
     if (this.readonly) {
@@ -391,7 +391,7 @@ export class Page extends Space<FlatBlockMap> {
     }
 
     // A map to store parent block and their respective child blocks
-    const childBlocksPerParent = new Map<BaseBlockModel, BaseBlockModel[]>();
+    const childBlocksPerParent = new Map<BlockModel, BlockModel[]>();
     blocksToMove.forEach(block => {
       const parentBlock = this.getParent(block);
       if (!parentBlock) {
@@ -466,13 +466,10 @@ export class Page extends Space<FlatBlockMap> {
     });
   }
 
-  updateBlock<T extends Partial<BlockProps>>(
-    model: BaseBlockModel,
-    props: T
-  ): void;
-  updateBlock(model: BaseBlockModel, callback: () => void): void;
+  updateBlock<T extends Partial<BlockProps>>(model: BlockModel, props: T): void;
+  updateBlock(model: BlockModel, callback: () => void): void;
   updateBlock(
-    model: BaseBlockModel,
+    model: BlockModel,
     callBackOrProps: (() => void) | Partial<BlockProps>
   ): void {
     if (this.readonly) {
@@ -519,7 +516,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   addSiblingBlocks(
-    targetModel: BaseBlockModel,
+    targetModel: BlockModel,
     props: Array<Partial<BlockProps>>,
     place: 'after' | 'before' = 'after'
   ): string[] {
@@ -551,9 +548,9 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   deleteBlock(
-    model: BaseBlockModel,
+    model: BlockModel,
     options: {
-      bringChildrenTo?: BaseBlockModel;
+      bringChildrenTo?: BlockModel;
       deleteChildren?: boolean;
     } = {
       deleteChildren: true,
@@ -720,9 +717,7 @@ export class Page extends Space<FlatBlockMap> {
           this._handleYBlockAdd(id);
         }
 
-        model.children[index as number] = this.getBlockById(
-          id
-        ) as BaseBlockModel;
+        model.children[index as number] = this.getBlockById(id) as BlockModel;
       });
     }
 

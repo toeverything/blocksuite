@@ -5,10 +5,10 @@ import {
   KEYBOARD_PREVENT_DEFAULT,
 } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
-import type { AffineInlineEditor } from '../inline/types.js';
+import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 import {
   handleBlockEndEnter,
   handleBlockSplit,
@@ -44,7 +44,7 @@ export function onSoftEnter(
 
 export function hardEnter(
   editorHost: EditorHost,
-  model: BaseBlockModel,
+  model: BlockModel,
   range: InlineRange,
   /**
    * @deprecated
@@ -151,7 +151,7 @@ export function hardEnter(
 // 1. In the end of block, first press Enter will insert a \n to break the line, second press Enter will insert a new block
 // 2. In the middle and start of block, press Enter will insert a \n to break the line
 // TODO this should be configurable per-block
-function isSoftEnterable(model: BaseBlockModel) {
+function isSoftEnterable(model: BlockModel) {
   if (matchFlavours(model, ['affine:code'])) return true;
   if (matchFlavours(model, ['affine:paragraph'])) {
     return model.type === 'quote';
@@ -161,7 +161,7 @@ function isSoftEnterable(model: BaseBlockModel) {
 
 export function onBackspace(
   editorHost: EditorHost,
-  model: BaseBlockModel,
+  model: BlockModel,
   e: KeyboardEvent,
   inlineEditor: AffineInlineEditor
 ) {
@@ -179,7 +179,7 @@ export function onBackspace(
 
 export function onForwardDelete(
   editorHost: EditorHost,
-  model: BaseBlockModel,
+  model: BlockModel,
   e: KeyboardEvent,
   inlineEditor: AffineInlineEditor
 ) {

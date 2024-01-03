@@ -4,7 +4,7 @@ import type { TestUtils } from '@blocks/index.js';
 import type { EditorHost } from '@lit/element/index.js';
 import type { DebugMenu } from '@playground/apps/starter/components/debug-menu.js';
 import type { AffineEditorContainer } from '@presets/editors/index.js';
-import type { BaseBlockModel, Page, Workspace } from '@store/index.js';
+import type { BlockModel, Page, Workspace } from '@store/index.js';
 import type { DocProvider } from '@store/providers/type.js';
 
 declare global {
@@ -20,7 +20,7 @@ declare global {
     };
     workspace: Workspace;
     ContentParser: typeof ContentParser;
-    blockSchema: Record<string, typeof BaseBlockModel>;
+    blockSchema: Record<string, typeof BlockModel>;
     page: Page;
     debugMenu: DebugMenu;
     editor: AffineEditorContainer;

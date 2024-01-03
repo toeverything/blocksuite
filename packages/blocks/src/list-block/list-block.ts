@@ -8,23 +8,40 @@ import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
-import { affineAttributeRenderer } from '../_common/components/rich-text/inline/attribute-renderer.js';
-import { affineTextAttributes } from '../_common/components/rich-text/inline/types.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import type { ListBlockModel } from './list-model.js';
+import type { ListService } from './list-service.js';
 import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 
 @customElement('affine-list')
-export class ListBlockComponent extends BlockElement<ListBlockModel> {
+export class ListBlockComponent extends BlockElement<
+  ListBlockModel,
+  ListService
+> {
   static override styles = styles;
 
-  readonly attributesSchema = affineTextAttributes;
-  readonly attributeRenderer = affineAttributeRenderer;
+  get inlineManager() {
+    const inlineManager = this.service?.inlineManager;
+    assertExists(inlineManager);
+    return inlineManager;
+  }
+  get attributesSchema() {
+    return this.inlineManager.getSchema();
+  }
+  get attributeRenderer() {
+    return this.inlineManager.getRenderer();
+  }
+  get markdownShortcutHandler() {
+    return this.inlineManager.markdownShortcutHandler;
+  }
+  get embedChecker() {
+    return this.inlineManager.embedChecker;
+  }
 
   @state()
   private _isCollapsedWhenReadOnly = !!this.model?.collapsed;
@@ -92,6 +109,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
+
     bindContainerHotkey(this);
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
@@ -163,6 +181,8 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
             .undoManager=${this.model.page.history}
             .attributeRenderer=${this.attributeRenderer}
             .attributesSchema=${this.attributesSchema}
+            .markdownShortcutHandler=${this.markdownShortcutHandler}
+            .embedChecker=${this.embedChecker}
             .readonly=${this.model.page.readonly}
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}

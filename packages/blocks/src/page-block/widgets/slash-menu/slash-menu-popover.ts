@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
+import { type BlockModel } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -30,7 +30,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   pageElement!: PageBlockComponent;
 
   @property({ attribute: false })
-  model!: BaseBlockModel;
+  model!: BlockModel;
 
   @property({ attribute: false })
   options!: SlashMenuOptions;

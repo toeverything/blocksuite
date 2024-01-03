@@ -1,5 +1,5 @@
 import type { MigrationRunner, Text } from '@blocksuite/store';
-import { BaseBlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
+import { BlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
 import { getTagColor } from '../_common/components/tags/colors.js';
 import { multiSelectPureColumnConfig } from './common/columns/multi-select/define.js';
@@ -26,7 +26,7 @@ export type SerializedCells = {
   };
 };
 
-export class DatabaseBlockModel extends BaseBlockModel<DatabaseBlockProps> {
+export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
   getViewList() {
     return this.views;
   }
@@ -209,7 +209,7 @@ export class DatabaseBlockModel extends BaseBlockModel<DatabaseBlockProps> {
     });
   }
 
-  getCell(rowId: BaseBlockModel['id'], columnId: Column['id']): Cell | null {
+  getCell(rowId: BlockModel['id'], columnId: Column['id']): Cell | null {
     if (columnId === 'title') {
       return {
         columnId: 'title',

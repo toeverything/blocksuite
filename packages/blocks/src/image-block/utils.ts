@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 import { Buffer } from 'buffer';
 
 import { humanFileSize } from '../_common/utils/math.js';
@@ -98,7 +98,7 @@ export async function downloadImage(model: ImageBlockModel) {
   downloadBlob(blob, 'image');
 }
 
-export function focusCaption(editorHost: EditorHost, model: BaseBlockModel) {
+export function focusCaption(editorHost: EditorHost, model: BlockModel) {
   const blockEle = editorHost.view.viewFromPath('block', buildPath(model));
   assertExists(blockEle);
   const dom = blockEle.querySelector(
@@ -136,7 +136,7 @@ export async function uploadBlobForImage(
   setImageLoading(blockId, true);
   const storage = page.blob;
   let sourceId = '';
-  let imageBlock: BaseBlockModel | null = null;
+  let imageBlock: BlockModel | null = null;
   try {
     imageBlock = page.getBlockById(blockId);
     if (!imageBlock) {
@@ -183,7 +183,7 @@ export function isImageLoading(blockId: string) {
 export function addSiblingImageBlock(
   files: File[],
   maxFileSize: number,
-  targetModel: BaseBlockModel,
+  targetModel: BlockModel,
   place: 'after' | 'before' = 'after'
 ) {
   const imageFiles = files.filter(file => file.type.startsWith('image/'));
@@ -219,7 +219,7 @@ export function addImageBlocks(
   files: File[],
   maxFileSize: number,
   page: Page,
-  parent?: BaseBlockModel | string | null,
+  parent?: BlockModel | string | null,
   parentIndex?: number
 ): string[] {
   const imageFiles = files.filter(file => file.type.startsWith('image/'));

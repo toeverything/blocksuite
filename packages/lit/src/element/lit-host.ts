@@ -10,7 +10,7 @@ import type {
 } from '@blocksuite/block-std';
 import { BlockStdScope } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 import {
   LitElement,
   nothing,
@@ -127,7 +127,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     return this.renderModel(root);
   }
 
-  renderModel = (model: BaseBlockModel): TemplateResult => {
+  renderModel = (model: BlockModel): TemplateResult => {
     const { flavour } = model;
     const schema = this.page.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
@@ -164,7 +164,7 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     ></${tag}>`;
   };
 
-  renderModelChildren = (model: BaseBlockModel): TemplateResult => {
+  renderModelChildren = (model: BlockModel): TemplateResult => {
     return html`${repeat(
       model.children,
       child => child.id,

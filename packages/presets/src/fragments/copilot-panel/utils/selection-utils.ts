@@ -2,7 +2,7 @@ import type { FrameBlockModel, ImageBlockModel } from '@blocksuite/blocks';
 import { BlocksUtils, type SurfaceBlockComponent } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
-import { type BaseBlockModel, Slice } from '@blocksuite/store';
+import { type BlockModel, Slice } from '@blocksuite/store';
 
 import type { AffineEditorContainer } from '../../../editors/index.js';
 import { getMarkdownFromSlice } from './markdown-utils.js';
@@ -38,7 +38,7 @@ export function hasSelectedTextContent(host: EditorHost) {
 }
 
 export async function getSelectedTextSlice(host: EditorHost) {
-  let models: BaseBlockModel[] = [];
+  let models: BlockModel[] = [];
 
   host.std.command
     .pipe()
@@ -52,7 +52,7 @@ export async function getSelectedTextSlice(host: EditorHost) {
           selection => ctx.std.view.viewFromPath('block', selection.path)?.model
         )
         .filter(
-          (model): model is BaseBlockModel<object> =>
+          (model): model is BlockModel<object> =>
             model !== undefined &&
             BlocksUtils.matchFlavours(model, [
               'affine:paragraph',

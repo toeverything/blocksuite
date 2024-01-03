@@ -14,7 +14,7 @@ import type { DebugMenu } from '@playground/apps/starter/components/debug-menu.j
 import type { PagesPanel } from '@playground/apps/starter/components/pages-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
-import type { BaseBlockModel } from '@store/schema/index.js';
+import type { BlockModel } from '@store/schema/index.js';
 import lz from 'lz-string';
 
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
@@ -1057,16 +1057,13 @@ export async function getBoundingBox(locator: Locator) {
   return box;
 }
 
-export async function getBlockModel<Model extends BaseBlockModel>(
+export async function getBlockModel<Model extends BlockModel>(
   page: Page,
   blockId: string
 ) {
-  const result: BaseBlockModel | null | undefined = await page.evaluate(
-    blockId => {
-      return window.page?.getBlockById(blockId);
-    },
-    blockId
-  );
+  const result: BlockModel | null | undefined = await page.evaluate(blockId => {
+    return window.page?.getBlockById(blockId);
+  }, blockId);
   expect(result).not.toBeNull();
   return result as Model;
 }

@@ -1,11 +1,11 @@
 import type { Text } from '@blocksuite/store';
-import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 type PageProps = {
   title: Text;
 };
 
-export class PageBlockModel extends BaseBlockModel<PageProps> {
+export class PageBlockModel extends BlockModel<PageProps> {
   constructor() {
     super();
     this.created.on(() => {

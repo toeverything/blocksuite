@@ -64,6 +64,10 @@ export default defineConfig({
                 link: '/working-with-block-tree#selecting-blocks',
               },
               {
+                text: 'Services and Commands 🚧',
+                link: '/working-with-block-tree#services-and-commands',
+              },
+              {
                 text: 'Customizing Blocks 🚧',
                 link: '/working-with-block-tree#customizing-blocks',
               },

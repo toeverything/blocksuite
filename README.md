@@ -23,14 +23,14 @@
 
 ## Overview
 
-BlockSuite is a toolkit for building collaborative editing applications. It embraces the **_data-centric_** approach to facilitate the development of more flexible, diverse, and scalable editable interfaces.
+BlockSuite is a toolkit for building collaborative editing applications. It embraces the **_document-centric_** approach to facilitate the development of more flexible, diverse, and scalable editable interfaces.
 
-In developing modern collaborative editing applications, the challenge lies not only in the internal implementation of the editor but also in the complex state management across many UI components. This means that the overall data flow of such applications should be consistently modeled and reused on a larger scale, reducing the interoperability cost between editor and non-editor components. **This is why BlockSuite completely separates the data model of collaborative content from the editor**. This allows any UI component, whether part of an editor or not, to simply **_attach_** to the same block tree document, **_composing_** a more flexible editing experience.
+In developing modern collaborative editing applications, the challenge lies not only in the internal implementation of the editor but also in the complex state management across many UI components. This means that the overall data flow of such applications should be consistently modeled and reused on a larger scale, reducing the interoperability cost between editor and non-editor components. **This is why BlockSuite completely separates the document model of collaborative content from the editor**. This allows any UI component, whether part of an editor or not, to simply **_attach_** to the same block tree document, **_composing_** a more flexible editing experience.
 
 ![showcase-doc-edgeless-editors](./packages/docs/images/showcase-doc-edgeless-editors.jpg)
 
 <!--
-> For an understanding of the design philosophy advocated by BlockSuite, please read the _Data-Centric, CRDT-Native_ article.
+> For an understanding of the design philosophy advocated by BlockSuite, please read the _Document-Centric, CRDT-Native_ article.
 -->
 
 Based on this concept, BlockSuite starts with a foundational block-based document model and independently implements a series of collaborative editing infrastructures, including editors. This means that with BlockSuite, you can choose to:
@@ -80,15 +80,11 @@ This can be illustrated as the diagram below:
 
 ![package-overview.png](./packages/docs/images/package-overview.png)
 
-This design ensures that BlockSuite is built for scalability. By reusing `block-std`, editors can be composed by editable blocks with different frameworks, making BlockSuite also framework-agnostic:
-
-![framework-agnostic](./packages/docs/images/framework-agnostic.png)
-
 In addition to extending custom blocks, here are what you can also conveniently achieve with BlockSuite:
 
 - Writing type-safe complex editing logic based on the [command](https://blocksuite.io/command.html) mechanism, similar to react hooks designed for document editing.
 - Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshot](https://blocksuite.io/data-persistence.html#snapshot-api) and transformer.
-- Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the document's [provider](https://blocksuite.io/data-persistence.html#realtime-provider-based-persistence) mechanism.
+- Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the document's [provider](https://blocksuite.io/data-persistence.html#provider-based-persistence) mechanism.
 - State scheduling across multiple documents and reusing one document in multiple editors.
 
 > 🚧 BlockSuite is currently in its early stage, with some extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!

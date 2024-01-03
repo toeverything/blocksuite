@@ -5,7 +5,7 @@ import {
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 
 import {
   type BlockComponent,
@@ -50,7 +50,7 @@ const heightMap: { [key: string]: number } = {
   divider: 36,
 };
 
-export const getDragHandleContainerHeight = (model: BaseBlockModel) => {
+export const getDragHandleContainerHeight = (model: BlockModel) => {
   const flavour = model.flavour;
   const index = flavour.indexOf(':');
   let key = flavour.slice(index + 1);
@@ -189,7 +189,7 @@ export const getClosestBlockByPoint = (
 
 export function calcDropTarget(
   point: Point,
-  model: BaseBlockModel,
+  model: BlockModel,
   element: Element,
   draggingElements: BlockComponent[],
   scale: number
@@ -345,7 +345,7 @@ export function updateDragHandleClassName(blockElements: BlockElement[] = []) {
   blockElements.forEach(blockElement => blockElement.classList.add(className));
 }
 
-function getBlockProps(model: BaseBlockModel) {
+function getBlockProps(model: BlockModel) {
   const keys = model.keys as (keyof typeof model)[];
   const values = keys.map(key => model[key]);
   const blockProps = Object.fromEntries(keys.map((key, i) => [key, values[i]]));

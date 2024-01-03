@@ -3,7 +3,7 @@ import '../page-block/edgeless/components/block-portal/edgeless-block-portal.js'
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BlockProps } from '@blocksuite/store';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 import { Workspace, type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -202,7 +202,7 @@ export class SurfaceBlockComponent extends BlockElement<
     flavours = typeof flavours === 'string' ? [flavours] : flavours;
 
     return flavours.reduce<TopLevelBlockModel[]>((pre, flavour) => {
-      const parent: BaseBlockModel =
+      const parent: BlockModel =
         flavour === 'affine:note' ? this.edgeless.model : this.model;
 
       return pre.concat(
@@ -707,13 +707,13 @@ export class SurfaceBlockComponent extends BlockElement<
   addElement<K extends EdgelessElementType>(
     type: K,
     properties: Partial<BlockProps & Omit<BlockProps, 'flavour'>>,
-    parent?: BaseBlockModel | string | null,
+    parent?: BlockModel | string | null,
     parentIndex?: number
   ): id;
   addElement<T extends EdgelessElementType>(
     type: T,
     properties: IEdgelessElementCreateProps<T>,
-    parent?: BaseBlockModel | string | null,
+    parent?: BlockModel | string | null,
     parentIndex?: number
   ): id {
     if (this.page.readonly) {

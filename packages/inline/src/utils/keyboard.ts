@@ -2,6 +2,7 @@ import { IS_IOS, IS_MAC } from '@blocksuite/global/env';
 
 import type { InlineEditor } from '../inline-editor.js';
 import type { InlineRange } from '../types.js';
+import type { BaseTextAttributes } from './base-attributes.js';
 
 const SHORT_KEY_PROPERTY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 
@@ -21,9 +22,11 @@ export interface KeyboardBinding {
 }
 export type KeyboardBindingRecord = Record<string, KeyboardBinding>;
 
-export interface KeyboardBindingContext {
+export interface KeyboardBindingContext<
+  TextAttributes extends BaseTextAttributes = BaseTextAttributes,
+> {
   inlineRange: InlineRange;
-  inlineEditor: InlineEditor;
+  inlineEditor: InlineEditor<TextAttributes>;
   collapsed: boolean;
   prefixText: string;
   suffixText: string;

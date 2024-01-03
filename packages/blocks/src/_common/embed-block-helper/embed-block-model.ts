@@ -1,5 +1,5 @@
 import type { Constructor } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@blocksuite/store';
 
 import {
   type EdgelessSelectableProps,
@@ -9,13 +9,11 @@ import type { EmbedProps } from './types.js';
 
 export function makeEmbedModel<
   Props extends object,
-  T extends Constructor<BaseBlockModel<Props>> = Constructor<
-    BaseBlockModel<Props>
-  >,
+  T extends Constructor<BlockModel<Props>> = Constructor<BlockModel<Props>>,
 >(SuperClass: T) {
   return selectable<Props & EdgelessSelectableProps>(
-    SuperClass as Constructor<BaseBlockModel<Props & EdgelessSelectableProps>>
+    SuperClass as Constructor<BlockModel<Props & EdgelessSelectableProps>>
   );
 }
 
-export type EmbedBlockModel<Props = object> = BaseBlockModel<EmbedProps<Props>>;
+export type EmbedBlockModel<Props = object> = BlockModel<EmbedProps<Props>>;

@@ -2,7 +2,7 @@ import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import {
-  type BaseBlockModel,
+  type BlockModel,
   type BlockSnapshot,
   type DeltaOperation,
   fromJSON,
@@ -26,7 +26,7 @@ const findLast = (snapshot: BlockSnapshot): BlockSnapshot => {
 class PointState {
   readonly block: BlockElement;
   readonly text: Text;
-  readonly model: BaseBlockModel;
+  readonly model: BlockModel;
   constructor(
     readonly std: EditorHost['std'],
     readonly point: TextRangePoint

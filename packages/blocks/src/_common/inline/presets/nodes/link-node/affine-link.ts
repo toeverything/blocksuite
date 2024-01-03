@@ -10,8 +10,8 @@ import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getModelByElement } from '../../../../../utils/query.js';
-import type { AffineTextAttributes } from '../../types.js';
+import { getModelByElement } from '../../../../utils/query.js';
+import type { AffineTextAttributes } from '../../affine-inline-specs.js';
 import { affineTextStyles } from '../affine-text.js';
 import type { LinkPopup } from './link-popup/link-popup.js';
 import { toggleLinkPopup } from './link-popup/toggle-link-popup.js';
