@@ -18,17 +18,14 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       {
-        text: 'Editors',
+        text: 'Presets',
         items: [
-          { text: '📝 DocEditor', link: '/editors#doceditor' },
-          { text: '🎨 EdgelessEditor', link: '/editors#edgelesseditor' },
+          { text: '📝 DocEditor', link: '/presets/doc-editor' },
+          { text: '🎨 EdgelessEditor', link: '/presets/edgeless-editor' },
         ],
       },
-      {
-        text: 'Playground',
-        link: 'https://try-blocksuite.vercel.app/starter/?init',
-      },
       { text: 'Docs', link: '/blocksuite-overview' },
+      // { text: 'Blog', link: '#' },
       {
         text: 'Releases',
         link: 'https://github.com/toeverything/blocksuite/releases',
@@ -79,7 +76,7 @@ export default defineConfig({
       {
         text: 'Editor In-Depth',
         items: [
-          { text: 'Design Philosophy 🚧' },
+          // { text: 'Design Philosophy 🚧' },
           {
             text: 'CRDT-Native Data Flow',
             link: '/crdt-native-data-flow',
@@ -112,6 +109,7 @@ export default defineConfig({
           },
           {
             text: '<code>store</code>',
+            collapsed: true,
             items: [
               { text: 'Page 🚧' },
               { text: 'Workspace 🚧' },

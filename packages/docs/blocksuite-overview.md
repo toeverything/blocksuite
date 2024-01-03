@@ -15,7 +15,9 @@ In developing modern collaborative editing applications, the challenge lies not 
 Based on this concept, BlockSuite starts with a foundational block-based document model and independently implements a series of collaborative editing infrastructures, including editors. This means that with BlockSuite, you can choose to:
 
 - Build a new editor from scratch based on the BlockSuite framework.
-- Or, reuse a variety of first-party editors based on BlockSuite right out of the box.
+- Or, reuse multiple first-party editors based on BlockSuite right out of the box:
+  - [**`DocEditor`**](./presets/doc-editor): **Built entirely from scratch**, `DocEditor` is a comprehensive block-based document editor, offering extensive customization and flexibility.
+  - [**`EdgelessEditor`**](./presets/edgeless-editor): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
 
 The BlockSuite project is structured around key packages that are categorized into two groups: a headless framework and prebuilt editing components.
 
