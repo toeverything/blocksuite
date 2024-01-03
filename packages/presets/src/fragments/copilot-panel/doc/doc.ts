@@ -151,7 +151,6 @@ export class CopilotDocPanel extends WithDisposable(ShadowlessElement) {
       const change = (e: Event) => {
         if (e.target instanceof HTMLInputElement) {
           this.payload.question = e.target.value;
-          console.log(this.payload);
         }
       };
       return html` <div style="margin-top: 16px;">

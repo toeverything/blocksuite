@@ -39,7 +39,6 @@ export class CreateNewService extends WithDisposable(ShadowlessElement) {
 
   changeKeyByEvent(e: Event) {
     const select = e.target as HTMLSelectElement;
-    console.log(select.value);
     this.changeKey(select.value);
   }
 

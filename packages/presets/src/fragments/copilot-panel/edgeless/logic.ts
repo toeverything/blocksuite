@@ -152,7 +152,6 @@ export class AIEdgelessLogic {
     }
   };
   createImageFromFrame = async () => {
-    console.log('start', this.fromFrame);
     const from = this.editor.page.getBlockById(
       this.fromFrame ?? ''
     ) as FrameBlockModel;
