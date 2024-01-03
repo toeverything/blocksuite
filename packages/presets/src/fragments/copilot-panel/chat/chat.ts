@@ -21,10 +21,10 @@ type EmbeddedPage = {
   }[];
 };
 
-@customElement('chat-with-workspace-panel')
-export class ChatWithWorkspacePanel extends WithDisposable(ShadowlessElement) {
+@customElement('copilot-chat-panel')
+export class CopilotChatPanel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    chat-with-workspace-panel {
+    copilot-chat-panel {
       margin-top: 12px;
       display: flex;
       flex-direction: column;
@@ -34,14 +34,14 @@ export class ChatWithWorkspacePanel extends WithDisposable(ShadowlessElement) {
       gap: 4px;
     }
 
-    .chat-with-workspace-prompt-container {
+    .copilot-chat-prompt-container {
       display: flex;
       gap: 8px;
       height: 30px;
       margin-top: 24px;
     }
 
-    .chat-with-workspace-prompt {
+    .copilot-chat-prompt {
       flex: 1;
       border: none;
       border-radius: 4px;
@@ -200,90 +200,106 @@ export class ChatWithWorkspacePanel extends WithDisposable(ShadowlessElement) {
 
   protected override render(): unknown {
     return html`
-      <div class="sync-workspace-button" @click="${this.syncWorkspace}">
-        Sync Workspace
-      </div>
-      <div class="synced-page-list">
-        <div style="margin-bottom: 8px;">Synced pages:</div>
-        ${this.syncedPages.length
-          ? repeat(this.syncedPages, page => {
-              const title =
-                this.editor.page.workspace.getPage(page.id)?.meta.title ??
-                'Untitled';
-              return html` <div>${title}</div>`;
-            })
-          : 'Empty'}
-      </div>
-      ${repeat(this.history, data => {
-        const style = styleMap({
-          alignItems: data.role === 'user' ? 'flex-end' : 'flex-start',
-          backgroundColor:
-            data.role === 'user' ? undefined : 'var(--affine-hover-color)',
-        });
-        return html` <div class="history-item" style="${style}">
-          <div style="width: fit-content">${data.content}</div>
-          ${data.sources?.length
-            ? html` <div class="history-refs">
-                <div style="margin-top: 8px;">sources:</div>
-                <div
-                  style="display: flex;flex-direction: column;gap: 4px;padding: 4px;"
-                >
-                  ${repeat(data.sources, ref => {
-                    const page = this.editor.page.workspace.getPage(ref.id);
-                    if (!page) {
-                      return;
-                    }
-                    const title = page.meta.title || 'Untitled';
-                    const jumpTo = () => {
-                      this.editor.page = page;
-                    };
-                    return html` <a @click="${jumpTo}" style="cursor: pointer"
-                      >${title}</a
-                    >`;
-                  })}
-                </div>
-              </div>`
-            : null}
-        </div>`;
-      })}
-      <div class="chat-with-workspace-prompt-container">
-        <input
-          placeholder="Prompt"
-          type="text"
-          class="chat-with-workspace-prompt"
-          .value="${this.value}"
-          @input="${(e: InputEvent) => {
-            this.value = (e.target as HTMLInputElement).value;
-          }}"
-        />
-        <div @click="${this.ask}" class="send-button">
-          <sl-icon name="stars"></sl-icon>
-        </div>
-      </div>
       <div
-        style="display:flex;flex-direction: column;gap: 12px;margin-top: 12px;"
+        style="display:flex;flex-direction: column;justify-content: space-between;height: 100%"
       >
-        <div style="display:flex;gap: 8px;flex-direction: column">
-          <div
-            style="font-size: 12px;color:var(--affine-text-secondary-color);"
-          >
-            embedding service:
+        <div>
+          ${repeat(this.history, data => {
+            const style = styleMap({
+              alignItems: data.role === 'user' ? 'flex-end' : 'flex-start',
+              backgroundColor:
+                data.role === 'user' ? undefined : 'var(--affine-hover-color)',
+            });
+            return html` <div class="history-item" style="${style}">
+              <div style="width: fit-content">${data.content}</div>
+              ${data.sources?.length
+                ? html` <div class="history-refs">
+                    <div style="margin-top: 8px;">sources:</div>
+                    <div
+                      style="display: flex;flex-direction: column;gap: 4px;padding: 4px;"
+                    >
+                      ${repeat(data.sources, ref => {
+                        const page = this.editor.page.workspace.getPage(ref.id);
+                        if (!page) {
+                          return;
+                        }
+                        const title = page.meta.title || 'Untitled';
+                        const jumpTo = () => {
+                          this.editor.page = page;
+                        };
+                        return html` <a
+                          @click="${jumpTo}"
+                          style="cursor: pointer"
+                          >${title}</a
+                        >`;
+                      })}
+                    </div>
+                  </div>`
+                : null}
+            </div>`;
+          })}
+          <div class="copilot-chat-prompt-container">
+            <input
+              autocomplete="off"
+              data-1p-ignore
+              placeholder="Prompt"
+              type="text"
+              class="copilot-chat-prompt"
+              .value="${this.value}"
+              @input="${(e: InputEvent) => {
+                this.value = (e.target as HTMLInputElement).value;
+              }}"
+            />
+            <div @click="${this.ask}" class="send-button">
+              <sl-icon name="stars"></sl-icon>
+            </div>
           </div>
-          <vendor-service-select
-            .featureKey="${'chat with workspace'}"
-            .service="${EmbeddingServiceKind}"
-          ></vendor-service-select>
         </div>
-        <div style="display:flex;gap: 8px;flex-direction: column">
+        <div>
           <div
-            style="font-size: 12px;color:var(--affine-text-secondary-color);"
+            style="display:flex;flex-direction: column;gap: 12px;margin-bottom: 12px;"
           >
-            chat service:
+            <div style="display:flex;gap: 8px;flex-direction: column">
+              <div
+                style="font-size: 12px;color:var(--affine-text-secondary-color);"
+              >
+                embedding service:
+              </div>
+              <vendor-service-select
+                .featureKey="${'chat with workspace'}"
+                .service="${EmbeddingServiceKind}"
+              ></vendor-service-select>
+            </div>
+            <div style="display:flex;gap: 8px;flex-direction: column">
+              <div
+                style="font-size: 12px;color:var(--affine-text-secondary-color);"
+              >
+                chat service:
+              </div>
+              <vendor-service-select
+                .featureKey="${'chat with workspace'}"
+                .service="${TextServiceKind}"
+              ></vendor-service-select>
+            </div>
           </div>
-          <vendor-service-select
-            .featureKey="${'chat with workspace'}"
-            .service="${TextServiceKind}"
-          ></vendor-service-select>
+          <div class="synced-page-list">
+            <div style="margin-bottom: 8px;">Synced pages:</div>
+            ${this.syncedPages.length
+              ? repeat(this.syncedPages, page => {
+                  const title =
+                    this.editor.page.workspace.getPage(page.id)?.meta.title ??
+                    'Untitled';
+                  return html` <div>${title}</div>`;
+                })
+              : 'Empty'}
+          </div>
+          <div
+            class="sync-workspace-button"
+            style="margin-bottom: 12px"
+            @click="${this.syncWorkspace}"
+          >
+            Sync Workspace
+          </div>
         </div>
       </div>
     `;
@@ -292,7 +308,7 @@ export class ChatWithWorkspacePanel extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'chat-with-workspace-panel': ChatWithWorkspacePanel;
+    'copilot-chat-panel': CopilotChatPanel;
   }
 }
 

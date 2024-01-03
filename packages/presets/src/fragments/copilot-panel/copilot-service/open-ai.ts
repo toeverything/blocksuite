@@ -3,6 +3,7 @@ import { OpenAI } from 'openai';
 
 import { pngBase64ToFile } from '../edgeless/edit-image.js';
 import {
+  ChatServiceKind,
   createVendor,
   EmbeddingServiceKind,
   Image2TextServiceKind,
@@ -38,6 +39,7 @@ export const openaiVendor = createVendor<{
 });
 const askGPT3_5turbo = async (
   apiKey: string,
+  model: 'gpt-4' | 'gpt-3.5-turbo-1106' | 'gpt-4-vision-preview',
   messages: Array<OpenAI.ChatCompletionMessageParam>
 ) => {
   const openai = new OpenAI({
@@ -57,7 +59,11 @@ TextServiceKind.implService({
   name: 'GPT3.5 Turbo',
   method: data => ({
     generateText: async messages => {
-      const result = await askGPT3_5turbo(data.apiKey, messages);
+      const result = await askGPT3_5turbo(
+        data.apiKey,
+        'gpt-3.5-turbo-1106',
+        messages
+      );
       return result.content ?? '';
     },
   }),
@@ -67,13 +73,52 @@ TextServiceKind.implService({
   name: 'GPT4',
   method: data => ({
     generateText: async messages => {
-      const result = await askGPT3_5turbo(data.apiKey, messages);
+      const result = await askGPT3_5turbo(data.apiKey, 'gpt-4', messages);
       return result.content ?? '';
     },
   }),
   vendor: openaiVendor,
 });
 
+ChatServiceKind.implService({
+  name: 'GPT3.5 Turbo',
+  method: data => ({
+    chat: async messages => {
+      const result = await askGPT3_5turbo(
+        data.apiKey,
+        'gpt-3.5-turbo-1106',
+        messages
+      );
+      return result.content ?? '';
+    },
+  }),
+  vendor: openaiVendor,
+});
+
+ChatServiceKind.implService({
+  name: 'GPT4',
+  method: data => ({
+    chat: async messages => {
+      const result = await askGPT3_5turbo(data.apiKey, 'gpt-4', messages);
+      return result.content ?? '';
+    },
+  }),
+  vendor: openaiVendor,
+});
+ChatServiceKind.implService({
+  name: 'GPT4-Vision',
+  method: data => ({
+    chat: async messages => {
+      const result = await askGPT3_5turbo(
+        data.apiKey,
+        'gpt-4-vision-preview',
+        messages
+      );
+      return result.content ?? '';
+    },
+  }),
+  vendor: openaiVendor,
+});
 Text2ImageServiceKind.implService({
   name: 'DALL-E3',
   method: data => ({

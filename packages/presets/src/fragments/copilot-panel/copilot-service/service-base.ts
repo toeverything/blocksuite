@@ -52,6 +52,12 @@ export const TextServiceKind = createServiceKind<{
   type: 'text-service',
   title: 'Text service',
 });
+export const ChatServiceKind = createServiceKind<{
+  chat(messages: Array<OpenAI.ChatCompletionMessageParam>): Promise<string>;
+}>({
+  type: 'chat-service',
+  title: 'Chat service',
+});
 
 export const Text2ImageServiceKind = createServiceKind<{
   generateImage(prompt: string): Promise<File>;
@@ -92,6 +98,7 @@ export const FastImage2ImageServiceKind = createServiceKind<{
 
 export const allKindService = [
   TextServiceKind,
+  ChatServiceKind,
   Text2ImageServiceKind,
   Image2TextServiceKind,
   Image2ImageServiceKind,
