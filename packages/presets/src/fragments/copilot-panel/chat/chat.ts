@@ -1,28 +1,22 @@
-import { MarkdownAdapter } from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { Job, type Page } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { copilotConfig } from '../copilot-service/copilot-config.js';
 import {
+  ChatServiceKind,
   EmbeddingServiceKind,
-  TextServiceKind,
 } from '../copilot-service/service-base.js';
+import { ChatFeatureKey } from '../doc/api.js';
 import type { AILogic } from '../logic.js';
-
-type EmbeddedPage = {
-  id: string;
-  sections: {
-    vector: number[];
-    text: string;
-  }[];
-};
+import type { ChatMessage, ChatReactiveData, EmbeddedPage } from './logic.js';
 
 @customElement('copilot-chat-panel')
-export class CopilotChatPanel extends WithDisposable(ShadowlessElement) {
+export class CopilotChatPanel
+  extends WithDisposable(ShadowlessElement)
+  implements ChatReactiveData
+{
   static override styles = css`
     copilot-chat-panel {
       margin-top: 12px;
@@ -93,167 +87,157 @@ export class CopilotChatPanel extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   logic!: AILogic;
+  get chat() {
+    return this.logic.chat;
+  }
   get editor() {
     return this.logic.editor;
   }
   @state()
-  history: {
-    role: 'user' | 'assistant';
-    content: string;
-    sources: {
-      id: string;
-      slice: string[];
-    }[];
-  }[] = [];
+  history: ChatMessage[] = [];
+  @state()
+  loading: boolean = false;
 
   @state()
   value = '';
   @state()
   syncedPages: EmbeddedPage[] = [];
+  @state()
+  surfaceSelection = false;
+  @state()
+  docSelection = false;
 
   public override connectedCallback() {
     super.connectedCallback();
+    this.logic.chat.reactiveData = this;
     this.disposables.add(
       this.editor.page.workspace.slots.pagesUpdated.on(() => {
         this.requestUpdate();
       })
     );
+    this.checkSelection();
+    this.disposables.add(
+      this.editor.host.selection.slots.changed.on(() => {
+        this.checkSelection();
+      })
+    );
   }
 
-  private ask = async () => {
-    const value = this.value;
-    this.history.push({ role: 'user', content: value, sources: [] });
-    this.value = '';
-    const [result] = await copilotConfig
-      .getService('chat with workspace', EmbeddingServiceKind)
-      .generateEmbeddings([value]);
-    const list = this.syncedPages
-      .flatMap(page => {
-        return page.sections.map(section => ({
-          id: page.id,
-          distance: distance(result, section.vector),
-          text: section.text,
-        }));
-      })
-      .sort((a, b) => a.distance - b.distance)
-      .filter(v => v.distance < 0.7)
-      .slice(0, 3);
-    const r = await copilotConfig
-      .getService('text completion', TextServiceKind)
-      .generateText([
-        {
-          role: 'system',
-          content: `the background is:\n${list.map(v => v.text).join('\n')}`,
-        },
-        ...this.history.map(v => ({ role: v.role, content: v.content })),
-      ]);
-    const refs: Record<
-      string,
-      {
-        slice: string[];
-      }
-    > = {};
-    list.forEach(v => {
-      const ref = refs[v.id] ?? (refs[v.id] = { slice: [] });
-      ref.slice.push(v.text);
-    });
-    this.history.push({
-      role: 'assistant',
-      content: r ?? '',
-      sources: Object.entries(refs).map(([id, ref]) => ({
-        id,
-        slice: ref.slice,
-      })),
-    });
+  checkSelection() {
+    this.surfaceSelection =
+      this.editor.host.selection.value.find(v => v.type === 'surface') != null;
+    this.docSelection =
+      this.editor.host.selection.value.find(v => v.type === 'block') != null;
+  }
+
+  addSelectionBackground = async () => {
+    if (this.surfaceSelection) {
+      await this.chat.selectShapesForBackground();
+    }
+    if (this.docSelection) {
+      await this.chat.selectTextForBackground();
+    }
     this.requestUpdate();
   };
 
-  splitPage = async (page: Page): Promise<string[]> => {
-    const markdown = await pageToMarkdown(page);
-    return splitText(markdown);
+  renderMessage = (message: ChatMessage) => {
+    if (message.role === 'system') {
+      return null;
+    }
+    if (message.role === 'user') {
+      const style = styleMap({
+        alignItems: 'flex-end',
+      });
+      return html` <div class="history-item" style="${style}">
+        ${repeat(message.content, item => {
+          if (item.type === 'text') {
+            return html`<div style="width: fit-content">${item.text}</div>`;
+          }
+          if (item.type === 'image_url') {
+            return html`<div style="width: fit-content">
+              <img .src="${item.image_url.url}" style="max-width: 100px" />
+            </div>`;
+          }
+          return null;
+        })}
+      </div>`;
+    }
+    if (message.role === 'assistant') {
+      const style = styleMap({
+        alignItems: 'flex-start',
+        backgroundColor: 'var(--affine-hover-color)',
+      });
+      return html` <div class="history-item" style="${style}">
+        <div style="width: fit-content">${message.content}</div>
+        ${message.sources?.length
+          ? html` <div class="history-refs">
+              <div style="margin-top: 8px;">sources:</div>
+              <div
+                style="display: flex;flex-direction: column;gap: 4px;padding: 4px;"
+              >
+                ${repeat(message.sources, ref => {
+                  const page = this.editor.page.workspace.getPage(ref.id);
+                  if (!page) {
+                    return;
+                  }
+                  const title = page.meta.title || 'Untitled';
+                  const jumpTo = () => {
+                    this.editor.page = page;
+                  };
+                  return html` <a @click="${jumpTo}" style="cursor: pointer"
+                    >${title}</a
+                  >`;
+                })}
+              </div>
+            </div>`
+          : null}
+      </div>`;
+    }
+    return null;
   };
-
-  embeddingPages = async (pageList: Page[]): Promise<EmbeddedPage[]> => {
-    const result: Record<string, EmbeddedPage> = {};
-    const list = (
-      await Promise.all(
-        pageList.map(async page =>
-          (await this.splitPage(page)).map(v => ({ id: page.id, text: v }))
-        )
-      )
-    ).flat();
-    const vectors = await copilotConfig
-      .getService('chat with workspace', EmbeddingServiceKind)
-      .generateEmbeddings(list.map(v => v.text));
-    list.forEach((v, i) => {
-      const page = result[v.id] ?? (result[v.id] = { id: v.id, sections: [] });
-      page.sections.push({ vector: vectors[i], text: v.text });
-    });
-    return Object.values(result);
-  };
-
-  syncWorkspace = async () => {
-    this.syncedPages = await this.embeddingPages([
-      ...this.editor.page.workspace.pages.values(),
-    ]);
-  };
-
+  @query('.copilot-chat-panel-chat-input')
+  input!: HTMLInputElement;
   protected override render(): unknown {
+    const getAnswer = async () => {
+      this.input.focus();
+      await this.chat.genAnswer();
+    };
+    const keydown = async (e: KeyboardEvent) => {
+      e.stopPropagation();
+      if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+        await getAnswer();
+      }
+    };
     return html`
       <div
         style="display:flex;flex-direction: column;justify-content: space-between;height: 100%"
       >
         <div>
-          ${repeat(this.history, data => {
-            const style = styleMap({
-              alignItems: data.role === 'user' ? 'flex-end' : 'flex-start',
-              backgroundColor:
-                data.role === 'user' ? undefined : 'var(--affine-hover-color)',
-            });
-            return html` <div class="history-item" style="${style}">
-              <div style="width: fit-content">${data.content}</div>
-              ${data.sources?.length
-                ? html` <div class="history-refs">
-                    <div style="margin-top: 8px;">sources:</div>
-                    <div
-                      style="display: flex;flex-direction: column;gap: 4px;padding: 4px;"
-                    >
-                      ${repeat(data.sources, ref => {
-                        const page = this.editor.page.workspace.getPage(ref.id);
-                        if (!page) {
-                          return;
-                        }
-                        const title = page.meta.title || 'Untitled';
-                        const jumpTo = () => {
-                          this.editor.page = page;
-                        };
-                        return html` <a
-                          @click="${jumpTo}"
-                          style="cursor: pointer"
-                          >${title}</a
-                        >`;
-                      })}
-                    </div>
-                  </div>`
-                : null}
-            </div>`;
-          })}
+          ${repeat(this.history, this.renderMessage)}
           <div class="copilot-chat-prompt-container">
             <input
+              @keydown="${keydown}"
               autocomplete="off"
               data-1p-ignore
-              placeholder="Prompt"
               type="text"
-              class="copilot-chat-prompt"
+              class="copilot-chat-panel-chat-input copilot-chat-prompt"
               .value="${this.value}"
               @input="${(e: InputEvent) => {
                 this.value = (e.target as HTMLInputElement).value;
               }}"
             />
-            <div @click="${this.ask}" class="send-button">
+            <div @click="${getAnswer}" class="send-button">
               <sl-icon name="stars"></sl-icon>
             </div>
           </div>
+          ${this.surfaceSelection || this.docSelection
+            ? html`<div
+                @click="${this.addSelectionBackground}"
+                style="border-radius: 4px;background-color: rgba(0,0,0,0.2);padding: 4px 8px;font-size: 12px;margin-top: 8px;width: max-content;cursor: pointer;user-select: none"
+              >
+                insert selected content
+              </div>`
+            : null}
         </div>
         <div>
           <div
@@ -266,7 +250,7 @@ export class CopilotChatPanel extends WithDisposable(ShadowlessElement) {
                 embedding service:
               </div>
               <vendor-service-select
-                .featureKey="${'chat with workspace'}"
+                .featureKey="${ChatFeatureKey}"
                 .service="${EmbeddingServiceKind}"
               ></vendor-service-select>
             </div>
@@ -277,8 +261,8 @@ export class CopilotChatPanel extends WithDisposable(ShadowlessElement) {
                 chat service:
               </div>
               <vendor-service-select
-                .featureKey="${'chat with workspace'}"
-                .service="${TextServiceKind}"
+                .featureKey="${ChatFeatureKey}"
+                .service="${ChatServiceKind}"
               ></vendor-service-select>
             </div>
           </div>
@@ -296,7 +280,7 @@ export class CopilotChatPanel extends WithDisposable(ShadowlessElement) {
           <div
             class="sync-workspace-button"
             style="margin-bottom: 12px"
-            @click="${this.syncWorkspace}"
+            @click="${this.chat.syncWorkspace}"
           >
             Sync Workspace
           </div>
@@ -311,51 +295,3 @@ declare global {
     'copilot-chat-panel': CopilotChatPanel;
   }
 }
-
-const pageToMarkdown = async (page: Page) => {
-  const job = new Job({ workspace: page.workspace });
-  const snapshot = await job.pageToSnapshot(page);
-  const result = await new MarkdownAdapter().fromPageSnapshot({
-    snapshot,
-    assets: job.assetsManager,
-  });
-  return result.file;
-};
-const distance = (a: number[], b: number[]) => {
-  let sum = 0;
-  for (let i = 0; i < a.length; i++) {
-    sum += (a[i] - b[i]) ** 2;
-  }
-  return Math.sqrt(sum);
-};
-
-const split = (text: string, n: number) => {
-  const result: string[] = [];
-  while (text.length) {
-    result.push(text.slice(0, n));
-    text = text.slice(n);
-  }
-  return result;
-};
-const maxChunk = 300;
-const splitText = (text: string) => {
-  const data = text.split(/(?<=[\n。，.,])/).flatMap(s => {
-    if (s.length > maxChunk) {
-      return split(s, Math.ceil(s.length / maxChunk));
-    }
-    return [s];
-  });
-  const result: string[] = [];
-  let current = '';
-  for (const item of data) {
-    if (current.length + item.length > maxChunk) {
-      result.push(current);
-      current = '';
-    }
-    current += item;
-  }
-  if (current.length) {
-    result.push(current);
-  }
-  return result;
-};

@@ -4,10 +4,10 @@ import {
   TextServiceKind,
 } from '../copilot-service/service-base.js';
 
-export const TextCompletionFeatureKey = 'text completion';
+export const ChatFeatureKey = 'chat';
 export const getTextService = () => {
-  return copilotConfig.getService(TextCompletionFeatureKey, TextServiceKind);
+  return copilotConfig.getService(ChatFeatureKey, TextServiceKind);
 };
 export const getChatService = () => {
-  return copilotConfig.getService(TextCompletionFeatureKey, ChatServiceKind);
+  return copilotConfig.getService(ChatFeatureKey, ChatServiceKind);
 };

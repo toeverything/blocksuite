@@ -48,7 +48,7 @@ const askGPT3_5turbo = async (
   });
   const result = await openai.chat.completions.create({
     messages,
-    model: 'gpt-3.5-turbo-1106',
+    model: model,
     temperature: 0,
     max_tokens: 4096,
   });
