@@ -1,4 +1,5 @@
-import { askGPT4V } from '../utils/request.js';
+import { copilotConfig } from '../copilot-service/copilot-config.js';
+import { Image2TextServiceKind } from '../copilot-service/service-base.js';
 
 export const genHtml = async (
   img: string,
@@ -7,10 +8,12 @@ export const genHtml = async (
     html: string;
   }
 ) => {
-  const result = await askGPT4V([
-    {
-      role: 'system',
-      content: `You are an expert web developer who specializes in building working website prototypes from low-fidelity wireframes.
+  const result = await copilotConfig
+    .getService('make it real', Image2TextServiceKind)
+    .generateText([
+      {
+        role: 'system',
+        content: `You are an expert web developer who specializes in building working website prototypes from low-fidelity wireframes.
 Your job is to accept low-fidelity wireframes, then create a working prototype using HTML, CSS, and JavaScript, and finally send back the results.
 The results should be a single HTML file.
 Use tailwind to style the website.
@@ -36,43 +39,43 @@ Use the provided list of text from the wireframes as a reference if any text is 
 You love your designers and want them to be happy. Incorporating their feedback and notes and producing working websites makes them happy.
 
 When sent new wireframes, respond ONLY with the contents of the html file.`,
-    },
-    {
-      role: 'user',
-      content: [
-        {
-          type: 'image_url',
-          image_url: {
-            detail: 'high',
-            url: img,
+      },
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image_url',
+            image_url: {
+              detail: 'high',
+              url: img,
+            },
           },
-        },
-        {
-          type: 'text',
-          text: 'Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?',
-        },
-        ...(latestHtmlBlock
-          ? ([
-              {
-                type: 'text',
-                text: "The designs also included one of your previous result. Here's the image that you used as its source:",
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: latestHtmlBlock.design,
-                  detail: 'high',
+          {
+            type: 'text',
+            text: 'Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?',
+          },
+          ...(latestHtmlBlock
+            ? ([
+                {
+                  type: 'text',
+                  text: "The designs also included one of your previous result. Here's the image that you used as its source:",
                 },
-              },
-              {
-                type: 'text',
-                text: `And here's the HTML you came up with for it: ${latestHtmlBlock.html}`,
-              },
-            ] as const)
-          : []),
-      ],
-    },
-  ]);
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: latestHtmlBlock.design,
+                    detail: 'high',
+                  },
+                },
+                {
+                  type: 'text',
+                  text: `And here's the HTML you came up with for it: ${latestHtmlBlock.html}`,
+                },
+              ] as const)
+            : []),
+        ],
+      },
+    ]);
   if (!result) {
     return;
   }

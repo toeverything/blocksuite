@@ -18,6 +18,7 @@ import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
+import { ListService } from '../list-block/list-service.js';
 import { NoteService } from '../note-block/index.js';
 import { NoteBlockSchema } from '../note-block/note-model.js';
 import { DocPageService } from '../page-block/doc/doc-page-service.js';
@@ -36,6 +37,7 @@ import { AFFINE_LINKED_PAGE_WIDGET } from '../page-block/widgets/linked-page/ind
 import { AFFINE_MODAL_WIDGET } from '../page-block/widgets/modal/modal.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../page-block/widgets/slash-menu/index.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
+import { ParagraphService } from '../paragraph-block/paragraph-service.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 import { SurfaceService } from '../surface-block/surface-service.js';
 import {
@@ -120,6 +122,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     view: {
       component: literal`affine-list`,
     },
+    service: ListService,
   },
   {
     schema: NoteBlockSchema,
@@ -168,6 +171,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     view: {
       component: literal`affine-paragraph`,
     },
+    service: ParagraphService,
   },
   {
     schema: BookmarkBlockSchema,

@@ -13,8 +13,8 @@ import {
   type GroupElement,
 } from '../surface-block/elements/index.js';
 import type { ShapeType } from '../surface-block/index.js';
-import type { RefNodeSlots } from './components/rich-text/inline/nodes/reference-node.js';
 import type { NavigatorMode } from './edgeless/frame/consts.js';
+import type { RefNodeSlots } from './inline/presets/nodes/reference-node.js';
 import type { BlockComponent } from './utils/query.js';
 import type { Point } from './utils/rect.js';
 

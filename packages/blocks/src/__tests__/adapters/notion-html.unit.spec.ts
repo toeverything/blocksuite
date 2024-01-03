@@ -908,10 +908,7 @@ describe('notion html to snapshot', () => {
               '$blocksuite:internal:text$': true,
               delta: [
                 {
-                  insert: '💡',
-                },
-                {
-                  insert: 'aaa',
+                  insert: '💡aaa',
                 },
               ],
             },

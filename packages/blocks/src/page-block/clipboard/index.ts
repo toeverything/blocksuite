@@ -49,11 +49,7 @@ export class PageClipboard {
       this._clipboardAdapter,
       100
     );
-    this._std.clipboard.registerAdapter(
-      'text/plain',
-      this._markdownAdapter,
-      90
-    );
+    this._std.clipboard.registerAdapter('text/html', this._htmlAdapter, 90);
     [
       'image/apng',
       'image/avif',
@@ -65,7 +61,11 @@ export class PageClipboard {
     ].map(type =>
       this._std.clipboard.registerAdapter(type, this._imageAdapter, 80)
     );
-    this._std.clipboard.registerAdapter('text/html', this._htmlAdapter, 70);
+    this._std.clipboard.registerAdapter(
+      'text/plain',
+      this._markdownAdapter,
+      70
+    );
     const copy = copyMiddleware(this._std);
     const paste = pasteMiddleware(this._std);
     this._std.clipboard.use(copy);

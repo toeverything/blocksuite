@@ -134,20 +134,27 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
     const { x: initConX, y: initConY } = this._initialContainerOffset;
     const { x: conX, y: conY } = state.containerOffset;
 
-    let left = Math.min(startX + initScrollX + initConX, x + scrollLeft + conX);
-    let right = Math.max(
-      startX + initScrollX + initConX,
-      x + scrollLeft + conX
+    const boundary = this._viewportElement.getBoundingClientRect();
+    let left = Math.min(
+      startX + initScrollX + initConX - boundary.left,
+      x + scrollLeft + conX - boundary.left
     );
-    let top = Math.min(startY + initScrollY + initConY, y + scrollTop + conY);
+    let right = Math.max(
+      startX + initScrollX + initConX - boundary.left,
+      x + scrollLeft + conX - boundary.left
+    );
+    let top = Math.min(
+      startY + initScrollY + initConY - boundary.top,
+      y + scrollTop + conY - boundary.top
+    );
     let bottom = Math.max(
-      startY + initScrollY + initConY,
-      y + scrollTop + conY
+      startY + initScrollY + initConY - boundary.top,
+      y + scrollTop + conY - boundary.top
     );
 
-    left = Math.max(left, conX);
+    left = Math.max(left, conX - boundary.left);
     right = Math.min(right, scrollWidth);
-    top = Math.max(top, conY);
+    top = Math.max(top, conY - boundary.top);
     bottom = Math.min(bottom, scrollHeight);
 
     const userRect = {
@@ -157,7 +164,12 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
       height: bottom - top,
     };
     this.rect = userRect;
-    this._selectBlocksByRect(userRect);
+    this._selectBlocksByRect({
+      left: userRect.left + boundary.left,
+      top: userRect.top + boundary.top,
+      width: userRect.width,
+      height: userRect.height,
+    });
     this._lastPointerState = state;
 
     if (shouldAutoScroll) {

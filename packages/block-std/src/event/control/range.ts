@@ -55,8 +55,6 @@ export class RangeControl {
   };
 
   private _selectionChange = (event: Event) => {
-    this._checkSelectionSource();
-
     if (!this._dispatcher.isActive) return;
 
     const scope = this._buildScope('selectionChange');
@@ -67,47 +65,6 @@ export class RangeControl {
   private _createContext(event: Event) {
     return UIEventStateContext.from(new UIEventState(event));
   }
-
-  private _checkSelectionSource = () => {
-    const viewport = this._dispatcher.viewportElement;
-    if (!viewport) return;
-
-    const selection = document.getSelection();
-    if (!selection || !selection.rangeCount) return;
-    const range = selection.getRangeAt(0);
-
-    const startElement =
-      range.startContainer instanceof Element
-        ? range.startContainer
-        : range.startContainer.parentElement;
-    if (!startElement) return;
-
-    if (
-      startElement === document.documentElement ||
-      startElement === document.body
-    )
-      return;
-
-    if (startElement.closest('.blocksuite-overlay')) return;
-
-    if (!viewport.contains(startElement)) {
-      this._dispatcher.deactivate();
-      return;
-    }
-
-    const endElement =
-      range.endContainer instanceof Element
-        ? range.endContainer
-        : range.endContainer.parentElement;
-    if (!endElement) return;
-
-    if (!viewport.contains(endElement)) {
-      this._dispatcher.deactivate();
-      return;
-    }
-
-    this._dispatcher.activate();
-  };
 
   private _buildScope = (eventName: EventName) => {
     let scope: EventScope | undefined;

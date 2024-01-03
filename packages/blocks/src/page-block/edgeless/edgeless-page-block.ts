@@ -841,6 +841,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
       const el = this.surface.pickById(surface.elements[0]);
       if (isCanvasElement(el)) {
+        this.host.event.activate();
         return true;
       }
 
