@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
@@ -61,6 +62,7 @@ export function collectGroupNames(menuItem: InternSlashItem[]) {
 }
 
 export function insertContent(
+  editorHost: EditorHost,
   model: BaseBlockModel,
   text: string,
   attributes?: AffineTextAttributes
@@ -68,7 +70,7 @@ export function insertContent(
   if (!model.text) {
     throw new Error("Can't insert text! Text not found");
   }
-  const inlineEditor = getInlineEditorByModel(model);
+  const inlineEditor = getInlineEditorByModel(editorHost, model);
   if (!inlineEditor) {
     throw new Error("Can't insert text! Inline editor not found");
   }

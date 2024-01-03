@@ -106,7 +106,7 @@ async function initEmptyEditor({
         debugMenu.pagesPanel = pagesPanel;
         const leftSidePanel = document.createElement('left-side-panel');
         debugMenu.leftSidePanel = leftSidePanel;
-        debugMenu.contentParser = new window.ContentParser(page);
+        debugMenu.contentParser = new window.ContentParser(editor.host, page);
         document.body.appendChild(debugMenu);
         document.body.appendChild(leftSidePanel);
         window.debugMenu = debugMenu;

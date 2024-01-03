@@ -127,6 +127,8 @@ export class Block {
   };
 
   pop = (prop: string) => {
+    if (!this._stashed.has(prop)) return;
+
     // @ts-ignore
     const value = this.model[prop];
 

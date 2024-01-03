@@ -1,5 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
-
 import type { EdgelessElement } from '../_common/types.js';
 import { GRID_SIZE, type IBound } from './consts.js';
 import { compare } from './managers/group-manager.js';
@@ -71,7 +69,7 @@ export class GridManager<T extends EdgelessElement> {
 
   remove(element: T) {
     const grids = this._elementToGrids.get(element);
-    assertExists(grids);
+    if (!grids) return;
 
     for (const grid of grids) {
       grid.delete(element);

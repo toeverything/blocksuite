@@ -51,7 +51,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       scroll-margin-bottom: 30px;
     }
 
-    rich-text .nowrap-lines v-text span {
+    rich-text .nowrap-lines v-text span,
+    rich-text .nowrap-lines v-element span {
       white-space: pre !important;
     }
   `;

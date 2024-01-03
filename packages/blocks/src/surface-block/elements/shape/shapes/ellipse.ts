@@ -14,6 +14,7 @@ import {
 import { PointLocation } from '../../../utils/point-location.js';
 import { type IVec, Vec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../edgeless-element.js';
+import { ShapeType } from '../consts.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
 import { drawGeneralShape, hitTestOnShapeText } from '../utils.js';
@@ -60,7 +61,7 @@ export const EllipseMethods: ShapeMethods = {
     );
 
     if (shapeStyle === ShapeStyle.General) {
-      drawGeneralShape(ctx, 'ellipse', {
+      drawGeneralShape(ctx, ShapeType.Ellipse, {
         x: 0,
         y: 0,
         width: renderWidth,

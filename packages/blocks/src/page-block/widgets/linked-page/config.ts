@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel, type PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
@@ -21,6 +22,7 @@ export type LinkedPageOptions = {
   ignoreBlockTypes: Flavour[];
   convertTriggerKey: boolean;
   getMenus: (ctx: {
+    editorHost: EditorHost;
     query: string;
     page: Page;
     pageMetas: PageMeta[];
@@ -47,13 +49,15 @@ const DEFAULT_PAGE_NAME = 'Untitled';
 const DISPLAY_NAME_LENGTH = 8;
 
 export function insertLinkedNode({
+  editorHost,
   model,
   pageId,
 }: {
+  editorHost: EditorHost;
   pageId: string;
   model: BaseBlockModel;
 }) {
-  const inlineEditor = getInlineEditorByModel(model);
+  const inlineEditor = getInlineEditorByModel(editorHost, model);
   assertExists(inlineEditor, 'Editor not found');
   const inlineRange = inlineEditor.getInlineRange();
   assertExists(inlineRange);
@@ -67,11 +71,12 @@ export function insertLinkedNode({
 }
 
 export const getMenus: (ctx: {
+  editorHost: EditorHost;
   query: string;
   page: Page;
   pageMetas: PageMeta[];
   model: BaseBlockModel;
-}) => LinkedPageGroup[] = ({ query, page, model, pageMetas }) => {
+}) => LinkedPageGroup[] = ({ editorHost, query, page, model, pageMetas }) => {
   const pageName = query || DEFAULT_PAGE_NAME;
   const displayPageName =
     pageName.slice(0, DISPLAY_NAME_LENGTH) +
@@ -91,6 +96,7 @@ export const getMenus: (ctx: {
         icon: PageIcon,
         action: () =>
           insertLinkedNode({
+            editorHost,
             model,
             pageId: page.id,
           }),
@@ -109,6 +115,7 @@ export const getMenus: (ctx: {
               title: pageName,
             });
             insertLinkedNode({
+              editorHost,
               model,
               pageId: newPage.id,
             });
@@ -130,6 +137,7 @@ export const getMenus: (ctx: {
               }
               const pageId = pageIds[0];
               insertLinkedNode({
+                editorHost,
                 model,
                 pageId: pageId,
               });

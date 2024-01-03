@@ -1,4 +1,5 @@
 import { assertExists, sleep } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import { BaseBlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 
@@ -209,6 +210,7 @@ export const createKeydownObserver = ({
  * Remove specified text from the current range.
  */
 export function cleanSpecifiedTail(
+  editorHost: EditorHost,
   inlineEditorOrModel: AffineInlineEditor | BaseBlockModel,
   str: string
 ) {
@@ -218,7 +220,7 @@ export function cleanSpecifiedTail(
   }
   const inlineEditor =
     inlineEditorOrModel instanceof BaseBlockModel
-      ? getInlineEditorByModel(inlineEditorOrModel)
+      ? getInlineEditorByModel(editorHost, inlineEditorOrModel)
       : inlineEditorOrModel;
   assertExists(inlineEditor, 'Inline editor not found');
 

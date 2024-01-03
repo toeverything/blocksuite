@@ -12,12 +12,11 @@ import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
+import type { TextAlign, TextVerticalAlign } from '../consts.js';
 import type { CanvasElementType, HitTestOptions } from '../edgeless-element.js';
 import type { ISurfaceElement } from '../surface-element.js';
-import type { SHAPE_TEXT_FONT_SIZE } from './consts.js';
+import type { SHAPE_TEXT_FONT_SIZE, ShapeType } from './consts.js';
 import type { ShapeElement } from './shape-element.js';
-
-export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 
 export interface IShape extends ISurfaceElement {
   type: CanvasElementType.SHAPE;
@@ -38,9 +37,9 @@ export interface IShape extends ISurfaceElement {
   fontFamily?: CanvasTextFontFamily;
   fontWeight?: CanvasTextFontWeight;
   fontStyle?: CanvasTextFontStyle;
-  textAlign?: 'left' | 'center' | 'right';
-  textHorizontalAlign?: 'left' | 'center' | 'right';
-  textVerticalAlign?: 'top' | 'center' | 'bottom';
+  textAlign?: TextAlign;
+  textHorizontalAlign?: TextAlign;
+  textVerticalAlign?: TextVerticalAlign;
 
   // outdated, use `fontWeight` and `fontStyle` instead
   // bold?: boolean;

@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import { INLINE_ROOT_ATTR } from '@blocksuite/inline';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
@@ -192,16 +192,6 @@ export function getPageByEditorHost(
   return null;
 }
 
-/** If it's not in the page mode, it will return `null` directly
- * Use `getDocPageByElement` or `getDocPageByEditorHost` instead.
- * @deprecated
- */
-export function getDocPage(page: Page): DocPageBlockComponent | null {
-  const pageComponent = getBlockComponentByModel(page.root);
-  if (pageComponent?.tagName !== 'AFFINE-DOC-PAGE') return null;
-  return pageComponent as DocPageBlockComponent;
-}
-
 /** If it's not in the page mode, it will return `null` directly */
 export function getDocPageByElement(element: Element) {
   return element.closest('affine-doc-page');
@@ -210,16 +200,6 @@ export function getDocPageByElement(element: Element) {
 /** If it's not in the page mode, it will return `null` directly */
 export function getDocPageByEditorHost(editorHost: EditorHost) {
   return editorHost.querySelector('affine-doc-page');
-}
-
-/** If it's not in the edgeless mode, it will return `null` directly
- * Use `getEdgelessPageByElement` or `getEdgelessPageByEditorHost` instead.
- * @deprecated
- */
-export function getEdgelessPage(page: Page): EdgelessPageBlockComponent | null {
-  const pageComponent = getBlockComponentByModel(page.root);
-  if (pageComponent?.tagName !== 'AFFINE-EDGELESS-PAGE') return null;
-  return pageComponent as EdgelessPageBlockComponent;
 }
 
 /** If it's not in the edgeless mode, it will return `null` directly */
@@ -233,21 +213,10 @@ export function getEdgelessPageByEditorHost(editorHost: EditorHost) {
 }
 
 /** @deprecated */
-export function getEditorContainer(page: Page): AbstractEditor {
-  const pageComponent = getBlockComponentByModel(page.root);
-  const editorContainer = pageComponent?.closest('affine-editor-container');
+export function getEditorContainer(editorHost: EditorHost): AbstractEditor {
+  const editorContainer = editorHost.closest('affine-editor-container');
   assertExists(editorContainer);
   return editorContainer as AbstractEditor;
-}
-
-/**
- * Note that this function is used for compatibility only, and may be removed in the future.
- * Use `isInsideDocEditor` or `isInsideEdgelessEditor` instead.
- * @deprecated
- */
-export function isPageMode(page: Page) {
-  const pageComponent = getBlockComponentByModel(page.root);
-  return pageComponent?.tagName === 'AFFINE-DOC-PAGE';
 }
 
 export function isInsideDocEditor(host: EditorHost) {
@@ -256,12 +225,6 @@ export function isInsideDocEditor(host: EditorHost) {
 
 export function isInsideEdgelessEditor(host: EditorHost) {
   return !!host.closest('edgeless-editor');
-}
-
-export function getLitRoot() {
-  const root = document.querySelector<EditorHost>('editor-host');
-  assertExists(root);
-  return root;
 }
 
 /**
@@ -297,15 +260,18 @@ export function getViewportElement(editorHost: EditorHost) {
  * Use `root.view.viewFromPath` instead.
  * @deprecated
  */
-export function getBlockComponentByModel(model: BaseBlockModel | null) {
-  if (!model) return null;
-  return getBlockComponentByPath(buildPath(model));
+export function getBlockComponentByModel(
+  editorHost: EditorHost,
+  model: BaseBlockModel | null
+) {
+  return getBlockComponentByPath(editorHost, buildPath(model));
 }
 
-export function getBlockComponentByPath(path: string[]) {
-  const root = getLitRoot();
-
-  return root.view.viewFromPath('block', path);
+export function getBlockComponentByPath(
+  editorHost: EditorHost,
+  path: string[]
+) {
+  return editorHost.view.viewFromPath('block', path);
 }
 
 /**
@@ -316,10 +282,11 @@ export function getBlockComponentByPath(path: string[]) {
  * @deprecated
  */
 export async function asyncGetBlockComponentByModel(
+  editorHost: EditorHost,
   model: BaseBlockModel
 ): Promise<BlockComponent | null> {
   assertExists(model.page.root);
-  const pageComponent = getBlockComponentByModel(model.page.root);
+  const pageComponent = getPageByEditorHost(editorHost);
   if (!pageComponent) return null;
   await pageComponent.updateComplete;
 
@@ -327,22 +294,34 @@ export async function asyncGetBlockComponentByModel(
     return pageComponent;
   }
 
-  const blockComponent = getBlockComponentByModel(model);
+  const blockComponent = editorHost.view.viewFromPath(
+    'block',
+    buildPath(model)
+  );
   return blockComponent;
 }
 
 /**
  * @deprecated In most cases, you not need RichText, you can use {@link getInlineEditorByModel} instead.
  */
-export function getRichTextByModel(model: BaseBlockModel) {
-  const blockComponent = getBlockComponentByModel(model);
+export function getRichTextByModel(
+  editorHost: EditorHost,
+  model: BaseBlockModel
+) {
+  const blockComponent = editorHost.view.viewFromPath(
+    'block',
+    buildPath(model)
+  );
   const richText = blockComponent?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;
 }
 
-export async function asyncGetRichTextByModel(model: BaseBlockModel) {
-  const blockComponent = await asyncGetBlockComponentByModel(model);
+export async function asyncGetRichTextByModel(
+  editorHost: EditorHost,
+  model: BaseBlockModel
+) {
+  const blockComponent = await asyncGetBlockComponentByModel(editorHost, model);
   if (!blockComponent) return null;
   await blockComponent.updateComplete;
   const richText = blockComponent?.querySelector<RichText>('rich-text');
@@ -350,23 +329,29 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
   return richText;
 }
 
-export function getInlineEditorByModel(model: BaseBlockModel) {
+export function getInlineEditorByModel(
+  editorHost: EditorHost,
+  model: BaseBlockModel
+) {
   if (matchFlavours(model, ['affine:database'])) {
     // Not support database model since it's may be have multiple inline editor instances.
     // Support to enter the editing state through the Enter key in the database.
     return null;
   }
-  const richText = getRichTextByModel(model);
+  const richText = getRichTextByModel(editorHost, model);
   if (!richText) return null;
   return richText.inlineEditor;
 }
 
-export async function asyncGetInlineEditorByModel(model: BaseBlockModel) {
+export async function asyncGetInlineEditorByModel(
+  editorHost: EditorHost,
+  model: BaseBlockModel
+) {
   if (matchFlavours(model, ['affine:database'])) {
     // Not support database model since it's may be have multiple inline editor instances.
     throw new Error('Cannot get inline editor by database model!');
   }
-  const richText = await asyncGetRichTextByModel(model);
+  const richText = await asyncGetRichTextByModel(editorHost, model);
   if (!richText) return null;
   return richText.inlineEditor;
 }
@@ -404,9 +389,14 @@ export function isInsideDocTitle(
   return titleElement.contains(element as Node);
 }
 
-export function isInsideEdgelessTextEditor(element: unknown): boolean {
-  const editor = document.querySelector('affine-editor-container');
-  const textElement = getEdgelessCanvasTextEditor(editor ?? document);
+export function isInsideEdgelessTextEditor(
+  editorHost: EditorHost,
+  element: unknown
+): boolean {
+  const edgelessPageElement = getEdgelessPageByEditorHost(editorHost);
+  const textElement = getEdgelessCanvasTextEditor(
+    edgelessPageElement ?? document
+  );
   if (!textElement) return false;
 
   return textElement.contains(element as Node);

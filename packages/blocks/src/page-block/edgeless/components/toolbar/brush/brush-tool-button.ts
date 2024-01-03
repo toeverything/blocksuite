@@ -1,24 +1,24 @@
 import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
-import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { css, html } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessPenIcon } from '../../../../../_common/icons/index.js';
-import {
-  type EdgelessTool,
-  LineWidth,
-} from '../../../../../_common/utils/index.js';
-import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import { LineWidth } from '../../../../../_common/utils/index.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
-import { createPopper, type MenuPopper } from '../common/create-popper.js';
+import { createPopper } from '../common/create-popper.js';
+import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
 import type { EdgelessBrushMenu } from './brush-menu.js';
 
 @customElement('edgeless-brush-tool-button')
-export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
+export class EdgelessBrushToolButton extends EdgelessToolButton<
+  EdgelessBrushMenu,
+  'brush',
+  readonly ['color', 'lineWidth']
+> {
   static override styles = css`
     :host {
       display: flex;
@@ -49,118 +49,62 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
       transform: translateY(5px);
     }
   `;
-
-  @property({ attribute: false })
-  edgelessTool!: EdgelessTool;
-
-  @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
-
-  @property({ attribute: false })
-  setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
+  @state()
+  color: string = DEFAULT_BRUSH_COLOR;
 
   @state()
-  private _color: string = DEFAULT_BRUSH_COLOR;
+  lineWidth = LineWidth.LINE_WIDTH_FOUR;
 
-  private _brushMenu: MenuPopper<EdgelessBrushMenu> | null = null;
+  protected override _type = 'brush' as const;
+  protected override readonly _states = ['color', 'lineWidth'] as const;
 
   private _toggleBrushMenu() {
-    if (this._brushMenu) {
-      this._brushMenu.dispose();
-      this._brushMenu = null;
+    const { surface } = this.edgeless;
+    if (this._menu) {
+      this._disposeMenu();
     } else {
-      this._brushMenu = createPopper('edgeless-brush-menu', this, {
+      this.edgeless.tools.setEdgelessTool({
+        type: this._type,
+      });
+      this._menu = createPopper('edgeless-brush-menu', this, {
         x: 110,
         y: -40,
       });
-      this._brushMenu.element.edgelessTool = this.edgelessTool;
-      this._brushMenu.element.edgeless = this.edgeless;
-    }
-  }
-
-  private _tryLoadBrushStateLocalColor() {
-    const key = 'blocksuite:' + this.edgeless.page.id + ':edgelessBrush';
-    const brushData = sessionStorage.getItem(key);
-    let color = null;
-    if (brushData) {
-      color = JSON.parse(brushData).color;
-      this._color = color;
+      this._menu.element.edgeless = this.edgeless;
+      this.updateMenu();
+      this._menu.element.onChange = (props: Record<string, unknown>) => {
+        surface.service.editSession.record(this._type, props);
+      };
     }
   }
 
   override updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('edgelessTool')) {
-      if (this.edgelessTool.type !== 'brush') {
-        this._brushMenu?.dispose();
-        this._brushMenu = null;
-      }
-      if (this._brushMenu) {
-        this._brushMenu.element.edgelessTool = this.edgelessTool;
-        this._brushMenu.element.edgeless = this.edgeless;
+    if (this._states.some(key => changedProperties.has(key))) {
+      if (this._menu) {
+        this.updateMenu();
+        this.edgeless.slots.edgelessToolUpdated.emit({
+          type: this._type,
+        });
       }
     }
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-    this.updateComplete
-      .then(() => {
-        this._tryLoadBrushStateLocalColor();
-      })
-      .catch(console.error);
-    this._disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(newTool => {
-        if (newTool.type === 'brush') {
-          this._color = newTool.color;
-        } else {
-          this._brushMenu?.dispose();
-          this._brushMenu = null;
-        }
-      })
-    );
-  }
-
-  override disconnectedCallback(): void {
-    this._disposables.dispose();
-    this._brushMenu?.dispose();
-    this._brushMenu = null;
-    super.disconnectedCallback();
-  }
-
-  override firstUpdated() {
-    this.edgeless.bindHotKey(
-      {
-        Escape: () => {
-          if (this.edgelessTool.type === 'brush') {
-            this.setEdgelessTool({ type: 'default' });
-          }
-        },
-      },
-      { global: true }
-    );
-  }
-
   override render() {
-    const type = this.edgelessTool?.type;
+    const { active } = this;
 
     return html`
       <edgeless-toolbar-button
         class="edgeless-brush-button"
-        .tooltip=${this._brushMenu ? '' : getTooltipWithShortcut('Pen', 'P')}
+        .tooltip=${this._menu ? '' : getTooltipWithShortcut('Pen', 'P')}
         .tooltipOffset=${4}
-        .active=${type === 'brush'}
+        .active=${active}
         @click=${() => {
-          this.setEdgelessTool({
-            type: 'brush',
-            lineWidth: LineWidth.LINE_WIDTH_FOUR,
-            color: DEFAULT_BRUSH_COLOR,
-          });
           this._toggleBrushMenu();
         }}
       >
         <div class="edgeless-brush-button">
-          <div class=${type === 'brush' ? 'active-mode' : ''}></div>
-          <div style=${styleMap({ color: `var(${this._color})` })}>
+          <div class=${active ? 'active-mode' : ''}></div>
+          <div style=${styleMap({ color: `var(${this.color})` })}>
             ${EdgelessPenIcon}
           </div>
         </div>

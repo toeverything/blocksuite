@@ -13,6 +13,7 @@ import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
+import { EmbedLinkedPageBlockSpec } from '../embed-linked-page-block/index.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
@@ -37,7 +38,10 @@ import { AFFINE_SLASH_MENU_WIDGET } from '../page-block/widgets/slash-menu/index
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 import { SurfaceService } from '../surface-block/surface-service.js';
-import { SurfaceRefBlockSchema } from '../surface-ref-block/index.js';
+import {
+  SurfaceRefBlockSchema,
+  SurfaceRefBlockService,
+} from '../surface-ref-block/index.js';
 
 const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
@@ -181,6 +185,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   },
   {
     schema: SurfaceRefBlockSchema,
+    service: SurfaceRefBlockService,
     view: {
       component: literal`affine-surface-ref`,
       widgets: {
@@ -190,6 +195,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   },
   EmbedGithubBlockSpec,
   EmbedHtmlBlockSpec,
+  EmbedLinkedPageBlockSpec,
 ];
 
 export const DocEditorBlockSpecs: BlockSpec[] = [

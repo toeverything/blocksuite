@@ -6,6 +6,9 @@ import {
   TextAlignLeftIcon,
   TextAlignRightIcon,
 } from '../../../../_common/icons/index.js';
+import { TextAlign } from '../../../../surface-block/elements/consts.js';
+
+const { Left, Center, Right } = TextAlign;
 
 @customElement('edgeless-align-panel')
 export class EdgelessAlignPanel extends LitElement {
@@ -30,7 +33,7 @@ export class EdgelessAlignPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value: 'left' | 'center' | 'right' = 'left';
+  value: TextAlign = Left;
 
   private _onSelect(value: EdgelessAlignPanel['value']) {
     this.value = value;
@@ -50,7 +53,7 @@ export class EdgelessAlignPanel extends LitElement {
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect('left');
+            this._onSelect(Left);
           }}
         >
           ${TextAlignLeftIcon}
@@ -61,7 +64,7 @@ export class EdgelessAlignPanel extends LitElement {
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect('center');
+            this._onSelect(Center);
           }}
         >
           ${TextAlignCenterIcon}
@@ -72,7 +75,7 @@ export class EdgelessAlignPanel extends LitElement {
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect('right');
+            this._onSelect(Right);
           }}
         >
           ${TextAlignRightIcon}

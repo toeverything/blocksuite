@@ -20,6 +20,7 @@ export function notify(
       ${escapeHtml(message)}
     `,
   });
+  alert.classList.add('blocksuite-overlay');
 
   document.body.append(alert);
   return alert.toast();

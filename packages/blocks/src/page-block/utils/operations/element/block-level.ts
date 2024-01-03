@@ -18,7 +18,7 @@ export function updateBlockElementType(
   if (blockElements.length === 0) {
     return [];
   }
-  const root = blockElements[0].host;
+  const editorHost = blockElements[0].host;
   const page = blockElements[0].page;
   const hasSamePage = blockElements.every(block => block.page === page);
   if (!hasSamePage) {
@@ -39,7 +39,7 @@ export function updateBlockElementType(
     if (!model) {
       throw new Error('Failed to get model after merge code block!');
     }
-    asyncSetInlineRange(model, {
+    asyncSetInlineRange(editorHost, model, {
       index: model.text?.length ?? 0,
       length: 0,
     }).catch(console.error);
@@ -61,7 +61,7 @@ export function updateBlockElementType(
     if (!nextSibling) {
       nextSiblingId = page.addBlock('affine:paragraph', {}, parent);
     }
-    asyncFocusRichText(page, nextSiblingId)?.catch(console.error);
+    asyncFocusRichText(editorHost, page, nextSiblingId)?.catch(console.error);
     const newModel = page.getBlockById(id);
     if (!newModel) {
       throw new Error('Failed to get model after add divider block!');
@@ -88,8 +88,10 @@ export function updateBlockElementType(
   const firstNewModel = newModels[0];
   const lastNewModel = newModels[newModels.length - 1];
 
-  const allTextUpdated = newModels.map(model => onModelTextUpdated(model));
-  const selectionManager = root.selection;
+  const allTextUpdated = newModels.map(model =>
+    onModelTextUpdated(editorHost, model)
+  );
+  const selectionManager = editorHost.selection;
   const textSelection = selectionManager.find('text');
   const blockSelections = selectionManager.filter('block');
 

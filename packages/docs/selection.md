@@ -15,10 +15,10 @@ The selection model contains a list of selections. Each selection is a range of 
 In BlockSuite, it will be represented as following:
 
 ```
-|-- Root Block (id: 0)
-    |-- Note Block (id: 1)
-        |-- Text Block (id: 2)
-        |-- Text Block (id: 3)
+|-- Page Block (id: a)
+    |-- Note Block (id: b)
+        |-- Text Block (id: c)
+        |-- Text Block (id: d)
 ```
 
 And if you select the text partially via mouse drag as following:
@@ -33,12 +33,12 @@ The selection model will be:
     type: 'text',
     group: 'note',
     from: {
-      path: [0, 1, 2],
+      path: ['a', 'b', 'c'],
       index: 1,
       length: 5,
     },
     to: {
-      path: [0, 1, 3],
+      path: ['a', 'b', 'd'],
       index: 0,
       length: 4,
     },
@@ -57,12 +57,12 @@ The selection model will be:
   {
     type: 'block',
     group: 'note',
-    path: [0, 1, 2],
+    path: ['a', 'b', 'c'],
   },
   {
     type: 'block',
     group: 'note',
-    path: [0, 1, 3],
+    path: ['a', 'b', 'd'],
   },
 ];
 ```
@@ -215,6 +215,6 @@ Now you can use the `MySelection` in the selection model.
 
 ```ts
 const mySelection = std.selection.create('mySelection', {
-  path: [0, 1, 2],
+  path: ['a', 'b', 'c'],
 });
 ```

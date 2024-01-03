@@ -241,6 +241,9 @@ importers:
       mdast-util-gfm-task-list-item:
         specifier: ^2.0.0
         version: 2.0.0
+      merge:
+        specifier: ^2.1.1
+        version: 2.1.1
       micromark-extension-gfm-autolink-literal:
         specifier: ^2.0.0
         version: 2.0.0

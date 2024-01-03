@@ -155,7 +155,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       buildPath(block)
     ) as NoteBlockComponent;
 
-    assertExists(noteBlockElement);
+    if (!noteBlockElement) return null;
 
     const {
       raw: { clientX, clientY },

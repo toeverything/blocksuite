@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
@@ -49,6 +50,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
   private _updateActionList() {
     this._actionGroup = this.options.getMenus({
+      editorHost: this.editorHost,
       query: this._query,
       page: this._page,
       model: this.model,
@@ -64,6 +66,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
   }
 
   constructor(
+    private editorHost: EditorHost,
     private model: BaseBlockModel,
     private abortController = new AbortController()
   ) {
@@ -72,7 +75,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    const richText = getRichTextByModel(this.model);
+    const richText = getRichTextByModel(this.editorHost, this.model);
     assertExists(richText, 'RichText not found');
 
     // init
@@ -120,7 +123,11 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       },
       onConfirm: () => {
         this.abortController.abort();
-        cleanSpecifiedTail(this.model, this.triggerKey + this._query);
+        cleanSpecifiedTail(
+          this.editorHost,
+          this.model,
+          this.triggerKey + this._query
+        );
         this._flattenActionList[this._activatedItemIndex]
           .action()
           ?.catch(console.error);
@@ -148,7 +155,10 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
     // XXX This is a side effect
     let accIdx = 0;
-    return html`<div class="linked-page-popover" style="${style}">
+    return html`<div
+      class="linked-page-popover blocksuite-overlay"
+      style="${style}"
+    >
       ${this._actionGroup
         .filter(group => group.items.length)
         .map((group, idx) => {
@@ -168,6 +178,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
                   @click=${() => {
                     this.abortController.abort();
                     cleanSpecifiedTail(
+                      this.editorHost,
                       this.model,
                       this.triggerKey + this._query
                     );

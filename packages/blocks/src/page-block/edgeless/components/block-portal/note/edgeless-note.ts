@@ -61,7 +61,10 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
     observer.observe(maskDOM!);
 
     this._disposables.add(() => {
-      this.model.pop('xywh');
+      // check if model still exist
+      if (this.model.page.getBlockById(this.model.id)) {
+        this.model.pop('xywh');
+      }
       observer.disconnect();
     });
   }
@@ -249,7 +252,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
     return html`
       <div
-        class="edgeless-block-portal-note"
+        class="edgeless-block-portal-note blocksuite-overlay"
         style=${styleMap(style)}
         data-model-height="${bound.h}"
         @mouseleave=${this._leaved}

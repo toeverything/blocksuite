@@ -4,6 +4,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   requestConnectedFrame,
@@ -190,23 +191,34 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   @state()
   private _searchKeyword = '';
 
+  @state()
+  private _loading = false;
+
+  @state()
+  private _categories: string[] = [];
+
+  @state()
+  private _templates: Template[] = [];
+
+  private _fetchJob: null | { cancel: () => void } = null;
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  get categoryCacheKey() {
-    return `blocksuite:${this.edgeless.page.id}:templateTool`;
+  private get _service() {
+    return this.edgeless.surface.service;
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
 
-    this._currentCategory =
-      this._getLocalSelectedCategory() ??
-      EdgelessTemplatePanel.templates.categories()[0];
     this.addEventListener('keydown', stopPropagation, false);
     this._disposables.add(() => {
       if (this._currentCategory) {
-        sessionStorage.setItem(this.categoryCacheKey, this._currentCategory);
+        this._service.editSession.setItem(
+          'templateCache',
+          this._currentCategory
+        );
       }
     });
   }
@@ -223,10 +235,67 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     }, this);
     this._disposables.addFromEvent(this, 'click', stopPropagation);
     this._disposables.addFromEvent(this, 'wheel', stopPropagation);
+
+    this._initCategory().catch(() => {});
+  }
+
+  private async _initCategory() {
+    try {
+      this._categories = await EdgelessTemplatePanel.templates.categories();
+      this._currentCategory =
+        this._getLocalSelectedCategory() ?? this._categories[0];
+      this._updateTemplates();
+    } catch (e) {
+      console.error('Failed to load categories', e);
+    }
+  }
+
+  private _fetch(fn: (state: { canceled: boolean }) => Promise<unknown>) {
+    if (this._fetchJob) {
+      this._fetchJob.cancel();
+    }
+
+    this._loading = true;
+
+    const state = { canceled: false };
+    const job = {
+      cancel: () => {
+        state.canceled = true;
+      },
+    };
+
+    this._fetchJob = job;
+
+    fn(state)
+      .catch(() => {})
+      .finally(() => {
+        if (!state.canceled && job === this._fetchJob) {
+          this._loading = false;
+          this._fetchJob = null;
+        }
+      });
+  }
+
+  private _updateTemplates() {
+    this._fetch(async state => {
+      try {
+        const templates = this._searchKeyword
+          ? await EdgelessTemplatePanel.templates.search(this._searchKeyword)
+          : await EdgelessTemplatePanel.templates.list(this._currentCategory);
+
+        if (state.canceled) return;
+
+        this._templates = templates;
+      } catch (e) {
+        if (state.canceled) return;
+
+        console.error('Failed to load templates', e);
+      }
+    });
   }
 
   private _getLocalSelectedCategory() {
-    return sessionStorage.getItem(this.categoryCacheKey) ?? undefined;
+    return this._service.editSession.getItem('templateCache');
   }
 
   private _createTemplateJob(type: string) {
@@ -255,7 +324,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       );
     }
 
-    return this.edgeless.surface.service!.TemplateJob.create({
+    return this.edgeless.surface.service.TemplateJob.create({
       model: this.edgeless.surfaceBlockModel,
       type,
       middlewares,
@@ -303,13 +372,11 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
   private _updateSearchKeyword(inputEvt: InputEvent) {
     this._searchKeyword = (inputEvt.target as HTMLInputElement).value;
+    this._updateTemplates();
   }
 
   override render() {
-    const categories = EdgelessTemplatePanel.templates.categories();
-    const templates = this._searchKeyword
-      ? EdgelessTemplatePanel.templates.search(this._searchKeyword)
-      : EdgelessTemplatePanel.templates.list(this._currentCategory);
+    const { _categories, _currentCategory, _templates } = this;
 
     return html`
       <div class="edgeless-templates-panel">
@@ -323,14 +390,17 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
         </div>
         <div class="template-categories">
           ${repeat(
-            categories,
+            _categories,
             cate => cate,
             cate => {
               return html`<div
-                class="category-entry ${this._currentCategory === cate
+                class="category-entry ${_currentCategory === cate
                   ? 'selected'
                   : ''}"
-                @click=${() => (this._currentCategory = cate)}
+                @click=${() => {
+                  this._currentCategory = cate;
+                  this._updateTemplates();
+                }}
               >
                 ${cate}
               </div>`;
@@ -338,36 +408,44 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
           )}
         </div>
         <div class="template-list">
-          ${repeat(
-            templates,
-            template => template.name,
-            template => {
-              return html`
-                <div
-                  class=${`template-item ${
-                    template === this._loadingTemplate ? 'loading' : ''
-                  }`}
-                  data-hover-text="Add"
-                  @click=${() => this._insertTemplate(template)}
-                >
-                  ${template.preview
-                    ? html`<img
-                        src="${template.preview}"
-                        class="template-preview"
-                      />`
-                    : defaultPreview}
-                  ${template === this._loadingTemplate
-                    ? html`<affine-template-loading></affine-template-loading>`
-                    : nothing}
-                  ${template.name
-                    ? html`<affine-tooltip .offset=${12} tip-position="top">
-                        ${template.name}
-                      </affine-tooltip>`
-                    : nothing}
-                </div>
-              `;
-            }
-          )}
+          ${this._loading
+            ? html`<affine-template-loading
+                style=${styleMap({
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                })}
+              ></affine-template-loading>`
+            : repeat(
+                _templates,
+                template => template.name,
+                template => {
+                  return html`
+                    <div
+                      class=${`template-item ${
+                        template === this._loadingTemplate ? 'loading' : ''
+                      }`}
+                      data-hover-text="Add"
+                      @click=${() => this._insertTemplate(template)}
+                    >
+                      ${template.preview
+                        ? html`<img
+                            src="${template.preview}"
+                            class="template-preview"
+                          />`
+                        : defaultPreview}
+                      ${template === this._loadingTemplate
+                        ? html`<affine-template-loading></affine-template-loading>`
+                        : nothing}
+                      ${template.name
+                        ? html`<affine-tooltip .offset=${12} tip-position="top">
+                            ${template.name}
+                          </affine-tooltip>`
+                        : nothing}
+                    </div>
+                  `;
+                }
+              )}
         </div>
         <div class="arrow">${ArrowIcon}</div>
       </div>

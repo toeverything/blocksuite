@@ -20,6 +20,7 @@ import {
   CanvasTextFontFamily,
   CanvasTextFontWeight,
 } from '../../../../surface-block/consts.js';
+import { TextAlign } from '../../../../surface-block/elements/consts.js';
 import {
   getFontFacesByFontFamily,
   isFontStyleSupported,
@@ -267,7 +268,9 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       (element: EdgelessCanvasTextElement) => element.textAlign
     );
     const max = maxBy(Object.entries(aligns), ([_k, count]) => count);
-    return max ? (max[0] as EdgelessCanvasTextElement['textAlign']) : 'left';
+    return max
+      ? (max[0] as EdgelessCanvasTextElement['textAlign'])
+      : TextAlign.Left;
   };
 
   private _updateElementBound = (element: EdgelessCanvasTextElement) => {

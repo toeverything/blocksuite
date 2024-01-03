@@ -27,7 +27,6 @@ export { GroupElement } from './group/group-element.js';
 
 export { ConnectorMode } from './connector/types.js';
 export { SHAPE_TEXT_PADDING } from './shape/consts.js';
-export type { ShapeType } from './shape/types.js';
 export { normalizeShapeBound } from './shape/utils.js';
 export {
   getFontString,

@@ -58,7 +58,7 @@ export class Portal extends LitElement {
           ...(typeof this.shadowDom !== 'boolean' ? this.shadowDom : {}),
         })
       : portalRoot;
-    portalRoot.classList.add('blocksuite-portal');
+    portalRoot.classList.add('blocksuite-portal', 'blocksuite-overlay');
     this.container.append(portalRoot);
     this._portalRoot = portalRoot;
     return renderRoot;

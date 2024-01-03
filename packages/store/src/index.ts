@@ -3,7 +3,6 @@
 /// <reference path="../shim.d.ts" />
 
 export type { Y };
-
 export * from './adapter/index.js';
 export * from './migration/index.js';
 export { createIndexeddbStorage } from './persistence/blob/indexeddb-storage.js';
@@ -29,6 +28,7 @@ export {
 export * as Utils from './utils/utils.js';
 export * from './workspace/index.js';
 export * from './yjs/index.js';
+export { Slot } from '@blocksuite/global/utils';
 
 import './utils/formatter.js';
 

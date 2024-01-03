@@ -4,8 +4,8 @@ import { customElement, property } from 'lit/decorators.js';
 
 import { BookmarkIcon } from '../../../../../_common/icons/edgeless.js';
 import {
-  type EdgelessTool,
   type NoteChildrenFlavour,
+  type NoteTool,
 } from '../../../../../_common/utils/index.js';
 import { toggleBookmarkCreateModal } from '../../../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import {
@@ -53,32 +53,30 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  edgelessTool!: EdgelessTool;
-
-  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  private _updateNoteTool(
-    childFlavour: NoteChildrenFlavour,
-    childType: string | null,
-    tip: string
-  ) {
-    if (this.edgelessTool.type !== 'note') return;
+  @property({ attribute: false })
+  childFlavour!: NoteChildrenFlavour;
 
-    const { background } = this.edgelessTool;
-    this.edgeless.slots.edgelessToolUpdated.emit({
-      type: 'note',
-      background,
-      childFlavour,
-      childType,
-      tip,
-    });
-  }
+  @property({ attribute: false })
+  childType!: string;
+
+  @property({ attribute: false })
+  tip!: string;
+
+  @property({ attribute: false })
+  onChange!: (
+    props: Partial<{
+      childFlavour: NoteTool['childFlavour'];
+      childType: string | null;
+      tip: string;
+    }>
+  ) => void;
 
   override render() {
-    if (this.edgelessTool.type !== 'note') return nothing;
+    if (this.edgeless.edgelessTool.type !== 'affine:note') return nothing;
 
-    const { childType } = this.edgelessTool;
+    const { childType } = this;
 
     return html`
       <edgeless-slide-menu .menuWidth=${NOTE_MENU_WIDTH}>
@@ -93,11 +91,11 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                   .iconContainerPadding=${2}
                   .tooltip=${item.tooltip}
                   @click=${() =>
-                    this._updateNoteTool(
-                      item.childFlavour,
-                      item.childType,
-                      item.tooltip
-                    )}
+                    this.onChange({
+                      childFlavour: item.childFlavour,
+                      childType: item.childType,
+                      tip: item.tooltip,
+                    })}
                 >
                   ${item.icon}
                 </edgeless-tool-icon-button>
