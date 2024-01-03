@@ -14,7 +14,7 @@ type GroupElementProps = BaseProps & {
 };
 
 export class GroupElementModel extends ElementModel<GroupElementProps> {
-  static override propsToYStruct(props: GroupElementProps) {
+  static override propsToY(props: GroupElementProps) {
     if (props.title && !(props.title instanceof Workspace.Y.Text)) {
       props.title = new Workspace.Y.Text(props.title);
     }

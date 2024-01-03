@@ -11,7 +11,7 @@ export type BaseProps = {
 };
 
 export abstract class ElementModel<Props extends BaseProps = BaseProps> {
-  static propsToYStruct(props: Record<string, unknown>) {
+  static propsToY(props: Record<string, unknown>) {
     return props;
   }
 

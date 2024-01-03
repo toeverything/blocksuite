@@ -17,7 +17,7 @@ import type { GroupElementModel } from './element-model/group.js';
 import {
   createElementModel,
   createModelFromProps,
-  propsToYStruct,
+  propsToY,
 } from './element-model/index.js';
 import { generateElementId } from './index.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
@@ -488,7 +488,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     }
 
     this.page.transact(() => {
-      props = propsToYStruct(
+      props = propsToY(
         elementModel.type,
         props as Record<string, unknown>
       ) as T;

@@ -42,7 +42,7 @@ export type ShapeProps = BaseProps & {
 };
 
 export class ShapeElementModel extends ElementModel<ShapeProps> {
-  static override propsToYStruct(props: ShapeProps) {
+  static override propsToY(props: ShapeProps) {
     if (props.text && !(props.text instanceof Workspace.Y.Text)) {
       props.text = new Workspace.Y.Text(props.text);
     }

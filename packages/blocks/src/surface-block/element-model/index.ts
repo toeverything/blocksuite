@@ -95,7 +95,7 @@ function onElementChange(
   };
 }
 
-export function propsToYStruct(type: string, props: Record<string, unknown>) {
+export function propsToY(type: string, props: Record<string, unknown>) {
   const ctor = elementsCtorMap[type as keyof typeof elementsCtorMap];
 
   if (!ctor) {
@@ -103,7 +103,7 @@ export function propsToYStruct(type: string, props: Record<string, unknown>) {
   }
 
   // @ts-ignore
-  return (ctor.propsToYStruct ?? ElementModel.propsToYStruct)(props);
+  return (ctor.propsToY ?? ElementModel.propsToY)(props);
 }
 
 export function createModelFromProps(
@@ -131,7 +131,7 @@ export function createModelFromProps(
     options
   );
 
-  props = propsToYStruct(type as string, props);
+  props = propsToY(type as string, props);
 
   yMap.set('type', type);
   yMap.set('id', id);
