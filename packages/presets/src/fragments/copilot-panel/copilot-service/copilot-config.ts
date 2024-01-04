@@ -114,7 +114,7 @@ export class CopilotConfig {
   }
 
   public addVendor(config: VendorConfig) {
-    this.config.vendors.push(config);
+    this._config?.vendors.push(config);
     this.save();
   }
 

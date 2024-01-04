@@ -1,10 +1,10 @@
 # Adapter
 
-Adapter works as a bridge between different formats of data and the BlockSuite Snapshot (i.e. the editor's data). It enables you to import and export data from and to BlockSuite.
+Adapter works as a bridge between different formats of data and the BlockSuite [`Snapshot`](./data-persistence#snapshot-api) (i.e., the JSON-serialized block tree). It enables you to import and export data from and to BlockSuite documents.
 
 ## Base Adapter
 
-[BaseAdapter](api/@blocksuite/store/classes/BaseAdapter.md) provides you with a skeleton to build your own adapter. It is an abstract class that you can extend and implement the following methods:
+[`BaseAdapter`](/api/@blocksuite/store/classes/BaseAdapter) provides you with a skeleton to build your own adapter. It is an abstract class that you can extend and implement the following methods:
 
 ```ts
 export abstract class BaseAdapter<AdapterTarget = unknown> {
@@ -60,7 +60,7 @@ const markdownResult = await adapter.fromPageSnapshot({
 
 ## AST Walker
 
-[ASTWalker](api/@blocksuite/store/classes/ASTWalker.md) is a helper class that helps you to transform from and to different ASTs (Abstract Syntax Trees). For example, you can use it to transform from BlockSuite Snapshot (which can be treated as AST) to Markdown AST and then export to Markdown. Unlike other AST walkers, it does not only traverse the AST, but also gives you the ability to build a new AST with the data from the original AST.
+[ASTWalker](/api/@blocksuite/store/classes/ASTWalker) is a helper class that helps you to transform from and to different ASTs (Abstract Syntax Trees). For example, you can use it to transform from BlockSuite Snapshot (which can be treated as AST) to Markdown AST and then export to Markdown. Unlike other AST walkers, it does not only traverse the AST, but also gives you the ability to build a new AST with the data from the original AST.
 
 It is recommended to use ASTWalker to build text-based adapters.
 
@@ -113,7 +113,7 @@ There are two handlers which will be called when the walker enters and leaves a 
 
 For example, consider a markdown document like this:
 
-```markdown
+```md
 - List 1 // context.openNode 1
   - List 1.1 // context.openNode 2 && context.closeNode 2
   - List 1.2 // context.openNode 3 && context.closeNode 3
