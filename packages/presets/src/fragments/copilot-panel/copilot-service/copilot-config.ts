@@ -36,6 +36,46 @@ export class CopilotConfig {
     }
   }
 
+  loadVendorFromUrl() {
+    const result: VendorConfig[] = [];
+    const params = new URLSearchParams(window.location.search);
+    const openAIKey = params.get('openai');
+
+    if (openAIKey) {
+      result.push({
+        id: 'url-openai',
+        vendorKey: 'OpenAI',
+        name: 'url',
+        data: {
+          apiKey: openAIKey,
+        },
+      });
+    }
+    const falKey = params.get('fal');
+    if (falKey) {
+      result.push({
+        id: 'url-fal',
+        vendorKey: 'Fal',
+        name: 'url',
+        data: {
+          apiKey: falKey,
+        },
+      });
+    }
+    const llamaUrl = params.get('llama');
+    if (llamaUrl) {
+      result.push({
+        id: 'url-llama',
+        vendorKey: 'llama',
+        name: 'url',
+        data: {
+          host: llamaUrl,
+        },
+      });
+    }
+    return result;
+  }
+
   get config(): CopilotConfigDataType {
     if (!this._config) {
       this._config = Object.assign(
@@ -46,7 +86,13 @@ export class CopilotConfig {
         this.loadFromLocalStorage()
       ) as CopilotConfigDataType;
     }
-    return this._config;
+    return {
+      ...this._config,
+      vendors: [
+        ...this._config.vendors.filter(v => v.name != 'url'),
+        ...this.loadVendorFromUrl(),
+      ],
+    };
   }
 
   save() {

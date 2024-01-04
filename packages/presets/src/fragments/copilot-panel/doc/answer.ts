@@ -1,4 +1,4 @@
-import { getTextService } from './api.js';
+import { getTextService, userText } from './api.js';
 
 export async function runAnswerAction({
   question,
@@ -13,8 +13,8 @@ export async function runAnswerAction({
       content:
         'You are assisting the user in discussing the content of the whiteboard.',
     },
-    { role: 'user', content: input },
-    { role: 'user', content: question },
+    userText(input),
+    userText(question),
   ]);
   return result;
 }

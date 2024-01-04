@@ -1,6 +1,10 @@
 import { html } from 'lit';
 
-import { createVendor, TextServiceKind } from './service-base.js';
+import {
+  ChatServiceKind,
+  createVendor,
+  TextServiceKind,
+} from './service-base.js';
 
 export const llama2Vendor = createVendor<{
   host: string;
@@ -34,14 +38,57 @@ TextServiceKind.implService({
     generateText: async messages => {
       const result: {
         message: {
-          role: 'assistant';
-          content: 'Hello! How are you today?';
+          role: string;
+          content: string;
         };
       } = await fetch(`${data.host}/api/chat`, {
         method: 'POST',
         body: JSON.stringify({
           model: 'llama2',
           messages: messages,
+          stream: false,
+        }),
+      }).then(res => res.json());
+      return result.message.content;
+    },
+  }),
+  vendor: llama2Vendor,
+});
+
+ChatServiceKind.implService({
+  name: 'llama2',
+  method: data => ({
+    chat: async messages => {
+      const llama2Messages = messages.map(message => {
+        if (message.role === 'user') {
+          let text = '';
+          const imgs: string[] = [];
+          message.content.forEach(v => {
+            if (v.type === 'text') {
+              text += `${v.text}\n`;
+            }
+            if (v.type === 'image_url') {
+              imgs.push(v.image_url.url);
+            }
+          });
+          return {
+            role: message.role,
+            content: text,
+            images: imgs,
+          };
+        }
+        return message;
+      });
+      const result: {
+        message: {
+          role: string;
+          content: string;
+        };
+      } = await fetch(`${data.host}/api/chat`, {
+        method: 'POST',
+        body: JSON.stringify({
+          model: 'llama2',
+          messages: llama2Messages,
           stream: false,
         }),
       }).then(res => res.json());
