@@ -1,5 +1,3 @@
-import { nanoid } from '@blocksuite/store';
-
 import type { AllServiceKind, GetMethod, ServiceImpl } from './service-base.js';
 
 export type VendorConfig = {
@@ -45,29 +43,29 @@ export class CopilotConfig {
 
     if (openAIKey) {
       result.push({
-        id: nanoid('unknown'),
+        id: 'url-openai',
         vendorKey: 'OpenAI',
         name: 'url',
         data: {
-          key: openAIKey,
+          apiKey: openAIKey,
         },
       });
     }
     const falKey = params.get('fal');
     if (falKey) {
       result.push({
-        id: nanoid('unknown'),
+        id: 'url-fal',
         vendorKey: 'Fal',
         name: 'url',
         data: {
-          key: falKey,
+          apiKey: falKey,
         },
       });
     }
     const llamaUrl = params.get('llama');
     if (llamaUrl) {
       result.push({
-        id: nanoid('unknown'),
+        id: 'url-llama',
         vendorKey: 'llama',
         name: 'url',
         data: {
