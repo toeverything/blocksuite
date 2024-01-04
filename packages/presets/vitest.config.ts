@@ -12,7 +12,7 @@ export default defineConfig(_configEnv =>
       include: ['src/__tests__/**/*.spec.ts'],
       browser: {
         enabled: true,
-        headless: true,
+        headless: false,
         name: 'chromium',
         provider: 'playwright',
         isolate: false,

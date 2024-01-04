@@ -14,8 +14,11 @@ hero:
       text: Get Started
       link: /blocksuite-overview
     - theme: alt
-      text: Try Online
-      link: https://try-blocksuite.vercel.app/starter/?init
+      text: DocEditor
+      link: /presets/doc-editor
+    - theme: alt
+      text: EdgelessEditor
+      link: /presets/edgeless-editor
 
 features:
   - title: 🧩 Headless Editor Framework
@@ -27,8 +30,8 @@ features:
     details: Powered by CRDT, BlockSuite supports conflict resolution and time-travel at its heart, ready for collaboration inherently.
     link: /crdt-native-data-flow
     linkText: Learn More
-  - title: 🎨 Extensive Presets
-    details: BlockSuite ships a comprehensive suite of editing components, assisting development with adaptable building blocks.
-    link: /editors
+  - title: 🎨 Extensive Components
+    details: BlockSuite ships a comprehensive set of editing component presets, assisting development with adaptable building blocks.
+    link: /component-types
     linkText: Learn More
 ---

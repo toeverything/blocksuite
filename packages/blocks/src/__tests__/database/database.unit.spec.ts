@@ -4,7 +4,7 @@ import '../../database-block/table/define.js';
 
 import type { BlockModel, Page } from '@blocksuite/store';
 import { Generator, Schema, Workspace } from '@blocksuite/store';
-import { beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { numberPureColumnConfig } from '../../database-block/common/columns/number/define.js';
 import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
@@ -58,6 +58,8 @@ describe('DatabaseManager', () => {
   ];
 
   beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ['requestIdleCallback'] });
+
     page = await createTestPage();
 
     pageBlockId = page.addBlock('affine:page', {
