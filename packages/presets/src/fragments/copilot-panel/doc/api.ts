@@ -1,3 +1,4 @@
+import type { ChatMessage } from '../chat/logic.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import {
   ChatServiceKind,
@@ -10,4 +11,15 @@ export const getTextService = () => {
 };
 export const getChatService = () => {
   return copilotConfig.getService(ChatFeatureKey, ChatServiceKind);
+};
+export const userText = (text: string): ChatMessage => {
+  return {
+    role: 'user',
+    content: [
+      {
+        type: 'text',
+        text,
+      },
+    ],
+  };
 };
