@@ -1,6 +1,8 @@
 import type { TemplateResult } from 'lit';
 import type { OpenAI } from 'openai';
 
+import type { ChatMessage } from '../chat/logic.js';
+
 export type Vendor<Data> = {
   key: string;
   color: string;
@@ -53,7 +55,7 @@ export const TextServiceKind = createServiceKind<{
   title: 'Text service',
 });
 export const ChatServiceKind = createServiceKind<{
-  chat(messages: Array<OpenAI.ChatCompletionMessageParam>): Promise<string>;
+  chat(messages: Array<ChatMessage>): Promise<string>;
 }>({
   type: 'chat-service',
   title: 'Chat service',
