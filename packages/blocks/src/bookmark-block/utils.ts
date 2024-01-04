@@ -47,7 +47,7 @@ export async function queryUrlDataFromAffineWorker(
   } else {
     const response = await fetch(
       // https://github.com/toeverything/affine-workers/tree/main/packages/link-preview
-      'https://affine-worker.toeverything.workers.dev/api/worker/linkPreview',
+      'https://affine-worker.toeverything.workers.dev/api/worker/link-preview',
       {
         method: 'POST',
         headers: {
