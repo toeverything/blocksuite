@@ -42,6 +42,7 @@ export class CopilotConfig {
     const result: VendorConfig[] = [];
     const params = new URLSearchParams(window.location.search);
     const openAIKey = params.get('openai');
+
     if (openAIKey) {
       result.push({
         id: nanoid('unknown'),
@@ -64,7 +65,7 @@ export class CopilotConfig {
       });
     }
     const llamaUrl = params.get('llama');
-    if (falKey) {
+    if (llamaUrl) {
       result.push({
         id: nanoid('unknown'),
         vendorKey: 'llama',
