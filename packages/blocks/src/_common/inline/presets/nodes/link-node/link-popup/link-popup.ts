@@ -309,37 +309,39 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
       <span class="affine-link-popover-dividing-line"></span>
 
-      <div class="affine-link-popover-view-selector">
-        <icon-button
-          size="24px"
-          class="affine-link-popover-view-selector link current-view"
-          hover="false"
-        >
-          ${LinkIcon}
-          <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
-        </icon-button>
+      ${this._isBookmarkAllowed()
+        ? html`<div class="affine-link-popover-view-selector">
+              <icon-button
+                size="24px"
+                class="affine-link-popover-view-selector link current-view"
+                hover="false"
+              >
+                ${LinkIcon}
+                <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
+              </icon-button>
 
-        <icon-button
-          size="24px"
-          class="affine-link-popover-view-selector card"
-          hover="false"
-          @click=${() => this._linkToBookmark()}
-        >
-          ${BookmarkIcon}
-          <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
-        </icon-button>
+              <icon-button
+                size="24px"
+                class="affine-link-popover-view-selector card"
+                hover="false"
+                @click=${() => this._linkToBookmark()}
+              >
+                ${BookmarkIcon}
+                <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
+              </icon-button>
 
-        <icon-button
-          size="24px"
-          class="affine-link-popover-view-selector embed"
-          hover="false"
-        >
-          ${EmbedWebIcon}
-          <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
-        </icon-button>
-      </div>
+              <icon-button
+                size="24px"
+                class="affine-link-popover-view-selector embed"
+                hover="false"
+              >
+                ${EmbedWebIcon}
+                <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
+              </icon-button>
+            </div>
 
-      <span class="affine-link-popover-dividing-line"></span>
+            <span class="affine-link-popover-dividing-line"></span>`
+        : nothing}
 
       <icon-button
         data-testid="unlink"
