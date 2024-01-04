@@ -114,6 +114,8 @@ export default defineConfig({
               { text: 'Page 🚧' },
               { text: 'Workspace 🚧' },
               { text: 'Slot', link: '/slot' },
+              { text: 'Transformer 🚧' },
+              { text: 'Adapter', link: '/adapter' },
             ],
           },
           {
