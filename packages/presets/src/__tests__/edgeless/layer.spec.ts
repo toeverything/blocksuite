@@ -15,7 +15,10 @@ import { setupEditor } from '../utils/setup.js';
 beforeEach(async () => {
   const cleanup = await setupEditor('edgeless');
 
-  return cleanup;
+  return async () => {
+    await wait(100);
+    cleanup();
+  };
 });
 
 test('layer manager inital state', () => {

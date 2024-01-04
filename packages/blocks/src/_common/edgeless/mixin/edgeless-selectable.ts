@@ -1,6 +1,7 @@
 import type { Constructor } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
+import type { SurfaceBlockModel } from '../../../models.js';
 import { BLOCK_BATCH } from '../../../surface-block/batch.js';
 import {
   Bound,
@@ -96,6 +97,14 @@ export function selectable<
           this.intersectWithLine(point, points[(i + 1) % points.length])
         )
       );
+    }
+
+    get group() {
+      const surfaceModel = this.page.getBlockByFlavour(
+        'affine:surface'
+      ) as SurfaceBlockModel[];
+
+      return surfaceModel[0]?.getGroup(this.id) ?? null;
     }
   }
 
