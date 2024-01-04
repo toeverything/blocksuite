@@ -6,7 +6,9 @@ import type { AffineEditorContainer } from '../../../editors/index.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import { EmbeddingServiceKind } from '../copilot-service/service-base.js';
 import { getChatService } from '../doc/api.js';
+import { insertFromMarkdown } from '../utils/markdown-utils.js';
 import {
+  getSelectedBlocks,
   getSelectedTextContent,
   selectedToCanvas,
 } from '../utils/selection-utils.js';
@@ -165,6 +167,67 @@ export class AIChatLogic {
         slice: textList,
       })),
     };
+  }
+
+  async replaceSelectedContent(text: string) {
+    if (!text) return;
+    const selectedBlocks = await getSelectedBlocks(this.host);
+    if (!selectedBlocks.length) return;
+
+    const firstBlock = selectedBlocks[0];
+    const parentBlock = firstBlock.parentBlockElement;
+
+    // update selected block
+    const firstIndex = parentBlock.model.children.findIndex(
+      child => child.id === firstBlock.model.id
+    ) as number;
+    selectedBlocks.forEach(block => {
+      this.editor.page.deleteBlock(block.model);
+    });
+
+    const models = await insertFromMarkdown(
+      this.host,
+      text,
+      parentBlock.model.id,
+      firstIndex
+    );
+    setTimeout(() => {
+      const parentPath = firstBlock.parentPath;
+      const selections = models
+        .map(model => [...parentPath, model.id])
+        .map(path => this.host.selection.create('block', { path }));
+      this.host.selection.setGroup('note', selections);
+    }, 0);
+  }
+
+  async insertBelowSelectedContent(text: string) {
+    if (!text) return;
+
+    const selectedBlocks = await getSelectedBlocks(this.host);
+    const blockLength = selectedBlocks.length;
+    if (!blockLength) return;
+
+    const lastBlock = selectedBlocks[blockLength - 1];
+    const parentBlock = lastBlock.parentBlockElement;
+
+    const lastIndex = parentBlock.model.children.findIndex(
+      child => child.id === lastBlock.model.id
+    ) as number;
+
+    const models = await insertFromMarkdown(
+      this.host,
+      text,
+      parentBlock.model.id,
+      lastIndex + 1
+    );
+
+    setTimeout(() => {
+      const parentPath = lastBlock.parentPath;
+      const selections = models
+        .map(model => [...parentPath, model.id])
+        .map(path => this.host.selection.create('block', { path }));
+      this.host.selection.setGroup('note', selections);
+    }, 0);
   }
 }
 

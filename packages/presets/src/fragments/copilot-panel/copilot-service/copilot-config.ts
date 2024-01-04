@@ -1,3 +1,5 @@
+import { nanoid } from '@blocksuite/store';
+
 import type { AllServiceKind, GetMethod, ServiceImpl } from './service-base.js';
 
 export type VendorConfig = {
@@ -36,6 +38,45 @@ export class CopilotConfig {
     }
   }
 
+  loadVendorFromUrl() {
+    const result: VendorConfig[] = [];
+    const params = new URLSearchParams(window.location.search);
+    const openAIKey = params.get('openai');
+    if (openAIKey) {
+      result.push({
+        id: nanoid('unknown'),
+        vendorKey: 'OpenAI',
+        name: 'url',
+        data: {
+          key: openAIKey,
+        },
+      });
+    }
+    const falKey = params.get('fal');
+    if (falKey) {
+      result.push({
+        id: nanoid('unknown'),
+        vendorKey: 'Fal',
+        name: 'url',
+        data: {
+          key: falKey,
+        },
+      });
+    }
+    const llamaUrl = params.get('llama');
+    if (falKey) {
+      result.push({
+        id: nanoid('unknown'),
+        vendorKey: 'llama',
+        name: 'url',
+        data: {
+          host: llamaUrl,
+        },
+      });
+    }
+    return result;
+  }
+
   get config(): CopilotConfigDataType {
     if (!this._config) {
       this._config = Object.assign(
@@ -46,7 +87,13 @@ export class CopilotConfig {
         this.loadFromLocalStorage()
       ) as CopilotConfigDataType;
     }
-    return this._config;
+    return {
+      ...this._config,
+      vendors: [
+        ...this._config.vendors.filter(v => v.name != 'url'),
+        ...this.loadVendorFromUrl(),
+      ],
+    };
   }
 
   save() {

@@ -191,6 +191,28 @@ export class CopilotChatPanel
               </div>
             </div>`
           : null}
+        ${this.docSelection
+          ? html`
+              <div
+                style="display:flex;align-items:center;gap: 8px;margin-top: 8px;user-select: none"
+              >
+                <div
+                  @click="${() =>
+                    this.chat.replaceSelectedContent(message.content)}"
+                  style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
+                >
+                  replace
+                </div>
+                <div
+                  @click="${() =>
+                    this.chat.insertBelowSelectedContent(message.content)}"
+                  style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
+                >
+                  insert below
+                </div>
+              </div>
+            `
+          : null}
       </div>`;
     }
     return null;
@@ -208,6 +230,9 @@ export class CopilotChatPanel
         await getAnswer();
       }
     };
+    const sendButtonStyle = styleMap({
+      opacity: !this.loading ? '1' : '0.5',
+    });
     return html`
       <div
         style="display:flex;flex-direction: column;justify-content: space-between;height: 100%"
@@ -226,7 +251,11 @@ export class CopilotChatPanel
                 this.value = (e.target as HTMLInputElement).value;
               }}"
             />
-            <div @click="${getAnswer}" class="send-button">
+            <div
+              @click="${getAnswer}"
+              style="${sendButtonStyle}"
+              class="send-button"
+            >
               <sl-icon name="stars"></sl-icon>
             </div>
           </div>
