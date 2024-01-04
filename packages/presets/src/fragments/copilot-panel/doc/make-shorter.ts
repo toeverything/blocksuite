@@ -1,8 +1,8 @@
-import { askGPT3_5turbo } from '../utils/request.js';
+import { getTextService } from './api.js';
 
 export async function runMakeShorterAction(payload: { input: string }) {
   const { input } = payload;
-  const completion = await askGPT3_5turbo([
+  const completion = await getTextService().generateText([
     {
       role: 'system',
       content: 'You are a professional writing assisting',
@@ -15,5 +15,5 @@ export async function runMakeShorterAction(payload: { input: string }) {
     },
   ]);
 
-  return completion.content;
+  return completion;
 }

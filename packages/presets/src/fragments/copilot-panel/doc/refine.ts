@@ -1,8 +1,8 @@
-import { askGPT3_5turbo } from '../utils/request.js';
+import { getTextService } from './api.js';
 
 export async function runRefineAction(payload: { input: string }) {
   const { input } = payload;
-  const completion = await askGPT3_5turbo([
+  const completion = await getTextService().generateText([
     {
       role: 'system',
       content:
@@ -12,5 +12,5 @@ export async function runRefineAction(payload: { input: string }) {
     { role: 'user', content: 'Refine this text.' },
   ]);
 
-  return completion.content;
+  return completion;
 }

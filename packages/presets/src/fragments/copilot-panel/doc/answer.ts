@@ -1,4 +1,4 @@
-import { askGPT3_5turbo } from '../utils/request.js';
+import { getTextService } from './api.js';
 
 export async function runAnswerAction({
   question,
@@ -7,7 +7,7 @@ export async function runAnswerAction({
   input: string;
   question: string;
 }) {
-  const result = await askGPT3_5turbo([
+  const result = await getTextService().generateText([
     {
       role: 'system',
       content:
@@ -16,5 +16,5 @@ export async function runAnswerAction({
     { role: 'user', content: input },
     { role: 'user', content: question },
   ]);
-  return result.content;
+  return result;
 }

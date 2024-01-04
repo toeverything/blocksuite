@@ -12,6 +12,10 @@ export const ConnectorElementDefaultProps: IElementDefaultProps<'connector'> = {
   stroke: '#000000',
   strokeStyle: StrokeStyle.Solid,
   roughness: DEFAULT_ROUGHNESS,
-  source: {},
-  target: {},
+  source: {
+    position: [0, 0],
+  },
+  target: {
+    position: [0, 0],
+  },
 };

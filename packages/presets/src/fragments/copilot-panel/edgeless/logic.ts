@@ -8,8 +8,12 @@ import {
 import type { Workspace } from '@blocksuite/store';
 
 import type { AffineEditorContainer } from '../../../editors/index.js';
+import { copilotConfig } from '../copilot-service/copilot-config.js';
+import {
+  FastImage2ImageServiceKind,
+  Text2ImageServiceKind,
+} from '../copilot-service/service-base.js';
 import { demoScript } from '../demo-script.js';
-import { askDallE3, createImageGenerator } from '../utils/request.js';
 import {
   frameToCanvas,
   getEdgelessPageBlockFromEditor,
@@ -18,10 +22,10 @@ import {
   selectedToCanvas,
   selectedToPng,
 } from '../utils/selection-utils.js';
-import { editImage, jpegBase64ToFile, pngBase64ToFile } from './edit-image.js';
+import { editImage, jpegBase64ToFile } from './edit-image.js';
 import { genHtml } from './gen-html.js';
 
-export class EditorWithAI {
+export class AIEdgelessLogic {
   public fromFrame: string = '';
   private targets: Record<
     string,
@@ -140,14 +144,14 @@ export class EditorWithAI {
       alert('Please enter some prompt first');
       return;
     }
-    const b64 = await askDallE3(prompt);
-    if (b64) {
-      const imgFile = pngBase64ToFile(b64, 'img');
-      await edgelessPage.addImages([imgFile]);
+    const file = await copilotConfig
+      .getService('text to image', Text2ImageServiceKind)
+      .generateImage(prompt);
+    if (file) {
+      await edgelessPage.addImages([file]);
     }
   };
   createImageFromFrame = async () => {
-    console.log('start', this.fromFrame);
     const from = this.editor.page.getBlockById(
       this.fromFrame ?? ''
     ) as FrameBlockModel;
@@ -183,7 +187,12 @@ export class EditorWithAI {
             if (!target) {
               this.targets[model.id] = target = {
                 lastHash: '',
-                request: createImageGenerator(),
+                request: copilotConfig
+                  .getService(
+                    'real time image to image',
+                    FastImage2ImageServiceKind
+                  )
+                  .createFastRequest(),
               };
             }
             if (target.lastHash === hash) {
