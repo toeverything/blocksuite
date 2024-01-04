@@ -45,7 +45,6 @@ function subscribePage(workspace: Workspace) {
     const page = workspace.getPage(pageId) as Page;
 
     const editor = createEditor(page, app);
-    const contentParser = new ContentParser(editor.host, page);
     const debugMenu = new DebugMenu();
     const outlinePanel = new CustomOutlinePanel();
     const framePanel = new CustomFramePanel();
@@ -57,13 +56,18 @@ function subscribePage(workspace: Workspace) {
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
     debugMenu.mode = defaultMode;
-    debugMenu.contentParser = contentParser;
     debugMenu.outlinePanel = outlinePanel;
     debugMenu.framePanel = framePanel;
     debugMenu.copilotPanel = copilotPanelPanel;
     debugMenu.sidePanel = sidePanel;
     debugMenu.leftSidePanel = leftSidePanel;
     debugMenu.pagesPanel = pagesPanel;
+
+    page.slots.ready.once(() => {
+      console.log('page ready');
+      const contentParser = new ContentParser(editor.host, page);
+      debugMenu.contentParser = contentParser;
+    });
 
     outlinePanel.editor = editor;
     copilotPanelPanel.editor = editor;
