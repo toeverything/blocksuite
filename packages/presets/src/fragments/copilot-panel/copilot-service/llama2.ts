@@ -68,7 +68,7 @@ ChatServiceKind.implService({
               text += `${v.text}\n`;
             }
             if (v.type === 'image_url') {
-              imgs.push(v.image_url.url);
+              imgs.push(v.image_url.url.split(',')[1]);
             }
           });
           return {
