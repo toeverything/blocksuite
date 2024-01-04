@@ -101,6 +101,9 @@ export class IconButton extends LitElement {
   @property({ attribute: true, type: Boolean })
   active?: boolean = false;
 
+  @property({ attribute: true, type: Boolean })
+  hover?: boolean = undefined;
+
   // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
   @property({ attribute: true, type: Boolean })
   disabled?: boolean = undefined;

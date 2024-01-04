@@ -27,9 +27,9 @@ import {
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import {
-  EdgelessBookmarkHeight,
-  EdgelessBookmarkWidth,
-} from '../../../bookmark-block/edgeless-bookmark-block.js';
+  BookmarkHeight,
+  BookmarkWidth,
+} from '../../../bookmark-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
@@ -204,8 +204,8 @@ export class EdgelessClipboardController extends PageClipboard {
               x,
               y,
             }),
-            EdgelessBookmarkWidth.horizontal,
-            EdgelessBookmarkHeight.horizontal
+            BookmarkWidth.horizontal,
+            BookmarkHeight.horizontal
           ).serialize(),
           url,
         },

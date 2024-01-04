@@ -12,7 +12,10 @@ import { BLOCK_ID_ATTR } from '../../../../../consts.js';
 import { BookmarkIcon } from '../../../../../icons/edgeless.js';
 import {
   ConfirmIcon,
+  CopyIcon,
   EditIcon,
+  EmbedWebIcon,
+  LinkIcon,
   UnlinkIcon,
 } from '../../../../../icons/text.js';
 import { isValidUrl, normalizeUrl } from '../../../../../utils/url.js';
@@ -275,31 +278,69 @@ export class LinkPopup extends WithDisposable(LitElement) {
     </div>`;
   }
 
+  private _copyUrl() {
+    navigator.clipboard.writeText(this.currentLink).catch(console.error);
+    toast('Copied link to clipboard');
+    this.remove();
+  }
+
   private _viewTemplate() {
     return html`<div class="affine-link-popover">
-      <div
-        class="affine-link-preview"
-        @click=${() => {
-          navigator.clipboard.writeText(this.currentLink).catch(console.error);
-          toast('Copied link to clipboard');
-          this.remove();
-        }}
-      >
+      <div class="affine-link-preview" @click=${() => this._copyUrl()}>
         <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
         <span style="overflow: hidden;">${this.currentLink}</span>
       </div>
 
-      ${this._isBookmarkAllowed()
-        ? html`<span class="affine-link-popover-dividing-line"></span
-            ><icon-button
-              data-testid="link-to-card"
-              @click=${() => this._linkToBookmark()}
-            >
-              ${BookmarkIcon}
-              <affine-tooltip .offset=${12}>Turn into Card view</affine-tooltip>
-            </icon-button>`
-        : nothing}
+      <icon-button size="32px" @click=${() => this._copyUrl()}>
+        ${CopyIcon}
+        <affine-tooltip .offset=${12}>${'Click to copy link'}</affine-tooltip>
+      </icon-button>
+
+      <icon-button
+        size="32px"
+        data-testid="edit"
+        @click=${() => {
+          this.type = 'edit';
+        }}
+      >
+        ${EditIcon}
+        <affine-tooltip .offset=${12}>Edit</affine-tooltip>
+      </icon-button>
+
       <span class="affine-link-popover-dividing-line"></span>
+
+      <div class="affine-link-popover-view-selector">
+        <icon-button
+          size="24px"
+          class="affine-link-popover-view-selector link current-view"
+          hover="false"
+        >
+          ${LinkIcon}
+          <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
+        </icon-button>
+
+        <icon-button
+          size="24px"
+          class="affine-link-popover-view-selector card"
+          hover="false"
+          @click=${() => this._linkToBookmark()}
+        >
+          ${BookmarkIcon}
+          <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
+        </icon-button>
+
+        <icon-button
+          size="24px"
+          class="affine-link-popover-view-selector embed"
+          hover="false"
+        >
+          ${EmbedWebIcon}
+          <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
+        </icon-button>
+      </div>
+
+      <span class="affine-link-popover-dividing-line"></span>
+
       <icon-button
         data-testid="unlink"
         @click=${() => {
@@ -313,16 +354,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
       >
         ${UnlinkIcon}
         <affine-tooltip .offset=${12}>Remove</affine-tooltip>
-      </icon-button>
-
-      <icon-button
-        data-testid="edit"
-        @click=${() => {
-          this.type = 'edit';
-        }}
-      >
-        ${EditIcon}
-        <affine-tooltip .offset=${12}>Edit</affine-tooltip>
       </icon-button>
     </div>`;
   }

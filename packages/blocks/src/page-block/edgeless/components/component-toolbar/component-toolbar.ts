@@ -177,15 +177,26 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   private _BookmarkButton(bookmarks?: BookmarkBlockModel[]) {
-    return bookmarks?.length === 1
-      ? html`
-          <edgeless-change-bookmark-button
-            .bookmark=${bookmarks[0]}
-            .page=${this.page}
-            .surface=${this.surface}
-          ></edgeless-change-bookmark-button>
-        `
-      : nothing;
+    if (bookmarks?.length !== 1) return nothing;
+
+    const bookmarkSelection = this.selection.selections.filter(sel =>
+      sel.elements.includes(bookmarks[0].id)
+    );
+    if (bookmarkSelection.length !== 1) return nothing;
+
+    const bookmarkElement = this.surface.std.view.viewFromPath(
+      'block',
+      bookmarkSelection[0].path
+    );
+    if (!bookmarkElement) return nothing;
+
+    return html`
+      <edgeless-change-bookmark-button
+        .bookmark=${bookmarkElement}
+        .page=${this.page}
+        .surface=${this.surface}
+      ></edgeless-change-bookmark-button>
+    `;
   }
 
   private _TextButton(textElements?: TextElement[]) {
@@ -375,9 +386,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       (typeof last === 'symbol' ||
         !last?.strings[0].includes('component-toolbar-menu-divider'))
     ) {
-      buttons.push(
-        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
-      );
+      buttons.push(this._Divider());
     }
 
     return html` <style>
@@ -396,7 +405,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         <edgeless-more-button
           .edgeless=${edgeless}
           .vertical=${true}
-          .setPoppetShow=${this.togglePopper}
+          .setPopperShow=${this.togglePopper}
         ></edgeless-more-button>
       </div>`;
   }

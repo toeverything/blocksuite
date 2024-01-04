@@ -163,9 +163,12 @@ export const linkPopupStyle = css`
   }
 
   .affine-link-popover {
+    box-sizing: border-box;
     display: flex;
     align-items: center;
+    gap: 8px;
     padding: 8px;
+    height: 40px;
 
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);
@@ -183,13 +186,30 @@ export const linkPopupStyle = css`
   }
 
   .affine-link-preview {
-    width: 260px;
-    height: 28px;
     display: flex;
-    align-items: center;
+    width: 180px;
+    padding: var(--1, 0px);
+    align-items: flex-start;
+    gap: 10px;
+    border-radius: var(--1, 0px);
+    opacity: var(--add, 1);
     user-select: none;
     cursor: pointer;
-    white-space: nowrap;
+  }
+
+  .affine-link-preview > span {
+    color: var(--affine-link-color);
+    font-feature-settings:
+      'clig' off,
+      'liga' off;
+    font-family: var(--affine-font-family);
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    opacity: var(--add, 1);
   }
 
   .affine-link-popover-dividing-line {
@@ -197,6 +217,22 @@ export const linkPopupStyle = css`
     width: 1px;
     height: 20px;
     background-color: var(--affine-border-color);
+  }
+
+  .affine-link-popover-view-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 2px;
+    border-radius: 6px;
+    background: var(--affine-hover-color);
+  }
+  .affine-link-popover-view-selector > icon-button {
+    background: transparent;
+    padding: 0px;
+  }
+  .affine-link-popover-view-selector .current-view {
+    background: var(--affine-background-overlay-panel-color);
   }
 
   ${editLinkStyle}

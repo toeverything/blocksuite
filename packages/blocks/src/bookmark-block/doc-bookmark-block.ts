@@ -8,12 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { HoverController } from '../_common/components/hover/controller.js';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 import type { BookmarkCaption } from './components/bookmark-caption.js';
-import type {
-  MenuActionCallback,
-  ToolbarActionCallback,
-} from './components/config.js';
-import { toggleBookmarkEditModal } from './components/modal/bookmark-edit-modal.js';
-import { refreshBookmarkUrlData } from './utils.js';
+import type { ToolbarActionCallback } from './components/config.js';
 
 @customElement('affine-doc-bookmark')
 export class DocBookmarkBlockComponent extends WithDisposable(
@@ -24,6 +19,9 @@ export class DocBookmarkBlockComponent extends WithDisposable(
 
   @state()
   private _showCaption = false;
+
+  @query('.affine-bookmark-card')
+  bookmardCardElement!: HTMLElement;
 
   @query('bookmark-caption')
   captionElement!: BookmarkCaption;
@@ -48,22 +46,16 @@ export class DocBookmarkBlockComponent extends WithDisposable(
   }
 
   private _optionsAbortController?: AbortController;
-  private _onToolbarSelected: ToolbarActionCallback & MenuActionCallback =
-    type => {
-      if (type === 'caption') {
-        this._showCaption = true;
-        this.updateComplete
-          .then(() => this.captionElement.input.focus())
-          .catch(console.error);
-      }
-      if (type === 'edit') {
-        toggleBookmarkEditModal(this.block);
-      }
-      if (type === 'reload') {
-        refreshBookmarkUrlData(this.block).catch(console.error);
-      }
-      this._optionsAbortController?.abort();
-    };
+  private _onToolbarSelected: ToolbarActionCallback = type => {
+    if (type === 'caption') {
+      this._showCaption = true;
+      this.updateComplete
+        .then(() => this.captionElement.input.focus())
+        .catch(console.error);
+    }
+    this._optionsAbortController?.abort();
+  };
+
   private _whenHover = new HoverController(this, ({ abortController }) => {
     this._optionsAbortController = abortController;
     return {
@@ -74,13 +66,14 @@ export class DocBookmarkBlockComponent extends WithDisposable(
         </style>
         <bookmark-toolbar
           .model=${this.model}
+          .block=${this.block}
           .onSelected=${this._onToolbarSelected}
           .host=${this}
           .abortController=${abortController}
           .std=${this.block.std}
         ></bookmark-toolbar>`,
       computePosition: {
-        referenceElement: this,
+        referenceElement: this.bookmardCardElement,
         placement: 'top-end',
         middleware: [flip(), offset(4)],
         autoUpdate: true,

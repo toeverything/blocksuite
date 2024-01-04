@@ -1,21 +1,30 @@
-import { Slice, Workspace } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { toast } from '../../_common/components/toast.js';
+import { getThemeMode } from '../../_common/utils/query.js';
+import type {
+  BookmarkBlockModel,
+  BookmarkBlockType,
+} from '../bookmark-model.js';
 import {
-  CaptionIcon,
-  CopyIcon,
-  DeleteIcon,
-  DuplicateIcon,
-  EditIcon,
-  LinkIcon,
-  RefreshIcon,
-} from '../../_common/icons/index.js';
-import type { BookmarkBlockModel } from '../bookmark-model.js';
-import type { BookmarkOperationMenu } from './bookmark-operation-popper.js';
+  DarkBanner,
+  DarkLargeHorizontalCardIcon,
+  DarkLargeVerticalCardIcon,
+  DarkLoadingIcon,
+  DarkSmallHorizontalCardIcon,
+  DarkSmallVerticalCardIcon,
+  LightBanner,
+  LightLargeHorizontalCardIcon,
+  LightLargeVerticalCardIcon,
+  LightLoadingIcon,
+  LightSmallHorizontalCardIcon,
+  LightSmallVerticalCardIcon,
+} from '../styles.js';
+import type { BookmarkToolbar } from './bookmark-toolbar.js';
 
-export type ConfigItem = {
-  type: 'link' | 'card' | 'embed' | 'edit' | 'caption';
+export type ToolbarActionCallback = (type: ConfigItem['type']) => void;
+
+type ConfigItem = {
+  type: 'link' | 'card' | 'embed' | 'edit' | 'caption' | 'card-style';
   icon: TemplateResult;
   tooltip: string;
   showWhen?: (model: BookmarkBlockModel) => boolean;
@@ -26,131 +35,60 @@ export type ConfigItem = {
      * @deprecated
      */
     callback?: ToolbarActionCallback,
-    element?: HTMLElement
+    element?: BookmarkToolbar
   ) => void;
   divider?: boolean;
 };
 
-export type ToolbarActionCallback = (type: ConfigItem['type']) => void;
-export const config: ConfigItem[] = [
-  {
-    type: 'link',
-    icon: LinkIcon,
-    tooltip: 'Turn into Link view',
-    disableWhen: model => model.page.readonly,
-    action: (model, callback) => {
-      const { page } = model;
-
-      const parent = page.getParent(model);
-      const index = parent?.children.indexOf(model);
-
-      const yText = new Workspace.Y.Text();
-      const insert = model.title || model.caption || model.url;
-      yText.insert(0, insert);
-      yText.format(0, insert.length, { link: model.url });
-      const text = new page.Text(yText);
-      page.addBlock(
-        'affine:paragraph',
-        {
-          text,
-        },
-        parent,
-        index
-      );
-
-      model.page.deleteBlock(model);
-      callback?.('link');
-    },
-  },
-  {
-    type: 'edit',
-    icon: EditIcon,
-    tooltip: 'Edit',
-    showWhen: model => !model.page.readonly,
-    action: (_model, callback) => {
-      callback?.('edit');
-    },
-  },
-  {
-    type: 'caption',
-    icon: CaptionIcon,
-    tooltip: 'Add Caption',
-    showWhen: model => !model.page.readonly,
-    action: (_model, callback) => {
-      callback?.('caption');
-    },
-    divider: true,
-  },
+export const STYLE_VALUES: BookmarkBlockType[] = [
+  'horizontal',
+  'list',
+  'vertical',
+  'cube',
 ];
 
-export type MenuActionCallback = (type: MoreOperation['type']) => void;
+export const STYLE_TOOLTIPS = [
+  'Large Horizontal Style',
+  'Small Horizontal Style',
+  'Large Vertical Style',
+  'Small Vertical Style',
+];
 
-type MoreOperation = {
-  type: 'reload' | 'copy' | 'delete' | 'duplicate';
-  icon: TemplateResult;
-  label: string;
-  action: (
-    model: BookmarkBlockModel,
-    callback?: MenuActionCallback,
-    element?: BookmarkOperationMenu
-  ) => Promise<void> | void;
-  showWhen?: (model: BookmarkBlockModel) => boolean;
-  disableWhen?: (model: BookmarkBlockModel) => boolean;
-  divider?: boolean;
+export const STYLE_ICON_NAMES: (keyof BookmarkDefaultImages)[] = [
+  'LargeHorizontalCardIcon',
+  'SmallHorizontalCardIcon',
+  'LargeVerticalCardIcon',
+  'SmallVerticalCardIcon',
+] as const;
+
+type BookmarkDefaultImages = {
+  LoadingIcon: TemplateResult<1>;
+  BannerImage: TemplateResult<1>;
+  LargeHorizontalCardIcon: TemplateResult<1>;
+  SmallHorizontalCardIcon: TemplateResult<1>;
+  LargeVerticalCardIcon: TemplateResult<1>;
+  SmallVerticalCardIcon: TemplateResult<1>;
 };
 
-export const moreOperations: MoreOperation[] = [
-  {
-    type: 'copy',
-    icon: CopyIcon,
-    label: 'Copy',
-    action: async (model, callback, element) => {
-      const slice = Slice.fromModels(model.page, [model]);
-      await element?.std.clipboard.copySlice(slice);
-      toast('Copied link to clipboard');
-      callback?.('copy');
-    },
-  },
-  {
-    type: 'duplicate',
-    icon: DuplicateIcon,
-    label: 'Duplicate',
-    showWhen: model => !model.page.readonly,
-    action: (model, callback) => {
-      const { page, url } = model;
-
-      const parent = page.getParent(model);
-      const index = parent?.children.indexOf(model);
-
-      page.addBlock(
-        'affine:bookmark',
-        {
-          url,
-        },
-        parent,
-        index
-      );
-
-      callback?.('duplicate');
-    },
-  },
-  {
-    type: 'reload',
-    icon: RefreshIcon,
-    label: 'Reload',
-    showWhen: model => !model.page.readonly,
-    action: (_, callback) => {
-      callback?.('reload');
-    },
-  },
-  {
-    type: 'delete',
-    icon: DeleteIcon,
-    label: 'Delete',
-    showWhen: model => !model.page.readonly,
-    action: (model, callback) => {
-      model.page.deleteBlock(model);
-      callback?.('delete');
-    },
-  },
-];
+export function getBookmarkDefaultImages(): BookmarkDefaultImages {
+  const theme = getThemeMode();
+  if (theme === 'light') {
+    return {
+      LoadingIcon: LightLoadingIcon,
+      BannerImage: LightBanner,
+      LargeHorizontalCardIcon: LightLargeHorizontalCardIcon,
+      SmallHorizontalCardIcon: LightSmallHorizontalCardIcon,
+      LargeVerticalCardIcon: LightLargeVerticalCardIcon,
+      SmallVerticalCardIcon: LightSmallVerticalCardIcon,
+    };
+  } else {
+    return {
+      LoadingIcon: DarkLoadingIcon,
+      BannerImage: DarkBanner,
+      LargeHorizontalCardIcon: DarkLargeHorizontalCardIcon,
+      SmallHorizontalCardIcon: DarkSmallHorizontalCardIcon,
+      LargeVerticalCardIcon: DarkLargeVerticalCardIcon,
+      SmallVerticalCardIcon: DarkSmallVerticalCardIcon,
+    };
+  }
+}

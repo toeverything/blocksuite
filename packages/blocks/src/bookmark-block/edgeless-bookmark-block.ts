@@ -7,24 +7,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { getEdgelessPageByElement } from '../_common/utils/query.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
-import type {
-  BookmarkBlockModel,
-  BookmarkBlockType,
-} from './bookmark-model.js';
-
-export const EdgelessBookmarkWidth: Record<BookmarkBlockType, number> = {
-  horizontal: 752,
-  list: 752,
-  vertical: 364,
-  cube: 170,
-};
-
-export const EdgelessBookmarkHeight: Record<BookmarkBlockType, number> = {
-  horizontal: 114,
-  list: 46,
-  vertical: 390,
-  cube: 114,
-};
+import type { BookmarkBlockModel } from './bookmark-model.js';
+import { BookmarkHeight, BookmarkWidth } from './styles.js';
 
 @customElement('affine-edgeless-bookmark')
 export class EdgelessBookmarkBlockComponent extends WithDisposable(
@@ -64,8 +48,8 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
 
   override render() {
     const style = this.model.style;
-    const width = EdgelessBookmarkWidth[style];
-    const height = EdgelessBookmarkHeight[style];
+    const width = BookmarkWidth[style];
+    const height = BookmarkHeight[style];
 
     const bound = Bound.deserialize(
       (

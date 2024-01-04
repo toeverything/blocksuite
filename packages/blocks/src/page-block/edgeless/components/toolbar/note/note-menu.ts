@@ -9,9 +9,9 @@ import {
 } from '../../../../../_common/utils/index.js';
 import { toggleBookmarkCreateModal } from '../../../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import {
-  EdgelessBookmarkHeight,
-  EdgelessBookmarkWidth,
-} from '../../../../../bookmark-block/edgeless-bookmark-block.js';
+  BookmarkHeight,
+  BookmarkWidth,
+} from '../../../../../bookmark-block/styles.js';
 import { Bound } from '../../../../../surface-block/utils/bound.js';
 import { Vec } from '../../../../../surface-block/utils/vec.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
@@ -116,8 +116,8 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                     url,
                     xywh: Bound.fromCenter(
                       center,
-                      EdgelessBookmarkWidth.horizontal,
-                      EdgelessBookmarkHeight.horizontal
+                      BookmarkWidth.horizontal,
+                      BookmarkHeight.horizontal
                     ).serialize(),
                   },
                   this.edgeless.surface.model

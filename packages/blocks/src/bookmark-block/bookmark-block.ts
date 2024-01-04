@@ -23,10 +23,7 @@ import {
 import type { BookmarkService } from './bookmark-service.js';
 import type { DocBookmarkBlockComponent } from './doc-bookmark-block.js';
 import type { EdgelessBookmarkBlockComponent } from './edgeless-bookmark-block.js';
-import {
-  EdgelessBookmarkHeight,
-  EdgelessBookmarkWidth,
-} from './edgeless-bookmark-block.js';
+import { BookmarkHeight, BookmarkWidth } from './styles.js';
 import { refreshBookmarkUrlData } from './utils.js';
 
 @customElement('affine-bookmark')
@@ -124,11 +121,12 @@ export class BookmarkBlockComponent extends BlockElement<
           ...props,
         });
       } else if (isTargetEdgelessContainer) {
+        const style = blockComponent.model.style;
         return convertDragPreviewDocToEdgeless({
           blockComponent,
-          cssSelector: 'bookmark-card',
-          width: EdgelessBookmarkWidth.horizontal,
-          height: EdgelessBookmarkHeight.horizontal,
+          cssSelector: '.affine-bookmark-card',
+          width: BookmarkWidth[style],
+          height: BookmarkHeight[style],
           ...props,
         });
       }
