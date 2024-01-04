@@ -1,6 +1,7 @@
-import './chat-with-workspace/chat-with-workspace';
+import './chat/chat.js';
+import './doc/doc.js';
+import './edgeless/edgeless.js';
 import './copilot-service';
-import './doc/doc';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, type TemplateResult } from 'lit';
@@ -15,10 +16,10 @@ import { allKindService } from './copilot-service/service-base.js';
 import type { AIEdgelessLogic } from './edgeless/logic.js';
 import {
   AddCursorIcon,
+  ChatIcon,
   DocIcon,
   EdgelessIcon,
   SettingIcon,
-  WorkspaceIcon,
 } from './icons.js';
 import { AILogic } from './logic.js';
 import { getSurfaceElementFromEditor } from './utils/selection-utils.js';
@@ -183,6 +184,14 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       render: () => TemplateResult;
     }
   > = {
+    chat: {
+      icon: ChatIcon,
+      render: () => {
+        return html` <copilot-chat-panel
+          .logic="${this.logic}"
+        ></copilot-chat-panel>`;
+      },
+    },
     doc: {
       icon: DocIcon,
       render: () => {
@@ -199,27 +208,19 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
         ></copilot-edgeless-panel>`;
       },
     },
-    workspace: {
-      icon: WorkspaceIcon,
-      render: () => {
-        return html` <chat-with-workspace-panel
-          .logic="${this.logic}"
-        ></chat-with-workspace-panel>`;
-      },
-    },
     config: {
       icon: SettingIcon,
       render: this.config,
     },
   };
   @state()
-  currentPanel: keyof typeof this.panels = 'doc';
+  currentPanel: keyof typeof this.panels = 'chat';
 
   override render() {
     const panel = this.panels[this.currentPanel];
     return html`
       <div
-        style="display:flex;flex-direction: column;padding: 12px;"
+        style="display:flex;flex-direction: column;padding: 12px;height: 100%"
         class="blocksuite-overlay"
       >
         <div style="display:flex;align-items:center;justify-content:center;">
@@ -244,7 +245,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
             })}
           </div>
         </div>
-        <div>${panel.render()}</div>
+        <div style="flex:1">${panel.render()}</div>
       </div>
     `;
   }

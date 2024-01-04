@@ -1,4 +1,4 @@
-import { getTextService } from './api.js';
+import { getTextService, userText } from './api.js';
 
 export async function runRefineAction(payload: { input: string }) {
   const { input } = payload;
@@ -8,8 +8,8 @@ export async function runRefineAction(payload: { input: string }) {
       content:
         'You are assisting the user in refining the content of the whiteboard.',
     },
-    { role: 'user', content: input },
-    { role: 'user', content: 'Refine this text.' },
+    userText(input),
+    userText('Refine this text.'),
   ]);
 
   return completion;

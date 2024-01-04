@@ -1,4 +1,4 @@
-import { getTextService } from './api.js';
+import { getTextService, userText } from './api.js';
 
 export async function runGenerateAction(payload: { input: string }) {
   const { input } = payload;
@@ -8,11 +8,8 @@ export async function runGenerateAction(payload: { input: string }) {
       content:
         'You are assisting the user in extending the content of the whiteboard.',
     },
-    { role: 'user', content: input },
-    {
-      role: 'user',
-      content: 'Generate more content based on the current input.',
-    },
+    userText(input),
+    userText('Generate more content based on the current input.'),
   ]);
   return result;
 }

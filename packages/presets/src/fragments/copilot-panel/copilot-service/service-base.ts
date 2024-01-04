@@ -1,6 +1,8 @@
 import type { TemplateResult } from 'lit';
 import type { OpenAI } from 'openai';
 
+import type { ChatMessage } from '../chat/logic.js';
+
 export type Vendor<Data> = {
   key: string;
   color: string;
@@ -42,15 +44,17 @@ const createServiceKind = <M>(config: {
   };
 };
 
-type TextServiceMessage = {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-};
 export const TextServiceKind = createServiceKind<{
-  generateText(messages: TextServiceMessage[]): Promise<string>;
+  generateText(messages: ChatMessage[]): Promise<string>;
 }>({
   type: 'text-service',
   title: 'Text service',
+});
+export const ChatServiceKind = createServiceKind<{
+  chat(messages: Array<ChatMessage>): Promise<string>;
+}>({
+  type: 'chat-service',
+  title: 'Chat service',
 });
 
 export const Text2ImageServiceKind = createServiceKind<{
@@ -92,6 +96,7 @@ export const FastImage2ImageServiceKind = createServiceKind<{
 
 export const allKindService = [
   TextServiceKind,
+  ChatServiceKind,
   Text2ImageServiceKind,
   Image2TextServiceKind,
   Image2ImageServiceKind,
