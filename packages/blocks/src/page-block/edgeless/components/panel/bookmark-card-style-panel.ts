@@ -28,19 +28,11 @@ export class BookmarkCardStylePanel extends WithDisposable(LitElement) {
       box-shadow: var(--affine-shadow-2);
     }
 
-    edgeless-tool-icon-button {
-      width: 76px;
-      height: 76px;
+    icon-button {
       padding: var(--1, 0px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: var(--1, 0px);
-      border-radius: 4px;
-      cursor: pointer;
     }
 
-    edgeless-tool-icon-button.selected {
+    icon-button.selected {
       border: 1px solid var(--affine-brand-color);
     }
   `;
@@ -58,17 +50,18 @@ export class BookmarkCardStylePanel extends WithDisposable(LitElement) {
       style => style,
       (style, index) => {
         return html`
-          <edgeless-tool-icon-button
+          <icon-button
+            size="76px"
             class=${classMap({
               selected: this.value === style,
             })}
             @click=${() => this.onSelect(style)}
-            .tooltip=${STYLE_TOOLTIPS[index]}
-            .tipPosition=${'bottom'}
-            .iconContainerPadding=${0}
           >
             ${images[STYLE_ICON_NAMES[index]]}
-          </edgeless-tool-icon-button>
+            <affine-tooltip .offset=${12} .placement=${'bottom'}
+              >${STYLE_TOOLTIPS[index]}</affine-tooltip
+            >
+          </icon-button>
         `;
       }
     )} `;

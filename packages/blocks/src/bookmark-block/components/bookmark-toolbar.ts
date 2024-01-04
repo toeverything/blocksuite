@@ -16,7 +16,7 @@ import {
   EditIcon,
   EmbedWebIcon,
   LinkIcon,
-  MoreIcon,
+  MoreVerticalIcon,
   PaletteIcon,
 } from '../../_common/icons/index.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
@@ -164,7 +164,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     const cardStyleMenu = new BookmarkCardStyleMenu();
     cardStyleMenu.model = this.model;
     cardStyleMenu.std = this.std;
-    cardStyleMenu.abortController = this._cardStyleMenuAbortController;
+    cardStyleMenu.abortController = this.abortController;
 
     createLitPortal({
       template: cardStyleMenu,
@@ -194,6 +194,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     bookmarkOperationMenu.model = this.model;
     bookmarkOperationMenu.block = this.block;
     bookmarkOperationMenu.std = this.std;
+    bookmarkOperationMenu.abortController = this.abortController;
 
     createLitPortal({
       template: bookmarkOperationMenu,
@@ -281,7 +282,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
           @click=${() => this._toggleCardStyleMenu()}
         >
           ${PaletteIcon}
-          <affine-tooltip .offset=${12}>${'Card Style'}</affine-tooltip>
+          <affine-tooltip .offset=${12}>${'Card style'}</affine-tooltip>
         </icon-button>
 
         <div class="divider"></div>
@@ -303,7 +304,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
           class="bookmark-toolbar-button more-button"
           @click=${() => this._toggleMoreMenu()}
         >
-          ${MoreIcon}
+          ${MoreVerticalIcon}
           <affine-tooltip .offset=${12}>More</affine-tooltip>
         </icon-button>
       </div>

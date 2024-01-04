@@ -223,7 +223,7 @@ export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
 
       <div class="change-bookmark-button card-style">
         <edgeless-tool-icon-button
-          .tooltip=${this._showPopper ? '' : 'Card Style'}
+          .tooltip=${this._showPopper ? '' : 'Card style'}
           ?disabled=${this.page.readonly}
           @click=${() => this._bookmarkCardStylePopper?.toggle()}
         >

@@ -10,7 +10,7 @@ export const BookmarkWidth: Record<BookmarkBlockType, number> = {
 };
 
 export const BookmarkHeight: Record<BookmarkBlockType, number> = {
-  horizontal: 114,
+  horizontal: 116,
   list: 46,
   vertical: 390,
   cube: 114,
@@ -31,6 +31,7 @@ export const styles = css`
     opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-shadow-1);
+    user-select: none;
   }
 
   .affine-bookmark-content {
@@ -145,23 +146,19 @@ export const styles = css`
   }
 
   .affine-bookmark-banner {
-    padding: 12px;
-    padding-bottom: 0;
-    padding-left: 0;
-    width: 216px;
-    height: 100%;
-
+    margin: 12px 12px 0px 0px;
+    width: 204px;
+    height: 102px;
     opacity: var(--add, 1);
-    overflow: hidden;
-    object-fit: fill;
   }
 
   .affine-bookmark-banner img,
   .affine-bookmark-banner object,
   .affine-bookmark-banner svg {
-    border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
-    height: 102px;
     width: 204px;
+    height: 102px;
+    object-fit: fill;
+    border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 
   .affine-bookmark-card.loading {
@@ -212,15 +209,16 @@ export const styles = css`
     }
 
     .affine-bookmark-banner {
-      width: 100%;
-      padding-left: 12px;
+      width: 340px;
+      height: 170px;
+      margin-left: 12px;
     }
 
     .affine-bookmark-banner img,
     .affine-bookmark-banner object,
     .affine-bookmark-banner svg {
-      height: 170px;
       width: 340px;
+      height: 170px;
     }
   }
 

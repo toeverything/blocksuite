@@ -2,14 +2,15 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline/types';
 import type { BlockElement } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import { computePosition, inline, offset, shift } from '@floating-ui/dom';
+import { flip, offset } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { IconButton } from '../../../../../components/button.js';
+import { createLitPortal } from '../../../../../components/portal.js';
 import { toast } from '../../../../../components/toast.js';
 import { BLOCK_ID_ATTR } from '../../../../../consts.js';
-import { BookmarkIcon } from '../../../../../icons/edgeless.js';
+import { BookmarkIcon, MoreVerticalIcon } from '../../../../../icons/index.js';
 import {
   ConfirmIcon,
   CopyIcon,
@@ -20,6 +21,7 @@ import {
 } from '../../../../../icons/text.js';
 import { isValidUrl, normalizeUrl } from '../../../../../utils/url.js';
 import type { AffineInlineEditor } from '../../../affine-inline-specs.js';
+import { LinkPopupMoreMenu } from './link-popup-more-menu-popup.js';
 import { linkPopupStyle } from './styles.js';
 
 @customElement('link-popup')
@@ -31,21 +33,31 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   inlineEditor!: AffineInlineEditor;
+
   @property({ attribute: false })
   targetInlineRange!: InlineRange;
 
+  @property({ attribute: false })
+  abortController!: AbortController;
+
   @query('#text-input')
   textInput?: HTMLInputElement;
+
   @query('#link-input')
   linkInput?: HTMLInputElement;
+
   @query('.popup-container')
-  popupContainer?: HTMLDivElement;
+  popupContainer!: HTMLDivElement;
+
   @query('.mock-selection-container')
-  mockSelectionContainer?: HTMLDivElement;
+  mockSelectionContainer!: HTMLDivElement;
+
   @query('.affine-confirm-button')
   confirmButton?: IconButton;
 
   private _bodyOverflowStyle = '';
+
+  private _moreMenuAbortController: AbortController | null = null;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -73,7 +85,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       parent.childrenUpdated.on(() => {
         const children = parent.children;
         if (children.includes(this.blockElement.model)) return;
-        this.remove();
+        this.abortController.abort();
       })
     );
   }
@@ -112,26 +124,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
         this.mockSelectionContainer.appendChild(mockSelection);
       });
     }
-
-    const visualElement = {
-      getBoundingClientRect: () => range.getBoundingClientRect(),
-      getClientRects: () => range.getClientRects(),
-    };
-    computePosition(visualElement, this.popupContainer, {
-      middleware: [
-        offset(10),
-        inline(),
-        shift({
-          padding: 6,
-        }),
-      ],
-    })
-      .then(({ x, y }) => {
-        if (!this.popupContainer) return;
-        this.popupContainer.style.left = `${x}px`;
-        this.popupContainer.style.top = `${y}px`;
-      })
-      .catch(console.error);
   }
 
   get blockElement() {
@@ -205,7 +197,13 @@ export class LinkPopup extends WithDisposable(LitElement) {
       });
     }
 
-    this.remove();
+    this.abortController.abort();
+  }
+
+  private _copyUrl() {
+    navigator.clipboard.writeText(this.currentLink).catch(console.error);
+    toast('Copied link to clipboard');
+    this.abortController.abort();
   }
 
   private _linkToBookmark() {
@@ -229,7 +227,16 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
     this.inlineEditor.deleteText(this.targetInlineRange);
 
-    this.remove();
+    this.abortController.abort();
+  }
+
+  private _removeLink() {
+    if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
+      this.inlineEditor.formatText(this.targetInlineRange, {
+        link: null,
+      });
+    }
+    this.abortController.abort();
   }
 
   private _onKeydown(e: KeyboardEvent) {
@@ -278,10 +285,29 @@ export class LinkPopup extends WithDisposable(LitElement) {
     </div>`;
   }
 
-  private _copyUrl() {
-    navigator.clipboard.writeText(this.currentLink).catch(console.error);
-    toast('Copied link to clipboard');
-    this.remove();
+  private _toggleMoreMenu() {
+    if (this._moreMenuAbortController) {
+      this._moreMenuAbortController.abort();
+      this._moreMenuAbortController = null;
+      return;
+    }
+    this._moreMenuAbortController = new AbortController();
+    const linkPopupMoreMenu = new LinkPopupMoreMenu();
+    linkPopupMoreMenu.abortController = this.abortController;
+    linkPopupMoreMenu.inlineEditor = this.inlineEditor;
+    linkPopupMoreMenu.targetInlineRange = this.targetInlineRange;
+
+    createLitPortal({
+      template: linkPopupMoreMenu,
+      container: this.popupContainer,
+      computePosition: {
+        referenceElement: this.popupContainer,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+      abortController: this._moreMenuAbortController,
+    });
   }
 
   private _viewTemplate() {
@@ -344,19 +370,20 @@ export class LinkPopup extends WithDisposable(LitElement) {
             <span class="affine-link-popover-dividing-line"></span>`
         : nothing}
 
-      <icon-button
-        data-testid="unlink"
-        @click=${() => {
-          if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
-            this.inlineEditor.formatText(this.targetInlineRange, {
-              link: null,
-            });
-          }
-          this.remove();
-        }}
-      >
+      <icon-button data-testid="unlink" @click=${() => this._removeLink()}>
         ${UnlinkIcon}
         <affine-tooltip .offset=${12}>Remove</affine-tooltip>
+      </icon-button>
+
+      <span class="affine-link-popover-dividing-line"></span>
+
+      <icon-button
+        size="24px"
+        class="bookmark-toolbar-button more-button"
+        @click=${() => this._toggleMoreMenu()}
+      >
+        ${MoreVerticalIcon}
+        <affine-tooltip .offset=${12}>More</affine-tooltip>
       </icon-button>
     </div>`;
   }
@@ -406,7 +433,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
   override render() {
     const mask =
       this.type === 'edit' || this.type === 'create'
-        ? html`<div class="overlay-mask" @click=${() => this.remove()}></div>`
+        ? html`<div
+            class="overlay-mask"
+            @click=${() => this.abortController.abort()}
+          ></div>`
         : nothing;
 
     const popover =

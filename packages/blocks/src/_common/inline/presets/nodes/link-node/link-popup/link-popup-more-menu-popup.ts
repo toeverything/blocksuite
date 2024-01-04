@@ -1,25 +1,22 @@
-import type { BlockStdScope } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
+import type { InlineRange } from '@blocksuite/inline/types';
 import { WithDisposable } from '@blocksuite/lit';
-import { Slice } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { toast } from '../../_common/components/toast.js';
+import { toast } from '../../../../../components/toast.js';
 import {
   CopyIcon,
   DeleteIcon,
-  DuplicateIcon,
   OpenIcon,
-  RefreshIcon,
-} from '../../_common/icons/text.js';
-import type { BookmarkBlockComponent } from '../bookmark-block.js';
-import type { BookmarkBlockModel } from '../bookmark-model.js';
-import { refreshBookmarkUrlData } from '../utils.js';
+  UnlinkIcon,
+} from '../../../../../icons/index.js';
+import type { AffineInlineEditor } from '../../../affine-inline-specs.js';
 
-@customElement('bookmark-more-menu')
-export class BookmarkMoreMenu extends WithDisposable(LitElement) {
+@customElement('link-popup-more-menu')
+export class LinkPopupMoreMenu extends WithDisposable(LitElement) {
   static override styles = css`
-    .bookmark-more-menu {
+    .link-popup-more-menu {
       border-radius: 8px;
       padding: 8px;
       background: var(--affine-background-overlay-panel-color);
@@ -58,19 +55,22 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!: BookmarkBlockModel;
+  inlineEditor!: AffineInlineEditor;
 
   @property({ attribute: false })
-  block!: BookmarkBlockComponent;
-
-  @property({ attribute: false })
-  std!: BlockStdScope;
+  targetInlineRange!: InlineRange;
 
   @property({ attribute: false })
   abortController!: AbortController;
 
+  get currentLink() {
+    const link = this.inlineEditor.getFormat(this.targetInlineRange).link;
+    assertExists(link);
+    return link;
+  }
+
   private _openLink() {
-    let link = this.model.url;
+    let link = this.currentLink;
     if (!link.match(/^[a-zA-Z]+:\/\//)) {
       link = 'https://' + link;
     }
@@ -78,35 +78,30 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private async _copyBookmark() {
-    const slice = Slice.fromModels(this.model.page, [this.model]);
-    await this.std.clipboard.copySlice(slice);
+  private _copyUrl() {
+    navigator.clipboard.writeText(this.currentLink).catch(console.error);
     toast('Copied link to clipboard');
     this.abortController.abort();
   }
 
-  private _duplicateBookmark() {
-    const { page, url } = this.model;
-    const parent = page.getParent(this.model);
-    const index = parent?.children.indexOf(this.model);
-    page.addBlock(
-      'affine:bookmark',
-      {
-        url,
-      },
-      parent,
-      index
-    );
+  private _removeLink() {
+    if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
+      this.inlineEditor.formatText(this.targetInlineRange, {
+        link: null,
+      });
+    }
     this.abortController.abort();
   }
 
-  private _refreshBookmark() {
-    refreshBookmarkUrlData(this.block).catch(console.error);
+  private _delete() {
+    if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
+      this.inlineEditor.deleteText(this.targetInlineRange);
+    }
     this.abortController.abort();
   }
 
   override render() {
-    return html`<div class="bookmark-more-menu">
+    return html`<div class="link-popup-more-menu">
       <icon-button
         width="126px"
         height="32px"
@@ -122,7 +117,7 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
         height="32px"
         class="menu-item copy"
         text="Copy"
-        @click=${() => this._copyBookmark()}
+        @click=${() => this._copyUrl()}
       >
         ${CopyIcon}
       </icon-button>
@@ -130,23 +125,11 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
       <icon-button
         width="126px"
         height="32px"
-        class="menu-item duplicate"
-        text="Duplicate"
-        ?disabled=${this.model.page.readonly}
-        @click=${() => this._duplicateBookmark()}
+        class="menu-item unlink"
+        text="Remove link"
+        @click=${() => this._removeLink()}
       >
-        ${DuplicateIcon}
-      </icon-button>
-
-      <icon-button
-        width="126px"
-        height="32px"
-        class="menu-item reload"
-        text="Reload"
-        ?disabled=${this.model.page.readonly}
-        @click=${() => this._refreshBookmark()}
-      >
-        ${RefreshIcon}
+        ${UnlinkIcon}
       </icon-button>
 
       <div class="divider"></div>
@@ -156,8 +139,7 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
         height="32px"
         class="menu-item delete"
         text="Delete"
-        ?disabled=${this.model.page.readonly}
-        @click=${() => this.model.page.deleteBlock(this.model)}
+        @click=${() => this._delete()}
       >
         ${DeleteIcon}
       </icon-button>
@@ -167,6 +149,6 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'bookmark-more-menu': BookmarkMoreMenu;
+    'link-popup-more-menu': LinkPopupMoreMenu;
   }
 }
