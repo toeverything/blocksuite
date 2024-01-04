@@ -131,13 +131,13 @@ test('new added notes should be placed under the topmost canvas layer', async ()
     surface
   );
   addNote(page, {
-    index: surface.layer.generateIndex('common', 'block'),
+    index: surface.layer.generateIndex('affine:note'),
   });
   addNote(page, {
-    index: surface.layer.generateIndex('common', 'block'),
+    index: surface.layer.generateIndex('affine:note'),
   });
   addNote(page, {
-    index: surface.layer.generateIndex('common', 'block'),
+    index: surface.layer.generateIndex('affine:note'),
   });
 
   await wait();
@@ -184,7 +184,8 @@ test('if the topmost layer is canvas layer, the number of layers in the canvasLa
     surface
   );
   addNote(page, {
-    index: surface.layer.generateIndex('common', 'canvas'),
+    // pass 'shape' to generateIndex to make sure the index is on the topmost layer
+    index: surface.layer.generateIndex('shape'),
   });
   addElement(
     'shape',
@@ -211,7 +212,8 @@ test('a new layer should be created in canvasLayers prop when the topmost layer 
     surface
   );
   addNote(page, {
-    index: surface.layer.generateIndex('common', 'canvas'),
+    // pass 'shape' to generateIndex to make sure the index is on the topmost layer
+    index: surface.layer.generateIndex('shape'),
   });
   addElement(
     'shape',
@@ -221,7 +223,8 @@ test('a new layer should be created in canvasLayers prop when the topmost layer 
     surface
   );
   addNote(page, {
-    index: surface.layer.generateIndex('common', 'canvas'),
+    // pass 'shape' to generateIndex to make sure the index is on the topmost layer
+    index: surface.layer.generateIndex('shape'),
   });
 
   expect(surface.layer.canvasLayers.length).toBe(3);
@@ -242,7 +245,8 @@ describe('layer reorder functionality', () => {
         surface
       ),
       addNote(page, {
-        index: surface.layer.generateIndex('common', 'canvas'),
+        // pass 'shape' to generateIndex to make sure the index is on the topmost layer
+        index: surface.layer.generateIndex('shape'),
       }),
       addElement(
         'shape',
@@ -252,7 +256,8 @@ describe('layer reorder functionality', () => {
         surface
       ),
       addNote(page, {
-        index: surface.layer.generateIndex('common', 'canvas'),
+        // pass 'shape' to generateIndex to make sure the index is on the topmost layer
+        index: surface.layer.generateIndex('shape'),
       }),
     ];
   });
@@ -412,7 +417,8 @@ test('indexed canvas should be inserted into edgeless portal when switch to edge
   );
 
   addNote(page, {
-    index: surface.layer.generateIndex('common', 'canvas'),
+    // pass 'shape' to generateIndex to make sure the index is on the topmost layer
+    index: surface.layer.generateIndex('shape'),
   });
 
   await wait();

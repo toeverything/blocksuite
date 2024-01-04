@@ -11,7 +11,6 @@ import {
 import { Bound, getCommonBound, type IConnector } from '../index.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import type { SurfaceBlockTransformer } from '../surface-transformer.js';
-import { replaceIdMiddleware } from './template-middlewares.js';
 
 /**
  * Those block contains other block's id
@@ -66,7 +65,9 @@ export class TemplateJob {
     return new TemplateJob(options);
   }
 
-  static middlewares = [replaceIdMiddleware];
+  static middlewares: ((job: TemplateJob) => void)[] = [];
+
+  private _template: PageSnapshot | null = null;
 
   job: Job;
   model: SurfaceBlockModel;
@@ -92,6 +93,22 @@ export class TemplateJob {
 
     middlewares.forEach(middleware => middleware(this));
     TemplateJob.middlewares.forEach(middleware => middleware(this));
+  }
+
+  walk(callback: (block: BlockSnapshot, template: PageSnapshot) => void) {
+    if (!this._template) {
+      throw new Error('Template not loaded, please call insertTemplate first');
+    }
+
+    const iterate = (block: BlockSnapshot, template: PageSnapshot) => {
+      callback(block, template);
+
+      if (block.children) {
+        block.children.forEach(child => iterate(child, template));
+      }
+    };
+
+    iterate(this._template.blocks, this._template);
   }
 
   private _mergeSurfaceElements(
@@ -142,10 +159,10 @@ export class TemplateJob {
     }
   }
 
-  private _getTemplateBound(template: PageSnapshot) {
+  private _getTemplateBound() {
     const bounds: Bound[] = [];
 
-    const iterate = (block: BlockSnapshot) => {
+    this.walk(block => {
       if (block.props.xywh) {
         bounds.push(Bound.deserialize(block.props['xywh'] as string));
       }
@@ -178,13 +195,7 @@ export class TemplateJob {
           }
         });
       }
-
-      if (block.children) {
-        block.children.forEach(iterate);
-      }
-    };
-
-    iterate(template.blocks);
+    });
 
     return getCommonBound(bounds);
   }
@@ -330,7 +341,9 @@ export class TemplateJob {
 
     assertType<PageSnapshot>(template);
 
-    const templateBound = this._getTemplateBound(template);
+    this._template = template;
+
+    const templateBound = this._getTemplateBound();
 
     this.slots.beforeInsert.emit({
       type: 'template',

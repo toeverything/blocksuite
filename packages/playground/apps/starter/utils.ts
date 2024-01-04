@@ -153,7 +153,10 @@ function toStyledEntry(key: string, value: unknown) {
 export const devtoolsFormatter: typeof window.devtoolsFormatters = [
   {
     header: function (obj: unknown) {
-      if ('flavour' in (obj as store.BlockModel)) {
+      if (
+        'flavour' in (obj as store.BlockModel) &&
+        'yBlock' in (obj as store.BlockModel)
+      ) {
         globalUtils.assertType<store.BlockModel>(obj);
         return [
           'span',
@@ -169,14 +172,20 @@ export const devtoolsFormatter: typeof window.devtoolsFormatters = [
       return null;
     },
     hasBody: (obj: unknown) => {
-      if ('flavour' in (obj as store.BlockModel)) {
+      if (
+        'flavour' in (obj as store.BlockModel) &&
+        'yBlock' in (obj as store.BlockModel)
+      ) {
         return true;
       }
 
       return null;
     },
     body: (obj: unknown) => {
-      if ('flavour' in (obj as store.BlockModel)) {
+      if (
+        'flavour' in (obj as store.BlockModel) &&
+        'yBlock' in (obj as store.BlockModel)
+      ) {
         globalUtils.assertType<store.BlockModel>(obj);
 
         // @ts-ignore
