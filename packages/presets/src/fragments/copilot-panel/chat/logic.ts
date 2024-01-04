@@ -50,7 +50,6 @@ export class AIChatLogic {
       return;
     }
     const url = canvas.toDataURL();
-    console.log(url);
     this.reactiveData.history.push({
       role: 'user',
       content: [
