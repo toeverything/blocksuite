@@ -71,8 +71,8 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const selected =
-      this.edgeless.selectionManager.has(this.model.id) &&
-      this.edgeless.selectionManager.selections.some(
+      this.edgeless?.selectionManager.has(this.model.id) &&
+      this.edgeless?.selectionManager.selections.some(
         sel => sel.elements.includes(this.model.id) && sel.editing
       );
 

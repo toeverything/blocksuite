@@ -1,7 +1,6 @@
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Slice, Text, type Y } from '@blocksuite/store';
 
-import { REFERENCE_NODE } from '../../../_common/components/rich-text/consts.js';
 import { toast } from '../../../_common/components/toast.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
@@ -25,6 +24,7 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '../../../_common/icons/index.js';
+import { REFERENCE_NODE } from '../../../_common/inline/presets/nodes/consts.js';
 import {
   createDefaultPage,
   getImageFilesFromLocal,

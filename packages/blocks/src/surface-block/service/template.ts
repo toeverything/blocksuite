@@ -113,7 +113,7 @@ export class TemplateJob {
 
   private _mergeSurfaceElements(
     from: Record<string, Record<string, unknown>>,
-    to: Y.Map<unknown>
+    to: Y.Map<Y.Map<unknown>>
   ) {
     const schema =
       this.model.page.workspace.schema.flavourSchemaMap.get('affine:surface');

@@ -18,11 +18,7 @@ import { isCanvasElement } from './page-block/edgeless/utils/query.js';
 import { deserializeXYWH } from './surface-block/index.js';
 
 export * from './_common/adapters/index.js';
-export type {
-  AffineInlineEditor,
-  AffineTextAttributes,
-  SelectTag,
-} from './_common/components/index.js';
+export type { SelectTag } from './_common/components/index.js';
 export {
   popTagSelect,
   RichText,
@@ -38,6 +34,11 @@ export {
   PlusIcon,
   TagsIcon,
 } from './_common/icons/index.js';
+export * from './_common/inline/inline-manager.js';
+export type {
+  AffineInlineEditor,
+  AffineTextAttributes,
+} from './_common/inline/presets/affine-inline-specs.js';
 export { type TreeNode } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export {
@@ -77,12 +78,16 @@ export * from './paragraph-block/index.js';
 export {
   Bound,
   type BrushElement,
+  BrushElementModel,
   CanvasElementType,
   type ConnectorElement,
+  ConnectorElementModel,
   ConnectorEndpointStyle,
   ConnectorMode,
   generateKeyBetween,
+  GroupElementModel,
   type ShapeElement,
+  ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
   type TextElement,

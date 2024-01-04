@@ -8,7 +8,7 @@ import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
-import type { AffineInlineEditor } from '../inline/types.js';
+import type { AffineInlineEditor } from '../../../inline/presets/affine-inline-specs.js';
 import {
   handleBlockEndEnter,
   handleBlockSplit,

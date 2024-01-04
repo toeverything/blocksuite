@@ -8,8 +8,8 @@ import {
   type WorkspaceOptions,
 } from '@blocksuite/store';
 
-import { getPlaygroundPresets } from './preset.js';
 import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
+import { getExampleSpecs } from './specs-examples/index.js';
 
 export const params = new URLSearchParams(location.search);
 export const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
@@ -70,11 +70,11 @@ export async function testIDBExistence() {
 }
 
 export function createEditor(page: Page, element: HTMLElement) {
-  const presets = getPlaygroundPresets();
+  const specs = getExampleSpecs();
 
   const editor = new AffineEditorContainer();
-  editor.docSpecs = presets.docModePreset;
-  editor.edgelessSpecs = presets.edgelessModePreset;
+  editor.docSpecs = specs.docModeSpecs;
+  editor.edgelessSpecs = specs.edgelessModeSpecs;
   editor.page = page;
   editor.slots.pageLinkClicked.on(({ pageId }) => {
     const target = page.workspace.getPage(pageId);

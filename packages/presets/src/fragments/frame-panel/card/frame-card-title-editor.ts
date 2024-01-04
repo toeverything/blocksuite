@@ -131,7 +131,6 @@ export class FrameCardTitleEditor extends WithDisposable(ShadowlessElement) {
       .enableAutoScrollHorizontally=${true}
       .enableAutoScrollVertically=${false}
       .enableUndoRedo=${false}
-      .enableMarkdownShortcut=${false}
       .wrapText=${false}
       style=${inlineEditorStyle}
     ></rich-text>`;

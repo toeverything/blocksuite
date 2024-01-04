@@ -1,24 +1,28 @@
-import './chat-with-workspace/chat-with-workspace.js';
+import './chat/chat.js';
+import './doc/doc.js';
+import './edgeless/edgeless.js';
+import './copilot-service';
 
-import { FrameBlockModel } from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css, html, nothing, type TemplateResult } from 'lit';
+import { css, html, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineEditorContainer } from '../../index.js';
-import { LANGUAGE, TONE } from './config.js';
-import { EditorWithAI } from './edgeless/api.js';
-import { GPTAPI, type GPTAPIPayloadMap } from './text/index.js';
-import { CopilotConfig } from './utils/copilot-config.js';
-import { insertFromMarkdown } from './utils/markdown-utils.js';
+import { copilotConfig } from './copilot-service/copilot-config.js';
+import { CreateNewService } from './copilot-service/index.js';
+import { allKindService } from './copilot-service/service-base.js';
+import type { AIEdgelessLogic } from './edgeless/logic.js';
 import {
-  getSelectedBlocks,
-  getSelectedTextContent,
-  getSurfaceElementFromEditor,
-  stopPropagation,
-} from './utils/selection-utils.js';
+  AddCursorIcon,
+  ChatIcon,
+  DocIcon,
+  EdgelessIcon,
+  SettingIcon,
+} from './icons.js';
+import { AILogic } from './logic.js';
+import { getSurfaceElementFromEditor } from './utils/selection-utils.js';
 
 @customElement('copilot-panel')
 export class CopilotPanel extends WithDisposable(ShadowlessElement) {
@@ -36,6 +40,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       margin-bottom: 4px;
       color: var(--affine-text-secondary-color);
     }
+
     .copilot-panel-key-input {
       width: 100%;
       border: 1px solid var(--affine-border-color, #e3e2e4);
@@ -57,8 +62,9 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: 36px;
+      margin-top: 12px;
     }
+
     .copilot-panel-action-prompt {
       width: 100%;
       border: 1px solid var(--affine-border-color, #e3e2e4);
@@ -74,27 +80,43 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
       margin-top: 4px;
       color: var(--affine-text-secondary-color);
     }
-  `;
 
-  @state()
-  private _result = '';
+    .copilot-panel-add-vendor-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .copilot-panel-add-vendor-button:hover {
+      background-color: var(--affine-hover-color);
+    }
+
+    .copilot-panel-vendor-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      color: white;
+    }
+    .copilot-box {
+      margin-bottom: 64px;
+    }
+  `;
 
   @property({ attribute: false })
   editor!: AffineEditorContainer;
-  editorWithAI?: EditorWithAI;
-  get api() {
-    if (!this.editorWithAI) {
-      this.editorWithAI = new EditorWithAI(this.editor);
+  editorWithAI?: AIEdgelessLogic;
+  aiLogic?: AILogic;
+
+  get logic() {
+    if (!this.aiLogic) {
+      this.aiLogic = new AILogic(this.editor);
     }
-    return this.editorWithAI;
-  }
-
-  get page() {
-    return this.editor.page;
-  }
-
-  get host() {
-    return this.editor.host;
+    return this.aiLogic;
   }
 
   public override connectedCallback() {
@@ -106,344 +128,99 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  private async _replace() {
-    if (!this._result) return;
-
-    const selectedBlocks = await getSelectedBlocks(this.host);
-    if (!selectedBlocks.length) return;
-
-    const firstBlock = selectedBlocks[0];
-    const parentBlock = firstBlock.parentBlockElement;
-
-    // update selected block
-    const firstIndex = parentBlock.model.children.findIndex(
-      child => child.id === firstBlock.model.id
-    ) as number;
-    selectedBlocks.forEach(block => {
-      this.page.deleteBlock(block.model);
-    });
-
-    const models = await insertFromMarkdown(
-      this.host,
-      this._result,
-      parentBlock.model.id,
-      firstIndex
-    );
-    setTimeout(() => {
-      const parentPath = firstBlock.parentPath;
-      const selections = models
-        .map(model => [...parentPath, model.id])
-        .map(path => this.host.selection.create('block', { path }));
-      this.host.selection.setGroup('note', selections);
-    }, 0);
-  }
-
-  private async _insertBelow() {
-    if (!this._result) return;
-
-    const selectedBlocks = await getSelectedBlocks(this.host);
-    const blockLength = selectedBlocks.length;
-    if (!blockLength) return;
-
-    const lastBlock = selectedBlocks[blockLength - 1];
-    const parentBlock = lastBlock.parentBlockElement;
-
-    const lastIndex = parentBlock.model.children.findIndex(
-      child => child.id === lastBlock.model.id
-    ) as number;
-
-    const models = await insertFromMarkdown(
-      this.host,
-      this._result,
-      parentBlock.model.id,
-      lastIndex + 1
-    );
-
-    setTimeout(() => {
-      const parentPath = lastBlock.parentPath;
-      const selections = models
-        .map(model => [...parentPath, model.id])
-        .map(path => this.host.selection.create('block', { path }));
-      this.host.selection.setGroup('note', selections);
-    }, 0);
-  }
-
-  private _ResultArea() {
-    if (!this._result) return nothing;
-
-    return html`
-      <div style="margin-top: 16px;">${this._result}</div>
-      <div style="display:flex;align-items:center;">
-        <div
-          class="copilot-panel-action-button"
-          style="flex: 1;"
-          @click="${this._replace}"
-        >
-          Replace
-        </div>
-        <div
-          class="copilot-panel-action-button"
-          style="flex: 1;"
-          @click="${this._insertBelow}"
-        >
-          Insert below
-        </div>
-      </div>
-    `;
-  }
-
   config = () => {
-    const changeGPTAPIKey = (e: Event) => {
-      if (e.target instanceof HTMLInputElement) {
-        CopilotConfig.GPTAPIKey = e.target.value;
-        saveToLocalstorage();
-      }
-    };
-    const changeFalAPIKey = (e: Event) => {
-      if (e.target instanceof HTMLInputElement) {
-        CopilotConfig.FalAPIKey = e.target.value;
-        saveToLocalstorage();
-      }
-    };
-    const saveToLocalstorage = () => {
-      const checked = (this.querySelector('#save') as HTMLInputElement).checked;
-      if (checked) {
-        CopilotConfig.SaveToLocalStorage = checked;
-        localStorage.setItem('APIKeys', JSON.stringify(CopilotConfig));
-      } else {
-        localStorage.removeItem('APIKeys');
-      }
+    const createNew = (type: string) => () => {
+      const panel = new CreateNewService();
+      panel.type = type;
+      panel.onSave = config => {
+        copilotConfig.addVendor(config);
+        this.requestUpdate();
+        panel.remove();
+      };
+      document.body.appendChild(panel);
     };
     return html`
-      <div>
-        <div class="copilot-panel-setting-title">GPT API Key</div>
-        <input
-          class="copilot-panel-key-input"
-          type="text"
-          @keydown="${stopPropagation}"
-          .value="${CopilotConfig.GPTAPIKey}"
-          @input="${changeGPTAPIKey}"
-        />
-        <div class="copilot-panel-setting-title">Fal API Key</div>
-        <input
-          class="copilot-panel-key-input"
-          type="text"
-          @keydown="${stopPropagation}"
-          .value="${CopilotConfig.FalAPIKey}"
-          @input="${changeFalAPIKey}"
-        />
-        <label
-          style="margin-top: 18px;display:flex;align-items:center;cursor: pointer;color: var(--affine-text-secondary-color)"
-        >
-          <input
-            .checked="${CopilotConfig.SaveToLocalStorage}"
-            @change="${saveToLocalstorage}"
-            id="save"
-            type="checkbox"
-          />
-          <div>save to localstorage</div>
-        </label>
+      <div style="display:flex;flex-direction: column;gap: 32px;">
+        ${repeat(allKindService, v => {
+          const list = copilotConfig.getVendorsByService(v);
+          return html`
+            <div>
+              <div
+                class="copilot-panel-setting-title"
+                style="display:flex;justify-content:space-between;align-items:center;;color: var(--affine-text-primary-color);"
+              >
+                ${v.title}
+                <div
+                  @click="${createNew(v.type)}"
+                  class="copilot-panel-add-vendor-button"
+                >
+                  ${AddCursorIcon}
+                </div>
+              </div>
+              <div style="display:flex;flex-wrap: wrap;padding: 4px;gap: 4px">
+                ${repeat(list, v => {
+                  const style = styleMap({
+                    backgroundColor: v.impl.vendor.color,
+                  });
+                  return html` <div
+                    style="${style}"
+                    class="copilot-panel-vendor-item"
+                  >
+                    ${v.vendor.name} ${v.impl.vendor.key} ${v.impl.name}
+                  </div>`;
+                })}
+              </div>
+            </div>
+          `;
+        })}
       </div>
     `;
   };
-  @state()
-  payload: { type: keyof GPTAPIPayloadMap } & Record<string, unknown> = {
-    type: 'answer',
-  };
-  changeType = (e: Event) => {
-    if (e.target instanceof HTMLSelectElement) {
-      this.payload = { type: e.target.value as keyof GPTAPIPayloadMap };
+
+  panels: Record<
+    string,
+    {
+      icon: TemplateResult;
+      render: () => TemplateResult;
     }
-  };
-  textCompletion = async <K extends keyof GPTAPIPayloadMap>(
-    key: K,
-    payload: Omit<GPTAPIPayloadMap[K], 'input'>
-  ) => {
-    const input = await getSelectedTextContent(this.host);
-    if (!input) {
-      alert('Please select some text first');
-      return;
-    }
-    return GPTAPI[key]({ input, ...payload } as never);
-  };
-  ask = async () => {
-    const result = await this.textCompletion(this.payload.type, this.payload);
-    this._result = result ?? '';
-  };
-  extraPayload: Record<keyof GPTAPIPayloadMap, () => TemplateResult | null> = {
-    answer: () => {
-      const change = (e: Event) => {
-        if (e.target instanceof HTMLInputElement) {
-          this.payload.question = e.target.value;
-          console.log(this.payload);
-        }
-      };
-      return html`<div style="margin-top: 16px;">
-        <input
-          class="copilot-panel-action-prompt"
-          type="text"
-          .value="${this.payload.question ?? ''}"
-          @input="${change}"
-        />
-      </div>`;
-    },
-    refine: () => null,
-    generate: () => null,
-    summary: () => null,
-    translate: () => {
-      const change = (e: Event) => {
-        if (e.target instanceof HTMLSelectElement) {
-          this.payload.language = e.target.value;
-        }
-      };
-      return html`<div style="margin-top: 16px;">
-        <div style="display:flex;align-items:center;">
-          <div style="margin-right: 4px;">Language:</div>
-          <select @change="${change}">
-            ${repeat(LANGUAGE, key => {
-              return html`<option>${key}</option>`;
-            })}
-          </select>
-        </div>
-      </div>`;
-    },
-    improveWriting: () => null,
-    fixSpelling: () => null,
-    makeShorter: () => null,
-    makeLonger: () => null,
-    changeTone: () => {
-      const change = (e: Event) => {
-        if (e.target instanceof HTMLSelectElement) {
-          this.payload.tone = e.target.value;
-        }
-      };
-      return html`<div style="margin-top: 16px;">
-        <div style="display:flex;align-items:center;">
-          <div style="margin-right: 4px;">Tone:</div>
-          <select @change="${change}">
-            ${repeat(TONE, key => {
-              return html`<option>${key}</option>`;
-            })}
-          </select>
-        </div>
-      </div>`;
-    },
-    simplifyLanguage: () => null,
-  };
-  doc = () => {
-    return html` <div style="margin-top: 16px;">
-      <div style="display:flex;align-items:center;">
-        <div style="margin-right: 4px;">Action:</div>
-        <select @change="${this.changeType}">
-          ${repeat(Object.keys(GPTAPI), key => {
-            return html`<option>${key}</option>`;
-          })}
-        </select>
-      </div>
-      ${this.extraPayload[this.payload.type]()}
-      <div class="copilot-panel-action-button" @click="${this.ask}">Ask</div>
-      <div>${this._ResultArea()}</div>
-    </div>`;
-  };
-  workspace = () => {
-    return html` <chat-with-workspace-panel
-      .editor="${this.editor}"
-    ></chat-with-workspace-panel>`;
-  };
-  edgeless = () => {
-    const frames = getSurfaceElementFromEditor(
-      this.editor
-    ).model.children.filter(
-      v => v instanceof FrameBlockModel
-    ) as FrameBlockModel[];
-    const changeFromFrame = (e: Event) => {
-      this.api.fromFrame = (e.target as HTMLSelectElement).value;
-    };
-    const toggleAutoGen = () => {
-      this.api.toggleAutoGen();
-      this.requestUpdate();
-    };
-    return html`
-      <div class="copilot-panel-action-button" @click="${this.api.makeItReal}">
-        Make It Real
-      </div>
-      <div class="copilot-panel-action-description">
-        Select some shapes and text to generate html
-      </div>
-      <div class="copilot-panel-action-button" @click="${this.api.createImage}">
-        Create Image
-      </div>
-      <input
-        id="copilot-panel-create-image-prompt"
-        class="copilot-panel-action-prompt"
-        type="text"
-        @keydown="${stopPropagation}"
-        placeholder="Prompt"
-      />
-      <div class="copilot-panel-action-description">
-        Type prompt to create an image.
-      </div>
-      <div class="copilot-panel-action-button" @click="${this.api.editImage}">
-        Edit Image
-      </div>
-      <input
-        id="copilot-panel-edit-image-prompt"
-        class="copilot-panel-action-prompt"
-        type="text"
-        @keydown="${stopPropagation}"
-        placeholder="Prompt"
-      />
-      <div class="copilot-panel-action-description">
-        Select some shapes and type prompt to edit them.
-      </div>
-      <div
-        class="copilot-panel-action-button"
-        @click="${this.api.htmlBlockDemo}"
-      >
-        HTML Block Test
-      </div>
-      <div class="copilot-panel-action-description">Generate a html block</div>
-      <div @click="${toggleAutoGen}" class="copilot-panel-action-button">
-        ${this.api.autoGen ? 'Stop auto gen image' : 'Start auto gen image'}
-      </div>
-      <div class="copilot-panel-action-description">
-        <div>
-          Based on the shapes in frame
-          <select .value="${this.api.fromFrame}" @change="${changeFromFrame}">
-            <option value="">None</option>
-            ${frames.map(v => {
-              return html`<option .value="${v.id}">
-                ${v.title.toString()}
-              </option>`;
-            })}
-          </select>
-        </div>
-        <div>Generate images to all connected frames</div>
-      </div>
-    `;
-  };
-  panels = {
-    config: {
-      render: this.config,
+  > = {
+    chat: {
+      icon: ChatIcon,
+      render: () => {
+        return html` <copilot-chat-panel
+          .logic="${this.logic}"
+        ></copilot-chat-panel>`;
+      },
     },
     doc: {
-      render: this.doc,
+      icon: DocIcon,
+      render: () => {
+        return html` <copilot-doc-panel
+          .logic="${this.logic}"
+        ></copilot-doc-panel>`;
+      },
     },
     edgeless: {
-      render: this.edgeless,
+      icon: EdgelessIcon,
+      render: () => {
+        return html` <copilot-edgeless-panel
+          .logic="${this.logic}"
+        ></copilot-edgeless-panel>`;
+      },
     },
-    workspace: {
-      render: this.workspace,
+    config: {
+      icon: SettingIcon,
+      render: this.config,
     },
   };
   @state()
-  currentPanel: keyof typeof this.panels = 'config';
+  currentPanel: keyof typeof this.panels = 'chat';
 
   override render() {
     const panel = this.panels[this.currentPanel];
     return html`
       <div
-        style="display:flex;flex-direction: column;padding: 12px;"
+        style="display:flex;flex-direction: column;padding: 12px;height: 100%"
         class="blocksuite-overlay"
       >
         <div style="display:flex;align-items:center;justify-content:center;">
@@ -459,14 +236,16 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
                   this.currentPanel === key ? 'white' : 'transparent',
                 padding: '4px 8px',
                 'border-radius': '8px',
+                display: 'flex',
+                alignItems: 'center',
               });
               return html` <div style="${style}" @click="${changePanel}">
-                ${key}
+                ${this.panels[key].icon}
               </div>`;
             })}
           </div>
         </div>
-        <div>${panel.render()}</div>
+        <div style="flex:1">${panel.render()}</div>
       </div>
     `;
   }

@@ -6,7 +6,7 @@ import { css, unsafeCSS } from 'lit';
 import { isControlledKeyboardEvent } from '../../_common/utils/event.js';
 import { getInlineEditorByModel } from '../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../_common/utils/selection.js';
-import type { AffineInlineEditor } from './rich-text/inline/types.js';
+import type { AffineInlineEditor } from '../inline/presets/affine-inline-specs.js';
 import type { RichText } from './rich-text/rich-text.js';
 
 export const createKeydownObserver = ({
