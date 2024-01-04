@@ -1,6 +1,5 @@
 import { MarkdownAdapter } from '@blocksuite/blocks';
 import { Job, type Page } from '@blocksuite/store';
-import type { OpenAI } from 'openai';
 
 import type { AffineEditorContainer } from '../../../editors/index.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
@@ -108,7 +107,7 @@ export class AIChatLogic {
       this.reactiveData.value = '';
       const r = await getChatService().chat([
         ...background.messages,
-        ...toGPTMessages(this.reactiveData.history),
+        ...this.reactiveData.history,
       ]);
 
       this.reactiveData.history.push({
@@ -314,15 +313,4 @@ export type EmbeddedPage = {
     vector: number[];
     text: string;
   }[];
-};
-
-const toGPTMessages = (
-  messages: ChatMessage[]
-): Array<OpenAI.ChatCompletionMessageParam> => {
-  return messages.map(v => {
-    if (v.role === 'assistant') {
-      return { role: v.role, content: v.content };
-    }
-    return v;
-  });
 };

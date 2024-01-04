@@ -44,12 +44,8 @@ const createServiceKind = <M>(config: {
   };
 };
 
-type TextServiceMessage = {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-};
 export const TextServiceKind = createServiceKind<{
-  generateText(messages: TextServiceMessage[]): Promise<string>;
+  generateText(messages: ChatMessage[]): Promise<string>;
 }>({
   type: 'text-service',
   title: 'Text service',

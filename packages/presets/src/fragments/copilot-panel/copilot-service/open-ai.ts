@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { OpenAI } from 'openai';
 
+import type { ChatMessage } from '../chat/logic.js';
 import { pngBase64ToFile } from '../edgeless/edit-image.js';
 import {
   ChatServiceKind,
@@ -37,17 +38,28 @@ export const openaiVendor = createVendor<{
     `;
   },
 });
-const askGPT3_5turbo = async (
+const toGPTMessages = (
+  messages: ChatMessage[]
+): Array<OpenAI.ChatCompletionMessageParam> => {
+  return messages.map(v => {
+    if (v.role === 'assistant') {
+      return { role: v.role, content: v.content };
+    }
+    return v;
+  });
+};
+
+const askGPT = async (
   apiKey: string,
   model: 'gpt-4' | 'gpt-3.5-turbo-1106' | 'gpt-4-vision-preview',
-  messages: Array<OpenAI.ChatCompletionMessageParam>
+  messages: Array<ChatMessage>
 ) => {
   const openai = new OpenAI({
     apiKey: apiKey,
     dangerouslyAllowBrowser: true,
   });
   const result = await openai.chat.completions.create({
-    messages,
+    messages: toGPTMessages(messages),
     model: model,
     temperature: 0,
     max_tokens: 4096,
@@ -59,11 +71,7 @@ TextServiceKind.implService({
   name: 'GPT3.5 Turbo',
   method: data => ({
     generateText: async messages => {
-      const result = await askGPT3_5turbo(
-        data.apiKey,
-        'gpt-3.5-turbo-1106',
-        messages
-      );
+      const result = await askGPT(data.apiKey, 'gpt-3.5-turbo-1106', messages);
       return result.content ?? '';
     },
   }),
@@ -73,7 +81,7 @@ TextServiceKind.implService({
   name: 'GPT4',
   method: data => ({
     generateText: async messages => {
-      const result = await askGPT3_5turbo(data.apiKey, 'gpt-4', messages);
+      const result = await askGPT(data.apiKey, 'gpt-4', messages);
       return result.content ?? '';
     },
   }),
@@ -84,11 +92,7 @@ ChatServiceKind.implService({
   name: 'GPT3.5 Turbo',
   method: data => ({
     chat: async messages => {
-      const result = await askGPT3_5turbo(
-        data.apiKey,
-        'gpt-3.5-turbo-1106',
-        messages
-      );
+      const result = await askGPT(data.apiKey, 'gpt-3.5-turbo-1106', messages);
       return result.content ?? '';
     },
   }),
@@ -99,7 +103,7 @@ ChatServiceKind.implService({
   name: 'GPT4',
   method: data => ({
     chat: async messages => {
-      const result = await askGPT3_5turbo(data.apiKey, 'gpt-4', messages);
+      const result = await askGPT(data.apiKey, 'gpt-4', messages);
       return result.content ?? '';
     },
   }),
@@ -109,7 +113,7 @@ ChatServiceKind.implService({
   name: 'GPT4-Vision',
   method: data => ({
     chat: async messages => {
-      const result = await askGPT3_5turbo(
+      const result = await askGPT(
         data.apiKey,
         'gpt-4-vision-preview',
         messages
