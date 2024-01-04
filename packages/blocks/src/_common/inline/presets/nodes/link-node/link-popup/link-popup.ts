@@ -322,6 +322,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
               <icon-button
                 size="24px"
+                data-testid="link-to-card"
                 class="affine-link-popover-view-selector card"
                 hover="false"
                 @click=${() => this._linkToBookmark()}
