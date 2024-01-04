@@ -109,12 +109,11 @@ export default defineConfig({
           },
           {
             text: '<code>store</code>',
-            collapsed: true,
             items: [
               { text: 'Page 🚧' },
               { text: 'Workspace 🚧' },
               { text: 'Slot', link: '/slot' },
-              { text: 'Transformer 🚧' },
+              // { text: 'Transformer 🚧' },
               { text: 'Adapter', link: '/adapter' },
             ],
           },
