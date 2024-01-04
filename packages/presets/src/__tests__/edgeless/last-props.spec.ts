@@ -14,9 +14,9 @@ describe('apply last props', () => {
   let surface!: SurfaceBlockComponent;
 
   beforeEach(async () => {
+    sessionStorage.removeItem('blocksuite:prop:record');
     const cleanup = await setupEditor('edgeless');
     surface = getSurface(window.page, window.editor);
-    sessionStorage.removeItem('blocksuite:prop:record');
     return cleanup;
   });
 
