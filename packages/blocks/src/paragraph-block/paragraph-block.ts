@@ -44,7 +44,11 @@ function TipsPlaceholder(
   }
   if (model.type === 'text') {
     if (isInsideEdgelessEditor(editorHost)) {
-      return html`<div class="tips-placeholder" style=${styleMap(tipsPos)}>
+      return html`<div
+        contenteditable="false"
+        class="tips-placeholder"
+        style=${styleMap(tipsPos)}
+      >
         Type '/' for commands
       </div> `;
     }
@@ -54,7 +58,11 @@ function TipsPlaceholder(
     ) as BlockHub | null;
     if (!blockHub) {
       // Fall back
-      return html`<div class="tips-placeholder" style=${styleMap(tipsPos)}>
+      return html`<div
+        contenteditable="false"
+        class="tips-placeholder"
+        style=${styleMap(tipsPos)}
+      >
         Type '/' for commands
       </div>`;
     }
@@ -67,6 +75,7 @@ function TipsPlaceholder(
     return html`
       <div
         class="tips-placeholder"
+        contenteditable="false"
         @click=${onClick}
         @pointerdown=${tipsPlaceholderPreventDefault}
         style=${styleMap(tipsPos)}
