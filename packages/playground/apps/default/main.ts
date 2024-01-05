@@ -47,6 +47,7 @@ function subscribePage(workspace: Workspace) {
 
     document.body.appendChild(quickEdgelessMenu);
 
+    // FIXME: should remove contentParser after move export functions to page service
     setTimeout(() => {
       const contentParser = new ContentParser(editor.host, page);
       quickEdgelessMenu.contentParser = contentParser;
