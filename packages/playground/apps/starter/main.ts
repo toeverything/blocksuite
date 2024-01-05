@@ -63,6 +63,7 @@ function subscribePage(workspace: Workspace) {
     debugMenu.leftSidePanel = leftSidePanel;
     debugMenu.pagesPanel = pagesPanel;
 
+    // FIXME: should remove contentParser after move export functions to page service
     page.slots.ready.once(() => {
       const contentParser = new ContentParser(editor.host, page);
       debugMenu.contentParser = contentParser;
