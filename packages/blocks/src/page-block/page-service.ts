@@ -6,6 +6,7 @@ import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
+import { ExportManager } from '../_common/export-manager/export-manager.js';
 import { DEFAULT_CANVAS_TEXT_FONT_CONFIG } from '../surface-block/consts.js';
 import {
   copySelectedModelsCommand,
@@ -29,13 +30,20 @@ import { FontLoader } from './font-loader/font-loader.js';
 import type { PageBlockModel } from './page-model.js';
 import type { PageBlockComponent } from './types.js';
 
+const DEFAULT_IMAGE_PROXY_ENDPOINT =
+  'https://workers.toeverything.workers.dev/proxy/image';
 export class PageService extends BlockService<PageBlockModel> {
   readonly fontLoader = new FontLoader();
 
   fileDropManager!: FileDropManager;
+  exportManager!: ExportManager;
 
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
+  };
+
+  private _exportOptions = {
+    imageProxyEndpoint: DEFAULT_IMAGE_PROXY_ENDPOINT,
   };
 
   get viewportElement() {
@@ -118,6 +126,7 @@ export class PageService extends BlockService<PageBlockModel> {
     this.loadFonts();
 
     this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
+    this.exportManager = new ExportManager(this, this._exportOptions);
     this.disposables.addFromEvent(
       this.std.host,
       'dragover',
