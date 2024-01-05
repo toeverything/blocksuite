@@ -379,6 +379,7 @@ test.describe('slash search', () => {
       noteId
     );
 
+    await focusRichText(page);
     await type(page, '/');
     await expect(slashMenu).toBeVisible();
     // first item should be selected by default

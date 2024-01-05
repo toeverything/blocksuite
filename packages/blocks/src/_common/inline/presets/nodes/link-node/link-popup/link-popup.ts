@@ -292,7 +292,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       .catch(console.error);
 
     return html`
-      <div class="affine-link-popover">
+      <div class="affine-link-popover create">
         <input
           id="link-input"
           class="affine-link-popover-input"
@@ -334,7 +334,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   private _viewTemplate() {
     return html`
-      <div class="affine-link-popover">
+      <div class="affine-link-popover view">
         <div class="affine-link-preview" @click=${() => this._copyUrl()}>
           <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
           <span>${this.currentLink}</span>
