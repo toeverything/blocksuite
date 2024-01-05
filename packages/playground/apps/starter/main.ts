@@ -64,7 +64,6 @@ function subscribePage(workspace: Workspace) {
     debugMenu.pagesPanel = pagesPanel;
 
     page.slots.ready.once(() => {
-      console.log('page ready');
       const contentParser = new ContentParser(editor.host, page);
       debugMenu.contentParser = contentParser;
     });
