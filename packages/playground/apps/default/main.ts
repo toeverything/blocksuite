@@ -69,7 +69,6 @@ async function syncProviders(
   const providers = workspace.providers;
 
   for (const provider of providers) {
-    console.log('provider: ', provider);
     if ('active' in provider) {
       provider.sync();
       await provider.whenReady;
@@ -145,7 +144,6 @@ async function initWorkspace(workspace: Workspace) {
     });
     page.resetHistory();
   } else {
-    console.log('init workspace');
     await syncProviders(workspace, getProviderCreators());
   }
 }
