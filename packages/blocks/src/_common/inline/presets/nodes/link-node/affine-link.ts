@@ -6,7 +6,6 @@ import {
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { flip, offset } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
@@ -76,12 +75,6 @@ export class AffineLink extends ShadowlessElement {
         this.selfInlineRange,
         abortController
       ),
-      computePosition: {
-        referenceElement: this,
-        placement: 'top-start',
-        middleware: [flip(), offset(44)],
-        autoUpdate: true,
-      },
     };
   });
 

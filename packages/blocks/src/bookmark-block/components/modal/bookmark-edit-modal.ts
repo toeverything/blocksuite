@@ -1,9 +1,9 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 
-import { CloseIcon } from '../../../_common/icons/index.js';
+import { toast } from '../../../_common/components/toast.js';
 import type { BookmarkBlockComponent } from '../../bookmark-block.js';
 import type { BookmarkBlockModel } from '../../bookmark-model.js';
 import { bookmarkModalStyles } from './styles.js';
@@ -14,14 +14,19 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   bookmark!: BookmarkBlockComponent;
-  get bookmarkModel(): BookmarkBlockModel {
-    return this.bookmark.model;
-  }
 
   @query('.title')
   titleInput!: HTMLInputElement;
+
   @query('.description')
   descInput!: HTMLInputElement;
+
+  @state()
+  private _titleInputValue = '';
+
+  get bookmarkModel(): BookmarkBlockModel {
+    return this.bookmark.model;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -34,86 +39,96 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
       .catch(console.error);
 
     this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
+
+    this._titleInputValue = this.bookmarkModel.title ?? '';
   }
 
-  private _onDocumentKeydown = (e: KeyboardEvent) => {
+  private _handleInput(e: InputEvent) {
+    const target = e.target as HTMLInputElement;
+    this._titleInputValue = target.value;
+  }
+
+  private _onDocumentKeydown(e: KeyboardEvent) {
     e.stopPropagation();
     if (e.key === 'Enter' && !e.isComposing) {
-      this._onConfirm();
+      this._onSave();
     }
     if (e.key === 'Escape') {
       this.remove();
     }
-  };
+  }
 
-  private _onConfirm = () => {
+  private _onSave() {
+    const title = this.titleInput.value;
+    if (title.length === 0) {
+      toast('Link title can not be empty');
+      return;
+    }
+
     this.bookmark.page.updateBlock(this.bookmarkModel, {
-      title: this.titleInput.value,
+      title,
       description: this.descInput.value,
     });
     this.remove();
-  };
+  }
 
   override render() {
-    const title =
-      this.bookmarkModel.title ?? this.bookmarkModel.title ?? 'Bookmark';
+    return html`
+      <div class="bookmark-modal blocksuite-overlay">
+        <div class="bookmark-modal-mask" @click=${() => this.remove()}></div>
+        <div class="bookmark-modal-wrapper">
+          <div class="bookmark-modal-title">Edit Link</div>
 
-    return html`<div class="bookmark-modal blocksuite-overlay">
-      <div class="bookmark-modal-mask" @click=${() => this.remove()}></div>
-      <div
-        class="bookmark-modal-wrapper"
-        style=${styleMap({
-          height: '320px',
-        })}
-      >
-        <icon-button
-          width="32px"
-          height="32px"
-          class="bookmark-modal-close-button"
-          @click=${() => this.remove()}
-          >${CloseIcon}</icon-button
-        >
+          <div class="bookmark-modal-content">
+            <input
+              class="bookmark-modal-input title"
+              type="text"
+              placeholder="Title"
+              value=${this._titleInputValue}
+              @input=${this._handleInput}
+              tabindex="0"
+            />
 
-        <div class="bookmark-modal-title">Edit</div>
-        <div class="bookmark-modal-input-wrapper">
-          <input
-            type="text"
-            class="bookmark-modal-input title"
-            placeholder="Title"
-            value=${title}
-            tabindex="0"
-          />
-        </div>
-        <div class="bookmark-modal-input-wrapper">
-          <textarea
-            class="bookmark-modal-input description"
-            placeholder="Description"
-            .value=${this.bookmarkModel.description ?? ''}
-            tabindex="0"
-            style=${styleMap({
-              height: '104px',
-            })}
-          ></textarea>
-        </div>
-        <div class="bookmark-modal-footer">
-          <div
-            class="bookmark-modal-confirm-button"
-            tabindex="0"
-            @click=${this._onConfirm}
-          >
-            Save
+            <textarea
+              class="bookmark-modal-input description"
+              placeholder="Description"
+              .value=${this.bookmarkModel.description ?? ''}
+              tabindex="0"
+            ></textarea>
+          </div>
+
+          <div class="bookmark-modal-action">
+            <div
+              class="bookmark-modal-button cancel"
+              tabindex="0"
+              @click=${() => this.remove()}
+            >
+              Cancel
+            </div>
+
+            <div
+              class=${classMap({
+                'bookmark-modal-button': true,
+                save: true,
+                disabled: this._titleInputValue.length === 0,
+              })}
+              tabindex="0"
+              @click=${() => this._onSave()}
+            >
+              Save
+            </div>
           </div>
         </div>
       </div>
-    </div>`;
+    `;
   }
 }
 
 export function toggleBookmarkEditModal(bookmark: BookmarkBlockComponent) {
   bookmark.host.selection.clear();
-  const modal = new BookmarkEditModal();
-  modal.bookmark = bookmark;
-  document.body.appendChild(modal);
+  const bookmarkEditModal = new BookmarkEditModal();
+  bookmarkEditModal.bookmark = bookmark;
+  document.body.appendChild(bookmarkEditModal);
 }
 
 declare global {

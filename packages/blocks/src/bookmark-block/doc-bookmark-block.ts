@@ -59,7 +59,8 @@ export class DocBookmarkBlockComponent extends WithDisposable(
   private _whenHover = new HoverController(this, ({ abortController }) => {
     this._optionsAbortController = abortController;
     return {
-      template: html`<style>
+      template: html`
+        <style>
           :host {
             z-index: 1;
           }
@@ -71,7 +72,8 @@ export class DocBookmarkBlockComponent extends WithDisposable(
           .host=${this}
           .abortController=${abortController}
           .std=${this.block.std}
-        ></bookmark-toolbar>`,
+        ></bookmark-toolbar>
+      `,
       computePosition: {
         referenceElement: this.bookmardCardElement,
         placement: 'top-end',
@@ -82,28 +84,30 @@ export class DocBookmarkBlockComponent extends WithDisposable(
   });
 
   override render() {
-    return html`<div
-      ${ref(this._whenHover.setReference)}
-      style=${styleMap({
-        width: '100%',
-        margin: '18px 0',
-        position: 'relative',
-      })}
-    >
-      <bookmark-card .bookmark=${this.block}></bookmark-card>
-      <bookmark-caption
-        .bookmark=${this.block}
-        .display=${this._showCaption}
-        @blur=${() => {
-          if (!this.model.caption) {
-            this._showCaption = false;
-          }
-        }}
-      ></bookmark-caption>
-      ${this.block.selected?.is('block')
-        ? html`<affine-block-selection></affine-block-selection>`
-        : null}
-    </div>`;
+    return html`
+      <div
+        ${ref(this._whenHover.setReference)}
+        style=${styleMap({
+          width: '100%',
+          margin: '18px 0',
+          position: 'relative',
+        })}
+      >
+        <bookmark-card .bookmark=${this.block}></bookmark-card>
+        <bookmark-caption
+          .bookmark=${this.block}
+          .display=${this._showCaption}
+          @blur=${() => {
+            if (!this.model.caption) {
+              this._showCaption = false;
+            }
+          }}
+        ></bookmark-caption>
+        ${this.block.selected?.is('block')
+          ? html`<affine-block-selection></affine-block-selection>`
+          : null}
+      </div>
+    `;
   }
 }
 

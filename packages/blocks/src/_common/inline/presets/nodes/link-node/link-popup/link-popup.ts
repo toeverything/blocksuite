@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline/types';
 import type { BlockElement } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import { flip, offset } from '@floating-ui/dom';
+import { computePosition, flip, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
@@ -124,6 +124,26 @@ export class LinkPopup extends WithDisposable(LitElement) {
         this.mockSelectionContainer.appendChild(mockSelection);
       });
     }
+
+    const visualElement = {
+      getBoundingClientRect: () => range.getBoundingClientRect(),
+      getClientRects: () => range.getClientRects(),
+    };
+    computePosition(visualElement, this.popupContainer, {
+      middleware: [
+        offset(10),
+        inline(),
+        shift({
+          padding: 6,
+        }),
+      ],
+    })
+      .then(({ x, y }) => {
+        if (!this.popupContainer) return;
+        this.popupContainer.style.left = `${x}px`;
+        this.popupContainer.style.top = `${y}px`;
+      })
+      .catch(console.error);
   }
 
   get blockElement() {
@@ -271,18 +291,20 @@ export class LinkPopup extends WithDisposable(LitElement) {
       })
       .catch(console.error);
 
-    return html`<div class="affine-link-popover">
-      <input
-        id="link-input"
-        class="affine-link-popover-input"
-        type="text"
-        spellcheck="false"
-        placeholder="Paste or type a link"
-        @input=${this._updateConfirmBtn}
-      />
-      <span class="affine-link-popover-dividing-line"></span>
-      ${this._confirmBtnTemplate()}
-    </div>`;
+    return html`
+      <div class="affine-link-popover">
+        <input
+          id="link-input"
+          class="affine-link-popover-input"
+          type="text"
+          spellcheck="false"
+          placeholder="Paste or type a link"
+          @input=${this._updateConfirmBtn}
+        />
+        <span class="affine-link-popover-dividing-line"></span>
+        ${this._confirmBtnTemplate()}
+      </div>
+    `;
   }
 
   private _toggleMoreMenu() {
@@ -311,81 +333,85 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _viewTemplate() {
-    return html`<div class="affine-link-popover">
-      <div class="affine-link-preview" @click=${() => this._copyUrl()}>
-        <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
-        <span style="overflow: hidden;">${this.currentLink}</span>
+    return html`
+      <div class="affine-link-popover">
+        <div class="affine-link-preview" @click=${() => this._copyUrl()}>
+          <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
+          <span>${this.currentLink}</span>
+        </div>
+
+        <icon-button size="32px" @click=${() => this._copyUrl()}>
+          ${CopyIcon}
+          <affine-tooltip .offset=${12}>${'Click to copy link'}</affine-tooltip>
+        </icon-button>
+
+        <icon-button
+          size="32px"
+          data-testid="edit"
+          @click=${() => {
+            this.type = 'edit';
+          }}
+        >
+          ${EditIcon}
+          <affine-tooltip .offset=${12}>Edit</affine-tooltip>
+        </icon-button>
+
+        <span class="affine-link-popover-dividing-line"></span>
+
+        ${this._isBookmarkAllowed()
+          ? html`
+              <div class="affine-link-popover-view-selector">
+                <icon-button
+                  size="24px"
+                  class="affine-link-popover-view-selector link current-view"
+                  ?hover=${false}
+                >
+                  ${LinkIcon}
+                  <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
+                </icon-button>
+
+                <icon-button
+                  size="24px"
+                  data-testid="link-to-card"
+                  class="affine-link-popover-view-selector card"
+                  ?hover=${false}
+                  @click=${() => this._linkToBookmark()}
+                >
+                  ${BookmarkIcon}
+                  <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
+                </icon-button>
+
+                <icon-button
+                  size="24px"
+                  class="affine-link-popover-view-selector embed"
+                  ?hover=${false}
+                >
+                  ${EmbedWebIcon}
+                  <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
+                </icon-button>
+              </div>
+
+              <span class="affine-link-popover-dividing-line"></span>
+            `
+          : nothing}
+
+        <icon-button data-testid="unlink" @click=${() => this._removeLink()}>
+          ${UnlinkIcon}
+          <affine-tooltip .offset=${12}>Remove</affine-tooltip>
+        </icon-button>
+
+        <span class="affine-link-popover-dividing-line"></span>
+
+        <icon-button
+          size="24px"
+          class="bookmark-toolbar-button more-button"
+          @click=${() => this._toggleMoreMenu()}
+        >
+          ${MoreVerticalIcon}
+          <affine-tooltip .offset=${12}>More</affine-tooltip>
+        </icon-button>
       </div>
-
-      <icon-button size="32px" @click=${() => this._copyUrl()}>
-        ${CopyIcon}
-        <affine-tooltip .offset=${12}>${'Click to copy link'}</affine-tooltip>
-      </icon-button>
-
-      <icon-button
-        size="32px"
-        data-testid="edit"
-        @click=${() => {
-          this.type = 'edit';
-        }}
-      >
-        ${EditIcon}
-        <affine-tooltip .offset=${12}>Edit</affine-tooltip>
-      </icon-button>
-
-      <span class="affine-link-popover-dividing-line"></span>
-
-      ${this._isBookmarkAllowed()
-        ? html`<div class="affine-link-popover-view-selector">
-              <icon-button
-                size="24px"
-                class="affine-link-popover-view-selector link current-view"
-                hover="false"
-              >
-                ${LinkIcon}
-                <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
-              </icon-button>
-
-              <icon-button
-                size="24px"
-                data-testid="link-to-card"
-                class="affine-link-popover-view-selector card"
-                hover="false"
-                @click=${() => this._linkToBookmark()}
-              >
-                ${BookmarkIcon}
-                <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
-              </icon-button>
-
-              <icon-button
-                size="24px"
-                class="affine-link-popover-view-selector embed"
-                hover="false"
-              >
-                ${EmbedWebIcon}
-                <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
-              </icon-button>
-            </div>
-
-            <span class="affine-link-popover-dividing-line"></span>`
-        : nothing}
-
-      <icon-button data-testid="unlink" @click=${() => this._removeLink()}>
-        ${UnlinkIcon}
-        <affine-tooltip .offset=${12}>Remove</affine-tooltip>
-      </icon-button>
-
-      <span class="affine-link-popover-dividing-line"></span>
-
-      <icon-button
-        size="24px"
-        class="bookmark-toolbar-button more-button"
-        @click=${() => this._toggleMoreMenu()}
-      >
-        ${MoreVerticalIcon}
-        <affine-tooltip .offset=${12}>More</affine-tooltip>
-      </icon-button>
-    </div>`;
+    `;
   }
 
   private _editTemplate() {
@@ -402,32 +428,34 @@ export class LinkPopup extends WithDisposable(LitElement) {
       })
       .catch(console.error);
 
-    return html`<div class="affine-link-edit-popover">
-      <div class="affine-edit-text-area">
-        <input
-          class="affine-edit-text-input"
-          id="text-input"
-          type="text"
-          placeholder="Enter text"
-          @input=${this._updateConfirmBtn}
-        />
-        <span class="affine-link-popover-dividing-line"></span>
-        <label class="affine-edit-text-text" for="text-input">Text</label>
+    return html`
+      <div class="affine-link-edit-popover">
+        <div class="affine-edit-text-area">
+          <input
+            class="affine-edit-text-input"
+            id="text-input"
+            type="text"
+            placeholder="Enter text"
+            @input=${this._updateConfirmBtn}
+          />
+          <span class="affine-link-popover-dividing-line"></span>
+          <label class="affine-edit-text-text" for="text-input">Text</label>
+        </div>
+        <div class="affine-edit-link-area">
+          <input
+            id="link-input"
+            class="affine-edit-link-input"
+            type="text"
+            spellcheck="false"
+            placeholder="Paste or type a link"
+            @input=${this._updateConfirmBtn}
+          />
+          <span class="affine-link-popover-dividing-line"></span>
+          <label class="affine-edit-link-text" for="link-input">Link</label>
+        </div>
+        ${this._confirmBtnTemplate()}
       </div>
-      <div class="affine-edit-link-area">
-        <input
-          id="link-input"
-          class="affine-edit-link-input"
-          type="text"
-          spellcheck="false"
-          placeholder="Paste or type a link"
-          @input=${this._updateConfirmBtn}
-        />
-        <span class="affine-link-popover-dividing-line"></span>
-        <label class="affine-edit-link-text" for="link-input">Link</label>
-      </div>
-      ${this._confirmBtnTemplate()}
-    </div>`;
+    `;
   }
 
   override render() {

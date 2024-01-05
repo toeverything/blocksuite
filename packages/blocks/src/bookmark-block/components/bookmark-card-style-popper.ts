@@ -5,18 +5,12 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { repeat } from 'lit/directives/repeat.js';
 
 import type {
   BookmarkBlockModel,
   BookmarkBlockType,
 } from '../bookmark-model.js';
-import {
-  getBookmarkDefaultImages,
-  STYLE_ICON_NAMES,
-  STYLE_TOOLTIPS,
-  STYLE_VALUES,
-} from './config.js';
+import { getBookmarkDefaultImages } from './config.js';
 
 @customElement('bookmark-card-style-menu')
 export class BookmarkCardStyleMenu extends WithDisposable(LitElement) {
@@ -57,29 +51,37 @@ export class BookmarkCardStyleMenu extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const images = getBookmarkDefaultImages();
-    const { style: currentStyle } = this.model;
-    return html`${repeat(
-      STYLE_VALUES,
-      style => style,
-      (style, index) => {
-        return html`
-          <icon-button
-            width="76px"
-            height="76px"
-            class=${classMap({
-              selected: currentStyle === style,
-            })}
-            @click=${() => this._setBookmarkStyle(style)}
-          >
-            ${images[STYLE_ICON_NAMES[index]]}
-            <affine-tooltip .offset=${4}
-              >${STYLE_TOOLTIPS[index]}</affine-tooltip
-            >
-          </icon-button>
-        `;
-      }
-    )} `;
+    const { LargeHorizontalCardIcon, SmallHorizontalCardIcon } =
+      getBookmarkDefaultImages();
+    return html`
+      <icon-button
+        width="76px"
+        height="76px"
+        class=${classMap({
+          selected: this.model.style === 'horizontal',
+        })}
+        @click=${() => this._setBookmarkStyle('horizontal')}
+      >
+        ${LargeHorizontalCardIcon}
+        <affine-tooltip .offset=${4}
+          >${'Large horizontal style'}</affine-tooltip
+        >
+      </icon-button>
+
+      <icon-button
+        width="76px"
+        height="76px"
+        class=${classMap({
+          selected: this.model.style === 'list',
+        })}
+        @click=${() => this._setBookmarkStyle('list')}
+      >
+        ${SmallHorizontalCardIcon}
+        <affine-tooltip .offset=${4}
+          >${'Small horizontal style'}</affine-tooltip
+        >
+      </icon-button>
+    `;
   }
 }
 

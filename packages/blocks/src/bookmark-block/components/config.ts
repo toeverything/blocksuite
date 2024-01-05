@@ -1,10 +1,7 @@
 import type { TemplateResult } from 'lit';
 
 import { getThemeMode } from '../../_common/utils/query.js';
-import type {
-  BookmarkBlockModel,
-  BookmarkBlockType,
-} from '../bookmark-model.js';
+import type { BookmarkBlockModel } from '../bookmark-model.js';
 import {
   DarkBanner,
   DarkLargeHorizontalCardIcon,
@@ -39,27 +36,6 @@ type ConfigItem = {
   ) => void;
   divider?: boolean;
 };
-
-export const STYLE_VALUES: BookmarkBlockType[] = [
-  'horizontal',
-  'list',
-  'vertical',
-  'cube',
-];
-
-export const STYLE_TOOLTIPS = [
-  'Large Horizontal Style',
-  'Small Horizontal Style',
-  'Large Vertical Style',
-  'Small Vertical Style',
-];
-
-export const STYLE_ICON_NAMES: (keyof BookmarkDefaultImages)[] = [
-  'LargeHorizontalCardIcon',
-  'SmallHorizontalCardIcon',
-  'LargeVerticalCardIcon',
-  'SmallVerticalCardIcon',
-] as const;
 
 type BookmarkDefaultImages = {
   LoadingIcon: TemplateResult<1>;

@@ -12,7 +12,6 @@ import {
   CopyIcon,
   EditIcon,
   EmbedWebIcon,
-  LinkIcon,
   PaletteIcon,
 } from '../../../../_common/icons/text.js';
 import { toggleBookmarkEditModal } from '../../../../bookmark-block/components/index.js';
@@ -59,6 +58,10 @@ export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
     }
 
     .change-bookmark-button.url > span {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+
       color: var(--affine-link-color);
       font-feature-settings:
         'clig' off,
@@ -161,81 +164,74 @@ export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
 
   override render() {
     const { style } = this._bookmarkModel;
-    return html`<div class="change-bookmark-container">
-      <div class="change-bookmark-button url" @click=${() => this._copyUrl()}>
-        <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
-        <span>${this._bookmarkModel.url}</span>
+    return html`
+      <div class="change-bookmark-container">
+        <div class="change-bookmark-button url" @click=${() => this._copyUrl()}>
+          <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
+          <span>${this._bookmarkModel.url}</span>
+        </div>
+
+        <edgeless-tool-icon-button
+          .tooltip=${'Click to copy link'}
+          class="change-bookmark-button copy"
+          ?disabled=${this.page.readonly}
+          @click=${() => this._copyUrl()}
+        >
+          ${CopyIcon}
+        </edgeless-tool-icon-button>
+
+        <edgeless-tool-icon-button
+          .tooltip=${'Edit'}
+          class="change-bookmark-button edit"
+          ?disabled=${this.page.readonly}
+          @click=${() => toggleBookmarkEditModal(this.bookmark)}
+        >
+          ${EditIcon}
+        </edgeless-tool-icon-button>
+
+        <component-toolbar-menu-divider
+          .vertical=${true}
+        ></component-toolbar-menu-divider>
+
+        <div class="change-bookmark-button-view-selector">
+          <edgeless-tool-icon-button
+            class="change-bookmark-button card current-view"
+            .tooltip=${'Card view'}
+            ?disabled=${this.page.readonly}
+            .iconContainerPadding=${2}
+            .hover=${false}
+          >
+            ${BookmarkIcon}
+          </edgeless-tool-icon-button>
+
+          <edgeless-tool-icon-button
+            class="change-bookmark-button embed"
+            .tooltip=${'Embed view'}
+            ?disabled=${this.page.readonly}
+            .iconContainerPadding=${2}
+            .hover=${false}
+          >
+            ${EmbedWebIcon}
+          </edgeless-tool-icon-button>
+        </div>
+
+        <div class="change-bookmark-button card-style">
+          <edgeless-tool-icon-button
+            .tooltip=${this._showPopper ? '' : 'Card style'}
+            ?disabled=${this.page.readonly}
+            @click=${() => this._bookmarkCardStylePopper?.toggle()}
+          >
+            ${PaletteIcon}
+          </edgeless-tool-icon-button>
+        </div>
+        <bookmark-card-style-panel
+          .value=${style}
+          .onSelect=${(value: BookmarkBlockType) =>
+            this._setBookmarkStyle(value)}
+        >
+        </bookmark-card-style-panel>
       </div>
-
-      <edgeless-tool-icon-button
-        .tooltip=${'Click to copy link'}
-        class="change-bookmark-button copy"
-        ?disabled=${this.page.readonly}
-        @click=${() => this._copyUrl()}
-      >
-        ${CopyIcon}
-      </edgeless-tool-icon-button>
-
-      <edgeless-tool-icon-button
-        .tooltip=${'Edit'}
-        class="change-bookmark-button edit"
-        ?disabled=${this.page.readonly}
-        @click=${() => toggleBookmarkEditModal(this.bookmark)}
-      >
-        ${EditIcon}
-      </edgeless-tool-icon-button>
-
-      <component-toolbar-menu-divider
-        .vertical=${true}
-      ></component-toolbar-menu-divider>
-
-      <div class="change-bookmark-button-view-selector">
-        <edgeless-tool-icon-button
-          class="change-bookmark-button link"
-          .tooltip=${'Link view'}
-          ?disabled=${this.page.readonly}
-          .iconContainerPadding=${2}
-          .hover=${false}
-        >
-          ${LinkIcon}
-        </edgeless-tool-icon-button>
-
-        <edgeless-tool-icon-button
-          class="change-bookmark-button card current-view"
-          .tooltip=${'Card view'}
-          ?disabled=${this.page.readonly}
-          .iconContainerPadding=${2}
-          .hover=${false}
-        >
-          ${BookmarkIcon}
-        </edgeless-tool-icon-button>
-
-        <edgeless-tool-icon-button
-          class="change-bookmark-button embed"
-          .tooltip=${'Embed view'}
-          ?disabled=${this.page.readonly}
-          .iconContainerPadding=${2}
-          .hover=${false}
-        >
-          ${EmbedWebIcon}
-        </edgeless-tool-icon-button>
-      </div>
-
-      <div class="change-bookmark-button card-style">
-        <edgeless-tool-icon-button
-          .tooltip=${this._showPopper ? '' : 'Card style'}
-          ?disabled=${this.page.readonly}
-          @click=${() => this._bookmarkCardStylePopper?.toggle()}
-        >
-          ${PaletteIcon}
-        </edgeless-tool-icon-button>
-      </div>
-      <bookmark-card-style-panel
-        .value=${style}
-        .onSelect=${(value: BookmarkBlockType) => this._setBookmarkStyle(value)}
-      >
-      </bookmark-card-style-panel>
-    </div>`;
+    `;
   }
 }
 

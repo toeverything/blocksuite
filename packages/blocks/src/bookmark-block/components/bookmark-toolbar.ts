@@ -62,6 +62,10 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     }
 
     .bookmark-toolbar-button.url > span {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+
       color: var(--affine-link-color);
       font-feature-settings:
         'clig' off,

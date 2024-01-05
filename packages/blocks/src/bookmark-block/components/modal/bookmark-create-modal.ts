@@ -1,10 +1,10 @@
 import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 
 import { toast } from '../../../_common/components/toast.js';
-import { CloseIcon } from '../../../_common/icons/index.js';
 import { bookmarkModalStyles } from './styles.js';
 
 @customElement('bookmark-create-modal')
@@ -20,6 +20,9 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
   @query('input')
   input!: HTMLInputElement;
 
+  @state()
+  private _linkInputValue = '';
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -31,6 +34,11 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
       })
       .catch(console.error);
     this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
+  }
+
+  private _handleInput(e: InputEvent) {
+    const target = e.target as HTMLInputElement;
+    this._linkInputValue = target.value;
   }
 
   private _onDocumentKeydown = (e: KeyboardEvent) => {
@@ -63,30 +71,40 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
   override render() {
     return html`<div class="bookmark-modal blocksuite-overlay">
       <div class="bookmark-modal-mask" @click=${this._onCancel}></div>
-      <div class="bookmark-modal-wrapper" style="width:480px">
-        <icon-button
-          width="32px"
-          height="32px"
-          class="bookmark-modal-close-button"
-          @click=${this._onCancel}
-          >${CloseIcon}</icon-button
-        >
-
+      <div class="bookmark-modal-wrapper">
         <div class="bookmark-modal-title">Bookmark</div>
-        <div class="bookmark-modal-desc">
-          Create a Bookmark that previews a link in card view.
-        </div>
-        <input
-          tabindex="1"
-          type="text"
-          class="bookmark-modal-input link"
-          placeholder="Input in https://..."
-        />
 
-        <div class="bookmark-modal-footer">
+        <div class="bookmark-modal-content">
+          <div class="bookmark-modal-content-text">
+            Create a Bookmark that previews a link in card view.
+          </div>
+
+          <input
+            class="bookmark-modal-input link"
+            tabindex="0"
+            type="text"
+            placeholder="Input in https://..."
+            value=${this._linkInputValue}
+            @input=${this._handleInput}
+          />
+        </div>
+
+        <div class="bookmark-modal-action">
           <div
-            tabindex="2"
-            class="bookmark-modal-confirm-button"
+            class="bookmark-modal-button cancel"
+            tabindex="0"
+            @click=${() => this.remove()}
+          >
+            Cancel
+          </div>
+
+          <div
+            class=${classMap({
+              'bookmark-modal-button': true,
+              confirm: true,
+              disabled: this._linkInputValue.length === 0,
+            })}
+            tabindex="0"
             @click=${this._onConfirm}
           >
             Confirm
