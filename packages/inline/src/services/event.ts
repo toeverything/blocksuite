@@ -224,8 +224,6 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _onBeforeInput = (event: InputEvent) => {
-    event.preventDefault();
-
     if (
       this.editor.isReadonly ||
       this._isComposing ||
@@ -250,6 +248,8 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
 
     const inlineRange = this.editor.getInlineRange();
     if (!inlineRange) return;
+
+    event.preventDefault();
 
     let ctx: BeforeinputHookCtx<TextAttributes> | null = {
       inlineEditor: this.editor,
