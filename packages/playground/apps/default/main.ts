@@ -47,10 +47,10 @@ function subscribePage(workspace: Workspace) {
 
     document.body.appendChild(quickEdgelessMenu);
 
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       const contentParser = new ContentParser(editor.host, page);
       quickEdgelessMenu.contentParser = contentParser;
-    });
+    }, 100);
 
     window.editor = editor;
     window.page = page;
