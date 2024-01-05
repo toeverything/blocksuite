@@ -1,4 +1,5 @@
 import { assertType, Slot } from '@blocksuite/global/utils';
+import type { BlockModel } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 
 import { type EdgelessElement } from '../../_common/types.js';
@@ -9,7 +10,7 @@ import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
 import type { CanvasElement } from '../../surface-block/elements/index.js';
-import { GroupElement } from '../../surface-block/elements/index.js';
+import type { GroupElement } from '../../surface-block/elements/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { GROUP_ROOT } from '../elements/group/consts.js';
 import { SurfaceElement } from '../elements/surface-element.js';
@@ -479,6 +480,7 @@ export class LayerManager {
     props?: Record<string, unknown>
   ) {
     let updateType: 'block' | 'canvas' | undefined = undefined;
+    const type = 'type' in element ? element.type : element.flavour;
 
     const indexChanged = !props || 'index' in props;
     const updateArray = (
@@ -490,22 +492,22 @@ export class LayerManager {
       insertToOrderedArray(array, element);
     };
 
-    if (element instanceof SurfaceElement) {
+    if (!type.startsWith('affine:')) {
       updateType = 'canvas';
       updateArray(this.canvasElements, element);
 
-      if (element instanceof GroupElement && indexChanged) {
-        element.childElements.forEach(
+      if (type === 'group' && indexChanged) {
+        (element as GroupElement).childElements.forEach(
           child => child && this._updateLayer(child)
         );
       }
-    } else if (matchFlavours(element, ['affine:frame'])) {
+    } else if (matchFlavours(element as BlockModel, ['affine:frame'])) {
       updateArray(this.frames, element);
-      this.framesGrid.add(element);
+      this.framesGrid.add(element as FrameBlockModel);
     } else {
       updateType = 'block';
       updateArray(this.blocks, element);
-      this.blocksGrid.add(element);
+      this.blocksGrid.add(element as IndexableBlock);
     }
 
     if (updateType && indexChanged) {
@@ -520,23 +522,24 @@ export class LayerManager {
 
   add(element: Indexable | FrameBlockModel) {
     let insertType: 'block' | 'canvas' | undefined = undefined;
+    const type = 'type' in element ? element.type : element.flavour;
 
-    if (element instanceof SurfaceElement) {
+    if (!type.startsWith('affine:')) {
       insertType = 'canvas';
       insertToOrderedArray(this.canvasElements, element);
 
-      if (element instanceof GroupElement) {
-        element.childElements.forEach(
+      if (type === 'group') {
+        (element as GroupElement).childElements.forEach(
           child => child && this._updateLayer(child)
         );
       }
-    } else if (matchFlavours(element, ['affine:frame'])) {
+    } else if (matchFlavours(element as BlockModel, ['affine:frame'])) {
       insertToOrderedArray(this.frames, element);
-      this.framesGrid.add(element);
+      this.framesGrid.add(element as FrameBlockModel);
     } else {
       insertType = 'block';
       insertToOrderedArray(this.blocks, element);
-      this.blocksGrid.add(element);
+      this.blocksGrid.add(element as IndexableBlock);
     }
 
     if (insertType) {
@@ -554,7 +557,7 @@ export class LayerManager {
       removeFromOrderedArray(this.canvasElements, element);
     } else if (matchFlavours(element, ['affine:frame'])) {
       removeFromOrderedArray(this.frames, element);
-      this.framesGrid.remove(element);
+      this.framesGrid.remove(element as FrameBlockModel);
     } else {
       deleteType = 'block';
       removeFromOrderedArray(this.blocks, element);
@@ -582,12 +585,10 @@ export class LayerManager {
     return this.canvasLayers;
   }
 
-  generateIndex(batch: 'frame'): string;
-  generateIndex(batch: 'common', type?: 'canvas' | 'block'): string;
-  generateIndex(
-    batch: 'common' | 'frame',
-    type: 'canvas' | 'block' = 'canvas'
-  ): string {
+  generateIndex(elementType: string): string {
+    const batch = elementType === 'affine:frame' ? 'frame' : 'common';
+    const type = elementType.startsWith('affine:') ? 'block' : 'canvas';
+
     if (batch === 'frame') {
       const lastFrame = last(this.frames);
 
@@ -625,6 +626,59 @@ export class LayerManager {
 
       return generateKeyBetween(lastLayer.indexes[1], null);
     }
+  }
+
+  /**
+   * In some cases, we need to generate a bunch of indexes in advance before acutally adding the elements to the layer manager.
+   * Eg. when importing a template. The `generateIndex` is a pure function which depends on the current state of the manager.
+   * We cannot use it because it will always return the same index if the element is not added to manager.
+   * So we need to create a generator that can "remember" the index it generated without actually adding the element to the manager.
+   *
+   * This is what this function does.
+   *
+   * @param ignoreRule If true, the generator will not distinguish between `block` and `canvas` elements.
+   * @returns
+   */
+  preservedIndexGenerator(ignoreRule: boolean) {
+    const manager = new LayerManager();
+
+    manager.frames = [...this.frames];
+    manager.blocks = [...this.blocks];
+    manager.canvasElements = [...this.canvasElements];
+    // @ts-ignore
+    manager.layers = this.layers.map(layer => {
+      return {
+        ...layer,
+        // @ts-ignore
+        set: new Set(layer.set),
+        elements: [...layer.elements],
+      };
+    });
+    manager._buildCanvasLayers();
+
+    return (elementType: string) => {
+      if (ignoreRule && elementType !== 'affine:frame') {
+        elementType = 'shape';
+      }
+
+      const idx = manager.generateIndex(elementType);
+      const bound = new Bound(0, 0, 10, 10);
+
+      if (elementType === 'group') elementType = 'shape';
+
+      manager.add({
+        index: idx,
+        flavour: elementType,
+        x: 0,
+        y: 0,
+        w: 10,
+        h: 10,
+        elementBound: bound,
+        xywh: '[0, 0, 10, 10]',
+      } as unknown as Indexable);
+
+      return idx;
+    };
   }
 
   getReorderedIndex(

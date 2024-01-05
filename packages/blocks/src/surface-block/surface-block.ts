@@ -735,7 +735,7 @@ export class SurfaceBlockComponent extends BlockElement<
         ...defaultProps,
         ...properties,
         id,
-        index: this.layer.generateIndex('common', 'canvas'),
+        index: this.layer.generateIndex(type),
         seed: randomSeed(),
       };
 
@@ -756,10 +756,7 @@ export class SurfaceBlockComponent extends BlockElement<
 
       return id;
     } else {
-      const index =
-        type === 'affine:frame'
-          ? this.layer.generateIndex('frame')
-          : this.layer.generateIndex('common', 'block');
+      const index = this.layer.generateIndex(type);
       return this.page.addBlock(
         type,
         { ...properties, index },

@@ -48,3 +48,46 @@ export function loadingSort<T extends { id: string; deps: string[] }>(
 
   return sortedOrder.map(id => map.get(id)!);
 }
+
+export function sortIndex(
+  a: { id: string; index: string },
+  b: { id: string; index: string },
+  groupIndexMap: Map<string, { id: string; index: string }>
+) {
+  const aGroupIndex = groupIndexMap.get(a.id);
+  const bGroupIndex = groupIndexMap.get(b.id);
+
+  if (aGroupIndex && bGroupIndex) {
+    return aGroupIndex.id === bGroupIndex.id
+      ? a.index === b.index
+        ? 0
+        : a.index > b.index
+          ? 1
+          : -1
+      : aGroupIndex.index > bGroupIndex.index
+        ? 1
+        : -1;
+  }
+
+  if (aGroupIndex) {
+    return aGroupIndex.id === b.id
+      ? 1
+      : aGroupIndex.index === b.index
+        ? 0
+        : aGroupIndex.index > b.index
+          ? 1
+          : -1;
+  }
+
+  if (bGroupIndex) {
+    return a.id === bGroupIndex.id
+      ? -1
+      : a.index === bGroupIndex.index
+        ? 0
+        : a.index > bGroupIndex.index
+          ? 1
+          : -1;
+  }
+
+  return a.index === b.index ? 0 : a.index > b.index ? 1 : -1;
+}

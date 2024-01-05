@@ -74,7 +74,10 @@ Firstly, let's explain the newly introduced `host` and `std`, which are determin
 - Regardless of the framework used to implement `EditorHost`, they can access the same headless standard library designed for editable blocks through `host.std`. For example, `std.spec` contains all the registered [`BlockSpec`](./block-spec)s.
 
 ::: tip
-We usually access `host.spec` instead of `host.std.spec` to simplify the code.
+
+- To access `host` after attaching page to an editor, wait for the [`page.slots.ready`](/api/@blocksuite/store/classes/Page.html#ready-1) slot.
+- We usually access `host.spec` instead of `host.std.spec` to simplify the code.
+
 :::
 
 As the runtime for the block tree, this is the mental model inside the `editor`:
