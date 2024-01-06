@@ -32,7 +32,7 @@ export const getBlockIndexCommand: Command<
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       blockIndex?: number;
       parentBlock?: BlockElement;
     }

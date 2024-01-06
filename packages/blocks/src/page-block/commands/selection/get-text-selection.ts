@@ -13,7 +13,7 @@ export const getTextSelectionCommand: Command<never, 'currentTextSelection'> = (
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       currentTextSelection?: TextSelection;
     }
 

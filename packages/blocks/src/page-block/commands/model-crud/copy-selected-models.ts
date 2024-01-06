@@ -47,7 +47,7 @@ export const copySelectedModelsCommand: Command<'selectedModels' | 'onCopy'> = (
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       onCopy?: () => void;
     }
     interface Commands {

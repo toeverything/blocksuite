@@ -16,7 +16,7 @@ export interface InitCommandCtx {
 }
 
 export type CommandKeyToData<K extends BlockSuite.CommandDataName> = Pick<
-  BlockSuite.CommandData,
+  BlockSuite.CommandContext,
   K
 >;
 export type Command<
@@ -42,7 +42,7 @@ type OutDataOfCommand<C> = C extends Command<any, infer K, any>
 // eslint-disable-next-line @typescript-eslint/ban-types
 type CommonMethods<In extends object = {}> = {
   run(): boolean;
-  with<T extends Partial<BlockSuite.CommandData>>(value: T): Chain<In & T>;
+  with<T extends Partial<BlockSuite.CommandContext>>(value: T): Chain<In & T>;
   inline: <InlineOut extends BlockSuite.CommandDataName = never>(
     command: Command<Extract<keyof In, BlockSuite.CommandDataName>, InlineOut>
   ) => Chain<In & CommandKeyToData<InlineOut>>;
@@ -94,7 +94,7 @@ export class CommandManager {
     const createChain = this.createChain;
     const pipe = this.pipe;
     const runCmds = (
-      ctx: BlockSuite.CommandData,
+      ctx: BlockSuite.CommandContext,
       [cmd, ...rest]: Command[]
     ) => {
       if (cmd) {
@@ -109,7 +109,7 @@ export class CommandManager {
         let success = false;
         try {
           const cmds = this[cmdSymbol];
-          runCmds(ctx as BlockSuite.CommandData, [
+          runCmds(ctx as BlockSuite.CommandContext, [
             ...cmds,
             (_, next) => {
               success = true;
@@ -222,7 +222,7 @@ export class CommandManager {
 
     return createChain(methods, []);
   };
-  getChainCtx = <T extends BlockSuite.CommandData>(chain: Chain<T>) => {
+  getChainCtx = <T extends BlockSuite.CommandContext>(chain: Chain<T>) => {
     const ctx = {} as T;
     chain
       .inline((chainCtx, next) => {
@@ -236,12 +236,12 @@ export class CommandManager {
 
 declare global {
   namespace BlockSuite {
-    interface CommandData extends InitCommandCtx {}
+    interface CommandContext extends InitCommandCtx {}
 
     interface Commands {}
 
     type CommandName = keyof Commands;
-    type CommandDataName = keyof CommandData;
+    type CommandDataName = keyof CommandContext;
 
     // eslint-disable-next-line @typescript-eslint/ban-types
     type CommandChain<In extends object = {}> = Chain<In>;
