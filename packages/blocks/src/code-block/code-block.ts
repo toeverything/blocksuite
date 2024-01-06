@@ -18,6 +18,7 @@ import {
 } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -463,9 +464,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   private _onClickWrapBtn() {
-    const container = this.querySelector('.affine-code-block-container');
-    assertExists(container);
-    this._wrap = container.classList.toggle('wrap');
+    this._wrap = !this._wrap;
   }
 
   setHighlightOptionsGetter(fn: HighlightOptionsGetter) {
@@ -592,7 +591,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   override render(): TemplateResult<1> {
     return html`<div
       ${ref(this._whenHover.setReference)}
-      class="affine-code-block-container"
+      class=${classMap({
+        'affine-code-block-container': true,
+        wrap: this._wrap,
+      })}
     >
       ${this._curLanguageButtonTemplate()}
       <div class="rich-text-container">
