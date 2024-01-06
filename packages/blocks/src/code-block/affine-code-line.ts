@@ -68,6 +68,7 @@ export class AffineCodeLine extends ShadowlessElement {
         .str=${token.content}
         .styles=${{
           'word-wrap': 'break-word',
+          'white-space': 'break-spaces',
           color: token.color,
         }}
       ></v-text>`;

@@ -229,7 +229,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         model: this.model,
         wrap: this._wrap,
         onClickWrap: () => {
-          this._onClickWrapBtn();
+          this._wrap = !this._wrap;
           updatePortal();
         },
         abortController,
@@ -461,10 +461,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     assertExists(this._richTextElement);
     this._richTextResizeObserver.disconnect();
     this._richTextResizeObserver.observe(this._richTextElement);
-  }
-
-  private _onClickWrapBtn() {
-    this._wrap = !this._wrap;
   }
 
   setHighlightOptionsGetter(fn: HighlightOptionsGetter) {
