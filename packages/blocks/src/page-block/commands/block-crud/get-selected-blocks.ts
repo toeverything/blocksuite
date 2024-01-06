@@ -109,7 +109,7 @@ export const getSelectedBlocksCommand: Command<
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       selectedBlocks?: BlockElement[];
     }
 

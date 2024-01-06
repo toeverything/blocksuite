@@ -40,7 +40,7 @@ export const getSelectedModelsCommand: Command<
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       selectedModels?: BlockModel[];
     }
 
