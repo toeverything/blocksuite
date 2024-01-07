@@ -6,6 +6,7 @@ import { computePosition, flip, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import type { PageService } from '../../../../../../page-block/page-service.js';
 import type { IconButton } from '../../../../../components/button.js';
 import { createLitPortal } from '../../../../../components/portal.js';
 import { toast } from '../../../../../components/toast.js';
@@ -46,7 +47,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   @query('#link-input')
   linkInput?: HTMLInputElement;
 
-  @query('.popup-container')
+  @query('.affine-link-popover-container')
   popupContainer!: HTMLDivElement;
 
   @query('.mock-selection-container')
@@ -146,6 +147,18 @@ export class LinkPopup extends WithDisposable(LitElement) {
       .catch(console.error);
   }
 
+  private get _pageService() {
+    const pageService = this.std.spec.getService(
+      'affine:page'
+    ) as PageService | null;
+    assertExists(pageService);
+    return pageService;
+  }
+
+  get std() {
+    return this.blockElement.std;
+  }
+
   get blockElement() {
     const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
       `[${BLOCK_ID_ATTR}]`
@@ -226,7 +239,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private _linkToBookmark() {
+  private _convertToCardView() {
     if (!this.inlineEditor.isValidInlineRange(this.targetInlineRange)) return;
 
     const blockElement = this.blockElement;
@@ -240,12 +253,32 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const parent = page.getParent(blockElement.model);
     assertExists(parent);
     const index = parent.children.indexOf(blockElement.model);
-    blockElement.host.page.addBlock(
-      'affine:bookmark',
-      props,
-      parent,
-      index + 1
-    );
+    page.addBlock('affine:bookmark', props, parent, index + 1);
+
+    this.inlineEditor.deleteText(this.targetInlineRange);
+
+    this.abortController.abort();
+  }
+
+  private _canConvertToEmbedView() {
+    const url = this.currentLink;
+    return !!this._pageService.getEmbedBlockOptions(url);
+  }
+
+  private _convertToEmbedView() {
+    const url = this.currentLink;
+    const embedOptions = this._pageService.getEmbedBlockOptions(url);
+    if (!embedOptions) return;
+
+    const { flavour } = embedOptions;
+
+    const blockElement = this.blockElement;
+    const page = blockElement.host.page;
+    const parent = page.getParent(blockElement.model);
+    assertExists(parent);
+    const index = parent.children.indexOf(blockElement.model);
+
+    page.addBlock(flavour, { url }, parent, index + 1);
 
     this.inlineEditor.deleteText(this.targetInlineRange);
 
@@ -365,8 +398,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
               <div class="affine-link-popover-view-selector">
                 <icon-button
                   size="24px"
-                  class="affine-link-popover-view-selector link current-view"
-                  ?hover=${false}
+                  class="affine-link-popover-view-selector-button link current-view"
+                  hover="false"
                 >
                   ${LinkIcon}
                   <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
@@ -375,22 +408,27 @@ export class LinkPopup extends WithDisposable(LitElement) {
                 <icon-button
                   size="24px"
                   data-testid="link-to-card"
-                  class="affine-link-popover-view-selector card"
-                  ?hover=${false}
-                  @click=${() => this._linkToBookmark()}
+                  class="affine-link-popover-view-selector-button card"
+                  hover="false"
+                  @click=${() => this._convertToCardView()}
                 >
                   ${BookmarkIcon}
                   <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
                 </icon-button>
 
-                <icon-button
-                  size="24px"
-                  class="affine-link-popover-view-selector embed"
-                  ?hover=${false}
-                >
-                  ${EmbedWebIcon}
-                  <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
-                </icon-button>
+                ${this._canConvertToEmbedView()
+                  ? html` <icon-button
+                      size="24px"
+                      class="affine-link-popover-view-selector-button embed"
+                      hover="false"
+                      @click=${() => this._convertToEmbedView()}
+                    >
+                      ${EmbedWebIcon}
+                      <affine-tooltip .offset=${12}
+                        >${'Embed view'}</affine-tooltip
+                      >
+                    </icon-button>`
+                  : nothing}
               </div>
 
               <span class="affine-link-popover-dividing-line"></span>
@@ -464,7 +502,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const mask =
       this.type === 'edit' || this.type === 'create'
         ? html`<div
-            class="overlay-mask"
+            class="affine-link-popover-overlay-mask"
             @click=${() => this.abortController.abort()}
           ></div>`
         : nothing;
@@ -479,7 +517,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     return html`
       <div class="overlay-root blocksuite-overlay">
         ${mask}
-        <div class="popup-container" @keydown=${this._onKeydown}>
+        <div class="affine-link-popover-container" @keydown=${this._onKeydown}>
           ${popover}
         </div>
         <div class="mock-selection-container"></div>

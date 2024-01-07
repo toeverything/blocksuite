@@ -8,6 +8,7 @@ import { BlockElement } from '@blocksuite/lit';
 import { html, render } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../_common/consts.js';
 import { matchFlavours } from '../_common/utils/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
 import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
@@ -23,7 +24,6 @@ import {
 import type { BookmarkService } from './bookmark-service.js';
 import type { DocBookmarkBlockComponent } from './doc-bookmark-block.js';
 import type { EdgelessBookmarkBlockComponent } from './edgeless-bookmark-block.js';
-import { BookmarkHeight, BookmarkWidth } from './styles.js';
 import { refreshBookmarkUrlData } from './utils.js';
 
 @customElement('affine-bookmark')
@@ -122,6 +122,7 @@ export class BookmarkBlockComponent extends BlockElement<
             style: 'horizontal',
           });
         }
+
         return convertDragPreviewEdgelessToDoc({
           blockComponent,
           ...props,
@@ -132,8 +133,8 @@ export class BookmarkBlockComponent extends BlockElement<
         return convertDragPreviewDocToEdgeless({
           blockComponent,
           cssSelector: '.affine-bookmark-card',
-          width: BookmarkWidth[style],
-          height: BookmarkHeight[style],
+          width: LINK_CARD_WIDTH[style],
+          height: LINK_CARD_HEIGHT[style],
           ...props,
         });
       }

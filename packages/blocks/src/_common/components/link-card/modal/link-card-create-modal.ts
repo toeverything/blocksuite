@@ -4,12 +4,12 @@ import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { toast } from '../../../_common/components/toast.js';
-import { bookmarkModalStyles } from './styles.js';
+import { toast } from '../../toast.js';
+import { linkCardModalStyles } from './styles.js';
 
-@customElement('bookmark-create-modal')
-export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
-  static override styles = bookmarkModalStyles;
+@customElement('link-card-create-modal')
+export class LinkCardCreateModal extends WithDisposable(ShadowlessElement) {
+  static override styles = linkCardModalStyles;
 
   @property({ attribute: false })
   onCancel?: () => void;
@@ -55,7 +55,7 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
     const url = this.input.value;
 
     if (url.length === 0) {
-      toast('Bookmark url can not be empty');
+      toast('Url can not be empty');
       return;
     }
 
@@ -69,18 +69,18 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    return html`<div class="bookmark-modal blocksuite-overlay">
-      <div class="bookmark-modal-mask" @click=${this._onCancel}></div>
-      <div class="bookmark-modal-wrapper">
-        <div class="bookmark-modal-title">Bookmark</div>
+    return html`<div class="link-card-modal blocksuite-overlay">
+      <div class="link-card-modal-mask" @click=${this._onCancel}></div>
+      <div class="link-card-modal-wrapper">
+        <div class="link-card-modal-title">Create Link</div>
 
-        <div class="bookmark-modal-content">
-          <div class="bookmark-modal-content-text">
+        <div class="link-card-modal-content">
+          <div class="link-card-modal-content-text">
             Create a Bookmark that previews a link in card view.
           </div>
 
           <input
-            class="bookmark-modal-input link"
+            class="link-card-modal-input link"
             tabindex="0"
             type="text"
             placeholder="Input in https://..."
@@ -89,9 +89,9 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
           />
         </div>
 
-        <div class="bookmark-modal-action">
+        <div class="link-card-modal-action">
           <div
-            class="bookmark-modal-button cancel"
+            class="link-card-modal-button cancel"
             tabindex="0"
             @click=${() => this.remove()}
           >
@@ -100,7 +100,7 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
 
           <div
             class=${classMap({
-              'bookmark-modal-button': true,
+              'link-card-modal-button': true,
               confirm: true,
               disabled: this._linkInputValue.length === 0,
             })}
@@ -115,24 +115,24 @@ export class BookmarkCreateModal extends WithDisposable(ShadowlessElement) {
   }
 }
 
-export async function toggleBookmarkCreateModal(
+export async function toggleLinkCardCreateModal(
   host: EditorHost
 ): Promise<null | string> {
   host.selection.clear();
-  const bookmarkCreateModal = new BookmarkCreateModal();
+  const linkCardCreateModal = new LinkCardCreateModal();
   return new Promise(resolve => {
-    bookmarkCreateModal.onConfirm = url => {
+    linkCardCreateModal.onConfirm = url => {
       resolve(url);
     };
-    bookmarkCreateModal.onCancel = () => {
+    linkCardCreateModal.onCancel = () => {
       resolve(null);
     };
-    document.body.appendChild(bookmarkCreateModal);
+    document.body.appendChild(linkCardCreateModal);
   });
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'bookmark-create-modal': BookmarkCreateModal;
+    'link-card-create-modal': LinkCardCreateModal;
   }
 }

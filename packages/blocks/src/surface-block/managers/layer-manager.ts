@@ -6,6 +6,7 @@ import { type EdgelessElement } from '../../_common/types.js';
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
+import type { EmbedGithubModel } from '../../embed-github-block/index.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../note-block/note-model.js';
@@ -29,7 +30,8 @@ import {
 export type IndexableBlock =
   | ImageBlockModel
   | NoteBlockModel
-  | BookmarkBlockModel;
+  | BookmarkBlockModel
+  | EmbedGithubModel;
 
 export type Indexable = CanvasElement | IndexableBlock;
 

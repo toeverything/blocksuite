@@ -4,11 +4,11 @@ import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../_common/consts.js';
 import { getEdgelessPageByElement } from '../_common/utils/query.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
-import { BookmarkHeight, BookmarkWidth } from './styles.js';
 
 @customElement('affine-edgeless-bookmark')
 export class EdgelessBookmarkBlockComponent extends WithDisposable(
@@ -48,8 +48,8 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
 
   override render() {
     const style = this.model.style;
-    const width = BookmarkWidth[style];
-    const height = BookmarkHeight[style];
+    const width = LINK_CARD_WIDTH[style];
+    const height = LINK_CARD_HEIGHT[style];
 
     const bound = Bound.deserialize(
       (

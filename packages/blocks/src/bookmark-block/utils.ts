@@ -77,20 +77,20 @@ export async function refreshBookmarkUrlData(
 
   const queryUrlData = bookmarkElement.service?.queryUrlData;
   assertExists(queryUrlData);
-  const metaData = await queryUrlData(bookmarkElement.model.url);
 
+  const metaData = await queryUrlData(bookmarkElement.model.url);
   const {
     title = null,
     description = null,
     icon = null,
     image = null,
   } = metaData;
+
   bookmarkElement.page.updateBlock(bookmarkElement.model, {
     description,
     icon,
     image,
     title,
   });
-
   bookmarkElement.loading = false;
 }

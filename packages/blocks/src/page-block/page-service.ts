@@ -10,6 +10,7 @@ import {
   DEFAULT_IMAGE_PROXY_ENDPOINT,
   ExportManager,
 } from '../_common/export-manager/export-manager.js';
+import type { LinkCardStyle } from '../_common/types.js';
 import { DEFAULT_CANVAS_TEXT_FONT_CONFIG } from '../surface-block/consts.js';
 import {
   copySelectedModelsCommand,
@@ -31,6 +32,11 @@ import {
 import { FontLoader } from './font-loader/font-loader.js';
 import type { PageBlockModel } from './page-model.js';
 import type { PageBlockComponent } from './types.js';
+
+type EmbedOptions = {
+  urlRegex: RegExp;
+  styles: LinkCardStyle[];
+};
 
 export class PageService extends BlockService<PageBlockModel> {
   readonly fontLoader = new FontLoader();
@@ -55,6 +61,29 @@ export class PageService extends BlockService<PageBlockModel> {
     assertExists(viewportElement);
     return viewportElement;
   }
+
+  private _embedBlockRegistry = new Map<string, EmbedOptions>();
+
+  registerEmbedBlockOptions = (
+    flavour: string,
+    options: EmbedOptions
+  ): void => {
+    this._embedBlockRegistry.set(flavour, options);
+  };
+
+  getEmbedBlockOptions = (
+    url: string
+  ): (EmbedOptions & { flavour: string }) | null => {
+    const entries = this._embedBlockRegistry.entries();
+    for (const [flavour, options] of entries) {
+      const regex = options.urlRegex;
+      const match = url.match(regex);
+      if (match) {
+        return { flavour, ...options };
+      }
+    }
+    return null;
+  };
 
   override mounted() {
     super.mounted();

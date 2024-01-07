@@ -1,22 +1,7 @@
 import type { TemplateResult } from 'lit';
 
-import { getThemeMode } from '../../_common/utils/query.js';
+import type { LinkCardToolbar } from '../../_common/components/link-card/link-card-toolbar.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
-import {
-  DarkBanner,
-  DarkLargeHorizontalCardIcon,
-  DarkLargeVerticalCardIcon,
-  DarkLoadingIcon,
-  DarkSmallHorizontalCardIcon,
-  DarkSmallVerticalCardIcon,
-  LightBanner,
-  LightLargeHorizontalCardIcon,
-  LightLargeVerticalCardIcon,
-  LightLoadingIcon,
-  LightSmallHorizontalCardIcon,
-  LightSmallVerticalCardIcon,
-} from '../styles.js';
-import type { BookmarkToolbar } from './bookmark-toolbar.js';
 
 export type ToolbarActionCallback = (type: ConfigItem['type']) => void;
 
@@ -32,39 +17,7 @@ type ConfigItem = {
      * @deprecated
      */
     callback?: ToolbarActionCallback,
-    element?: BookmarkToolbar
+    element?: LinkCardToolbar
   ) => void;
   divider?: boolean;
 };
-
-type BookmarkDefaultImages = {
-  LoadingIcon: TemplateResult<1>;
-  BannerImage: TemplateResult<1>;
-  LargeHorizontalCardIcon: TemplateResult<1>;
-  SmallHorizontalCardIcon: TemplateResult<1>;
-  LargeVerticalCardIcon: TemplateResult<1>;
-  SmallVerticalCardIcon: TemplateResult<1>;
-};
-
-export function getBookmarkDefaultImages(): BookmarkDefaultImages {
-  const theme = getThemeMode();
-  if (theme === 'light') {
-    return {
-      LoadingIcon: LightLoadingIcon,
-      BannerImage: LightBanner,
-      LargeHorizontalCardIcon: LightLargeHorizontalCardIcon,
-      SmallHorizontalCardIcon: LightSmallHorizontalCardIcon,
-      LargeVerticalCardIcon: LightLargeVerticalCardIcon,
-      SmallVerticalCardIcon: LightSmallVerticalCardIcon,
-    };
-  } else {
-    return {
-      LoadingIcon: DarkLoadingIcon,
-      BannerImage: DarkBanner,
-      LargeHorizontalCardIcon: DarkLargeHorizontalCardIcon,
-      SmallHorizontalCardIcon: DarkSmallHorizontalCardIcon,
-      LargeVerticalCardIcon: DarkLargeVerticalCardIcon,
-      SmallVerticalCardIcon: DarkSmallVerticalCardIcon,
-    };
-  }
-}

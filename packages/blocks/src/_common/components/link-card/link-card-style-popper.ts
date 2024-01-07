@@ -1,4 +1,4 @@
-import '../../_common/components/button';
+import './../button';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/lit';
@@ -6,14 +6,13 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type {
-  BookmarkBlockModel,
-  BookmarkBlockType,
-} from '../bookmark-model.js';
-import { getBookmarkDefaultImages } from './config.js';
+import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
+import type { LinkCardStyle } from '../../types.js';
+import { getLinkCardIcons } from '../../utils/url.js';
 
-@customElement('bookmark-card-style-menu')
-export class BookmarkCardStyleMenu extends WithDisposable(LitElement) {
+@customElement('link-card-style-menu')
+export class LinkCardStyleMenu extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       border-radius: 8px;
@@ -36,7 +35,7 @@ export class BookmarkCardStyleMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!: BookmarkBlockModel;
+  model!: BookmarkBlockModel | EmbedGithubModel;
 
   @property({ attribute: false })
   std!: BlockStdScope;
@@ -44,15 +43,14 @@ export class BookmarkCardStyleMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   abortController!: AbortController;
 
-  private _setBookmarkStyle(style: BookmarkBlockType) {
+  private _setLinkCardStyle(style: LinkCardStyle) {
     this.model.page.updateBlock(this.model, { style });
     this.requestUpdate();
     this.abortController.abort();
   }
 
   override render() {
-    const { LargeHorizontalCardIcon, SmallHorizontalCardIcon } =
-      getBookmarkDefaultImages();
+    const { LinkCardHorizontalIcon, LinkCardListIcon } = getLinkCardIcons();
     return html`
       <icon-button
         width="76px"
@@ -60,9 +58,9 @@ export class BookmarkCardStyleMenu extends WithDisposable(LitElement) {
         class=${classMap({
           selected: this.model.style === 'horizontal',
         })}
-        @click=${() => this._setBookmarkStyle('horizontal')}
+        @click=${() => this._setLinkCardStyle('horizontal')}
       >
-        ${LargeHorizontalCardIcon}
+        ${LinkCardHorizontalIcon}
         <affine-tooltip .offset=${4}
           >${'Large horizontal style'}</affine-tooltip
         >
@@ -74,9 +72,9 @@ export class BookmarkCardStyleMenu extends WithDisposable(LitElement) {
         class=${classMap({
           selected: this.model.style === 'list',
         })}
-        @click=${() => this._setBookmarkStyle('list')}
+        @click=${() => this._setLinkCardStyle('list')}
       >
-        ${SmallHorizontalCardIcon}
+        ${LinkCardListIcon}
         <affine-tooltip .offset=${4}
           >${'Small horizontal style'}</affine-tooltip
         >
@@ -87,6 +85,6 @@ export class BookmarkCardStyleMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'bookmark-card-style-menu': BookmarkCardStyleMenu;
+    'link-card-style-menu': LinkCardStyleMenu;
   }
 }

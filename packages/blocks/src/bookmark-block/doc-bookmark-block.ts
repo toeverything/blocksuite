@@ -1,3 +1,5 @@
+import '../_common/components/link-card/link-card-toolbar';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
@@ -65,14 +67,14 @@ export class DocBookmarkBlockComponent extends WithDisposable(
             z-index: 1;
           }
         </style>
-        <bookmark-toolbar
+        <link-card-toolbar
           .model=${this.model}
           .block=${this.block}
           .onSelected=${this._onToolbarSelected}
           .host=${this}
           .abortController=${abortController}
           .std=${this.block.std}
-        ></bookmark-toolbar>
+        ></link-card-toolbar>
       `,
       computePosition: {
         referenceElement: this.bookmardCardElement,

@@ -145,7 +145,7 @@ test.skip(scoped`create bookmark by blockhub`, async ({ page }) => {
 test(scoped`covert bookmark block to link text`, async ({ page }) => {
   await createBookmarkBlockBySlashMenu(page);
   await hoverBookmarkBlock(page);
-  await page.click('.bookmark-toolbar-button.link');
+  await page.click('.link-card-toolbar-button.link');
   await assertStoreMatchJSX(
     page,
     /*xml*/ `<affine:page>

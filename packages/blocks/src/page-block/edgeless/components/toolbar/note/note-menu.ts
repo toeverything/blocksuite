@@ -2,16 +2,16 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { toggleLinkCardCreateModal } from '../../../../../_common/components/link-card/modal/index.js';
+import {
+  LINK_CARD_HEIGHT,
+  LINK_CARD_WIDTH,
+} from '../../../../../_common/consts.js';
 import { BookmarkIcon } from '../../../../../_common/icons/edgeless.js';
 import {
   type NoteChildrenFlavour,
   type NoteTool,
 } from '../../../../../_common/utils/index.js';
-import { toggleBookmarkCreateModal } from '../../../../../bookmark-block/components/modal/bookmark-create-modal.js';
-import {
-  BookmarkHeight,
-  BookmarkWidth,
-} from '../../../../../bookmark-block/styles.js';
 import { Bound } from '../../../../../surface-block/utils/bound.js';
 import { Vec } from '../../../../../surface-block/utils/vec.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
@@ -106,7 +106,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
               .iconContainerPadding=${2}
               .tooltip=${'Bookmark'}
               @click=${async () => {
-                const url = await toggleBookmarkCreateModal(this.edgeless.host);
+                const url = await toggleLinkCardCreateModal(this.edgeless.host);
                 if (!url) return;
 
                 const center = Vec.toVec(this.edgeless.surface.viewport.center);
@@ -116,8 +116,8 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                     url,
                     xywh: Bound.fromCenter(
                       center,
-                      BookmarkWidth.horizontal,
-                      BookmarkHeight.horizontal
+                      LINK_CARD_WIDTH.horizontal,
+                      LINK_CARD_HEIGHT.horizontal
                     ).serialize(),
                   },
                   this.edgeless.surface.model

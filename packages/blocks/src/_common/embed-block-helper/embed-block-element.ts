@@ -14,8 +14,13 @@ import {
   convertDragPreviewEdgelessToDoc,
 } from '../../page-block/widgets/drag-handle/utils.js';
 import { Bound } from '../../surface-block/index.js';
+import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../consts.js';
 import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
-import { type BlockModels, matchFlavours } from '../utils/index.js';
+import {
+  type BlockModels,
+  type LinkCardStyle,
+  matchFlavours,
+} from '../utils/index.js';
 
 export class EmbedBlockElement<
   Model extends
@@ -23,17 +28,16 @@ export class EmbedBlockElement<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {
-  protected _isInSurface = false;
+  protected _style: LinkCardStyle = 'horizontal';
 
-  protected _width = 400;
-  protected _height = 200;
+  private _isInSurface = false;
 
   get isInSurface() {
     return this._isInSurface;
   }
 
   get surface() {
-    if (!this._isInSurface) return null;
+    if (!this.isInSurface) return null;
     return this.host.querySelector('affine-surface');
   }
 
@@ -42,24 +46,6 @@ export class EmbedBlockElement<
       (this.surface?.pickById(this.model.id) ?? this.model).xywh
     );
   }
-
-  renderEmbed = (children: () => TemplateResult) => {
-    if (!this._isInSurface) {
-      return html` <div class="embed-block-container">${children()}</div> `;
-    }
-
-    return html`
-      <div
-        class="embed-block-container"
-        style=${styleMap({
-          width: '100%',
-          height: '100%',
-        })}
-      >
-        ${children()}
-      </div>
-    `;
-  };
 
   private _dragHandleOption: DragHandleOption = {
     flavour: /affine:embed-*/,
@@ -128,16 +114,24 @@ export class EmbedBlockElement<
         target?.classList.contains('affine-block-children-container');
 
       if (isInSurface) {
+        const style = blockComponent._style;
+        if (style !== 'horizontal' && style !== 'list') {
+          this.page.updateBlock(blockComponent.model, {
+            style: 'horizontal',
+          });
+        }
         return convertDragPreviewEdgelessToDoc({
           blockComponent,
           ...props,
         });
       } else if (isTargetEdgelessContainer) {
+        const style = blockComponent._style;
+
         return convertDragPreviewDocToEdgeless({
           blockComponent,
           cssSelector: '.embed-block-container',
-          width: this._width,
-          height: this._height,
+          width: LINK_CARD_WIDTH[style],
+          height: LINK_CARD_HEIGHT[style],
           ...props,
         });
       }
@@ -156,4 +150,47 @@ export class EmbedBlockElement<
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );
   }
+
+  renderEmbed = (children: () => TemplateResult) => {
+    if (!this.isInSurface) {
+      return html`
+        <div
+          class="embed-block-container"
+          style=${styleMap({
+            width: '100%',
+            height: '100%',
+            margin: '18px 0',
+          })}
+        >
+          ${children()}
+        </div>
+      `;
+    }
+
+    const surface = this.surface;
+    assertExists(surface);
+
+    const style = this._style;
+    const width = LINK_CARD_WIDTH[style];
+    const height = LINK_CARD_HEIGHT[style];
+    const bound = Bound.deserialize(
+      (surface.pickById(this.model.id) ?? this.model).xywh
+    );
+    const scaleX = bound.w / width;
+    const scaleY = bound.h / height;
+
+    return html`
+      <div
+        class="embed-block-container"
+        style=${styleMap({
+          width: `${width}px`,
+          height: `${height}px`,
+          transform: `scale(${scaleX}, ${scaleY})`,
+          transformOrigin: '0 0',
+        })}
+      >
+        ${children()}
+      </div>
+    `;
+  };
 }

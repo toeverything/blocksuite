@@ -1,7 +1,7 @@
 import { css } from 'lit';
 
-export const bookmarkModalStyles = css`
-  .bookmark-modal-mask {
+export const linkCardModalStyles = css`
+  .link-card-modal-mask {
     position: absolute;
     left: 0;
     right: 0;
@@ -11,7 +11,7 @@ export const bookmarkModalStyles = css`
     z-index: 1;
   }
 
-  .bookmark-modal-wrapper {
+  .link-card-modal-wrapper {
     position: absolute;
     left: 0;
     right: 0;
@@ -26,7 +26,7 @@ export const bookmarkModalStyles = css`
     border-radius: var(--affine-popover-radius);
   }
 
-  .bookmark-modal-title {
+  .link-card-modal-title {
     display: flex;
     align-items: flex-end;
     gap: var(--1, 0px);
@@ -42,7 +42,7 @@ export const bookmarkModalStyles = css`
     user-select: none;
   }
 
-  .bookmark-modal-content {
+  .link-card-modal-content {
     display: flex;
     min-height: 80px;
     padding: 12px 24px;
@@ -54,7 +54,7 @@ export const bookmarkModalStyles = css`
     opacity: var(--add, 1);
   }
 
-  .bookmark-modal-content-text {
+  .link-card-modal-content-text {
     color: var(--affine-text-primary-color);
     font-family: var(--affine-font-family);
     font-size: 15px;
@@ -63,7 +63,7 @@ export const bookmarkModalStyles = css`
     line-height: 24px;
   }
 
-  .bookmark-modal-input {
+  .link-card-modal-input {
     display: flex;
     padding: 4px 10px;
     align-items: center;
@@ -85,12 +85,12 @@ export const bookmarkModalStyles = css`
     transition: border-color 150ms;
   }
 
-  .bookmark-modal-input:focus {
+  .link-card-modal-input:focus {
     border-color: var(--affine-brand-color);
     box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
   }
 
-  .bookmark-modal-input::placeholder {
+  .link-card-modal-input::placeholder {
     color: var(--affine-placeholder-color);
     font-family: var(--affine-font-family);
     font-size: 15px;
@@ -99,11 +99,11 @@ export const bookmarkModalStyles = css`
     line-height: 24px;
   }
 
-  .bookmark-modal-input.description {
+  .link-card-modal-input.description {
     height: 112px;
   }
 
-  .bookmark-modal-action {
+  .link-card-modal-action {
     display: flex;
     padding: 20px 24px;
     justify-content: flex-end;
@@ -115,7 +115,7 @@ export const bookmarkModalStyles = css`
     user-select: none;
   }
 
-  .bookmark-modal-button {
+  .link-card-modal-button {
     display: flex;
     padding: 4px 18px;
     justify-content: center;
@@ -131,21 +131,21 @@ export const bookmarkModalStyles = css`
     cursor: pointer;
   }
 
-  .bookmark-modal-button.cancel {
+  .link-card-modal-button.cancel {
     border: 1px solid var(--affine-border-color);
     background: var(--affine-white-10);
     color: var(--affine-text-primary-color);
   }
 
-  .bookmark-modal-button.save,
-  .bookmark-modal-button.confirm {
+  .link-card-modal-button.save,
+  .link-card-modal-button.confirm {
     border: 1px solid var(--affine-black-10);
     background: var(--affine-primary-color);
     color: var(--affine-pure-white);
   }
 
-  .bookmark-modal-button.save.disabled,
-  .bookmark-modal-button.confirm.disabled {
+  .link-card-modal-button.save.disabled,
+  .link-card-modal-button.confirm.disabled {
     background: rgba(30, 150, 235, 0.4);
   }
 `;

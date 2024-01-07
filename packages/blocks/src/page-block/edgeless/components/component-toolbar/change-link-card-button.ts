@@ -1,12 +1,19 @@
 import '../buttons/tool-icon-button.js';
 import '../panel/bookmark-card-style-panel';
 
+import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 
+import { toggleLinkCardEditModal } from '../../../../_common/components/link-card/modal/link-card-edit-modal.js';
 import { toast } from '../../../../_common/components/toast.js';
+import {
+  LINK_CARD_HEIGHT,
+  LINK_CARD_WIDTH,
+} from '../../../../_common/consts.js';
 import { BookmarkIcon } from '../../../../_common/icons/edgeless.js';
 import {
   CopyIcon,
@@ -14,21 +21,20 @@ import {
   EmbedWebIcon,
   PaletteIcon,
 } from '../../../../_common/icons/text.js';
-import { toggleBookmarkEditModal } from '../../../../bookmark-block/components/index.js';
-import type {
-  BookmarkBlockComponent,
-  BookmarkBlockType,
-} from '../../../../bookmark-block/index.js';
+import type { LinkCardStyle } from '../../../../_common/types.js';
+import type { BookmarkBlockComponent } from '../../../../bookmark-block/index.js';
+import type { EmbedGithubBlockComponent } from '../../../../embed-github-block/embed-github-block.js';
 import {
-  BookmarkHeight,
-  BookmarkWidth,
-} from '../../../../bookmark-block/styles.js';
-import { Bound } from '../../../../surface-block/index.js';
+  Bound,
+  type EdgelessBlockType,
+} from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import type { PageService } from '../../../page-service.js';
+import { isBookmarkBlock, isEmbeddedBlock } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
 
-@customElement('edgeless-change-bookmark-button')
-export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
+@customElement('edgeless-change-link-card-button')
+export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
   static override styles = css`
     .change-bookmark-container {
       display: flex;
@@ -111,7 +117,7 @@ export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  bookmark!: BookmarkBlockComponent;
+  linkCard!: BookmarkBlockComponent | EmbedGithubBlockComponent;
 
   @property({ attribute: false })
   page!: Page;
@@ -130,23 +136,70 @@ export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
     typeof createButtonPopper
   > | null = null;
 
-  private get _bookmarkModel() {
-    return this.bookmark.model;
+  private get _model() {
+    return this.linkCard.model;
+  }
+
+  private get _pageService() {
+    const pageService = this.surface.std.spec.getService(
+      'affine:page'
+    ) as PageService | null;
+    assertExists(pageService);
+    return pageService;
   }
 
   private _copyUrl() {
-    navigator.clipboard.writeText(this._bookmarkModel.url).catch(console.error);
+    navigator.clipboard.writeText(this._model.url).catch(console.error);
     toast('Copied link to clipboard');
     this.surface.selection.clear();
   }
 
-  private _setBookmarkStyle(style: BookmarkBlockType) {
-    const bounds = Bound.deserialize(this._bookmarkModel.xywh);
-    bounds.w = BookmarkWidth[style];
-    bounds.h = BookmarkHeight[style];
+  private _setLinkCardStyle(style: LinkCardStyle) {
+    const bounds = Bound.deserialize(this._model.xywh);
+    bounds.w = LINK_CARD_WIDTH[style];
+    bounds.h = LINK_CARD_HEIGHT[style];
     const xywh = bounds.serialize();
-    this._bookmarkModel.page.updateBlock(this._bookmarkModel, { style, xywh });
+    this._model.page.updateBlock(this._model, { style, xywh });
     this._bookmarkCardStylePopper?.hide();
+  }
+
+  private _convertToCardView() {
+    if (isBookmarkBlock(this._model)) return;
+    const { url, xywh, style } = this._model;
+    const blockId = this.surface.addElement(
+      'affine:bookmark',
+      { url, xywh, style },
+      this.surface.model
+    );
+    this.surface.edgeless.selectionManager.set({
+      editing: false,
+      elements: [blockId],
+    });
+    this.page.deleteBlock(this._model);
+  }
+
+  private _canConvertToEmbedView() {
+    const { url } = this._model;
+    return !!this._pageService.getEmbedBlockOptions(url);
+  }
+
+  private _convertToEmbedView() {
+    const { url, xywh, style } = this._model;
+    const embedOptions = this._pageService.getEmbedBlockOptions(url);
+    if (!embedOptions) return;
+
+    const { flavour, styles } = embedOptions;
+
+    const blockId = this.surface.addElement(
+      flavour as EdgelessBlockType,
+      { url, xywh, style: styles.includes(style) ? style : styles[0] },
+      this.surface.model
+    );
+    this.surface.edgeless.selectionManager.set({
+      editing: false,
+      elements: [blockId],
+    });
+    this.page.deleteBlock(this._model);
   }
 
   override firstUpdated(changedProperties: Map<string, unknown>) {
@@ -163,12 +216,12 @@ export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const { style } = this._bookmarkModel;
+    const { style } = this._model;
     return html`
       <div class="change-bookmark-container">
         <div class="change-bookmark-button url" @click=${() => this._copyUrl()}>
           <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
-          <span>${this._bookmarkModel.url}</span>
+          <span>${this._model.url}</span>
         </div>
 
         <edgeless-tool-icon-button
@@ -184,7 +237,7 @@ export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
           .tooltip=${'Edit'}
           class="change-bookmark-button edit"
           ?disabled=${this.page.readonly}
-          @click=${() => toggleBookmarkEditModal(this.bookmark)}
+          @click=${() => toggleLinkCardEditModal(this.linkCard)}
         >
           ${EditIcon}
         </edgeless-tool-icon-button>
@@ -193,27 +246,41 @@ export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
           .vertical=${true}
         ></component-toolbar-menu-divider>
 
-        <div class="change-bookmark-button-view-selector">
-          <edgeless-tool-icon-button
-            class="change-bookmark-button card current-view"
-            .tooltip=${'Card view'}
-            ?disabled=${this.page.readonly}
-            .iconContainerPadding=${2}
-            .hover=${false}
-          >
-            ${BookmarkIcon}
-          </edgeless-tool-icon-button>
+        ${isEmbeddedBlock(this._model) || this._canConvertToEmbedView()
+          ? html`
+              <div class="change-bookmark-button-view-selector">
+                <edgeless-tool-icon-button
+                  class=${classMap({
+                    'change-bookmark-button': true,
+                    card: true,
+                    'current-view': isBookmarkBlock(this._model),
+                  })}
+                  .tooltip=${'Card view'}
+                  ?disabled=${this.page.readonly}
+                  .iconContainerPadding=${2}
+                  .hover=${false}
+                  @click=${() => this._convertToCardView()}
+                >
+                  ${BookmarkIcon}
+                </edgeless-tool-icon-button>
 
-          <edgeless-tool-icon-button
-            class="change-bookmark-button embed"
-            .tooltip=${'Embed view'}
-            ?disabled=${this.page.readonly}
-            .iconContainerPadding=${2}
-            .hover=${false}
-          >
-            ${EmbedWebIcon}
-          </edgeless-tool-icon-button>
-        </div>
+                <edgeless-tool-icon-button
+                  class=${classMap({
+                    'change-bookmark-button': true,
+                    embed: true,
+                    'current-view': isEmbeddedBlock(this._model),
+                  })}
+                  .tooltip=${'Embed view'}
+                  ?disabled=${this.page.readonly}
+                  .iconContainerPadding=${2}
+                  .hover=${false}
+                  @click=${() => this._convertToEmbedView()}
+                >
+                  ${EmbedWebIcon}
+                </edgeless-tool-icon-button>
+              </div>
+            `
+          : nothing}
 
         <div class="change-bookmark-button card-style">
           <edgeless-tool-icon-button
@@ -226,8 +293,7 @@ export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
         </div>
         <bookmark-card-style-panel
           .value=${style}
-          .onSelect=${(value: BookmarkBlockType) =>
-            this._setBookmarkStyle(value)}
+          .onSelect=${(value: LinkCardStyle) => this._setLinkCardStyle(value)}
         >
         </bookmark-card-style-panel>
       </div>
@@ -237,6 +303,6 @@ export class EdgelessChangeBookmarkButton extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-change-bookmark-button': EdgelessChangeBookmarkButton;
+    'edgeless-change-link-card-button': EdgelessChangeLinkCardButton;
   }
 }

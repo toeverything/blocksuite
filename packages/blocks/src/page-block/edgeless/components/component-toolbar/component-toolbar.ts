@@ -3,7 +3,7 @@ import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
 import './change-note-button.js';
-import './change-bookmark-button.js';
+import './change-link-card-button.js';
 import './change-text-button.js';
 import './change-frame-button.js';
 import './change-group-button.js';
@@ -33,6 +33,7 @@ import {
   pickValues,
 } from '../../../../_common/utils/iterable.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
+import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
@@ -49,6 +50,7 @@ import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import {
   isBookmarkBlock,
+  isEmbeddedBlock,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
@@ -63,7 +65,7 @@ type CategorizedElements = {
   note?: NoteBlockModel[];
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
-  bookmark?: BookmarkBlockModel[];
+  linkCard?: BookmarkBlockModel[] & EmbedGithubModel[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -123,8 +125,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         return 'frame';
       } else if (isImageBlock(model)) {
         return 'image';
-      } else if (isBookmarkBlock(model)) {
-        return 'bookmark';
+      } else if (isBookmarkBlock(model) || isEmbeddedBlock(model)) {
+        return 'linkCard';
       }
       return model.type;
     });
@@ -176,26 +178,28 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _BookmarkButton(bookmarks?: BookmarkBlockModel[]) {
-    if (bookmarks?.length !== 1) return nothing;
+  private _LinkCardButton(
+    linkCards?: BookmarkBlockModel[] & EmbedGithubModel[]
+  ) {
+    if (linkCards?.length !== 1) return nothing;
 
-    const bookmarkSelection = this.selection.selections.filter(sel =>
-      sel.elements.includes(bookmarks[0].id)
+    const linkCardSelection = this.selection.selections.filter(sel =>
+      sel.elements.includes(linkCards[0].id)
     );
-    if (bookmarkSelection.length !== 1) return nothing;
+    if (linkCardSelection.length !== 1) return nothing;
 
-    const bookmarkElement = this.surface.std.view.viewFromPath(
+    const linkCardElement = this.surface.std.view.viewFromPath(
       'block',
-      bookmarkSelection[0].path
+      linkCardSelection[0].path
     );
-    if (!bookmarkElement) return nothing;
+    if (!linkCardElement) return nothing;
 
     return html`
-      <edgeless-change-bookmark-button
-        .bookmark=${bookmarkElement}
+      <edgeless-change-link-card-button
+        .linkCard=${linkCardElement}
         .page=${this.page}
         .surface=${this.surface}
-      ></edgeless-change-bookmark-button>
+      ></edgeless-change-link-card-button>
     `;
   }
 
@@ -342,7 +346,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless, selection } = this;
-    const { shape, brush, connector, note, text, frame, group, bookmark } =
+    const { shape, brush, connector, note, text, frame, group, linkCard } =
       groupedSelected;
     const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -358,7 +362,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._BrushButton(brush),
           this._ConnectorButton(connector),
           this._NoteButton(note),
-          this._BookmarkButton(bookmark),
+          this._LinkCardButton(linkCard),
           this._TextButton(text),
           this._FrameButton(frame),
           this._GroupButton(group),

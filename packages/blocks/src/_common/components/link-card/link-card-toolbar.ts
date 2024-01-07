@@ -1,35 +1,41 @@
-import './bookmark-card-style-popper';
-
 import type { BlockStdScope } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { Workspace } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 
-import { createLitPortal } from '../../_common/components/portal.js';
-import { toast } from '../../_common/components/toast.js';
+import type { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
+import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import type { ToolbarActionCallback } from '../../../bookmark-block/components/config.js';
+import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
+import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import {
-  BookmarkIcon,
+  isBookmarkBlock,
+  isEmbeddedBlock,
+} from '../../../page-block/edgeless/utils/query.js';
+import type { PageService } from '../../../page-block/page-service.js';
+import { BookmarkIcon, MoreVerticalIcon } from '../../icons/edgeless.js';
+import {
   CaptionIcon,
   CopyIcon,
   EditIcon,
   EmbedWebIcon,
   LinkIcon,
-  MoreVerticalIcon,
   PaletteIcon,
-} from '../../_common/icons/index.js';
-import type { BookmarkBlockComponent } from '../bookmark-block.js';
-import type { BookmarkBlockModel } from '../bookmark-model.js';
-import { BookmarkCardStyleMenu } from './bookmark-card-style-popper.js';
-import { BookmarkMoreMenu } from './bookmark-more-menu-popper.js';
-import { type ToolbarActionCallback } from './config.js';
-import { toggleBookmarkEditModal } from './modal/bookmark-edit-modal.js';
+} from '../../icons/text.js';
+import { createLitPortal } from '../portal.js';
+import { toast } from '../toast.js';
+import { LinkCardMoreMenu } from './link-card-more-menu-popper.js';
+import { LinkCardStyleMenu } from './link-card-style-popper.js';
+import { toggleLinkCardEditModal } from './modal/link-card-edit-modal.js';
 
-@customElement('bookmark-toolbar')
-export class BookmarkToolbar extends WithDisposable(LitElement) {
+@customElement('link-card-toolbar')
+export class LinkCardToolbar extends WithDisposable(LitElement) {
   static override styles = css`
-    .bookmark-toolbar {
+    .link-card-toolbar {
       box-sizing: border-box;
       display: flex;
       align-items: center;
@@ -43,13 +49,13 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       user-select: none;
     }
 
-    .divider {
+    .link-card-toolbar .divider {
       width: 1px;
       height: 24px;
       background-color: var(--affine-border-color);
     }
 
-    .bookmark-toolbar-button.url {
+    .link-card-toolbar-button.url {
       display: flex;
       width: 180px;
       padding: var(--1, 0px);
@@ -61,7 +67,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       cursor: pointer;
     }
 
-    .bookmark-toolbar-button.url > span {
+    .link-card-toolbar-button.url > span {
       display: -webkit-box;
       -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
@@ -80,7 +86,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       opacity: var(--add, 1);
     }
 
-    .bookmark-toolbar-button.view-selector {
+    .link-card-toolbar-button.view-selector {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -88,20 +94,20 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       border-radius: 6px;
       background: var(--affine-hover-color);
     }
-    .bookmark-toolbar-button.view-selector > icon-button {
+    .link-card-toolbar-button.view-selector > icon-button {
       padding: 0px;
     }
-    .bookmark-toolbar-button.view-selector .current-view {
+    .link-card-toolbar-button.view-selector .current-view {
       background: var(--affine-background-overlay-panel-color);
       border-radius: 6px;
     }
   `;
 
   @property({ attribute: false })
-  model!: BookmarkBlockModel;
+  model!: BookmarkBlockModel | EmbedGithubModel;
 
   @property({ attribute: false })
-  block!: BookmarkBlockComponent;
+  block!: BookmarkBlockComponent | EmbedGithubBlockComponent;
 
   @property({ attribute: false })
   onSelected!: ToolbarActionCallback;
@@ -115,15 +121,23 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
   @property({ attribute: false })
   std!: BlockStdScope;
 
-  @query('.bookmark-toolbar')
-  bookmarkBarElement!: HTMLElement;
+  @query('.link-card-toolbar')
+  linkCardToolbarElement!: HTMLElement;
 
-  @query('.bookmark-toolbar-button.card-style')
+  @query('.link-card-toolbar-button.card-style')
   cardStyleButton!: HTMLElement;
 
   private _cardStyleMenuAbortController: AbortController | null = null;
 
   private _moreMenuAbortController: AbortController | null = null;
+
+  private get _pageService() {
+    const pageService = this.std.spec.getService(
+      'affine:page'
+    ) as PageService | null;
+    assertExists(pageService);
+    return pageService;
+  }
 
   private _copyUrl() {
     navigator.clipboard.writeText(this.model.url).catch(console.error);
@@ -154,6 +168,46 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     this.onSelected('link');
   }
 
+  private _convertToCardView() {
+    if (isBookmarkBlock(this.model)) return;
+    const { page, url, style } = this.model;
+
+    const parent = page.getParent(this.model);
+    assertExists(parent);
+    const index = parent.children.indexOf(this.model);
+
+    page.addBlock('affine:bookmark', { url, style }, parent, index);
+    this.std.selection.setGroup('note', []);
+    page.deleteBlock(this.model);
+  }
+
+  private _canConvertToEmbedView() {
+    const { url } = this.model;
+    return !!this._pageService.getEmbedBlockOptions(url);
+  }
+
+  private _convertToEmbedView() {
+    const { page, url, style } = this.model;
+    const embedOptions = this._pageService.getEmbedBlockOptions(url);
+    if (!embedOptions) return;
+
+    const { flavour, styles } = embedOptions;
+
+    const parent = page.getParent(this.model);
+    assertExists(parent);
+    const index = parent.children.indexOf(this.model);
+
+    page.addBlock(
+      flavour,
+      { url, style: styles.includes(style) ? style : styles[0] },
+      parent,
+      index
+    );
+
+    this.std.selection.setGroup('note', []);
+    page.deleteBlock(this.model);
+  }
+
   private _toggleCardStyleMenu() {
     if (this._moreMenuAbortController) {
       this._moreMenuAbortController.abort();
@@ -165,14 +219,14 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       return;
     }
     this._cardStyleMenuAbortController = new AbortController();
-    const cardStyleMenu = new BookmarkCardStyleMenu();
-    cardStyleMenu.model = this.model;
-    cardStyleMenu.std = this.std;
-    cardStyleMenu.abortController = this.abortController;
+    const linkCardStyleMenu = new LinkCardStyleMenu();
+    linkCardStyleMenu.model = this.model;
+    linkCardStyleMenu.std = this.std;
+    linkCardStyleMenu.abortController = this.abortController;
 
     createLitPortal({
-      template: cardStyleMenu,
-      container: this.bookmarkBarElement,
+      template: linkCardStyleMenu,
+      container: this.linkCardToolbarElement,
       computePosition: {
         referenceElement: this.cardStyleButton,
         placement: 'top',
@@ -194,17 +248,17 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       return;
     }
     this._moreMenuAbortController = new AbortController();
-    const bookmarkOperationMenu = new BookmarkMoreMenu();
-    bookmarkOperationMenu.model = this.model;
-    bookmarkOperationMenu.block = this.block;
-    bookmarkOperationMenu.std = this.std;
-    bookmarkOperationMenu.abortController = this.abortController;
+    const linkCardMoreMenu = new LinkCardMoreMenu();
+    linkCardMoreMenu.model = this.model;
+    linkCardMoreMenu.block = this.block;
+    linkCardMoreMenu.std = this.std;
+    linkCardMoreMenu.abortController = this.abortController;
 
     createLitPortal({
-      template: bookmarkOperationMenu,
-      container: this.bookmarkBarElement,
+      template: linkCardMoreMenu,
+      container: this.linkCardToolbarElement,
       computePosition: {
-        referenceElement: this.bookmarkBarElement,
+        referenceElement: this.linkCardToolbarElement,
         placement: 'top-end',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
@@ -215,9 +269,9 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
   override render() {
     return html`
-      <div class="bookmark-toolbar">
+      <div class="link-card-toolbar">
         <div
-          class="bookmark-toolbar-button url"
+          class="link-card-toolbar-button url"
           @click=${() => this._copyUrl()}
         >
           <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
@@ -226,7 +280,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
         <icon-button
           size="32px"
-          class="bookmark-toolbar-button copy"
+          class="link-card-toolbar-button copy"
           ?disabled=${this.model.page.readonly}
           @click=${() => this._copyUrl()}
         >
@@ -236,9 +290,9 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
         <icon-button
           size="32px"
-          class="bookmark-toolbar-button edit"
+          class="link-card-toolbar-button edit"
           ?disabled=${this.model.page.readonly}
-          @click=${() => toggleBookmarkEditModal(this.block)}
+          @click=${() => toggleLinkCardEditModal(this.block)}
         >
           ${EditIcon}
           <affine-tooltip .offset=${12}>${'Edit'}</affine-tooltip>
@@ -246,10 +300,10 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
         <div class="divider"></div>
 
-        <div class="bookmark-toolbar-button view-selector">
+        <div class="link-card-toolbar-button view-selector">
           <icon-button
             size="24px"
-            class="bookmark-toolbar-button link"
+            class="link-card-toolbar-button link"
             hover="false"
             ?disabled=${this.model.page.readonly}
             @click=${() => this._turnIntoLinkView()}
@@ -260,28 +314,40 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
           <icon-button
             size="24px"
-            class="bookmark-toolbar-button card current-view"
+            class=${classMap({
+              'link-card-toolbar-button': true,
+              card: true,
+              'current-view': isBookmarkBlock(this.model),
+            })}
             hover="false"
             ?disabled=${this.model.page.readonly}
+            @click=${() => this._convertToCardView()}
           >
             ${BookmarkIcon}
             <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
           </icon-button>
 
-          <icon-button
-            size="24px"
-            class="bookmark-toolbar-button embed"
-            hover="false"
-            ?disabled=${this.model.page.readonly}
-          >
-            ${EmbedWebIcon}
-            <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
-          </icon-button>
+          ${isEmbeddedBlock(this.model) || this._canConvertToEmbedView()
+            ? html`<icon-button
+                size="24px"
+                class=${classMap({
+                  'link-card-toolbar-button': true,
+                  embed: true,
+                  'current-view': isEmbeddedBlock(this.model),
+                })}
+                hover="false"
+                ?disabled=${this.model.page.readonly}
+                @click=${() => this._convertToEmbedView()}
+              >
+                ${EmbedWebIcon}
+                <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
+              </icon-button>`
+            : nothing}
         </div>
 
         <icon-button
           size="32px"
-          class="bookmark-toolbar-button card-style"
+          class="link-card-toolbar-button card-style"
           ?disabled=${this.model.page.readonly}
           @click=${() => this._toggleCardStyleMenu()}
         >
@@ -293,7 +359,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
         <icon-button
           size="32px"
-          class="bookmark-toolbar-button caption"
+          class="link-card-toolbar-button caption"
           ?disabled=${this.model.page.readonly}
           @click=${() => this.onSelected('caption')}
         >
@@ -305,7 +371,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
         <icon-button
           size="24px"
-          class="bookmark-toolbar-button more-button"
+          class="link-card-toolbar-button more-button"
           @click=${() => this._toggleMoreMenu()}
         >
           ${MoreVerticalIcon}
@@ -318,6 +384,6 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'bookmark-toolbar': BookmarkToolbar;
+    'link-card-toolbar': LinkCardToolbar;
   }
 }

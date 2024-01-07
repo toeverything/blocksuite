@@ -1,9 +1,8 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/index.js';
+import type { LinkCardStyle } from '../_common/types.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
-
-export type BookmarkBlockType = 'horizontal' | 'list' | 'vertical' | 'cube';
 
 export interface BookmarkBlockUrlData {
   description: string | null;
@@ -30,7 +29,7 @@ export interface BookmarkBlockEdgelessProps {
 }
 
 export type BookmarkBlockProps = {
-  style: BookmarkBlockType;
+  style: LinkCardStyle;
   url: string;
   caption: string | null;
 

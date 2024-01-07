@@ -1,3 +1,21 @@
+import type { TemplateResult } from 'lit';
+
+import {
+  DarkLoadingIcon,
+  LightLoadingIcon,
+  LinkCardDarkBannerIcon,
+  LinkCardDarkCubeIcon,
+  LinkCardDarkHorizontalIcon,
+  LinkCardDarkListIcon,
+  LinkCardDarkVerticalIcon,
+  LinkCardLightBannerIcon,
+  LinkCardLightCubeIcon,
+  LinkCardLightHorizontalIcon,
+  LinkCardLightListIcon,
+  LinkCardLightVerticalIcon,
+} from '../icons/text.js';
+import { getThemeMode } from './query.js';
+
 export const ALLOWED_SCHEMES = [
   'http',
   'https',
@@ -143,4 +161,36 @@ export function isStrictUrl(str: string) {
 export function isUrlInClipboard(clipboardData: DataTransfer) {
   const url = clipboardData.getData('text/plain');
   return isValidUrl(url);
+}
+
+type LinkCardImages = {
+  LoadingIcon: TemplateResult<1>;
+  LinkCardBannerIcon: TemplateResult<1>;
+  LinkCardHorizontalIcon: TemplateResult<1>;
+  LinkCardListIcon: TemplateResult<1>;
+  LinkCardVerticalIcon: TemplateResult<1>;
+  LinkCardCubeIcon: TemplateResult<1>;
+};
+
+export function getLinkCardIcons(): LinkCardImages {
+  const theme = getThemeMode();
+  if (theme === 'light') {
+    return {
+      LoadingIcon: LightLoadingIcon,
+      LinkCardBannerIcon: LinkCardLightBannerIcon,
+      LinkCardHorizontalIcon: LinkCardLightHorizontalIcon,
+      LinkCardListIcon: LinkCardLightListIcon,
+      LinkCardVerticalIcon: LinkCardLightVerticalIcon,
+      LinkCardCubeIcon: LinkCardLightCubeIcon,
+    };
+  } else {
+    return {
+      LoadingIcon: DarkLoadingIcon,
+      LinkCardBannerIcon: LinkCardDarkBannerIcon,
+      LinkCardHorizontalIcon: LinkCardDarkHorizontalIcon,
+      LinkCardListIcon: LinkCardDarkListIcon,
+      LinkCardVerticalIcon: LinkCardDarkVerticalIcon,
+      LinkCardCubeIcon: LinkCardDarkCubeIcon,
+    };
+  }
 }

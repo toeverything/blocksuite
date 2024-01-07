@@ -5,8 +5,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { getBookmarkDefaultImages } from '../../../../bookmark-block/components/config.js';
-import type { BookmarkBlockType } from '../../../../index.js';
+import type { LinkCardStyle } from '../../../../_common/types.js';
+import { getLinkCardIcons } from '../../../../_common/utils/url.js';
 
 @customElement('bookmark-card-style-panel')
 export class BookmarkCardStylePanel extends WithDisposable(LitElement) {
@@ -35,15 +35,15 @@ export class BookmarkCardStylePanel extends WithDisposable(LitElement) {
   value!: string;
 
   @property({ attribute: false })
-  onSelect!: (value: BookmarkBlockType) => void;
+  onSelect!: (value: LinkCardStyle) => void;
 
   override render() {
     const {
-      LargeHorizontalCardIcon,
-      SmallHorizontalCardIcon,
-      LargeVerticalCardIcon,
-      SmallVerticalCardIcon,
-    } = getBookmarkDefaultImages();
+      LinkCardHorizontalIcon,
+      LinkCardListIcon,
+      LinkCardVerticalIcon,
+      LinkCardCubeIcon,
+    } = getLinkCardIcons();
     return html`
       <icon-button
         width="76px"
@@ -53,7 +53,7 @@ export class BookmarkCardStylePanel extends WithDisposable(LitElement) {
         })}
         @click=${() => this.onSelect('horizontal')}
       >
-        ${LargeHorizontalCardIcon}
+        ${LinkCardHorizontalIcon}
         <affine-tooltip .offset=${4}
           >${'Large horizontal style'}</affine-tooltip
         >
@@ -67,7 +67,7 @@ export class BookmarkCardStylePanel extends WithDisposable(LitElement) {
         })}
         @click=${() => this.onSelect('list')}
       >
-        ${SmallHorizontalCardIcon}
+        ${LinkCardListIcon}
         <affine-tooltip .offset=${4}
           >${'Small horizontal style'}</affine-tooltip
         >
@@ -81,7 +81,7 @@ export class BookmarkCardStylePanel extends WithDisposable(LitElement) {
         })}
         @click=${() => this.onSelect('vertical')}
       >
-        ${LargeVerticalCardIcon}
+        ${LinkCardVerticalIcon}
         <affine-tooltip .offset=${4}>${'Large vertical style'}</affine-tooltip>
       </icon-button>
 
@@ -93,7 +93,7 @@ export class BookmarkCardStylePanel extends WithDisposable(LitElement) {
         })}
         @click=${() => this.onSelect('cube')}
       >
-        ${SmallVerticalCardIcon}
+        ${LinkCardCubeIcon}
         <affine-tooltip .offset=${4}>${'Small vertical style'}</affine-tooltip>
       </icon-button>
     `;

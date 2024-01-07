@@ -3,17 +3,19 @@ import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { toast } from '../../../_common/components/toast.js';
-import type { BookmarkBlockComponent } from '../../bookmark-block.js';
-import type { BookmarkBlockModel } from '../../bookmark-model.js';
-import { bookmarkModalStyles } from './styles.js';
+import type { BookmarkBlockComponent } from '../../../../bookmark-block/bookmark-block.js';
+import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
+import type { EmbedGithubBlockComponent } from '../../../../embed-github-block/embed-github-block.js';
+import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
+import { toast } from '../../toast.js';
+import { linkCardModalStyles } from './styles.js';
 
-@customElement('bookmark-edit-modal')
-export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
-  static override styles = bookmarkModalStyles;
+@customElement('link-card-edit-modal')
+export class LinkCardEditModal extends WithDisposable(ShadowlessElement) {
+  static override styles = linkCardModalStyles;
 
   @property({ attribute: false })
-  bookmark!: BookmarkBlockComponent;
+  linkCardElement!: BookmarkBlockComponent | EmbedGithubBlockComponent;
 
   @query('.title')
   titleInput!: HTMLInputElement;
@@ -24,8 +26,8 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
   @state()
   private _titleInputValue = '';
 
-  get bookmarkModel(): BookmarkBlockModel {
-    return this.bookmark.model;
+  get model(): BookmarkBlockModel | EmbedGithubModel {
+    return this.linkCardElement.model;
   }
 
   override connectedCallback() {
@@ -40,7 +42,7 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
 
     this.disposables.addFromEvent(this, 'keydown', this._onDocumentKeydown);
 
-    this._titleInputValue = this.bookmarkModel.title ?? '';
+    this._titleInputValue = this.model.title ?? '';
   }
 
   private _handleInput(e: InputEvent) {
@@ -65,7 +67,7 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
       return;
     }
 
-    this.bookmark.page.updateBlock(this.bookmarkModel, {
+    this.linkCardElement.page.updateBlock(this.model, {
       title,
       description: this.descInput.value,
     });
@@ -74,14 +76,14 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
 
   override render() {
     return html`
-      <div class="bookmark-modal blocksuite-overlay">
-        <div class="bookmark-modal-mask" @click=${() => this.remove()}></div>
-        <div class="bookmark-modal-wrapper">
-          <div class="bookmark-modal-title">Edit Link</div>
+      <div class="link-card-modal blocksuite-overlay">
+        <div class="link-card-modal-mask" @click=${() => this.remove()}></div>
+        <div class="link-card-modal-wrapper">
+          <div class="link-card-modal-title">Edit Link</div>
 
-          <div class="bookmark-modal-content">
+          <div class="link-card-modal-content">
             <input
-              class="bookmark-modal-input title"
+              class="link-card-modal-input title"
               type="text"
               placeholder="Title"
               value=${this._titleInputValue}
@@ -90,16 +92,16 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
             />
 
             <textarea
-              class="bookmark-modal-input description"
+              class="link-card-modal-input description"
               placeholder="Description"
-              .value=${this.bookmarkModel.description ?? ''}
+              .value=${this.model.description ?? ''}
               tabindex="0"
             ></textarea>
           </div>
 
-          <div class="bookmark-modal-action">
+          <div class="link-card-modal-action">
             <div
-              class="bookmark-modal-button cancel"
+              class="link-card-modal-button cancel"
               tabindex="0"
               @click=${() => this.remove()}
             >
@@ -108,7 +110,7 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
 
             <div
               class=${classMap({
-                'bookmark-modal-button': true,
+                'link-card-modal-button': true,
                 save: true,
                 disabled: this._titleInputValue.length === 0,
               })}
@@ -124,15 +126,17 @@ export class BookmarkEditModal extends WithDisposable(ShadowlessElement) {
   }
 }
 
-export function toggleBookmarkEditModal(bookmark: BookmarkBlockComponent) {
-  bookmark.host.selection.clear();
-  const bookmarkEditModal = new BookmarkEditModal();
-  bookmarkEditModal.bookmark = bookmark;
-  document.body.appendChild(bookmarkEditModal);
+export function toggleLinkCardEditModal(
+  linkCardElement: BookmarkBlockComponent | EmbedGithubBlockComponent
+) {
+  linkCardElement.host.selection.clear();
+  const linkCardEditModal = new LinkCardEditModal();
+  linkCardEditModal.linkCardElement = linkCardElement;
+  document.body.appendChild(linkCardEditModal);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'bookmark-edit-modal': BookmarkEditModal;
+    'link-card-edit-modal': LinkCardEditModal;
   }
 }

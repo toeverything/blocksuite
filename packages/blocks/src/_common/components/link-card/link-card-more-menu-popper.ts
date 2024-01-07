@@ -4,51 +4,55 @@ import { Slice } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { toast } from '../../_common/components/toast.js';
+import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
+import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
+import type {
+  BookmarkBlockComponent,
+  BookmarkBlockModel,
+} from '../../../index.js';
 import {
   CopyIcon,
   DeleteIcon,
   DuplicateIcon,
   OpenIcon,
   RefreshIcon,
-} from '../../_common/icons/text.js';
-import type { BookmarkBlockComponent } from '../bookmark-block.js';
-import type { BookmarkBlockModel } from '../bookmark-model.js';
+} from '../../icons/text.js';
+import { toast } from '../toast.js';
 
-@customElement('bookmark-more-menu')
-export class BookmarkMoreMenu extends WithDisposable(LitElement) {
+@customElement('link-card-more-menu')
+export class LinkCardMoreMenu extends WithDisposable(LitElement) {
   static override styles = css`
-    .bookmark-more-menu {
+    .link-card-more-menu {
       border-radius: 8px;
       padding: 8px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
     }
 
-    .menu-item {
+    .link-card-more-menu .menu-item {
       display: flex;
       justify-content: flex-start;
       align-items: center;
       width: 100%;
     }
 
-    .menu-item:hover {
+    .link-card-more-menu .menu-item:hover {
       background: var(--affine-hover-color);
     }
 
-    .menu-item:hover.delete {
+    .link-card-more-menu .menu-item:hover.delete {
       background: var(--affine-background-error-color);
       color: var(--affine-error-color);
     }
-    .menu-item:hover.delete > svg {
+    .link-card-more-menu .menu-item:hover.delete > svg {
       color: var(--affine-error-color);
     }
 
-    .menu-item svg {
+    .link-card-more-menu .menu-item svg {
       margin: 0 8px;
     }
 
-    .divider {
+    .link-card-more-menu .divider {
       width: 148px;
       height: 1px;
       margin: 8px;
@@ -57,10 +61,10 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!: BookmarkBlockModel;
+  model!: BookmarkBlockModel | EmbedGithubModel;
 
   @property({ attribute: false })
-  block!: BookmarkBlockComponent;
+  block!: BookmarkBlockComponent | EmbedGithubBlockComponent;
 
   @property({ attribute: false })
   std!: BlockStdScope;
@@ -77,19 +81,19 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private async _copyBookmark() {
+  private async _copyBlock() {
     const slice = Slice.fromModels(this.model.page, [this.model]);
     await this.std.clipboard.copySlice(slice);
     toast('Copied link to clipboard');
     this.abortController.abort();
   }
 
-  private _duplicateBookmark() {
+  private _duplicateBlock() {
     const { page, url } = this.model;
     const parent = page.getParent(this.model);
     const index = parent?.children.indexOf(this.model);
     page.addBlock(
-      'affine:bookmark',
+      this.model.flavour,
       {
         url,
       },
@@ -99,13 +103,13 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private _refreshBookmark() {
+  private _refreshUrlData() {
     this.block.refreshUrlData();
     this.abortController.abort();
   }
 
   override render() {
-    return html`<div class="bookmark-more-menu">
+    return html`<div class="link-card-more-menu">
       <icon-button
         width="126px"
         height="32px"
@@ -121,7 +125,7 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
         height="32px"
         class="menu-item copy"
         text="Copy"
-        @click=${() => this._copyBookmark()}
+        @click=${() => this._copyBlock()}
       >
         ${CopyIcon}
       </icon-button>
@@ -132,7 +136,7 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
         class="menu-item duplicate"
         text="Duplicate"
         ?disabled=${this.model.page.readonly}
-        @click=${() => this._duplicateBookmark()}
+        @click=${() => this._duplicateBlock()}
       >
         ${DuplicateIcon}
       </icon-button>
@@ -143,7 +147,7 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
         class="menu-item reload"
         text="Reload"
         ?disabled=${this.model.page.readonly}
-        @click=${() => this._refreshBookmark()}
+        @click=${() => this._refreshUrlData()}
       >
         ${RefreshIcon}
       </icon-button>
@@ -166,6 +170,6 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'bookmark-more-menu': BookmarkMoreMenu;
+    'link-card-more-menu': LinkCardMoreMenu;
   }
 }

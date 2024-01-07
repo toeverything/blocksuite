@@ -1,6 +1,7 @@
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Slice, Text, type Y } from '@blocksuite/store';
 
+import { toggleLinkCardCreateModal } from '../../../_common/components/link-card/modal/link-card-create-modal.js';
 import { toast } from '../../../_common/components/toast.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
@@ -35,7 +36,6 @@ import {
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
-import { toggleBookmarkCreateModal } from '../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import type { DatabaseService } from '../../../database-block/database-service.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { ImageService } from '../../../image-block/image-service.js';
@@ -278,7 +278,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const url = await toggleBookmarkCreateModal(pageElement.host);
+          const url = await toggleLinkCardCreateModal(pageElement.host);
           if (!url) return;
           const props = {
             flavour: 'affine:bookmark',

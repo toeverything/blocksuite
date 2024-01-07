@@ -12,6 +12,7 @@ import {
   Workspace,
 } from '@blocksuite/store';
 
+import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../../../_common/consts.js';
 import type {
   EdgelessElement,
   Selectable,
@@ -26,14 +27,12 @@ import {
 } from '../../../_common/utils/query.js';
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
-import {
-  BookmarkHeight,
-  BookmarkWidth,
-} from '../../../bookmark-block/styles.js';
+import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
+import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
 import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
 import { CanvasElementType } from '../../../surface-block/elements/edgeless-element.js';
@@ -46,12 +45,14 @@ import type { SurfaceBlockComponent } from '../../../surface-block/surface-block
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
 import { PageClipboard } from '../../clipboard/index.js';
+import type { PageService } from '../../index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { deleteElements } from '../utils/crud.js';
 import {
   isBookmarkBlock,
   isCanvasElementWithText,
+  isEmbedGithubBlock,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
@@ -86,6 +87,14 @@ export class EdgelessClipboardController extends PageClipboard {
 
   private get selectionManager() {
     return this.host.selectionManager;
+  }
+
+  private get _pageService() {
+    const pageService = this.std.spec.getService(
+      'affine:page'
+    ) as PageService | null;
+    assertExists(pageService);
+    return pageService;
   }
 
   override hostConnected() {
@@ -196,21 +205,27 @@ export class EdgelessClipboardController extends PageClipboard {
       const url = data.getData('text/plain');
       const { lastMousePos } = this.toolManager;
       const [x, y] = this.surface.toModelCoord(lastMousePos.x, lastMousePos.y);
+
+      const embedOptions = this._pageService.getEmbedBlockOptions(url);
+      const flavour = embedOptions
+        ? (embedOptions.flavour as EdgelessElementType)
+        : 'affine:bookmark';
       const id = this.surface.addElement(
-        'affine:bookmark',
+        flavour,
         {
           xywh: Bound.fromCenter(
             Vec.toVec({
               x,
               y,
             }),
-            BookmarkWidth.horizontal,
-            BookmarkHeight.horizontal
+            LINK_CARD_WIDTH.horizontal,
+            LINK_CARD_HEIGHT.horizontal
           ).serialize(),
           url,
         },
         this.surface.model.id
       );
+
       this.selectionManager.set({
         editing: false,
         elements: [id],
@@ -326,94 +341,132 @@ export class EdgelessClipboardController extends PageClipboard {
     ];
   }
 
-  private async _createNoteBlocks(
+  private _createNoteBlocks(
     notes: BlockSnapshot[],
     oldToNewIdMap: Map<string, string>
   ) {
     const { surface } = this;
-    const noteIds = await Promise.all(
-      notes.map(async ({ id, props, children }) => {
-        delete props.index;
-        assertExists(props.xywh);
-        const noteId = this.surface.addElement(
-          'affine:note',
-          props,
-          this.page.root?.id
-        );
-        const note = surface.pickById(noteId) as NoteBlockModel;
-        if (id) oldToNewIdMap.set(id, noteId);
-        assertExists(note);
+    const noteIds = notes.map(({ id, props, children }) => {
+      delete props.index;
+      assertExists(props.xywh);
+      const noteId = this.surface.addElement(
+        'affine:note',
+        props,
+        this.page.root?.id
+      );
+      const note = surface.pickById(noteId) as NoteBlockModel;
+      if (id) oldToNewIdMap.set(id, noteId);
+      assertExists(note);
 
-        children.forEach((child, index) => {
-          this.onBlockSnapshotPaste(child, this.page, note.id, index);
-        });
-        return noteId;
-      })
-    );
+      children.forEach((child, index) => {
+        this.onBlockSnapshotPaste(child, this.page, note.id, index);
+      });
+      return noteId;
+    });
     return noteIds;
   }
 
-  private async _createFrameBlocks(frames: BlockSnapshot[]) {
-    const frameIds = await Promise.all(
-      frames.map(async ({ props }) => {
-        const { xywh, title, background } = props;
-        const frameId = this.surface.addElement(
-          'affine:frame',
-          {
-            xywh,
-            background,
-            title: fromJSON(title),
-          },
-          this.surface.model.id
-        );
-        return frameId;
-      })
-    );
+  private _createFrameBlocks(frames: BlockSnapshot[]) {
+    const frameIds = frames.map(({ props }) => {
+      const { xywh, title, background } = props;
+      const frameId = this.surface.addElement(
+        'affine:frame',
+        {
+          xywh,
+          background,
+          title: fromJSON(title),
+        },
+        this.surface.model.id
+      );
+      return frameId;
+    });
     return frameIds;
   }
 
-  private async _createImageBlocks(images: BlockSnapshot[]) {
-    const imageIds = await Promise.all(
-      images.map(async ({ props }) => {
-        const { xywh, sourceId, rotate } = props;
-        const imageId = this.surface.addElement(
-          'affine:image',
-          {
-            xywh,
-            sourceId,
-            rotate,
-          },
-          this.surface.model.id
-        );
-        return imageId;
-      })
-    );
+  private _createImageBlocks(images: BlockSnapshot[]) {
+    const imageIds = images.map(({ props }) => {
+      const { xywh, sourceId, rotate } = props;
+      const imageId = this.surface.addElement(
+        'affine:image',
+        {
+          xywh,
+          sourceId,
+          rotate,
+        },
+        this.surface.model.id
+      );
+      return imageId;
+    });
     return imageIds;
   }
 
-  private async _createBookmarkBlocks(bookmarks: BlockSnapshot[]) {
-    const bookmarkIds = await Promise.all(
-      bookmarks.map(async ({ props }) => {
-        const { xywh, style, url, caption, description, icon, image, title } =
-          props;
-        const bookmarkId = this.surface.addElement(
-          'affine:bookmark',
-          {
-            xywh,
-            style,
-            url,
-            caption,
-            description,
-            icon,
-            image,
-            title,
-          },
-          this.surface.model.id
-        );
-        return bookmarkId;
-      })
-    );
+  private _createBookmarkBlocks(bookmarks: BlockSnapshot[]) {
+    const bookmarkIds = bookmarks.map(({ props }) => {
+      const { xywh, style, url, caption, description, icon, image, title } =
+        props;
+      const bookmarkId = this.surface.addElement(
+        'affine:bookmark',
+        {
+          xywh,
+          style,
+          url,
+          caption,
+          description,
+          icon,
+          image,
+          title,
+        },
+        this.surface.model.id
+      );
+      return bookmarkId;
+    });
     return bookmarkIds;
+  }
+
+  private _createGithubEmbedBlocks(githubEmbeds: BlockSnapshot[]) {
+    const embedGithubIds = githubEmbeds.map(({ props }) => {
+      const {
+        xywh,
+        style,
+        owner,
+        repo,
+        type,
+        githubId,
+        url,
+        caption,
+        image,
+        status,
+        statusReason,
+        title,
+        description,
+        createdAt,
+        assignees,
+      } = props;
+
+      const bookmarkId = this.surface.addElement(
+        'affine:embed-github',
+        {
+          xywh,
+          style,
+          owner,
+          repo,
+          type,
+          githubId,
+          url,
+          caption,
+          image,
+          status,
+          statusReason,
+          title,
+          description,
+          createdAt,
+          assignees,
+        },
+        this.surface.model.id
+      );
+      return bookmarkId;
+    });
+    return embedGithubIds;
   }
 
   private _emitSelectionChangeAfterPaste(
@@ -446,12 +499,15 @@ export class EdgelessClipboardController extends PageClipboard {
             ? 'images'
             : isBookmarkBlock(data as unknown as Selectable)
               ? 'bookmarks'
-              : 'elements'
+              : isEmbedGithubBlock(data as unknown as Selectable)
+                ? 'githubEmbeds'
+                : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];
       images?: BlockSnapshot[];
       bookmarks?: BlockSnapshot[];
+      githubEmbeds?: BlockSnapshot[];
       elements?: { type: CanvasElement['type'] }[];
     };
     pasteCenter =
@@ -464,14 +520,17 @@ export class EdgelessClipboardController extends PageClipboard {
     const oldIdToNewIdMap = new Map<string, string>();
 
     // create and add blocks to page
-    const noteIds = await this._createNoteBlocks(
+    const noteIds = this._createNoteBlocks(
       groupedByType.notes || [],
       oldIdToNewIdMap
     );
-    const frameIds = await this._createFrameBlocks(groupedByType.frames ?? []);
-    const imageIds = await this._createImageBlocks(groupedByType.images ?? []);
-    const bookmarkIds = await this._createBookmarkBlocks(
+    const frameIds = this._createFrameBlocks(groupedByType.frames ?? []);
+    const imageIds = this._createImageBlocks(groupedByType.images ?? []);
+    const bookmarkIds = this._createBookmarkBlocks(
       groupedByType.bookmarks ?? []
+    );
+    const embedGithubIds = this._createGithubEmbedBlocks(
+      groupedByType.githubEmbeds ?? []
     );
 
     const notes = noteIds.map(id =>
@@ -490,6 +549,10 @@ export class EdgelessClipboardController extends PageClipboard {
       this.surface.pickById(id)
     ) as BookmarkBlockModel[];
 
+    const githubEmbeds = embedGithubIds.map(id =>
+      this.surface.pickById(id)
+    ) as EmbedGithubModel[];
+
     const elements = this._createCanvasElements(
       groupedByType.elements || [],
       oldIdToNewIdMap
@@ -503,6 +566,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...frames,
       ...images,
       ...bookmarks,
+      ...githubEmbeds,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
@@ -865,6 +929,9 @@ export async function prepareClipboardData(
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (isBookmarkBlock(selected)) {
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
+      } else if (isEmbedGithubBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (selected instanceof ConnectorElement) {

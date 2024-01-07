@@ -1,19 +1,39 @@
 import { literal } from 'lit/static-html.js';
 
 import { createEmbedBlock } from '../_common/embed-block-helper/index.js';
-import { EmbedGithubModel } from './embed-github-model.js';
+import {
+  type EmbedGithubBlockProps,
+  EmbedGithubModel,
+} from './embed-github-model.js';
+import { EmbedGithubService } from './embed-github-service.js';
+
+const defaultEmbedGithubProps: EmbedGithubBlockProps = {
+  style: 'horizontal',
+  owner: '',
+  repo: '',
+  type: 'issue',
+  githubId: '',
+  url: '',
+  caption: null,
+
+  image: null,
+  status: null,
+  statusReason: null,
+  title: null,
+  description: null,
+  createdAt: null,
+  assignees: null,
+};
 
 export const EmbedGithubBlockSpec = createEmbedBlock({
   schema: {
     name: 'github',
     version: 1,
     toModel: () => new EmbedGithubModel(),
-    props: () => ({
-      owner: '',
-      repo: '',
-    }),
+    props: (): EmbedGithubBlockProps => defaultEmbedGithubProps,
   },
   view: {
     component: literal`affine-embed-github-block`,
   },
+  service: EmbedGithubService,
 });
