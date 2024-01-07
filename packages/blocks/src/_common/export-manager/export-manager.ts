@@ -10,7 +10,6 @@ import {
   matchFlavours,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
-import { FileExporter } from '../../_legacy/content-parser/file-exporter/file-exporter.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
@@ -20,6 +19,7 @@ import type { IBound } from '../../surface-block/consts.js';
 import type { SurfaceElement } from '../../surface-block/elements/surface-element.js';
 import type { Renderer } from '../../surface-block/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
+import { FileExporter } from './file-exporter.js';
 
 type Html2CanvasFunction = typeof import('html2canvas').default;
 
