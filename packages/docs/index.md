@@ -3,12 +3,12 @@
 layout: home
 
 title: BlockSuite
-titleTemplate: Content Editing Toolkit
+titleTemplate: The Editor Framework
 
 hero:
   name: BlockSuite
-  text: Toolkit for Diverse Content Editing
-  tagline: BlockSuite provides the toolkit for composing collaborative editing applications.
+  text: The Framework for Building Editor(s)
+  tagline: BlockSuite is the toolkit for composing diverse collaborative editing applications.
   actions:
     - theme: brand
       text: Get Started

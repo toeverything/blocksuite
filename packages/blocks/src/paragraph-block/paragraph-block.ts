@@ -188,8 +188,8 @@ export class ParagraphBlockComponent extends BlockElement<
       align-items: center;
       gap: 4px;
       pointer-events: none;
-      color: var(--affine-placeholder-color);
-      fill: var(--affine-placeholder-color);
+      color: var(--affine-black-30);
+      fill: var(--affine-black-30);
     }
 
     .tips-placeholder > svg {
