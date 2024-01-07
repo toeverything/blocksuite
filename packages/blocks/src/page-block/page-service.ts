@@ -28,7 +28,6 @@ import {
   getTextSelectionCommand,
   withHostCommand,
 } from './commands/index.js';
-import type { EdgelessPageBlockComponent } from './edgeless/edgeless-page-block.js';
 import { FontLoader } from './font-loader/font-loader.js';
 import type { PageBlockModel } from './page-model.js';
 import type { PageBlockComponent } from './types.js';
@@ -50,7 +49,7 @@ export class PageService extends BlockService<PageBlockModel> {
   get viewportElement() {
     const pageElement = this.std.view.viewFromPath('block', [
       this.std.page.root?.id ?? '',
-    ]) as PageBlockComponent | EdgelessPageBlockComponent | null;
+    ]) as PageBlockComponent | null;
     assertExists(pageElement);
     const viewportElement = pageElement.viewportElement as HTMLElement | null;
     assertExists(viewportElement);

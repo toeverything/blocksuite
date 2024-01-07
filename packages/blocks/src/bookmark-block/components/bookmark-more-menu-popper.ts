@@ -14,7 +14,6 @@ import {
 } from '../../_common/icons/text.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
-import { refreshBookmarkUrlData } from '../utils.js';
 
 @customElement('bookmark-more-menu')
 export class BookmarkMoreMenu extends WithDisposable(LitElement) {
@@ -101,7 +100,7 @@ export class BookmarkMoreMenu extends WithDisposable(LitElement) {
   }
 
   private _refreshBookmark() {
-    refreshBookmarkUrlData(this.block).catch(console.error);
+    this.block.refreshUrlData();
     this.abortController.abort();
   }
 

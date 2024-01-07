@@ -230,9 +230,11 @@ export class LinkPopup extends WithDisposable(LitElement) {
     if (!this.inlineEditor.isValidInlineRange(this.targetInlineRange)) return;
 
     const blockElement = this.blockElement;
+    const url = this.currentLink;
+    const title = this.currentText;
     const props = {
-      url: this.currentLink,
-      title: this.currentText,
+      url,
+      title: title === url ? '' : title,
     };
     const page = blockElement.host.page;
     const parent = page.getParent(blockElement.model);

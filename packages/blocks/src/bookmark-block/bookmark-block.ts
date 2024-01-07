@@ -116,12 +116,19 @@ export class BookmarkBlockComponent extends BlockElement<
         target?.classList.contains('affine-block-children-container');
 
       if (isInSurface) {
+        const style = blockComponent.model.style;
+        if (style !== 'horizontal' && style !== 'list') {
+          this.page.updateBlock(blockComponent.model, {
+            style: 'horizontal',
+          });
+        }
         return convertDragPreviewEdgelessToDoc({
           blockComponent,
           ...props,
         });
       } else if (isTargetEdgelessContainer) {
         const style = blockComponent.model.style;
+
         return convertDragPreviewDocToEdgeless({
           blockComponent,
           cssSelector: '.affine-bookmark-card',
@@ -135,6 +142,10 @@ export class BookmarkBlockComponent extends BlockElement<
     },
   };
 
+  refreshUrlData = () => {
+    refreshBookmarkUrlData(this).catch(console.error);
+  };
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -142,14 +153,14 @@ export class BookmarkBlockComponent extends BlockElement<
     this._isInSurface = parent?.flavour === 'affine:surface';
 
     if (!this.model.description && !this.model.title) {
-      refreshBookmarkUrlData(this).catch(console.error);
+      this.refreshUrlData();
     }
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
         this.edgelessOrDocBookmark?.requestUpdate();
         if (key === 'url') {
-          refreshBookmarkUrlData(this).catch(console.error);
+          this.refreshUrlData();
         }
       })
     );
