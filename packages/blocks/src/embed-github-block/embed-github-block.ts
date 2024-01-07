@@ -7,13 +7,18 @@ import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 
 import { HoverController } from '../_common/components/hover/controller.js';
+import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
 import { getLinkCardIcons } from '../_common/utils/url.js';
 import { type EmbedGithubModel, githubUrlRegex } from './embed-github-model.js';
 import type { EmbedGithubService } from './embed-github-service.js';
 import { GithubIcon, styles } from './styles.js';
-import { getGithubStatusIcon, refreshEmbedGithubUrlData } from './utils.js';
+import {
+  getGithubStatusIcon,
+  refreshEmbedGithubStatus,
+  refreshEmbedGithubUrlData,
+} from './utils.js';
 
 @customElement('affine-embed-github-block')
 export class EmbedGithubBlockComponent extends EmbedBlockElement<
@@ -31,6 +36,10 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 
   refreshUrlData = () => {
     refreshEmbedGithubUrlData(this).catch(console.error);
+  };
+
+  refreshStatus = () => {
+    refreshEmbedGithubStatus(this).catch(console.error);
   };
 
   private _selectBlock() {
@@ -94,6 +103,10 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     if (!this.model.description && !this.model.title) {
       this.page.withoutTransact(() => {
         this.refreshUrlData();
+      });
+    } else {
+      this.page.withoutTransact(() => {
+        this.refreshStatus();
       });
     }
 
@@ -207,7 +220,8 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       dateText = dateText.replace(/\d+/, `${day}${suffix}`);
     }
 
-    this._style = style;
+    this._width = LINK_CARD_WIDTH[style];
+    this._height = LINK_CARD_HEIGHT[style];
 
     return this.renderEmbed(
       () => html`

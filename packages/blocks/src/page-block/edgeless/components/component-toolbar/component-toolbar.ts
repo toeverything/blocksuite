@@ -34,6 +34,7 @@ import {
 } from '../../../../_common/utils/iterable.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
+import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
@@ -65,7 +66,7 @@ type CategorizedElements = {
   note?: NoteBlockModel[];
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
-  linkCard?: BookmarkBlockModel[] & EmbedGithubModel[];
+  linkCard?: BookmarkBlockModel[] & EmbedGithubModel[] & EmbedYoutubeModel[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -179,7 +180,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   private _LinkCardButton(
-    linkCards?: BookmarkBlockModel[] & EmbedGithubModel[]
+    linkCards?: BookmarkBlockModel[] & EmbedGithubModel[] & EmbedYoutubeModel[]
   ) {
     if (linkCards?.length !== 1) return nothing;
 

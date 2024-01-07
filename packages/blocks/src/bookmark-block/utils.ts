@@ -16,10 +16,6 @@ interface AffineLinkPreviewResponseData {
   favicons?: string[];
 }
 
-export type QueryUrlData = (
-  url: string
-) => Promise<Partial<BookmarkBlockUrlData>>;
-
 export async function queryUrlDataFromAffineWorker(
   url: string
 ): Promise<Partial<BookmarkBlockUrlData>> {

@@ -12,9 +12,12 @@ import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.
 import type { ToolbarActionCallback } from '../../../bookmark-block/components/config.js';
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
+import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
+import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import {
   isBookmarkBlock,
   isEmbeddedBlock,
+  isEmbedGithubBlock,
 } from '../../../page-block/edgeless/utils/query.js';
 import type { PageService } from '../../../page-block/page-service.js';
 import { BookmarkIcon, MoreVerticalIcon } from '../../icons/edgeless.js';
@@ -104,10 +107,13 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!: BookmarkBlockModel | EmbedGithubModel;
+  model!: BookmarkBlockModel | EmbedGithubModel | EmbedYoutubeModel;
 
   @property({ attribute: false })
-  block!: BookmarkBlockComponent | EmbedGithubBlockComponent;
+  block!:
+    | BookmarkBlockComponent
+    | EmbedGithubBlockComponent
+    | EmbedYoutubeBlockComponent;
 
   @property({ attribute: false })
   onSelected!: ToolbarActionCallback;
@@ -345,15 +351,17 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
             : nothing}
         </div>
 
-        <icon-button
-          size="32px"
-          class="link-card-toolbar-button card-style"
-          ?disabled=${this.model.page.readonly}
-          @click=${() => this._toggleCardStyleMenu()}
-        >
-          ${PaletteIcon}
-          <affine-tooltip .offset=${12}>${'Card style'}</affine-tooltip>
-        </icon-button>
+        ${isBookmarkBlock(this.model) || isEmbedGithubBlock(this.model)
+          ? html` <icon-button
+              size="32px"
+              class="link-card-toolbar-button card-style"
+              ?disabled=${this.model.page.readonly}
+              @click=${() => this._toggleCardStyleMenu()}
+            >
+              ${PaletteIcon}
+              <affine-tooltip .offset=${12}>${'Card style'}</affine-tooltip>
+            </icon-button>`
+          : nothing}
 
         <div class="divider"></div>
 

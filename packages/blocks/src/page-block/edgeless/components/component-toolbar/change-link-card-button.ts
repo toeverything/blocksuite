@@ -30,7 +30,11 @@ import {
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { PageService } from '../../../page-service.js';
-import { isBookmarkBlock, isEmbeddedBlock } from '../../utils/query.js';
+import {
+  isBookmarkBlock,
+  isEmbeddedBlock,
+  isEmbedGithubBlock,
+} from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
 
 @customElement('edgeless-change-link-card-button')
@@ -89,7 +93,6 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       padding: 2px;
       border-radius: 6px;
       background: var(--affine-hover-color);
-      margin-right: 12px;
     }
     .change-bookmark-button-view-selector .change-bookmark-button {
       width: 24px;
@@ -101,6 +104,10 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
     .change-bookmark-button-view-selector .current-view {
       background: var(--affine-background-overlay-panel-color);
       border-radius: 6px;
+    }
+
+    .change-bookmark-button.card-style {
+      margin-left: 12px;
     }
 
     component-toolbar-menu-divider {
@@ -166,9 +173,14 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
   private _convertToCardView() {
     if (isBookmarkBlock(this._model)) return;
     const { url, xywh, style } = this._model;
+
+    const bound = Bound.deserialize(xywh);
+    bound.w = LINK_CARD_WIDTH[style];
+    bound.h = LINK_CARD_HEIGHT[style];
+
     const blockId = this.surface.addElement(
       'affine:bookmark',
-      { url, xywh, style },
+      { url, xywh: bound.serialize(), style },
       this.surface.model
     );
     this.surface.edgeless.selectionManager.set({
@@ -190,9 +202,17 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
 
     const { flavour, styles } = embedOptions;
 
+    const bound = Bound.deserialize(xywh);
+    bound.w = embedOptions.width;
+    bound.h = embedOptions.height;
+
     const blockId = this.surface.addElement(
       flavour as EdgelessBlockType,
-      { url, xywh, style: styles.includes(style) ? style : styles[0] },
+      {
+        url,
+        xywh: bound.serialize(),
+        style: styles.includes(style) ? style : styles[0],
+      },
       this.surface.model
     );
     this.surface.edgeless.selectionManager.set({
@@ -281,16 +301,20 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
               </div>
             `
           : nothing}
+        ${isBookmarkBlock(this._model) || isEmbedGithubBlock(this._model)
+          ? html`
+              <div class="change-bookmark-button card-style">
+                <edgeless-tool-icon-button
+                  .tooltip=${this._showPopper ? '' : 'Card style'}
+                  ?disabled=${this.page.readonly}
+                  @click=${() => this._bookmarkCardStylePopper?.toggle()}
+                >
+                  ${PaletteIcon}
+                </edgeless-tool-icon-button>
+              </div>
+            `
+          : nothing}
 
-        <div class="change-bookmark-button card-style">
-          <edgeless-tool-icon-button
-            .tooltip=${this._showPopper ? '' : 'Card style'}
-            ?disabled=${this.page.readonly}
-            @click=${() => this._bookmarkCardStylePopper?.toggle()}
-          >
-            ${PaletteIcon}
-          </edgeless-tool-icon-button>
-        </div>
         <bookmark-card-style-panel
           .value=${style}
           .onSelect=${(value: LinkCardStyle) => this._setLinkCardStyle(value)}

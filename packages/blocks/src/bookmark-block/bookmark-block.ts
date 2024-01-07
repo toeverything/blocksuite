@@ -99,7 +99,7 @@ export class BookmarkBlockComponent extends BlockElement<
       return true;
     },
     onDragEnd: props => {
-      const { state, draggingElements } = props;
+      const { state, draggingElements, dropBlockId } = props;
       if (
         draggingElements.length !== 1 ||
         !matchFlavours(draggingElements[0].model, [
@@ -116,11 +116,13 @@ export class BookmarkBlockComponent extends BlockElement<
         target?.classList.contains('affine-block-children-container');
 
       if (isInSurface) {
-        const style = blockComponent.model.style;
-        if (style !== 'horizontal' && style !== 'list') {
-          this.page.updateBlock(blockComponent.model, {
-            style: 'horizontal',
-          });
+        if (dropBlockId) {
+          const style = blockComponent.model.style;
+          if (style !== 'horizontal' && style !== 'list') {
+            this.page.updateBlock(blockComponent.model, {
+              style: 'horizontal',
+            });
+          }
         }
 
         return convertDragPreviewEdgelessToDoc({

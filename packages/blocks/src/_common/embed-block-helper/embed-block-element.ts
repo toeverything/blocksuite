@@ -16,11 +16,7 @@ import {
 import { Bound } from '../../surface-block/index.js';
 import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../consts.js';
 import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
-import {
-  type BlockModels,
-  type LinkCardStyle,
-  matchFlavours,
-} from '../utils/index.js';
+import { type BlockModels, matchFlavours } from '../utils/index.js';
 
 export class EmbedBlockElement<
   Model extends
@@ -28,7 +24,9 @@ export class EmbedBlockElement<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {
-  protected _style: LinkCardStyle = 'horizontal';
+  protected _style = 'horizontal';
+  protected _width = LINK_CARD_WIDTH.horizontal;
+  protected _height = LINK_CARD_HEIGHT.horizontal;
 
   private _isInSurface = false;
 
@@ -97,7 +95,7 @@ export class EmbedBlockElement<
       return true;
     },
     onDragEnd: props => {
-      const { state, draggingElements } = props;
+      const { state, draggingElements, dropBlockId } = props;
       if (
         draggingElements.length !== 1 ||
         !matchFlavours(draggingElements[0].model, [
@@ -114,24 +112,24 @@ export class EmbedBlockElement<
         target?.classList.contains('affine-block-children-container');
 
       if (isInSurface) {
-        const style = blockComponent._style;
-        if (style !== 'horizontal' && style !== 'list') {
-          this.page.updateBlock(blockComponent.model, {
-            style: 'horizontal',
-          });
+        if (dropBlockId) {
+          const style = blockComponent._style;
+          if (style !== 'horizontal' && style !== 'list') {
+            this.page.updateBlock(blockComponent.model, {
+              style: 'horizontal',
+            });
+          }
         }
         return convertDragPreviewEdgelessToDoc({
           blockComponent,
           ...props,
         });
       } else if (isTargetEdgelessContainer) {
-        const style = blockComponent._style;
-
         return convertDragPreviewDocToEdgeless({
           blockComponent,
           cssSelector: '.embed-block-container',
-          width: LINK_CARD_WIDTH[style],
-          height: LINK_CARD_HEIGHT[style],
+          width: blockComponent._width,
+          height: blockComponent._height,
           ...props,
         });
       }
@@ -170,9 +168,8 @@ export class EmbedBlockElement<
     const surface = this.surface;
     assertExists(surface);
 
-    const style = this._style;
-    const width = LINK_CARD_WIDTH[style];
-    const height = LINK_CARD_HEIGHT[style];
+    const width = this._width;
+    const height = this._height;
     const bound = Bound.deserialize(
       (surface.pickById(this.model.id) ?? this.model).xywh
     );

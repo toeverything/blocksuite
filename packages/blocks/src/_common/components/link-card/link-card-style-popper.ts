@@ -8,6 +8,7 @@ import { classMap } from 'lit/directives/class-map.js';
 
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
+import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { LinkCardStyle } from '../../types.js';
 import { getLinkCardIcons } from '../../utils/url.js';
 
@@ -35,7 +36,7 @@ export class LinkCardStyleMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!: BookmarkBlockModel | EmbedGithubModel;
+  model!: BookmarkBlockModel | EmbedGithubModel | EmbedYoutubeModel;
 
   @property({ attribute: false })
   std!: BlockStdScope;

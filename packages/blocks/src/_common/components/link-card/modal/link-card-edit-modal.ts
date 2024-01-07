@@ -7,6 +7,8 @@ import type { BookmarkBlockComponent } from '../../../../bookmark-block/bookmark
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubBlockComponent } from '../../../../embed-github-block/embed-github-block.js';
 import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
+import type { EmbedYoutubeBlockComponent } from '../../../../embed-youtube-block/embed-youtube-block.js';
+import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import { toast } from '../../toast.js';
 import { linkCardModalStyles } from './styles.js';
 
@@ -15,7 +17,10 @@ export class LinkCardEditModal extends WithDisposable(ShadowlessElement) {
   static override styles = linkCardModalStyles;
 
   @property({ attribute: false })
-  linkCardElement!: BookmarkBlockComponent | EmbedGithubBlockComponent;
+  linkCardElement!:
+    | BookmarkBlockComponent
+    | EmbedGithubBlockComponent
+    | EmbedYoutubeBlockComponent;
 
   @query('.title')
   titleInput!: HTMLInputElement;
@@ -26,7 +31,7 @@ export class LinkCardEditModal extends WithDisposable(ShadowlessElement) {
   @state()
   private _titleInputValue = '';
 
-  get model(): BookmarkBlockModel | EmbedGithubModel {
+  get model(): BookmarkBlockModel | EmbedGithubModel | EmbedYoutubeModel {
     return this.linkCardElement.model;
   }
 
@@ -127,7 +132,10 @@ export class LinkCardEditModal extends WithDisposable(ShadowlessElement) {
 }
 
 export function toggleLinkCardEditModal(
-  linkCardElement: BookmarkBlockComponent | EmbedGithubBlockComponent
+  linkCardElement:
+    | BookmarkBlockComponent
+    | EmbedGithubBlockComponent
+    | EmbedYoutubeBlockComponent
 ) {
   linkCardElement.host.selection.clear();
   const linkCardEditModal = new LinkCardEditModal();

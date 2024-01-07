@@ -6,6 +6,8 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
+import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
+import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type {
   BookmarkBlockComponent,
   BookmarkBlockModel,
@@ -61,10 +63,13 @@ export class LinkCardMoreMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!: BookmarkBlockModel | EmbedGithubModel;
+  model!: BookmarkBlockModel | EmbedGithubModel | EmbedYoutubeModel;
 
   @property({ attribute: false })
-  block!: BookmarkBlockComponent | EmbedGithubBlockComponent;
+  block!:
+    | BookmarkBlockComponent
+    | EmbedGithubBlockComponent
+    | EmbedYoutubeBlockComponent;
 
   @property({ attribute: false })
   std!: BlockStdScope;

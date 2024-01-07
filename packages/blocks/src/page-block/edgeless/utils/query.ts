@@ -11,6 +11,7 @@ import {
 } from '../../../_common/utils/index.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/index.js';
+import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
@@ -81,6 +82,16 @@ export function isEmbedGithubBlock(
     !!element &&
     'flavour' in element &&
     element.flavour === 'affine:embed-github'
+  );
+}
+
+export function isEmbedYoutubeBlock(
+  element: BlockModel | EdgelessElement | null
+): element is EmbedYoutubeModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:embed-youtube'
   );
 }
 

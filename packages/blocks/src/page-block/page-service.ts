@@ -34,8 +34,11 @@ import type { PageBlockModel } from './page-model.js';
 import type { PageBlockComponent } from './types.js';
 
 type EmbedOptions = {
+  flavour: string;
   urlRegex: RegExp;
   styles: LinkCardStyle[];
+  width: number;
+  height: number;
 };
 
 export class PageService extends BlockService<PageBlockModel> {
@@ -62,25 +65,18 @@ export class PageService extends BlockService<PageBlockModel> {
     return viewportElement;
   }
 
-  private _embedBlockRegistry = new Map<string, EmbedOptions>();
+  private _embedBlockRegistry = new Set<EmbedOptions>();
 
-  registerEmbedBlockOptions = (
-    flavour: string,
-    options: EmbedOptions
-  ): void => {
-    this._embedBlockRegistry.set(flavour, options);
+  registerEmbedBlockOptions = (options: EmbedOptions): void => {
+    this._embedBlockRegistry.add(options);
   };
 
-  getEmbedBlockOptions = (
-    url: string
-  ): (EmbedOptions & { flavour: string }) | null => {
+  getEmbedBlockOptions = (url: string): EmbedOptions | null => {
     const entries = this._embedBlockRegistry.entries();
-    for (const [flavour, options] of entries) {
+    for (const [options] of entries) {
       const regex = options.urlRegex;
       const match = url.match(regex);
-      if (match) {
-        return { flavour, ...options };
-      }
+      if (match) return options;
     }
     return null;
   };

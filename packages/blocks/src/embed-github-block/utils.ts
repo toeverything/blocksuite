@@ -1,7 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 
-import { queryUrlDataFromAffineWorker } from '../bookmark-block/utils.js';
 import type { EmbedGithubBlockComponent } from './embed-github-block.js';
 import type {
   EmbedGithubBlockUrlData,
@@ -17,35 +16,60 @@ import {
   GithubPROpenIcon,
 } from './styles.js';
 
-export type QueryUrlData = (
-  embedGithubModel: EmbedGithubModel
-) => Promise<Partial<EmbedGithubBlockUrlData>>;
+interface AffineLinkPreviewResponseData {
+  url: string;
+  title?: string;
+  siteName?: string;
+  description?: string;
+  images?: string[];
+  mediaType?: string;
+  contentType?: string;
+  charset?: string;
+  videos?: string[];
+  favicons?: string[];
+}
 
 export async function queryEmbedGithubData(
   embedGithubModel: EmbedGithubModel
 ): Promise<Partial<EmbedGithubBlockUrlData>> {
-  const { owner, repo, type, githubId, url } = embedGithubModel;
-  let urlData: Partial<EmbedGithubBlockUrlData> = {};
+  const [githubApiData, openGraphData] = await Promise.all([
+    queryEmbedGithubApiData(embedGithubModel),
+    queryEmbedGithubOpenGraphData(embedGithubModel.url),
+  ]);
+  return { ...githubApiData, ...openGraphData };
+}
 
+export async function queryEmbedGithubApiData(
+  embedGithubModel: EmbedGithubModel
+): Promise<Partial<EmbedGithubBlockUrlData>> {
+  const { owner, repo, type, githubId } = embedGithubModel;
+  let githubApiData: Partial<EmbedGithubBlockUrlData> = {};
+
+  // github's public api has a rate limit of 60 requests per hour
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/${
     type === 'issue' ? 'issues' : 'pulls'
   }/${githubId}`;
 
-  const githubApiResponse = await fetch(apiUrl).catch(() => null);
+  const githubApiResponse = await fetch(apiUrl, { cache: 'no-cache' }).catch(
+    () => null
+  );
   if (githubApiResponse && githubApiResponse.ok) {
-    const githubApiData = await githubApiResponse.json();
+    const githubApiJson = await githubApiResponse.json();
     const { state, state_reason, draft, merged, created_at, assignees } =
-      githubApiData;
+      githubApiJson;
+
     const assigneeLogins = assignees.map(
       (assignee: { login: string }) => assignee.login
     );
+
     let status = state;
     if (merged) {
       status = 'merged';
     } else if (state === 'open' && draft) {
       status = 'draft';
     }
-    urlData = {
+
+    githubApiData = {
       status,
       statusReason: state_reason,
       createdAt: created_at,
@@ -53,13 +77,32 @@ export async function queryEmbedGithubData(
     };
   }
 
-  const linkResponseData = await queryUrlDataFromAffineWorker(url);
-  urlData = { ...urlData, ...linkResponseData };
-
-  return urlData;
+  return githubApiData;
 }
 
-// Result is boolean used to record whether the meta data is crawled
+export async function queryEmbedGithubOpenGraphData(url: string) {
+  const response = await fetch(
+    'https://affine-worker.toeverything.workers.dev/api/worker/link-preview',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url,
+      }),
+    }
+  ).catch(() => null);
+  if (!response || !response.ok) return {};
+  const data: AffineLinkPreviewResponseData = await response.json();
+  return {
+    title: data.title,
+    description: data.description,
+    icon: data.favicons?.[0],
+    image: data.images?.[0],
+  };
+}
+
 export async function refreshEmbedGithubUrlData(
   embedGithubElement: EmbedGithubBlockComponent
 ) {
@@ -67,8 +110,8 @@ export async function refreshEmbedGithubUrlData(
 
   const queryUrlData = embedGithubElement.service?.queryUrlData;
   assertExists(queryUrlData);
+  const githubUrlData = await queryUrlData(embedGithubElement.model);
 
-  const metaData = await queryUrlData(embedGithubElement.model);
   const {
     image = null,
     status = null,
@@ -77,7 +120,7 @@ export async function refreshEmbedGithubUrlData(
     description = null,
     createdAt = null,
     assignees = null,
-  } = metaData;
+  } = githubUrlData;
 
   embedGithubElement.page.updateBlock(embedGithubElement.model, {
     image,
@@ -88,7 +131,22 @@ export async function refreshEmbedGithubUrlData(
     createdAt,
     assignees,
   });
+
   embedGithubElement.loading = false;
+}
+
+export async function refreshEmbedGithubStatus(
+  embedGithubElement: EmbedGithubBlockComponent
+) {
+  const queryApiData = embedGithubElement.service?.queryApiData;
+  assertExists(queryApiData);
+  const githubApiData = await queryApiData(embedGithubElement.model);
+
+  if (!githubApiData.status) return;
+
+  embedGithubElement.page.updateBlock(embedGithubElement.model, {
+    status: githubApiData.status,
+  });
 }
 
 export function getGithubStatusIcon(
