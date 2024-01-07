@@ -6,7 +6,6 @@ import './components/start-panel';
 import '@blocksuite/presets/themes/affine.css';
 
 import { TestUtils } from '@blocksuite/blocks';
-import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { EditorHost } from '@blocksuite/lit';
 import { CopilotPanel } from '@blocksuite/presets';
@@ -63,12 +62,6 @@ function subscribePage(workspace: Workspace) {
     debugMenu.leftSidePanel = leftSidePanel;
     debugMenu.pagesPanel = pagesPanel;
 
-    // FIXME: should remove contentParser after move export functions to page service
-    page.slots.ready.once(() => {
-      const contentParser = new ContentParser(editor.host, page);
-      debugMenu.contentParser = contentParser;
-    });
-
     outlinePanel.editor = editor;
     copilotPanelPanel.editor = editor;
     framePanel.editor = editor;
@@ -120,7 +113,6 @@ async function main() {
   window.job = new Job({ workspace });
   window.blockSchemas = AffineSchemas;
   window.Y = Workspace.Y;
-  window.ContentParser = ContentParser;
   Object.defineProperty(globalThis, 'host', {
     get() {
       return document.querySelector('editor-host') as EditorHost;

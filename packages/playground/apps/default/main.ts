@@ -4,7 +4,6 @@ import '@blocksuite/presets';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/presets/themes/affine.css';
 
-import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { EditorHost } from '@blocksuite/lit';
 import { type DocProviderCreator, type Page, Text } from '@blocksuite/store';
@@ -46,12 +45,6 @@ function subscribePage(workspace: Workspace) {
     quickEdgelessMenu.mode = defaultMode;
 
     document.body.appendChild(quickEdgelessMenu);
-
-    // FIXME: should remove contentParser after move export functions to page service
-    setTimeout(() => {
-      const contentParser = new ContentParser(editor.host, page);
-      quickEdgelessMenu.contentParser = contentParser;
-    }, 100);
 
     window.editor = editor;
     window.page = page;
@@ -159,7 +152,6 @@ async function main() {
   window.blockSchemas = AffineSchemas;
   window.job = new Job({ workspace });
   window.Y = Workspace.Y;
-  window.ContentParser = ContentParser;
   Object.defineProperty(globalThis, 'host', {
     get() {
       return document.querySelector('editor-host') as EditorHost;
