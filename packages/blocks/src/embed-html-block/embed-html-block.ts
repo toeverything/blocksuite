@@ -2,10 +2,10 @@ import { css, html, type PropertyValues } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { EmbedBlockElement } from '../_common/embed-block-helper/index.js';
-import type { EmbedHtmlBlockModel } from './embed-html-model.js';
+import type { EmbedHtmlModel } from './embed-html-model.js';
 
 @customElement('affine-embed-html-block')
-export class EmbedHtmlBlock extends EmbedBlockElement<EmbedHtmlBlockModel> {
+export class EmbedHtmlBlock extends EmbedBlockElement<EmbedHtmlModel> {
   static override styles = css`
     //affine-html {
     //  display: block;

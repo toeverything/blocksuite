@@ -7,7 +7,7 @@ import {
 } from '../edgeless/mixin/index.js';
 import type { EmbedProps } from './types.js';
 
-export function makeEmbedModel<
+export function defineEmbedModel<
   Props extends object,
   T extends Constructor<BlockModel<Props>> = Constructor<BlockModel<Props>>,
 >(SuperClass: T) {
