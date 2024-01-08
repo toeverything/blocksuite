@@ -3,6 +3,7 @@ import { literal } from 'lit/static-html.js';
 import { createEmbedBlock } from '../_common/embed-block-helper/index.js';
 import {
   type EmbedYoutubeBlockProps,
+  EmbedYoutubeModel,
   EmbedYoutubeStyles,
 } from './embed-youtube-model.js';
 import { EmbedYoutubeService } from './embed-youtube-service.js';

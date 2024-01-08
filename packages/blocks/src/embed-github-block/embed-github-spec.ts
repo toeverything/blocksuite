@@ -3,6 +3,7 @@ import { literal } from 'lit/static-html.js';
 import { createEmbedBlock } from '../_common/embed-block-helper/index.js';
 import {
   type EmbedGithubBlockProps,
+  EmbedGithubModel,
   EmbedGithubStyles,
 } from './embed-github-model.js';
 import { EmbedGithubService } from './embed-github-service.js';

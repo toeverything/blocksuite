@@ -122,7 +122,7 @@ export type TopLevelBlockModel =
   | FrameBlockModel
   | ImageBlockModel
   | BookmarkBlockModel
-  | EmbedGithubModel;
+  | EmbedGithubModel
   | EmbedYoutubeModel;
 
 export type EdgelessElement = TopLevelBlockModel | CanvasElement;
