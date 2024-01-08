@@ -57,8 +57,8 @@ export async function queryUrlDataFromAffineWorker(
     if (!response || !response.ok) return {};
     const data: AffineLinkPreviewResponseData = await response.json();
     return {
-      title: data.title,
-      description: data.description,
+      title: getStringFromHTML(data.title ?? ''),
+      description: getStringFromHTML(data.description ?? ''),
       icon: data.favicons?.[0],
       image: data.images?.[0],
     };
@@ -89,4 +89,10 @@ export async function refreshBookmarkUrlData(
     title,
   });
   bookmarkElement.loading = false;
+}
+
+function getStringFromHTML(html: string) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent;
 }

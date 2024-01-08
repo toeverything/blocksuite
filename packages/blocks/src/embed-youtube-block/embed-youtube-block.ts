@@ -108,6 +108,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       })
     );
 
+    // this is required to prevent iframe from capturing pointer events
     this.disposables.add(
       this.std.selection.slots.changed.on(sels => {
         if (this._isDragging) return;
@@ -116,7 +117,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
         );
       })
     );
-
+    // this is required to prevent iframe from capturing pointer events
     this.handleEvent('pointerMove', ctx => {
       this._isDragging = ctx.get('pointerState').dragging;
       if (this._isDragging) this._showOverlay = true;

@@ -83,8 +83,8 @@ export async function queryEmbedYoutubeOpenGraphData(url: string) {
   if (!response || !response.ok) return {};
   const data: AffineLinkPreviewResponseData = await response.json();
   return {
-    title: data.title,
-    description: data.description,
+    title: getStringFromHTML(data.title ?? ''),
+    description: getStringFromHTML(data.description ?? ''),
     icon: data.favicons?.[0],
     image: data.images?.[0],
   };
@@ -118,4 +118,10 @@ export async function refreshEmbedYoutubeUrlData(
   });
 
   embedYoutubeElement.loading = false;
+}
+
+function getStringFromHTML(html: string) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent;
 }
