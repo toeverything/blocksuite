@@ -1,5 +1,5 @@
 import '../buttons/tool-icon-button.js';
-import '../panel/bookmark-card-style-panel';
+import '../panel/link-card-style-panel';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -42,12 +42,12 @@ import { createButtonPopper } from '../utils.js';
 @customElement('edgeless-change-link-card-button')
 export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
   static override styles = css`
-    .change-bookmark-container {
+    .change-link-card-container {
       display: flex;
       align-items: center;
     }
 
-    .change-bookmark-button {
+    .change-link-card-button {
       width: 40px;
       height: 24px;
       border-radius: 4px;
@@ -56,7 +56,7 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       align-items: center;
     }
 
-    .change-bookmark-button.url {
+    .change-link-card-button.url {
       display: flex;
       width: 180px;
       padding: var(--1, 0px);
@@ -69,7 +69,7 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       cursor: pointer;
     }
 
-    .change-bookmark-button.url > span {
+    .change-link-card-button.url > span {
       display: -webkit-box;
       -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
@@ -88,13 +88,13 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       opacity: var(--add, 1);
     }
 
-    .change-bookmark-view-style {
+    .change-link-card-view-style {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .change-bookmark-button-view-selector {
+    .change-link-card-button-view-selector {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -102,14 +102,14 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       border-radius: 6px;
       background: var(--affine-hover-color);
     }
-    .change-bookmark-button-view-selector .change-bookmark-button {
+    .change-link-card-button-view-selector .change-link-card-button {
       width: 24px;
       height: 24px;
     }
-    .change-bookmark-button-view-selector > icon-button {
+    .change-link-card-button-view-selector > icon-button {
       padding: 0px;
     }
-    .change-bookmark-button-view-selector .current-view {
+    .change-link-card-button-view-selector .current-view {
       background: var(--affine-background-overlay-panel-color);
       border-radius: 6px;
     }
@@ -119,10 +119,10 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       margin: 0 12px;
     }
 
-    bookmark-card-style-panel {
+    link-card-style-panel {
       display: none;
     }
-    bookmark-card-style-panel[data-show] {
+    link-card-style-panel[data-show] {
       display: flex;
     }
   `;
@@ -142,13 +142,14 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
   @state()
   private _showPopper = false;
 
-  @query('.change-bookmark-button.card-style')
-  private _bookmarkCardStyleButton!: HTMLDivElement;
-  @query('bookmark-card-style-panel')
-  private _bookmarkCardStylePanel!: HTMLDivElement;
-  private _bookmarkCardStylePopper: ReturnType<
-    typeof createButtonPopper
-  > | null = null;
+  @query('.change-link-card-button.card-style')
+  private _linkCardStyleButton!: HTMLDivElement;
+
+  @query('link-card-style-panel')
+  private _linkCardStylePanel!: HTMLDivElement;
+
+  private _linkCardStylePopper: ReturnType<typeof createButtonPopper> | null =
+    null;
 
   private get _model() {
     return this.linkCard.model;
@@ -160,6 +161,10 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
     ) as PageService | null;
     assertExists(pageService);
     return pageService;
+  }
+
+  private get _canShowCardStylePanel() {
+    return isBookmarkBlock(this._model) || isEmbedGithubBlock(this._model);
   }
 
   private _copyUrl() {
@@ -174,7 +179,7 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
     bounds.h = LINK_CARD_HEIGHT[style];
     const xywh = bounds.serialize();
     this._model.page.updateBlock(this._model, { style, xywh });
-    this._bookmarkCardStylePopper?.hide();
+    this._linkCardStylePopper?.hide();
   }
 
   private _convertToCardView() {
@@ -236,14 +241,16 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
   }
 
   override firstUpdated(changedProperties: Map<string, unknown>) {
-    this._bookmarkCardStylePopper = createButtonPopper(
-      this._bookmarkCardStyleButton,
-      this._bookmarkCardStylePanel,
-      ({ display }) => {
-        this._showPopper = display === 'show';
-      }
-    );
-    this._disposables.add(this._bookmarkCardStylePopper);
+    if (this._canShowCardStylePanel) {
+      this._linkCardStylePopper = createButtonPopper(
+        this._linkCardStyleButton,
+        this._linkCardStylePanel,
+        ({ display }) => {
+          this._showPopper = display === 'show';
+        }
+      );
+      this._disposables.add(this._linkCardStylePopper);
+    }
 
     super.firstUpdated(changedProperties);
   }
@@ -251,15 +258,18 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
   override render() {
     const { style } = this._model;
     return html`
-      <div class="change-bookmark-container">
-        <div class="change-bookmark-button url" @click=${() => this._copyUrl()}>
+      <div class="change-link-card-container">
+        <div
+          class="change-link-card-button url"
+          @click=${() => this._copyUrl()}
+        >
           <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
           <span>${this._model.url}</span>
         </div>
 
         <edgeless-tool-icon-button
           .tooltip=${'Click to copy link'}
-          class="change-bookmark-button copy"
+          class="change-link-card-button copy"
           ?disabled=${this.page.readonly}
           @click=${() => this._copyUrl()}
         >
@@ -268,7 +278,7 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           .tooltip=${'Edit'}
-          class="change-bookmark-button edit"
+          class="change-link-card-button edit"
           ?disabled=${this.page.readonly}
           @click=${() => toggleLinkCardEditModal(this.linkCard)}
         >
@@ -279,13 +289,13 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
           .vertical=${true}
         ></component-toolbar-menu-divider>
 
-        <div class="change-bookmark-view-style">
+        <div class="change-link-card-view-style">
           ${isEmbeddedBlock(this._model) || this._canConvertToEmbedView()
             ? html`
-                <div class="change-bookmark-button-view-selector">
+                <div class="change-link-card-button-view-selector">
                   <edgeless-tool-icon-button
                     class=${classMap({
-                      'change-bookmark-button': true,
+                      'change-link-card-button': true,
                       card: true,
                       'current-view': isBookmarkBlock(this._model),
                     })}
@@ -300,7 +310,7 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
 
                   <edgeless-tool-icon-button
                     class=${classMap({
-                      'change-bookmark-button': true,
+                      'change-link-card-button': true,
                       embed: true,
                       'current-view': isEmbeddedBlock(this._model),
                     })}
@@ -315,13 +325,13 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
                 </div>
               `
             : nothing}
-          ${isBookmarkBlock(this._model) || isEmbedGithubBlock(this._model)
+          ${this._canShowCardStylePanel
             ? html`
-                <div class="change-bookmark-button card-style">
+                <div class="change-link-card-button card-style">
                   <edgeless-tool-icon-button
                     .tooltip=${this._showPopper ? '' : 'Card style'}
                     ?disabled=${this.page.readonly}
-                    @click=${() => this._bookmarkCardStylePopper?.toggle()}
+                    @click=${() => this._linkCardStylePopper?.toggle()}
                   >
                     ${PaletteIcon}
                   </edgeless-tool-icon-button>
@@ -329,11 +339,11 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
               `
             : nothing}
 
-          <bookmark-card-style-panel
+          <link-card-style-panel
             .value=${style}
             .onSelect=${(value: LinkCardStyle) => this._setLinkCardStyle(value)}
           >
-          </bookmark-card-style-panel>
+          </link-card-style-panel>
         </div>
       </div>
     `;

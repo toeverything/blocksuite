@@ -1,5 +1,6 @@
 import '../_common/components/link-card/link-card-caption.js';
 
+import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
@@ -35,6 +36,9 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   loading = false;
 
   @state()
+  private _showOverlay = true;
+
+  @state()
   showCaption = false;
 
   @query('.affine-embed-youtube-block')
@@ -42,6 +46,8 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
   @query('link-card-caption')
   captionElement!: LinkCardCaption;
+
+  private _isDragging = false;
 
   refreshUrlData = () => {
     refreshEmbedYoutubeUrlData(this).catch(console.error);
@@ -66,13 +72,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   private _handleClick() {
     if (!this.isInSurface) {
       this._selectBlock();
-    }
-  }
-
-  private _handleDoubleClick(event: MouseEvent) {
-    if (!this.isInSurface) {
-      event.stopPropagation();
-      this._openLink();
     }
   }
 
@@ -108,6 +107,20 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
         if (key === 'url') this.refreshUrlData();
       })
     );
+
+    this.disposables.add(
+      this.std.selection.slots.changed.on(sels => {
+        if (this._isDragging) return;
+        this._showOverlay = !sels.some(sel =>
+          PathFinder.equals(sel.path, this.path)
+        );
+      })
+    );
+
+    this.handleEvent('pointerMove', ctx => {
+      this._isDragging = ctx.get('pointerState').dragging;
+      if (this._isDragging) this._showOverlay = true;
+    });
 
     if (this.isInSurface) {
       const surface = this.surface;
@@ -193,19 +206,26 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
               loading,
             })}
             @click=${this._handleClick}
-            @dblclick=${this._handleDoubleClick}
           >
             <div class="affine-embed-youtube-video">
               ${videoId
                 ? html`
-                    <iframe
-                      id="ytplayer"
-                      type="text/html"
-                      src=${`https://www.youtube.com/embed/${videoId}`}
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowfullscreen
-                    ></iframe>
+                    <div class="affine-embed-youtube-video-iframe-container">
+                      <iframe
+                        id="ytplayer"
+                        type="text/html"
+                        src=${`https://www.youtube.com/embed/${videoId}`}
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                      ></iframe>
+                      <div
+                        class=${classMap({
+                          'affine-embed-youtube-video-iframe-overlay': true,
+                          hide: !this._showOverlay,
+                        })}
+                      ></div>
+                    </div>
                   `
                 : bannerImage}
             </div>

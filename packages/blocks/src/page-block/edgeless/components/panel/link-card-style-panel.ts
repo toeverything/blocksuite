@@ -8,8 +8,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import type { LinkCardStyle } from '../../../../_common/types.js';
 import { getLinkCardIcons } from '../../../../_common/utils/url.js';
 
-@customElement('bookmark-card-style-panel')
-export class BookmarkCardStylePanel extends WithDisposable(LitElement) {
+@customElement('link-card-style-panel')
+export class LinkCardStylePanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       border-radius: 8px;
@@ -102,6 +102,6 @@ export class BookmarkCardStylePanel extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'bookmark-card-style-panel': BookmarkCardStylePanel;
+    'link-card-style-panel': LinkCardStylePanel;
   }
 }

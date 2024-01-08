@@ -38,11 +38,26 @@ export const styles = css`
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 
-  .affine-embed-youtube-video iframe {
+  .affine-embed-youtube-video-iframe-container {
+    position: relative;
+  }
+
+  .affine-embed-youtube-video-iframe-container > iframe {
     width: 100%;
     height: 329px;
-    object-fit: fill;
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
+  }
+
+  .affine-embed-youtube-video-iframe-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .affine-embed-youtube-video-iframe-overlay.hide {
+    display: none;
   }
 
   .affine-embed-youtube-content {
