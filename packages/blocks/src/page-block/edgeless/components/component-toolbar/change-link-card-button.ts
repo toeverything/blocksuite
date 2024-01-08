@@ -196,7 +196,7 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
 
     const blockId = this.surface.addElement(
       'affine:bookmark',
-      { url, xywh: bound.serialize(), targetStyle },
+      { url, xywh: bound.serialize(), style: targetStyle },
       this.surface.model
     );
     this.surface.edgeless.selectionManager.set({

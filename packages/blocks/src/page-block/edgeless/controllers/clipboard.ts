@@ -231,6 +231,7 @@ export class EdgelessClipboardController extends PageClipboard {
             height
           ).serialize(),
           url,
+          style,
         },
         this.surface.model.id
       );
