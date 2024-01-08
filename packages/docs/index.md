@@ -8,7 +8,7 @@ titleTemplate: The Editor Framework
 hero:
   name: BlockSuite
   text: The Framework for Building Editor(s)
-  tagline: BlockSuite is the toolkit for composing diverse collaborative editing applications.
+  tagline: BlockSuite is a framework for building collaborative editors and applications.
   actions:
     - theme: brand
       text: Get Started

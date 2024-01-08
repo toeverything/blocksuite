@@ -230,7 +230,7 @@ import type { Command } from '@blocksuite/block-std';
 import { type EditorHost } from '@blocksuite/lit';
 
 // This command requires no input field on context (`never`),
-// and will add `host` to context
+// and will add `host` to context as output
 export const withHostCommand: Command<never, 'host'> = (ctx, next) => {
   const host = ctx.std.host as EditorHost;
   next({ host });
@@ -245,6 +245,7 @@ class PageService {
   }
 }
 
+// This allows the command to be strongly typed
 declare global {
   namespace BlockSuite {
     interface CommandContext {
@@ -264,6 +265,6 @@ You can refer to the [`Command`](./command) documentation for more advanced uses
 We plan to continue supplementing and documenting some of the most commonly used commands, please stay tuned.
 :::
 
-## Customizing Blocks
+## Defining New Blocks
 
 TODO

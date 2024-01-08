@@ -2,10 +2,10 @@ import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
-import type { EmbedGithubBlockModel } from './embed-github-model.js';
+import type { EmbedGithubModel } from './embed-github-model.js';
 
 @customElement('affine-embed-github-block')
-export class EmbedGithubBlock extends EmbedBlockElement<EmbedGithubBlockModel> {
+export class EmbedGithubBlock extends EmbedBlockElement<EmbedGithubModel> {
   static override styles = css`
     .affine-embed-github-block {
       display: block;
@@ -25,7 +25,7 @@ export class EmbedGithubBlock extends EmbedBlockElement<EmbedGithubBlockModel> {
     }
   `;
 
-  override render(): unknown {
+  override render() {
     return this.renderEmbed(() => {
       return html`
         <div class="affine-embed-github-block">
