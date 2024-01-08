@@ -15,33 +15,33 @@ export function setCreateState(
   state.creating = creating;
 }
 
-function yDecorator(prototype: unknown, prop: string | symbol) {
-  Object.defineProperty(prototype, prop, {
-    get(this: ElementModel) {
-      return (
-        this.yMap.get(prop as string) ?? this._preserved.get(prop as string)
-      );
-    },
-    set(this: ElementModel, val) {
-      if (state.skip) {
-        return;
-      }
+export function yfield(fallback?: unknown): PropertyDecorator {
+  return function yDecorator(prototype: unknown, prop: string | symbol) {
+    Object.defineProperty(prototype, prop, {
+      get(this: ElementModel) {
+        return (
+          this.yMap.get(prop as string) ??
+          this._preserved.get(prop as string) ??
+          fallback
+        );
+      },
+      set(this: ElementModel, val) {
+        if (state.skip) {
+          return;
+        }
 
-      if (this.yMap) {
-        this.yMap.set(prop as string, val);
-      }
+        if (this.yMap) {
+          this.yMap.set(prop as string, val);
+        }
 
-      if (!this.yMap.doc) {
-        this._preserved.set(prop as string, val);
-      }
+        if (!this.yMap.doc) {
+          this._preserved.set(prop as string, val);
+        }
 
-      updateDerivedProp(prototype, prop as string, this);
-    },
-  });
-}
-
-export function yfield(): PropertyDecorator {
-  return yDecorator;
+        updateDerivedProp(prototype, prop as string, this);
+      },
+    });
+  };
 }
 
 export function local(): PropertyDecorator {

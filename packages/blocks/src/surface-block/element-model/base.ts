@@ -1,5 +1,6 @@
 import { type Y } from '@blocksuite/store';
 
+import { randomSeed } from '../rough/math.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { Bound } from '../utils/bound.js';
 import { getBoundsWithRotation } from '../utils/math-utils.js';
@@ -8,6 +9,7 @@ import { local, updateDerivedProp, yfield } from './decorators.js';
 
 export type BaseProps = {
   index: string;
+  seed: number;
 };
 
 export abstract class ElementModel<Props extends BaseProps = BaseProps> {
@@ -36,6 +38,9 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
   @yfield()
   index!: string;
 
+  @yfield()
+  seed!: number;
+
   @local()
   display: boolean = true;
 
@@ -58,6 +63,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     // base class property field is assigned before yMap is set
     // so we need to manually assign the default value here
     this.index = 'a0';
+    this.seed = randomSeed();
   }
 
   get deserializedXYWH() {

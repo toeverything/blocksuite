@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
+import type { Renderer } from '../../../surface-block/canvas-renderer/renderer.js';
 import type { IVec } from '../../../surface-block/index.js';
-import type { Renderer } from '../../../surface-block/renderer.js';
 
 const PANNING_DISTANCE = 30;
 

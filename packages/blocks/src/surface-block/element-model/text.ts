@@ -1,9 +1,11 @@
-import type { Y } from '@blocksuite/store';
+import { Workspace, type Y } from '@blocksuite/store';
 
 import type { SerializedXYWH } from '../index.js';
 import { type BaseProps, ElementModel } from './base.js';
-import type { FontFamily, FontStyle, FontWeight } from './common.js';
+import { FontFamily, type FontStyle, FontWeight } from './common.js';
 import { yfield } from './decorators.js';
+
+export type TextAlign = 'left' | 'center' | 'right';
 
 export type TextElementProps = BaseProps & {
   text: Y.Text;
@@ -17,32 +19,40 @@ export type TextElementProps = BaseProps & {
 };
 
 export class TextElementModel extends ElementModel<TextElementProps> {
+  static override propsToY(props: Record<string, unknown>) {
+    if (props.text && !(props.text instanceof Workspace.Y.Text)) {
+      props.text = new Workspace.Y.Text(props.text as string);
+    }
+
+    return props;
+  }
+
   @yfield()
-  xywh: SerializedXYWH = '[0,0,0,0]';
+  xywh: SerializedXYWH = '[0,0,16,16]';
 
   @yfield()
   rotate: number = 0;
 
   @yfield()
-  text!: Y.Text;
+  text: Y.Text = new Workspace.Y.Text();
 
   @yfield()
-  color!: string;
+  color: string = '#000000';
 
   @yfield()
-  fontSize!: number;
+  fontSize: number = 16;
 
   @yfield()
-  fontFamily!: FontFamily;
+  fontFamily: FontFamily = FontFamily.Inter;
 
   @yfield()
-  fontWeight?: FontWeight;
+  fontWeight: FontWeight = FontWeight.Regular;
 
   @yfield()
-  fontStyle?: FontStyle;
+  fontStyle: FontStyle = 'normal';
 
   @yfield()
-  textAlign!: 'left' | 'center' | 'right';
+  textAlign: TextAlign = 'center';
 
   @yfield()
   hasMaxWidth?: boolean;

@@ -1,16 +1,16 @@
 import { Slot } from '@blocksuite/global/utils';
 
-import { requestConnectedFrame } from '../_common/utils/event.js';
-import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
-import type { SurfaceElement } from './elements/surface-element.js';
-import { GridManager } from './grid.js';
-import type { LayerManager } from './managers/layer-manager.js';
-import { RoughCanvas } from './rough/canvas.js';
-import { Bound } from './utils/bound.js';
-import { intersects } from './utils/math-utils.js';
-import { clamp, getBoundsWithRotation } from './utils/math-utils.js';
-import { type IPoint } from './utils/point.js';
-import { type IVec, Vec } from './utils/vec.js';
+import { requestConnectedFrame } from '../../_common/utils/event.js';
+import { type IBound, ZOOM_MAX, ZOOM_MIN } from '../consts.js';
+import type { SurfaceElement } from '../elements/surface-element.js';
+import { GridManager } from '../grid.js';
+import type { LayerManager } from '../managers/layer-manager.js';
+import { RoughCanvas } from '../rough/canvas.js';
+import { Bound } from '../utils/bound.js';
+import { intersects } from '../utils/math-utils.js';
+import { clamp, getBoundsWithRotation } from '../utils/math-utils.js';
+import { type IPoint } from '../utils/point.js';
+import { type IVec, Vec } from '../utils/vec.js';
 
 export interface SurfaceViewport {
   readonly left: number;
@@ -59,6 +59,11 @@ export abstract class Overlay {
   abstract render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void;
 }
 
+type EnvProvider = {
+  getVariableColor: (val: string) => string;
+  selectedElements: () => string[];
+};
+
 export class Renderer implements SurfaceViewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
@@ -66,6 +71,8 @@ export class Renderer implements SurfaceViewport {
   gridManager = new GridManager<SurfaceElement>();
   indexedCanvases: HTMLCanvasElement[] = [];
   layerManager: LayerManager;
+
+  provider: Partial<EnvProvider>;
 
   slots = {
     viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
@@ -83,12 +90,18 @@ export class Renderer implements SurfaceViewport {
   private _shouldUpdate = false;
   private _rafId: number | null = null;
 
-  constructor(options: { layerManager: LayerManager }) {
+  constructor(options: {
+    layerManager: LayerManager;
+    provider?: Partial<EnvProvider>;
+    getVariableColor: (val: string) => string;
+  }) {
     const canvas = document.createElement('canvas');
+
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     this.rc = new RoughCanvas(canvas);
     this.layerManager = options.layerManager;
+    this.provider = options.provider ?? {};
   }
 
   private _emitViewportUpdatedSlot() {
@@ -175,6 +188,10 @@ export class Renderer implements SurfaceViewport {
 
   get boundingClientRect() {
     return this._container.getBoundingClientRect();
+  }
+
+  getVariableColor(val: string) {
+    return this.provider.getVariableColor(val);
   }
 
   isInViewport(bound: Bound) {

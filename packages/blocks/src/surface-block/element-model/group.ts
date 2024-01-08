@@ -6,7 +6,7 @@ import { Bound } from '../utils/bound.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
 import type { BaseProps } from './base.js';
 import { ElementModel } from './base.js';
-import { yfield } from './decorators.js';
+import { local, yfield } from './decorators.js';
 
 type GroupElementProps = BaseProps & {
   children: Y.Map<boolean>;
@@ -38,8 +38,11 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
   @yfield()
   title: Y.Text = new Workspace.Y.Text();
 
+  @local()
+  showTitle: boolean = true;
+
   get xywh() {
-    const childrenIds = this.childrenIds;
+    const childrenIds = this.childIds;
 
     if (childrenIds.length === 0) return '[0,0,0,0]';
 
@@ -72,11 +75,11 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     return 'group';
   }
 
-  get childrenIds() {
+  get childIds() {
     return [...this.children.keys()];
   }
 
-  get childrenElements() {
+  get childElements() {
     const elements = [];
     const keys = this.children.keys();
 

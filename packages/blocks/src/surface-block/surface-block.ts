@@ -31,6 +31,7 @@ import {
   isTopLevelBlock,
 } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
+import { Renderer } from './canvas-renderer/renderer.js';
 import { type IBound } from './consts.js';
 import {
   type EdgelessBlockModelMap,
@@ -63,7 +64,6 @@ import {
   setGroupParent,
 } from './managers/group-manager.js';
 import { LayerManager } from './managers/layer-manager.js';
-import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceService } from './surface-service.js';

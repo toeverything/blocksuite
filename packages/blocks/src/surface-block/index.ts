@@ -1,3 +1,5 @@
+export type { SurfaceViewport } from './canvas-renderer/renderer.js';
+export { Overlay, Renderer } from './canvas-renderer/renderer.js';
 export {
   type IBound,
   type IModelCoord,
@@ -30,8 +32,6 @@ export { ShapeType } from './elements/shape/consts.js';
 export { ShapeMethodsMap } from './elements/shape/shapes/index.js';
 export { type ComputedValue } from './elements/surface-element.js';
 export { getStroke } from './perfect-freehand/getStroke.js';
-export type { SurfaceViewport } from './renderer.js';
-export { Overlay, Renderer } from './renderer.js';
 export { RoughCanvas } from './rough/canvas.js';
 export type { Options } from './rough/core.js';
 export { AStarRunner } from './utils/a-star.js';

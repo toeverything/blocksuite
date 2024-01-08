@@ -1,8 +1,9 @@
 import { DEFAULT_ROUGHNESS } from '../consts.js';
-import type { SerializedXYWH } from '../index.js';
+import type { PointLocation } from '../index.js';
+import { type SerializedXYWH } from '../index.js';
 import { type BaseProps, ElementModel } from './base.js';
 import type { StrokeStyle } from './common.js';
-import { local, yfield } from './decorators.js';
+import { derive, local, yfield } from './decorators.js';
 
 export type PointStyle = 'None' | 'Arrow' | 'Triangle' | 'Circle' | 'Diamond';
 
@@ -35,6 +36,21 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   get type() {
     return 'connector';
   }
+
+  @derive((instance: ConnectorElementModel) => {
+    const { x, y } = instance;
+
+    return {
+      absolutePath: instance.path.map(p =>
+        p.clone().setVec([p[0] + x, p[1] + y])
+      ),
+    };
+  })
+  @local()
+  path: PointLocation[] = [];
+
+  @local()
+  absolutePath: PointLocation[] = [];
 
   @local()
   xywh: SerializedXYWH = '[0,0,0,0]';
@@ -70,9 +86,9 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     position: [0, 0],
   };
 
-  @yfield()
-  frontEndpointStyle?: PointStyle;
+  @yfield('None')
+  frontEndpointStyle!: PointStyle;
 
-  @yfield()
-  rearEndpointStyle?: PointStyle;
+  @yfield('Arrow')
+  rearEndpointStyle!: PointStyle;
 }

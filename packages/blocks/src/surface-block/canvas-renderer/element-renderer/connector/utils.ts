@@ -1,23 +1,24 @@
-import type { ConnectorElementModel } from '../../../index.js';
-import type { Renderer, RoughCanvas } from '../../index.js';
+import type { ConnectorElementModel } from '../../../element-model/connector.js';
+import { ConnectorMode } from '../../../element-model/connector.js';
+import type { PointLocation } from '../../../index.js';
+import type { RoughCanvas } from '../../../rough/canvas.js';
 import {
   type BezierCurveParameters,
   getBezierTangent,
-} from '../../utils/curve.js';
-import type { PointLocation } from '../../utils/point-location.js';
-import { type IVec, Vec } from '../../utils/vec.js';
-import {
-  ConnectorEndpoint,
-  ConnectorMode,
-  DEFAULT_ARROW_SIZE,
-} from './types.js';
+} from '../../../utils/curve.js';
+import { type IVec, Vec } from '../../../utils/vec.js';
+import type { Renderer } from '../../renderer.js';
+
+type ConnectorEnd = 'Front' | 'Rear';
+
+export const DEFAULT_ARROW_SIZE = 15;
 
 export function getArrowPoints(
   points: PointLocation[],
   size = 10,
   mode: ConnectorMode,
   bezierParameters: BezierCurveParameters,
-  endPoint: ConnectorEndpoint = ConnectorEndpoint.Rear,
+  endPoint: ConnectorEnd = 'Rear',
   radians: number = Math.PI / 4
 ) {
   const anchorPoint = getPointWithTangent(
@@ -27,7 +28,7 @@ export function getArrowPoints(
     bezierParameters
   );
   const unit = Vec.mul(anchorPoint.tangent, -1);
-  const angle = endPoint === ConnectorEndpoint.Front ? Math.PI : 0;
+  const angle = endPoint === 'Front' ? Math.PI : 0;
 
   return {
     points: [
@@ -43,7 +44,7 @@ export function getCircleCenterPoint(
   radius = 5,
   mode: ConnectorMode,
   bezierParameters: BezierCurveParameters,
-  endPoint: ConnectorEndpoint = ConnectorEndpoint.Rear
+  endPoint: ConnectorEnd = 'Rear'
 ) {
   const anchorPoint = getPointWithTangent(
     points,
@@ -53,7 +54,7 @@ export function getCircleCenterPoint(
   );
 
   const unit = Vec.mul(anchorPoint.tangent, -1);
-  const angle = endPoint === ConnectorEndpoint.Front ? Math.PI : 0;
+  const angle = endPoint === 'Front' ? Math.PI : 0;
 
   return Vec.add(Vec.mul(Vec.rot(unit, angle), radius), anchorPoint);
 }
@@ -61,13 +62,12 @@ export function getCircleCenterPoint(
 export function getPointWithTangent(
   points: PointLocation[],
   mode: ConnectorMode,
-  endPoint: ConnectorEndpoint,
+  endPoint: ConnectorEnd,
   bezierParameters: BezierCurveParameters
 ) {
-  const anchorIndex =
-    endPoint === ConnectorEndpoint.Rear ? points.length - 1 : 0;
+  const anchorIndex = endPoint === 'Rear' ? points.length - 1 : 0;
   const pointToAnchorIndex =
-    endPoint === ConnectorEndpoint.Rear ? anchorIndex - 1 : anchorIndex + 1;
+    endPoint === 'Rear' ? anchorIndex - 1 : anchorIndex + 1;
   const anchorPoint = points[anchorIndex];
   const pointToAnchor = points[pointToAnchorIndex];
 
@@ -75,12 +75,12 @@ export function getPointWithTangent(
   let tangent;
   if (mode !== ConnectorMode.Curve) {
     tangent =
-      endPoint === ConnectorEndpoint.Rear
+      endPoint === 'Rear'
         ? Vec.tangent(anchorPoint, pointToAnchor)
         : Vec.tangent(pointToAnchor, anchorPoint);
   } else {
     tangent =
-      endPoint === ConnectorEndpoint.Rear
+      endPoint === 'Rear'
         ? getBezierTangent(bezierParameters, 1)
         : getBezierTangent(bezierParameters, 0);
   }
@@ -92,10 +92,10 @@ export function getPointWithTangent(
 export function getDiamondPoints(
   point: PointLocation,
   size = 10,
-  endPoint: ConnectorEndpoint = ConnectorEndpoint.Rear
+  endPoint: ConnectorEnd = 'Rear'
 ) {
   const unit = Vec.mul(point.tangent, -1);
-  const angle = endPoint === ConnectorEndpoint.Front ? Math.PI : 0;
+  const angle = endPoint === 'Front' ? Math.PI : 0;
 
   const diamondPoints = [
     Vec.add(Vec.mul(Vec.rot(unit, angle + Math.PI * 0.25), size), point),
@@ -109,18 +109,29 @@ export function getDiamondPoints(
   };
 }
 
-export type ArrowOptions = {
-  end: ConnectorEndpoint;
-  seed: number;
-  mode: ConnectorMode;
-  rough: boolean;
-  roughness: number;
-  strokeColor: string;
-  strokeWidth: number;
-  fillColor: string;
-  fillStyle: string;
-  bezierParameters: BezierCurveParameters;
-};
+export type ArrowOptions = ReturnType<typeof getArrowOptions>;
+
+export function getArrowOptions(
+  end: ConnectorEnd,
+  model: ConnectorElementModel,
+  renderer: Renderer
+) {
+  const { stroke } = model;
+  const realStrokeColor = renderer.getVariableColor(stroke);
+
+  return {
+    end,
+    seed: model.seed,
+    mode: model.mode,
+    rough: model.rough,
+    roughness: model.roughness,
+    strokeColor: realStrokeColor,
+    strokeWidth: model.strokeWidth,
+    fillColor: realStrokeColor,
+    fillStyle: 'solid',
+    bezierParameters: getBezierParameters(model),
+  };
+}
 
 export function getRcOptions(options: ArrowOptions) {
   const { seed, roughness, strokeWidth, strokeColor, fillColor } = options;
@@ -295,30 +306,10 @@ export function renderCircle(
   }
 }
 
-export function getBezierParameters(model: ConnectorElementModel) {
+export function getBezierParameters(
+  model: ConnectorElementModel
+): BezierCurveParameters {
   const p = model.absolutePath;
 
   return [p[0], p[0].absOut, p[1].absIn, p[1]];
-}
-
-export function getArrowOptions(
-  end: 'Front' | 'Rear',
-  model: ConnectorElementModel,
-  renderer: Renderer
-) {
-  const { stroke } = model;
-  const realStrokeColor = renderer.getVariableColor(stroke);
-
-  return {
-    end,
-    seed: model.seed,
-    mode: model.mode,
-    rough: model.rough,
-    roughness: model.roughness,
-    strokeColor: realStrokeColor,
-    strokeWidth: model.strokeWidth,
-    fillColor: realStrokeColor,
-    fillStyle: 'solid',
-    bezierParameters: getBezierParameters(model),
-  };
 }

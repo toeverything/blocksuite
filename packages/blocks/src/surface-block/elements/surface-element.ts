@@ -2,8 +2,8 @@ import type { Y } from '@blocksuite/store';
 
 import type { EdgelessElement } from '../../_common/types.js';
 import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
+import type { Renderer } from '../canvas-renderer/renderer.js';
 import type { GroupElement } from '../index.js';
-import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import { Bound } from '../utils/bound.js';
 import { getBoundsWithRotation, isPointIn } from '../utils/math-utils.js';
