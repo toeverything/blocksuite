@@ -9,11 +9,11 @@
   "license": "MPL-2.0",
   "type": "module",
   "devDependencies": {
-    "typedoc": "^0.25.4",
-    "typedoc-plugin-markdown": "4.0.0-next.36",
-    "vite-plugin-wasm": "^3.2.2",
-    "vitepress": "1.0.0-rc.31",
-    "vue": "^3.3.10"
+    "typedoc": "^0.25.6",
+    "typedoc-plugin-markdown": "4.0.0-next.39",
+    "vite-plugin-wasm": "^3.3.0",
+    "vitepress": "1.0.0-rc.35",
+    "vue": "^3.4.5"
   },
   "scripts": {
     "typedoc": "pnpm -C ../.. build:packages && typedoc --options ../../typedoc.json",
