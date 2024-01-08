@@ -32,9 +32,12 @@ export enum Direction {
   Top,
 }
 
+export const PANEL_WIDTH = 136;
+export const PANEL_HEIGHT = 108;
+
 export const PANEL_OFFSET = {
-  x: 100,
-  y: -160,
+  x: -PANEL_WIDTH / 2,
+  y: -PANEL_HEIGHT * (3 / 4),
 };
 export const MAIN_GAP = 100;
 export const SECOND_GAP = 20;
