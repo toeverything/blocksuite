@@ -110,18 +110,20 @@ export default defineConfig({
           {
             text: '<code>store</code>',
             items: [
-              { text: 'Page 🚧' },
-              { text: 'Workspace 🚧' },
+              { text: 'Page', link: '/store#page' },
+              { text: 'Workspace', link: '/store#workspace' },
               { text: 'Slot', link: '/slot' },
               // { text: 'Transformer 🚧' },
               { text: 'Adapter', link: '/adapter' },
             ],
           },
           {
-            text: '<code>inline</code> 🚧',
+            text: '<code>inline</code>',
+            link: '/inline',
           },
           {
-            text: '<code>lit</code> 🚧',
+            text: '<code>lit</code>',
+            link: '/lit',
           },
         ],
       },
