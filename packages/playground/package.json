@@ -29,16 +29,16 @@
     "lit": "^3.1.0",
     "lz-string": "^1.5.0",
     "merge": "^2.1.1",
-    "tweakpane": "^4.0.1",
+    "tweakpane": "^4.0.3",
     "y-protocols": "^1.0.6",
     "yjs": "^13.6.10",
     "zod": "^3.22.4"
   },
   "license": "MPL-2.0",
   "devDependencies": {
-    "@tweakpane/core": "^2.0.1",
+    "@tweakpane/core": "^2.0.3",
     "@types/micromatch": "^4.0.6",
     "magic-string": "^0.30.5",
-    "vite-plugin-wasm": "^3.2.2"
+    "vite-plugin-wasm": "^3.3.0"
   }
 }

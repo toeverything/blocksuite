@@ -44,7 +44,8 @@ export async function insertFromMarkdown(
     .children;
 
   const models: BlockModel[] = [];
-  snapshots.map(async (blockSnapshot, i) => {
+  for (let i = 0; i < snapshots.length; i++) {
+    const blockSnapshot = snapshots[i];
     const model = await job.snapshotToBlock(
       blockSnapshot,
       host.std.page,
@@ -52,7 +53,7 @@ export async function insertFromMarkdown(
       (index ?? 0) + i
     );
     models.push(model);
-  });
+  }
 
   return models;
 }
