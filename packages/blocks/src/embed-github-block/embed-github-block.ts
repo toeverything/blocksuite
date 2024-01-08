@@ -1,7 +1,6 @@
 import '../_common/components/link-card/link-card-caption.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { Slot } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -13,6 +12,7 @@ import { HoverController } from '../_common/components/hover/controller.js';
 import type { LinkCardCaption } from '../_common/components/link-card/link-card-caption.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
+import type { LinkCardStyle } from '../_common/types.js';
 import { getLinkCardIcons } from '../_common/utils/url.js';
 import { type EmbedGithubModel, githubUrlRegex } from './embed-github-model.js';
 import type { EmbedGithubService } from './embed-github-service.js';
@@ -30,6 +30,8 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
+  override cardStyle: LinkCardStyle = 'horizontal';
+
   @property({ attribute: false })
   loading = false;
 
@@ -38,10 +40,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 
   @query('link-card-caption')
   captionElement!: LinkCardCaption;
-
-  readonly slots = {
-    loadingUpdated: new Slot(),
-  };
 
   refreshUrlData = () => {
     refreshEmbedGithubUrlData(this).catch(console.error);
@@ -88,16 +86,11 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!!this.model.caption && this.model.caption.length > 0) {
+    if (!!this.model.caption && !!this.model.caption.length) {
       this.showCaption = true;
     }
 
-    if (
-      !this.model.owner ||
-      !this.model.repo ||
-      !this.model.type ||
-      !this.model.githubId
-    ) {
+    if (!this.model.owner || !this.model.repo || !this.model.githubId) {
       this.page.withoutTransact(() => {
         const url = this.model.url;
         const urlMatch = url.match(githubUrlRegex);
@@ -113,15 +106,10 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       });
     }
 
-    if (!this.model.description && !this.model.title) {
-      this.page.withoutTransact(() => {
-        this.refreshUrlData();
-      });
-    } else {
-      this.page.withoutTransact(() => {
-        this.refreshStatus();
-      });
-    }
+    this.page.withoutTransact(() => {
+      if (!this.model.description && !this.model.title) this.refreshUrlData();
+      else this.refreshStatus();
+    });
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
@@ -140,13 +128,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
           }
         })
       );
-    }
-  }
-
-  override updated(changedProperties: Map<string, unknown>) {
-    super.updated(changedProperties);
-    if (changedProperties.has('loading')) {
-      this.slots.loadingUpdated.emit();
     }
   }
 
@@ -191,26 +172,14 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     } = this.model;
 
     const loading = this.loading;
-
-    const cardClassMap = classMap({
-      loading,
-      [style]: true,
-    });
-
     const { LoadingIcon, LinkCardBannerIcon } = getLinkCardIcons();
-
     const titleIcon = loading ? LoadingIcon : GithubIcon;
-
     const statusIcon = status
       ? getGithubStatusIcon(type, status, statusReason)
       : nothing;
-
     const statusText = loading ? '' : status;
-
     const titleText = loading ? 'Loading...' : title;
-
     const descriptionText = loading ? '' : description;
-
     const bannerImage =
       !loading && image
         ? html`<object type="image/webp" data=${image}>
@@ -219,21 +188,19 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
         : LinkCardBannerIcon;
 
     let dateText = '';
-
     if (createdAt) {
       const date = new Date(createdAt);
       dateText = date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
       });
-
       const day = date.getDate();
       const suffix =
         ['th', 'st', 'nd', 'rd'][((day / 10) | 0) !== 1 ? day % 10 : 4] || 'th';
       dateText = dateText.replace(/\d+/, `${day}${suffix}`);
     }
 
-    this._style = style;
+    this.cardStyle = style;
 
     return this.renderEmbed(
       () => html`
@@ -243,8 +210,12 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
           })}
         >
           <div
-            ${!this.isInSurface ? ref(this._whenHover.setReference) : nothing}
-            class="affine-embed-github-block${cardClassMap}"
+            ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
+            class=${classMap({
+              'affine-embed-github-block': true,
+              loading,
+              [style]: true,
+            })}
             @click=${this._handleClick}
             @dblclick=${this._handleDoubleClick}
           >
@@ -266,6 +237,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
                         })}
                       >
                         ${statusIcon}
+
                         <span>${statusText}</span>
                       </div>`
                     : nothing}
@@ -312,7 +284,10 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
                   `
                 : nothing}
 
-              <div class="affine-embed-github-content-url">
+              <div
+                class="affine-embed-github-content-url"
+                @click=${this._openLink}
+              >
                 <span class="affine-embed-github-content-repo"
                   >${`${owner}/${repo} |`}</span
                 >
@@ -324,16 +299,15 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
                   : nothing}
                 <span>github.com</span>
 
-                <div
-                  class="affine-embed-github-content-url-icon"
-                  @click=${this._openLink}
-                >
+                <div class="affine-embed-github-content-url-icon">
                   ${OpenIcon}
                 </div>
               </div>
             </div>
+
             <div class="affine-embed-github-banner">${bannerImage}</div>
           </div>
+
           <link-card-caption
             .block=${this}
             .display=${this.showCaption}
@@ -341,6 +315,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
               if (!this.model.caption) this.showCaption = false;
             }}
           ></link-card-caption>
+
           ${this.selected?.is('block')
             ? html`<affine-block-selection></affine-block-selection>`
             : nothing}

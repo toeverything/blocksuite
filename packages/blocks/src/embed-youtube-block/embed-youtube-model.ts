@@ -16,7 +16,7 @@ export type EmbedYoutubeBlockUrlData = {
   creatorImage: string | null;
 };
 
-export const EmbedYoutubeStyles: LinkCardStyle[] = ['vertical'] as const;
+export const EmbedYoutubeStyles: LinkCardStyle[] = ['video'] as const;
 
 export type EmbedYoutubeBlockProps = {
   style: (typeof EmbedYoutubeStyles)[number];

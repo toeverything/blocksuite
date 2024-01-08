@@ -1,7 +1,6 @@
 import '../_common/components/link-card/link-card-caption.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { Slot } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -13,6 +12,7 @@ import { HoverController } from '../_common/components/hover/controller.js';
 import type { LinkCardCaption } from '../_common/components/link-card/link-card-caption.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
+import type { LinkCardStyle } from '../_common/types.js';
 import { getLinkCardIcons } from '../_common/utils/url.js';
 import {
   type EmbedYoutubeModel,
@@ -29,6 +29,8 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
+  override cardStyle: LinkCardStyle = 'video';
+
   @property({ attribute: false })
   loading = false;
 
@@ -40,10 +42,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
   @query('link-card-caption')
   captionElement!: LinkCardCaption;
-
-  readonly slots = {
-    loadingUpdated: new Slot(),
-  };
 
   refreshUrlData = () => {
     refreshEmbedYoutubeUrlData(this).catch(console.error);
@@ -81,7 +79,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!!this.model.caption && this.model.caption.length > 0) {
+    if (!!this.model.caption && !!this.model.caption.length) {
       this.showCaption = true;
     }
 
@@ -124,13 +122,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     }
   }
 
-  override updated(changedProperties: Map<string, unknown>) {
-    super.updated(changedProperties);
-    if (changedProperties.has('loading')) {
-      this.slots.loadingUpdated.emit();
-    }
-  }
-
   private _whenHover = new HoverController(this, ({ abortController }) => {
     return {
       template: html`
@@ -168,19 +159,10 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     } = this.model;
 
     const loading = this.loading;
-
-    const cardClassMap = classMap({
-      loading,
-    });
-
     const { LoadingIcon, LinkCardBannerIcon } = getLinkCardIcons();
-
     const titleIcon = loading ? LoadingIcon : YoutubeIcon;
-
     const titleText = loading ? 'Loading...' : title;
-
     const descriptionText = loading ? '' : description;
-
     const bannerImage =
       !loading && image
         ? html`<object type="image/webp" data=${image}>
@@ -195,7 +177,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
           </object>`
         : nothing;
 
-    this._style = style;
+    this.cardStyle = style;
 
     return this.renderEmbed(
       () => html`
@@ -205,8 +187,11 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
           })}
         >
           <div
-            ${!this.isInSurface ? ref(this._whenHover.setReference) : nothing}
-            class="affine-embed-youtube-block${cardClassMap}"
+            ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
+            class=${classMap({
+              'affine-embed-youtube-block': true,
+              loading,
+            })}
             @click=${this._handleClick}
             @dblclick=${this._handleDoubleClick}
           >
@@ -247,18 +232,19 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
                 ${descriptionText}
               </div>
 
-              <div class="affine-embed-youtube-content-url">
+              <div
+                class="affine-embed-youtube-content-url"
+                @click=${this._openLink}
+              >
                 <span>www.youtube.com</span>
 
-                <div
-                  class="affine-embed-youtube-content-url-icon"
-                  @click=${this._openLink}
-                >
+                <div class="affine-embed-youtube-content-url-icon">
                   ${OpenIcon}
                 </div>
               </div>
             </div>
           </div>
+
           <link-card-caption
             .block=${this}
             .display=${this.showCaption}
@@ -266,6 +252,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
               if (!this.model.caption) this.showCaption = false;
             }}
           ></link-card-caption>
+
           ${this.selected?.is('block')
             ? html`<affine-block-selection></affine-block-selection>`
             : nothing}

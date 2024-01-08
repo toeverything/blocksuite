@@ -223,6 +223,7 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
     this.block.updateComplete
       .then(() => this.block.captionElement.input.focus())
       .catch(console.error);
+    this.abortController.abort();
   }
 
   private _toggleCardStyleMenu() {
