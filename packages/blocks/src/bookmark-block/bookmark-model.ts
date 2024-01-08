@@ -29,9 +29,9 @@ export interface BookmarkBlockEdgelessProps {
 }
 
 export const BookmarkStyles: LinkCardStyle[] = [
+  'vertical',
   'horizontal',
   'list',
-  'vertical',
   'cube',
 ] as const;
 
@@ -49,7 +49,7 @@ export type BookmarkBlockProps = {
   BookmarkBlockEdgelessProps;
 
 const defaultBookmarkProps: BookmarkBlockProps = {
-  style: BookmarkStyles[0],
+  style: BookmarkStyles[1],
   url: '',
   caption: null,
 

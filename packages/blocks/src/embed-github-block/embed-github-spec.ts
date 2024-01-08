@@ -8,7 +8,7 @@ import {
 import { EmbedGithubService } from './embed-github-service.js';
 
 const defaultEmbedGithubProps: EmbedGithubBlockProps = {
-  style: EmbedGithubStyles[0],
+  style: EmbedGithubStyles[1],
   owner: '',
   repo: '',
   githubType: 'issue',

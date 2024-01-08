@@ -182,7 +182,9 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
 
     const targetStyle = BookmarkStyles.includes(style)
       ? style
-      : BookmarkStyles[0];
+      : BookmarkStyles.filter(
+          style => style !== 'vertical' && style !== 'cube'
+        )[0];
 
     const parent = page.getParent(this.model);
     assertExists(parent);
@@ -210,7 +212,9 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
 
     const { flavour, styles } = embedOptions;
 
-    const targetStyle = styles.includes(style) ? style : styles[0];
+    const targetStyle = styles.includes(style)
+      ? style
+      : styles.filter(style => style !== 'vertical' && style !== 'cube')[0];
 
     const parent = page.getParent(this.model);
     assertExists(parent);

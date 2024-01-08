@@ -17,9 +17,9 @@ export type EmbedGithubBlockUrlData = {
 };
 
 export const EmbedGithubStyles: LinkCardStyle[] = [
+  'vertical',
   'horizontal',
   'list',
-  'vertical',
   'cube',
 ] as const;
 
