@@ -101,6 +101,8 @@ export const styles = css`
     align-items: center;
     justify-content: flex-start;
     gap: 4px;
+    width: max-content;
+    max-width: 100%;
   }
   .affine-bookmark-content-url > span {
     display: -webkit-box;
