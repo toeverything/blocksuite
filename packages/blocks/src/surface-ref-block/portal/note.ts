@@ -86,6 +86,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
         class="surface-ref-note-portal"
         style=${styleMap(style)}
         data-model-height="${modelH}"
+        data-portal-reference-block-id="${model.id}"
       >
         ${this.renderModel(model)}
       </div>

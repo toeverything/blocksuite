@@ -5,7 +5,6 @@ import type {
 } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import type { BlockModel } from '@blocksuite/store';
 import {
   type BlockSnapshot,
   fromJSON,
@@ -21,7 +20,7 @@ import type {
 import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
-  buildPath,
+  blockElementGetter,
   getEditorContainer,
   isInsideDocEditor,
 } from '../../../_common/utils/query.js';
@@ -127,24 +126,6 @@ export class EdgelessClipboardController extends PageClipboard {
       { global: true }
     );
   };
-
-  private _blockElmentGetter(model: BlockModel) {
-    if (matchFlavours(model, ['affine:image', 'affine:frame'])) {
-      let current: BlockModel | null = model;
-      const path: string[] = [];
-      while (current) {
-        // Top level image render under page block not surface block
-        if (!matchFlavours(current, ['affine:surface'])) {
-          path.unshift(current.id);
-        }
-        current = current.page.getParent(current);
-      }
-
-      return this.std.view.viewFromPath('block', path);
-    } else {
-      return this.std.view.viewFromPath('block', buildPath(model));
-    }
-  }
 
   private _onCopy = async (
     _context: UIEventStateContext,
@@ -749,7 +730,8 @@ export class EdgelessClipboardController extends PageClipboard {
       block: TopLevelBlockModel,
       isInFrame = false
     ) => {
-      let blockElement = this._blockElmentGetter(block)?.parentElement;
+      let blockElement = blockElementGetter(block, this.std.view)
+        ?.parentElement;
       const blockPortalSelector = block.flavour.replace(
         'affine:',
         '.edgeless-block-portal-'
