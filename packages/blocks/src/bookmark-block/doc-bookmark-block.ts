@@ -1,16 +1,15 @@
+import '../_common/components/link-card/link-card-caption.js';
 import '../_common/components/link-card/link-card-toolbar';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
-import { html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { html, nothing } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { HoverController } from '../_common/components/hover/controller.js';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
-import type { BookmarkCaption } from './components/bookmark-caption.js';
-import type { ToolbarActionCallback } from './components/config.js';
 
 @customElement('affine-doc-bookmark')
 export class DocBookmarkBlockComponent extends WithDisposable(
@@ -19,14 +18,8 @@ export class DocBookmarkBlockComponent extends WithDisposable(
   @property({ attribute: false })
   block!: BookmarkBlockComponent;
 
-  @state()
-  private _showCaption = false;
-
   @query('.affine-bookmark-card')
   bookmardCardElement!: HTMLElement;
-
-  @query('bookmark-caption')
-  captionElement!: BookmarkCaption;
 
   get model() {
     return this.block.model;
@@ -38,28 +31,13 @@ export class DocBookmarkBlockComponent extends WithDisposable(
 
   override connectedCallback() {
     super.connectedCallback();
-    if (!!this.model.caption && this.model.caption.length > 0) {
-      this._showCaption = true;
-    }
 
     this.disposables.add(
       this.host.selection.slots.changed.on(() => this.requestUpdate())
     );
   }
 
-  private _optionsAbortController?: AbortController;
-  private _onToolbarSelected: ToolbarActionCallback = type => {
-    if (type === 'caption') {
-      this._showCaption = true;
-      this.updateComplete
-        .then(() => this.captionElement.input.focus())
-        .catch(console.error);
-    }
-    this._optionsAbortController?.abort();
-  };
-
   private _whenHover = new HoverController(this, ({ abortController }) => {
-    this._optionsAbortController = abortController;
     return {
       template: html`
         <style>
@@ -70,7 +48,6 @@ export class DocBookmarkBlockComponent extends WithDisposable(
         <link-card-toolbar
           .model=${this.model}
           .block=${this.block}
-          .onSelected=${this._onToolbarSelected}
           .host=${this}
           .abortController=${abortController}
           .std=${this.block.std}
@@ -96,18 +73,16 @@ export class DocBookmarkBlockComponent extends WithDisposable(
         })}
       >
         <bookmark-card .bookmark=${this.block}></bookmark-card>
-        <bookmark-caption
-          .bookmark=${this.block}
-          .display=${this._showCaption}
+        <link-card-caption
+          .block=${this.block}
+          .display=${this.block.showCaption}
           @blur=${() => {
-            if (!this.model.caption) {
-              this._showCaption = false;
-            }
+            if (!this.model.caption) this.block.showCaption = false;
           }}
-        ></bookmark-caption>
+        ></link-card-caption>
         ${this.block.selected?.is('block')
           ? html`<affine-block-selection></affine-block-selection>`
-          : null}
+          : nothing}
       </div>
     `;
   }

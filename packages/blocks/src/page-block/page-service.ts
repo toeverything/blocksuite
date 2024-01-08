@@ -37,8 +37,6 @@ type EmbedOptions = {
   flavour: string;
   urlRegex: RegExp;
   styles: LinkCardStyle[];
-  width: number;
-  height: number;
 };
 
 export class PageService extends BlockService<PageBlockModel> {

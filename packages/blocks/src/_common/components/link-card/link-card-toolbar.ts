@@ -8,8 +8,10 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
-import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
-import type { ToolbarActionCallback } from '../../../bookmark-block/components/config.js';
+import {
+  type BookmarkBlockModel,
+  BookmarkStyles,
+} from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
@@ -116,9 +118,6 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
     | EmbedYoutubeBlockComponent;
 
   @property({ attribute: false })
-  onSelected!: ToolbarActionCallback;
-
-  @property({ attribute: false })
   host!: HTMLElement;
 
   @property({ attribute: false })
@@ -171,18 +170,26 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
     );
 
     page.deleteBlock(this.model);
-    this.onSelected('link');
   }
 
   private _convertToCardView() {
     if (isBookmarkBlock(this.model)) return;
     const { page, url, style } = this.model;
 
+    const targetStyle = BookmarkStyles.includes(style)
+      ? style
+      : BookmarkStyles[0];
+
     const parent = page.getParent(this.model);
     assertExists(parent);
     const index = parent.children.indexOf(this.model);
 
-    page.addBlock('affine:bookmark', { url, style }, parent, index);
+    page.addBlock(
+      'affine:bookmark',
+      { url, style: targetStyle },
+      parent,
+      index
+    );
     this.std.selection.setGroup('note', []);
     page.deleteBlock(this.model);
   }
@@ -199,19 +206,23 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
 
     const { flavour, styles } = embedOptions;
 
+    const targetStyle = styles.includes(style) ? style : styles[0];
+
     const parent = page.getParent(this.model);
     assertExists(parent);
     const index = parent.children.indexOf(this.model);
 
-    page.addBlock(
-      flavour,
-      { url, style: styles.includes(style) ? style : styles[0] },
-      parent,
-      index
-    );
+    page.addBlock(flavour, { url, style: targetStyle }, parent, index);
 
     this.std.selection.setGroup('note', []);
     page.deleteBlock(this.model);
+  }
+
+  private _showCaption() {
+    this.block.showCaption = true;
+    this.block.updateComplete
+      .then(() => this.block.captionElement.input.focus())
+      .catch(console.error);
   }
 
   private _toggleCardStyleMenu() {
@@ -369,7 +380,7 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
           size="32px"
           class="link-card-toolbar-button caption"
           ?disabled=${this.model.page.readonly}
-          @click=${() => this.onSelected('caption')}
+          @click=${() => this._showCaption()}
         >
           ${CaptionIcon}
           <affine-tooltip .offset=${12}>${'Add Caption'}</affine-tooltip>

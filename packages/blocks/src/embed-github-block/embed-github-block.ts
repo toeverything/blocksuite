@@ -1,13 +1,16 @@
+import '../_common/components/link-card/link-card-caption.js';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { HoverController } from '../_common/components/hover/controller.js';
-import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../_common/consts.js';
+import type { LinkCardCaption } from '../_common/components/link-card/link-card-caption.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
 import { getLinkCardIcons } from '../_common/utils/url.js';
@@ -29,6 +32,12 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 
   @property({ attribute: false })
   loading = false;
+
+  @state()
+  showCaption = false;
+
+  @query('link-card-caption')
+  captionElement!: LinkCardCaption;
 
   readonly slots = {
     loadingUpdated: new Slot(),
@@ -78,6 +87,10 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    if (!!this.model.caption && this.model.caption.length > 0) {
+      this.showCaption = true;
+    }
 
     if (
       !this.model.owner ||
@@ -220,102 +233,117 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       dateText = dateText.replace(/\d+/, `${day}${suffix}`);
     }
 
-    this._width = LINK_CARD_WIDTH[style];
-    this._height = LINK_CARD_HEIGHT[style];
+    this._style = style;
 
     return this.renderEmbed(
       () => html`
         <div
-          ${!this.isInSurface ? ref(this._whenHover.setReference) : null}
-          class="affine-embed-github-block${cardClassMap}"
-          @click=${this._handleClick}
-          @dblclick=${this._handleDoubleClick}
+          style=${styleMap({
+            position: 'relative',
+          })}
         >
-          <div class="affine-embed-github-content">
-            <div class="affine-embed-github-content-title">
-              <div class="affine-embed-github-content-title-icons">
-                <div class="affine-embed-github-content-title-site-icon">
-                  ${titleIcon}
+          <div
+            ${!this.isInSurface ? ref(this._whenHover.setReference) : nothing}
+            class="affine-embed-github-block${cardClassMap}"
+            @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
+          >
+            <div class="affine-embed-github-content">
+              <div class="affine-embed-github-content-title">
+                <div class="affine-embed-github-content-title-icons">
+                  <div class="affine-embed-github-content-title-site-icon">
+                    ${titleIcon}
+                  </div>
+
+                  ${status && statusText
+                    ? html`<div
+                        class=${classMap({
+                          'affine-embed-github-content-title-status-icon': true,
+                          [type]: true,
+                          [status]: true,
+                          success: statusReason === 'completed',
+                          failure: statusReason === 'not_planned',
+                        })}
+                      >
+                        ${statusIcon}
+                        <span>${statusText}</span>
+                      </div>`
+                    : nothing}
                 </div>
 
-                ${status && statusText
-                  ? html`<div
-                      class=${classMap({
-                        'affine-embed-github-content-title-status-icon': true,
-                        [type]: true,
-                        [status]: true,
-                        success: statusReason === 'completed',
-                        failure: statusReason === 'not_planned',
-                      })}
-                    >
-                      ${statusIcon}
-                      <span>${statusText}</span>
-                    </div>`
-                  : nothing}
+                <div class="affine-embed-github-content-title-text">
+                  ${titleText}
+                </div>
               </div>
 
-              <div class="affine-embed-github-content-title-text">
-                ${titleText}
+              <div class="affine-embed-github-content-description">
+                ${descriptionText}
               </div>
-            </div>
 
-            <div class="affine-embed-github-content-description">
-              ${descriptionText}
-            </div>
+              ${type === 'issue' && assignees
+                ? html`
+                    <div class="affine-embed-github-content-assignees">
+                      <div
+                        class="affine-embed-github-content-assignees-text label"
+                      >
+                        Assignees
+                      </div>
 
-            ${type === 'issue' && assignees
-              ? html`
-                  <div class="affine-embed-github-content-assignees">
-                    <div
-                      class="affine-embed-github-content-assignees-text label"
-                    >
-                      Assignees
+                      <div
+                        class="affine-embed-github-content-assignees-text users"
+                      >
+                        ${assignees.length === 0
+                          ? html`<span
+                              class="affine-embed-github-content-assignees-text-users placeholder"
+                              >No one</span
+                            >`
+                          : assignees.map(
+                              (assignee, index) =>
+                                html`<span
+                                    class="affine-embed-github-content-assignees-text-users user"
+                                    @click=${() =>
+                                      this._handleAssigneeClick(assignee)}
+                                    >${`@${assignee}`}</span
+                                  >
+                                  ${index === assignees.length - 1 ? '' : `, `}`
+                            )}
+                      </div>
                     </div>
-
-                    <div
-                      class="affine-embed-github-content-assignees-text users"
-                    >
-                      ${assignees.length === 0
-                        ? html`<span
-                            class="affine-embed-github-content-assignees-text-users placeholder"
-                            >No one</span
-                          >`
-                        : assignees.map(
-                            (assignee, index) =>
-                              html`<span
-                                  class="affine-embed-github-content-assignees-text-users user"
-                                  @click=${() =>
-                                    this._handleAssigneeClick(assignee)}
-                                  >${`@${assignee}`}</span
-                                >
-                                ${index === assignees.length - 1 ? '' : `, `}`
-                          )}
-                    </div>
-                  </div>
-                `
-              : nothing}
-
-            <div class="affine-embed-github-content-url">
-              <span class="affine-embed-github-content-repo"
-                >${`${owner}/${repo} |`}</span
-              >
-
-              ${createdAt
-                ? html`<span class="affine-embed-github-content-date"
-                    >${dateText} |</span
-                  >`
+                  `
                 : nothing}
-              <span>github.com</span>
 
-              <div
-                class="affine-embed-github-content-url-icon"
-                @click=${this._openLink}
-              >
-                ${OpenIcon}
+              <div class="affine-embed-github-content-url">
+                <span class="affine-embed-github-content-repo"
+                  >${`${owner}/${repo} |`}</span
+                >
+
+                ${createdAt
+                  ? html`<span class="affine-embed-github-content-date"
+                      >${dateText} |</span
+                    >`
+                  : nothing}
+                <span>github.com</span>
+
+                <div
+                  class="affine-embed-github-content-url-icon"
+                  @click=${this._openLink}
+                >
+                  ${OpenIcon}
+                </div>
               </div>
             </div>
+            <div class="affine-embed-github-banner">${bannerImage}</div>
           </div>
-          <div class="affine-embed-github-banner">${bannerImage}</div>
+          <link-card-caption
+            .block=${this}
+            .display=${this.showCaption}
+            @blur=${() => {
+              if (!this.model.caption) this.showCaption = false;
+            }}
+          ></link-card-caption>
+          ${this.selected?.is('block')
+            ? html`<affine-block-selection></affine-block-selection>`
+            : nothing}
         </div>
       `
     );

@@ -1,12 +1,16 @@
+import '../_common/components/link-card/link-card-caption.js';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { HoverController } from '../_common/components/hover/controller.js';
+import type { LinkCardCaption } from '../_common/components/link-card/link-card-caption.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
 import { getLinkCardIcons } from '../_common/utils/url.js';
@@ -15,12 +19,7 @@ import {
   youtubeUrlRegex,
 } from './embed-youtube-model.js';
 import type { EmbedYoutubeService } from './embed-youtube-service.js';
-import {
-  EmbedYoutubeHeight,
-  EmbedYoutubeWidth,
-  styles,
-  YoutubeIcon,
-} from './styles.js';
+import { styles, YoutubeIcon } from './styles.js';
 import { refreshEmbedYoutubeUrlData } from './utils.js';
 
 @customElement('affine-embed-youtube-block')
@@ -33,8 +32,14 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   @property({ attribute: false })
   loading = false;
 
+  @state()
+  showCaption = false;
+
   @query('.affine-embed-youtube-block')
   private _youtubeBlockEl!: HTMLDivElement;
+
+  @query('link-card-caption')
+  captionElement!: LinkCardCaption;
 
   readonly slots = {
     loadingUpdated: new Slot(),
@@ -75,6 +80,10 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    if (!!this.model.caption && this.model.caption.length > 0) {
+      this.showCaption = true;
+    }
 
     if (!this.model.videoId) {
       this.page.withoutTransact(() => {
@@ -155,6 +164,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       creator,
       creatorImage,
       videoId,
+      style,
     } = this.model;
 
     const loading = this.loading;
@@ -185,65 +195,80 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
           </object>`
         : nothing;
 
-    this._width = EmbedYoutubeWidth;
-    this._height = EmbedYoutubeHeight;
+    this._style = style;
 
     return this.renderEmbed(
       () => html`
         <div
-          ${!this.isInSurface ? ref(this._whenHover.setReference) : null}
-          class="affine-embed-youtube-block${cardClassMap}"
-          @click=${this._handleClick}
-          @dblclick=${this._handleDoubleClick}
+          style=${styleMap({
+            position: 'relative',
+          })}
         >
-          <div class="affine-embed-youtube-video">
-            ${videoId
-              ? html`
-                  <iframe
-                    id="ytplayer"
-                    type="text/html"
-                    src=${`https://www.youtube.com/embed/${videoId}`}
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowfullscreen
-                  ></iframe>
-                `
-              : bannerImage}
+          <div
+            ${!this.isInSurface ? ref(this._whenHover.setReference) : nothing}
+            class="affine-embed-youtube-block${cardClassMap}"
+            @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
+          >
+            <div class="affine-embed-youtube-video">
+              ${videoId
+                ? html`
+                    <iframe
+                      id="ytplayer"
+                      type="text/html"
+                      src=${`https://www.youtube.com/embed/${videoId}`}
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowfullscreen
+                    ></iframe>
+                  `
+                : bannerImage}
+            </div>
+            <div class="affine-embed-youtube-content">
+              <div class="affine-embed-youtube-content-header">
+                <div class="affine-embed-youtube-content-title-icon">
+                  ${titleIcon}
+                </div>
+
+                <div class="affine-embed-youtube-content-title-text">
+                  ${titleText}
+                </div>
+
+                <div class="affine-embed-youtube-content-creator-image">
+                  ${creatorImageEl}
+                </div>
+
+                <div class="affine-embed-youtube-content-creator-text">
+                  ${creator}
+                </div>
+              </div>
+
+              <div class="affine-embed-youtube-content-description">
+                ${descriptionText}
+              </div>
+
+              <div class="affine-embed-youtube-content-url">
+                <span>www.youtube.com</span>
+
+                <div
+                  class="affine-embed-youtube-content-url-icon"
+                  @click=${this._openLink}
+                >
+                  ${OpenIcon}
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="affine-embed-youtube-content">
-            <div class="affine-embed-youtube-content-header">
-              <div class="affine-embed-youtube-content-title-icon">
-                ${titleIcon}
-              </div>
-
-              <div class="affine-embed-youtube-content-title-text">
-                ${titleText}
-              </div>
-
-              <div class="affine-embed-youtube-content-creator-image">
-                ${creatorImageEl}
-              </div>
-
-              <div class="affine-embed-youtube-content-creator-text">
-                ${creator}
-              </div>
-            </div>
-
-            <div class="affine-embed-youtube-content-description">
-              ${descriptionText}
-            </div>
-
-            <div class="affine-embed-youtube-content-url">
-              <span>www.youtube.com</span>
-
-              <div
-                class="affine-embed-youtube-content-url-icon"
-                @click=${this._openLink}
-              >
-                ${OpenIcon}
-              </div>
-            </div>
-          </div>
+          <link-card-caption
+            .block=${this}
+            .display=${this.showCaption}
+            @blur=${() => {
+              if (!this.model.caption) this.showCaption = false;
+            }}
+          ></link-card-caption>
+          ${this.selected?.is('block')
+            ? html`<affine-block-selection></affine-block-selection>`
+            : nothing}
         </div>
       `
     );

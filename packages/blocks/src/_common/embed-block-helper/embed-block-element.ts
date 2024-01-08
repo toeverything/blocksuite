@@ -16,7 +16,11 @@ import {
 import { Bound } from '../../surface-block/index.js';
 import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../consts.js';
 import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
-import { type BlockModels, matchFlavours } from '../utils/index.js';
+import {
+  type BlockModels,
+  type LinkCardStyle,
+  matchFlavours,
+} from '../utils/index.js';
 
 export class EmbedBlockElement<
   Model extends
@@ -24,9 +28,7 @@ export class EmbedBlockElement<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {
-  protected _style = 'horizontal';
-  protected _width = LINK_CARD_WIDTH.horizontal;
-  protected _height = LINK_CARD_HEIGHT.horizontal;
+  protected _style: LinkCardStyle = 'horizontal';
 
   private _isInSurface = false;
 
@@ -114,7 +116,7 @@ export class EmbedBlockElement<
       if (isInSurface) {
         if (dropBlockId) {
           const style = blockComponent._style;
-          if (style !== 'horizontal' && style !== 'list') {
+          if (style === 'vertical' || style === 'cube') {
             this.page.updateBlock(blockComponent.model, {
               style: 'horizontal',
             });
@@ -125,11 +127,13 @@ export class EmbedBlockElement<
           ...props,
         });
       } else if (isTargetEdgelessContainer) {
+        const style = blockComponent._style;
+
         return convertDragPreviewDocToEdgeless({
           blockComponent,
           cssSelector: '.embed-block-container',
-          width: blockComponent._width,
-          height: blockComponent._height,
+          width: LINK_CARD_WIDTH[style],
+          height: LINK_CARD_HEIGHT[style],
           ...props,
         });
       }
@@ -156,7 +160,6 @@ export class EmbedBlockElement<
           class="embed-block-container"
           style=${styleMap({
             width: '100%',
-            height: '100%',
             margin: '18px 0',
           })}
         >
@@ -168,8 +171,9 @@ export class EmbedBlockElement<
     const surface = this.surface;
     assertExists(surface);
 
-    const width = this._width;
-    const height = this._height;
+    const style = this._style;
+    const width = LINK_CARD_WIDTH[style];
+    const height = LINK_CARD_HEIGHT[style];
     const bound = Bound.deserialize(
       (surface.pickById(this.model.id) ?? this.model).xywh
     );

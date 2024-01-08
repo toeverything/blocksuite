@@ -225,4 +225,9 @@ export type EmbedBlockDoubleClickData = {
   blockId: string;
 };
 
-export type LinkCardStyle = 'horizontal' | 'list' | 'vertical' | 'cube';
+export type LinkCardStyle =
+  | 'horizontal'
+  | 'list'
+  | 'vertical'
+  | 'cube'
+  | 'video';

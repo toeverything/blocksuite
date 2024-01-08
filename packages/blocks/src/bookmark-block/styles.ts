@@ -8,8 +8,8 @@ export const styles = css`
     box-sizing: border-box;
     display: flex;
     width: 100%;
-    max-width: ${LINK_CARD_WIDTH['horizontal']}px;
-    height: ${LINK_CARD_HEIGHT['horizontal']}px;
+    max-width: ${LINK_CARD_WIDTH.horizontal}px;
+    height: ${LINK_CARD_HEIGHT.horizontal}px;
 
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
@@ -154,7 +154,7 @@ export const styles = css`
   }
 
   .affine-bookmark-card.list {
-    height: ${LINK_CARD_HEIGHT['list']}px;
+    height: ${LINK_CARD_HEIGHT.list}px;
 
     .affine-bookmark-content {
       width: 100%;
@@ -182,8 +182,8 @@ export const styles = css`
   }
 
   .affine-bookmark-card.vertical {
-    width: ${LINK_CARD_WIDTH['vertical']}px;
-    height: ${LINK_CARD_HEIGHT['vertical']}px;
+    width: ${LINK_CARD_WIDTH.vertical}px;
+    height: ${LINK_CARD_HEIGHT.vertical}px;
     flex-direction: column-reverse;
 
     .affine-bookmark-content {
@@ -209,8 +209,8 @@ export const styles = css`
   }
 
   .affine-bookmark-card.cube {
-    width: ${LINK_CARD_WIDTH['cube']}px;
-    height: ${LINK_CARD_HEIGHT['cube']}px;
+    width: ${LINK_CARD_WIDTH.cube}px;
+    height: ${LINK_CARD_HEIGHT.cube}px;
 
     .affine-bookmark-content {
       width: 100%;

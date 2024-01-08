@@ -16,8 +16,15 @@ export type EmbedGithubBlockUrlData = {
   assignees: string[] | null;
 };
 
+export const EmbedGithubStyles: LinkCardStyle[] = [
+  'horizontal',
+  'list',
+  'vertical',
+  'cube',
+] as const;
+
 export type EmbedGithubBlockProps = {
-  style: LinkCardStyle;
+  style: (typeof EmbedGithubStyles)[number];
   owner: string;
   repo: string;
   type: 'issue' | 'pr';

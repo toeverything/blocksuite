@@ -28,8 +28,15 @@ export interface BookmarkBlockEdgelessProps {
   rotate: number;
 }
 
+export const BookmarkStyles: LinkCardStyle[] = [
+  'horizontal',
+  'list',
+  'vertical',
+  'cube',
+] as const;
+
 export type BookmarkBlockProps = {
-  style: LinkCardStyle;
+  style: (typeof BookmarkStyles)[number];
   url: string;
   caption: string | null;
 
@@ -42,7 +49,7 @@ export type BookmarkBlockProps = {
   BookmarkBlockEdgelessProps;
 
 const defaultBookmarkProps: BookmarkBlockProps = {
-  style: 'horizontal',
+  style: BookmarkStyles[0],
   url: '',
   caption: null,
 

@@ -1,4 +1,4 @@
-import './components/index.js';
+import './components/bookmark-card.js';
 import '../_common/components/button.js';
 import './doc-bookmark-block.js';
 import './edgeless-bookmark-block.js';
@@ -6,8 +6,9 @@ import './edgeless-bookmark-block.js';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { html, render } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
+import type { LinkCardCaption } from '../_common/components/link-card/link-card-caption.js';
 import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../_common/consts.js';
 import { matchFlavours } from '../_common/utils/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
@@ -34,10 +35,16 @@ export class BookmarkBlockComponent extends BlockElement<
   @property({ attribute: false })
   loading = false;
 
+  @state()
+  showCaption = false;
+
   @query('affine-edgeless-bookmark, affine-doc-bookmark')
   edgelessOrDocBookmark?:
     | EdgelessBookmarkBlockComponent
     | DocBookmarkBlockComponent;
+
+  @query('link-card-caption')
+  captionElement!: LinkCardCaption;
 
   private _isInSurface = false;
 
@@ -118,7 +125,7 @@ export class BookmarkBlockComponent extends BlockElement<
       if (isInSurface) {
         if (dropBlockId) {
           const style = blockComponent.model.style;
-          if (style !== 'horizontal' && style !== 'list') {
+          if (style === 'vertical' || style === 'cube') {
             this.page.updateBlock(blockComponent.model, {
               style: 'horizontal',
             });
@@ -152,6 +159,10 @@ export class BookmarkBlockComponent extends BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    if (!!this.model.caption && this.model.caption.length > 0) {
+      this.showCaption = true;
+    }
+
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
@@ -181,13 +192,11 @@ export class BookmarkBlockComponent extends BlockElement<
   }
 
   override render() {
-    if (this.isInSurface) {
-      return html`<affine-edgeless-bookmark
-        .block=${this}
-      ></affine-edgeless-bookmark>`;
-    } else {
-      return html`<affine-doc-bookmark .block=${this}></affine-doc-bookmark>`;
-    }
+    return html`${this.isInSurface
+      ? html`<affine-edgeless-bookmark
+          .block=${this}
+        ></affine-edgeless-bookmark>`
+      : html`<affine-doc-bookmark .block=${this}></affine-doc-bookmark>`} `;
   }
 }
 

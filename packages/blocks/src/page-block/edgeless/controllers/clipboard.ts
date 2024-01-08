@@ -26,7 +26,10 @@ import {
   isInsideDocEditor,
 } from '../../../_common/utils/query.js';
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
-import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import {
+  type BookmarkBlockModel,
+  BookmarkStyles,
+} from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
@@ -212,12 +215,10 @@ export class EdgelessClipboardController extends PageClipboard {
       const flavour = embedOptions
         ? (embedOptions.flavour as EdgelessElementType)
         : 'affine:bookmark';
-      const width = embedOptions
-        ? embedOptions.width
-        : LINK_CARD_WIDTH.horizontal;
-      const height = embedOptions
-        ? embedOptions.height
-        : LINK_CARD_HEIGHT.horizontal;
+      const style = embedOptions ? embedOptions.styles[0] : BookmarkStyles[0];
+      const width = LINK_CARD_WIDTH[style];
+      const height = LINK_CARD_HEIGHT[style];
+
       const id = this.surface.addElement(
         flavour,
         {

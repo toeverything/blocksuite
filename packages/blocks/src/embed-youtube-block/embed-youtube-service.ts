@@ -4,9 +4,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { PageService } from '../index.js';
 import {
   type EmbedYoutubeModel,
+  EmbedYoutubeStyles,
   youtubeUrlRegex,
 } from './embed-youtube-model.js';
-import { EmbedYoutubeHeight, EmbedYoutubeWidth } from './styles.js';
 import { queryEmbedYoutubeData } from './utils.js';
 
 export class EmbedYoutubeService extends BlockService<EmbedYoutubeModel> {
@@ -24,9 +24,7 @@ export class EmbedYoutubeService extends BlockService<EmbedYoutubeModel> {
     pageService.registerEmbedBlockOptions({
       flavour: this.flavour,
       urlRegex: youtubeUrlRegex,
-      styles: ['vertical'],
-      width: EmbedYoutubeWidth,
-      height: EmbedYoutubeHeight,
+      styles: EmbedYoutubeStyles,
     });
   }
 }

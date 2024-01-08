@@ -44,13 +44,25 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     selectionManager.setGroup('note', [blockSelection]);
   }
 
-  private _openLink(event: MouseEvent) {
-    event.stopPropagation();
+  private _openLink() {
     let link = this.bookmark.model.url;
     if (!link.match(/^[a-zA-Z]+:\/\//)) {
       link = 'https://' + link;
     }
     window.open(link, '_blank');
+  }
+
+  private _handleClick() {
+    if (!this.bookmark.isInSurface) {
+      this._selectBlock();
+    }
+  }
+
+  private _handleDoubleClick(event: MouseEvent) {
+    if (!this.bookmark.isInSurface) {
+      event.stopPropagation();
+      this._openLink();
+    }
   }
 
   override render() {
@@ -99,8 +111,8 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     return html`
       <div
         class="affine-bookmark-card${cardClassMap}"
-        @click=${this._selectBlock}
-        @dblclick=${this._openLink}
+        @click=${this._handleClick}
+        @dblclick=${this._handleDoubleClick}
       >
         <div class="affine-bookmark-content">
           <div class="affine-bookmark-content-title">

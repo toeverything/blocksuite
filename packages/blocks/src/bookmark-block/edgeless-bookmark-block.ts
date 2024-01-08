@@ -1,7 +1,9 @@
+import '../_common/components/link-card/link-card-caption.js';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { html, nothing } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../_common/consts.js';
@@ -17,9 +19,6 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
   @property({ attribute: false })
   block!: BookmarkBlockComponent;
 
-  @state()
-  private _showCaption = false;
-
   get model() {
     return this.block.model;
   }
@@ -32,10 +31,6 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
 
   override connectedCallback() {
     super.connectedCallback();
-
-    if (!!this.model.caption && this.model.caption.length > 0) {
-      this._showCaption = true;
-    }
 
     this.disposables.add(
       this.edgeless.slots.elementUpdated.on(({ id }) => {
@@ -64,24 +59,21 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
       style=${styleMap({
         width: `${width}px`,
         height: `${height}px`,
-        pointerEvents: 'none',
         transform: `scale(${scaleX}, ${scaleY})`,
         transformOrigin: '0 0',
       })}
     >
       <bookmark-card .bookmark=${this.block}></bookmark-card>
-      <bookmark-caption
-        .bookmark=${this.block}
-        .display=${this._showCaption}
+      <link-card-caption
+        .block=${this.block}
+        .display=${this.block.showCaption}
         @blur=${() => {
-          if (!this.model.caption) {
-            this._showCaption = false;
-          }
+          if (!this.model.caption) this.block.showCaption = false;
         }}
-      ></bookmark-caption>
+      ></link-card-caption>
       ${this.block.selected?.is('block')
         ? html`<affine-block-selection></affine-block-selection>`
-        : null}
+        : nothing}
     </div>`;
   }
 }

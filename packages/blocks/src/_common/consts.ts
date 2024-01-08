@@ -16,6 +16,7 @@ export const LINK_CARD_WIDTH: Record<LinkCardStyle, number> = {
   list: 752,
   vertical: 364,
   cube: 170,
+  video: 686,
 };
 
 export const LINK_CARD_HEIGHT: Record<LinkCardStyle, number> = {
@@ -23,4 +24,5 @@ export const LINK_CARD_HEIGHT: Record<LinkCardStyle, number> = {
   list: 46,
   vertical: 390,
   cube: 114,
+  video: 463,
 };

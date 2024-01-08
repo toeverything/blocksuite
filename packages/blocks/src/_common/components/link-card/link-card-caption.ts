@@ -2,13 +2,15 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { stopPropagation } from '../../_common/utils/event.js';
-import type { BookmarkBlockComponent } from '../bookmark-block.js';
+import type { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
+import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
+import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
+import { stopPropagation } from '../../utils/event.js';
 
-@customElement('bookmark-caption')
-export class BookmarkCaption extends WithDisposable(ShadowlessElement) {
+@customElement('link-card-caption')
+export class LinkCardCaption extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .affine-bookmark-caption {
+    .affine-link-card-caption {
       width: 100%;
       font-size: var(--affine-font-sm);
       outline: none;
@@ -19,26 +21,29 @@ export class BookmarkCaption extends WithDisposable(ShadowlessElement) {
       display: inline-block;
       background: transparent;
     }
-    .affine-bookmark-caption::placeholder {
+    .affine-link-card-caption::placeholder {
       color: var(--affine-placeholder-color);
     }
   `;
 
-  @query('.affine-bookmark-caption')
-  input!: HTMLInputElement;
-
   @property({ attribute: false })
-  bookmark!: BookmarkBlockComponent;
+  block!:
+    | BookmarkBlockComponent
+    | EmbedGithubBlockComponent
+    | EmbedYoutubeBlockComponent;
 
   @property({ attribute: false })
   display!: boolean;
 
+  @query('.affine-link-card-caption')
+  input!: HTMLInputElement;
+
   get caption() {
-    return this.bookmark.model.caption ?? '';
+    return this.block.model.caption ?? '';
   }
 
   private _onInputChange() {
-    this.bookmark.model.page.updateBlock(this.bookmark.model, {
+    this.block.model.page.updateBlock(this.block.model, {
       caption: this.input.value,
     });
     this.requestUpdate();
@@ -50,12 +55,12 @@ export class BookmarkCaption extends WithDisposable(ShadowlessElement) {
 
   override render() {
     if (!this.display) return nothing;
-    const model = this.bookmark.model;
+    const model = this.block.model;
 
     return html`<input
       .disabled=${model.page.readonly}
       placeholder="Write a caption"
-      class="affine-bookmark-caption"
+      class="affine-link-card-caption"
       value=${this.caption}
       @input=${this._onInputChange}
       @blur=${this._onInputBlur}
@@ -66,6 +71,6 @@ export class BookmarkCaption extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'bookmark-caption': BookmarkCaption;
+    'link-card-caption': LinkCardCaption;
   }
 }
