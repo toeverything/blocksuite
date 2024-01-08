@@ -27,7 +27,7 @@ export type EmbedGithubBlockProps = {
   style: (typeof EmbedGithubStyles)[number];
   owner: string;
   repo: string;
-  type: 'issue' | 'pr';
+  githubType: 'issue' | 'pr';
   githubId: string;
   url: string;
   caption: string | null;

@@ -95,11 +95,11 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
         const url = this.model.url;
         const urlMatch = url.match(githubUrlRegex);
         if (urlMatch) {
-          const [, owner, repo, type, githubId] = urlMatch;
+          const [, owner, repo, githubType, githubId] = urlMatch;
           this.page.updateBlock(this.model, {
             owner,
             repo,
-            type: type === 'issue' ? 'issue' : 'pr',
+            githubType: githubType === 'issue' ? 'issue' : 'pr',
             githubId,
           });
         }
@@ -159,7 +159,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   override render() {
     const {
       title = 'GitHub',
-      type,
+      githubType,
       status,
       statusReason,
       owner,
@@ -175,7 +175,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     const { LoadingIcon, LinkCardBannerIcon } = getLinkCardIcons();
     const titleIcon = loading ? LoadingIcon : GithubIcon;
     const statusIcon = status
-      ? getGithubStatusIcon(type, status, statusReason)
+      ? getGithubStatusIcon(githubType, status, statusReason)
       : nothing;
     const statusText = loading ? '' : status;
     const titleText = loading ? 'Loading...' : title;
@@ -230,7 +230,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
                     ? html`<div
                         class=${classMap({
                           'affine-embed-github-content-title-status-icon': true,
-                          [type]: true,
+                          [githubType]: true,
                           [status]: true,
                           success: statusReason === 'completed',
                           failure: statusReason === 'not_planned',
@@ -252,7 +252,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
                 ${descriptionText}
               </div>
 
-              ${type === 'issue' && assignees
+              ${githubType === 'issue' && assignees
                 ? html`
                     <div class="affine-embed-github-content-assignees">
                       <div

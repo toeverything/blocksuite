@@ -144,6 +144,10 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
     return pageService;
   }
 
+  private get _canShowCardStylePanel() {
+    return isBookmarkBlock(this.model) || isEmbedGithubBlock(this.model);
+  }
+
   private _copyUrl() {
     navigator.clipboard.writeText(this.model.url).catch(console.error);
     toast('Copied link to clipboard');
@@ -363,7 +367,7 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
             : nothing}
         </div>
 
-        ${isBookmarkBlock(this.model) || isEmbedGithubBlock(this.model)
+        ${this._canShowCardStylePanel
           ? html` <icon-button
               size="32px"
               class="link-card-toolbar-button card-style"

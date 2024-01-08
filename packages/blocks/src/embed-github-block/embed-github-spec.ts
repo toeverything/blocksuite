@@ -11,7 +11,7 @@ const defaultEmbedGithubProps: EmbedGithubBlockProps = {
   style: EmbedGithubStyles[0],
   owner: '',
   repo: '',
-  type: 'issue',
+  githubType: 'issue',
   githubId: '',
   url: '',
   caption: null,

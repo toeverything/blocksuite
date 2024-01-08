@@ -42,12 +42,12 @@ export async function queryEmbedGithubData(
 export async function queryEmbedGithubApiData(
   embedGithubModel: EmbedGithubModel
 ): Promise<Partial<EmbedGithubBlockUrlData>> {
-  const { owner, repo, type, githubId } = embedGithubModel;
+  const { owner, repo, githubType, githubId } = embedGithubModel;
   let githubApiData: Partial<EmbedGithubBlockUrlData> = {};
 
   // github's public api has a rate limit of 60 requests per hour
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/${
-    type === 'issue' ? 'issues' : 'pulls'
+    githubType === 'issue' ? 'issues' : 'pulls'
   }/${githubId}`;
 
   const githubApiResponse = await fetch(apiUrl, { cache: 'no-cache' }).catch(
@@ -96,8 +96,8 @@ export async function queryEmbedGithubOpenGraphData(url: string) {
   if (!response || !response.ok) return {};
   const data: AffineLinkPreviewResponseData = await response.json();
   return {
-    title: getStringFromHTML(data.title ?? ''),
-    description: getStringFromHTML(data.description ?? ''),
+    title: data.title ? getStringFromHTML(data.title) : null,
+    description: data.description ? getStringFromHTML(data.description) : null,
     icon: data.favicons?.[0],
     image: data.images?.[0],
   };

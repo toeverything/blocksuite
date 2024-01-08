@@ -83,8 +83,8 @@ export async function queryEmbedYoutubeOpenGraphData(url: string) {
   if (!response || !response.ok) return {};
   const data: AffineLinkPreviewResponseData = await response.json();
   return {
-    title: getStringFromHTML(data.title ?? ''),
-    description: getStringFromHTML(data.description ?? ''),
+    title: data.title ? getStringFromHTML(data.title) : null,
+    description: data.description ? getStringFromHTML(data.description) : null,
     icon: data.favicons?.[0],
     image: data.images?.[0],
   };
