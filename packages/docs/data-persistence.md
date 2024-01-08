@@ -4,7 +4,7 @@ No matter the application is collaborative of not, BlockSuite offers flexible so
 
 ## Snapshot API
 
-When real-time collaboration is not a primary concern, such as in regular web apps or local apps, BlockSuite has the JSON snapshot format as the best fit. The snapshot format is designed for readability, organizing blocks in an intuitive tree structure.
+When real-time collaboration is not a primary concern, such as in regular web apps or local apps, BlockSuite has the JSON snapshot format as the most simple fit. The snapshot format is designed for readability, organizing blocks in an intuitive tree structure.
 
 ```ts
 import { Job } from '@blocksuite/store';

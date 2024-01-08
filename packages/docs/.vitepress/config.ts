@@ -24,7 +24,7 @@ export default defineConfig({
           { text: '🎨 EdgelessEditor', link: '/presets/edgeless-editor' },
         ],
       },
-      { text: 'Docs', link: '/blocksuite-overview' },
+      { text: 'Docs', link: '/overview' },
       // { text: 'Blog', link: '#' },
       {
         text: 'Releases',
@@ -36,7 +36,7 @@ export default defineConfig({
       {
         text: 'Getting Started',
         items: [
-          { text: 'Overview', link: '/blocksuite-overview' },
+          { text: 'Overview', link: '/overview' },
           { text: 'Quick Start', link: '/quick-start' },
         ],
       },
@@ -65,7 +65,7 @@ export default defineConfig({
                 link: '/working-with-block-tree#services-and-commands',
               },
               {
-                text: 'Defining New Blocks 🚧',
+                text: 'Defining New Blocks',
                 link: '/working-with-block-tree#defining-new-blocks',
               },
             ],
