@@ -37,6 +37,10 @@ import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-ed
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
 import type { DatabaseService } from '../../../database-block/database-service.js';
+import { githubUrlRegex } from '../../../embed-github-block/index.js';
+import { GithubIcon } from '../../../embed-github-block/styles.js';
+import { youtubeUrlRegex } from '../../../embed-youtube-block/embed-youtube-model.js';
+import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { ImageService } from '../../../image-block/image-service.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
@@ -313,6 +317,60 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           addSiblingAttachmentBlock(file, maxFileSize, model).catch(
             console.error
           );
+        }),
+      },
+      {
+        name: 'YouTube',
+        icon: YoutubeIcon,
+        showWhen: model => {
+          if (!model.page.schema.flavourSchemaMap.has('affine:embed-youtube')) {
+            return false;
+          }
+          return !insideDatabase(model);
+        },
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
+          if (!parent) {
+            return;
+          }
+          const url = await toggleLinkCardCreateModal(
+            pageElement.host,
+            youtubeUrlRegex,
+            'Create a YouTube link card'
+          );
+          if (!url) return;
+          const props = {
+            flavour: 'affine:embed-youtube',
+            url,
+          } as const;
+          pageElement.page.addSiblingBlocks(model, [props]);
+        }),
+      },
+      {
+        name: 'GitHub',
+        icon: GithubIcon,
+        showWhen: model => {
+          if (!model.page.schema.flavourSchemaMap.has('affine:embed-github')) {
+            return false;
+          }
+          return !insideDatabase(model);
+        },
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
+          if (!parent) {
+            return;
+          }
+          const url = await toggleLinkCardCreateModal(
+            pageElement.host,
+            githubUrlRegex,
+            'Create a GitHub link card'
+          );
+          if (!url) return;
+          const props = {
+            flavour: 'affine:embed-github',
+            url,
+          } as const;
+          pageElement.page.addSiblingBlocks(model, [props]);
         }),
       },
     ],

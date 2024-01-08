@@ -73,8 +73,7 @@ export class PageService extends BlockService<PageBlockModel> {
     const entries = this._embedBlockRegistry.entries();
     for (const [options] of entries) {
       const regex = options.urlRegex;
-      const match = url.match(regex);
-      if (match) return options;
+      if (regex.test(url)) return options;
     }
     return null;
   };

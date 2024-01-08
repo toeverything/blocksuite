@@ -4,12 +4,19 @@ import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
+import { isValidUrl } from '../../../utils/url.js';
 import { toast } from '../../toast.js';
 import { linkCardModalStyles } from './styles.js';
 
 @customElement('link-card-create-modal')
 export class LinkCardCreateModal extends WithDisposable(ShadowlessElement) {
   static override styles = linkCardModalStyles;
+
+  @property({ attribute: false })
+  labelText: string = 'Create a Bookmark that previews a link in card view.';
+
+  @property({ attribute: false })
+  checkUrl?: (url: string) => boolean;
 
   @property({ attribute: false })
   onCancel?: () => void;
@@ -54,8 +61,8 @@ export class LinkCardCreateModal extends WithDisposable(ShadowlessElement) {
   private _onConfirm = () => {
     const url = this.input.value;
 
-    if (url.length === 0) {
-      toast('Url can not be empty');
+    if (!this.checkUrl?.(url)) {
+      toast('Invalid link');
       return;
     }
 
@@ -75,9 +82,7 @@ export class LinkCardCreateModal extends WithDisposable(ShadowlessElement) {
         <div class="link-card-modal-title">Create Link</div>
 
         <div class="link-card-modal-content">
-          <div class="link-card-modal-content-text">
-            Create a Bookmark that previews a link in card view.
-          </div>
+          <div class="link-card-modal-content-text">${this.labelText}</div>
 
           <input
             class="link-card-modal-input link"
@@ -102,7 +107,7 @@ export class LinkCardCreateModal extends WithDisposable(ShadowlessElement) {
             class=${classMap({
               'link-card-modal-button': true,
               confirm: true,
-              disabled: this._linkInputValue.length === 0,
+              disabled: !this.checkUrl?.(this._linkInputValue),
             })}
             tabindex="0"
             @click=${this._onConfirm}
@@ -116,11 +121,18 @@ export class LinkCardCreateModal extends WithDisposable(ShadowlessElement) {
 }
 
 export async function toggleLinkCardCreateModal(
-  host: EditorHost
+  host: EditorHost,
+  urlRegex?: RegExp,
+  labelText?: string
 ): Promise<null | string> {
   host.selection.clear();
   const linkCardCreateModal = new LinkCardCreateModal();
   return new Promise(resolve => {
+    if (labelText) linkCardCreateModal.labelText = labelText;
+    linkCardCreateModal.checkUrl = url => {
+      if (urlRegex) return urlRegex.test(url);
+      return isValidUrl(url);
+    };
     linkCardCreateModal.onConfirm = url => {
       resolve(url);
     };

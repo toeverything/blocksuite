@@ -177,7 +177,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 
   override render() {
     const {
-      title = 'Github',
+      title = 'GitHub',
       type,
       status,
       statusReason,

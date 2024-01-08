@@ -12,6 +12,10 @@ import {
   type NoteChildrenFlavour,
   type NoteTool,
 } from '../../../../../_common/utils/index.js';
+import { githubUrlRegex } from '../../../../../embed-github-block/embed-github-model.js';
+import { GithubIcon } from '../../../../../embed-github-block/styles.js';
+import { youtubeUrlRegex } from '../../../../../embed-youtube-block/embed-youtube-model.js';
+import { YoutubeIcon } from '../../../../../embed-youtube-block/styles.js';
 import { Bound } from '../../../../../surface-block/utils/bound.js';
 import { Vec } from '../../../../../surface-block/utils/vec.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
@@ -129,6 +133,72 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
               }}
             >
               ${BookmarkIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .activeMode=${'background'}
+              .iconContainerPadding=${2}
+              .tooltip=${'YouTube'}
+              @click=${async () => {
+                const url = await toggleLinkCardCreateModal(
+                  this.edgeless.host,
+                  youtubeUrlRegex,
+                  'Create a YouTube link card'
+                );
+                if (!url) return;
+
+                const center = Vec.toVec(this.edgeless.surface.viewport.center);
+                this.edgeless.surface.addElement(
+                  'affine:embed-youtube',
+                  {
+                    url,
+                    xywh: Bound.fromCenter(
+                      center,
+                      LINK_CARD_WIDTH.video,
+                      LINK_CARD_HEIGHT.video
+                    ).serialize(),
+                  },
+                  this.edgeless.surface.model
+                );
+
+                this.edgeless.tools.setEdgelessTool({
+                  type: 'default',
+                });
+              }}
+            >
+              ${YoutubeIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .activeMode=${'background'}
+              .iconContainerPadding=${2}
+              .tooltip=${'GitHub'}
+              @click=${async () => {
+                const url = await toggleLinkCardCreateModal(
+                  this.edgeless.host,
+                  githubUrlRegex,
+                  'Create a GitHub link card'
+                );
+                if (!url) return;
+
+                const center = Vec.toVec(this.edgeless.surface.viewport.center);
+                this.edgeless.surface.addElement(
+                  'affine:embed-github',
+                  {
+                    url,
+                    xywh: Bound.fromCenter(
+                      center,
+                      LINK_CARD_WIDTH.vertical,
+                      LINK_CARD_HEIGHT.vertical
+                    ).serialize(),
+                  },
+                  this.edgeless.surface.model
+                );
+
+                this.edgeless.tools.setEdgelessTool({
+                  type: 'default',
+                });
+              }}
+            >
+              ${GithubIcon}
             </edgeless-tool-icon-button>
           </div>
         </div>
