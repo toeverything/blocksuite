@@ -149,10 +149,6 @@ export abstract class SurfaceElement<
     );
   }
 
-  get batch() {
-    return (this.yMap.get('batch') as T['batch']) ?? null;
-  }
-
   get elementBound() {
     if (this.rotate) {
       return Bound.from(getBoundsWithRotation(this));

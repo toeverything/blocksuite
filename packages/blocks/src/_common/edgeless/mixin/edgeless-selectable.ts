@@ -2,7 +2,6 @@ import type { Constructor } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import type { SurfaceBlockModel } from '../../../models.js';
-import { BLOCK_BATCH } from '../../../surface-block/batch.js';
 import {
   Bound,
   getBoundsWithRotation,
@@ -32,7 +31,6 @@ export function selectable<
     implements IEdgelessElement
   {
     connectable = true;
-    batch = BLOCK_BATCH;
     override rotate = 0;
 
     get elementBound() {

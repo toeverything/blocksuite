@@ -34,7 +34,6 @@ export interface IEdgelessElement {
   rotate: number;
   connectable: boolean;
   index: string;
-  batch: string | null;
   elementBound: Bound;
   containedByBounds(bounds: Bound): boolean;
   getNearestPoint(point: IVec): IVec;
