@@ -58,8 +58,7 @@
   "exports": {
     "./dist/*": "./dist/*",
     ".": "./src/index.ts",
-    "./models": "./src/models.ts",
-    "./content-parser": "./src/content-parser.ts"
+    "./models": "./src/models.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -75,10 +74,6 @@
       "./models": {
         "types": "./dist/models.d.ts",
         "default": "./dist/models.js"
-      },
-      "./content-parser": {
-        "types": "./dist/content-parser.d.ts",
-        "default": "./dist/content-parser.js"
       }
     }
   },
@@ -87,8 +82,6 @@
     "dist",
     "!src/__tests__",
     "!dist/__tests__",
-    "content-parser.d.ts",
-    "content-parser.js",
     "models.d.ts",
     "models.js"
   ],
