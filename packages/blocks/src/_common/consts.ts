@@ -1,4 +1,4 @@
-import type { LinkCardStyle } from './types.js';
+import type { EmbedCardStyle } from './types.js';
 
 export const BLOCK_ID_ATTR = 'data-block-id';
 
@@ -11,7 +11,7 @@ export const EDGELESS_BLOCK_CHILD_BORDER_WIDTH = 2;
 // In AFFiNE, to avoid the option element to be covered by the header, we need to reserve the space for the header
 export const PAGE_HEADER_HEIGHT = 53;
 
-export const LINK_CARD_WIDTH: Record<LinkCardStyle, number> = {
+export const EMBED_CARD_WIDTH: Record<EmbedCardStyle, number> = {
   horizontal: 752,
   list: 752,
   vertical: 364,
@@ -19,7 +19,7 @@ export const LINK_CARD_WIDTH: Record<LinkCardStyle, number> = {
   video: 686,
 };
 
-export const LINK_CARD_HEIGHT: Record<LinkCardStyle, number> = {
+export const EMBED_CARD_HEIGHT: Record<EmbedCardStyle, number> = {
   horizontal: 116,
   list: 46,
   vertical: 390,

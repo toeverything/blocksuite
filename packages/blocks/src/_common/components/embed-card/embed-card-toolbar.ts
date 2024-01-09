@@ -33,14 +33,14 @@ import {
 } from '../../icons/text.js';
 import { createLitPortal } from '../portal.js';
 import { toast } from '../toast.js';
-import { LinkCardMoreMenu } from './link-card-more-menu-popper.js';
-import { LinkCardStyleMenu } from './link-card-style-popper.js';
-import { toggleLinkCardEditModal } from './modal/link-card-edit-modal.js';
+import { EmbedCardMoreMenu } from './embed-card-more-menu-popper.js';
+import { EmbedCardStyleMenu } from './embed-card-style-popper.js';
+import { toggleEmbedCardEditModal } from './modal/embed-card-edit-modal.js';
 
-@customElement('link-card-toolbar')
-export class LinkCardToolbar extends WithDisposable(LitElement) {
+@customElement('embed-card-toolbar')
+export class EmbedCardToolbar extends WithDisposable(LitElement) {
   static override styles = css`
-    .link-card-toolbar {
+    .embed-card-toolbar {
       box-sizing: border-box;
       display: flex;
       align-items: center;
@@ -54,13 +54,13 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
       user-select: none;
     }
 
-    .link-card-toolbar .divider {
+    .embed-card-toolbar .divider {
       width: 1px;
       height: 24px;
       background-color: var(--affine-border-color);
     }
 
-    .link-card-toolbar-button.url {
+    .embed-card-toolbar-button.url {
       display: flex;
       width: 180px;
       padding: var(--1, 0px);
@@ -72,7 +72,7 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
       cursor: pointer;
     }
 
-    .link-card-toolbar-button.url > span {
+    .embed-card-toolbar-button.url > span {
       display: -webkit-box;
       -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
@@ -91,7 +91,7 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
       opacity: var(--add, 1);
     }
 
-    .link-card-toolbar-button.view-selector {
+    .embed-card-toolbar-button.view-selector {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -99,10 +99,10 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
       border-radius: 6px;
       background: var(--affine-hover-color);
     }
-    .link-card-toolbar-button.view-selector > icon-button {
+    .embed-card-toolbar-button.view-selector > icon-button {
       padding: 0px;
     }
-    .link-card-toolbar-button.view-selector .current-view {
+    .embed-card-toolbar-button.view-selector .current-view {
       background: var(--affine-background-overlay-panel-color);
       border-radius: 6px;
     }
@@ -126,10 +126,10 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
   @property({ attribute: false })
   std!: BlockStdScope;
 
-  @query('.link-card-toolbar')
-  linkCardToolbarElement!: HTMLElement;
+  @query('.embed-card-toolbar')
+  embedCardToolbarElement!: HTMLElement;
 
-  @query('.link-card-toolbar-button.card-style')
+  @query('.embed-card-toolbar-button.card-style')
   cardStyleButton!: HTMLElement;
 
   private _cardStyleMenuAbortController: AbortController | null = null;
@@ -245,14 +245,14 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
       return;
     }
     this._cardStyleMenuAbortController = new AbortController();
-    const linkCardStyleMenu = new LinkCardStyleMenu();
-    linkCardStyleMenu.model = this.model;
-    linkCardStyleMenu.std = this.std;
-    linkCardStyleMenu.abortController = this.abortController;
+    const embedCardStyleMenu = new EmbedCardStyleMenu();
+    embedCardStyleMenu.model = this.model;
+    embedCardStyleMenu.std = this.std;
+    embedCardStyleMenu.abortController = this.abortController;
 
     createLitPortal({
-      template: linkCardStyleMenu,
-      container: this.linkCardToolbarElement,
+      template: embedCardStyleMenu,
+      container: this.embedCardToolbarElement,
       computePosition: {
         referenceElement: this.cardStyleButton,
         placement: 'top',
@@ -274,17 +274,17 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
       return;
     }
     this._moreMenuAbortController = new AbortController();
-    const linkCardMoreMenu = new LinkCardMoreMenu();
-    linkCardMoreMenu.model = this.model;
-    linkCardMoreMenu.block = this.block;
-    linkCardMoreMenu.std = this.std;
-    linkCardMoreMenu.abortController = this.abortController;
+    const embedCardMoreMenu = new EmbedCardMoreMenu();
+    embedCardMoreMenu.model = this.model;
+    embedCardMoreMenu.block = this.block;
+    embedCardMoreMenu.std = this.std;
+    embedCardMoreMenu.abortController = this.abortController;
 
     createLitPortal({
-      template: linkCardMoreMenu,
-      container: this.linkCardToolbarElement,
+      template: embedCardMoreMenu,
+      container: this.embedCardToolbarElement,
       computePosition: {
-        referenceElement: this.linkCardToolbarElement,
+        referenceElement: this.embedCardToolbarElement,
         placement: 'top-end',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
@@ -295,9 +295,9 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
 
   override render() {
     return html`
-      <div class="link-card-toolbar">
+      <div class="embed-card-toolbar">
         <div
-          class="link-card-toolbar-button url"
+          class="embed-card-toolbar-button url"
           @click=${() => this._copyUrl()}
         >
           <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
@@ -306,7 +306,7 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
 
         <icon-button
           size="32px"
-          class="link-card-toolbar-button copy"
+          class="embed-card-toolbar-button copy"
           ?disabled=${this.model.page.readonly}
           @click=${() => this._copyUrl()}
         >
@@ -316,9 +316,9 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
 
         <icon-button
           size="32px"
-          class="link-card-toolbar-button edit"
+          class="embed-card-toolbar-button edit"
           ?disabled=${this.model.page.readonly}
-          @click=${() => toggleLinkCardEditModal(this.block)}
+          @click=${() => toggleEmbedCardEditModal(this.block)}
         >
           ${EditIcon}
           <affine-tooltip .offset=${12}>${'Edit'}</affine-tooltip>
@@ -326,10 +326,10 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
 
         <div class="divider"></div>
 
-        <div class="link-card-toolbar-button view-selector">
+        <div class="embed-card-toolbar-button view-selector">
           <icon-button
             size="24px"
-            class="link-card-toolbar-button link"
+            class="embed-card-toolbar-button link"
             hover="false"
             ?disabled=${this.model.page.readonly}
             @click=${() => this._turnIntoLinkView()}
@@ -341,7 +341,7 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
           <icon-button
             size="24px"
             class=${classMap({
-              'link-card-toolbar-button': true,
+              'embed-card-toolbar-button': true,
               card: true,
               'current-view': isBookmarkBlock(this.model),
             })}
@@ -357,7 +357,7 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
             ? html`<icon-button
                 size="24px"
                 class=${classMap({
-                  'link-card-toolbar-button': true,
+                  'embed-card-toolbar-button': true,
                   embed: true,
                   'current-view': isEmbeddedBlock(this.model),
                 })}
@@ -374,7 +374,7 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
         ${this._canShowCardStylePanel
           ? html` <icon-button
               size="32px"
-              class="link-card-toolbar-button card-style"
+              class="embed-card-toolbar-button card-style"
               ?disabled=${this.model.page.readonly}
               @click=${() => this._toggleCardStyleMenu()}
             >
@@ -387,7 +387,7 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
 
         <icon-button
           size="32px"
-          class="link-card-toolbar-button caption"
+          class="embed-card-toolbar-button caption"
           ?disabled=${this.model.page.readonly}
           @click=${() => this._showCaption()}
         >
@@ -399,7 +399,7 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
 
         <icon-button
           size="24px"
-          class="link-card-toolbar-button more-button"
+          class="embed-card-toolbar-button more-button"
           @click=${() => this._toggleMoreMenu()}
         >
           ${MoreVerticalIcon}
@@ -412,6 +412,6 @@ export class LinkCardToolbar extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'link-card-toolbar': LinkCardToolbar;
+    'embed-card-toolbar': EmbedCardToolbar;
   }
 }

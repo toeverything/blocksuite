@@ -6,11 +6,11 @@ import { classMap } from 'lit/directives/class-map.js';
 
 import { isValidUrl } from '../../../utils/url.js';
 import { toast } from '../../toast.js';
-import { linkCardModalStyles } from './styles.js';
+import { embedCardModalStyles } from './styles.js';
 
-@customElement('link-card-create-modal')
-export class LinkCardCreateModal extends WithDisposable(ShadowlessElement) {
-  static override styles = linkCardModalStyles;
+@customElement('embed-card-create-modal')
+export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
+  static override styles = embedCardModalStyles;
 
   @property({ attribute: false })
   labelText: string = 'Create a Bookmark that previews a link in card view.';
@@ -76,16 +76,16 @@ export class LinkCardCreateModal extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    return html`<div class="link-card-modal blocksuite-overlay">
-      <div class="link-card-modal-mask" @click=${this._onCancel}></div>
-      <div class="link-card-modal-wrapper">
-        <div class="link-card-modal-title">Create Link</div>
+    return html`<div class="embed-card-modal blocksuite-overlay">
+      <div class="embed-card-modal-mask" @click=${this._onCancel}></div>
+      <div class="embed-card-modal-wrapper">
+        <div class="embed-card-modal-title">Create Link</div>
 
-        <div class="link-card-modal-content">
-          <div class="link-card-modal-content-text">${this.labelText}</div>
+        <div class="embed-card-modal-content">
+          <div class="embed-card-modal-content-text">${this.labelText}</div>
 
           <input
-            class="link-card-modal-input link"
+            class="embed-card-modal-input link"
             tabindex="0"
             type="text"
             placeholder="Input in https://..."
@@ -94,9 +94,9 @@ export class LinkCardCreateModal extends WithDisposable(ShadowlessElement) {
           />
         </div>
 
-        <div class="link-card-modal-action">
+        <div class="embed-card-modal-action">
           <div
-            class="link-card-modal-button cancel"
+            class="embed-card-modal-button cancel"
             tabindex="0"
             @click=${() => this.remove()}
           >
@@ -105,7 +105,7 @@ export class LinkCardCreateModal extends WithDisposable(ShadowlessElement) {
 
           <div
             class=${classMap({
-              'link-card-modal-button': true,
+              'embed-card-modal-button': true,
               confirm: true,
               disabled: !this.checkUrl?.(this._linkInputValue),
             })}
@@ -120,31 +120,31 @@ export class LinkCardCreateModal extends WithDisposable(ShadowlessElement) {
   }
 }
 
-export async function toggleLinkCardCreateModal(
+export async function toggleEmbedCardCreateModal(
   host: EditorHost,
   urlRegex?: RegExp,
   labelText?: string
 ): Promise<null | string> {
   host.selection.clear();
-  const linkCardCreateModal = new LinkCardCreateModal();
+  const embedCardCreateModal = new EmbedCardCreateModal();
   return new Promise(resolve => {
-    if (labelText) linkCardCreateModal.labelText = labelText;
-    linkCardCreateModal.checkUrl = url => {
+    if (labelText) embedCardCreateModal.labelText = labelText;
+    embedCardCreateModal.checkUrl = url => {
       if (urlRegex) return urlRegex.test(url);
       return isValidUrl(url);
     };
-    linkCardCreateModal.onConfirm = url => {
+    embedCardCreateModal.onConfirm = url => {
       resolve(url);
     };
-    linkCardCreateModal.onCancel = () => {
+    embedCardCreateModal.onCancel = () => {
       resolve(null);
     };
-    document.body.appendChild(linkCardCreateModal);
+    document.body.appendChild(embedCardCreateModal);
   });
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'link-card-create-modal': LinkCardCreateModal;
+    'embed-card-create-modal': EmbedCardCreateModal;
   }
 }

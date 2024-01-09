@@ -1019,7 +1019,7 @@ export const DarkLoadingIcon = html`<svg
   />
 </svg>`;
 
-export const LinkCardLightBannerIcon = html`<svg
+export const EmbedCardLightBannerIcon = html`<svg
   width="340"
   height="170"
   viewBox="0 0 340 170"
@@ -1048,7 +1048,7 @@ export const LinkCardLightBannerIcon = html`<svg
   />
 </svg>`;
 
-export const LinkCardDarkBannerIcon = html`<svg
+export const EmbedCardDarkBannerIcon = html`<svg
   width="340"
   height="170"
   viewBox="0 0 340 170"
@@ -1077,7 +1077,7 @@ export const LinkCardDarkBannerIcon = html`<svg
   />
 </svg>`;
 
-export const LinkCardLightHorizontalIcon = html`
+export const EmbedCardLightHorizontalIcon = html`
   <svg
     width="70"
     height="32"
@@ -1133,7 +1133,7 @@ export const LinkCardLightHorizontalIcon = html`
   </svg>
 `;
 
-export const LinkCardDarkHorizontalIcon = html`
+export const EmbedCardDarkHorizontalIcon = html`
   <svg
     width="70"
     height="32"
@@ -1196,7 +1196,7 @@ export const LinkCardDarkHorizontalIcon = html`
   </svg>
 `;
 
-export const LinkCardLightListIcon = html`
+export const EmbedCardLightListIcon = html`
   <svg
     width="70"
     height="14"
@@ -1219,7 +1219,7 @@ export const LinkCardLightListIcon = html`
   </svg>
 `;
 
-export const LinkCardDarkListIcon = html`
+export const EmbedCardDarkListIcon = html`
   <svg
     width="70"
     height="14"
@@ -1249,7 +1249,7 @@ export const LinkCardDarkListIcon = html`
   </svg>
 `;
 
-export const LinkCardLightVerticalIcon = html`
+export const EmbedCardLightVerticalIcon = html`
   <svg
     width="60"
     height="66"
@@ -1305,7 +1305,7 @@ export const LinkCardLightVerticalIcon = html`
   </svg>
 `;
 
-export const LinkCardDarkVerticalIcon = html`
+export const EmbedCardDarkVerticalIcon = html`
   <svg
     width="60"
     height="66"
@@ -1361,7 +1361,7 @@ export const LinkCardDarkVerticalIcon = html`
   </svg>
 `;
 
-export const LinkCardLightCubeIcon = html`
+export const EmbedCardLightCubeIcon = html`
   <svg
     width="38"
     height="30"
@@ -1385,7 +1385,7 @@ export const LinkCardLightCubeIcon = html`
   </svg>
 `;
 
-export const LinkCardDarkCubeIcon = html`
+export const EmbedCardDarkCubeIcon = html`
   <svg
     width="38"
     height="30"

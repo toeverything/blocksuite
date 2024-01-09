@@ -1,7 +1,7 @@
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Slice, Text, type Y } from '@blocksuite/store';
 
-import { toggleLinkCardCreateModal } from '../../../_common/components/link-card/modal/link-card-create-modal.js';
+import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
 import { toast } from '../../../_common/components/toast.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
@@ -282,7 +282,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const url = await toggleLinkCardCreateModal(pageElement.host);
+          const url = await toggleEmbedCardCreateModal(pageElement.host);
           if (!url) return;
           const props = {
             flavour: 'affine:bookmark',
@@ -333,7 +333,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const url = await toggleLinkCardCreateModal(
+          const url = await toggleEmbedCardCreateModal(
             pageElement.host,
             youtubeUrlRegex,
             'Create a YouTube link card'
@@ -360,7 +360,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const url = await toggleLinkCardCreateModal(
+          const url = await toggleEmbedCardCreateModal(
             pageElement.host,
             githubUrlRegex,
             'Create a GitHub link card'

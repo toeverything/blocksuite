@@ -7,10 +7,10 @@ import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embe
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 import { stopPropagation } from '../../utils/event.js';
 
-@customElement('link-card-caption')
-export class LinkCardCaption extends WithDisposable(ShadowlessElement) {
+@customElement('embed-card-caption')
+export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .affine-link-card-caption {
+    .affine-embed-card-caption {
       width: 100%;
       font-size: var(--affine-font-sm);
       outline: none;
@@ -21,7 +21,7 @@ export class LinkCardCaption extends WithDisposable(ShadowlessElement) {
       display: inline-block;
       background: transparent;
     }
-    .affine-link-card-caption::placeholder {
+    .affine-embed-card-caption::placeholder {
       color: var(--affine-placeholder-color);
     }
   `;
@@ -35,7 +35,7 @@ export class LinkCardCaption extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   display!: boolean;
 
-  @query('.affine-link-card-caption')
+  @query('.affine-embed-card-caption')
   input!: HTMLInputElement;
 
   get caption() {
@@ -60,7 +60,7 @@ export class LinkCardCaption extends WithDisposable(ShadowlessElement) {
     return html`<input
       .disabled=${model.page.readonly}
       placeholder="Write a caption"
-      class="affine-link-card-caption"
+      class="affine-embed-card-caption"
       value=${this.caption}
       @input=${this._onInputChange}
       @blur=${this._onInputBlur}
@@ -71,6 +71,6 @@ export class LinkCardCaption extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'link-card-caption': LinkCardCaption;
+    'embed-card-caption': EmbedCardCaption;
   }
 }

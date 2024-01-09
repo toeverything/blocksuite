@@ -8,8 +8,8 @@ import { BlockElement } from '@blocksuite/lit';
 import { html, render } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { LinkCardCaption } from '../_common/components/link-card/link-card-caption.js';
-import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../_common/consts.js';
+import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { matchFlavours } from '../_common/utils/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
 import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
@@ -43,8 +43,8 @@ export class BookmarkBlockComponent extends BlockElement<
     | EdgelessBookmarkBlockComponent
     | DocBookmarkBlockComponent;
 
-  @query('link-card-caption')
-  captionElement!: LinkCardCaption;
+  @query('embed-card-caption')
+  captionElement!: EmbedCardCaption;
 
   private _isInSurface = false;
 
@@ -142,8 +142,8 @@ export class BookmarkBlockComponent extends BlockElement<
         return convertDragPreviewDocToEdgeless({
           blockComponent,
           cssSelector: '.affine-bookmark-card',
-          width: LINK_CARD_WIDTH[style],
-          height: LINK_CARD_HEIGHT[style],
+          width: EMBED_CARD_WIDTH[style],
+          height: EMBED_CARD_HEIGHT[style],
           ...props,
         });
       }

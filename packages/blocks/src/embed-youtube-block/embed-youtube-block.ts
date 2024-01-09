@@ -1,4 +1,4 @@
-import '../_common/components/link-card/link-card-caption.js';
+import '../_common/components/embed-card/embed-card-caption.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -9,12 +9,12 @@ import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import { HoverController } from '../_common/components/hover/controller.js';
-import type { LinkCardCaption } from '../_common/components/link-card/link-card-caption.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
-import type { LinkCardStyle } from '../_common/types.js';
-import { getLinkCardIcons } from '../_common/utils/url.js';
+import type { EmbedCardStyle } from '../_common/types.js';
+import { getEmbedCardIcons } from '../_common/utils/url.js';
 import {
   type EmbedYoutubeModel,
   youtubeUrlRegex,
@@ -30,7 +30,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override cardStyle: LinkCardStyle = 'video';
+  override cardStyle: EmbedCardStyle = 'video';
 
   @property({ attribute: false })
   loading = false;
@@ -44,8 +44,8 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   @query('.affine-embed-youtube-block')
   private _youtubeBlockEl!: HTMLDivElement;
 
-  @query('link-card-caption')
-  captionElement!: LinkCardCaption;
+  @query('embed-card-caption')
+  captionElement!: EmbedCardCaption;
 
   private _isDragging = false;
 
@@ -144,13 +144,13 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
             z-index: 1;
           }
         </style>
-        <link-card-toolbar
+        <embed-card-toolbar
           .model=${this.model}
           .block=${this}
           .host=${this.host}
           .abortController=${abortController}
           .std=${this.std}
-        ></link-card-toolbar>
+        ></embed-card-toolbar>
       `,
       computePosition: {
         referenceElement: this._youtubeBlockEl,
@@ -173,21 +173,21 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     } = this.model;
 
     const loading = this.loading;
-    const { LoadingIcon, LinkCardBannerIcon } = getLinkCardIcons();
+    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
     const titleIcon = loading ? LoadingIcon : YoutubeIcon;
     const titleText = loading ? 'Loading...' : title;
     const descriptionText = loading ? '' : description;
     const bannerImage =
       !loading && image
         ? html`<object type="image/webp" data=${image}>
-            ${LinkCardBannerIcon}
+            ${EmbedCardBannerIcon}
           </object>`
-        : LinkCardBannerIcon;
+        : EmbedCardBannerIcon;
 
     const creatorImageEl =
       !loading && creatorImage
         ? html`<object type="image/webp" data=${creatorImage}>
-            ${LinkCardBannerIcon}
+            ${EmbedCardBannerIcon}
           </object>`
         : nothing;
 
@@ -266,13 +266,13 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
             </div>
           </div>
 
-          <link-card-caption
+          <embed-card-caption
             .block=${this}
             .display=${this.showCaption}
             @blur=${() => {
               if (!this.model.caption) this.showCaption = false;
             }}
-          ></link-card-caption>
+          ></embed-card-caption>
 
           ${this.selected?.is('block')
             ? html`<affine-block-selection></affine-block-selection>`

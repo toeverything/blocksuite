@@ -2,17 +2,17 @@ import type { TemplateResult } from 'lit';
 
 import {
   DarkLoadingIcon,
+  EmbedCardDarkBannerIcon,
+  EmbedCardDarkCubeIcon,
+  EmbedCardDarkHorizontalIcon,
+  EmbedCardDarkListIcon,
+  EmbedCardDarkVerticalIcon,
+  EmbedCardLightBannerIcon,
+  EmbedCardLightCubeIcon,
+  EmbedCardLightHorizontalIcon,
+  EmbedCardLightListIcon,
+  EmbedCardLightVerticalIcon,
   LightLoadingIcon,
-  LinkCardDarkBannerIcon,
-  LinkCardDarkCubeIcon,
-  LinkCardDarkHorizontalIcon,
-  LinkCardDarkListIcon,
-  LinkCardDarkVerticalIcon,
-  LinkCardLightBannerIcon,
-  LinkCardLightCubeIcon,
-  LinkCardLightHorizontalIcon,
-  LinkCardLightListIcon,
-  LinkCardLightVerticalIcon,
 } from '../icons/text.js';
 import { getThemeMode } from './query.js';
 
@@ -163,34 +163,34 @@ export function isUrlInClipboard(clipboardData: DataTransfer) {
   return isValidUrl(url);
 }
 
-type LinkCardImages = {
+type EmbedCardImages = {
   LoadingIcon: TemplateResult<1>;
-  LinkCardBannerIcon: TemplateResult<1>;
-  LinkCardHorizontalIcon: TemplateResult<1>;
-  LinkCardListIcon: TemplateResult<1>;
-  LinkCardVerticalIcon: TemplateResult<1>;
-  LinkCardCubeIcon: TemplateResult<1>;
+  EmbedCardBannerIcon: TemplateResult<1>;
+  EmbedCardHorizontalIcon: TemplateResult<1>;
+  EmbedCardListIcon: TemplateResult<1>;
+  EmbedCardVerticalIcon: TemplateResult<1>;
+  EmbedCardCubeIcon: TemplateResult<1>;
 };
 
-export function getLinkCardIcons(): LinkCardImages {
+export function getEmbedCardIcons(): EmbedCardImages {
   const theme = getThemeMode();
   if (theme === 'light') {
     return {
       LoadingIcon: LightLoadingIcon,
-      LinkCardBannerIcon: LinkCardLightBannerIcon,
-      LinkCardHorizontalIcon: LinkCardLightHorizontalIcon,
-      LinkCardListIcon: LinkCardLightListIcon,
-      LinkCardVerticalIcon: LinkCardLightVerticalIcon,
-      LinkCardCubeIcon: LinkCardLightCubeIcon,
+      EmbedCardBannerIcon: EmbedCardLightBannerIcon,
+      EmbedCardHorizontalIcon: EmbedCardLightHorizontalIcon,
+      EmbedCardListIcon: EmbedCardLightListIcon,
+      EmbedCardVerticalIcon: EmbedCardLightVerticalIcon,
+      EmbedCardCubeIcon: EmbedCardLightCubeIcon,
     };
   } else {
     return {
       LoadingIcon: DarkLoadingIcon,
-      LinkCardBannerIcon: LinkCardDarkBannerIcon,
-      LinkCardHorizontalIcon: LinkCardDarkHorizontalIcon,
-      LinkCardListIcon: LinkCardDarkListIcon,
-      LinkCardVerticalIcon: LinkCardDarkVerticalIcon,
-      LinkCardCubeIcon: LinkCardDarkCubeIcon,
+      EmbedCardBannerIcon: EmbedCardDarkBannerIcon,
+      EmbedCardHorizontalIcon: EmbedCardDarkHorizontalIcon,
+      EmbedCardListIcon: EmbedCardDarkListIcon,
+      EmbedCardVerticalIcon: EmbedCardDarkVerticalIcon,
+      EmbedCardCubeIcon: EmbedCardDarkCubeIcon,
     };
   }
 }

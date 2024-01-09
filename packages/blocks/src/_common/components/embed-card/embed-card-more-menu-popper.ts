@@ -21,40 +21,40 @@ import {
 } from '../../icons/text.js';
 import { toast } from '../toast.js';
 
-@customElement('link-card-more-menu')
-export class LinkCardMoreMenu extends WithDisposable(LitElement) {
+@customElement('embed-card-more-menu')
+export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   static override styles = css`
-    .link-card-more-menu {
+    .embed-card-more-menu {
       border-radius: 8px;
       padding: 8px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
     }
 
-    .link-card-more-menu .menu-item {
+    .embed-card-more-menu .menu-item {
       display: flex;
       justify-content: flex-start;
       align-items: center;
       width: 100%;
     }
 
-    .link-card-more-menu .menu-item:hover {
+    .embed-card-more-menu .menu-item:hover {
       background: var(--affine-hover-color);
     }
 
-    .link-card-more-menu .menu-item:hover.delete {
+    .embed-card-more-menu .menu-item:hover.delete {
       background: var(--affine-background-error-color);
       color: var(--affine-error-color);
     }
-    .link-card-more-menu .menu-item:hover.delete > svg {
+    .embed-card-more-menu .menu-item:hover.delete > svg {
       color: var(--affine-error-color);
     }
 
-    .link-card-more-menu .menu-item svg {
+    .embed-card-more-menu .menu-item svg {
       margin: 0 8px;
     }
 
-    .link-card-more-menu .divider {
+    .embed-card-more-menu .divider {
       width: 148px;
       height: 1px;
       margin: 8px;
@@ -114,7 +114,7 @@ export class LinkCardMoreMenu extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="link-card-more-menu">
+    return html`<div class="embed-card-more-menu">
       <icon-button
         width="126px"
         height="32px"
@@ -175,6 +175,6 @@ export class LinkCardMoreMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'link-card-more-menu': LinkCardMoreMenu;
+    'embed-card-more-menu': EmbedCardMoreMenu;
   }
 }

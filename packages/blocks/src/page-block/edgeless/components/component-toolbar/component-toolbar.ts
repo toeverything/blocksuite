@@ -3,7 +3,7 @@ import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
 import './change-note-button.js';
-import './change-link-card-button.js';
+import './change-embed-card-button.js';
 import './change-text-button.js';
 import './change-frame-button.js';
 import './change-group-button.js';
@@ -66,7 +66,7 @@ type CategorizedElements = {
   note?: NoteBlockModel[];
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
-  linkCard?: BookmarkBlockModel[] & EmbedGithubModel[] & EmbedYoutubeModel[];
+  embedCard?: BookmarkBlockModel[] & EmbedGithubModel[] & EmbedYoutubeModel[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -127,7 +127,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       } else if (isImageBlock(model)) {
         return 'image';
       } else if (isBookmarkBlock(model) || isEmbeddedBlock(model)) {
-        return 'linkCard';
+        return 'embedCard';
       }
       return model.type;
     });
@@ -179,28 +179,28 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _LinkCardButton(
-    linkCards?: BookmarkBlockModel[] & EmbedGithubModel[] & EmbedYoutubeModel[]
+  private _EmbedCardButton(
+    embedCards?: BookmarkBlockModel[] & EmbedGithubModel[] & EmbedYoutubeModel[]
   ) {
-    if (linkCards?.length !== 1) return nothing;
+    if (embedCards?.length !== 1) return nothing;
 
-    const linkCardSelection = this.selection.selections.filter(sel =>
-      sel.elements.includes(linkCards[0].id)
+    const embedCardSelection = this.selection.selections.filter(sel =>
+      sel.elements.includes(embedCards[0].id)
     );
-    if (linkCardSelection.length !== 1) return nothing;
+    if (embedCardSelection.length !== 1) return nothing;
 
-    const linkCardElement = this.surface.std.view.viewFromPath(
+    const embedCardElement = this.surface.std.view.viewFromPath(
       'block',
-      linkCardSelection[0].path
+      embedCardSelection[0].path
     );
-    if (!linkCardElement) return nothing;
+    if (!embedCardElement) return nothing;
 
     return html`
-      <edgeless-change-link-card-button
-        .linkCard=${linkCardElement}
+      <edgeless-change-embed-card-button
+        .embedCard=${embedCardElement}
         .page=${this.page}
         .surface=${this.surface}
-      ></edgeless-change-link-card-button>
+      ></edgeless-change-embed-card-button>
     `;
   }
 
@@ -347,7 +347,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless, selection } = this;
-    const { shape, brush, connector, note, text, frame, group, linkCard } =
+    const { shape, brush, connector, note, text, frame, group, embedCard } =
       groupedSelected;
     const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -363,7 +363,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._BrushButton(brush),
           this._ConnectorButton(connector),
           this._NoteButton(note),
-          this._LinkCardButton(linkCard),
+          this._EmbedCardButton(embedCard),
           this._TextButton(text),
           this._FrameButton(frame),
           this._GroupButton(group),

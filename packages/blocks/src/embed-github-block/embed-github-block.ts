@@ -1,4 +1,4 @@
-import '../_common/components/link-card/link-card-caption.js';
+import '../_common/components/embed-card/embed-card-caption.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
@@ -9,12 +9,12 @@ import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import { HoverController } from '../_common/components/hover/controller.js';
-import type { LinkCardCaption } from '../_common/components/link-card/link-card-caption.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
-import type { LinkCardStyle } from '../_common/types.js';
-import { getLinkCardIcons } from '../_common/utils/url.js';
+import type { EmbedCardStyle } from '../_common/types.js';
+import { getEmbedCardIcons } from '../_common/utils/url.js';
 import { type EmbedGithubModel, githubUrlRegex } from './embed-github-model.js';
 import type { EmbedGithubService } from './embed-github-service.js';
 import { GithubIcon, styles } from './styles.js';
@@ -31,7 +31,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override cardStyle: LinkCardStyle = 'horizontal';
+  override cardStyle: EmbedCardStyle = 'horizontal';
 
   @property({ attribute: false })
   loading = false;
@@ -39,8 +39,8 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   @state()
   showCaption = false;
 
-  @query('link-card-caption')
-  captionElement!: LinkCardCaption;
+  @query('embed-card-caption')
+  captionElement!: EmbedCardCaption;
 
   refreshUrlData = () => {
     refreshEmbedGithubUrlData(this).catch(console.error);
@@ -140,13 +140,13 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
             z-index: 1;
           }
         </style>
-        <link-card-toolbar
+        <embed-card-toolbar
           .model=${this.model}
           .block=${this}
           .host=${this.host}
           .abortController=${abortController}
           .std=${this.std}
-        ></link-card-toolbar>
+        ></embed-card-toolbar>
       `,
       computePosition: {
         referenceElement: this,
@@ -173,7 +173,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     } = this.model;
 
     const loading = this.loading;
-    const { LoadingIcon, LinkCardBannerIcon } = getLinkCardIcons();
+    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
     const titleIcon = loading ? LoadingIcon : GithubIcon;
     const statusIcon = status
       ? getGithubStatusIcon(githubType, status, statusReason)
@@ -184,9 +184,9 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     const bannerImage =
       !loading && image
         ? html`<object type="image/webp" data=${image}>
-            ${LinkCardBannerIcon}
+            ${EmbedCardBannerIcon}
           </object>`
-        : LinkCardBannerIcon;
+        : EmbedCardBannerIcon;
 
     let dateText = '';
     if (createdAt) {
@@ -311,13 +311,13 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
             <div class="affine-embed-github-banner">${bannerImage}</div>
           </div>
 
-          <link-card-caption
+          <embed-card-caption
             .block=${this}
             .display=${this.showCaption}
             @blur=${() => {
               if (!this.model.caption) this.showCaption = false;
             }}
-          ></link-card-caption>
+          ></embed-card-caption>
 
           ${this.selected?.is('block')
             ? html`<affine-block-selection></affine-block-selection>`

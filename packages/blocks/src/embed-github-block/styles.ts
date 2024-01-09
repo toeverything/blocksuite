@@ -1,6 +1,6 @@
 import { css, html } from 'lit';
 
-import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../_common/consts.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 
 export const styles = css`
   .affine-embed-github-block {
@@ -8,8 +8,8 @@ export const styles = css`
     box-sizing: border-box;
     display: flex;
     width: 100%;
-    max-width: ${LINK_CARD_WIDTH.horizontal}px;
-    height: ${LINK_CARD_HEIGHT.horizontal}px;
+    max-width: ${EMBED_CARD_WIDTH.horizontal}px;
+    height: ${EMBED_CARD_HEIGHT.horizontal}px;
 
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
@@ -222,7 +222,7 @@ export const styles = css`
   }
 
   .affine-embed-github-block.list {
-    height: ${LINK_CARD_HEIGHT.list}px;
+    height: ${EMBED_CARD_HEIGHT.list}px;
 
     .affine-embed-github-content {
       width: 100%;
@@ -258,8 +258,8 @@ export const styles = css`
   }
 
   .affine-embed-github-block.vertical {
-    width: ${LINK_CARD_WIDTH.vertical}px;
-    height: ${LINK_CARD_HEIGHT.vertical}px;
+    width: ${EMBED_CARD_WIDTH.vertical}px;
+    height: ${EMBED_CARD_HEIGHT.vertical}px;
     flex-direction: column-reverse;
 
     .affine-embed-github-content {
@@ -329,8 +329,8 @@ export const styles = css`
   }
 
   .affine-embed-github-block.cube {
-    width: ${LINK_CARD_WIDTH.cube}px;
-    height: ${LINK_CARD_HEIGHT.cube}px;
+    width: ${EMBED_CARD_WIDTH.cube}px;
+    height: ${EMBED_CARD_HEIGHT.cube}px;
 
     .affine-embed-github-content {
       width: 100%;

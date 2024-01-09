@@ -1,7 +1,7 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/index.js';
-import type { LinkCardStyle } from '../_common/types.js';
+import type { EmbedCardStyle } from '../_common/types.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
 
 export interface BookmarkBlockUrlData {
@@ -28,7 +28,7 @@ export interface BookmarkBlockEdgelessProps {
   rotate: number;
 }
 
-export const BookmarkStyles: LinkCardStyle[] = [
+export const BookmarkStyles: EmbedCardStyle[] = [
   'vertical',
   'horizontal',
   'list',

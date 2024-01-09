@@ -10,7 +10,7 @@ import {
   DEFAULT_IMAGE_PROXY_ENDPOINT,
   ExportManager,
 } from '../_common/export-manager/export-manager.js';
-import type { LinkCardStyle } from '../_common/types.js';
+import type { EmbedCardStyle } from '../_common/types.js';
 import { DEFAULT_CANVAS_TEXT_FONT_CONFIG } from '../surface-block/consts.js';
 import {
   copySelectedModelsCommand,
@@ -36,7 +36,7 @@ import type { PageBlockComponent } from './types.js';
 type EmbedOptions = {
   flavour: string;
   urlRegex: RegExp;
-  styles: LinkCardStyle[];
+  styles: EmbedCardStyle[];
 };
 
 export class PageService extends BlockService<PageBlockModel> {

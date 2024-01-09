@@ -2,10 +2,10 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { toggleLinkCardCreateModal } from '../../../../../_common/components/link-card/modal/index.js';
+import { toggleEmbedCardCreateModal } from '../../../../../_common/components/embed-card/modal/index.js';
 import {
-  LINK_CARD_HEIGHT,
-  LINK_CARD_WIDTH,
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
 } from '../../../../../_common/consts.js';
 import { BookmarkIcon } from '../../../../../_common/icons/edgeless.js';
 import {
@@ -110,7 +110,9 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
               .iconContainerPadding=${2}
               .tooltip=${'Bookmark'}
               @click=${async () => {
-                const url = await toggleLinkCardCreateModal(this.edgeless.host);
+                const url = await toggleEmbedCardCreateModal(
+                  this.edgeless.host
+                );
                 if (!url) return;
 
                 const center = Vec.toVec(this.edgeless.surface.viewport.center);
@@ -120,8 +122,8 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                     url,
                     xywh: Bound.fromCenter(
                       center,
-                      LINK_CARD_WIDTH.vertical,
-                      LINK_CARD_HEIGHT.vertical
+                      EMBED_CARD_WIDTH.vertical,
+                      EMBED_CARD_HEIGHT.vertical
                     ).serialize(),
                     style: 'vertical',
                   },
@@ -140,7 +142,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
               .iconContainerPadding=${2}
               .tooltip=${'YouTube'}
               @click=${async () => {
-                const url = await toggleLinkCardCreateModal(
+                const url = await toggleEmbedCardCreateModal(
                   this.edgeless.host,
                   youtubeUrlRegex,
                   'Create a YouTube link card'
@@ -154,8 +156,8 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                     url,
                     xywh: Bound.fromCenter(
                       center,
-                      LINK_CARD_WIDTH.video,
-                      LINK_CARD_HEIGHT.video
+                      EMBED_CARD_WIDTH.video,
+                      EMBED_CARD_HEIGHT.video
                     ).serialize(),
                     style: 'video',
                   },
@@ -174,7 +176,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
               .iconContainerPadding=${2}
               .tooltip=${'GitHub'}
               @click=${async () => {
-                const url = await toggleLinkCardCreateModal(
+                const url = await toggleEmbedCardCreateModal(
                   this.edgeless.host,
                   githubUrlRegex,
                   'Create a GitHub link card'
@@ -188,8 +190,8 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                     url,
                     xywh: Bound.fromCenter(
                       center,
-                      LINK_CARD_WIDTH.vertical,
-                      LINK_CARD_HEIGHT.vertical
+                      EMBED_CARD_WIDTH.vertical,
+                      EMBED_CARD_HEIGHT.vertical
                     ).serialize(),
                     style: 'vertical',
                   },

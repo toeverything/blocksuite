@@ -1,14 +1,14 @@
 import { css, html } from 'lit';
 
-import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../_common/consts.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 
 export const styles = css`
   .affine-embed-youtube-block {
     margin: 0 auto;
     box-sizing: border-box;
     width: 100%;
-    max-width: ${LINK_CARD_WIDTH.video}px;
-    height: ${LINK_CARD_HEIGHT.video}px;
+    max-width: ${EMBED_CARD_WIDTH.video}px;
+    height: ${EMBED_CARD_HEIGHT.video}px;
     display: flex;
     flex-direction: column;
     gap: 20px;

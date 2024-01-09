@@ -1,7 +1,7 @@
 import { BlockModel } from '@blocksuite/store';
 
 import { defineEmbedModel } from '../_common/embed-block-helper/embed-block-model.js';
-import type { LinkCardStyle } from '../_common/types.js';
+import type { EmbedCardStyle } from '../_common/types.js';
 
 export const youtubeUrlRegex: RegExp =
   /(?:https?:\/\/)?(?:(?:www|m)\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w-_]+)/;
@@ -16,7 +16,7 @@ export type EmbedYoutubeBlockUrlData = {
   creatorImage: string | null;
 };
 
-export const EmbedYoutubeStyles: LinkCardStyle[] = ['video'] as const;
+export const EmbedYoutubeStyles: EmbedCardStyle[] = ['video'] as const;
 
 export type EmbedYoutubeBlockProps = {
   style: (typeof EmbedYoutubeStyles)[number];

@@ -9,11 +9,11 @@ import { classMap } from 'lit/directives/class-map.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
-import type { LinkCardStyle } from '../../types.js';
-import { getLinkCardIcons } from '../../utils/url.js';
+import type { EmbedCardStyle } from '../../types.js';
+import { getEmbedCardIcons } from '../../utils/url.js';
 
-@customElement('link-card-style-menu')
-export class LinkCardStyleMenu extends WithDisposable(LitElement) {
+@customElement('embed-card-style-menu')
+export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       border-radius: 8px;
@@ -44,14 +44,14 @@ export class LinkCardStyleMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   abortController!: AbortController;
 
-  private _setLinkCardStyle(style: LinkCardStyle) {
+  private _setEmbedCardStyle(style: EmbedCardStyle) {
     this.model.page.updateBlock(this.model, { style });
     this.requestUpdate();
     this.abortController.abort();
   }
 
   override render() {
-    const { LinkCardHorizontalIcon, LinkCardListIcon } = getLinkCardIcons();
+    const { EmbedCardHorizontalIcon, EmbedCardListIcon } = getEmbedCardIcons();
     return html`
       <icon-button
         width="76px"
@@ -59,9 +59,9 @@ export class LinkCardStyleMenu extends WithDisposable(LitElement) {
         class=${classMap({
           selected: this.model.style === 'horizontal',
         })}
-        @click=${() => this._setLinkCardStyle('horizontal')}
+        @click=${() => this._setEmbedCardStyle('horizontal')}
       >
-        ${LinkCardHorizontalIcon}
+        ${EmbedCardHorizontalIcon}
         <affine-tooltip .offset=${4}
           >${'Large horizontal style'}</affine-tooltip
         >
@@ -73,9 +73,9 @@ export class LinkCardStyleMenu extends WithDisposable(LitElement) {
         class=${classMap({
           selected: this.model.style === 'list',
         })}
-        @click=${() => this._setLinkCardStyle('list')}
+        @click=${() => this._setEmbedCardStyle('list')}
       >
-        ${LinkCardListIcon}
+        ${EmbedCardListIcon}
         <affine-tooltip .offset=${4}
           >${'Small horizontal style'}</affine-tooltip
         >
@@ -86,6 +86,6 @@ export class LinkCardStyleMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'link-card-style-menu': LinkCardStyleMenu;
+    'embed-card-style-menu': EmbedCardStyleMenu;
   }
 }

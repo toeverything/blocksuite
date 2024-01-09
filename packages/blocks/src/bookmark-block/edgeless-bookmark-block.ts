@@ -1,4 +1,4 @@
-import '../_common/components/link-card/link-card-caption.js';
+import '../_common/components/embed-card/embed-card-caption.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -6,7 +6,7 @@ import { html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../_common/consts.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { getEdgelessPageByElement } from '../_common/utils/query.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
@@ -43,8 +43,8 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
 
   override render() {
     const style = this.model.style;
-    const width = LINK_CARD_WIDTH[style];
-    const height = LINK_CARD_HEIGHT[style];
+    const width = EMBED_CARD_WIDTH[style];
+    const height = EMBED_CARD_HEIGHT[style];
 
     const bound = Bound.deserialize(
       (
@@ -64,13 +64,13 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
       })}
     >
       <bookmark-card .bookmark=${this.block}></bookmark-card>
-      <link-card-caption
+      <embed-card-caption
         .block=${this.block}
         .display=${this.block.showCaption}
         @blur=${() => {
           if (!this.model.caption) this.block.showCaption = false;
         }}
-      ></link-card-caption>
+      ></embed-card-caption>
       ${this.block.selected?.is('block')
         ? html`<affine-block-selection></affine-block-selection>`
         : nothing}

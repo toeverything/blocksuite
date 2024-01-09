@@ -1,5 +1,5 @@
 import '../buttons/tool-icon-button.js';
-import '../panel/link-card-style-panel';
+import '../panel/embed-card-style-panel';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -8,11 +8,11 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { toggleLinkCardEditModal } from '../../../../_common/components/link-card/modal/link-card-edit-modal.js';
+import { toggleEmbedCardEditModal } from '../../../../_common/components/embed-card/modal/embed-card-edit-modal.js';
 import { toast } from '../../../../_common/components/toast.js';
 import {
-  LINK_CARD_HEIGHT,
-  LINK_CARD_WIDTH,
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
 } from '../../../../_common/consts.js';
 import { BookmarkIcon } from '../../../../_common/icons/edgeless.js';
 import {
@@ -21,7 +21,7 @@ import {
   EmbedWebIcon,
   PaletteIcon,
 } from '../../../../_common/icons/text.js';
-import type { LinkCardStyle } from '../../../../_common/types.js';
+import type { EmbedCardStyle } from '../../../../_common/types.js';
 import type { BookmarkBlockComponent } from '../../../../bookmark-block/bookmark-block.js';
 import { BookmarkStyles } from '../../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubBlockComponent } from '../../../../embed-github-block/embed-github-block.js';
@@ -39,15 +39,15 @@ import {
 } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
 
-@customElement('edgeless-change-link-card-button')
-export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
+@customElement('edgeless-change-embed-card-button')
+export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   static override styles = css`
-    .change-link-card-container {
+    .change-embed-card-container {
       display: flex;
       align-items: center;
     }
 
-    .change-link-card-button {
+    .change-embed-card-button {
       width: 40px;
       height: 24px;
       border-radius: 4px;
@@ -56,7 +56,7 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       align-items: center;
     }
 
-    .change-link-card-button.url {
+    .change-embed-card-button.url {
       display: flex;
       width: 180px;
       padding: var(--1, 0px);
@@ -69,7 +69,7 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       cursor: pointer;
     }
 
-    .change-link-card-button.url > span {
+    .change-embed-card-button.url > span {
       display: -webkit-box;
       -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
@@ -88,13 +88,13 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       opacity: var(--add, 1);
     }
 
-    .change-link-card-view-style {
+    .change-embed-card-view-style {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .change-link-card-button-view-selector {
+    .change-embed-card-button-view-selector {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -102,14 +102,14 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       border-radius: 6px;
       background: var(--affine-hover-color);
     }
-    .change-link-card-button-view-selector .change-link-card-button {
+    .change-embed-card-button-view-selector .change-embed-card-button {
       width: 24px;
       height: 24px;
     }
-    .change-link-card-button-view-selector > icon-button {
+    .change-embed-card-button-view-selector > icon-button {
       padding: 0px;
     }
-    .change-link-card-button-view-selector .current-view {
+    .change-embed-card-button-view-selector .current-view {
       background: var(--affine-background-overlay-panel-color);
       border-radius: 6px;
     }
@@ -119,16 +119,16 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       margin: 0 12px;
     }
 
-    link-card-style-panel {
+    embed-card-style-panel {
       display: none;
     }
-    link-card-style-panel[data-show] {
+    embed-card-style-panel[data-show] {
       display: flex;
     }
   `;
 
   @property({ attribute: false })
-  linkCard!:
+  embedCard!:
     | BookmarkBlockComponent
     | EmbedGithubBlockComponent
     | EmbedYoutubeBlockComponent;
@@ -142,17 +142,17 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
   @state()
   private _showPopper = false;
 
-  @query('.change-link-card-button.card-style')
-  private _linkCardStyleButton!: HTMLDivElement;
+  @query('.change-embed-card-button.card-style')
+  private _embedCardStyleButton!: HTMLDivElement;
 
-  @query('link-card-style-panel')
-  private _linkCardStylePanel!: HTMLDivElement;
+  @query('embed-card-style-panel')
+  private _embedCardStylePanel!: HTMLDivElement;
 
-  private _linkCardStylePopper: ReturnType<typeof createButtonPopper> | null =
+  private _embedCardStylePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
   private get _model() {
-    return this.linkCard.model;
+    return this.embedCard.model;
   }
 
   private get _pageService() {
@@ -173,13 +173,13 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
     this.surface.selection.clear();
   }
 
-  private _setLinkCardStyle(style: LinkCardStyle) {
+  private _setEmbedCardStyle(style: EmbedCardStyle) {
     const bounds = Bound.deserialize(this._model.xywh);
-    bounds.w = LINK_CARD_WIDTH[style];
-    bounds.h = LINK_CARD_HEIGHT[style];
+    bounds.w = EMBED_CARD_WIDTH[style];
+    bounds.h = EMBED_CARD_HEIGHT[style];
     const xywh = bounds.serialize();
     this._model.page.updateBlock(this._model, { style, xywh });
-    this._linkCardStylePopper?.hide();
+    this._embedCardStylePopper?.hide();
   }
 
   private _convertToCardView() {
@@ -191,8 +191,8 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
       : BookmarkStyles[0];
 
     const bound = Bound.deserialize(xywh);
-    bound.w = LINK_CARD_WIDTH[targetStyle];
-    bound.h = LINK_CARD_HEIGHT[targetStyle];
+    bound.w = EMBED_CARD_WIDTH[targetStyle];
+    bound.h = EMBED_CARD_HEIGHT[targetStyle];
 
     const blockId = this.surface.addElement(
       'affine:bookmark',
@@ -221,8 +221,8 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
     const targetStyle = styles.includes(style) ? style : styles[0];
 
     const bound = Bound.deserialize(xywh);
-    bound.w = LINK_CARD_WIDTH[targetStyle];
-    bound.h = LINK_CARD_HEIGHT[targetStyle];
+    bound.w = EMBED_CARD_WIDTH[targetStyle];
+    bound.h = EMBED_CARD_HEIGHT[targetStyle];
 
     const blockId = this.surface.addElement(
       flavour as EdgelessBlockType,
@@ -242,14 +242,14 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
 
   override firstUpdated(changedProperties: Map<string, unknown>) {
     if (this._canShowCardStylePanel) {
-      this._linkCardStylePopper = createButtonPopper(
-        this._linkCardStyleButton,
-        this._linkCardStylePanel,
+      this._embedCardStylePopper = createButtonPopper(
+        this._embedCardStyleButton,
+        this._embedCardStylePanel,
         ({ display }) => {
           this._showPopper = display === 'show';
         }
       );
-      this._disposables.add(this._linkCardStylePopper);
+      this._disposables.add(this._embedCardStylePopper);
     }
 
     super.firstUpdated(changedProperties);
@@ -258,9 +258,9 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
   override render() {
     const { style } = this._model;
     return html`
-      <div class="change-link-card-container">
+      <div class="change-embed-card-container">
         <div
-          class="change-link-card-button url"
+          class="change-embed-card-button url"
           @click=${() => this._copyUrl()}
         >
           <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
@@ -269,7 +269,7 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           .tooltip=${'Click to copy link'}
-          class="change-link-card-button copy"
+          class="change-embed-card-button copy"
           ?disabled=${this.page.readonly}
           @click=${() => this._copyUrl()}
         >
@@ -278,9 +278,9 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           .tooltip=${'Edit'}
-          class="change-link-card-button edit"
+          class="change-embed-card-button edit"
           ?disabled=${this.page.readonly}
-          @click=${() => toggleLinkCardEditModal(this.linkCard)}
+          @click=${() => toggleEmbedCardEditModal(this.embedCard)}
         >
           ${EditIcon}
         </edgeless-tool-icon-button>
@@ -289,13 +289,13 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
           .vertical=${true}
         ></component-toolbar-menu-divider>
 
-        <div class="change-link-card-view-style">
+        <div class="change-embed-card-view-style">
           ${isEmbeddedBlock(this._model) || this._canConvertToEmbedView()
             ? html`
-                <div class="change-link-card-button-view-selector">
+                <div class="change-embed-card-button-view-selector">
                   <edgeless-tool-icon-button
                     class=${classMap({
-                      'change-link-card-button': true,
+                      'change-embed-card-button': true,
                       card: true,
                       'current-view': isBookmarkBlock(this._model),
                     })}
@@ -310,7 +310,7 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
 
                   <edgeless-tool-icon-button
                     class=${classMap({
-                      'change-link-card-button': true,
+                      'change-embed-card-button': true,
                       embed: true,
                       'current-view': isEmbeddedBlock(this._model),
                     })}
@@ -327,11 +327,11 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
             : nothing}
           ${this._canShowCardStylePanel
             ? html`
-                <div class="change-link-card-button card-style">
+                <div class="change-embed-card-button card-style">
                   <edgeless-tool-icon-button
                     .tooltip=${this._showPopper ? '' : 'Card style'}
                     ?disabled=${this.page.readonly}
-                    @click=${() => this._linkCardStylePopper?.toggle()}
+                    @click=${() => this._embedCardStylePopper?.toggle()}
                   >
                     ${PaletteIcon}
                   </edgeless-tool-icon-button>
@@ -339,11 +339,12 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
               `
             : nothing}
 
-          <link-card-style-panel
+          <embed-card-style-panel
             .value=${style}
-            .onSelect=${(value: LinkCardStyle) => this._setLinkCardStyle(value)}
+            .onSelect=${(value: EmbedCardStyle) =>
+              this._setEmbedCardStyle(value)}
           >
-          </link-card-style-panel>
+          </embed-card-style-panel>
         </div>
       </div>
     `;
@@ -352,6 +353,6 @@ export class EdgelessChangeLinkCardButton extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-change-link-card-button': EdgelessChangeLinkCardButton;
+    'edgeless-change-embed-card-button': EdgelessChangeEmbedCardButton;
   }
 }

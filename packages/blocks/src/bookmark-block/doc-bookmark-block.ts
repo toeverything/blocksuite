@@ -1,5 +1,5 @@
-import '../_common/components/link-card/link-card-caption.js';
-import '../_common/components/link-card/link-card-toolbar';
+import '../_common/components/embed-card/embed-card-caption.js';
+import '../_common/components/embed-card/embed-card-toolbar';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
@@ -45,13 +45,13 @@ export class DocBookmarkBlockComponent extends WithDisposable(
             z-index: 1;
           }
         </style>
-        <link-card-toolbar
+        <embed-card-toolbar
           .model=${this.model}
           .block=${this.block}
           .host=${this}
           .abortController=${abortController}
           .std=${this.block.std}
-        ></link-card-toolbar>
+        ></embed-card-toolbar>
       `,
       computePosition: {
         referenceElement: this.bookmardCardElement,
@@ -73,13 +73,13 @@ export class DocBookmarkBlockComponent extends WithDisposable(
         })}
       >
         <bookmark-card .bookmark=${this.block}></bookmark-card>
-        <link-card-caption
+        <embed-card-caption
           .block=${this.block}
           .display=${this.block.showCaption}
           @blur=${() => {
             if (!this.model.caption) this.block.showCaption = false;
           }}
-        ></link-card-caption>
+        ></embed-card-caption>
         ${this.block.selected?.is('block')
           ? html`<affine-block-selection></affine-block-selection>`
           : nothing}

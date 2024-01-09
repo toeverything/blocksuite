@@ -12,7 +12,10 @@ import {
   Workspace,
 } from '@blocksuite/store';
 
-import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../../../_common/consts.js';
+import {
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '../../../_common/consts.js';
 import type {
   EdgelessElement,
   Selectable,
@@ -216,8 +219,8 @@ export class EdgelessClipboardController extends PageClipboard {
         ? (embedOptions.flavour as EdgelessElementType)
         : 'affine:bookmark';
       const style = embedOptions ? embedOptions.styles[0] : BookmarkStyles[0];
-      const width = LINK_CARD_WIDTH[style];
-      const height = LINK_CARD_HEIGHT[style];
+      const width = EMBED_CARD_WIDTH[style];
+      const height = EMBED_CARD_HEIGHT[style];
 
       const id = this.surface.addElement(
         flavour,

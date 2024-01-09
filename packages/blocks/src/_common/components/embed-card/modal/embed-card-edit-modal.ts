@@ -10,14 +10,14 @@ import type { EmbedGithubModel } from '../../../../embed-github-block/embed-gith
 import type { EmbedYoutubeBlockComponent } from '../../../../embed-youtube-block/embed-youtube-block.js';
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import { toast } from '../../toast.js';
-import { linkCardModalStyles } from './styles.js';
+import { embedCardModalStyles } from './styles.js';
 
-@customElement('link-card-edit-modal')
-export class LinkCardEditModal extends WithDisposable(ShadowlessElement) {
-  static override styles = linkCardModalStyles;
+@customElement('embed-card-edit-modal')
+export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
+  static override styles = embedCardModalStyles;
 
   @property({ attribute: false })
-  linkCardElement!:
+  embedCardElement!:
     | BookmarkBlockComponent
     | EmbedGithubBlockComponent
     | EmbedYoutubeBlockComponent;
@@ -32,7 +32,7 @@ export class LinkCardEditModal extends WithDisposable(ShadowlessElement) {
   private _titleInputValue = '';
 
   get model(): BookmarkBlockModel | EmbedGithubModel | EmbedYoutubeModel {
-    return this.linkCardElement.model;
+    return this.embedCardElement.model;
   }
 
   override connectedCallback() {
@@ -72,7 +72,7 @@ export class LinkCardEditModal extends WithDisposable(ShadowlessElement) {
       return;
     }
 
-    this.linkCardElement.page.updateBlock(this.model, {
+    this.embedCardElement.page.updateBlock(this.model, {
       title,
       description: this.descInput.value,
     });
@@ -81,14 +81,14 @@ export class LinkCardEditModal extends WithDisposable(ShadowlessElement) {
 
   override render() {
     return html`
-      <div class="link-card-modal blocksuite-overlay">
-        <div class="link-card-modal-mask" @click=${() => this.remove()}></div>
-        <div class="link-card-modal-wrapper">
-          <div class="link-card-modal-title">Edit Link</div>
+      <div class="embed-card-modal blocksuite-overlay">
+        <div class="embed-card-modal-mask" @click=${() => this.remove()}></div>
+        <div class="embed-card-modal-wrapper">
+          <div class="embed-card-modal-title">Edit Link</div>
 
-          <div class="link-card-modal-content">
+          <div class="embed-card-modal-content">
             <input
-              class="link-card-modal-input title"
+              class="embed-card-modal-input title"
               type="text"
               placeholder="Title"
               value=${this._titleInputValue}
@@ -97,16 +97,16 @@ export class LinkCardEditModal extends WithDisposable(ShadowlessElement) {
             />
 
             <textarea
-              class="link-card-modal-input description"
+              class="embed-card-modal-input description"
               placeholder="Description"
               .value=${this.model.description ?? ''}
               tabindex="0"
             ></textarea>
           </div>
 
-          <div class="link-card-modal-action">
+          <div class="embed-card-modal-action">
             <div
-              class="link-card-modal-button cancel"
+              class="embed-card-modal-button cancel"
               tabindex="0"
               @click=${() => this.remove()}
             >
@@ -115,7 +115,7 @@ export class LinkCardEditModal extends WithDisposable(ShadowlessElement) {
 
             <div
               class=${classMap({
-                'link-card-modal-button': true,
+                'embed-card-modal-button': true,
                 save: true,
                 disabled: this._titleInputValue.length === 0,
               })}
@@ -131,20 +131,20 @@ export class LinkCardEditModal extends WithDisposable(ShadowlessElement) {
   }
 }
 
-export function toggleLinkCardEditModal(
-  linkCardElement:
+export function toggleEmbedCardEditModal(
+  embedCardElement:
     | BookmarkBlockComponent
     | EmbedGithubBlockComponent
     | EmbedYoutubeBlockComponent
 ) {
-  linkCardElement.host.selection.clear();
-  const linkCardEditModal = new LinkCardEditModal();
-  linkCardEditModal.linkCardElement = linkCardElement;
-  document.body.appendChild(linkCardEditModal);
+  embedCardElement.host.selection.clear();
+  const embedCardEditModal = new EmbedCardEditModal();
+  embedCardEditModal.embedCardElement = embedCardElement;
+  document.body.appendChild(embedCardEditModal);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'link-card-edit-modal': LinkCardEditModal;
+    'embed-card-edit-modal': EmbedCardEditModal;
   }
 }

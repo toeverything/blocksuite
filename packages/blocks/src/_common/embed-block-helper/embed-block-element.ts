@@ -14,11 +14,11 @@ import {
   convertDragPreviewEdgelessToDoc,
 } from '../../page-block/widgets/drag-handle/utils.js';
 import { Bound } from '../../surface-block/index.js';
-import { LINK_CARD_HEIGHT, LINK_CARD_WIDTH } from '../consts.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../consts.js';
 import type { EdgelessSelectableProps } from '../edgeless/mixin/index.js';
 import {
   type BlockModels,
-  type LinkCardStyle,
+  type EmbedCardStyle,
   matchFlavours,
 } from '../utils/index.js';
 
@@ -28,7 +28,7 @@ export class EmbedBlockElement<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {
-  protected cardStyle: LinkCardStyle = 'horizontal';
+  protected cardStyle: EmbedCardStyle = 'horizontal';
 
   private _isInSurface = false;
 
@@ -132,8 +132,8 @@ export class EmbedBlockElement<
         return convertDragPreviewDocToEdgeless({
           blockComponent,
           cssSelector: '.embed-block-container',
-          width: LINK_CARD_WIDTH[style],
-          height: LINK_CARD_HEIGHT[style],
+          width: EMBED_CARD_WIDTH[style],
+          height: EMBED_CARD_HEIGHT[style],
           ...props,
         });
       }
@@ -172,8 +172,8 @@ export class EmbedBlockElement<
     assertExists(surface);
 
     const style = this.cardStyle;
-    const width = LINK_CARD_WIDTH[style];
-    const height = LINK_CARD_HEIGHT[style];
+    const width = EMBED_CARD_WIDTH[style];
+    const height = EMBED_CARD_HEIGHT[style];
     const bound = Bound.deserialize(
       (surface.pickById(this.model.id) ?? this.model).xywh
     );

@@ -5,7 +5,7 @@ import { classMap } from 'lit/directives/class-map.js';
 
 import { OpenIcon, WebIcon16 } from '../../_common/icons/text.js';
 import { ThemeObserver } from '../../_common/theme/theme-observer.js';
-import { getLinkCardIcons } from '../../_common/utils/url.js';
+import { getEmbedCardIcons } from '../../_common/utils/url.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import { styles } from '../styles.js';
 
@@ -84,7 +84,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
     const titleText = loading ? 'Loading...' : title;
 
-    const { LoadingIcon, LinkCardBannerIcon } = getLinkCardIcons();
+    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
 
     const titleIconType =
       !icon?.split('.').pop() || icon?.split('.').pop() === 'svg'
@@ -104,9 +104,9 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     const bannerImage =
       !loading && image
         ? html`<object type="image/webp" data=${image}>
-            ${LinkCardBannerIcon}
+            ${EmbedCardBannerIcon}
           </object>`
-        : LinkCardBannerIcon;
+        : EmbedCardBannerIcon;
 
     return html`
       <div

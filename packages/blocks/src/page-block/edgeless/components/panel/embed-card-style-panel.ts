@@ -5,11 +5,11 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { LinkCardStyle } from '../../../../_common/types.js';
-import { getLinkCardIcons } from '../../../../_common/utils/url.js';
+import type { EmbedCardStyle } from '../../../../_common/types.js';
+import { getEmbedCardIcons } from '../../../../_common/utils/url.js';
 
-@customElement('link-card-style-panel')
-export class LinkCardStylePanel extends WithDisposable(LitElement) {
+@customElement('embed-card-style-panel')
+export class EmbedCardStylePanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       border-radius: 8px;
@@ -35,15 +35,15 @@ export class LinkCardStylePanel extends WithDisposable(LitElement) {
   value!: string;
 
   @property({ attribute: false })
-  onSelect!: (value: LinkCardStyle) => void;
+  onSelect!: (value: EmbedCardStyle) => void;
 
   override render() {
     const {
-      LinkCardHorizontalIcon,
-      LinkCardListIcon,
-      LinkCardVerticalIcon,
-      LinkCardCubeIcon,
-    } = getLinkCardIcons();
+      EmbedCardHorizontalIcon,
+      EmbedCardListIcon,
+      EmbedCardVerticalIcon,
+      EmbedCardCubeIcon,
+    } = getEmbedCardIcons();
     return html`
       <icon-button
         width="76px"
@@ -53,7 +53,7 @@ export class LinkCardStylePanel extends WithDisposable(LitElement) {
         })}
         @click=${() => this.onSelect('horizontal')}
       >
-        ${LinkCardHorizontalIcon}
+        ${EmbedCardHorizontalIcon}
         <affine-tooltip .offset=${4}
           >${'Large horizontal style'}</affine-tooltip
         >
@@ -67,7 +67,7 @@ export class LinkCardStylePanel extends WithDisposable(LitElement) {
         })}
         @click=${() => this.onSelect('list')}
       >
-        ${LinkCardListIcon}
+        ${EmbedCardListIcon}
         <affine-tooltip .offset=${4}
           >${'Small horizontal style'}</affine-tooltip
         >
@@ -81,7 +81,7 @@ export class LinkCardStylePanel extends WithDisposable(LitElement) {
         })}
         @click=${() => this.onSelect('vertical')}
       >
-        ${LinkCardVerticalIcon}
+        ${EmbedCardVerticalIcon}
         <affine-tooltip .offset=${4}>${'Large vertical style'}</affine-tooltip>
       </icon-button>
 
@@ -93,7 +93,7 @@ export class LinkCardStylePanel extends WithDisposable(LitElement) {
         })}
         @click=${() => this.onSelect('cube')}
       >
-        ${LinkCardCubeIcon}
+        ${EmbedCardCubeIcon}
         <affine-tooltip .offset=${4}>${'Small vertical style'}</affine-tooltip>
       </icon-button>
     `;
@@ -102,6 +102,6 @@ export class LinkCardStylePanel extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'link-card-style-panel': LinkCardStylePanel;
+    'embed-card-style-panel': EmbedCardStylePanel;
   }
 }

@@ -7,7 +7,7 @@ import { customElement, query, queryAll, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { DragIndicator } from '../../../../_common/components/drag-indicator.js';
-import { toggleLinkCardCreateModal } from '../../../../_common/components/link-card/modal/index.js';
+import { toggleEmbedCardCreateModal } from '../../../../_common/components/embed-card/modal/index.js';
 import { BlockHubIcon, CrossIcon } from '../../../../_common/icons/index.js';
 import {
   asyncFocusRichText,
@@ -471,7 +471,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
       addSiblingImageBlock(imageFiles, maxFileSize, lastModelState.model);
     } else if (props.flavour === 'affine:bookmark') {
-      const url = await toggleLinkCardCreateModal(this._editorHost);
+      const url = await toggleEmbedCardCreateModal(this._editorHost);
       url &&
         models.push({
           flavour: 'affine:bookmark',
@@ -595,7 +595,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
       lastId = blockIds[blockIds.length - 1];
     } else if (data.flavour === 'affine:bookmark') {
-      const url = await toggleLinkCardCreateModal(this._editorHost);
+      const url = await toggleEmbedCardCreateModal(this._editorHost);
       url &&
         models.push({
           flavour: 'affine:bookmark',

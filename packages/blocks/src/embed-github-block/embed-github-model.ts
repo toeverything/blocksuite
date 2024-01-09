@@ -1,7 +1,7 @@
 import { BlockModel } from '@blocksuite/store';
 
 import { defineEmbedModel } from '../_common/embed-block-helper/embed-block-model.js';
-import type { LinkCardStyle } from '../_common/types.js';
+import type { EmbedCardStyle } from '../_common/types.js';
 
 export const githubUrlRegex: RegExp =
   /^(?:https?:\/\/)?(?:www\.)?github\.com\/([^/]+)\/([^/]+)\/(issue|pull)s?\/(\d+)$/;
@@ -16,7 +16,7 @@ export type EmbedGithubBlockUrlData = {
   assignees: string[] | null;
 };
 
-export const EmbedGithubStyles: LinkCardStyle[] = [
+export const EmbedGithubStyles: EmbedCardStyle[] = [
   'vertical',
   'horizontal',
   'list',
