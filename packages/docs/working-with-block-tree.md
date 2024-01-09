@@ -155,7 +155,7 @@ function getFirstSelectedModel(host: EditorHost) {
 
 This direct usage is not very convenient. Also, as BlockSuite encourages completely splitting the editor into different [`BlockSpec`](./block-spec)s ([recall here](./component-types#composing-editors-by-blocks)), which indicates that methods and properties globally available in the editor should also be implemented on the block level. A mechanism is needed at this point to organize such code, ensuring maintainability in large projects. This is why BlockSuite introduces the concept of [`BlockService`](./block-service).
 
-### Services
+### Service
 
 In BlockSuite, service is used for registering state or methods specific to a certain block type. For example, instead of implementing the `getFirstSelectedModel` method yourself, you can use shortcuts predefined on `PageService`:
 
