@@ -101,7 +101,6 @@ export const styles = css`
     align-items: center;
     justify-content: flex-start;
     gap: 4px;
-    width: max-content;
     max-width: 100%;
   }
   .affine-bookmark-content-url > span {
@@ -136,6 +135,7 @@ export const styles = css`
   .affine-bookmark-banner {
     margin: 12px 12px 0px 0px;
     width: 204px;
+    max-width: 100%;
     height: 102px;
     opacity: var(--add, 1);
   }
@@ -144,6 +144,7 @@ export const styles = css`
   .affine-bookmark-banner object,
   .affine-bookmark-banner svg {
     width: 204px;
+    max-width: 100%;
     height: 102px;
     object-fit: fill;
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);

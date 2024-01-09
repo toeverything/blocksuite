@@ -173,7 +173,6 @@ export const styles = css`
     align-items: center;
     justify-content: flex-start;
     gap: 4px;
-    width: max-content;
     max-width: 100%;
   }
   .affine-embed-youtube-content-url > span {

@@ -166,7 +166,6 @@ export const styles = css`
     align-items: center;
     justify-content: flex-start;
     gap: 4px;
-    width: max-content;
     max-width: 100%;
   }
   .affine-embed-github-content-url > span {
@@ -202,6 +201,7 @@ export const styles = css`
     margin: 12px 12px 0px 0px;
     width: 204px;
     height: 102px;
+    max-width: 100%;
     opacity: var(--add, 1);
   }
 
@@ -209,6 +209,7 @@ export const styles = css`
   .affine-embed-github-banner object,
   .affine-embed-github-banner svg {
     width: 204px;
+    max-width: 100%;
     height: 102px;
     object-fit: fill;
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
