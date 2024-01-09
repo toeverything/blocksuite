@@ -197,6 +197,10 @@ export class ExportManager {
     const editorContainer = getEditorContainer(this.editorHost);
     const containerComputedStyle = window.getComputedStyle(editorContainer);
 
+    const html2canvas = (element: HTMLElement) =>
+      this._html2canvas(element, {
+        backgroundColor: containerComputedStyle.backgroundColor,
+      });
     const container = editorContainer.querySelector(
       '.affine-block-children-container'
     );
@@ -222,7 +226,6 @@ export class ExportManager {
 
     // TODO: refactor of this part
     const blocks = nodes ?? edgeless?.getSortedElementsByBound(bound) ?? [];
-    const { toCanvas } = await import('html-to-image');
     for (const block of blocks) {
       if (matchFlavours(block, ['affine:image'])) {
         if (!block.sourceId) return;
@@ -253,8 +256,6 @@ export class ExportManager {
 
       if (blockElement) {
         const blockBound = xywhArrayToObject(block);
-        // const { toCanvas } = await import('html-to-image');
-        // const canvasData = await toCanvas(blockElement as HTMLElement);
         const canvasData = await this._html2canvas(blockElement as HTMLElement);
         ctx.drawImage(
           canvasData,
@@ -274,25 +275,7 @@ export class ExportManager {
           const htmlElement = blockElementGetter(element);
           console.log('htmlElement: ', htmlElement);
           const blockBound = xywhArrayToObject(element);
-          const { w, h } = blockBound;
-          const canvasData = await toCanvas(htmlElement as HTMLElement, {
-            width: w,
-            height: h,
-          });
-          FileExporter.exportPng(
-            (this.page.root as PageBlockModel).title.toString(),
-            canvasData.toDataURL('image/png')
-          );
-
-          console.log('canvasData: ', canvasData);
-          // const canvasData = await html2canvas(htmlElement as HTMLElement);
-          console.log(
-            'x y w h: ',
-            blockBound.x - bound.x + 50,
-            blockBound.y - bound.y + 50,
-            blockBound.w,
-            (blockBound.w / canvasData.width) * canvasData.height
-          );
+          const canvasData = await html2canvas(htmlElement as HTMLElement);
 
           ctx.drawImage(
             canvasData,
@@ -317,6 +300,9 @@ export class ExportManager {
   }
 
   private async _docToCanvas(): Promise<HTMLCanvasElement | void> {
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
     const pathname = location.pathname;
     const pageMode = isInsideDocEditor(this.editorHost);
 
@@ -325,14 +311,48 @@ export class ExportManager {
       editorContainer.querySelector('affine-doc-editor');
     if (!docEditorContainer) return;
 
-    const { toCanvas } = await import('html-to-image');
-    const data = await toCanvas(docEditorContainer as HTMLElement);
+    const replaceRichTextWithSvgElementFunc =
+      this._replaceRichTextWithSvgElement.bind(this);
+    const html2canvasOption = {
+      ignoreElements: function (element: Element) {
+        if (
+          element.tagName === 'AFFINE-BLOCK-HUB' ||
+          element.tagName === 'EDGELESS-TOOLBAR' ||
+          element.classList.contains('dg')
+        ) {
+          return true;
+        } else if (
+          (element.classList.contains('close') &&
+            element.parentElement?.classList.contains(
+              'meta-data-expanded-title'
+            )) ||
+          (element.classList.contains('expand') &&
+            element.parentElement?.classList.contains('meta-data'))
+        ) {
+          // the close and expand buttons in affine-page-meta-data is not needed to be showed
+          return true;
+        } else {
+          return false;
+        }
+      },
+      onclone: async function (_documentClone: Document, element: HTMLElement) {
+        await replaceRichTextWithSvgElementFunc(element);
+      },
+      backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
+      useCORS: this._exportOptions.imageProxyEndpoint ? false : true,
+      proxy: this._exportOptions.imageProxyEndpoint,
+    };
+
+    const data = await html2canvas(
+      docEditorContainer as HTMLElement,
+      html2canvasOption
+    );
     this._checkCanContinueToCanvas(pathname, pageMode);
     return data;
   }
 
   private _replaceRichTextWithSvgElement = async (element: HTMLElement) => {
-    const richList = Array.from(element.querySelectorAll('rich-text'));
+    const richList = Array.from(element.querySelectorAll('.inline-editor'));
     await Promise.all(
       richList.map(async rich => {
         const svgEle = await this._elementToSvgElement(
