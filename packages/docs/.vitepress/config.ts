@@ -41,7 +41,7 @@ export default defineConfig({
         ],
       },
       {
-        text: 'Essentials',
+        text: 'Tutorial',
         items: [
           { text: 'Component Types', link: '/component-types' },
           {
@@ -61,8 +61,8 @@ export default defineConfig({
                 link: '/working-with-block-tree#selecting-blocks',
               },
               {
-                text: 'Services and Commands',
-                link: '/working-with-block-tree#services-and-commands',
+                text: 'Service and Commands',
+                link: '/working-with-block-tree#service-and-commands',
               },
               {
                 text: 'Defining New Blocks',

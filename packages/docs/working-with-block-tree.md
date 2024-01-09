@@ -134,11 +134,11 @@ For the more complex native [selection](https://developer.mozilla.org/en-US/docs
 
 ![flat-inlines](./images/flat-inlines.png)
 
-Additionally, the entire `selection.value` object is isolated under the `clientId` scope of the current session. During collaborative editing, selection instances between different clients will be distributed in real-time (via [providers](./data-persistence#provider-based-persistence)), facilitating the implementation of UI states like remote cursors.
+Additionally, the entire `selection.value` object is isolated under the `clientId` scope of the current session. During collaborative editing, selection instances between different clients will be distributed in real-time (via [providers](./data-persistence#provider-based-state-management)), facilitating the implementation of UI states like remote cursors.
 
 For more advanced usage and details, please refer to the [`Selection`](./selection) documentation.
 
-## Services and Commands
+## Service and Commands
 
 In many cases, operations on the block tree within an editor environment need further encapsulation. For example, when using the selection manager mentioned before, since the atomic selection state only includes `id`s, retrieving the corresponding block model based on `selection.value` often requires some boilerplate, as follows:
 

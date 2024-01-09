@@ -1,8 +1,10 @@
 # `@blocksuite/inline`
 
-Inline rich text editing component for BlockSuite.
+This package is a minimal rich text component for inline editing. It uses an external [`Y.Text`](https://docs.yjs.dev/api/shared-types/y.text) as it source of truth. Every `inlineEditor` instance attaches to an independant `Y.Text`, so rich text content in different block nodes can be splitted into different inline editors, making complex content conveniently composable. This significantly reduces the complexity required to implement traditional rich text editing features.
 
-Usage:
+![flat-inlines](./images/flat-inlines.png)
+
+You can use `InlineEditor` without other BlockSuite dependencies:
 
 ```ts
 import * as Y from 'yjs';
@@ -16,8 +18,8 @@ const myEditor = document.getElementById('my-editor');
 inlineEditor.mount(myEditor);
 ```
 
-You can go to [inline editor playground](https://try-blocksuite.vercel.app/examples/inline/)
-for online testing and check out the code in its [repository](https://github.com/toeverything/blocksuite/tree/master/packages/playground/examples/inline).
+The [inline editor playground](https://try-blocksuite.vercel.app/examples/inline/)
+is used for online testing and you can also check out the [source code](https://github.com/toeverything/blocksuite/tree/master/packages/playground/examples/inline) in its repository.
 
 ## Attributes
 
