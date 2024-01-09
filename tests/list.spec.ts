@@ -726,6 +726,7 @@ test.describe('toggle list', () => {
 
     await expect(prefixes).toHaveCount(3);
     await parentPrefix.hover();
+    await waitNextFrame(page);
     await assertToggleIconVisible(toggleIcon);
 
     await toggleIcon.click();
