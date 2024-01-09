@@ -7,9 +7,16 @@ import '@blocksuite/presets/themes/affine.css';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { EditorHost } from '@blocksuite/lit';
-import { type DocProviderCreator, type Page, Text } from '@blocksuite/store';
-import { Job, Workspace } from '@blocksuite/store';
+import {
+  type DocProviderCreator,
+  Job,
+  type Page,
+  Text,
+  Workspace,
+} from '@blocksuite/store';
 
+import { LeftSidePanel } from '../starter/components/left-side-panel';
+import { PagesPanel } from '../starter/components/pages-panel';
 import { QuickEdgelessMenu } from './components/quick-edgeless-menu.js';
 import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
 import { initCollaborationSocket } from './providers/websocket-channel.js';
@@ -42,12 +49,18 @@ function subscribePage(workspace: Workspace) {
     const editor = createEditor(page, app);
     const contentParser = new ContentParser(editor.host, page);
     const quickEdgelessMenu = new QuickEdgelessMenu();
+    const pagesPanel = new PagesPanel();
+    const leftSidePanel = new LeftSidePanel();
     quickEdgelessMenu.workspace = workspace;
     quickEdgelessMenu.editor = editor;
     quickEdgelessMenu.mode = defaultMode;
     quickEdgelessMenu.contentParser = contentParser;
+    quickEdgelessMenu.leftSidePanel = leftSidePanel;
+    quickEdgelessMenu.pagesPanel = pagesPanel;
     document.body.appendChild(quickEdgelessMenu);
+    document.body.appendChild(leftSidePanel);
 
+    pagesPanel.editor = editor;
     window.editor = editor;
     window.page = page;
   });
