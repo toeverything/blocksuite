@@ -120,9 +120,10 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                     url,
                     xywh: Bound.fromCenter(
                       center,
-                      LINK_CARD_WIDTH.horizontal,
-                      LINK_CARD_HEIGHT.horizontal
+                      LINK_CARD_WIDTH.vertical,
+                      LINK_CARD_HEIGHT.vertical
                     ).serialize(),
+                    style: 'vertical',
                   },
                   this.edgeless.surface.model
                 );
@@ -156,6 +157,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                       LINK_CARD_WIDTH.video,
                       LINK_CARD_HEIGHT.video
                     ).serialize(),
+                    style: 'video',
                   },
                   this.edgeless.surface.model
                 );
@@ -189,6 +191,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                       LINK_CARD_WIDTH.vertical,
                       LINK_CARD_HEIGHT.vertical
                     ).serialize(),
+                    style: 'vertical',
                   },
                   this.edgeless.surface.model
                 );
