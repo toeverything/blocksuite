@@ -6,6 +6,7 @@ import { html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { HoverController } from '../_common/components/hover/controller.js';
@@ -269,7 +270,9 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
                               class="affine-embed-github-content-assignees-text-users placeholder"
                               >No one</span
                             >`
-                          : assignees.map(
+                          : repeat(
+                              assignees,
+                              assignee => assignee,
                               (assignee, index) =>
                                 html`<span
                                     class="affine-embed-github-content-assignees-text-users user"
