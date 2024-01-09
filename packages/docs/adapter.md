@@ -1,6 +1,6 @@
 # Adapter
 
-Adapter works as a bridge between different formats of data and the BlockSuite [`Snapshot`](./data-persistence#snapshot-api) (i.e., the JSON-serialized block tree). It enables you to import and export data from and to BlockSuite documents.
+Adapter works as a bridge between different formats of data and the BlockSuite [`Snapshot`](./data-synchronization#snapshot-api) (i.e., the JSON-serialized block tree). It enables you to import and export data from and to BlockSuite documents.
 
 ## Base Adapter
 

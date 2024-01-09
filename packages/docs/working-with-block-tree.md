@@ -44,7 +44,7 @@ This example creates a subset of the block tree hierarchy defaultly used in `@bl
 
 ![block-nesting](./images/block-nesting.png)
 
-As a document-centric framework, **you need to initialize a valid document structure before attaching it to editors**, which is also why it requires `init()` after `createEmptyPage()`. See [creating new block tree](./data-persistence#creating-new-block-tree) for more details.
+As a document-centric framework, **you need to initialize a valid document structure before attaching it to editors**, which is also why it requires `init()` after `createEmptyPage()`. See [creating new block tree](./data-synchronization#creating-new-block-tree) for more details.
 
 ::: info
 The block tree hierarchy is specific to the preset editors. At the framework level, `@blocksuite/store` does **NOT** treat the "first-party" `affine:*` blocks with any special way. Feel free to add blocks from different namespaces for the block tree!
@@ -134,7 +134,7 @@ For the more complex native [selection](https://developer.mozilla.org/en-US/docs
 
 ![flat-inlines](./images/flat-inlines.png)
 
-Additionally, the entire `selection.value` object is isolated under the `clientId` scope of the current session. During collaborative editing, selection instances between different clients will be distributed in real-time (via [providers](./data-persistence#provider-based-state-management)), facilitating the implementation of UI states like remote cursors.
+Additionally, the entire `selection.value` object is isolated under the `clientId` scope of the current session. During collaborative editing, selection instances between different clients will be distributed in real-time (via [providers](./data-synchronization#provider-based-state-management)), facilitating the implementation of UI states like remote cursors.
 
 For more advanced usage and details, please refer to the [`Selection`](./selection) documentation.
 

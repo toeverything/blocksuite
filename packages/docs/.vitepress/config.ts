@@ -70,7 +70,7 @@ export default defineConfig({
               },
             ],
           },
-          { text: 'Data Persistence', link: '/data-persistence' },
+          { text: 'Data Synchronization', link: '/data-synchronization' },
         ],
       },
       {
