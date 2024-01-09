@@ -14,7 +14,6 @@ import { bindContainerHotkey } from '../_common/components/rich-text/keymap/inde
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import {
-  getThemeMode,
   isInsideEdgelessEditor,
   matchFlavours,
 } from '../_common/utils/index.js';
@@ -99,12 +98,16 @@ export class ParagraphBlockComponent extends BlockElement<
     .affine-paragraph-rich-text-wrapper {
       position: relative;
     }
+    .affine-paragraph-rich-text-wrapper rich-text {
+      /* -webkit-font-smoothing: antialiased; */
+    }
     code {
       font-size: calc(var(--affine-font-base) - 3px);
     }
     .h1 {
       font-size: var(--affine-font-h-1);
-      line-height: calc(1em + 12px);
+      font-weight: 600;
+      line-height: calc(1em + 8px);
       margin-top: 18px;
       margin-bottom: 10px;
     }
@@ -113,6 +116,7 @@ export class ParagraphBlockComponent extends BlockElement<
     }
     .h2 {
       font-size: var(--affine-font-h-2);
+      font-weight: 600;
       line-height: calc(1em + 10px);
       margin-top: 14px;
       margin-bottom: 10px;
@@ -122,6 +126,7 @@ export class ParagraphBlockComponent extends BlockElement<
     }
     .h3 {
       font-size: var(--affine-font-h-3);
+      font-weight: 600;
       line-height: calc(1em + 8px);
       margin-top: 12px;
       margin-bottom: 10px;
@@ -131,7 +136,8 @@ export class ParagraphBlockComponent extends BlockElement<
     }
     .h4 {
       font-size: var(--affine-font-h-4);
-      line-height: calc(1em + 10px);
+      font-weight: 600;
+      line-height: calc(1em + 8px);
       margin-top: 12px;
       margin-bottom: 10px;
     }
@@ -140,6 +146,7 @@ export class ParagraphBlockComponent extends BlockElement<
     }
     .h5 {
       font-size: var(--affine-font-h-5);
+      font-weight: 600;
       line-height: calc(1em + 8px);
       margin-top: 12px;
       margin-bottom: 10px;
@@ -149,6 +156,7 @@ export class ParagraphBlockComponent extends BlockElement<
     }
     .h6 {
       font-size: var(--affine-font-h-6);
+      font-weight: 600;
       line-height: calc(1em + 8px);
       margin-top: 12px;
       margin-bottom: 10px;
@@ -328,15 +336,6 @@ export class ParagraphBlockComponent extends BlockElement<
       ${this.renderModelChildren(this.model)}
     </div>`;
 
-    const fontWeightMap: { [key: string]: { [key: string]: number } } = {
-      h1: { light: 600, dark: 700 },
-      h2: { light: 500, dark: 600 },
-      h3: { light: 700, dark: 800 },
-      h4: { light: 700, dark: 800 },
-      h5: { light: 600, dark: 700 },
-      h6: { light: 500, dark: 600 },
-    };
-
     return html`
       <div class="affine-paragraph-block-container ${type}">
         <div class="affine-paragraph-rich-text-wrapper">
@@ -352,9 +351,6 @@ export class ParagraphBlockComponent extends BlockElement<
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}
-            style=${styleMap({
-              fontWeight: fontWeightMap?.[type]?.[getThemeMode()],
-            })}
           ></rich-text>
         </div>
         ${children}
