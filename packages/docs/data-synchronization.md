@@ -27,7 +27,7 @@ const newPage = await job.snapshotToPage(json);
 
 The snapshot stores the JSON representation of the `page` block tree, preserving its nested structure. Additionally, BlockSuite has designed an [Adapter](./adapter) API on top of the snapshot to handle conversions between the block tree and third-party formats like markdown and HTML.
 
-## Provider-Based State Management
+## Document Streaming
 
 Different from the classic mechanism above, BlockSuite natively supports a state management strategy that can be mentally paralleled with [React Server Component](https://www.joshwcomeau.com/react/server-components/). This allows the state of the block tree to be directly used as serializable data, streaming from the server (or local database) to the client.
 
