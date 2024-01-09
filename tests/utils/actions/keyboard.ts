@@ -23,7 +23,7 @@ export const MODIFIER_KEY = IS_MAC ? 'Alt' : 'Shift';
 
 export const SHIFT_KEY = 'Shift';
 
-export async function type(page: Page, content: string, delay = 5) {
+export async function type(page: Page, content: string, delay = 10) {
   await page.keyboard.type(content, { delay });
 }
 
@@ -77,7 +77,7 @@ export async function pressArrowUp(page: Page, count = 1) {
 export async function pressEnter(page: Page, count = 1) {
   // avoid flaky test by simulate real user input
   for (let i = 0; i < count; i++) {
-    await page.keyboard.press('Enter', { delay: 10 });
+    await page.keyboard.press('Enter', { delay: 20 });
   }
 }
 
@@ -136,7 +136,7 @@ export async function strikethrough(page: Page) {
 }
 
 export async function copyByKeyboard(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+c`, { delay: 10 });
+  await page.keyboard.press(`${SHORT_KEY}+c`, { delay: 20 });
 }
 
 export async function cutByKeyboard(page: Page) {
@@ -156,7 +156,7 @@ export async function pasteByKeyboard(page: Page, forceFocus = true) {
     }
   }
 
-  await page.keyboard.press(`${SHORT_KEY}+v`, { delay: 10 });
+  await page.keyboard.press(`${SHORT_KEY}+v`, { delay: 20 });
 }
 
 export async function createCodeBlock(page: Page) {
