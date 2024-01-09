@@ -4,6 +4,7 @@ import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel, Page } from '@blocksuite/store';
 
 import {
+  blockElementGetter,
   getBlockComponentByModel,
   getEditorContainer,
   isInsideDocEditor,
@@ -180,10 +181,10 @@ export class ExportManager {
   public async edgelessToCanvas(
     surfaceRenderer: Renderer,
     bound: IBound,
+    blockElementGetter: (model: BlockModel) => Element | null = () => null,
     edgeless?: EdgelessPageBlockComponent,
     nodes?: TopLevelBlockModel[],
     surfaces?: SurfaceElement[],
-    blockElementGetter: (model: BlockModel) => Element | null = () => null,
     edgelessBackground?: {
       zoom: number;
     }
@@ -248,7 +249,10 @@ export class ExportManager {
           blockBound.h
         );
       }
-      const blockElement = blockElementGetter(block)?.parentElement;
+      let blockElement = blockElementGetter(block)?.parentElement;
+      if (matchFlavours(block, ['affine:note'])) {
+        blockElement = blockElement?.closest('.edgeless-block-portal-note');
+      }
 
       if (blockElement) {
         const blockBound = xywhArrayToObject(block);
@@ -268,7 +272,7 @@ export class ExportManager {
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
           const element = blocksInsideFrame[i];
-          const htmlElement = blockElementGetter(element)?.parentElement;
+          const htmlElement = blockElementGetter(element);
           const blockBound = xywhArrayToObject(element);
           const canvasData = await html2canvas(htmlElement as HTMLElement);
 
@@ -302,10 +306,9 @@ export class ExportManager {
     const pageMode = isInsideDocEditor(this.editorHost);
 
     const editorContainer = getEditorContainer(this.editorHost);
-    const pageContainer = editorContainer.querySelector(
-      '.affine-doc-page-block-container'
-    );
-    if (!pageContainer) return;
+    const docEditorContainer =
+      editorContainer.querySelector('affine-doc-editor');
+    if (!docEditorContainer) return;
 
     const replaceRichTextWithSvgElementFunc =
       this._replaceRichTextWithSvgElement.bind(this);
@@ -340,7 +343,7 @@ export class ExportManager {
     };
 
     const data = await html2canvas(
-      pageContainer as HTMLElement,
+      docEditorContainer as HTMLElement,
       html2canvasOption
     );
     this._checkCanContinueToCanvas(pathname, pageMode);
@@ -348,7 +351,7 @@ export class ExportManager {
   }
 
   private _replaceRichTextWithSvgElement = async (element: HTMLElement) => {
-    const richList = Array.from(element.querySelectorAll('rich-text'));
+    const richList = Array.from(element.querySelectorAll('.inline-editor'));
     await Promise.all(
       richList.map(async rich => {
         const svgEle = await this._elementToSvgElement(
@@ -413,6 +416,7 @@ export class ExportManager {
       return await this.edgelessToCanvas(
         edgeless.surface.viewport,
         bound,
+        (model: BlockModel) => blockElementGetter(model, this.editorHost.view),
         edgeless
       );
     }
