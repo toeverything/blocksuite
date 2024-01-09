@@ -67,7 +67,7 @@ export class ImageAdapter extends BaseAdapter<Image> {
   }
   override async toSliceSnapshot(
     payload: PngToSliceSnapshotPayload
-  ): Promise<SliceSnapshot> {
+  ): Promise<SliceSnapshot | null> {
     const content: SliceSnapshot['content'] = [];
     for (const item of payload.file) {
       const blobId = await sha(await item.arrayBuffer());
@@ -82,6 +82,9 @@ export class ImageAdapter extends BaseAdapter<Image> {
         },
         children: [],
       });
+    }
+    if (content.length === 0) {
+      return null;
     }
     return {
       type: 'slice',

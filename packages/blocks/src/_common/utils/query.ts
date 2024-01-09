@@ -1,3 +1,4 @@
+import type { ViewStore } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
 import { INLINE_ROOT_ATTR } from '@blocksuite/inline';
@@ -166,6 +167,24 @@ export function buildPath(model: BlockModel | null): string[] {
     current = current.page.getParent(current);
   }
   return path;
+}
+
+export function blockElementGetter(model: BlockModel, view: ViewStore) {
+  if (matchFlavours(model, ['affine:image', 'affine:frame'])) {
+    let current: BlockModel | null = model;
+    const path: string[] = [];
+    while (current) {
+      // Top level image render under page block not surface block
+      if (!matchFlavours(current, ['affine:surface'])) {
+        path.unshift(current.id);
+      }
+      current = current.page.getParent(current);
+    }
+
+    return view.viewFromPath('block', path);
+  } else {
+    return view.viewFromPath('block', buildPath(model));
+  }
 }
 
 export function getPageByElement(element: Element): PageBlockComponent | null {

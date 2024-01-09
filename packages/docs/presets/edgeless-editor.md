@@ -1,5 +1,9 @@
 # `EdgelessEditor`
 
+::: info
+The comprehensive API surface of this preset is still a work in progress. Please stay tuned!
+:::
+
 This editor preset is great at whiteboard graphics editing capabilites. It combines canvas-based graphics rendering and DOM-based block tree editing together. This facilitates both creative graphic design and structured document editing, catering to a wide range of user needs and workflows.
 
 ```ts

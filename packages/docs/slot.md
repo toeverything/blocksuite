@@ -12,7 +12,7 @@ const slot = new Slot<{ name: string }>();
 slot.on(({ name }) => console.log(name));
 
 // Or alternatively only listen event once
-slot.once(({ name }) => co，nsole.log(name));
+slot.once(({ name }) => console.log(name));
 
 // Emit the event
 slot.emit({ name: 'foo' });

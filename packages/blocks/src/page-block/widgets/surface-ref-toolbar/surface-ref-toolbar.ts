@@ -154,7 +154,7 @@ function SurfaceRefToolbarOptions(options: {
 
           if (!referencedModel) return;
 
-          edgelessToBlob(blockElement.host, model.page, {
+          edgelessToBlob(blockElement.host, {
             surfaceRefBlock: blockElement,
             surfaceRenderer: blockElement.surfaceRenderer,
             edgelessElement: referencedModel,
@@ -180,7 +180,7 @@ function SurfaceRefToolbarOptions(options: {
         size="32px"
         ?hidden=${!hasValidReference}
         @click=${() => {
-          edgelessToBlob(blockElement.host, model.page, {
+          edgelessToBlob(blockElement.host, {
             surfaceRefBlock: blockElement,
             surfaceRenderer: blockElement.surfaceRenderer,
             edgelessElement: blockElement.referenceModel as EdgelessElement,

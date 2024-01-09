@@ -21,9 +21,9 @@ import {
   extractCssVariables,
   HtmlTransformer,
   MarkdownTransformer,
+  type PageService,
   ZipTransformer,
 } from '@blocksuite/blocks';
-import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { ShadowlessElement } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import { Utils, type Workspace } from '@blocksuite/store';
@@ -75,9 +75,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   editor!: AffineEditorContainer;
-
-  @property({ attribute: false })
-  contentParser!: ContentParser;
   @property({ attribute: false })
   leftSidePanel!: LeftSidePanel;
   @property({ attribute: false })
@@ -106,6 +103,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   get page() {
     return this.editor.page;
+  }
+
+  get pageService() {
+    return this.editor.host.spec.getService('affine:page') as PageService;
   }
 
   override createRenderRoot() {
@@ -182,7 +183,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.contentParser.exportPdf().catch(console.error);
+    this.pageService.exportManager.exportPdf().catch(console.error);
   }
 
   private _exportHtml() {
@@ -194,7 +195,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportPng() {
-    this.contentParser.exportPng().catch(console.error);
+    this.pageService.exportManager.exportPng().catch(console.error);
   }
 
   private async _exportSnapshot() {

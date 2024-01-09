@@ -4,7 +4,6 @@ import '@blocksuite/presets';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/presets/themes/affine.css';
 
-import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { EditorHost } from '@blocksuite/lit';
 import {
@@ -47,14 +46,12 @@ function subscribePage(workspace: Workspace) {
     const page = workspace.getPage(pageId) as Page;
 
     const editor = createEditor(page, app);
-    const contentParser = new ContentParser(editor.host, page);
     const quickEdgelessMenu = new QuickEdgelessMenu();
     const pagesPanel = new PagesPanel();
     const leftSidePanel = new LeftSidePanel();
     quickEdgelessMenu.workspace = workspace;
     quickEdgelessMenu.editor = editor;
     quickEdgelessMenu.mode = defaultMode;
-    quickEdgelessMenu.contentParser = contentParser;
     quickEdgelessMenu.leftSidePanel = leftSidePanel;
     quickEdgelessMenu.pagesPanel = pagesPanel;
     document.body.appendChild(quickEdgelessMenu);
@@ -167,7 +164,6 @@ async function main() {
   window.blockSchemas = AffineSchemas;
   window.job = new Job({ workspace });
   window.Y = Workspace.Y;
-  window.ContentParser = ContentParser;
   Object.defineProperty(globalThis, 'host', {
     get() {
       return document.querySelector('editor-host') as EditorHost;

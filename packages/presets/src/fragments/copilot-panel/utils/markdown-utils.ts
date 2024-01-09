@@ -1,4 +1,5 @@
 import { MarkdownAdapter } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import { Job, type Slice } from '@blocksuite/store';
@@ -40,11 +41,14 @@ export async function insertFromMarkdown(
     pageId: host.std.page.id,
   };
 
-  const snapshots = (await markdownAdapter.toSliceSnapshot(payload)).content[0]
-    .children;
+  const snapshot = await markdownAdapter.toSliceSnapshot(payload);
+  assertExists(snapshot, 'import markdown failed, expected to get a snapshot');
+
+  const snapshots = snapshot.content[0].children;
 
   const models: BlockModel[] = [];
-  snapshots.map(async (blockSnapshot, i) => {
+  for (let i = 0; i < snapshots.length; i++) {
+    const blockSnapshot = snapshots[i];
     const model = await job.snapshotToBlock(
       blockSnapshot,
       host.std.page,
@@ -52,7 +56,7 @@ export async function insertFromMarkdown(
       (index ?? 0) + i
     );
     models.push(model);
-  });
+  }
 
   return models;
 }

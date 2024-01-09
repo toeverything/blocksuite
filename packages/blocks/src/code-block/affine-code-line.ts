@@ -37,6 +37,7 @@ export class AffineCodeLine extends ShadowlessElement {
           .str=${this.delta.insert}
           .styles=${{
             'word-wrap': 'break-word',
+            'white-space': 'break-spaces',
           }}
         ></v-text
       ></span>`;
@@ -67,6 +68,7 @@ export class AffineCodeLine extends ShadowlessElement {
         .str=${token.content}
         .styles=${{
           'word-wrap': 'break-word',
+          'white-space': 'break-spaces',
           color: token.color,
         }}
       ></v-text>`;

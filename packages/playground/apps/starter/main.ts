@@ -6,7 +6,6 @@ import './components/start-panel';
 import '@blocksuite/presets/themes/affine.css';
 
 import { TestUtils } from '@blocksuite/blocks';
-import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { EditorHost } from '@blocksuite/lit';
 import { CopilotPanel } from '@blocksuite/presets';
@@ -45,7 +44,6 @@ function subscribePage(workspace: Workspace) {
     const page = workspace.getPage(pageId) as Page;
 
     const editor = createEditor(page, app);
-    const contentParser = new ContentParser(editor.host, page);
     const debugMenu = new DebugMenu();
     const outlinePanel = new CustomOutlinePanel();
     const framePanel = new CustomFramePanel();
@@ -57,7 +55,6 @@ function subscribePage(workspace: Workspace) {
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
     debugMenu.mode = defaultMode;
-    debugMenu.contentParser = contentParser;
     debugMenu.outlinePanel = outlinePanel;
     debugMenu.framePanel = framePanel;
     debugMenu.copilotPanel = copilotPanelPanel;
@@ -116,7 +113,6 @@ async function main() {
   window.job = new Job({ workspace });
   window.blockSchemas = AffineSchemas;
   window.Y = Workspace.Y;
-  window.ContentParser = ContentParser;
   Object.defineProperty(globalThis, 'host', {
     get() {
       return document.querySelector('editor-host') as EditorHost;

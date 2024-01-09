@@ -17,7 +17,7 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel';
 import './side-panel';
 
-import type { TreeNode } from '@blocksuite/blocks';
+import type { PageService, TreeNode } from '@blocksuite/blocks';
 import {
   BlocksUtils,
   ColorVariables,
@@ -30,7 +30,6 @@ import {
   type SurfaceBlockComponent,
   ZipTransformer,
 } from '@blocksuite/blocks';
-import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   type BlockElement,
@@ -201,9 +200,6 @@ export class DebugMenu extends ShadowlessElement {
   editor!: AffineEditorContainer;
 
   @property({ attribute: false })
-  contentParser!: ContentParser;
-
-  @property({ attribute: false })
   outlinePanel!: CustomOutlinePanel;
 
   @property({ attribute: false })
@@ -248,6 +244,10 @@ export class DebugMenu extends ShadowlessElement {
 
   get page() {
     return this.editor.page;
+  }
+
+  get pageService() {
+    return this.editor.host.spec.getService('affine:page') as PageService;
   }
 
   override createRenderRoot() {
@@ -400,7 +400,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.contentParser.exportPdf().catch(console.error);
+    this.pageService.exportManager.exportPdf().catch(console.error);
   }
 
   private _exportHtml() {
@@ -412,7 +412,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportPng() {
-    this.contentParser.exportPng().catch(console.error);
+    this.pageService.exportManager.exportPng().catch(console.error);
   }
 
   private async _exportSnapshot() {

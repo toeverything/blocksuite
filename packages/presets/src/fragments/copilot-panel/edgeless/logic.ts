@@ -1,7 +1,7 @@
 import {
   BlocksUtils,
-  EmbedHtmlBlockModel,
   EmbedHtmlBlockSpec,
+  EmbedHtmlModel,
   FrameBlockModel,
   type ImageBlockProps,
 } from '@blocksuite/blocks';
@@ -77,7 +77,7 @@ export class AIEdgelessLogic {
       design: string;
     } = notes.flatMap(v =>
       v.children.filter(v => {
-        if (v instanceof EmbedHtmlBlockModel) {
+        if (v instanceof EmbedHtmlModel) {
           return v.html && v.design;
         } else {
           return false;

@@ -1,9 +1,5 @@
 # Block Spec
 
-::: info
-This document is preliminary and subject to refinement and updates for clarity and accuracy.
-:::
-
 In BlockSuite, a `BlockSpec` defines the structure and interactive elements for a specific block type within the editor. BlockSuite editors are typically composed entirely of block specs, with the top-level UI often implemented as a dedicated block, usually of the `affine:page` type.
 
 A block spec contains the following properties:
