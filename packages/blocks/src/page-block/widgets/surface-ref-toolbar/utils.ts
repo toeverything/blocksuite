@@ -27,13 +27,10 @@ export const edgelessToBlob = async (
     .edgelessToCanvas(
       options.surfaceRenderer,
       bound,
-      model => {
-        console.log('blockContainer', blockContainer);
-        console.log('model', model);
-        return blockContainer.querySelector(
+      model =>
+        blockContainer.querySelector(
           `[data-portal-reference-block-id="${model.id}"]`
-        );
-      },
+        ),
       undefined,
       isBlock ? [edgelessElement] : undefined,
       isBlock ? undefined : [edgelessElement],

@@ -273,7 +273,6 @@ export class ExportManager {
         for (let i = 0; i < blocksInsideFrame.length; i++) {
           const element = blocksInsideFrame[i];
           const htmlElement = blockElementGetter(element);
-          console.log('htmlElement: ', htmlElement);
           const blockBound = xywhArrayToObject(element);
           const canvasData = await html2canvas(htmlElement as HTMLElement);
 
