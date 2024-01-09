@@ -2,11 +2,11 @@ import type { Constructor } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 
 import type { SurfaceBlockModel } from '../../../models.js';
+import { type IEdgelessElement } from '../../../page-block/edgeless/type.js';
 import {
   Bound,
   getBoundsWithRotation,
   getPointsFromBoundsWithRotation,
-  type IEdgelessElement,
   type IVec,
   linePolygonIntersects,
   PointLocation,
@@ -103,6 +103,14 @@ export function selectable<
       ) as SurfaceBlockModel[];
 
       return surfaceModel[0]?.getGroup(this.id) ?? null;
+    }
+
+    get groups() {
+      const surfaceModel = this.page.getBlockByFlavour(
+        'affine:surface'
+      ) as SurfaceBlockModel[];
+
+      return surfaceModel[0]?.getGroups(this.id) ?? [];
     }
   }
 

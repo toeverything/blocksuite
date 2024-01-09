@@ -2,12 +2,9 @@ import type { Text } from '@blocksuite/store';
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import type { HitTestOptions } from '../page-block/edgeless/type.js';
 import { getTextRect } from '../surface-block/elements/text/utils.js';
-import {
-  Bound,
-  type HitTestOptions,
-  type SerializedXYWH,
-} from '../surface-block/index.js';
+import { Bound, type SerializedXYWH } from '../surface-block/index.js';
 
 type FrameBlockProps = {
   title: Text;

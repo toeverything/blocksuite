@@ -6,7 +6,7 @@ import {
   type UIEventHandler,
   type UIEventState,
 } from '@blocksuite/block-std';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import {
   type EdgelessTool,
@@ -16,9 +16,9 @@ import {
   isMiddleButtonPressed,
   isPinchEvent,
   Point,
-  type Selectable,
 } from '../../../_common/utils/index.js';
 import { normalizeWheelDeltaY } from '../../../surface-block/index.js';
+import type { Bound } from '../../../surface-block/utils/bound.js';
 import { BrushToolController } from '../controllers/tools/brush-tool.js';
 import { ConnectorToolController } from '../controllers/tools/connector-tool.js';
 import { DefaultToolController } from '../controllers/tools/default-tool.js';
@@ -31,8 +31,9 @@ import { PanToolController } from '../controllers/tools/pan-tool.js';
 import { ShapeToolController } from '../controllers/tools/shape-tool.js';
 import { TextToolController } from '../controllers/tools/text-tool.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import type { EdgelessPageService } from '../edgeless-page-service.js';
+import type { EdgelessElement } from '../type.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
-import { getSelectionBoxBound } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
 function shouldFilterMouseEvent(event: Event): boolean {
@@ -62,8 +63,8 @@ function shouldFilterMouseEvent(event: Event): boolean {
 }
 
 export interface EdgelessHoverState {
-  rect: DOMRect;
-  content: Selectable;
+  rect: Bound;
+  content: EdgelessElement;
 }
 
 export interface SelectionArea {
@@ -92,16 +93,17 @@ export class EdgelessToolsManager {
 
   private _dragging = false;
 
+  slots = {
+    hoverUpdated: new Slot(),
+    edgelessToolUpdated: new Slot<EdgelessTool>(),
+  };
+
   get dragging() {
     return this._dragging;
   }
 
   get selection() {
-    return this.container.selectionManager;
-  }
-
-  get surface() {
-    return this.container.surface;
+    return this.service.selection;
   }
 
   get lastMousePos() {
@@ -143,26 +145,27 @@ export class EdgelessToolsManager {
   }
 
   get page() {
-    return this.container.page;
+    return this.service.page;
   }
 
   protected readonly _disposables = new DisposableGroup();
 
   constructor(
     public readonly container: EdgelessPageBlockComponent,
+    public readonly service: EdgelessPageService,
     protected readonly dispatcher: UIEventDispatcher
   ) {
     this._controllers = {
-      default: new DefaultToolController(this.container),
-      text: new TextToolController(this.container),
-      shape: new ShapeToolController(this.container),
-      brush: new BrushToolController(this.container),
-      pan: new PanToolController(this.container),
-      'affine:note': new NoteToolController(this.container),
-      connector: new ConnectorToolController(this.container),
-      eraser: new EraserToolController(this.container),
-      frame: new FrameToolController(this.container),
-      frameNavigator: new PresentToolController(this.container),
+      default: new DefaultToolController(container, service),
+      text: new TextToolController(container, service),
+      shape: new ShapeToolController(container, service),
+      brush: new BrushToolController(container, service),
+      pan: new PanToolController(container, service),
+      'affine:note': new NoteToolController(container, service),
+      connector: new ConnectorToolController(container, service),
+      eraser: new EraserToolController(container, service),
+      frame: new FrameToolController(container, service),
+      frameNavigator: new PresentToolController(container, service),
     };
 
     this._initMouseAndWheelEvents().catch(console.error);
@@ -335,7 +338,7 @@ export class EdgelessToolsManager {
 
   private _onContainerPointerMove = (e: PointerEventState) => {
     this._updateLastMousePos(e);
-    this.container.slots.hoverUpdated.emit();
+    this.slots.hoverUpdated.emit();
     return this._controllers[this.edgelessTool.type].onContainerMouseMove(e);
   };
 
@@ -403,7 +406,7 @@ export class EdgelessToolsManager {
         edgelessTool: edgelessTool,
       } = this._rightClickTimer;
       if (e.raw.timeStamp - timeStamp > 233) {
-        this.container.slots.edgelessToolUpdated.emit(edgelessTool);
+        this.slots.edgelessToolUpdated.emit(edgelessTool);
       } else {
         clearTimeout(timer);
       }
@@ -415,20 +418,16 @@ export class EdgelessToolsManager {
     if (!this.currentController.enableHover) {
       return null;
     }
-    const { surface } = this.container;
     const { x, y } = this._lastMousePos;
-    const [modelX, modelY] = surface.toModelCoord(x, y);
-    const hovered: Selectable | null = surface.pickTop(modelX, modelY);
+    const [modelX, modelY] = this.service.toModelCoord(x, y);
+    const hovered = this.service.pickElement(modelX, modelY);
 
     if (!hovered || this.selection?.editing) {
       return null;
     }
 
     return {
-      rect: getSelectionBoxBound(
-        surface.viewport,
-        edgelessElementsBound([hovered])
-      ),
+      rect: this.service.toViewBound(edgelessElementsBound([hovered])),
       content: hovered,
     };
   }
@@ -460,7 +459,7 @@ export class EdgelessToolsManager {
     }
 
     this.selection.set(state);
-    this.container.slots.edgelessToolUpdated.emit(edgelessTool);
+    this.slots.edgelessToolUpdated.emit(edgelessTool);
     this._controllers[lastType].afterModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };

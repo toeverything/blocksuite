@@ -2,6 +2,10 @@ import type { Y } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
 import { keys } from '../../_common/utils/iterable.js';
+import type {
+  EdgelessBlock,
+  IEdgelessElement,
+} from '../../page-block/edgeless/type.js';
 import { Bound } from '../utils/bound.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
 import type { BaseProps } from './base.js';
@@ -71,6 +75,10 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
 
   set rotate(_: number) {}
 
+  override get connectable(): boolean {
+    return false;
+  }
+
   get type() {
     return 'group';
   }
@@ -86,11 +94,20 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     for (const key of keys) {
       const element =
         this.surfaceModel.getElementById(key) ||
-        this.surfaceModel.page.getBlockById(key);
+        (this.surfaceModel.page.getBlockById(key) as EdgelessBlock);
 
       element && elements.push(element);
     }
 
     return elements;
+  }
+
+  hasDescendant(element: string | IEdgelessElement) {
+    const groups =
+      typeof element === 'string'
+        ? this.surfaceModel.getGroups(element)
+        : this.surfaceModel.getGroups(element.id);
+
+    return groups.some(group => group.id === this.id);
   }
 }

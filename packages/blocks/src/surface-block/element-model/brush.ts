@@ -57,6 +57,10 @@ export class BrushElementModel extends ElementModel<BrushProps> {
   @yfield()
   lineWidth: number = 4;
 
+  override get connectable() {
+    return false;
+  }
+
   override get type() {
     return 'brush';
   }

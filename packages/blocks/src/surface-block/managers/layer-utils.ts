@@ -1,8 +1,6 @@
-import type { EdgelessElement } from '../../_common/types.js';
-import type { FrameBlockModel } from '../../models.js';
-import type { CanvasElement } from '../index.js';
-import { compare, getGroups } from './group-manager.js';
-import type { Indexable, IndexableBlock, Layer } from './layer-manager.js';
+import type { EdgelessElement } from '../../page-block/edgeless/type.js';
+import { compare } from './group-manager.js';
+import type { Layer } from './layer-manager.js';
 
 export function getLayerZIndex(layers: Layer[], layerIndex: number) {
   const layer = layers[layerIndex];
@@ -31,13 +29,13 @@ export function updateLayersIndex(layers: Layer[], startIdx: number) {
   }
 }
 
-export function getElementIndex(indexable: Indexable | FrameBlockModel) {
-  const groups = getGroups(indexable);
+export function getElementIndex(indexable: EdgelessElement) {
+  const groups = indexable.groups;
 
   if (groups.length > 1) {
     return (
       groups
-        .map(group => group.group.index)
+        .map(group => group.index)
         .reverse()
         .slice(1)
         .join('-') + `-${indexable.index}`
@@ -75,8 +73,8 @@ export function removeFromOrderedArray(
 }
 
 export function isInRange(
-  edges: [IndexableBlock | CanvasElement, IndexableBlock | CanvasElement],
-  target: IndexableBlock | CanvasElement
+  edges: [EdgelessElement, EdgelessElement],
+  target: EdgelessElement
 ) {
   return compare(target, edges[0]) >= 0 && compare(target, edges[1]) < 0;
 }

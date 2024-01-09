@@ -37,6 +37,10 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     return 'connector';
   }
 
+  override get connectable() {
+    return false;
+  }
+
   @derive((instance: ConnectorElementModel) => {
     const { x, y } = instance;
 

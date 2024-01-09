@@ -282,7 +282,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this.elementModels.forEach(model => {
       if (model.type === 'group') {
-        (model as GroupElementModel).childrenIds.forEach(childId => {
+        (model as GroupElementModel).childIds.forEach(childId => {
           addToGroup(childId, model.id);
         });
       }
@@ -296,7 +296,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
           removeFromGroup(childId, id);
         });
 
-        (element as GroupElementModel).childrenIds.forEach(childId => {
+        (element as GroupElementModel).childIds.forEach(childId => {
           addToGroup(childId, id);
         });
       }
@@ -306,7 +306,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       const element = this.getElementById(id)!;
 
       if (element.type === 'group') {
-        (element as GroupElementModel).childrenIds.forEach(childId => {
+        (element as GroupElementModel).childIds.forEach(childId => {
           addToGroup(childId, id);
         });
       }
@@ -432,6 +432,18 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
           this._elementToGroup.get(id)!
         ) as GroupElementModel)
       : null;
+  }
+
+  getGroups(id: string): GroupElementModel[] {
+    const groups: GroupElementModel[] = [];
+    let group = this.getGroup(id);
+
+    while (group) {
+      groups.push(group);
+      group = this.getGroup(group.id);
+    }
+
+    return groups;
   }
 
   getElementById(id: string): ElementModel | null {

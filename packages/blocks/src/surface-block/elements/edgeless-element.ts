@@ -1,7 +1,3 @@
-import type { EditorHost } from '@blocksuite/lit';
-
-import type { Bound, IVec, PointLocation, SerializedXYWH } from '../index.js';
-import type { SurfaceBlockComponent } from '../surface-block.js';
 import type { IBrush } from './brush/types.js';
 import type { IConnector } from './connector/types.js';
 import type { IGroup } from './group/types.js';
@@ -18,35 +14,6 @@ export enum CanvasElementType {
 
 export function isCanvasElementType(type: string): type is CanvasElementType {
   return type.toLocaleUpperCase() in CanvasElementType;
-}
-
-export interface HitTestOptions {
-  expand?: number;
-  ignoreTransparent?: boolean;
-  // we will select a shape without fill color by selecting its content area if
-  // we set `pierce` to false, shape element used this options in `hitTest` method
-  pierce?: boolean;
-  all?: boolean;
-  zoom?: number;
-}
-export interface IEdgelessElement {
-  xywh: SerializedXYWH;
-  rotate: number;
-  connectable: boolean;
-  index: string;
-  elementBound: Bound;
-  containedByBounds(bounds: Bound): boolean;
-  getNearestPoint(point: IVec): IVec;
-  intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;
-  getRelativePointLocation(point: IVec): PointLocation;
-  hitTest(
-    x: number,
-    y: number,
-    options: HitTestOptions,
-    editorHost: EditorHost,
-    surface?: SurfaceBlockComponent
-  ): boolean;
-  boxSelect(bound: Bound): boolean;
 }
 
 export type ICanvasElementType = {

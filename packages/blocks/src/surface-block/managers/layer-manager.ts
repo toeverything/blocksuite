@@ -1,18 +1,17 @@
 import { assertType, Slot } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 
-import { type EdgelessElement } from '../../_common/types.js';
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
-import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
-import type { ImageBlockModel } from '../../image-block/image-model.js';
-import type { NoteBlockModel } from '../../note-block/note-model.js';
-import type { CanvasElement } from '../../surface-block/elements/index.js';
-import { GroupElement } from '../../surface-block/elements/index.js';
+import type {
+  EdgelessBlock,
+  EdgelessElement,
+} from '../../page-block/edgeless/type.js';
 import { Bound } from '../../surface-block/utils/bound.js';
+import { ElementModel } from '../element-model/base.js';
+import { GroupElementModel } from '../element-model/group.js';
 import { GROUP_ROOT } from '../elements/group/consts.js';
-import { SurfaceElement } from '../elements/surface-element.js';
 import { GridManager } from '../grid.js';
 import { compare, getGroupParent } from './group-manager.js';
 import {
@@ -25,13 +24,6 @@ import {
   updateLayersIndex,
 } from './layer-utils.js';
 
-export type IndexableBlock =
-  | ImageBlockModel
-  | NoteBlockModel
-  | BookmarkBlockModel;
-
-export type Indexable = CanvasElement | IndexableBlock;
-
 type BaseLayer<T> = {
   set: Set<T>;
 
@@ -43,7 +35,7 @@ type BaseLayer<T> = {
   indexes: [string, string];
 };
 
-type BlockLayer = BaseLayer<IndexableBlock> & {
+type BlockLayer = BaseLayer<EdgelessBlock> & {
   type: 'block';
   /**
    * The computed DOM z-index used for rendering blocks.
@@ -53,7 +45,7 @@ type BlockLayer = BaseLayer<IndexableBlock> & {
   zIndexes: [number, number];
 };
 
-type CanvasLayer = BaseLayer<CanvasElement> & {
+type CanvasLayer = BaseLayer<ElementModel> & {
   type: 'canvas';
   /**
    * The computed DOM z-index used for rendering this canvas layer.
@@ -72,14 +64,14 @@ export class LayerManager {
     layerUpdated: new Slot(),
   };
 
-  canvasElements!: SurfaceElement[];
-  blocks!: IndexableBlock[];
+  canvasElements!: ElementModel[];
+  blocks!: EdgelessBlock[];
   frames!: FrameBlockModel[];
 
   layers!: Layer[];
 
   canvasLayers!: {
-    set: Set<CanvasElement>;
+    set: Set<ElementModel>;
     /**
      * fractional index
      */
@@ -88,11 +80,12 @@ export class LayerManager {
      * z-index, used for actual rendering
      */
     zIndexes: number;
-    elements: Array<CanvasElement>;
+    elements: Array<ElementModel>;
   }[];
 
-  blocksGrid = new GridManager<IndexableBlock>();
+  blocksGrid = new GridManager<EdgelessBlock>();
   framesGrid = new GridManager<FrameBlockModel>();
+  canvasGrid = new GridManager<ElementModel>();
 
   constructor(elements?: EdgelessElement[]) {
     if (elements) {
@@ -106,8 +99,9 @@ export class LayerManager {
     this.frames = [];
 
     elements.forEach(element => {
-      if (element instanceof SurfaceElement) {
+      if (element instanceof ElementModel) {
         this.canvasElements.push(element);
+        this.canvasGrid.add(element);
       } else if (matchFlavours(element, ['affine:frame'])) {
         this.framesGrid.add(element);
         this.frames.push(element);
@@ -265,7 +259,7 @@ export class LayerManager {
     this.layers = layers;
   }
 
-  private _insertIntoLayer(target: Indexable, type: 'block' | 'canvas') {
+  private _insertIntoLayer(target: EdgelessElement, type: 'block' | 'canvas') {
     if (this.layers.length === 0) {
       this._initLayers();
       return;
@@ -276,11 +270,11 @@ export class LayerManager {
 
     const addToLayer = (
       layer: Layer,
-      element: Indexable,
+      element: EdgelessElement,
       position: number | 'tail'
     ) => {
       assertType<CanvasLayer>(layer);
-      assertType<CanvasElement>(element);
+      assertType<ElementModel>(element);
 
       if (position === 'tail') {
         layer.elements.push(element);
@@ -303,7 +297,7 @@ export class LayerManager {
     };
     const createLayer = (
       type: 'block' | 'canvas',
-      targets: Indexable[],
+      targets: EdgelessElement[],
       curZIndex: number
     ): Layer => {
       const newLayer = {
@@ -353,7 +347,7 @@ export class LayerManager {
             updateLayersIndex(layers, cur);
           } else {
             const splicedElements = layer.elements.splice(insertIdx);
-            layer.set = new Set(layer.elements as CanvasElement[]);
+            layer.set = new Set(layer.elements as ElementModel[]);
 
             layers.splice(
               cur + 1,
@@ -390,13 +384,13 @@ export class LayerManager {
     }
   }
 
-  private _removeFromLayer(target: Indexable, type: 'block' | 'canvas') {
+  private _removeFromLayer(target: EdgelessElement, type: 'block' | 'canvas') {
     const layers = this.layers;
     const index = layers.findIndex(layer => {
       if (layer.type !== type) return false;
 
       assertType<CanvasLayer>(layer);
-      assertType<CanvasElement>(target);
+      assertType<ElementModel>(target);
 
       if (layer.set.has(target)) {
         layer.set.delete(target);
@@ -475,7 +469,7 @@ export class LayerManager {
    * @returns a boolean value to indicate whether the layers have been updated
    */
   private _updateLayer(
-    element: Indexable | FrameBlockModel,
+    element: EdgelessElement,
     props?: Record<string, unknown>
   ) {
     let updateType: 'block' | 'canvas' | undefined = undefined;
@@ -490,11 +484,12 @@ export class LayerManager {
       insertToOrderedArray(array, element);
     };
 
-    if (element instanceof SurfaceElement) {
+    if (element instanceof ElementModel) {
       updateType = 'canvas';
       updateArray(this.canvasElements, element);
+      this.canvasGrid.add(element);
 
-      if (element instanceof GroupElement && indexChanged) {
+      if (element instanceof GroupElementModel && indexChanged) {
         element.childElements.forEach(
           child => child && this._updateLayer(child)
         );
@@ -509,8 +504,8 @@ export class LayerManager {
     }
 
     if (updateType && indexChanged) {
-      this._removeFromLayer(element as Indexable, updateType);
-      this._insertIntoLayer(element as Indexable, updateType);
+      this._removeFromLayer(element as EdgelessElement, updateType);
+      this._insertIntoLayer(element as EdgelessElement, updateType);
 
       return true;
     }
@@ -518,14 +513,15 @@ export class LayerManager {
     return false;
   }
 
-  add(element: Indexable | FrameBlockModel) {
+  add(element: EdgelessElement) {
     let insertType: 'block' | 'canvas' | undefined = undefined;
 
-    if (element instanceof SurfaceElement) {
+    if (element instanceof ElementModel) {
       insertType = 'canvas';
       insertToOrderedArray(this.canvasElements, element);
+      this.canvasGrid.add(element);
 
-      if (element instanceof GroupElement) {
+      if (element instanceof GroupElementModel) {
         element.childElements.forEach(
           child => child && this._updateLayer(child)
         );
@@ -540,16 +536,16 @@ export class LayerManager {
     }
 
     if (insertType) {
-      this._insertIntoLayer(element as Indexable, insertType);
+      this._insertIntoLayer(element as EdgelessElement, insertType);
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit();
     }
   }
 
-  delete(element: Indexable | FrameBlockModel) {
+  delete(element: EdgelessElement) {
     let deleteType: 'canvas' | 'block' | undefined = undefined;
 
-    if (element instanceof SurfaceElement) {
+    if (element instanceof ElementModel) {
       deleteType = 'canvas';
       removeFromOrderedArray(this.canvasElements, element);
     } else if (matchFlavours(element, ['affine:frame'])) {
@@ -562,16 +558,13 @@ export class LayerManager {
     }
 
     if (deleteType) {
-      this._removeFromLayer(element as Indexable, deleteType);
+      this._removeFromLayer(element, deleteType);
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit();
     }
   }
 
-  update(
-    element: Indexable | FrameBlockModel,
-    props?: Record<string, unknown>
-  ) {
+  update(element: EdgelessElement, props?: Record<string, unknown>) {
     if (this._updateLayer(element, props)) {
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit();
@@ -628,14 +621,14 @@ export class LayerManager {
   }
 
   getReorderedIndex(
-    element: Indexable | FrameBlockModel,
+    element: EdgelessElement,
     direction: 'front' | 'forward' | 'back' | 'backward'
   ): string {
     const group = getGroupParent(element);
     const isFrameBlock =
       (element as FrameBlockModel).flavour === 'affine:frame';
 
-    let elements: (Indexable | FrameBlockModel)[];
+    let elements: EdgelessElement[];
 
     if (group !== GROUP_ROOT) {
       elements = group.childElements.filter(
@@ -649,7 +642,7 @@ export class LayerManager {
       elements = this.frames;
     } else {
       elements = this.layers.reduce(
-        (pre: Indexable[], current) =>
+        (pre: EdgelessElement[], current) =>
           pre.concat(
             current.elements.filter(
               element => getGroupParent(element) == GROUP_ROOT
@@ -697,5 +690,13 @@ export class LayerManager {
           return generateKeyBetween(pre2?.index ?? null, pre.index);
         }
     }
+  }
+
+  /**
+   * Pass to the `Array.sort` to  sort the elements by their index
+   */
+  compare(a: EdgelessElement, b: EdgelessElement) {
+    throw new Error('Not implemented');
+    return a.index > b.index ? 1 : -1;
   }
 }

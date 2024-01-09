@@ -1,9 +1,24 @@
+import type { EditorHost } from '@blocksuite/lit';
 import { type Y } from '@blocksuite/store';
 
+import type {
+  HitTestOptions,
+  IEdgelessElement,
+} from '../../page-block/edgeless/type.js';
 import { randomSeed } from '../rough/math.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { Bound } from '../utils/bound.js';
-import { getBoundsWithRotation } from '../utils/math-utils.js';
+import {
+  getBoundsWithRotation,
+  getPointsFromBoundsWithRotation,
+  isPointIn,
+  linePolygonIntersects,
+  polygonGetPointTangent,
+  polygonNearestPoint,
+  rotatePoints,
+} from '../utils/math-utils.js';
+import { PointLocation } from '../utils/point-location.js';
+import type { IVec } from '../utils/vec.js';
 import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
 import { local, updateDerivedProp, yfield } from './decorators.js';
 
@@ -12,7 +27,9 @@ export type BaseProps = {
   seed: number;
 };
 
-export abstract class ElementModel<Props extends BaseProps = BaseProps> {
+export abstract class ElementModel<Props extends BaseProps = BaseProps>
+  implements IEdgelessElement
+{
   static propsToY(props: Record<string, unknown>) {
     return props;
   }
@@ -22,7 +39,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
    * But sometimes we need to access the value when creating the element model, those temporary values are stored here.
    */
   protected _preserved: Map<string, unknown> = new Map();
-  protected _stashed: Map<keyof Props, unknown>;
+  protected _stashed: Map<keyof Props | string, unknown>;
   protected _local: Map<string | symbol, unknown> = new Map();
   protected _onChange: (props: Record<string, { oldValue: unknown }>) => void;
 
@@ -66,6 +83,10 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     this.seed = randomSeed();
   }
 
+  get connectable() {
+    return true;
+  }
+
   get deserializedXYWH() {
     return deserializeXYWH(this.xywh);
   }
@@ -90,6 +111,10 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     return this.surfaceModel.getGroup(this.id);
   }
 
+  get groups() {
+    return this.surfaceModel.getGroups(this.id);
+  }
+
   get id() {
     return this.yMap.get('id') as string;
   }
@@ -102,7 +127,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     return Bound.deserialize(this.xywh);
   }
 
-  stash(prop: keyof Props) {
+  stash(prop: keyof Props | string) {
     if (this._stashed.has(prop)) {
       return;
     }
@@ -127,7 +152,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     });
   }
 
-  pop(prop: keyof Props) {
+  pop(prop: keyof Props | string) {
     if (!this._stashed.has(prop)) {
       return;
     }
@@ -137,5 +162,43 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     // @ts-ignore
     delete this[prop];
     this.yMap.set(prop as string, value);
+  }
+
+  containedByBounds(bounds: Bound): boolean {
+    return getPointsFromBoundsWithRotation(this).some(point =>
+      bounds.containsPoint(point)
+    );
+  }
+
+  getNearestPoint(point: IVec) {
+    const points = getPointsFromBoundsWithRotation(this);
+    return polygonNearestPoint(points, point);
+  }
+
+  intersectWithLine(start: IVec, end: IVec) {
+    const points = getPointsFromBoundsWithRotation(this);
+    return linePolygonIntersects(start, end, points);
+  }
+
+  getRelativePointLocation(relativePoint: IVec) {
+    const bound = Bound.deserialize(this.xywh);
+    const point = bound.getRelativePoint(relativePoint);
+    const rotatePoint = rotatePoints([point], bound.center, this.rotate)[0];
+    const points = rotatePoints(bound.points, bound.center, this.rotate);
+    const tangent = polygonGetPointTangent(points, rotatePoint);
+    return new PointLocation(rotatePoint, tangent);
+  }
+
+  boxSelect(bound: Bound): boolean {
+    return (
+      this.containedByBounds(bound) ||
+      bound.points.some((point, i, points) =>
+        this.intersectWithLine(point, points[(i + 1) % points.length])
+      )
+    );
+  }
+
+  hitTest(x: number, y: number, _: HitTestOptions, __?: EditorHost): boolean {
+    return isPointIn(this, x, y);
   }
 }

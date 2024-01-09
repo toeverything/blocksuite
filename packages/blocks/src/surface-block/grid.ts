@@ -1,4 +1,4 @@
-import type { EdgelessElement } from '../_common/types.js';
+import type { EdgelessElement } from '../page-block/edgeless/type.js';
 import { GRID_SIZE, type IBound } from './consts.js';
 import { compare } from './managers/group-manager.js';
 import { Bound } from './utils/bound.js';
