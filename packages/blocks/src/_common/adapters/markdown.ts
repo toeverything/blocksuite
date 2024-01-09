@@ -201,7 +201,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
 
   async toSliceSnapshot(
     payload: MarkdownToSliceSnapshotPayload
-  ): Promise<SliceSnapshot> {
+  ): Promise<SliceSnapshot | null> {
     const markdownAst = this._markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
@@ -215,15 +215,17 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       },
       children: [],
     };
+    const contentSlice = (await this._traverseMarkdown(
+      markdownAst,
+      blockSnapshotRoot as BlockSnapshot,
+      payload.assets
+    )) as BlockSnapshot;
+    if (contentSlice.children.length === 0) {
+      return null;
+    }
     return {
       type: 'slice',
-      content: [
-        await this._traverseMarkdown(
-          markdownAst,
-          blockSnapshotRoot as BlockSnapshot,
-          payload.assets
-        ),
-      ],
+      content: [contentSlice],
       blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,

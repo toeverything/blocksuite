@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
 
@@ -60,6 +61,8 @@ export async function importMarkdown({
     workspaceId: page.workspace.id,
     pageId: page.id,
   });
+
+  assertExists(snapshot, 'import markdown failed, expected to get a snapshot');
 
   const blocks = snapshot.content.flatMap(x => x.children);
 

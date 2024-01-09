@@ -17,12 +17,12 @@ import type {
   SurfaceRefBlockService,
 } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
-import type { EmbedLinkedPageBlockModel } from './embed-linked-page-model.js';
+import type { EmbedLinkedPageModel } from './embed-linked-page-model.js';
 import type { EmbedLinkedPageBlockService } from './embed-linked-page-service.js';
 
 @customElement('affine-embed-linked-page-block')
 export class EmbedLinkedPageBlock extends EmbedBlockElement<
-  EmbedLinkedPageBlockModel,
+  EmbedLinkedPageModel,
   EmbedLinkedPageBlockService
 > {
   static override styles = css`

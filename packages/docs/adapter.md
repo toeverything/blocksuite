@@ -27,7 +27,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
   ): Promise<BlockSnapshot>;
   abstract toSliceSnapshot(
     payload: ToSliceSnapshotPayload<AdapterTarget>
-  ): Promise<SliceSnapshot>;
+  ): Promise<SliceSnapshot | null>;
 
   applyConfigs(configs: Map<string, unknown>) {
     this.configs = new Map([...configs]);
@@ -36,6 +36,8 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
 ```
 
 Methods `fromPageSnapshot`, `fromBlockSnapshot`, `fromSliceSnapshot` are used to convert the data from the BlockSuite Snapshot to the target format. Methods `toPageSnapshot`, `toBlockSnapshot`, `toSliceSnapshot` are used to convert the data from the target format to the BlockSuite Snapshot.
+
+Method `toSliceSnapshot` can return `null` if the target format cannot be converted to a slice using this adapter. It enables some components like clipboard to determine whether the adapter can handle the data. If not, it will try other adapters according to the priority.
 
 These six core methods are expected to be purely functional. They should not have any side effects. If you need to do some side effects, you can use the `applyConfigs` method to apply the configurations.
 
@@ -121,7 +123,7 @@ For example, consider a markdown document like this:
 - List 2 // context.openNode 4 && context.closeNode 4
 ```
 
-The context is just like a stack. In fact, it is a stack. When the walker enters a node, it will push the node to the stack. When the walker leaves a node, it will pop the node from the stack. Whenever the node pops from the stack, the walker will mount the node to its parent node.
+The context works like a stack. In fact, it is a stack. When the walker enters a node, it will push the node to the stack. When the walker leaves a node, it will pop the node from the stack. Whenever the node pops from the stack, the walker will mount the node to its parent node.
 
 In this case, the walker will push nodes when entering and pop nodes when leaving, producing a nested structure i.e. a tree.
 

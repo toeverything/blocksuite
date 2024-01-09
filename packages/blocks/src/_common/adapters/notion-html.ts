@@ -181,7 +181,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
   }
   override async toSliceSnapshot(
     payload: NotionHtmlToSliceSnapshotPayload
-  ): Promise<SliceSnapshot> {
+  ): Promise<SliceSnapshot | null> {
     const notionHtmlAst = this._htmlToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
@@ -195,15 +195,17 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
       },
       children: [],
     };
+    const contentSlice = (await this._traverseNotionHtml(
+      notionHtmlAst,
+      blockSnapshotRoot as BlockSnapshot,
+      payload.assets
+    )) as BlockSnapshot;
+    if (contentSlice.children.length === 0) {
+      return null;
+    }
     return {
       type: 'slice',
-      content: [
-        await this._traverseNotionHtml(
-          notionHtmlAst,
-          blockSnapshotRoot as BlockSnapshot,
-          payload.assets
-        ),
-      ],
+      content: [contentSlice],
       blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,

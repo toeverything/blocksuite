@@ -201,7 +201,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
   }
   override async toSliceSnapshot(
     payload: HtmlToSliceSnapshotPayload
-  ): Promise<SliceSnapshot> {
+  ): Promise<SliceSnapshot | null> {
     const htmlAst = this._htmlToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
@@ -215,15 +215,17 @@ export class HtmlAdapter extends BaseAdapter<Html> {
       },
       children: [],
     };
+    const contentSlice = (await this._traverseHtml(
+      htmlAst,
+      blockSnapshotRoot as BlockSnapshot,
+      payload.assets
+    )) as BlockSnapshot;
+    if (contentSlice.children.length === 0) {
+      return null;
+    }
     return {
       type: 'slice',
-      content: [
-        await this._traverseHtml(
-          htmlAst,
-          blockSnapshotRoot as BlockSnapshot,
-          payload.assets
-        ),
-      ],
+      content: [contentSlice],
       blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
@@ -807,6 +809,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           }
           break;
         }
+        case 'body':
         case 'div': {
           if (
             // Check if it is a paragraph like div
