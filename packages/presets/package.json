@@ -15,15 +15,15 @@
   "dependencies": {
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
-    "@blocksuite/inline": "workspace:*",
     "@blocksuite/global": "workspace:*",
+    "@blocksuite/inline": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@fal-ai/serverless-client": "^0.7.3",
-    "@floating-ui/dom": "^1.5.3",
+    "@fal-ai/serverless-client": "^0.7.4",
+    "@floating-ui/dom": "^1.5.4",
     "@toeverything/theme": "^0.7.27",
     "lit": "^3.1.0",
-    "openai": "^4.20.1"
+    "openai": "^4.24.1"
   },
   "exports": {
     ".": "./src/index.ts",

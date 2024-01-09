@@ -9,7 +9,6 @@ import { ImageOptionsTemplate } from './image-options.js';
 
 export const AFFINE_IMAGE_TOOLBAR_WIDGET = 'affine-image-toolbar-widget';
 
-//TODO(Flrande): move to image-block widget
 @customElement(AFFINE_IMAGE_TOOLBAR_WIDGET)
 export class AffineImageToolbarWidget extends WidgetElement<ImageBlockComponent> {
   private _hoverController = new HoverController(

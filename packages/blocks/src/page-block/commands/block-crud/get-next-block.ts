@@ -71,7 +71,7 @@ export const getNextBlockCommand: Command<
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       nextBlock?: BlockElement;
     }
 

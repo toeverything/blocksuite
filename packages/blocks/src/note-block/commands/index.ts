@@ -5,7 +5,7 @@ export * from './select-blocks-between.js';
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       focusBlock?: BlockElement | null;
 
       anchorBlock?: BlockElement | null;

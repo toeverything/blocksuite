@@ -21,17 +21,18 @@ import {
   extractCssVariables,
   HtmlTransformer,
   MarkdownTransformer,
+  type PageService,
   ZipTransformer,
 } from '@blocksuite/blocks';
-import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { ShadowlessElement } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import { Utils, type Workspace } from '@blocksuite/store';
-import type { SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import type { LeftSidePanel } from '../../starter/components/left-side-panel';
+import type { PagesPanel } from '../../starter/components/pages-panel';
 import {
   generateRoomId,
   initCollaborationSocket,
@@ -48,64 +49,6 @@ const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist/';
 setBasePath(basePath);
-
-function getTabGroupTemplate({
-  workspace,
-  editor,
-  requestUpdate,
-}: {
-  workspace: Workspace;
-  editor: AffineEditorContainer;
-  requestUpdate: () => void;
-}) {
-  workspace.meta.pageMetasUpdated.on(requestUpdate);
-  const pageList = workspace.meta.pageMetas;
-  editor.slots.pageLinkClicked.on(({ pageId }) => {
-    const tabGroup = document.querySelector<SlTabGroup>('.tabs-closable');
-    if (!tabGroup) throw new Error('tab group not found');
-    tabGroup.show(pageId);
-  });
-
-  return html`<sl-tab-group
-    class="tabs-closable"
-    style="display: flex; overflow: hidden;"
-    @sl-tab-show=${(e: CustomEvent<{ name: string }>) => {
-      const otherPage = workspace.getPage(e.detail.name);
-      if (otherPage) {
-        editor.page = otherPage;
-      }
-    }}
-  >
-    ${pageList.map(
-      page =>
-        html`<sl-tab
-          slot="nav"
-          panel="${page.id}"
-          ?active=${page.id === editor.page.id}
-          ?closable=${pageList.length > 1}
-          @sl-close=${(e: CustomEvent) => {
-            const tab = e.target;
-            // Show other tab if the tab is currently active
-            if (tab && (tab as SlTab).active) {
-              const tabGroup =
-                document.querySelector<SlTabGroup>('.tabs-closable');
-              if (!tabGroup) throw new Error('tab group not found');
-              const otherPage = pageList.find(
-                metaPage => page.id !== metaPage.id
-              );
-              if (!otherPage) throw new Error('no other page found');
-              tabGroup.show(otherPage.id);
-            }
-            workspace.removePage(page.id);
-          }}
-        >
-          <div>
-            <div>${page.title || 'Untitled'}</div>
-          </div>
-        </sl-tab>`
-    )}
-  </sl-tab-group>`;
-}
 
 @customElement('quick-edgeless-menu')
 export class QuickEdgelessMenu extends ShadowlessElement {
@@ -132,9 +75,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   editor!: AffineEditorContainer;
-
   @property({ attribute: false })
-  contentParser!: ContentParser;
+  leftSidePanel!: LeftSidePanel;
+  @property({ attribute: false })
+  pagesPanel!: PagesPanel;
 
   @state()
   private _connected = true;
@@ -152,9 +96,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   readonly = false;
 
   @state()
-  private _showTabMenu = false;
-
-  @state()
   private _dark = localStorage.getItem('blocksuite:dark') === 'true';
 
   @state()
@@ -162,6 +103,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   get page() {
     return this.editor.page;
+  }
+
+  get pageService() {
+    return this.editor.host.spec.getService('affine:page') as PageService;
   }
 
   override createRenderRoot() {
@@ -238,7 +183,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.contentParser.exportPdf().catch(console.error);
+    this.pageService.exportManager.exportPdf().catch(console.error);
   }
 
   private _exportHtml() {
@@ -250,7 +195,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportPng() {
-    this.contentParser.exportPng().catch(console.error);
+    this.pageService.exportManager.exportPng().catch(console.error);
   }
 
   private async _exportSnapshot() {
@@ -359,6 +304,9 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       this.requestUpdate();
     }
   };
+  private _togglePagesPanel() {
+    this.leftSidePanel.toggle(this.pagesPanel);
+  }
 
   private async _initWebsocketProvider(room: string): Promise<boolean> {
     this._initws = true;
@@ -368,13 +316,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   override async firstUpdated() {
-    this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
-    this.workspace.slots.pageAdded.on(() => {
-      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
-    });
-    this.workspace.slots.pageRemoved.on(() => {
-      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
-    });
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
@@ -561,6 +502,16 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 <sl-icon name="people" label="Collaboration"></sl-icon>
               </sl-button>
             </sl-tooltip>
+            <sl-tooltip content="Start collaboration" placement="bottom" hoist>
+              <sl-button
+                @click=${this._togglePagesPanel}
+                size="small"
+                .loading=${this._initws}
+                circle
+              >
+                <sl-icon name="filetype-doc" label="Page"></sl-icon>
+              </sl-button>
+            </sl-tooltip>
 
             ${new URLSearchParams(location.search).get('room')
               ? html`<sl-tooltip
@@ -620,14 +571,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 </sl-button>
               </sl-tooltip>
             </sl-button-group>
-
-            ${this._showTabMenu
-              ? getTabGroupTemplate({
-                  workspace: this.workspace,
-                  editor: this.editor,
-                  requestUpdate: () => this.requestUpdate(),
-                })
-              : null}
           </div>
         </div>
       </div>

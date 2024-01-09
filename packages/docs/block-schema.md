@@ -1,9 +1,5 @@
 # Block Schema
 
-::: info
-This document is preliminary and subject to refinement and updates for clarity and accuracy.
-:::
-
 In BlockSuite, all blocks should have a schema. The schema of the block describes the data structure of the block.
 
 You can use the `defineBlockSchema` function to define the schema of the block.

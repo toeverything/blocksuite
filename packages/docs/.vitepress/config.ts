@@ -24,7 +24,7 @@ export default defineConfig({
           { text: '🎨 EdgelessEditor', link: '/presets/edgeless-editor' },
         ],
       },
-      { text: 'Docs', link: '/blocksuite-overview' },
+      { text: 'Docs', link: '/overview' },
       // { text: 'Blog', link: '#' },
       {
         text: 'Releases',
@@ -36,12 +36,12 @@ export default defineConfig({
       {
         text: 'Getting Started',
         items: [
-          { text: 'Overview', link: '/blocksuite-overview' },
+          { text: 'Overview', link: '/overview' },
           { text: 'Quick Start', link: '/quick-start' },
         ],
       },
       {
-        text: 'Essentials',
+        text: 'Tutorial',
         items: [
           { text: 'Component Types', link: '/component-types' },
           {
@@ -61,16 +61,16 @@ export default defineConfig({
                 link: '/working-with-block-tree#selecting-blocks',
               },
               {
-                text: 'Services and Commands 🚧',
-                link: '/working-with-block-tree#services-and-commands',
+                text: 'Service and Commands',
+                link: '/working-with-block-tree#service-and-commands',
               },
               {
-                text: 'Customizing Blocks 🚧',
-                link: '/working-with-block-tree#customizing-blocks',
+                text: 'Defining New Blocks',
+                link: '/working-with-block-tree#defining-new-blocks',
               },
             ],
           },
-          { text: 'Data Persistence', link: '/data-persistence' },
+          { text: 'Data Synchronization', link: '/data-synchronization' },
         ],
       },
       {
@@ -110,18 +110,20 @@ export default defineConfig({
           {
             text: '<code>store</code>',
             items: [
-              { text: 'Page 🚧' },
-              { text: 'Workspace 🚧' },
+              { text: 'Page', link: '/store#page' },
+              { text: 'Workspace', link: '/store#workspace' },
               { text: 'Slot', link: '/slot' },
               // { text: 'Transformer 🚧' },
               { text: 'Adapter', link: '/adapter' },
             ],
           },
           {
-            text: '<code>inline</code> 🚧',
+            text: '<code>inline</code>',
+            link: '/inline',
           },
           {
-            text: '<code>lit</code> 🚧',
+            text: '<code>lit</code>',
+            link: '/lit',
           },
         ],
       },

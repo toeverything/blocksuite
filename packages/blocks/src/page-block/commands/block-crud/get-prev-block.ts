@@ -85,7 +85,7 @@ export const getPrevBlockCommand: Command<
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       prevBlock?: BlockElement;
     }
 

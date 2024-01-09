@@ -11,7 +11,7 @@ export const withHostCommand: Command<never, 'host'> = (ctx, next) => {
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       host?: EditorHost;
     }
 

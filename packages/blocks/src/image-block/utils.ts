@@ -15,7 +15,9 @@ async function getImageBlob(model: ImageBlockModel) {
   if (!blob) return null;
 
   if (!blob.type) {
-    // FIXME: this file-type will be removed in future, see https://github.com/toeverything/AFFiNE/issues/3245
+    // FIXME: See https://github.com/toeverything/AFFiNE/issues/3245
+    // https://github.com/toeverything/AFFiNE/pull/4845
+    // https://github.com/toeverything/blocksuite/issues/5097
     // @ts-ignore
     const FileType = await import('file-type/browser.js');
     if (window.Buffer === undefined) {
@@ -209,8 +211,9 @@ export function addSiblingImageBlock(
 
   const page = targetModel.page;
   const blockIds = page.addSiblingBlocks(targetModel, imageBlockProps, place);
-  blockIds.map((blockId, index) =>
-    uploadBlobForImage(page, blockId, imageFiles[index])
+  blockIds.map(
+    (blockId, index) =>
+      void uploadBlobForImage(page, blockId, imageFiles[index])
   );
   return blockIds;
 }
@@ -243,8 +246,9 @@ export function addImageBlocks(
       parentIndex
     )
   );
-  blockIds.map((blockId, index) =>
-    uploadBlobForImage(page, blockId, imageFiles[index])
+  blockIds.map(
+    (blockId, index) =>
+      void uploadBlobForImage(page, blockId, imageFiles[index])
   );
   return blockIds;
 }
