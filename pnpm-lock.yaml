@@ -496,8 +496,8 @@ importers:
         specifier: ^0.7.6
         version: 0.7.6
       flexsearch:
-        specifier: 0.7.41
-        version: 0.7.41
+        specifier: 0.7.43
+        version: 0.7.43
       idb-keyval:
         specifier: ^6.2.1
         version: 6.2.1
@@ -4212,8 +4212,8 @@ packages:
     deprecated: flatten is deprecated in favor of utility frameworks such as lodash.
     dev: true
 
-  /flexsearch@0.7.41:
-    resolution: {integrity: sha512-nlSsN+cLeoOMEPivjjMuYdMN7WdCKaogCirVZNxQ8a34reoKZvxDxbAtIoAK1ewmkXd5dz8Pb2kwwYJ6b/07PQ==}
+  /flexsearch@0.7.43:
+    resolution: {integrity: sha512-c5o/+Um8aqCSOXGcZoqZOm+NqtVwNsvVpWv6lfmSclU954O3wvQKxxK8zj74fPaSJbXpSLTs4PRhh+wnoCXnKg==}
     dev: false
 
   /focus-trap@7.5.4:
