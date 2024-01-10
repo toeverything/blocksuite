@@ -45,3 +45,23 @@ The `BlockService` class provides some lifecycle hooks for you to override.
 
 - `mounted`: This hook will be called when the service is instantiated.
 - `unmounted`: This hook will be called when the service is destroyed.
+
+## Set runtime configurations
+
+Sometimes you may want to set some runtime configurations for some blocks to better fit your needs.
+
+For example, you may want to set an image proxy middleware URL for the image block. By default the image block will use AFFiNE's image proxy to bypass CORS restrictions. In the self-hosted case, you may want to set your own image proxy middleware URL concerning that the default one will not be available.
+
+```ts
+import type { ImageService } from '@blocksuite/blocks';
+
+const editorRoot = document.querySelector('editor-host');
+if (!editorRoot) return;
+
+const imageService = editorRoot.spec.getService('affine:image') as ImageService;
+
+// Call specific method to set runtime configurations
+imageService.setImageProxyMiddlewareURL('https://example.com/image-proxy');
+```
+
+For different blocks, the method to set runtime configurations may be different. You can check the [block's API document](/api/@blocksuite/blocks) to find out the methods you need.
