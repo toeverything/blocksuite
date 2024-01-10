@@ -111,7 +111,7 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     return groups.some(group => group.id === this.id);
   }
 
-  addElement(element: IEdgelessElement | string) {
+  addChild(element: IEdgelessElement | string) {
     const id = typeof element === 'string' ? element : element.id;
 
     this.surfaceModel.page.transact(() => {
@@ -119,11 +119,32 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     });
   }
 
-  removeElement(element: IEdgelessElement | string) {
+  removeChild(element: IEdgelessElement | string) {
     const id = typeof element === 'string' ? element : element.id;
 
     this.surfaceModel.page.transact(() => {
       this.children.delete(id);
     });
+  }
+
+  /**
+   * Get all decendants of this group
+   * @param withoutGroup if true, will not include group element
+   */
+  decendants(withoutGroup = true) {
+    return this.childElements.reduce(
+      (prev, child) => {
+        if (child instanceof GroupElementModel) {
+          prev = prev.concat(child.decendants());
+
+          !withoutGroup && prev.push(child);
+        } else {
+          prev.push(child);
+        }
+
+        return prev;
+      },
+      [] as GroupElementModel['childElements']
+    );
   }
 }

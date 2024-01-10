@@ -3,7 +3,6 @@ import type {
   EdgelessElement,
 } from '../../../_common/utils/index.js';
 import { GroupElementModel } from '../../../surface-block/index.js';
-import { getElementsFromGroup } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { isConnectable, isNoteBlock } from './query.js';
 
@@ -23,7 +22,7 @@ export function deleteElements(
     }
 
     if (element instanceof GroupElementModel) {
-      getElementsFromGroup(element).forEach(child => {
+      element.decendants().forEach(child => {
         set.add(child);
       });
     }

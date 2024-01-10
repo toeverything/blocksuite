@@ -5,7 +5,7 @@ import {
   Bound,
   ConnectorElement,
   ConnectorMode,
-  GroupElement,
+  GroupElementModel,
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
@@ -107,17 +107,17 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             !this.pageElement.selectionManager.editing
           ) {
             ctx.get('keyboardState').event.preventDefault();
-            pageElement.surface.group.createGroupOnSelected();
+            pageElement.service.createGroupFromSelected();
           }
         },
         'Shift-Mod-g': ctx => {
-          const { selectionManager, surface } = this.pageElement;
+          const { selectionManager } = this.pageElement;
           if (
             selectionManager.elements.length === 1 &&
-            selectionManager.firstElement instanceof GroupElement
+            selectionManager.firstElement instanceof GroupElementModel
           ) {
             ctx.get('keyboardState').event.preventDefault();
-            surface.group.ungroup(selectionManager.firstElement);
+            pageElement.service.ungroup(selectionManager.firstElement);
           }
         },
         'Mod-a': ctx => {
@@ -126,14 +126,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
 
           ctx.get('defaultState').event.preventDefault();
-          const { service, surface } = this.pageElement;
+          const { service } = this.pageElement;
           this.pageElement.selectionManager.set({
             elements: [
-              ...surface.group
-                .getRootElements(service.blocks)
+              ...service.blocks
+                .filter(block => block.group === null)
                 .map(block => block.id),
-              ...surface.group
-                .getRootElements(service.elements)
+              ...service.elements
+                .filter(el => el.group === null)
                 .map(el => el.id),
             ],
             editing: false,

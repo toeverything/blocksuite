@@ -308,7 +308,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   }
 
   private _addNote() {
-    const { page, surface } = this.edgeless;
+    const { page } = this.edgeless;
     const service = this.edgeless.service!;
     const target = this._getTargetXYWH(
       DEFAULT_NOTE_WIDTH,
@@ -333,7 +333,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const group = this.currentShape.group;
 
     if (group instanceof GroupElementModel) {
-      surface.group.addChild(group, id);
+      group.addChild(id);
     }
     this.connector.target = {
       id,

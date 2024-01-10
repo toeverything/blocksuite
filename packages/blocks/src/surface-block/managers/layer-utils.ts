@@ -1,8 +1,8 @@
 import type { BlockModel, Page } from '@blocksuite/store';
 
 import type { EdgelessElement } from '../../page-block/edgeless/type.js';
+import { GroupElementModel } from '../index.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
-import { compare } from './group-manager.js';
 import type { Layer } from './layer-manager.js';
 
 export function getLayerZIndex(layers: Layer[], layerIndex: number) {
@@ -90,4 +90,33 @@ export function renderableInEdgeless(
   const parent = page.getParent(block);
 
   return parent === page.root || parent === surface;
+}
+
+export function compare(a: EdgelessElement, b: EdgelessElement) {
+  if (a instanceof GroupElementModel && a.hasDescendant(b)) {
+    return -1;
+  } else if (b instanceof GroupElementModel && b.hasDescendant(a)) {
+    return 1;
+  } else {
+    const aGroups = a.groups;
+    const bGroups = b.groups;
+    const minGroups = Math.min(aGroups.length, bGroups.length);
+
+    for (let i = 0; i < minGroups; ++i) {
+      if (aGroups[i] !== bGroups[i]) {
+        const aGroup = aGroups[i] ?? a;
+        const bGroup = bGroups[i] ?? b;
+
+        return aGroup.index === bGroup.index
+          ? 0
+          : aGroup.index < bGroup.index
+            ? -1
+            : 1;
+      }
+    }
+
+    if (a.index < b.index) return -1;
+    else if (a.index > b.index) return 1;
+    return 0;
+  }
 }

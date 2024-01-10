@@ -5,10 +5,6 @@ import { BlockElement } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import {
-  type CssVariableName,
-  isCssVariable,
-} from '../_common/theme/css-variables.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { isInsideEdgelessEditor } from '../_common/utils/index.js';
 import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
@@ -23,12 +19,6 @@ import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.j
 import { Renderer } from './canvas-renderer/renderer.js';
 import { type EdgelessElementType } from './edgeless-types.js';
 import { ConnectorElement } from './elements/index.js';
-import {
-  compare,
-  EdgelessGroupManager,
-  getGroupParent,
-  setGroupParent,
-} from './managers/group-manager.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceService } from './surface-service.js';
 import { Bound } from './utils/bound.js';
@@ -109,11 +99,6 @@ export class SurfaceBlockComponent extends BlockElement<
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
   frame!: EdgelessFrameManager;
-  group!: EdgelessGroupManager;
-
-  compare = compare;
-  getGroupParent = getGroupParent;
-  setGroupParent = setGroupParent;
 
   private _lastTime = 0;
   private _cachedViewport = new Bound();
@@ -152,35 +137,18 @@ export class SurfaceBlockComponent extends BlockElement<
       layerManager: edgelessService.layer,
       provider: {
         selectedElements: () => edgelessService.selection.selectedIds,
-        getVariableColor: (val: string) => this.getCSSPropertyValue(val),
+        getVariableColor: (val: string) =>
+          this._themeObserver.getVariableValue(val),
       },
     });
 
     this.connector = new EdgelessConnectorManager(edgeless);
     this.frame = new EdgelessFrameManager(edgeless);
     this.snap = new EdgelessSnapManager(edgeless);
-    this.group = new EdgelessGroupManager(this);
 
     this._initEvents();
     this._initThemeObserver();
   }
-
-  getCSSPropertyValue = (value: string) => {
-    if (isCssVariable(value)) {
-      const cssValue =
-        this._themeObserver.cssVariables?.[value as CssVariableName];
-      if (cssValue === undefined) {
-        console.error(
-          new Error(
-            `All variables should have a value. Please check for any dirty data or variable renaming.Variable: ${value}`
-          )
-        );
-      }
-      return cssValue ?? value;
-    }
-
-    return value;
-  };
 
   private _initEvents() {
     const { _disposables, edgeless } = this;

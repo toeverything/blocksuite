@@ -233,7 +233,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'create-group': {
-        this.edgeless.surface.group.createGroupOnSelected();
+        this.edgeless.service.createGroupFromSelected();
         break;
       }
       case 'front':

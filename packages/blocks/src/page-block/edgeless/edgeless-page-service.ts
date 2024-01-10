@@ -1,4 +1,4 @@
-import type { BlockModel } from '@blocksuite/store';
+import { type BlockModel } from '@blocksuite/store';
 
 import { last } from '../../_common/utils/iterable.js';
 import { GroupElementModel } from '../../index.js';
@@ -100,7 +100,9 @@ export class EdgelessPageService extends PageService {
     }
   }
 
-  removeElement(id: string) {
+  removeElement(id: string | EdgelessElement) {
+    id = typeof id === 'string' ? id : id.id;
+
     if (this._surfaceModel.getElementById(id)) {
       this._surfaceModel.removeElement(id);
     } else if (this.page.getBlockById(id)) {
@@ -246,5 +248,104 @@ export class EdgelessPageService extends PageService {
     const index = this._layer.getReorderedIndex(element, direction);
 
     element.index = index;
+  }
+
+  createGroup(elements: EdgelessElement[] | string[]) {
+    const groups = this.elements.filter(
+      el => el.type === 'group'
+    ) as GroupElementModel[];
+    const groupId = this._surfaceModel.addElement({
+      type: 'group',
+      children: elements.reduce(
+        (pre, el) => {
+          const id = typeof el === 'string' ? el : el.id;
+          pre[id] = true;
+          return pre;
+        },
+        {} as { [id: string]: true }
+      ),
+      title: `Group ${groups.length + 1}`,
+    });
+
+    return groupId;
+  }
+
+  createGroupFromSelected() {
+    const { selection } = this;
+
+    if (
+      selection.elements.length <= 0 ||
+      !selection.elements.every(
+        element => element.group === selection.firstElement.group
+      )
+    ) {
+      return;
+    }
+
+    const parent = selection.firstElement.group;
+
+    if (parent !== null) {
+      selection.elements.forEach(element => {
+        parent.removeChild(element.id);
+      });
+    }
+
+    const groupId = this.createGroup(selection.elements);
+
+    if (parent !== null) {
+      parent.addChild(groupId);
+    }
+
+    selection.set({
+      editing: false,
+      elements: [groupId],
+    });
+  }
+
+  ungroup(group: GroupElementModel) {
+    const { selection } = this;
+    const elements = group.childElements;
+    const parent = group.group;
+
+    if (parent !== null) {
+      parent.removeChild(group.id);
+    }
+
+    elements.forEach(element => {
+      // @ts-ignore
+      const elementType = element.type || element.flavour;
+
+      element.index = this.generateIndex(elementType);
+    });
+
+    this.removeElement(group.id);
+
+    if (parent !== null) {
+      elements.forEach(element => {
+        parent.addChild(element.id);
+      });
+    }
+
+    selection.set({
+      editing: false,
+      elements: elements.map(ele => ele.id),
+    });
+  }
+
+  releaseFromGroup(element: EdgelessElement) {
+    if (element.group === null) return;
+
+    const group = element.group;
+
+    group.removeChild(element.id);
+
+    element.index = this.layer.generateIndex(
+      'flavour' in element ? element.flavour : element.type
+    );
+
+    const parent = group.group;
+    if (parent != null) {
+      parent.addChild(element.id);
+    }
   }
 }

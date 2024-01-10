@@ -187,7 +187,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     super();
     this.edgeless = edgeless;
     this._frames = edgeless.surface.frame.frames.sort(
-      edgeless.surface.compare
+      edgeless.service.layer.compare
     ) as FrameBlockModel[];
   }
 
@@ -210,7 +210,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private _updateFrames() {
     this._frames = this.edgeless.surface.frame.frames.sort(
-      this.edgeless.surface.compare
+      this.edgeless.service.layer.compare
     ) as FrameBlockModel[];
   }
 

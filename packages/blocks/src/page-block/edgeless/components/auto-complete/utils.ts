@@ -250,8 +250,9 @@ export function nextBound(
 }
 
 export function getPosition(type: Direction) {
-  let startPosition: Connection['position'] = [],
-    endPosition: Connection['position'] = [];
+  let startPosition: Connection['position'];
+  let endPosition: Connection['position'];
+
   switch (type) {
     case Direction.Right:
       startPosition = [1, 0.5];
@@ -289,7 +290,7 @@ export function createEdgelessElement(
   bound: Bound
 ) {
   let id;
-  const { surface, service } = edgeless;
+  const { service } = edgeless;
 
   if (isShape(current)) {
     id = service.addElement(current.type, {
@@ -316,9 +317,9 @@ export function createEdgelessElement(
     });
     page.addBlock('affine:paragraph', {}, note.id);
   }
-  const group = surface.getGroupParent(current);
+  const group = current.group;
   if (group instanceof GroupElementModel) {
-    surface.group.addChild(group, id);
+    group.addChild(id);
   }
   return id;
 }
@@ -328,7 +329,6 @@ export async function createShapeElement(
   current: ShapeElementModel,
   targetType: TARGET_SHAPE_TYPE
 ) {
-  const { surface } = edgeless;
   const service = edgeless.service!;
 
   const id = service.addElement(current.type, {
@@ -337,9 +337,9 @@ export async function createShapeElement(
     radius: targetType === 'roundedRect' ? 0.1 : 0,
     text: new Workspace.Y.Text(),
   });
-  const group = surface.getGroupParent(current);
+  const group = current.group;
   if (group instanceof GroupElementModel) {
-    group.addElement(id);
+    group.addChild(id);
   }
   return id;
 }
@@ -348,7 +348,6 @@ export async function createTextElement(
   edgeless: EdgelessPageBlockComponent,
   current: ShapeElementModel
 ) {
-  const { surface } = edgeless;
   const id = edgeless.service.addElement(CanvasElementType.TEXT, {
     text: new Workspace.Y.Text(),
     textAlign: 'left',
@@ -358,9 +357,9 @@ export async function createTextElement(
     fontWeight: CanvasTextFontWeight.Regular,
     fontStyle: CanvasTextFontStyle.Normal,
   });
-  const group = surface.getGroupParent(current);
+  const group = current.group;
   if (group instanceof GroupElementModel) {
-    surface.group.addChild(group, id);
+    group.addChild(id);
   }
   return id;
 }

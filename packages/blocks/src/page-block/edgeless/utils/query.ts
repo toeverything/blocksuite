@@ -22,8 +22,8 @@ import {
   type SurfaceViewport,
   TextElement,
 } from '../../../surface-block/index.js';
-import { getElementsWithoutGroup } from '../../../surface-block/managers/group-manager.js';
 import type { EdgelessBlock, EdgelessElement } from '../type.js';
+import { getElementsWithoutGroup } from './group.js';
 
 export function isTopLevelBlock(
   selectable: BlockModel | Selectable | BlockModel | null

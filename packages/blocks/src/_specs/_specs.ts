@@ -39,6 +39,7 @@ import { AFFINE_SLASH_MENU_WIDGET } from '../page-block/widgets/slash-menu/index
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { ParagraphService } from '../paragraph-block/paragraph-service.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+import { SurfacePageService } from '../surface-block/surface-page-service.js';
 import { SurfaceService } from '../surface-block/surface-service.js';
 import {
   SurfaceRefBlockSchema,
@@ -110,13 +111,6 @@ const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
 };
 
 const CommonFirstPartyBlockSpecs: BlockSpec[] = [
-  {
-    schema: SurfaceBlockSchema,
-    view: {
-      component: literal`affine-surface`,
-    },
-    service: SurfaceService,
-  },
   {
     schema: ListBlockSchema,
     view: {
@@ -205,11 +199,25 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
 export const DocEditorBlockSpecs: BlockSpec[] = [
   DocPageSpec,
   ...CommonFirstPartyBlockSpecs,
+  {
+    schema: SurfaceBlockSchema,
+    view: {
+      component: literal`affine-surface`,
+    },
+    service: SurfacePageService,
+  },
 ];
 
 export const EdgelessEditorBlockSpecs: BlockSpec[] = [
   EdgelessPageSpec,
   ...CommonFirstPartyBlockSpecs,
+  {
+    schema: SurfaceBlockSchema,
+    view: {
+      component: literal`affine-surface`,
+    },
+    service: SurfaceService,
+  },
   {
     schema: FrameBlockSchema,
     view: {

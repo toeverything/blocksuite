@@ -11,9 +11,9 @@ import {
   RenameIcon,
   UngroupButtonIcon,
 } from '../../../../_common/icons/index.js';
+import type { GroupElementModel } from '../../../../surface-block/index.js';
 import {
   deserializeXYWH,
-  type GroupElement,
   serializeXYWH,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
@@ -32,7 +32,7 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
   surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
-  groups!: GroupElement[];
+  groups!: GroupElementModel[];
 
   private _insertIntoPage() {
     if (!this.surface.page.root) return;
@@ -103,7 +103,7 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         class=${'edgeless-component-toolbar-ungroup-button'}
         @click=${() => {
-          groups.forEach(group => this.surface.group.ungroup(group));
+          groups.forEach(group => this.surface.edgeless.service.ungroup(group));
         }}
         .tooltip=${'Ungroup'}
         .tipPosition=${'bottom'}

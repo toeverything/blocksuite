@@ -61,7 +61,7 @@ export abstract class Overlay {
 
 type EnvProvider = {
   getVariableColor: (val: string) => string;
-  selectedElements: () => string[];
+  selectedElements?: () => string[];
 };
 
 export class Renderer implements SurfaceViewport {
@@ -89,10 +89,7 @@ export class Renderer implements SurfaceViewport {
   private _shouldUpdate = false;
   private _rafId: number | null = null;
 
-  constructor(options: {
-    layerManager: LayerManager;
-    provider?: Partial<EnvProvider>;
-  }) {
+  constructor(options: { layerManager: LayerManager; provider: EnvProvider }) {
     const canvas = document.createElement('canvas');
 
     this.canvas = canvas;

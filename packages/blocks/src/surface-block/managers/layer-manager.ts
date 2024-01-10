@@ -13,11 +13,10 @@ import type {
 import { Bound } from '../../surface-block/utils/bound.js';
 import { ElementModel } from '../element-model/base.js';
 import type { GroupElementModel } from '../element-model/group.js';
-import { GROUP_ROOT } from '../elements/group/consts.js';
 import { GridManager } from '../grid.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
-import { compare, getGroupParent } from './group-manager.js';
 import {
+  compare,
   getElementIndex,
   getLayerZIndex,
   insertToOrderedArray,
@@ -782,13 +781,13 @@ export class LayerManager {
     element: EdgelessElement,
     direction: ReorderingDirection
   ): string {
-    const group = getGroupParent(element);
+    const group = element.group;
     const isFrameBlock =
       (element as FrameBlockModel).flavour === 'affine:frame';
 
     let elements: EdgelessElement[];
 
-    if (group !== GROUP_ROOT) {
+    if (group !== null) {
       elements = group.childElements.filter(
         element =>
           ((element as FrameBlockModel)?.flavour === 'affine:frame') ===
@@ -801,11 +800,7 @@ export class LayerManager {
     } else {
       elements = this.layers.reduce(
         (pre: EdgelessElement[], current) =>
-          pre.concat(
-            current.elements.filter(
-              element => getGroupParent(element) == GROUP_ROOT
-            )
-          ),
+          pre.concat(current.elements.filter(element => element.group == null)),
         []
       );
     }
@@ -854,8 +849,7 @@ export class LayerManager {
    * Pass to the `Array.sort` to  sort the elements by their index
    */
   compare(a: EdgelessElement, b: EdgelessElement) {
-    throw new Error('Not implemented');
-    return a.index > b.index ? 1 : -1;
+    return compare(a, b);
   }
 
   dispose() {

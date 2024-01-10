@@ -25,7 +25,7 @@ import type { ElementModel } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
   deserializeXYWH,
-  GroupElement,
+  GroupElementModel,
   ShapeElementModel,
 } from '../../../../surface-block/index.js';
 import {
@@ -36,13 +36,13 @@ import {
   normalizeShapeBound,
   serializeXYWH,
 } from '../../../../surface-block/index.js';
-import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import {
   NOTE_MIN_HEIGHT,
   NOTE_MIN_WIDTH,
   SELECTED_RECT_PADDING,
 } from '../../utils/consts.js';
+import { getElementsWithoutGroup } from '../../utils/group.js';
 import {
   getSelectableBounds,
   getSelectedRect,
@@ -858,7 +858,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         : nothing;
 
     const isSingleGroup =
-      elements.length === 1 && elements[0] instanceof GroupElement;
+      elements.length === 1 && elements[0] instanceof GroupElementModel;
     _selectedRect.borderStyle = isSingleGroup ? 'dashed' : 'solid';
 
     return html`

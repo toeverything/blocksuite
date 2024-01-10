@@ -9,7 +9,10 @@ import {
   type TopLevelBlockModel,
 } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import { ConnectorElementModel } from '../../../../surface-block/element-model/index.js';
+import {
+  ConnectorElementModel,
+  GroupElementModel,
+} from '../../../../surface-block/element-model/index.js';
 import {
   Bound,
   type CanvasElement,
@@ -20,7 +23,6 @@ import {
   TextElement,
   Vec,
 } from '../../../../surface-block/index.js';
-import { getElementsFromGroup } from '../../../../surface-block/managers/group-manager.js';
 import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
 import type { EdgelessElement, HitTestOptions } from '../../type.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
@@ -495,8 +497,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         this._surface.frame
           .getElementsInFrame(element)
           .forEach(ele => toBeMoved.add(ele));
-      } else if (element instanceof GroupElement) {
-        getElementsFromGroup(element).forEach(ele => toBeMoved.add(ele));
+      } else if (element instanceof GroupElementModel) {
+        element.decendants().forEach(ele => toBeMoved.add(ele));
       }
     });
     this._toBeMoved = Array.from(toBeMoved);

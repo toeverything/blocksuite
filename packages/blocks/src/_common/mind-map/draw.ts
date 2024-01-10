@@ -145,5 +145,5 @@ export function drawMindMap(
     elements: [...shapeIds, ...connectorIds],
     editing: false,
   });
-  surfaceElement.group.createGroupOnSelected();
+  surfaceElement.edgeless.service.createGroupFromSelected();
 }

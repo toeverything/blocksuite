@@ -36,8 +36,10 @@ import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-mod
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
-import { GROUP_ROOT } from '../../../../surface-block/elements/group/consts.js';
-import type { GroupElement } from '../../../../surface-block/index.js';
+import type {
+  ElementModel,
+  GroupElement,
+} from '../../../../surface-block/index.js';
 import {
   type BrushElement,
   clamp,
@@ -126,7 +128,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       } else if (isBookmarkBlock(model)) {
         return 'bookmark';
       }
-      return model.type;
+
+      return (model as ElementModel).type;
     });
     return result as CategorizedElements;
   }
@@ -363,7 +366,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     }
 
     if (elements.length === 1) {
-      if (this.surface.getGroupParent(selection.firstElement) !== GROUP_ROOT) {
+      if (selection.firstElement.group !== null) {
         buttons.unshift(this._Divider());
         buttons.unshift(this._ReleaseFromGroupButton());
       }

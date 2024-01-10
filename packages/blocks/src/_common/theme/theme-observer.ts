@@ -48,6 +48,16 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
     });
   }
 
+  getVariableValue(variable: string) {
+    const value = this._cssVariables?.[variable];
+
+    if (value === undefined) {
+      console.error(new Error(`Cannot find css variable: ${variable}`));
+    }
+
+    return value ?? variable;
+  }
+
   override dispose() {
     super.dispose();
     this._observer?.disconnect();
