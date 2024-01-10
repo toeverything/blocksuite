@@ -12,7 +12,7 @@ The `@blocksuite/presets` package includes reusable editors like `DocEditor` and
 
 The distinction between editors and fragments lies in their complexity and functionality. **Fragments typically offer more simplified capabilities, serving specific UI purposes, whereas editors provide comprehensive editing capabilities over the block tree**. Nevertheless, both editors and fragments shares similar tech stacks and [data flows](./crdt-native-data-flow).
 
-![showcase-fragments](./images/showcase-fragments.jpg)
+![showcase-fragments-2](./images/showcase-fragments-2.jpg)
 
 ## Blocks and Widgets
 
