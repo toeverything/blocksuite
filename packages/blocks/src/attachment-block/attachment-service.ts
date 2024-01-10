@@ -1,4 +1,5 @@
 import { BlockService } from '@blocksuite/block-std';
+import { Slot } from '@blocksuite/store';
 
 import {
   FileDropManager,
@@ -10,6 +11,10 @@ import { addSiblingAttachmentBlock } from './utils.js';
 
 export class AttachmentService extends BlockService<AttachmentBlockModel> {
   maxFileSize = 10 * 1000 * 1000; // 10MB (default)
+
+  slots = {
+    onFilesDropped: new Slot<File[]>(),
+  };
 
   private _fileDropOptions: FileDropOptions = {
     flavour: this.flavour,
@@ -30,6 +35,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
           place
         ).catch(console.error);
       });
+      this.slots.onFilesDropped.emit(attachmentFiles);
       return true;
     },
   };
