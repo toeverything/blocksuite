@@ -19,25 +19,69 @@ import { InlineItems } from './components/inline-items.js';
 import { ParagraphButton } from './components/paragraph-button.js';
 import { formatBarStyle } from './styles.js';
 
-type CustomElementCreator = (
-  formatBar: AffineFormatBarWidget
-) => HTMLDivElement;
-
+type FormatBarCustomAction = {
+  disable?: (formatBar: AffineFormatBarWidget) => boolean;
+  image(formatBar: AffineFormatBarWidget): string | undefined;
+  onClick(formatBar: AffineFormatBarWidget): void;
+};
+type FormatBarCustomElement = {
+  showWhen?(formatBar: AffineFormatBarWidget): boolean;
+  init(formatBar: AffineFormatBarWidget): HTMLElement;
+};
+type FormatBarCustomRender = {
+  render(formatBar: AffineFormatBarWidget): TemplateResult | undefined;
+};
 export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
   static override styles = formatBarStyle;
-  static readonly customElements: Set<CustomElementCreator> =
-    new Set<CustomElementCreator>();
+  private static readonly customElements: Set<FormatBarCustomRender> =
+    new Set<FormatBarCustomRender>();
 
-  @query('.custom-items')
-  customItemsContainer!: HTMLElement;
+  static registerCustomRender(render: FormatBarCustomRender) {
+    this.customElements.add(render);
+  }
+  static registerCustomElement(element: FormatBarCustomElement) {
+    let elementInstance: HTMLElement | undefined;
+    this.customElements.add({
+      ...element,
+      render: formatBar => {
+        if (!elementInstance) {
+          elementInstance = element.init(formatBar);
+        }
+        const show = element.showWhen?.(formatBar) ?? true;
+        return show ? html`${elementInstance}` : undefined;
+      },
+    });
+  }
+
+  static registerCustomAction(action: FormatBarCustomAction) {
+    this.customElements.add({
+      render: formatBar => {
+        const url = action.image(formatBar);
+        if (url == null) {
+          return;
+        }
+        const disable = action.disable ? action.disable(formatBar) : false;
+        const click = () => {
+          if (!disable) {
+            action.onClick(formatBar);
+          }
+        };
+        return html`<icon-button
+          size="32px"
+          ?disabled=${disable}
+          @click=${click}
+        >
+          <img src="${url}" alt="" />
+        </icon-button>`;
+      },
+    });
+  }
 
   @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
   formatBarElement?: HTMLElement;
-
-  private _customElements: HTMLDivElement[] = [];
 
   private get _selectionManager() {
     return this.host.selection;
@@ -87,28 +131,6 @@ export class AffineFormatBarWidget extends WidgetElement {
     return !readonly && this.displayType !== 'none' && !this._dragging;
   }
 
-  private _appendCustomElement() {
-    if (
-      !this.customItemsContainer ||
-      this.customItemsContainer.children.length ===
-        AffineFormatBarWidget.customElements.size
-    )
-      return;
-
-    if (
-      this._customElements.length !== AffineFormatBarWidget.customElements.size
-    )
-      this._initCustomElement();
-
-    this.customItemsContainer.replaceChildren(...this._customElements);
-  }
-
-  private _initCustomElement() {
-    this._customElements = Array.from(AffineFormatBarWidget.customElements).map(
-      elementCtr => elementCtr(this)
-    );
-  }
-
   override connectedCallback() {
     super.connectedCallback();
     this._abortController = new AbortController();
@@ -128,10 +150,6 @@ export class AffineFormatBarWidget extends WidgetElement {
         `format bar not support pageElement: ${pageElement.constructor.name} but its widgets has format bar`
       );
     }
-
-    this._disposables.add(() => {
-      this._customElements = [];
-    });
 
     this.disposables.add(
       this.host.event.add('dragStart', () => {
@@ -258,6 +276,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   }
 
   private _floatDisposables: DisposableGroup | null = null;
+
   override updated() {
     if (!this._shouldDisplay()) {
       if (this._floatDisposables) {
@@ -266,7 +285,6 @@ export class AffineFormatBarWidget extends WidgetElement {
       return;
     }
 
-    this._appendCustomElement();
     this._floatDisposables = new DisposableGroup();
 
     const formatQuickBarElement = this.formatBarElement;
@@ -377,6 +395,23 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
   }
 
+  private _customRender() {
+    const result: TemplateResult[] = [];
+    AffineFormatBarWidget.customElements.forEach(render => {
+      const element = render.render(this);
+      if (element) {
+        result.push(element);
+      }
+    });
+    return result.length > 0
+      ? html` <div
+          style="display: flex;align-items: center;justify-content: center"
+        >
+          ${result}
+        </div>`
+      : null;
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._abortController.abort();
@@ -391,11 +426,8 @@ export class AffineFormatBarWidget extends WidgetElement {
     const paragraphButton = ParagraphButton(this);
     const inlineItems = InlineItems(this);
     const actionItems = ActionItems(this);
-
     const renderList = [
-      AffineFormatBarWidget.customElements.size > 0
-        ? html`<div class="custom-items"></div>`
-        : null,
+      this._customRender(),
       paragraphButton,
       inlineItems,
       actionItems,
@@ -406,13 +438,13 @@ export class AffineFormatBarWidget extends WidgetElement {
       (acc, el, i) =>
         i === renderList.length - 1
           ? [...acc, el]
-          : [...acc, el, html`<div class="divider"></div>`],
+          : [...acc, el, html` <div class="divider"></div>`],
       []
     );
 
-    return html`<div
-      class=${AFFINE_FORMAT_BAR_WIDGET}
-      @pointerdown=${stopPropagation}
+    return html` <div
+      class="${AFFINE_FORMAT_BAR_WIDGET}"
+      @pointerdown="${stopPropagation}"
     >
       ${renderListWithDivider}
     </div>`;
