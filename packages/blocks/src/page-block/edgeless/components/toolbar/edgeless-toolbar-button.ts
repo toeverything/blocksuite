@@ -63,18 +63,8 @@ export class EdgelessToolButton<
         }
       })
     );
-    _disposables.add(
-      editSession.slots.lastPropsUpdated.on(({ type, props }) => {
-        if (type === this._type) {
-          this._states.forEach(_key => {
-            const key = _key as string;
-            if (props[key] != undefined) {
-              Object.assign(this, { [key]: props[key] });
-            }
-          });
-        }
-      })
-    );
+
+    this.syncLastProps();
 
     edgeless.bindHotKey(
       {
@@ -85,6 +75,21 @@ export class EdgelessToolButton<
         },
       },
       { global: true }
+    );
+  }
+
+  protected syncLastProps() {
+    this._disposables.add(
+      this.service.editSession.slots.lastPropsUpdated.on(({ type, props }) => {
+        if (type === this._type) {
+          this._states.forEach(_key => {
+            const key = _key as string;
+            if (props[key] != undefined) {
+              Object.assign(this, { [key]: props[key] });
+            }
+          });
+        }
+      })
     );
   }
 
