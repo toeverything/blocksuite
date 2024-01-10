@@ -37,7 +37,12 @@ export class SurfaceRefImagePortal extends WithDisposable(ShadowlessElement) {
     };
 
     return html`
-      <div style=${styleMap(style)}>${this.renderModel(model)}</div>
+      <div
+        style=${styleMap(style)}
+        data-portal-reference-block-id="${model.id}"
+      >
+        ${this.renderModel(model)}
+      </div>
     `;
   }
 }

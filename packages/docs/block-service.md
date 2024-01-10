@@ -1,9 +1,5 @@
 # Block Service
 
-::: info
-This document is preliminary and subject to refinement and updates for clarity and accuracy.
-:::
-
 Each kind of block can register its own service, so as to define block-specific methods to be called during the editor lifecycle. The service is a class that extends the `BlockService` class:
 
 ```ts
@@ -49,3 +45,23 @@ The `BlockService` class provides some lifecycle hooks for you to override.
 
 - `mounted`: This hook will be called when the service is instantiated.
 - `unmounted`: This hook will be called when the service is destroyed.
+
+## Set Runtime Configs
+
+Sometimes you may want to set some runtime configurations for some blocks to better fit your needs.
+
+For example, you may want to set an image proxy middleware URL for the image block. By default the image block will use AFFiNE's image proxy to bypass CORS restrictions. In the self-hosted case, you may want to set your own image proxy middleware URL concerning that the default one will not be available:
+
+```ts
+import type { ImageService } from '@blocksuite/blocks';
+
+const editorRoot = document.querySelector('editor-host');
+if (!editorRoot) return;
+
+const imageService = editorRoot.spec.getService('affine:image') as ImageService;
+
+// Call specific method to set runtime configurations
+imageService.setImageProxyMiddlewareURL('https://example.com/image-proxy');
+```
+
+For different blocks, the method to set runtime configurations may be different. You can check the [block API document](/api/@blocksuite/blocks/index) to find out the methods you need.

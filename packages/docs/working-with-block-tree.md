@@ -1,5 +1,9 @@
 # Working with Block Tree
 
+::: info
+🌐 This documentation has a [Chinese translation](https://insider.affine.pro/share/af3478a2-9c9c-4d16-864d-bffa1eb10eb6/-3bEQPBoOEkNH13ULW9Ed).
+:::
+
 In previous examples, we demonstrated how a `page` collaborates with an `editor`. In this document, we will introduce the basic structure of the block tree within the `page` and the common methods for controlling it in an editor environment.
 
 ## Block Tree Basics
@@ -20,10 +24,11 @@ Here is an example demonstrating the manipulation of the block tree through thes
 const rootId = page.addBlock('affine:page');
 
 // Insert second block as a child of the root with empty props
-const noteId = page.addBlock('affine:note', {}, rootId);
+const props = {};
+const noteId = page.addBlock('affine:note', props, rootId);
 
 // You can also provide an optional `parentIndex`
-const paragraphId = page.addBlock('affine:paragraph', {}, noteId, 0);
+const paragraphId = page.addBlock('affine:paragraph', props, noteId, 0);
 
 const modelA = page.root!.children[0].children[0];
 const modelB = page.getBlockById(paragraphId);
@@ -39,7 +44,7 @@ This example creates a subset of the block tree hierarchy defaultly used in `@bl
 
 ![block-nesting](./images/block-nesting.png)
 
-As a document-centric framework, **you need to initialize a valid document structure before attaching it to editors**, which is also why it requires `init()` after `createEmptyPage()`. See [creating new block tree](./data-persistence#creating-new-block-tree) for more details.
+As a document-centric framework, **you need to initialize a valid document structure before attaching it to editors**, which is also why it requires `init()` after `createEmptyPage()`. See [creating new block tree](./data-synchronization#creating-new-block-tree) for more details.
 
 ::: info
 The block tree hierarchy is specific to the preset editors. At the framework level, `@blocksuite/store` does **NOT** treat the "first-party" `affine:*` blocks with any special way. Feel free to add blocks from different namespaces for the block tree!
@@ -49,7 +54,7 @@ All block operations on `page` are automatically recorded and can be reversed us
 
 ```ts
 const rootId = page.addBlock('affine:page');
-const noteId = page.addBlock('affine:note', {}, rootId);
+const noteId = page.addBlock('affine:note', props, rootId);
 
 // Capture a history record now
 page.captureSync();
@@ -74,7 +79,10 @@ Firstly, let's explain the newly introduced `host` and `std`, which are determin
 - Regardless of the framework used to implement `EditorHost`, they can access the same headless standard library designed for editable blocks through `host.std`. For example, `std.spec` contains all the registered [`BlockSpec`](./block-spec)s.
 
 ::: tip
-We usually access `host.spec` instead of `host.std.spec` to simplify the code.
+
+- To access `host` after attaching page to an editor, wait for a [slot](./slot) named [`page.slots.ready`](/api/@blocksuite/store/classes/Page.html#ready-1).
+- We usually access `host.spec` instead of `host.std.spec` to simplify the code.
+
 :::
 
 As the runtime for the block tree, this is the mental model inside the `editor`:
@@ -126,14 +134,264 @@ For the more complex native [selection](https://developer.mozilla.org/en-US/docs
 
 ![flat-inlines](./images/flat-inlines.png)
 
-Additionally, the entire `selection.value` object is isolated under the `clientId` scope of the current session. During collaborative editing, selection instances between different clients will be distributed in real-time (via [providers](./data-persistence#provider-based-persistence)), facilitating the implementation of UI states like remote cursors.
+Additionally, the entire `selection.value` object is isolated under the `clientId` scope of the current session. During collaborative editing, selection instances between different clients will be distributed in real-time (via [providers](./data-synchronization#provider-based-state-management)), facilitating the implementation of UI states like remote cursors.
 
 For more advanced usage and details, please refer to the [`Selection`](./selection) documentation.
 
-## Services and Commands
+## Service and Commands
 
-TODO
+In many cases, operations on the block tree within an editor environment need further encapsulation. For example, when using the selection manager mentioned before, since the atomic selection state only includes `id`s, retrieving the corresponding block model based on `selection.value` often requires some boilerplate, as follows:
 
-## Customizing Blocks
+```ts
+function getFirstSelectedModel(host: EditorHost) {
+  const { selection, page } = host;
+  const firstSelection = selection.value[0];
+  const { path } = firstSelection;
+  const leafId = path[path.length - 1];
+  const blockModel = page.getBlockById(leafId);
+  return blockModel;
+}
+```
 
-TODO
+This direct usage is not very convenient. Also, as BlockSuite encourages completely splitting the editor into different [`BlockSpec`](./block-spec)s ([recall here](./component-types#composing-editors-by-blocks)), which indicates that methods and properties globally available in the editor should also be implemented on the block level. A mechanism is needed at this point to organize such code, ensuring maintainability in large projects. This is why BlockSuite introduces the concept of [`BlockService`](./block-service).
+
+### Service
+
+In BlockSuite, service is used for registering state or methods specific to a certain block type. For example, instead of implementing the `getFirstSelectedModel` method yourself, you can use shortcuts predefined on `PageService`:
+
+```ts
+const pageService = host.spec.getService('affine:page');
+
+// Get models of selected blocks
+pageService.selectedModel;
+// Get UI components of selected blocks
+pageService.selectedBlocks;
+```
+
+Here, `getService` is used to obtain the service corresponding to a certain block spec. Each service is a plain class, existing as a singleton throughout the lifecycle of the `host` (with a corresponding [`mounted`](/api/@blocksuite/block-std/classes/BlockService.html#mounted) lifecycle hook). Some typical uses of service include:
+
+- For blocks that serve as the root node of the block tree, common editor APIs can be registered on their services for application developers.
+- For blocks requiring specific dynamic configurations, service can be used to pass in corresponding options. For example, a service can accept configurations related to image uploading for image block.
+- For blocks that need to execute certain side effects (such as subscribing to keyboard shortcuts) when the editor loads, operations on `host` can be done in the `mounted` callback of their services. In this way, even if the block does not yet exist in the block tree, the corresponding logic will still execute.
+
+As an example, the following code more specifically shows how the two getters `selectedBlocks` and `selectedModels` mentioned earlier are implemented using a service:
+
+```ts
+import { BlockService } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/lit';
+import type { PageBlockModel } from './page-model.js';
+
+export class PageService extends BlockService<PageBlockModel> {
+  // ...
+
+  // A plain getter in service
+  get selectedBlocks() {
+    let result: BlockElement[] = [];
+    // Here we are using something new...
+    // Introducing commands!
+    this.std.command
+      .pipe()
+      .withHost()
+      .tryAll(chain => [
+        chain.getTextSelection(),
+        chain.getImageSelections(),
+        chain.getBlockSelections(),
+      ])
+      .getSelectedBlocks()
+      .inline(({ selectedBlocks }) => {
+        if (!selectedBlocks) return;
+        result = selectedBlocks;
+      })
+      .run();
+    return result;
+  }
+
+  // Another plain getter
+  get selectedModels() {
+    return this.selectedBlocks.map(block => block.model);
+  }
+}
+```
+
+### Commands
+
+Besides the service, this code snippet also utilizes the chain of commands occurring on `this.std.command` (the [`CommandManager`](/api/@blocksuite/block-std/classes/CommandManager)). This is about using predefined [`Command`](./command)s.
+
+In BlockSuite, you can always control the editor solely through direct operations on `host` and `page`. However, in the real world, it's often necessary to treat some operations as variables, dynamically constructing control flow (e.g., dynamically combining different subsequent processing logics based on current selection states). This is where commands really shines. **It allows complex sequences of operations to be recorded as reusable chains, and also simplifies the context sharing between operations**.
+
+The code at the end of the previous section demonstrates the basic usage of commands:
+
+- The `pipe` method is used to start a new command chain.
+- The `withHost` method allows adding `host` to the _context object_ of the command. Every subsequent command method in this chain is executed with this shared context object.
+- The `tryAll` method sequentially executes multiple sub-commands on the current chain's context.
+- Commands like `getSelectedBlock` and `getTextSelection` are used for actual block tree operations.
+- The `inline` method transfers the state on the command context object to the outside or executes other side effects.
+- The `run` method is used to finally execute the command chain. The context will be destroyed after the command chain execution.
+
+In the above methods, task-specific commands like `getSelectedBlock` are not implemented by the command manager but are registered by individual blocks. In fact, since BlockSuite separates the framework-specific `host` from the framework-agnostic `block-std`, even the `withHost` command is defined in the block spec:
+
+```ts
+import type { Command } from '@blocksuite/block-std';
+import { type EditorHost } from '@blocksuite/lit';
+
+// This command requires no input field on context (`never`),
+// and will add `host` to context as output
+export const withHostCommand: Command<never, 'host'> = (ctx, next) => {
+  const host = ctx.std.host as EditorHost;
+  next({ host });
+};
+
+// ...
+class PageService {
+  // ...
+  mounted() {
+    // ...
+    this.std.command.add('withHost', withHostCommand);
+  }
+}
+
+// This allows the command to be strongly typed
+declare global {
+  namespace BlockSuite {
+    interface CommandContext {
+      host?: EditorHost;
+    }
+
+    interface Commands {
+      withHost: typeof withHostCommand;
+    }
+  }
+}
+```
+
+You can refer to the [`Command`](./command) documentation for more advanced uses of commands.
+
+::: info
+We plan to continue supplementing and documenting some of the most commonly used commands, please stay tuned.
+:::
+
+## Defining New Blocks
+
+So far, we have introduced almost all the main parts that make up a block spec. Now, it's time to learn how to create new block types.
+
+In BlockSuite, the block spec is built from three main components: [`schema`](./block-schema), [`service`](./block-service), and [`view`](./block-view). Among these, the definition of the `view` part is specific to the frontend framework used. For example, in the case of `DocEditor` and `EdgelessEditor` based on `@blocksuite/lit`, the block specs are defined with lit primitives in this way:
+
+```ts
+import type { BlockSpec } from '@blocksuite/block-std';
+import { literal } from 'lit/static-html.js';
+
+const MyBlockSpec: BlockSpec = {
+  schema: MyBlockSchema, // Define this with `defineBlockSchema`
+  service: MyBlockService, // Extend `BlockService`
+  // Define lit components here
+  view: {
+    component: literal`my-block-component`,
+    widgets: {
+      myToolbar: literal`my-toolbar`,
+      myMenu: literal`my-menu`,
+    },
+  },
+};
+```
+
+This design aims at balancing ease of use with customizability. Both the service and view are built around the schema, which allows for different components, services, and widgets to be implemented for the same block model, enabling:
+
+- A single block to have multiple component views. For example, `DocEditor` and `EdgelessEditor` have different implementations of the page block ([recall here](./component-types#one-block-multiple-specs)).
+- A single block to be configured with different widget combinations. For instance, you can remove all widgets to compose read-only editors.
+- A single block to even be implemented based on different frontend frameworks, by simply providing an `EditorHost` middleware implementation for the respective framework.
+
+![framework-agnostic](./images/framework-agnostic.png)
+
+::: info
+
+- In terms of cross-framework support, the biggest difference between BlockSuite and other popular editor frameworks is that **BlockSuite has no DOM host of its own**. Instead, it implements a middleware like `@blocksuite/lit`, mapping the block tree to the framework's component tree. Thus, the entire content area of a BlockSuite editor is natively controlled by different frameworks, rather than creating many different framework component subtrees within a BlockSuite-controlled DOM tree through excessive use of `createRoot`.
+- The reason BlockSuite uses lit by default is that as a web component framework, the lit component tree IS the DOM tree natively. This simplifies the three-phase update process of `block tree -> component tree -> DOM tree` to just `block tree -> component (DOM) tree`.
+  :::
+
+Furthermore, BlockSuite also supports defining the most commonly used type of custom block in a more straightforward way: the _embed block_. **This type of block does not nest other blocks and manages its internal area's state entirely on its own**. For example, to create a GitHub link card that can be displayed in `DocEditor`, you can start by defining the model:
+
+```ts
+import { BlockModel } from '@blocksuite/store';
+import { defineEmbedModel } from '@blocksuite/blocks';
+
+// Define strongly typed block model
+export class EmbedGithubModel extends defineEmbedModel<{
+  owner: string;
+  repo: string;
+}>(BlockModel) {}
+```
+
+Then based on this model, a lit-based UI component for the block can be defined:
+
+```ts
+import { EmbedBlockElement } from '@blocksuite/blocks';
+import type { EmbedGithubBlockModel } from './embed-github-model.js';
+import { html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+
+@customElement('affine-embed-github-block')
+export class EmbedGithubBlock extends EmbedBlockElement<EmbedGithubModel> {
+  // styles...
+
+  override render() {
+    return this.renderEmbed(() => {
+      return html`
+        <div class="affine-embed-github-block">
+          <h3>GitHub Card</h3>
+          <div>${this.model.owner}/${this.model.repo}</div>
+        </div>
+      `;
+    });
+  }
+}
+```
+
+As next step, we can further define the corresponding `BlockSpec`:
+
+```ts
+import { createEmbedBlock } from '@blocksuite/blocks';
+import { EmbedGithubBlockModel } from './embed-github-model.js';
+
+export const EmbedGithubBlockSpec = createEmbedBlock({
+  schema: {
+    name: 'github',
+    version: 1,
+    toModel: () => new EmbedGithubModel(),
+    props: () => ({
+      owner: '',
+      repo: '',
+    }),
+  },
+  view: {
+    component: literal`affine-embed-github-block`,
+  },
+});
+```
+
+Finally, by inserting this `BlockSpec` into the `host.specs` array, you can expand with new block types:
+
+```ts
+// ...
+import { DocEditorBlockSpecs } from '@blocksuite/blocks';
+import { EmbedGithubBlockSpec } from './embed-block-spec.js';
+
+const editor = new DocEditor();
+editor.specs = [...DocEditorBlockSpecs, EmbedGithubBlockSpec];
+editor.page = page;
+```
+
+After completing the above steps, you can insert the new block type into the block tree:
+
+```ts
+const props = {
+  owner: 'toeverything', // The company behind BlockSuite and AFFiNE 🤫
+  repo: 'https://github.com/toeverything/blocksuite',
+};
+
+// The 'affine' prefix is kept by default, but you can also override it.
+page.addBlock('affine:embed-github', props, parentId);
+```
+
+You can view the [source code](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/embed-github-block) for the above example in the BlockSuite code repository.
+
+Combining the earlier example of composing `DocEditor` entirely based on block spec ([recall here](./component-types#composing-editors-by-blocks)), this should give you a more direct understanding of BlockSuite's extensibility.

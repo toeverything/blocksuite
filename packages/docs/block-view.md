@@ -1,9 +1,5 @@
 # Block View
 
-::: info
-This document is preliminary and subject to refinement and updates for clarity and accuracy.
-:::
-
 In BlockSuite, blocks can be rendered by any UI framework. A block should be rendered to a DOM element, and we use `view` to represent the renderer.
 
 By default, we provide a [lit](https://lit.dev/) renderer called `@blocksuite/lit`. But it's still possible to use other UI frameworks. We'll introduce later about how to write custom block renderers.

@@ -5,7 +5,7 @@ import { CommandManager } from '../command/index.js';
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       commandData1?: string;
       commandData2?: string;
       commandData3?: string;

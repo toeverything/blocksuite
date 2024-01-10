@@ -13,7 +13,7 @@ export const getBlockSelectionsCommand: Command<
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       currentBlockSelections?: BlockSelection[];
     }
 

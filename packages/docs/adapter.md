@@ -1,10 +1,10 @@
 # Adapter
 
-Adapter works as a bridge between different formats of data and the BlockSuite Snapshot (i.e. the editor's data). It enables you to import and export data from and to BlockSuite.
+Adapter works as a bridge between different formats of data and the BlockSuite [`Snapshot`](./data-synchronization#snapshot-api) (i.e., the JSON-serialized block tree). It enables you to import and export data from and to BlockSuite documents.
 
 ## Base Adapter
 
-[BaseAdapter](api/@blocksuite/store/classes/BaseAdapter.md) provides you with a skeleton to build your own adapter. It is an abstract class that you can extend and implement the following methods:
+[`BaseAdapter`](/api/@blocksuite/store/classes/BaseAdapter) provides you with a skeleton to build your own adapter. It is an abstract class that you can extend and implement the following methods:
 
 ```ts
 export abstract class BaseAdapter<AdapterTarget = unknown> {
@@ -27,7 +27,7 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
   ): Promise<BlockSnapshot>;
   abstract toSliceSnapshot(
     payload: ToSliceSnapshotPayload<AdapterTarget>
-  ): Promise<SliceSnapshot>;
+  ): Promise<SliceSnapshot | null>;
 
   applyConfigs(configs: Map<string, unknown>) {
     this.configs = new Map([...configs]);
@@ -36,6 +36,8 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
 ```
 
 Methods `fromPageSnapshot`, `fromBlockSnapshot`, `fromSliceSnapshot` are used to convert the data from the BlockSuite Snapshot to the target format. Methods `toPageSnapshot`, `toBlockSnapshot`, `toSliceSnapshot` are used to convert the data from the target format to the BlockSuite Snapshot.
+
+Method `toSliceSnapshot` can return `null` if the target format cannot be converted to a slice using this adapter. It enables some components like clipboard to determine whether the adapter can handle the data. If not, it will try other adapters according to the priority.
 
 These six core methods are expected to be purely functional. They should not have any side effects. If you need to do some side effects, you can use the `applyConfigs` method to apply the configurations.
 
@@ -60,7 +62,7 @@ const markdownResult = await adapter.fromPageSnapshot({
 
 ## AST Walker
 
-[ASTWalker](api/@blocksuite/store/classes/ASTWalker.md) is a helper class that helps you to transform from and to different ASTs (Abstract Syntax Trees). For example, you can use it to transform from BlockSuite Snapshot (which can be treated as AST) to Markdown AST and then export to Markdown. Unlike other AST walkers, it does not only traverse the AST, but also gives you the ability to build a new AST with the data from the original AST.
+[ASTWalker](/api/@blocksuite/store/classes/ASTWalker) is a helper class that helps you to transform from and to different ASTs (Abstract Syntax Trees). For example, you can use it to transform from BlockSuite Snapshot (which can be treated as AST) to Markdown AST and then export to Markdown. Unlike other AST walkers, it does not only traverse the AST, but also gives you the ability to build a new AST with the data from the original AST.
 
 It is recommended to use ASTWalker to build text-based adapters.
 
@@ -113,7 +115,7 @@ There are two handlers which will be called when the walker enters and leaves a 
 
 For example, consider a markdown document like this:
 
-```markdown
+```md
 - List 1 // context.openNode 1
   - List 1.1 // context.openNode 2 && context.closeNode 2
   - List 1.2 // context.openNode 3 && context.closeNode 3
@@ -121,7 +123,7 @@ For example, consider a markdown document like this:
 - List 2 // context.openNode 4 && context.closeNode 4
 ```
 
-The context is just like a stack. In fact, it is a stack. When the walker enters a node, it will push the node to the stack. When the walker leaves a node, it will pop the node from the stack. Whenever the node pops from the stack, the walker will mount the node to its parent node.
+The context works like a stack. In fact, it is a stack. When the walker enters a node, it will push the node to the stack. When the walker leaves a node, it will pop the node from the stack. Whenever the node pops from the stack, the walker will mount the node to its parent node.
 
 In this case, the walker will push nodes when entering and pop nodes when leaving, producing a nested structure i.e. a tree.
 

@@ -14,7 +14,9 @@ import { type IBound } from '../../../../../surface-block/consts.js';
 import type { TemplateJob } from '../../../../../surface-block/service/template.js';
 import {
   createInsertPlaceMiddleware,
+  createRegenerateIndexMiddleware,
   createStickerMiddleware,
+  replaceIdMiddleware,
 } from '../../../../../surface-block/service/template-middlewares.js';
 import {
   Bound,
@@ -24,6 +26,7 @@ import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js
 import { builtInTemplates } from './builtin-templates.js';
 import { ArrowIcon, defaultPreview } from './icon.js';
 import type { Template } from './template-type.js';
+import { cloneDeep } from './utils.js';
 
 @customElement('edgeless-templates-panel')
 export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
@@ -314,15 +317,23 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
           currentContentBound.w + 20 / service.viewport.zoom;
         middlewares.push(createInsertPlaceMiddleware(currentContentBound));
       }
+
+      const idxGenerator = service.layer.preservedIndexGenerator(true);
+
+      middlewares.push(
+        createRegenerateIndexMiddleware((type: string) => idxGenerator(type))
+      );
     }
 
     if (type === 'sticker') {
       middlewares.push(
         createStickerMiddleware(service.viewport.center, () =>
-          service.layer.generateIndex('common', 'block')
+          service.layer.generateIndex('affine:image')
         )
       );
     }
+
+    middlewares.push(replaceIdMiddleware);
 
     return this.edgeless.surface.service.TemplateJob.create({
       model: this.edgeless.surfaceBlockModel,
@@ -333,6 +344,8 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
   private async _insertTemplate(template: Template) {
     this._loadingTemplate = template;
+
+    template = cloneDeep(template);
 
     const templateJob = this._createTemplateJob(template.type);
     const surface = this.edgeless.surface;

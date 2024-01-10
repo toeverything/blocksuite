@@ -4,6 +4,7 @@ import { type BlockSnapshot, type SnapshotReturn } from '@blocksuite/store';
 import type { IConnector } from '../index.js';
 import { Bound } from '../utils/bound.js';
 import { generateElementId } from '../utils/index.js';
+import { sortIndex } from '../utils/sort.js';
 import type { SlotBlockPayload, TemplateJob } from './template.js';
 
 export const replaceIdMiddleware = (job: TemplateJob) => {
@@ -224,6 +225,115 @@ export const createStickerMiddleware = (
         ).serialize();
 
         blockJson.props.index = getIndex();
+      }
+    };
+  };
+};
+
+export const createRegenerateIndexMiddleware = (
+  generateIndex: (type: string) => string
+) => {
+  return (job: TemplateJob) => {
+    job.slots.beforeInsert.on(blockData => {
+      if (blockData.type === 'template') {
+        generateIndexMap();
+      }
+
+      if (blockData.type === 'block') {
+        resetIndex(blockData.data.blockJson);
+      }
+    });
+
+    const indexMap = new Map<string, string>();
+
+    const generateIndexMap = () => {
+      const indexList: {
+        id: string;
+        index: string;
+        flavour: string;
+        element?: boolean;
+      }[] = [];
+      const frameList: {
+        id: string;
+        index: string;
+      }[] = [];
+      const groupIndexMap = new Map<
+        string,
+        {
+          index: string;
+          id: string;
+        }
+      >();
+
+      job.walk(block => {
+        if (block.props.index) {
+          if (block.flavour === 'affine:frame') {
+            frameList.push({
+              id: block.id,
+              index: block.props.index as string,
+            });
+          } else {
+            indexList.push({
+              id: block.id,
+              index: block.props.index as string,
+              flavour: block.flavour,
+            });
+          }
+        }
+
+        if (block.flavour === 'affine:surface') {
+          Object.entries(
+            block.props.elements as Record<string, Record<string, unknown>>
+          ).forEach(([_, element]) => {
+            indexList.push({
+              index: element['index'] as string,
+              flavour: element['type'] as string,
+              id: element['id'] as string,
+              element: true,
+            });
+
+            if (element['type'] === 'group') {
+              const children = element['children'] as {
+                json: Record<string, boolean>;
+              };
+              const groupIndex = {
+                index: element['index'] as string,
+                id: element['id'] as string,
+              };
+
+              Object.keys(children.json).forEach(key => {
+                groupIndexMap.set(key, groupIndex);
+              });
+            }
+          });
+        }
+      });
+
+      indexList.sort((a, b) => sortIndex(a, b, groupIndexMap));
+      frameList.sort((a, b) => sortIndex(a, b, groupIndexMap));
+
+      frameList.forEach(index => {
+        indexMap.set(index.id, generateIndex('affine:frame'));
+      });
+
+      indexList.forEach(index => {
+        indexMap.set(index.id, generateIndex(index.flavour));
+      });
+    };
+    const resetIndex = (blockJson: BlockSnapshot) => {
+      if (blockJson.props.index) {
+        blockJson.props.index =
+          indexMap.get(blockJson.id) ?? blockJson.props.index;
+      }
+
+      if (blockJson.flavour === 'affine:surface') {
+        Object.entries(
+          blockJson.props.elements as Record<string, Record<string, unknown>>
+        ).forEach(([_, element]) => {
+          if (element['index']) {
+            element['index'] = indexMap.get(element['id'] as string);
+          }
+        });
       }
     };
   };

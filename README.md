@@ -85,8 +85,8 @@ This can be illustrated as the diagram below:
 In addition to extending custom blocks, here are what you can also conveniently achieve with BlockSuite:
 
 - Writing type-safe complex editing logic based on the [command](https://blocksuite.io/command.html) mechanism, similar to react hooks designed for document editing.
-- Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshot](https://blocksuite.io/data-persistence.html#snapshot-api) and transformer.
-- Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the document's [provider](https://blocksuite.io/data-persistence.html#provider-based-persistence) mechanism.
+- Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshot](https://blocksuite.io/data-synchronization.html#snapshot-api) and transformer.
+- Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the [provider](https://blocksuite.io/data-synchronization.html#provider-based-state-management) mechanism of the document.
 - State scheduling across multiple documents and reusing one document in multiple editors.
 
 > 🚧 BlockSuite is currently in its early stage, with some extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!

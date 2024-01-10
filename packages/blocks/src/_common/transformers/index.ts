@@ -4,5 +4,6 @@ export {
   customImageProxyMiddleware,
   defaultImageProxyMiddleware,
   replaceIdMiddleware,
+  setImageProxyMiddlewareURL,
 } from './middlewares.js';
 export * as ZipTransformer from './zip.js';

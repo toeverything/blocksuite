@@ -52,7 +52,9 @@ import {
   DEFAULT_TEXT_WIDTH,
   Direction,
   NOTE_BACKGROUND_COLOR_MAP,
+  PANEL_HEIGHT,
   PANEL_OFFSET,
+  PANEL_WIDTH,
   type TARGET_SHAPE_TYPE,
 } from './utils.js';
 
@@ -437,8 +439,8 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
     x += PANEL_OFFSET.x;
     y += PANEL_OFFSET.y;
-    x = clamp(x, 20, width - 20 - 136);
-    y = clamp(y, 20, height - 20 - 108);
+    x = clamp(x, 20, width - 20 - PANEL_WIDTH);
+    y = clamp(y, 20, height - 20 - PANEL_HEIGHT);
     return [x, y] as [number, number];
   }
 

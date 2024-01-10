@@ -26,6 +26,11 @@ export {
 } from './_common/components/index.js';
 export { type NavigatorMode } from './_common/edgeless/frame/consts.js';
 export {
+  createEmbedBlock,
+  defineEmbedModel,
+  EmbedBlockElement,
+} from './_common/embed-block-helper/index.js';
+export {
   ArrowDownSmallIcon,
   CloseIcon,
   DualLinkIcon16,

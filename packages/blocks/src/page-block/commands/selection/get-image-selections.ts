@@ -14,7 +14,7 @@ export const getImageSelectionsCommand: Command<
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {
+    interface CommandContext {
       currentImageSelections?: ImageSelection[];
     }
 

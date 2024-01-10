@@ -105,13 +105,13 @@ test('new added notes should be placed under the topmost canvas layer', async ()
     shapeType: 'rect',
   });
   addNote(page, {
-    index: service.layer.generateIndex('common', 'block'),
+    index: service.layer.generateIndex('affine:note'),
   });
   addNote(page, {
-    index: service.layer.generateIndex('common', 'block'),
+    index: service.layer.generateIndex('affine:note'),
   });
   addNote(page, {
-    index: service.layer.generateIndex('common', 'block'),
+    index: service.layer.generateIndex('affine:note'),
   });
 
   await wait();
@@ -144,7 +144,7 @@ test('if the topmost layer is canvas layer, the number of layers in the canvasLa
     shapeType: 'rect',
   });
   addNote(page, {
-    index: service.layer.generateIndex('common', 'canvas'),
+    index: service.layer.generateIndex('shape'),
   });
   service.addElement('shape', {
     shapeType: 'rect',
@@ -161,13 +161,13 @@ test('a new layer should be created in canvasLayers prop when the topmost layer 
     shapeType: 'rect',
   });
   addNote(page, {
-    index: service.layer.generateIndex('common', 'canvas'),
+    index: service.layer.generateIndex('shape'),
   });
   service.addElement('shape', {
     shapeType: 'rect',
   });
   addNote(page, {
-    index: service.layer.generateIndex('common', 'canvas'),
+    index: service.layer.generateIndex('shape'),
   });
 
   expect(service.layer.canvasLayers.length).toBe(3);
@@ -182,13 +182,13 @@ describe('layer reorder functionality', () => {
         shapeType: 'rect',
       }),
       addNote(page, {
-        index: service.layer.generateIndex('common', 'canvas'),
+        index: service.layer.generateIndex('shape'),
       }),
       service.addElement('shape', {
         shapeType: 'rect',
       }),
       addNote(page, {
-        index: service.layer.generateIndex('common', 'canvas'),
+        index: service.layer.generateIndex('shape'),
       }),
     ];
   });
@@ -342,7 +342,7 @@ test('indexed canvas should be inserted into edgeless portal when switch to edge
   });
 
   addNote(page, {
-    index: service.layer.generateIndex('common', 'canvas'),
+    index: service.layer.generateIndex('shape'),
   });
 
   await wait();

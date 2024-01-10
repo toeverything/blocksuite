@@ -1,5 +1,4 @@
 import type { TestUtils } from '@blocksuite/blocks';
-import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorHost } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
 import type {
@@ -23,7 +22,6 @@ declare global {
     page: Page;
     workspace: Workspace;
     blockSchemas: z.infer<typeof BlockSchema>[];
-    ContentParser: typeof ContentParser;
     job: Job;
     Y: typeof Workspace.Y;
     std: typeof std;
