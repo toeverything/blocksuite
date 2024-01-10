@@ -5,13 +5,14 @@ import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
 import type { BookmarkBlockModel } from '../models.js';
 import type { NoteBlockModel } from '../note-block/index.js';
-import {
-  type BrushElement,
-  type CanvasElement,
-  type ConnectorElement,
-  type ConnectorMode,
-  type GroupElement,
-} from '../surface-block/elements/index.js';
+import type { EdgelessElement } from '../page-block/edgeless/type.js';
+import type { ConnectorMode } from '../surface-block/element-model/connector.js';
+import type {
+  BrushElementModel,
+  ConnectorElementModel,
+  GroupElementModel,
+} from '../surface-block/element-model/index.js';
+import { type CanvasElement } from '../surface-block/element-model/index.js';
 import type { ShapeType } from '../surface-block/index.js';
 import type { NavigatorMode } from './edgeless/frame/consts.js';
 import type { RefNodeSlots } from './inline/presets/nodes/reference-node.js';
@@ -121,7 +122,7 @@ export type TopLevelBlockModel =
   | ImageBlockModel
   | BookmarkBlockModel;
 
-export type EdgelessElement = TopLevelBlockModel | CanvasElement;
+export type { EdgelessElement };
 
 export type Alignable = EdgelessElement;
 
@@ -131,7 +132,10 @@ export type Erasable = EdgelessElement;
 
 export type Connectable =
   | TopLevelBlockModel
-  | Exclude<CanvasElement, ConnectorElement | BrushElement | GroupElement>;
+  | Exclude<
+      CanvasElement,
+      ConnectorElementModel | BrushElementModel | GroupElementModel
+    >;
 
 export type DefaultTool = {
   type: 'default';

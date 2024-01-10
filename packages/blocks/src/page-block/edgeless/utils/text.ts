@@ -3,15 +3,15 @@ import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../../frame-block/index.js';
+import { getCursorByCoord } from '../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { CanvasTextFontFamily } from '../../../surface-block/consts.js';
+import type { GroupElementModel } from '../../../surface-block/element-model/group.js';
+import { ShapeElementModel } from '../../../surface-block/element-model/shape.js';
+import { TextElementModel } from '../../../surface-block/element-model/text.js';
 import {
   Bound,
   CanvasElementType,
-  type GroupElement,
   type IModelCoord,
-  ShapeElement,
-  ShapeStyle,
-  TextElement,
 } from '../../../surface-block/index.js';
 import {
   GET_DEFAULT_LINE_COLOR,
@@ -29,14 +29,14 @@ import {
 } from './consts.js';
 
 export function mountTextElementEditor(
-  textElement: TextElement,
+  textElement: TextElementModel,
   edgeless: EdgelessPageBlockComponent,
   focusCoord?: IModelCoord
 ) {
   let cursorIndex = textElement.text.length;
   if (focusCoord) {
     cursorIndex = Math.min(
-      textElement.getCursorByCoord(focusCoord),
+      getCursorByCoord(textElement, focusCoord),
       cursorIndex
     );
   }
@@ -59,7 +59,7 @@ export function mountTextElementEditor(
 }
 
 export function mountShapeTextEditor(
-  shapeElement: ShapeElement,
+  shapeElement: ShapeElementModel,
   edgeless: EdgelessPageBlockComponent
 ) {
   if (!shapeElement.text) {
@@ -70,17 +70,17 @@ export function mountShapeTextEditor(
       : fillColor === SHAPE_FILL_COLOR_BLACK
         ? SHAPE_TEXT_COLOR_PURE_WHITE
         : SHAPE_TEXT_COLOR_PURE_BLACK;
-    edgeless.surface.updateElement<CanvasElementType.SHAPE>(shapeElement.id, {
+    edgeless.service.updateElement(shapeElement.id, {
       text,
       color,
       fontFamily:
-        shapeElement.shapeStyle === ShapeStyle.General
+        shapeElement.shapeStyle === 'General'
           ? CanvasTextFontFamily.Inter
           : CanvasTextFontFamily.Kalam,
     });
   }
-  const updatedElement = edgeless.surface.pickById(shapeElement.id);
-  assertInstanceOf(updatedElement, ShapeElement);
+  const updatedElement = edgeless.service.getElementById(shapeElement.id);
+  assertInstanceOf(updatedElement, ShapeElementModel);
 
   const shapeEditor = new EdgelessShapeTextEditor();
   shapeEditor.element = updatedElement;
@@ -110,7 +110,7 @@ export function mountFrameTitleEditor(
 }
 
 export function mountGroupTitleEditor(
-  group: GroupElement,
+  group: GroupElementModel,
   edgeless: EdgelessPageBlockComponent
 ) {
   const groupEditor = new EdgelessGroupTitleEditor();
@@ -129,21 +129,21 @@ export function addText(
   event: PointerEventState
 ) {
   const [x, y] = edgeless.surface.viewport.toModelCoord(event.x, event.y);
-  const selected = edgeless.surface.pickTop(x, y);
+  const selected = edgeless.service?.pickElement(x, y);
 
   if (!selected) {
     const [modelX, modelY] = edgeless.surface.viewport.toModelCoord(
       event.x,
       event.y
     );
-    const id = edgeless.surface.addElement(CanvasElementType.TEXT, {
+    const id = edgeless.service.addElement(CanvasElementType.TEXT, {
       xywh: new Bound(modelX, modelY, 32, 32).serialize(),
       text: new Workspace.Y.Text(),
     });
     edgeless.page.captureSync();
-    const textElement = edgeless.surface.pickById(id);
+    const textElement = edgeless.service.getElementById(id);
     assertExists(textElement);
-    if (textElement instanceof TextElement) {
+    if (textElement instanceof TextElementModel) {
       mountTextElementEditor(textElement, edgeless);
     }
   }

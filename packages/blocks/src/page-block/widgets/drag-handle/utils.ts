@@ -372,7 +372,7 @@ export function convertDragPreviewDocToEdgeless({
   const previewEl = dragPreview.querySelector(cssSelector);
   assertExists(previewEl);
   const rect = previewEl.getBoundingClientRect();
-  const point = edgelessPage.surface.toModelCoord(rect.x, rect.y);
+  const point = edgelessPage.service.toModelCoord(rect.x, rect.y);
   const bound = new Bound(
     point[0],
     point[1],
@@ -383,13 +383,13 @@ export function convertDragPreviewDocToEdgeless({
   const blockModel = blockComponent.model;
   const blockProps = getBlockProps(blockModel);
 
-  edgelessPage.surface.addElement(
+  edgelessPage.service.addBlock(
     blockComponent.flavour as EdgelessBlockType,
     {
       ...blockProps,
       xywh: bound.serialize(),
     },
-    edgelessPage.surface.model
+    edgelessPage.surfaceBlockModel
   );
   blockComponent.page.deleteBlock(blockModel);
   return true;

@@ -2,6 +2,10 @@ import type { Y } from '@blocksuite/store';
 
 import type { EdgelessElement } from '../../_common/types.js';
 import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
+import type {
+  HitTestOptions,
+  IEdgelessElement,
+} from '../../page-block/edgeless/type.js';
 import type { Renderer } from '../canvas-renderer/renderer.js';
 import type { GroupElement } from '../index.js';
 import type { RoughCanvas } from '../rough/canvas.js';
@@ -14,11 +18,7 @@ import {
   type SerializedXYWH,
   type XYWH,
 } from '../utils/xywh.js';
-import type {
-  CanvasElementType,
-  HitTestOptions,
-  IEdgelessElement,
-} from './edgeless-element.js';
+import type { CanvasElementType } from './edgeless-element.js';
 
 export interface ISurfaceElement {
   id: string;

@@ -300,26 +300,26 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
   private _createTemplateJob(type: string) {
     const middlewares: ((job: TemplateJob) => void)[] = [];
-    const surface = this.edgeless.surface;
+    const service = this.edgeless.service;
 
     if (type === 'template') {
       const currentContentBound = getCommonBound(
         (
-          surface.blocks.map(block => Bound.deserialize(block.xywh)) as IBound[]
-        ).concat(surface.getElements())
+          service.blocks.map(block => Bound.deserialize(block.xywh)) as IBound[]
+        ).concat(service.elements)
       );
 
       if (currentContentBound) {
         currentContentBound.x +=
-          currentContentBound.w + 20 / surface.viewport.zoom;
+          currentContentBound.w + 20 / service.viewport.zoom;
         middlewares.push(createInsertPlaceMiddleware(currentContentBound));
       }
     }
 
     if (type === 'sticker') {
       middlewares.push(
-        createStickerMiddleware(surface.viewport.center, () =>
-          surface.layer.generateIndex('common', 'block')
+        createStickerMiddleware(service.viewport.center, () =>
+          service.layer.generateIndex('common', 'block')
         )
       );
     }

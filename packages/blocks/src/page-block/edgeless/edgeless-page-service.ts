@@ -3,7 +3,8 @@ import type { BlockModel } from '@blocksuite/store';
 import { last } from '../../_common/utils/iterable.js';
 import { GroupElementModel } from '../../index.js';
 import type { SurfaceBlockModel } from '../../models.js';
-import type { LayerManager } from '../../surface-block/managers/layer-manager.js';
+import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
+import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { PageService } from '../page-service.js';
 import type { EdgelessSelectionManager } from './services/selection-manager.js';
@@ -17,13 +18,32 @@ export class EdgelessPageService extends PageService {
     viewportY: number;
     translateX: number;
     translateY: number;
+    center: {
+      x: number;
+      y: number;
+    };
     zoom: number;
   };
   private _selection!: EdgelessSelectionManager;
 
+  override mounted() {
+    super.mounted();
+
+    this._layer = LayerManager.create(this.page, this._surfaceModel);
+  }
+
   override unmounted() {
     super.unmounted();
+    this._layer.dispose();
     this.selectionManager.set([]);
+  }
+
+  get surface() {
+    return this._surfaceModel;
+  }
+
+  get layer() {
+    return this._layer;
   }
 
   get selection() {
@@ -34,15 +54,30 @@ export class EdgelessPageService extends PageService {
     return this._viewport;
   }
 
+  get elements() {
+    return this._layer.canvasElements;
+  }
+
+  get frames() {
+    return this._layer.frames;
+  }
+
+  get blocks() {
+    return (this.frames as EdgelessBlock[]).concat(this._layer.blocks);
+  }
+
   generateIndex(type: string) {
     // @ts-ignore
     return this._layer.generateIndex(type);
   }
 
-  addElement<T = Record<string, unknown>>(props: T & { type: string }) {
+  addElement<T = Record<string, unknown>>(type: string, props: T) {
     // @ts-ignore
     props['index'] = this.generateIndex(props.type);
-    this._surfaceModel.addElement(props);
+    // @ts-ignore
+    props['type'] = type;
+
+    return this._surfaceModel.addElement(props as T & { type: string });
   }
 
   addBlock(
@@ -52,7 +87,27 @@ export class EdgelessPageService extends PageService {
     parentIndex?: number
   ) {
     props['index'] = this.generateIndex(flavour);
-    this.page.addBlock(flavour, props, parent, parentIndex);
+
+    return this.page.addBlock(flavour, props, parent, parentIndex);
+  }
+
+  updateElement(id: string, props: Record<string, unknown>) {
+    if (this._surfaceModel.getElementById(id)) {
+      this._surfaceModel.updateElement(id, props);
+    } else if (this.page.getBlockById(id)) {
+      const block = this.page.getBlockById(id)!;
+      this.page.updateBlock(block, props);
+    }
+  }
+
+  removeElement(id: string) {
+    if (this._surfaceModel.getElementById(id)) {
+      this._surfaceModel.removeElement(id);
+    } else if (this.page.getBlockById(id)) {
+      const block = this.page.getBlockById(id)!;
+
+      this.page.deleteBlock(block);
+    }
   }
 
   getElementById(id: string) {
@@ -185,5 +240,11 @@ export class EdgelessPageService extends PageService {
     const [x, y] = this.toViewCoord(bound.x, bound.y);
 
     return new Bound(x, y, w * this._viewport.zoom, h * this._viewport.zoom);
+  }
+
+  reorderElement(element: EdgelessElement, direction: ReorderingDirection) {
+    const index = this._layer.getReorderedIndex(element, direction);
+
+    element.index = index;
   }
 }

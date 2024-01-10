@@ -1,4 +1,5 @@
-import { assertType, Slot } from '@blocksuite/global/utils';
+import { assertType, DisposableGroup, Slot } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 
 import { last, nToLast } from '../../_common/utils/iterable.js';
@@ -13,6 +14,7 @@ import { ElementModel } from '../element-model/base.js';
 import { GroupElementModel } from '../element-model/group.js';
 import { GROUP_ROOT } from '../elements/group/consts.js';
 import { GridManager } from '../grid.js';
+import type { SurfaceBlockModel } from '../surface-model.js';
 import { compare, getGroupParent } from './group-manager.js';
 import {
   getElementIndex,
@@ -20,9 +22,12 @@ import {
   insertToOrderedArray,
   isInRange,
   removeFromOrderedArray,
+  renderableInEdgeless,
   ungroupIndex,
   updateLayersIndex,
 } from './layer-utils.js';
+
+export type ReorderingDirection = 'front' | 'forward' | 'backward' | 'back';
 
 type BaseLayer<T> = {
   set: Set<T>;
@@ -59,6 +64,54 @@ export type Layer = BlockLayer | CanvasLayer;
 
 export class LayerManager {
   static INITAL_INDEX = 'a0';
+  static create(page: Page, surface: SurfaceBlockModel) {
+    const layerManager = new LayerManager(
+      (
+        page
+          .getBlocks()
+          .filter(model =>
+            renderableInEdgeless(page, surface, model)
+          ) as EdgelessElement[]
+      ).concat(surface.elementModels)
+    );
+
+    page.slots.blockUpdated.on(payload => {
+      if (payload.type === 'add') {
+        const block = page.getBlockById(payload.id)!;
+
+        // @ts-ignore
+        if (block['edgeless'] && renderableInEdgeless(block)) {
+          layerManager.add(block as EdgelessBlock);
+        }
+      }
+      if (payload.type === 'update') {
+        const block = page.getBlockById(payload.id)!;
+
+        if (
+          // @ts-ignore
+          block['edgeless'] &&
+          payload.props.key === 'index' &&
+          renderableInEdgeless(page, surface, block)
+        ) {
+          layerManager.update(block as EdgelessBlock);
+        }
+      }
+      if (payload.type === 'delete') {
+        const block = payload.model;
+
+        // @ts-ignore
+        if (block['edgeless']) {
+          layerManager.delete(block as EdgelessBlock);
+        }
+      }
+    });
+
+    layerManager.listen(page, surface);
+
+    return layerManager;
+  }
+
+  private _disposables = new DisposableGroup();
 
   slots = {
     layerUpdated: new Slot(),
@@ -89,11 +142,62 @@ export class LayerManager {
 
   constructor(elements?: EdgelessElement[]) {
     if (elements) {
-      this.init(elements);
+      this._init(elements);
     }
   }
 
-  init(elements: EdgelessElement[]) {
+  private listen(page: Page, surface: SurfaceBlockModel) {
+    this._disposables.add(
+      page.slots.blockUpdated.on(payload => {
+        if (payload.type === 'add') {
+          const block = page.getBlockById(payload.id)!;
+
+          // @ts-ignore
+          if (block['edgeless'] && renderableInEdgeless(block)) {
+            this.add(block as EdgelessBlock);
+          }
+        }
+        if (payload.type === 'update') {
+          const block = page.getBlockById(payload.id)!;
+
+          if (
+            // @ts-ignore
+            block['edgeless'] &&
+            payload.props.key === 'index' &&
+            renderableInEdgeless(page, surface, block)
+          ) {
+            this.update(block as EdgelessBlock);
+          }
+        }
+        if (payload.type === 'delete') {
+          const block = payload.model;
+
+          // @ts-ignore
+          if (block['edgeless']) {
+            this.delete(block as EdgelessBlock);
+          }
+        }
+      })
+    );
+
+    this._disposables.add(
+      surface.elementAdded.on(element =>
+        this.add(surface.getElementById(element.id)!)
+      )
+    );
+    this._disposables.add(
+      surface.elementUpdated.on(element =>
+        this.update(surface.getElementById(element.id)!)
+      )
+    );
+    this._disposables.add(
+      surface.elementRemoved.on(element =>
+        this.delete(surface.getElementById(element.id)!)
+      )
+    );
+  }
+
+  private _init(elements: EdgelessElement[]) {
     this.canvasElements = [];
     this.blocks = [];
     this.frames = [];
@@ -622,7 +726,7 @@ export class LayerManager {
 
   getReorderedIndex(
     element: EdgelessElement,
-    direction: 'front' | 'forward' | 'back' | 'backward'
+    direction: ReorderingDirection
   ): string {
     const group = getGroupParent(element);
     const isFrameBlock =
@@ -698,5 +802,10 @@ export class LayerManager {
   compare(a: EdgelessElement, b: EdgelessElement) {
     throw new Error('Not implemented');
     return a.index > b.index ? 1 : -1;
+  }
+
+  dispose() {
+    this.slots.layerUpdated.dispose();
+    this._disposables.dispose();
   }
 }

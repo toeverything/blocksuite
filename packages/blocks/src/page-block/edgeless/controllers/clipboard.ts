@@ -42,6 +42,7 @@ import {
   type CanvasElement,
   GroupElement,
 } from '../../../surface-block/elements/index.js';
+import type { ElementModel } from '../../../surface-block/index.js';
 import { compare } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
@@ -214,8 +215,11 @@ export class EdgelessClipboardController extends PageClipboard {
     if (isUrlInClipboard(data)) {
       const url = data.getData('text/plain');
       const { lastMousePos } = this.toolManager;
-      const [x, y] = this.surface.toModelCoord(lastMousePos.x, lastMousePos.y);
-      const id = this.surface.addElement(
+      const [x, y] = this.host.service.toModelCoord(
+        lastMousePos.x,
+        lastMousePos.y
+      );
+      const id = this.host.service.addBlock(
         'affine:bookmark',
         {
           xywh: Bound.fromCenter(
@@ -284,11 +288,11 @@ export class EdgelessClipboardController extends PageClipboard {
       }
       clipboardData.children = yMap;
     }
-    const id = this.surface.addElement(
+    const id = this.host.service.addElement(
       clipboardData.type as CanvasElementType,
       clipboardData
     );
-    const element = this.surface.pickById(id) as CanvasElement;
+    const element = this.host.service.getElementById(id) as CanvasElement;
     assertExists(element);
     return element;
   }
@@ -349,17 +353,17 @@ export class EdgelessClipboardController extends PageClipboard {
     notes: BlockSnapshot[],
     oldToNewIdMap: Map<string, string>
   ) {
-    const { surface } = this;
+    const { host } = this;
     const noteIds = await Promise.all(
       notes.map(async ({ id, props, children }) => {
         delete props.index;
         assertExists(props.xywh);
-        const noteId = this.surface.addElement(
+        const noteId = this.host.service.addBlock(
           'affine:note',
           props,
           this.page.root?.id
         );
-        const note = surface.pickById(noteId) as NoteBlockModel;
+        const note = host.service.getElementById(noteId) as NoteBlockModel;
         if (id) oldToNewIdMap.set(id, noteId);
         assertExists(note);
 
@@ -376,7 +380,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const frameIds = await Promise.all(
       frames.map(async ({ props }) => {
         const { xywh, title, background } = props;
-        const frameId = this.surface.addElement(
+        const frameId = this.host.service.addBlock(
           'affine:frame',
           {
             xywh,
@@ -395,7 +399,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const imageIds = await Promise.all(
       images.map(async ({ props }) => {
         const { xywh, sourceId, rotate } = props;
-        const imageId = this.surface.addElement(
+        const imageId = this.host.service.addBlock(
           'affine:image',
           {
             xywh,
@@ -415,7 +419,7 @@ export class EdgelessClipboardController extends PageClipboard {
       bookmarks.map(async ({ props }) => {
         const { xywh, style, url, caption, description, icon, image, title } =
           props;
-        const bookmarkId = this.surface.addElement(
+        const bookmarkId = this.host.service.addBlock(
           'affine:bookmark',
           {
             xywh,
@@ -502,11 +506,11 @@ export class EdgelessClipboardController extends PageClipboard {
     ) as FrameBlockModel[];
 
     const images = imageIds.map(id =>
-      this.surface.pickById(id)
+      this.host.service.getElementById(id)
     ) as ImageBlockModel[];
 
     const bookmarks = bookmarkIds.map(id =>
-      this.surface.pickById(id)
+      this.host.service.getElementById(id)
     ) as BookmarkBlockModel[];
 
     const elements = this._createCanvasElements(
@@ -537,7 +541,7 @@ export class EdgelessClipboardController extends PageClipboard {
       if (ele instanceof ConnectorElement) {
         this.surface.connector.updateXYWH(ele, newBound);
       } else {
-        this.surface.updateElement(ele.id, {
+        this.host.service.updateElement(ele.id, {
           xywh: newBound.serialize(),
         });
       }
@@ -549,7 +553,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
       bound.x += pasteX - oldCommonBound.x;
       bound.y += pasteY - oldCommonBound.y;
-      this.surface.updateElement(block.id, {
+      this.surface.edgeless.service.updateElement(block.id, {
         xywh: bound.serialize(),
       });
     });
@@ -888,7 +892,7 @@ export async function prepareClipboardData(
       } else if (selected instanceof ConnectorElement) {
         return prepareConnectorClipboardData(selected, selectedAll);
       } else {
-        return selected.serialize();
+        return (selected as ElementModel).serialize();
       }
     })
   );

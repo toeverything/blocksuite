@@ -9,7 +9,7 @@ export type PointStyle = 'None' | 'Arrow' | 'Triangle' | 'Circle' | 'Diamond';
 
 export type Connection = {
   id?: string;
-  position: [number, number];
+  position?: [number, number];
 };
 
 export enum ConnectorMode {

@@ -110,4 +110,20 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
 
     return groups.some(group => group.id === this.id);
   }
+
+  addElement(element: IEdgelessElement | string) {
+    const id = typeof element === 'string' ? element : element.id;
+
+    this.surfaceModel.page.transact(() => {
+      this.children.set(id, true);
+    });
+  }
+
+  removeElement(element: IEdgelessElement | string) {
+    const id = typeof element === 'string' ? element : element.id;
+
+    this.surfaceModel.page.transact(() => {
+      this.children.delete(id);
+    });
+  }
 }

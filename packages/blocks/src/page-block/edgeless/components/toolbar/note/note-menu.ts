@@ -110,7 +110,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                 if (!url) return;
 
                 const center = Vec.toVec(this.edgeless.surface.viewport.center);
-                this.edgeless.surface.addElement(
+                this.edgeless.service.addElement(
                   'affine:bookmark',
                   {
                     url,

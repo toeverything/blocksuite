@@ -1,5 +1,17 @@
 import type { Y } from '@blocksuite/store';
 
+import type {
+  FontFamily,
+  FontStyle,
+  FontWeight,
+} from '../../../element-model/common.js';
+import type { TextElementModel } from '../../../element-model/text.js';
+import type { Bound } from '../../../utils/bound.js';
+import {
+  getPointsFromBoundsWithRotation,
+  rotatePoints,
+} from '../../../utils/math-utils.js';
+
 type TextDelta = {
   insert: string;
   attributes?: {
@@ -68,7 +80,7 @@ export function getLineHeight(fontFamily: string, fontSize: number) {
   return lineHeight;
 }
 
-function wrapFontFamily(fontFamily: string): string {
+export function wrapFontFamily(fontFamily: string): string {
   return `"${fontFamily}"`;
 }
 
@@ -373,3 +385,140 @@ export const truncateTextByWidth = (
   }
   return text.slice(0, i);
 };
+
+export function getTextCursorPosition(
+  model: TextElementModel,
+  coord: { x: number; y: number }
+) {
+  const leftTop = getPointsFromBoundsWithRotation(model)[0];
+  const mousePos = rotatePoints(
+    [[coord.x, coord.y]],
+    leftTop,
+    -model.rotate
+  )[0];
+
+  return [
+    Math.floor(
+      (mousePos[1] - leftTop[1]) /
+        getLineHeight(model.fontFamily, model.fontSize)
+    ),
+    mousePos[0] - leftTop[0],
+  ];
+}
+
+export function getCursorByCoord(
+  model: TextElementModel,
+  coord: { x: number; y: number }
+) {
+  const [lineIndex, offsetX] = getTextCursorPosition(model, coord);
+
+  const font = getFontString(model);
+  const deltas = wrapTextDeltas(model.text, font, model.w);
+  const lines = deltaInsertsToChunks(deltas).map(line =>
+    line.map(iTextDelta => iTextDelta.insert).join('')
+  );
+  const string = lines[lineIndex];
+
+  let index = lines.slice(0, lineIndex).join('').length - 1;
+  let currentStringWidth = 0;
+  let charIndex = 0;
+  while (currentStringWidth < offsetX) {
+    index += 1;
+    if (charIndex === string.length) {
+      break;
+    }
+    currentStringWidth += charWidth.calculate(string[charIndex], font);
+    charIndex += 1;
+  }
+  return index;
+}
+
+export function normalizeTextBound(
+  text: TextElementModel,
+  bound: Bound,
+  dragging: boolean = false
+): Bound {
+  if (!text.text) return bound;
+
+  const yText = text.text;
+  const { fontStyle, fontWeight, fontSize, fontFamily } = text;
+  const lineHeightPx = getLineHeight(fontFamily, fontSize);
+  const font = getFontString({
+    fontStyle,
+    fontWeight,
+    fontSize,
+    fontFamily,
+  });
+
+  let lines: TextDelta[][] = [];
+  const deltas: TextDelta[] = yText.toDelta() as TextDelta[];
+  const widestCharWidth =
+    [...yText.toString()]
+      .map(char => getTextWidth(char, font))
+      .sort((a, b) => a - b)
+      .pop() ?? getTextWidth('W', font);
+
+  if (bound.w < widestCharWidth) {
+    bound.w = widestCharWidth;
+  }
+
+  const width = bound.w;
+  const insertDeltas = deltas.flatMap(delta => ({
+    insert: wrapText(delta.insert, font, width),
+    attributes: delta.attributes,
+  })) as TextDelta[];
+  lines = deltaInsertsToChunks(insertDeltas);
+  if (!dragging && !text.hasMaxWidth) {
+    lines = deltaInsertsToChunks(deltas);
+    const widestLineWidth = Math.max(
+      ...yText
+        .toString()
+        .split('\n')
+        .map(text => getTextWidth(text, font))
+    );
+    bound.w = widestLineWidth;
+  }
+  bound.h = lineHeightPx * lines.length;
+
+  return bound;
+}
+
+export function getFontFacesByFontFamily(
+  fontFamily: FontFamily | string
+): FontFace[] {
+  const fonts = document.fonts;
+  return (
+    [...fonts.keys()]
+      .filter(fontFace => {
+        return fontFace.family === fontFamily;
+      })
+      // remove duplicate font faces
+      .filter(
+        (item, index, arr) =>
+          arr.findIndex(
+            fontFace =>
+              fontFace.family === item.family &&
+              fontFace.weight === item.weight &&
+              fontFace.style === item.style
+          ) === index
+      )
+  );
+}
+
+export function isFontWeightSupported(
+  fontFamily: FontFamily | string,
+  weight: FontWeight
+) {
+  const fontFaces = getFontFacesByFontFamily(fontFamily);
+  const fontFace = fontFaces.find(fontFace => fontFace.weight === weight);
+  return !!fontFace;
+}
+
+export function isFontStyleSupported(
+  fontFamily: FontFamily | string,
+  style: FontStyle
+) {
+  const fontFaces = getFontFacesByFontFamily(fontFamily);
+  const fontFace = fontFaces.find(fontFace => fontFace.style === style);
+  return !!fontFace;
+}

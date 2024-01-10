@@ -6,7 +6,7 @@ import type {
   ShapeTool,
 } from '../../../../_common/utils/index.js';
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
-import type { ShapeElement } from '../../../../surface-block/index.js';
+import type { ShapeElementModel } from '../../../../surface-block/index.js';
 import { Bound, CanvasElementType } from '../../../../surface-block/index.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
 import {
@@ -24,7 +24,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     shapeType: 'rect',
   };
 
-  private _draggingElement: ShapeElement | null = null;
+  private _draggingElement: ShapeElementModel | null = null;
   private _draggingElementId: string | null = null;
 
   // shape overlay
@@ -44,7 +44,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const bound = new Bound(modelX, modelY, width, height);
     const { shapeType } = this.tool;
 
-    const id = this._surface.addElement(CanvasElementType.SHAPE, {
+    const id = this._service.addElement(CanvasElementType.SHAPE, {
       shapeType: shapeType === 'roundedRect' ? 'rect' : shapeType,
       xywh: bound.serialize(),
       radius: shapeType === 'roundedRect' ? 0.1 : 0,
@@ -64,7 +64,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const id = this._addNewShape(e, shapeWidth, SHAPE_OVERLAY_HEIGHT);
 
-    const element = this._surface.pickById(id);
+    const element = this._service.getElementById(id);
     assertExists(element);
 
     this._edgeless.tools.switchToDefaultMode({
@@ -97,7 +97,9 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const id = this._addNewShape(e, 0, 0);
 
     this._draggingElementId = id;
-    this._draggingElement = this._surface.pickById(id) as ShapeElement;
+    this._draggingElement = this._service.getElementById(
+      id
+    ) as ShapeElementModel;
     this._draggingElement.stash('xywh');
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
@@ -134,7 +136,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
         this._draggingArea?.end.y - this._draggingArea?.start.y
       );
       if (width < 20 && height < 20) {
-        this._surface.removeElement(id);
+        this._service.removeElement(id);
         return;
       }
     }
@@ -145,7 +147,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     this._page.captureSync();
 
-    const element = this._surface.pickById(id);
+    const element = this._service.getElementById(id);
     assertExists(element);
     this._edgeless.tools.switchToDefaultMode({
       elements: [element.id],
@@ -191,7 +193,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const bound = new Bound(x, y, w, h);
 
-    this._surface.updateElement(id, {
+    this._service.updateElement(id, {
       xywh: bound.serialize(),
     });
   }

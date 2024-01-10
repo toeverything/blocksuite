@@ -33,6 +33,10 @@ export function selectable<
     connectable = true;
     override rotate = 0;
 
+    get edgeless() {
+      return true;
+    }
+
     get elementBound() {
       const bound = Bound.deserialize(this.xywh);
       return Bound.from(

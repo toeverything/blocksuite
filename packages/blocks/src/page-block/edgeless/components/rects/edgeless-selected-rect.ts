@@ -1,7 +1,7 @@
 import '../connector/connector-handle.js';
 import '../auto-complete/edgeless-auto-complete.js';
 
-import type { Disposable } from '@blocksuite/global/utils';
+import { assertType, type Disposable } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -19,11 +19,14 @@ import {
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
 import type { NoteBlockModel } from '../../../../models.js';
+import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import { TextElementModel } from '../../../../surface-block/element-model/text.js';
+import type { ElementModel } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
   deserializeXYWH,
   GroupElement,
-  normalizeTextBound,
+  ShapeElementModel,
 } from '../../../../surface-block/index.js';
 import {
   Bound,
@@ -32,8 +35,6 @@ import {
   normalizeDegAngle,
   normalizeShapeBound,
   serializeXYWH,
-  ShapeElement,
-  TextElement,
 } from '../../../../surface-block/index.js';
 import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -385,6 +386,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         areAllShapes = false;
         areAllTexts = false;
       } else {
+        assertType<ElementModel>(element);
         if (element.type !== CanvasElementType.CONNECTOR)
           areAllConnectors = false;
         if (
@@ -420,7 +422,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         el.stash('rotate' as 'xywh');
       }
 
-      if (el instanceof TextElement && !rotation) {
+      if (el instanceof TextElementModel && !rotation) {
         el.stash('fontSize');
         el.stash('hasMaxWidth');
       }
@@ -432,7 +434,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           el.pop('rotate' as 'xywh');
         }
 
-        if (el instanceof TextElement && !rotation) {
+        if (el instanceof TextElementModel && !rotation) {
           el.pop('fontSize');
           el.pop('hasMaxWidth');
         }
@@ -451,10 +453,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     >,
     direction: HandleDirection
   ) => {
-    const { surface, edgeless } = this;
+    const { edgeless } = this;
 
     newBounds.forEach(({ bound }, id) => {
-      const element = surface.pickById(id);
+      const element = edgeless.service.getElementById(id);
       if (!element) return;
 
       if (isNoteBlock(element)) {
@@ -473,7 +475,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         this._isNoteHeightLimit = bound.h === NOTE_MIN_HEIGHT ? true : false;
 
         props.xywh = bound.serialize();
-        edgeless.surface.updateElement(element.id, props);
+        edgeless.service.updateElement(element.id, props);
       } else if (isImageBlock(element) || isBookmarkBlock(element)) {
         const curBound = Bound.deserialize(element.xywh);
         if (
@@ -488,11 +490,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           bound.w = (curBound.w / curBound.h) * bound.h;
         }
 
-        edgeless.surface.updateElement(element.id, {
+        edgeless.service.updateElement(element.id, {
           xywh: bound.serialize(),
         });
       } else {
-        if (element instanceof TextElement) {
+        if (element instanceof TextElementModel) {
           let p = 1;
           if (
             direction === HandleDirection.Left ||
@@ -501,7 +503,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             bound = normalizeTextBound(element, bound, true);
             // If the width of the text element has been changed by dragging,
             // We need to set hasMaxWidth to true for wrapping the text
-            edgeless.surface.updateElement(id, {
+            edgeless.service.updateElement(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
               hasMaxWidth: true,
@@ -511,16 +513,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             // const newFontsize = element.fontSize * p;
             // bound = normalizeTextBound(element, bound, false, newFontsize);
 
-            edgeless.surface.updateElement(id, {
+            edgeless.service.updateElement(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
             });
           }
         } else {
-          if (element instanceof ShapeElement) {
+          if (element instanceof ShapeElementModel) {
             bound = normalizeShapeBound(element, bound);
           }
-          edgeless.surface.updateElement(id, {
+          edgeless.service.updateElement(id, {
             xywh: bound.serialize(),
           });
         }
@@ -529,7 +531,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _onDragRotate = (center: IPoint, delta: number) => {
-    const { surface, selection } = this;
+    const { selection } = this;
     const m = new DOMMatrix()
       .translateSelf(center.x, center.y)
       .rotateSelf(delta)
@@ -547,7 +549,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       const { x, y, w, h } = Bound.deserialize(element.xywh);
       const center = new DOMPoint(x + w / 2, y + h / 2).matrixTransform(m);
 
-      surface.updateElement(id, {
+      this.edgeless.service.updateElement(id, {
         xywh: serializeXYWH(center.x - w / 2, center.y - h / 2, w, h),
         rotate: normalizeDegAngle(rotate + delta),
       });
@@ -769,7 +771,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     return (
       !this._isResizing &&
       this.selection.elements.length === 1 &&
-      (this.selection.elements[0] instanceof ShapeElement ||
+      (this.selection.elements[0] instanceof ShapeElementModel ||
         isNoteBlock(this.selection.elements[0]))
     );
   }
@@ -805,7 +807,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             if (target.classList.contains('rotate') && !this._canRotate()) {
               return;
             }
-            const proportional = elements.some(el => el instanceof TextElement);
+            const proportional = elements.some(
+              el => el instanceof TextElementModel
+            );
             _resizeManager.onPointerDown(e, direction, proportional);
           },
           (

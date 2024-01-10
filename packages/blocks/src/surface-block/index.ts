@@ -16,6 +16,7 @@ export { BrushElementModel } from './element-model/brush.js';
 export { ConnectorElementModel } from './element-model/connector.js';
 export { GroupElementModel } from './element-model/group.js';
 export { ShapeElementModel } from './element-model/shape.js';
+export { TextElementModel } from './element-model/text.js';
 export {
   type Connection,
   ConnectorEndpoint,

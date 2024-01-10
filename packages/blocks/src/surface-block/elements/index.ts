@@ -13,7 +13,6 @@ import { GroupElement } from './group/group-element.js';
 import { ShapeElementDefaultProps } from './shape/consts.js';
 import { ShapeElement } from './shape/shape-element.js';
 import type { IShape } from './shape/types.js';
-import type { SurfaceElement } from './surface-element.js';
 import { TextElementDefaultProps } from './text/consts.js';
 import { TextElement } from './text/text-element.js';
 import type { IText } from './text/types.js';
@@ -34,13 +33,13 @@ export {
   getLineWidth,
   normalizeTextBound,
 } from './text/utils.js';
+import type {
+  CanvasElement,
+  ShapeElementModel,
+  TextElementModel,
+} from '../element-model/index.js';
 
-export type CanvasElement =
-  | ShapeElement
-  | BrushElement
-  | ConnectorElement
-  | SurfaceElement
-  | GroupElement;
+export type { CanvasElement };
 
 export const ElementCtors = {
   brush: BrushElement,
@@ -61,6 +60,6 @@ export const ElementDefaultProps: Record<
   group: GroupElementDefaultProps,
 } as const;
 
-export type CanvasElementWithText = ShapeElement | TextElement;
+export type CanvasElementWithText = ShapeElementModel | TextElementModel;
 
 export type { IBrush, IConnector, IShape, IText };

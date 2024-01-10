@@ -6,12 +6,9 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
+import { wrapFontFamily } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import type { ShapeElementModel } from '../../../../surface-block/element-model/index.js';
 import { SHAPE_TEXT_PADDING } from '../../../../surface-block/elements/shape/consts.js';
-import { wrapFontFamily } from '../../../../surface-block/elements/text/utils.js';
-import type {
-  CanvasElementType,
-  ShapeElement,
-} from '../../../../surface-block/index.js';
 import { Bound, toRadian, Vec } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getSelectedRect } from '../../utils/query.js';
@@ -22,7 +19,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   richText!: RichText;
 
   @property({ attribute: false })
-  element!: ShapeElement;
+  element!: ShapeElementModel;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -58,17 +55,14 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         leftTopY
       );
 
-      this.edgeless.surface.updateElement<CanvasElementType.SHAPE>(
-        this.element.id,
-        {
-          xywh: new Bound(
-            modelLeftTopX,
-            modelLeftTopY,
-            this.element.w,
-            containerHeight
-          ).serialize(),
-        }
-      );
+      this.edgeless.service.updateElement(this.element.id, {
+        xywh: new Bound(
+          modelLeftTopX,
+          modelLeftTopY,
+          this.element.w,
+          containerHeight
+        ).serialize(),
+      });
       this.richText.style.minHeight = `${containerHeight}px`;
     }
     this.edgeless.selectionManager.set({

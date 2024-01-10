@@ -90,8 +90,8 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._eraserPoints = [[x, y]];
     this._prevPoint = [x, y];
     this._erasables = new Set([
-      ...this._surface.getElements(),
-      ...this._surface.blocks,
+      ...this._service.elements,
+      ...this._service.blocks,
     ]);
     this._loop();
     this._edgeless.surface.viewport.addOverlay(this._overlay);

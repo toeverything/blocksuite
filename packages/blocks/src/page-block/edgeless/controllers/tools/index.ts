@@ -1,12 +1,10 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import type {
-  EdgelessTool as EdgelessTool,
-  TopLevelBlockModel,
-} from '../../../../_common/utils/index.js';
+import type { EdgelessTool as EdgelessTool } from '../../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessPageService } from '../../edgeless-page-service.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
+import type { EdgelessBlock } from '../../type.js';
 
 export abstract class EdgelessToolController<
   Tool extends EdgelessTool = EdgelessTool,
@@ -39,8 +37,8 @@ export abstract class EdgelessToolController<
     return this._edgeless.page;
   }
 
-  protected get _blocks(): TopLevelBlockModel[] {
-    return this._edgeless.surface.sortedBlocks;
+  protected get _blocks(): EdgelessBlock[] {
+    return this._edgeless.service.blocks;
   }
 
   abstract tool: Tool;

@@ -48,7 +48,6 @@ import {
   type EdgelessBlockType,
   getCommonBound,
   type IBound,
-  intersects,
   type IVec,
   serializeXYWH,
   Vec,
@@ -87,7 +86,6 @@ import {
   DEFAULT_NOTE_WIDTH,
   FIT_TO_SCREEN_PADDING,
 } from './utils/consts.js';
-import { xywhArrayToObject } from './utils/convert.js';
 import { getCursorMode, isCanvasElement, isFrameBlock } from './utils/query.js';
 
 @customElement('affine-edgeless-page')
@@ -218,6 +216,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return this.service?.uiEventDispatcher;
   }
 
+  override get service() {
+    return super.service!;
+  }
+
   private _viewportElement: HTMLElement | null = null;
 
   get viewportElement(): HTMLElement {
@@ -283,8 +285,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     );
     _disposables.add(this.tools);
     _disposables.add(this.selectionManager);
-    _disposables.add(this.surface);
-
     _disposables.add(
       slots.zoomUpdated.on(
         (action: ZoomAction) =>
@@ -322,7 +322,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     _disposables.add(
       slots.elementAdded.on(({ id }) => {
-        if (isFrameBlock(this.surface.pickById(id))) {
+        if (isFrameBlock(this.service.getElementById(id))) {
           this._updateFrames();
         }
       })
@@ -347,22 +347,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
       'affine:frame'
     ) as FrameBlockModel[];
     this.frames = frames.sort(compare);
-  }
-
-  getSortedElementsWithViewportBounds(elements: Selectable[]) {
-    const viewportBound = this.surface.viewport.viewportBounds;
-    return this.surface.sortedBlocks.filter(element => {
-      if (isFrameBlock(element)) return false;
-      if (elements.includes(element)) return true;
-      return intersects(viewportBound, xywhArrayToObject(element));
-    });
-  }
-
-  getSortedElementsByBound(bound: IBound) {
-    return this.surface.sortedBlocks.filter(element => {
-      if (isFrameBlock(element)) return false;
-      return intersects(bound, xywhArrayToObject(element));
-    });
   }
 
   /**
@@ -390,8 +374,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
       parentId = this.page.root?.id,
       noteIndex: noteIndex,
     } = options;
-    const [x, y] = this.surface.toModelCoord(point.x, point.y);
-    return this.surface.addElement(
+    const [x, y] = this.service.toModelCoord(point.x, point.y);
+    return this.service.addBlock(
       'affine:note',
       {
         xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
@@ -451,9 +435,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
       delete model.width;
       delete model.height;
     }
-    point = this.surface.toModelCoord(point[0], point[1]);
+    point = this.service.toModelCoord(point[0], point[1]);
     const bound = new Bound(point[0], point[1], options.width, options.height);
-    return this.surface.addElement(
+    return this.service.addBlock(
       'affine:image',
       { ...model, xywh: bound.serialize() },
       this.surface.model
@@ -501,7 +485,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
         SURFACE_IMAGE_CARD_WIDTH,
         SURFACE_IMAGE_CARD_HEIGHT
       );
-      const blockId = this.surface.addElement(
+      const blockId = this.service.addBlock(
         'affine:image',
         {
           size: file.size,
@@ -523,7 +507,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       const bound = Bound.fromCenter(center, imageSize.width, imageSize.height);
 
       this.page.withoutTransact(() => {
-        this.surface.updateElement(blockId, {
+        this.service.updateElement(blockId, {
           sourceId,
           ...imageSize,
           xywh: bound.serialize(),
@@ -545,8 +529,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
    * Not supports surface elements.
    */
   setSelection(noteId: string, _active = true, blockId: string, point?: Point) {
-    const noteBlock = this.surface
-      .getBlocks('affine:note')
+    const noteBlock = this.service.blocks
+      .filter(block => block.flavour === 'affine:note')
       .find(b => b.id === noteId);
     assertExists(noteBlock);
 
@@ -573,8 +557,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   getElementsBound(): IBound | null {
-    const { surface } = this;
-    return edgelessElementsBound([...surface.getElements(), ...surface.blocks]);
+    const { service } = this;
+    return edgelessElementsBound([...service.elements, ...service.blocks]);
   }
 
   override update(changedProperties: Map<string, unknown>) {
@@ -707,7 +691,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     if (!storedViewport) return null;
 
     if ('referenceId' in storedViewport) {
-      const block = this.surface.pickById(storedViewport.referenceId);
+      const block = this.service.getElementById(storedViewport.referenceId);
 
       if (block) {
         this.surface.viewport.setViewportByBound(
@@ -730,11 +714,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
   ) {
     const bounds = [];
 
-    this.surface.blocks.forEach(block => {
+    this.service.blocks.forEach(block => {
       bounds.push(Bound.deserialize(block.xywh));
     });
 
-    const surfaceElementsBound = this.surface.getElementsBound();
+    const surfaceElementsBound = getCommonBound(this.service.elements);
     if (surfaceElementsBound) {
       bounds.push(surfaceElementsBound);
     }
@@ -839,7 +823,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       );
       if (!surface) return;
 
-      const el = this.surface.pickById(surface.elements[0]);
+      const el = this.service.getElementById(surface.elements[0]);
       if (isCanvasElement(el)) {
         this.host.event.activate();
         return true;

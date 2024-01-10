@@ -31,7 +31,6 @@ import {
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { LineWidth } from '../../../../_common/types.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
-import type { CanvasElementType } from '../../../../surface-block/index.js';
 import {
   type ConnectorElement,
   ConnectorEndpoint,
@@ -158,11 +157,15 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
+  get service() {
+    return this.surface.edgeless.service;
+  }
+
   private _setConnectorMode(mode: ConnectorMode) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.mode !== mode) {
-        this.surface.updateElement<CanvasElementType.CONNECTOR>(element.id, {
+        this.service.updateElement(element.id, {
           mode,
         });
       }
@@ -173,7 +176,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.rough !== rough) {
-        this.surface.updateElement<CanvasElementType.CONNECTOR>(element.id, {
+        this.service.updateElement(element.id, {
           rough,
         });
       }
@@ -187,7 +190,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     this.elements.forEach(element => {
       if (element.stroke !== stroke) {
         shouldUpdate = true;
-        this.surface.updateElement<CanvasElementType.CONNECTOR>(element.id, {
+        this.service.updateElement(element.id, {
           stroke,
         });
       }
@@ -197,7 +200,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
 
   private _setConnectorStrokeWidth(strokeWidth: number) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.CONNECTOR>(ele.id, {
+      this.service.updateElement(ele.id, {
         strokeWidth,
       });
     });
@@ -205,7 +208,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
 
   private _setConnectorStrokeStyle(strokeStyle: StrokeStyle) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.CONNECTOR>(ele.id, {
+      this.service.updateElement(ele.id, {
         strokeStyle,
       });
     });
@@ -217,11 +220,11 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   ) {
     this.elements.forEach(ele => {
       if (end === ConnectorEndpoint.Front) {
-        this.surface.updateElement<CanvasElementType.CONNECTOR>(ele.id, {
+        this.service.updateElement(ele.id, {
           frontEndpointStyle: style,
         });
       } else {
-        this.surface.updateElement<CanvasElementType.CONNECTOR>(ele.id, {
+        this.service.updateElement(ele.id, {
           rearEndpointStyle: style,
         });
       }
@@ -235,7 +238,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     if (frontEndpointStyle === rearEndpointStyle) return;
 
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.CONNECTOR>(ele.id, {
+      this.service.updateElement(ele.id, {
         frontEndpointStyle: rearEndpointStyle,
         rearEndpointStyle: frontEndpointStyle,
       });

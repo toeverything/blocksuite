@@ -1,10 +1,10 @@
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 
+import type { ShapeStyle } from '../../../surface-block/element-model/shape.js';
 import {
   type Options,
   Overlay,
   type RoughCanvas,
-  ShapeStyle,
   type XYWH,
 } from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
@@ -123,7 +123,7 @@ export abstract class Shape {
 
 export class RectShape extends Shape {
   draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
-    if (this.shapeStyle === ShapeStyle.Scribbled) {
+    if (this.shapeStyle === 'Scribbled') {
       const [x, y, w, h] = this.xywh;
       rc.rectangle(x, y, w, h, this.options);
     } else {
@@ -134,7 +134,7 @@ export class RectShape extends Shape {
 
 export class TriangleShape extends Shape {
   draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
-    if (this.shapeStyle === ShapeStyle.Scribbled) {
+    if (this.shapeStyle === 'Scribbled') {
       const [x, y, w, h] = this.xywh;
       rc.polygon(
         [
@@ -152,7 +152,7 @@ export class TriangleShape extends Shape {
 
 export class DiamondShape extends Shape {
   draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
-    if (this.shapeStyle === ShapeStyle.Scribbled) {
+    if (this.shapeStyle === 'Scribbled') {
       const [x, y, w, h] = this.xywh;
       rc.polygon(
         [
@@ -171,7 +171,7 @@ export class DiamondShape extends Shape {
 
 export class EllipseShape extends Shape {
   draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
-    if (this.shapeStyle === ShapeStyle.Scribbled) {
+    if (this.shapeStyle === 'Scribbled') {
       const [x, y, w, h] = this.xywh;
       rc.ellipse(x + w / 2, y + h / 2, w, h, this.options);
     } else {
@@ -182,7 +182,7 @@ export class EllipseShape extends Shape {
 
 export class RoundedRectShape extends Shape {
   draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
-    if (this.shapeStyle === ShapeStyle.Scribbled) {
+    if (this.shapeStyle === 'Scribbled') {
       const [x, y, w, h] = this.xywh;
       const radius = 0.1;
       const r = Math.min(w * radius, h * radius);

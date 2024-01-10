@@ -201,4 +201,8 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   hitTest(x: number, y: number, _: HitTestOptions, __?: EditorHost): boolean {
     return isPointIn(this, x, y);
   }
+
+  serialize() {
+    return this.yMap.toJSON();
+  }
 }

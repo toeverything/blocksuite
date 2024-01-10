@@ -1,3 +1,5 @@
+import type { ConnectorElementModel } from '@blocksuite/blocks';
+import type { ElementModel } from '@blocksuite/blocks';
 import {
   BlocksUtils,
   EmbedHtmlBlockModel,
@@ -159,9 +161,14 @@ export class AIEdgelessLogic {
       return;
     }
     const surface = getSurfaceElementFromEditor(this.editor);
-    const targets = surface
-      .getElementsByType('connector')
-      .filter(v => v.source.id === from.id)
+    const targets = surface.edgeless.service.elements
+      .filter(
+        (el =>
+          el.type === 'connector' &&
+          (el as ConnectorElementModel).source.id === from.id) as (
+          el: ElementModel
+        ) => el is ConnectorElementModel
+      )
       .flatMap(v => {
         const block = this.editor.page.getBlockById(v.target.id ?? '');
         if (block instanceof FrameBlockModel) {
@@ -209,7 +216,7 @@ export class AIEdgelessLogic {
             const imgFile = jpegBase64ToFile(b64, 'img');
             const sourceId = await this.editor.page.workspace.blob.set(imgFile);
             if (!image) {
-              image = surface.addElement(
+              image = surface.edgeless.service.addBlock(
                 'affine:image',
                 {
                   size: imgFile.size,
@@ -218,7 +225,7 @@ export class AIEdgelessLogic {
                 surface.model
               );
             }
-            surface.updateElement(image, {
+            surface.edgeless.service.updateElement(image, {
               sourceId,
             } satisfies Partial<ImageBlockProps>);
           };

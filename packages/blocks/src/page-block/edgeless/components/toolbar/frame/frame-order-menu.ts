@@ -202,7 +202,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
 
           const frame = this.frames[index];
 
-          this.edgeless.surface.updateElement(frame.id, {
+          this.edgeless.service.updateElement(frame.id, {
             index: generateKeyBetween(before, after),
           });
           this.edgeless.page.captureSync();

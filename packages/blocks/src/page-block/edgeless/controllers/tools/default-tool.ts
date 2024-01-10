@@ -9,7 +9,7 @@ import {
   type TopLevelBlockModel,
 } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import type { HitTestOptions } from '../../../../surface-block/elements/edgeless-element.js';
+import { ConnectorElementModel } from '../../../../surface-block/element-model/index.js';
 import {
   Bound,
   type CanvasElement,
@@ -22,6 +22,7 @@ import {
 } from '../../../../surface-block/index.js';
 import { getElementsFromGroup } from '../../../../surface-block/managers/group-manager.js';
 import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
+import type { EdgelessElement, HitTestOptions } from '../../type.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
 import {
@@ -71,7 +72,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _isDoubleClickedOnMask = false;
   private _alignBound = new Bound();
   private _selectedBounds: Bound[] = [];
-  private _toBeMoved: Selectable[] = [];
+  private _toBeMoved: EdgelessElement[] = [];
   private _frames = new Set<FrameBlockModel>();
   private _autoPanTimer: number | null = null;
   private _dragging = false;
@@ -105,10 +106,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _pick(x: number, y: number, options?: HitTestOptions) {
     const { surface } = this._edgeless;
-    return surface.pickTopWithGroup(
-      surface.viewport.toModelCoord(x, y),
-      options
-    );
+
+    const service = this._service;
+    const modelPos = surface.viewport.toModelCoord(x, y);
+
+    return service.pickElementInGroup(modelPos[0], modelPos[1], options);
   }
 
   private _setNoneSelectionState() {
@@ -125,7 +127,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _handleClickOnSelected(element: Selectable, e: PointerEventState) {
+  private _handleClickOnSelected(
+    element: EdgelessElement,
+    e: PointerEventState
+  ) {
     const { selectedIds, selections } = this.selection;
     const editing = selections[0]?.editing ?? false;
 
@@ -181,7 +186,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       surface.connector.updateXYWH(selected, bound);
     }
 
-    this._surface.updateElement(selected.id, {
+    this._service.updateElement(selected.id, {
       xywh: bound.serialize(),
     });
   }
@@ -195,7 +200,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.x += delta[0];
     bound.y += delta[1];
 
-    this._surface.updateElement(block.id, {
+    this._service.updateElement(block.id, {
       xywh: bound.serialize(),
     });
   }
@@ -215,7 +220,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _isDraggable(element: Selectable) {
     return !(
-      element instanceof ConnectorElement &&
+      element instanceof ConnectorElementModel &&
       !isConnectorAndBindingsAllSelected(element, this._toBeMoved)
     );
   }
@@ -373,7 +378,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _updateSelectingState = () => {
-    const { surface, tools, selectionManager } = this._edgeless;
+    const { surface, tools, selectionManager, service } = this._edgeless;
     const { viewport } = surface;
     const startX = this._dragStartModelCoord[0];
     const startY = this._dragStartModelCoord[1];
@@ -389,7 +394,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const h = Math.abs(startY - curY);
     const bound = new Bound(x, y, w, h);
 
-    const elements = surface.pickByBound(bound);
+    const elements = service?.pickElementsByBound(bound);
 
     const set = new Set(
       tools.shiftKey ? [...elements, ...selectionManager.elements] : elements

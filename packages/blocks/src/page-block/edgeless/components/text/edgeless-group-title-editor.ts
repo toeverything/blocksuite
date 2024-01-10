@@ -5,7 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import type { GroupElement } from '../../../../surface-block/index.js';
+import type { GroupElementModel } from '../../../../surface-block/element-model/group.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
@@ -17,7 +17,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
   richText!: RichText;
 
   @property({ attribute: false })
-  group!: GroupElement;
+  group!: GroupElementModel;
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 

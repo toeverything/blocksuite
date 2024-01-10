@@ -5,7 +5,7 @@ import {
   type EdgelessElement,
   type Selectable,
 } from '../../_common/types.js';
-import type { CanvasElementType } from '../../surface-block/index.js';
+import type { ConnectorElementModel } from '../../surface-block/index.js';
 import {
   almostEqual,
   AStarRunner,
@@ -1101,7 +1101,7 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
   constructor(private _edgeless: EdgelessPageBlockComponent) {
     super({
       pickById: (id: string) =>
-        this._edgeless.surface.pickById(id) as Connectable,
+        this._edgeless.service.getElementById(id) as Connectable,
       refresh: () => this._edgeless.surface.refresh(),
     });
 
@@ -1110,12 +1110,12 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
   }
 
   private _findConnectablesInViewport() {
-    const { surface } = this._edgeless;
+    const { surface, service } = this._edgeless;
     const { viewport } = surface;
     const bound = viewport.viewportBounds;
     const candidates = [
-      ...surface.viewport.gridManager.search(bound),
-      ...surface.blocks,
+      ...service.layer.canvasGrid.search(bound),
+      ...service.blocks,
     ];
     const picked = candidates.filter(
       element => element.boxSelect(bound) && element.connectable
@@ -1217,19 +1217,16 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
     point: IVec,
     connection: 'source' | 'target'
   ) {
-    const { surface } = this._edgeless;
     const id = connector.id;
     const anotherConnection = connection === 'source' ? 'target' : 'source';
     const anotherId = connector[anotherConnection]?.id;
     const result = this.searchConnection(point, anotherId ? [anotherId] : []);
-    surface.updateElement<CanvasElementType.CONNECTOR>(id, {
+    this._edgeless.service.updateElement(id, {
       [connection]: result,
     });
   }
 
   updateXYWH(connector: ConnectorElement, bound: Bound) {
-    const { surface } = this._edgeless;
-
     const oldBound = Bound.deserialize(connector.xywh);
     const offset = Vec.sub([bound.x, bound.y], [oldBound.x, oldBound.y]);
     const updates: Partial<IConnector> = {};
@@ -1239,7 +1236,7 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
       updates.source = { position: Vec.add(source.position, offset) };
     if (!target.id && target.position)
       updates.target = { position: Vec.add(target.position, offset) };
-    surface.updateElement<CanvasElementType.CONNECTOR>(connector.id, updates);
+    this._edgeless.service.updateElement(connector.id, updates);
   }
 
   syncConnectorPos(connected: Connectable[]) {
@@ -1248,16 +1245,17 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
   }
 
   detachConnectors(connected: Connectable[]) {
-    const surface = this._edgeless.surface;
+    const service = this._edgeless.service;
+
     connected.forEach(ele => {
       this.getConnecttedConnectors([ele]).forEach(connector => {
         const absolutePath = connector.absolutePath;
         if (connector.source.id === ele.id) {
-          surface.updateElement<CanvasElementType.CONNECTOR>(connector.id, {
+          service.updateElement(connector.id, {
             source: { position: absolutePath[0] },
           });
         } else if (connector.target.id === ele.id) {
-          surface.updateElement<CanvasElementType.CONNECTOR>(connector.id, {
+          service.updateElement(connector.id, {
             target: { position: absolutePath[absolutePath.length - 1] },
           });
         }
@@ -1266,12 +1264,12 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
   }
 
   getConnecttedConnectors(elements: Connectable[]) {
-    const { surface } = this._edgeless;
+    const { service } = this._edgeless;
     const ids = new Set(elements.map(e => e.id));
-    const connectors = surface
-      .getElements()
-      .filter(e => e.type === 'connector') as ConnectorElement[];
-    const result: ConnectorElement[] = [];
+    const connectors = service.elements.filter(
+      e => e.type === 'connector'
+    ) as ConnectorElementModel[];
+    const result: ConnectorElementModel[] = [];
     connectors.forEach(connector => {
       if (
         (connector.source.id && ids.has(connector.source.id)) ||
@@ -1284,16 +1282,20 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
   }
 
   getConnecttedElements(element: Connectable) {
-    const { surface } = this._edgeless;
-    const connectors = surface
-      .getElements()
-      .filter(e => e.type === 'connector') as ConnectorElement[];
+    const { service } = this._edgeless;
+    const connectors = service.elements.filter(
+      e => e.type === 'connector'
+    ) as ConnectorElementModel[];
     const results: Connectable[] = [];
     connectors.forEach(connector => {
       if (connector.source.id === element.id && connector.target.id) {
-        results.push(surface.pickById(connector.target.id) as Connectable);
+        results.push(
+          service.getElementById(connector.target.id) as Connectable
+        );
       } else if (connector.target.id === element.id && connector.source.id) {
-        results.push(surface.pickById(connector.source.id) as Connectable);
+        results.push(
+          service.getElementById(connector.source.id) as Connectable
+        );
       }
     });
     return results;

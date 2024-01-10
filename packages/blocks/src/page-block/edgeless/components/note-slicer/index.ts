@@ -304,7 +304,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     const resetBlocks = children.slice(sliceIndex + 1);
     const { sliceVerticalPos } = this._lastPosition;
     const [x, , width] = deserializeXYWH(xywh);
-    const newNoteId = this.edgelessPage.surface.addElement(
+    const newNoteId = this.edgelessPage.service.addBlock(
       'affine:note',
       {
         background,

@@ -32,14 +32,14 @@ export class EmbedBlockElement<
     return this._isInSurface;
   }
 
-  get surface() {
-    if (!this._isInSurface) return null;
-    return this.host.querySelector('affine-surface');
+  get edgeless() {
+    if (this._isInSurface) return null;
+    return this.host.querySelector('affine-edgeless-page');
   }
 
   get bound(): Bound {
     return Bound.deserialize(
-      (this.surface?.pickById(this.model.id) ?? this.model).xywh
+      (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
     );
   }
 

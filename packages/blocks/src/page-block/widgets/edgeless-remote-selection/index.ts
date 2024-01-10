@@ -117,7 +117,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
   private _remoteColorManager: RemoteColorManager | null = null;
 
   private _updateRemoteRects = () => {
-    const { selection, surface } = this;
+    const { selection, blockElement } = this;
     const remoteSelection = selection.remoteSelection;
     const remoteRects: EdgelessRemoteSelectionWidget['_remoteRects'] =
       new Map();
@@ -126,7 +126,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
       if (selection.elements.length === 0) return;
 
       const elements = selection.elements
-        .map(id => surface.pickById(id))
+        .map(id => blockElement.service.getElementById(id))
         .filter(element => element) as Selectable[];
       const rect = getSelectedRect(elements);
 

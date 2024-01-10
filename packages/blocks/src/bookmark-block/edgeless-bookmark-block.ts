@@ -69,8 +69,9 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
 
     const bound = Bound.deserialize(
       (
-        (this.edgeless.surface.pickById(this.model.id) as BookmarkBlockModel) ??
-        this.model
+        (this.edgeless.service.getElementById(
+          this.model.id
+        ) as BookmarkBlockModel) ?? this.model
       ).xywh
     );
     const scaleX = bound.w / width;

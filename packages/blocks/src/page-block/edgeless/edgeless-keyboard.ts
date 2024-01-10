@@ -126,14 +126,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
 
           ctx.get('defaultState').event.preventDefault();
-          const { surface } = this.pageElement;
+          const { service, surface } = this.pageElement;
           this.pageElement.selectionManager.set({
             elements: [
               ...surface.group
-                .getRootElements(this.pageElement.surface.blocks)
+                .getRootElements(service.blocks)
                 .map(block => block.id),
               ...surface.group
-                .getRootElements(this.pageElement.surface.getElements())
+                .getRootElements(service.elements)
                 .map(el => el.id),
             ],
             editing: false,
@@ -309,9 +309,13 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         if (element instanceof ConnectorElement) {
           surface.connector.updateXYWH(element, bound);
         }
-        surface.setElementBound(element.id, bound);
+        this.pageElement.service.updateElement(element.id, {
+          xywh: bound.serialize(),
+        });
       } else {
-        this.pageElement.page.updateBlock(element, { xywh: bound.serialize() });
+        this.pageElement.service.updateElement(element.id, {
+          xywh: bound.serialize(),
+        });
       }
       this.pageElement.slots.hoverUpdated.emit();
     });

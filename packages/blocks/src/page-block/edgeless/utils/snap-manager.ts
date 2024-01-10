@@ -51,7 +51,7 @@ export class EdgelessSnapManager extends Overlay {
 
   setupAlignables(alignables: Alignable[]): Bound {
     if (alignables.length === 0) return new Bound();
-    const { surface } = this.container;
+    const { surface, service } = this.container;
     const connectors = surface.connector.getConnecttedConnectors(
       alignables.filter(isConnectable)
     );
@@ -59,11 +59,10 @@ export class EdgelessSnapManager extends Overlay {
     const { viewport } = surface;
     const viewportBounds = Bound.from(viewport.viewportBounds);
     viewport.addOverlay(this);
-
-    const canvasElements = surface.getElements();
+    const canvasElements = service.elements;
     const excludes = [...alignables, ...connectors];
     this._alignableBounds = [];
-    (<Alignable[]>[...surface.blocks, ...canvasElements]).forEach(alignable => {
+    (<Alignable[]>[...service.blocks, ...canvasElements]).forEach(alignable => {
       const bounds = this._getBoundsWithRotationByAlignable(alignable);
       if (
         viewportBounds.isOverlapWithBound(bounds) &&

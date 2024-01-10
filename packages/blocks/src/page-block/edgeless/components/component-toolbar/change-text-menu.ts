@@ -15,24 +15,24 @@ import {
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
-import { CanvasTextFontStyle } from '../../../../surface-block/consts.js';
-import {
-  CanvasTextFontFamily,
-  CanvasTextFontWeight,
-} from '../../../../surface-block/consts.js';
-import { TextAlign } from '../../../../surface-block/elements/consts.js';
 import {
   getFontFacesByFontFamily,
   isFontStyleSupported,
   isFontWeightSupported,
-} from '../../../../surface-block/elements/text/utils.js';
+} from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import { CanvasTextFontStyle } from '../../../../surface-block/consts.js';
+import {
+  FontFamily,
+  FontWeight,
+} from '../../../../surface-block/element-model/common.js';
+import type { TextElementModel } from '../../../../surface-block/element-model/text.js';
+import { TextAlign } from '../../../../surface-block/elements/consts.js';
+import type { ShapeElementModel } from '../../../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
   normalizeShapeBound,
   normalizeTextBound,
-  type ShapeElement,
-  type TextElement,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';
@@ -197,6 +197,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     typeof createButtonPopper
   > | null = null;
 
+  get service() {
+    return this.surface.edgeless.service;
+  }
+
   private _getMostCommonFontFamily = (
     elements: EdgelessCanvasTextElement[]
   ): EdgelessCanvasTextElement['fontFamily'] => {
@@ -207,7 +211,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const max = maxBy(Object.entries(fontFamilies), ([_k, count]) => count);
     return max
       ? (max[0] as EdgelessCanvasTextElement['fontFamily'])
-      : CanvasTextFontFamily.Inter;
+      : FontFamily.Inter;
   };
 
   private _getMostCommonFontSize = (
@@ -231,7 +235,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const max = maxBy(Object.entries(fontWeights), ([_k, count]) => count);
     return max
       ? (max[0] as EdgelessCanvasTextElement['fontWeight'])
-      : CanvasTextFontWeight.Regular;
+      : FontWeight.Regular;
   };
 
   private _getMostCommonFontStyle = (
@@ -278,18 +282,18 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     if (elementType === CanvasElementType.TEXT) {
       // the change of font family will change the bound of the text
       const newBound = normalizeTextBound(
-        element as TextElement,
+        element as TextElementModel,
         new Bound(element.x, element.y, element.w, element.h)
       );
-      this.surface.updateElement<CanvasElementType.TEXT>(element.id, {
+      this.service.updateElement(element.id, {
         xywh: newBound.serialize(),
       });
     } else {
       const newBound = normalizeShapeBound(
-        element as ShapeElement,
+        element as ShapeElementModel,
         new Bound(element.x, element.y, element.w, element.h)
       );
-      this.surface.updateElement<CanvasElementType.TEXT>(element.id, {
+      this.service.updateElement(element.id, {
         xywh: newBound.serialize(),
       });
     }
@@ -297,7 +301,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   private _setTextColor = (color: CssVariableName) => {
     this.elements.forEach(element => {
-      this.surface.updateElement<CanvasElementType.TEXT>(element.id, {
+      this.service.updateElement(element.id, {
         color,
       });
     });
@@ -305,7 +309,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   private _setTextAlign = (align: EdgelessCanvasTextElement['textAlign']) => {
     this.elements.forEach(element => {
-      this.surface.updateElement<CanvasElementType.TEXT>(element.id, {
+      this.service.updateElement(element.id, {
         textAlign: align,
       });
     });
@@ -317,14 +321,14 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const currentFontWeight = this._getMostCommonFontWeight(this.elements);
     const fontWeight = isFontWeightSupported(fontFamily, currentFontWeight)
       ? currentFontWeight
-      : CanvasTextFontWeight.Regular;
+      : FontWeight.Regular;
     const currentFontStyle = this._getMostCommonFontStyle(this.elements);
     const fontStyle = isFontStyleSupported(fontFamily, currentFontStyle)
       ? currentFontStyle
       : CanvasTextFontStyle.Normal;
 
     this.elements.forEach(element => {
-      this.surface.updateElement<CanvasElementType.TEXT>(element.id, {
+      this.service.updateElement(element.id, {
         fontFamily,
         fontWeight,
         fontStyle,
@@ -336,7 +340,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   private _setFontSize = (fontSize: EdgelessCanvasTextElement['fontSize']) => {
     this.elements.forEach(element => {
-      this.surface.updateElement<CanvasElementType.TEXT>(element.id, {
+      this.service.updateElement(element.id, {
         fontSize: fontSize,
       });
 
@@ -345,11 +349,11 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   };
 
   private _setFontWeightAndStyle = (
-    fontWeight: CanvasTextFontWeight,
+    fontWeight: FontWeight,
     fontStyle: CanvasTextFontStyle
   ) => {
     this.elements.forEach(element => {
-      this.surface.updateElement<CanvasElementType.TEXT>(element.id, {
+      this.service.updateElement(element.id, {
         fontWeight,
         fontStyle,
       });
@@ -537,9 +541,9 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         <div class="button-with-arrow-group">
           <span
             >${`${
-              selectedFontWeight === CanvasTextFontWeight.Light
+              selectedFontWeight === FontWeight.Light
                 ? 'Light'
-                : selectedFontWeight === CanvasTextFontWeight.Regular
+                : selectedFontWeight === FontWeight.Regular
                   ? 'Regular'
                   : 'Semibold'
             }${
@@ -554,7 +558,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
           .fontWeight=${selectedFontWeight}
           .fontStyle=${selectedFontStyle}
           .onSelect=${(
-            fontWeight: CanvasTextFontWeight,
+            fontWeight: FontWeight,
             fontStyle: CanvasTextFontStyle
           ) => this._setFontWeightAndStyle(fontWeight, fontStyle)}
         ></edgeless-font-weight-and-style-panel>

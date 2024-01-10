@@ -168,7 +168,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     props: Record<string, { oldValue: unknown }>;
   }>();
   elementAdded = new Slot<{ id: string }>();
-  elementRemoved = new Slot<{ id: string; type: string }>();
+  elementRemoved = new Slot<{
+    id: string;
+    type: string;
+    model: ElementModel;
+  }>();
 
   get elementModels() {
     const models: ElementModel[] = [];
@@ -221,7 +225,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
             if (this._elementModels.has(id)) {
               const { model, dispose } = this._elementModels.get(id)!;
               dispose();
-              this.elementRemoved.emit({ id, type: model.type });
+              this.elementRemoved.emit({ id, type: model.type, model });
               this._elementToGroup.delete(id);
               this._elementToConnector.delete(id);
               this._elementModels.delete(id);

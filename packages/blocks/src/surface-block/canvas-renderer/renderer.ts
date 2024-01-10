@@ -2,8 +2,7 @@ import { Slot } from '@blocksuite/global/utils';
 
 import { requestConnectedFrame } from '../../_common/utils/event.js';
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from '../consts.js';
-import type { SurfaceElement } from '../elements/surface-element.js';
-import { GridManager } from '../grid.js';
+import type { ElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 import { RoughCanvas } from '../rough/canvas.js';
 import { Bound } from '../utils/bound.js';
@@ -11,6 +10,7 @@ import { intersects } from '../utils/math-utils.js';
 import { clamp, getBoundsWithRotation } from '../utils/math-utils.js';
 import { type IPoint } from '../utils/point.js';
 import { type IVec, Vec } from '../utils/vec.js';
+import { modelRenderer } from './element-renderer/index.js';
 
 export interface SurfaceViewport {
   readonly left: number;
@@ -41,7 +41,7 @@ export interface SurfaceViewport {
 
   getCanvasByBound(
     bound: IBound,
-    surfaceElements?: SurfaceElement[]
+    surfaceElements?: ElementModel[]
   ): HTMLCanvasElement;
 }
 
@@ -68,7 +68,6 @@ export class Renderer implements SurfaceViewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   rc: RoughCanvas;
-  gridManager = new GridManager<SurfaceElement>();
   indexedCanvases: HTMLCanvasElement[] = [];
   layerManager: LayerManager;
 
@@ -93,7 +92,6 @@ export class Renderer implements SurfaceViewport {
   constructor(options: {
     layerManager: LayerManager;
     provider?: Partial<EnvProvider>;
-    getVariableColor: (val: string) => string;
   }) {
     const canvas = document.createElement('canvas');
 
@@ -191,7 +189,7 @@ export class Renderer implements SurfaceViewport {
   }
 
   getVariableColor(val: string) {
-    return this.provider.getVariableColor(val);
+    return this.provider.getVariableColor?.(val) ?? val;
   }
 
   isInViewport(bound: Bound) {
@@ -330,23 +328,6 @@ export class Renderer implements SurfaceViewport {
     this._emitViewportUpdatedSlot();
   };
 
-  addElement(element: SurfaceElement) {
-    this.gridManager.add(element);
-    this._shouldUpdate = true;
-  }
-
-  removeElement(element: SurfaceElement) {
-    this.gridManager.remove(element);
-    this._shouldUpdate = true;
-  }
-
-  load(elements: SurfaceElement[]) {
-    for (let i = 0; i < elements.length; i++) {
-      this.gridManager.add(elements[i]);
-    }
-    this._shouldUpdate = true;
-  }
-
   refresh() {
     this._shouldUpdate = true;
   }
@@ -450,7 +431,7 @@ export class Renderer implements SurfaceViewport {
      * its element will be add to this array and drawing on the
      * main canvas
      */
-    let fallbackElement: SurfaceElement[] = [];
+    let fallbackElement: ElementModel[] = [];
 
     this.layerManager.getCanvasLayers().forEach((layer, idx) => {
       if (!this.indexedCanvases[idx]) {
@@ -481,13 +462,13 @@ export class Renderer implements SurfaceViewport {
     matrix: DOMMatrix,
     rc: RoughCanvas,
     bound: IBound,
-    surfaceElements?: SurfaceElement[],
+    surfaceElements?: ElementModel[],
     overLay: boolean = false
   ) {
     if (!ctx) return;
 
-    const { gridManager } = this;
-    const elements = surfaceElements ?? gridManager.search(bound);
+    const elements =
+      surfaceElements ?? this.layerManager.canvasGrid.search(bound);
     for (const element of elements) {
       ctx.save();
 
@@ -497,7 +478,16 @@ export class Renderer implements SurfaceViewport {
         ctx.globalAlpha = opacity;
         const dx = element.x - bound.x;
         const dy = element.y - bound.y;
-        element.render(ctx, matrix.translate(dx, dy), rc);
+
+        const renderFn =
+          modelRenderer[element.type as keyof typeof modelRenderer];
+
+        if (!renderFn) {
+          console.warn(`Cannot find renderer for ${element.type}`);
+          continue;
+        }
+
+        renderFn(element, ctx, matrix.translate(dx, dy), this);
       }
 
       ctx.restore();
@@ -517,7 +507,7 @@ export class Renderer implements SurfaceViewport {
 
   public getCanvasByBound(
     bound: IBound = this.viewportBounds,
-    surfaceElements?: SurfaceElement[],
+    surfaceElements?: ElementModel[],
     canvas?: HTMLCanvasElement,
     clearBeforeDrawing?: boolean,
     withZoom?: boolean

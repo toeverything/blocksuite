@@ -1,12 +1,9 @@
 import type { BlockModel } from '@blocksuite/store';
-import { type Page } from '@blocksuite/store';
 
 import {
   type Connectable,
-  type EdgelessElement,
   type EdgelessTool,
   type Selectable,
-  type TopLevelBlockModel,
 } from '../../../_common/utils/index.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
@@ -26,11 +23,11 @@ import {
   TextElement,
 } from '../../../surface-block/index.js';
 import { getElementsWithoutGroup } from '../../../surface-block/managers/group-manager.js';
-import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
+import type { EdgelessBlock, EdgelessElement } from '../type.js';
 
 export function isTopLevelBlock(
   selectable: BlockModel | Selectable | BlockModel | null
-): selectable is TopLevelBlockModel {
+): selectable is EdgelessBlock {
   return !!selectable && 'flavour' in selectable;
 }
 
@@ -114,19 +111,6 @@ export function getCursorMode(edgelessTool: EdgelessTool) {
     default:
       return 'default';
   }
-}
-
-export function pickSurfaceElementById(
-  surface: SurfaceBlockComponent,
-  page: Page,
-  id: string
-) {
-  const blocks =
-    (page.root?.children.filter(
-      child => child.flavour === 'affine:note'
-    ) as TopLevelBlockModel[]) ?? [];
-  const element = surface.pickById(id) || blocks.find(b => b.id === id);
-  return element;
 }
 
 export function getBackgroundGrid(zoom: number, showGrid: boolean) {

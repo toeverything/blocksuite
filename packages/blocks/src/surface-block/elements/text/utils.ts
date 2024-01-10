@@ -5,8 +5,8 @@ import type {
   CanvasTextFontStyle,
 } from '../../consts.js';
 import { type CanvasTextFontWeight } from '../../consts.js';
+import type { TextElementModel } from '../../element-model/text.js';
 import type { Bound } from '../../utils/bound.js';
-import type { TextElement } from './text-element.js';
 import type { ITextDelta } from './types.js';
 
 const RS_LTR_CHARS =
@@ -391,7 +391,7 @@ export function deltaInsertsToChunks(delta: ITextDelta[]): ITextDelta[][] {
 }
 
 export function normalizeTextBound(
-  text: TextElement,
+  text: TextElementModel,
   bound: Bound,
   dragging: boolean = false
 ): Bound {

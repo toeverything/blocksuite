@@ -146,3 +146,19 @@ export function createModelFromProps(
 
   return elementModel;
 }
+
+export {
+  BrushElementModel,
+  ConnectorElementModel,
+  ElementModel,
+  GroupElementModel,
+  ShapeElementModel,
+  TextElementModel,
+};
+
+export type CanvasElement =
+  | BrushElementModel
+  | ConnectorElementModel
+  | ShapeElementModel
+  | TextElementModel
+  | GroupElementModel;

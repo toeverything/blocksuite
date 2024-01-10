@@ -13,7 +13,6 @@ import type {
   NoteBlockModel,
   SurfaceBlockModel,
 } from '../../models.js';
-import type { Renderer } from '../../surface-block/index.js';
 import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
@@ -52,7 +51,9 @@ export class EdgelessFrameManager {
   }
 
   get frames() {
-    return this._edgeless.surface.getBlocks('affine:frame');
+    return this._edgeless.service.blocks.filter(
+      block => block.flavour === 'affine:frame'
+    );
   }
 
   selectFrame(eles: Selectable[]) {
@@ -84,9 +85,7 @@ export class EdgelessFrameManager {
   getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
     const elements: EdgelessElement[] =
-      this._edgeless.surface.viewport.gridManager
-        .search(bound, true)
-        .filter(ele => !isFrameBlock(ele));
+      this._edgeless.service.layer.canvasGrid.search(bound, true);
 
     return elements.concat(
       getBlocksInFrame(this._edgeless.page, frame, fullyContained)
@@ -95,7 +94,7 @@ export class EdgelessFrameManager {
 
   createFrameOnSelected() {
     const { _edgeless } = this;
-    const { surface } = _edgeless;
+    const { surface, service } = _edgeless;
     const frames = this.frames;
     let bound = edgelessElementsBound(_edgeless.selectionManager.elements);
     bound = bound.expand(FRAME_PADDING);
@@ -107,7 +106,7 @@ export class EdgelessFrameManager {
       const offset = (MIN_FRAME_HEIGHT - bound.h) / 2;
       bound = bound.expand(0, offset);
     }
-    const id = surface.addElement(
+    const id = service.addBlock(
       'affine:frame',
       {
         title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
@@ -115,7 +114,7 @@ export class EdgelessFrameManager {
       },
       surface.model
     );
-    const frameModel = surface.pickById(id);
+    const frameModel = service.getElementById(id);
     _edgeless.page.captureSync();
     assertExists(frameModel);
     surface.fitToViewport(bound);
@@ -124,20 +123,6 @@ export class EdgelessFrameManager {
       editing: false,
     });
   }
-}
-
-export function getElementsInFrame(
-  page: Page,
-  surfaceRenderer: Renderer,
-  frame: FrameBlockModel
-) {
-  const bound = Bound.deserialize(frame.xywh);
-
-  return (
-    surfaceRenderer.gridManager
-      .search(bound, true)
-      .filter(ele => !isFrameBlock(ele)) as EdgelessElement[]
-  ).concat(getNotesInFrame(page, frame));
 }
 
 export function getNotesInFrame(

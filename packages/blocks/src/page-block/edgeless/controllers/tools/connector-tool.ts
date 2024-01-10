@@ -2,10 +2,10 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
 import type { ConnectorTool } from '../../../../_common/utils/index.js';
+import type { ConnectorElementModel } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
   type Connection,
-  type ConnectorElement,
   type IVec,
 } from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
@@ -15,7 +15,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     type: 'connector',
   };
 
-  private _connector: ConnectorElement | null = null;
+  private _connector: ConnectorElementModel | null = null;
   private _source: Connection | null = null;
   private _startPoint: IVec | null = null;
 
@@ -46,14 +46,16 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     this._page.captureSync();
     const { mode } = this.tool;
 
-    const { _surface } = this;
-    const id = _surface.addElement(CanvasElementType.CONNECTOR, {
+    const { _edgeless } = this;
+    const id = _edgeless.service.addElement(CanvasElementType.CONNECTOR, {
       mode,
       controllers: [],
       source: this._source,
       target: { position: this._startPoint },
     });
-    this._connector = _surface.pickById(id) as unknown as ConnectorElement;
+    this._connector = _edgeless.service.getElementById(
+      id
+    ) as ConnectorElementModel;
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -65,10 +67,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       point,
       this._connector.source.id ? [this._connector.source.id] : []
     ) as Connection;
-    this._surface.updateElement<CanvasElementType.CONNECTOR>(
-      this._connector.id,
-      { target }
-    );
+    this._edgeless.service.updateElement(this._connector.id, { target });
   }
 
   onContainerDragEnd() {

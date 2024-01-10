@@ -11,10 +11,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { LineWidth } from '../../../../_common/types.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
-import type {
-  BrushElement,
-  CanvasElementType,
-} from '../../../../surface-block/index.js';
+import type { BrushElement } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import {
   type ColorEvent,
@@ -114,11 +111,15 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private _colorPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  get service() {
+    return this.surface.edgeless.service;
+  }
+
   private _setLineWidth(size: LineWidth) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.lineWidth !== size) {
-        this.surface.updateElement<CanvasElementType.BRUSH>(element.id, {
+        this.service.updateElement(element.id, {
           lineWidth: size,
         });
       }
@@ -129,7 +130,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
-        this.surface.updateElement<CanvasElementType.BRUSH>(element.id, {
+        this.service.updateElement(element.id, {
           color,
         });
       }

@@ -126,7 +126,9 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
 
     _disposables.add(
       edgeless.slots.elementUpdated.on(({ id }) => {
-        const element = surface.pickById(id) as AutoConnectElement;
+        const element = edgeless.service.getElementById(
+          id
+        ) as AutoConnectElement;
         if (element && this.elementsMap.has(element)) {
           this.requestUpdate();
         }

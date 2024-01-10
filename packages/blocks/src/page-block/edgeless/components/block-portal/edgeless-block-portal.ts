@@ -179,13 +179,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   private _updateReference() {
     const { _surfaceRefReferenceSet, edgeless } = this;
-    edgeless.surface.getBlocks('affine:note').forEach(note => {
-      note.children.forEach(model => {
-        if (matchFlavours(model, ['affine:surface-ref'])) {
-          _surfaceRefReferenceSet.add(model.reference);
-        }
+    edgeless.service.blocks
+      .filter(block => block.flavour === 'affine:note')
+      .forEach(note => {
+        note.children.forEach(model => {
+          if (matchFlavours(model, ['affine:surface-ref'])) {
+            _surfaceRefReferenceSet.add(model.reference);
+          }
+        });
       });
-    });
   }
 
   private _updateAutoConnect() {
@@ -292,13 +294,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   override render() {
     const { edgeless } = this;
-    const { surface, page } = edgeless;
+    const { surface, page, service } = edgeless;
     const { readonly } = page;
 
     if (!surface) return nothing;
 
-    const notes = surface.getBlocks(['affine:note']);
-    const layers = surface.layer.layers;
+    const notes = service.blocks.filter(
+      block => block.flavour === 'affine:note'
+    );
+    const layers = service.layer.layers;
     const autoConnectedBlocks = new Map<AutoConnectElement, number>();
 
     notes.forEach(note => {
@@ -307,7 +311,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       }
       note.children.forEach(model => {
         if (matchFlavours(model, ['affine:surface-ref'])) {
-          const reference = surface.pickById(
+          const reference = service.getElementById(
             model.reference
           ) as AutoConnectElement;
           if (!autoConnectedBlocks.has(reference)) {

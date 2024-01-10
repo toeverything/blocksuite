@@ -1,4 +1,12 @@
+import {
+  deltaInsertsToChunks,
+  getFontString,
+  getLineHeight,
+  getTextWidth,
+  wrapText,
+} from '../../canvas-renderer/element-renderer/text/utils.js';
 import { type IBound, StrokeStyle } from '../../consts.js';
+import type { ShapeElementModel } from '../../index.js';
 import { Bound } from '../../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
@@ -6,18 +14,14 @@ import {
 } from '../../utils/math-utils.js';
 import { type IVec } from '../../utils/vec.js';
 import type { ITextDelta } from '../text/types.js';
-import {
-  deltaInsertsToChunks,
-  getFontString,
-  getLineHeight,
-  getTextWidth,
-  wrapText,
-} from '../text/utils.js';
 import type { ShapeType } from './consts.js';
 import { type GeneralShapeOptions, SHAPE_TEXT_PADDING } from './consts.js';
 import type { ShapeElement } from './shape-element.js';
 
-export function normalizeShapeBound(shape: ShapeElement, bound: Bound): Bound {
+export function normalizeShapeBound(
+  shape: ShapeElementModel,
+  bound: Bound
+): Bound {
   if (!shape.text) return bound;
 
   const yText = shape.text;

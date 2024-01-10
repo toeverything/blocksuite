@@ -145,8 +145,8 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   get anchorEdgelessElement(): TopLevelBlockModel | null {
     if (isInsideDocEditor(this.host) || !this._anchorBlockId) return null;
-    const { surface } = this.pageBlockElement as EdgelessPageBlockComponent;
-    const edgelessElement = surface.pickById(this._anchorBlockId);
+    const { service } = this.pageBlockElement as EdgelessPageBlockComponent;
+    const edgelessElement = service.getElementById(this._anchorBlockId);
     return isTopLevelBlock(edgelessElement) ? edgelessElement : null;
   }
 
@@ -626,7 +626,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const blockElement = this.anchorBlockElement;
     assertExists(blockElement);
 
-    const edgelessElement = edgelessPage.surface.pickById(
+    const edgelessElement = edgelessPage.service.getElementById(
       blockElement.model.id
     );
     assertExists(edgelessElement);

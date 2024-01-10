@@ -26,7 +26,6 @@ import {
   ShapeType,
   STROKE_COLORS,
 } from '../../../../surface-block/elements/shape/consts.js';
-import type { CanvasElementType } from '../../../../surface-block/index.js';
 import {
   type ShapeElement,
   ShapeStyle,
@@ -276,6 +275,10 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   private _lineStylesPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  get service() {
+    return this.surface.edgeless.service;
+  }
+
   private _getTextColor(fillColor: CssVariableName) {
     // When the shape is filled with black color, the text color should be white.
     // When the shape is transparent, the text color should be set according to the theme.
@@ -293,7 +296,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     const textColor = this._getTextColor(color);
     const filled = !isTransparent(color);
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
+      this.service.updateElement(ele.id, {
         filled,
         fillColor: color,
         color: textColor,
@@ -303,7 +306,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeColor(color: CssVariableName) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
+      this.service.updateElement(ele.id, {
         strokeColor: color,
       });
     });
@@ -311,7 +314,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeWidth(strokeWidth: number) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
+      this.service.updateElement(ele.id, {
         strokeWidth,
       });
     });
@@ -319,7 +322,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
+      this.service.updateElement(ele.id, {
         strokeStyle,
       });
     });
@@ -349,7 +352,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStyle(shapeStyle: ShapeStyle) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
+      this.service.updateElement(ele.id, {
         shapeStyle: shapeStyle,
         fontFamily:
           shapeStyle === ShapeStyle.General
@@ -379,10 +382,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
         this.page.captureSync();
         this.elements.forEach(element => {
-          this.surface.updateElement<CanvasElementType.SHAPE>(
-            element.id,
-            updatedProps
-          );
+          this.service.updateElement(element.id, updatedProps);
         });
       })
     );

@@ -79,6 +79,7 @@ export class Page extends Space<FlatBlockMap> {
           type: 'update';
           id: string;
           flavour: string;
+          props: { key: string };
         }
     >(),
   };
@@ -299,6 +300,17 @@ export class Page extends Space<FlatBlockMap> {
     const schema = this.schema.flavourSchemaMap.get(flavour);
     assertExists(schema);
     return schema.model.props?.(internalPrimitives) ?? {};
+  }
+
+  getBlocks() {
+    const blocks: BlockModel[] = [];
+    const allBlocks = this._blockTree.blocks;
+
+    allBlocks.forEach(({ model }) => {
+      blocks.push(model);
+    });
+
+    return blocks;
   }
 
   addBlocks(
@@ -696,11 +708,12 @@ export class Page extends Space<FlatBlockMap> {
       onChange: (block, key) => {
         block.model.propsUpdated.emit({ key });
       },
-      onYBlockUpdated: block => {
+      onYBlockUpdated: (block, props) => {
         this.slots.blockUpdated.emit({
           type: 'update',
           id,
           flavour: block.flavour,
+          props,
         });
       },
     });

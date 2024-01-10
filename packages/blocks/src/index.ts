@@ -84,6 +84,7 @@ export {
   ConnectorElementModel,
   ConnectorEndpointStyle,
   ConnectorMode,
+  ElementModel,
   generateKeyBetween,
   GroupElementModel,
   type ShapeElement,
@@ -91,6 +92,7 @@ export {
   ShapeStyle,
   StrokeStyle,
   type TextElement,
+  TextElementModel,
 } from './surface-block/index.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';

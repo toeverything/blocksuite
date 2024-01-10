@@ -1,21 +1,19 @@
-import {
-  CanvasElementType,
-  type SurfaceBlockComponent,
-} from '@blocksuite/blocks';
+import type { EdgelessPageBlockComponent } from '@blocksuite/blocks';
+import { CanvasElementType } from '@blocksuite/blocks';
 import { Workspace } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { addElement, getSurface } from '../utils/edgeless.js';
+import { getPageRootBlock } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
 const { GROUP } = CanvasElementType;
 
 describe('group', () => {
-  let surface!: SurfaceBlockComponent;
+  let service!: EdgelessPageBlockComponent['service'];
 
   beforeEach(async () => {
     const cleanup = await setupEditor('edgeless');
-    surface = getSurface(window.page, window.editor);
+    service = getPageRootBlock(window.page, window.editor, 'edgeless').service;
 
     return cleanup;
   });
@@ -23,28 +21,24 @@ describe('group', () => {
   test('remove group without children', async () => {
     const map = new Workspace.Y.Map<boolean>();
     const ids = Array.from({ length: 2 }).map(() => {
-      const id = addElement(
-        'shape',
-        {
-          shapeType: 'rect',
-        },
-        surface
-      );
+      const id = service.addElement('shape', {
+        shapeType: 'rect',
+      });
       map.set(id, true);
 
       return id;
     });
-    surface.addElement(GROUP, { children: map });
-    expect(surface.getElements().length).toBe(3);
-    surface.removeElement(ids[0]);
-    expect(surface.getElements().length).toBe(2);
+    service.addElement(GROUP, { children: map });
+    expect(service.elements.length).toBe(3);
+    service.removeElement(ids[0]);
+    expect(service.elements.length).toBe(2);
     page.captureSync();
-    surface.removeElement(ids[1]);
-    expect(surface.getElements().length).toBe(0);
+    service.removeElement(ids[1]);
+    expect(service.elements.length).toBe(0);
 
     page.undo();
-    expect(surface.getElements().length).toBe(2);
+    expect(service.elements.length).toBe(2);
     page.redo();
-    expect(surface.getElements().length).toBe(0);
+    expect(service.elements.length).toBe(0);
   });
 });

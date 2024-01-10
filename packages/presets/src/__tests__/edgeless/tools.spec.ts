@@ -13,6 +13,7 @@ import { setupEditor } from '../utils/setup.js';
 describe('default tool', () => {
   let surface!: SurfaceBlockComponent;
   let edgeless!: EdgelessPageBlockComponent;
+  let service!: EdgelessPageBlockComponent['service'];
 
   beforeEach(async () => {
     const cleanup = await setupEditor('edgeless');
@@ -28,7 +29,7 @@ describe('default tool', () => {
   });
 
   test('element click selection', async () => {
-    const id = surface.addElement('shape', {
+    const id = service.addElement('shape', {
       shapeType: 'rect',
       xywh: '[0,0,100,100]',
       fillColor: 'red',
@@ -47,7 +48,7 @@ describe('default tool', () => {
   });
 
   test('element drag moving', async () => {
-    const id = surface.addElement('shape', {
+    const id = edgeless.service.addElement('shape', {
       shapeType: 'rect',
       xywh: '[0,0,100,100]',
       fillColor: 'red',
@@ -64,7 +65,7 @@ describe('default tool', () => {
     drag(edgeless.host, { x: 0, y: 50 }, { x: 0, y: 150 });
     await wait();
 
-    const element = surface.pickById(id)!;
+    const element = service.getElementById(id)!;
     expect(element.xywh).toEqual(`[0,100,100,100]`);
   });
 
@@ -84,7 +85,7 @@ describe('default tool', () => {
     drag(edgeless.host, { x: 50, y: 50 }, { x: 150, y: 150 });
     await wait();
 
-    const element = surface.pickById(noteId)!;
+    const element = service.getElementById(noteId)!;
     const [x, y] = JSON.parse(element.xywh);
 
     expect(x).toEqual(100);

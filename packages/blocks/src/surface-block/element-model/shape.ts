@@ -3,10 +3,10 @@ import { Workspace, type Y } from '@blocksuite/store';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
 import type { SerializedXYWH } from '../index.js';
 import { type BaseProps, ElementModel } from './base.js';
-import type { FontWeight } from './common.js';
+import { FontFamily, FontWeight } from './common.js';
 import { type FontStyle } from './common.js';
 import { type StrokeStyle } from './common.js';
-import { yfield } from './decorators.js';
+import { local, yfield } from './decorators.js';
 
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 export type ShapeStyle = 'General' | 'Scribbled';
@@ -50,6 +50,13 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
     return props;
   }
 
+  get type() {
+    return 'shape';
+  }
+
+  @local()
+  textDisplay: boolean = true;
+
   @yfield()
   xywh: SerializedXYWH = '[0,0,100,100]';
 
@@ -86,31 +93,27 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   @yfield()
   text?: Y.Text;
 
-  @yfield()
-  color?: string;
+  @yfield('#000000')
+  color!: string;
 
-  @yfield()
-  fontSize?: number;
+  @yfield(ShapeTextFontSize.MEDIUM)
+  fontSize!: number;
 
-  @yfield()
-  fontFamily?: string;
+  @yfield(FontFamily.Inter)
+  fontFamily!: string;
 
-  @yfield()
-  fontWeight?: FontWeight;
+  @yfield(FontWeight.Regular)
+  fontWeight!: FontWeight;
 
-  @yfield()
-  fontStyle?: FontStyle;
+  @yfield('normal')
+  fontStyle!: FontStyle;
 
-  @yfield()
-  textAlign?: 'left' | 'center' | 'right';
+  @yfield('center')
+  textAlign!: 'left' | 'center' | 'right';
 
-  @yfield()
-  textHorizontalAlign?: 'left' | 'center' | 'right';
+  @yfield('center')
+  textHorizontalAlign!: 'left' | 'center' | 'right';
 
-  @yfield()
-  textVerticalAlign?: 'top' | 'center' | 'bottom';
-
-  get type() {
-    return 'shape';
-  }
+  @yfield('center')
+  textVerticalAlign!: 'top' | 'center' | 'bottom';
 }
