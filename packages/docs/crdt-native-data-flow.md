@@ -1,5 +1,9 @@
 # CRDT-Native Data Flow
 
+::: info
+🌐 This documentation has a [Chinese translation](https://insider.affine.pro/share/af3478a2-9c9c-4d16-864d-bffa1eb10eb6/I9qBPLR9WvuNE92BLm1L2).
+:::
+
 To make the editor logic based on BlockSuite intuitive and collaboration-ready, there is one major goal in BlockSuite: **Regardless of whether it is in a multi-user collaboration state, the application-layer code based on BlockSuite should be unaware of it**.
 
 We will introduce how this design is embodied in BlockSuite.
@@ -29,10 +33,6 @@ This design can be represented by the following diagram:
 ![crdt-native-data-flow](./images/crdt-native-data-flow.png)
 
 The advantage of this approach is that the application-layer code can **completely ignore whether updates to the block model come from local editing, history stack, or collaboration with other users**. Just subscribing to model update events is adequate.
-
-::: info
-In BlockSuite, we generally refer to the block instances that users manipulate through the `page` API as _block models_, but the true source of the state of these models comes from their underlying CRDT data structure, which is usually referred to as _YBlock_ in our documentation.
-:::
 
 ## Unidirectional Update Flow
 

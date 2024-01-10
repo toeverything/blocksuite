@@ -6,6 +6,7 @@ import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
+import { setImageProxyMiddlewareURL } from '../_common/transformers/middlewares.js';
 import {
   isInsideEdgelessEditor,
   matchFlavours,
@@ -55,4 +56,6 @@ export class ImageService extends BlockService<ImageBlockModel> {
     this.selectionManager.register(ImageSelection);
     this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
   }
+
+  setImageProxyMiddlewareURL = setImageProxyMiddlewareURL;
 }

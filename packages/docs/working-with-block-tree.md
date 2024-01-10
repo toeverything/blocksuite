@@ -134,7 +134,7 @@ For the more complex native [selection](https://developer.mozilla.org/en-US/docs
 
 ![flat-inlines](./images/flat-inlines.png)
 
-Additionally, the entire `selection.value` object is isolated under the `clientId` scope of the current session. During collaborative editing, selection instances between different clients will be distributed in real-time (via [providers](./data-synchronization#provider-based-state-management)), facilitating the implementation of UI states like remote cursors.
+Additionally, the entire `selection.value` object is isolated under the `clientId` scope of the current session. During collaborative editing, selection instances between different clients will be distributed in real-time (via [providers](./data-synchronization#document-streaming)), facilitating the implementation of UI states like remote cursors.
 
 For more advanced usage and details, please refer to the [`Selection`](./selection) documentation.
 
@@ -392,6 +392,6 @@ const props = {
 page.addBlock('affine:embed-github', props, parentId);
 ```
 
-You can view the [source code](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/embed-github-block) for the above example in the BlockSuite code repository.
+You can view the [source code](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/embed-github-block) for the above example in BlockSuite repository.
 
 Combining the earlier example of composing `DocEditor` entirely based on block spec ([recall here](./component-types#composing-editors-by-blocks)), this should give you a more direct understanding of BlockSuite's extensibility.

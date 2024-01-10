@@ -144,6 +144,21 @@ export const customImageProxyMiddleware = (
   };
 };
 
-export const defaultImageProxyMiddleware = customImageProxyMiddleware(
-  'https://workers.toeverything.workers.dev/proxy/image'
-);
+const imageProxyMiddlewareBuilder = () => {
+  let middleware = customImageProxyMiddleware(
+    'https://workers.toeverything.workers.dev/proxy/image'
+  );
+  return {
+    get: () => middleware,
+    set: (url: string) => {
+      middleware = customImageProxyMiddleware(url);
+    },
+  };
+};
+
+const defaultImageProxyMiddlewarBuilder = imageProxyMiddlewareBuilder();
+
+export const setImageProxyMiddlewareURL = defaultImageProxyMiddlewarBuilder.set;
+
+export const defaultImageProxyMiddleware =
+  defaultImageProxyMiddlewarBuilder.get();

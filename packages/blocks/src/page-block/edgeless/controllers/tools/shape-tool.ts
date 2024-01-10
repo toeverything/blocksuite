@@ -38,16 +38,20 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     height: number
   ): string {
     const { viewport } = this._edgeless.surface;
-
+    const attributes =
+      this._edgeless.surface.service.editSession.getLastProps('shape');
+    const { shapeType } = this.tool;
+    if (shapeType === 'rect' && attributes.radius > 0) {
+      width += 40;
+    }
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
     const bound = new Bound(modelX, modelY, width, height);
-    const { shapeType } = this.tool;
 
     const id = this._surface.addElement(CanvasElementType.SHAPE, {
-      shapeType: shapeType === 'roundedRect' ? 'rect' : shapeType,
+      shapeType: shapeType,
       xywh: bound.serialize(),
-      radius: shapeType === 'roundedRect' ? 0.1 : 0,
+      radius: attributes.radius,
     });
 
     return id;
@@ -58,11 +62,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     this._page.captureSync();
 
-    // RoundedRect shape should different with normal rect
-    let shapeWidth = SHAPE_OVERLAY_WIDTH;
-    if (this.tool.shapeType === 'roundedRect') shapeWidth += 40;
-
-    const id = this._addNewShape(e, shapeWidth, SHAPE_OVERLAY_HEIGHT);
+    const id = this._addNewShape(e, SHAPE_OVERLAY_WIDTH, SHAPE_OVERLAY_HEIGHT);
 
     const element = this._surface.pickById(id);
     assertExists(element);
@@ -257,16 +257,15 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       this._edgeless.surface.service.editSession.getLastProps('shape');
     options.stroke = computedStyle.getPropertyValue(attributes.strokeColor);
     options.fill = computedStyle.getPropertyValue(attributes.fillColor);
-    this._shapeOverlay = new ShapeOverlay(
-      this._edgeless,
-      attributes.shapeType,
-      options,
-      {
-        shapeStyle: attributes.shapeStyle,
-        fillColor: attributes.fillColor,
-        strokeColor: attributes.strokeColor,
-      }
-    );
+    let shapeType: string = attributes.shapeType;
+    if (attributes.radius > 0 && shapeType === 'rect') {
+      shapeType = 'roundedRect';
+    }
+    this._shapeOverlay = new ShapeOverlay(this._edgeless, shapeType, options, {
+      shapeStyle: attributes.shapeStyle,
+      fillColor: attributes.fillColor,
+      strokeColor: attributes.strokeColor,
+    });
     this._edgeless.surface.viewport.addOverlay(this._shapeOverlay);
   }
 }
