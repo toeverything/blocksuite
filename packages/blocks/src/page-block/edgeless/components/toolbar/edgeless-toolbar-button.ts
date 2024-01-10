@@ -64,7 +64,7 @@ export class EdgelessToolButton<
       })
     );
 
-    this.syncLastProps();
+    this.initLastPropsSlot();
 
     edgeless.bindHotKey(
       {
@@ -78,7 +78,7 @@ export class EdgelessToolButton<
     );
   }
 
-  protected syncLastProps() {
+  protected initLastPropsSlot() {
     this._disposables.add(
       this.service.editSession.slots.lastPropsUpdated.on(({ type, props }) => {
         if (type === this._type) {

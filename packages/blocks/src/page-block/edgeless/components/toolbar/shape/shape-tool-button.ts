@@ -164,7 +164,7 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
     );
   }
 
-  protected override syncLastProps(): void {
+  protected override initLastPropsSlot(): void {
     this._disposables.add(
       this.service.editSession.slots.lastPropsUpdated.on(({ type, props }) => {
         if (type === this._type) {
