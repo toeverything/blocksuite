@@ -256,7 +256,13 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const index = parent.children.indexOf(blockElement.model);
     page.addBlock('affine:bookmark', props, parent, index + 1);
 
-    this.inlineEditor.deleteText(this.targetInlineRange);
+    const totalTextLength = this.inlineEditor.yTextLength;
+    const inlineTextLength = this.targetInlineRange.length;
+    if (totalTextLength === inlineTextLength) {
+      page.deleteBlock(blockElement.model);
+    } else {
+      this.inlineEditor.deleteText(this.targetInlineRange);
+    }
 
     this.abortController.abort();
   }
@@ -281,7 +287,13 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
     page.addBlock(flavour, { url }, parent, index + 1);
 
-    this.inlineEditor.deleteText(this.targetInlineRange);
+    const totalTextLength = this.inlineEditor.yTextLength;
+    const inlineTextLength = this.targetInlineRange.length;
+    if (totalTextLength === inlineTextLength) {
+      page.deleteBlock(blockElement.model);
+    } else {
+      this.inlineEditor.deleteText(this.targetInlineRange);
+    }
 
     this.abortController.abort();
   }

@@ -125,7 +125,13 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     const pageId = this.referencePageId;
     page.addBlock('affine:embed-linked-page', { pageId }, parent, index + 1);
 
-    this.inlineEditor.deleteText(this.targetInlineRange);
+    const totalTextLength = this.inlineEditor.yTextLength;
+    const inlineTextLength = this.targetInlineRange.length;
+    if (totalTextLength === inlineTextLength) {
+      page.deleteBlock(blockElement.model);
+    } else {
+      this.inlineEditor.deleteText(this.targetInlineRange);
+    }
 
     this.abortController.abort();
   }

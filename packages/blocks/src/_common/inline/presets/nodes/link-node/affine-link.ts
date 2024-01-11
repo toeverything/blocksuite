@@ -45,9 +45,6 @@ export class AffineLink extends ShadowlessElement {
     return selfInlineRange;
   }
 
-  @property({ attribute: false })
-  popoverHoverOpenDelay = 150;
-
   static override styles = css`
     affine-link > a {
       white-space: nowrap;
