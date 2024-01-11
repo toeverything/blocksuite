@@ -138,7 +138,7 @@ export type SerializedViewport = z.infer<
 >;
 
 export class EditSessionStorage {
-  private _lastProps: LastProps = {
+  static defaultLastProps: LastProps = {
     connector: {
       frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
       rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
@@ -182,6 +182,8 @@ export class EditSessionStorage {
     },
   };
 
+  private _lastProps!: LastProps;
+
   slots = {
     lastPropsUpdated: new Slot<{
       type: keyof LastProps;
@@ -190,9 +192,12 @@ export class EditSessionStorage {
   };
 
   constructor(private _service: SurfaceService) {
-    const props = sessionStorage.getItem(SESSION_PROP_KEY);
-    if (props) {
-      this._lastProps = LastPropsSchema.parse(JSON.parse(props));
+    try {
+      this._lastProps = LastPropsSchema.parse(
+        JSON.parse(sessionStorage.getItem(SESSION_PROP_KEY) ?? '')
+      );
+    } catch {
+      this._lastProps = EditSessionStorage.defaultLastProps;
     }
   }
 
