@@ -37,7 +37,9 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
 
   onContainerPointerDown(e: PointerEventState): void {
     this._startPoint = this._surface.viewport.toModelCoord(e.x, e.y);
-    this._source = this._surface.connector.searchConnection(this._startPoint);
+    this._source = this._surface.overlays.connector.renderConnector(
+      this._startPoint
+    );
   }
 
   onContainerDragStart() {
@@ -60,10 +62,10 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
 
   onContainerDragMove(e: PointerEventState) {
     assertExists(this._connector);
-    const { connector, viewport } = this._surface;
+    const { viewport, overlays } = this._surface;
 
     const point = viewport.toModelCoord(e.x, e.y);
-    const target = connector.searchConnection(
+    const target = overlays.connector.renderConnector(
       point,
       this._connector.source.id ? [this._connector.source.id] : []
     ) as Connection;
@@ -72,7 +74,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
 
   onContainerDragEnd() {
     assertExists(this._connector);
-    this._surface.connector.clear();
+    this._surface.overlays.connector.clear();
     this._page.captureSync();
     this._edgeless.tools.switchToDefaultMode({
       elements: [this._connector.id],
@@ -82,9 +84,10 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   }
 
   onContainerMouseMove(e: PointerEventState) {
-    const { connector, viewport } = this._surface;
+    const { viewport, overlays } = this._surface;
     const point = viewport.toModelCoord(e.x, e.y);
-    connector.searchConnection(point);
+
+    overlays.connector.renderConnector(point);
   }
 
   onContainerMouseOut() {
@@ -100,6 +103,6 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   }
 
   afterModeSwitch() {
-    this._surface.connector.clear();
+    this._surface.overlays.connector.clear();
   }
 }

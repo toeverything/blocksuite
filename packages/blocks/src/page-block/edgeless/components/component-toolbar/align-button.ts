@@ -20,7 +20,7 @@ import {
 import type { EdgelessElement } from '../../../../_common/utils/index.js';
 import {
   Bound,
-  ConnectorElement,
+  ConnectorElementModel,
   GroupElement,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -43,8 +43,8 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
   }
 
   private _updateXYWH(ele: EdgelessElement, bound: Bound) {
-    if (ele instanceof ConnectorElement) {
-      this.edgeless.surface.connector.updateXYWH(ele, bound);
+    if (ele instanceof ConnectorElementModel) {
+      ele.moveTo(bound);
     } else if (ele instanceof GroupElement) {
       const groupBound = Bound.deserialize(ele.xywh);
       ele.childElements.forEach(child => {

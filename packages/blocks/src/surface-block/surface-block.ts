@@ -7,18 +7,15 @@ import { customElement, query } from 'lit/decorators.js';
 
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { isInsideEdgelessEditor } from '../_common/utils/index.js';
+import { values } from '../_common/utils/iterable.js';
 import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
-import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
-import {
-  isConnectable,
-  isTopLevelBlock,
-} from '../page-block/edgeless/utils/query.js';
+import { ConnectionOverlay } from '../page-block/edgeless/managers/connector-manager.js';
+import { isTopLevelBlock } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
 import { type EdgelessElementType } from './edgeless-types.js';
-import { ConnectorElement } from './elements/index.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceService } from './surface-service.js';
 import { Bound } from './utils/bound.js';
@@ -97,13 +94,16 @@ export class SurfaceBlockComponent extends BlockElement<
   indexedCanvases: HTMLCanvasElement[] = [];
 
   snap!: EdgelessSnapManager;
-  connector!: EdgelessConnectorManager;
   frame!: EdgelessFrameManager;
 
   private _lastTime = 0;
   private _cachedViewport = new Bound();
 
-  private readonly _themeObserver = new ThemeObserver();
+  readonly themeObserver = new ThemeObserver();
+
+  overlays!: {
+    connector: ConnectionOverlay;
+  };
 
   @query('edgeless-block-portal-container')
   portal!: EdgelessBlockPortalContainer;
@@ -138,16 +138,30 @@ export class SurfaceBlockComponent extends BlockElement<
       provider: {
         selectedElements: () => edgelessService.selection.selectedIds,
         getVariableColor: (val: string) =>
-          this._themeObserver.getVariableValue(val),
+          this.themeObserver.getVariableValue(val),
       },
     });
 
-    this.connector = new EdgelessConnectorManager(edgeless);
     this.frame = new EdgelessFrameManager(edgeless);
     this.snap = new EdgelessSnapManager(edgeless);
 
+    this.overlays = {
+      connector: new ConnectionOverlay(edgelessService),
+    };
+
+    values(this.overlays).forEach(overlay => {
+      this._renderer.addOverlay(overlay);
+    });
+
     this._initEvents();
     this._initThemeObserver();
+
+    this._disposables.add(
+      this.edgeless.service.viewport.viewportUpdated.on(({ center, zoom }) => {
+        this._renderer.setCenter(center[0], center[1]);
+        if (this._renderer.zoom !== zoom) this._renderer.setZoom(zoom);
+      })
+    );
   }
 
   private _initEvents() {
@@ -163,18 +177,6 @@ export class SurfaceBlockComponent extends BlockElement<
     );
 
     _disposables.add(
-      edgeless.slots.elementAdded.on(({ id }) => {
-        const element = edgeless.service.getElementById(id);
-        assertExists(element);
-        if (element instanceof ConnectorElement) {
-          // FIXME waiting for refactor
-          if (!this.connector.hasRelatedElement(element)) return;
-          this.connector.updatePath(element);
-        }
-      })
-    );
-
-    _disposables.add(
       edgeless.slots.elementUpdated.on(({ id, props }) => {
         const element = edgeless.service.getElementById(id);
         assertExists(element);
@@ -185,21 +187,6 @@ export class SurfaceBlockComponent extends BlockElement<
             : element.type) as EdgelessElementType,
           props as Record<string, unknown>
         );
-
-        if (element instanceof ConnectorElement) {
-          this.connector.updatePath(element);
-        }
-      })
-    );
-
-    _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id, props }) => {
-        if (!props || 'xywh' in props || 'rotate' in props) {
-          const element = edgeless.service.getElementById(id);
-          if (isConnectable(element)) {
-            this.connector.syncConnectorPos([element]);
-          }
-        }
       })
     );
 
@@ -211,9 +198,9 @@ export class SurfaceBlockComponent extends BlockElement<
   }
 
   private _initThemeObserver = () => {
-    this._themeObserver.observe(document.documentElement);
-    this._themeObserver.on(() => this.requestUpdate());
-    this.disposables.add(() => this._themeObserver.dispose());
+    this.themeObserver.observe(document.documentElement);
+    this.themeObserver.on(() => this.requestUpdate());
+    this.disposables.add(() => this.themeObserver.dispose());
   };
 
   private _updateIndexCanvases() {

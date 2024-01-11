@@ -1,6 +1,8 @@
 import { DEFAULT_ROUGHNESS } from '../consts.js';
 import type { PointLocation } from '../index.js';
 import { type SerializedXYWH } from '../index.js';
+import { Bound } from '../utils/bound.js';
+import { Vec } from '../utils/vec.js';
 import { type BaseProps, ElementModel } from './base.js';
 import type { StrokeStyle } from './common.js';
 import { derive, local, yfield } from './decorators.js';
@@ -37,8 +39,9 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     return 'connector';
   }
 
+  // @ts-ignore
   override get connectable() {
-    return false;
+    return false as const;
   }
 
   @derive((instance: ConnectorElementModel) => {
@@ -95,4 +98,22 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
 
   @yfield('Arrow')
   rearEndpointStyle!: PointStyle;
+
+  moveTo(bound: Bound) {
+    const oldBound = Bound.deserialize(this.xywh);
+    const offset = Vec.sub([bound.x, bound.y], [oldBound.x, oldBound.y]);
+    const { source, target } = this;
+
+    if (!source.id && source.position) {
+      this.source = {
+        position: Vec.add(source.position, offset) as [number, number],
+      };
+    }
+
+    if (!target.id && target.position) {
+      this.target = {
+        position: Vec.add(target.position, offset) as [number, number],
+      };
+    }
+  }
 }

@@ -41,7 +41,10 @@ import {
   type CanvasElement,
   GroupElement,
 } from '../../../surface-block/elements/index.js';
-import type { ElementModel } from '../../../surface-block/index.js';
+import {
+  ConnectorElementModel,
+  type ElementModel,
+} from '../../../surface-block/index.js';
 import { compare } from '../../../surface-block/managers/layer-utils.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
@@ -519,8 +522,8 @@ export class EdgelessClipboardController extends PageClipboard {
         ele.w,
         ele.h
       );
-      if (ele instanceof ConnectorElement) {
-        this.surface.connector.updateXYWH(ele, newBound);
+      if (ele instanceof ConnectorElementModel) {
+        ele.moveTo(newBound);
       } else {
         this.host.service.updateElement(ele.id, {
           xywh: newBound.serialize(),
@@ -761,7 +764,9 @@ export class EdgelessClipboardController extends PageClipboard {
       );
     };
 
-    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
+    const nodeElements =
+      nodes ??
+      (edgeless.service.pickElementsByBound(bound) as TopLevelBlockModel[]);
     for (const nodeElement of nodeElements) {
       await _drawTopLevelBlock(nodeElement);
 
@@ -771,9 +776,9 @@ export class EdgelessClipboardController extends PageClipboard {
           .getElementsInFrame(nodeElement, false)
           .forEach(ele => {
             if (isTopLevelBlock(ele)) {
-              blocksInsideFrame.push(ele);
+              blocksInsideFrame.push(ele as TopLevelBlockModel);
             } else {
-              canvasElements.push(ele);
+              canvasElements.push(ele as CanvasElement);
             }
           });
 

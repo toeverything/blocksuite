@@ -5,7 +5,7 @@ import type { Page } from '@blocksuite/store';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import type { EdgelessElement, TopLevelBlockModel } from '../_common/types.js';
 import type { NoteBlockModel } from '../note-block/index.js';
-import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
+import { ConnectorPathGenerator } from '../page-block/edgeless/managers/connector-manager.js';
 import type { SurfaceElement } from '../surface-block/elements/surface-element.js';
 import { Renderer } from '../surface-block/index.js';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
@@ -63,7 +63,7 @@ export class SurfaceRefRenderer {
     themeObserver.observe(document.documentElement);
     this._surfaceRenderer = renderer;
     this._connectorManager = new ConnectorPathGenerator({
-      pickById: id => this.getModel(id),
+      getElementById: id => this.getModel(id),
       refresh: () => renderer.refresh(),
     });
 

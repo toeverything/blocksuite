@@ -3,7 +3,7 @@ import { IS_MAC } from '@blocksuite/global/env';
 import { type EdgelessTool } from '../../_common/types.js';
 import {
   Bound,
-  ConnectorElement,
+  ConnectorElementModel,
   ConnectorMode,
   GroupElementModel,
 } from '../../surface-block/index.js';
@@ -285,7 +285,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _move(key: string) {
     const edgeless = this.pageElement;
     if (edgeless.selectionManager.editing) return;
-    const { surface } = edgeless;
     const { elements } = edgeless.selectionManager;
     elements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
@@ -306,16 +305,12 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       }
 
       if (isCanvasElement(element)) {
-        if (element instanceof ConnectorElement) {
-          surface.connector.updateXYWH(element, bound);
+        if (element instanceof ConnectorElementModel) {
+          element.moveTo(bound);
         }
-        this.pageElement.service.updateElement(element.id, {
-          xywh: bound.serialize(),
-        });
+        element['xywh'] = bound.serialize();
       } else {
-        this.pageElement.service.updateElement(element.id, {
-          xywh: bound.serialize(),
-        });
+        element['xywh'] = bound.serialize();
       }
       this.pageElement.slots.hoverUpdated.emit();
     });

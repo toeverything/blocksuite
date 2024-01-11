@@ -15,9 +15,7 @@ export function deleteElements(
 
   elements.forEach(element => {
     if (isConnectable(element)) {
-      const connectors = surface.connector.getConnecttedConnectors([
-        element as Connectable,
-      ]);
+      const connectors = service.getConnectors(element as Connectable);
       connectors.forEach(connector => set.add(connector));
     }
 

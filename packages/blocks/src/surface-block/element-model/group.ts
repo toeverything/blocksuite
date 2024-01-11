@@ -75,7 +75,7 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
 
   set rotate(_: number) {}
 
-  override get connectable(): boolean {
+  override get connectable() {
     return false;
   }
 

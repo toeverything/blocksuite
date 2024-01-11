@@ -1,4 +1,3 @@
-export type { SurfaceViewport } from './canvas-renderer/renderer.js';
 export { Overlay, Renderer } from './canvas-renderer/renderer.js';
 export {
   type IBound,

@@ -1,4 +1,3 @@
-import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 
 import type { ElementModel } from '../../surface-block/element-model/base.js';
@@ -33,12 +32,7 @@ export interface IEdgelessElement {
   getNearestPoint(point: IVec): IVec;
   intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;
   getRelativePointLocation(point: IVec): PointLocation;
-  hitTest(
-    x: number,
-    y: number,
-    options: HitTestOptions,
-    editorHost?: EditorHost
-  ): boolean;
+  hitTest(x: number, y: number, options: HitTestOptions): boolean;
   boxSelect(bound: Bound): boolean;
 }
 

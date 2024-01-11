@@ -20,6 +20,7 @@ import {
   propsToY,
 } from './element-model/index.js';
 import { generateElementId } from './index.js';
+import { connectorMiddleware } from './middlewares/connector.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 
 export type SurfaceBlockProps = {
@@ -189,6 +190,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     this._initElementModels();
     this._initGroup();
     this._initConnector();
+    this._initMiddlewares();
+  }
+
+  private _initMiddlewares() {
+    this._disposables.push(connectorMiddleware(this));
   }
 
   private _initElementModels() {
@@ -427,7 +433,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   getConnectors(id: string) {
     return (this._elementToConnector.get(id) || []).map(
       id => this.getElementById(id)!
-    );
+    ) as ConnectorElementModel[];
   }
 
   getGroup(id: string): GroupElementModel | null {

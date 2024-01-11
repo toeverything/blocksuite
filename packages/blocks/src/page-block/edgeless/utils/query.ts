@@ -19,11 +19,11 @@ import {
   GRID_GAP_MAX,
   GRID_GAP_MIN,
   ShapeElement,
-  type SurfaceViewport,
   TextElement,
 } from '../../../surface-block/index.js';
 import type { EdgelessBlock, EdgelessElement } from '../type.js';
 import { getElementsWithoutGroup } from './group.js';
+import type { Viewport } from './viewport.js';
 
 export function isTopLevelBlock(
   selectable: BlockModel | Selectable | BlockModel | null
@@ -87,7 +87,7 @@ export function isConnectable(
   return !!element && element.connectable;
 }
 
-export function getSelectionBoxBound(viewport: SurfaceViewport, bound: Bound) {
+export function getSelectionBoxBound(viewport: Viewport, bound: Bound) {
   const { w, h } = bound;
   const [x, y] = viewport.toViewCoord(bound.x, bound.y);
   return new DOMRect(x, y, w * viewport.zoom, h * viewport.zoom);

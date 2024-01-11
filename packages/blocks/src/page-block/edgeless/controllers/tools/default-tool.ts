@@ -6,25 +6,28 @@ import {
   handleNativeRangeAtPoint,
   resetNativeSelection,
   type Selectable,
-  type TopLevelBlockModel,
 } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
+import { titleBound } from '../../../../surface-block/canvas-renderer/element-renderer/group/utils.js';
 import {
   ConnectorElementModel,
   GroupElementModel,
+  ShapeElementModel,
+  TextElementModel,
 } from '../../../../surface-block/element-model/index.js';
 import {
   Bound,
   type CanvasElement,
   ConnectorElement,
-  GroupElement,
   type IVec,
-  ShapeElement,
-  TextElement,
   Vec,
 } from '../../../../surface-block/index.js';
-import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
-import type { EdgelessElement, HitTestOptions } from '../../type.js';
+import { isConnectorAndBindingsAllSelected } from '../../managers/connector-manager.js';
+import type {
+  EdgelessBlock,
+  EdgelessElement,
+  HitTestOptions,
+} from '../../type.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
 import {
@@ -179,13 +182,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._page.captureSync();
     }
 
-    const { surface } = this._edgeless;
     const bound = initialBound.clone();
     bound.x += delta[0];
     bound.y += delta[1];
 
-    if (selected instanceof ConnectorElement) {
-      surface.connector.updateXYWH(selected, bound);
+    if (selected instanceof ConnectorElementModel) {
+      selected.moveTo(bound);
     }
 
     this._service.updateElement(selected.id, {
@@ -194,7 +196,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _handleBlockDragMove(
-    block: TopLevelBlockModel,
+    block: EdgelessBlock,
     initialBound: Bound,
     delta: IVec
   ) {
@@ -287,14 +289,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         e.x,
         e.y
       );
-      if (selected instanceof TextElement) {
+      if (selected instanceof TextElementModel) {
         mountTextElementEditor(selected, this._edgeless, {
           x: modelX,
           y: modelY,
         });
         return;
       }
-      if (selected instanceof ShapeElement) {
+      if (selected instanceof ShapeElementModel) {
         mountShapeTextEditor(selected, this._edgeless);
         return;
       }
@@ -303,8 +305,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         return;
       }
       if (
-        selected instanceof GroupElement &&
-        selected.titleBound.containsPoint([modelX, modelY])
+        selected instanceof GroupElementModel &&
+        titleBound(
+          selected,
+          this._edgeless.service.viewport.zoom
+        ).containsPoint([modelX, modelY])
       ) {
         mountGroupTitleEditor(selected, this._edgeless);
         return;
@@ -396,7 +401,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const h = Math.abs(startY - curY);
     const bound = new Bound(x, y, w, h);
 
-    const elements = service?.pickElementsByBound(bound);
+    const elements = service.pickElementsByBound(bound);
 
     const set = new Set(
       tools.shiftKey ? [...elements, ...selectionManager.elements] : elements
@@ -586,7 +591,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             );
           } else {
             this._handleBlockDragMove(
-              element,
+              element as EdgelessBlock,
               this._selectedBounds[index],
               delta
             );

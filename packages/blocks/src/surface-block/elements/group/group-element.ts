@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import type { HitTestOptions } from '../../../page-block/edgeless/type.js';
 import {
   CanvasTextFontFamily,
   CanvasTextFontStyle,
@@ -10,7 +11,6 @@ import { Bound } from '../../utils/bound.js';
 import { linePolygonIntersects } from '../../utils/math-utils.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
-import type { HitTestOptions } from '../edgeless-element.js';
 import { SurfaceElement } from '../surface-element.js';
 import {
   getFontString,

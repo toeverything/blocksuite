@@ -1,5 +1,6 @@
 import type { Alignable } from '../../../_common/types.js';
 import { Point } from '../../../_common/utils/rect.js';
+import type { ConnectorElementModel } from '../../../surface-block/index.js';
 import {
   Bound,
   deserializeXYWH,
@@ -52,9 +53,15 @@ export class EdgelessSnapManager extends Overlay {
   setupAlignables(alignables: Alignable[]): Bound {
     if (alignables.length === 0) return new Bound();
     const { surface, service } = this.container;
-    const connectors = surface.connector.getConnecttedConnectors(
-      alignables.filter(isConnectable)
-    );
+    const connectors = alignables.filter(isConnectable).reduce((prev, el) => {
+      const connectors = service.getConnectors(el);
+
+      if (connectors.length > 0) {
+        prev = prev.concat(connectors);
+      }
+
+      return prev;
+    }, [] as ConnectorElementModel[]);
 
     const { viewport } = surface;
     const viewportBounds = Bound.from(viewport.viewportBounds);

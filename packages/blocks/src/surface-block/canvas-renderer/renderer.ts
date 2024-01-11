@@ -1,62 +1,31 @@
 import { Slot } from '@blocksuite/global/utils';
 
 import { requestConnectedFrame } from '../../_common/utils/event.js';
-import { type IBound, ZOOM_MAX, ZOOM_MIN } from '../consts.js';
+import { Viewport } from '../../page-block/edgeless/utils/viewport.js';
+import { type IBound } from '../consts.js';
 import type { ElementModel } from '../element-model/base.js';
 import type { LayerManager } from '../managers/layer-manager.js';
 import { RoughCanvas } from '../rough/canvas.js';
-import { Bound } from '../utils/bound.js';
 import { intersects } from '../utils/math-utils.js';
-import { clamp, getBoundsWithRotation } from '../utils/math-utils.js';
-import { type IPoint } from '../utils/point.js';
-import { type IVec, Vec } from '../utils/vec.js';
+import { getBoundsWithRotation } from '../utils/math-utils.js';
+import { type IVec } from '../utils/vec.js';
 import { modelRenderer } from './element-renderer/index.js';
-
-export interface SurfaceViewport {
-  readonly left: number;
-  readonly top: number;
-  readonly width: number;
-  readonly height: number;
-  readonly center: IPoint;
-  readonly centerX: number;
-  readonly centerY: number;
-  readonly zoom: number;
-  readonly viewportX: number;
-  readonly viewportY: number;
-  readonly viewportMinXY: IPoint;
-  readonly viewportMaxXY: IPoint;
-  readonly viewportBounds: Bound;
-  readonly boundingClientRect: DOMRect;
-
-  toModelCoord(viewX: number, viewY: number): [number, number];
-  toViewCoord(logicalX: number, logicalY: number): [number, number];
-
-  setCenter(centerX: number, centerY: number): void;
-  setZoom(zoom: number, focusPoint?: IPoint): void;
-  applyDeltaCenter(deltaX: number, deltaY: number): void;
-  isInViewport(bound: Bound): boolean;
-
-  addOverlay(overlay: Overlay): void;
-  removeOverlay(overlay: Overlay): void;
-
-  getCanvasByBound(
-    bound: IBound,
-    surfaceElements?: ElementModel[]
-  ): HTMLCanvasElement;
-}
-
-function cutoff(value: number, ref: number, sign: number) {
-  if (sign > 0 && value > ref) return ref;
-  if (sign < 0 && value < ref) return ref;
-  return value;
-}
 
 /**
  * An overlay is a layer covered on top of elements,
  * can be used for rendering non-CRDT state indicators.
  */
 export abstract class Overlay {
+  protected _renderer!: Renderer;
+
+  constructor() {}
+
   abstract render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void;
+
+  setRenderer(renderer: Renderer | null) {
+    // @ts-ignore
+    this._renderer = renderer;
+  }
 }
 
 type EnvProvider = {
@@ -64,7 +33,7 @@ type EnvProvider = {
   selectedElements?: () => string[];
 };
 
-export class Renderer implements SurfaceViewport {
+export class Renderer extends Viewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   rc: RoughCanvas;
@@ -78,18 +47,11 @@ export class Renderer implements SurfaceViewport {
   };
 
   private _overlays: Set<Overlay> = new Set();
-  private _container!: HTMLElement;
-  private _left = 0;
-  private _top = 0;
-  private _width = 0;
-  private _height = 0;
-
-  private _zoom = 1.0;
-  private _center = { x: 0, y: 0 };
   private _shouldUpdate = false;
-  private _rafId: number | null = null;
 
   constructor(options: { layerManager: LayerManager; provider: EnvProvider }) {
+    super();
+
     const canvas = document.createElement('canvas');
 
     this.canvas = canvas;
@@ -97,233 +59,15 @@ export class Renderer implements SurfaceViewport {
     this.rc = new RoughCanvas(canvas);
     this.layerManager = options.layerManager;
     this.provider = options.provider ?? {};
-  }
-
-  private _emitViewportUpdatedSlot() {
-    this.slots.viewportUpdated.emit({
-      zoom: this._zoom,
-      center: Vec.toVec(this._center),
+    this._viewportUpdated.on(payload => {
+      this._shouldUpdate = true;
+      this.slots.viewportUpdated.emit(payload);
     });
-  }
-
-  get left() {
-    return this._left;
-  }
-
-  get top() {
-    return this._top;
-  }
-
-  get width() {
-    return this._width;
-  }
-
-  get height() {
-    return this._height;
-  }
-
-  get zoom() {
-    return this._zoom;
-  }
-
-  get centerX() {
-    return this._center.x;
-  }
-
-  get centerY() {
-    return this._center.y;
-  }
-
-  get center() {
-    return this._center;
-  }
-
-  get viewportX() {
-    const { centerX, width, zoom } = this;
-    return centerX - width / 2 / zoom;
-  }
-
-  get viewportY() {
-    const { centerY, height, zoom } = this;
-    return centerY - height / 2 / zoom;
-  }
-
-  get translateX() {
-    return -this.viewportX * this.zoom;
-  }
-
-  get translateY() {
-    return -this.viewportY * this.zoom;
-  }
-
-  get viewportMinXY() {
-    const { centerX, centerY, width, height, zoom } = this;
-    return {
-      x: centerX - width / 2 / zoom,
-      y: centerY - height / 2 / zoom,
-    };
-  }
-
-  get viewportMaxXY() {
-    const { centerX, centerY, width, height, zoom } = this;
-    return {
-      x: centerX + width / 2 / zoom,
-      y: centerY + height / 2 / zoom,
-    };
-  }
-
-  get viewportBounds() {
-    const { viewportMinXY, viewportMaxXY } = this;
-    return Bound.from({
-      ...viewportMinXY,
-      w: viewportMaxXY.x - viewportMinXY.x,
-      h: viewportMaxXY.y - viewportMinXY.y,
-    });
-  }
-
-  get boundingClientRect() {
-    return this._container.getBoundingClientRect();
   }
 
   getVariableColor(val: string) {
     return this.provider.getVariableColor?.(val) ?? val;
   }
-
-  isInViewport(bound: Bound) {
-    const viewportBounds = Bound.from(this.viewportBounds);
-    return (
-      viewportBounds.contains(bound) ||
-      viewportBounds.isIntersectWithBound(bound)
-    );
-  }
-
-  toModelCoord(viewX: number, viewY: number): [number, number] {
-    const { viewportX, viewportY, zoom } = this;
-    return [viewportX + viewX / zoom, viewportY + viewY / zoom];
-  }
-
-  toViewCoord(modelX: number, modelY: number): [number, number] {
-    const { viewportX, viewportY, zoom } = this;
-    return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
-  }
-
-  setCenter(centerX: number, centerY: number) {
-    this._center.x = centerX;
-    this._center.y = centerY;
-    this._shouldUpdate = true;
-    this._emitViewportUpdatedSlot();
-  }
-
-  /**
-   *
-   * @param zoom zoom
-   * @param focusPoint canvas coordinate
-   */
-  setZoom(zoom: number, focusPoint?: IPoint) {
-    const prevZoom = this.zoom;
-    focusPoint = (focusPoint ?? this._center) as IPoint;
-    this._zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
-    const newZoom = this.zoom;
-
-    const offset = Vec.sub(Vec.toVec(this.center), Vec.toVec(focusPoint));
-    const newCenter = Vec.add(
-      Vec.toVec(focusPoint),
-      Vec.mul(offset, prevZoom / newZoom)
-    );
-    this.setCenter(newCenter[0], newCenter[1]);
-    this._shouldUpdate = true;
-    this._emitViewportUpdatedSlot();
-  }
-
-  setViewport(
-    newZoom: number,
-    newCenter = Vec.toVec(this.center),
-    smooth = false
-  ) {
-    const preZoom = this._zoom;
-    if (smooth) {
-      const cofficient = preZoom / newZoom;
-      if (cofficient === 1) {
-        this.smoothTranslate(newCenter[0], newCenter[1]);
-      } else {
-        const center = [this.centerX, this.centerY];
-        const focusPoint = Vec.mul(
-          Vec.sub(newCenter, Vec.mul(center, cofficient)),
-          1 / (1 - cofficient)
-        );
-        this.smoothZoom(newZoom, Vec.toPoint(focusPoint));
-      }
-    } else {
-      this._center.x = newCenter[0];
-      this._center.y = newCenter[1];
-      this.setZoom(newZoom);
-    }
-  }
-
-  setViewportByBound(
-    bound: Bound,
-    padding: [number, number, number, number] = [0, 0, 0, 0],
-    smooth = false
-  ) {
-    const [pt, pr, pb, pl] = padding;
-    const zoom = clamp(
-      (this.width - (pr + pl)) / bound.w,
-      ZOOM_MIN,
-      (this.height - (pt + pb)) / bound.h
-    );
-    const center = [
-      bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2,
-      bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2,
-    ];
-
-    this.setViewport(zoom, center, smooth);
-  }
-
-  smoothZoom(zoom: number, focusPoint?: IPoint) {
-    const delta = zoom - this.zoom;
-    if (this._rafId) cancelAnimationFrame(this._rafId);
-
-    const innerSmoothZoom = () => {
-      this._rafId = requestAnimationFrame(() => {
-        const sign = delta > 0 ? 1 : -1;
-        const total = 10;
-        const step = delta / total;
-        const nextZoom = cutoff(this.zoom + step, zoom, sign);
-
-        this.setZoom(nextZoom, focusPoint);
-        if (nextZoom != zoom) innerSmoothZoom();
-      });
-    };
-    innerSmoothZoom();
-  }
-
-  smoothTranslate(x: number, y: number) {
-    const { center } = this;
-    const delta = { x: x - center.x, y: y - center.y };
-    const innerSmoothTranslate = () => {
-      if (this._rafId) cancelAnimationFrame(this._rafId);
-      this._rafId = requestAnimationFrame(() => {
-        const rate = 10;
-        const step = { x: delta.x / rate, y: delta.y / rate };
-        const nextCenter = {
-          x: this.centerX + step.x,
-          y: this.centerY + step.y,
-        };
-        const signX = delta.x > 0 ? 1 : -1;
-        const signY = delta.y > 0 ? 1 : -1;
-        nextCenter.x = cutoff(nextCenter.x, x, signX);
-        nextCenter.y = cutoff(nextCenter.y, y, signY);
-        this.setCenter(nextCenter.x, nextCenter.y);
-        if (nextCenter.x != x || nextCenter.y != y) innerSmoothTranslate();
-      });
-    };
-    innerSmoothTranslate();
-  }
-
-  applyDeltaCenter = (deltaX: number, deltaY: number) => {
-    this.setCenter(this.centerX + deltaX, this.centerY + deltaY);
-    this._emitViewportUpdatedSlot();
-  };
 
   refresh() {
     this._shouldUpdate = true;
@@ -531,11 +275,13 @@ export class Renderer implements SurfaceViewport {
   }
 
   public addOverlay(overlay: Overlay) {
+    overlay.setRenderer(this);
     this._overlays.add(overlay);
     this._shouldUpdate = true;
   }
 
   public removeOverlay(overlay: Overlay) {
+    overlay.setRenderer(null);
     this._overlays.delete(overlay);
     this._shouldUpdate = true;
   }

@@ -3,33 +3,27 @@ import { type BlockModel } from '@blocksuite/store';
 import { last } from '../../_common/utils/iterable.js';
 import { GroupElementModel } from '../../index.js';
 import type { SurfaceBlockModel } from '../../models.js';
+import type { IBound } from '../../surface-block/consts.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { PageService } from '../page-service.js';
-import type { EdgelessSelectionManager } from './services/selection-manager.js';
+import { EdgelessSelectionManager } from './services/selection-manager.js';
 import type { EdgelessBlock, EdgelessElement, HitTestOptions } from './type.js';
+import { Viewport } from './utils/viewport.js';
 
 export class EdgelessPageService extends PageService {
-  private _layer!: LayerManager;
   private _surfaceModel!: SurfaceBlockModel;
-  private _viewport!: {
-    viewportX: number;
-    viewportY: number;
-    translateX: number;
-    translateY: number;
-    center: {
-      x: number;
-      y: number;
-    };
-    zoom: number;
-  };
+  private _layer!: LayerManager;
   private _selection!: EdgelessSelectionManager;
+  private _viewport!: Viewport;
 
   override mounted() {
     super.mounted();
 
     this._layer = LayerManager.create(this.page, this._surfaceModel);
+    this._viewport = new Viewport();
+    this._selection = new EdgelessSelectionManager(this);
   }
 
   override unmounted() {
@@ -173,15 +167,46 @@ export class EdgelessPageService extends PageService {
     return options.all ? results : last(results) ?? null;
   }
 
-  pickElementsByBound(bound: Bound): EdgelessElement[] {
-    const candidates: EdgelessElement[] = (
-      this._layer.canvasGrid.search(bound) as EdgelessElement[]
-    ).concat(this._layer.blocksGrid.search(bound));
-    const picked = candidates.filter(
-      element => element.boxSelect(bound) && element.group === null
-    );
+  pickElementsByBound(
+    bound: IBound | Bound,
+    type: 'frame' | 'blocks' | 'canvas' | 'all' = 'all'
+  ): EdgelessElement[] {
+    bound = new Bound(bound.x, bound.y, bound.w, bound.h);
 
-    return picked;
+    const pickCanvasElement = () => {
+      const candidates = this._layer.canvasGrid.search(bound);
+      const picked = candidates.filter(element =>
+        element.boxSelect(bound as Bound)
+      );
+      return picked as EdgelessElement[];
+    };
+    const pickBlock = () => {
+      const candidates = this._layer.blocksGrid.search(bound);
+      const picked = candidates.filter(element =>
+        element.boxSelect(bound as Bound)
+      );
+      return picked as EdgelessElement[];
+    };
+    const pickFrames = () => {
+      const candidates = this._layer.framesGrid.search(bound);
+      return candidates.filter(frame =>
+        frame.boxSelect(bound as Bound)
+      ) as EdgelessElement[];
+    };
+
+    switch (type) {
+      case 'canvas':
+        return pickCanvasElement();
+      case 'blocks':
+        return pickBlock();
+      case 'frame':
+        return pickFrames();
+      case 'all': {
+        const results = pickCanvasElement().concat(pickBlock());
+        results.sort(this._layer.compare);
+        return pickFrames().concat(results);
+      }
+    }
   }
 
   /**
@@ -347,5 +372,22 @@ export class EdgelessPageService extends PageService {
     if (parent != null) {
       parent.addChild(element.id);
     }
+  }
+
+  getConnectedElements(element: EdgelessElement) {
+    return this.surface.getConnectors(element.id).reduce((prev, current) => {
+      if (current.target.id === element.id && current.source.id) {
+        prev.push(this.getElementById(current.source.id));
+      }
+      if (current.source.id === element.id && current.target.id) {
+        prev.push(this.getElementById(current.target.id));
+      }
+
+      return prev;
+    }, [] as EdgelessElement[]);
+  }
+
+  getConnectors(element: EdgelessElement) {
+    return this.surface.getConnectors(element.id);
   }
 }
