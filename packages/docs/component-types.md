@@ -56,7 +56,15 @@ export class SimpleDocEditor extends LitElement {
 }
 ```
 
-As long as there is a corresponding `host` implementation, you can use the component model of frameworks like react or vue to implement your BlockSuite editors:
+In other words, you can think of the BlockSuite editor as being composed in this way:
+
+```ts
+type Editor = BlockSpec[];
+```
+
+With very little overhead.
+
+So, as long as there is a corresponding `host` implementation, you can use the component model of frameworks like react or vue to implement your BlockSuite editors:
 
 ![framework-agnostic](./images/framework-agnostic.png)
 

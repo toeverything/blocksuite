@@ -6,7 +6,7 @@
 
 ## Motivation
 
-For years, web frameworks such as React and Vue have promoted a mental model of component based development. This approach allows us to break down complex front-end applications into components for better composition and maintenance.
+For years, web frameworks such as React and Vue have popularized the mental model of component based development. This approach allows us to break down complex front-end applications into components for better composition and maintenance.
 
 Hence, when discussing front-end collaborative editing (or rich text editing), the first thought is often to define an `<Editor/>` component, then design the corresponding data flow and APIs around this editor. This method seems intuitive and has been adopted by many open-source editors in the front-end community. Everything sounds natural, but are there limitations or room for improvement?
 
