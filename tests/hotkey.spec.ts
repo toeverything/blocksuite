@@ -1305,7 +1305,6 @@ test('enter in title should move cursor in new paragraph block', async ({
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await page.pause();
   await focusTitle(page);
   await type(page, 'hello');
   await assertTitle(page, 'hello');

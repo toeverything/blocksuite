@@ -141,7 +141,6 @@ test.describe('group', () => {
     });
 
     test('select group by click', async ({ page }) => {
-      await page.pause();
       await clickView(page, [300, -100]);
       await assertEdgelessNonSelectedRect(page);
       await clickView(page, [50, 50]);
