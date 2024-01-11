@@ -209,6 +209,7 @@ export class DocPageBlockComponent extends BlockElement<
       this._getDefaultNoteBlock(),
       0
     );
+    this.host.event.activate();
     asyncFocusRichText(this.host, this.page, newFirstParagraphId)?.catch(
       console.error
     );
