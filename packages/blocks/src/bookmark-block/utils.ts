@@ -16,6 +16,20 @@ interface AffineLinkPreviewResponseData {
   favicons?: string[];
 }
 
+const linkPreviewEndpoint = (() => {
+  // https://github.com/toeverything/affine-workers/tree/main/packages/link-preview
+  let endpoint =
+    'https://affine-worker.toeverything.workers.dev/api/worker/link-preview';
+  return {
+    get: () => endpoint,
+    set: (url: string) => {
+      endpoint = url;
+    },
+  };
+})();
+
+export const setLinkPreviewEndpoint = linkPreviewEndpoint.set;
+
 export async function queryUrlDataFromAffineWorker(
   url: string
 ): Promise<Partial<BookmarkBlockUrlData>> {
@@ -41,19 +55,15 @@ export async function queryUrlDataFromAffineWorker(
       return {};
     }
   } else {
-    const response = await fetch(
-      // https://github.com/toeverything/affine-workers/tree/main/packages/link-preview
-      'https://affine-worker.toeverything.workers.dev/api/worker/link-preview',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-        }),
-      }
-    ).catch(() => null);
+    const response = await fetch(linkPreviewEndpoint.get(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url,
+      }),
+    }).catch(() => null);
     if (!response || !response.ok) return {};
     const data: AffineLinkPreviewResponseData = await response.json();
     return {
