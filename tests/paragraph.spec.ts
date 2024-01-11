@@ -1178,6 +1178,7 @@ test('handling keyup when cursor located in first paragraph', async ({
   await type(page, 'world');
   await assertRichTexts(page, ['world', '']);
   await pressArrowUp(page);
+  await waitNextFrame(page);
   await pressArrowUp(page);
   await assertPageTitleFocus(page);
 });
@@ -1404,14 +1405,6 @@ test('should placeholder works', async ({ page }) => {
   await expect(placeholder).toHaveCount(1);
 
   return; // test.skip
-  // should block hub icon works
-  const blockHubPlaceholder = placeholder.locator('svg');
-  const blockHubMenu = page.locator('.block-hub-icons-container');
-  await expect(blockHubPlaceholder).toBeVisible();
-  await expect(blockHubMenu).not.toBeVisible();
-  await blockHubPlaceholder.click();
-  await expect(placeholder).toHaveCount(1);
-  await expect(blockHubMenu).toBeVisible();
 });
 
 test.describe('press ArrowDown when cursor is at the last line of a block', () => {
