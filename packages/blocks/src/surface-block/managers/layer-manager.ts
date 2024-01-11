@@ -7,6 +7,7 @@ import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../embed-github-block/index.js';
+import type { EmbedLinkedPageModel } from '../../embed-linked-page-block/embed-linked-page-model.js';
 import type { EmbedYoutubeModel } from '../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../image-block/image-model.js';
@@ -33,7 +34,8 @@ export type IndexableBlock =
   | NoteBlockModel
   | BookmarkBlockModel
   | EmbedGithubModel
-  | EmbedYoutubeModel;
+  | EmbedYoutubeModel
+  | EmbedLinkedPageModel;
 
 export type Indexable = CanvasElement | IndexableBlock;
 

@@ -34,6 +34,7 @@ import {
 } from '../../../../_common/utils/iterable.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
+import type { EmbedLinkedPageModel } from '../../../../embed-linked-page-block/embed-linked-page-model.js';
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
@@ -66,7 +67,10 @@ type CategorizedElements = {
   note?: NoteBlockModel[];
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
-  embedCard?: BookmarkBlockModel[] & EmbedGithubModel[] & EmbedYoutubeModel[];
+  embedCard?: BookmarkBlockModel[] &
+    EmbedGithubModel[] &
+    EmbedYoutubeModel[] &
+    EmbedLinkedPageModel[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -179,26 +183,15 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _EmbedCardButton(
-    embedCards?: BookmarkBlockModel[] & EmbedGithubModel[] & EmbedYoutubeModel[]
-  ) {
+  private _EmbedCardButton(embedCards?: CategorizedElements['embedCard']) {
     if (embedCards?.length !== 1) return nothing;
 
-    const embedCardSelection = this.selection.selections.filter(sel =>
-      sel.elements.includes(embedCards[0].id)
-    );
-    if (embedCardSelection.length !== 1) return nothing;
-
-    const embedCardElement = this.surface.std.view.viewFromPath(
-      'block',
-      embedCardSelection[0].path
-    );
-    if (!embedCardElement) return nothing;
+    const embedCard = embedCards[0];
 
     return html`
       <edgeless-change-embed-card-button
-        .embedCard=${embedCardElement}
-        .page=${this.page}
+        .model=${embedCard}
+        .std=${this.edgeless.std}
         .surface=${this.surface}
       ></edgeless-change-embed-card-button>
     `;

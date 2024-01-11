@@ -11,10 +11,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import { HoverController } from '../_common/components/hover/controller.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
-import type { EmbedCardStyle } from '../_common/types.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
+import type { EmbedGithubStyles } from './embed-github-model.js';
 import { type EmbedGithubModel, githubUrlRegex } from './embed-github-model.js';
 import type { EmbedGithubService } from './embed-github-service.js';
 import { GithubIcon, styles } from './styles.js';
@@ -31,7 +32,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override cardStyle: EmbedCardStyle = 'horizontal';
+  override cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
 
   @property({ attribute: false })
   loading = false;
@@ -42,7 +43,15 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
 
-  refreshUrlData = () => {
+  open = () => {
+    let link = this.model.url;
+    if (!link.match(/^[a-zA-Z]+:\/\//)) {
+      link = 'https://' + link;
+    }
+    window.open(link, '_blank');
+  };
+
+  refreshData = () => {
     refreshEmbedGithubUrlData(this).catch(console.error);
   };
 
@@ -58,14 +67,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     selectionManager.setGroup('note', [blockSelection]);
   }
 
-  private _openLink() {
-    let link = this.model.url;
-    if (!link.match(/^[a-zA-Z]+:\/\//)) {
-      link = 'https://' + link;
-    }
-    window.open(link, '_blank');
-  }
-
   private _handleClick() {
     if (!this.isInSurface) {
       this._selectBlock();
@@ -75,7 +76,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   private _handleDoubleClick(event: MouseEvent) {
     if (!this.isInSurface) {
       event.stopPropagation();
-      this._openLink();
+      this.open();
     }
   }
 
@@ -108,14 +109,14 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     }
 
     this.page.withoutTransact(() => {
-      if (!this.model.description && !this.model.title) this.refreshUrlData();
+      if (!this.model.description && !this.model.title) this.refreshData();
       else this.refreshStatus();
     });
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
         this.requestUpdate();
-        if (key === 'url') this.refreshUrlData();
+        if (key === 'url') this.refreshData();
       })
     );
 
@@ -172,6 +173,10 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       style,
     } = this.model;
 
+    this.cardStyle = style;
+    this._width = EMBED_CARD_WIDTH[this.cardStyle];
+    this._height = EMBED_CARD_HEIGHT[this.cardStyle];
+
     const loading = this.loading;
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
     const titleIcon = loading ? LoadingIcon : GithubIcon;
@@ -200,8 +205,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
         ['th', 'st', 'nd', 'rd'][((day / 10) | 0) !== 1 ? day % 10 : 4] || 'th';
       dateText = dateText.replace(/\d+/, `${day}${suffix}`);
     }
-
-    this.cardStyle = style;
 
     return this.renderEmbed(
       () => html`
@@ -287,10 +290,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
                   `
                 : nothing}
 
-              <div
-                class="affine-embed-github-content-url"
-                @click=${this._openLink}
-              >
+              <div class="affine-embed-github-content-url" @click=${this.open}>
                 <span class="affine-embed-github-content-repo"
                   >${`${owner}/${repo} |`}</span
                 >

@@ -29,6 +29,8 @@ export class EmbedBlockElement<
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {
   protected cardStyle: EmbedCardStyle = 'horizontal';
+  protected _width = EMBED_CARD_WIDTH.horizontal;
+  protected _height = EMBED_CARD_HEIGHT.horizontal;
 
   private _isInSurface = false;
 
@@ -160,7 +162,7 @@ export class EmbedBlockElement<
           class="embed-block-container"
           style=${styleMap({
             width: '100%',
-            margin: '18px 0',
+            margin: '18px 0px',
           })}
         >
           ${children()}
@@ -171,9 +173,8 @@ export class EmbedBlockElement<
     const surface = this.surface;
     assertExists(surface);
 
-    const style = this.cardStyle;
-    const width = EMBED_CARD_WIDTH[style];
-    const height = EMBED_CARD_HEIGHT[style];
+    const width = this._width;
+    const height = this._height;
     const bound = Bound.deserialize(
       (surface.pickById(this.model.id) ?? this.model).xywh
     );

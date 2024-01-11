@@ -152,7 +152,15 @@ export class BookmarkBlockComponent extends BlockElement<
     },
   };
 
-  refreshUrlData = () => {
+  open = () => {
+    let link = this.model.url;
+    if (!link.match(/^[a-zA-Z]+:\/\//)) {
+      link = 'https://' + link;
+    }
+    window.open(link, '_blank');
+  };
+
+  refreshData = () => {
     refreshBookmarkUrlData(this).catch(console.error);
   };
 
@@ -167,14 +175,14 @@ export class BookmarkBlockComponent extends BlockElement<
     this._isInSurface = parent?.flavour === 'affine:surface';
 
     if (!this.model.description && !this.model.title) {
-      this.refreshUrlData();
+      this.refreshData();
     }
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
         this.edgelessOrDocBookmark?.requestUpdate();
         if (key === 'url') {
-          this.refreshUrlData();
+          this.refreshData();
         }
       })
     );

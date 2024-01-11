@@ -20,9 +20,6 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
       min-width: 500px;
     }
 
-    .filter-modal-container {
-    }
-
     .filter-modal-bottom {
       border-top: 1px solid var(--affine-border-color);
       padding: 8px;

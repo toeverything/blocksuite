@@ -140,9 +140,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
       ],
     })
       .then(({ x, y }) => {
-        if (!this.popupContainer) return;
-        this.popupContainer.style.left = `${x}px`;
-        this.popupContainer.style.top = `${y}px`;
+        const popupContainer = this.popupContainer;
+        if (!popupContainer) return;
+        popupContainer.style.left = `${x}px`;
+        popupContainer.style.top = `${y}px`;
       })
       .catch(console.error);
   }
@@ -442,11 +443,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
         <span class="affine-link-popover-dividing-line"></span>
 
-        <icon-button
-          size="24px"
-          class="bookmark-toolbar-button more-button"
-          @click=${() => this._toggleMoreMenu()}
-        >
+        <icon-button size="24px" @click=${() => this._toggleMoreMenu()}>
           ${MoreVerticalIcon}
           <affine-tooltip .offset=${12}>More</affine-tooltip>
         </icon-button>
