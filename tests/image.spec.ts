@@ -105,8 +105,10 @@ test('can click and copy image', async ({ page }) => {
   await activeEmbed(page);
   await copyByKeyboard(page);
   await pressEnter(page);
+  await waitNextFrame(page);
 
   await pasteByKeyboard(page);
+  await waitNextFrame(page);
   await assertRichImage(page, 2);
 });
 
