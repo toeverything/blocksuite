@@ -167,12 +167,13 @@ export const styles = css`
     }
   }
   .affine-embed-linked-page-block.horizontal:not(.loading).deleted {
-    height: 78px;
+    height: 80px;
     background: var(--affine-background-secondary-color);
 
     .affine-embed-linked-page-banner {
       height: 66px;
     }
+
     .affine-embed-linked-page-banner img,
     .affine-embed-linked-page-banner object,
     .affine-embed-linked-page-banner svg {

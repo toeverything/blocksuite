@@ -337,7 +337,7 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
 
   override updated() {
     if (this.isInSurface) {
-      // deleted state in horizontal style has 78px height
+      // deleted state in horizontal style has 80px height
       const linkedPage = this._linkedPage;
       const { xywh, style } = this.model;
       const bound = Bound.deserialize(xywh);
@@ -352,8 +352,8 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
             xywh: bound.serialize(),
           });
         });
-      } else if (!linkedPage && style === 'horizontal' && bound.h !== 78) {
-        bound.h = 78;
+      } else if (!linkedPage && style === 'horizontal' && bound.h !== 80) {
+        bound.h = 80;
         this.page.withoutTransact(() => {
           this.page.updateBlock(this.model, {
             xywh: bound.serialize(),
