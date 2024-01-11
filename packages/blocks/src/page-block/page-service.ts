@@ -10,6 +10,7 @@ import {
   DEFAULT_IMAGE_PROXY_ENDPOINT,
   ExportManager,
 } from '../_common/export-manager/export-manager.js';
+import type { EmbedCardStyle } from '../_common/types.js';
 import { DEFAULT_CANVAS_TEXT_FONT_CONFIG } from '../surface-block/consts.js';
 import {
   copySelectedModelsCommand,
@@ -28,10 +29,15 @@ import {
   getTextSelectionCommand,
   withHostCommand,
 } from './commands/index.js';
-import type { EdgelessPageBlockComponent } from './edgeless/edgeless-page-block.js';
 import { FontLoader } from './font-loader/font-loader.js';
 import type { PageBlockModel } from './page-model.js';
 import type { PageBlockComponent } from './types.js';
+
+type EmbedOptions = {
+  flavour: string;
+  urlRegex: RegExp;
+  styles: EmbedCardStyle[];
+};
 
 export class PageService extends BlockService<PageBlockModel> {
   readonly fontLoader = new FontLoader();
@@ -50,12 +56,27 @@ export class PageService extends BlockService<PageBlockModel> {
   get viewportElement() {
     const pageElement = this.std.view.viewFromPath('block', [
       this.std.page.root?.id ?? '',
-    ]) as PageBlockComponent | EdgelessPageBlockComponent | null;
+    ]) as PageBlockComponent | null;
     assertExists(pageElement);
     const viewportElement = pageElement.viewportElement as HTMLElement | null;
     assertExists(viewportElement);
     return viewportElement;
   }
+
+  private _embedBlockRegistry = new Set<EmbedOptions>();
+
+  registerEmbedBlockOptions = (options: EmbedOptions): void => {
+    this._embedBlockRegistry.add(options);
+  };
+
+  getEmbedBlockOptions = (url: string): EmbedOptions | null => {
+    const entries = this._embedBlockRegistry.entries();
+    for (const [options] of entries) {
+      const regex = options.urlRegex;
+      if (regex.test(url)) return options;
+    }
+    return null;
+  };
 
   override mounted() {
     super.mounted();

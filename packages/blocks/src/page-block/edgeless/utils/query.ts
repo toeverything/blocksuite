@@ -1,6 +1,7 @@
 import type { BlockModel } from '@blocksuite/store';
 import { type Page } from '@blocksuite/store';
 
+import type { EmbedBlockModel } from '../../../_common/embed-block-helper/embed-block-model.js';
 import {
   type Connectable,
   type EdgelessElement,
@@ -9,6 +10,8 @@ import {
   type TopLevelBlockModel,
 } from '../../../_common/utils/index.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import type { EmbedGithubModel } from '../../../embed-github-block/index.js';
+import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
@@ -66,9 +69,29 @@ export function isBookmarkBlock(
 
 export function isEmbeddedBlock(
   element: BlockModel | EdgelessElement | null
-): element is BookmarkBlockModel {
+): element is EmbedBlockModel {
   return (
     !!element && 'flavour' in element && /affine:embed-*/.test(element.flavour)
+  );
+}
+
+export function isEmbedGithubBlock(
+  element: BlockModel | EdgelessElement | null
+): element is EmbedGithubModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:embed-github'
+  );
+}
+
+export function isEmbedYoutubeBlock(
+  element: BlockModel | EdgelessElement | null
+): element is EmbedYoutubeModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:embed-youtube'
   );
 }
 

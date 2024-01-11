@@ -1,6 +1,8 @@
 import { type Slot } from '@blocksuite/global/utils';
 import { type BlockModel, type Page } from '@blocksuite/store';
 
+import type { EmbedGithubModel } from '../embed-github-block/embed-github-model.js';
+import type { EmbedYoutubeModel } from '../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
 import type { BookmarkBlockModel } from '../models.js';
@@ -119,7 +121,9 @@ export type TopLevelBlockModel =
   | NoteBlockModel
   | FrameBlockModel
   | ImageBlockModel
-  | BookmarkBlockModel;
+  | BookmarkBlockModel
+  | EmbedGithubModel
+  | EmbedYoutubeModel;
 
 export type EdgelessElement = TopLevelBlockModel | CanvasElement;
 
@@ -220,3 +224,10 @@ export type EdgelessTool =
 export type EmbedBlockDoubleClickData = {
   blockId: string;
 };
+
+export type EmbedCardStyle =
+  | 'horizontal'
+  | 'list'
+  | 'vertical'
+  | 'cube'
+  | 'video';

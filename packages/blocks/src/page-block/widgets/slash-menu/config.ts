@@ -1,6 +1,7 @@
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Slice, Text, type Y } from '@blocksuite/store';
 
+import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
 import { toast } from '../../../_common/components/toast.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
@@ -35,8 +36,11 @@ import {
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
-import { toggleBookmarkCreateModal } from '../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import type { DatabaseService } from '../../../database-block/database-service.js';
+import { githubUrlRegex } from '../../../embed-github-block/index.js';
+import { GithubIcon } from '../../../embed-github-block/styles.js';
+import { youtubeUrlRegex } from '../../../embed-youtube-block/embed-youtube-model.js';
+import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { ImageService } from '../../../image-block/image-service.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
@@ -278,7 +282,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const url = await toggleBookmarkCreateModal(pageElement.host);
+          const url = await toggleEmbedCardCreateModal(pageElement.host);
           if (!url) return;
           const props = {
             flavour: 'affine:bookmark',
@@ -313,6 +317,60 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           addSiblingAttachmentBlock(file, maxFileSize, model).catch(
             console.error
           );
+        }),
+      },
+      {
+        name: 'YouTube',
+        icon: YoutubeIcon,
+        showWhen: model => {
+          if (!model.page.schema.flavourSchemaMap.has('affine:embed-youtube')) {
+            return false;
+          }
+          return !insideDatabase(model);
+        },
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
+          if (!parent) {
+            return;
+          }
+          const url = await toggleEmbedCardCreateModal(
+            pageElement.host,
+            youtubeUrlRegex,
+            'Create a YouTube link card'
+          );
+          if (!url) return;
+          const props = {
+            flavour: 'affine:embed-youtube',
+            url,
+          } as const;
+          pageElement.page.addSiblingBlocks(model, [props]);
+        }),
+      },
+      {
+        name: 'GitHub',
+        icon: GithubIcon,
+        showWhen: model => {
+          if (!model.page.schema.flavourSchemaMap.has('affine:embed-github')) {
+            return false;
+          }
+          return !insideDatabase(model);
+        },
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
+          if (!parent) {
+            return;
+          }
+          const url = await toggleEmbedCardCreateModal(
+            pageElement.host,
+            githubUrlRegex,
+            'Create a GitHub link card'
+          );
+          if (!url) return;
+          const props = {
+            flavour: 'affine:embed-github',
+            url,
+          } as const;
+          pageElement.page.addSiblingBlocks(model, [props]);
         }),
       },
     ],

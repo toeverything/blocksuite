@@ -798,7 +798,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
         if (
           event.flavour === 'affine:image' ||
-          event.flavour === 'affine:bookmark'
+          event.flavour === 'affine:bookmark' ||
+          event.flavour === 'affine:embed-github' ||
+          event.flavour === 'affine:embed-youtube'
         ) {
           const parent =
             event.type === 'delete'

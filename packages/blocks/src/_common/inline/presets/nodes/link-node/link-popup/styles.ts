@@ -23,6 +23,36 @@ const editLinkStyle = css`
     /* user-select: none; */
   }
 
+  .affine-link-edit-popover label {
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+    font-size: var(--affine-font-sm);
+    box-sizing: border-box;
+    padding: 6px 0 6px 12px;
+    color: var(--affine-icon-color);
+  }
+
+  .affine-link-edit-popover input {
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+    font-size: var(--affine-font-base);
+    box-sizing: border-box;
+    padding: 6px 12px 6px 0;
+    width: 260px;
+    height: 34px;
+    color: inherit;
+    border: none;
+    background: transparent;
+  }
+  .affine-link-edit-popover input::placeholder {
+    color: var(--affine-placeholder-color);
+  }
+  input:focus {
+    outline: none;
+  }
+  .affine-link-edit-popover input:focus ~ label,
+  .affine-link-edit-popover input:active ~ label {
+    color: var(--affine-primary-color);
+  }
+
   .affine-edit-text-area {
     grid-area: text-area;
     width: 338px;
@@ -35,6 +65,16 @@ const editLinkStyle = css`
     align-items: center;
     user-select: none;
   }
+  .affine-edit-text-area {
+    border: 1px solid var(--affine-border-color);
+    outline: none;
+    border-radius: 10px;
+    background: transparent;
+  }
+
+  .affine-edit-text-area:focus-within {
+    border: 1px solid var(--affine-primary-color);
+  }
 
   .affine-edit-link-area {
     grid-area: link-area;
@@ -46,6 +86,15 @@ const editLinkStyle = css`
     grid-template-areas: 'link span link-input';
     justify-items: center;
     align-items: center;
+  }
+  .affine-edit-link-area {
+    border: 1px solid var(--affine-border-color);
+    outline: none;
+    border-radius: 10px;
+    background: transparent;
+  }
+  .affine-edit-link-area:focus-within {
+    border: 1px solid var(--affine-primary-color);
   }
 
   .affine-link-popover-dividing-line {
@@ -83,7 +132,7 @@ export const linkPopupStyle = css`
     background-color: rgba(35, 131, 226, 0.28);
   }
 
-  .popup-container {
+  .affine-link-popover-container {
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-base);
     font-style: normal;
@@ -105,7 +154,7 @@ export const linkPopupStyle = css`
     }
   }
 
-  .overlay-mask {
+  .affine-link-popover-overlay-mask {
     position: fixed;
     top: 0;
     left: 0;
@@ -113,63 +162,30 @@ export const linkPopupStyle = css`
     height: 100vh;
     z-index: var(--affine-z-index-popover);
   }
-  .affine-edit-text-area {
-    border: 1px solid var(--affine-border-color);
-    outline: none;
-    border-radius: 10px;
-    background: transparent;
-  }
-  .affine-edit-text-area:focus-within {
-    border: 1px solid var(--affine-primary-color);
-  }
-  .affine-edit-link-area {
-    border: 1px solid var(--affine-border-color);
-    outline: none;
-    border-radius: 10px;
-    background: transparent;
-  }
-  .affine-edit-link-area:focus-within {
-    border: 1px solid var(--affine-primary-color);
-  }
-
-  label {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-sm);
-    box-sizing: border-box;
-    padding: 6px 0 6px 12px;
-    color: var(--affine-icon-color);
-  }
-
-  input {
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    font-size: var(--affine-font-base);
-    box-sizing: border-box;
-    padding: 6px 12px 6px 0;
-    width: 260px;
-    height: 34px;
-    color: inherit;
-    border: none;
-    background: transparent;
-  }
-  input::placeholder {
-    color: var(--affine-placeholder-color);
-  }
-  input:focus {
-    outline: none;
-  }
-  input:focus ~ label,
-  input:active ~ label {
-    color: var(--affine-primary-color);
-  }
 
   .affine-link-popover {
+    box-sizing: border-box;
     display: flex;
     align-items: center;
+    gap: 8px;
     padding: 8px;
+    height: 40px;
 
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);
     border-radius: 8px;
+  }
+
+  .affine-link-preview {
+    display: flex;
+    width: 180px;
+    padding: var(--1, 0px);
+    align-items: flex-start;
+    gap: 10px;
+    border-radius: var(--1, 0px);
+    opacity: var(--add, 1);
+    user-select: none;
+    cursor: pointer;
   }
 
   .affine-link-popover-input {
@@ -182,14 +198,23 @@ export const linkPopupStyle = css`
     border: none;
   }
 
-  .affine-link-preview {
-    width: 260px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    user-select: none;
-    cursor: pointer;
-    white-space: nowrap;
+  .affine-link-preview > span {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+
+    color: var(--affine-link-color);
+    font-feature-settings:
+      'clig' off,
+      'liga' off;
+    font-family: var(--affine-font-family);
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    opacity: var(--add, 1);
   }
 
   .affine-link-popover-dividing-line {
@@ -197,6 +222,21 @@ export const linkPopupStyle = css`
     width: 1px;
     height: 20px;
     background-color: var(--affine-border-color);
+  }
+
+  .affine-link-popover-view-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 2px;
+    border-radius: 6px;
+    background: var(--affine-hover-color);
+  }
+  .affine-link-popover-view-selector > icon-button {
+    padding: 0px;
+  }
+  .affine-link-popover-view-selector .current-view {
+    background: var(--affine-background-overlay-panel-color);
   }
 
   ${editLinkStyle}
