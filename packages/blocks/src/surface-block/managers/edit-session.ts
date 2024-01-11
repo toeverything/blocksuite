@@ -137,51 +137,50 @@ export type SerializedViewport = z.infer<
   typeof SessionPropsSchema.shape.viewport
 >;
 
-const defaultLastProps: LastProps = {
-  connector: {
-    frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
-    rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
-    stroke: GET_DEFAULT_LINE_COLOR(),
-    strokeStyle: StrokeStyle.Solid,
-    strokeWidth: LineWidth.LINE_WIDTH_TWO,
-    rough: false,
-  },
-  brush: {
-    color: GET_DEFAULT_LINE_COLOR(),
-    lineWidth: LineWidth.Thin,
-  },
-  shape: {
-    shapeType: ShapeType.Rect,
-    fillColor: DEFAULT_SHAPE_FILL_COLOR,
-    strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-    shapeStyle: ShapeStyle.General,
-    filled: true,
-    radius: 0,
-  },
-  text: {
-    color: GET_DEFAULT_TEXT_COLOR(),
-    fontFamily: CanvasTextFontFamily.Inter,
-    textAlign: TextAlign.Left,
-    fontWeight: CanvasTextFontWeight.Regular,
-    fontStyle: CanvasTextFontStyle.Normal,
-    fontSize: 24,
-    hasMaxWidth: false,
-  },
-  'affine:note': {
-    background: DEFAULT_NOTE_COLOR,
-    hidden: false,
-    edgeless: {
-      style: {
-        borderRadius: 8,
-        borderSize: 4,
-        borderStyle: StrokeStyle.Solid,
-        shadowType: NOTE_SHADOWS[1],
+export class EditSessionStorage {
+  static defaultLastProps: LastProps = {
+    connector: {
+      frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
+      rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
+      stroke: GET_DEFAULT_LINE_COLOR(),
+      strokeStyle: StrokeStyle.Solid,
+      strokeWidth: LineWidth.LINE_WIDTH_TWO,
+      rough: false,
+    },
+    brush: {
+      color: GET_DEFAULT_LINE_COLOR(),
+      lineWidth: LineWidth.Thin,
+    },
+    shape: {
+      shapeType: ShapeType.Rect,
+      fillColor: DEFAULT_SHAPE_FILL_COLOR,
+      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+      shapeStyle: ShapeStyle.General,
+      filled: true,
+      radius: 0,
+    },
+    text: {
+      color: GET_DEFAULT_TEXT_COLOR(),
+      fontFamily: CanvasTextFontFamily.Inter,
+      textAlign: TextAlign.Left,
+      fontWeight: CanvasTextFontWeight.Regular,
+      fontStyle: CanvasTextFontStyle.Normal,
+      fontSize: 24,
+      hasMaxWidth: false,
+    },
+    'affine:note': {
+      background: DEFAULT_NOTE_COLOR,
+      hidden: false,
+      edgeless: {
+        style: {
+          borderRadius: 8,
+          borderSize: 4,
+          borderStyle: StrokeStyle.Solid,
+          shadowType: NOTE_SHADOWS[1],
+        },
       },
     },
-  },
-};
-
-export class EditSessionStorage {
+  };
   private _lastProps!: LastProps;
 
   slots = {
@@ -197,7 +196,7 @@ export class EditSessionStorage {
         JSON.parse(sessionStorage.getItem(SESSION_PROP_KEY) ?? '')
       );
     } catch {
-      this._lastProps = defaultLastProps;
+      this._lastProps = EditSessionStorage.defaultLastProps;
     }
   }
 
