@@ -36,15 +36,15 @@ export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
   static override styles = formatBarStyle;
-  private static readonly customElements: Set<FormatBarCustomRender> =
+  private static readonly _customElements: Set<FormatBarCustomRender> =
     new Set<FormatBarCustomRender>();
 
   static registerCustomRender(render: FormatBarCustomRender) {
-    this.customElements.add(render);
+    this._customElements.add(render);
   }
   static registerCustomElement(element: FormatBarCustomElement) {
     let elementInstance: HTMLElement | undefined;
-    this.customElements.add({
+    this._customElements.add({
       ...element,
       render: formatBar => {
         if (!elementInstance) {
@@ -57,7 +57,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   }
 
   static registerCustomAction(action: FormatBarCustomAction) {
-    this.customElements.add({
+    this._customElements.add({
       render: formatBar => {
         const url = action.image(formatBar);
         if (url == null) {
@@ -397,7 +397,7 @@ export class AffineFormatBarWidget extends WidgetElement {
 
   private _customRender() {
     const result: TemplateResult[] = [];
-    AffineFormatBarWidget.customElements.forEach(render => {
+    AffineFormatBarWidget._customElements.forEach(render => {
       const element = render.render(this);
       if (element) {
         result.push(element);
