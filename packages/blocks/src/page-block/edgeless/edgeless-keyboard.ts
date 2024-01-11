@@ -177,6 +177,11 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         ArrowRight: () => {
           this._move('ArrowRight');
         },
+        Escape: () => {
+          if (!this.pageElement.selectionManager.empty) {
+            pageElement.selectionManager.clear();
+          }
+        },
       },
       {
         global: true,
