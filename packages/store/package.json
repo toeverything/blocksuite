@@ -18,7 +18,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/inline": "workspace:*",
     "@types/flexsearch": "^0.7.6",
-    "flexsearch": "0.7.41",
+    "flexsearch": "0.7.43",
     "idb-keyval": "^6.2.1",
     "lib0": "^0.2.88",
     "merge": "^2.1.1",
