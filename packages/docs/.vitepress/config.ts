@@ -13,7 +13,7 @@ export default defineConfig({
   },
   lang: 'en-US',
   title: 'BlockSuite',
-  description: 'Toolkit for Diverse Content Editing',
+  description: 'The Editor Framework',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
