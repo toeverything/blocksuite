@@ -1,12 +1,12 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import type { Renderer } from '../../../surface-block/canvas-renderer/renderer.js';
 import type { IVec } from '../../../surface-block/index.js';
+import type { Viewport } from './viewport.js';
 
 const PANNING_DISTANCE = 30;
 
 export function calPanDelta(
-  viewport: Renderer,
+  viewport: Viewport,
   e: PointerEventState,
   edgeDistance = 20
 ): IVec | null {

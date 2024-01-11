@@ -198,7 +198,7 @@ export class EdgelessPageService extends PageService {
       case 'canvas':
         return pickCanvasElement();
       case 'blocks':
-        return pickBlock();
+        return pickFrames().concat(pickBlock());
       case 'frame':
         return pickFrames();
       case 'all': {

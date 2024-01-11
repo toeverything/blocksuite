@@ -766,7 +766,10 @@ export class EdgelessClipboardController extends PageClipboard {
 
     const nodeElements =
       nodes ??
-      (edgeless.service.pickElementsByBound(bound) as TopLevelBlockModel[]);
+      (edgeless.service.pickElementsByBound(
+        bound,
+        'blocks'
+      ) as TopLevelBlockModel[]);
     for (const nodeElement of nodeElements) {
       await _drawTopLevelBlock(nodeElement);
 

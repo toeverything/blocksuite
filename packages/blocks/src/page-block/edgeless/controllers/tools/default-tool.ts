@@ -110,10 +110,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _pick(x: number, y: number, options?: HitTestOptions) {
-    const { surface } = this._edgeless;
-
     const service = this._service;
-    const modelPos = surface.viewport.toModelCoord(x, y);
+    const modelPos = service.viewport.toModelCoord(x, y);
 
     return service.pickElementInGroup(modelPos[0], modelPos[1], options);
   }
@@ -264,7 +262,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   onContainerDblClick(e: PointerEventState) {
     if (this._page.readonly) {
-      const viewport = this._surface.viewport;
+      const viewport = this._service.viewport;
       if (viewport.zoom === 1) {
         // Fit to Screen
         const { centerX, centerY, zoom } = this._edgeless.getFitToScreenData();
@@ -285,10 +283,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       addText(this._edgeless, e);
       return;
     } else {
-      const [modelX, modelY] = this._edgeless.surface.viewport.toModelCoord(
-        e.x,
-        e.y
-      );
+      const [modelX, modelY] = this._service.viewport.toModelCoord(e.x, e.y);
       if (selected instanceof TextElementModel) {
         mountTextElementEditor(selected, this._edgeless, {
           x: modelX,
@@ -385,12 +380,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _updateSelectingState = () => {
-    const { surface, tools, selectionManager, service } = this._edgeless;
-    const { viewport } = surface;
+    const { tools, selectionManager, service } = this._edgeless;
     const startX = this._dragStartModelCoord[0];
     const startY = this._dragStartModelCoord[1];
     // Should convert the last drag position to model coordinate
-    const [curX, curY] = viewport.toModelCoord(
+    const [curX, curY] = service.viewport.toModelCoord(
       this._dragLastPos[0],
       this._dragLastPos[1]
     );
@@ -419,7 +413,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   };
 
   private _panViewport = (delta: IVec) => {
-    const { viewport } = this._edgeless.surface;
+    const { viewport } = this._service;
     viewport.applyDeltaCenter(delta[0], delta[1]);
   };
 
@@ -547,7 +541,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   onContainerDragMove(e: PointerEventState) {
     const { surface } = this._edgeless;
-    const { viewport } = surface;
+    const { viewport } = this._service;
     const zoom = viewport.zoom;
     switch (this.dragType) {
       case DefaultModeDragType.Selecting: {
