@@ -21,14 +21,14 @@ import { formatBarStyle } from './styles.js';
 
 type FormatBarCustomAction = {
   disable?: (formatBar: AffineFormatBarWidget) => boolean;
-  image(formatBar: AffineFormatBarWidget): string | undefined;
+  icon(formatBar: AffineFormatBarWidget): string | undefined;
   onClick(formatBar: AffineFormatBarWidget): void;
 };
 type FormatBarCustomElement = {
   showWhen?(formatBar: AffineFormatBarWidget): boolean;
   init(formatBar: AffineFormatBarWidget): HTMLElement;
 };
-type FormatBarCustomRender = {
+type FormatBarCustomRenderer = {
   render(formatBar: AffineFormatBarWidget): TemplateResult | undefined;
 };
 export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
@@ -36,10 +36,10 @@ export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 @customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
   static override styles = formatBarStyle;
-  private static readonly _customElements: Set<FormatBarCustomRender> =
-    new Set<FormatBarCustomRender>();
+  private static readonly _customElements: Set<FormatBarCustomRenderer> =
+    new Set<FormatBarCustomRenderer>();
 
-  static registerCustomRender(render: FormatBarCustomRender) {
+  static registerCustomRenderer(render: FormatBarCustomRenderer) {
     this._customElements.add(render);
   }
   static registerCustomElement(element: FormatBarCustomElement) {
@@ -59,7 +59,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   static registerCustomAction(action: FormatBarCustomAction) {
     this._customElements.add({
       render: formatBar => {
-        const url = action.image(formatBar);
+        const url = action.icon(formatBar);
         if (url == null) {
           return;
         }

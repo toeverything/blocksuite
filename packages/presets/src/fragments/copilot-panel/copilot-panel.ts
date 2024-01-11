@@ -258,7 +258,7 @@ declare global {
     'copilot-panel': CopilotPanel;
   }
 }
-AffineFormatBarWidget.registerCustomRender({
+AffineFormatBarWidget.registerCustomRenderer({
   render(): TemplateResult | undefined {
     const copilot = document.querySelector('copilot-panel');
     if (!copilot) {
