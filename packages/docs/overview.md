@@ -2,7 +2,7 @@
 
 BlockSuite is a toolkit for building collaborative editors and applications. It embraces the [**_document-centric_**](./design-philosophy) approach to facilitate the development of more flexible, diverse, and scalable editable interfaces.
 
-We believe that for modern collaborative editing applications, the overall application data flow should be consistently modeled and reused on a larger scale, reducing the interoperability cost between editor and non-editor components. **Hence, BlockSuite completely separates the collaborative document model from the editor**. This separation allows any UI component, whether part of an editor or not, to function effectively by simply attaching it to the same document, offering a more flexible editing experience.
+We believe that for modern collaborative editing applications, the overall application data flow should be consistently modeled and reused on a larger scale, reducing the interoperability cost between editor and non-editor components. **This is why BlockSuite completely separates the collaborative document model from the editor**. This separation allows any UI component, whether part of an editor or not, to function effectively by simply attaching it to the same document, offering a more flexible editing experience.
 
 ![showcase-doc-edgeless-editors](./images/showcase-doc-edgeless-editors.jpg)
 
