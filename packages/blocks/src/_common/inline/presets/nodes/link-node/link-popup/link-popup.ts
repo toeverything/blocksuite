@@ -2,21 +2,27 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline/types';
 import type { BlockElement } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import { computePosition, inline, offset, shift } from '@floating-ui/dom';
+import { computePosition, flip, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import type { PageService } from '../../../../../../page-block/page-service.js';
 import type { IconButton } from '../../../../../components/button.js';
+import { createLitPortal } from '../../../../../components/portal.js';
 import { toast } from '../../../../../components/toast.js';
 import { BLOCK_ID_ATTR } from '../../../../../consts.js';
-import { BookmarkIcon } from '../../../../../icons/edgeless.js';
+import { BookmarkIcon, MoreVerticalIcon } from '../../../../../icons/index.js';
 import {
   ConfirmIcon,
+  CopyIcon,
   EditIcon,
+  EmbedWebIcon,
+  LinkIcon,
   UnlinkIcon,
 } from '../../../../../icons/text.js';
 import { isValidUrl, normalizeUrl } from '../../../../../utils/url.js';
 import type { AffineInlineEditor } from '../../../affine-inline-specs.js';
+import { LinkPopupMoreMenu } from './link-popup-more-menu-popup.js';
 import { linkPopupStyle } from './styles.js';
 
 @customElement('link-popup')
@@ -28,21 +34,31 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   inlineEditor!: AffineInlineEditor;
+
   @property({ attribute: false })
   targetInlineRange!: InlineRange;
 
+  @property({ attribute: false })
+  abortController!: AbortController;
+
   @query('#text-input')
   textInput?: HTMLInputElement;
+
   @query('#link-input')
   linkInput?: HTMLInputElement;
-  @query('.popup-container')
-  popupContainer?: HTMLDivElement;
+
+  @query('.affine-link-popover-container')
+  popupContainer!: HTMLDivElement;
+
   @query('.mock-selection-container')
-  mockSelectionContainer?: HTMLDivElement;
+  mockSelectionContainer!: HTMLDivElement;
+
   @query('.affine-confirm-button')
   confirmButton?: IconButton;
 
   private _bodyOverflowStyle = '';
+
+  private _moreMenuAbortController: AbortController | null = null;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -70,7 +86,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       parent.childrenUpdated.on(() => {
         const children = parent.children;
         if (children.includes(this.blockElement.model)) return;
-        this.remove();
+        this.abortController.abort();
       })
     );
   }
@@ -129,6 +145,18 @@ export class LinkPopup extends WithDisposable(LitElement) {
         this.popupContainer.style.top = `${y}px`;
       })
       .catch(console.error);
+  }
+
+  private get _pageService() {
+    const pageService = this.std.spec.getService(
+      'affine:page'
+    ) as PageService | null;
+    assertExists(pageService);
+    return pageService;
+  }
+
+  get std() {
+    return this.blockElement.std;
   }
 
   get blockElement() {
@@ -202,31 +230,68 @@ export class LinkPopup extends WithDisposable(LitElement) {
       });
     }
 
-    this.remove();
+    this.abortController.abort();
   }
 
-  private _linkToBookmark() {
+  private _copyUrl() {
+    navigator.clipboard.writeText(this.currentLink).catch(console.error);
+    toast('Copied link to clipboard');
+    this.abortController.abort();
+  }
+
+  private _convertToCardView() {
     if (!this.inlineEditor.isValidInlineRange(this.targetInlineRange)) return;
 
     const blockElement = this.blockElement;
+    const url = this.currentLink;
+    const title = this.currentText;
     const props = {
-      url: this.currentLink,
-      title: this.currentText,
+      url,
+      title: title === url ? '' : title,
     };
     const page = blockElement.host.page;
     const parent = page.getParent(blockElement.model);
     assertExists(parent);
     const index = parent.children.indexOf(blockElement.model);
-    blockElement.host.page.addBlock(
-      'affine:bookmark',
-      props,
-      parent,
-      index + 1
-    );
+    page.addBlock('affine:bookmark', props, parent, index + 1);
 
     this.inlineEditor.deleteText(this.targetInlineRange);
 
-    this.remove();
+    this.abortController.abort();
+  }
+
+  private _canConvertToEmbedView() {
+    const url = this.currentLink;
+    return !!this._pageService.getEmbedBlockOptions(url);
+  }
+
+  private _convertToEmbedView() {
+    const url = this.currentLink;
+    const embedOptions = this._pageService.getEmbedBlockOptions(url);
+    if (!embedOptions) return;
+
+    const { flavour } = embedOptions;
+
+    const blockElement = this.blockElement;
+    const page = blockElement.host.page;
+    const parent = page.getParent(blockElement.model);
+    assertExists(parent);
+    const index = parent.children.indexOf(blockElement.model);
+
+    page.addBlock(flavour, { url }, parent, index + 1);
+
+    this.inlineEditor.deleteText(this.targetInlineRange);
+
+    this.abortController.abort();
+  }
+
+  private _removeLink() {
+    if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
+      this.inlineEditor.formatText(this.targetInlineRange, {
+        link: null,
+      });
+    }
+    this.abortController.abort();
   }
 
   private _onKeydown(e: KeyboardEvent) {
@@ -261,70 +326,132 @@ export class LinkPopup extends WithDisposable(LitElement) {
       })
       .catch(console.error);
 
-    return html`<div class="affine-link-popover">
-      <input
-        id="link-input"
-        class="affine-link-popover-input"
-        type="text"
-        spellcheck="false"
-        placeholder="Paste or type a link"
-        @input=${this._updateConfirmBtn}
-      />
-      <span class="affine-link-popover-dividing-line"></span>
-      ${this._confirmBtnTemplate()}
-    </div>`;
+    return html`
+      <div class="affine-link-popover create">
+        <input
+          id="link-input"
+          class="affine-link-popover-input"
+          type="text"
+          spellcheck="false"
+          placeholder="Paste or type a link"
+          @input=${this._updateConfirmBtn}
+        />
+        <span class="affine-link-popover-dividing-line"></span>
+        ${this._confirmBtnTemplate()}
+      </div>
+    `;
+  }
+
+  private _toggleMoreMenu() {
+    if (this._moreMenuAbortController) {
+      this._moreMenuAbortController.abort();
+      this._moreMenuAbortController = null;
+      return;
+    }
+    this._moreMenuAbortController = new AbortController();
+    const linkPopupMoreMenu = new LinkPopupMoreMenu();
+    linkPopupMoreMenu.abortController = this.abortController;
+    linkPopupMoreMenu.inlineEditor = this.inlineEditor;
+    linkPopupMoreMenu.targetInlineRange = this.targetInlineRange;
+
+    createLitPortal({
+      template: linkPopupMoreMenu,
+      container: this.popupContainer,
+      computePosition: {
+        referenceElement: this.popupContainer,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+      abortController: this._moreMenuAbortController,
+    });
   }
 
   private _viewTemplate() {
-    return html`<div class="affine-link-popover">
-      <div
-        class="affine-link-preview"
-        @click=${() => {
-          navigator.clipboard.writeText(this.currentLink).catch(console.error);
-          toast('Copied link to clipboard');
-          this.remove();
-        }}
-      >
-        <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
-        <span style="overflow: hidden;">${this.currentLink}</span>
+    return html`
+      <div class="affine-link-popover view">
+        <div class="affine-link-preview" @click=${() => this._copyUrl()}>
+          <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
+          <span>${this.currentLink}</span>
+        </div>
+
+        <icon-button size="32px" @click=${() => this._copyUrl()}>
+          ${CopyIcon}
+          <affine-tooltip .offset=${12}>${'Click to copy link'}</affine-tooltip>
+        </icon-button>
+
+        <icon-button
+          size="32px"
+          data-testid="edit"
+          @click=${() => {
+            this.type = 'edit';
+          }}
+        >
+          ${EditIcon}
+          <affine-tooltip .offset=${12}>Edit</affine-tooltip>
+        </icon-button>
+
+        <span class="affine-link-popover-dividing-line"></span>
+
+        ${this._isBookmarkAllowed()
+          ? html`
+              <div class="affine-link-popover-view-selector">
+                <icon-button
+                  size="24px"
+                  class="affine-link-popover-view-selector-button link current-view"
+                  hover="false"
+                >
+                  ${LinkIcon}
+                  <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
+                </icon-button>
+
+                <icon-button
+                  size="24px"
+                  data-testid="link-to-card"
+                  class="affine-link-popover-view-selector-button card"
+                  hover="false"
+                  @click=${() => this._convertToCardView()}
+                >
+                  ${BookmarkIcon}
+                  <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
+                </icon-button>
+
+                ${this._canConvertToEmbedView()
+                  ? html` <icon-button
+                      size="24px"
+                      class="affine-link-popover-view-selector-button embed"
+                      hover="false"
+                      @click=${() => this._convertToEmbedView()}
+                    >
+                      ${EmbedWebIcon}
+                      <affine-tooltip .offset=${12}
+                        >${'Embed view'}</affine-tooltip
+                      >
+                    </icon-button>`
+                  : nothing}
+              </div>
+
+              <span class="affine-link-popover-dividing-line"></span>
+            `
+          : nothing}
+
+        <icon-button data-testid="unlink" @click=${() => this._removeLink()}>
+          ${UnlinkIcon}
+          <affine-tooltip .offset=${12}>Remove</affine-tooltip>
+        </icon-button>
+
+        <span class="affine-link-popover-dividing-line"></span>
+
+        <icon-button
+          size="24px"
+          class="bookmark-toolbar-button more-button"
+          @click=${() => this._toggleMoreMenu()}
+        >
+          ${MoreVerticalIcon}
+          <affine-tooltip .offset=${12}>More</affine-tooltip>
+        </icon-button>
       </div>
-
-      ${this._isBookmarkAllowed()
-        ? html`<span class="affine-link-popover-dividing-line"></span
-            ><icon-button
-              data-testid="link-to-card"
-              @click=${() => this._linkToBookmark()}
-            >
-              ${BookmarkIcon}
-              <affine-tooltip .offset=${12}>Turn into Card view</affine-tooltip>
-            </icon-button>`
-        : nothing}
-      <span class="affine-link-popover-dividing-line"></span>
-      <icon-button
-        data-testid="unlink"
-        @click=${() => {
-          if (this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
-            this.inlineEditor.formatText(this.targetInlineRange, {
-              link: null,
-            });
-          }
-          this.remove();
-        }}
-      >
-        ${UnlinkIcon}
-        <affine-tooltip .offset=${12}>Remove</affine-tooltip>
-      </icon-button>
-
-      <icon-button
-        data-testid="edit"
-        @click=${() => {
-          this.type = 'edit';
-        }}
-      >
-        ${EditIcon}
-        <affine-tooltip .offset=${12}>Edit</affine-tooltip>
-      </icon-button>
-    </div>`;
+    `;
   }
 
   private _editTemplate() {
@@ -341,38 +468,43 @@ export class LinkPopup extends WithDisposable(LitElement) {
       })
       .catch(console.error);
 
-    return html`<div class="affine-link-edit-popover">
-      <div class="affine-edit-text-area">
-        <input
-          class="affine-edit-text-input"
-          id="text-input"
-          type="text"
-          placeholder="Enter text"
-          @input=${this._updateConfirmBtn}
-        />
-        <span class="affine-link-popover-dividing-line"></span>
-        <label class="affine-edit-text-text" for="text-input">Text</label>
+    return html`
+      <div class="affine-link-edit-popover">
+        <div class="affine-edit-text-area">
+          <input
+            class="affine-edit-text-input"
+            id="text-input"
+            type="text"
+            placeholder="Enter text"
+            @input=${this._updateConfirmBtn}
+          />
+          <span class="affine-link-popover-dividing-line"></span>
+          <label class="affine-edit-text-text" for="text-input">Text</label>
+        </div>
+        <div class="affine-edit-link-area">
+          <input
+            id="link-input"
+            class="affine-edit-link-input"
+            type="text"
+            spellcheck="false"
+            placeholder="Paste or type a link"
+            @input=${this._updateConfirmBtn}
+          />
+          <span class="affine-link-popover-dividing-line"></span>
+          <label class="affine-edit-link-text" for="link-input">Link</label>
+        </div>
+        ${this._confirmBtnTemplate()}
       </div>
-      <div class="affine-edit-link-area">
-        <input
-          id="link-input"
-          class="affine-edit-link-input"
-          type="text"
-          spellcheck="false"
-          placeholder="Paste or type a link"
-          @input=${this._updateConfirmBtn}
-        />
-        <span class="affine-link-popover-dividing-line"></span>
-        <label class="affine-edit-link-text" for="link-input">Link</label>
-      </div>
-      ${this._confirmBtnTemplate()}
-    </div>`;
+    `;
   }
 
   override render() {
     const mask =
       this.type === 'edit' || this.type === 'create'
-        ? html`<div class="overlay-mask" @click=${() => this.remove()}></div>`
+        ? html`<div
+            class="affine-link-popover-overlay-mask"
+            @click=${() => this.abortController.abort()}
+          ></div>`
         : nothing;
 
     const popover =
@@ -385,7 +517,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     return html`
       <div class="overlay-root blocksuite-overlay">
         ${mask}
-        <div class="popup-container" @keydown=${this._onKeydown}>
+        <div class="affine-link-popover-container" @keydown=${this._onKeydown}>
           ${popover}
         </div>
         <div class="mock-selection-container"></div>

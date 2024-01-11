@@ -16,10 +16,6 @@ interface AffineLinkPreviewResponseData {
   favicons?: string[];
 }
 
-export type QueryUrlData = (
-  url: string
-) => Promise<Partial<BookmarkBlockUrlData>>;
-
 export async function queryUrlDataFromAffineWorker(
   url: string
 ): Promise<Partial<BookmarkBlockUrlData>> {
@@ -61,8 +57,10 @@ export async function queryUrlDataFromAffineWorker(
     if (!response || !response.ok) return {};
     const data: AffineLinkPreviewResponseData = await response.json();
     return {
-      title: data.title,
-      description: data.description,
+      title: data.title ? getStringFromHTML(data.title) : null,
+      description: data.description
+        ? getStringFromHTML(data.description)
+        : null,
       icon: data.favicons?.[0],
       image: data.images?.[0],
     };
@@ -77,20 +75,26 @@ export async function refreshBookmarkUrlData(
 
   const queryUrlData = bookmarkElement.service?.queryUrlData;
   assertExists(queryUrlData);
-  const metaData = await queryUrlData(bookmarkElement.model.url);
 
+  const metaData = await queryUrlData(bookmarkElement.model.url);
   const {
     title = null,
     description = null,
     icon = null,
     image = null,
   } = metaData;
+
   bookmarkElement.page.updateBlock(bookmarkElement.model, {
     description,
     icon,
     image,
     title,
   });
-
   bookmarkElement.loading = false;
+}
+
+function getStringFromHTML(html: string) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent;
 }

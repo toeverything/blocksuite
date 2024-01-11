@@ -21,17 +21,26 @@ export const embed: InitFn = async (workspace: Workspace, id: string) => {
 
     page.addBlock(
       'affine:embed-github',
-      { owner: 'toeverything', repo: 'blocksuite' },
+      {
+        url: 'https://github.com/toeverything/AFFiNE/pull/5453',
+      },
       noteId
     );
     page.addBlock(
       'affine:embed-github',
-      { owner: 'toeverything', repo: 'affine', xywh: '[0, 400, 400, 200]' },
+      {
+        url: 'https://www.github.com/toeverything/blocksuite/pull/5927',
+        style: 'vertical',
+        xywh: '[0, 400, 364, 390]',
+      },
       surfaceId
     );
     page.addBlock(
       'affine:embed-github',
-      { owner: 'milkdown', repo: 'milkdown', xywh: '[0, 700, 400, 200]' },
+      {
+        url: 'https://github.com/Milkdown/milkdown/pull/1215',
+        xywh: '[500, 400, 752, 116]',
+      },
       surfaceId
     );
     page.addBlock('affine:paragraph', {}, noteId);

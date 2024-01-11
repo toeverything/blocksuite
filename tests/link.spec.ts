@@ -41,29 +41,31 @@ test('basic link', async ({ page }) => {
   // Create link
   await dragBetweenIndices(page, [0, 0], [0, 8]);
   await pressCreateLinkShortCut(page);
+  await page.mouse.move(0, 0);
 
-  const linkPopoverLocator = page.locator('.affine-link-popover');
-  await expect(linkPopoverLocator).toBeVisible();
+  const createLinkPopoverLocator = page.locator('.affine-link-popover.create');
+  await expect(createLinkPopoverLocator).toBeVisible();
   const linkPopoverInput = page.locator('.affine-link-popover-input');
   await expect(linkPopoverInput).toBeVisible();
   await type(page, link);
   await pressEnter(page);
-  await expect(linkPopoverLocator).not.toBeVisible();
+  await expect(createLinkPopoverLocator).not.toBeVisible();
 
   const linkLocator = page.locator('affine-link a');
   await expect(linkLocator).toHaveAttribute('href', link);
 
+  const viewLinkPopoverLocator = page.locator('.affine-link-popover.view');
   // Hover link
-  await expect(linkPopoverLocator).not.toBeVisible();
+  await expect(viewLinkPopoverLocator).not.toBeVisible();
   await linkLocator.hover();
   // wait for popover delay open
   await page.waitForTimeout(200);
-  await expect(linkPopoverLocator).toBeVisible();
+  await expect(viewLinkPopoverLocator).toBeVisible();
 
   // Edit link
   const text2 = 'link2';
   const link2 = 'https://github.com';
-  const editLinkBtn = linkPopoverLocator.getByTestId('edit');
+  const editLinkBtn = viewLinkPopoverLocator.getByTestId('edit');
   await editLinkBtn.click();
 
   const editLinkPopoverLocator = page.locator('.affine-link-edit-popover');
@@ -309,12 +311,12 @@ test('create link with paste', async ({ page }) => {
   await focusRichText(page);
   await type(page, 'aaa');
 
-  const linkPopoverLocator = page.locator('.affine-link-popover');
+  const createLinkPopoverLocator = page.locator('.affine-link-popover.create');
   const confirmBtn = page.locator('.affine-link-popover icon-button');
 
   await dragBetweenIndices(page, [0, 0], [0, 3]);
   await pressCreateLinkShortCut(page);
-  await expect(linkPopoverLocator).toBeVisible();
+  await expect(createLinkPopoverLocator).toBeVisible();
   await expect(confirmBtn).toHaveAttribute('data-test-disabled', 'true');
 
   await type(page, 'affine.pro');
@@ -324,13 +326,13 @@ test('create link with paste', async ({ page }) => {
 
   // press enter should not trigger confirm
   await pressEnter(page);
-  await expect(linkPopoverLocator).toBeVisible();
+  await expect(createLinkPopoverLocator).toBeVisible();
   await expect(confirmBtn).toHaveAttribute('data-test-disabled', 'true');
 
   await pasteByKeyboard(page, false);
   await expect(confirmBtn).toHaveAttribute('data-test-disabled', 'false');
   await pressEnter(page);
-  await expect(linkPopoverLocator).not.toBeVisible();
+  await expect(createLinkPopoverLocator).not.toBeVisible();
   await assertStoreMatchJSX(
     page,
     `

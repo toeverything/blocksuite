@@ -1,4 +1,4 @@
-import './components/index.js';
+import './components/bookmark-card.js';
 import '../_common/components/button.js';
 import './doc-bookmark-block.js';
 import './edgeless-bookmark-block.js';
@@ -6,8 +6,10 @@ import './edgeless-bookmark-block.js';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { html, render } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
+import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { matchFlavours } from '../_common/utils/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
 import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
@@ -23,10 +25,6 @@ import {
 import type { BookmarkService } from './bookmark-service.js';
 import type { DocBookmarkBlockComponent } from './doc-bookmark-block.js';
 import type { EdgelessBookmarkBlockComponent } from './edgeless-bookmark-block.js';
-import {
-  EdgelessBookmarkHeight,
-  EdgelessBookmarkWidth,
-} from './edgeless-bookmark-block.js';
 import { refreshBookmarkUrlData } from './utils.js';
 
 @customElement('affine-bookmark')
@@ -37,10 +35,16 @@ export class BookmarkBlockComponent extends BlockElement<
   @property({ attribute: false })
   loading = false;
 
+  @state()
+  showCaption = false;
+
   @query('affine-edgeless-bookmark, affine-doc-bookmark')
   edgelessOrDocBookmark?:
     | EdgelessBookmarkBlockComponent
     | DocBookmarkBlockComponent;
+
+  @query('embed-card-caption')
+  captionElement!: EmbedCardCaption;
 
   private _isInSurface = false;
 
@@ -102,7 +106,7 @@ export class BookmarkBlockComponent extends BlockElement<
       return true;
     },
     onDragEnd: props => {
-      const { state, draggingElements } = props;
+      const { state, draggingElements, dropBlockId } = props;
       if (
         draggingElements.length !== 1 ||
         !matchFlavours(draggingElements[0].model, [
@@ -119,16 +123,27 @@ export class BookmarkBlockComponent extends BlockElement<
         target?.classList.contains('affine-block-children-container');
 
       if (isInSurface) {
+        if (dropBlockId) {
+          const style = blockComponent.model.style;
+          if (style === 'vertical' || style === 'cube') {
+            this.page.updateBlock(blockComponent.model, {
+              style: 'horizontal',
+            });
+          }
+        }
+
         return convertDragPreviewEdgelessToDoc({
           blockComponent,
           ...props,
         });
       } else if (isTargetEdgelessContainer) {
+        const style = blockComponent.model.style;
+
         return convertDragPreviewDocToEdgeless({
           blockComponent,
-          cssSelector: 'bookmark-card',
-          width: EdgelessBookmarkWidth.horizontal,
-          height: EdgelessBookmarkHeight.horizontal,
+          cssSelector: '.affine-bookmark-card',
+          width: EMBED_CARD_WIDTH[style],
+          height: EMBED_CARD_HEIGHT[style],
           ...props,
         });
       }
@@ -137,21 +152,29 @@ export class BookmarkBlockComponent extends BlockElement<
     },
   };
 
+  refreshUrlData = () => {
+    refreshBookmarkUrlData(this).catch(console.error);
+  };
+
   override connectedCallback() {
     super.connectedCallback();
+
+    if (!!this.model.caption && this.model.caption.length > 0) {
+      this.showCaption = true;
+    }
 
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
     if (!this.model.description && !this.model.title) {
-      refreshBookmarkUrlData(this).catch(console.error);
+      this.refreshUrlData();
     }
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
         this.edgelessOrDocBookmark?.requestUpdate();
         if (key === 'url') {
-          refreshBookmarkUrlData(this).catch(console.error);
+          this.refreshUrlData();
         }
       })
     );
@@ -169,13 +192,11 @@ export class BookmarkBlockComponent extends BlockElement<
   }
 
   override render() {
-    if (this.isInSurface) {
-      return html`<affine-edgeless-bookmark
-        .block=${this}
-      ></affine-edgeless-bookmark>`;
-    } else {
-      return html`<affine-doc-bookmark .block=${this}></affine-doc-bookmark>`;
-    }
+    return html`${this.isInSurface
+      ? html`<affine-edgeless-bookmark
+          .block=${this}
+        ></affine-edgeless-bookmark>`
+      : html`<affine-doc-bookmark .block=${this}></affine-doc-bookmark>`} `;
   }
 }
 

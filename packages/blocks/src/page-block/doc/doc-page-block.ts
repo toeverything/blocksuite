@@ -402,7 +402,8 @@ export class DocPageBlockComponent extends BlockElement<
             'affine:bookmark',
             'affine:attachment',
             'affine:surface-ref',
-          ])
+          ]) ||
+          /affine:embed-*/.test(last.flavour)
         ) {
           if (readonly) return;
           paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);

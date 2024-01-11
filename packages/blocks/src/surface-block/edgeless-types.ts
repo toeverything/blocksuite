@@ -1,6 +1,8 @@
 import type { BlockProps } from '@blocksuite/store';
 
 import type { BookmarkBlockModel } from '../bookmark-block/bookmark-model.js';
+import type { EmbedGithubModel } from '../embed-github-block/embed-github-model.js';
+import type { EmbedYoutubeModel } from '../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/image-model.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
@@ -14,13 +16,17 @@ export type EdgelessBlockModelMap = {
   'affine:note': NoteBlockModel;
   'affine:image': ImageBlockModel;
   'affine:bookmark': BookmarkBlockModel;
+  'affine:embed-github': EmbedGithubModel;
+  'affine:embed-youtube': EmbedYoutubeModel;
 };
 
 export type EdgelessBlockType =
   | 'affine:frame'
   | 'affine:note'
   | 'affine:image'
-  | 'affine:bookmark';
+  | 'affine:bookmark'
+  | 'affine:embed-github'
+  | 'affine:embed-youtube';
 
 export type EdgelessElementType =
   | EdgelessBlockType

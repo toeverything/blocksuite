@@ -14,6 +14,7 @@ import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
 import { EmbedLinkedPageBlockSpec } from '../embed-linked-page-block/index.js';
+import { EmbedYoutubeBlockSpec } from '../embed-youtube-block/index.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
@@ -197,6 +198,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
       },
     },
   },
+  EmbedYoutubeBlockSpec,
   EmbedGithubBlockSpec,
   EmbedHtmlBlockSpec,
   EmbedLinkedPageBlockSpec,

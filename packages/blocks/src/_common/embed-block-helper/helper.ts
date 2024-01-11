@@ -28,8 +28,8 @@ export function createEmbedBlock<
       const userProps = schema.props?.(internalPrimitives);
 
       return {
-        xywh: '[0,0,0,0]',
         index: 'a0',
+        xywh: '[0,0,0,0]',
         rotate: 0,
         ...(userProps || {}),
       } as EmbedProps<Props>;

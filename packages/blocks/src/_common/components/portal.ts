@@ -127,7 +127,7 @@ export function createSimplePortal({
 }: PortalOptions) {
   const portalRoot = document.createElement('div');
   if (identifyWrapper) {
-    portalRoot.classList.add('blocksuite-portal');
+    portalRoot.classList.add('blocksuite-portal', 'blocksuite-overlay');
   }
   if (shadowDom) {
     portalRoot.attachShadow({
