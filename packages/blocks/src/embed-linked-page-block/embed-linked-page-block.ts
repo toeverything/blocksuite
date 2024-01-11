@@ -66,6 +66,8 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
 
   private _pageMode: 'page' | 'edgeless' = 'page';
 
+  private _abstractText = '';
+
   private _pageUpdatedAt: Date = new Date();
 
   private _surfaceRefService!: SurfaceRefBlockService;
@@ -86,6 +88,7 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
   private _load() {
     const onLoad = () => {
       this._loading = false;
+      this._abstractText = this._getAbstractText();
       this._prepareSurfaceRefRenderer();
     };
 
@@ -120,9 +123,10 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
     if (!linkedPage) {
       return false;
     }
-    const abstractText = this._getAbstractText();
     return (
-      !!linkedPage && !linkedPage.meta.title.length && !abstractText.length
+      !!linkedPage &&
+      !linkedPage.meta.title.length &&
+      !this._abstractText.length
     );
   }
 
@@ -170,7 +174,6 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
         await this._renderPageAbstract();
       }
     });
-
     this._surfaceRefRenderer.mount();
   }
 
@@ -371,7 +374,9 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
 
     this.model.propsUpdated.on(({ key }) => {
       this.requestUpdate();
-      if (key === 'pageId') this._load();
+      if (key === 'pageId') {
+        this._load();
+      }
     });
 
     if (this.isInSurface) {
@@ -430,8 +435,6 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
         ? 78
         : EMBED_CARD_HEIGHT[this.cardStyle];
 
-    const abstractText = isDeleted || isLoading ? '' : this._getAbstractText();
-
     const isEmpty = this._isPageEmpty() && this._isBannerEmpty;
 
     const cardClassMap = classMap({
@@ -469,7 +472,7 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
         ? 'This linked page is deleted.'
         : isEmpty
           ? 'Preview of the page will be displayed here.'
-          : abstractText;
+          : this._abstractText;
 
     const dateText = this._pageUpdatedAt.toLocaleTimeString();
 
