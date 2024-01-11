@@ -119,8 +119,13 @@ export class EmbedBlockElement<
         if (dropBlockId) {
           const style = blockComponent.cardStyle;
           if (style === 'vertical' || style === 'cube') {
+            const { xywh } = blockComponent.model;
+            const bound = Bound.deserialize(xywh);
+            bound.w = EMBED_CARD_WIDTH.horizontal;
+            bound.h = EMBED_CARD_HEIGHT.horizontal;
             this.page.updateBlock(blockComponent.model, {
               style: 'horizontal',
+              xywh: bound.serialize(),
             });
           }
         }

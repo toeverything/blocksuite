@@ -363,6 +363,10 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    if (!!this.model.caption && !!this.model.caption.length) {
+      this.showCaption = true;
+    }
+
     this._load();
 
     this.model.propsUpdated.on(({ key }) => {
@@ -504,9 +508,9 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
               </div>
             </div>
 
-            <div class="affine-embed-linked-page-banner .render"></div>
+            <div class="affine-embed-linked-page-banner render"></div>
 
-            <div class="affine-embed-linked-page-banner .default">
+            <div class="affine-embed-linked-page-banner default">
               ${isDeleted
                 ? LinkedPageDeletedBanner
                 : isEmpty
