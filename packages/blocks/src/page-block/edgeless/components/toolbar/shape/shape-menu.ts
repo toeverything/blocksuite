@@ -68,6 +68,9 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   strokeColor!: CssVariableName;
 
   @property({ attribute: false })
+  radius!: number;
+
+  @property({ attribute: false })
   onChange!: (props: Record<string, unknown>) => void;
 
   private _setStrokeColor = (strokeColor: CssVariableName) => {
@@ -105,7 +108,11 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   override render() {
     if (this.edgeless.edgelessTool.type !== 'shape') return nothing;
 
-    const { shapeType, strokeColor, shapeStyle } = this;
+    const { radius, strokeColor, shapeStyle } = this;
+    let { shapeType } = this;
+    if (shapeType === 'rect' && radius > 0) {
+      shapeType = 'roundedRect';
+    }
 
     return html`
       <div class="shape-menu-container">

@@ -70,6 +70,7 @@ const LastPropsSchema = z.object({
     strokeColor: StrokeColorsSchema,
     shapeStyle: ShapeStyleSchema,
     filled: z.boolean(),
+    radius: z.number(),
     strokeWidth: z.number().optional(),
     strokeStyle: StorkeStyleSchema.optional(),
     color: z.string().optional(),
@@ -156,6 +157,7 @@ export class EditSessionStorage {
       strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
       shapeStyle: ShapeStyle.General,
       filled: true,
+      radius: 0,
     },
     text: {
       color: GET_DEFAULT_TEXT_COLOR(),
