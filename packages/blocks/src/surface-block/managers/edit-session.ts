@@ -192,7 +192,10 @@ export class EditSessionStorage {
   constructor(private _service: SurfaceService) {
     const props = sessionStorage.getItem(SESSION_PROP_KEY);
     if (props) {
-      this._lastProps = LastPropsSchema.parse(JSON.parse(props));
+      const result = LastPropsSchema.safeParse(JSON.parse(props));
+      if (result.success) {
+        this._lastProps = result.data;
+      }
     }
   }
 
