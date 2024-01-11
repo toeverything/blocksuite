@@ -190,12 +190,12 @@ export class EditSessionStorage {
   };
 
   constructor(private _service: SurfaceService) {
-    try {
-      this._lastProps = LastPropsSchema.parse(
-        JSON.parse(sessionStorage.getItem(SESSION_PROP_KEY) ?? '')
-      );
-    } catch {
-      /* empty */
+    const props = sessionStorage.getItem(SESSION_PROP_KEY);
+    if (props) {
+      const result = LastPropsSchema.safeParse(JSON.parse(props));
+      if (result.success) {
+        this._lastProps = result.data;
+      }
     }
   }
 
