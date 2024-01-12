@@ -351,9 +351,9 @@ export class ExportManager {
         await replaceRichTextWithSvgElementFunc(element);
       },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
-      x: pageLeft ?? '',
-      width: pageWidth ?? '',
-      height: viewportHeight ?? '',
+      x: pageLeft,
+      width: pageWidth,
+      height: viewportHeight,
       useCORS: this._exportOptions.imageProxyEndpoint ? false : true,
       proxy: this._exportOptions.imageProxyEndpoint,
     };
