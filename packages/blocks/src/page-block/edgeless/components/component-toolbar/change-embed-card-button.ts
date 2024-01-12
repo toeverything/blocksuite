@@ -1,5 +1,5 @@
 import '../buttons/tool-icon-button.js';
-import '../panel/embed-card-style-panel';
+import '../panel/embed-card-style-panel.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
