@@ -29,6 +29,7 @@ export class AffineDocEditor extends WithDisposable(ShadowlessElement) {
           height: 100%;
           overflow: hidden;
           font-family: var(--affine-font-family);
+          background: var(--affine-background-primary-color);
         }
 
         affine-doc-editor * {
