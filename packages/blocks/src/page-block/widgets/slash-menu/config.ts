@@ -212,9 +212,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const linkedDocWidgetEle =
             pageElement.widgetElements['affine-linked-doc-widget'];
           if (!linkedDocWidgetEle) return false;
-          if (!('showLinkedPage' in linkedDocWidgetEle)) {
+          if (!('showLinkedDoc' in linkedDocWidgetEle)) {
             console.warn(
-              'You may not have correctly implemented the linkedDoc widget! "showLinkedPage(model)" method not found on widget'
+              'You may not have correctly implemented the linkedDoc widget! "showLinkedDoc(model)" method not found on widget'
             );
             return false;
           }
@@ -227,7 +227,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const widgetEle =
             pageElement.widgetElements['affine-linked-doc-widget'];
           assertExists(widgetEle);
-          // We have checked the existence of showLinkedPage method in the showWhen
+          // We have checked the existence of showLinkedDoc method in the showWhen
           const linkedDocWidget = widgetEle as AffineLinkedDocWidget;
           // Wait for range to be updated
           setTimeout(() => {
