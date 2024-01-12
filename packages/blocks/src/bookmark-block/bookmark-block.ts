@@ -36,6 +36,9 @@ export class BookmarkBlockComponent extends BlockElement<
   @property({ attribute: false })
   loading = false;
 
+  @property({ attribute: false })
+  loadingFailed = false;
+
   @state()
   showCaption = false;
 

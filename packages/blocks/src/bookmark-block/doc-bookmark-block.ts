@@ -48,7 +48,7 @@ export class DocBookmarkBlockComponent extends WithDisposable(
         <embed-card-toolbar
           .model=${this.model}
           .block=${this.block}
-          .host=${this}
+          .host=${this.host}
           .abortController=${abortController}
           .std=${this.block.std}
         ></embed-card-toolbar>
