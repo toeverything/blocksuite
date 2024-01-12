@@ -13,7 +13,10 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 
   @property({ attribute: false })
-  labelText: string = 'Create a Bookmark that previews a link in card view.';
+  titleText!: string;
+
+  @property({ attribute: false })
+  descriptionText!: string;
 
   @property({ attribute: false })
   checkUrl?: (url: string) => boolean;
@@ -79,10 +82,12 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
     return html`<div class="embed-card-modal blocksuite-overlay">
       <div class="embed-card-modal-mask" @click=${this._onCancel}></div>
       <div class="embed-card-modal-wrapper">
-        <div class="embed-card-modal-title">Create Link</div>
+        <div class="embed-card-modal-title">${this.titleText}</div>
 
         <div class="embed-card-modal-content">
-          <div class="embed-card-modal-content-text">${this.labelText}</div>
+          <div class="embed-card-modal-content-text">
+            ${this.descriptionText}
+          </div>
 
           <input
             class="embed-card-modal-input link"
@@ -122,13 +127,15 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
 
 export async function toggleEmbedCardCreateModal(
   host: EditorHost,
-  urlRegex?: RegExp,
-  labelText?: string
+  titleText: string,
+  descriptionText: string,
+  urlRegex?: RegExp
 ): Promise<null | string> {
   host.selection.clear();
   const embedCardCreateModal = new EmbedCardCreateModal();
   return new Promise(resolve => {
-    if (labelText) embedCardCreateModal.labelText = labelText;
+    embedCardCreateModal.titleText = titleText;
+    embedCardCreateModal.descriptionText = descriptionText;
     embedCardCreateModal.checkUrl = url => {
       if (urlRegex) return urlRegex.test(url);
       return isValidUrl(url);

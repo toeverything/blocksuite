@@ -471,7 +471,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
       addSiblingImageBlock(imageFiles, maxFileSize, lastModelState.model);
     } else if (props.flavour === 'affine:bookmark') {
-      const url = await toggleEmbedCardCreateModal(this._editorHost);
+      const url = await toggleEmbedCardCreateModal(
+        this._editorHost,
+        'Link',
+        'The added link will be displayed as a card view.'
+      );
       url &&
         models.push({
           flavour: 'affine:bookmark',
@@ -595,7 +599,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
       lastId = blockIds[blockIds.length - 1];
     } else if (data.flavour === 'affine:bookmark') {
-      const url = await toggleEmbedCardCreateModal(this._editorHost);
+      const url = await toggleEmbedCardCreateModal(
+        this._editorHost,
+        'Link',
+        'The added link will be displayed as a card view.'
+      );
       url &&
         models.push({
           flavour: 'affine:bookmark',
