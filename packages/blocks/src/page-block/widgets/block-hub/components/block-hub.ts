@@ -473,7 +473,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     } else if (props.flavour === 'affine:bookmark') {
       const url = await toggleEmbedCardCreateModal(
         this._editorHost,
-        'Link',
+        'Links',
         'The added link will be displayed as a card view.'
       );
       url &&
@@ -601,7 +601,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     } else if (data.flavour === 'affine:bookmark') {
       const url = await toggleEmbedCardCreateModal(
         this._editorHost,
-        'Link',
+        'Links',
         'The added link will be displayed as a card view.'
       );
       url &&

@@ -269,7 +269,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         }),
       },
       {
-        name: 'Link',
+        name: 'Links',
         icon: BookmarkIcon,
         showWhen: model => {
           if (!model.page.schema.flavourSchemaMap.has('affine:bookmark')) {
@@ -284,7 +284,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           const url = await toggleEmbedCardCreateModal(
             pageElement.host,
-            'Link',
+            'Links',
             'The added link will be displayed as a card view.'
           );
           if (!url) return;

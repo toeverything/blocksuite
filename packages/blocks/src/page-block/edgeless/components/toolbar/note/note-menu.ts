@@ -108,11 +108,11 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
             <edgeless-tool-icon-button
               .activeMode=${'background'}
               .iconContainerPadding=${2}
-              .tooltip=${'Link'}
+              .tooltip=${'Links'}
               @click=${async () => {
                 const url = await toggleEmbedCardCreateModal(
                   this.edgeless.host,
-                  'Link',
+                  'Links',
                   'The added link will be displayed as a card view.'
                 );
                 if (!url) return;

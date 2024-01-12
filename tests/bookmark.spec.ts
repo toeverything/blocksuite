@@ -40,7 +40,7 @@ const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await type(page, '/bookmark');
+  await type(page, '/links');
   await pressEnter(page);
   await type(page, inputUrl);
   await pressEnter(page);
