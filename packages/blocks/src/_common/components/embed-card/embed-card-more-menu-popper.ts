@@ -6,6 +6,8 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
+import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
+import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type {
@@ -63,13 +65,18 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  model!: BookmarkBlockModel | EmbedGithubModel | EmbedYoutubeModel;
+  model!:
+    | BookmarkBlockModel
+    | EmbedGithubModel
+    | EmbedYoutubeModel
+    | EmbedLinkedDocModel;
 
   @property({ attribute: false })
   block!:
     | BookmarkBlockComponent
     | EmbedGithubBlockComponent
-    | EmbedYoutubeBlockComponent;
+    | EmbedYoutubeBlockComponent
+    | EmbedLinkedDocBlockComponent;
 
   @property({ attribute: false })
   std!: BlockStdScope;
@@ -77,12 +84,8 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   abortController!: AbortController;
 
-  private _openLink() {
-    let link = this.model.url;
-    if (!link.match(/^[a-zA-Z]+:\/\//)) {
-      link = 'https://' + link;
-    }
-    window.open(link, '_blank');
+  private _open() {
+    this.block.open();
     this.abortController.abort();
   }
 
@@ -94,22 +97,24 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   }
 
   private _duplicateBlock() {
-    const { page, url } = this.model;
-    const parent = page.getParent(this.model);
-    const index = parent?.children.indexOf(this.model);
-    page.addBlock(
-      this.model.flavour,
-      {
-        url,
-      },
-      parent,
-      index
+    const model = this.model;
+    const keys = model.keys as (keyof typeof model)[];
+    const values = keys.map(key => model[key]);
+    const blockProps = Object.fromEntries(
+      keys.map((key, i) => [key, values[i]])
     );
+    const { width, height, xywh, rotate, zIndex, ...duplicateProps } =
+      blockProps;
+
+    const { page } = model;
+    const parent = page.getParent(model);
+    const index = parent?.children.indexOf(model);
+    page.addBlock(model.flavour, duplicateProps, parent, index);
     this.abortController.abort();
   }
 
-  private _refreshUrlData() {
-    this.block.refreshUrlData();
+  private _refreshData() {
+    this.block.refreshData();
     this.abortController.abort();
   }
 
@@ -120,7 +125,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
         height="32px"
         class="menu-item open"
         text="Open"
-        @click=${() => this._openLink()}
+        @click=${() => this._open()}
       >
         ${OpenIcon}
       </icon-button>
@@ -152,7 +157,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
         class="menu-item reload"
         text="Reload"
         ?disabled=${this.model.page.readonly}
-        @click=${() => this._refreshUrlData()}
+        @click=${() => this._refreshData()}
       >
         ${RefreshIcon}
       </icon-button>

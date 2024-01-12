@@ -140,9 +140,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
       ],
     })
       .then(({ x, y }) => {
-        if (!this.popupContainer) return;
-        this.popupContainer.style.left = `${x}px`;
-        this.popupContainer.style.top = `${y}px`;
+        const popupContainer = this.popupContainer;
+        if (!popupContainer) return;
+        popupContainer.style.left = `${x}px`;
+        popupContainer.style.top = `${y}px`;
       })
       .catch(console.error);
   }
@@ -255,7 +256,13 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const index = parent.children.indexOf(blockElement.model);
     page.addBlock('affine:bookmark', props, parent, index + 1);
 
-    this.inlineEditor.deleteText(this.targetInlineRange);
+    const totalTextLength = this.inlineEditor.yTextLength;
+    const inlineTextLength = this.targetInlineRange.length;
+    if (totalTextLength === inlineTextLength) {
+      page.deleteBlock(blockElement.model);
+    } else {
+      this.inlineEditor.deleteText(this.targetInlineRange);
+    }
 
     this.abortController.abort();
   }
@@ -280,7 +287,13 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
     page.addBlock(flavour, { url }, parent, index + 1);
 
-    this.inlineEditor.deleteText(this.targetInlineRange);
+    const totalTextLength = this.inlineEditor.yTextLength;
+    const inlineTextLength = this.targetInlineRange.length;
+    if (totalTextLength === inlineTextLength) {
+      page.deleteBlock(blockElement.model);
+    } else {
+      this.inlineEditor.deleteText(this.targetInlineRange);
+    }
 
     this.abortController.abort();
   }
@@ -442,11 +455,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
         <span class="affine-link-popover-dividing-line"></span>
 
-        <icon-button
-          size="24px"
-          class="bookmark-toolbar-button more-button"
-          @click=${() => this._toggleMoreMenu()}
-        >
+        <icon-button size="24px" @click=${() => this._toggleMoreMenu()}>
           ${MoreVerticalIcon}
           <affine-tooltip .offset=${12}>More</affine-tooltip>
         </icon-button>

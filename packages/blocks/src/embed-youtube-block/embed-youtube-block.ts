@@ -11,10 +11,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import { HoverController } from '../_common/components/hover/controller.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
-import type { EmbedCardStyle } from '../_common/types.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
+import type { EmbedYoutubeStyles } from './embed-youtube-model.js';
 import {
   type EmbedYoutubeModel,
   youtubeUrlRegex,
@@ -30,7 +31,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override cardStyle: EmbedCardStyle = 'video';
+  override cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
 
   @property({ attribute: false })
   loading = false;
@@ -49,7 +50,15 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
   private _isDragging = false;
 
-  refreshUrlData = () => {
+  open = () => {
+    let link = this.model.url;
+    if (!link.match(/^[a-zA-Z]+:\/\//)) {
+      link = 'https://' + link;
+    }
+    window.open(link, '_blank');
+  };
+
+  refreshData = () => {
     refreshEmbedYoutubeUrlData(this).catch(console.error);
   };
 
@@ -59,14 +68,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       path: this.path,
     });
     selectionManager.setGroup('note', [blockSelection]);
-  }
-
-  private _openLink() {
-    let link = this.model.url;
-    if (!link.match(/^[a-zA-Z]+:\/\//)) {
-      link = 'https://' + link;
-    }
-    window.open(link, '_blank');
   }
 
   private _handleClick() {
@@ -97,14 +98,14 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
     if (!this.model.description && !this.model.title) {
       this.page.withoutTransact(() => {
-        this.refreshUrlData();
+        this.refreshData();
       });
     }
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
         this.requestUpdate();
-        if (key === 'url') this.refreshUrlData();
+        if (key === 'url') this.refreshData();
       })
     );
 
@@ -172,6 +173,10 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       style,
     } = this.model;
 
+    this.cardStyle = style;
+    this._width = EMBED_CARD_WIDTH[this.cardStyle];
+    this._height = EMBED_CARD_HEIGHT[this.cardStyle];
+
     const loading = this.loading;
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
     const titleIcon = loading ? LoadingIcon : YoutubeIcon;
@@ -190,8 +195,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
             ${EmbedCardBannerIcon}
           </object>`
         : nothing;
-
-    this.cardStyle = style;
 
     return this.renderEmbed(
       () => html`
@@ -253,10 +256,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
                 ${descriptionText}
               </div>
 
-              <div
-                class="affine-embed-youtube-content-url"
-                @click=${this._openLink}
-              >
+              <div class="affine-embed-youtube-content-url" @click=${this.open}>
                 <span>www.youtube.com</span>
 
                 <div class="affine-embed-youtube-content-url-icon">

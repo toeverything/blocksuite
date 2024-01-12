@@ -50,7 +50,7 @@ import { onModelTextUpdated } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
-import type { AffineLinkedPageWidget } from '../linked-page/index.js';
+import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import {
   formatDate,
   insertContent,
@@ -209,12 +209,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         alias: ['dual link'],
         icon: DualLinkIcon,
         showWhen: (_, pageElement) => {
-          const linkedPageWidgetEle =
-            pageElement.widgetElements['affine-linked-page-widget'];
-          if (!linkedPageWidgetEle) return false;
-          if (!('showLinkedPage' in linkedPageWidgetEle)) {
+          const linkedDocWidgetEle =
+            pageElement.widgetElements['affine-linked-doc-widget'];
+          if (!linkedDocWidgetEle) return false;
+          if (!('showLinkedDoc' in linkedDocWidgetEle)) {
             console.warn(
-              'You may not have correctly implemented the linkedPage widget! "showLinkedPage(model)" method not found on widget'
+              'You may not have correctly implemented the linkedDoc widget! "showLinkedDoc(model)" method not found on widget'
             );
             return false;
           }
@@ -225,13 +225,13 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           insertContent(pageElement.host, model, triggerKey);
           assertExists(model.page.root);
           const widgetEle =
-            pageElement.widgetElements['affine-linked-page-widget'];
+            pageElement.widgetElements['affine-linked-doc-widget'];
           assertExists(widgetEle);
-          // We have checked the existence of showLinkedPage method in the showWhen
-          const linkedPageWidget = widgetEle as AffineLinkedPageWidget;
+          // We have checked the existence of showLinkedDoc method in the showWhen
+          const linkedDocWidget = widgetEle as AffineLinkedDocWidget;
           // Wait for range to be updated
           setTimeout(() => {
-            linkedPageWidget.showLinkedPage(model, triggerKey);
+            linkedDocWidget.showLinkedDoc(model, triggerKey);
           });
         },
       },

@@ -17,10 +17,10 @@ import {
 } from '../../../_common/utils/query.js';
 import { getCurrentNativeRange } from '../../../_common/utils/selection.js';
 import { getPopperPosition } from '../../../page-block/utils/position.js';
-import { getMenus, type LinkedPageOptions } from './config.js';
-import { LinkedPagePopover } from './linked-page-popover.js';
+import { getMenus, type LinkedDocOptions } from './config.js';
+import { LinkedDocPopover } from './linked-doc-popover.js';
 
-export function showLinkedPagePopover({
+export function showLinkedDocPopover({
   editorHost,
   model,
   range,
@@ -34,28 +34,28 @@ export function showLinkedPagePopover({
   range: Range;
   container?: HTMLElement;
   abortController?: AbortController;
-  options: LinkedPageOptions;
+  options: LinkedDocOptions;
   triggerKey: string;
 }) {
   const disposables = new DisposableGroup();
   abortController.signal.addEventListener('abort', () => disposables.dispose());
 
-  const linkedPage = new LinkedPagePopover(editorHost, model, abortController);
-  linkedPage.options = options;
-  linkedPage.triggerKey = triggerKey;
+  const linkedDoc = new LinkedDocPopover(editorHost, model, abortController);
+  linkedDoc.options = options;
+  linkedDoc.triggerKey = triggerKey;
   // Mount
-  container.appendChild(linkedPage);
-  disposables.add(() => linkedPage.remove());
+  container.appendChild(linkedDoc);
+  disposables.add(() => linkedDoc.remove());
 
   // Handle position
   const updatePosition = throttle(() => {
-    const linkedPageElement = linkedPage.linkedPageElement;
+    const linkedDocElement = linkedDoc.linkedDocElement;
     assertExists(
-      linkedPageElement,
+      linkedDocElement,
       'You should render the linked page node even if no position'
     );
-    const position = getPopperPosition(linkedPageElement, range);
-    linkedPage.updatePosition(position);
+    const position = getPopperPosition(linkedDocElement, range);
+    linkedDoc.updatePosition(position);
   }, 10);
   disposables.addFromEvent(window, 'resize', updatePosition);
   const scrollContainer = getViewportElement(editorHost);
@@ -70,18 +70,18 @@ export function showLinkedPagePopover({
   setTimeout(updatePosition);
 
   disposables.addFromEvent(window, 'mousedown', (e: Event) => {
-    if (e.target === linkedPage) return;
+    if (e.target === linkedDoc) return;
     abortController.abort();
   });
 
-  return linkedPage;
+  return linkedDoc;
 }
 
-export const AFFINE_LINKED_PAGE_WIDGET = 'affine-linked-page-widget';
+export const AFFINE_LINKED_DOC_WIDGET = 'affine-linked-doc-widget';
 
-@customElement(AFFINE_LINKED_PAGE_WIDGET)
-export class AffineLinkedPageWidget extends WidgetElement {
-  static DEFAULT_OPTIONS: LinkedPageOptions = {
+@customElement(AFFINE_LINKED_DOC_WIDGET)
+export class AffineLinkedDocWidget extends WidgetElement {
+  static DEFAULT_OPTIONS: LinkedDocOptions = {
     /**
      * The first item of the trigger keys will be the primary key
      */
@@ -94,16 +94,16 @@ export class AffineLinkedPageWidget extends WidgetElement {
     getMenus,
   };
 
-  options = AffineLinkedPageWidget.DEFAULT_OPTIONS;
+  options = AffineLinkedDocWidget.DEFAULT_OPTIONS;
 
   override connectedCallback() {
     super.connectedCallback();
     this.handleEvent('keyDown', this._onKeyDown);
   }
 
-  public showLinkedPage = (model: BlockModel, triggerKey: string) => {
+  public showLinkedDoc = (model: BlockModel, triggerKey: string) => {
     const curRange = getCurrentNativeRange();
-    showLinkedPagePopover({
+    showLinkedDocPopover({
       editorHost: this.host,
       model,
       range: curRange,
@@ -170,17 +170,17 @@ export class AffineLinkedPageWidget extends WidgetElement {
           length: 0,
         });
         inlineEditor.slots.inlineRangeApply.once(() => {
-          this.showLinkedPage(model, primaryTriggerKey);
+          this.showLinkedDoc(model, primaryTriggerKey);
         });
         return;
       }
-      this.showLinkedPage(model, matchedKey);
+      this.showLinkedDoc(model, matchedKey);
     });
   };
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    [AFFINE_LINKED_PAGE_WIDGET]: AffineLinkedPageWidget;
+    [AFFINE_LINKED_DOC_WIDGET]: AffineLinkedDocWidget;
   }
 }

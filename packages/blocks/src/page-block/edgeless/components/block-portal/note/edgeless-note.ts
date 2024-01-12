@@ -263,6 +263,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
           style=${styleMap({
             width: '100%',
             height: '100%',
+            padding: '0 4px',
             overflow: this._isShowCollapsedContent ? 'initial' : 'hidden',
           })}
         >
