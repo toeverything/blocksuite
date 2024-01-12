@@ -153,7 +153,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const { _disposables, edgeless } = this;
 
     _disposables.add(
-      this.edgeless.selectionManager.slots.updated.on(() => {
+      this.edgeless.service.selection.slots.updated.on(() => {
         this._autoCompleteOverlay.linePoints = [];
         this._autoCompleteOverlay.shapePoints = [];
       })
@@ -179,7 +179,10 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   ) {
     if (!isShape(this.current)) return;
 
-    const position = this._surface.toModelCoord(e.clientX, e.clientY);
+    const position = this.edgeless.service.viewport.toModelCoord(
+      e.clientX,
+      e.clientY
+    );
     const autoCompletePanel = new EdgelessAutoCompletePanel(
       position,
       this.edgeless,
@@ -192,9 +195,9 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   private _onPointerDown = (e: PointerEvent, type: Direction) => {
-    const { surface } = this.edgeless;
-    const viewportRect = surface.viewport.boundingClientRect;
-    const start = surface.viewport.toModelCoord(
+    const { service } = this.edgeless;
+    const viewportRect = service.viewport.boundingClientRect;
+    const start = service.viewport.toModelCoord(
       e.clientX - viewportRect.left,
       e.clientY - viewportRect.top
     );
@@ -204,7 +207,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     let connector: ConnectorElementModel | null;
 
     this._disposables.addFromEvent(document, 'pointermove', e => {
-      const point = surface.viewport.toModelCoord(
+      const point = service.viewport.toModelCoord(
         e.clientX - viewportRect.left,
         e.clientY - viewportRect.top
       );
@@ -233,7 +236,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       if (!this._isMoving) {
         this._generateElementOnClick(type);
       } else if (connector && !connector.target.id) {
-        this.edgeless.selectionManager.clear();
+        this.edgeless.service.selection.clear();
         this._createAutoCompletePanel(e, connector);
       }
 
@@ -257,7 +260,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   private _generateElementOnClick(type: Direction) {
-    const { surface, page, service } = this.edgeless;
+    const { page, service } = this.edgeless;
     const bound = this._computeNextBound(type);
     const id = createEdgelessElement(this.edgeless, this.current, bound);
     if (isShape(this.current)) {
@@ -280,7 +283,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     } else {
       const model = page.getBlockById(id);
       assertExists(model);
-      const [x, y] = surface.viewport.toViewCoord(
+      const [x, y] = service.viewport.toViewCoord(
         bound.center[0],
         bound.y + NOTE_INIT_HEIGHT / 2
       );
@@ -289,7 +292,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       });
     }
 
-    this.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [id],
       editing: true,
     });
@@ -303,7 +306,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     targetType: ShapeType
   ) {
     const { surface } = this.edgeless;
-    surface.viewport.addOverlay(this._autoCompleteOverlay);
+    surface.renderer.addOverlay(this._autoCompleteOverlay);
 
     this._autoCompleteOverlay.stroke =
       this._surface.themeObserver.getVariableValue(current.strokeColor);
@@ -374,7 +377,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   removeOverlay() {
     this._timer && clearTimeout(this._timer);
-    this.edgeless.surface.viewport.removeOverlay(this._autoCompleteOverlay);
+    this.edgeless.surface.renderer.removeOverlay(this._autoCompleteOverlay);
   }
 
   override render() {

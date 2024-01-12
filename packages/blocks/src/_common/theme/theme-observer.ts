@@ -1,7 +1,7 @@
 import { Slot } from '@blocksuite/global/utils';
 
 import type { CssVariablesMap } from './css-variables.js';
-import { StyleVariables } from './css-variables.js';
+import { isCssVariable, StyleVariables } from './css-variables.js';
 
 export function extractCssVariables(element: Element): CssVariablesMap {
   const styles = window.getComputedStyle(element);
@@ -49,13 +49,17 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
   }
 
   getVariableValue(variable: string) {
-    const value = this._cssVariables?.[variable];
+    if (isCssVariable(variable)) {
+      const value = this._cssVariables?.[variable];
 
-    if (value === undefined) {
-      console.error(new Error(`Cannot find css variable: ${variable}`));
+      if (value === undefined) {
+        console.error(new Error(`Cannot find css variable: ${variable}`));
+      } else {
+        return value;
+      }
     }
 
-    return value ?? variable;
+    return variable;
   }
 
   override dispose() {

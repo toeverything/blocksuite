@@ -109,7 +109,7 @@ export function getEdgelessPageBlockFromEditor(editor: AffineEditorContainer) {
 export async function selectedToCanvas(editor: AffineEditorContainer) {
   const edgelessPage = getEdgelessPageBlockFromEditor(editor);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
-    edgelessPage.selectionManager.elements
+    edgelessPage.service.selection.elements
   );
   if (notes.length + frames.length + images.length + shapes.length === 0) {
     return;

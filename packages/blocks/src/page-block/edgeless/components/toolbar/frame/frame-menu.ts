@@ -105,7 +105,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                 <div
                   @click=${() => {
                     const frames = surface.frame.frames;
-                    const center = edgeless.surface.viewport.center;
+                    const center = edgeless.service.viewport.center;
                     const bound = new Bound(
                       center.x - item.wh[0] / 2,
                       center.y - item.wh[1] / 2,
@@ -126,7 +126,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                     const frame = edgeless.service.getElementById(id);
                     assertExists(frame);
                     edgeless.tools.setEdgelessTool({ type: 'default' });
-                    edgeless.selectionManager.set({
+                    edgeless.service.selection.set({
                       elements: [frame.id],
                       editing: false,
                     });

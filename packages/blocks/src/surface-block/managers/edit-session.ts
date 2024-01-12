@@ -1,3 +1,4 @@
+import type { BlockService } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { isPlainObject, recursive } from 'merge';
 import { z } from 'zod';
@@ -36,7 +37,6 @@ import {
   ShapeType,
   StrokeColorsSchema,
 } from '../elements/shape/consts.js';
-import type { SurfaceService } from '../surface-service.js';
 
 const ConnectorEndpointSchema = z.nativeEnum(ConnectorEndpointStyle);
 const StorkeStyleSchema = z.nativeEnum(StrokeStyle);
@@ -187,7 +187,7 @@ export class EditSessionStorage {
     }>(),
   };
 
-  constructor(private _service: SurfaceService) {
+  constructor(private _service: BlockService) {
     const props = sessionStorage.getItem(SESSION_PROP_KEY);
     if (props) {
       this._lastProps = LastPropsSchema.parse(JSON.parse(props));

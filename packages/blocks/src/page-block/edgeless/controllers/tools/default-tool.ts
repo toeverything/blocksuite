@@ -85,11 +85,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
-      const [startX, startY] = this._surface.toViewCoord(
+      const [startX, startY] = this._service.viewport.toViewCoord(
         this._dragStartModelCoord[0],
         this._dragStartModelCoord[1]
       );
-      const [endX, endY] = this._surface.toViewCoord(
+      const [endX, endY] = this._service.viewport.toViewCoord(
         this._dragLastModelCoord[0],
         this._dragLastModelCoord[1]
       );
@@ -102,7 +102,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   get selection() {
-    return this._edgeless.selectionManager;
+    return this._edgeless.service.selection;
   }
 
   get state() {
@@ -213,7 +213,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     const commonBound = edgelessElementsBound(selected);
 
-    const [modelX, modelY] = this._surface.toModelCoord(viewX, viewY);
+    const [modelX, modelY] = this._service.viewport.toModelCoord(viewX, viewY);
     if (commonBound && commonBound.isPointInBound([modelX, modelY])) {
       return true;
     }
@@ -380,7 +380,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _updateSelectingState = () => {
-    const { tools, selectionManager, service } = this._edgeless;
+    const { tools, service } = this._edgeless;
+    const { selection } = service;
     const startX = this._dragStartModelCoord[0];
     const startY = this._dragStartModelCoord[1];
     // Should convert the last drag position to model coordinate
@@ -398,7 +399,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const elements = service.pickElementsByBound(bound);
 
     const set = new Set(
-      tools.shiftKey ? [...elements, ...selectionManager.elements] : elements
+      tools.shiftKey ? [...elements, ...selection.elements] : elements
     );
 
     this._setSelectionState(
@@ -509,7 +510,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragging = true;
     this._dragStartPos = [x, y];
     this._dragLastPos = [x, y];
-    const [startX, startY] = this._surface.toModelCoord(x, y);
+    const [startX, startY] = this._service.viewport.toModelCoord(x, y);
     this._dragStartModelCoord = [startX, startY];
     this._dragLastModelCoord = [startX, startY];
 
@@ -526,7 +527,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
       this._draggingAreaDisposables = new DisposableGroup();
       this._draggingAreaDisposables.add(
-        this._edgeless.slots.viewportUpdated.on(() => {
+        this._edgeless.service.viewport.viewportUpdated.on(() => {
           if (
             this.dragType === DefaultModeDragType.Selecting &&
             this._dragging &&

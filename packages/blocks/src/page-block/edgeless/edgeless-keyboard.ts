@@ -93,41 +93,41 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         f: () => {
           if (
-            this.pageElement.selectionManager.elements.length !== 0 &&
-            !this.pageElement.selectionManager.editing
+            this.pageElement.service.selection.elements.length !== 0 &&
+            !this.pageElement.service.selection.editing
           ) {
             pageElement.surface.frame.createFrameOnSelected();
-          } else if (!this.pageElement.selectionManager.editing) {
+          } else if (!this.pageElement.service.selection.editing) {
             this._setEdgelessTool(pageElement, { type: 'frame' });
           }
         },
         'Mod-g': ctx => {
           if (
-            this.pageElement.selectionManager.elements.length > 1 &&
-            !this.pageElement.selectionManager.editing
+            this.pageElement.service.selection.elements.length > 1 &&
+            !this.pageElement.service.selection.editing
           ) {
             ctx.get('keyboardState').event.preventDefault();
             pageElement.service.createGroupFromSelected();
           }
         },
         'Shift-Mod-g': ctx => {
-          const { selectionManager } = this.pageElement;
+          const { selection } = this.pageElement.service;
           if (
-            selectionManager.elements.length === 1 &&
-            selectionManager.firstElement instanceof GroupElementModel
+            selection.elements.length === 1 &&
+            selection.firstElement instanceof GroupElementModel
           ) {
             ctx.get('keyboardState').event.preventDefault();
-            pageElement.service.ungroup(selectionManager.firstElement);
+            pageElement.service.ungroup(selection.firstElement);
           }
         },
         'Mod-a': ctx => {
-          if (this.pageElement.selectionManager.editing) {
+          if (this.pageElement.service.selection.editing) {
             return;
           }
 
           ctx.get('defaultState').event.preventDefault();
           const { service } = this.pageElement;
-          this.pageElement.selectionManager.set({
+          this.pageElement.service.selection.set({
             elements: [
               ...service.blocks
                 .filter(block => block.group === null)
@@ -233,7 +233,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _space(event: KeyboardEvent) {
     const edgeless = this.pageElement;
     const type = edgeless.edgelessTool.type;
-    const selection = edgeless.selectionManager;
+    const selection = edgeless.service.selection;
 
     if (type !== 'default' && type !== 'pan') {
       return;
@@ -260,14 +260,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _delete() {
     const edgeless = this.pageElement;
 
-    if (edgeless.selectionManager.editing) {
+    if (edgeless.service.selection.editing) {
       return;
     }
 
-    deleteElements(edgeless.surface, edgeless.selectionManager.elements);
+    deleteElements(edgeless.surface, edgeless.service.selection.elements);
 
-    edgeless.selectionManager.clear();
-    edgeless.selectionManager.set(edgeless.selectionManager.selections);
+    edgeless.service.selection.clear();
+    edgeless.service.selection.set(edgeless.service.selection.selections);
   }
 
   private _setEdgelessTool(
@@ -276,7 +276,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     ignoreActiveState = false
   ) {
     // when editing, should not update mouse mode by shortcut
-    if (!ignoreActiveState && edgeless.selectionManager.editing) {
+    if (!ignoreActiveState && edgeless.service.selection.editing) {
       return;
     }
     edgeless.tools.setEdgelessTool(edgelessTool);
@@ -284,8 +284,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
   private _move(key: string) {
     const edgeless = this.pageElement;
-    if (edgeless.selectionManager.editing) return;
-    const { elements } = edgeless.selectionManager;
+    if (edgeless.service.selection.editing) return;
+    const { elements } = edgeless.service.selection;
     elements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
 

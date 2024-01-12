@@ -414,7 +414,7 @@ export class ExportManager {
       const bound = edgeless.getElementsBound();
       assertExists(bound);
       return await this.edgelessToCanvas(
-        edgeless.surface.viewport,
+        edgeless.surface.renderer,
         bound,
         (model: BlockModel) => blockElementGetter(model, this.editorHost.view),
         edgeless

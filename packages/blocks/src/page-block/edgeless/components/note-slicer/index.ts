@@ -101,7 +101,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       })
     );
     this._disposables.add(
-      this.edgelessPage.selectionManager.slots.updated.on(() => {
+      this.edgelessPage.service.selection.slots.updated.on(() => {
         if (this._lastPointerState) {
           this._updateVisibility(this._lastPointerState);
         }
@@ -110,7 +110,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   private get selection() {
-    return this.edgelessPage.selectionManager;
+    return this.edgelessPage.service.selection;
   }
 
   private get _notHovering() {
@@ -122,7 +122,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   private get _zoom() {
-    return this.edgelessPage?.surface?.viewport.zoom ?? 1;
+    return this.edgelessPage?.service?.viewport.zoom ?? 1;
   }
 
   get editorHost() {
@@ -225,7 +225,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     assertExists(noteContainer);
     const [baseX, baseY, noteWidth] = deserializeXYWH(note.xywh);
     const transformX = baseX;
-    const transformY = this.edgelessPage.surface.toModelCoord(
+    const transformY = this.edgelessPage.service.toModelCoord(
       gapRect.x - edgelessRect.x,
       gapRect.y - edgelessRect.y + gapRect.height / 2
     )[1];

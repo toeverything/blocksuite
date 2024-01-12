@@ -1,5 +1,4 @@
-import type { BlockModel } from '@blocksuite/store';
-
+import type { EdgelessBlock as EdgelessBlockModel } from '../../_common/edgeless/mixin/edgeless-selectable.js';
 import type { ElementModel } from '../../surface-block/element-model/base.js';
 import type { GroupElementModel } from '../../surface-block/element-model/group.js';
 import type { Bound } from '../../surface-block/utils/bound.js';
@@ -35,8 +34,6 @@ export interface IEdgelessElement {
   hitTest(x: number, y: number, options: HitTestOptions): boolean;
   boxSelect(bound: Bound): boolean;
 }
-
-export type EdgelessBlock = IEdgelessElement &
-  BlockModel<{ xywh: SerializedXYWH; index: string }>;
+export interface EdgelessBlock extends EdgelessBlockModel {}
 
 export type EdgelessElement = EdgelessBlock | ElementModel;

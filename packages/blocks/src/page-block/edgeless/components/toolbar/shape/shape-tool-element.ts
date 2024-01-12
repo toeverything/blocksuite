@@ -231,8 +231,8 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
     const height = 100;
     const { x: edgelessX, y: edgelessY } =
       this.edgeless.getBoundingClientRect();
-    const zoom = this.edgeless.surface.viewport.zoom;
-    const [modelX, modelY] = this.edgeless.surface.viewport.toModelCoord(
+    const zoom = this.edgeless.service.viewport.zoom;
+    const [modelX, modelY] = this.edgeless.service.viewport.toModelCoord(
       coord.x - edgelessX - width * padding.x * zoom,
       coord.y - edgelessY - height * padding.y * zoom
     );

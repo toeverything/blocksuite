@@ -47,7 +47,7 @@ class FrameOverlay extends Overlay {
 export class EdgelessFrameManager {
   private _frameOverlay = new FrameOverlay();
   constructor(private _edgeless: EdgelessPageBlockComponent) {
-    this._edgeless.surface.viewport.addOverlay(this._frameOverlay);
+    this._edgeless.surface.renderer.addOverlay(this._frameOverlay);
   }
 
   get frames() {
@@ -96,7 +96,7 @@ export class EdgelessFrameManager {
     const { _edgeless } = this;
     const { surface, service } = _edgeless;
     const frames = this.frames;
-    let bound = edgelessElementsBound(_edgeless.selectionManager.elements);
+    let bound = edgelessElementsBound(_edgeless.service.selection.elements);
     bound = bound.expand(FRAME_PADDING);
     if (bound.w < MIN_FRAME_WIDTH) {
       const offset = (MIN_FRAME_WIDTH - bound.w) / 2;
@@ -118,7 +118,7 @@ export class EdgelessFrameManager {
     _edgeless.page.captureSync();
     assertExists(frameModel);
     surface.fitToViewport(bound);
-    _edgeless.selectionManager.set({
+    _edgeless.service.selection.set({
       elements: [frameModel.id],
       editing: false,
     });

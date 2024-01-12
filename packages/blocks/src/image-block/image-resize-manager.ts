@@ -24,7 +24,7 @@ export class ImageResizeManager {
 
     const pageElement = getClosestPageBlockComponent(this._activeComponent);
     if (pageElement && isEdgelessPage(pageElement)) {
-      this._zoom = pageElement.surface.viewport.zoom;
+      this._zoom = pageElement.service.viewport.zoom;
     } else {
       this._zoom = 1;
     }

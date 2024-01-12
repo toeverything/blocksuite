@@ -141,7 +141,8 @@ export function drawMindMap(
 ) {
   const { shapeIds, connectorIds } = drawAllNode(mindMap, surfaceElement);
   const { edgeless } = surfaceElement;
-  edgeless.selectionManager.set({
+
+  edgeless.service.selection.set({
     elements: [...shapeIds, ...connectorIds],
     editing: false,
   });

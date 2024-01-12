@@ -270,7 +270,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         );
 
         this.disposables.add(
-          edgeless.surface.viewport.slots.viewportUpdated.on(() => {
+          edgeless.service.viewport.viewportUpdated.on(() => {
             this.requestUpdate();
           })
         );
@@ -285,7 +285,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
             deleteElements(edgeless.surface, [element]);
           }
 
-          edgeless.selectionManager.set({
+          edgeless.service.selection.set({
             elements: [],
             editing: false,
           });
@@ -340,7 +340,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     const lineHeight = getLineHeight(fontFamily, fontSize);
     const rect = getSelectedRect([this.element]);
 
-    const { translateX, translateY, zoom } = this.edgeless.surface.viewport;
+    const { translateX, translateY, zoom } = this.edgeless.service.viewport;
     const [visualX, visualY] = this.getVisualPosition(this.element);
     const containerOffset = this.getContainerOffset();
     const transformOperation = [

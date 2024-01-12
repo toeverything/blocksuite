@@ -37,7 +37,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     width: number,
     height: number
   ): string {
-    const { viewport } = this._edgeless.surface;
+    const { viewport } = this._service;
 
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
@@ -163,12 +163,11 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   private _resize(shift = false) {
-    const { _draggingElementId: id, _draggingArea, _edgeless } = this;
+    const { _draggingElementId: id, _draggingArea } = this;
     assertExists(id);
     assertExists(_draggingArea);
 
-    const { surface } = _edgeless;
-    const { viewport } = surface;
+    const { viewport } = this._service;
     const { zoom } = viewport;
     const {
       start: { x: startX, y: startY },
@@ -209,7 +208,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     if (!this._shapeOverlay) return;
 
     this._shapeOverlay.dispose();
-    this._edgeless.surface.viewport.removeOverlay(this._shapeOverlay);
+    this._edgeless.surface.renderer.removeOverlay(this._shapeOverlay);
     this._shapeOverlay = null;
     this._edgeless.surface.refresh();
   }
@@ -226,7 +225,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     // shpae options, like stroke color, fill color, etc.
     if (this._shapeOverlay.globalAlpha === 0)
       this._shapeOverlay.globalAlpha = 1;
-    const [x, y] = this._surface.viewport.toModelCoord(e.x, e.y);
+    const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
     this._updateOverlayPosition(x, y);
   }
 
@@ -269,6 +268,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
         strokeColor: attributes.strokeColor,
       }
     );
-    this._edgeless.surface.viewport.addOverlay(this._shapeOverlay);
+    this._edgeless.surface.renderer.addOverlay(this._shapeOverlay);
   }
 }

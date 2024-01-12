@@ -101,6 +101,7 @@ export class EdgelessSelectionManager {
 
   constructor(service: EdgelessPageService) {
     this.service = service;
+    this.surfaceModel = service.surface;
     this.mount();
   }
 
@@ -297,8 +298,6 @@ export class EdgelessSelectionManager {
         this._activeGroup = null;
       }
     }
-
-    throw new Error('should refresh renderer');
   }
 
   setCursor(cursor: CursorSelection | CursorSelectionState) {

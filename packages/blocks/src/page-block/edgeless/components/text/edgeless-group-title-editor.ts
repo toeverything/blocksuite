@@ -63,7 +63,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
           })
         );
         this.disposables.add(
-          this.edgeless.slots.viewportUpdated.on(() => {
+          this.edgeless.service.viewport.viewportUpdated.on(() => {
             this.requestUpdate();
           })
         );
@@ -85,7 +85,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
     this.group.showTitle = true;
-    this.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [this.group.id],
       editing: false,
     });
@@ -93,7 +93,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
   }
 
   override render() {
-    const viewport = this.edgeless.surface.viewport;
+    const viewport = this.edgeless.service.viewport;
     const bound = Bound.deserialize(this.group.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const inlineEditorStyle = styleMap({

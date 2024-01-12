@@ -63,9 +63,9 @@ export class EdgelessSnapManager extends Overlay {
       return prev;
     }, [] as ConnectorElementModel[]);
 
-    const { viewport } = surface;
+    const { viewport } = service;
     const viewportBounds = Bound.from(viewport.viewportBounds);
-    viewport.addOverlay(this);
+    surface.renderer.addOverlay(this);
     const canvasElements = service.elements;
     const excludes = [...alignables, ...connectors];
     this._alignableBounds = [];
@@ -86,18 +86,18 @@ export class EdgelessSnapManager extends Overlay {
   }
 
   cleanupAlignables() {
-    const { viewport } = this.container.surface;
+    const { renderer } = this.container.surface;
     this._alignableBounds = [];
     this._intraGraphicAlignLines = [];
     this._distributedAlignLines = [];
-    viewport.removeOverlay(this);
+    renderer.removeOverlay(this);
   }
 
   align(bound: Bound): { dx: number; dy: number } {
     const rst = { dx: 0, dy: 0 };
     const threshold = ALIGN_THRESHOLD;
-    const { surface } = this.container;
-    const { viewport } = surface;
+    const { service } = this.container;
+    const { viewport } = service;
 
     this._intraGraphicAlignLines = [];
     this._distributedAlignLines = [];
@@ -395,7 +395,7 @@ export class EdgelessSnapManager extends Overlay {
       this._distributedAlignLines.length === 0
     )
       return;
-    const { viewport } = this.container.surface;
+    const { viewport } = this.container.service;
     const strokeWidth = 1 / viewport.zoom;
     const offset = 5 / viewport.zoom;
     ctx.strokeStyle = '#1672F3';

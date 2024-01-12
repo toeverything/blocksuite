@@ -40,7 +40,7 @@ export function addNote(
       ) as TopLevelBlockModel[]) ?? [];
     const element = blocks.find(b => b.id === noteId);
     if (element) {
-      edgeless.selectionManager.set({
+      edgeless.service.selection.set({
         elements: [element.id],
         editing: true,
       });

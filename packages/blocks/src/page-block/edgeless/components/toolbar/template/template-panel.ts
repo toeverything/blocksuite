@@ -348,7 +348,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     template = cloneDeep(template);
 
     const templateJob = this._createTemplateJob(template.type);
-    const surface = this.edgeless.surface;
+    const service = this.edgeless.service;
 
     try {
       const { assets } = template;
@@ -366,8 +366,8 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       const insertedBound = await templateJob.insertTemplate(template.content);
 
       if (insertedBound && template.type === 'template') {
-        const padding = 20 / surface.viewport.zoom;
-        surface.viewport.setViewportByBound(
+        const padding = 20 / service.viewport.zoom;
+        service.viewport.setViewportByBound(
           insertedBound,
           [padding, padding, padding, padding],
           true

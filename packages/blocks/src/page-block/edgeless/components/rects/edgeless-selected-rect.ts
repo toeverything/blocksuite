@@ -350,7 +350,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   get selection() {
-    return this.edgeless.selectionManager;
+    return this.edgeless.service.selection;
   }
 
   get page() {
@@ -366,7 +366,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   get zoom() {
-    return this.surface.viewport.zoom;
+    return this.edgeless.service.viewport.zoom;
   }
 
   get resizeMode(): ResizeMode {
@@ -627,14 +627,17 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _updateSelectedRect = batchToAnimationFrame(() => {
-    const { surface, zoom, selection } = this;
+    const { zoom, selection, edgeless } = this;
 
     const elements = selection.elements;
     // in surface
     const rect = getSelectedRect(elements);
 
     // in viewport
-    const [left, top] = surface.toViewCoord(rect.left, rect.top);
+    const [left, top] = edgeless.service.viewport.toViewCoord(
+      rect.left,
+      rect.top
+    );
     const [width, height] = [rect.width * zoom, rect.height * zoom];
 
     let rotate = 0;
@@ -733,7 +736,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     _disposables.add(
       // viewport zooming / scrolling
-      slots.viewportUpdated.on(this._updateOnViewportChange)
+      edgeless.service.viewport.viewportUpdated.on(this._updateOnViewportChange)
     );
 
     pickValues(edgeless.slots, [
@@ -839,7 +842,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       elements.length > 1
         ? elements.map(element => {
             const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
-            const [x, y] = this.surface.toViewCoord(modelX, modelY);
+            const [x, y] = edgeless.service.viewport.toViewCoord(
+              modelX,
+              modelY
+            );
             const { left, top, borderWidth } = this._selectedRect;
             const style = {
               position: 'absolute',

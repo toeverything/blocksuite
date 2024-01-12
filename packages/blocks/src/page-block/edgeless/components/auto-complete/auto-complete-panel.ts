@@ -190,7 +190,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     if (!xywh) return;
 
     this._overlay = new AutoCompleteTextOverlay(xywh);
-    this.edgeless.surface.viewport.addOverlay(this._overlay);
+    this.edgeless.surface.renderer.addOverlay(this._overlay);
   }
 
   private _showNoteOverlay() {
@@ -206,7 +206,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       NOTE_BACKGROUND_COLOR_MAP.get(fillColor) ?? DEFAULT_NOTE_BACKGROUND_COLOR
     );
     this._overlay = new AutoCompleteNoteOverlay(xywh, backgroundColor);
-    this.edgeless.surface.viewport.addOverlay(this._overlay);
+    this.edgeless.surface.renderer.addOverlay(this._overlay);
   }
 
   private _showFrameOverlay() {
@@ -221,7 +221,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const computedStyle = getComputedStyle(this.edgeless);
     const strokeColor = computedStyle.getPropertyValue('--affine-black-30');
     this._overlay = new AutoCompleteFrameOverlay(xywh, strokeColor);
-    this.edgeless.surface.viewport.addOverlay(this._overlay);
+    this.edgeless.surface.renderer.addOverlay(this._overlay);
   }
 
   private _showShapeOverlay(targetType: TARGET_SHAPE_TYPE) {
@@ -252,7 +252,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       shapeStyle
     );
 
-    this.edgeless.surface.viewport.addOverlay(this._overlay);
+    this.edgeless.surface.renderer.addOverlay(this._overlay);
   }
 
   private _showOverlay(targetType: AUTO_COMPLETE_TARGET_TYPE) {
@@ -278,7 +278,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
   private _removeOverlay() {
     if (this._overlay)
-      this.edgeless.surface.viewport.removeOverlay(this._overlay);
+      this.edgeless.surface.renderer.removeOverlay(this._overlay);
   }
 
   private async _addShape(targetType: TARGET_SHAPE_TYPE) {
@@ -300,7 +300,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       service.getElementById(id) as ShapeElementModel,
       this.edgeless
     );
-    edgeless.selectionManager.set({
+    edgeless.service.selection.set({
       elements: [id],
       editing: true,
     });
@@ -342,7 +342,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     service.updateElement(this.connector.id, {
       target: { id, position },
     });
-    this.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [id],
       editing: true,
     });
@@ -379,7 +379,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       position,
     };
 
-    edgeless.selectionManager.set({
+    edgeless.service.selection.set({
       elements: [frame.id],
       editing: false,
     });
@@ -397,7 +397,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     service.updateElement(this.connector.id, {
       target: { id, position },
     });
-    this.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [id],
       editing: false,
     });
@@ -431,8 +431,9 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   }
 
   private _getPanelPosition() {
-    const viewportRect = this.edgeless.surface.viewport.boundingClientRect;
-    let [x, y] = this.edgeless.surface.toViewCoord(...this.position);
+    const { viewport } = this.edgeless.service;
+    const viewportRect = viewport.boundingClientRect;
+    let [x, y] = viewport.toViewCoord(...this.position);
     const { width, height } = viewportRect;
     // if connector target position is out of viewport, don't show the panel
     if (x <= 0 || x >= width || y <= 0 || y >= height) return null;
@@ -474,7 +475,9 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
   override firstUpdated() {
     this.disposables.add(
-      this.edgeless.slots.viewportUpdated.on(() => this.requestUpdate())
+      this.edgeless.service.viewport.viewportUpdated.on(() =>
+        this.requestUpdate()
+      )
     );
   }
 

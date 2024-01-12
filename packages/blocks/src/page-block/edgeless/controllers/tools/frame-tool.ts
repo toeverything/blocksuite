@@ -19,7 +19,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
   private _frame: FrameBlockModel | null = null;
 
   private _toModelCoord(p: IPoint): IVec {
-    return this._surface.viewport.toModelCoord(p.x, p.y);
+    return this._service.viewport.toModelCoord(p.x, p.y);
   }
 
   override onContainerPointerDown(): void {
@@ -62,7 +62,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
         frame.pop('xywh');
       });
       this._edgeless.tools.setEdgelessTool({ type: 'default' });
-      this._edgeless.selectionManager.set({
+      this._edgeless.service.selection.set({
         elements: [this._frame.id],
         editing: false,
       });

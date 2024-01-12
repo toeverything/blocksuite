@@ -636,7 +636,10 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (!container || !grabber) return;
 
     const rect = getSelectedRect([edgelessElement]);
-    const [left, top] = edgelessPage.surface.toViewCoord(rect.left, rect.top);
+    const [left, top] = edgelessPage.service.viewport.toViewCoord(
+      rect.left,
+      rect.top
+    );
     const height = rect.height * this.scale;
 
     const posLeft =
@@ -745,7 +748,10 @@ export class AffineDragHandleWidget extends WidgetElement<
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
 
     const rect = getSelectedRect([edgelessElement]);
-    let [left, top] = edgelessPage.surface.toViewCoord(rect.left, rect.top);
+    let [left, top] = edgelessPage.service.viewport.toViewCoord(
+      rect.left,
+      rect.top
+    );
     const width = rect.width * this.scale;
     const height = rect.height * this.scale;
 
@@ -814,8 +820,8 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
     return (
-      edgelessPage.selectionManager.editing &&
-      edgelessPage.selectionManager.selectedIds[0] === noteBlockId
+      edgelessPage.service.selection.editing &&
+      edgelessPage.service.selection.selectedIds[0] === noteBlockId
     );
   };
 
@@ -830,8 +836,8 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
-    const editing = edgelessPage.selectionManager.editing;
-    const selectedElements = edgelessPage.selectionManager.elements;
+    const editing = edgelessPage.service.selection.editing;
+    const selectedElements = edgelessPage.service.selection.elements;
     if (editing || selectedElements.length !== 1) {
       this._hide();
       return;
@@ -850,7 +856,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       return;
     }
 
-    const selections = edgelessPage.selectionManager.selections;
+    const selections = edgelessPage.service.selection.selections;
 
     this._anchorBlockId = selectedElement.id;
     this._anchorBlockPath = selections[0].path;
@@ -1436,13 +1442,13 @@ export class AffineDragHandleWidget extends WidgetElement<
       );
 
       this._disposables.add(
-        edgelessPage.slots.viewportUpdated.on(
+        edgelessPage.service.viewport.viewportUpdated.on(
           this._handleEdgelessViewPortUpdated
         )
       );
 
       this._disposables.add(
-        edgelessPage.selectionManager.slots.updated.on(() => {
+        edgelessPage.service.selection.slots.updated.on(() => {
           this._checkTopLevelBlockSelection();
         })
       );

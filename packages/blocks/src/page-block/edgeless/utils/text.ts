@@ -128,11 +128,11 @@ export function addText(
   edgeless: EdgelessPageBlockComponent,
   event: PointerEventState
 ) {
-  const [x, y] = edgeless.surface.viewport.toModelCoord(event.x, event.y);
-  const selected = edgeless.service?.pickElement(x, y);
+  const [x, y] = edgeless.service.viewport.toModelCoord(event.x, event.y);
+  const selected = edgeless.service.pickElement(x, y);
 
   if (!selected) {
-    const [modelX, modelY] = edgeless.surface.viewport.toModelCoord(
+    const [modelX, modelY] = edgeless.service.viewport.toModelCoord(
       event.x,
       event.y
     );

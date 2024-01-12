@@ -42,7 +42,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
   onContainerDragStart(e: PointerEventState) {
     this._page.captureSync();
-    const { viewport } = this._edgeless.surface;
+    const { viewport } = this._edgeless.service;
 
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
@@ -86,7 +86,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       this._straightLineType = null;
     }
 
-    const [modelX, modelY] = this._edgeless.surface.toModelCoord(
+    const [modelX, modelY] = this._service.viewport.toModelCoord(
       pointX,
       pointY
     );

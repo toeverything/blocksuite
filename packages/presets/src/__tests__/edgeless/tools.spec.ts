@@ -37,14 +37,14 @@ describe('default tool', () => {
 
     await wait();
 
-    surface.viewport.setViewport(1, [
+    service.viewport.setViewport(1, [
       surface.renderer.width / 2,
       surface.renderer.height / 2,
     ]);
 
     click(edgeless.host, { x: 0, y: 50 });
 
-    expect(edgeless.selectionManager.selections[0].elements).toEqual([id]);
+    expect(edgeless.service.selection.selections[0].elements).toEqual([id]);
   });
 
   test('element drag moving', async () => {
@@ -55,7 +55,7 @@ describe('default tool', () => {
     });
     await wait();
 
-    surface.viewport.setViewport(1, [
+    edgeless.service.viewport.setViewport(1, [
       surface.renderer.width / 2,
       surface.renderer.height / 2,
     ]);
@@ -74,14 +74,14 @@ describe('default tool', () => {
 
     await wait();
 
-    surface.viewport.setViewport(1, [
+    edgeless.service.viewport.setViewport(1, [
       surface.renderer.width / 2,
       surface.renderer.height / 2,
     ]);
     await wait();
 
     click(edgeless.host, { x: 50, y: 50 });
-    expect(edgeless.selectionManager.selections[0].elements).toEqual([noteId]);
+    expect(edgeless.service.selection.selections[0].elements).toEqual([noteId]);
     drag(edgeless.host, { x: 50, y: 50 }, { x: 150, y: 150 });
     await wait();
 

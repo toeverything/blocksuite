@@ -137,8 +137,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   refreshLayerViewport = batchToAnimationFrame(() => {
     if (!this.edgeless || !this.edgeless.surface) return;
 
-    const { surface } = this.edgeless;
-    const { zoom, translateX, translateY } = surface.viewport;
+    const { service } = this.edgeless;
+    const { zoom, translateX, translateY } = service.viewport;
     const { gap } = getBackgroundGrid(zoom, true);
 
     this.container.style.setProperty(
@@ -192,9 +192,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   private _updateAutoConnect() {
     const { edgeless } = this;
-    const { elements } = edgeless.selectionManager;
+    const { elements } = edgeless.service.selection;
     if (
-      !edgeless.selectionManager.editing &&
+      !edgeless.service.selection.editing &&
       elements.length === 1 &&
       (isNoteBlock(elements[0]) ||
         this._surfaceRefReferenceSet.has(elements[0].id))
@@ -206,8 +206,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   }
 
   private _getLayerViewport(negative = false) {
-    const { surface } = this.edgeless;
-    const { translateX, translateY, zoom } = surface.viewport;
+    const { service } = this.edgeless;
+    const { translateX, translateY, zoom } = service.viewport;
 
     if (negative) {
       return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
@@ -222,14 +222,14 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     const { page } = edgeless;
 
     _disposables.add(
-      edgeless.slots.viewportUpdated.on(() => {
+      edgeless.service.viewport.viewportUpdated.on(() => {
         this._applyWillChangeProp();
         this.refreshLayerViewport();
       })
     );
 
     _disposables.add(
-      edgeless.surface.layer.slots.layerUpdated.on(() => {
+      edgeless.service.layer.slots.layerUpdated.on(() => {
         this.requestUpdate();
       })
     );
@@ -267,8 +267,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      edgeless.selectionManager.slots.updated.on(() => {
-        const selection = edgeless.selectionManager;
+      edgeless.service.selection.slots.updated.on(() => {
+        const selection = edgeless.service.selection;
 
         if (selection.selectedIds.length === 0 || selection.editing) {
           this._toolbarVisible = false;

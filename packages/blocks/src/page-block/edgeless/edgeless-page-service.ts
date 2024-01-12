@@ -21,6 +21,14 @@ export class EdgelessPageService extends PageService {
   override mounted() {
     super.mounted();
 
+    this._surfaceModel = this.page.getBlockByFlavour(
+      'affine:surface'
+    )[0] as SurfaceBlockModel;
+
+    if (!this._surfaceModel) {
+      throw new Error('surface block not found');
+    }
+
     this._layer = LayerManager.create(this.page, this._surfaceModel);
     this._viewport = new Viewport();
     this._selection = new EdgelessSelectionManager(this);
@@ -67,7 +75,7 @@ export class EdgelessPageService extends PageService {
 
   addElement<T = Record<string, unknown>>(type: string, props: T) {
     // @ts-ignore
-    props['index'] = this.generateIndex(props.type);
+    props['index'] = this.generateIndex(type);
     // @ts-ignore
     props['type'] = type;
 

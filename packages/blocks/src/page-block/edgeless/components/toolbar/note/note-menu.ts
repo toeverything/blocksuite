@@ -109,8 +109,8 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                 const url = await toggleBookmarkCreateModal(this.edgeless.host);
                 if (!url) return;
 
-                const center = Vec.toVec(this.edgeless.surface.viewport.center);
-                this.edgeless.service.addElement(
+                const center = Vec.toVec(this.edgeless.service.viewport.center);
+                this.edgeless.service.addBlock(
                   'affine:bookmark',
                   {
                     url,
@@ -120,7 +120,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                       EdgelessBookmarkHeight.horizontal
                     ).serialize(),
                   },
-                  this.edgeless.surface.model
+                  this.edgeless.service.surface
                 );
 
                 this.edgeless.tools.setEdgelessTool({

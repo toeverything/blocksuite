@@ -41,9 +41,10 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
 
   protected override firstUpdated(): void {
     const { _disposables, surface } = this;
+    const { service } = surface.edgeless;
 
     _disposables.add(
-      surface.viewport.slots.viewportUpdated.on(() => {
+      service.viewport.viewportUpdated.on(() => {
         this.requestUpdate();
       })
     );
@@ -66,7 +67,7 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
   protected override render() {
     if (!this.show) return nothing;
 
-    const { viewport } = this.surface;
+    const { viewport } = this.surface.edgeless.service;
     const { elements } = this._getElementsAndCounts();
     const points: [IVec, IVec][] = [];
     for (let i = 1; i < elements.length; i++) {

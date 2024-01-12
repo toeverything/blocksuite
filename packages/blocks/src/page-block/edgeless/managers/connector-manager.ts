@@ -28,7 +28,6 @@ import {
   toRadian,
   Vec,
 } from '../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { isVecZero } from '../../../surface-block/utils/math-utils.js';
 import type { IVec2 } from '../../../surface-block/utils/vec.js';
 import type { EdgelessPageService } from '../edgeless-page-service.js';
@@ -723,7 +722,6 @@ function adjustStartEndPoint(
 }
 
 export class ConnectionOverlay extends Overlay {
-  surface!: SurfaceBlockComponent;
   points: IVec[] = [];
   highlightPoint: IVec | null = null;
   bound: Bound | null = null;
@@ -739,7 +737,7 @@ export class ConnectionOverlay extends Overlay {
   }
 
   override render(ctx: CanvasRenderingContext2D): void {
-    const zoom = this.surface.viewport.zoom;
+    const zoom = this._service.viewport.zoom;
     this.points.forEach(p => {
       ctx.beginPath();
       ctx.arc(p[0], p[1], 3 / zoom, 0, Math.PI * 2);

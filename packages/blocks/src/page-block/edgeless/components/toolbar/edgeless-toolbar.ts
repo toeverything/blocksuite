@@ -283,9 +283,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         if (tool.type === 'frameNavigator') {
           this._cachedIndex = this._currentFrameIndex;
           this._navigatorMode = tool.mode ?? this._navigatorMode;
-          if (isFrameBlock(edgeless.selectionManager.elements[0])) {
+          if (isFrameBlock(edgeless.service.selection.elements[0])) {
             this._cachedIndex = this._frames.findIndex(
-              frame => frame.id === edgeless.selectionManager.elements[0].id
+              frame => frame.id === edgeless.service.selection.elements[0].id
             );
           }
           if (this._frames.length === 0)
@@ -316,7 +316,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       })
     );
     _disposables.add(page.slots.blockUpdated);
-    _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      edgeless.service.viewport.viewportUpdated.on(() => this.requestUpdate())
+    );
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => {
         this.requestUpdate();
@@ -341,7 +343,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private _moveToCurrentFrame() {
     const current = this._currentFrameIndex;
-    const viewport = this.edgeless.surface.viewport;
+    const viewport = this.edgeless.service.viewport;
     const frame = this._frames[current];
 
     if (frame) {

@@ -6,9 +6,9 @@ import { generateKeyBetween } from 'fractional-indexing';
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
-import type {
+import {
   EdgelessBlock,
-  EdgelessElement,
+  type EdgelessElement,
 } from '../../page-block/edgeless/type.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { ElementModel } from '../element-model/base.js';
@@ -69,8 +69,10 @@ export class LayerManager {
       (
         page
           .getBlocks()
-          .filter(model =>
-            renderableInEdgeless(page, surface, model)
+          .filter(
+            model =>
+              model instanceof EdgelessBlock &&
+              renderableInEdgeless(page, surface, model)
           ) as EdgelessElement[]
       ).concat(surface.elementModels)
     );
@@ -79,8 +81,10 @@ export class LayerManager {
       if (payload.type === 'add') {
         const block = page.getBlockById(payload.id)!;
 
-        // @ts-ignore
-        if (block['edgeless'] && renderableInEdgeless(block)) {
+        if (
+          block instanceof EdgelessBlock &&
+          renderableInEdgeless(page, surface, block)
+        ) {
           layerManager.add(block as EdgelessBlock);
         }
       }
@@ -88,8 +92,7 @@ export class LayerManager {
         const block = page.getBlockById(payload.id)!;
 
         if (
-          // @ts-ignore
-          block['edgeless'] &&
+          block instanceof EdgelessBlock &&
           payload.props.key === 'index' &&
           renderableInEdgeless(page, surface, block)
         ) {

@@ -148,24 +148,27 @@ export class EdgelessToolsManager {
     return this.service.page;
   }
 
+  get service() {
+    return this.container.service as EdgelessPageService;
+  }
+
   protected readonly _disposables = new DisposableGroup();
 
   constructor(
     public readonly container: EdgelessPageBlockComponent,
-    public readonly service: EdgelessPageService,
     protected readonly dispatcher: UIEventDispatcher
   ) {
     this._controllers = {
-      default: new DefaultToolController(container, service),
-      text: new TextToolController(container, service),
-      shape: new ShapeToolController(container, service),
-      brush: new BrushToolController(container, service),
-      pan: new PanToolController(container, service),
-      'affine:note': new NoteToolController(container, service),
-      connector: new ConnectorToolController(container, service),
-      eraser: new EraserToolController(container, service),
-      frame: new FrameToolController(container, service),
-      frameNavigator: new PresentToolController(container, service),
+      default: new DefaultToolController(container, container.service),
+      text: new TextToolController(container, container.service),
+      shape: new ShapeToolController(container, container.service),
+      brush: new BrushToolController(container, container.service),
+      pan: new PanToolController(container, container.service),
+      'affine:note': new NoteToolController(container, container.service),
+      connector: new ConnectorToolController(container, container.service),
+      eraser: new EraserToolController(container, container.service),
+      frame: new FrameToolController(container, container.service),
+      frameNavigator: new PresentToolController(container, container.service),
     };
 
     this._initMouseAndWheelEvents().catch(console.error);
@@ -271,7 +274,7 @@ export class EdgelessToolsManager {
       e.preventDefault();
 
       const container = this.container;
-      const { viewport } = container.surface;
+      const { viewport } = this.service;
       // pan
       if (!isPinchEvent(e)) {
         const dx = e.deltaX / viewport.zoom;
@@ -282,7 +285,7 @@ export class EdgelessToolsManager {
       else {
         const rect = container.getBoundingClientRect();
         // Perform zooming relative to the mouse position
-        const [baseX, baseY] = container.surface.toModelCoord(
+        const [baseX, baseY] = container.service.viewport.toModelCoord(
           e.clientX - rect.x,
           e.clientY - rect.y
         );

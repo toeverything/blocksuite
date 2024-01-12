@@ -107,7 +107,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
   > = new Map();
 
   get selection() {
-    return this.edgeless.selectionManager;
+    return this.edgeless.service.selection;
   }
 
   get surface() {
@@ -180,7 +180,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
   };
 
   private _updateTransform = batchToAnimationFrame(() => {
-    const { translateX, translateY } = this.edgeless.surface.viewport;
+    const { translateX, translateY } = this.edgeless.service.viewport;
 
     this.style.setProperty(
       'transform',
@@ -193,7 +193,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
 
     if (!EdgelessRemoteSelectionWidget.enable) return;
 
-    const { _disposables, surface, page, edgeless } = this;
+    const { _disposables, page, edgeless } = this;
 
     pickValues(edgeless.slots, [
       'elementAdded',
@@ -213,7 +213,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
     );
 
     _disposables.add(
-      surface.viewport.slots.viewportUpdated.on(() => {
+      edgeless.service.viewport.viewportUpdated.on(() => {
         this._updateTransform();
       })
     );
@@ -229,7 +229,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
 
     const { _remoteRects, _remoteCursors, _remoteColorManager } = this;
     assertExists(_remoteColorManager);
-    const { zoom } = this.surface.viewport;
+    const { zoom } = this.edgeless.service.viewport;
 
     const rects = repeat(
       _remoteRects.entries(),

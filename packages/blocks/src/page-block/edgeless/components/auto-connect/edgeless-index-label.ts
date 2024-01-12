@@ -116,10 +116,10 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   private _index = -1;
 
   protected override firstUpdated(): void {
-    const { _disposables, surface, edgeless } = this;
+    const { _disposables, edgeless } = this;
 
     _disposables.add(
-      surface.viewport.slots.viewportUpdated.on(() => {
+      edgeless.service.viewport.viewportUpdated.on(() => {
         this.requestUpdate();
       })
     );
@@ -136,8 +136,8 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     );
 
     _disposables.add(
-      edgeless.selectionManager.slots.updated.on(() => {
-        const { elements } = edgeless.selectionManager;
+      edgeless.service.selection.slots.updated.on(() => {
+        const { elements } = edgeless.service.selection;
         if (!(elements.length === 1 && isNoteBlock(elements[0]))) {
           this._index = -1;
         }
@@ -145,9 +145,9 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     );
 
     requestAnimationFrame(() => {
-      if (surface.isConnected && surface.edgeless.dispatcher) {
+      if (edgeless.isConnected && edgeless.dispatcher) {
         this._disposables.add(
-          surface.edgeless.dispatcher.add('click', ctx => {
+          edgeless.dispatcher.add('click', ctx => {
             const event = ctx.get('pointerState');
             const { raw } = event;
             const target = raw.target as HTMLElement;
@@ -197,11 +197,15 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     this._index = this._index + 1;
     const element = elements[this._index];
     const bound = Bound.deserialize(element.xywh);
-    this.surface.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [element.id],
       editing: false,
     });
-    this.surface.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
+    this.edgeless.service.viewport.setViewportByBound(
+      bound,
+      [80, 80, 80, 80],
+      true
+    );
   }
 
   private _navigateToPrev() {
@@ -210,15 +214,19 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     this._index = this._index - 1;
     const element = elements[this._index];
     const bound = Bound.deserialize(element.xywh);
-    this.surface.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [element.id],
       editing: false,
     });
-    this.surface.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
+    this.edgeless.service.viewport.setViewportByBound(
+      bound,
+      [80, 80, 80, 80],
+      true
+    );
   }
 
   private _NavigatorComponent(elements: AutoConnectElement[]) {
-    const { viewport } = this.surface;
+    const { viewport } = this.surface.edgeless.service;
     const { zoom } = viewport;
     const classname = `navigator ${this._index >= 0 ? 'show' : 'hidden'}`;
     const element = elements[this._index];
@@ -245,7 +253,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   protected override render() {
     if (!this.show) return nothing;
 
-    const { viewport } = this.surface;
+    const { viewport } = this.surface.edgeless.service;
     const { zoom } = viewport;
     const { elements, counts } = this._getElementsAndCounts();
     let index = 0;

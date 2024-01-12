@@ -182,7 +182,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   }
 
   get selection() {
-    return this.edgeless.selectionManager;
+    return this.edgeless.service.selection;
   }
 
   get slots() {
@@ -203,7 +203,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   }
 
   private _runAction = async ({ type }: Action) => {
-    const selection = this.edgeless.selectionManager;
+    const selection = this.edgeless.service.selection;
     switch (type) {
       case 'copy': {
         // FIXME(clipboard): copy
@@ -266,7 +266,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const selection = this.edgeless.selectionManager;
+    const selection = this.edgeless.service.selection;
 
     const actions = Actions(
       selection.elements.some(ele => isFrameBlock(ele))

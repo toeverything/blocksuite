@@ -92,10 +92,10 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
     if (!show || !frame) return nothing;
 
     const bound = Bound.deserialize(frame.xywh);
-    const zoom = edgeless.surface.viewport.zoom;
+    const zoom = edgeless.service.viewport.zoom;
     const width = bound.w * zoom;
     const height = bound.h * zoom;
-    const [x, y] = edgeless.surface.viewport.toViewCoord(bound.x, bound.y);
+    const [x, y] = edgeless.service.viewport.toViewCoord(bound.x, bound.y);
 
     return html` <style>
         .edgeless-navigator-black-background {

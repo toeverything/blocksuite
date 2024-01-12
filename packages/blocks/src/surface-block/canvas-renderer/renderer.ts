@@ -59,7 +59,7 @@ export class Renderer extends Viewport {
     this.rc = new RoughCanvas(canvas);
     this.layerManager = options.layerManager;
     this.provider = options.provider ?? {};
-    this._viewportUpdated.on(payload => {
+    this.viewportUpdated.on(payload => {
       this._shouldUpdate = true;
       this.slots.viewportUpdated.emit(payload);
     });

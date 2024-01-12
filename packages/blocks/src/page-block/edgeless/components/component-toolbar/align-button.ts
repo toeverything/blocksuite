@@ -31,12 +31,12 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
   edgeless!: EdgelessPageBlockComponent;
 
   private get elements() {
-    return this.edgeless.selectionManager.elements;
+    return this.edgeless.service.selection.elements;
   }
 
   override firstUpdated() {
     this._disposables.add(
-      this.edgeless.selectionManager.slots.updated.on(() =>
+      this.edgeless.service.selection.slots.updated.on(() =>
         this.requestUpdate()
       )
     );

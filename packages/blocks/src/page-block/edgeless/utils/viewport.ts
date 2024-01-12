@@ -107,6 +107,14 @@ export class Viewport {
     return this._container.getBoundingClientRect();
   }
 
+  setContainer(container: HTMLElement) {
+    const { width, height } = container.getBoundingClientRect();
+
+    this._container = container;
+    this._width = width;
+    this._height = height;
+  }
+
   toModelCoord(viewX: number, viewY: number): [number, number] {
     const { viewportX, viewportY, zoom } = this;
     return [viewportX + viewX / zoom, viewportY + viewY / zoom];

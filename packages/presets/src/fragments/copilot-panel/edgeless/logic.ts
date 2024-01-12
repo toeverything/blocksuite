@@ -71,7 +71,7 @@ export class AIEdgelessLogic {
     }
     const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
     const { notes } = BlocksUtils.splitElements(
-      edgelessPage.selectionManager.elements
+      edgelessPage.service.selection.elements
     );
     // @ts-ignore
     const htmlBlock: {

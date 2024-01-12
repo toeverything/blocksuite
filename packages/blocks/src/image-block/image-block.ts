@@ -145,7 +145,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       if (!insideDragHandle) return false;
 
       const edgelessPage = getEdgelessPageByElement(blockComponent);
-      const scale = edgelessPage ? edgelessPage.surface.viewport.zoom : 1;
+      const scale = edgelessPage ? edgelessPage.service.viewport.zoom : 1;
       const width = blockComponent.getBoundingClientRect().width;
 
       const dragPreviewEl = document.createElement('div');

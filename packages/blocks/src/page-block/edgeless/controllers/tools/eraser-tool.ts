@@ -61,7 +61,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
       }
     }
     if (didUpdate) {
-      const zoom = this._surface.viewport.zoom;
+      const zoom = this._service.viewport.zoom;
       const d = getSvgPathFromStroke(
         getStroke(this._eraserPoints, {
           size: 16 / zoom,
@@ -79,7 +79,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   }
 
   private toModelCoord(p: IPoint): IVec {
-    return this._surface.viewport.toModelCoord(p.x, p.y);
+    return this._service.viewport.toModelCoord(p.x, p.y);
   }
 
   override onContainerDragStart(e: PointerEventState): void {
@@ -94,7 +94,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
       ...this._service.blocks,
     ]);
     this._loop();
-    this._edgeless.surface.viewport.addOverlay(this._overlay);
+    this._edgeless.surface.renderer.addOverlay(this._overlay);
   }
 
   override onContainerDragMove(e: PointerEventState): void {
@@ -141,7 +141,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
 
   private _reset() {
     cancelAnimationFrame(this._timer);
-    this._edgeless.surface.viewport.removeOverlay(this._overlay);
+    this._edgeless.surface.renderer.removeOverlay(this._overlay);
     this._erasables.clear();
     this._eraseTargets.clear();
   }

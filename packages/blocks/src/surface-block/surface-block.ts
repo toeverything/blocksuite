@@ -157,11 +157,17 @@ export class SurfaceBlockComponent extends BlockElement<
     this._initThemeObserver();
 
     this._disposables.add(
-      this.edgeless.service.viewport.viewportUpdated.on(({ center, zoom }) => {
+      edgelessService.viewport.viewportUpdated.on(({ center, zoom }) => {
         this._renderer.setCenter(center[0], center[1]);
         if (this._renderer.zoom !== zoom) this._renderer.setZoom(zoom);
       })
     );
+
+    this._renderer.setCenter(
+      edgelessService.viewport.centerX,
+      edgelessService.viewport.centerY
+    );
+    this._renderer.setZoom(edgelessService.viewport.zoom);
   }
 
   private _initEvents() {
@@ -287,10 +293,6 @@ export class SurfaceBlockComponent extends BlockElement<
     });
   }
 
-  get viewport(): Renderer {
-    return this._renderer;
-  }
-
   refresh() {
     this._renderer.refresh();
   }
@@ -304,7 +306,7 @@ export class SurfaceBlockComponent extends BlockElement<
   }
 
   fitToViewport(bound: Bound) {
-    const { viewport } = this;
+    const { viewport } = this.edgeless.service;
     bound = bound.expand(30);
     if (Date.now() - this._lastTime > 200)
       this._cachedViewport = viewport.viewportBounds;
@@ -314,14 +316,6 @@ export class SurfaceBlockComponent extends BlockElement<
 
     this._cachedViewport = this._cachedViewport.unite(bound);
     viewport.setViewportByBound(this._cachedViewport, [0, 0, 0, 0], true);
-  }
-
-  toModelCoord(viewX: number, viewY: number): [number, number] {
-    return this._renderer.toModelCoord(viewX, viewY);
-  }
-
-  toViewCoord(modelX: number, modelY: number): [number, number] {
-    return this._renderer.toViewCoord(modelX, modelY);
   }
 
   /** @internal Only for testing */

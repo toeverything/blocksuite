@@ -89,7 +89,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private get selectionManager() {
-    return this.host.selectionManager;
+    return this.host.service.selection;
   }
 
   override hostConnected() {
@@ -463,7 +463,7 @@ export class EdgelessClipboardController extends PageClipboard {
     };
     pasteCenter =
       pasteCenter ??
-      this.surface.toModelCoord(
+      this.host.service.viewport.toModelCoord(
         this.toolManager.lastMousePos.x,
         this.toolManager.lastMousePos.y
       );
@@ -510,7 +510,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...frames,
       ...images,
       ...bookmarks,
-    ]);
+    ] as EdgelessElement[]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
 
@@ -794,7 +794,7 @@ export class EdgelessClipboardController extends PageClipboard {
       this._checkCanContinueToCanvas(host, pathname, pageMode);
     }
 
-    const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(
+    const surfaceCanvas = edgeless.surface.renderer.getCanvasByBound(
       bound,
       canvasElements
     );

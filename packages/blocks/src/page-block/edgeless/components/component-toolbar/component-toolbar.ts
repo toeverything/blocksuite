@@ -106,7 +106,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   get selection() {
-    return this.edgeless.selectionManager;
+    return this.edgeless.service.selection;
   }
 
   get slots() {
@@ -236,9 +236,9 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   };
 
   protected override firstUpdated() {
-    const { _disposables, edgeless, surface } = this;
+    const { _disposables, edgeless } = this;
     _disposables.add(
-      surface.viewport.slots.viewportUpdated.on(() => {
+      edgeless.service.viewport.viewportUpdated.on(() => {
         const [left, top] = this._computePosition();
         this.left = left;
         this.top = top;
@@ -299,11 +299,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   private _computePosition() {
-    const { selectionManager } = this.edgeless;
+    const { selection, viewport } = this.edgeless.service;
 
-    const bound = edgelessElementsBound(selectionManager.elements);
+    const bound = edgelessElementsBound(selection.elements);
 
-    const { viewport } = this.edgeless.surface;
     const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
 
