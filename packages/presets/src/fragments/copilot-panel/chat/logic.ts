@@ -250,7 +250,6 @@ export class AIChatLogic {
   ): (input: string) => Promise<void> {
     return async (input: string) => {
       const result = await action(input);
-      console.log(this.reactiveData.history);
       this.reactiveData.history = [
         ...this.reactiveData.history,
         {
@@ -267,7 +266,6 @@ export class AIChatLogic {
           sources: [],
         },
       ];
-      console.log(this.reactiveData.history);
     };
   }
 
@@ -351,7 +349,15 @@ export class AIChatLogic {
     {
       type: 'action',
       name: 'Insert into Chat',
-      action: async () => {},
+      action: async input => {
+        this.reactiveData.history = [
+          ...this.reactiveData.history,
+          {
+            role: 'user',
+            content: [{ text: input, type: 'text' }],
+          },
+        ];
+      },
     },
   ];
 }
