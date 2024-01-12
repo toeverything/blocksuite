@@ -432,7 +432,7 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
     this._width = EMBED_CARD_WIDTH[this.cardStyle];
     this._height =
       isDeleted && this.cardStyle === 'horizontal'
-        ? 78
+        ? 80
         : EMBED_CARD_HEIGHT[this.cardStyle];
 
     const isEmpty = this._isPageEmpty() && this._isBannerEmpty;
