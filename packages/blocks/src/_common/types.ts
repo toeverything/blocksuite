@@ -2,7 +2,7 @@ import { type Slot } from '@blocksuite/global/utils';
 import { type BlockModel, type Page } from '@blocksuite/store';
 
 import type { EmbedGithubModel } from '../embed-github-block/embed-github-model.js';
-import type { EmbedLinkedPageModel } from '../embed-linked-page-block/embed-linked-page-model.js';
+import type { EmbedLinkedDocModel } from '../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
@@ -125,7 +125,7 @@ export type TopLevelBlockModel =
   | BookmarkBlockModel
   | EmbedGithubModel
   | EmbedYoutubeModel
-  | EmbedLinkedPageModel;
+  | EmbedLinkedDocModel;
 
 export type EdgelessElement = TopLevelBlockModel | CanvasElement;
 

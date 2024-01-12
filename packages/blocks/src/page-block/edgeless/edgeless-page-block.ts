@@ -801,7 +801,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
           event.flavour === 'affine:bookmark' ||
           event.flavour === 'affine:embed-github' ||
           event.flavour === 'affine:embed-youtube' ||
-          event.flavour === 'affine:embed-linked-page'
+          event.flavour === 'affine:embed-linked-doc'
         ) {
           const parent =
             event.type === 'delete'

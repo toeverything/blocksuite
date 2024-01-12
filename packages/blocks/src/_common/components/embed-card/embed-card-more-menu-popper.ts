@@ -6,8 +6,8 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
-import type { EmbedLinkedPageBlockComponent } from '../../../embed-linked-page-block/embed-linked-page-block.js';
-import type { EmbedLinkedPageModel } from '../../../embed-linked-page-block/embed-linked-page-model.js';
+import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
+import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type {
@@ -69,14 +69,14 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     | BookmarkBlockModel
     | EmbedGithubModel
     | EmbedYoutubeModel
-    | EmbedLinkedPageModel;
+    | EmbedLinkedDocModel;
 
   @property({ attribute: false })
   block!:
     | BookmarkBlockComponent
     | EmbedGithubBlockComponent
     | EmbedYoutubeBlockComponent
-    | EmbedLinkedPageBlockComponent;
+    | EmbedLinkedDocBlockComponent;
 
   @property({ attribute: false })
   std!: BlockStdScope;

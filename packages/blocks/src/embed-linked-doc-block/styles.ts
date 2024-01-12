@@ -3,7 +3,7 @@ import { css, html } from 'lit';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 
 export const styles = css`
-  .affine-embed-linked-page-block {
+  .affine-embed-linked-doc-block {
     margin: 0 auto;
     box-sizing: border-box;
     display: flex;
@@ -18,7 +18,7 @@ export const styles = css`
     user-select: none;
   }
 
-  .affine-embed-linked-page-content {
+  .affine-embed-linked-doc-content {
     width: 536px;
     height: 100%;
     display: flex;
@@ -30,7 +30,7 @@ export const styles = css`
     opacity: var(--add, 1);
   }
 
-  .affine-embed-linked-page-content-title {
+  .affine-embed-linked-doc-content-title {
     display: flex;
     flex-direction: row;
     gap: 8px;
@@ -41,22 +41,22 @@ export const styles = css`
     opacity: var(--add, 1);
   }
 
-  .affine-embed-linked-page-content-title-icon {
+  .affine-embed-linked-doc-content-title-icon {
     display: flex;
     width: 16px;
     height: 16px;
     justify-content: center;
     align-items: center;
   }
-  .affine-embed-linked-page-content-title-icon img,
-  .affine-embed-linked-page-content-title-icon object,
-  .affine-embed-linked-page-content-title-icon svg {
+  .affine-embed-linked-doc-content-title-icon img,
+  .affine-embed-linked-doc-content-title-icon object,
+  .affine-embed-linked-doc-content-title-icon svg {
     width: 16px;
     height: 16px;
     fill: var(--affine-background-primary-color);
   }
 
-  .affine-embed-linked-page-content-title-text {
+  .affine-embed-linked-doc-content-title-text {
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -71,7 +71,7 @@ export const styles = css`
     line-height: 22px;
   }
 
-  .affine-embed-linked-page-content-description {
+  .affine-embed-linked-doc-content-description {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -87,7 +87,7 @@ export const styles = css`
     line-height: 20px;
   }
 
-  .affine-embed-linked-page-content-date {
+  .affine-embed-linked-doc-content-date {
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -96,7 +96,7 @@ export const styles = css`
     max-width: 100%;
   }
 
-  .affine-embed-linked-page-content-date > span {
+  .affine-embed-linked-doc-content-date > span {
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -112,16 +112,16 @@ export const styles = css`
     line-height: 20px;
   }
 
-  .affine-embed-linked-page-banner {
+  .affine-embed-linked-doc-banner {
     margin: 12px 12px 0px 0px;
     width: 204px;
     max-width: 100%;
     height: 102px;
     opacity: var(--add, 1);
   }
-  .affine-embed-linked-page-banner img,
-  .affine-embed-linked-page-banner object,
-  .affine-embed-linked-page-banner svg {
+  .affine-embed-linked-doc-banner img,
+  .affine-embed-linked-doc-banner object,
+  .affine-embed-linked-doc-banner svg {
     width: 204px;
     max-width: 100%;
     height: 102px;
@@ -129,144 +129,144 @@ export const styles = css`
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 
-  .affine-embed-linked-page-block.loading {
-    .affine-embed-linked-page-content-date {
+  .affine-embed-linked-doc-block.loading {
+    .affine-embed-linked-doc-content-date {
       display: none;
     }
   }
-  .affine-embed-linked-page-block:not(.loading).empty {
-    .affine-embed-linked-page-content-description {
+  .affine-embed-linked-doc-block:not(.loading).empty {
+    .affine-embed-linked-doc-content-description {
       color: var(--affine-placeholder-color);
     }
 
-    .affine-embed-linked-page-banner.render {
+    .affine-embed-linked-doc-banner.render {
       display: none;
     }
 
-    .affine-embed-linked-page-banner.default {
+    .affine-embed-linked-doc-banner.default {
       display: block;
     }
   }
-  .affine-embed-linked-page-block:not(.loading).deleted {
+  .affine-embed-linked-doc-block:not(.loading).deleted {
     background: var(--affine-background-secondary-color);
 
-    .affine-embed-linked-page-content-description {
+    .affine-embed-linked-doc-content-description {
       color: var(--affine-placeholder-color);
     }
 
-    .affine-embed-linked-page-content-date {
+    .affine-embed-linked-doc-content-date {
       display: none;
     }
 
-    .affine-embed-linked-page-banner.render {
+    .affine-embed-linked-doc-banner.render {
       display: none;
     }
 
-    .affine-embed-linked-page-banner.default {
+    .affine-embed-linked-doc-banner.default {
       display: block;
     }
   }
-  .affine-embed-linked-page-block.horizontal:not(.loading).deleted {
+  .affine-embed-linked-doc-block.horizontal:not(.loading).deleted {
     height: 80px;
     background: var(--affine-background-secondary-color);
 
-    .affine-embed-linked-page-banner {
+    .affine-embed-linked-doc-banner {
       height: 66px;
     }
 
-    .affine-embed-linked-page-banner img,
-    .affine-embed-linked-page-banner object,
-    .affine-embed-linked-page-banner svg {
+    .affine-embed-linked-doc-banner img,
+    .affine-embed-linked-doc-banner object,
+    .affine-embed-linked-doc-banner svg {
       height: 66px;
     }
 
-    .affine-embed-linked-page-content {
+    .affine-embed-linked-doc-content {
       gap: 12px;
     }
   }
-  .affine-embed-linked-page-block.list {
+  .affine-embed-linked-doc-block.list {
     height: ${EMBED_CARD_HEIGHT.list}px;
-    .affine-embed-linked-page-content {
+    .affine-embed-linked-doc-content {
       width: 100%;
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
     }
 
-    .affine-embed-linked-page-content-title {
+    .affine-embed-linked-doc-content-title {
       width: 536px;
     }
 
-    .affine-embed-linked-page-content-description {
+    .affine-embed-linked-doc-content-description {
       display: none;
     }
 
-    .affine-embed-linked-page-content-date {
+    .affine-embed-linked-doc-content-date {
       width: 204px;
       justify-content: flex-end;
     }
 
-    .affine-embed-linked-page-banner {
+    .affine-embed-linked-doc-banner {
       display: none;
     }
   }
-  .affine-embed-linked-page-block.vertical {
+  .affine-embed-linked-doc-block.vertical {
     width: ${EMBED_CARD_WIDTH.vertical}px;
     height: ${EMBED_CARD_HEIGHT.vertical}px;
     flex-direction: column-reverse;
 
-    .affine-embed-linked-page-content {
+    .affine-embed-linked-doc-content {
       width: 100%;
     }
 
-    .affine-embed-linked-page-content-description {
+    .affine-embed-linked-doc-content-description {
       -webkit-line-clamp: 6;
     }
 
-    .affine-embed-linked-page-banner {
+    .affine-embed-linked-doc-banner {
       width: 340px;
       height: 170px;
       margin-left: 12px;
     }
-    .affine-embed-linked-page-banner img,
-    .affine-embed-linked-page-banner object,
-    .affine-embed-linked-page-banner svg {
+    .affine-embed-linked-doc-banner img,
+    .affine-embed-linked-doc-banner object,
+    .affine-embed-linked-doc-banner svg {
       width: 340px;
       height: 170px;
     }
   }
-  .affine-embed-linked-page-block.cube {
+  .affine-embed-linked-doc-block.cube {
     width: ${EMBED_CARD_WIDTH.cube}px;
     height: ${EMBED_CARD_HEIGHT.cube}px;
 
-    .affine-embed-linked-page-content {
+    .affine-embed-linked-doc-content {
       width: 100%;
       flex-direction: column;
       align-items: flex-start;
       justify-content: space-between;
     }
 
-    .affine-embed-linked-page-content-title {
+    .affine-embed-linked-doc-content-title {
       flex-direction: column;
       gap: 4px;
       align-items: flex-start;
     }
 
-    .affine-embed-linked-page-content-title-text {
+    .affine-embed-linked-doc-content-title-text {
       -webkit-line-clamp: 2;
     }
 
-    .affine-embed-linked-page-content-description {
+    .affine-embed-linked-doc-content-description {
       display: none;
     }
 
-    .affine-embed-linked-page-banner {
+    .affine-embed-linked-doc-banner {
       display: none;
     }
   }
 `;
 
-export const LinkedDocIcon = html`<svg
+export const LinkedPageIcon = html`<svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -296,7 +296,7 @@ export const LinkedEdgelessIcon = html`<svg
   />
 </svg> `;
 
-export const LinkedPageDeletedIcon = html`<svg
+export const LinkedDocDeletedIcon = html`<svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -311,7 +311,7 @@ export const LinkedPageDeletedIcon = html`<svg
   />
 </svg> `;
 
-export const LightLinkedDocEmptySmallBanner = html`<svg
+export const LightLinkedPageEmptySmallBanner = html`<svg
   width="204"
   height="102"
   viewBox="0 0 204 102"
@@ -435,7 +435,7 @@ export const LightLinkedDocEmptySmallBanner = html`<svg
   </defs>
 </svg> `;
 
-export const DarkLinkedDocEmptySmallBanner = html`<svg
+export const DarkLinkedPageEmptySmallBanner = html`<svg
   width="204"
   height="102"
   viewBox="0 0 204 102"
@@ -559,7 +559,7 @@ export const DarkLinkedDocEmptySmallBanner = html`<svg
   </defs>
 </svg> `;
 
-export const LightLinkedDocEmptyLargeBanner = html`<svg
+export const LightLinkedPageEmptyLargeBanner = html`<svg
   width="340"
   height="170"
   viewBox="0 0 340 170"
@@ -670,7 +670,7 @@ export const LightLinkedDocEmptyLargeBanner = html`<svg
   </defs>
 </svg>`;
 
-export const DarkLinkedDocEmptyLargeBanner = html`<svg
+export const DarkLinkedPageEmptyLargeBanner = html`<svg
   width="340"
   height="170"
   viewBox="0 0 340 170"
@@ -783,7 +783,7 @@ export const DarkLinkedDocEmptyLargeBanner = html`<svg
   </defs>
 </svg> `;
 
-export const LightLinkedDocDeletedSmallBanner = html`<svg
+export const LightLinkedPageDeletedSmallBanner = html`<svg
   width="204"
   height="66"
   viewBox="0 0 204 66"
@@ -885,7 +885,7 @@ export const LightLinkedDocDeletedSmallBanner = html`<svg
   </defs>
 </svg> `;
 
-export const DarkLinkedDocDeletedSmallBanner = html`<svg
+export const DarkLinkedPageDeletedSmallBanner = html`<svg
   width="204"
   height="66"
   viewBox="0 0 204 66"
@@ -993,7 +993,7 @@ export const DarkLinkedDocDeletedSmallBanner = html`<svg
   </defs>
 </svg> `;
 
-export const LightLinkedDocDeletedLargeBanner = html`<svg
+export const LightLinkedPageDeletedLargeBanner = html`<svg
   width="340"
   height="170"
   viewBox="0 0 340 170"
@@ -1112,7 +1112,7 @@ export const LightLinkedDocDeletedLargeBanner = html`<svg
   </defs>
 </svg> `;
 
-export const DarkLinkedDocDeletedLargeBanner = html`<svg
+export const DarkLinkedPageDeletedLargeBanner = html`<svg
   width="340"
   height="170"
   viewBox="0 0 340 170"

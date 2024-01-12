@@ -15,9 +15,9 @@ import { createDefaultPage } from '../../../_common/utils/init.js';
 import { getInlineEditorByModel } from '../../../_common/utils/query.js';
 import { isFuzzyMatch } from '../../../_common/utils/string.js';
 import type { Flavour } from '../../../models.js';
-import { showImportModal } from './import-page/index.js';
+import { showImportModal } from './import-doc/index.js';
 
-export type LinkedPageOptions = {
+export type LinkedDocOptions = {
   triggerKeys: string[];
   ignoreBlockTypes: Flavour[];
   convertTriggerKey: boolean;
@@ -27,10 +27,10 @@ export type LinkedPageOptions = {
     page: Page;
     pageMetas: PageMeta[];
     model: BlockModel;
-  }) => LinkedPageGroup[];
+  }) => LinkedDocGroup[];
 };
 
-export type LinkedPageItem = {
+export type LinkedDocItem = {
   key: string;
   name: string;
   icon: TemplateResult<1>;
@@ -39,10 +39,10 @@ export type LinkedPageItem = {
   action: () => Promise<void> | void;
 };
 
-export type LinkedPageGroup = {
+export type LinkedDocGroup = {
   name: string;
   styles?: string;
-  items: LinkedPageItem[];
+  items: LinkedDocItem[];
 };
 
 const DEFAULT_PAGE_NAME = 'Untitled';
@@ -76,7 +76,7 @@ export const getMenus: (ctx: {
   page: Page;
   pageMetas: PageMeta[];
   model: BlockModel;
-}) => LinkedPageGroup[] = ({ editorHost, query, page, model, pageMetas }) => {
+}) => LinkedDocGroup[] = ({ editorHost, query, page, model, pageMetas }) => {
   const pageName = query || DEFAULT_PAGE_NAME;
   const displayPageName =
     pageName.slice(0, DISPLAY_NAME_LENGTH) +
@@ -150,5 +150,5 @@ export const getMenus: (ctx: {
         },
       ],
     },
-  ] satisfies LinkedPageGroup[];
+  ] satisfies LinkedDocGroup[];
 };

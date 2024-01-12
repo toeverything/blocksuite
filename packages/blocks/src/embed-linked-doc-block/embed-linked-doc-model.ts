@@ -3,19 +3,19 @@ import { BlockModel } from '@blocksuite/store';
 import { defineEmbedModel } from '../_common/embed-block-helper/index.js';
 import type { EmbedCardStyle } from '../_common/types.js';
 
-export const EmbedLinkedPageStyles: EmbedCardStyle[] = [
+export const EmbedLinkedDocStyles: EmbedCardStyle[] = [
   'vertical',
   'horizontal',
   'list',
   'cube',
 ] as const;
 
-export type EmbedLinkedPageBlockProps = {
+export type EmbedLinkedDocBlockProps = {
   pageId: string;
-  style: (typeof EmbedLinkedPageStyles)[number];
+  style: (typeof EmbedLinkedDocStyles)[number];
   caption: string | null;
 };
 
-export class EmbedLinkedPageModel extends defineEmbedModel<EmbedLinkedPageBlockProps>(
+export class EmbedLinkedDocModel extends defineEmbedModel<EmbedLinkedDocBlockProps>(
   BlockModel
 ) {}

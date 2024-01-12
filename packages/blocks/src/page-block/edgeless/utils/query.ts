@@ -11,7 +11,7 @@ import {
 } from '../../../_common/utils/index.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/index.js';
-import type { EmbedLinkedPageModel } from '../../../embed-linked-page-block/embed-linked-page-model.js';
+import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
@@ -96,13 +96,13 @@ export function isEmbedYoutubeBlock(
   );
 }
 
-export function isEmbedLinkedPageBlock(
+export function isEmbedLinkedDocBlock(
   element: BlockModel | EdgelessElement | null
-): element is EmbedLinkedPageModel {
+): element is EmbedLinkedDocModel {
   return (
     !!element &&
     'flavour' in element &&
-    element.flavour === 'affine:embed-linked-page'
+    element.flavour === 'affine:embed-linked-doc'
   );
 }
 

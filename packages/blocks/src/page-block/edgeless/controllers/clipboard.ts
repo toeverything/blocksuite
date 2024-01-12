@@ -34,7 +34,7 @@ import {
   BookmarkStyles,
 } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
-import type { EmbedLinkedPageModel } from '../../../embed-linked-page-block/embed-linked-page-model.js';
+import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
@@ -61,7 +61,7 @@ import {
   isBookmarkBlock,
   isCanvasElementWithText,
   isEmbedGithubBlock,
-  isEmbedLinkedPageBlock,
+  isEmbedLinkedDocBlock,
   isEmbedYoutubeBlock,
   isFrameBlock,
   isImageBlock,
@@ -522,12 +522,12 @@ export class EdgelessClipboardController extends PageClipboard {
     return embedYoutubeIds;
   }
 
-  private _createLinkedPageEmbedBlocks(linkedPageEmbeds: BlockSnapshot[]) {
-    const embedlinkedPageIds = linkedPageEmbeds.map(({ props }) => {
+  private _createLinkedDocEmbedBlocks(linkedDocEmbeds: BlockSnapshot[]) {
+    const embedlinkedDocIds = linkedDocEmbeds.map(({ props }) => {
       const { xywh, style, caption, pageId } = props;
 
       return this.surface.addElement(
-        'affine:embed-linked-page',
+        'affine:embed-linked-doc',
         {
           xywh,
           style,
@@ -537,7 +537,7 @@ export class EdgelessClipboardController extends PageClipboard {
         this.surface.model.id
       );
     });
-    return embedlinkedPageIds;
+    return embedlinkedDocIds;
   }
 
   private _emitSelectionChangeAfterPaste(
@@ -574,8 +574,8 @@ export class EdgelessClipboardController extends PageClipboard {
                 ? 'githubEmbeds'
                 : isEmbedYoutubeBlock(data as unknown as Selectable)
                   ? 'youtubeEmbeds'
-                  : isEmbedLinkedPageBlock(data as unknown as Selectable)
-                    ? 'linkedPageEmbeds'
+                  : isEmbedLinkedDocBlock(data as unknown as Selectable)
+                    ? 'linkedDocEmbeds'
                     : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
@@ -584,7 +584,7 @@ export class EdgelessClipboardController extends PageClipboard {
       bookmarks?: BlockSnapshot[];
       githubEmbeds?: BlockSnapshot[];
       youtubeEmbeds?: BlockSnapshot[];
-      linkedPageEmbeds?: BlockSnapshot[];
+      linkedDocEmbeds?: BlockSnapshot[];
       elements?: { type: CanvasElement['type'] }[];
     };
     pasteCenter =
@@ -612,8 +612,8 @@ export class EdgelessClipboardController extends PageClipboard {
     const embedYoutubeIds = this._createYoutubeEmbedBlocks(
       groupedByType.youtubeEmbeds ?? []
     );
-    const embedLinkedPageIds = this._createLinkedPageEmbedBlocks(
-      groupedByType.linkedPageEmbeds ?? []
+    const embedLinkedDocIds = this._createLinkedDocEmbedBlocks(
+      groupedByType.linkedDocEmbeds ?? []
     );
 
     const notes = noteIds.map(id =>
@@ -640,9 +640,9 @@ export class EdgelessClipboardController extends PageClipboard {
       this.surface.pickById(id)
     ) as EmbedYoutubeModel[];
 
-    const linkedPageEmbeds = embedLinkedPageIds.map(id =>
+    const linkedDocEmbeds = embedLinkedDocIds.map(id =>
       this.surface.pickById(id)
-    ) as EmbedLinkedPageModel[];
+    ) as EmbedLinkedDocModel[];
 
     const elements = this._createCanvasElements(
       groupedByType.elements || [],
@@ -659,7 +659,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...bookmarks,
       ...githubEmbeds,
       ...youtubeEmbeds,
-      ...linkedPageEmbeds,
+      ...linkedDocEmbeds,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
@@ -1030,7 +1030,7 @@ export async function prepareClipboardData(
       } else if (isEmbedYoutubeBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
-      } else if (isEmbedLinkedPageBlock(selected)) {
+      } else if (isEmbedLinkedDocBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (selected instanceof ConnectorElement) {

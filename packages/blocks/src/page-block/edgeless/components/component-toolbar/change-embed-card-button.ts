@@ -30,8 +30,8 @@ import type {
   EmbedGithubBlockComponent,
   EmbedGithubModel,
 } from '../../../../embed-github-block/index.js';
-import type { EmbedLinkedPageBlockComponent } from '../../../../embed-linked-page-block/embed-linked-page-block.js';
-import type { EmbedLinkedPageModel } from '../../../../embed-linked-page-block/embed-linked-page-model.js';
+import type { EmbedLinkedDocBlockComponent } from '../../../../embed-linked-doc-block/embed-linked-doc-block.js';
+import type { EmbedLinkedDocModel } from '../../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeBlockComponent } from '../../../../embed-youtube-block/embed-youtube-block.js';
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import type { BookmarkBlockComponent } from '../../../../index.js';
@@ -45,7 +45,7 @@ import {
   isBookmarkBlock,
   isEmbeddedBlock,
   isEmbedGithubBlock,
-  isEmbedLinkedPageBlock,
+  isEmbedLinkedDocBlock,
 } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
 
@@ -142,7 +142,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | BookmarkBlockModel
     | EmbedGithubModel
     | EmbedYoutubeModel
-    | EmbedLinkedPageModel;
+    | EmbedLinkedDocModel;
 
   @property({ attribute: false })
   std!: BlockStdScope;
@@ -178,7 +178,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return (
       isBookmarkBlock(this.model) ||
       isEmbedGithubBlock(this.model) ||
-      isEmbedLinkedPageBlock(this.model)
+      isEmbedLinkedDocBlock(this.model)
     );
   }
 
@@ -198,7 +198,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       | BookmarkBlockComponent
       | EmbedGithubBlockComponent
       | EmbedYoutubeBlockComponent
-      | EmbedLinkedPageBlockComponent
+      | EmbedLinkedDocBlockComponent
       | null;
     assertExists(blockElement);
     blockElement.open();
@@ -224,7 +224,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _convertToCardView() {
-    if (isBookmarkBlock(this.model) || isEmbedLinkedPageBlock(this.model))
+    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model))
       return;
     const { url, xywh, style } = this.model;
 
@@ -249,7 +249,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private get _canShowOpenButton() {
-    return isEmbedLinkedPageBlock(this.model);
+    return isEmbedLinkedDocBlock(this.model);
   }
 
   private get _canShowUrlOptions() {
@@ -257,12 +257,12 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       'url' in this.model &&
       (isBookmarkBlock(this.model) ||
         isEmbedGithubBlock(this.model) ||
-        isEmbedLinkedPageBlock(this.model))
+        isEmbedLinkedDocBlock(this.model))
     );
   }
 
   private get _canConvertToEmbedView() {
-    if (isEmbedLinkedPageBlock(this.model)) {
+    if (isEmbedLinkedDocBlock(this.model)) {
       return false;
     }
 
@@ -275,7 +275,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _convertToEmbedView() {
-    if (isEmbedLinkedPageBlock(this.model)) {
+    if (isEmbedLinkedDocBlock(this.model)) {
       return;
     }
 

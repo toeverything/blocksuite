@@ -5,7 +5,7 @@ import { type InitFn } from './utils';
 export const linked: InitFn = async (workspace: Workspace, id: string) => {
   const pageA = workspace.getPage(id) ?? workspace.createPage({ id });
 
-  const pageBId = 'page:page-linked-page';
+  const pageBId = 'page:page-linked-doc';
   const pageB =
     workspace.getPage('pageB') ?? workspace.createPage({ id: pageBId });
 
@@ -56,18 +56,18 @@ export const linked: InitFn = async (workspace: Workspace, id: string) => {
     // Add paragraph block inside note block
     pageA.addBlock('affine:paragraph', {}, noteId);
 
-    pageA.addBlock('affine:embed-linked-page', { pageId: pageBId }, noteId);
+    pageA.addBlock('affine:embed-linked-doc', { pageId: pageBId }, noteId);
 
     pageA.addBlock(
-      'affine:embed-linked-page',
+      'affine:embed-linked-doc',
       { pageId: 'page:deleted-example' },
       noteId
     );
 
-    pageA.addBlock('affine:embed-linked-page', { pageId: pageCId }, noteId);
+    pageA.addBlock('affine:embed-linked-doc', { pageId: pageCId }, noteId);
 
     pageA.addBlock(
-      'affine:embed-linked-page',
+      'affine:embed-linked-doc',
       { pageId: 'page:deleted-example-edgeless' },
       noteId
     );

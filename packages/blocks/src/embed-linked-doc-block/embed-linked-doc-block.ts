@@ -31,21 +31,21 @@ import type {
 } from '../surface-ref-block/index.js';
 import type { SurfaceRefRenderer } from '../surface-ref-block/surface-ref-renderer.js';
 import type {
-  EmbedLinkedPageModel,
-  EmbedLinkedPageStyles,
-} from './embed-linked-page-model.js';
-import type { EmbedLinkedPageService } from './embed-linked-page-service.js';
+  EmbedLinkedDocModel,
+  EmbedLinkedDocStyles,
+} from './embed-linked-doc-model.js';
+import type { EmbedLinkedDocService } from './embed-linked-doc-service.js';
 import { styles } from './styles.js';
-import { getEmbedLinkedPageIcons } from './utils.js';
+import { getEmbedLinkedDocIcons } from './utils.js';
 
-@customElement('affine-embed-linked-page-block')
-export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
-  EmbedLinkedPageModel,
-  EmbedLinkedPageService
+@customElement('affine-embed-linked-doc-block')
+export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
+  EmbedLinkedDocModel,
+  EmbedLinkedDocService
 > {
   static override styles = styles;
 
-  override cardStyle: (typeof EmbedLinkedPageStyles)[number] = 'horizontal';
+  override cardStyle: (typeof EmbedLinkedDocStyles)[number] = 'horizontal';
   override _width = EMBED_CARD_WIDTH.horizontal;
   override _height = EMBED_CARD_HEIGHT.horizontal;
 
@@ -61,7 +61,7 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
 
-  @queryAsync('.affine-embed-linked-page-banner.render')
+  @queryAsync('.affine-embed-linked-doc-banner.render')
   private _bannerContainer!: Promise<HTMLDivElement>;
 
   private _pageMode: 'page' | 'edgeless' = 'page';
@@ -74,7 +74,7 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
 
   private _surfaceRefRenderer!: SurfaceRefRenderer;
 
-  private get _linkedPage() {
+  private get _linkedDoc() {
     const page = this.std.workspace.getPage(this.model.pageId);
     return page;
   }
@@ -96,17 +96,17 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
     this._pageMode = this._service.getPageMode(pageId);
     this._pageUpdatedAt = this._service.getPageUpdatedAt(pageId);
 
-    if (!this._linkedPage) {
+    if (!this._linkedDoc) {
       return;
     }
 
     this._loading = true;
     this._isBannerEmpty = true;
 
-    if (this._linkedPage.loaded) {
+    if (this._linkedDoc.loaded) {
       onLoad();
     } else {
-      this._linkedPage
+      this._linkedDoc
         .load()
         .then(() => onLoad())
         .catch(e => {
@@ -119,25 +119,23 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
   }
 
   private _isPageEmpty() {
-    const linkedPage = this._linkedPage;
-    if (!linkedPage) {
+    const linkedDoc = this._linkedDoc;
+    if (!linkedDoc) {
       return false;
     }
     return (
-      !!linkedPage &&
-      !linkedPage.meta.title.length &&
-      !this._abstractText.length
+      !!linkedDoc && !linkedDoc.meta.title.length && !this._abstractText.length
     );
   }
 
   private _getNoteFromPage() {
-    const linkedPage = this._linkedPage;
+    const linkedDoc = this._linkedDoc;
     assertExists(
-      linkedPage,
+      linkedDoc,
       `Trying to load page ${this.model.pageId} in linked page block, but the page is not found.`
     );
 
-    const note = linkedPage.root?.children.find(child =>
+    const note = linkedDoc.root?.children.find(child =>
       matchFlavours(child, ['affine:note'])
     ) as NoteBlockModel | undefined;
     assertExists(
@@ -157,15 +155,15 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
 
     this._cleanUpSurfaceRefRenderer();
 
-    const linkedPage = this._linkedPage;
+    const linkedDoc = this._linkedDoc;
     assertExists(
-      linkedPage,
+      linkedDoc,
       `Trying to load page ${this.model.pageId} in linked page block, but the page is not found.`
     );
 
     this._surfaceRefRenderer = this._surfaceRefService.getRenderer(
       PathFinder.id(this.path),
-      linkedPage
+      linkedDoc
     );
     this._surfaceRefRenderer.slots.mounted.on(async () => {
       if (this._pageMode === 'edgeless') {
@@ -285,15 +283,15 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
   }
 
   open = () => {
-    const linkedPageId = this.model.pageId;
-    if (linkedPageId === this.model.page.id) return;
+    const linkedDocId = this.model.pageId;
+    if (linkedDocId === this.model.page.id) return;
 
     const pageElement = this.std.view.viewFromPath('block', [
       this.model.page.root?.id ?? '',
     ]) as PageBlockComponent | null;
     assertExists(pageElement);
 
-    pageElement.slots.pageLinkClicked.emit({ pageId: linkedPageId });
+    pageElement.slots.pageLinkClicked.emit({ pageId: linkedDocId });
   };
 
   covertToinline = () => {
@@ -338,11 +336,11 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
   override updated() {
     if (this.isInSurface) {
       // deleted state in horizontal style has 80px height
-      const linkedPage = this._linkedPage;
+      const linkedDoc = this._linkedDoc;
       const { xywh, style } = this.model;
       const bound = Bound.deserialize(xywh);
       if (
-        linkedPage &&
+        linkedDoc &&
         style === 'horizontal' &&
         bound.h !== EMBED_CARD_HEIGHT.horizontal
       ) {
@@ -352,7 +350,7 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
             xywh: bound.serialize(),
           });
         });
-      } else if (!linkedPage && style === 'horizontal' && bound.h !== 80) {
+      } else if (!linkedDoc && style === 'horizontal' && bound.h !== 80) {
         bound.h = 80;
         this.page.withoutTransact(() => {
           this.page.updateBlock(this.model, {
@@ -423,8 +421,8 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
   });
 
   override render() {
-    const linkedPage = this._linkedPage;
-    const isDeleted = !linkedPage;
+    const linkedDoc = this._linkedDoc;
+    const isDeleted = !linkedDoc;
     const isLoading = this._loading;
     const pageMode = this._pageMode;
 
@@ -446,24 +444,24 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
 
     const {
       LoadingIcon,
-      LinkedPageIcon,
-      LinkedPageDeletedIcon,
-      LinkedPageDeletedBanner,
-      LinkedPageEmptyBanner,
-    } = getEmbedLinkedPageIcons(this._pageMode, this.cardStyle);
+      LinkedDocIcon,
+      LinkedDocDeletedIcon,
+      LinkedDocDeletedBanner,
+      LinkedDocEmptyBanner,
+    } = getEmbedLinkedDocIcons(this._pageMode, this.cardStyle);
 
     const titleIcon = isLoading
       ? LoadingIcon
       : isDeleted
-        ? LinkedPageDeletedIcon
-        : LinkedPageIcon;
+        ? LinkedDocDeletedIcon
+        : LinkedDocIcon;
 
     const titleText = isLoading
       ? 'Loading...'
       : isDeleted
         ? `Deleted ${pageMode}`
-        : linkedPage?.meta.title.length
-          ? linkedPage.meta.title
+        : linkedDoc?.meta.title.length
+          ? linkedDoc.meta.title
           : 'Untitled';
 
     const descriptionText = isLoading
@@ -485,39 +483,39 @@ export class EmbedLinkedPageBlockComponent extends EmbedBlockElement<
         >
           <div
             ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
-            class="affine-embed-linked-page-block${cardClassMap}"
+            class="affine-embed-linked-doc-block${cardClassMap}"
             @click=${this._handleClick}
             @dblclick=${this._handleDoubleClick}
           >
-            <div class="affine-embed-linked-page-content">
-              <div class="affine-embed-linked-page-content-title">
-                <div class="affine-embed-linked-page-content-title-icon">
+            <div class="affine-embed-linked-doc-content">
+              <div class="affine-embed-linked-doc-content-title">
+                <div class="affine-embed-linked-doc-content-title-icon">
                   ${titleIcon}
                 </div>
 
-                <div class="affine-embed-linked-page-content-title-text">
+                <div class="affine-embed-linked-doc-content-title-text">
                   ${titleText}
                 </div>
               </div>
 
-              <div class="affine-embed-linked-page-content-description">
+              <div class="affine-embed-linked-doc-content-description">
                 ${descriptionText}
               </div>
 
-              <div class="affine-embed-linked-page-content-date">
+              <div class="affine-embed-linked-doc-content-date">
                 <span>Updated</span>
 
                 <span>${dateText}</span>
               </div>
             </div>
 
-            <div class="affine-embed-linked-page-banner render"></div>
+            <div class="affine-embed-linked-doc-banner render"></div>
 
-            <div class="affine-embed-linked-page-banner default">
+            <div class="affine-embed-linked-doc-banner default">
               ${isDeleted
-                ? LinkedPageDeletedBanner
+                ? LinkedDocDeletedBanner
                 : isEmpty
-                  ? LinkedPageEmptyBanner
+                  ? LinkedDocEmptyBanner
                   : nothing}
             </div>
           </div>

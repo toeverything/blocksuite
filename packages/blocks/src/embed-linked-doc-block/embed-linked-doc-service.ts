@@ -1,6 +1,6 @@
 import { BlockService } from '@blocksuite/block-std';
 
-export class EmbedLinkedPageService extends BlockService {
+export class EmbedLinkedDocService extends BlockService {
   private _getPageMode: (pageId: string) => 'page' | 'edgeless' = pageId =>
     pageId.endsWith('edgeless') ? 'edgeless' : 'page';
 

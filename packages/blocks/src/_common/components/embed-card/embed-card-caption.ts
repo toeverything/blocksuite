@@ -4,7 +4,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import type { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
-import type { EmbedLinkedPageBlockComponent } from '../../../embed-linked-page-block/embed-linked-page-block.js';
+import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 import { stopPropagation } from '../../utils/event.js';
 
@@ -32,7 +32,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
     | BookmarkBlockComponent
     | EmbedGithubBlockComponent
     | EmbedYoutubeBlockComponent
-    | EmbedLinkedPageBlockComponent;
+    | EmbedLinkedDocBlockComponent;
 
   @property({ attribute: false })
   display!: boolean;
