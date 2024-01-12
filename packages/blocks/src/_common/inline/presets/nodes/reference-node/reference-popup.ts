@@ -130,7 +130,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     if (totalTextLength === inlineTextLength) {
       page.deleteBlock(blockElement.model);
     } else {
-      this.inlineEditor.deleteText(this.targetInlineRange);
+      this.inlineEditor.formatText(this.targetInlineRange, { link: null });
     }
 
     this.abortController.abort();
