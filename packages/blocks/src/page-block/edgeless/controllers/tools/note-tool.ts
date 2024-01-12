@@ -1,12 +1,16 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { noop } from '@blocksuite/global/utils';
+import { assertExists, noop } from '@blocksuite/global/utils';
 
 import {
   type EdgelessTool,
   getThemeMode,
   hasClassNameInList,
   type NoteTool,
+  Point,
 } from '../../../../_common/utils/index.js';
+import type { NoteBlockModel } from '../../../../models.js';
+import { Bound } from '../../../../surface-block/utils/bound.js';
+import type { SelectionArea } from '../../services/tools-manager.js';
 import {
   DEFAULT_NOTE_WIDTH,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
@@ -26,6 +30,9 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   private _dragStartEvent: PointerEventState | null = null;
 
   private _noteOverlay: NoteOverlay | null = null;
+  private _draggingElement: NoteBlockModel | null = null;
+  private _draggingElementId: string | null = null;
+  protected override _draggingArea: SelectionArea | null = null;
 
   private _addNote(
     e: PointerEventState,
@@ -33,6 +40,72 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     options: NoteOptions
   ) {
     addNote(this._edgeless, this._page, e, width, options);
+  }
+
+  private _addNoteWithBlock(
+    e: PointerEventState,
+    width = 0,
+    height = 0,
+    options: NoteOptions
+  ) {
+    const noteId = this._edgeless.addNoteWithPoint(
+      new Point(e.point.x, e.point.y),
+      {
+        width,
+        height,
+      }
+    );
+
+    this._page.addBlock(
+      options.childFlavour,
+      { type: options.childType },
+      noteId
+    );
+
+    return noteId;
+  }
+
+  onPressShiftKey(pressed: boolean) {
+    const id = this._draggingElementId;
+    if (!id) return;
+
+    this._resize(pressed);
+  }
+
+  private _resize(shift = false) {
+    const { _draggingElementId: id, _draggingArea, _edgeless } = this;
+    assertExists(id);
+    assertExists(_draggingArea);
+
+    const { surface } = _edgeless;
+    const { viewport } = surface;
+    const { zoom } = viewport;
+    const {
+      start: { x: startX, y: startY },
+      end,
+    } = _draggingArea;
+    let { x: endX, y: endY } = end;
+
+    if (shift) {
+      const w = Math.abs(endX - startX);
+      const h = Math.abs(endY - startY);
+      const m = Math.max(w, h);
+      endX = startX + (endX > startX ? m : -m);
+      endY = startY + (endY > startY ? m : -m);
+    }
+
+    const [x, y] = viewport.toModelCoord(
+      Math.min(startX, endX),
+      Math.min(startY, endY)
+    );
+    const w = Math.abs(startX - endX) / zoom;
+    const h = Math.abs(startY - endY) / zoom;
+
+    const bound = new Bound(x, y, w, h);
+
+    this._surface.updateElement(id, {
+      xywh: bound.serialize(),
+    });
   }
 
   onContainerPointerDown(): void {
@@ -51,7 +124,6 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   }
 
   onContainerContextMenu(): void {
-    // this._hideOverlay();
     noop();
   }
 
@@ -66,7 +138,17 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   onContainerDragStart(e: PointerEventState) {
     this._clearOverlay();
 
-    this._dragStartEvent = e;
+    this._page.captureSync();
+    const options = {
+      childFlavour: this.tool.childFlavour,
+      childType: this.tool.childType,
+    };
+
+    const id = this._addNoteWithBlock(e, 0, 0, options);
+    this._draggingElementId = id;
+    this._draggingElement = this._surface.pickById(id) as NoteBlockModel;
+    this._draggingElement.stash('xywh');
+
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
       end: new DOMPoint(e.x, e.y),
@@ -74,30 +156,50 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   }
 
   onContainerDragMove(e: PointerEventState) {
-    if (this._draggingArea) {
-      this._draggingArea.end = new DOMPoint(e.x, e.y);
-      this._edgeless.slots.draggingAreaUpdated.emit();
-    }
+    assertExists(this._draggingElementId);
+    assertExists(this._draggingArea);
+
+    this._draggingArea.end = new DOMPoint(e.x, e.y);
+    this._resize(e.keys.shift || this._edgeless.tools.shiftKey);
   }
 
-  onContainerDragEnd(e: PointerEventState) {
-    const { childFlavour, childType } = this.tool;
-    const options = {
-      childFlavour,
-      childType,
-    };
-    if (this._dragStartEvent) {
-      const startEvent =
-        e.x > this._dragStartEvent.x ? this._dragStartEvent : e;
-      const width = Math.max(
-        Math.abs(e.x - this._dragStartEvent.x),
-        DEFAULT_NOTE_WIDTH
-      );
-      this._addNote(startEvent, width, options);
+  onContainerDragEnd() {
+    if (this._draggingElement) {
+      const draggingElement = this._draggingElement;
+
+      this._page.transact(() => {
+        draggingElement.pop('xywh');
+      });
     }
-    this._dragStartEvent = null;
+
+    const id = this._draggingElementId;
+    assertExists(id);
+
+    if (this._draggingArea) {
+      const width = Math.abs(
+        this._draggingArea?.end.x - this._draggingArea?.start.x
+      );
+      const height = Math.abs(
+        this._draggingArea?.end.y - this._draggingArea?.start.y
+      );
+      if (width < 20 && height < 20) {
+        this._surface.removeElement(id);
+        return;
+      }
+    }
+
+    this._draggingElement = null;
+    this._draggingElementId = null;
     this._draggingArea = null;
-    this._edgeless.slots.draggingAreaUpdated.emit();
+
+    this._page.captureSync();
+
+    const element = this._surface.pickById(id);
+    assertExists(element);
+    this._edgeless.tools.switchToDefaultMode({
+      elements: [element.id],
+      editing: true,
+    });
   }
 
   private _updateOverlayPosition(x: number, y: number) {
@@ -145,10 +247,6 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     )
       return;
     this._hideOverlay();
-  }
-
-  onPressShiftKey(_: boolean) {
-    noop();
   }
 
   beforeModeSwitch() {
