@@ -11,6 +11,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { AffineEditorContainer } from '../../index.js';
+import type { AllAction } from './chat/logic.js';
 import { copilotConfig } from './copilot-service/copilot-config.js';
 import { CreateNewService } from './copilot-service/index.js';
 import { allKindService } from './copilot-service/service-base.js';
@@ -247,7 +248,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
             })}
           </div>
         </div>
-        <div style="flex:1">${panel.render()}</div>
+        <div style="flex:1;overflow: hidden">${panel.render()}</div>
       </div>
     `;
   }
@@ -264,9 +265,27 @@ AffineFormatBarWidget.registerCustomRenderer({
     if (!copilot) {
       return;
     }
-    const ask = async () => {
-      console.log('ask');
-      await copilot.aiLogic?.chat.selectTextForBackground();
+    const renderItem = (item: AllAction): TemplateResult => {
+      if (item.type === 'group') {
+        return html`
+          <sl-menu-item>
+            ${item.name}
+            <sl-menu slot="submenu">
+              ${repeat(item.children, renderItem)}
+            </sl-menu>
+          </sl-menu-item>
+        `;
+      }
+      const onClick = async () => {
+        const text = await copilot.aiLogic?.chat.getSelectedText();
+        if (!text) {
+          return;
+        }
+        await item.action(text);
+      };
+      return html`
+        <sl-menu-item @click="${onClick}">${item.name}</sl-menu-item>
+      `;
     };
     return html`
       <style>
@@ -283,8 +302,13 @@ AffineFormatBarWidget.registerCustomRenderer({
           background-color: var(--affine-hover-color);
         }
       </style>
-      <div class="copilot-format-bar-item" @click="${ask}">
-        ${StarIcon} Ask AI
+      <div class="copilot-format-bar-item">
+        <sl-dropdown>
+          <div slot="trigger" caret>${StarIcon} Ask AI</div>
+          <sl-menu>
+            ${repeat(copilot.aiLogic?.chat.actionList ?? [], renderItem)}
+          </sl-menu>
+        </sl-dropdown>
       </div>
     `;
   },

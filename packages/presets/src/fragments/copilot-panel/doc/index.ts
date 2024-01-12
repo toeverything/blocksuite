@@ -12,15 +12,15 @@ import { runTranslateAction } from './translate.js';
 
 export const GPTAPI = {
   answer: runAnswerAction,
+  translate: runTranslateAction,
+  changeTone: runChangeToneAction,
   refine: runRefineAction,
   generate: runGenerateAction,
   summary: runSummaryAction,
-  translate: runTranslateAction,
   improveWriting: runImproveWritingAction,
   fixSpelling: runFixSpellingAction,
   makeShorter: runMakeShorterAction,
   makeLonger: runMakeLongerAction,
-  changeTone: runChangeToneAction,
   simplifyLanguage: runSimplifyWritingAction,
 } satisfies Record<string, (payload: never) => Promise<string | null>>;
 

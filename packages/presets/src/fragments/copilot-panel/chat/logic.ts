@@ -2,9 +2,20 @@ import { MarkdownAdapter } from '@blocksuite/blocks';
 import { Job, type Page } from '@blocksuite/store';
 
 import type { AffineEditorContainer } from '../../../editors/index.js';
+import { LANGUAGE, TONE } from '../config.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import { EmbeddingServiceKind } from '../copilot-service/service-base.js';
 import { getChatService } from '../doc/api.js';
+import { runChangeToneAction } from '../doc/change-tone.js';
+import { runFixSpellingAction } from '../doc/fix-spelling.js';
+import { runGenerateAction } from '../doc/generate.js';
+import { runImproveWritingAction } from '../doc/improve-writing.js';
+import { runMakeLongerAction } from '../doc/make-longer.js';
+import { runMakeShorterAction } from '../doc/make-shorter.js';
+import { runRefineAction } from '../doc/refine.js';
+import { runSimplifyWritingAction } from '../doc/simplify-language.js';
+import { runSummaryAction } from '../doc/summary.js';
+import { runTranslateAction } from '../doc/translate.js';
 import { insertFromMarkdown } from '../utils/markdown-utils.js';
 import {
   getSelectedBlocks,
@@ -28,8 +39,13 @@ export class AIChatLogic {
 
   reactiveData!: ChatReactiveData;
 
-  selectTextForBackground = async () => {
+  getSelectedText = async () => {
     const text = await getSelectedTextContent(this.editor.host);
+    return text;
+  };
+
+  selectTextForBackground = async () => {
+    const text = await this.getSelectedText();
     if (!text) return;
     this.reactiveData.history.push({
       role: 'user',
@@ -227,8 +243,130 @@ export class AIChatLogic {
       this.host.selection.setGroup('note', selections);
     }, 0);
   }
+
+  createAction(
+    name: string,
+    action: (input: string) => Promise<string>
+  ): (input: string) => Promise<void> {
+    return async (input: string) => {
+      const result = await action(input);
+      console.log(this.reactiveData.history);
+      this.reactiveData.history = [
+        ...this.reactiveData.history,
+        {
+          role: 'user',
+          content: [{ text: input, type: 'text' }],
+        },
+        {
+          role: 'user',
+          content: [{ text: name, type: 'text' }],
+        },
+        {
+          role: 'assistant',
+          content: result,
+          sources: [],
+        },
+      ];
+      console.log(this.reactiveData.history);
+    };
+  }
+
+  actionList: AllAction[] = [
+    {
+      type: 'group',
+      name: 'Translate',
+      children: LANGUAGE.map(language => ({
+        type: 'action',
+        name: language,
+        action: this.createAction(`Translate to ${language}`, input =>
+          runTranslateAction({ input, language })
+        ),
+      })),
+    },
+    {
+      type: 'group',
+      name: 'Change tone',
+      children: TONE.map(tone => ({
+        type: 'action',
+        name: tone,
+        action: this.createAction(`Make more ${tone}`, input =>
+          runChangeToneAction({ input, tone })
+        ),
+      })),
+    },
+    {
+      type: 'action',
+      name: 'Refine',
+      action: this.createAction('Refine', input => runRefineAction({ input })),
+    },
+    {
+      type: 'action',
+      name: 'Generate',
+      action: this.createAction('Generate', input =>
+        runGenerateAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Summary',
+      action: this.createAction('Summary', input =>
+        runSummaryAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Improve writing',
+      action: this.createAction('Improve writing', input =>
+        runImproveWritingAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Fix spelling',
+      action: this.createAction('Fix spelling', input =>
+        runFixSpellingAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Make shorter',
+      action: this.createAction('Make shorter', input =>
+        runMakeShorterAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Make longer',
+      action: this.createAction('Make longer', input =>
+        runMakeLongerAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Simplify language',
+      action: this.createAction('Simplify language', input =>
+        runSimplifyWritingAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Insert into Chat',
+      action: async () => {},
+    },
+  ];
 }
 
+type Action = {
+  type: 'action';
+  name: string;
+  action: (input: string) => Promise<void>;
+};
+type ActionGroup = {
+  type: 'group';
+  name: string;
+  children: AllAction[];
+};
+export type AllAction = Action | ActionGroup;
 type MessageContent =
   | {
       type: 'text';

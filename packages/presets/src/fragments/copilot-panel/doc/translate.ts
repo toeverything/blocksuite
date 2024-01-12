@@ -10,9 +10,12 @@ export async function runTranslateAction(payload: {
       role: 'system',
       content: 'You are assisting the user in translating the content.',
     },
-    userText(input),
     userText(
-      `Translate the Markdown text to ${language} while preserving the formatting, like bold, italic, link, highlight. Please only return the result of translate.`
+      `Translate the Markdown text
+      
+      ${input}
+      
+      to ${language} while preserving the formatting, like bold, italic, link, highlight. Please only return the result of translate.`
     ),
   ]);
 

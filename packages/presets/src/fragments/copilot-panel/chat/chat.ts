@@ -26,6 +26,7 @@ export class CopilotChatPanel
       font-family: var(--affine-font-family);
       height: 100%;
       gap: 4px;
+      overflow: auto;
     }
 
     .copilot-chat-prompt-container {
