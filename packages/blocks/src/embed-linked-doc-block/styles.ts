@@ -198,7 +198,7 @@ export const styles = css`
     }
 
     .affine-embed-linked-doc-content-description {
-      display: none;
+      display: none !important;
     }
 
     .affine-embed-linked-doc-content-date {
@@ -207,7 +207,7 @@ export const styles = css`
     }
 
     .affine-embed-linked-doc-banner {
-      display: none;
+      display: none !important;
     }
   }
   .affine-embed-linked-doc-block.vertical {
@@ -257,11 +257,11 @@ export const styles = css`
     }
 
     .affine-embed-linked-doc-content-description {
-      display: none;
+      display: none !important;
     }
 
     .affine-embed-linked-doc-banner {
-      display: none;
+      display: none !important;
     }
   }
 `;
