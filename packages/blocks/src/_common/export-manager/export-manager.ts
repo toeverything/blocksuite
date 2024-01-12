@@ -25,7 +25,7 @@ import { FileExporter } from './file-exporter.js';
 type Html2CanvasFunction = typeof import('html2canvas').default;
 
 export const DEFAULT_IMAGE_PROXY_ENDPOINT =
-  'https://workers.toeverything.workers.dev/proxy/image';
+  'https://affine-worker.toeverything.workers.dev/api/worker/image-proxy';
 
 export type ExportOptions = {
   imageProxyEndpoint: string;

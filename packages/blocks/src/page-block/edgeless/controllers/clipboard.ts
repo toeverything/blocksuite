@@ -881,7 +881,7 @@ export class EdgelessClipboardController extends PageClipboard {
       location.hostname.split('.').includes('affine')
     ) {
       _imageProxyEndpoint =
-        'https://workers.toeverything.workers.dev/proxy/image';
+        'https://affine-worker.toeverything.workers.dev/api/worker/image-proxy';
     }
 
     const html2canvasOption = {

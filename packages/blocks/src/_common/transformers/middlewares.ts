@@ -146,7 +146,7 @@ export const customImageProxyMiddleware = (
 
 const imageProxyMiddlewareBuilder = () => {
   let middleware = customImageProxyMiddleware(
-    'https://workers.toeverything.workers.dev/proxy/image'
+    'https://affine-worker.toeverything.workers.dev/api/worker/image-proxy'
   );
   return {
     get: () => middleware,
