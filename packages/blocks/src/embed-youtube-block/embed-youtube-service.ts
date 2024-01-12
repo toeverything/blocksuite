@@ -7,7 +7,7 @@ import {
   EmbedYoutubeStyles,
   youtubeUrlRegex,
 } from './embed-youtube-model.js';
-import { queryEmbedYoutubeData } from './utils.js';
+import { queryEmbedYoutubeData, setLinkPreviewEndpoint } from './utils.js';
 
 export class EmbedYoutubeService extends BlockService<EmbedYoutubeModel> {
   queryUrlData = (embedYoutubeModel: EmbedYoutubeModel) => {
@@ -28,4 +28,6 @@ export class EmbedYoutubeService extends BlockService<EmbedYoutubeModel> {
       viewType: 'embed',
     });
   }
+
+  setLinkPreviewEndpoint = setLinkPreviewEndpoint;
 }
