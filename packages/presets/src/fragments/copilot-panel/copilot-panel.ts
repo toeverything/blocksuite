@@ -1,5 +1,4 @@
 import './chat/chat.js';
-import './doc/doc.js';
 import './edgeless/edgeless.js';
 import './copilot-service';
 
@@ -19,7 +18,6 @@ import type { AIEdgelessLogic } from './edgeless/logic.js';
 import {
   AddCursorIcon,
   ChatIcon,
-  DocIcon,
   EdgelessIcon,
   SettingIcon,
   StarIcon,
@@ -193,14 +191,6 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
         return html` <copilot-chat-panel
           .logic="${this.logic}"
         ></copilot-chat-panel>`;
-      },
-    },
-    doc: {
-      icon: DocIcon,
-      render: () => {
-        return html` <copilot-doc-panel
-          .logic="${this.logic}"
-        ></copilot-doc-panel>`;
       },
     },
     edgeless: {

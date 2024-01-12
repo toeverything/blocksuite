@@ -1,4 +1,4 @@
-import { getTextService, userText } from './api.js';
+import { getChatService, userText } from './api.js';
 
 export async function runChangeToneAction({
   input,
@@ -7,7 +7,7 @@ export async function runChangeToneAction({
   input: string;
   tone: string;
 }) {
-  const result = await getTextService().generateText([
+  const result = await getChatService().chat([
     {
       role: 'system',
       content: 'You are assisting the user in writing high quality content.',

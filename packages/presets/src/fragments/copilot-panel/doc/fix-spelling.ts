@@ -1,8 +1,8 @@
-import { getTextService, userText } from './api.js';
+import { getChatService, userText } from './api.js';
 
 export async function runFixSpellingAction(payload: { input: string }) {
   const { input } = payload;
-  const result = await getTextService().generateText([
+  const result = await getChatService().chat([
     {
       role: 'system',
       content: 'You are a professional writing assisting',

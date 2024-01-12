@@ -1,8 +1,8 @@
-import { getTextService, userText } from './api.js';
+import { getChatService, userText } from './api.js';
 
 export async function runImproveWritingAction(payload: { input: string }) {
   const { input } = payload;
-  const completion = await getTextService().generateText([
+  const completion = await getChatService().chat([
     {
       role: 'system',
       content: 'You are a professional writing assisting',
