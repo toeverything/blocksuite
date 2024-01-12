@@ -26,6 +26,9 @@ export class ReferencePopup extends WithDisposable(LitElement) {
   targetInlineRange!: InlineRange;
 
   @property({ attribute: false })
+  pageTitle!: string;
+
+  @property({ attribute: false })
   abortController!: AbortController;
 
   @query('.affine-reference-popover-container')
@@ -130,7 +133,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     if (totalTextLength === inlineTextLength) {
       page.deleteBlock(blockElement.model);
     } else {
-      this.inlineEditor.formatText(this.targetInlineRange, { link: null });
+      this.inlineEditor.insertText(this.targetInlineRange, this.pageTitle);
     }
 
     this.abortController.abort();
@@ -218,11 +221,13 @@ declare global {
 export function toggleReferencePopup(
   inlineEditor: AffineInlineEditor,
   targetInlineRange: InlineRange,
+  pageTitle: string,
   abortController: AbortController
 ): ReferencePopup {
   const popup = new ReferencePopup();
   popup.inlineEditor = inlineEditor;
   popup.targetInlineRange = targetInlineRange;
+  popup.pageTitle = pageTitle;
   popup.abortController = abortController;
 
   document.body.appendChild(popup);
