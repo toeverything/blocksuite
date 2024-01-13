@@ -953,7 +953,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const state = ctx.get('pointerState');
     const { target } = state.raw;
     const element = captureEventTarget(target);
-    const insideDragHandle = !!element?.closest('affine-drag-handle-widget');
+    const insideDragHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
     if (!insideDragHandle) return;
 
     if (!this._anchorBlockId || !this._anchorBlockPath) return;
@@ -990,7 +990,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const event = state.raw;
     const { target } = event;
     const element = captureEventTarget(target);
-    const insideDragHandle = !!element?.closest('affine-drag-handle-widget');
+    const insideDragHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
     // Should only start dragging when pointer down on drag handle
     // And current mouse button is left button
     if (!insideDragHandle) {
@@ -1276,7 +1276,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const outOfPageViewPort = element.classList.contains('affine-doc-viewport');
     const inPage = !!relatedElement?.closest('.affine-doc-viewport');
 
-    const inDragHandle = !!relatedElement?.closest('affine-drag-handle-widget');
+    const inDragHandle = !!relatedElement?.closest(AFFINE_DRAG_HANDLE_WIDGET);
     if (outOfPageViewPort && !inDragHandle && !inPage) this._hide();
   };
 

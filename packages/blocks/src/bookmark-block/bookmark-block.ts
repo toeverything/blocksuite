@@ -12,7 +12,10 @@ import type { EmbedCardCaption } from '../_common/components/embed-card/embed-ca
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { matchFlavours } from '../_common/utils/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
-import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
+import {
+  AFFINE_DRAG_HANDLE_WIDGET,
+  AffineDragHandleWidget,
+} from '../page-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
@@ -82,7 +85,7 @@ export class BookmarkBlockComponent extends BlockElement<
 
       const canDrag =
         blockComponent.contains(element) ||
-        !!element?.closest('affine-drag-handle-widget');
+        !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
       if (!canDrag) return false;
 
       const isInSurface = blockComponent.isInSurface;

@@ -6,7 +6,10 @@ import { customElement } from 'lit/decorators.js';
 
 import { matchFlavours } from '../_common/utils/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
-import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
+import {
+  AFFINE_DRAG_HANDLE_WIDGET,
+  AffineDragHandleWidget,
+} from '../page-block/widgets/drag-handle/drag-handle.js';
 import { captureEventTarget } from '../page-block/widgets/drag-handle/utils.js';
 import { KeymapController } from './keymap-controller.js';
 import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
@@ -32,7 +35,7 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
       if (!anchorBlockPath) return false;
 
       const element = captureEventTarget(state.raw.target);
-      const insideDragHandle = !!element?.closest('affine-drag-handle-widget');
+      const insideDragHandle = !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
       if (!insideDragHandle) return false;
 
       const anchorComponent = this.std.view.viewFromPath(

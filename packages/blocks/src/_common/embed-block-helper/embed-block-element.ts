@@ -7,7 +7,10 @@ import { html, render } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DragHandleOption } from '../../page-block/widgets/drag-handle/config.js';
-import { AffineDragHandleWidget } from '../../page-block/widgets/drag-handle/drag-handle.js';
+import {
+  AFFINE_DRAG_HANDLE_WIDGET,
+  AffineDragHandleWidget,
+} from '../../page-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
@@ -71,7 +74,7 @@ export class EmbedBlockElement<
 
       const canDrag =
         blockComponent.contains(element) ||
-        !!element?.closest('affine-drag-handle-widget');
+        !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
       if (!canDrag) return false;
 
       const isInSurface = blockComponent.isInSurface;
