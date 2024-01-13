@@ -78,6 +78,13 @@ export class BookmarkBlockComponent extends BlockElement<
         return false;
 
       const blockComponent = anchorComponent as BookmarkBlockComponent;
+      const element = captureEventTarget(state.raw.target);
+
+      const canDrag =
+        blockComponent.contains(element) ||
+        !!element?.closest('affine-drag-handle-widget');
+      if (!canDrag) return false;
+
       const isInSurface = blockComponent.isInSurface;
       if (!isInSurface) {
         this.host.selection.setGroup('note', [
@@ -88,10 +95,6 @@ export class BookmarkBlockComponent extends BlockElement<
         startDragging([blockComponent], state);
         return true;
       }
-
-      const element = captureEventTarget(state.raw.target);
-      const insideDragHandle = !!element?.closest('affine-drag-handle-widget');
-      if (!insideDragHandle) return false;
 
       const bookmarkPortal = blockComponent.closest(
         '.edgeless-block-portal-bookmark'

@@ -130,6 +130,12 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         return false;
 
       const blockComponent = anchorComponent as ImageBlockComponent;
+
+      const canDrag =
+        blockComponent.contains(element) ||
+        !!element?.closest('affine-drag-handle-widget');
+      if (!canDrag) return false;
+
       const isInSurface = blockComponent.isInSurface;
       if (!isInSurface) {
         this.std.selection.setGroup('note', [
@@ -140,9 +146,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         startDragging([blockComponent], state);
         return true;
       }
-
-      const insideDragHandle = !!element?.closest('affine-drag-handle-widget');
-      if (!insideDragHandle) return false;
 
       const edgelessPage = getEdgelessPageByElement(blockComponent);
       const scale = edgelessPage ? edgelessPage.surface.viewport.zoom : 1;
