@@ -37,9 +37,7 @@ import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-ed
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
 import type { DatabaseService } from '../../../database-block/database-service.js';
-import { githubUrlRegex } from '../../../embed-github-block/index.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
-import { youtubeUrlRegex } from '../../../embed-youtube-block/embed-youtube-model.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { ImageService } from '../../../image-block/image-service.js';
@@ -278,21 +276,17 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return !insideDatabase(model);
         },
         action: withRemoveEmptyLine(async ({ pageElement, model }) => {
-          const parent = pageElement.page.getParent(model);
-          if (!parent) {
+          const parentModel = pageElement.page.getParent(model);
+          if (!parentModel) {
             return;
           }
-          const url = await toggleEmbedCardCreateModal(
+          const index = parentModel.children.indexOf(model) + 1;
+          await toggleEmbedCardCreateModal(
             pageElement.host,
             'Links',
-            'The added link will be displayed as a card view.'
+            'The added link will be displayed as a card view.',
+            { mode: 'page', parentModel, index }
           );
-          if (!url) return;
-          const props = {
-            flavour: 'affine:bookmark',
-            url,
-          } as const;
-          pageElement.page.addSiblingBlocks(model, [props]);
         }),
       },
       {
@@ -333,22 +327,17 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return !insideDatabase(model);
         },
         action: withRemoveEmptyLine(async ({ pageElement, model }) => {
-          const parent = pageElement.page.getParent(model);
-          if (!parent) {
+          const parentModel = pageElement.page.getParent(model);
+          if (!parentModel) {
             return;
           }
-          const url = await toggleEmbedCardCreateModal(
+          const index = parentModel.children.indexOf(model) + 1;
+          await toggleEmbedCardCreateModal(
             pageElement.host,
             'YouTube',
             'The added YouTube video link will be displayed as an embed view.',
-            youtubeUrlRegex
+            { mode: 'page', parentModel, index }
           );
-          if (!url) return;
-          const props = {
-            flavour: 'affine:embed-youtube',
-            url,
-          } as const;
-          pageElement.page.addSiblingBlocks(model, [props]);
         }),
       },
       {
@@ -361,22 +350,17 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return !insideDatabase(model);
         },
         action: withRemoveEmptyLine(async ({ pageElement, model }) => {
-          const parent = pageElement.page.getParent(model);
-          if (!parent) {
+          const parentModel = pageElement.page.getParent(model);
+          if (!parentModel) {
             return;
           }
-          const url = await toggleEmbedCardCreateModal(
+          const index = parentModel.children.indexOf(model) + 1;
+          await toggleEmbedCardCreateModal(
             pageElement.host,
             'GitHub',
             'The added GitHub issue or pull request link will be displayed as a card view.',
-            githubUrlRegex
+            { mode: 'page', parentModel, index }
           );
-          if (!url) return;
-          const props = {
-            flavour: 'affine:embed-github',
-            url,
-          } as const;
-          pageElement.page.addSiblingBlocks(model, [props]);
         }),
       },
     ],

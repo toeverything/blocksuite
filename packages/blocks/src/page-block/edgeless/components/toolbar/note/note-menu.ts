@@ -3,21 +3,13 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { toggleEmbedCardCreateModal } from '../../../../../_common/components/embed-card/modal/index.js';
-import {
-  EMBED_CARD_HEIGHT,
-  EMBED_CARD_WIDTH,
-} from '../../../../../_common/consts.js';
 import { BookmarkIcon } from '../../../../../_common/icons/edgeless.js';
 import {
   type NoteChildrenFlavour,
   type NoteTool,
 } from '../../../../../_common/utils/index.js';
-import { githubUrlRegex } from '../../../../../embed-github-block/embed-github-model.js';
 import { GithubIcon } from '../../../../../embed-github-block/styles.js';
-import { youtubeUrlRegex } from '../../../../../embed-youtube-block/embed-youtube-model.js';
 import { YoutubeIcon } from '../../../../../embed-youtube-block/styles.js';
-import { Bound } from '../../../../../surface-block/utils/bound.js';
-import { Vec } from '../../../../../surface-block/utils/vec.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { NOTE_MENU_ITEMS, NOTE_MENU_WIDTH } from './note-menu-config.js';
 
@@ -109,33 +101,15 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
               .activeMode=${'background'}
               .iconContainerPadding=${2}
               .tooltip=${'Links'}
-              @click=${async () => {
-                const url = await toggleEmbedCardCreateModal(
+              @click=${() =>
+                toggleEmbedCardCreateModal(
                   this.edgeless.host,
                   'Links',
-                  'The added link will be displayed as a card view.'
-                );
-                if (!url) return;
-
-                const center = Vec.toVec(this.edgeless.surface.viewport.center);
-                this.edgeless.surface.addElement(
-                  'affine:bookmark',
+                  'The added link will be displayed as a card view.',
                   {
-                    url,
-                    xywh: Bound.fromCenter(
-                      center,
-                      EMBED_CARD_WIDTH.vertical,
-                      EMBED_CARD_HEIGHT.vertical
-                    ).serialize(),
-                    style: 'vertical',
-                  },
-                  this.edgeless.surface.model
-                );
-
-                this.edgeless.tools.setEdgelessTool({
-                  type: 'default',
-                });
-              }}
+                    mode: 'edgeless',
+                  }
+                )}
             >
               ${BookmarkIcon}
             </edgeless-tool-icon-button>
@@ -143,34 +117,15 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
               .activeMode=${'background'}
               .iconContainerPadding=${2}
               .tooltip=${'YouTube'}
-              @click=${async () => {
-                const url = await toggleEmbedCardCreateModal(
+              @click=${() =>
+                toggleEmbedCardCreateModal(
                   this.edgeless.host,
                   'YouTube',
                   'The added YouTube video link will be displayed as an embed view.',
-                  youtubeUrlRegex
-                );
-                if (!url) return;
-
-                const center = Vec.toVec(this.edgeless.surface.viewport.center);
-                this.edgeless.surface.addElement(
-                  'affine:embed-youtube',
                   {
-                    url,
-                    xywh: Bound.fromCenter(
-                      center,
-                      EMBED_CARD_WIDTH.video,
-                      EMBED_CARD_HEIGHT.video
-                    ).serialize(),
-                    style: 'video',
-                  },
-                  this.edgeless.surface.model
-                );
-
-                this.edgeless.tools.setEdgelessTool({
-                  type: 'default',
-                });
-              }}
+                    mode: 'edgeless',
+                  }
+                )}
             >
               ${YoutubeIcon}
             </edgeless-tool-icon-button>
@@ -178,34 +133,15 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
               .activeMode=${'background'}
               .iconContainerPadding=${2}
               .tooltip=${'GitHub'}
-              @click=${async () => {
-                const url = await toggleEmbedCardCreateModal(
+              @click=${() =>
+                toggleEmbedCardCreateModal(
                   this.edgeless.host,
                   'GitHub',
                   'The added GitHub issue or pull request link will be displayed as a card view.',
-                  githubUrlRegex
-                );
-                if (!url) return;
-
-                const center = Vec.toVec(this.edgeless.surface.viewport.center);
-                this.edgeless.surface.addElement(
-                  'affine:embed-github',
                   {
-                    url,
-                    xywh: Bound.fromCenter(
-                      center,
-                      EMBED_CARD_WIDTH.vertical,
-                      EMBED_CARD_HEIGHT.vertical
-                    ).serialize(),
-                    style: 'vertical',
-                  },
-                  this.edgeless.surface.model
-                );
-
-                this.edgeless.tools.setEdgelessTool({
-                  type: 'default',
-                });
-              }}
+                    mode: 'edgeless',
+                  }
+                )}
             >
               ${GithubIcon}
             </edgeless-tool-icon-button>
