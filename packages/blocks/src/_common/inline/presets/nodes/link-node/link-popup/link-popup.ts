@@ -94,6 +94,12 @@ export class LinkPopup extends WithDisposable(LitElement) {
         this.abortController.abort();
       })
     );
+
+    if (this.type === 'view') {
+      this._embedOptions = this._pageService.getEmbedBlockOptions(
+        this.currentLink
+      );
+    }
   }
 
   protected override firstUpdated() {
