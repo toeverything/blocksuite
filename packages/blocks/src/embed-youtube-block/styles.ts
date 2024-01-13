@@ -44,7 +44,7 @@ export const styles = css`
 
   .affine-embed-youtube-video-iframe-container > iframe {
     width: 100%;
-    height: 329px;
+    height: 410px;
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 

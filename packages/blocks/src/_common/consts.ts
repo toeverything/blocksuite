@@ -16,7 +16,7 @@ export const EMBED_CARD_WIDTH: Record<EmbedCardStyle, number> = {
   list: 752,
   vertical: 364,
   cube: 170,
-  video: 686,
+  video: 752,
 };
 
 export const EMBED_CARD_HEIGHT: Record<EmbedCardStyle, number> = {
@@ -24,5 +24,5 @@ export const EMBED_CARD_HEIGHT: Record<EmbedCardStyle, number> = {
   list: 46,
   vertical: 390,
   cube: 114,
-  video: 463,
+  video: 544,
 };
