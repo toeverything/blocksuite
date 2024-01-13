@@ -50,9 +50,8 @@ export async function queryUrlDataFromAffineWorker(
         description: tweet.text,
         image: tweet.media?.photos[0].url || tweet.author.banner_url,
       };
-    } catch (err) {
-      console.error('getBookmarkDataByLink', err);
-      return {};
+    } catch (_e) {
+      throw new Error('Failed to fetch tweet');
     }
   } else {
     const response = await fetch(linkPreviewEndpoint.get(), {
@@ -63,8 +62,12 @@ export async function queryUrlDataFromAffineWorker(
       body: JSON.stringify({
         url,
       }),
-    }).catch(() => null);
-    if (!response || !response.ok) return {};
+    }).catch(_e => {
+      throw new Error('Failed to fetch link preview');
+    });
+    if (!response || !response.ok) {
+      throw new Error('Failed to fetch link preview');
+    }
     const data: AffineLinkPreviewResponseData = await response.json();
     return {
       title: data.title ? getStringFromHTML(data.title) : null,
@@ -86,19 +89,27 @@ export async function refreshBookmarkUrlData(
   const queryUrlData = bookmarkElement.service?.queryUrlData;
   assertExists(queryUrlData);
 
-  const metaData = await queryUrlData(bookmarkElement.model.url);
-  const {
-    title = null,
-    description = null,
-    icon = null,
-    image = null,
-  } = metaData;
+  let title, description, icon, image;
+
+  try {
+    const metaData = await queryUrlData(bookmarkElement.model.url);
+    title = metaData.title ?? null;
+    description = metaData.description ?? null;
+    icon = metaData.icon ?? null;
+    image = metaData.image ?? null;
+    if (!title && !description && !icon && !image) {
+      bookmarkElement.loadingFailed = true;
+    }
+  } catch (error) {
+    console.error(error);
+    bookmarkElement.loadingFailed = true;
+  }
 
   bookmarkElement.page.updateBlock(bookmarkElement.model, {
+    title,
     description,
     icon,
     image,
-    title,
   });
   bookmarkElement.loading = false;
 }

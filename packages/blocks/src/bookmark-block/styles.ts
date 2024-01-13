@@ -156,6 +156,12 @@ export const styles = css`
     }
   }
 
+  .affine-bookmark-card.loading-failed {
+    .affine-bookmark-content-description {
+      color: var(--affine-placeholder-color);
+    }
+  }
+
   .affine-bookmark-card.list {
     height: ${EMBED_CARD_HEIGHT.list}px;
 
