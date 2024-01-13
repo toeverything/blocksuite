@@ -61,8 +61,14 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
     return pageBlock.viewportElement;
   }
 
+  private get _viewport() {
+    const pageBlock = this.blockElement;
+    assertExists(pageBlock);
+    return pageBlock.viewport;
+  }
+
   private get _allBlocksWithRect(): BlockInfo[] {
-    const viewportElement = this._viewportElement;
+    const { scrollLeft, scrollTop } = this._viewport;
 
     const getAllNodeFromTree = (): BlockElement[] => {
       const blockElement: BlockElement[] = [];
@@ -91,8 +97,8 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
       return {
         element,
         rect: {
-          left: bounding.left + viewportElement.scrollLeft,
-          top: bounding.top + viewportElement.scrollTop,
+          left: bounding.left + scrollLeft,
+          top: bounding.top + scrollTop,
           width: bounding.width,
           height: bounding.height,
         },
@@ -128,33 +134,32 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
     const { x: startX, y: startY } = state.start;
 
     const { left: initScrollX, top: initScrollY } = this._initialScrollOffset;
-    const { scrollLeft, scrollTop, scrollWidth, scrollHeight } =
-      this._viewportElement;
+    const { scrollLeft, scrollTop, scrollWidth, scrollHeight } = this._viewport;
 
     const { x: initConX, y: initConY } = this._initialContainerOffset;
     const { x: conX, y: conY } = state.containerOffset;
 
-    const boundary = this._viewportElement.getBoundingClientRect();
+    const { left: viewportLeft, top: viewportTop } = this._viewport;
     let left = Math.min(
-      startX + initScrollX + initConX - boundary.left,
-      x + scrollLeft + conX - boundary.left
+      startX + initScrollX + initConX - viewportLeft,
+      x + scrollLeft + conX - viewportLeft
     );
     let right = Math.max(
-      startX + initScrollX + initConX - boundary.left,
-      x + scrollLeft + conX - boundary.left
+      startX + initScrollX + initConX - viewportLeft,
+      x + scrollLeft + conX - viewportLeft
     );
     let top = Math.min(
-      startY + initScrollY + initConY - boundary.top,
-      y + scrollTop + conY - boundary.top
+      startY + initScrollY + initConY - viewportTop,
+      y + scrollTop + conY - viewportTop
     );
     let bottom = Math.max(
-      startY + initScrollY + initConY - boundary.top,
-      y + scrollTop + conY - boundary.top
+      startY + initScrollY + initConY - viewportTop,
+      y + scrollTop + conY - viewportTop
     );
 
-    left = Math.max(left, conX - boundary.left);
+    left = Math.max(left, conX - viewportLeft);
     right = Math.min(right, scrollWidth);
-    top = Math.max(top, conY - boundary.top);
+    top = Math.max(top, conY - viewportTop);
     bottom = Math.min(bottom, scrollHeight);
 
     const userRect = {
@@ -165,8 +170,8 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
     };
     this.rect = userRect;
     this._selectBlocksByRect({
-      left: userRect.left + boundary.left,
-      top: userRect.top + boundary.top,
+      left: userRect.left + viewportLeft,
+      top: userRect.top + viewportTop,
       width: userRect.width,
       height: userRect.height,
     });
@@ -192,10 +197,10 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
 
         if (isDragArea(state)) {
           this._dragging = true;
-          const viewportElement = this._viewportElement;
+          const { scrollLeft, scrollTop } = this._viewport;
           this._initialScrollOffset = {
-            left: viewportElement.scrollLeft,
-            top: viewportElement.scrollTop,
+            left: scrollLeft,
+            top: scrollTop,
           };
           this._initialContainerOffset = {
             x: state.containerOffset.x,

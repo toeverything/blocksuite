@@ -90,6 +90,17 @@ import {
 import { xywhArrayToObject } from './utils/convert.js';
 import { getCursorMode, isCanvasElement, isFrameBlock } from './utils/query.js';
 
+export interface EdgelessViewport {
+  left: number;
+  top: number;
+  scrollLeft: number;
+  scrollTop: number;
+  scrollWidth: number;
+  scrollHeight: number;
+  clientWidth: number;
+  clientHeight: number;
+}
+
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent extends BlockElement<
   PageBlockModel,
@@ -227,6 +238,41 @@ export class EdgelessPageBlockComponent extends BlockElement<
     ) as HTMLElement | null;
     assertExists(this._viewportElement);
     return this._viewportElement;
+  }
+
+  get viewport(): EdgelessViewport {
+    if (!this.viewportElement) {
+      return {
+        left: 0,
+        top: 0,
+        scrollLeft: 0,
+        scrollTop: 0,
+        scrollWidth: 0,
+        scrollHeight: 0,
+        clientWidth: 0,
+        clientHeight: 0,
+      };
+    }
+
+    const {
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    } = this.viewportElement;
+    const { top, left } = this.viewportElement.getBoundingClientRect();
+    return {
+      top,
+      left,
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    };
   }
 
   private _resizeObserver: ResizeObserver | null = null;

@@ -239,19 +239,18 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.dropBlockId = dropResult?.dropBlockId ?? '';
     this.dropType = dropResult?.dropType ?? null;
     if (dropResult?.rect) {
+      const {
+        left: viewportLeft,
+        top: viewportTop,
+        scrollLeft,
+        scrollTop,
+      } = this.pageBlockElement.viewport;
+
       let { left, top } = dropResult.rect;
+      left += scrollLeft - viewportLeft;
+      top += scrollTop - viewportTop;
+
       const { width, height } = dropResult.rect;
-      const pageBlockElement = this.pageBlockElement;
-      if (pageBlockElement instanceof DocPageBlockComponent) {
-        const {
-          left: offsetX,
-          top: offsetY,
-          scrollLeft,
-          scrollTop,
-        } = pageBlockElement.viewport;
-        left += scrollLeft - offsetX;
-        top += scrollTop - offsetY;
-      }
       const rect = Rect.fromLWTH(left, width, top, height);
       this.dropIndicator.rect = rect;
     } else {
@@ -378,27 +377,27 @@ export class AffineDragHandleWidget extends WidgetElement<
   private _updateDragPreviewPosition = (state: PointerEventState) => {
     if (!this.dragPreview) return;
 
-    const dragPreviewOffset = this.dragPreview.offset;
-    let posX = state.raw.x - dragPreviewOffset.x;
-    let posY = state.raw.y - dragPreviewOffset.y;
     const pageBlockElement = this.pageBlockElement;
-    if (pageBlockElement instanceof DocPageBlockComponent) {
-      const { left, top, scrollLeft, scrollTop, scrollWidth, scrollHeight } =
-        pageBlockElement.viewport;
-      posX += scrollLeft - left;
-      posY += scrollTop - top;
-      const { width, height } = this.dragPreview.getBoundingClientRect();
-      if (posY < 0) {
-        posY = 0;
-      } else if (posY + height > scrollHeight) {
-        posY = scrollHeight - height;
-      }
-      if (posX < 0) {
-        posX = 0;
-      } else if (posX + width > scrollWidth) {
-        posX = scrollWidth - width;
-      }
+    const { left, top, scrollLeft, scrollTop, scrollWidth, scrollHeight } =
+      pageBlockElement.viewport;
+
+    const dragPreviewOffset = this.dragPreview.offset;
+    const { width, height } = this.dragPreview.getBoundingClientRect();
+
+    let posX = state.raw.x - dragPreviewOffset.x - left + scrollLeft;
+    if (posX < 0) {
+      posX = 0;
+    } else if (posX + width > scrollWidth) {
+      posX = scrollWidth - width;
     }
+
+    let posY = state.raw.y - dragPreviewOffset.y - top + scrollTop;
+    if (posY < 0) {
+      posY = 0;
+    } else if (posY + height > scrollHeight) {
+      posY = scrollHeight - height;
+    }
+
     this.dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this.scale})`;
   };
 
@@ -1096,8 +1095,10 @@ export class AffineDragHandleWidget extends WidgetElement<
       const edgelessPage = this.pageBlockElement;
       assertInstanceOf(edgelessPage, EdgelessPageBlockComponent);
 
+      const { left: viewportLeft, top: viewportTop } = edgelessPage.viewport;
+
       const newNoteId = edgelessPage.addNoteWithPoint(
-        new Point(state.raw.x, state.raw.y)
+        new Point(state.raw.x - viewportLeft, state.raw.y - viewportTop)
       );
       const newNoteBlock = this.page.getBlockById(newNoteId);
       assertExists(newNoteBlock);
