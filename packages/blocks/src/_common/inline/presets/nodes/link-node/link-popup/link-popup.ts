@@ -94,10 +94,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
         this.abortController.abort();
       })
     );
-
-    this._embedOptions = this._pageService.getEmbedBlockOptions(
-      this.currentLink
-    );
   }
 
   protected override firstUpdated() {
@@ -155,6 +151,12 @@ export class LinkPopup extends WithDisposable(LitElement) {
         popupContainer.style.top = `${y}px`;
       })
       .catch(console.error);
+
+    if (this.type === 'view') {
+      this._embedOptions = this._pageService.getEmbedBlockOptions(
+        this.currentLink
+      );
+    }
   }
 
   private get _pageService() {
