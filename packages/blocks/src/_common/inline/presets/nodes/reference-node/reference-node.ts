@@ -161,6 +161,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       template: toggleReferencePopup(
         this.inlineEditor,
         this.selfInlineRange,
+        this._refMeta?.title ?? DEFAULT_PAGE_NAME,
         abortController
       ),
     };
