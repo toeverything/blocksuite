@@ -24,6 +24,7 @@ import {
   type EdgelessTool,
   Point,
   type Selectable,
+  type Viewport,
 } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
@@ -240,20 +241,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return this._viewportElement;
   }
 
-  get viewport(): EdgelessViewport {
-    if (!this.viewportElement) {
-      return {
-        left: 0,
-        top: 0,
-        scrollLeft: 0,
-        scrollTop: 0,
-        scrollWidth: 0,
-        scrollHeight: 0,
-        clientWidth: 0,
-        clientHeight: 0,
-      };
-    }
-
+  get viewport(): Viewport {
     const {
       scrollLeft,
       scrollTop,
