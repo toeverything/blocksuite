@@ -9,8 +9,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { PageBlockComponent } from '../../../../../page-block/types.js';
 import { createLitPortal } from '../../../../components/portal.js';
 import { BLOCK_ID_ATTR } from '../../../../consts.js';
-import { MoreVerticalIcon } from '../../../../icons/index.js';
-import { EmbedWebIcon, LinkIcon, OpenIcon } from '../../../../icons/text.js';
+import { BookmarkIcon, MoreVerticalIcon } from '../../../../icons/index.js';
+import { LinkIcon, OpenIcon } from '../../../../icons/text.js';
 import type { AffineInlineEditor } from '../../affine-inline-specs.js';
 import { ReferencePopupMoreMenu } from './reference-popup-more-menu-popup.js';
 import { styles } from './styles.js';
@@ -118,7 +118,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
     pageElement.slots.pageLinkClicked.emit({ pageId: refPageId });
   }
 
-  private _convertToEmbedView() {
+  private _convertToCardView() {
     const blockElement = this.blockElement;
     const page = blockElement.host.page;
     const parent = page.getParent(blockElement.model);
@@ -192,9 +192,9 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                 size="24px"
                 class="affine-reference-popover-view-selector-button embed"
                 hover="false"
-                @click=${() => this._convertToEmbedView()}
+                @click=${() => this._convertToCardView()}
               >
-                ${EmbedWebIcon}
+                ${BookmarkIcon}
                 <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
               </icon-button>
             </div>

@@ -29,6 +29,7 @@ export class EmbedGithubService extends BlockService<EmbedGithubModel> {
       flavour: this.flavour,
       urlRegex: githubUrlRegex,
       styles: EmbedGithubStyles,
+      viewType: 'card',
     });
   }
 }
