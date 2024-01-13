@@ -269,7 +269,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         }),
       },
       {
-        name: 'Bookmark',
+        name: 'Links',
         icon: BookmarkIcon,
         showWhen: model => {
           if (!model.page.schema.flavourSchemaMap.has('affine:bookmark')) {
@@ -282,7 +282,11 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const url = await toggleEmbedCardCreateModal(pageElement.host);
+          const url = await toggleEmbedCardCreateModal(
+            pageElement.host,
+            'Links',
+            'The added link will be displayed as a card view.'
+          );
           if (!url) return;
           const props = {
             flavour: 'affine:bookmark',
@@ -335,8 +339,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           const url = await toggleEmbedCardCreateModal(
             pageElement.host,
-            youtubeUrlRegex,
-            'Create a YouTube link card'
+            'YouTube',
+            'The added YouTube video link will be displayed as an embed view.',
+            youtubeUrlRegex
           );
           if (!url) return;
           const props = {
@@ -362,8 +367,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           const url = await toggleEmbedCardCreateModal(
             pageElement.host,
-            githubUrlRegex,
-            'Create a GitHub link card'
+            'GitHub',
+            'The added GitHub issue or pull request link will be displayed as a card view.',
+            githubUrlRegex
           );
           if (!url) return;
           const props = {

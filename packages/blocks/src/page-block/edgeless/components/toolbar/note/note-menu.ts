@@ -108,10 +108,12 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
             <edgeless-tool-icon-button
               .activeMode=${'background'}
               .iconContainerPadding=${2}
-              .tooltip=${'Bookmark'}
+              .tooltip=${'Links'}
               @click=${async () => {
                 const url = await toggleEmbedCardCreateModal(
-                  this.edgeless.host
+                  this.edgeless.host,
+                  'Links',
+                  'The added link will be displayed as a card view.'
                 );
                 if (!url) return;
 
@@ -144,8 +146,9 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
               @click=${async () => {
                 const url = await toggleEmbedCardCreateModal(
                   this.edgeless.host,
-                  youtubeUrlRegex,
-                  'Create a YouTube link card'
+                  'YouTube',
+                  'The added YouTube video link will be displayed as an embed view.',
+                  youtubeUrlRegex
                 );
                 if (!url) return;
 
@@ -178,8 +181,9 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
               @click=${async () => {
                 const url = await toggleEmbedCardCreateModal(
                   this.edgeless.host,
-                  githubUrlRegex,
-                  'Create a GitHub link card'
+                  'GitHub',
+                  'The added GitHub issue or pull request link will be displayed as a card view.',
+                  githubUrlRegex
                 );
                 if (!url) return;
 
