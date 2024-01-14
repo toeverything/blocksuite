@@ -11,6 +11,7 @@ import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
+import { EmbedFigmaBlockSpec } from '../embed-figma-block/embed-figma-spec.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
 import { EmbedLinkedDocBlockSpec } from '../embed-linked-doc-block/index.js';
@@ -198,6 +199,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
       },
     },
   },
+  EmbedFigmaBlockSpec,
   EmbedYoutubeBlockSpec,
   EmbedGithubBlockSpec,
   EmbedHtmlBlockSpec,

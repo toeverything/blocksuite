@@ -32,7 +32,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
+  override _cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
 
   @property({ attribute: false })
   loading = false;
@@ -173,9 +173,9 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       style,
     } = this.model;
 
-    this.cardStyle = style;
-    this._width = EMBED_CARD_WIDTH[this.cardStyle];
-    this._height = EMBED_CARD_HEIGHT[this.cardStyle];
+    this._cardStyle = style;
+    this._width = EMBED_CARD_WIDTH[this._cardStyle];
+    this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
     const loading = this.loading;
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();

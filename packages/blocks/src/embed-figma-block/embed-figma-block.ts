@@ -15,23 +15,20 @@ import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
 import { getEmbedCardIcons } from '../_common/utils/url.js';
-import type { EmbedYoutubeStyles } from './embed-youtube-model.js';
-import {
-  type EmbedYoutubeModel,
-  youtubeUrlRegex,
-} from './embed-youtube-model.js';
-import type { EmbedYoutubeService } from './embed-youtube-service.js';
-import { styles, YoutubeIcon } from './styles.js';
-import { refreshEmbedYoutubeUrlData } from './utils.js';
+import type { EmbedFigmaStyles } from './embed-figma-model.js';
+import { type EmbedFigmaModel } from './embed-figma-model.js';
+import type { EmbedFigmaService } from './embed-figma-service.js';
+import { FigmaIcon, styles } from './styles.js';
+import { refreshEmbedFigmaUrlData } from './utils.js';
 
-@customElement('affine-embed-youtube-block')
-export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
-  EmbedYoutubeModel,
-  EmbedYoutubeService
+@customElement('affine-embed-figma-block')
+export class EmbedFigmaBlockComponent extends EmbedBlockElement<
+  EmbedFigmaModel,
+  EmbedFigmaService
 > {
   static override styles = styles;
 
-  override _cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
+  override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
 
   @property({ attribute: false })
   loading = false;
@@ -42,8 +39,8 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   @state()
   showCaption = false;
 
-  @query('.affine-embed-youtube-block')
-  private _youtubeBlockEl!: HTMLDivElement;
+  @query('.affine-embed-figma-block')
+  private _figmaBlockEl!: HTMLDivElement;
 
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
@@ -59,7 +56,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   };
 
   refreshData = () => {
-    refreshEmbedYoutubeUrlData(this).catch(console.error);
+    refreshEmbedFigmaUrlData(this).catch(console.error);
   };
 
   private _selectBlock() {
@@ -81,19 +78,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
     if (!!this.model.caption && !!this.model.caption.length) {
       this.showCaption = true;
-    }
-
-    if (!this.model.videoId) {
-      this.page.withoutTransact(() => {
-        const url = this.model.url;
-        const urlMatch = url.match(youtubeUrlRegex);
-        if (urlMatch) {
-          const [, videoId] = urlMatch;
-          this.page.updateBlock(this.model, {
-            videoId,
-          });
-        }
-      });
     }
 
     if (!this.model.description && !this.model.title) {
@@ -154,7 +138,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
         ></embed-card-toolbar>
       `,
       computePosition: {
-        referenceElement: this._youtubeBlockEl,
+        referenceElement: this._figmaBlockEl,
         placement: 'top-end',
         middleware: [flip(), offset(4)],
         autoUpdate: true,
@@ -163,38 +147,17 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   });
 
   override render() {
-    const {
-      image,
-      title = 'YouTube',
-      description,
-      creator,
-      creatorImage,
-      videoId,
-      style,
-    } = this.model;
+    const { title = 'Figma', description, style, url } = this.model;
 
     this._cardStyle = style;
     this._width = EMBED_CARD_WIDTH[this._cardStyle];
     this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
     const loading = this.loading;
-    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
-    const titleIcon = loading ? LoadingIcon : YoutubeIcon;
+    const { LoadingIcon } = getEmbedCardIcons();
+    const titleIcon = loading ? LoadingIcon : FigmaIcon;
     const titleText = loading ? 'Loading...' : title;
     const descriptionText = loading ? '' : description;
-    const bannerImage =
-      !loading && image
-        ? html`<object type="image/webp" data=${image}>
-            ${EmbedCardBannerIcon}
-          </object>`
-        : EmbedCardBannerIcon;
-
-    const creatorImageEl =
-      !loading && creatorImage
-        ? html`<object type="image/webp" data=${creatorImage}>
-            ${EmbedCardBannerIcon}
-          </object>`
-        : nothing;
 
     return this.renderEmbed(
       () => html`
@@ -206,60 +169,45 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
           <div
             ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
             class=${classMap({
-              'affine-embed-youtube-block': true,
+              'affine-embed-figma-block': true,
               loading,
             })}
             @click=${this._handleClick}
           >
-            <div class="affine-embed-youtube-video">
-              ${videoId
-                ? html`
-                    <div class="affine-embed-youtube-video-iframe-container">
-                      <iframe
-                        id="ytplayer"
-                        type="text/html"
-                        src=${`https://www.youtube.com/embed/${videoId}`}
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen
-                      ></iframe>
-                      <div
-                        class=${classMap({
-                          'affine-embed-youtube-video-iframe-overlay': true,
-                          hide: !this._showOverlay,
-                        })}
-                      ></div>
-                    </div>
-                  `
-                : bannerImage}
+            <div class="affine-embed-figma">
+              <div class="affine-embed-figma-iframe-container">
+                <iframe
+                  src=${`https://www.figma.com/embed?embed_host=blocksuite&url=${url}`}
+                  allowfullscreen
+                ></iframe>
+
+                <div
+                  class=${classMap({
+                    'affine-embed-figma-iframe-overlay': true,
+                    hide: !this._showOverlay,
+                  })}
+                ></div>
+              </div>
             </div>
-            <div class="affine-embed-youtube-content">
-              <div class="affine-embed-youtube-content-header">
-                <div class="affine-embed-youtube-content-title-icon">
+            <div class="affine-embed-figma-content">
+              <div class="affine-embed-figma-content-header">
+                <div class="affine-embed-figma-content-title-icon">
                   ${titleIcon}
                 </div>
 
-                <div class="affine-embed-youtube-content-title-text">
+                <div class="affine-embed-figma-content-title-text">
                   ${titleText}
-                </div>
-
-                <div class="affine-embed-youtube-content-creator-image">
-                  ${creatorImageEl}
-                </div>
-
-                <div class="affine-embed-youtube-content-creator-text">
-                  ${creator}
                 </div>
               </div>
 
-              <div class="affine-embed-youtube-content-description">
+              <div class="affine-embed-figma-content-description">
                 ${descriptionText}
               </div>
 
-              <div class="affine-embed-youtube-content-url" @click=${this.open}>
-                <span>www.youtube.com</span>
+              <div class="affine-embed-figma-content-url" @click=${this.open}>
+                <span>www.figma.com</span>
 
-                <div class="affine-embed-youtube-content-url-icon">
+                <div class="affine-embed-figma-content-url-icon">
                   ${OpenIcon}
                 </div>
               </div>
@@ -285,6 +233,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-embed-youtube-block': EmbedYoutubeBlockComponent;
+    'affine-embed-figma-block': EmbedFigmaBlockComponent;
   }
 }

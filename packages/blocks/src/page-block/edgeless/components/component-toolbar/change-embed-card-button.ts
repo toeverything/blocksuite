@@ -26,6 +26,8 @@ import {
 import type { EmbedCardStyle } from '../../../../_common/types.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import { BookmarkStyles } from '../../../../bookmark-block/bookmark-model.js';
+import type { EmbedFigmaBlockComponent } from '../../../../embed-figma-block/embed-figma-block.js';
+import type { EmbedFigmaModel } from '../../../../embed-figma-block/embed-figma-model.js';
 import type {
   EmbedGithubBlockComponent,
   EmbedGithubModel,
@@ -141,6 +143,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | BookmarkBlockModel
     | EmbedGithubModel
     | EmbedYoutubeModel
+    | EmbedFigmaModel
     | EmbedLinkedDocModel;
 
   @property({ attribute: false })
@@ -230,6 +233,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       | BookmarkBlockComponent
       | EmbedGithubBlockComponent
       | EmbedYoutubeBlockComponent
+      | EmbedFigmaBlockComponent
       | EmbedLinkedDocBlockComponent
       | null;
     assertExists(blockElement);

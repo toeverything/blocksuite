@@ -6,6 +6,7 @@ import { type EdgelessElement } from '../../_common/types.js';
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
 import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
+import type { EmbedFigmaModel } from '../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../embed-github-block/index.js';
 import type { EmbedLinkedDocModel } from '../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../../embed-youtube-block/embed-youtube-model.js';
@@ -35,6 +36,7 @@ export type IndexableBlock =
   | BookmarkBlockModel
   | EmbedGithubModel
   | EmbedYoutubeModel
+  | EmbedFigmaModel
   | EmbedLinkedDocModel;
 
 export type Indexable = CanvasElement | IndexableBlock;

@@ -13,6 +13,8 @@ import {
   type BookmarkBlockModel,
   BookmarkStyles,
 } from '../../../bookmark-block/bookmark-model.js';
+import type { EmbedFigmaBlockComponent } from '../../../embed-figma-block/embed-figma-block.js';
+import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
@@ -120,6 +122,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     | BookmarkBlockModel
     | EmbedGithubModel
     | EmbedYoutubeModel
+    | EmbedFigmaModel
     | EmbedLinkedDocModel;
 
   @property({ attribute: false })
@@ -127,6 +130,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     | BookmarkBlockComponent
     | EmbedGithubBlockComponent
     | EmbedYoutubeBlockComponent
+    | EmbedFigmaBlockComponent
     | EmbedLinkedDocBlockComponent;
 
   @property({ attribute: false })
