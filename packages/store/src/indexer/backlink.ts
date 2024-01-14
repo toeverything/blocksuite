@@ -141,15 +141,33 @@ export class BacklinkIndexer {
     switch (action) {
       case 'add':
       case 'update': {
+        let links: LinkedNode[] = [];
+
         const text = block.get('prop:text');
-        if (!(text instanceof Text)) {
-          if (text) {
+        if (text) {
+          if (text instanceof Text) {
+            const deltas: TextDelta[] = text.toDelta();
+            links = [
+              ...links,
+              ...deltas
+                .filter(delta => delta.attributes && delta.attributes.reference)
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                .map(delta => ({ ...delta.attributes!.reference!, blockId })),
+            ];
+          } else {
             console.warn('Unexpected prop:text type', text);
           }
-          return;
         }
-        const deltas: TextDelta[] = text.toDelta();
-        this._indexDelta({ action, pageId, blockId, deltas });
+
+        const flavour = block.get('sys:flavour');
+        if (flavour === 'affine:embed-linked-doc') {
+          const pageId = block.get('prop:pageId');
+          if (typeof pageId === 'string') {
+            links = [...links, { pageId, blockId, type: 'LinkedPage' }];
+          }
+        }
+
+        this._indexDelta({ action, pageId, blockId, links });
         return;
       }
       case 'delete': {
@@ -163,18 +181,13 @@ export class BacklinkIndexer {
     action,
     pageId,
     blockId,
-    deltas,
+    links,
   }: {
     action: IndexBlockEvent['action'];
     pageId: PageId;
     blockId: BlockId;
-    deltas: TextDelta[];
+    links: LinkedNode[];
   }) {
-    const links = deltas
-      .filter(delta => delta.attributes && delta.attributes.reference)
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      .map(delta => ({ ...delta.attributes!.reference!, blockId }));
-
     const before = this._linkIndexMap[pageId]?.[blockId] ?? [];
     const diff = diffArray(before, links);
     if (!diff.changed) return;

@@ -523,7 +523,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private _createLinkedDocEmbedBlocks(linkedDocEmbeds: BlockSnapshot[]) {
-    const embedlinkedDocIds = linkedDocEmbeds.map(({ props }) => {
+    const embedLinkedDocIds = linkedDocEmbeds.map(({ props }) => {
       const { xywh, style, caption, pageId } = props;
 
       return this.surface.addElement(
@@ -537,7 +537,7 @@ export class EdgelessClipboardController extends PageClipboard {
         this.surface.model.id
       );
     });
-    return embedlinkedDocIds;
+    return embedLinkedDocIds;
   }
 
   private _emitSelectionChangeAfterPaste(
