@@ -16,9 +16,19 @@ interface AffineLinkPreviewResponseData {
   favicons?: string[];
 }
 
-export type QueryUrlData = (
-  url: string
-) => Promise<Partial<BookmarkBlockUrlData>>;
+const linkPreviewEndpoint = (() => {
+  // https://github.com/toeverything/affine-workers/tree/main/packages/link-preview
+  let endpoint =
+    'https://affine-worker.toeverything.workers.dev/api/worker/link-preview';
+  return {
+    get: () => endpoint,
+    set: (url: string) => {
+      endpoint = url;
+    },
+  };
+})();
+
+export const setLinkPreviewEndpoint = linkPreviewEndpoint.set;
 
 export async function queryUrlDataFromAffineWorker(
   url: string
@@ -40,29 +50,30 @@ export async function queryUrlDataFromAffineWorker(
         description: tweet.text,
         image: tweet.media?.photos[0].url || tweet.author.banner_url,
       };
-    } catch (err) {
-      console.error('getBookmarkDataByLink', err);
-      return {};
+    } catch (_e) {
+      throw new Error('Failed to fetch tweet');
     }
   } else {
-    const response = await fetch(
-      // https://github.com/toeverything/affine-workers/tree/main/packages/link-preview
-      'https://affine-worker.toeverything.workers.dev/api/worker/link-preview',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-        }),
-      }
-    ).catch(() => null);
-    if (!response || !response.ok) return {};
+    const response = await fetch(linkPreviewEndpoint.get(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url,
+      }),
+    }).catch(_e => {
+      throw new Error('Failed to fetch link preview');
+    });
+    if (!response || !response.ok) {
+      throw new Error('Failed to fetch link preview');
+    }
     const data: AffineLinkPreviewResponseData = await response.json();
     return {
-      title: data.title,
-      description: data.description,
+      title: data.title ? getStringFromHTML(data.title) : null,
+      description: data.description
+        ? getStringFromHTML(data.description)
+        : null,
       icon: data.favicons?.[0],
       image: data.images?.[0],
     };
@@ -77,20 +88,34 @@ export async function refreshBookmarkUrlData(
 
   const queryUrlData = bookmarkElement.service?.queryUrlData;
   assertExists(queryUrlData);
-  const metaData = await queryUrlData(bookmarkElement.model.url);
 
-  const {
-    title = null,
-    description = null,
-    icon = null,
-    image = null,
-  } = metaData;
+  let title, description, icon, image;
+
+  try {
+    const metaData = await queryUrlData(bookmarkElement.model.url);
+    title = metaData.title ?? null;
+    description = metaData.description ?? null;
+    icon = metaData.icon ?? null;
+    image = metaData.image ?? null;
+    if (!title && !description && !icon && !image) {
+      bookmarkElement.loadingFailed = true;
+    }
+  } catch (error) {
+    console.error(error);
+    bookmarkElement.loadingFailed = true;
+  }
+
   bookmarkElement.page.updateBlock(bookmarkElement.model, {
+    title,
     description,
     icon,
     image,
-    title,
   });
-
   bookmarkElement.loading = false;
+}
+
+function getStringFromHTML(html: string) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent;
 }

@@ -12,7 +12,10 @@ import {
   matchFlavours,
 } from '../_common/utils/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
-import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
+import {
+  AFFINE_DRAG_HANDLE_WIDGET,
+  AffineDragHandleWidget,
+} from '../page-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
@@ -130,6 +133,12 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         return false;
 
       const blockComponent = anchorComponent as ImageBlockComponent;
+
+      const canDrag =
+        blockComponent.contains(element) ||
+        !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
+      if (!canDrag) return false;
+
       const isInSurface = blockComponent.isInSurface;
       if (!isInSurface) {
         this.std.selection.setGroup('note', [
@@ -140,9 +149,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         startDragging([blockComponent], state);
         return true;
       }
-
-      const insideDragHandle = !!element?.closest('affine-drag-handle-widget');
-      if (!insideDragHandle) return false;
 
       const edgelessPage = getEdgelessPageByElement(blockComponent);
       const scale = edgelessPage ? edgelessPage.surface.viewport.zoom : 1;

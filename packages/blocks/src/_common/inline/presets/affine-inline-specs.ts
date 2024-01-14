@@ -117,7 +117,7 @@ export const affineInlineSpecs: InlineSpecs<AffineTextAttributes>[] = [
       return !!delta.attributes?.background;
     },
     renderer: delta => {
-      return html` <affine-text .delta=${delta}></affine-text> `;
+      return html`<affine-text .delta=${delta}></affine-text>`;
     },
   },
   {
@@ -127,7 +127,7 @@ export const affineInlineSpecs: InlineSpecs<AffineTextAttributes>[] = [
       return !!delta.attributes?.color;
     },
     renderer: delta => {
-      return html` <affine-text .delta=${delta}></affine-text> `;
+      return html`<affine-text .delta=${delta}></affine-text>`;
     },
   },
 ];

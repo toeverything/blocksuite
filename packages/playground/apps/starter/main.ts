@@ -44,6 +44,13 @@ function subscribePage(workspace: Workspace) {
     const page = workspace.getPage(pageId) as Page;
 
     const editor = createEditor(page, app);
+    editor.slots.pageLinkClicked.on(({ pageId }) => {
+      const target = page.workspace.getPage(pageId);
+      if (!target) {
+        throw new Error(`Failed to jump to page ${pageId}`);
+      }
+      editor.page = target;
+    });
     const debugMenu = new DebugMenu();
     const outlinePanel = new CustomOutlinePanel();
     const framePanel = new CustomFramePanel();

@@ -40,7 +40,7 @@ const createBookmarkBlockBySlashMenu = async (page: Page) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await type(page, '/bookmark');
+  await type(page, '/links');
   await pressEnter(page);
   await type(page, inputUrl);
   await pressEnter(page);
@@ -145,7 +145,7 @@ test.skip(scoped`create bookmark by blockhub`, async ({ page }) => {
 test(scoped`covert bookmark block to link text`, async ({ page }) => {
   await createBookmarkBlockBySlashMenu(page);
   await hoverBookmarkBlock(page);
-  await page.click('.bookmark-toolbar-button.link');
+  await page.click('.embed-card-toolbar-button.link');
   await assertStoreMatchJSX(
     page,
     /*xml*/ `<affine:page>
@@ -189,7 +189,7 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
   await setInlineRangeInSelectedRichText(page, 0, inputUrl.length);
   await copyByKeyboard(page);
   await focusRichText(page);
-  await type(page, '/bookmark');
+  await type(page, '/links');
   await pressEnter(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await pressEnter(page);
@@ -245,7 +245,7 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
   await copyByKeyboard(page);
   await pressArrowRight(page);
   await waitNextFrame(page);
-  await type(page, '/bookmark');
+  await type(page, '/links');
   await pressEnter(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await pressEnter(page);

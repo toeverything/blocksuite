@@ -3,7 +3,7 @@ import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
 import './change-note-button.js';
-import './change-bookmark-button.js';
+import './change-embed-card-button.js';
 import './change-text-button.js';
 import './change-frame-button.js';
 import './change-group-button.js';
@@ -33,6 +33,9 @@ import {
   pickValues,
 } from '../../../../_common/utils/iterable.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
+import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
+import type { EmbedLinkedDocModel } from '../../../../embed-linked-doc-block/embed-linked-doc-model.js';
+import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
@@ -49,6 +52,7 @@ import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import {
   isBookmarkBlock,
+  isEmbeddedBlock,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
@@ -63,7 +67,10 @@ type CategorizedElements = {
   note?: NoteBlockModel[];
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
-  bookmark?: BookmarkBlockModel[];
+  embedCard?: BookmarkBlockModel[] &
+    EmbedGithubModel[] &
+    EmbedYoutubeModel[] &
+    EmbedLinkedDocModel[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -123,8 +130,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         return 'frame';
       } else if (isImageBlock(model)) {
         return 'image';
-      } else if (isBookmarkBlock(model)) {
-        return 'bookmark';
+      } else if (isBookmarkBlock(model) || isEmbeddedBlock(model)) {
+        return 'embedCard';
       }
       return model.type;
     });
@@ -176,16 +183,18 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _BookmarkButton(bookmarks?: BookmarkBlockModel[]) {
-    return bookmarks?.length === 1
-      ? html`
-          <edgeless-change-bookmark-button
-            .bookmark=${bookmarks[0]}
-            .page=${this.page}
-            .surface=${this.surface}
-          ></edgeless-change-bookmark-button>
-        `
-      : nothing;
+  private _EmbedCardButton(embedCards?: CategorizedElements['embedCard']) {
+    if (embedCards?.length !== 1) return nothing;
+
+    const embedCard = embedCards[0];
+
+    return html`
+      <edgeless-change-embed-card-button
+        .model=${embedCard}
+        .std=${this.edgeless.std}
+        .surface=${this.surface}
+      ></edgeless-change-embed-card-button>
+    `;
   }
 
   private _TextButton(textElements?: TextElement[]) {
@@ -331,7 +340,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless, selection } = this;
-    const { shape, brush, connector, note, text, frame, group, bookmark } =
+    const { shape, brush, connector, note, text, frame, group, embedCard } =
       groupedSelected;
     const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -347,7 +356,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._BrushButton(brush),
           this._ConnectorButton(connector),
           this._NoteButton(note),
-          this._BookmarkButton(bookmark),
+          this._EmbedCardButton(embedCard),
           this._TextButton(text),
           this._FrameButton(frame),
           this._GroupButton(group),
@@ -375,9 +384,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       (typeof last === 'symbol' ||
         !last?.strings[0].includes('component-toolbar-menu-divider'))
     ) {
-      buttons.push(
-        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
-      );
+      buttons.push(this._Divider());
     }
 
     return html` <style>
@@ -396,7 +403,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         <edgeless-more-button
           .edgeless=${edgeless}
           .vertical=${true}
-          .setPoppetShow=${this.togglePopper}
+          .setPopperShow=${this.togglePopper}
         ></edgeless-more-button>
       </div>`;
   }

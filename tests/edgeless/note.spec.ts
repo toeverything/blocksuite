@@ -638,7 +638,6 @@ test('undo/redo should work correctly after resizing', async ({ page }) => {
   await waitNextFrame(page, 400);
   // current implementation may be a little inefficient
   await fillLine(page, true);
-  await page.pause();
   await page.mouse.click(0, 0);
   await waitNextFrame(page, 400);
   await selectNoteInEdgeless(page, noteId);

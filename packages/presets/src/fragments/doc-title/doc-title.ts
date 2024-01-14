@@ -6,16 +6,6 @@ import type { Page } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-export interface PageViewport {
-  left: number;
-  top: number;
-  scrollLeft: number;
-  scrollTop: number;
-  scrollHeight: number;
-  clientHeight: number;
-  clientWidth: number;
-}
-
 const PAGE_BLOCK_CHILD_PADDING = 24;
 
 @customElement('doc-title')

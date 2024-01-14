@@ -32,7 +32,7 @@ import { test } from './utils/playwright.js';
 function getLinkedPagePopover(page: Page) {
   const REFERENCE_NODE = ' ' as const;
   const refNode = page.locator('affine-reference');
-  const linkedPagePopover = page.locator('.linked-page-popover');
+  const linkedPagePopover = page.locator('.linked-doc-popover');
   const pageBtn = linkedPagePopover.locator('.group > icon-button');
 
   const findRefNode = async (title: string) => {

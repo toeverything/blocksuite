@@ -6,7 +6,7 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { EditingState } from '../../_common/utils/index.js';
+import type { EditingState, Viewport } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
   getDocTitleInlineEditor,
@@ -18,17 +18,6 @@ import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
 import type { DocPageService } from './doc-page-service.js';
-
-export interface PageViewport {
-  left: number;
-  top: number;
-  scrollLeft: number;
-  scrollTop: number;
-  scrollWidth: number;
-  scrollHeight: number;
-  clientWidth: number;
-  clientHeight: number;
-}
 
 const PAGE_BLOCK_CHILD_PADDING = 24;
 
@@ -120,7 +109,7 @@ export class DocPageBlockComponent extends BlockElement<
     tagClicked: new Slot<{
       tagId: string;
     }>(),
-    viewportUpdated: new Slot<PageViewport>(),
+    viewportUpdated: new Slot<Viewport>(),
   };
 
   private _viewportElement: HTMLDivElement | null = null;
@@ -134,20 +123,7 @@ export class DocPageBlockComponent extends BlockElement<
     return this._viewportElement;
   }
 
-  get viewport(): PageViewport {
-    if (!this.viewportElement) {
-      return {
-        left: 0,
-        top: 0,
-        scrollLeft: 0,
-        scrollTop: 0,
-        scrollWidth: 0,
-        scrollHeight: 0,
-        clientWidth: 0,
-        clientHeight: 0,
-      };
-    }
-
+  get viewport(): Viewport {
     const {
       scrollLeft,
       scrollTop,
@@ -205,6 +181,7 @@ export class DocPageBlockComponent extends BlockElement<
       this._getDefaultNoteBlock(),
       0
     );
+    this.host.event.activate();
     asyncFocusRichText(this.host, this.page, newFirstParagraphId)?.catch(
       console.error
     );
@@ -334,7 +311,8 @@ export class DocPageBlockComponent extends BlockElement<
             'affine:bookmark',
             'affine:attachment',
             'affine:surface-ref',
-          ])
+          ]) ||
+          /affine:embed-*/.test(last.flavour)
         ) {
           if (readonly) return;
           paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);

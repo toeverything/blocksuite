@@ -11,7 +11,7 @@ import type { BlockElement } from '@blocksuite/lit';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { PageBlockComponent } from '../../../../page-block/types.js';
-import { insertLinkedNode } from '../../../../page-block/widgets/linked-page/config.js';
+import { insertLinkedNode } from '../../../../page-block/widgets/linked-doc/config.js';
 import { textFormatConfigs } from '../../../configs/text-format/config.js';
 import { getChainWithHost } from '../../../utils/command.js';
 import { createDefaultPage } from '../../../utils/init.js';
@@ -372,15 +372,15 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     return true;
   }
 
-  function tryConvertToLinkedPage() {
+  function tryConvertToLinkedDoc() {
     const pageBlock = blockElement.host.view.viewFromPath(
       'block',
       buildPath(model.page.root)
     );
     assertExists(pageBlock);
-    const linkedPageWidgetEle =
-      pageBlock.widgetElements['affine-linked-page-widget'];
-    if (!linkedPageWidgetEle) return false;
+    const linkedDocWidgetEle =
+      pageBlock.widgetElements['affine-linked-doc-widget'];
+    if (!linkedDocWidgetEle) return false;
 
     const inlineEditor = _getInlineEditor();
     const inlineRange = inlineEditor.getInlineRange();
@@ -442,7 +442,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (pair.name === 'square bracket') {
           // [[Selected text]] should automatically be converted to a Linked page with the title "Selected text".
           // See https://github.com/toeverything/blocksuite/issues/2730
-          const success = tryConvertToLinkedPage();
+          const success = tryConvertToLinkedDoc();
           if (success) return;
         }
         inlineEditor.insertText(

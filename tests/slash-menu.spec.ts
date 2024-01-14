@@ -307,7 +307,7 @@ test('should slash menu works with fast type', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await type(page, 'a/text', 10);
+  await type(page, 'a/text', 0);
   const slashMenu = page.locator(`.slash-menu`);
   await expect(slashMenu).toBeVisible();
 });

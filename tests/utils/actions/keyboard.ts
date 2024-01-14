@@ -23,7 +23,7 @@ export const MODIFIER_KEY = IS_MAC ? 'Alt' : 'Shift';
 
 export const SHIFT_KEY = 'Shift';
 
-export async function type(page: Page, content: string, delay = 50) {
+export async function type(page: Page, content: string, delay = 20) {
   await page.keyboard.type(content, { delay });
 }
 
@@ -38,51 +38,51 @@ export async function withPressKey(
 }
 
 export async function defaultTool(page: Page) {
-  await page.keyboard.press('v', { delay: 50 });
+  await page.keyboard.press('v', { delay: 20 });
 }
 
 export async function pressBackspace(page: Page, count = 1) {
   for (let i = 0; i < count; i++) {
-    await page.keyboard.press('Backspace', { delay: 50 });
+    await page.keyboard.press('Backspace', { delay: 20 });
   }
 }
 
 export async function pressSpace(page: Page) {
-  await page.keyboard.press('Space', { delay: 50 });
+  await page.keyboard.press('Space', { delay: 20 });
 }
 
 export async function pressArrowLeft(page: Page, count = 1) {
   for (let i = 0; i < count; i++) {
-    await page.keyboard.press('ArrowLeft', { delay: 50 });
+    await page.keyboard.press('ArrowLeft', { delay: 20 });
   }
 }
 export async function pressArrowRight(page: Page, count = 1) {
   for (let i = 0; i < count; i++) {
-    await page.keyboard.press('ArrowRight', { delay: 50 });
+    await page.keyboard.press('ArrowRight', { delay: 20 });
   }
 }
 
 export async function pressArrowDown(page: Page, count = 1) {
   for (let i = 0; i < count; i++) {
-    await page.keyboard.press('ArrowDown', { delay: 50 });
+    await page.keyboard.press('ArrowDown', { delay: 20 });
   }
 }
 
 export async function pressArrowUp(page: Page, count = 1) {
   for (let i = 0; i < count; i++) {
-    await page.keyboard.press('ArrowUp', { delay: 50 });
+    await page.keyboard.press('ArrowUp', { delay: 20 });
   }
 }
 
 export async function pressEnter(page: Page, count = 1) {
   // avoid flaky test by simulate real user input
   for (let i = 0; i < count; i++) {
-    await page.keyboard.press('Enter', { delay: 50 });
+    await page.keyboard.press('Enter', { delay: 30 });
   }
 }
 
 export async function pressEnterWithShortkey(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+Enter`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+Enter`, { delay: 20 });
 }
 
 export async function pressEscape(page: Page) {
@@ -95,7 +95,7 @@ export async function undoByKeyboard(page: Page) {
 
 export async function formatType(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+1`, {
-    delay: 50,
+    delay: 20,
   });
 }
 
@@ -105,42 +105,42 @@ export async function redoByKeyboard(page: Page) {
 
 export async function selectAllByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+a`, {
-    delay: 50,
+    delay: 20,
   });
 }
 
 export async function pressTab(page: Page, count = 1) {
   for (let i = 0; i < count; i++) {
-    await page.keyboard.press('Tab', { delay: 50 });
+    await page.keyboard.press('Tab', { delay: 20 });
   }
 }
 
 export async function pressShiftTab(page: Page) {
-  await page.keyboard.press('Shift+Tab', { delay: 50 });
+  await page.keyboard.press('Shift+Tab', { delay: 20 });
 }
 
 export async function pressBackspaceWithShortKey(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 20 });
 }
 
 export async function pressShiftEnter(page: Page) {
-  await page.keyboard.press('Shift+Enter', { delay: 50 });
+  await page.keyboard.press('Shift+Enter', { delay: 20 });
 }
 
 export async function inlineCode(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+e`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+e`, { delay: 20 });
 }
 
 export async function strikethrough(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`, { delay: 20 });
 }
 
 export async function copyByKeyboard(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+c`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+c`, { delay: 20 });
 }
 
 export async function cutByKeyboard(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+x`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+x`, { delay: 20 });
 }
 
 /**
@@ -156,7 +156,7 @@ export async function pasteByKeyboard(page: Page, forceFocus = true) {
     }
   }
 
-  await page.keyboard.press(`${SHORT_KEY}+v`, { delay: 50 });
+  await page.keyboard.press(`${SHORT_KEY}+v`, { delay: 20 });
 }
 
 export async function createCodeBlock(page: Page) {
@@ -193,7 +193,7 @@ export async function fillLine(page: Page, toNext = false) {
     let nextHeight;
     // type until current block height is changed, means has new line
     do {
-      await page.keyboard.type('a', { delay: 50 });
+      await page.keyboard.type('a', { delay: 20 });
       [, nextHeight] = await getCursorBlockIdAndHeight(page);
     } while (nextHeight === height);
     if (!toNext) {
@@ -204,16 +204,16 @@ export async function fillLine(page: Page, toNext = false) {
 
 export async function pressForwardDelete(page: Page) {
   if (IS_MAC) {
-    await page.keyboard.press('Control+d', { delay: 50 });
+    await page.keyboard.press('Control+d', { delay: 20 });
   } else {
-    await page.keyboard.press('Delete', { delay: 50 });
+    await page.keyboard.press('Delete', { delay: 20 });
   }
 }
 
 export async function pressForwardDeleteWord(page: Page) {
   if (IS_MAC) {
-    await page.keyboard.press('Alt+Delete', { delay: 50 });
+    await page.keyboard.press('Alt+Delete', { delay: 20 });
   } else {
-    await page.keyboard.press('Control+Delete', { delay: 50 });
+    await page.keyboard.press('Control+Delete', { delay: 20 });
   }
 }
