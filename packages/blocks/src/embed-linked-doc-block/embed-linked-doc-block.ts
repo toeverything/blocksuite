@@ -294,7 +294,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     pageElement.slots.pageLinkClicked.emit({ pageId: linkedDocId });
   };
 
-  covertToinline = () => {
+  covertToInline = () => {
     const { page, pageId } = this.model;
     const parent = page.getParent(this.model);
     const index = parent?.children.indexOf(this.model);

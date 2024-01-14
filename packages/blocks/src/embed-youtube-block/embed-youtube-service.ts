@@ -25,6 +25,7 @@ export class EmbedYoutubeService extends BlockService<EmbedYoutubeModel> {
       flavour: this.flavour,
       urlRegex: youtubeUrlRegex,
       styles: EmbedYoutubeStyles,
+      viewType: 'embed',
     });
   }
 }

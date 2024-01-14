@@ -33,10 +33,11 @@ import { FontLoader } from './font-loader/font-loader.js';
 import type { PageBlockModel } from './page-model.js';
 import type { PageBlockComponent } from './types.js';
 
-type EmbedOptions = {
+export type EmbedOptions = {
   flavour: string;
   urlRegex: RegExp;
   styles: EmbedCardStyle[];
+  viewType: 'card' | 'embed';
 };
 
 export class PageService extends BlockService<PageBlockModel> {

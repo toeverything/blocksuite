@@ -40,10 +40,9 @@ import {
   type EdgelessBlockType,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import type { PageService } from '../../../page-service.js';
+import type { EmbedOptions, PageService } from '../../../page-service.js';
 import {
   isBookmarkBlock,
-  isEmbeddedBlock,
   isEmbedGithubBlock,
   isEmbedLinkedDocBlock,
 } from '../../utils/query.js';
@@ -163,6 +162,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return this.model.page;
   }
 
+  private _embedOptions: EmbedOptions | null = null;
+
   private _embedCardStylePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
@@ -172,6 +173,37 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     ) as PageService | null;
     assertExists(pageService);
     return pageService;
+  }
+
+  private get _canShowUrlOptions() {
+    return (
+      'url' in this.model &&
+      (isBookmarkBlock(this.model) ||
+        isEmbedGithubBlock(this.model) ||
+        isEmbedLinkedDocBlock(this.model))
+    );
+  }
+
+  private get _canShowOpenButton() {
+    return isEmbedLinkedDocBlock(this.model);
+  }
+
+  private get _isCardView() {
+    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model)) {
+      return true;
+    }
+    return this._embedOptions?.viewType === 'card';
+  }
+
+  private get _isEmbedView() {
+    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model)) {
+      return false;
+    }
+    return this._embedOptions?.viewType === 'embed';
+  }
+
+  private get _canConvertToEmbedView() {
+    return this._embedOptions?.viewType === 'embed';
   }
 
   private get _canShowCardStylePanel() {
@@ -224,20 +256,29 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _convertToCardView() {
-    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model))
+    if (this._isCardView || !('url' in this.model)) {
       return;
+    }
+
     const { url, xywh, style } = this.model;
 
-    const targetStyle = BookmarkStyles.includes(style)
-      ? style
-      : BookmarkStyles[0];
+    let targetFlavour = 'affine:bookmark',
+      targetStyle = style;
+
+    if (this._embedOptions && this._embedOptions.viewType === 'card') {
+      const { flavour, styles } = this._embedOptions;
+      targetFlavour = flavour;
+      targetStyle = styles.includes(style) ? style : styles[0];
+    } else {
+      targetStyle = BookmarkStyles.includes(style) ? style : BookmarkStyles[0];
+    }
 
     const bound = Bound.deserialize(xywh);
     bound.w = EMBED_CARD_WIDTH[targetStyle];
     bound.h = EMBED_CARD_HEIGHT[targetStyle];
 
     const blockId = this.surface.addElement(
-      'affine:bookmark',
+      targetFlavour as EdgelessBlockType,
       { url, xywh: bound.serialize(), style: targetStyle },
       this.surface.model
     );
@@ -248,42 +289,16 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._page.deleteBlock(this.model);
   }
 
-  private get _canShowOpenButton() {
-    return isEmbedLinkedDocBlock(this.model);
-  }
-
-  private get _canShowUrlOptions() {
-    return (
-      'url' in this.model &&
-      (isBookmarkBlock(this.model) ||
-        isEmbedGithubBlock(this.model) ||
-        isEmbedLinkedDocBlock(this.model))
-    );
-  }
-
-  private get _canConvertToEmbedView() {
-    if (isEmbedLinkedDocBlock(this.model)) {
-      return false;
-    }
-
-    if (isEmbeddedBlock(this.model)) {
-      return true;
-    }
-
-    const { url } = this.model;
-    return !!this._pageService.getEmbedBlockOptions(url);
-  }
-
   private _convertToEmbedView() {
-    if (isEmbedLinkedDocBlock(this.model)) {
+    if (this._isEmbedView || !('url' in this.model)) {
       return;
     }
 
-    const { url, xywh, style } = this.model;
-    const embedOptions = this._pageService.getEmbedBlockOptions(url);
-    if (!embedOptions) return;
+    if (!this._embedOptions) return;
 
-    const { flavour, styles } = embedOptions;
+    const { flavour, styles } = this._embedOptions;
+
+    const { url, xywh, style } = this.model;
 
     const targetStyle = styles.includes(style) ? style : styles[0];
 
@@ -307,7 +322,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._page.deleteBlock(this.model);
   }
 
-  override firstUpdated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
+    this._embedCardStylePopper?.dispose();
     if (this._canShowCardStylePanel) {
       this._embedCardStylePopper = createButtonPopper(
         this._embedCardStyleButton,
@@ -320,6 +336,15 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
 
     super.firstUpdated(changedProperties);
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    if ('url' in this.model) {
+      this._embedOptions = this._pageService.getEmbedBlockOptions(
+        this.model.url
+      );
+    }
   }
 
   override render() {
@@ -384,7 +409,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                     class=${classMap({
                       'change-embed-card-button': true,
                       card: true,
-                      'current-view': isBookmarkBlock(model),
+                      'current-view': this._isCardView,
                     })}
                     .tooltip=${'Card view'}
                     ?disabled=${this._page.readonly}
@@ -399,7 +424,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                     class=${classMap({
                       'change-embed-card-button': true,
                       embed: true,
-                      'current-view': isEmbeddedBlock(model),
+                      'current-view': this._isEmbedView,
                     })}
                     .tooltip=${'Embed view'}
                     ?disabled=${this._page.readonly}
@@ -423,15 +448,15 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                     ${PaletteIcon}
                   </edgeless-tool-icon-button>
                 </div>
+
+                <embed-card-style-panel
+                  .value=${style}
+                  .onSelect=${(value: EmbedCardStyle) =>
+                    this._setEmbedCardStyle(value)}
+                >
+                </embed-card-style-panel>
               `
             : nothing}
-
-          <embed-card-style-panel
-            .value=${style}
-            .onSelect=${(value: EmbedCardStyle) =>
-              this._setEmbedCardStyle(value)}
-          >
-          </embed-card-style-panel>
         </div>
       </div>
     `;

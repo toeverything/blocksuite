@@ -2,7 +2,6 @@ import type { BlockStdScope } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import type { BlockModel } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
@@ -22,11 +21,13 @@ import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/em
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import {
   isBookmarkBlock,
-  isEmbeddedBlock,
   isEmbedGithubBlock,
   isEmbedLinkedDocBlock,
 } from '../../../page-block/edgeless/utils/query.js';
-import type { PageService } from '../../../page-block/page-service.js';
+import type {
+  EmbedOptions,
+  PageService,
+} from '../../../page-block/page-service.js';
 import { BookmarkIcon, MoreVerticalIcon } from '../../icons/edgeless.js';
 import {
   CaptionIcon,
@@ -147,6 +148,8 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
 
   private _moreMenuAbortController: AbortController | null = null;
 
+  private _embedOptions: EmbedOptions | null = null;
+
   private get _pageService() {
     const pageService = this.std.spec.getService(
       'affine:page'
@@ -155,20 +158,38 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     return pageService;
   }
 
-  private _canShowUrlOptions(model: BlockModel) {
+  private get _canShowUrlOptions() {
     return (
-      'url' in model &&
+      'url' in this.model &&
       (isBookmarkBlock(this.model) ||
         isEmbedGithubBlock(this.model) ||
         isEmbedLinkedDocBlock(this.model))
     );
   }
 
-  private _canShowCardStylePanel(model: BlockModel) {
+  private get _isCardView() {
+    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model)) {
+      return true;
+    }
+    return this._embedOptions?.viewType === 'card';
+  }
+
+  private get _isEmbedView() {
+    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model)) {
+      return false;
+    }
+    return this._embedOptions?.viewType === 'embed';
+  }
+
+  private get _canConvertToEmbedView() {
+    return this._embedOptions?.viewType === 'embed';
+  }
+
+  private get _canShowCardStylePanel() {
     return (
-      isBookmarkBlock(model) ||
-      isEmbedGithubBlock(model) ||
-      isEmbedLinkedDocBlock(model)
+      isBookmarkBlock(this.model) ||
+      isEmbedGithubBlock(this.model) ||
+      isEmbedLinkedDocBlock(this.model)
     );
   }
 
@@ -185,7 +206,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
   private _turnIntoInlineView() {
     if (isEmbedLinkedDocBlock(this.model)) {
       const block = this.block as EmbedLinkedDocBlockComponent;
-      block.covertToinline();
+      block.covertToInline();
       return;
     }
 
@@ -211,48 +232,47 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
   }
 
   private _convertToCardView() {
-    if (isBookmarkBlock(this.model) || isEmbedLinkedDocBlock(this.model)) {
+    if (this._isCardView || !('url' in this.model)) {
       return;
     }
 
     const { page, url, style } = this.model;
-    const targetStyle = BookmarkStyles.includes(style)
-      ? style
-      : BookmarkStyles.filter(
-          style => style !== 'vertical' && style !== 'cube'
-        )[0];
+
+    let targetFlavour = 'affine:bookmark',
+      targetStyle = style;
+
+    if (this._embedOptions && this._embedOptions.viewType === 'card') {
+      const { flavour, styles } = this._embedOptions;
+      targetFlavour = flavour;
+      targetStyle = styles.includes(style) ? style : styles[0];
+    } else {
+      targetStyle = BookmarkStyles.includes(style)
+        ? style
+        : BookmarkStyles.filter(
+            style => style !== 'vertical' && style !== 'cube'
+          )[0];
+    }
 
     const parent = page.getParent(this.model);
     assertExists(parent);
     const index = parent.children.indexOf(this.model);
 
-    page.addBlock(
-      'affine:bookmark',
-      { url, style: targetStyle },
-      parent,
-      index
-    );
+    page.addBlock(targetFlavour, { url, style: targetStyle }, parent, index);
     this.std.selection.setGroup('note', []);
     page.deleteBlock(this.model);
   }
 
-  private _canConvertToEmbedView() {
-    if (isEmbedLinkedDocBlock(this.model)) {
-      return false;
+  private _convertToEmbedView() {
+    if (this._isEmbedView || !('url' in this.model)) {
+      return;
     }
 
-    const { url } = this.model;
-    return !!this._pageService.getEmbedBlockOptions(url);
-  }
-
-  private _convertToEmbedView() {
-    if (isEmbedLinkedDocBlock(this.model)) return;
-
     const { page, url, style } = this.model;
-    const embedOptions = this._pageService.getEmbedBlockOptions(url);
-    if (!embedOptions) return;
+    if (!this._embedOptions || this._embedOptions.viewType !== 'embed') {
+      return;
+    }
 
-    const { flavour, styles } = embedOptions;
+    const { flavour, styles } = this._embedOptions;
 
     const targetStyle = styles.includes(style)
       ? style
@@ -335,11 +355,20 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     });
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    if ('url' in this.model) {
+      this._embedOptions = this._pageService.getEmbedBlockOptions(
+        this.model.url
+      );
+    }
+  }
+
   override render() {
     const model = this.model;
     return html`
       <div class="embed-card-toolbar">
-        ${this._canShowUrlOptions(model) && 'url' in model
+        ${this._canShowUrlOptions && 'url' in model
           ? html`<div
                 class="embed-card-toolbar-button url"
                 @click=${() => this._copyUrl()}
@@ -353,7 +382,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
               <icon-button
                 size="32px"
                 class="embed-card-toolbar-button copy"
-                ?disabled=${this.model.page.readonly}
+                ?disabled=${model.page.readonly}
                 @click=${() => this._copyUrl()}
               >
                 ${CopyIcon}
@@ -401,29 +430,27 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
             <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
           </icon-button>
 
-          ${isEmbedLinkedDocBlock(model)
-            ? nothing
-            : html`<icon-button
-                size="24px"
-                class=${classMap({
-                  'embed-card-toolbar-button': true,
-                  card: true,
-                  'current-view': isBookmarkBlock(model),
-                })}
-                hover="false"
-                ?disabled=${model.page.readonly}
-                @click=${() => this._convertToCardView()}
-              >
-                ${BookmarkIcon}
-                <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
-              </icon-button>`}
-          ${isEmbeddedBlock(model) || this._canConvertToEmbedView()
+          <icon-button
+            size="24px"
+            class=${classMap({
+              'embed-card-toolbar-button': true,
+              card: true,
+              'current-view': this._isCardView,
+            })}
+            hover="false"
+            ?disabled=${model.page.readonly}
+            @click=${() => this._convertToCardView()}
+          >
+            ${BookmarkIcon}
+            <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
+          </icon-button>
+          ${this._canConvertToEmbedView
             ? html`<icon-button
                 size="24px"
                 class=${classMap({
                   'embed-card-toolbar-button': true,
                   embed: true,
-                  'current-view': isEmbeddedBlock(model),
+                  'current-view': this._isEmbedView,
                 })}
                 hover="false"
                 ?disabled=${model.page.readonly}
@@ -435,7 +462,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
             : nothing}
         </div>
 
-        ${this._canShowCardStylePanel(model)
+        ${this._canShowCardStylePanel
           ? html` <icon-button
               size="32px"
               class="embed-card-toolbar-button card-style"
