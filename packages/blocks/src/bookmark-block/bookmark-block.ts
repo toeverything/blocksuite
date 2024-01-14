@@ -83,13 +83,13 @@ export class BookmarkBlockComponent extends BlockElement<
       const blockComponent = anchorComponent as BookmarkBlockComponent;
       const element = captureEventTarget(state.raw.target);
 
-      const canDrag =
-        blockComponent.contains(element) ||
-        !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
-      if (!canDrag) return false;
-
+      const isDraggingByDragHandle = !!element?.closest(
+        AFFINE_DRAG_HANDLE_WIDGET
+      );
+      const isDraggingByComponent = blockComponent.contains(element);
       const isInSurface = blockComponent.isInSurface;
-      if (!isInSurface) {
+
+      if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         this.host.selection.setGroup('note', [
           this.host.selection.create('block', {
             path: blockComponent.path,
@@ -97,23 +97,24 @@ export class BookmarkBlockComponent extends BlockElement<
         ]);
         startDragging([blockComponent], state);
         return true;
+      } else if (isInSurface && isDraggingByDragHandle) {
+        const bookmarkPortal = blockComponent.closest(
+          '.edgeless-block-portal-bookmark'
+        );
+        assertExists(bookmarkPortal);
+        const dragPreviewEl = bookmarkPortal.cloneNode() as HTMLElement;
+        dragPreviewEl.style.transform = '';
+        dragPreviewEl.style.left = '0';
+        dragPreviewEl.style.top = '0';
+        render(
+          blockComponent.host.renderModel(blockComponent.model),
+          dragPreviewEl
+        );
+
+        startDragging([blockComponent], state, dragPreviewEl);
+        return true;
       }
-
-      const bookmarkPortal = blockComponent.closest(
-        '.edgeless-block-portal-bookmark'
-      );
-      assertExists(bookmarkPortal);
-      const dragPreviewEl = bookmarkPortal.cloneNode() as HTMLElement;
-      dragPreviewEl.style.transform = '';
-      dragPreviewEl.style.left = '0';
-      dragPreviewEl.style.top = '0';
-      render(
-        blockComponent.host.renderModel(blockComponent.model),
-        dragPreviewEl
-      );
-
-      startDragging([blockComponent], state, dragPreviewEl);
-      return true;
+      return false;
     },
     onDragEnd: props => {
       const { state, draggingElements, dropBlockId } = props;

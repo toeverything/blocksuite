@@ -195,7 +195,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                 @click=${() => this._convertToCardView()}
               >
                 ${BookmarkIcon}
-                <affine-tooltip .offset=${12}>${'Embed view'}</affine-tooltip>
+                <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
               </icon-button>
             </div>
 
