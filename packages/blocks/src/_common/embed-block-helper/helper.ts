@@ -90,9 +90,8 @@ export async function queryLinkPreview(
         description: tweet.text,
         image: tweet.media?.photos[0].url || tweet.author.banner_url,
       };
-    } catch (err) {
-      console.error('getBookmarkDataByLink', err);
-      return {};
+    } catch (_) {
+      throw new Error('Failed to fetch tweet');
     }
   } else {
     const response = await fetch(linkPreviewEndpoint.get(), {
@@ -103,8 +102,17 @@ export async function queryLinkPreview(
       body: JSON.stringify({
         url,
       }),
-    }).catch(() => null);
-    if (!response || !response.ok) return {};
+    })
+      .then(r => {
+        if (!r || !r.ok) {
+          throw new Error('Failed to fetch link preview');
+        }
+        return r;
+      })
+      .catch(_ => {
+        throw new Error('Failed to fetch link preview');
+      });
+
     const data: LinkPreviewResponseData = await response.json();
     return {
       title: data.title ? getStringFromHTML(data.title) : null,
