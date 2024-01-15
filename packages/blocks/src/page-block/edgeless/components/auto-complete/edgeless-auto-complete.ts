@@ -4,6 +4,7 @@ import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -81,6 +82,9 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+    .edgeless-auto-complete-arrow-wrapper.hidden {
+      display: none;
     }
     .edgeless-auto-complete-arrow {
       display: flex;
@@ -370,6 +374,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       return nothing;
     }
     const { selectedRect } = this;
+    const { zoom } = this.edgeless.surface.viewport;
     const width = 72;
     const height = 44;
     // Auto-complete arrows for shape and note are different
@@ -409,8 +414,12 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
           break;
       }
       transform += `translate(${-width / 2}px, ${-height / 2}px)`;
+      const arrowWrapperClasses = classMap({
+        'edgeless-auto-complete-arrow-wrapper': true,
+        hidden: !isShape && type === Direction.Left && zoom >= 1.5,
+      });
       return html`<div
-        class="edgeless-auto-complete-arrow-wrapper"
+        class=${arrowWrapperClasses}
         style=${styleMap({
           transform,
           transformOrigin: 'left top',

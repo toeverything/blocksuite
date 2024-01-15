@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css, html, nothing } from 'lit';
+import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -9,6 +9,7 @@ import {
   AutoConnectRightIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { SmallPageIcon } from '../../../../_common/icons/text.js';
+import type { NoteBlockModel } from '../../../../models.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -47,6 +48,39 @@ function calculatePosition(gap: number, count: number, iconWidth: number) {
   }
 
   return positions;
+}
+
+function getIndexLabelTooltip(content: string, icon: TemplateResult) {
+  const styles = css`
+    .index-label-tooltip {
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 10px;
+    }
+
+    .index-label-tooltip-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .index-label-tooltip-content {
+      font-size: var(--affine-font-sm);
+
+      display: flex;
+      height: 16px;
+      line-height: 16px;
+    }
+  `;
+
+  return html`<style>
+      ${styles}
+    </style>
+    <div class="index-label-tooltip">
+      <span class="index-label-tooltip-icon">${icon}</span>
+      <span class="index-label-tooltip-content">${content}</span>
+    </div>`;
 }
 
 @customElement('edgeless-index-label')
@@ -99,21 +133,6 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     .navigator.show {
       opacity: 1;
     }
-
-    .index-label-tooltip {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 22px;
-      gap: 10px;
-    }
-
-    .index-label-tooltip-label {
-      height: 100%;
-      font-size: var(--affine-font-sm);
-      font-weight: 400;
-      line-height: 22px;
-    }
   `;
 
   @property({ attribute: false })
@@ -126,7 +145,10 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   show = false;
 
   @property({ attribute: false })
-  elementsMap!: Map<AutoConnectElement, number>;
+  pageVisibleElementsMap!: Map<AutoConnectElement, number>;
+
+  @property({ attribute: false })
+  edgelessOnlyNotes!: NoteBlockModel[];
 
   @state()
   private _index = -1;
@@ -143,7 +165,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     _disposables.add(
       edgeless.slots.elementUpdated.on(({ id }) => {
         const element = surface.pickById(id) as AutoConnectElement;
-        if (element && this.elementsMap.has(element)) {
+        if (element && this.pageVisibleElementsMap.has(element)) {
           this.requestUpdate();
         }
       })
@@ -198,7 +220,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   private _getElementsAndCounts() {
     const elements: AutoConnectElement[] = [];
     const counts: number[] = [];
-    for (const [key, value] of this.elementsMap.entries()) {
+    for (const [key, value] of this.pageVisibleElementsMap.entries()) {
       elements.push(key);
       counts.push(value);
     }
@@ -302,11 +324,8 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
               class="edgeless-index-label"
             >
               ${index}
-              <affine-tooltip tip-position="bottom" .offset=${12}>
-                <div class="index-label-tooltip">
-                  <span class="index-label-tooltip-icon">${SmallPageIcon}</span>
-                  <span class="index-label-tooltip-label">Page Mode Index</span>
-                </div>
+              <affine-tooltip tip-position="bottom">
+                ${getIndexLabelTooltip('Page mode index', SmallPageIcon)}
               </affine-tooltip>
             </div>
           `);

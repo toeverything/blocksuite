@@ -299,14 +299,16 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     const notes = surface.getBlocks(['affine:note']);
     const layers = surface.layer.layers;
-    const autoConnectedBlocks = new Map<AutoConnectElement, number>();
+    const pageVisibleBlocks = new Map<AutoConnectElement, number>();
+    const edgelessOnlyNotes: NoteBlockModel[] = [];
 
     notes.forEach(note => {
-      if (
-        isNoteBlock(note) &&
-        note.displayMode !== NoteDisplayMode.EdgelessOnly
-      ) {
-        autoConnectedBlocks.set(note, 1);
+      if (isNoteBlock(note)) {
+        if (note.displayMode === NoteDisplayMode.EdgelessOnly) {
+          edgelessOnlyNotes.push(note);
+        } else {
+          pageVisibleBlocks.set(note, 1);
+        }
       }
 
       note.children.forEach(model => {
@@ -314,12 +316,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           const reference = surface.pickById(
             model.reference
           ) as AutoConnectElement;
-          if (!autoConnectedBlocks.has(reference)) {
-            autoConnectedBlocks.set(reference, 1);
+          if (!pageVisibleBlocks.has(reference)) {
+            pageVisibleBlocks.set(reference, 1);
           } else {
-            autoConnectedBlocks.set(
+            pageVisibleBlocks.set(
               reference,
-              autoConnectedBlocks.get(reference)! + 1
+              pageVisibleBlocks.get(reference)! + 1
             );
           }
         }
@@ -396,7 +398,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         }}
       ></edgeless-selected-rect>
       <edgeless-index-label
-        .elementsMap=${autoConnectedBlocks}
+        .pageVisibleElementsMap=${pageVisibleBlocks}
+        .edgelessOnlyNotes=${edgelessOnlyNotes}
         .surface=${surface}
         .edgeless=${edgeless}
         .show=${this._showAutoConnect}
