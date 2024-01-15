@@ -1,4 +1,8 @@
-import { DEFAULT_ROUGHNESS } from '../../../surface-block/consts.js';
+import { LineWidth } from '../../../_common/types.js';
+import {
+  DEFAULT_ROUGHNESS,
+  StrokeStyle,
+} from '../../../surface-block/consts.js';
 
 export const NOTE_MIN_WIDTH = 364;
 export const NOTE_MIN_HEIGHT = 78;
@@ -25,9 +29,10 @@ export const SHAPE_OVERLAY_OFFSET_Y = 6;
 export const SHAPE_OVERLAY_OPTIONS = {
   seed: 666,
   roughness: DEFAULT_ROUGHNESS,
-  strokeLineDash: [0, 0],
+  strokeStyle: StrokeStyle.Solid,
+  strokeLineDash: [] as number[],
   stroke: 'black',
-  strokeWidth: 4,
+  strokeWidth: LineWidth.LINE_WIDTH_TWO,
   fill: 'transparent',
 };
 

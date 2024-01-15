@@ -145,7 +145,7 @@ test('change shape stroke color', async ({ page }) => {
   await changeShapeStrokeColor(page, color);
   await page.waitForTimeout(50);
   const [picked] = await pickColorAtPoints(page, [
-    [rect.start.x + 2, rect.start.y + 2],
+    [rect.start.x + 1, rect.start.y + 1],
   ]);
 
   await assertEdgelessColorSameWithHexColor(page, color, picked);
@@ -478,7 +478,7 @@ test('change shape style', async ({ page }) => {
   const color = '--affine-palette-line-navy';
   await changeShapeStrokeColor(page, color);
   await page.waitForTimeout(50);
-  const [picked] = await pickColorAtPoints(page, [[start.x + 2, start.y + 2]]);
+  const [picked] = await pickColorAtPoints(page, [[start.x + 1, start.y + 1]]);
 
   await assertEdgelessColorSameWithHexColor(page, color, picked);
 });
