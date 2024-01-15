@@ -130,10 +130,12 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     if (!this._draggingNoteOverlay) return;
     this._draggingArea = null;
 
-    const width = this._draggingNoteOverlay.width;
-    const height = this._draggingNoteOverlay.height;
+    const { x, y, width, height } = this._draggingNoteOverlay;
+    this._disposeOverlay(this._draggingNoteOverlay);
+
     if (width < NOTE_MIN_WIDTH || height < NOTE_MIN_HEIGHT) {
       //TODO: add toast to notify user
+      this._edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
       return;
     }
 
@@ -143,13 +145,9 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
       childType,
       collapse: true,
     };
-    const [x, y] = this._surface.viewport.toViewCoord(
-      this._draggingNoteOverlay.x,
-      this._draggingNoteOverlay.y
-    );
-    const point = new Point(x, y);
+    const [viewX, viewY] = this._surface.viewport.toViewCoord(x, y);
+    const point = new Point(viewX, viewY);
 
-    this._disposeOverlay(this._draggingNoteOverlay);
     this._page.captureSync();
     addNote(this._edgeless, this._page, point, options, width, height);
   }
