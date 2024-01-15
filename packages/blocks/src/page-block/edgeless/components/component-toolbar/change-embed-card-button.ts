@@ -17,6 +17,7 @@ import {
 } from '../../../../_common/consts.js';
 import { BookmarkIcon } from '../../../../_common/icons/edgeless.js';
 import {
+  CaptionIcon,
   CopyIcon,
   EditIcon,
   EmbedWebIcon,
@@ -246,6 +247,16 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this._blockElement?.open();
   }
 
+  private _showCaption() {
+    const blockElement = this._blockElement;
+    if (blockElement) {
+      blockElement.showCaption = true;
+      blockElement.updateComplete
+        .then(() => blockElement.captionElement.input.focus())
+        .catch(console.error);
+    }
+  }
+
   private _refreshData() {
     this._blockElement?.refreshData();
   }
@@ -367,9 +378,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                 class="change-embed-card-button url"
                 @click=${this._copyUrl}
               >
-                <affine-tooltip .offset=${12}
-                  >Click to copy link</affine-tooltip
-                >
                 <span>${model.url}</span>
               </div>
 
@@ -467,6 +475,19 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               `
             : nothing}
         </div>
+
+        <component-toolbar-menu-divider
+          .vertical=${true}
+        ></component-toolbar-menu-divider>
+
+        <edgeless-tool-icon-button
+          .tooltip=${'Add Caption'}
+          class="change-embed-card-button reload"
+          ?disabled=${this._page.readonly}
+          @click=${() => this._showCaption()}
+        >
+          ${CaptionIcon}
+        </edgeless-tool-icon-button>
 
         <component-toolbar-menu-divider
           .vertical=${true}

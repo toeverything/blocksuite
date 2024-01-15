@@ -401,7 +401,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
     return html`
       <div class="affine-link-popover view">
         <div class="affine-link-preview" @click=${() => this._copyUrl()}>
-          <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
           <span>${this.currentLink}</span>
         </div>
 
@@ -432,7 +431,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
                   hover="false"
                 >
                   ${LinkIcon}
-                  <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
+                  <affine-tooltip .offset=${12}
+                    >${'Inline view'}</affine-tooltip
+                  >
                 </icon-button>
 
                 <icon-button

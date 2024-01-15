@@ -379,9 +379,6 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
                 class="embed-card-toolbar-button url"
                 @click=${() => this._copyUrl()}
               >
-                <affine-tooltip .offset=${12}
-                  >Click to copy link</affine-tooltip
-                >
                 <span>${model.url}</span>
               </div>
 
@@ -433,7 +430,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
             @click=${() => this._turnIntoInlineView()}
           >
             ${LinkIcon}
-            <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
+            <affine-tooltip .offset=${12}>${'Inline view'}</affine-tooltip>
           </icon-button>
 
           <icon-button
