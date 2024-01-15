@@ -94,12 +94,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
         this.abortController.abort();
       })
     );
-
-    if (this.type === 'view') {
-      this._embedOptions = this._pageService.getEmbedBlockOptions(
-        this.currentLink
-      );
-    }
   }
 
   protected override firstUpdated() {
@@ -157,12 +151,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
         popupContainer.style.top = `${y}px`;
       })
       .catch(console.error);
-
-    if (this.type === 'view') {
-      this._embedOptions = this._pageService.getEmbedBlockOptions(
-        this.currentLink
-      );
-    }
   }
 
   private get _pageService() {
@@ -406,6 +394,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _viewTemplate() {
+    this._embedOptions = this._pageService.getEmbedBlockOptions(
+      this.currentLink
+    );
+
     return html`
       <div class="affine-link-popover view">
         <div class="affine-link-preview" @click=${() => this._copyUrl()}>
