@@ -271,7 +271,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       default:
         options.strokeLineDash = [];
     }
-    console.log('options: ', options);
     let shapeType: string = attributes.shapeType;
     if (attributes.radius > 0 && shapeType === 'rect') {
       shapeType = 'roundedRect';
