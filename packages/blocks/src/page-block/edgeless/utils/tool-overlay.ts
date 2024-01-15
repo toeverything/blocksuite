@@ -68,6 +68,7 @@ const drawGeneralShape = (
   xywh: XYWH,
   options: Options
 ) => {
+  ctx.setLineDash(options.strokeLineDash ?? []);
   ctx.strokeStyle = options.stroke ?? 'transparent';
   ctx.lineWidth = options.strokeWidth ?? 2;
   ctx.fillStyle = options.fill ?? 'transparent';
