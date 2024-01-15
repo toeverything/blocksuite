@@ -3,7 +3,6 @@ import { assertExists, noop } from '@blocksuite/global/utils';
 
 import {
   type EdgelessTool,
-  getThemeMode,
   hasClassNameInList,
   type NoteTool,
   Point,
@@ -26,8 +25,6 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     childType: 'text',
     tip: 'Text',
   };
-
-  private _dragStartEvent: PointerEventState | null = null;
 
   private _noteOverlay: NoteOverlay | null = null;
   private _draggingElement: NoteBlockModel | null = null;
@@ -256,9 +253,11 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   afterModeSwitch(newTool: EdgelessTool) {
     if (newTool.type !== 'affine:note') return;
 
-    this._noteOverlay = new NoteOverlay(this._edgeless);
+    const attributes =
+      this._edgeless.surface.service.editSession.getLastProps('affine:note');
+    const background = attributes.background;
+    this._noteOverlay = new NoteOverlay(this._edgeless, background);
     this._noteOverlay.text = newTool.tip;
-    this._noteOverlay.themeMode = getThemeMode();
     this._edgeless.surface.viewport.addOverlay(this._noteOverlay);
   }
 }

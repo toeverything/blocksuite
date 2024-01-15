@@ -1,5 +1,6 @@
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
 
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import {
   type Options,
   Overlay,
@@ -10,9 +11,7 @@ import {
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
   NOTE_OVERLAY_CORNER_RADIUS,
-  NOTE_OVERLAY_DARK_BACKGROUND_COLOR,
   NOTE_OVERLAY_HEIGHT,
-  NOTE_OVERLAY_LIGHT_BACKGROUND_COLOR,
   NOTE_OVERLAY_OFFSET_X,
   NOTE_OVERLAY_OFFSET_Y,
   NOTE_OVERLAY_STOKE_COLOR,
@@ -240,6 +239,10 @@ class ToolOverlay extends Overlay {
   protected edgeless: EdgelessPageBlockComponent;
   protected disposables!: DisposableGroup;
 
+  get computedStyle() {
+    return getComputedStyle(this.edgeless);
+  }
+
   public isTransparent(color: string): boolean {
     return color.includes('transparent');
   }
@@ -276,26 +279,18 @@ class ToolOverlay extends Overlay {
 export class ShapeOverlay extends ToolOverlay {
   public shape: Shape;
 
-  get computedStyle() {
-    return getComputedStyle(this.edgeless);
-  }
-
-  private _isTransparent(color: string) {
-    return color.includes('transparent');
-  }
-
   private _getRealStrokeColor(color: string) {
     const realStrokeColor = this.computedStyle.getPropertyValue(
       color as string
     );
-    if (!this._isTransparent(color)) return realStrokeColor;
+    if (!this.isTransparent(color)) return realStrokeColor;
 
     return 'transparent';
   }
 
   private _getRealFillColor(color: string) {
     const realFillColor = this.computedStyle.getPropertyValue(color as string);
-    if (!this._isTransparent(color)) return realFillColor;
+    if (!this.isTransparent(color)) return realFillColor;
 
     return 'transparent';
   }
@@ -370,15 +365,26 @@ export class ShapeOverlay extends ToolOverlay {
 
 export class NoteOverlay extends ToolOverlay {
   public text = '';
-  public themeMode = 'light';
+  public backgroundColor = 'transparent';
 
   private _getOverlayText(text: string): string {
     return text[0].toUpperCase() + text.slice(1);
   }
 
-  constructor(edgeless: EdgelessPageBlockComponent) {
+  private _getRealBackgroundColor(color: CssVariableName) {
+    const realStrokeColor = this.computedStyle.getPropertyValue(color);
+    if (!this.isTransparent(color)) return realStrokeColor;
+
+    return 'transparent';
+  }
+
+  constructor(
+    edgeless: EdgelessPageBlockComponent,
+    background: CssVariableName
+  ) {
     super(edgeless);
     this.globalAlpha = 0;
+    this.backgroundColor = this._getRealBackgroundColor(background);
     this.disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
         // when change note child type, update overlay text
@@ -397,10 +403,7 @@ export class NoteOverlay extends ToolOverlay {
     const computedStyle = getComputedStyle(this.edgeless);
     ctx.strokeStyle = computedStyle.getPropertyValue(NOTE_OVERLAY_STOKE_COLOR);
     // Draw the overlay rectangle
-    ctx.fillStyle =
-      this.themeMode === 'light'
-        ? NOTE_OVERLAY_LIGHT_BACKGROUND_COLOR
-        : NOTE_OVERLAY_DARK_BACKGROUND_COLOR;
+    ctx.fillStyle = this.backgroundColor;
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(overlayX + NOTE_OVERLAY_CORNER_RADIUS, overlayY);
