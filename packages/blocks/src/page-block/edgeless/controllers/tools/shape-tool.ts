@@ -252,11 +252,10 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   createOverlay() {
     this.clearOverlay();
     const options = SHAPE_OVERLAY_OPTIONS;
-    const computedStyle = getComputedStyle(this._edgeless);
     const attributes =
       this._edgeless.surface.service.editSession.getLastProps('shape');
-    options.stroke = computedStyle.getPropertyValue(attributes.strokeColor);
-    options.fill = computedStyle.getPropertyValue(attributes.fillColor);
+    options.stroke = attributes.strokeColor;
+    options.fill = attributes.fillColor;
     let shapeType: string = attributes.shapeType;
     if (attributes.radius > 0 && shapeType === 'rect') {
       shapeType = 'roundedRect';

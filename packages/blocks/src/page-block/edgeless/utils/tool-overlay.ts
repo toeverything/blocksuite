@@ -68,9 +68,9 @@ const drawGeneralShape = (
   xywh: XYWH,
   options: Options
 ) => {
-  ctx.strokeStyle = options.stroke ?? '';
+  ctx.strokeStyle = options.stroke ?? 'transparent';
   ctx.lineWidth = options.strokeWidth ?? 2;
-  ctx.fillStyle = options.fill ?? '#FFFFFF00';
+  ctx.fillStyle = options.fill ?? 'transparent';
 
   ctx.beginPath();
 
@@ -239,6 +239,10 @@ class ToolOverlay extends Overlay {
   protected edgeless: EdgelessPageBlockComponent;
   protected disposables!: DisposableGroup;
 
+  public isTransparent(color: string): boolean {
+    return color.includes('transparent');
+  }
+
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
     this.x = 0;
@@ -271,6 +275,30 @@ class ToolOverlay extends Overlay {
 export class ShapeOverlay extends ToolOverlay {
   public shape: Shape;
 
+  get computedStyle() {
+    return getComputedStyle(this.edgeless);
+  }
+
+  private _isTransparent(color: string) {
+    return color.includes('transparent');
+  }
+
+  private _getRealStrokeColor(color: string) {
+    const realStrokeColor = this.computedStyle.getPropertyValue(
+      color as string
+    );
+    if (!this._isTransparent(color)) return realStrokeColor;
+
+    return 'transparent';
+  }
+
+  private _getRealFillColor(color: string) {
+    const realFillColor = this.computedStyle.getPropertyValue(color as string);
+    if (!this._isTransparent(color)) return realFillColor;
+
+    return 'transparent';
+  }
+
   constructor(
     edgeless: EdgelessPageBlockComponent,
     type: string,
@@ -288,24 +316,18 @@ export class ShapeOverlay extends ToolOverlay {
       SHAPE_OVERLAY_WIDTH,
       SHAPE_OVERLAY_HEIGHT,
     ] as XYWH;
-    const { shapeStyle } = style;
+    const { shapeStyle, fillColor, strokeColor } = style;
+    options.fill = this._getRealFillColor(fillColor);
+    options.stroke = this._getRealStrokeColor(strokeColor);
     this.shape = ShapeFactory.createShape(xywh, type, options, shapeStyle);
     this.disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
         if (edgelessTool.type !== 'shape') return;
         const shapeType = edgelessTool.shapeType;
-
-        const computedStyle = getComputedStyle(edgeless);
-        const strokeColor = computedStyle.getPropertyValue(
-          style.strokeColor as string
-        );
-        const fillColor = computedStyle.getPropertyValue(
-          style.fillColor as string
-        );
         const newOptions = {
           ...options,
-          stroke: strokeColor,
-          fill: fillColor,
+          stroke: this._getRealStrokeColor(strokeColor),
+          fill: this._getRealFillColor(fillColor),
         };
 
         let { x, y } = this;
