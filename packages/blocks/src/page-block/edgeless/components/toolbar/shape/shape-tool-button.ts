@@ -21,6 +21,7 @@ import {
 } from '../../../../../surface-block/elements/shape/consts.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
+import { isTransparent } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper } from '../common/create-popper.js';
 import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
@@ -221,7 +222,14 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
         <div class="container-clip">
           <div
             class="shapes"
-            style=${styleMap({ color: `var(${this.fillColor})` })}
+            style=${styleMap({
+              color: `${
+                !isTransparent(this.fillColor)
+                  ? `var(${this.fillColor})`
+                  : 'var(--affine-white-60)'
+              }`,
+              stroke: 'var(--affine-black-10)',
+            })}
           >
             ${repeat(shapes, (shape, index) => {
               return html`<edgeless-shape-tool-element
