@@ -175,12 +175,6 @@ export const styles = css`
     height: 12px;
     width: 12px;
   }
-
-  .affine-embed-figma-block.loading {
-    .affine-embed-figma-content-title-text {
-      color: var(--affine-placeholder-color);
-    }
-  }
 `;
 
 export const FigmaIcon = html`<svg

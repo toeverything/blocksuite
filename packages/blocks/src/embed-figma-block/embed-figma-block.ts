@@ -4,7 +4,7 @@ import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -14,7 +14,6 @@ import { HoverController } from '../_common/components/hover/controller.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { EmbedBlockElement } from '../_common/embed-block-helper/embed-block-element.js';
 import { OpenIcon } from '../_common/icons/text.js';
-import { getEmbedCardIcons } from '../_common/utils/url.js';
 import type { EmbedFigmaStyles } from './embed-figma-model.js';
 import { type EmbedFigmaModel } from './embed-figma-model.js';
 import type { EmbedFigmaService } from './embed-figma-service.js';
@@ -28,9 +27,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   static override styles = styles;
 
   override _cardStyle: (typeof EmbedFigmaStyles)[number] = 'figma';
-
-  @property({ attribute: false })
-  loading = false;
 
   @state()
   private _showOverlay = true;
@@ -147,17 +143,14 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   });
 
   override render() {
-    const { title = 'Figma', description, style, url } = this.model;
+    const { title, description, style, url } = this.model;
 
     this._cardStyle = style;
     this._width = EMBED_CARD_WIDTH[this._cardStyle];
     this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
-    const loading = this.loading;
-    const { LoadingIcon } = getEmbedCardIcons();
-    const titleIcon = loading ? LoadingIcon : FigmaIcon;
-    const titleText = loading ? 'Loading...' : title;
-    const descriptionText = loading ? '' : description ?? url;
+    const titleText = title ?? 'Figma';
+    const descriptionText = description ?? url;
 
     return this.renderEmbed(
       () => html`
@@ -170,7 +163,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
             ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
             class=${classMap({
               'affine-embed-figma-block': true,
-              loading,
             })}
             @click=${this._handleClick}
           >
@@ -192,7 +184,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
             <div class="affine-embed-figma-content">
               <div class="affine-embed-figma-content-header">
                 <div class="affine-embed-figma-content-title-icon">
-                  ${titleIcon}
+                  ${FigmaIcon}
                 </div>
 
                 <div class="affine-embed-figma-content-title-text">
