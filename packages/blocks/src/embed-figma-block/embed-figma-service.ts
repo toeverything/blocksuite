@@ -7,13 +7,8 @@ import {
   EmbedFigmaStyles,
   figmaUrlRegex,
 } from './embed-figma-model.js';
-import { queryEmbedFigmaData } from './utils.js';
 
 export class EmbedFigmaService extends BlockService<EmbedFigmaModel> {
-  queryUrlData = (embedFigmaModel: EmbedFigmaModel) => {
-    return queryEmbedFigmaData(embedFigmaModel);
-  };
-
   override mounted() {
     super.mounted();
 

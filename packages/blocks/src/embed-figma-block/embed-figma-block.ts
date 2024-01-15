@@ -19,7 +19,6 @@ import type { EmbedFigmaStyles } from './embed-figma-model.js';
 import { type EmbedFigmaModel } from './embed-figma-model.js';
 import type { EmbedFigmaService } from './embed-figma-service.js';
 import { FigmaIcon, styles } from './styles.js';
-import { refreshEmbedFigmaUrlData } from './utils.js';
 
 @customElement('affine-embed-figma-block')
 export class EmbedFigmaBlockComponent extends EmbedBlockElement<
@@ -55,9 +54,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     window.open(link, '_blank');
   };
 
-  refreshData = () => {
-    refreshEmbedFigmaUrlData(this).catch(console.error);
-  };
+  refreshData = () => {};
 
   private _selectBlock() {
     const selectionManager = this.host.selection;
@@ -82,7 +79,10 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
 
     if (!this.model.description && !this.model.title) {
       this.page.withoutTransact(() => {
-        this.refreshData();
+        this.page.updateBlock(this.model, {
+          title: 'Figma',
+          description: this.model.url,
+        });
       });
     }
 
@@ -157,7 +157,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     const { LoadingIcon } = getEmbedCardIcons();
     const titleIcon = loading ? LoadingIcon : FigmaIcon;
     const titleText = loading ? 'Loading...' : title;
-    const descriptionText = loading ? '' : description;
+    const descriptionText = loading ? '' : description ?? url;
 
     return this.renderEmbed(
       () => html`

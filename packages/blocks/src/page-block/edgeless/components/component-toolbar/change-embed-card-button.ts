@@ -22,6 +22,7 @@ import {
   EmbedWebIcon,
   OpenIcon,
   PaletteIcon,
+  RefreshIcon,
 } from '../../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../../_common/types.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
@@ -178,6 +179,30 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return pageService;
   }
 
+  private get _blockElement() {
+    const blockSelection =
+      this.surface.edgeless.selectionManager.selections.filter(sel =>
+        sel.elements.includes(this.model.id)
+      );
+    if (blockSelection.length !== 1) {
+      return;
+    }
+
+    const blockElement = this.std.view.viewFromPath(
+      'block',
+      blockSelection[0].path
+    ) as
+      | BookmarkBlockComponent
+      | EmbedGithubBlockComponent
+      | EmbedYoutubeBlockComponent
+      | EmbedFigmaBlockComponent
+      | EmbedLinkedDocBlockComponent
+      | null;
+    assertExists(blockElement);
+
+    return blockElement;
+  }
+
   private get _canShowUrlOptions() {
     return (
       'url' in this.model &&
@@ -218,26 +243,11 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _open() {
-    const blockSelection =
-      this.surface.edgeless.selectionManager.selections.filter(sel =>
-        sel.elements.includes(this.model.id)
-      );
-    if (blockSelection.length !== 1) {
-      return;
-    }
+    this._blockElement?.open();
+  }
 
-    const blockElement = this.std.view.viewFromPath(
-      'block',
-      blockSelection[0].path
-    ) as
-      | BookmarkBlockComponent
-      | EmbedGithubBlockComponent
-      | EmbedYoutubeBlockComponent
-      | EmbedFigmaBlockComponent
-      | EmbedLinkedDocBlockComponent
-      | null;
-    assertExists(blockElement);
-    blockElement.open();
+  private _refreshData() {
+    this._blockElement?.refreshData();
   }
 
   private _copyUrl() {
@@ -457,6 +467,19 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               `
             : nothing}
         </div>
+
+        <component-toolbar-menu-divider
+          .vertical=${true}
+        ></component-toolbar-menu-divider>
+
+        <edgeless-tool-icon-button
+          .tooltip=${'Reload'}
+          class="change-embed-card-button reload"
+          ?disabled=${this._page.readonly}
+          @click=${() => this._refreshData()}
+        >
+          ${RefreshIcon}
+        </edgeless-tool-icon-button>
       </div>
     `;
   }
