@@ -12,7 +12,7 @@ import {
   rotatePoints,
 } from '../../../utils/math-utils.js';
 
-type TextDelta = {
+export type TextDelta = {
   insert: string;
   attributes?: {
     [k: string]: unknown;

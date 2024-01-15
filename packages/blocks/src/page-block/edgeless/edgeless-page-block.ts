@@ -75,7 +75,6 @@ import {
 import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
-import type { EdgelessSelectionManager } from './services/selection-manager.js';
 import { EdgelessToolsManager } from './services/tools-manager.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import {
@@ -165,7 +164,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
       };
       dragging?: boolean;
     }>(),
-    hoverUpdated: new Slot(),
     edgelessToolUpdated: new Slot<EdgelessTool>(),
     reorderingElements: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
@@ -189,10 +187,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     navigatorFrameChanged: new Slot<FrameBlockModel>(),
     fullScrennToggled: new Slot(),
 
-    elementUpdated: new Slot<{
-      id: string;
-      props?: Record<string, unknown>;
-    }>(),
     elementAdded: new Slot<{ id: string }>(),
     elementRemoved: new Slot<{ id: string; element: EdgelessElement }>(),
     elementResizeStart: new Slot(),
@@ -204,7 +198,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   fontLoader!: FontLoader;
 
-  selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;
 
   get dispatcher() {
@@ -264,11 +257,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
       listenToThemeChange(this, () => this.surface.refresh())
     );
 
-    const surfaceService = this.surface.service;
     _disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         this.edgelessTool = edgelessTool;
-        surfaceService.slots.edgelessToolUpdated.emit(edgelessTool);
         slots.cursorUpdated.emit(getCursorMode(edgelessTool));
       })
     );

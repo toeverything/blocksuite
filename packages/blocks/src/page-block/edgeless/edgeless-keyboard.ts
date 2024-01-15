@@ -312,7 +312,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       } else {
         element['xywh'] = bound.serialize();
       }
-      this.pageElement.slots.hoverUpdated.emit();
     });
   }
 }

@@ -155,8 +155,10 @@ export class LayerManager {
         if (payload.type === 'add') {
           const block = page.getBlockById(payload.id)!;
 
-          // @ts-ignore
-          if (block['edgeless'] && renderableInEdgeless(block)) {
+          if (
+            block instanceof EdgelessBlock &&
+            renderableInEdgeless(page, surface, block)
+          ) {
             this.add(block as EdgelessBlock);
           }
         }
@@ -164,10 +166,10 @@ export class LayerManager {
           const block = page.getBlockById(payload.id)!;
 
           if (
-            // @ts-ignore
-            block['edgeless'] &&
-            payload.props.key === 'index' &&
-            renderableInEdgeless(page, surface, block)
+            payload.props.key === 'index' ||
+            (payload.props.key === 'xywh' &&
+              block instanceof EdgelessBlock &&
+              renderableInEdgeless(page, surface, block))
           ) {
             this.update(block as EdgelessBlock);
           }
@@ -175,8 +177,7 @@ export class LayerManager {
         if (payload.type === 'delete') {
           const block = payload.model;
 
-          // @ts-ignore
-          if (block['edgeless']) {
+          if (block instanceof EdgelessBlock) {
             this.delete(block as EdgelessBlock);
           }
         }
@@ -189,9 +190,11 @@ export class LayerManager {
       )
     );
     this._disposables.add(
-      surface.elementUpdated.on(element =>
-        this.update(surface.getElementById(element.id)!)
-      )
+      surface.elementUpdated.on(element => {
+        if (element.props['index'] || element.props['xywh']) {
+          this.update(surface.getElementById(element.id)!);
+        }
+      })
     );
     this._disposables.add(
       surface.elementRemoved.on(element =>

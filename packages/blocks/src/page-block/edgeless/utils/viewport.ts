@@ -24,9 +24,16 @@ export class Viewport {
   protected _center: IPoint = { x: 0, y: 0 };
   protected _zoom: number = 1.0;
   protected _rafId: number | null = null;
-  protected _container!: HTMLElement;
+  protected _el!: HTMLElement;
+  private _syncFlag = false;
 
   viewportUpdated = new Slot<{ zoom: number; center: IVec2 }>();
+  sizeUpdated = new Slot<{
+    width: number;
+    height: number;
+    left: number;
+    top: number;
+  }>();
 
   get left() {
     return this._left;
@@ -104,15 +111,27 @@ export class Viewport {
   }
 
   get boundingClientRect() {
-    return this._container.getBoundingClientRect();
+    return this._el.getBoundingClientRect();
+  }
+
+  onResize() {
+    const oldWidth = this.width;
+    const oldHeight = this.height;
+    const bbox = this._el.getBoundingClientRect();
+
+    this.setRect(bbox.left, bbox.top, bbox.width, bbox.height);
+    this.setCenter(
+      this.centerX - (oldWidth - this.width) / 2,
+      this.centerY - (oldHeight - this.height) / 2
+    );
   }
 
   setContainer(container: HTMLElement) {
-    const { width, height } = container.getBoundingClientRect();
+    const rect = container.getBoundingClientRect();
 
-    this._container = container;
-    this._width = width;
-    this._height = height;
+    this._el = container;
+
+    this.setRect(rect.left, rect.top, rect.width, rect.height);
   }
 
   toModelCoord(viewX: number, viewY: number): [number, number] {
@@ -208,6 +227,19 @@ export class Viewport {
     this.setViewport(zoom, center, smooth);
   }
 
+  setRect(left: number, top: number, width: number, height: number) {
+    this._left = left;
+    this._top = top;
+    this._width = width;
+    this._height = height;
+    this.sizeUpdated.emit({
+      width: this.width,
+      height: this.height,
+      left: this.left,
+      top: this.top,
+    });
+  }
+
   smoothZoom(zoom: number, focusPoint?: IPoint) {
     const delta = zoom - this.zoom;
     if (this._rafId) cancelAnimationFrame(this._rafId);
@@ -247,5 +279,44 @@ export class Viewport {
       });
     };
     innerSmoothTranslate();
+  }
+
+  sync(viewport: Viewport) {
+    const syncViewport = (from: Viewport, to: Viewport) => {
+      to._syncFlag = true;
+      to.setZoom(from.zoom);
+      to.setCenter(from.centerX, from.centerY);
+      to._syncFlag = false;
+    };
+    const syncSize = (from: Viewport, to: Viewport) => {
+      to._syncFlag = true;
+      to.setRect(from.left, from.top, from.width, from.height);
+      to._syncFlag = false;
+    };
+
+    const disposables = [
+      viewport.viewportUpdated.on(() => {
+        if (viewport._syncFlag) return;
+        syncViewport(viewport, this);
+      }),
+      this.viewportUpdated.on(() => {
+        if (this._syncFlag) return;
+        syncViewport(this, viewport);
+      }),
+      viewport.sizeUpdated.on(() => {
+        if (viewport._syncFlag) return;
+        syncSize(viewport, this);
+      }),
+      this.sizeUpdated.on(() => {
+        if (this._syncFlag) return;
+        syncSize(this, viewport);
+      }),
+    ];
+
+    syncViewport(viewport, this);
+
+    return () => {
+      disposables.forEach(disposable => disposable.dispose());
+    };
   }
 }

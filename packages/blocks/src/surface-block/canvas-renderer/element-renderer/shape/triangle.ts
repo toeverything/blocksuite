@@ -36,7 +36,7 @@ export function triangle(
   );
 
   if (shapeStyle === 'General') {
-    drawGeneralShape(ctx, model);
+    drawGeneralShape(ctx, model, renderer);
   } else {
     rc.polygon(
       [

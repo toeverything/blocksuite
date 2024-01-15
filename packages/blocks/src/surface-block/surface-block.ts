@@ -131,43 +131,44 @@ export class SurfaceBlockComponent extends BlockElement<
     super.connectedCallback();
     if (!this._isEdgeless) return;
 
-    const edgelessService = this.edgeless.service!;
     const { edgeless } = this;
+
+    this._initThemeObserver();
+    this._initRenderer();
+    this._initEvents();
+    this._initOverlay();
+
+    this.frame = new EdgelessFrameManager(edgeless);
+    this.snap = new EdgelessSnapManager(edgeless);
+  }
+
+  private _initOverlay() {
+    this.overlays = {
+      connector: new ConnectionOverlay(this.edgeless.service),
+    };
+    values(this.overlays).forEach(overlay => {
+      this._renderer.addOverlay(overlay);
+    });
+  }
+
+  private _initRenderer() {
+    const service = this.edgeless.service!;
+
     this._renderer = new Renderer({
-      layerManager: edgelessService.layer,
+      layerManager: service.layer,
       provider: {
-        selectedElements: () => edgelessService.selection.selectedIds,
+        selectedElements: () => service.selection.selectedIds,
         getVariableColor: (val: string) =>
           this.themeObserver.getVariableValue(val),
       },
     });
 
-    this.frame = new EdgelessFrameManager(edgeless);
-    this.snap = new EdgelessSnapManager(edgeless);
-
-    this.overlays = {
-      connector: new ConnectionOverlay(edgelessService),
-    };
-
-    values(this.overlays).forEach(overlay => {
-      this._renderer.addOverlay(overlay);
-    });
-
-    this._initEvents();
-    this._initThemeObserver();
-
     this._disposables.add(
-      edgelessService.viewport.viewportUpdated.on(({ center, zoom }) => {
-        this._renderer.setCenter(center[0], center[1]);
-        if (this._renderer.zoom !== zoom) this._renderer.setZoom(zoom);
+      this.model.elementUpdated.on(() => {
+        this._renderer.refresh();
       })
     );
-
-    this._renderer.setCenter(
-      edgelessService.viewport.centerX,
-      edgelessService.viewport.centerY
-    );
-    this._renderer.setZoom(edgelessService.viewport.zoom);
+    this._disposables.add(this._renderer.sync(this.edgeless.service.viewport));
   }
 
   private _initEvents() {
@@ -177,13 +178,13 @@ export class SurfaceBlockComponent extends BlockElement<
     _disposables.add(
       edgeless.slots.reorderingElements.on(({ elements, type }) => {
         elements.forEach(element => {
-          this.edgeless.service!.reorderElement(element, type);
+          this.edgeless.service.reorderElement(element, type);
         });
       })
     );
 
     _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id, props }) => {
+      this.model.elementUpdated.on(({ id, props }) => {
         const element = edgeless.service.getElementById(id);
         assertExists(element);
 
@@ -274,7 +275,7 @@ export class SurfaceBlockComponent extends BlockElement<
   override firstUpdated() {
     if (!this._isEdgeless) return;
 
-    this.attach(this._surfaceContainer);
+    this._renderer.attach(this._surfaceContainer);
     this._initResizeEffect();
   }
 
@@ -295,10 +296,6 @@ export class SurfaceBlockComponent extends BlockElement<
 
   refresh() {
     this._renderer.refresh();
-  }
-
-  attach(container: HTMLElement) {
-    this._renderer.attach(container);
   }
 
   onResize() {

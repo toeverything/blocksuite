@@ -93,10 +93,7 @@ export class EdgelessToolsManager {
 
   private _dragging = false;
 
-  slots = {
-    hoverUpdated: new Slot(),
-    edgelessToolUpdated: new Slot<EdgelessTool>(),
-  };
+  edgelessToolUpdated = new Slot<EdgelessTool>();
 
   get dragging() {
     return this._dragging;
@@ -182,11 +179,6 @@ export class EdgelessToolsManager {
   }
 
   private async _initMouseAndWheelEvents() {
-    // due to surface initializing after one frame, the events handler should register after that.
-    if (!this.container.surface) {
-      await new Promise(resolve => requestAnimationFrame(resolve));
-    }
-
     this._add('dragStart', ctx => {
       this._dragging = true;
       const event = ctx.get('pointerState');
@@ -341,7 +333,6 @@ export class EdgelessToolsManager {
 
   private _onContainerPointerMove = (e: PointerEventState) => {
     this._updateLastMousePos(e);
-    this.slots.hoverUpdated.emit();
     return this._controllers[this.edgelessTool.type].onContainerMouseMove(e);
   };
 
@@ -409,7 +400,7 @@ export class EdgelessToolsManager {
         edgelessTool: edgelessTool,
       } = this._rightClickTimer;
       if (e.raw.timeStamp - timeStamp > 233) {
-        this.slots.edgelessToolUpdated.emit(edgelessTool);
+        this.container.slots.edgelessToolUpdated.emit(edgelessTool);
       } else {
         clearTimeout(timer);
       }
@@ -462,7 +453,7 @@ export class EdgelessToolsManager {
     }
 
     this.selection.set(state);
-    this.slots.edgelessToolUpdated.emit(edgelessTool);
+    this.container.slots.edgelessToolUpdated.emit(edgelessTool);
     this._controllers[lastType].afterModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };

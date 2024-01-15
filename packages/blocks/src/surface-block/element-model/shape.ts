@@ -4,8 +4,12 @@ import { DEFAULT_ROUGHNESS } from '../consts.js';
 import type { SerializedXYWH } from '../index.js';
 import { type BaseProps, ElementModel } from './base.js';
 import { FontFamily, FontWeight } from './common.js';
-import { type FontStyle } from './common.js';
-import { type StrokeStyle } from './common.js';
+import {
+  type FontStyle,
+  type StrokeStyle,
+  type TextAlign,
+  type VerticalAlign,
+} from './common.js';
 import { local, yfield } from './decorators.js';
 
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
@@ -36,9 +40,9 @@ export type ShapeProps = BaseProps & {
   fontFamily?: string;
   fontWeight?: FontWeight;
   fontStyle?: FontStyle;
-  textAlign?: 'left' | 'center' | 'right';
-  textHorizontalAlign?: 'left' | 'center' | 'right';
-  textVerticalAlign?: 'top' | 'center' | 'bottom';
+  textAlign?: TextAlign;
+  textHorizontalAlign?: TextAlign;
+  textVerticalAlign?: VerticalAlign;
 };
 
 export class ShapeElementModel extends ElementModel<ShapeProps> {
@@ -109,11 +113,11 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
   fontStyle!: FontStyle;
 
   @yfield('center')
-  textAlign!: 'left' | 'center' | 'right';
+  textAlign!: TextAlign;
 
   @yfield('center')
-  textHorizontalAlign!: 'left' | 'center' | 'right';
+  textHorizontalAlign!: TextAlign;
 
   @yfield('center')
-  textVerticalAlign!: 'top' | 'center' | 'bottom';
+  textVerticalAlign!: VerticalAlign;
 }

@@ -41,7 +41,7 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
 
   protected override firstUpdated(): void {
     const { _disposables, surface } = this;
-    const { service } = surface.edgeless;
+    const { service, page } = surface.edgeless;
 
     _disposables.add(
       service.viewport.viewportUpdated.on(() => {
@@ -49,19 +49,21 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
       })
     );
 
-    _disposables.add(
-      surface.edgeless.slots.elementUpdated.on(event => {
-        if (
-          this.elementsMap.has(
-            this.surface.edgeless.service.getElementById(
-              event.id
-            ) as AutoConnectElement
-          )
-        ) {
-          this.requestUpdate();
-        }
-      })
-    );
+    const requestUpdate = (payload: { id: string }) => {
+      if (
+        this.elementsMap.has(
+          this.surface.edgeless.service.getElementById(
+            payload.id
+          ) as AutoConnectElement
+        )
+      ) {
+        this.requestUpdate();
+      }
+    };
+
+    _disposables.add(page.slots.blockUpdated.on(requestUpdate));
+
+    _disposables.add(service.surface.elementUpdated.on(requestUpdate));
   }
 
   protected override render() {

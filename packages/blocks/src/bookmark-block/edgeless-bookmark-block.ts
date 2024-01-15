@@ -54,7 +54,7 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
     }
 
     this.disposables.add(
-      this.edgeless.slots.elementUpdated.on(({ id }) => {
+      this.model.page.slots.blockUpdated.on(({ id }) => {
         if (id === this.model.id) {
           this.requestUpdate();
         }

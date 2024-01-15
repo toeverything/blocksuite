@@ -48,7 +48,7 @@ export class AIEdgelessLogic {
       return;
     }
     const edgeless = getEdgelessPageBlockFromEditor(this.editor);
-    this.unsub = edgeless.slots.elementUpdated.on(() => {
+    this.unsub = edgeless.service.surface.elementUpdated.on(() => {
       this.createImageFromFrame().catch(console.error);
     }).dispose;
   };

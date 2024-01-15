@@ -53,8 +53,7 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     const bound: Bound = childrenIds
       .map(
         id =>
-          this.surfaceModel.getElementById(id) ??
-          this.surfaceModel.page.getBlockById(id)
+          this.surface.getElementById(id) ?? this.surface.page.getBlockById(id)
       )
       .filter(el => el)
       .reduce(
@@ -93,8 +92,8 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
 
     for (const key of keys) {
       const element =
-        this.surfaceModel.getElementById(key) ||
-        (this.surfaceModel.page.getBlockById(key) as EdgelessBlock);
+        this.surface.getElementById(key) ||
+        (this.surface.page.getBlockById(key) as EdgelessBlock);
 
       element && elements.push(element);
     }
@@ -105,8 +104,8 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
   hasDescendant(element: string | IEdgelessElement) {
     const groups =
       typeof element === 'string'
-        ? this.surfaceModel.getGroups(element)
-        : this.surfaceModel.getGroups(element.id);
+        ? this.surface.getGroups(element)
+        : this.surface.getGroups(element.id);
 
     return groups.some(group => group.id === this.id);
   }
@@ -114,7 +113,7 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
   addChild(element: IEdgelessElement | string) {
     const id = typeof element === 'string' ? element : element.id;
 
-    this.surfaceModel.page.transact(() => {
+    this.surface.page.transact(() => {
       this.children.set(id, true);
     });
   }
@@ -122,7 +121,7 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
   removeChild(element: IEdgelessElement | string) {
     const id = typeof element === 'string' ? element : element.id;
 
-    this.surfaceModel.page.transact(() => {
+    this.surface.page.transact(() => {
       this.children.delete(id);
     });
   }

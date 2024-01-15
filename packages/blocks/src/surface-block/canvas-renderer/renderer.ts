@@ -1,5 +1,3 @@
-import { Slot } from '@blocksuite/global/utils';
-
 import { requestConnectedFrame } from '../../_common/utils/event.js';
 import { Viewport } from '../../page-block/edgeless/utils/viewport.js';
 import { type IBound } from '../consts.js';
@@ -8,7 +6,6 @@ import type { LayerManager } from '../managers/layer-manager.js';
 import { RoughCanvas } from '../rough/canvas.js';
 import { intersects } from '../utils/math-utils.js';
 import { getBoundsWithRotation } from '../utils/math-utils.js';
-import { type IVec } from '../utils/vec.js';
 import { modelRenderer } from './element-renderer/index.js';
 
 /**
@@ -42,10 +39,6 @@ export class Renderer extends Viewport {
 
   provider: Partial<EnvProvider>;
 
-  slots = {
-    viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
-  };
-
   private _overlays: Set<Overlay> = new Set();
   private _shouldUpdate = false;
 
@@ -59,9 +52,13 @@ export class Renderer extends Viewport {
     this.rc = new RoughCanvas(canvas);
     this.layerManager = options.layerManager;
     this.provider = options.provider ?? {};
-    this.viewportUpdated.on(payload => {
+
+    this.viewportUpdated.on(() => {
       this._shouldUpdate = true;
-      this.slots.viewportUpdated.emit(payload);
+    });
+    this.sizeUpdated.on(() => {
+      this._resetSize();
+      this._shouldUpdate = true;
     });
   }
 
@@ -78,29 +75,11 @@ export class Renderer extends Viewport {
    * @param container
    */
   attach(container: HTMLElement) {
-    this._container = container;
+    this._el = container;
     container.appendChild(this.canvas);
 
     this._resetSize();
     this._loop();
-  }
-
-  onResize() {
-    const oldWidth = this.width;
-    const oldHeight = this.height;
-
-    this._resetSize();
-
-    this.setCenter(
-      this.centerX - (oldWidth - this.width) / 2,
-      this.centerY - (oldHeight - this.height) / 2
-    );
-
-    // Re-render once the canvas size changed. Otherwise it will flicker.
-    // Because the observer will be called after DOM element rendered,
-    // by the time the canvas content is stale.
-    this._render();
-    this._shouldUpdate = false;
   }
 
   setIndexedCanvas(canvases: HTMLCanvasElement[]) {
@@ -144,11 +123,6 @@ export class Renderer extends Viewport {
       indexedCanvas.style.height = `${bbox.height}px`;
     });
 
-    this._left = bbox.left;
-    this._top = bbox.top;
-    this._width = bbox.width;
-    this._height = bbox.height;
-
     this._shouldUpdate = true;
   }
 
@@ -159,11 +133,11 @@ export class Renderer extends Viewport {
       }
       this._shouldUpdate = false;
       this._loop();
-    }, this._container);
+    }, this._el);
   }
 
   private _render() {
-    const { ctx, viewportBounds, width, height, rc, zoom } = this;
+    const { ctx, viewportBounds, rc, zoom } = this;
     const dpr = window.devicePixelRatio;
     const scale = zoom * dpr;
     const matrix = new DOMMatrix().scaleSelf(scale);
@@ -190,7 +164,7 @@ export class Renderer extends Viewport {
       this._renderByBound(ctx, matrix, rc, viewportBounds, layer.elements);
     });
 
-    ctx.clearRect(0, 0, width * dpr, height * dpr);
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.save();
 
     ctx.setTransform(matrix);

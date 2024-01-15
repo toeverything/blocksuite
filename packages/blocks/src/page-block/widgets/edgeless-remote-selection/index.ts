@@ -195,7 +195,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
 
     const { _disposables, page, edgeless } = this;
 
-    pickValues(edgeless.slots, [
+    pickValues(edgeless.service.surface, [
       'elementAdded',
       'elementRemoved',
       'elementUpdated',

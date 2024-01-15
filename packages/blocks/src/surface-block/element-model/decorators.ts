@@ -31,7 +31,9 @@ export function yfield(fallback?: unknown): PropertyDecorator {
         }
 
         if (this.yMap) {
-          this.yMap.set(prop as string, val);
+          this.surface.page.transact(() => {
+            this.yMap.set(prop as string, val);
+          });
         }
 
         if (!this.yMap.doc) {

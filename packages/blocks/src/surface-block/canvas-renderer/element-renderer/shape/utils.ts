@@ -1,27 +1,39 @@
+import type {
+  TextAlign,
+  VerticalAlign,
+} from '../../../element-model/common.js';
 import type { ShapeElementModel } from '../../../element-model/shape.js';
+import type { Renderer } from '../../renderer.js';
+import type { TextDelta } from '../text/utils.js';
+
+const SHAPE_TEXT_PADDING = 20;
 
 export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,
-  shapeModel: ShapeElementModel
+  shapeModel: ShapeElementModel,
+  renderer: Renderer
 ) {
-  const { x, y, w, h } = shapeModel;
-  switch (shapeModel.type) {
+  const sizeOffset = Math.max(shapeModel.strokeWidth, 0);
+  const w = shapeModel.w - sizeOffset;
+  const h = shapeModel.h - sizeOffset;
+
+  switch (shapeModel.shapeType) {
     case 'rect':
-      drawRect(ctx, x, y, w, h, shapeModel.radius ?? 0);
+      drawRect(ctx, 0, 0, w, h, shapeModel.radius ?? 0);
       break;
     case 'diamond':
-      drawDiamond(ctx, x, y, w, h);
+      drawDiamond(ctx, 0, 0, w, h);
       break;
     case 'ellipse':
-      drawEllipse(ctx, x, y, w, h);
+      drawEllipse(ctx, 0, 0, w, h);
       break;
     case 'triangle':
-      drawTriangle(ctx, x, y, w, h);
+      drawTriangle(ctx, 0, 0, w, h);
   }
 
   ctx.lineWidth = shapeModel.strokeWidth;
-  ctx.strokeStyle = shapeModel.strokeColor;
-  ctx.fillStyle = shapeModel.fillColor;
+  ctx.strokeStyle = renderer.getVariableColor(shapeModel.strokeColor);
+  ctx.fillStyle = renderer.getVariableColor(shapeModel.fillColor);
 
   switch (shapeModel.strokeStyle) {
     case 'none':
@@ -29,10 +41,10 @@ export function drawGeneralShape(
       break;
     case 'dash':
       ctx.setLineDash([12, 12]);
-      ctx.strokeStyle = shapeModel.strokeStyle;
+      ctx.strokeStyle = renderer.getVariableColor(shapeModel.strokeStyle);
       break;
     default:
-      ctx.strokeStyle = shapeModel.strokeStyle;
+      ctx.strokeStyle = renderer.getVariableColor(shapeModel.strokeStyle);
   }
   ctx.fill();
   ctx.stroke();
@@ -101,4 +113,25 @@ function drawTriangle(
   ctx.lineTo(width, height);
   ctx.lineTo(x, height);
   ctx.closePath();
+}
+
+export function horizontalOffset(width: number, textAlign: TextAlign) {
+  return textAlign === 'center'
+    ? width / 2
+    : textAlign === 'right'
+      ? width - SHAPE_TEXT_PADDING
+      : SHAPE_TEXT_PADDING;
+}
+
+export function verticalOffset(
+  lines: TextDelta[][],
+  lineHeight: number,
+  height: number,
+  textVerticalAlign: VerticalAlign
+) {
+  return textVerticalAlign === 'center'
+    ? (height - lineHeight * lines.length) / 2
+    : textVerticalAlign === 'top'
+      ? SHAPE_TEXT_PADDING
+      : height - lineHeight * lines.length - SHAPE_TEXT_PADDING;
 }

@@ -124,15 +124,18 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
       })
     );
 
+    const requestUpdate = (payload: { id: string }) => {
+      const element = edgeless.service.getElementById(
+        payload.id
+      ) as AutoConnectElement;
+      if (element && this.elementsMap.has(element)) {
+        this.requestUpdate();
+      }
+    };
+    _disposables.add(edgeless.service.surface.elementUpdated.on(requestUpdate));
+
     _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id }) => {
-        const element = edgeless.service.getElementById(
-          id
-        ) as AutoConnectElement;
-        if (element && this.elementsMap.has(element)) {
-          this.requestUpdate();
-        }
-      })
+      edgeless.service.page.slots.blockUpdated.on(requestUpdate)
     );
 
     _disposables.add(

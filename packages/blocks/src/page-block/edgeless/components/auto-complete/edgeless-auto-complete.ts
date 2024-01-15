@@ -161,14 +161,15 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     _disposables.add(() => this.removeOverlay());
 
     _disposables.add(
-      edgeless.slots.hoverUpdated.on(() => {
+      edgeless.host.event.add('pointerMove', () => {
         const state = edgeless.tools.getHoverState();
+
         if (!state) {
           this._isHover = false;
           return;
         }
-        const { content } = state;
-        this._isHover = content === this.current ? true : false;
+
+        this._isHover = state.content === this.current ? true : false;
       })
     );
   }

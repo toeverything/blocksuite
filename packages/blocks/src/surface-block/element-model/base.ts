@@ -11,7 +11,6 @@ import { Bound } from '../utils/bound.js';
 import {
   getBoundsWithRotation,
   getPointsFromBoundsWithRotation,
-  isPointIn,
   linePolygonIntersects,
   polygonGetPointTangent,
   polygonNearestPoint,
@@ -44,7 +43,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   protected _onChange: (props: Record<string, { oldValue: unknown }>) => void;
 
   yMap: Y.Map<unknown>;
-  surfaceModel!: SurfaceBlockModel;
+  surface!: SurfaceBlockModel;
 
   abstract rotate: number;
 
@@ -73,7 +72,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     const { yMap, model, stashedStore, onChange } = options;
 
     this.yMap = yMap;
-    this.surfaceModel = model;
+    this.surface = model;
     this._stashed = stashedStore as Map<keyof Props, unknown>;
     this._onChange = onChange;
 
@@ -108,11 +107,11 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   }
 
   get group() {
-    return this.surfaceModel.getGroup(this.id);
+    return this.surface.getGroup(this.id);
   }
 
   get groups() {
-    return this.surfaceModel.getGroups(this.id);
+    return this.surface.getGroups(this.id);
   }
 
   get id() {
@@ -161,7 +160,10 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     this._stashed.delete(prop);
     // @ts-ignore
     delete this[prop];
-    this.yMap.set(prop as string, value);
+
+    this.surface.page.transact(() => {
+      this.yMap.set(prop as string, value);
+    });
   }
 
   containedByBounds(bounds: Bound): boolean {
@@ -199,7 +201,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   }
 
   hitTest(x: number, y: number, _: HitTestOptions, __?: EditorHost): boolean {
-    return isPointIn(this, x, y);
+    return this.elementBound.isPointInBound([x, y]);
   }
 
   serialize() {

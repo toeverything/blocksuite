@@ -2,10 +2,13 @@ import { Workspace, type Y } from '@blocksuite/store';
 
 import type { SerializedXYWH } from '../index.js';
 import { type BaseProps, ElementModel } from './base.js';
-import { FontFamily, type FontStyle, FontWeight } from './common.js';
+import {
+  FontFamily,
+  type FontStyle,
+  FontWeight,
+  type TextAlign,
+} from './common.js';
 import { yfield } from './decorators.js';
-
-export type TextAlign = 'left' | 'center' | 'right';
 
 export type TextElementProps = BaseProps & {
   text: Y.Text;

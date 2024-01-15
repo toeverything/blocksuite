@@ -43,10 +43,8 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
     );
 
     _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id }) => {
-        if (id === this.frame.id) {
-          this.requestUpdate();
-        }
+      this.frame.propsUpdated.on(() => {
+        this.requestUpdate();
       })
     );
 

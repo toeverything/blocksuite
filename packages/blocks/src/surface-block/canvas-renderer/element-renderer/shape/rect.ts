@@ -43,7 +43,7 @@ export function rect(
   );
 
   if (shapeStyle === 'General') {
-    drawGeneralShape(ctx, model);
+    drawGeneralShape(ctx, model, renderer);
   } else {
     rc.path(
       `

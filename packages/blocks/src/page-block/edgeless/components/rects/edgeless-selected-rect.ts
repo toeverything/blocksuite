@@ -739,13 +739,17 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       edgeless.service.viewport.viewportUpdated.on(this._updateOnViewportChange)
     );
 
-    pickValues(edgeless.slots, [
+    pickValues(edgeless.service.surface, [
       'elementAdded',
       'elementRemoved',
       'elementUpdated',
     ]).forEach(slot => {
       _disposables.add(slot.on(this._updateOnElementChange));
     });
+
+    _disposables.add(
+      this.page.slots.blockUpdated.on(this._updateOnElementChange)
+    );
 
     _disposables.add(
       slots.pressShiftKeyUpdated.on(pressed =>

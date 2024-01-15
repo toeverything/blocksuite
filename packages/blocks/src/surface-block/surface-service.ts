@@ -1,8 +1,6 @@
 import { BlockService } from '@blocksuite/block-std';
-import { Slot } from '@blocksuite/global/utils';
 
 import type { NavigatorMode } from '../_common/edgeless/frame/consts.js';
-import { type EdgelessTool } from '../_common/types.js';
 import { buildPath } from '../_common/utils/query.js';
 import { EditSessionStorage } from './managers/edit-session.js';
 import { TemplateJob } from './service/template.js';
@@ -11,10 +9,6 @@ import type { SurfaceBlockModel } from './surface-model.js';
 
 export class SurfaceService extends BlockService<SurfaceBlockModel> {
   TemplateJob = TemplateJob;
-
-  slots = {
-    edgelessToolUpdated: new Slot<EdgelessTool>(),
-  };
 
   editSession!: EditSessionStorage;
 
