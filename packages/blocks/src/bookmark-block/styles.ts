@@ -101,7 +101,9 @@ export const styles = css`
     align-items: center;
     justify-content: flex-start;
     gap: 4px;
+    width: max-content;
     max-width: 100%;
+    cursor: pointer;
   }
   .affine-bookmark-content-url > span {
     display: -webkit-box;
@@ -152,6 +154,12 @@ export const styles = css`
 
   .affine-bookmark-card.loading {
     .affine-bookmark-content-title-text {
+      color: var(--affine-placeholder-color);
+    }
+  }
+
+  .affine-bookmark-card.loading-failed {
+    .affine-bookmark-content-description {
       color: var(--affine-placeholder-color);
     }
   }

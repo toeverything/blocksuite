@@ -1,13 +1,11 @@
+import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import type { BookmarkBlockComponent } from '../../../../bookmark-block/bookmark-block.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
-import type { EmbedGithubBlockComponent } from '../../../../embed-github-block/embed-github-block.js';
 import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
-import type { EmbedYoutubeBlockComponent } from '../../../../embed-youtube-block/embed-youtube-block.js';
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import { toast } from '../../toast.js';
 import { embedCardModalStyles } from './styles.js';
@@ -17,10 +15,7 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 
   @property({ attribute: false })
-  embedCardElement!:
-    | BookmarkBlockComponent
-    | EmbedGithubBlockComponent
-    | EmbedYoutubeBlockComponent;
+  model!: BookmarkBlockModel | EmbedGithubModel | EmbedYoutubeModel;
 
   @query('.title')
   titleInput!: HTMLInputElement;
@@ -30,10 +25,6 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
 
   @state()
   private _titleInputValue = '';
-
-  get model(): BookmarkBlockModel | EmbedGithubModel | EmbedYoutubeModel {
-    return this.embedCardElement.model;
-  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -72,7 +63,7 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
       return;
     }
 
-    this.embedCardElement.page.updateBlock(this.model, {
+    this.model.page.updateBlock(this.model, {
       title,
       description: this.descInput.value,
     });
@@ -132,14 +123,12 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
 }
 
 export function toggleEmbedCardEditModal(
-  embedCardElement:
-    | BookmarkBlockComponent
-    | EmbedGithubBlockComponent
-    | EmbedYoutubeBlockComponent
+  host: EditorHost,
+  embedCardModel: BookmarkBlockModel | EmbedGithubModel | EmbedYoutubeModel
 ) {
-  embedCardElement.host.selection.clear();
+  host.selection.clear();
   const embedCardEditModal = new EmbedCardEditModal();
-  embedCardEditModal.embedCardElement = embedCardElement;
+  embedCardEditModal.model = embedCardModel;
   document.body.appendChild(embedCardEditModal);
 }
 

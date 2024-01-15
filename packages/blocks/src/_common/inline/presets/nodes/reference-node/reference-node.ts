@@ -11,17 +11,20 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page, PageMeta } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { ref } from 'lit/directives/ref.js';
 
-import type { PageBlockComponent } from '../../../../page-block/types.js';
-import { FontLinkedPageIcon, FontPageIcon } from '../../../icons/text.js';
+import type { PageBlockComponent } from '../../../../../page-block/types.js';
+import { HoverController } from '../../../../components/hover/controller.js';
+import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/text.js';
 import {
   getClosestBlockElementByElement,
   getModelByElement,
   getPageByElement,
-} from '../../../utils/query.js';
-import type { AffineTextAttributes } from '../affine-inline-specs.js';
-import { affineTextStyles } from './affine-text.js';
-import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from './consts.js';
+} from '../../../../utils/query.js';
+import type { AffineTextAttributes } from '../../affine-inline-specs.js';
+import { affineTextStyles } from '../affine-text.js';
+import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from '../consts.js';
+import { toggleReferencePopup } from './reference-popup.js';
 
 export type RefNodeSlots = {
   pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;
@@ -81,12 +84,18 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     pageId: '0',
   };
 
-  get inlineRoot() {
+  get inlineEditor() {
     const inlineRoot = this.closest<InlineRootElement<AffineTextAttributes>>(
       `[${INLINE_ROOT_ATTR}]`
     );
     assertExists(inlineRoot);
-    return inlineRoot;
+    return inlineRoot.inlineEditor;
+  }
+
+  get selfInlineRange() {
+    const selfInlineRange = this.inlineEditor.getInlineRangeFromElement(this);
+    assertExists(selfInlineRange);
+    return selfInlineRange;
   }
 
   override connectedCallback() {
@@ -109,9 +118,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
     // observe yText update
     this.disposables.add(
-      this.inlineRoot.inlineEditor.slots.textChange.on(() =>
-        this._updateRefMeta(page)
-      )
+      this.inlineEditor.slots.textChange.on(() => this._updateRefMeta(page))
     );
   }
 
@@ -149,21 +156,32 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     pageElement.slots.pageLinkClicked.emit({ pageId: targetPageId });
   }
 
+  private _whenHover = new HoverController(this, ({ abortController }) => {
+    return {
+      template: toggleReferencePopup(
+        this.inlineEditor,
+        this.selfInlineRange,
+        this._refMeta?.title ?? DEFAULT_PAGE_NAME,
+        abortController
+      ),
+    };
+  });
+
   override render() {
     const refMeta = this._refMeta;
-    const unavailable = !refMeta;
-    const title = unavailable
-      ? // Maybe the page is deleted
-        'Deleted page'
-      : refMeta.title;
+    const isDeleted = !refMeta;
+
+    const title = isDeleted ? 'Deleted page' : refMeta.title;
+
     const attributes = this.delta.attributes;
     assertExists(attributes, 'Failed to get attributes!');
+
     const type = attributes.reference?.type;
     assertExists(type, 'Unable to get reference type!');
 
     const style = affineTextStyles(
       attributes,
-      unavailable
+      isDeleted
         ? {
             color: 'var(--affine-text-disable-color)',
             textDecoration: 'line-through',
@@ -175,6 +193,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     // we need to add `<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text>` in an
     // embed element to make sure inline range calculation is correct
     return html`<span
+      ${ref(this._whenHover.setReference)}
       data-selected=${this.selected}
       class="affine-reference"
       style=${style}

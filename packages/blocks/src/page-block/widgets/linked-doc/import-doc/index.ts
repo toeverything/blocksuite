@@ -1,8 +1,8 @@
 import type { Workspace } from '@blocksuite/store';
 
-import { ImportPage, type OnSuccessHandler } from './import-page.js';
+import { ImportDoc, type OnSuccessHandler } from './import-doc.js';
 
-export { importHtml, importMarkDown, importNotion } from './import-page.js';
+export { importHtml, importMarkDown, importNotion } from './import-doc.js';
 
 /**
  * @deprecated Waiting for migration
@@ -20,8 +20,8 @@ export function showImportModal({
   container?: HTMLElement;
   abortController?: AbortController;
 }) {
-  const importPage = new ImportPage(workspace, onSuccess, abortController);
-  container.appendChild(importPage);
-  abortController.signal.addEventListener('abort', () => importPage.remove());
-  return importPage;
+  const importDoc = new ImportDoc(workspace, onSuccess, abortController);
+  container.appendChild(importDoc);
+  abortController.signal.addEventListener('abort', () => importDoc.remove());
+  return importDoc;
 }

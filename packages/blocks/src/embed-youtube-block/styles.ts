@@ -44,7 +44,7 @@ export const styles = css`
 
   .affine-embed-youtube-video-iframe-container > iframe {
     width: 100%;
-    height: 329px;
+    height: 410px;
     border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
   }
 
@@ -173,7 +173,9 @@ export const styles = css`
     align-items: center;
     justify-content: flex-start;
     gap: 4px;
+    width: max-content;
     max-width: 100%;
+    cursor: pointer;
   }
   .affine-embed-youtube-content-url > span {
     display: -webkit-box;

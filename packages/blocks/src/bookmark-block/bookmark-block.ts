@@ -12,12 +12,16 @@ import type { EmbedCardCaption } from '../_common/components/embed-card/embed-ca
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { matchFlavours } from '../_common/utils/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
-import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
+import {
+  AFFINE_DRAG_HANDLE_WIDGET,
+  AffineDragHandleWidget,
+} from '../page-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
   convertDragPreviewEdgelessToDoc,
 } from '../page-block/widgets/drag-handle/utils.js';
+import { Bound } from '../surface-block/utils/bound.js';
 import {
   type BookmarkBlockModel,
   BookmarkBlockSchema,
@@ -34,6 +38,9 @@ export class BookmarkBlockComponent extends BlockElement<
 > {
   @property({ attribute: false })
   loading = false;
+
+  @property({ attribute: false })
+  loadingFailed = false;
 
   @state()
   showCaption = false;
@@ -74,8 +81,15 @@ export class BookmarkBlockComponent extends BlockElement<
         return false;
 
       const blockComponent = anchorComponent as BookmarkBlockComponent;
+      const element = captureEventTarget(state.raw.target);
+
+      const isDraggingByDragHandle = !!element?.closest(
+        AFFINE_DRAG_HANDLE_WIDGET
+      );
+      const isDraggingByComponent = blockComponent.contains(element);
       const isInSurface = blockComponent.isInSurface;
-      if (!isInSurface) {
+
+      if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         this.host.selection.setGroup('note', [
           this.host.selection.create('block', {
             path: blockComponent.path,
@@ -83,27 +97,24 @@ export class BookmarkBlockComponent extends BlockElement<
         ]);
         startDragging([blockComponent], state);
         return true;
+      } else if (isInSurface && isDraggingByDragHandle) {
+        const bookmarkPortal = blockComponent.closest(
+          '.edgeless-block-portal-bookmark'
+        );
+        assertExists(bookmarkPortal);
+        const dragPreviewEl = bookmarkPortal.cloneNode() as HTMLElement;
+        dragPreviewEl.style.transform = '';
+        dragPreviewEl.style.left = '0';
+        dragPreviewEl.style.top = '0';
+        render(
+          blockComponent.host.renderModel(blockComponent.model),
+          dragPreviewEl
+        );
+
+        startDragging([blockComponent], state, dragPreviewEl);
+        return true;
       }
-
-      const element = captureEventTarget(state.raw.target);
-      const insideDragHandle = !!element?.closest('affine-drag-handle-widget');
-      if (!insideDragHandle) return false;
-
-      const bookmarkPortal = blockComponent.closest(
-        '.edgeless-block-portal-bookmark'
-      );
-      assertExists(bookmarkPortal);
-      const dragPreviewEl = bookmarkPortal.cloneNode() as HTMLElement;
-      dragPreviewEl.style.transform = '';
-      dragPreviewEl.style.left = '0';
-      dragPreviewEl.style.top = '0';
-      render(
-        blockComponent.host.renderModel(blockComponent.model),
-        dragPreviewEl
-      );
-
-      startDragging([blockComponent], state, dragPreviewEl);
-      return true;
+      return false;
     },
     onDragEnd: props => {
       const { state, draggingElements, dropBlockId } = props;
@@ -126,8 +137,13 @@ export class BookmarkBlockComponent extends BlockElement<
         if (dropBlockId) {
           const style = blockComponent.model.style;
           if (style === 'vertical' || style === 'cube') {
+            const { xywh } = blockComponent.model;
+            const bound = Bound.deserialize(xywh);
+            bound.w = EMBED_CARD_WIDTH.horizontal;
+            bound.h = EMBED_CARD_HEIGHT.horizontal;
             this.page.updateBlock(blockComponent.model, {
               style: 'horizontal',
+              xywh: bound.serialize(),
             });
           }
         }
@@ -152,7 +168,15 @@ export class BookmarkBlockComponent extends BlockElement<
     },
   };
 
-  refreshUrlData = () => {
+  open = () => {
+    let link = this.model.url;
+    if (!link.match(/^[a-zA-Z]+:\/\//)) {
+      link = 'https://' + link;
+    }
+    window.open(link, '_blank');
+  };
+
+  refreshData = () => {
     refreshBookmarkUrlData(this).catch(console.error);
   };
 
@@ -167,14 +191,14 @@ export class BookmarkBlockComponent extends BlockElement<
     this._isInSurface = parent?.flavour === 'affine:surface';
 
     if (!this.model.description && !this.model.title) {
-      this.refreshUrlData();
+      this.refreshData();
     }
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
         this.edgelessOrDocBookmark?.requestUpdate();
         if (key === 'url') {
-          this.refreshUrlData();
+          this.refreshData();
         }
       })
     );

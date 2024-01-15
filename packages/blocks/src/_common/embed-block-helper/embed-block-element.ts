@@ -7,7 +7,10 @@ import { html, render } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { DragHandleOption } from '../../page-block/widgets/drag-handle/config.js';
-import { AffineDragHandleWidget } from '../../page-block/widgets/drag-handle/drag-handle.js';
+import {
+  AFFINE_DRAG_HANDLE_WIDGET,
+  AffineDragHandleWidget,
+} from '../../page-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
@@ -29,6 +32,8 @@ export class EmbedBlockElement<
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {
   protected cardStyle: EmbedCardStyle = 'horizontal';
+  protected _width = EMBED_CARD_WIDTH.horizontal;
+  protected _height = EMBED_CARD_HEIGHT.horizontal;
 
   private _isInSurface = false;
 
@@ -65,8 +70,15 @@ export class EmbedBlockElement<
         return false;
 
       const blockComponent = anchorComponent as this;
+      const element = captureEventTarget(state.raw.target);
+
+      const isDraggingByDragHandle = !!element?.closest(
+        AFFINE_DRAG_HANDLE_WIDGET
+      );
+      const isDraggingByComponent = blockComponent.contains(element);
       const isInSurface = blockComponent.isInSurface;
-      if (!isInSurface) {
+
+      if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         this.host.selection.setGroup('note', [
           this.host.selection.create('block', {
             path: blockComponent.path,
@@ -74,27 +86,24 @@ export class EmbedBlockElement<
         ]);
         startDragging([blockComponent], state);
         return true;
+      } else if (isInSurface && isDraggingByDragHandle) {
+        const embedPortal = blockComponent.closest(
+          '.edgeless-block-portal-embed'
+        );
+        assertExists(embedPortal);
+        const dragPreviewEl = embedPortal.cloneNode() as HTMLElement;
+        dragPreviewEl.style.transform = '';
+        dragPreviewEl.style.left = '0';
+        dragPreviewEl.style.top = '0';
+        render(
+          blockComponent.host.renderModel(blockComponent.model),
+          dragPreviewEl
+        );
+
+        startDragging([blockComponent], state, dragPreviewEl);
+        return true;
       }
-
-      const element = captureEventTarget(state.raw.target);
-      const insideDragHandle = !!element?.closest('affine-drag-handle-widget');
-      if (!insideDragHandle) return false;
-
-      const embedPortal = blockComponent.closest(
-        '.edgeless-block-portal-embed'
-      );
-      assertExists(embedPortal);
-      const dragPreviewEl = embedPortal.cloneNode() as HTMLElement;
-      dragPreviewEl.style.transform = '';
-      dragPreviewEl.style.left = '0';
-      dragPreviewEl.style.top = '0';
-      render(
-        blockComponent.host.renderModel(blockComponent.model),
-        dragPreviewEl
-      );
-
-      startDragging([blockComponent], state, dragPreviewEl);
-      return true;
+      return false;
     },
     onDragEnd: props => {
       const { state, draggingElements, dropBlockId } = props;
@@ -117,8 +126,13 @@ export class EmbedBlockElement<
         if (dropBlockId) {
           const style = blockComponent.cardStyle;
           if (style === 'vertical' || style === 'cube') {
+            const { xywh } = blockComponent.model;
+            const bound = Bound.deserialize(xywh);
+            bound.w = EMBED_CARD_WIDTH.horizontal;
+            bound.h = EMBED_CARD_HEIGHT.horizontal;
             this.page.updateBlock(blockComponent.model, {
               style: 'horizontal',
+              xywh: bound.serialize(),
             });
           }
         }
@@ -160,7 +174,7 @@ export class EmbedBlockElement<
           class="embed-block-container"
           style=${styleMap({
             width: '100%',
-            margin: '18px 0',
+            margin: '18px 0px',
           })}
         >
           ${children()}
@@ -171,9 +185,8 @@ export class EmbedBlockElement<
     const surface = this.surface;
     assertExists(surface);
 
-    const style = this.cardStyle;
-    const width = EMBED_CARD_WIDTH[style];
-    const height = EMBED_CARD_HEIGHT[style];
+    const width = this._width;
+    const height = this._height;
     const bound = Bound.deserialize(
       (surface.pickById(this.model.id) ?? this.model).xywh
     );

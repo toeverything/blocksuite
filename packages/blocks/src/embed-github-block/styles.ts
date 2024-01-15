@@ -166,7 +166,9 @@ export const styles = css`
     align-items: center;
     justify-content: flex-start;
     gap: 4px;
+    width: max-content;
     max-width: 100%;
+    cursor: pointer;
   }
   .affine-embed-github-content-url > span {
     display: -webkit-box;
@@ -308,6 +310,7 @@ export const styles = css`
 
     .affine-embed-github-content-assignees-text-users.user {
       color: var(--affine-link-color);
+      cursor: pointer;
     }
 
     .affine-embed-github-content-assignees-text-users.placeholder {

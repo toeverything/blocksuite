@@ -8,7 +8,7 @@ export const styles = css`
     position: absolute;
   }
 
-  .linked-page-popover {
+  .linked-doc-popover {
     position: fixed;
     left: 0;
     top: 0;
@@ -25,22 +25,22 @@ export const styles = css`
     z-index: var(--affine-z-index-popover);
   }
 
-  .linked-page-popover icon-button {
+  .linked-doc-popover icon-button {
     padding: 8px;
     justify-content: flex-start;
     gap: 8px;
   }
 
-  .linked-page-popover .group-title {
+  .linked-doc-popover .group-title {
     color: var(--affine-text-secondary-color);
     margin: 8px 12px;
   }
 
-  .linked-page-popover .divider {
+  .linked-doc-popover .divider {
     margin: 6px 12px;
     height: 1px;
     background: var(--affine-border-color);
   }
 
-  ${scrollbarStyle('.linked-page-popover .group')}
+  ${scrollbarStyle('.linked-doc-popover .group')}
 `;

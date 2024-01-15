@@ -6,7 +6,10 @@ import { computePosition, flip, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { PageService } from '../../../../../../page-block/page-service.js';
+import type {
+  EmbedOptions,
+  PageService,
+} from '../../../../../../page-block/page-service.js';
 import type { IconButton } from '../../../../../components/button.js';
 import { createLitPortal } from '../../../../../components/portal.js';
 import { toast } from '../../../../../components/toast.js';
@@ -59,6 +62,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
   private _bodyOverflowStyle = '';
 
   private _moreMenuAbortController: AbortController | null = null;
+
+  private _embedOptions: EmbedOptions | null = null;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -140,9 +145,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
       ],
     })
       .then(({ x, y }) => {
-        if (!this.popupContainer) return;
-        this.popupContainer.style.left = `${x}px`;
-        this.popupContainer.style.top = `${y}px`;
+        const popupContainer = this.popupContainer;
+        if (!popupContainer) return;
+        popupContainer.style.left = `${x}px`;
+        popupContainer.style.top = `${y}px`;
       })
       .catch(console.error);
   }
@@ -180,7 +186,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     return link;
   }
 
-  private _isBookmarkAllowed() {
+  private get _isBookmarkAllowed() {
     const blockElement = this.blockElement;
     const schema = blockElement.host.page.schema;
     const parent = blockElement.host.page.getParent(blockElement.model);
@@ -197,6 +203,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
     }
 
     return true;
+  }
+
+  private get _canConvertToEmbedView() {
+    return this._embedOptions?.viewType === 'embed';
   }
 
   private _onConfirm() {
@@ -240,7 +250,15 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _convertToCardView() {
-    if (!this.inlineEditor.isValidInlineRange(this.targetInlineRange)) return;
+    if (!this.inlineEditor.isValidInlineRange(this.targetInlineRange)) {
+      return;
+    }
+
+    let targetFlavour = 'affine:bookmark';
+
+    if (this._embedOptions && this._embedOptions.viewType === 'card') {
+      targetFlavour = this._embedOptions.flavour;
+    }
 
     const blockElement = this.blockElement;
     const url = this.currentLink;
@@ -253,24 +271,26 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const parent = page.getParent(blockElement.model);
     assertExists(parent);
     const index = parent.children.indexOf(blockElement.model);
-    page.addBlock('affine:bookmark', props, parent, index + 1);
+    page.addBlock(targetFlavour, props, parent, index + 1);
 
-    this.inlineEditor.deleteText(this.targetInlineRange);
+    const totalTextLength = this.inlineEditor.yTextLength;
+    const inlineTextLength = this.targetInlineRange.length;
+    if (totalTextLength === inlineTextLength) {
+      page.deleteBlock(blockElement.model);
+    } else {
+      this.inlineEditor.formatText(this.targetInlineRange, { link: null });
+    }
 
     this.abortController.abort();
   }
 
-  private _canConvertToEmbedView() {
-    const url = this.currentLink;
-    return !!this._pageService.getEmbedBlockOptions(url);
-  }
-
   private _convertToEmbedView() {
-    const url = this.currentLink;
-    const embedOptions = this._pageService.getEmbedBlockOptions(url);
-    if (!embedOptions) return;
+    if (!this._embedOptions || this._embedOptions.viewType !== 'embed') {
+      return;
+    }
 
-    const { flavour } = embedOptions;
+    const { flavour } = this._embedOptions;
+    const url = this.currentLink;
 
     const blockElement = this.blockElement;
     const page = blockElement.host.page;
@@ -280,7 +300,13 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
     page.addBlock(flavour, { url }, parent, index + 1);
 
-    this.inlineEditor.deleteText(this.targetInlineRange);
+    const totalTextLength = this.inlineEditor.yTextLength;
+    const inlineTextLength = this.targetInlineRange.length;
+    if (totalTextLength === inlineTextLength) {
+      page.deleteBlock(blockElement.model);
+    } else {
+      this.inlineEditor.formatText(this.targetInlineRange, { link: null });
+    }
 
     this.abortController.abort();
   }
@@ -368,6 +394,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _viewTemplate() {
+    this._embedOptions = this._pageService.getEmbedBlockOptions(
+      this.currentLink
+    );
+
     return html`
       <div class="affine-link-popover view">
         <div class="affine-link-preview" @click=${() => this._copyUrl()}>
@@ -393,7 +423,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
         <span class="affine-link-popover-dividing-line"></span>
 
-        ${this._isBookmarkAllowed()
+        ${this._isBookmarkAllowed
           ? html`
               <div class="affine-link-popover-view-selector">
                 <icon-button
@@ -416,7 +446,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
                   <affine-tooltip .offset=${12}>${'Card view'}</affine-tooltip>
                 </icon-button>
 
-                ${this._canConvertToEmbedView()
+                ${this._canConvertToEmbedView
                   ? html` <icon-button
                       size="24px"
                       class="affine-link-popover-view-selector-button embed"
@@ -442,11 +472,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
         <span class="affine-link-popover-dividing-line"></span>
 
-        <icon-button
-          size="24px"
-          class="bookmark-toolbar-button more-button"
-          @click=${() => this._toggleMoreMenu()}
-        >
+        <icon-button size="24px" @click=${() => this._toggleMoreMenu()}>
           ${MoreVerticalIcon}
           <affine-tooltip .offset=${12}>More</affine-tooltip>
         </icon-button>

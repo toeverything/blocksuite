@@ -52,6 +52,7 @@ export class AffineDocEditor extends WithDisposable(ShadowlessElement) {
           user-select: none;
           container-name: viewport;
           container-type: inline-size;
+          background: var(--affine-background-primary-color);
         }
 
         doc-editor {

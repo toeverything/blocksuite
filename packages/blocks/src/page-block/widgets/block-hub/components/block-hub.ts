@@ -471,12 +471,24 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
       addSiblingImageBlock(imageFiles, maxFileSize, lastModelState.model);
     } else if (props.flavour === 'affine:bookmark') {
-      const url = await toggleEmbedCardCreateModal(this._editorHost);
-      url &&
-        models.push({
-          flavour: 'affine:bookmark',
-          url,
-        });
+      if (lastModelState && lastType !== 'none' && lastType !== 'database') {
+        const model = lastModelState.model;
+        const parentModel = page.getParent(model);
+        assertExists(parentModel);
+
+        const index =
+          parentModel.children.indexOf(model) + (lastType === 'after' ? 1 : 0);
+        await toggleEmbedCardCreateModal(
+          this._editorHost,
+          'Links',
+          'The added link will be displayed as a card view.',
+          {
+            mode: 'page',
+            parentModel,
+            index,
+          }
+        );
+      }
     } else {
       models.push(props);
     }
@@ -595,12 +607,15 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
       lastId = blockIds[blockIds.length - 1];
     } else if (data.flavour === 'affine:bookmark') {
-      const url = await toggleEmbedCardCreateModal(this._editorHost);
-      url &&
-        models.push({
-          flavour: 'affine:bookmark',
-          url,
-        });
+      await toggleEmbedCardCreateModal(
+        this._editorHost,
+        'Links',
+        'The added link will be displayed as a card view.',
+        {
+          mode: 'page',
+          parentModel: defaultNoteBlock,
+        }
+      );
     } else {
       models.push(data);
     }

@@ -11,16 +11,16 @@ import {
   createKeydownObserver,
 } from '../../../_common/components/utils.js';
 import { getRichTextByModel } from '../../../_common/utils/query.js';
-import type { LinkedPageOptions } from './config.js';
-import { type LinkedPageGroup } from './config.js';
+import type { LinkedDocOptions } from './config.js';
+import { type LinkedDocGroup } from './config.js';
 import { styles } from './styles.js';
 
-@customElement('affine-linked-page-popover')
-export class LinkedPagePopover extends WithDisposable(LitElement) {
+@customElement('affine-linked-doc-popover')
+export class LinkedDocPopover extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  options!: LinkedPageOptions;
+  options!: LinkedDocOptions;
 
   @property({ attribute: false })
   triggerKey!: string;
@@ -38,7 +38,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
   @state()
   private _activatedItemIndex = 0;
 
-  private _actionGroup: LinkedPageGroup[] = [];
+  private _actionGroup: LinkedDocGroup[] = [];
 
   private get _flattenActionList() {
     return this._actionGroup
@@ -58,8 +58,8 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     });
   }
 
-  @query('.linked-page-popover')
-  linkedPageElement?: Element;
+  @query('.linked-doc-popover')
+  linkedDocElement?: Element;
 
   private get _page() {
     return this.model.page;
@@ -156,7 +156,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     // XXX This is a side effect
     let accIdx = 0;
     return html`<div
-      class="linked-page-popover blocksuite-overlay"
+      class="linked-doc-popover blocksuite-overlay"
       style="${style}"
     >
       ${this._actionGroup

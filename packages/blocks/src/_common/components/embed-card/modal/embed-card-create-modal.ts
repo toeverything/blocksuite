@@ -1,9 +1,19 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { BlockModel } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
+import type { EdgelessPageBlockComponent } from '../../../../page-block/edgeless/edgeless-page-block.js';
+import type { PageService } from '../../../../page-block/page-service.js';
+import type { EdgelessElementType } from '../../../../surface-block/edgeless-types.js';
+import { Bound } from '../../../../surface-block/utils/bound.js';
+import { Vec } from '../../../../surface-block/utils/vec.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../../../consts.js';
+import type { EmbedCardStyle } from '../../../types.js';
+import { getPageByEditorHost } from '../../../utils/query.js';
 import { isValidUrl } from '../../../utils/url.js';
 import { toast } from '../../toast.js';
 import { embedCardModalStyles } from './styles.js';
@@ -13,16 +23,27 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 
   @property({ attribute: false })
-  labelText: string = 'Create a Bookmark that previews a link in card view.';
+  host!: EditorHost;
 
   @property({ attribute: false })
-  checkUrl?: (url: string) => boolean;
+  titleText!: string;
 
   @property({ attribute: false })
-  onCancel?: () => void;
+  descriptionText!: string;
 
   @property({ attribute: false })
-  onConfirm?: (url: string) => void;
+  createOptions!:
+    | {
+        mode: 'page';
+        parentModel: BlockModel | string;
+        index?: number;
+      }
+    | {
+        mode: 'edgeless';
+      };
+
+  @property({ attribute: false })
+  onConfirm!: () => void;
 
   @query('input')
   input!: HTMLInputElement;
@@ -61,17 +82,74 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   private _onConfirm = () => {
     const url = this.input.value;
 
-    if (!this.checkUrl?.(url)) {
+    if (!isValidUrl(url)) {
       toast('Invalid link');
       return;
     }
 
-    this.onConfirm?.(url);
+    const pageService = this.host.spec.getService(
+      'affine:page'
+    ) as PageService | null;
+    assertExists(pageService);
+
+    const embedOptions = pageService.getEmbedBlockOptions(url);
+
+    const { mode } = this.createOptions;
+    if (mode === 'page') {
+      const { parentModel, index } = this.createOptions;
+      let flavour = 'affine:bookmark';
+
+      if (embedOptions) {
+        flavour = embedOptions.flavour;
+      }
+
+      this.host.page.addBlock(
+        flavour,
+        {
+          url,
+        },
+        parentModel,
+        index
+      );
+    } else if (mode === 'edgeless') {
+      let flavour = 'affine:bookmark',
+        targetStyle: EmbedCardStyle = 'vertical';
+
+      if (embedOptions) {
+        flavour = embedOptions.flavour;
+        targetStyle = embedOptions.styles[0];
+      }
+
+      const edgelessPageElement = getPageByEditorHost(
+        this.host
+      ) as EdgelessPageBlockComponent | null;
+      assertExists(edgelessPageElement);
+
+      const surface = edgelessPageElement.surface;
+      const center = Vec.toVec(surface.viewport.center);
+      surface.addElement(
+        flavour as EdgelessElementType,
+        {
+          url,
+          xywh: Bound.fromCenter(
+            center,
+            EMBED_CARD_WIDTH[targetStyle],
+            EMBED_CARD_HEIGHT[targetStyle]
+          ).serialize(),
+          style: targetStyle,
+        },
+        surface.model
+      );
+
+      edgelessPageElement.tools.setEdgelessTool({
+        type: 'default',
+      });
+    }
+    this.onConfirm();
     this.remove();
   };
 
   private _onCancel = () => {
-    this.onCancel?.();
     this.remove();
   };
 
@@ -79,10 +157,12 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
     return html`<div class="embed-card-modal blocksuite-overlay">
       <div class="embed-card-modal-mask" @click=${this._onCancel}></div>
       <div class="embed-card-modal-wrapper">
-        <div class="embed-card-modal-title">Create Link</div>
+        <div class="embed-card-modal-title">${this.titleText}</div>
 
         <div class="embed-card-modal-content">
-          <div class="embed-card-modal-content-text">${this.labelText}</div>
+          <div class="embed-card-modal-content-text">
+            ${this.descriptionText}
+          </div>
 
           <input
             class="embed-card-modal-input link"
@@ -107,7 +187,7 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
             class=${classMap({
               'embed-card-modal-button': true,
               confirm: true,
-              disabled: !this.checkUrl?.(this._linkInputValue),
+              disabled: !isValidUrl(this._linkInputValue),
             })}
             tabindex="0"
             @click=${this._onConfirm}
@@ -122,24 +202,30 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
 
 export async function toggleEmbedCardCreateModal(
   host: EditorHost,
-  urlRegex?: RegExp,
-  labelText?: string
-): Promise<null | string> {
+  titleText: string,
+  descriptionText: string,
+  createOptions:
+    | {
+        mode: 'page';
+        parentModel: BlockModel | string;
+        index?: number;
+      }
+    | {
+        mode: 'edgeless';
+      }
+): Promise<void> {
   host.selection.clear();
+
   const embedCardCreateModal = new EmbedCardCreateModal();
+  embedCardCreateModal.host = host;
+  embedCardCreateModal.titleText = titleText;
+  embedCardCreateModal.descriptionText = descriptionText;
+  embedCardCreateModal.createOptions = createOptions;
+
+  document.body.appendChild(embedCardCreateModal);
+
   return new Promise(resolve => {
-    if (labelText) embedCardCreateModal.labelText = labelText;
-    embedCardCreateModal.checkUrl = url => {
-      if (urlRegex) return urlRegex.test(url);
-      return isValidUrl(url);
-    };
-    embedCardCreateModal.onConfirm = url => {
-      resolve(url);
-    };
-    embedCardCreateModal.onCancel = () => {
-      resolve(null);
-    };
-    document.body.appendChild(embedCardCreateModal);
+    embedCardCreateModal.onConfirm = () => resolve();
   });
 }
 

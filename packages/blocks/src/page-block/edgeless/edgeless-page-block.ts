@@ -24,6 +24,7 @@ import {
   type EdgelessTool,
   Point,
   type Selectable,
+  type Viewport,
 } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
@@ -89,6 +90,17 @@ import {
 } from './utils/consts.js';
 import { xywhArrayToObject } from './utils/convert.js';
 import { getCursorMode, isCanvasElement, isFrameBlock } from './utils/query.js';
+
+export interface EdgelessViewport {
+  left: number;
+  top: number;
+  scrollLeft: number;
+  scrollTop: number;
+  scrollWidth: number;
+  scrollHeight: number;
+  clientWidth: number;
+  clientHeight: number;
+}
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent extends BlockElement<
@@ -227,6 +239,28 @@ export class EdgelessPageBlockComponent extends BlockElement<
     ) as HTMLElement | null;
     assertExists(this._viewportElement);
     return this._viewportElement;
+  }
+
+  get viewport(): Viewport {
+    const {
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    } = this.viewportElement;
+    const { top, left } = this.viewportElement.getBoundingClientRect();
+    return {
+      top,
+      left,
+      scrollLeft,
+      scrollTop,
+      scrollWidth,
+      scrollHeight,
+      clientWidth,
+      clientHeight,
+    };
   }
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -800,7 +834,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
           event.flavour === 'affine:image' ||
           event.flavour === 'affine:bookmark' ||
           event.flavour === 'affine:embed-github' ||
-          event.flavour === 'affine:embed-youtube'
+          event.flavour === 'affine:embed-youtube' ||
+          event.flavour === 'affine:embed-linked-doc'
         ) {
           const parent =
             event.type === 'delete'

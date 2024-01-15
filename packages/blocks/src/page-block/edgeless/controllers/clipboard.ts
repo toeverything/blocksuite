@@ -34,6 +34,7 @@ import {
   BookmarkStyles,
 } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
+import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
@@ -60,6 +61,7 @@ import {
   isBookmarkBlock,
   isCanvasElementWithText,
   isEmbedGithubBlock,
+  isEmbedLinkedDocBlock,
   isEmbedYoutubeBlock,
   isFrameBlock,
   isImageBlock,
@@ -520,6 +522,24 @@ export class EdgelessClipboardController extends PageClipboard {
     return embedYoutubeIds;
   }
 
+  private _createLinkedDocEmbedBlocks(linkedDocEmbeds: BlockSnapshot[]) {
+    const embedLinkedDocIds = linkedDocEmbeds.map(({ props }) => {
+      const { xywh, style, caption, pageId } = props;
+
+      return this.surface.addElement(
+        'affine:embed-linked-doc',
+        {
+          xywh,
+          style,
+          caption,
+          pageId,
+        },
+        this.surface.model.id
+      );
+    });
+    return embedLinkedDocIds;
+  }
+
   private _emitSelectionChangeAfterPaste(
     canvasElementIds: string[],
     blockIds: string[]
@@ -554,7 +574,9 @@ export class EdgelessClipboardController extends PageClipboard {
                 ? 'githubEmbeds'
                 : isEmbedYoutubeBlock(data as unknown as Selectable)
                   ? 'youtubeEmbeds'
-                  : 'elements'
+                  : isEmbedLinkedDocBlock(data as unknown as Selectable)
+                    ? 'linkedDocEmbeds'
+                    : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];
@@ -562,6 +584,7 @@ export class EdgelessClipboardController extends PageClipboard {
       bookmarks?: BlockSnapshot[];
       githubEmbeds?: BlockSnapshot[];
       youtubeEmbeds?: BlockSnapshot[];
+      linkedDocEmbeds?: BlockSnapshot[];
       elements?: { type: CanvasElement['type'] }[];
     };
     pasteCenter =
@@ -589,6 +612,9 @@ export class EdgelessClipboardController extends PageClipboard {
     const embedYoutubeIds = this._createYoutubeEmbedBlocks(
       groupedByType.youtubeEmbeds ?? []
     );
+    const embedLinkedDocIds = this._createLinkedDocEmbedBlocks(
+      groupedByType.linkedDocEmbeds ?? []
+    );
 
     const notes = noteIds.map(id =>
       this.page.getBlockById(id)
@@ -614,6 +640,10 @@ export class EdgelessClipboardController extends PageClipboard {
       this.surface.pickById(id)
     ) as EmbedYoutubeModel[];
 
+    const linkedDocEmbeds = embedLinkedDocIds.map(id =>
+      this.surface.pickById(id)
+    ) as EmbedLinkedDocModel[];
+
     const elements = this._createCanvasElements(
       groupedByType.elements || [],
       oldIdToNewIdMap
@@ -629,6 +659,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...bookmarks,
       ...githubEmbeds,
       ...youtubeEmbeds,
+      ...linkedDocEmbeds,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
@@ -997,6 +1028,9 @@ export async function prepareClipboardData(
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (isEmbedYoutubeBlock(selected)) {
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
+      } else if (isEmbedLinkedDocBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (selected instanceof ConnectorElement) {

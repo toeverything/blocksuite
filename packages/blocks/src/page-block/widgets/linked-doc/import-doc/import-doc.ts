@@ -124,8 +124,8 @@ export async function importNotion(workspace: Workspace, file: File) {
  * @deprecated Waiting for migration
  * See https://github.com/toeverything/blocksuite/issues/3316
  */
-@customElement('import-page')
-export class ImportPage extends WithDisposable(LitElement) {
+@customElement('import-doc')
+export class ImportDoc extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @state()
