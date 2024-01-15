@@ -107,6 +107,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
       height: 22px;
       gap: 10px;
     }
+
     .index-label-tooltip-label {
       height: 100%;
       font-size: var(--affine-font-sm);

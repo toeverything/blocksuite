@@ -308,6 +308,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       ) {
         autoConnectedBlocks.set(note, 1);
       }
+
       note.children.forEach(model => {
         if (matchFlavours(model, ['affine:surface-ref'])) {
           const reference = surface.pickById(
