@@ -12,7 +12,7 @@ import {
 import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import type { ColorEvent } from '../../panel/color-panel.js';
+import { type ColorEvent, isTransparent } from '../../panel/color-panel.js';
 import {
   LINE_COLOR_PREFIX,
   SHAPE_COLOR_PREFIX,
@@ -76,10 +76,13 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
     if (this.edgeless.edgelessTool.type !== 'shape') return;
 
     const props: Record<string, unknown> = { strokeColor };
-    props.fillColor = strokeColor.replace(
+    const fillColor = strokeColor.replace(
       LINE_COLOR_PREFIX,
       SHAPE_COLOR_PREFIX
     );
+    const filled = !isTransparent(fillColor);
+    props.fillColor = fillColor;
+    props.filled = filled;
     this.onChange(props);
   };
 
