@@ -8,6 +8,7 @@ import {
   AutoConnectLeftIcon,
   AutoConnectRightIcon,
 } from '../../../../_common/icons/edgeless.js';
+import { SmallPageIcon } from '../../../../_common/icons/text.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -97,6 +98,20 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
 
     .navigator.show {
       opacity: 1;
+    }
+
+    .index-label-tooltip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 22px;
+      gap: 10px;
+    }
+    .index-label-tooltip-label {
+      height: 100%;
+      font-size: var(--affine-font-sm);
+      font-weight: 400;
+      line-height: 22px;
     }
   `;
 
@@ -262,7 +277,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
           height: iconWidth + 'px',
           position: 'absolute',
           transform: `translate(${left + width / 2 - 44 / 2}px, ${
-            right + height - 14
+            right + height + 16
           }px)`,
           display: 'flex',
           justifyContent: 'center',
@@ -286,6 +301,12 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
               class="edgeless-index-label"
             >
               ${index}
+              <affine-tooltip tip-position="bottom" .offset=${12}>
+                <div class="index-label-tooltip">
+                  <span class="index-label-tooltip-icon">${SmallPageIcon}</span>
+                  <span class="index-label-tooltip-label">Page Mode Index</span>
+                </div>
+              </affine-tooltip>
             </div>
           `);
         }

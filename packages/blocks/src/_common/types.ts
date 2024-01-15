@@ -206,6 +206,12 @@ export type NoteTool = {
   tip: string;
 };
 
+export enum NoteDisplayMode {
+  PageAndEdgeless = 'In Both',
+  EdgelessOnly = 'In Edgeless Only',
+  PageOnly = 'In Page Only',
+}
+
 export type ConnectorTool = {
   type: 'connector';
   mode: ConnectorMode;

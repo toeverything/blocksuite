@@ -57,7 +57,7 @@ export {
   ThemeObserver,
 } from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
-export { type AbstractEditor } from './_common/types.js';
+export { type AbstractEditor, NoteDisplayMode } from './_common/types.js';
 export { on, once } from './_common/utils/event.js';
 export { createDefaultPage } from './_common/utils/init.js';
 export type { BlockModels } from './_common/utils/model.js';

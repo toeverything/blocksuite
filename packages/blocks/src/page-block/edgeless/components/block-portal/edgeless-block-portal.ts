@@ -7,7 +7,6 @@ import './embed/edgeless-embed.js';
 import '../rects/edgeless-selected-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
 import '../../components/auto-connect/edgeless-index-label.js';
-import '../../components/auto-connect/edgeless-auto-connect-line.js';
 import '../component-toolbar/component-toolbar.js';
 import '../presentation/edgeless-navigator-black-background.js';
 
@@ -26,6 +25,7 @@ import {
 } from '../../../../_common/utils/event.js';
 import {
   matchFlavours,
+  NoteDisplayMode,
   type TopLevelBlockModel,
 } from '../../../../_common/utils/index.js';
 import type { SurfaceBlockComponent } from '../../../../index.js';
@@ -302,7 +302,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     const autoConnectedBlocks = new Map<AutoConnectElement, number>();
 
     notes.forEach(note => {
-      if (isNoteBlock(note) && !note.hidden) {
+      if (
+        isNoteBlock(note) &&
+        note.displayMode !== NoteDisplayMode.EdgelessOnly
+      ) {
         autoConnectedBlocks.set(note, 1);
       }
       note.children.forEach(model => {
@@ -324,12 +327,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     return html`
       <div class="affine-block-children-container edgeless">
-        <edgeless-auto-connect-line
-          .surface=${surface}
-          .show=${this._showAutoConnect}
-          .elementsMap=${autoConnectedBlocks}
-        >
-        </edgeless-auto-connect-line>
         <div class="affine-edgeless-layer">
           <edgeless-frames-container
             .surface=${surface}

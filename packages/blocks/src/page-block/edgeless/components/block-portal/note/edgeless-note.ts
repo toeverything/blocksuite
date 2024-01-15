@@ -7,6 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
+import { NoteDisplayMode } from '../../../../../_common/types.js';
 import { almostEqual } from '../../../../../_common/utils/math.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
@@ -203,6 +204,9 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   override render() {
     const { model, surface, index } = this;
+    const { displayMode } = model;
+    if (displayMode === NoteDisplayMode.PageOnly) return nothing;
+
     const { xywh, background, hidden, edgeless } = model;
     const { borderRadius, borderSize, borderStyle, shadowType } =
       edgeless.style;

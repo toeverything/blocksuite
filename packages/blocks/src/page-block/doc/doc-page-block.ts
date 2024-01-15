@@ -11,6 +11,7 @@ import {
   asyncFocusRichText,
   getDocTitleInlineEditor,
   matchFlavours,
+  NoteDisplayMode,
 } from '../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { PageClipboard } from '../clipboard/index.js';
@@ -359,7 +360,9 @@ export class DocPageBlockComponent extends BlockElement<
         .reverse()
         .find(
           child =>
-            child.flavour === 'affine:note' && !(child as NoteBlockModel).hidden
+            child.flavour === 'affine:note' &&
+            (child as NoteBlockModel).displayMode !==
+              NoteDisplayMode.EdgelessOnly
         );
       if (!lastNote) {
         if (readonly) return;
@@ -416,7 +419,11 @@ export class DocPageBlockComponent extends BlockElement<
   override render() {
     const content = html`${repeat(
       this.model.children.filter(
-        child => !(matchFlavours(child, ['affine:note']) && child.hidden)
+        child =>
+          !(
+            matchFlavours(child, ['affine:note']) &&
+            child.displayMode === NoteDisplayMode.EdgelessOnly
+          )
       ),
       child => child.id,
       child => this.renderModel(child)
