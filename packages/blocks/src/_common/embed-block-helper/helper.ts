@@ -2,6 +2,7 @@ import type { BlockSpec } from '@blocksuite/block-std';
 import type { BaseBlockTransformer } from '@blocksuite/store';
 import { defineBlockSchema } from '@blocksuite/store';
 
+import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../consts.js';
 import type { EmbedBlockModel } from './embed-block-model.js';
 import type {
   EmbedBlockGeneratorOptions,
@@ -57,9 +58,7 @@ export function createEmbedBlock<
 // ========== Link Preview ==========
 
 const linkPreviewEndpoint = (() => {
-  // https://github.com/toeverything/affine-workers/tree/main/packages/link-preview
-  let endpoint =
-    'https://affine-worker.toeverything.workers.dev/api/worker/link-preview';
+  let endpoint = DEFAULT_LINK_PREVIEW_ENDPOINT;
   return {
     get: () => endpoint,
     set: (url: string) => {

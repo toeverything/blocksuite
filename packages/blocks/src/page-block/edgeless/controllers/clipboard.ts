@@ -13,6 +13,7 @@ import {
 } from '@blocksuite/store';
 
 import {
+  DEFAULT_IMAGE_PROXY_ENDPOINT,
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
@@ -880,8 +881,7 @@ export class EdgelessClipboardController extends PageClipboard {
       location.protocol === 'https:' &&
       location.hostname.split('.').includes('affine')
     ) {
-      _imageProxyEndpoint =
-        'https://affine-worker.toeverything.workers.dev/api/worker/image-proxy';
+      _imageProxyEndpoint = DEFAULT_IMAGE_PROXY_ENDPOINT;
     }
 
     const html2canvasOption = {

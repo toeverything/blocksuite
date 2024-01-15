@@ -61,7 +61,7 @@ if (!editorRoot) return;
 const imageService = editorRoot.spec.getService('affine:image') as ImageService;
 
 // Call specific method to set runtime configurations
-imageService.setImageProxyMiddlewareURL('https://example.com/image-proxy');
+imageService.setImageProxyURL('https://example.com/image-proxy');
 ```
 
 For different blocks, the method to set runtime configurations may be different. You can check the [block API document](/api/@blocksuite/blocks/index) to find out the methods you need.

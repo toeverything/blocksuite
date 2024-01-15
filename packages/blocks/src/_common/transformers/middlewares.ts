@@ -3,6 +3,7 @@ import type { DeltaOperation, JobMiddleware } from '@blocksuite/store';
 
 import type { DatabaseBlockModel } from '../../database-block/index.js';
 import type { ListBlockModel, ParagraphBlockModel } from '../../models.js';
+import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../consts.js';
 
 export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
   const idMap = new Map<string, string>();
@@ -145,9 +146,7 @@ export const customImageProxyMiddleware = (
 };
 
 const imageProxyMiddlewareBuilder = () => {
-  let middleware = customImageProxyMiddleware(
-    'https://affine-worker.toeverything.workers.dev/api/worker/image-proxy'
-  );
+  let middleware = customImageProxyMiddleware(DEFAULT_IMAGE_PROXY_ENDPOINT);
   return {
     get: () => middleware,
     set: (url: string) => {
