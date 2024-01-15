@@ -226,13 +226,9 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
               color: `${
                 !isTransparent(this.fillColor)
                   ? `var(${this.fillColor})`
-                  : 'transparent'
+                  : 'var(--affine-white-60)'
               }`,
-              stroke: `${
-                !isTransparent(this.strokeColor)
-                  ? `var(${this.strokeColor})`
-                  : 'var(--affine-border-color)'
-              }`,
+              stroke: 'var(--affine-black-10)',
             })}
           >
             ${repeat(shapes, (shape, index) => {
