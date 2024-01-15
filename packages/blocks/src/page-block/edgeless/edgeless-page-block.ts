@@ -425,6 +425,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
       noteIndex: noteIndex,
     } = options;
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
+    console.log('width: ', width);
+    console.log('height: ', height);
     return this.surface.addElement(
       'affine:note',
       {

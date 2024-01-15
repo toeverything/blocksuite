@@ -1,14 +1,13 @@
-import type { PointerEventState } from '@blocksuite/block-std';
 import { type Page } from '@blocksuite/store';
 
 import {
   handleNativeRangeAtPoint,
   type NoteChildrenFlavour,
-  Point,
+  type Point,
   type TopLevelBlockModel,
 } from '../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { DEFAULT_NOTE_WIDTH } from './consts.js';
+import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from './consts.js';
 
 export type NoteOptions = {
   childFlavour: NoteChildrenFlavour;
@@ -18,16 +17,15 @@ export type NoteOptions = {
 export function addNote(
   edgeless: EdgelessPageBlockComponent,
   page: Page,
-  event: PointerEventState,
+  point: Point,
+  options: NoteOptions,
   width = DEFAULT_NOTE_WIDTH,
-  options: NoteOptions
+  height = DEFAULT_NOTE_HEIGHT
 ) {
-  const noteId = edgeless.addNoteWithPoint(
-    new Point(event.point.x, event.point.y),
-    {
-      width,
-    }
-  );
+  const noteId = edgeless.addNoteWithPoint(point, {
+    width,
+    height,
+  });
 
   page.addBlock(options.childFlavour, { type: options.childType }, noteId);
   edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
@@ -50,7 +48,7 @@ export function addNote(
         .then(() => {
           // Cannot reuse `handleNativeRangeClick` directly here,
           // since `retargetClick` will re-target to pervious editor
-          handleNativeRangeAtPoint(event.raw.clientX, event.raw.clientY);
+          handleNativeRangeAtPoint(point.x, point.y);
         })
         .catch(console.error);
     }

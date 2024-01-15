@@ -1,4 +1,4 @@
-import { DisposableGroup, noop } from '@blocksuite/global/utils';
+import { DisposableGroup, noop, Slot } from '@blocksuite/global/utils';
 
 import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import {
@@ -463,5 +463,51 @@ export class NoteOverlay extends ToolOverlay {
     }
 
     ctx.fillText(this.text, overlayX + 10, overlayY + NOTE_OVERLAY_HEIGHT / 2);
+  }
+}
+
+export class DraggingNoteOverlay extends NoteOverlay {
+  slots: {
+    draggingNoteUpdated: Slot<{ x: number; y: number; w: number; h: number }>;
+  };
+  width: number;
+  height: number;
+  constructor(
+    edgeless: EdgelessPageBlockComponent,
+    background: CssVariableName
+  ) {
+    super(edgeless, background);
+    this.slots = {
+      draggingNoteUpdated: new Slot<{
+        x: number;
+        y: number;
+        w: number;
+        h: number;
+      }>(),
+    };
+    this.width = 0;
+    this.height = 0;
+    this.disposables.add(
+      this.slots.draggingNoteUpdated.on(({ x, y, w, h }) => {
+        this.x = x;
+        this.y = y;
+        this.width = w;
+        this.height = h;
+        this.edgeless.surface.refresh();
+      })
+    );
+  }
+
+  override render(ctx: CanvasRenderingContext2D): void {
+    // draw a rounded rectangle with provided background color and xywh
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = this.backgroundColor;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.10)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(this.x, this.y, this.width, this.height, 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
   }
 }
