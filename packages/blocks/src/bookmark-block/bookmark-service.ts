@@ -1,15 +1,15 @@
 import { BlockService } from '@blocksuite/block-std';
 
-import type { BookmarkBlockModel } from './bookmark-model.js';
 import {
-  queryUrlDataFromAffineWorker,
+  queryLinkPreview,
   setLinkPreviewEndpoint,
-} from './utils.js';
+} from '../_common/embed-block-helper/index.js';
+import type { BookmarkBlockModel } from './bookmark-model.js';
 
 export class BookmarkService extends BlockService<BookmarkBlockModel> {
   queryUrlData = (url: string) => {
-    return queryUrlDataFromAffineWorker(url);
+    return queryLinkPreview(url);
   };
 
-  setLinkPreviewEndpoint = setLinkPreviewEndpoint;
+  static setLinkPreviewEndpoint = setLinkPreviewEndpoint;
 }
