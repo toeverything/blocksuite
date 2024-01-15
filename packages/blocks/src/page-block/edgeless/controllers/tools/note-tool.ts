@@ -64,10 +64,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     const h = Math.abs(startY - endY) / zoom;
 
     _draggingNoteOverlay.slots.draggingNoteUpdated.emit({
-      x,
-      y,
-      w,
-      h,
+      xywh: [x, y, w, h],
     });
   }
 

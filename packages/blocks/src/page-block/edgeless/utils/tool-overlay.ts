@@ -468,7 +468,7 @@ export class NoteOverlay extends ToolOverlay {
 
 export class DraggingNoteOverlay extends NoteOverlay {
   slots: {
-    draggingNoteUpdated: Slot<{ x: number; y: number; w: number; h: number }>;
+    draggingNoteUpdated: Slot<{ xywh: XYWH }>;
   };
   width: number;
   height: number;
@@ -479,20 +479,14 @@ export class DraggingNoteOverlay extends NoteOverlay {
     super(edgeless, background);
     this.slots = {
       draggingNoteUpdated: new Slot<{
-        x: number;
-        y: number;
-        w: number;
-        h: number;
+        xywh: XYWH;
       }>(),
     };
     this.width = 0;
     this.height = 0;
     this.disposables.add(
-      this.slots.draggingNoteUpdated.on(({ x, y, w, h }) => {
-        this.x = x;
-        this.y = y;
-        this.width = w;
-        this.height = h;
+      this.slots.draggingNoteUpdated.on(({ xywh }) => {
+        [this.x, this.y, this.width, this.height] = xywh;
         this.edgeless.surface.refresh();
       })
     );
