@@ -4,6 +4,7 @@ import type { TemplateResult } from 'lit';
 export class ReferenceNodeConfig {
   private _customIcon: TemplateResult | null = null;
   private _customTitle: string | null = null;
+  private _customContent: TemplateResult | null = null;
   private _page: Page | null = null;
 
   get customIcon() {
@@ -16,6 +17,14 @@ export class ReferenceNodeConfig {
 
   get page() {
     return this._page;
+  }
+
+  get customContent() {
+    return this._customContent;
+  }
+
+  setCustomContent(content: TemplateResult | null) {
+    this._customContent = content;
   }
 
   setCustomIcon(icon: TemplateResult | null) {

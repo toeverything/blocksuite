@@ -115,6 +115,10 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     return this.config.customTitle;
   }
 
+  get customContent() {
+    return this.config.customContent;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -215,6 +219,12 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         : {}
     );
 
+    const content =
+      this.customContent ??
+      html`${icon}<span data-title=${title} class="affine-reference-title"
+          >${title}</span
+        >`;
+
     // we need to add `<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text>` in an
     // embed element to make sure inline range calculation is correct
     return html`<span
@@ -223,9 +233,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       class="affine-reference"
       style=${style}
       @click=${this._onClick}
-      >${icon}<span data-title=${title} class="affine-reference-title"
-        >${title}</span
-      ><v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+      >${content}<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
     ></span>`;
   }
 }
