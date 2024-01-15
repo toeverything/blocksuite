@@ -355,17 +355,13 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     });
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
+  override render() {
+    const model = this.model;
     if ('url' in this.model) {
       this._embedOptions = this._pageService.getEmbedBlockOptions(
         this.model.url
       );
     }
-  }
-
-  override render() {
-    const model = this.model;
     return html`
       <div class="embed-card-toolbar">
         ${this._canShowUrlOptions && 'url' in model

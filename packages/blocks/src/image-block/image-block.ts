@@ -134,13 +134,13 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
       const blockComponent = anchorComponent as ImageBlockComponent;
 
-      const canDrag =
-        blockComponent.contains(element) ||
-        !!element?.closest(AFFINE_DRAG_HANDLE_WIDGET);
-      if (!canDrag) return false;
-
+      const isDraggingByDragHandle = !!element?.closest(
+        AFFINE_DRAG_HANDLE_WIDGET
+      );
+      const isDraggingByComponent = blockComponent.contains(element);
       const isInSurface = blockComponent.isInSurface;
-      if (!isInSurface) {
+
+      if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         this.std.selection.setGroup('note', [
           this.std.selection.create('block', {
             path: blockComponent.path,
@@ -148,22 +148,23 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         ]);
         startDragging([blockComponent], state);
         return true;
+      } else if (isInSurface && isDraggingByDragHandle) {
+        const edgelessPage = getEdgelessPageByElement(blockComponent);
+        const scale = edgelessPage ? edgelessPage.surface.viewport.zoom : 1;
+        const width = blockComponent.getBoundingClientRect().width;
+
+        const dragPreviewEl = document.createElement('div');
+        dragPreviewEl.classList.add('affine-block-element');
+        dragPreviewEl.style.border = '2px solid var(--affine-border-color)';
+        dragPreviewEl.style.borderRadius = '4px';
+        dragPreviewEl.style.overflow = 'hidden';
+        dragPreviewEl.style.width = `${width / scale}px`;
+        render(blockComponent.renderModel(blockComponent.model), dragPreviewEl);
+
+        startDragging([blockComponent], state, dragPreviewEl);
+        return true;
       }
-
-      const edgelessPage = getEdgelessPageByElement(blockComponent);
-      const scale = edgelessPage ? edgelessPage.surface.viewport.zoom : 1;
-      const width = blockComponent.getBoundingClientRect().width;
-
-      const dragPreviewEl = document.createElement('div');
-      dragPreviewEl.classList.add('affine-block-element');
-      dragPreviewEl.style.border = '2px solid var(--affine-border-color)';
-      dragPreviewEl.style.borderRadius = '4px';
-      dragPreviewEl.style.overflow = 'hidden';
-      dragPreviewEl.style.width = `${width / scale}px`;
-      render(blockComponent.renderModel(blockComponent.model), dragPreviewEl);
-
-      startDragging([blockComponent], state, dragPreviewEl);
-      return true;
+      return false;
     },
     onDragEnd: props => {
       const { state, draggingElements } = props;

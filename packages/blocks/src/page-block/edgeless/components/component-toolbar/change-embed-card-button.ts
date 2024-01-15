@@ -338,18 +338,13 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     super.firstUpdated(changedProperties);
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
+  override render() {
+    const model = this.model;
     if ('url' in this.model) {
       this._embedOptions = this._pageService.getEmbedBlockOptions(
         this.model.url
       );
     }
-  }
-
-  override render() {
-    const model = this.model;
-    const style = model.style;
 
     return html`
       <div class="change-embed-card-container">
@@ -450,7 +445,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                 </div>
 
                 <embed-card-style-panel
-                  .value=${style}
+                  .value=${model.style}
                   .onSelect=${(value: EmbedCardStyle) =>
                     this._setEmbedCardStyle(value)}
                 >
