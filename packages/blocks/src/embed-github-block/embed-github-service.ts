@@ -1,6 +1,7 @@
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
+import { setLinkPreviewEndpoint } from '../_common/embed-block-helper/index.js';
 import type { PageService } from '../index.js';
 import {
   type EmbedGithubModel,
@@ -32,4 +33,6 @@ export class EmbedGithubService extends BlockService<EmbedGithubModel> {
       viewType: 'card',
     });
   }
+
+  static setLinkPreviewEndpoint = setLinkPreviewEndpoint;
 }

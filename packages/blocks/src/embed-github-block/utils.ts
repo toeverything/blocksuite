@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 
+import { queryLinkPreview } from '../_common/embed-block-helper/index.js';
 import type { EmbedGithubBlockComponent } from './embed-github-block.js';
 import type {
   EmbedGithubBlockUrlData,
@@ -16,25 +17,12 @@ import {
   GithubPROpenIcon,
 } from './styles.js';
 
-interface AffineLinkPreviewResponseData {
-  url: string;
-  title?: string;
-  siteName?: string;
-  description?: string;
-  images?: string[];
-  mediaType?: string;
-  contentType?: string;
-  charset?: string;
-  videos?: string[];
-  favicons?: string[];
-}
-
 export async function queryEmbedGithubData(
   embedGithubModel: EmbedGithubModel
 ): Promise<Partial<EmbedGithubBlockUrlData>> {
   const [githubApiData, openGraphData] = await Promise.all([
     queryEmbedGithubApiData(embedGithubModel),
-    queryEmbedGithubOpenGraphData(embedGithubModel.url),
+    queryLinkPreview(embedGithubModel.url),
   ]);
   return { ...githubApiData, ...openGraphData };
 }
@@ -78,29 +66,6 @@ export async function queryEmbedGithubApiData(
   }
 
   return githubApiData;
-}
-
-export async function queryEmbedGithubOpenGraphData(url: string) {
-  const response = await fetch(
-    'https://affine-worker.toeverything.workers.dev/api/worker/link-preview',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url,
-      }),
-    }
-  ).catch(() => null);
-  if (!response || !response.ok) return {};
-  const data: AffineLinkPreviewResponseData = await response.json();
-  return {
-    title: data.title ? getStringFromHTML(data.title) : null,
-    description: data.description ? getStringFromHTML(data.description) : null,
-    icon: data.favicons?.[0],
-    image: data.images?.[0],
-  };
 }
 
 export async function refreshEmbedGithubUrlData(
@@ -176,10 +141,4 @@ export function getGithubStatusIcon(
     }
   }
   return nothing;
-}
-
-function getStringFromHTML(html: string) {
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  return div.textContent;
 }

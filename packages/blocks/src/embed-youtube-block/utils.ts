@@ -1,23 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import { queryLinkPreview } from '../_common/embed-block-helper/index.js';
 import type { EmbedYoutubeBlockComponent } from './embed-youtube-block.js';
 import type {
   EmbedYoutubeBlockUrlData,
   EmbedYoutubeModel,
 } from './embed-youtube-model.js';
-
-interface AffineLinkPreviewResponseData {
-  url: string;
-  title?: string;
-  siteName?: string;
-  description?: string;
-  images?: string[];
-  mediaType?: string;
-  contentType?: string;
-  charset?: string;
-  videos?: string[];
-  favicons?: string[];
-}
 
 export async function queryEmbedYoutubeData(
   embedYoutubeModel: EmbedYoutubeModel
@@ -25,7 +13,7 @@ export async function queryEmbedYoutubeData(
   const url = embedYoutubeModel.url;
 
   const [videoOpenGraphData, videoOEmbedData] = await Promise.all([
-    queryEmbedYoutubeOpenGraphData(url),
+    queryLinkPreview(url),
     queryYoutubeOEmbedData(url),
   ]);
 
@@ -35,7 +23,7 @@ export async function queryEmbedYoutubeData(
   };
 
   if (youtubeEmbedData.creatorUrl) {
-    const creatorOpenGraphData = await queryEmbedYoutubeOpenGraphData(
+    const creatorOpenGraphData = await queryLinkPreview(
       youtubeEmbedData.creatorUrl
     );
     youtubeEmbedData.creatorImage = creatorOpenGraphData.image;
@@ -66,29 +54,6 @@ export async function queryYoutubeOEmbedData(
   return youtubeOEmbedData;
 }
 
-export async function queryEmbedYoutubeOpenGraphData(url: string) {
-  const response = await fetch(
-    'https://affine-worker.toeverything.workers.dev/api/worker/link-preview',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url,
-      }),
-    }
-  ).catch(() => null);
-  if (!response || !response.ok) return {};
-  const data: AffineLinkPreviewResponseData = await response.json();
-  return {
-    title: data.title ? getStringFromHTML(data.title) : null,
-    description: data.description ? getStringFromHTML(data.description) : null,
-    icon: data.favicons?.[0],
-    image: data.images?.[0],
-  };
-}
-
 export async function refreshEmbedYoutubeUrlData(
   embedYoutubeElement: EmbedYoutubeBlockComponent
 ) {
@@ -117,10 +82,4 @@ export async function refreshEmbedYoutubeUrlData(
   });
 
   embedYoutubeElement.loading = false;
-}
-
-function getStringFromHTML(html: string) {
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  return div.textContent;
 }
