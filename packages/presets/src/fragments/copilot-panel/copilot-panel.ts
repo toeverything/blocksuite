@@ -3,6 +3,7 @@ import './doc/doc.js';
 import './edgeless/edgeless.js';
 import './copilot-service';
 
+import { AffineFormatBarWidget } from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -20,6 +21,7 @@ import {
   DocIcon,
   EdgelessIcon,
   SettingIcon,
+  StarIcon,
 } from './icons.js';
 import { AILogic } from './logic.js';
 import { getSurfaceElementFromEditor } from './utils/selection-utils.js';
@@ -256,3 +258,34 @@ declare global {
     'copilot-panel': CopilotPanel;
   }
 }
+AffineFormatBarWidget.registerCustomRenderer({
+  render(): TemplateResult | undefined {
+    const copilot = document.querySelector('copilot-panel');
+    if (!copilot) {
+      return;
+    }
+    const ask = async () => {
+      console.log('ask');
+      await copilot.aiLogic?.chat.selectTextForBackground();
+    };
+    return html`
+      <style>
+        .copilot-format-bar-item {
+          padding: 4px;
+          border-radius: 4px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--affine-icon-color);
+        }
+        .copilot-format-bar-item:hover {
+          background-color: var(--affine-hover-color);
+        }
+      </style>
+      <div class="copilot-format-bar-item" @click="${ask}">
+        ${StarIcon} Ask AI
+      </div>
+    `;
+  },
+});
