@@ -109,9 +109,9 @@ export class ParagraphBlockComponent extends BlockElement<
     .affine-paragraph-rich-text-wrapper {
       position: relative;
     }
-    .affine-paragraph-rich-text-wrapper rich-text {
-      /* -webkit-font-smoothing: antialiased; */
-    }
+    /* .affine-paragraph-rich-text-wrapper rich-text {
+      -webkit-font-smoothing: antialiased;
+    } */
     code {
       font-size: calc(var(--affine-font-base) - 3px);
     }
@@ -275,10 +275,6 @@ export class ParagraphBlockComponent extends BlockElement<
     bindContainerHotkey(this);
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
-
-    this.disposables.addFromEvent(document, 'selectionchange', () => {
-      this._updatePlaceholder();
-    });
   }
 
   override firstUpdated() {
@@ -295,6 +291,16 @@ export class ParagraphBlockComponent extends BlockElement<
         this._updatePlaceholder();
       }
     });
+
+    this.updateComplete
+      .then(() => {
+        const inlineEditor = this._richTextElement?.inlineEditor;
+        assertExists(inlineEditor);
+        this.disposables.add(
+          inlineEditor.slots.inputting.on(this._updatePlaceholder)
+        );
+      })
+      .catch(console.error);
   }
 
   private _updatePlaceholder = () => {

@@ -49,6 +49,11 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     );
     this.editor.disposables.addFromEvent(
       eventSource,
+      'compositionupdate',
+      this._onCompositionUpdate
+    );
+    this.editor.disposables.addFromEvent(
+      eventSource,
       'compositionend',
       (event: CompositionEvent) => {
         this._onCompositionEnd(event).catch(console.error);
@@ -183,6 +188,14 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     }
   };
 
+  private _onCompositionUpdate = () => {
+    if (!this.editor.rootElement.isConnected) return;
+
+    if (this.editor.isReadonly || !this._isRangeCompletelyInRoot()) return;
+
+    this.editor.slots.inputting.emit();
+  };
+
   private _onCompositionEnd = async (event: CompositionEvent) => {
     this._isComposing = false;
     if (!this.editor.rootElement.isConnected) return;
@@ -221,6 +234,8 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
         false
       );
     }
+
+    this.editor.slots.inputting.emit();
   };
 
   private _onBeforeInput = (event: InputEvent) => {
@@ -272,15 +287,21 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
       newInlineRange,
       this.editor as InlineEditor
     );
+
+    this.editor.slots.inputting.emit();
   };
 
   private _onKeyDown = (event: KeyboardEvent) => {
+    const inlineRange = this.editor.getInlineRange();
+    if (!inlineRange) return;
+
+    this.editor.slots.keydown.emit(event);
+
     if (
       !event.shiftKey &&
       (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
     ) {
-      const inlineRange = this.editor.getInlineRange();
-      if (!inlineRange || inlineRange.length !== 0) return;
+      if (inlineRange.length !== 0) return;
 
       const prevent = () => {
         event.preventDefault();

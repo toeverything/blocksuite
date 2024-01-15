@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { InlineRange } from '@blocksuite/inline';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -74,7 +75,8 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.topContenteditableElement;
+    assertExists(databaseBlock);
+    return databaseBlock.topContenteditableElement;
   }
 
   override firstUpdated() {
@@ -85,34 +87,30 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
     this.updateComplete
       .then(() => {
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'focus',
-          this._onTitleFocus
+        this.disposables.add(
+          this.inlineEditor.slots.keydown.on(this._onKeyDown)
         );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'blur',
-          this._onTitleBlur
+
+        this.disposables.add(
+          this.inlineEditor.slots.inputting.on(() => {
+            this.isComposing = this.inlineEditor.isComposing;
+          })
         );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'compositionstart',
-          () => {
-            this.isComposing = true;
-          }
-        );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'compositionend',
-          () => {
-            this.isComposing = false;
-          }
-        );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'keydown',
-          this._onKeyDown
+
+        let beforeInlineRange: InlineRange | null = null;
+        this.disposables.add(
+          this.inlineEditor.slots.inlineRangeUpdate.on(([inlineRange]) => {
+            if (inlineRange) {
+              if (!beforeInlineRange) {
+                this.isActive = true;
+              }
+            } else {
+              if (beforeInlineRange) {
+                this.isActive = false;
+              }
+            }
+            beforeInlineRange = inlineRange;
+          })
         );
       })
       .catch(console.error);
@@ -136,12 +134,6 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   @state()
   private isActive = false;
-  private _onTitleFocus = () => {
-    this.isActive = true;
-  };
-  private _onTitleBlur = () => {
-    this.isActive = false;
-  };
 
   override render() {
     const isEmpty =

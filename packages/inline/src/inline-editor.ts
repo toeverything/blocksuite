@@ -82,6 +82,14 @@ export class InlineEditor<
     renderComplete: new Slot(),
     inlineRangeUpdate: new Slot<InlineRangeUpdatedProp>(),
     inlineRangeApply: new Slot<Range>(),
+    /**
+     * Corresponding to the `compositionUpdate` and `beforeInput` events, and triggered only when the `inlineRange` is not null.
+     */
+    inputting: new Slot(),
+    /**
+     * Triggered only when the `inlineRange` is not null.
+     */
+    keydown: new Slot<KeyboardEvent>(),
   };
 
   get yText() {

@@ -210,7 +210,8 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   get topContenteditableElement() {
     const databaseBlock =
       this.closest<DatabaseBlockComponent>('affine-database');
-    return databaseBlock?.topContenteditableElement;
+    assertExists(databaseBlock);
+    return databaseBlock.topContenteditableElement;
   }
 
   override connectedCallback() {
@@ -225,15 +226,14 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   }
 
   override firstUpdated() {
-    assertExists(this._richTextElement);
-    this.disposables.addFromEvent(
-      this._richTextElement,
-      'keydown',
-      this._handleKeyDown
-    );
-
     this._richTextElement?.updateComplete
-      .then(() => this.inlineEditor.focusEnd())
+      .then(() => {
+        this.disposables.add(
+          this.inlineEditor.slots.keydown.on(this._handleKeyDown)
+        );
+
+        this.inlineEditor.focusEnd();
+      })
       .catch(console.error);
   }
 
