@@ -7,7 +7,11 @@ import type {
 } from '../../../../_common/utils/index.js';
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
 import type { ShapeElement } from '../../../../surface-block/index.js';
-import { Bound, CanvasElementType } from '../../../../surface-block/index.js';
+import {
+  Bound,
+  CanvasElementType,
+  StrokeStyle,
+} from '../../../../surface-block/index.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
@@ -252,19 +256,29 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   createOverlay() {
     this.clearOverlay();
     const options = SHAPE_OVERLAY_OPTIONS;
-    const computedStyle = getComputedStyle(this._edgeless);
     const attributes =
       this._edgeless.surface.service.editSession.getLastProps('shape');
-    options.stroke = computedStyle.getPropertyValue(attributes.strokeColor);
-    options.fill = computedStyle.getPropertyValue(attributes.fillColor);
+    options.stroke = attributes.strokeColor;
+    options.fill = attributes.fillColor;
+    switch (attributes.strokeStyle) {
+      case StrokeStyle.Dashed:
+        options.strokeLineDash = [12, 12];
+        break;
+      case StrokeStyle.None:
+        options.strokeLineDash = [];
+        options.stroke = 'transparent';
+        break;
+      default:
+        options.strokeLineDash = [];
+    }
     let shapeType: string = attributes.shapeType;
     if (attributes.radius > 0 && shapeType === 'rect') {
       shapeType = 'roundedRect';
     }
     this._shapeOverlay = new ShapeOverlay(this._edgeless, shapeType, options, {
       shapeStyle: attributes.shapeStyle,
-      fillColor: attributes.fillColor,
-      strokeColor: attributes.strokeColor,
+      fillColor: options.fill,
+      strokeColor: options.stroke,
     });
     this._edgeless.surface.viewport.addOverlay(this._shapeOverlay);
   }
