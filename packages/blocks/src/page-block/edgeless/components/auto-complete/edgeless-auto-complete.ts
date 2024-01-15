@@ -372,22 +372,24 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const { selectedRect } = this;
     const width = 72;
     const height = 44;
-    const Arrows = [
-      Direction.Right,
-      Direction.Bottom,
-      Direction.Left,
-      Direction.Top,
-    ].map(type => {
+    // Auto-complete arrows for shape and note are different
+    // Shape: right, bottom, left, top
+    // Note: right, left
+    const arrowDirections = isShape
+      ? [Direction.Right, Direction.Bottom, Direction.Left, Direction.Top]
+      : [Direction.Right, Direction.Left];
+    const arrowMargin = isShape ? height / 2 : height * (2 / 3);
+    const Arrows = arrowDirections.map(type => {
       let transform = '';
 
       switch (type) {
         case Direction.Top:
-          transform += `translate(${selectedRect.width / 2}px, ${
-            -height / 2
-          }px)`;
+          transform += `translate(${
+            selectedRect.width / 2
+          }px, ${-arrowMargin}px)`;
           break;
         case Direction.Right:
-          transform += `translate(${selectedRect.width + height / 2}px, ${
+          transform += `translate(${selectedRect.width + arrowMargin}px, ${
             selectedRect.height / 2
           }px)`;
 
@@ -395,12 +397,12 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
           break;
         case Direction.Bottom:
           transform += `translate(${selectedRect.width / 2}px, ${
-            selectedRect.height + height / 2
+            selectedRect.height + arrowMargin
           }px)`;
           isShape && (transform += `rotate(180deg)`);
           break;
         case Direction.Left:
-          transform += `translate(${-height / 2}px, ${
+          transform += `translate(${-arrowMargin}px, ${
             selectedRect.height / 2
           }px)`;
           isShape && (transform += `rotate(-90deg)`);
