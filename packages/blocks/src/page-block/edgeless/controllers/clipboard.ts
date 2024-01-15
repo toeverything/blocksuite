@@ -875,6 +875,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const replaceRichTextWithSvgElementFunc =
       this._replaceRichTextWithSvgElement.bind(this);
 
+    // TODO: use image proxy endpoint middleware shared with image block
     let _imageProxyEndpoint: string | undefined;
     if (
       !_imageProxyEndpoint &&
