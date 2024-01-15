@@ -82,6 +82,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     const options = {
       childFlavour,
       childType,
+      collapse: false,
     };
     const point = new Point(e.point.x, e.point.y);
     addNote(this._edgeless, this._page, point, options);
@@ -140,6 +141,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     const options = {
       childFlavour,
       childType,
+      collapse: true,
     };
     const [x, y] = this._surface.viewport.toViewCoord(
       this._draggingNoteOverlay.x,

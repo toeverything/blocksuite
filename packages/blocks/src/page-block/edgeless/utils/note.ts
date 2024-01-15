@@ -6,12 +6,14 @@ import {
   type Point,
   type TopLevelBlockModel,
 } from '../../../_common/utils/index.js';
+import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from './consts.js';
 
 export type NoteOptions = {
   childFlavour: NoteChildrenFlavour;
   childType: string | null;
+  collapse: boolean;
 };
 
 export function addNote(
@@ -28,6 +30,10 @@ export function addNote(
   });
 
   page.addBlock(options.childFlavour, { type: options.childType }, noteId);
+  if (options.collapse) {
+    const note = page.getBlockById(noteId) as NoteBlockModel;
+    page.updateBlock(note, () => (note.edgeless.collapse = true));
+  }
   edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
 
   // Wait for edgelessTool updated
