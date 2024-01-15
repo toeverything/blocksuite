@@ -1,10 +1,15 @@
 import type { Page } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import type { AffineReference } from './reference-node.js';
+
 export class ReferenceNodeConfig {
-  private _customIcon: TemplateResult | null = null;
-  private _customTitle: string | null = null;
-  private _customContent: TemplateResult | null = null;
+  private _customIcon: ((reference: AffineReference) => TemplateResult) | null =
+    null;
+  private _customTitle: ((reference: AffineReference) => string) | null = null;
+  private _customContent:
+    | ((reference: AffineReference) => TemplateResult)
+    | null = null;
   private _page: Page | null = null;
 
   get customIcon() {
@@ -23,15 +28,15 @@ export class ReferenceNodeConfig {
     return this._customContent;
   }
 
-  setCustomContent(content: TemplateResult | null) {
+  setCustomContent(content: ReferenceNodeConfig['_customContent']) {
     this._customContent = content;
   }
 
-  setCustomIcon(icon: TemplateResult | null) {
+  setCustomIcon(icon: ReferenceNodeConfig['_customIcon']) {
     this._customIcon = icon;
   }
 
-  setCustomTitle(title: string | null) {
+  setCustomTitle(title: ReferenceNodeConfig['_customTitle']) {
     this._customTitle = title;
   }
 

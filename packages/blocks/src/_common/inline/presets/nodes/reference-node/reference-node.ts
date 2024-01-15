@@ -197,16 +197,18 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const type = attributes.reference?.type;
     assertExists(type, 'Unable to get reference type!');
 
-    const title =
-      this.customTitle ??
-      (isDeleted
+    const title = this.customTitle
+      ? this.customTitle(this)
+      : isDeleted
         ? 'Deleted page'
         : refMeta.title.length > 0
           ? refMeta.title
-          : DEFAULT_PAGE_NAME);
-    const icon =
-      this.customIcon ??
-      (type === 'LinkedPage' ? FontLinkedPageIcon : FontPageIcon);
+          : DEFAULT_PAGE_NAME;
+    const icon = this.customIcon
+      ? this.customIcon(this)
+      : type === 'LinkedPage'
+        ? FontLinkedPageIcon
+        : FontPageIcon;
 
     const style = affineTextStyles(
       attributes,
@@ -219,11 +221,11 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         : {}
     );
 
-    const content =
-      this.customContent ??
-      html`${icon}<span data-title=${title} class="affine-reference-title"
-          >${title}</span
-        >`;
+    const content = this.customContent
+      ? this.customContent(this)
+      : html`${icon}<span data-title=${title} class="affine-reference-title"
+            >${title}</span
+          >`;
 
     // we need to add `<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text>` in an
     // embed element to make sure inline range calculation is correct
