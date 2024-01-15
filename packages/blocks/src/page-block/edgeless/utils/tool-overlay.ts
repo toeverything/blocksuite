@@ -500,7 +500,7 @@ export class DraggingNoteOverlay extends NoteOverlay {
 
   override render(ctx: CanvasRenderingContext2D): void {
     // draw a rounded rectangle with provided background color and xywh
-    ctx.globalAlpha = 0.6;
+    ctx.globalAlpha = 0.8;
     ctx.fillStyle = this.backgroundColor;
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.10)';
     ctx.lineWidth = 2;
