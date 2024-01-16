@@ -3,7 +3,7 @@ import type {
   NoteBlockModel,
 } from '@blocksuite/blocks';
 import { BlocksUtils, Bound, NoteDisplayMode } from '@blocksuite/blocks';
-import { DisposableGroup, noop } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BlockModel, type Page } from '@blocksuite/store';
@@ -14,6 +14,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { headingKeys } from './config.js';
 import {
   type ClickBlockEvent,
+  type DisplayModeChangeEvent,
   type FitViewEvent,
   type SelectEvent,
   TOCNoteCard,
@@ -465,15 +466,54 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     );
   }
 
-  // TODO: when display mode change to page only, we should de-select the note if it is selected in edgeless mode
-  // private _handleDisplayModeChange(e: DisplayModeChangeEvent) {
-  //   if (this._isEdgelessMode() || !this.editorHost) return;
+  private _deSelectNoteInEdgelessMode(note: NoteBlockModel) {
+    if (!this._isEdgelessMode() || !this.edgeless) return;
 
-  //   const { noteId } = e.detail;
-  //   const pageId = this.page.root?.id;
-  //   if (!pageId) return;
+    const { selectionManager } = this.edgeless;
+    if (!selectionManager.has(note.id)) return;
+    const selectedIds = selectionManager.selectedIds.filter(
+      id => id !== note.id
+    );
+    selectionManager.set({
+      elements: selectedIds,
+      editing: false,
+    });
+  }
 
-  // }
+  // when display mode change to page only, we should de-select the note if it is selected in edgeless mode
+  private _handleDisplayModeChange(e: DisplayModeChangeEvent) {
+    const { note, newMode } = e.detail;
+    const { displayMode: currentMode } = note;
+    if (newMode === currentMode) {
+      return;
+    }
+
+    this.page.updateBlock(note, { displayMode: newMode });
+
+    const noteParent = this.page.getParent(note);
+    assertExists(noteParent);
+    const noteParentChildNotes = noteParent.children.filter(block =>
+      BlocksUtils.matchFlavours(block, ['affine:note'])
+    ) as NoteBlockModel[];
+    const noteParentLastNote =
+      noteParentChildNotes[noteParentChildNotes.length - 1];
+
+    // When the display mode of a note change from edgeless to page visible
+    // We should move the note to the end of the note list
+    if (
+      currentMode === NoteDisplayMode.EdgelessOnly &&
+      note !== noteParentLastNote
+    ) {
+      this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
+    }
+
+    // When the display mode of a note changed to page only
+    // We should check if the note is selected in edgeless mode
+    // If so, we should de-select it
+    if (newMode === NoteDisplayMode.PageOnly) {
+      this._deSelectNoteInEdgelessMode(note);
+    }
+  }
 
   private _scrollToBlock(e: ClickBlockEvent) {
     if (this._isEdgelessMode() || !this.editorHost) return;
@@ -600,6 +640,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
                 @drag=${this._drag}
                 @fitview=${this._fitToElement}
                 @clickblock=${this._scrollToBlock}
+                @displaymodechange=${this._handleDisplayModeChange}
               ></toc-note-card>
             `
           )
@@ -620,6 +661,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
                   .showPreviewIcon=${this.showPreviewIcon}
                   .enableNotesSorting=${this.enableNotesSorting}
                   @fitview=${this._fitToElement}
+                  @displaymodechange=${this._handleDisplayModeChange}
                 ></toc-note-card>`
             )} `
         : nothing}

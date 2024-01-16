@@ -1,13 +1,12 @@
 import {
-  BlocksUtils,
   createButtonPopper,
   getThemeMode,
   type NoteBlockModel,
-  NoteDisplayMode,
+  type NoteDisplayMode,
   on,
   once,
 } from '@blocksuite/blocks';
-import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
+import { DisposableGroup, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { BlockModel, Page } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
@@ -49,7 +48,8 @@ export type ClickBlockEvent = CustomEvent<{
 }>;
 
 export type DisplayModeChangeEvent = CustomEvent<{
-  noteId: string;
+  note: NoteBlockModel;
+  newMode: NoteDisplayMode;
 }>;
 
 const styles = css`
@@ -382,43 +382,18 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     this.dispatchEvent(event);
   }
 
-  private _dispatchDisplayModeChangeEvent(note: NoteBlockModel) {
+  private _dispatchDisplayModeChangeEvent(
+    note: NoteBlockModel,
+    newMode: NoteDisplayMode
+  ) {
     const event = new CustomEvent('displaymodechange', {
       detail: {
-        noteId: note.id,
+        note,
+        newMode,
       },
     });
 
     this.dispatchEvent(event);
-  }
-
-  private _setDisplayMode(note: NoteBlockModel, newMode: NoteDisplayMode) {
-    const { displayMode: currentMode } = note;
-    if (newMode === currentMode) {
-      return;
-    }
-
-    this.page.updateBlock(note, { displayMode: newMode });
-
-    const noteParent = this.page.getParent(note);
-    assertExists(noteParent);
-    const noteParentChildNotes = noteParent.children.filter(block =>
-      BlocksUtils.matchFlavours(block, ['affine:note'])
-    ) as NoteBlockModel[];
-    const noteParentLastNote =
-      noteParentChildNotes[noteParentChildNotes.length - 1];
-
-    if (
-      currentMode === NoteDisplayMode.EdgelessOnly &&
-      newMode !== NoteDisplayMode.EdgelessOnly &&
-      note !== noteParentLastNote
-    ) {
-      // move to the end
-      this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
-    }
-
-    this._displayModePopper?.hide();
-    this._dispatchDisplayModeChangeEvent(note);
   }
 
   override render() {
@@ -469,8 +444,10 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
           <note-display-mode-panel
             .displayMode=${displayMode}
             .panelWidth=${220}
-            .onSelect=${(newMode: NoteDisplayMode) =>
-              this._setDisplayMode(this.note, newMode)}
+            .onSelect=${(newMode: NoteDisplayMode) => {
+              this._dispatchDisplayModeChangeEvent(this.note, newMode);
+              this._displayModePopper?.toggle();
+            }}
           >
           </note-display-mode-panel>
         </div>`}

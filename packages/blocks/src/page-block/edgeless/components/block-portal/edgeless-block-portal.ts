@@ -315,7 +315,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       if (isNoteBlock(note)) {
         if (note.displayMode === NoteDisplayMode.EdgelessOnly) {
           edgelessOnlyNotesSet.add(note);
-        } else {
+        } else if (note.displayMode === NoteDisplayMode.PageAndEdgeless) {
           pageVisibleBlocks.set(note, 1);
         }
       }
