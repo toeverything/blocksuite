@@ -7,6 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   AutoConnectLeftIcon,
   AutoConnectRightIcon,
+  HiddenIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { SmallPageIcon } from '../../../../_common/icons/text.js';
 import type { NoteBlockModel } from '../../../../models.js';
@@ -50,7 +51,7 @@ function calculatePosition(gap: number, count: number, iconWidth: number) {
   return positions;
 }
 
-function getIndexLabelTooltip(content: string, icon: TemplateResult) {
+function getIndexLabelTooltip(icon: TemplateResult, content: string) {
   const styles = css`
     .index-label-tooltip {
       display: flex;
@@ -148,7 +149,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   pageVisibleElementsMap!: Map<AutoConnectElement, number>;
 
   @property({ attribute: false })
-  edgelessOnlyNotes!: NoteBlockModel[];
+  edgelessOnlyNotesSet!: Set<NoteBlockModel>;
 
   @state()
   private _index = -1;
@@ -166,6 +167,9 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
       edgeless.slots.elementUpdated.on(({ id }) => {
         const element = surface.pickById(id) as AutoConnectElement;
         if (element && this.pageVisibleElementsMap.has(element)) {
+          this.requestUpdate();
+        }
+        if (isNoteBlock(element) && this.edgelessOnlyNotesSet.has(element)) {
           this.requestUpdate();
         }
       })
@@ -278,12 +282,12 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     </div> `;
   }
 
-  protected override render() {
-    if (!this.show) return nothing;
-
+  private _PageVisibleIndexLabels(
+    elements: AutoConnectElement[],
+    counts: number[]
+  ) {
     const { viewport } = this.surface;
     const { zoom } = viewport;
-    const { elements, counts } = this._getElementsAndCounts();
     let index = 0;
 
     return html`${repeat(
@@ -325,7 +329,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
             >
               ${index}
               <affine-tooltip tip-position="bottom">
-                ${getIndexLabelTooltip('Page mode index', SmallPageIcon)}
+                ${getIndexLabelTooltip(SmallPageIcon, 'Page mode index')}
               </affine-tooltip>
             </div>
           `);
@@ -354,7 +358,54 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
           ${components}
         </div>`;
       }
-    )}
+    )}`;
+  }
+
+  private _EdgelessOnlyLabels() {
+    const { edgelessOnlyNotesSet } = this;
+    if (!edgelessOnlyNotesSet.size) return nothing;
+
+    return html`${repeat(
+      edgelessOnlyNotesSet,
+      note => note.id,
+      note => {
+        const { viewport } = this.surface;
+        const { zoom } = viewport;
+        const bound = Bound.deserialize(note.xywh);
+        const [left, right] = viewport.toViewCoord(bound.x, bound.y);
+        const [width, height] = [bound.w * zoom, bound.h * zoom];
+        const style = styleMap({
+          width: '24px',
+          height: '24px',
+          borderRadius: '50%',
+          backgroundColor: 'var(--affine-text-secondary-color)',
+          border: '1px solid var(--affine-border-color)',
+          color: 'var(--affine-white)',
+          position: 'absolute',
+          transform: `translate(${left + width / 2 - 44 / 2}px, ${
+            right + height + 16
+          }px)`,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        });
+        return html`<div style=${style}>
+          ${HiddenIcon}
+          <affine-tooltip tip-position="bottom">
+            ${getIndexLabelTooltip(SmallPageIcon, 'Hidden on page')}
+          </affine-tooltip>
+        </div>`;
+      }
+    )}`;
+  }
+
+  protected override render() {
+    if (!this.show) return nothing;
+
+    const { elements, counts } = this._getElementsAndCounts();
+
+    return html`${this._PageVisibleIndexLabels(elements, counts)}
+    ${this._EdgelessOnlyLabels()}
     ${this._index >= 0 && this._index < elements.length
       ? this._NavigatorComponent(elements)
       : nothing} `;

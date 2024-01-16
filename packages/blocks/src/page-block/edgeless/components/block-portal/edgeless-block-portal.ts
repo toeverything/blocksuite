@@ -300,12 +300,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     const notes = surface.getBlocks(['affine:note']);
     const layers = surface.layer.layers;
     const pageVisibleBlocks = new Map<AutoConnectElement, number>();
-    const edgelessOnlyNotes: NoteBlockModel[] = [];
+    const edgelessOnlyNotesSet = new Set<NoteBlockModel>();
 
     notes.forEach(note => {
       if (isNoteBlock(note)) {
         if (note.displayMode === NoteDisplayMode.EdgelessOnly) {
-          edgelessOnlyNotes.push(note);
+          edgelessOnlyNotesSet.add(note);
         } else {
           pageVisibleBlocks.set(note, 1);
         }
@@ -399,7 +399,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       ></edgeless-selected-rect>
       <edgeless-index-label
         .pageVisibleElementsMap=${pageVisibleBlocks}
-        .edgelessOnlyNotes=${edgelessOnlyNotes}
+        .edgelessOnlyNotesSet=${edgelessOnlyNotesSet}
         .surface=${surface}
         .edgeless=${edgeless}
         .show=${this._showAutoConnect}
