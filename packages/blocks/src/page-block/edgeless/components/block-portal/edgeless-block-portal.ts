@@ -118,7 +118,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   canvasSlot!: HTMLDivElement;
 
   @state()
-  private _showAutoConnect = false;
+  private _showIndexLabel = false;
 
   @state()
   private _toolbarVisible = false;
@@ -188,7 +188,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     });
   }
 
-  private _updateAutoConnect() {
+  private _updateIndexLabel() {
     const { edgeless } = this;
     const { elements } = edgeless.selectionManager;
     if (
@@ -197,9 +197,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       (isNoteBlock(elements[0]) ||
         this._surfaceRefReferenceSet.has(elements[0].id))
     ) {
-      this._showAutoConnect = true;
+      this._showIndexLabel = true;
     } else {
-      this._showAutoConnect = false;
+      this._showIndexLabel = false;
     }
   }
 
@@ -258,8 +258,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         ) {
           requestConnectedFrame(() => {
             this._updateReference();
-            this._updateAutoConnect();
+            this._updateIndexLabel();
           }, this);
+        }
+        // TODO: need to optimize, should only update index label when note display mode changed
+        if (type === 'update' && flavour === 'affine:note') {
+          this.requestUpdate();
         }
       })
     );
@@ -273,7 +277,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         } else {
           this._toolbarVisible = true;
         }
-        this._updateAutoConnect();
+        this._updateIndexLabel();
       })
     );
 
@@ -402,7 +406,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         .edgelessOnlyNotesSet=${edgelessOnlyNotesSet}
         .surface=${surface}
         .edgeless=${edgeless}
-        .show=${this._showAutoConnect}
+        .show=${this._showIndexLabel}
       ></edgeless-index-label>
       ${this._toolbarVisible && !page.readonly
         ? html`<edgeless-component-toolbar .edgeless=${edgeless}>
