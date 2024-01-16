@@ -164,6 +164,13 @@ export const styles = css`
     font-weight: 400;
     line-height: 20px;
   }
+  .affine-embed-figma-content-url:hover > span {
+    color: var(--affine-link-color);
+  }
+  .affine-embed-figma-content-url:hover svg {
+    fill: var(--affine-link-color);
+  }
+
   .affine-embed-figma-content-url-icon {
     display: flex;
     align-items: center;
@@ -174,6 +181,16 @@ export const styles = css`
   .affine-embed-figma-content-url-icon svg {
     height: 12px;
     width: 12px;
+    fill: var(--affine-text-secondary-color);
+  }
+
+  .affine-embed-figma-block.selected {
+    .affine-embed-figma-content-url > span {
+      color: var(--affine-link-color);
+    }
+    .affine-embed-figma-content-url svg {
+      fill: var(--affine-link-color);
+    }
   }
 `;
 

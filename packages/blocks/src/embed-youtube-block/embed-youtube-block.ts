@@ -37,6 +37,9 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   loading = false;
 
   @state()
+  private _isSelected = false;
+
+  @state()
   private _showOverlay = true;
 
   @state()
@@ -112,10 +115,10 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     // this is required to prevent iframe from capturing pointer events
     this.disposables.add(
       this.std.selection.slots.changed.on(sels => {
-        if (this._isDragging) return;
-        this._showOverlay = !sels.some(sel =>
+        this._isSelected = sels.some(sel =>
           PathFinder.equals(sel.path, this.path)
         );
+        this._showOverlay = this._isDragging || !this._isSelected;
       })
     );
     // this is required to prevent iframe from capturing pointer events
@@ -208,6 +211,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
             class=${classMap({
               'affine-embed-youtube-block': true,
               loading,
+              selected: this._isSelected,
             })}
             @click=${this._handleClick}
           >
