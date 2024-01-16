@@ -123,9 +123,6 @@ export const quickActionConfig: QuickActionConfig[] = [
 
       host.selection.clear();
 
-      const firstBlock = selectedModels[0];
-      assertExists(firstBlock);
-
       const page = host.page;
       const linkedPage = page.workspace.createPage({});
       linkedPage
@@ -136,6 +133,9 @@ export const quickActionConfig: QuickActionConfig[] = [
           linkedPage.addBlock('affine:surface', {}, pageBlockId);
           const noteId = linkedPage.addBlock('affine:note', {}, pageBlockId);
 
+          const firstBlock = selectedModels[0];
+          assertExists(firstBlock);
+
           page.addSiblingBlocks(
             firstBlock,
             [
@@ -145,9 +145,20 @@ export const quickActionConfig: QuickActionConfig[] = [
               },
             ],
             'before'
-          )[0];
+          );
 
-          let title = '';
+          if (
+            matchFlavours(firstBlock, ['affine:paragraph']) &&
+            firstBlock.type.match(/^h[1-6]$/)
+          ) {
+            const title = firstBlock.text.toString();
+            linkedPage.workspace.setPageMeta(linkedPage.id, {
+              title,
+            });
+
+            page.deleteBlock(firstBlock);
+            selectedModels.shift();
+          }
 
           selectedModels.forEach(model => {
             const keys = model.keys as (keyof typeof model)[];
@@ -155,17 +166,6 @@ export const quickActionConfig: QuickActionConfig[] = [
             const blockProps = Object.fromEntries(
               keys.map((key, i) => [key, values[i]])
             );
-
-            if (!title && matchFlavours(model, ['affine:paragraph'])) {
-              const type = model.type;
-              if (type.match(/^h[1-6]$/)) {
-                title = model.text.toString();
-                linkedPage.workspace.setPageMeta(linkedPage.id, {
-                  title,
-                });
-              }
-            }
-
             linkedPage.addBlock(model.flavour, blockProps, noteId);
             page.deleteBlock(model);
           });
@@ -176,7 +176,6 @@ export const quickActionConfig: QuickActionConfig[] = [
         'affine:embed-linked-doc'
       ) as EmbedLinkedDocService | null;
       assertExists(linkedDocService);
-
       linkedDocService.slots.linkedDocCreated.emit({ pageId: linkedPage.id });
     },
   },
