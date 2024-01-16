@@ -58,10 +58,11 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     .change-embed-card-container {
       display: flex;
       align-items: center;
+      gap: 12px;
     }
 
     .change-embed-card-button {
-      width: 40px;
+      width: 24px;
       height: 24px;
       border-radius: 4px;
       display: flex;
@@ -129,7 +130,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     component-toolbar-menu-divider {
       height: 24px;
-      margin: 0 12px;
     }
 
     embed-card-style-panel {
@@ -482,7 +482,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           .tooltip=${'Add Caption'}
-          class="change-embed-card-button reload"
+          class="change-embed-card-button caption"
           ?disabled=${this._page.readonly}
           @click=${() => this._showCaption()}
         >
