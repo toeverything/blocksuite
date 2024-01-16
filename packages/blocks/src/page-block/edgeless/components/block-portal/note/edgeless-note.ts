@@ -3,10 +3,12 @@ import '../../note-slicer/index.js';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
+import { MoreIndicatorIcon } from '../../../../../_common/icons/edgeless.js';
 import { almostEqual } from '../../../../../_common/utils/math.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
@@ -97,6 +99,41 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 
 @customElement('edgeless-block-portal-note')
 export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> {
+  static override styles = css`
+    .edgeless-note-collapse-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      z-index: 2;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.2;
+      transition: opacity 0.3s;
+    }
+    .edgeless-note-collapse-button:hover {
+      opacity: 1;
+    }
+    .edgeless-note-collapse-button.flip {
+      transform: translateX(-50%) rotate(180deg);
+    }
+    .edgeless-note-collapse-button.hide {
+      display: none;
+    }
+
+    .edgeless-block-portal-note:has(.edgeless-note-collapse-button:hover) {
+      .affine-note-mask {
+        background-color: var(--affine-hover-color);
+      }
+    }
+  `;
+
+  @state()
+  private _isSelected = false;
+
   @state()
   private _editing = false;
 
@@ -105,6 +142,9 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   @state()
   private _isHover = false;
+
+  @state()
+  private _noteFullHeight = 0;
 
   @query('affine-note')
   private _affineNote!: HTMLDivElement;
@@ -120,6 +160,79 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         }
       })
     );
+  }
+
+  private get _isShowCollapsedContent() {
+    return this.model.edgeless.collapse && (this._isResizing || this._isHover);
+  }
+
+  private _hovered() {
+    if (!this._isHover && this.edgeless.selectionManager.has(this.model.id)) {
+      this._isHover = true;
+    }
+  }
+
+  private _leaved() {
+    if (this._isHover) {
+      this._isHover = false;
+    }
+  }
+
+  private _setCollapse(event: MouseEvent) {
+    event.stopImmediatePropagation();
+    const { xywh } = this.model;
+    const { collapse, collapsedHeight } = this.model.edgeless;
+
+    const bound = Bound.deserialize(xywh);
+    if (collapse) {
+      this.model.page.updateBlock(this.model, () => {
+        this.model.edgeless.collapsedHeight = bound.h;
+        this.model.edgeless.collapse = false;
+      });
+    } else if (collapsedHeight) {
+      bound.h = collapsedHeight;
+      this.model.page.updateBlock(this.model, () => {
+        this.model.edgeless.collapse = true;
+        this.model.xywh = bound.serialize();
+      });
+    }
+
+    this.edgeless.selectionManager.clear();
+  }
+
+  private _collapsedContent() {
+    if (!this._isShowCollapsedContent || !this._affineNote) {
+      return nothing;
+    }
+
+    const { model, surface } = this;
+    const bound = Bound.deserialize(model.xywh);
+    if (bound.h >= this._noteFullHeight) {
+      return nothing;
+    }
+
+    const zoom = surface.viewport.zoom;
+
+    return html`
+      <div
+        style=${styleMap({
+          width: `${bound.w}px`,
+          height: `${
+            this._noteFullHeight - EDGELESS_BLOCK_CHILD_PADDING / zoom - bound.h
+          }px`,
+          position: 'absolute',
+          left: '0px',
+          top: `${bound.h}px`,
+          background: 'var(--affine-white)',
+          opacity: 0.5,
+          pointerEvents: 'none',
+          borderLeft: '2px var(--affine-blue) solid',
+          borderBottom: '2px var(--affine-blue) solid',
+          borderRight: '2px var(--affine-blue) solid',
+          borderRadius: '0 0 8px 8px',
+        })}
+      ></div>
+    `;
   }
 
   override firstUpdated() {
@@ -144,61 +257,25 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
     _disposables.add(
       edgeless.selectionManager.slots.updated.on(() => {
-        if (edgeless.selectionManager.elements.includes(this.model)) {
-          this._isHover =
-            edgeless.tools.getHoverState()?.content === this.model;
-        }
+        this._isSelected = edgeless.selectionManager.elements.includes(
+          this.model
+        );
+
+        this._isHover =
+          this._isSelected &&
+          edgeless.tools.getHoverState()?.content === this.model;
       })
     );
-  }
 
-  private _hovered() {
-    if (!this._isHover && this.edgeless.selectionManager.has(this.model.id)) {
-      this._isHover = true;
-    }
-  }
-
-  private _leaved() {
-    if (this._isHover) {
-      this._isHover = false;
-    }
-  }
-
-  private get _isShowCollapsedContent() {
-    return this.model.edgeless.collapse && (this._isResizing || this._isHover);
-  }
-
-  private _collapsedContent() {
-    const { model, surface } = this;
-    if (!this._isShowCollapsedContent || !this._affineNote) return nothing;
-
-    const rect = this._affineNote.getBoundingClientRect();
-    const bound = Bound.deserialize(model.xywh);
-    const zoom = surface.viewport.zoom;
-
-    if (bound.h >= (rect.height + EDGELESS_BLOCK_CHILD_PADDING) / zoom)
-      return nothing;
-
-    return html`
-      <div
-        style=${styleMap({
-          width: `${bound.w}px`,
-          height: `${
-            (rect.height + EDGELESS_BLOCK_CHILD_PADDING) / zoom - bound.h
-          }px`,
-          position: 'absolute',
-          left: '0px',
-          top: `${bound.h}px`,
-          background: 'var(--affine-white)',
-          opacity: 0.5,
-          pointerEvents: 'none',
-          borderLeft: '2px var(--affine-blue) solid',
-          borderBottom: '2px var(--affine-blue) solid',
-          borderRight: '2px var(--affine-blue) solid',
-          borderRadius: '0 0 8px 8px',
-        })}
-      ></div>
-    `;
+    const observer = new MutationObserver(() => {
+      const affineNote = this._affineNote;
+      const rect = affineNote.getBoundingClientRect();
+      const zoom = this.surface.viewport.zoom;
+      this._noteFullHeight =
+        (rect.height + 2 * EDGELESS_BLOCK_CHILD_PADDING) / zoom;
+    });
+    observer.observe(this, { childList: true, subtree: true });
+    _disposables.add(() => observer.disconnect());
   }
 
   override render() {
@@ -206,7 +283,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     const { xywh, background, hidden, edgeless } = model;
     const { borderRadius, borderSize, borderStyle, shadowType } =
       edgeless.style;
-    const { collapse } = edgeless;
+    const { collapse, collapsedHeight } = edgeless;
     const bound = Bound.deserialize(xywh);
 
     const style = {
@@ -250,6 +327,15 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
           : `var(${shadowType})`,
     };
 
+    const isCollapsable =
+      collapse != null &&
+      collapsedHeight != null &&
+      collapsedHeight !== this._noteFullHeight;
+
+    const isCollapseArrowUp = collapse
+      ? this._noteFullHeight < bound.h
+      : !!collapsedHeight && this._noteFullHeight > collapsedHeight;
+
     return html`
       <div
         class="edgeless-block-portal-note blocksuite-overlay"
@@ -259,6 +345,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         @mousemove=${this._hovered}
       >
         <div class="note-background" style=${styleMap(backgroundStyle)}></div>
+
         <div
           style=${styleMap({
             width: '100%',
@@ -269,7 +356,23 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         >
           ${surface.edgeless.renderModel(model)}
         </div>
+
+        ${isCollapsable
+          ? html`<div
+              class="${classMap({
+                'edgeless-note-collapse-button': true,
+                flip: isCollapseArrowUp,
+                hide: this._isSelected,
+              })}"
+              @mousedown=${(e: MouseEvent) => e.stopPropagation()}
+              @mouseup=${(e: MouseEvent) => e.stopPropagation()}
+              @click=${this._setCollapse}
+            >
+              ${MoreIndicatorIcon}
+            </div>`
+          : nothing}
         ${this._collapsedContent()}
+
         <edgeless-note-mask
           .surface=${surface}
           .model=${this.model}
