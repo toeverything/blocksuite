@@ -27,7 +27,7 @@ import {
   STROKE_COLORS,
 } from '../../../../surface-block/elements/shape/consts.js';
 import {
-  type ShapeElement,
+  type ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
 } from '../../../../surface-block/index.js';
@@ -55,9 +55,9 @@ import { createButtonPopper } from '../utils.js';
 const ICON_BUTTON_PADDING_TWO = 2;
 
 function getMostCommonShape(
-  elements: ShapeElement[]
+  elements: ShapeElementModel[]
 ): ShapeTool['shapeType'] | null {
-  const shapeTypes = countBy(elements, (ele: ShapeElement) => {
+  const shapeTypes = countBy(elements, (ele: ShapeElementModel) => {
     return ele.shapeType === 'rect' && ele.radius
       ? 'roundedRect'
       : ele.shapeType;
@@ -66,24 +66,26 @@ function getMostCommonShape(
   return max ? (max[0] as ShapeTool['shapeType']) : null;
 }
 
-function getMostCommonFillColor(elements: ShapeElement[]): string | null {
-  const colors = countBy(elements, (ele: ShapeElement) => {
+function getMostCommonFillColor(elements: ShapeElementModel[]): string | null {
+  const colors = countBy(elements, (ele: ShapeElementModel) => {
     return ele.filled ? ele.fillColor : '--affine-palette-transparent';
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as string) : null;
 }
 
-function getMostCommonStrokeColor(elements: ShapeElement[]): string | null {
-  const colors = countBy(elements, (ele: ShapeElement) => {
+function getMostCommonStrokeColor(
+  elements: ShapeElementModel[]
+): string | null {
+  const colors = countBy(elements, (ele: ShapeElementModel) => {
     return ele.strokeColor;
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as string) : null;
 }
 
-function getMostCommonLineSize(elements: ShapeElement[]): LineWidth {
-  const sizes = countBy(elements, (ele: ShapeElement) => {
+function getMostCommonLineSize(elements: ShapeElementModel[]): LineWidth {
+  const sizes = countBy(elements, (ele: ShapeElementModel) => {
     return ele.strokeWidth;
   });
   const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
@@ -91,17 +93,17 @@ function getMostCommonLineSize(elements: ShapeElement[]): LineWidth {
 }
 
 function getMostCommonLineStyle(
-  elements: ShapeElement[]
+  elements: ShapeElementModel[]
 ): LineStyleButtonProps['mode'] | null {
-  const sizes = countBy(elements, (ele: ShapeElement) => {
+  const sizes = countBy(elements, (ele: ShapeElementModel) => {
     switch (ele.strokeStyle) {
-      case StrokeStyle.Solid: {
+      case 'solid': {
         return 'solid';
       }
-      case StrokeStyle.Dashed: {
+      case 'dash': {
         return 'dash';
       }
-      case StrokeStyle.None: {
+      case 'none': {
         return 'none';
       }
     }
@@ -110,12 +112,12 @@ function getMostCommonLineStyle(
   return max ? (max[0] as LineStyleButtonProps['mode']) : null;
 }
 
-function doesAllShapesContainText(elements: ShapeElement[]): boolean {
+function doesAllShapesContainText(elements: ShapeElementModel[]): boolean {
   return elements.every(ele => ele.text);
 }
 
-function getMostCommonShapeStyle(elements: ShapeElement[]): ShapeStyle {
-  const roughnesses = countBy(elements, (ele: ShapeElement) => {
+function getMostCommonShapeStyle(elements: ShapeElementModel[]): ShapeStyle {
+  const roughnesses = countBy(elements, (ele: ShapeElementModel) => {
     return ele.shapeStyle;
   });
   const max = maxBy(Object.entries(roughnesses), ([_k, count]) => count);
@@ -229,7 +231,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   ];
 
   @property({ attribute: false })
-  elements: ShapeElement[] = [];
+  elements: ShapeElementModel[] = [];
 
   @property({ attribute: false })
   page!: Page;

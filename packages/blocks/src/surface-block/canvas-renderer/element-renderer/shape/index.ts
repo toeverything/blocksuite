@@ -2,11 +2,13 @@ import type {
   ShapeElementModel,
   ShapeType,
 } from '../../../element-model/shape.js';
+import { serializeXYWH } from '../../../utils/xywh.js';
 import type { Renderer } from '../../renderer.js';
 import {
   deltaInsertsToChunks,
   getFontString,
   getLineHeight,
+  getLineWidth,
   isRTL,
   wrapTextDeltas,
 } from '../text/utils.js';
@@ -14,7 +16,11 @@ import { diamond } from './diamond.js';
 import { ellipse } from './ellipse.js';
 import { rect } from './rect.js';
 import { triangle } from './triangle.js';
-import { horizontalOffset, verticalOffset } from './utils.js';
+import {
+  horizontalOffset,
+  SHAPE_TEXT_PADDING,
+  verticalOffset,
+} from './utils.js';
 
 const shapeRenderers: {
   [key in ShapeType]: (
@@ -70,6 +76,7 @@ function renderText(
   const lines = deltaInsertsToChunks(wrapTextDeltas(text, font, w));
   const horiOffset = horizontalOffset(model.w, model.textAlign);
   const vertOffset = verticalOffset(lines, lineHeight, h, textVerticalAlign);
+  let maxLineWidth = 0;
 
   for (const [lineIndex, line] of lines.entries()) {
     for (const delta of line) {
@@ -98,6 +105,8 @@ function renderText(
         (lineIndex + 1) * lineHeight + vertOffset - 1.5
       );
 
+      maxLineWidth = Math.max(maxLineWidth, getLineWidth(str, font));
+
       if (shouldTemporarilyAttach) {
         ctx.canvas.remove();
       }
@@ -105,4 +114,18 @@ function renderText(
       ctx.restore();
     }
   }
+
+  const textOffsetX =
+    textAlign === 'center'
+      ? horiOffset - maxLineWidth / 2
+      : textAlign === 'right'
+        ? horiOffset - maxLineWidth
+        : SHAPE_TEXT_PADDING;
+
+  model.externalXYWH = serializeXYWH(
+    model.x + textOffsetX - 2,
+    model.y + vertOffset - 1.5,
+    maxLineWidth,
+    lines.length * lineHeight
+  );
 }

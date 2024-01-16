@@ -6,7 +6,7 @@ import type { ShapeElementModel } from '../../../element-model/shape.js';
 import type { Renderer } from '../../renderer.js';
 import type { TextDelta } from '../text/utils.js';
 
-const SHAPE_TEXT_PADDING = 20;
+export const SHAPE_TEXT_PADDING = 20;
 
 export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,

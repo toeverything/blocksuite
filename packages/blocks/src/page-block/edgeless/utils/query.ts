@@ -18,8 +18,8 @@ import {
   getQuadBoundsWithRotation,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
-  ShapeElement,
-  TextElement,
+  ShapeElementModel,
+  TextElementModel,
 } from '../../../surface-block/index.js';
 import type { EdgelessBlock, EdgelessElement } from '../type.js';
 import { getElementsWithoutGroup } from './group.js';
@@ -78,7 +78,9 @@ export function isCanvasElement(
 export function isCanvasElementWithText(
   element: Selectable
 ): element is CanvasElementWithText {
-  return element instanceof TextElement || element instanceof ShapeElement;
+  return (
+    element instanceof TextElementModel || element instanceof ShapeElementModel
+  );
 }
 
 export function isConnectable(

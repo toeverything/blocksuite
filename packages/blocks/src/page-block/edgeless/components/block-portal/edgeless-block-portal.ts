@@ -31,7 +31,7 @@ import {
 import type { SurfaceBlockComponent } from '../../../../index.js';
 import type { FrameBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
-import type { GroupElement } from '../../../../surface-block/index.js';
+import type { GroupElementModel } from '../../../../surface-block/index.js';
 import { type EdgelessBlockType } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
@@ -40,7 +40,7 @@ import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect.js';
 export type AutoConnectElement =
   | NoteBlockModel
   | FrameBlockModel
-  | GroupElement;
+  | GroupElementModel;
 
 const portalMap = new Map<EdgelessBlockType | RegExp, string>([
   ['affine:frame', 'edgeless-block-portal-frame'],

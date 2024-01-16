@@ -19,7 +19,12 @@ import {
 import { PointLocation } from '../utils/point-location.js';
 import type { IVec } from '../utils/vec.js';
 import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
-import { local, updateDerivedProp, yfield } from './decorators.js';
+import {
+  convertProps,
+  local,
+  updateDerivedProp,
+  yfield,
+} from './decorators.js';
 
 export type BaseProps = {
   index: string;
@@ -62,6 +67,13 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
 
   @local()
   opacity: number = 1;
+
+  @local()
+  externalXYWH: SerializedXYWH | undefined = undefined;
+
+  get externalBound(): Bound | null {
+    return this.externalXYWH ? Bound.deserialize(this.externalXYWH) : null;
+  }
 
   constructor(options: {
     yMap: Y.Map<unknown>;
@@ -131,7 +143,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       return;
     }
 
-    const curVal = this.yMap.get(prop as string);
+    const curVal = this[prop as unknown as keyof ElementModel];
     const prototype = Object.getPrototypeOf(this);
 
     this._stashed.set(prop, curVal);
@@ -140,13 +152,14 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       configurable: true,
       enumerable: true,
       get: () => this._stashed.get(prop),
-      set: (value: unknown) => {
+      set: (original: unknown) => {
+        const value = convertProps(prototype, prop as string, original, this);
         const oldValue = this._stashed.get(prop);
 
         this._stashed.set(prop, value);
         this._onChange({ [prop]: { oldValue } });
 
-        updateDerivedProp(prototype, prop as string, this);
+        updateDerivedProp(prototype, prop as string, original, this);
       },
     });
   }

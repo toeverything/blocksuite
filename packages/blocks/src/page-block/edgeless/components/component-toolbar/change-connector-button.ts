@@ -32,7 +32,7 @@ import type { CssVariableName } from '../../../../_common/theme/css-variables.js
 import { LineWidth } from '../../../../_common/types.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import {
-  type ConnectorElement,
+  type ConnectorElementModel,
   ConnectorEndpoint,
   ConnectorEndpointStyle,
   ConnectorMode,
@@ -50,20 +50,24 @@ import {
 } from '../panel/color-panel.js';
 import type { LineWidthEvent } from '../panel/line-width-panel.js';
 
-function getMostCommonColor(elements: ConnectorElement[]): CssVariableName {
-  const colors = countBy(elements, (ele: ConnectorElement) => ele.stroke);
+function getMostCommonColor(
+  elements: ConnectorElementModel[]
+): CssVariableName {
+  const colors = countBy(elements, (ele: ConnectorElementModel) => ele.stroke);
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
-function getMostCommonMode(elements: ConnectorElement[]): ConnectorMode | null {
-  const modes = countBy(elements, (ele: ConnectorElement) => ele.mode);
+function getMostCommonMode(
+  elements: ConnectorElementModel[]
+): ConnectorMode | null {
+  const modes = countBy(elements, (ele: ConnectorElementModel) => ele.mode);
   const max = maxBy(Object.entries(modes), ([_k, count]) => count);
   return max ? (Number(max[0]) as ConnectorMode) : null;
 }
 
-function getMostCommonLineWidth(elements: ConnectorElement[]): LineWidth {
-  const sizes = countBy(elements, (ele: ConnectorElement) => {
+function getMostCommonLineWidth(elements: ConnectorElementModel[]): LineWidth {
+  const sizes = countBy(elements, (ele: ConnectorElementModel) => {
     return ele.strokeWidth;
   });
   const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
@@ -71,17 +75,17 @@ function getMostCommonLineWidth(elements: ConnectorElement[]): LineWidth {
 }
 
 export function getMostCommonLineStyle(
-  elements: ConnectorElement[]
+  elements: ConnectorElementModel[]
 ): LineStyleButtonProps['mode'] | null {
-  const sizes = countBy(elements, (ele: ConnectorElement) => {
+  const sizes = countBy(elements, (ele: ConnectorElementModel) => {
     switch (ele.strokeStyle) {
-      case StrokeStyle.Solid: {
+      case 'solid': {
         return 'solid';
       }
-      case StrokeStyle.Dashed: {
+      case 'dash': {
         return 'dash';
       }
-      case StrokeStyle.None: {
+      case 'none': {
         return 'none';
       }
     }
@@ -90,7 +94,7 @@ export function getMostCommonLineStyle(
   return max ? (max[0] as LineStyleButtonProps['mode']) : null;
 }
 
-function getMostCommonRough(elements: ConnectorElement[]): boolean {
+function getMostCommonRough(elements: ConnectorElementModel[]): boolean {
   const { trueCount, falseCount } = elements.reduce(
     (counts, ele) => {
       if (ele.rough) {
@@ -107,10 +111,10 @@ function getMostCommonRough(elements: ConnectorElement[]): boolean {
 }
 
 function getMostCommonEndpointStyle(
-  elements: ConnectorElement[],
+  elements: ConnectorElementModel[],
   end: ConnectorEndpoint
 ): ConnectorEndpointStyle | null {
-  const modes = countBy(elements, (ele: ConnectorElement) =>
+  const modes = countBy(elements, (ele: ConnectorElementModel) =>
     end === ConnectorEndpoint.Front
       ? ele.frontEndpointStyle
       : ele.rearEndpointStyle
@@ -149,7 +153,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  elements: ConnectorElement[] = [];
+  elements: ConnectorElementModel[] = [];
 
   @property({ attribute: false })
   page!: Page;

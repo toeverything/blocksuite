@@ -1,6 +1,14 @@
 import { Workspace, type Y } from '@blocksuite/store';
 
 import type { SerializedXYWH } from '../index.js';
+import { Bound } from '../utils/bound.js';
+import {
+  getPointsFromBoundsWithRotation,
+  linePolygonIntersects,
+  pointInPolygon,
+  polygonNearestPoint,
+} from '../utils/math-utils.js';
+import type { IVec2 } from '../utils/vec.js';
 import { type BaseProps, ElementModel } from './base.js';
 import {
   FontFamily,
@@ -62,5 +70,27 @@ export class TextElementModel extends ElementModel<TextElementProps> {
 
   get type() {
     return 'text';
+  }
+
+  override getNearestPoint(point: IVec2): IVec2 {
+    return polygonNearestPoint(
+      Bound.deserialize(this.xywh).points,
+      point
+    ) as IVec2;
+  }
+
+  override containedByBounds(bounds: Bound): boolean {
+    const points = getPointsFromBoundsWithRotation(this);
+    return points.some(point => bounds.containsPoint(point));
+  }
+
+  override intersectWithLine(start: IVec2, end: IVec2) {
+    const points = getPointsFromBoundsWithRotation(this);
+    return linePolygonIntersects(start, end, points);
+  }
+
+  override hitTest(x: number, y: number): boolean {
+    const points = getPointsFromBoundsWithRotation(this);
+    return pointInPolygon([x, y], points);
   }
 }

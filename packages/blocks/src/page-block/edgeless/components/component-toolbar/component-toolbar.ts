@@ -38,14 +38,14 @@ import type { ImageBlockModel } from '../../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type {
   ElementModel,
-  GroupElement,
+  GroupElementModel,
 } from '../../../../surface-block/index.js';
 import {
-  type BrushElement,
+  type BrushElementModel,
   clamp,
-  type ConnectorElement,
-  type ShapeElement,
-  type TextElement,
+  type ConnectorElementModel,
+  type ShapeElementModel,
+  type TextElementModel,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
@@ -57,11 +57,11 @@ import {
 } from '../../utils/query.js';
 
 type CategorizedElements = {
-  shape?: ShapeElement[];
-  brush?: BrushElement[];
-  text?: TextElement[];
-  group?: GroupElement[];
-  connector?: ConnectorElement[];
+  shape?: ShapeElementModel[];
+  brush?: BrushElementModel[];
+  text?: TextElementModel[];
+  group?: GroupElementModel[];
+  connector?: ConnectorElementModel[];
   note?: NoteBlockModel[];
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
@@ -134,7 +134,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return result as CategorizedElements;
   }
 
-  private _ShapeButton(shapeElements?: ShapeElement[]) {
+  private _ShapeButton(shapeElements?: ShapeElementModel[]) {
     const shapeButton = shapeElements?.length
       ? html`<edgeless-change-shape-button
           .elements=${shapeElements}
@@ -146,7 +146,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return shapeButton;
   }
 
-  private _BrushButton(brushElements?: BrushElement[]) {
+  private _BrushButton(brushElements?: BrushElementModel[]) {
     return brushElements?.length
       ? html`<edgeless-change-brush-button
           .elements=${brushElements}
@@ -157,7 +157,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _ConnectorButton(connectorElements?: ConnectorElement[]) {
+  private _ConnectorButton(connectorElements?: ConnectorElementModel[]) {
     return connectorElements?.length
       ? html` <edgeless-change-connector-button
           .elements=${connectorElements}
@@ -191,7 +191,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _TextButton(textElements?: TextElement[]) {
+  private _TextButton(textElements?: TextElementModel[]) {
     return textElements?.length
       ? html`<edgeless-change-text-button
           .texts=${textElements}
@@ -214,7 +214,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _GroupButton(groups?: GroupElement[]) {
+  private _GroupButton(groups?: GroupElementModel[]) {
     return groups?.length
       ? html`<edgeless-change-group-button
           .surface=${this.surface}

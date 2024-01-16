@@ -389,7 +389,10 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     this.elementUpdated.on(({ id, props }) => {
       const element = this.getElementById(id)!;
 
-      if (element.type !== 'connector' || !props['source'] || !props['target'])
+      if (
+        element.type !== 'connector' ||
+        (!props['source'] && !props['target'])
+      )
         return;
 
       const oldConnected = [

@@ -44,6 +44,12 @@ export function titleRenderParams(group: GroupElementModel, zoom: number) {
     lineHeight,
     padding,
     offset,
+    titleBound: new Bound(
+      bound.x,
+      bound.y - titleHeight,
+      titleWidth,
+      titleHeight
+    ),
   };
 }
 

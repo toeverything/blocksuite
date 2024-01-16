@@ -16,7 +16,7 @@ import type { TopLevelBlockModel } from '../_common/types.js';
 import type { FrameBlockModel } from '../models.js';
 import { getBlocksInFrame } from '../page-block/edgeless/frame-manager.js';
 import { type EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import type { GroupElement } from '../surface-block/elements/group/group-element.js';
+import type { GroupElementModel } from '../surface-block/element-model/group.js';
 import { compare } from '../surface-block/managers/layer-utils.js';
 
 const portalMap = {
@@ -42,7 +42,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   page!: Page;
 
   @property({ attribute: false })
-  containerModel!: GroupElement | FrameBlockModel;
+  containerModel!: GroupElementModel | FrameBlockModel;
 
   @query('.surface-blocks-portal')
   portal!: HTMLDivElement;
@@ -50,7 +50,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   renderModel!: (model: BlockModel) => TemplateResult;
 
-  private _getBlocksInChildren(model: GroupElement): TopLevelBlockModel[] {
+  private _getBlocksInChildren(model: GroupElementModel): TopLevelBlockModel[] {
     return Array.from(model.children.keys())
       .map(id => this.page.getBlockById(id) as TopLevelBlockModel)
       .filter(el => el);

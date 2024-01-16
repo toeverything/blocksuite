@@ -2,6 +2,7 @@
 // Credits to tldraw
 
 import type { IBound } from '../consts.js';
+import type { Bound } from './bound.js';
 import { PointLocation } from './point-location.js';
 import { type IVec, Vec } from './vec.js';
 
@@ -430,6 +431,15 @@ export function rotatePoints<T extends IVec>(
   ) as T[];
 }
 
+export function rotatePoint(
+  point: [number, number],
+  center: IVec,
+  rotate: number
+): [number, number] {
+  const rad = toRadian(rotate);
+  return Vec.add(center, Vec.rot(Vec.sub(point, center), rad)) as T;
+}
+
 export function getPointsFromBoundsWithRotation(
   bounds: IBound,
   getPoints: (bounds: IBound) => IVec[] = ({ x, y, w, h }: IBound) => [
@@ -532,4 +542,74 @@ export function getCenterAreaBounds(bounds: IBound, ratio: number) {
     h: nh,
     rotate,
   };
+}
+
+export const distance2d = (x1: number, y1: number, x2: number, y2: number) => {
+  const xd = x2 - x1;
+  const yd = y2 - y1;
+  return Math.hypot(xd, yd);
+};
+
+export function isPointOnlines(
+  element: Bound,
+  points: readonly [number, number][],
+  rotate: number,
+  hitPoint: [number, number],
+  threshold: number
+): boolean {
+  // credit to Excalidraw hitTestFreeDrawElement
+
+  let x: number;
+  let y: number;
+
+  if (rotate === 0) {
+    x = hitPoint[0] - element.x;
+    y = hitPoint[1] - element.y;
+  } else {
+    // Counter-rotate the point around center before testing
+    const { minX, minY, maxX, maxY } = element;
+    const rotatedPoint = rotatePoint(
+      hitPoint,
+      [minX + (maxX - minX) / 2, minY + (maxY - minY) / 2],
+      -rotate
+    ) as [number, number];
+    x = rotatedPoint[0] - element.x;
+    y = rotatedPoint[1] - element.y;
+  }
+
+  let [A, B] = points;
+  let P: readonly [number, number];
+
+  // For freedraw dots
+  if (
+    distance2d(A[0], A[1], x, y) < threshold ||
+    distance2d(B[0], B[1], x, y) < threshold
+  ) {
+    return true;
+  }
+
+  // For freedraw lines
+  for (let i = 0; i < points.length; i++) {
+    const delta = [B[0] - A[0], B[1] - A[1]];
+    const length = Math.hypot(delta[1], delta[0]);
+
+    const U = [delta[0] / length, delta[1] / length];
+    const C = [x - A[0], y - A[1]];
+    const d = (C[0] * U[0] + C[1] * U[1]) / Math.hypot(U[1], U[0]);
+    P = [A[0] + U[0] * d, A[1] + U[1] * d];
+
+    const da = distance2d(P[0], P[1], A[0], A[1]);
+    const db = distance2d(P[0], P[1], B[0], B[1]);
+
+    P = db < da && da > length ? B : da < db && db > length ? A : P;
+
+    if (Math.hypot(y - P[1], x - P[0]) < threshold) {
+      return true;
+    }
+
+    A = B;
+    B = points[i + 1];
+  }
+
+  return false;
 }

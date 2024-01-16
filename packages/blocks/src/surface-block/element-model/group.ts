@@ -7,6 +7,9 @@ import type {
   IEdgelessElement,
 } from '../../page-block/edgeless/type.js';
 import { Bound } from '../utils/bound.js';
+import { linePolygonIntersects } from '../utils/math-utils.js';
+import type { PointLocation } from '../utils/point-location.js';
+import type { IVec2 } from '../utils/vec.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
 import type { BaseProps } from './base.js';
 import { ElementModel } from './base.js';
@@ -46,22 +49,13 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
   showTitle: boolean = true;
 
   get xywh() {
-    const childrenIds = this.childIds;
+    const childElements = this.childElements;
 
-    if (childrenIds.length === 0) return '[0,0,0,0]';
+    if (childElements.length === 0) return '[0,0,0,0]';
 
-    const bound: Bound = childrenIds
-      .map(
-        id =>
-          this.surface.getElementById(id) ?? this.surface.page.getBlockById(id)
-      )
-      .filter(el => el)
-      .reduce(
-        (prev, ele) => {
-          return prev.unite((ele as ElementModel).elementBound);
-        },
-        new Bound(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, 0, 0)
-      );
+    const bound: Bound = childElements.slice(1).reduce((prev, ele) => {
+      return prev.unite((ele as ElementModel).elementBound);
+    }, childElements[0].elementBound);
 
     return bound.serialize();
   }
@@ -145,5 +139,14 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
       },
       [] as GroupElementModel['childElements']
     );
+  }
+
+  override containedByBounds(bound: Bound): boolean {
+    return bound.contains(Bound.deserialize(this.xywh));
+  }
+
+  override intersectWithLine(start: IVec2, end: IVec2): PointLocation[] | null {
+    const bound = Bound.deserialize(this.xywh);
+    return linePolygonIntersects(start, end, bound.points);
   }
 }

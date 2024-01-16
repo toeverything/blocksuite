@@ -191,7 +191,11 @@ export class LayerManager {
     );
     this._disposables.add(
       surface.elementUpdated.on(element => {
-        if (element.props['index'] || element.props['xywh']) {
+        if (
+          element.props['index'] ||
+          element.props['xywh'] ||
+          element.props['externalXYWH']
+        ) {
           this.update(surface.getElementById(element.id)!);
         }
       })

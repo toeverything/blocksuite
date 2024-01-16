@@ -230,6 +230,7 @@ export class Block {
           if (this._stashed.has(p)) {
             const result = Reflect.set(target, p, value, receiver);
             this.options.onChange?.(this, p, value);
+            this.options.onYBlockUpdated?.(this, { key: p });
             return result;
           }
 

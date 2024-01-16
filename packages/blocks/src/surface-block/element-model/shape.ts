@@ -1,7 +1,11 @@
 import { Workspace, type Y } from '@blocksuite/store';
 
+import { type HitTestOptions } from '../../page-block/edgeless/type.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
 import type { SerializedXYWH } from '../index.js';
+import type { Bound } from '../utils/bound.js';
+import type { PointLocation } from '../utils/point-location.js';
+import { type IVec2 } from '../utils/vec.js';
 import { type BaseProps, ElementModel } from './base.js';
 import { FontFamily, FontWeight } from './common.js';
 import {
@@ -11,6 +15,19 @@ import {
   type VerticalAlign,
 } from './common.js';
 import { local, yfield } from './decorators.js';
+import { diamond } from './utils/shape/diamond.js';
+import { ellipse } from './utils/shape/ellipse.js';
+import { rect } from './utils/shape/rect.js';
+import { triangle } from './utils/shape/triangle.js';
+
+const shapeMethods: {
+  [key in ShapeType]: typeof rect;
+} = {
+  rect,
+  triangle,
+  ellipse,
+  diamond,
+};
 
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 export type ShapeStyle = 'General' | 'Scribbled';
@@ -120,4 +137,24 @@ export class ShapeElementModel extends ElementModel<ShapeProps> {
 
   @yfield('center')
   textVerticalAlign!: VerticalAlign;
+
+  override hitTest(x: number, y: number, options: HitTestOptions) {
+    return shapeMethods[this.shapeType].hitTest.call(this, x, y, options);
+  }
+
+  override containedByBounds(bounds: Bound) {
+    return shapeMethods[this.shapeType].containedByBounds(bounds, this);
+  }
+
+  override intersectWithLine(start: IVec2, end: IVec2) {
+    return shapeMethods[this.shapeType].intersectWithLine(start, end, this);
+  }
+
+  override getNearestPoint(point: IVec2): IVec2 {
+    return shapeMethods[this.shapeType].getNearestPoint(point, this) as IVec2;
+  }
+
+  override getRelativePointLocation(point: IVec2): PointLocation {
+    return shapeMethods[this.shapeType].getRelativePointLocation(point, this);
+  }
 }

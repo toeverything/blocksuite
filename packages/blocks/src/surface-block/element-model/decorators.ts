@@ -25,10 +25,12 @@ export function yfield(fallback?: unknown): PropertyDecorator {
           fallback
         );
       },
-      set(this: ElementModel, val) {
+      set(this: ElementModel, originalVal) {
         if (state.skip) {
           return;
         }
+
+        const val = convertProps(prototype, prop, originalVal, this);
 
         if (this.yMap) {
           this.surface.page.transact(() => {
@@ -39,8 +41,6 @@ export function yfield(fallback?: unknown): PropertyDecorator {
         if (!this.yMap.doc) {
           this._preserved.set(prop as string, val);
         }
-
-        updateDerivedProp(prototype, prop as string, this);
       },
     });
   };
@@ -52,11 +52,16 @@ export function local(): PropertyDecorator {
       get(this: ElementModel) {
         return this._local.get(prop);
       },
-      set(this: ElementModel, newVal: unknown) {
+      set(this: ElementModel, originalValue: unknown) {
         const oldValue = this._local.get(prop);
+        const newVal = convertProps(target, prop, originalValue, this);
 
         this._local.set(prop, newVal);
+
         if (state.creating) return;
+
+        updateDerivedProp(target, prop as string, originalValue, this);
+
         this._onChange({
           [prop]: {
             oldValue,
@@ -69,20 +74,22 @@ export function local(): PropertyDecorator {
 
 const deriveSymbol = Symbol('derive');
 
-function setDerivedMeta(
+function setObjectMeta(
+  symbol: symbol,
   target: unknown,
   prop: string | symbol,
-  fn: (instance: unknown) => Record<string, unknown>
+  val: unknown
 ) {
   // @ts-ignore
-  target[deriveSymbol] = target[deriveSymbol] ?? {};
+  target[symbol] = target[symbol] ?? {};
   // @ts-ignore
-  target[deriveSymbol][prop] = fn;
+  target[symbol][prop] = val;
 }
 
 export function updateDerivedProp(
   target: unknown,
   prop: string | symbol,
+  propValue: unknown,
   receiver: unknown
 ) {
   if (state.derive || state.creating) return;
@@ -91,7 +98,7 @@ export function updateDerivedProp(
 
   if (deriveFn) {
     state.derive = true;
-    const derived = deriveFn(receiver);
+    const derived = deriveFn(propValue, receiver);
     keys(derived).forEach(key => {
       // @ts-ignore
       receiver[key] = derived[key];
@@ -100,19 +107,52 @@ export function updateDerivedProp(
   }
 }
 
-export function getDerivedMeta(
+function getDerivedMeta(
   target: unknown,
   prop: string | symbol
-): null | ((instance: unknown) => Record<string, unknown>) {
+): null | ((propValue: unknown, instance: unknown) => Record<string, unknown>) {
   // @ts-ignore
   return target[deriveSymbol]?.[prop] ?? null;
 }
 
-export function derive(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fn: (instance: any) => Record<string, unknown>
+export function derive<T extends ElementModel>(
+  fn: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    propValue: any,
+    instance: T
+  ) => Record<string, unknown>
 ): PropertyDecorator {
   return function deriveDecorator(target: unknown, prop: string | symbol) {
-    setDerivedMeta(target, prop as string, fn);
+    setObjectMeta(deriveSymbol, target, prop as string, fn);
   };
+}
+
+const convertSymbol = Symbol('convert');
+
+export function convert<T extends ElementModel>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fn: (propValue: any, instance: T) => unknown
+) {
+  return function convertDecorator(target: unknown, prop: string | symbol) {
+    setObjectMeta(convertSymbol, target, prop as string, fn);
+  };
+}
+
+export function getConvertMeta(
+  target: unknown,
+  prop: string | symbol
+): null | ((propValue: unknown, instance: unknown) => unknown) {
+  // @ts-ignore
+  return target[convertSymbol]?.[prop] ?? null;
+}
+
+export function convertProps(
+  target: unknown,
+  propKey: string | symbol,
+  newProp: unknown,
+  receiver: unknown
+) {
+  const convertFn = getConvertMeta(target, propKey as string)!;
+
+  return convertFn ? convertFn(newProp, receiver) : newProp;
 }

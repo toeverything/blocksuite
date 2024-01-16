@@ -8,9 +8,7 @@ import {
   type Selectable,
 } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import { titleBound } from '../../../../surface-block/canvas-renderer/element-renderer/group/utils.js';
 import {
-  ConnectorElementModel,
   GroupElementModel,
   ShapeElementModel,
   TextElementModel,
@@ -18,7 +16,7 @@ import {
 import {
   Bound,
   type CanvasElement,
-  ConnectorElement,
+  ConnectorElementModel,
   type IVec,
   Vec,
 } from '../../../../surface-block/index.js';
@@ -301,10 +299,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
       if (
         selected instanceof GroupElementModel &&
-        titleBound(
-          selected,
-          this._edgeless.service.viewport.zoom
-        ).containsPoint([modelX, modelY])
+        selected.externalBound?.containsPoint([modelX, modelY])
       ) {
         mountGroupTitleEditor(selected, this._edgeless);
         return;
@@ -469,7 +464,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
 
     // Connector needs to be updated first
-    this._toBeMoved.sort((a, _) => (a instanceof ConnectorElement ? -1 : 1));
+    this._toBeMoved.sort((a, _) =>
+      a instanceof ConnectorElementModel ? -1 : 1
+    );
     this._addFrames();
     // Set up drag state
     this.initializeDragState(e, dragType);
@@ -477,7 +474,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _filterConnectedConnector() {
     this._toBeMoved = this._toBeMoved.filter(ele => {
-      if (ele instanceof ConnectorElement && ele.source.id && ele.target.id) {
+      if (
+        ele instanceof ConnectorElementModel &&
+        ele.source.id &&
+        ele.target.id
+      ) {
         if (
           !!this._toBeMoved.find(e => e.id === ele.source.id) &&
           !!this._toBeMoved.find(e => e.id === ele.target.id)
@@ -514,11 +515,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartModelCoord = [startX, startY];
     this._dragLastModelCoord = [startX, startY];
 
+    this._selectedBounds = this._toBeMoved.map(element => element.elementBound);
     this._alignBound = this._surface.snap.setupAlignables(this._toBeMoved);
-
-    this._selectedBounds = this._toBeMoved.map(element =>
-      Bound.deserialize(element.xywh)
-    );
 
     // If the drag type is selecting, set up the dragging area disposable group
     // If the viewport updates when dragging, should update the dragging area and selection

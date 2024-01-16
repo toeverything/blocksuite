@@ -733,7 +733,7 @@ export class ConnectionOverlay extends Overlay {
   private _findConnectablesInViews() {
     const service = this._service;
     const bound = this._service.viewport.viewportBounds;
-    return service.pickElementsByBound(bound);
+    return service.pickElementsByBound(bound).filter(ele => ele.connectable);
   }
 
   override render(ctx: CanvasRenderingContext2D): void {

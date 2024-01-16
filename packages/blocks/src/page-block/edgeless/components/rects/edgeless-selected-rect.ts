@@ -30,7 +30,7 @@ import {
 } from '../../../../surface-block/index.js';
 import {
   Bound,
-  ConnectorElement,
+  ConnectorElementModel,
   type IVec,
   normalizeDegAngle,
   normalizeShapeBound,
@@ -835,7 +835,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       : nothing;
 
     const connectorHandle =
-      elements.length === 1 && elements[0] instanceof ConnectorElement
+      elements.length === 1 && elements[0] instanceof ConnectorElementModel
         ? html`<edgeless-connector-handle
             .connector=${elements[0]}
             .edgeless=${edgeless}

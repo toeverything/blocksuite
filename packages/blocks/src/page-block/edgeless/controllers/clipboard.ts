@@ -34,13 +34,12 @@ import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
-import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
 import { CanvasElementType } from '../../../surface-block/elements/edgeless-element.js';
 import {
   type CanvasElement,
-  GroupElement,
-} from '../../../surface-block/elements/index.js';
+  GroupElementModel,
+} from '../../../surface-block/index.js';
 import {
   ConnectorElementModel,
   type ElementModel,
@@ -827,10 +826,11 @@ export function getCopyElements(
     if (isFrameBlock(element)) {
       set.add(element);
       surface.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
-    } else if (element instanceof GroupElement) {
-      getCopyElements(surface, element.childElements).forEach(ele =>
-        set.add(ele)
-      );
+    } else if (element instanceof GroupElementModel) {
+      getCopyElements(
+        surface,
+        (element as GroupElementModel).childElements
+      ).forEach(ele => set.add(ele));
       set.add(element);
     } else {
       set.add(element);
@@ -840,7 +840,7 @@ export function getCopyElements(
 }
 
 function prepareConnectorClipboardData(
-  connector: ConnectorElement,
+  connector: ConnectorElementModel,
   selected: Selectable[]
 ) {
   const sourceId = connector.source?.id;
@@ -879,7 +879,7 @@ export async function prepareClipboardData(
       } else if (isBookmarkBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
-      } else if (selected instanceof ConnectorElement) {
+      } else if (selected instanceof ConnectorElementModel) {
         return prepareConnectorClipboardData(selected, selectedAll);
       } else {
         return (selected as ElementModel).serialize();

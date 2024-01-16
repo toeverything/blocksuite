@@ -33,6 +33,20 @@ export class EdgelessBlock<
   connectable = true;
   rotate = 0;
 
+  private _externalXYWH: SerializedXYWH | undefined = undefined;
+
+  get externalXYWH(): SerializedXYWH | undefined {
+    return this._externalXYWH;
+  }
+
+  set externalXYWH(xywh: SerializedXYWH | undefined) {
+    this._externalXYWH = xywh;
+  }
+
+  get externalBound(): Bound | null {
+    return this._externalXYWH ? Bound.deserialize(this._externalXYWH) : null;
+  }
+
   get elementBound() {
     const bound = Bound.deserialize(this.xywh);
     return Bound.from(getBoundsWithRotation({ ...bound, rotate: this.rotate }));

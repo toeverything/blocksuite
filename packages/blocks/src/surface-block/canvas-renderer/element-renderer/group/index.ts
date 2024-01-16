@@ -33,10 +33,20 @@ function renderTitle(
   renderer: Renderer
 ) {
   const zoom = renderer.zoom;
-  const { titleWidth, text, lineHeight, font, padding, offset, radius } =
-    titleRenderParams(model, zoom);
+  const {
+    titleWidth,
+    text,
+    lineHeight,
+    font,
+    padding,
+    offset,
+    radius,
+    titleBound,
+  } = titleRenderParams(model, zoom);
 
   if (!model.showTitle) return;
+
+  model.externalXYWH = titleBound.serialize();
 
   ctx.translate(0, -offset);
 
