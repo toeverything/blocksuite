@@ -10,10 +10,9 @@ import {
   ScribbledStyleIcon,
 } from '../../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
-import { DEFAULT_SHAPE_FILL_COLOR } from '../../../../../surface-block/elements/shape/consts.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import type { ColorEvent } from '../../panel/color-panel.js';
+import { type ColorEvent, isTransparent } from '../../panel/color-panel.js';
 import {
   LINE_COLOR_PREFIX,
   SHAPE_COLOR_PREFIX,
@@ -68,44 +67,41 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   strokeColor!: CssVariableName;
 
   @property({ attribute: false })
+  radius!: number;
+
+  @property({ attribute: false })
   onChange!: (props: Record<string, unknown>) => void;
 
   private _setStrokeColor = (strokeColor: CssVariableName) => {
     if (this.edgeless.edgelessTool.type !== 'shape') return;
 
-    const { shapeStyle } = this;
-
     const props: Record<string, unknown> = { strokeColor };
-    if (shapeStyle === ShapeStyle.General) {
-      props.fillColor = strokeColor.replace(
-        LINE_COLOR_PREFIX,
-        SHAPE_COLOR_PREFIX
-      );
-    }
+    const fillColor = strokeColor.replace(
+      LINE_COLOR_PREFIX,
+      SHAPE_COLOR_PREFIX
+    );
+    const filled = !isTransparent(fillColor);
+    props.fillColor = fillColor;
+    props.filled = filled;
     this.onChange(props);
   };
 
   private _setShapeStyle = (shapeStyle: ShapeStyle) => {
     if (this.edgeless.edgelessTool.type !== 'shape') return;
 
-    const { strokeColor } = this;
-
-    let fillColor;
-    if (shapeStyle === ShapeStyle.General) {
-      fillColor = strokeColor.replace(LINE_COLOR_PREFIX, SHAPE_COLOR_PREFIX);
-    } else {
-      fillColor = DEFAULT_SHAPE_FILL_COLOR;
-    }
     this.onChange({
       shapeStyle,
-      fillColor,
     });
   };
 
   override render() {
     if (this.edgeless.edgelessTool.type !== 'shape') return nothing;
 
-    const { shapeType, strokeColor, shapeStyle } = this;
+    const { radius, strokeColor, shapeStyle } = this;
+    let { shapeType } = this;
+    if (shapeType === 'rect' && radius > 0) {
+      shapeType = 'roundedRect';
+    }
 
     return html`
       <div class="shape-menu-container">

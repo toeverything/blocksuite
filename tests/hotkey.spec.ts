@@ -1300,6 +1300,19 @@ test('should cut in title works', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 });
 
+test('enter in title should move cursor in new paragraph block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusTitle(page);
+  await type(page, 'hello');
+  await assertTitle(page, 'hello');
+  await pressEnter(page);
+  await type(page, 'world');
+  await assertRichTexts(page, ['world', '']);
+});
+
 test('should support ctrl/cmd+g convert to database', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);

@@ -372,7 +372,11 @@ export function convertDragPreviewDocToEdgeless({
   const previewEl = dragPreview.querySelector(cssSelector);
   assertExists(previewEl);
   const rect = previewEl.getBoundingClientRect();
-  const point = edgelessPage.service.toModelCoord(rect.x, rect.y);
+  const { left: viewportLeft, top: viewportTop } = edgelessPage.viewport;
+  const point = edgelessPage.service.toModelCoord(
+    rect.x - viewportLeft,
+    rect.y - viewportTop
+  );
   const bound = new Bound(
     point[0],
     point[1],

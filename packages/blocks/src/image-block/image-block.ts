@@ -12,7 +12,10 @@ import {
   matchFlavours,
 } from '../_common/utils/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
-import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
+import {
+  AFFINE_DRAG_HANDLE_WIDGET,
+  AffineDragHandleWidget,
+} from '../page-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
   convertDragPreviewDocToEdgeless,
@@ -130,8 +133,14 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         return false;
 
       const blockComponent = anchorComponent as ImageBlockComponent;
+
+      const isDraggingByDragHandle = !!element?.closest(
+        AFFINE_DRAG_HANDLE_WIDGET
+      );
+      const isDraggingByComponent = blockComponent.contains(element);
       const isInSurface = blockComponent.isInSurface;
-      if (!isInSurface) {
+
+      if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
         this.std.selection.setGroup('note', [
           this.std.selection.create('block', {
             path: blockComponent.path,
@@ -139,25 +148,23 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         ]);
         startDragging([blockComponent], state);
         return true;
+      } else if (isInSurface && isDraggingByDragHandle) {
+        const edgelessPage = getEdgelessPageByElement(blockComponent);
+        const scale = edgelessPage ? edgelessPage.service.viewport.zoom : 1;
+        const width = blockComponent.getBoundingClientRect().width;
+
+        const dragPreviewEl = document.createElement('div');
+        dragPreviewEl.classList.add('affine-block-element');
+        dragPreviewEl.style.border = '2px solid var(--affine-border-color)';
+        dragPreviewEl.style.borderRadius = '4px';
+        dragPreviewEl.style.overflow = 'hidden';
+        dragPreviewEl.style.width = `${width / scale}px`;
+        render(blockComponent.renderModel(blockComponent.model), dragPreviewEl);
+
+        startDragging([blockComponent], state, dragPreviewEl);
+        return true;
       }
-
-      const insideDragHandle = !!element?.closest('affine-drag-handle-widget');
-      if (!insideDragHandle) return false;
-
-      const edgelessPage = getEdgelessPageByElement(blockComponent);
-      const scale = edgelessPage ? edgelessPage.service.viewport.zoom : 1;
-      const width = blockComponent.getBoundingClientRect().width;
-
-      const dragPreviewEl = document.createElement('div');
-      dragPreviewEl.classList.add('affine-block-element');
-      dragPreviewEl.style.border = '2px solid var(--affine-border-color)';
-      dragPreviewEl.style.borderRadius = '4px';
-      dragPreviewEl.style.overflow = 'hidden';
-      dragPreviewEl.style.width = `${width / scale}px`;
-      render(blockComponent.renderModel(blockComponent.model), dragPreviewEl);
-
-      startDragging([blockComponent], state, dragPreviewEl);
-      return true;
+      return false;
     },
     onDragEnd: props => {
       const { state, draggingElements } = props;

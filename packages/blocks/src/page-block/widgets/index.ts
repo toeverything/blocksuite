@@ -8,8 +8,8 @@ export { AffineImageToolbarWidget } from './image-toolbar/image-toolbar.js';
 export {
   // It's used in the AFFiNE!
   showImportModal,
-} from './linked-page/import-page/index.js';
-export { AffineLinkedPageWidget } from './linked-page/index.js';
+} from './linked-doc/import-doc/index.js';
+export { AffineLinkedDocWidget } from './linked-doc/index.js';
 export { AffineModalWidget } from './modal/modal.js';
 export { AffineSlashMenuWidget } from './slash-menu/index.js';
 export { AffineSurfaceRefToolbar } from './surface-ref-toolbar/surface-ref-toolbar.js';

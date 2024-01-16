@@ -1,6 +1,7 @@
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Slice, Text, type Y } from '@blocksuite/store';
 
+import { toggleEmbedCardCreateModal } from '../../../_common/components/embed-card/modal/embed-card-create-modal.js';
 import { toast } from '../../../_common/components/toast.js';
 import { textConversionConfigs } from '../../../_common/configs/text-conversion.js';
 import { textFormatConfigs } from '../../../_common/configs/text-format/config.js';
@@ -35,8 +36,9 @@ import {
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
-import { toggleBookmarkCreateModal } from '../../../bookmark-block/components/modal/bookmark-create-modal.js';
 import type { DatabaseService } from '../../../database-block/database-service.js';
+import { GithubIcon } from '../../../embed-github-block/styles.js';
+import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { ImageService } from '../../../image-block/image-service.js';
 import { addSiblingImageBlock } from '../../../image-block/utils.js';
@@ -46,7 +48,7 @@ import { onModelTextUpdated } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { CanvasElementType } from '../../../surface-block/index.js';
-import type { AffineLinkedPageWidget } from '../linked-page/index.js';
+import type { AffineLinkedDocWidget } from '../linked-doc/index.js';
 import {
   formatDate,
   insertContent,
@@ -205,12 +207,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         alias: ['dual link'],
         icon: DualLinkIcon,
         showWhen: (_, pageElement) => {
-          const linkedPageWidgetEle =
-            pageElement.widgetElements['affine-linked-page-widget'];
-          if (!linkedPageWidgetEle) return false;
-          if (!('showLinkedPage' in linkedPageWidgetEle)) {
+          const linkedDocWidgetEle =
+            pageElement.widgetElements['affine-linked-doc-widget'];
+          if (!linkedDocWidgetEle) return false;
+          if (!('showLinkedDoc' in linkedDocWidgetEle)) {
             console.warn(
-              'You may not have correctly implemented the linkedPage widget! "showLinkedPage(model)" method not found on widget'
+              'You may not have correctly implemented the linkedDoc widget! "showLinkedDoc(model)" method not found on widget'
             );
             return false;
           }
@@ -221,13 +223,13 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           insertContent(pageElement.host, model, triggerKey);
           assertExists(model.page.root);
           const widgetEle =
-            pageElement.widgetElements['affine-linked-page-widget'];
+            pageElement.widgetElements['affine-linked-doc-widget'];
           assertExists(widgetEle);
-          // We have checked the existence of showLinkedPage method in the showWhen
-          const linkedPageWidget = widgetEle as AffineLinkedPageWidget;
+          // We have checked the existence of showLinkedDoc method in the showWhen
+          const linkedDocWidget = widgetEle as AffineLinkedDocWidget;
           // Wait for range to be updated
           setTimeout(() => {
-            linkedPageWidget.showLinkedPage(model, triggerKey);
+            linkedDocWidget.showLinkedDoc(model, triggerKey);
           });
         },
       },
@@ -265,7 +267,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         }),
       },
       {
-        name: 'Bookmark',
+        name: 'Links',
         icon: BookmarkIcon,
         showWhen: model => {
           if (!model.page.schema.flavourSchemaMap.has('affine:bookmark')) {
@@ -274,17 +276,17 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return !insideDatabase(model);
         },
         action: withRemoveEmptyLine(async ({ pageElement, model }) => {
-          const parent = pageElement.page.getParent(model);
-          if (!parent) {
+          const parentModel = pageElement.page.getParent(model);
+          if (!parentModel) {
             return;
           }
-          const url = await toggleBookmarkCreateModal(pageElement.host);
-          if (!url) return;
-          const props = {
-            flavour: 'affine:bookmark',
-            url,
-          } as const;
-          pageElement.page.addSiblingBlocks(model, [props]);
+          const index = parentModel.children.indexOf(model) + 1;
+          await toggleEmbedCardCreateModal(
+            pageElement.host,
+            'Links',
+            'The added link will be displayed as a card view.',
+            { mode: 'page', parentModel, index }
+          );
         }),
       },
       {
@@ -312,6 +314,52 @@ export const menuGroups: SlashMenuOptions['menus'] = [
 
           addSiblingAttachmentBlock(file, maxFileSize, model).catch(
             console.error
+          );
+        }),
+      },
+      {
+        name: 'YouTube',
+        icon: YoutubeIcon,
+        showWhen: model => {
+          if (!model.page.schema.flavourSchemaMap.has('affine:embed-youtube')) {
+            return false;
+          }
+          return !insideDatabase(model);
+        },
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+          const parentModel = pageElement.page.getParent(model);
+          if (!parentModel) {
+            return;
+          }
+          const index = parentModel.children.indexOf(model) + 1;
+          await toggleEmbedCardCreateModal(
+            pageElement.host,
+            'YouTube',
+            'The added YouTube video link will be displayed as an embed view.',
+            { mode: 'page', parentModel, index }
+          );
+        }),
+      },
+      {
+        name: 'GitHub',
+        icon: GithubIcon,
+        showWhen: model => {
+          if (!model.page.schema.flavourSchemaMap.has('affine:embed-github')) {
+            return false;
+          }
+          return !insideDatabase(model);
+        },
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+          const parentModel = pageElement.page.getParent(model);
+          if (!parentModel) {
+            return;
+          }
+          const index = parentModel.children.indexOf(model) + 1;
+          await toggleEmbedCardCreateModal(
+            pageElement.host,
+            'GitHub',
+            'The added GitHub issue or pull request link will be displayed as a card view.',
+            { mode: 'page', parentModel, index }
           );
         }),
       },

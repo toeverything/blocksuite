@@ -1,6 +1,9 @@
 import { type Slot } from '@blocksuite/global/utils';
 import { type BlockModel, type Page } from '@blocksuite/store';
 
+import type { EmbedGithubModel } from '../embed-github-block/embed-github-model.js';
+import type { EmbedLinkedDocModel } from '../embed-linked-doc-block/embed-linked-doc-model.js';
+import type { EmbedYoutubeModel } from '../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
 import type { BookmarkBlockModel } from '../models.js';
@@ -15,7 +18,7 @@ import type {
 import { type CanvasElement } from '../surface-block/element-model/index.js';
 import type { ShapeType } from '../surface-block/index.js';
 import type { NavigatorMode } from './edgeless/frame/consts.js';
-import type { RefNodeSlots } from './inline/presets/nodes/reference-node.js';
+import type { RefNodeSlots } from './inline/presets/nodes/reference-node/reference-node.js';
 import type { BlockComponent } from './utils/query.js';
 import type { Point } from './utils/rect.js';
 
@@ -120,7 +123,10 @@ export type TopLevelBlockModel =
   | NoteBlockModel
   | FrameBlockModel
   | ImageBlockModel
-  | BookmarkBlockModel;
+  | BookmarkBlockModel
+  | EmbedGithubModel
+  | EmbedYoutubeModel
+  | EmbedLinkedDocModel;
 
 export type { EdgelessElement };
 
@@ -224,3 +230,21 @@ export type EdgelessTool =
 export type EmbedBlockDoubleClickData = {
   blockId: string;
 };
+
+export interface Viewport {
+  left: number;
+  top: number;
+  scrollLeft: number;
+  scrollTop: number;
+  scrollWidth: number;
+  scrollHeight: number;
+  clientWidth: number;
+  clientHeight: number;
+}
+
+export type EmbedCardStyle =
+  | 'horizontal'
+  | 'list'
+  | 'vertical'
+  | 'cube'
+  | 'video';

@@ -103,6 +103,9 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   @property({ attribute: false })
   strokeColor!: CssVariableName;
 
+  @property({ attribute: false })
+  radius!: number;
+
   private _transformMap: TransformMap = {
     z1: { x: 0, y: 5, scale: 1.1, origin: '50% 100%' },
     z2: { x: -15, y: 0, scale: 0.75, origin: '20% 20%' },
@@ -240,7 +243,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
     this.edgeless.service.addElement(CanvasElementType.SHAPE, {
       shapeType: this.shape.name === 'roundedRect' ? 'rect' : this.shape.name,
       xywh: xywh,
-      radius: this.shape.name === 'roundedRect' ? 0.1 : 0,
+      radius: this.radius,
     });
   };
 

@@ -21,6 +21,7 @@ import {
 } from '../../../../../surface-block/elements/shape/consts.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
+import { isTransparent } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper } from '../common/create-popper.js';
 import { EdgelessToolButton } from '../edgeless-toolbar-button.js';
@@ -41,7 +42,7 @@ const shapes: Array<Shape> = [
 export class EdgelessShapeToolButton extends EdgelessToolButton<
   EdgelessShapeMenu,
   'shape',
-  readonly ['shapeStyle', 'shapeType', 'fillColor', 'strokeColor']
+  readonly ['shapeStyle', 'shapeType', 'fillColor', 'strokeColor', 'radius']
 > {
   static override styles = css`
     .shape-button-group {
@@ -105,6 +106,9 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
   strokeColor: string = DEFAULT_SHAPE_STROKE_COLOR;
 
   @state()
+  radius = 0;
+
+  @state()
   private order = shapes.map((_, i) => i + 1);
 
   protected override _type = 'shape' as const;
@@ -113,6 +117,7 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
     'shapeType',
     'fillColor',
     'strokeColor',
+    'radius',
   ] as const;
 
   private _toggleMenu() {
@@ -134,6 +139,12 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
         if (props.shapeType) {
           this._activeShape(props.shapeType as ShapeName);
         }
+        if (props.shapeType === 'rect') {
+          props.radius = 0;
+        } else if (props.shapeType === 'roundedRect') {
+          props.shapeType = 'rect';
+          props.radius = 0.1;
+        }
         this.surface.service.editSession.record(this._type, props);
       };
     }
@@ -144,9 +155,31 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
     this.surface.service.editSession.slots.lastPropsUpdated.on(
       ({ type, props }) => {
         if (type === 'shape' && props.shapeType) {
-          this._activeShape(props.shapeType as ShapeName);
+          let { shapeType } = props;
+          if (shapeType === 'rect' && (props.radius as number) > 0) {
+            shapeType = 'roundedRect';
+          }
+          this._activeShape(shapeType as ShapeName);
         }
       }
+    );
+  }
+
+  protected override initLastPropsSlot(): void {
+    this._disposables.add(
+      this.service.editSession.slots.lastPropsUpdated.on(({ type, props }) => {
+        if (type === this._type) {
+          this._states.forEach(_key => {
+            const key = _key as string;
+            if (key === 'rect' && (props.radius as number) > 0) {
+              return;
+            }
+            if (props[key] != undefined) {
+              Object.assign(this, { [key]: props[key] });
+            }
+          });
+        }
+      })
     );
   }
 
@@ -189,7 +222,14 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
         <div class="container-clip">
           <div
             class="shapes"
-            style=${styleMap({ color: `var(${this.fillColor})` })}
+            style=${styleMap({
+              color: `${
+                !isTransparent(this.fillColor)
+                  ? `var(${this.fillColor})`
+                  : 'var(--affine-white-60)'
+              }`,
+              stroke: 'var(--affine-black-10)',
+            })}
           >
             ${repeat(shapes, (shape, index) => {
               return html`<edgeless-shape-tool-element
@@ -197,6 +237,7 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
                 .fillColor=${this.fillColor}
                 .strokeColor=${this.strokeColor}
                 .shapeStyle=${this.shapeStyle}
+                .radius=${this.radius}
                 .order=${this.order[index]}
                 .getContainerRect=${() => this.getBoundingClientRect()}
                 .handleClick=${() => this._toggleMenu()}

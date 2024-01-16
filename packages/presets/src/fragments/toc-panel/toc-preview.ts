@@ -116,7 +116,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       text-overflow: ellipsis;
     }
 
-    .linked-page-preview svg {
+    .linked-doc-preview svg {
       width: 1.1em;
       height: 1.1em;
       vertical-align: middle;
@@ -124,18 +124,18 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       margin-bottom: 0.1em;
     }
 
-    .linked-page-text {
+    .linked-doc-text {
       font-size: inherit;
       border-bottom: 0.5px solid var(--affine-divider-color);
       white-space: break-spaces;
       margin-right: 2px;
     }
 
-    .linked-page-preview.unavailable svg {
+    .linked-doc-preview.unavailable svg {
       color: var(--affine-text-disable-color);
     }
 
-    .linked-page-preview.unavailable .linked-page-text {
+    .linked-doc-preview.unavailable .linked-doc-text {
       color: var(--affine-text-disable-color);
       text-decoration: line-through;
     }
@@ -193,9 +193,9 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         const unavailable = !refMeta;
         const title = unavailable ? 'Deleted page' : refMeta.title;
         return html`<span
-          class="linked-page-preview ${unavailable ? 'unavailable' : ''}"
+          class="linked-doc-preview ${unavailable ? 'unavailable' : ''}"
           >${SmallLinkedPageIcon}
-          <span class="linked-page-text"
+          <span class="linked-doc-text"
             >${title.length ? title : 'Untitled'}</span
           ></span
         >`;

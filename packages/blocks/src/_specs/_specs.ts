@@ -13,7 +13,8 @@ import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
-import { EmbedLinkedPageBlockSpec } from '../embed-linked-page-block/index.js';
+import { EmbedLinkedDocBlockSpec } from '../embed-linked-doc-block/index.js';
+import { EmbedYoutubeBlockSpec } from '../embed-youtube-block/index.js';
 import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
@@ -33,7 +34,7 @@ import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../page-block/widgets/doc-re
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../page-block/widgets/drag-handle/drag-handle.js';
 import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../page-block/widgets/edgeless-remote-selection/index.js';
 import { AFFINE_FORMAT_BAR_WIDGET } from '../page-block/widgets/format-bar/format-bar.js';
-import { AFFINE_LINKED_PAGE_WIDGET } from '../page-block/widgets/linked-page/index.js';
+import { AFFINE_LINKED_DOC_WIDGET } from '../page-block/widgets/linked-doc/index.js';
 import { AFFINE_MODAL_WIDGET } from '../page-block/widgets/modal/modal.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../page-block/widgets/slash-menu/index.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
@@ -59,8 +60,8 @@ const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
       [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
         AFFINE_SLASH_MENU_WIDGET
       )}`,
-      [AFFINE_LINKED_PAGE_WIDGET]: literal`${unsafeStatic(
-        AFFINE_LINKED_PAGE_WIDGET
+      [AFFINE_LINKED_DOC_WIDGET]: literal`${unsafeStatic(
+        AFFINE_LINKED_DOC_WIDGET
       )}`,
       [AFFINE_DOC_DRAGGING_AREA_WIDGET]: literal`${unsafeStatic(
         AFFINE_DOC_DRAGGING_AREA_WIDGET
@@ -91,8 +92,8 @@ const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
       [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
         AFFINE_SLASH_MENU_WIDGET
       )}`,
-      [AFFINE_LINKED_PAGE_WIDGET]: literal`${unsafeStatic(
-        AFFINE_LINKED_PAGE_WIDGET
+      [AFFINE_LINKED_DOC_WIDGET]: literal`${unsafeStatic(
+        AFFINE_LINKED_DOC_WIDGET
       )}`,
       [AFFINE_DRAG_HANDLE_WIDGET]: literal`${unsafeStatic(
         AFFINE_DRAG_HANDLE_WIDGET
@@ -191,9 +192,10 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
       },
     },
   },
+  EmbedYoutubeBlockSpec,
   EmbedGithubBlockSpec,
   EmbedHtmlBlockSpec,
-  EmbedLinkedPageBlockSpec,
+  EmbedLinkedDocBlockSpec,
 ];
 
 export const DocEditorBlockSpecs: BlockSpec[] = [
