@@ -185,7 +185,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                 hover="false"
               >
                 ${LinkIcon}
-                <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
+                <affine-tooltip .offset=${12}>${'Inline view'}</affine-tooltip>
               </icon-button>
 
               <icon-button
