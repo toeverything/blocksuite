@@ -59,7 +59,6 @@ export class Clipboard {
     }
     return (type: string) => {
       const item = data.get(type);
-      console.log(data.get('text/html'));
       if (item) {
         return item;
       }
