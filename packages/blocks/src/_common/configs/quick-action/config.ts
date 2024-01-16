@@ -5,6 +5,7 @@ import type { EditorHost } from '@blocksuite/lit';
 import { html, type TemplateResult } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
+import type { EmbedLinkedDocService } from '../../../embed-linked-doc-block/embed-linked-doc-service.js';
 import { createSimplePortal } from '../../components/portal.js';
 import { toast } from '../../components/toast.js';
 import {
@@ -126,21 +127,21 @@ export const quickActionConfig: QuickActionConfig[] = [
       assertExists(firstBlock);
 
       const page = host.page;
-      const newPage = page.workspace.createPage({});
-      newPage
+      const linkedPage = page.workspace.createPage({});
+      linkedPage
         .load(() => {
-          const pageBlockId = newPage.addBlock('affine:page', {
+          const pageBlockId = linkedPage.addBlock('affine:page', {
             title: new page.Text(''),
           });
-          newPage.addBlock('affine:surface', {}, pageBlockId);
-          const noteId = newPage.addBlock('affine:note', {}, pageBlockId);
+          linkedPage.addBlock('affine:surface', {}, pageBlockId);
+          const noteId = linkedPage.addBlock('affine:note', {}, pageBlockId);
 
           page.addSiblingBlocks(
             firstBlock,
             [
               {
                 flavour: 'affine:embed-linked-doc',
-                pageId: newPage.id,
+                pageId: linkedPage.id,
               },
             ],
             'before'
@@ -159,17 +160,24 @@ export const quickActionConfig: QuickActionConfig[] = [
               const type = model.type;
               if (type.match(/^h[1-6]$/)) {
                 title = model.text.toString();
-                newPage.workspace.setPageMeta(newPage.id, {
+                linkedPage.workspace.setPageMeta(linkedPage.id, {
                   title,
                 });
               }
             }
 
-            newPage.addBlock(model.flavour, blockProps, noteId);
+            linkedPage.addBlock(model.flavour, blockProps, noteId);
             page.deleteBlock(model);
           });
         })
         .catch(console.error);
+
+      const linkedDocService = host.spec.getService(
+        'affine:embed-linked-doc'
+      ) as EmbedLinkedDocService | null;
+      assertExists(linkedDocService);
+
+      linkedDocService.slots.linkedDocCreated.emit({ pageId: linkedPage.id });
     },
   },
 ];
