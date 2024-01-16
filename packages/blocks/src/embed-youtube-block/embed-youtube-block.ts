@@ -118,7 +118,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
         this._isSelected = sels.some(sel =>
           PathFinder.equals(sel.path, this.path)
         );
-        this._showOverlay = !this._isSelected && !this._isDragging;
+        this._showOverlay = this._isDragging || !this._isSelected;
       })
     );
     // this is required to prevent iframe from capturing pointer events
