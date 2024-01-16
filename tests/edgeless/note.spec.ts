@@ -878,3 +878,72 @@ test('when no visible note block, clicking in page mode will auto add a new note
   });
   expect(note).not.toBeNull();
 });
+
+test('drag to add customized size note', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+  await setEdgelessTool(page, 'note');
+  // add note at 300,300
+  await page.mouse.move(300, 300);
+  await page.mouse.down();
+  await page.mouse.move(900, 600, { steps: 10 });
+  await page.mouse.up();
+  // should wait for inline editor update and resizeObserver callback
+  await waitForInlineEditorStateUpdated(page);
+
+  // assert add note success
+  await assertBlockCount(page, 'note', 2);
+
+  // click out of note
+  await page.mouse.click(250, 200);
+  // click on note to select it
+  await page.mouse.click(600, 500);
+  // assert selected note
+  // note add on edgeless mode will have a offsetX of 30 and offsetY of 40
+  await assertEdgelessSelectedRect(page, [270, 260, 600, 300]);
+});
+
+test('drag to add customized size note: should wider than minimum width and higher than minimum height ', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+  await setEdgelessTool(page, 'note');
+  // add note at 300,300
+  await page.mouse.move(300, 300);
+  await page.mouse.down();
+  await page.mouse.move(400, 360, { steps: 10 });
+  await page.mouse.up();
+  await waitNextFrame(page);
+
+  // assert add note unsuccessful, note should be wider than minimum width and higher than minimum height
+  await assertBlockCount(page, 'note', 1);
+
+  await setEdgelessTool(page, 'note');
+  await waitNextFrame(page);
+
+  // add note at 300,300
+  await page.mouse.move(300, 300);
+  await page.mouse.down();
+  await page.mouse.move(900, 600, { steps: 10 });
+  await page.mouse.up();
+
+  // should wait for inline editor update and resizeObserver callback
+  await waitForInlineEditorStateUpdated(page);
+  // assert add note success
+  await assertBlockCount(page, 'note', 2);
+
+  // click out of note
+  await page.mouse.click(250, 200);
+  // click on note to select it
+  await page.mouse.click(600, 500);
+  // assert selected note
+  // note add on edgeless mode will have a offsetX of 30 and offsetY of 40
+  await assertEdgelessSelectedRect(page, [270, 260, 600, 300]);
+});
