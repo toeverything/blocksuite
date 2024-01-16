@@ -45,7 +45,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override cardStyle: (typeof EmbedLinkedDocStyles)[number] = 'horizontal';
+  override _cardStyle: (typeof EmbedLinkedDocStyles)[number] = 'horizontal';
   override _width = EMBED_CARD_WIDTH.horizontal;
   override _height = EMBED_CARD_HEIGHT.horizontal;
 
@@ -426,12 +426,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const isLoading = this._loading;
     const pageMode = this._pageMode;
 
-    this.cardStyle = this.model.style;
-    this._width = EMBED_CARD_WIDTH[this.cardStyle];
+    this._cardStyle = this.model.style;
+    this._width = EMBED_CARD_WIDTH[this._cardStyle];
     this._height =
-      isDeleted && this.cardStyle === 'horizontal'
+      isDeleted && this._cardStyle === 'horizontal'
         ? 80
-        : EMBED_CARD_HEIGHT[this.cardStyle];
+        : EMBED_CARD_HEIGHT[this._cardStyle];
 
     const isEmpty = this._isPageEmpty() && this._isBannerEmpty;
 
@@ -439,7 +439,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       loading: isLoading,
       deleted: isDeleted,
       empty: isEmpty,
-      [this.cardStyle]: true,
+      [this._cardStyle]: true,
     });
 
     const {
@@ -448,7 +448,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       LinkedDocDeletedIcon,
       LinkedDocDeletedBanner,
       LinkedDocEmptyBanner,
-    } = getEmbedLinkedDocIcons(this._pageMode, this.cardStyle);
+    } = getEmbedLinkedDocIcons(this._pageMode, this._cardStyle);
 
     const titleIcon = isLoading
       ? LoadingIcon

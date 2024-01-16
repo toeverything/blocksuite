@@ -31,7 +31,7 @@ export class EmbedBlockElement<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {
-  protected cardStyle: EmbedCardStyle = 'horizontal';
+  protected _cardStyle: EmbedCardStyle = 'horizontal';
   protected _width = EMBED_CARD_WIDTH.horizontal;
   protected _height = EMBED_CARD_HEIGHT.horizontal;
 
@@ -124,7 +124,7 @@ export class EmbedBlockElement<
 
       if (isInSurface) {
         if (dropBlockId) {
-          const style = blockComponent.cardStyle;
+          const style = blockComponent._cardStyle;
           if (style === 'vertical' || style === 'cube') {
             const { xywh } = blockComponent.model;
             const bound = Bound.deserialize(xywh);
@@ -141,7 +141,7 @@ export class EmbedBlockElement<
           ...props,
         });
       } else if (isTargetEdgelessContainer) {
-        const style = blockComponent.cardStyle;
+        const style = blockComponent._cardStyle;
 
         return convertDragPreviewDocToEdgeless({
           blockComponent,

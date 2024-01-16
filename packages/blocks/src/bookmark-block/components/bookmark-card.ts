@@ -1,3 +1,4 @@
+import { PathFinder } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -15,6 +16,9 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
   @state()
   bookmark!: BookmarkBlockComponent;
+
+  @state()
+  private _isSelected = false;
 
   private readonly _themeObserver = new ThemeObserver();
 
@@ -34,6 +38,14 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     this._themeObserver.observe(document.documentElement);
     this._themeObserver.on(() => this.requestUpdate());
     this.disposables.add(() => this._themeObserver.dispose());
+
+    this.disposables.add(
+      this.bookmark.selection.slots.changed.on(sels => {
+        this._isSelected = sels.some(sel =>
+          PathFinder.equals(sel.path, this.bookmark.path)
+        );
+      })
+    );
   }
 
   private _selectBlock() {
@@ -75,6 +87,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       loading,
       'loading-failed': loadingFailed,
       [style]: true,
+      selected: this._isSelected,
     });
 
     const domainName = url.match(

@@ -17,13 +17,13 @@ import type { PageBlockComponent } from '../../../../../page-block/types.js';
 import { HoverController } from '../../../../components/hover/controller.js';
 import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/text.js';
 import {
-  getClosestBlockElementByElement,
   getModelByElement,
   getPageByElement,
 } from '../../../../utils/query.js';
 import type { AffineTextAttributes } from '../../affine-inline-specs.js';
 import { affineTextStyles } from '../affine-text.js';
 import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from '../consts.js';
+import type { ReferenceNodeConfig } from './reference-config.js';
 import { toggleReferencePopup } from './reference-popup.js';
 
 export type RefNodeSlots = {
@@ -75,6 +75,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   @property({ type: Boolean })
   selected = false;
 
+  @property({ attribute: false })
+  config!: ReferenceNodeConfig;
+
   // Since the linked page may be deleted, the `_refMeta` could be undefined.
   @state()
   private _refMeta?: PageMeta;
@@ -98,19 +101,36 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     return selfInlineRange;
   }
 
+  get page() {
+    const page = this.config.page;
+    assertExists(page, '`reference-node` need `Page`.');
+    return page;
+  }
+
+  get customIcon() {
+    return this.config.customIcon;
+  }
+
+  get customTitle() {
+    return this.config.customTitle;
+  }
+
+  get customContent() {
+    return this.config.customContent;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
+
+    assertExists(this.config, '`reference-node` need `ReferenceNodeConfig`.');
+
     if (this.delta.insert !== REFERENCE_NODE) {
       console.error(
         `Reference node must be initialized with '${REFERENCE_NODE}', but got '${this.delta.insert}'`
       );
     }
 
-    const closestBlock = getClosestBlockElementByElement(this);
-    if (!closestBlock) return;
-
-    const page = closestBlock.page;
-
+    const page = this.page;
     this._updateRefMeta(page);
     this._disposables.add(
       page.workspace.slots.pagesUpdated.on(() => this._updateRefMeta(page))
@@ -171,13 +191,24 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const refMeta = this._refMeta;
     const isDeleted = !refMeta;
 
-    const title = isDeleted ? 'Deleted page' : refMeta.title;
-
     const attributes = this.delta.attributes;
     assertExists(attributes, 'Failed to get attributes!');
 
     const type = attributes.reference?.type;
     assertExists(type, 'Unable to get reference type!');
+
+    const title = this.customTitle
+      ? this.customTitle(this)
+      : isDeleted
+        ? 'Deleted page'
+        : refMeta.title.length > 0
+          ? refMeta.title
+          : DEFAULT_PAGE_NAME;
+    const icon = this.customIcon
+      ? this.customIcon(this)
+      : type === 'LinkedPage'
+        ? FontLinkedPageIcon
+        : FontPageIcon;
 
     const style = affineTextStyles(
       attributes,
@@ -190,6 +221,12 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         : {}
     );
 
+    const content = this.customContent
+      ? this.customContent(this)
+      : html`${icon}<span data-title=${title} class="affine-reference-title"
+            >${title}</span
+          >`;
+
     // we need to add `<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text>` in an
     // embed element to make sure inline range calculation is correct
     return html`<span
@@ -198,11 +235,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       class="affine-reference"
       style=${style}
       @click=${this._onClick}
-      >${type === 'LinkedPage' ? FontLinkedPageIcon : FontPageIcon}<span
-        data-title=${title || DEFAULT_PAGE_NAME}
-        class="affine-reference-title"
-        >${title || DEFAULT_PAGE_NAME}</span
-      ><v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+      >${content}<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
     ></span>`;
   }
 }
