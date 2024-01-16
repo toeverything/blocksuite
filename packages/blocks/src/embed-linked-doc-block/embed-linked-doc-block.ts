@@ -100,12 +100,13 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const onLoad = () => {
       if (linkedDoc.root) {
         displayLinkedPageInfo();
+        this._loading = false;
       } else {
         linkedDoc.slots.rootAdded.once(() => {
           displayLinkedPageInfo();
+          this._loading = false;
         });
       }
-      this._loading = false;
     };
 
     this._loading = true;
