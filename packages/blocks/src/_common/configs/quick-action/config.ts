@@ -146,12 +146,25 @@ export const quickActionConfig: QuickActionConfig[] = [
             'before'
           )[0];
 
+          let title = '';
+
           selectedModels.forEach(model => {
             const keys = model.keys as (keyof typeof model)[];
             const values = keys.map(key => model[key]);
             const blockProps = Object.fromEntries(
               keys.map((key, i) => [key, values[i]])
             );
+
+            if (!title && matchFlavours(model, ['affine:paragraph'])) {
+              const type = model.type;
+              if (type.match(/^h[1-6]$/)) {
+                title = model.text.toString();
+                newPage.workspace.setPageMeta(newPage.id, {
+                  title,
+                });
+              }
+            }
+
             newPage.addBlock(model.flavour, blockProps, noteId);
             page.deleteBlock(model);
           });
