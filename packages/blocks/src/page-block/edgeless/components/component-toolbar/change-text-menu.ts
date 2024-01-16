@@ -20,6 +20,7 @@ import {
   isFontStyleSupported,
   isFontWeightSupported,
 } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { CanvasTextFontStyle } from '../../../../surface-block/consts.js';
 import {
   FontFamily,
@@ -32,7 +33,6 @@ import {
   Bound,
   CanvasElementType,
   normalizeShapeBound,
-  normalizeTextBound,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';

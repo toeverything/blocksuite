@@ -1,13 +1,7 @@
-import type { BlockProps } from '@blocksuite/store';
-
 import type { BookmarkBlockModel } from '../bookmark-block/bookmark-model.js';
 import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/image-model.js';
 import type { NoteBlockModel } from '../note-block/note-model.js';
-import type {
-  CanvasElementType,
-  IElementCreateProps,
-} from './elements/edgeless-element.js';
 
 export type EdgelessBlockModelMap = {
   'affine:frame': FrameBlockModel;
@@ -30,8 +24,3 @@ export type EdgelessElementType =
   | 'text'
   | 'group'
   | 'debug';
-
-export type IEdgelessElementCreateProps<T extends EdgelessElementType> =
-  T extends CanvasElementType
-    ? IElementCreateProps<T>
-    : Partial<BlockProps & Omit<BlockProps, 'flavour'>>;

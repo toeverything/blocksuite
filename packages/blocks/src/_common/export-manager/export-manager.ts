@@ -9,7 +9,6 @@ import {
   getEditorContainer,
   isInsideDocEditor,
   matchFlavours,
-  type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
@@ -17,9 +16,10 @@ import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../page-block/edgeless/utils/query.js';
 import type { IBound } from '../../surface-block/consts.js';
-import type { SurfaceElement } from '../../surface-block/elements/surface-element.js';
+import type { ElementModel } from '../../surface-block/element-model/index.js';
 import type { Renderer } from '../../surface-block/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
+import type { EdgelessBlock } from '../edgeless/mixin/index.js';
 import { FileExporter } from './file-exporter.js';
 
 type Html2CanvasFunction = typeof import('html2canvas').default;
@@ -183,8 +183,8 @@ export class ExportManager {
     bound: IBound,
     blockElementGetter: (model: BlockModel) => Element | null = () => null,
     edgeless?: EdgelessPageBlockComponent,
-    nodes?: TopLevelBlockModel[],
-    surfaces?: SurfaceElement[],
+    nodes?: EdgelessBlock[],
+    surfaces?: ElementModel[],
     edgelessBackground?: {
       zoom: number;
     }
@@ -225,7 +225,8 @@ export class ExportManager {
     }
 
     // TODO: refactor of this part
-    const blocks = nodes ?? edgeless?.getSortedElementsByBound(bound) ?? [];
+    const blocks =
+      nodes ?? edgeless?.service.pickElementsByBound(bound, 'blocks') ?? [];
     for (const block of blocks) {
       if (matchFlavours(block, ['affine:image'])) {
         if (!block.sourceId) return;

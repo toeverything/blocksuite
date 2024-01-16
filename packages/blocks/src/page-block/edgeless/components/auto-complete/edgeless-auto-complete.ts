@@ -18,6 +18,7 @@ import {
   ConnectorMode,
 } from '../../../../surface-block/element-model/connector.js';
 import type { ShapeType } from '../../../../surface-block/element-model/shape.js';
+import { shapeMethods } from '../../../../surface-block/element-model/shape.js';
 import { ShapeElementModel } from '../../../../surface-block/index.js';
 import {
   type Bound,
@@ -26,7 +27,6 @@ import {
   Overlay,
   rotatePoints,
   type RoughCanvas,
-  ShapeMethodsMap,
   Vec,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -313,7 +313,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       this._surface.themeObserver.getVariableValue(current.strokeColor);
     this._autoCompleteOverlay.linePoints = path;
     this._autoCompleteOverlay.shapePoints = rotatePoints(
-      ShapeMethodsMap[targetType].points(bound),
+      shapeMethods[targetType].points(bound),
       bound.center,
       current.rotate
     );

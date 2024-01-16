@@ -1,4 +1,5 @@
 import type { HitTestOptions } from '../../../../page-block/edgeless/type.js';
+import { type IBound } from '../../../consts.js';
 import { Bound } from '../../../utils/bound.js';
 import {
   getCenterAreaBounds,
@@ -16,6 +17,14 @@ import { DEFAULT_CENTRAL_AREA_RATIO } from '../../common.js';
 import type { ShapeElementModel } from '../../shape.js';
 
 export const rect = {
+  points({ x, y, w, h }: IBound) {
+    return [
+      [x, y],
+      [x + w, y],
+      [x + w, y + h],
+      [x, y + h],
+    ];
+  },
   hitTest(
     this: ShapeElementModel,
     x: number,

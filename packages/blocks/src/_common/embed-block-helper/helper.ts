@@ -32,7 +32,7 @@ export function createEmbedBlock<
         index: 'a0',
         rotate: 0,
         ...(userProps || {}),
-      } as EmbedProps<Props>;
+      } as unknown as EmbedProps<Props>;
     },
     metadata: {
       version: schema.version,

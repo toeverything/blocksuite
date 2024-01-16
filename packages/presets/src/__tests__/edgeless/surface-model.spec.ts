@@ -206,7 +206,7 @@ describe('group', () => {
       },
     });
 
-    expect(group.childrenIds).toEqual([id]);
+    expect(group.childIds).toEqual([id]);
   });
 });
 

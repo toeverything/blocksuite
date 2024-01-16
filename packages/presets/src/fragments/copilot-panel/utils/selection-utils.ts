@@ -1,4 +1,5 @@
 import type { FrameBlockModel, ImageBlockModel } from '@blocksuite/blocks';
+import type { EdgelessBlock } from '@blocksuite/blocks';
 import { BlocksUtils, type SurfaceBlockComponent } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
@@ -181,7 +182,7 @@ export const getFirstImageInFrame = (
   const elements = surface.frame.getElementsInFrame(frame, false);
   const image = elements.find(ele => {
     if (!BlocksUtils.isCanvasElement(ele)) {
-      return ele.flavour === 'affine:image';
+      return (ele as EdgelessBlock).flavour === 'affine:image';
     }
     return false;
   }) as ImageBlockModel | undefined;

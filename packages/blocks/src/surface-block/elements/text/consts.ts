@@ -6,12 +6,9 @@ import {
   CanvasTextFontWeight,
 } from '../../consts.js';
 import { TextAlign } from '../consts.js';
-import {
-  CanvasElementType,
-  type IElementDefaultProps,
-} from '../edgeless-element.js';
+import { CanvasElementType } from '../edgeless-element.js';
 
-export const TextElementDefaultProps: IElementDefaultProps<'text'> = {
+export const TextElementDefaultProps = {
   type: CanvasElementType.TEXT,
   xywh: '[0,0,0,0]',
 

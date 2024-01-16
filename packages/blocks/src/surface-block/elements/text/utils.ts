@@ -5,8 +5,6 @@ import type {
   CanvasTextFontStyle,
 } from '../../consts.js';
 import { type CanvasTextFontWeight } from '../../consts.js';
-import type { TextElementModel } from '../../element-model/text.js';
-import type { Bound } from '../../utils/bound.js';
 import type { ITextDelta } from './types.js';
 
 const RS_LTR_CHARS =
@@ -388,56 +386,6 @@ export function deltaInsertsToChunks(delta: ITextDelta[]): ITextDelta[][] {
   }
 
   return Array.from(chunksGenerator(transformedDelta));
-}
-
-export function normalizeTextBound(
-  text: TextElementModel,
-  bound: Bound,
-  dragging: boolean = false
-): Bound {
-  if (!text.text) return bound;
-
-  const yText = text.text;
-  const { fontStyle, fontWeight, fontSize, fontFamily } = text;
-  const lineHeightPx = getLineHeight(fontFamily, fontSize);
-  const font = getFontString({
-    fontStyle,
-    fontWeight,
-    fontSize,
-    fontFamily,
-  });
-
-  let lines: ITextDelta[][] = [];
-  const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
-  const widestCharWidth =
-    [...yText.toString()]
-      .map(char => getTextWidth(char, font))
-      .sort((a, b) => a - b)
-      .pop() ?? getTextWidth('W', font);
-
-  if (bound.w < widestCharWidth) {
-    bound.w = widestCharWidth;
-  }
-
-  const width = bound.w;
-  const insertDeltas = deltas.flatMap(delta => ({
-    insert: wrapText(delta.insert, font, width),
-    attributes: delta.attributes,
-  })) as ITextDelta[];
-  lines = deltaInsertsToChunks(insertDeltas);
-  if (!dragging && !text.hasMaxWidth) {
-    lines = deltaInsertsToChunks(deltas);
-    const widestLineWidth = Math.max(
-      ...yText
-        .toString()
-        .split('\n')
-        .map(text => getTextWidth(text, font))
-    );
-    bound.w = widestLineWidth;
-  }
-  bound.h = lineHeightPx * lines.length;
-
-  return bound;
 }
 
 export function getFontFacesByFontFamily(

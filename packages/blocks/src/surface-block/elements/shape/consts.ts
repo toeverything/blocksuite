@@ -1,10 +1,7 @@
 import { z } from 'zod';
 
 import { DEFAULT_ROUGHNESS, ShapeStyle, StrokeStyle } from '../../consts.js';
-import {
-  CanvasElementType,
-  type IElementDefaultProps,
-} from '../edgeless-element.js';
+import { CanvasElementType } from '../edgeless-element.js';
 
 export enum ShapeType {
   Rect = 'rect',
@@ -13,7 +10,7 @@ export enum ShapeType {
   Diamond = 'diamond',
 }
 
-export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
+export const ShapeElementDefaultProps = {
   type: CanvasElementType.SHAPE,
   xywh: '[0,0,0,0]',
 

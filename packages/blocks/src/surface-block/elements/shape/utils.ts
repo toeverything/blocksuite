@@ -5,18 +5,12 @@ import {
   getTextWidth,
   wrapText,
 } from '../../canvas-renderer/element-renderer/text/utils.js';
-import { type IBound, StrokeStyle } from '../../consts.js';
+import { StrokeStyle } from '../../consts.js';
 import type { ShapeElementModel } from '../../index.js';
-import { Bound } from '../../utils/bound.js';
-import {
-  getPointsFromBoundsWithRotation,
-  pointInPolygon,
-} from '../../utils/math-utils.js';
-import { type IVec } from '../../utils/vec.js';
+import type { Bound } from '../../utils/bound.js';
 import type { ITextDelta } from '../text/types.js';
 import type { ShapeType } from './consts.js';
 import { type GeneralShapeOptions, SHAPE_TEXT_PADDING } from './consts.js';
-import type { ShapeElement } from './shape-element.js';
 
 export function normalizeShapeBound(
   shape: ShapeElementModel,
@@ -55,57 +49,6 @@ export function normalizeShapeBound(
   }
 
   return bound;
-}
-
-export function hitTestOnShapeText(point: IVec, shape: ShapeElement): boolean {
-  // calculate the text area
-  const shapeTextIBound = getShapeTextIBound(shape);
-  if (!shapeTextIBound) return false;
-  // Check if the point is in the text area
-  const textAreaPoints = getPointsFromBoundsWithRotation(shapeTextIBound);
-  return pointInPolygon(point, textAreaPoints);
-}
-
-export function getShapeTextIBound(shape: ShapeElement): IBound | null {
-  const {
-    x,
-    y,
-    text,
-    fontSize,
-    fontFamily,
-    font,
-    horizontalOffset,
-    rotate,
-    textAlign,
-  } = shape;
-  if (!text) return null;
-
-  const lineHeight = getLineHeight(fontFamily, fontSize);
-  const lines = deltaInsertsToChunks(shape.wrapTextDeltas);
-  const widestLineWidth = Math.max(
-    ...text
-      .toString()
-      .split('\n')
-      .map(text => getTextWidth(text, font))
-  );
-  const height = lineHeight * lines.length;
-  const verticalOffset = shape.verticalOffset(lines, lineHeight);
-  const offsetX =
-    textAlign === 'center'
-      ? horizontalOffset - widestLineWidth / 2
-      : textAlign === 'right'
-        ? horizontalOffset - widestLineWidth
-        : SHAPE_TEXT_PADDING;
-
-  const iBound = new Bound(
-    x + offsetX - 2,
-    y + verticalOffset - 1.5,
-    widestLineWidth,
-    height
-  ) as IBound;
-
-  if (rotate) iBound.rotate = rotate;
-  return iBound;
 }
 
 function drawRect(

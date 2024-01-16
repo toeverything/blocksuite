@@ -5,8 +5,6 @@ import type { Page } from '@blocksuite/store';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import type { EdgelessElement, TopLevelBlockModel } from '../_common/types.js';
 import type { NoteBlockModel } from '../note-block/index.js';
-import { ConnectorPathGenerator } from '../page-block/edgeless/managers/connector-manager.js';
-import type { SurfaceElement } from '../surface-block/elements/surface-element.js';
 import { Renderer } from '../surface-block/index.js';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 import type { SurfacePageService } from '../surface-block/surface-page-service.js';
@@ -16,8 +14,6 @@ type RefElement = Exclude<EdgelessElement, NoteBlockModel>;
 
 export class SurfaceRefRenderer {
   private readonly _surfaceRenderer: Renderer;
-  private readonly _connectorManager: ConnectorPathGenerator;
-  private readonly _elements: Map<string, SurfaceElement>;
 
   private _surfaceModel: SurfaceBlockModel | null = null;
   protected _disposables = new DisposableGroup();
@@ -38,12 +34,8 @@ export class SurfaceRefRenderer {
     return this._surfaceRenderer;
   }
 
-  get elements() {
-    return this._elements;
-  }
-
-  get connectorManager() {
-    return this._connectorManager;
+  get surfaceModel() {
+    return this._surfaceModel;
   }
 
   constructor(
@@ -62,12 +54,6 @@ export class SurfaceRefRenderer {
 
     themeObserver.observe(document.documentElement);
     this._surfaceRenderer = renderer;
-    this._connectorManager = new ConnectorPathGenerator({
-      getElementById: id => this.getModel(id),
-      refresh: () => renderer.refresh(),
-    });
-
-    this._elements = new Map<string, SurfaceElement>();
     this.slots.unmounted.once(() => {
       themeObserver.dispose();
     });
@@ -94,7 +80,7 @@ export class SurfaceRefRenderer {
         TopLevelBlockModel,
         NoteBlockModel
       >) ??
-      this._elements.get(id) ??
+      this._surfaceModel?.getElementById(id) ??
       null
     );
   }

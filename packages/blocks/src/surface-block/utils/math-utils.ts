@@ -437,7 +437,10 @@ export function rotatePoint(
   rotate: number
 ): [number, number] {
   const rad = toRadian(rotate);
-  return Vec.add(center, Vec.rot(Vec.sub(point, center), rad)) as T;
+  return Vec.add(center, Vec.rot(Vec.sub(point, center), rad)) as [
+    number,
+    number,
+  ];
 }
 
 export function getPointsFromBoundsWithRotation(

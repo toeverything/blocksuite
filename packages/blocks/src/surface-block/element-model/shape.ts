@@ -20,7 +20,7 @@ import { ellipse } from './utils/shape/ellipse.js';
 import { rect } from './utils/shape/rect.js';
 import { triangle } from './utils/shape/triangle.js';
 
-const shapeMethods: {
+export const shapeMethods: {
   [key in ShapeType]: typeof rect;
 } = {
   rect,

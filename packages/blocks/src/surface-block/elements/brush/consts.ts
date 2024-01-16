@@ -1,9 +1,6 @@
-import {
-  CanvasElementType,
-  type IElementDefaultProps,
-} from '../edgeless-element.js';
+import { CanvasElementType } from '../edgeless-element.js';
 
-export const BrushElementDefaultProps: IElementDefaultProps<'brush'> = {
+export const BrushElementDefaultProps = {
   type: CanvasElementType.BRUSH,
   xywh: '[0,0,0,0]',
 

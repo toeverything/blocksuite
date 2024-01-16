@@ -175,6 +175,8 @@ export class EdgelessPageService extends PageService {
     return options.all ? results : last(results) ?? null;
   }
 
+  pickElementsByBound(bound: IBound | Bound, type?: 'all'): EdgelessElement[];
+  pickElementsByBound(bound: IBound | Bound, type: 'blocks'): EdgelessBlock[];
   pickElementsByBound(
     bound: IBound | Bound,
     type: 'frame' | 'blocks' | 'canvas' | 'all' = 'all'

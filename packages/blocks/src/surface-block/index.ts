@@ -29,7 +29,6 @@ export { getArrowPoints } from './elements/connector/utils.js';
 export * from './elements/edgeless-element.js';
 export * from './elements/index.js';
 export { ShapeType } from './elements/shape/consts.js';
-export { ShapeMethodsMap } from './elements/shape/shapes/index.js';
 export { type ComputedValue } from './elements/surface-element.js';
 export { getStroke } from './perfect-freehand/getStroke.js';
 export { RoughCanvas } from './rough/canvas.js';
