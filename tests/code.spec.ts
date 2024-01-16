@@ -108,7 +108,7 @@ test('use markdown syntax can create code block', async ({ page }) => {
       },
     }
   }
-  prop:hidden={false}
+  prop:displayMode='In Both'
   prop:index="a0"
 >
   <affine:paragraph
@@ -151,7 +151,7 @@ test('use markdown syntax can create code block', async ({ page }) => {
       },
     }
   }
-  prop:hidden={false}
+  prop:displayMode='In Both'
   prop:index="a0"
 >
   <affine:code
@@ -405,7 +405,7 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
         },
       }
     }
-    prop:hidden={false}
+    prop:displayMode='In Both'
     prop:index="a0"
   >
     <affine:code
@@ -459,7 +459,7 @@ test.fixme(
         },
       }
     }
-    prop:hidden={false}
+    prop:displayMode='In Both'
     prop:index="a0"
   >
     <affine:code

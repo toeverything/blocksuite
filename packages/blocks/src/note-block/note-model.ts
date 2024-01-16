@@ -19,7 +19,6 @@ export const NoteBlockSchema = defineBlockSchema({
     xywh: `[0,0,${NOTE_WIDTH},95]`,
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
-    hidden: false,
     displayMode: NoteDisplayMode.PageAndEdgeless,
     edgeless: {
       style: {
@@ -58,7 +57,6 @@ type NoteProps = {
   xywh: SerializedXYWH;
   background: string;
   index: string;
-  hidden: boolean;
   displayMode: NoteDisplayMode;
   edgeless: NoteEdgelessProps;
 };

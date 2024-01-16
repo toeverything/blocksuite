@@ -2909,4 +2909,3 @@ export const DocIcon = svg`
       />
   </svg>
 `;
-

@@ -522,7 +522,7 @@ test(scoped`automatic identify url text`, async ({ page }) => {
         },
       }
     }
-    prop:hidden={false}
+    prop:displayMode='In Both'
     prop:index="a0"
   >
     <affine:paragraph

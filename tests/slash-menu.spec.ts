@@ -367,7 +367,7 @@ test.describe('slash search', () => {
       },
     }
   }
-  prop:hidden={false}
+  prop:displayMode='In Both'
   prop:index="a0"
 >
   <affine:list
@@ -797,7 +797,7 @@ test('delete block by slash menu should remove children', async ({ page }) => {
       },
     }
   }
-  prop:hidden={false}
+  prop:displayMode='In Both'
   prop:index="a0"
 >
   <affine:list

@@ -219,7 +219,7 @@ test('nested list blocks', async ({ page }) => {
         },
       }
     }
-    prop:hidden={false}
+    prop:displayMode='In Both'
     prop:index="a0"
   >
     <affine:list
@@ -265,7 +265,7 @@ test('nested list blocks', async ({ page }) => {
         },
       }
     }
-    prop:hidden={false}
+    prop:displayMode='In Both'
     prop:index="a0"
   >
     <affine:list
@@ -343,7 +343,7 @@ test('basic indent and unindent', async ({ page }) => {
         },
       }
     }
-    prop:hidden={false}
+    prop:displayMode='In Both'
     prop:index="a0"
   >
     <affine:paragraph
@@ -375,7 +375,7 @@ test('basic indent and unindent', async ({ page }) => {
         },
       }
     }
-    prop:hidden={false}
+    prop:displayMode='In Both'
     prop:index="a0"
   >
     <affine:paragraph
@@ -409,7 +409,7 @@ test('basic indent and unindent', async ({ page }) => {
         },
       }
     }
-    prop:hidden={false}
+    prop:displayMode='In Both'
     prop:index="a0"
   >
     <affine:paragraph
@@ -452,7 +452,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
       },
     }
   }
-  prop:hidden={false}
+  prop:displayMode='In Both'
   prop:index="a0"
 >
   <affine:paragraph
@@ -485,7 +485,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
       },
     }
   }
-  prop:hidden={false}
+  prop:displayMode='In Both'
   prop:index="a0"
 >
   <affine:paragraph
@@ -748,7 +748,7 @@ test.describe('toggle list', () => {
       },
     }
   }
-  prop:hidden={false}
+  prop:displayMode='In Both'
   prop:index="a0"
 >
   <affine:list
@@ -795,7 +795,7 @@ test.describe('toggle list', () => {
       },
     }
   }
-  prop:hidden={false}
+  prop:displayMode='In Both'
   prop:index="a0"
 >
   <affine:list

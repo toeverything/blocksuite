@@ -1,6 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
-import { type TemplateResult } from 'lit';
+import { nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -10,6 +10,7 @@ import {
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../_common/edgeless/note/consts.js';
+import { NoteDisplayMode } from '../../_common/types.js';
 import { type NoteBlockModel } from '../../note-block/index.js';
 import { deserializeXYWH } from '../../surface-block/index.js';
 
@@ -56,22 +57,20 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const { model, index } = this;
+    const { displayMode } = model;
+    if (displayMode === NoteDisplayMode.PageOnly) return nothing;
+
     const { xywh, background } = model;
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
-    const isHiddenNote = model.hidden;
     const style = {
       zIndex: `${index}`,
       width: modelW + 'px',
       height: modelH + 'px',
       transform: `translate(${modelX}px, ${modelY}px)`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-      border: `${EDGELESS_BLOCK_CHILD_BORDER_WIDTH}px ${
-        isHiddenNote ? 'dashed' : 'solid'
-      } var(--affine-black-10)`,
-      background: isHiddenNote
-        ? 'transparent'
-        : `var(${background ?? DEFAULT_NOTE_COLOR})`,
-      boxShadow: isHiddenNote ? undefined : 'var(--affine-shadow-3)',
+      border: `${EDGELESS_BLOCK_CHILD_BORDER_WIDTH}px ${'solid'} var(--affine-black-10)`,
+      background: `var(${background ?? DEFAULT_NOTE_COLOR})`,
+      boxShadow: 'var(--affine-shadow-3)',
       position: 'absolute',
       borderRadius: '8px',
       boxSizing: 'border-box',

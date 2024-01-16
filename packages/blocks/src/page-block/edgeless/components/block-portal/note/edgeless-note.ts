@@ -285,7 +285,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     const { displayMode } = model;
     if (displayMode === NoteDisplayMode.PageOnly) return nothing;
 
-    const { xywh, background, hidden, edgeless } = model;
+    const { xywh, background, edgeless } = model;
     const { borderRadius, borderSize, borderStyle, shadowType } =
       edgeless.style;
     const { collapse, collapsedHeight } = edgeless;
@@ -317,17 +317,13 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       transition: this._editing
         ? 'left 0.3s, top 0.3s, width 0.3s, height 0.3s'
         : 'none',
-      background: hidden
-        ? 'transparent'
-        : `var(${background ?? DEFAULT_NOTE_COLOR})`,
-      border: hidden
-        ? `2px dashed var(--affine-black-10)`
-        : `${borderSize}px ${
-            borderStyle === StrokeStyle.Dashed ? 'dashed' : borderStyle
-          } var(--affine-black-10)`,
+      background: `var(${background ?? DEFAULT_NOTE_COLOR})`,
+      border: `${borderSize}px ${
+        borderStyle === StrokeStyle.Dashed ? 'dashed' : borderStyle
+      } var(--affine-black-10)`,
       boxShadow: this._editing
         ? 'var(--affine-active-shadow)'
-        : hidden || !shadowType
+        : !shadowType
           ? 'none'
           : `var(${shadowType})`,
     };
