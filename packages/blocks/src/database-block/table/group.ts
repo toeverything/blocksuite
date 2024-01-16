@@ -146,7 +146,6 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
       ${this.view.readonly
         ? null
         : html` <div
-            contenteditable="false"
             class="data-view-table-group-add-row dv-hover"
             @click="${this.clickAddRow}"
           >

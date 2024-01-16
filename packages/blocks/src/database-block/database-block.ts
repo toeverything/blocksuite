@@ -170,11 +170,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     if (this.page.readonly) {
       return nothing;
     }
-    return html`<div
-      contenteditable="false"
-      class="database-ops"
-      @click="${this._clickDatabaseOps}"
-    >
+    return html`<div class="database-ops" @click="${this._clickDatabaseOps}">
       ${MoreHorizontalIcon}
     </div>`;
   }
@@ -211,12 +207,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         this.viewSource.updateSlot.emit();
       })
     );
-    this.handleEvent('selectionChange', () => {
-      const selection = this.service?.selectionManager.value.find(selection =>
-        PathFinder.equals(selection.path, this.path)
-      );
-      return !!selection;
-    });
     let canDrop = false;
     this.disposables.add(
       AffineDragHandleWidget.registerOption({
@@ -300,7 +290,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     ></affine-database-title>`;
   };
   private renderReference = () => {
-    return html`<div contenteditable="false"></div>`;
+    return html`<div></div>`;
   };
 
   headerComponent = defineUniComponent(
@@ -318,7 +308,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
             ${this.renderReference()}
           </div>
           <div
-            contenteditable="false"
             style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
           >
             ${this.renderViews()} ${renderTools(view, viewMethods)}
@@ -382,7 +371,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       std: this.std,
     };
     return html`
-      <div style="position: relative">
+      <div contenteditable="false" style="position: relative">
         <affine-data-view-native
           ${ref(this._view)}
           .config="${config}"

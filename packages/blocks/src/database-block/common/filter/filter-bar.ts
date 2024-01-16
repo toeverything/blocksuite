@@ -222,7 +222,6 @@ export const renderFilterBar = (view?: DataViewManager) => {
     return;
   }
   return html`<filter-bar
-    contenteditable="false"
     .vars=${view.vars}
     .data=${view.filter}
     .setData=${view.updateFilter.bind(view)}

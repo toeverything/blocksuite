@@ -155,13 +155,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
         data-block-is-database-title="true"
         title="${this.titleText.toString()}"
       ></rich-text>
-      <div
-        contenteditable="false"
-        class="database-title"
-        style="float:left;height: 0;"
-      >
-        Untitled
-      </div>
+      <div class="database-title" style="float:left;height: 0;">Untitled</div>
     </div>`;
   }
 }
