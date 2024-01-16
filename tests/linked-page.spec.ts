@@ -122,7 +122,7 @@ test.describe('multiple page', () => {
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -160,7 +160,7 @@ test.describe('multiple page', () => {
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -545,7 +545,7 @@ test.describe('reference node', () => {
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -578,7 +578,7 @@ test.describe('reference node', () => {
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -800,7 +800,7 @@ test.describe.skip('linked page with clipboard', () => {
       },
     }
   }
-  prop:displayMode='In Both'
+  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph

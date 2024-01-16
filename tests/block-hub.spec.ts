@@ -139,7 +139,7 @@ test.skip('auto-scroll should be activate when adding blank lines or blocks', as
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -281,7 +281,7 @@ test.skip('drag blank line into text area', async ({ page }) => {
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -352,7 +352,7 @@ test.skip('drag Heading1 block from text menu into text area and blockHub text c
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -422,7 +422,7 @@ test.skip('drag numbered list block from list menu into text area and blockHub l
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -546,7 +546,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
       },
     }
   }
-  prop:displayMode='In Both'
+  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -595,7 +595,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
       },
     }
   }
-  prop:displayMode='In Both'
+  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph

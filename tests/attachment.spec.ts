@@ -145,7 +145,7 @@ test('can insert attachment from slash menu', async ({ page }) => {
       },
     }
   }
-  prop:displayMode='In Both'
+  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:attachment
@@ -186,7 +186,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
       },
     }
   }
-  prop:displayMode='In Both'
+  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:attachment
@@ -217,7 +217,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
       },
     }
   }
-  prop:displayMode='In Both'
+  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -243,7 +243,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
       },
     }
   }
-  prop:displayMode='In Both'
+  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:attachment
@@ -325,7 +325,7 @@ test('should turn attachment to image works', async ({ page }) => {
       },
     }
   }
-  prop:displayMode='In Both'
+  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:image
@@ -356,7 +356,7 @@ test('should turn attachment to image works', async ({ page }) => {
       },
     }
   }
-  prop:displayMode='In Both'
+  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:attachment
@@ -399,7 +399,7 @@ test('should attachment can be deleted', async ({ page }) => {
       },
     }
   }
-  prop:displayMode='In Both'
+  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -440,7 +440,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
       },
     }
   }
-  prop:displayMode='In Both'
+  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:attachment
@@ -490,7 +490,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:attachment
@@ -545,7 +545,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph

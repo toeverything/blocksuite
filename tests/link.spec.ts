@@ -99,7 +99,7 @@ test('basic link', async ({ page }) => {
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -390,7 +390,7 @@ test('convert link to card', async ({ page }) => {
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -481,7 +481,7 @@ test.skip('convert link to embed', async ({ page }) => {
         },
       }
     }
-    prop:displayMode='In Both'
+    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
