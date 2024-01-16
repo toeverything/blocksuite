@@ -87,37 +87,39 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   private _load() {
+    const linkedDoc = this._linkedDoc;
+    if (!linkedDoc) {
+      return;
+    }
+
     const displayLinkedPageInfo = () => {
       this._abstractText = this._getAbstractText();
       this._prepareSurfaceRefRenderer();
-      this._loading = false;
     };
 
     const onLoad = () => {
-      if (this._linkedDoc?.root) {
+      if (linkedDoc.root) {
         displayLinkedPageInfo();
       } else {
-        this._linkedDoc?.slots.rootAdded.once(() => {
+        linkedDoc.slots.rootAdded.once(() => {
           displayLinkedPageInfo();
         });
       }
+      this._loading = false;
     };
+
+    this._loading = true;
+    this._abstractText = '';
+    this._isBannerEmpty = true;
 
     const { pageId } = this.model;
     this._pageMode = this._service.getPageMode(pageId);
     this._pageUpdatedAt = this._service.getPageUpdatedAt(pageId);
 
-    if (!this._linkedDoc) {
-      return;
-    }
-
-    this._loading = true;
-    this._isBannerEmpty = true;
-
-    if (this._linkedDoc.loaded) {
+    if (linkedDoc.loaded) {
       onLoad();
     } else {
-      this._linkedDoc
+      linkedDoc
         .load()
         .then(() => onLoad())
         .catch(e => {
@@ -380,6 +382,14 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     }
 
     this._load();
+
+    const linkedDoc = this._linkedDoc;
+    if (linkedDoc) {
+      this.disposables.add(
+        linkedDoc.workspace.meta.pageMetasUpdated.on(() => this._load())
+      );
+      this.disposables.add(linkedDoc.slots.blockUpdated.on(() => this._load()));
+    }
 
     this.model.propsUpdated.on(({ key }) => {
       this.requestUpdate();

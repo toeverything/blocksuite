@@ -120,12 +120,13 @@ export const quickActionConfig: QuickActionConfig[] = [
       ).selectedModels;
       assertExists(selectedModels);
 
+      host.selection.clear();
+
       const firstBlock = selectedModels[0];
       assertExists(firstBlock);
 
       const page = host.page;
       const newPage = page.workspace.createPage({});
-
       newPage
         .load(() => {
           const pageBlockId = newPage.addBlock('affine:page', {
@@ -134,6 +135,17 @@ export const quickActionConfig: QuickActionConfig[] = [
           newPage.addBlock('affine:surface', {}, pageBlockId);
           const noteId = newPage.addBlock('affine:note', {}, pageBlockId);
 
+          page.addSiblingBlocks(
+            firstBlock,
+            [
+              {
+                flavour: 'affine:embed-linked-doc',
+                pageId: newPage.id,
+              },
+            ],
+            'before'
+          )[0];
+
           selectedModels.forEach(model => {
             const keys = model.keys as (keyof typeof model)[];
             const values = keys.map(key => model[key]);
@@ -141,26 +153,10 @@ export const quickActionConfig: QuickActionConfig[] = [
               keys.map((key, i) => [key, values[i]])
             );
             newPage.addBlock(model.flavour, blockProps, noteId);
+            page.deleteBlock(model);
           });
         })
         .catch(console.error);
-
-      page.addSiblingBlocks(
-        firstBlock,
-        [
-          {
-            flavour: 'affine:embed-linked-doc',
-            pageId: newPage.id,
-          },
-        ],
-        'before'
-      )[0];
-
-      selectedModels.forEach(model => {
-        page.deleteBlock(model);
-      });
-
-      host.selection.clear();
     },
   },
 ];
