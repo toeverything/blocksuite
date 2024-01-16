@@ -5,7 +5,7 @@ import type { InlineRangeProvider } from '@blocksuite/inline';
 import type { EditorHost } from '@blocksuite/lit';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
-import { css, html, type TemplateResult } from 'lit';
+import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
@@ -252,7 +252,6 @@ export class ParagraphBlockComponent extends BlockElement<
   override get topContenteditableElement() {
     if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
-      assertExists(note);
       return note;
     }
     return this.rootBlockElement;
@@ -368,7 +367,7 @@ export class ParagraphBlockComponent extends BlockElement<
           ${tipsPlaceholderTemplate}
           <rich-text
             .yText=${this.model.text.yText}
-            .inlineEventSource=${this.topContenteditableElement}
+            .inlineEventSource=${this.topContenteditableElement ?? nothing}
             .undoManager=${this.model.page.history}
             .attributesSchema=${this.attributesSchema}
             .attributeRenderer=${this.attributeRenderer}

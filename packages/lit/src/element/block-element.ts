@@ -89,7 +89,7 @@ export class BlockElement<
     return rootElement;
   }
 
-  get topContenteditableElement() {
+  get topContenteditableElement(): BlockElement | null {
     return this.rootBlockElement;
   }
 
@@ -151,7 +151,7 @@ export class BlockElement<
       path:
         options?.global || options?.flavour
           ? undefined
-          : this.topContenteditableElement.path,
+          : this.topContenteditableElement?.path ?? this.path,
     };
     this._disposables.add(this.host.event.bindHotkey(keymap, config));
   }

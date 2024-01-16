@@ -85,7 +85,6 @@ export class ListBlockComponent extends BlockElement<
   override get topContenteditableElement() {
     if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
-      assertExists(note);
       return note;
     }
     return this.rootBlockElement;
@@ -189,7 +188,7 @@ export class ListBlockComponent extends BlockElement<
           ${this._toggleTemplate(collapsed)} ${listIcon}
           <rich-text
             .yText=${this.model.text.yText}
-            .inlineEventSource=${this.topContenteditableElement}
+            .inlineEventSource=${this.topContenteditableElement ?? nothing}
             .undoManager=${this.model.page.history}
             .attributeRenderer=${this.attributeRenderer}
             .attributesSchema=${this.attributesSchema}

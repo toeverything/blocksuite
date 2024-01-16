@@ -7,7 +7,7 @@ import './common/filter/filter-bar.js';
 import './data-view.js';
 
 import { PathFinder } from '@blocksuite/block-std';
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 import { BlockElement, RangeManager } from '@blocksuite/lit';
 import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
@@ -182,7 +182,6 @@ export class DatabaseBlockComponent extends BlockElement<
   override get topContenteditableElement() {
     if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
-      assertExists(note);
       return note;
     }
     return this.rootBlockElement;
@@ -349,7 +348,7 @@ export class DatabaseBlockComponent extends BlockElement<
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
       dispose: this.host.event.bindHotkey(hotkeys, {
-        path: this.topContenteditableElement.path,
+        path: this.topContenteditableElement?.path ?? this.path,
       }),
     };
   };

@@ -156,7 +156,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   override get topContenteditableElement() {
     if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
-      assertExists(note);
       return note;
     }
     return this.rootBlockElement;
@@ -608,7 +607,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         <div id="line-numbers"></div>
         <rich-text
           .yText=${this.model.text.yText}
-          .inlineEventSource=${this.topContenteditableElement}
+          .inlineEventSource=${this.topContenteditableElement ?? nothing}
           .undoManager=${this.model.page.history}
           .attributesSchema=${this.attributesSchema}
           .attributeRenderer=${this.getAttributeRenderer()}

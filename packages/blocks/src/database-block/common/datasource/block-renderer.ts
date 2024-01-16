@@ -64,7 +64,7 @@ export class BlockRenderer
     super.connectedCallback();
     this.root = this.closest('editor-host') ?? undefined;
     this._disposables.addFromEvent(
-      this.topContenteditableElement,
+      this.topContenteditableElement ?? this,
       'keydown',
       e => {
         if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
