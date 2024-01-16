@@ -95,7 +95,7 @@ export const quickActionConfig: QuickActionConfig[] = [
     id: 'convert-to-linked-doc',
     name: 'Create Linked Doc',
     icon: FontLinkedPageIcon,
-    hotkey: `Mod-g`,
+    hotkey: `Mod-Shift-l`,
     showWhen: host => {
       const selectedModels = host.command.getChainCtx(
         getChainWithHost(host.std).getSelectedModels({
