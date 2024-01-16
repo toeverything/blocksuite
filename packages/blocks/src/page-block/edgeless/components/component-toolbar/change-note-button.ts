@@ -238,6 +238,12 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       // move to the end
       this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
     }
+
+    // if change note to page only, should clear the selection
+    if (newMode === NoteDisplayMode.PageOnly) {
+      this.surface.edgeless.selectionManager.clear();
+    }
+
     this._queryCache = !this._queryCache;
   }
 
