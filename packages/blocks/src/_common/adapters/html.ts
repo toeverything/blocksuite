@@ -1,4 +1,4 @@
-import { assertEquals, isEqual } from '@blocksuite/global/utils';
+import { assertEquals } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import type {
   FromBlockSnapshotPayload,
@@ -43,7 +43,7 @@ import {
   hastQuerySelector,
   type HtmlAST,
 } from './hast.js';
-import { fetchImage } from './utils.js';
+import { fetchImage, mergeDeltas } from './utils.js';
 
 export type Html = string;
 
@@ -716,8 +716,8 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                 blobId = await sha(await clonedRes.arrayBuffer());
                 assets?.getAssets().set(blobId, file);
                 await assets?.writeToBlob(blobId);
-              } catch (e) {
-                console.error(e);
+              } catch (_) {
+                break;
               }
             }
             context
@@ -1056,7 +1056,10 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     deltas: DeltaInsert[],
     rawLang: unknown
   ) => {
-    assertEquals(deltas.length, 1);
+    deltas = deltas.reduce((acc, cur) => {
+      return mergeDeltas(acc, cur, { force: true });
+    }, [] as DeltaInsert<object>[]);
+    assertEquals(deltas.length, 1, 'Delta length should be 1 in code block');
     const delta = deltas[0];
     if (rawLang === 'Plain Text' || rawLang === 'Text' || !rawLang) {
       return [
@@ -1287,20 +1290,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     } = { trim: true }
   ): DeltaInsert<object>[] => {
     return this._hastToDeltaSpreaded(ast, option).reduce((acc, cur) => {
-      if (acc.length === 0) {
-        return [cur];
-      }
-      const last = acc[acc.length - 1];
-      if (
-        typeof last.insert === 'string' &&
-        typeof cur.insert === 'string' &&
-        (isEqual(last.attributes, cur.attributes) ||
-          (last.attributes === undefined && cur.attributes === undefined))
-      ) {
-        last.insert += cur.insert;
-        return acc;
-      }
-      return [...acc, cur];
+      return mergeDeltas(acc, cur);
     }, [] as DeltaInsert<object>[]);
   };
 }

@@ -241,6 +241,7 @@ export class SurfaceBlockComponent extends BlockElement<
         ...this.getBlocks('affine:note'),
         ...this.getBlocks('affine:image'),
         ...this.getBlocks('affine:bookmark'),
+        ...this.getBlocks(/affine:embed-*/),
       ].sort(this.compare),
     ];
   }

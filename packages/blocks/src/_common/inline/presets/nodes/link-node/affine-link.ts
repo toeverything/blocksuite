@@ -7,13 +7,13 @@ import {
 } from '@blocksuite/inline';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
+import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getModelByElement } from '../../../../utils/query.js';
+import { HoverController } from '../../../../components/hover/index.js';
 import type { AffineTextAttributes } from '../../affine-inline-specs.js';
 import { affineTextStyles } from '../affine-text.js';
-import type { LinkPopup } from './link-popup/link-popup.js';
 import { toggleLinkPopup } from './link-popup/toggle-link-popup.js';
 
 @customElement('affine-link')
@@ -39,15 +39,11 @@ export class AffineLink extends ShadowlessElement {
     return inlineRoot.inlineEditor;
   }
 
-  @property({ attribute: false })
-  popoverHoverOpenDelay = 150;
-
-  @state()
-  private _popoverTimer = 0;
-
-  private _isLinkHover = false;
-  private _isLinkPopupHover = false;
-  private _popup: LinkPopup | null = null;
+  get selfInlineRange() {
+    const selfInlineRange = this.inlineEditor.getInlineRangeFromElement(this);
+    assertExists(selfInlineRange);
+    return selfInlineRange;
+  }
 
   static override styles = css`
     affine-link > a {
@@ -68,67 +64,16 @@ export class AffineLink extends ShadowlessElement {
     }
   `;
 
-  constructor() {
-    super();
-    this.addEventListener('mouseenter', this._onHover);
-    this.addEventListener('mouseleave', this._onHoverEnd);
-  }
-
-  private _onHover(e: MouseEvent) {
-    if (this._isLinkHover) {
-      return;
-    } else {
-      this._isLinkHover = true;
-    }
-
-    const model = getModelByElement(this);
-    if (model.page.readonly) return;
-
-    this._popoverTimer = window.setTimeout(() => {
-      this._onDelayHover(e);
-    }, this.popoverHoverOpenDelay);
-  }
-
-  private _onDelayHover(e: MouseEvent) {
-    if (!(e.target instanceof HTMLElement) || !document.contains(e.target)) {
-      return;
-    }
-
-    const selfInlineRange = this.inlineEditor.getInlineRangeFromElement(this);
-    assertExists(selfInlineRange);
-    const popup = toggleLinkPopup(this.inlineEditor, 'view', selfInlineRange);
-    popup.addEventListener('mouseenter', () => {
-      this._isLinkPopupHover = true;
-    });
-    popup.addEventListener('mouseleave', () => {
-      this._isLinkPopupHover = false;
-      popup.remove();
-      this._popup = null;
-    });
-    this._popup = popup;
-  }
-
-  private _onHoverEnd() {
-    this._isLinkHover = false;
-    clearTimeout(this._popoverTimer);
-
-    new Promise<void>(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 500);
-    })
-      .then(() => {
-        const model = getModelByElement(this);
-        if (this._isLinkHover && !model.page.readonly) return;
-        if (!this._isLinkPopupHover) {
-          if (this._popup) {
-            this._popup.remove();
-            this._popup = null;
-          }
-        }
-      })
-      .catch(console.error);
-  }
+  private _whenHover = new HoverController(this, ({ abortController }) => {
+    return {
+      template: toggleLinkPopup(
+        this.inlineEditor,
+        'view',
+        this.selfInlineRange,
+        abortController
+      ),
+    };
+  });
 
   // Workaround for links not working in contenteditable div
   // see also https://stackoverflow.com/questions/12059211/how-to-make-clickable-anchor-in-contenteditable-div
@@ -154,6 +99,7 @@ export class AffineLink extends ShadowlessElement {
       : styleMap({});
 
     return html`<a
+      ${ref(this._whenHover.setReference)}
       href=${this.link}
       rel="noopener noreferrer"
       target="_blank"

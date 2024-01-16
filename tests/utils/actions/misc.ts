@@ -34,7 +34,7 @@ declare global {
 
 export const defaultPlaygroundURL = new URL(`http://localhost:5173/starter/`);
 
-const NEXT_FRAME_TIMEOUT = 100;
+const NEXT_FRAME_TIMEOUT = 50;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
 const RICH_TEXT_SELECTOR = '.inline-editor';
 

@@ -39,7 +39,7 @@ import {
 import type { SurfaceService } from '../surface-service.js';
 
 const ConnectorEndpointSchema = z.nativeEnum(ConnectorEndpointStyle);
-const StorkeStyleSchema = z.nativeEnum(StrokeStyle);
+const StrokeStyleSchema = z.nativeEnum(StrokeStyle);
 const LineWidthSchema = z.nativeEnum(LineWidth);
 const ShapeStyleSchema = z.nativeEnum(ShapeStyle);
 const ShapeTextFontSizeSchema = z.nativeEnum(SHAPE_TEXT_FONT_SIZE);
@@ -54,7 +54,7 @@ const LastPropsSchema = z.object({
   connector: z.object({
     frontEndpointStyle: ConnectorEndpointSchema,
     rearEndpointStyle: ConnectorEndpointSchema,
-    strokeStyle: StorkeStyleSchema,
+    strokeStyle: StrokeStyleSchema,
     stroke: LineColorsSchema,
     strokeWidth: LineWidthSchema,
     rough: z.boolean(),
@@ -72,7 +72,7 @@ const LastPropsSchema = z.object({
     filled: z.boolean(),
     radius: z.number(),
     strokeWidth: z.number().optional(),
-    strokeStyle: StorkeStyleSchema.optional(),
+    strokeStyle: StrokeStyleSchema.optional(),
     color: z.string().optional(),
     fontSize: ShapeTextFontSizeSchema.optional(),
     fontFamily: CanvasTextFontFamilySchema.optional(),
@@ -98,7 +98,7 @@ const LastPropsSchema = z.object({
       style: z.object({
         borderRadius: z.number(),
         borderSize: z.number(),
-        borderStyle: StorkeStyleSchema,
+        borderStyle: StrokeStyleSchema,
         shadowType: NoteShadowsSchema,
       }),
     }),
@@ -155,6 +155,8 @@ export class EditSessionStorage {
       shapeType: ShapeType.Rect,
       fillColor: DEFAULT_SHAPE_FILL_COLOR,
       strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+      strokeStyle: StrokeStyle.Solid,
+      strokeWidth: LineWidth.LINE_WIDTH_TWO,
       shapeStyle: ShapeStyle.General,
       filled: true,
       radius: 0,
@@ -192,7 +194,10 @@ export class EditSessionStorage {
   constructor(private _service: SurfaceService) {
     const props = sessionStorage.getItem(SESSION_PROP_KEY);
     if (props) {
-      this._lastProps = LastPropsSchema.parse(JSON.parse(props));
+      const result = LastPropsSchema.safeParse(JSON.parse(props));
+      if (result.success) {
+        this._lastProps = result.data;
+      }
     }
   }
 

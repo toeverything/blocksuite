@@ -31,6 +31,12 @@ export type ExportOptions = {
   imageProxyEndpoint: string;
 };
 
+const IGNORE_TAGS = [
+  'AFFINE-BLOCK-HUB',
+  'EDGELESS-TOOLBAR',
+  'AFFINE-DRAG-HANDLE-WIDGET',
+];
+
 export class ExportManager {
   private _exportOptions: ExportOptions;
   private _blockService: BlockService;
@@ -306,17 +312,23 @@ export class ExportManager {
     const pageMode = isInsideDocEditor(this.editorHost);
 
     const editorContainer = getEditorContainer(this.editorHost);
-    const docEditorContainer =
-      editorContainer.querySelector('affine-doc-editor');
-    if (!docEditorContainer) return;
+    const docViewport = editorContainer.querySelector('.affine-doc-viewport');
+    if (!docViewport) return;
+
+    const pageContainer = docViewport.querySelector(
+      '.affine-doc-page-block-container'
+    );
+    const rect = pageContainer?.getBoundingClientRect();
+    const pageWidth = rect?.width;
+    const pageLeft = rect?.left;
+    const viewportHeight = docViewport?.scrollHeight;
 
     const replaceRichTextWithSvgElementFunc =
       this._replaceRichTextWithSvgElement.bind(this);
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
-          element.tagName === 'AFFINE-BLOCK-HUB' ||
-          element.tagName === 'EDGELESS-TOOLBAR' ||
+          IGNORE_TAGS.includes(element.tagName) ||
           element.classList.contains('dg')
         ) {
           return true;
@@ -335,15 +347,19 @@ export class ExportManager {
         }
       },
       onclone: async function (_documentClone: Document, element: HTMLElement) {
+        element.style.height = `${viewportHeight}px`;
         await replaceRichTextWithSvgElementFunc(element);
       },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
+      x: pageLeft,
+      width: pageWidth,
+      height: viewportHeight,
       useCORS: this._exportOptions.imageProxyEndpoint ? false : true,
       proxy: this._exportOptions.imageProxyEndpoint,
     };
 
     const data = await html2canvas(
-      docEditorContainer as HTMLElement,
+      docViewport as HTMLElement,
       html2canvasOption
     );
     this._checkCanContinueToCanvas(pathname, pageMode);

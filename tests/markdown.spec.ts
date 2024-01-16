@@ -33,8 +33,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '[] ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'todo');
   await undoByClick(page);
   await assertText(page, '[] ');
@@ -45,8 +45,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '[ ] ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'todo');
   await undoByClick(page);
   await assertText(page, '[ ] ');
@@ -57,8 +57,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '[x] ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'todo');
   await undoByClick(page);
   await assertText(page, '[x] ');
@@ -67,8 +67,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '* ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'bulleted');
   await undoByClick(page);
   await assertText(page, '* ');
@@ -77,8 +77,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '- ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'bulleted');
   await undoByClick(page);
   await assertText(page, '- ');
@@ -87,8 +87,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '1. ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'numbered');
   await undoByClick(page);
   await assertText(page, '1. ');
@@ -97,8 +97,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '20. ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'numbered');
   await undoByClick(page);
   await assertText(page, '20. ');
@@ -107,8 +107,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '# ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h1');
   await undoByClick(page);
   await assertText(page, '# ');
@@ -117,8 +117,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '## ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h2');
   await undoByClick(page);
   await assertText(page, '## ');
@@ -127,8 +127,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '### ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h3');
   await undoByClick(page);
   await assertText(page, '### ');
@@ -137,8 +137,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '#### ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h4');
   await undoByClick(page);
   await assertText(page, '#### ');
@@ -147,8 +147,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '##### ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h5');
   await undoByClick(page);
   await assertText(page, '##### ');
@@ -157,8 +157,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '###### ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h6');
   await undoByClick(page);
   await assertText(page, '###### ');
@@ -167,8 +167,8 @@ test('markdown shortcut', async ({ page }) => {
 
   await waitNextFrame(page);
   await type(page, '> ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await waitNextFrame(page);
+  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'quote');
   await undoByClick(page);
   await assertText(page, '> ');

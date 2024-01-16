@@ -1,5 +1,6 @@
-import { DisposableGroup, noop } from '@blocksuite/global/utils';
+import { DisposableGroup, noop, Slot } from '@blocksuite/global/utils';
 
+import type { CssVariableName } from '../../../_common/theme/css-variables.js';
 import {
   type Options,
   Overlay,
@@ -10,9 +11,7 @@ import {
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
   NOTE_OVERLAY_CORNER_RADIUS,
-  NOTE_OVERLAY_DARK_BACKGROUND_COLOR,
   NOTE_OVERLAY_HEIGHT,
-  NOTE_OVERLAY_LIGHT_BACKGROUND_COLOR,
   NOTE_OVERLAY_OFFSET_X,
   NOTE_OVERLAY_OFFSET_Y,
   NOTE_OVERLAY_STOKE_COLOR,
@@ -68,9 +67,10 @@ const drawGeneralShape = (
   xywh: XYWH,
   options: Options
 ) => {
-  ctx.strokeStyle = options.stroke ?? '';
+  ctx.setLineDash(options.strokeLineDash ?? []);
+  ctx.strokeStyle = options.stroke ?? 'transparent';
   ctx.lineWidth = options.strokeWidth ?? 2;
-  ctx.fillStyle = options.fill ?? '#FFFFFF00';
+  ctx.fillStyle = options.fill ?? 'transparent';
 
   ctx.beginPath();
 
@@ -239,6 +239,14 @@ class ToolOverlay extends Overlay {
   protected edgeless: EdgelessPageBlockComponent;
   protected disposables!: DisposableGroup;
 
+  get computedStyle() {
+    return getComputedStyle(this.edgeless);
+  }
+
+  public isTransparent(color: string): boolean {
+    return color.includes('transparent');
+  }
+
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
     this.x = 0;
@@ -271,6 +279,22 @@ class ToolOverlay extends Overlay {
 export class ShapeOverlay extends ToolOverlay {
   public shape: Shape;
 
+  private _getRealStrokeColor(color: string) {
+    const realStrokeColor = this.computedStyle.getPropertyValue(
+      color as string
+    );
+    if (!this.isTransparent(color)) return realStrokeColor;
+
+    return 'transparent';
+  }
+
+  private _getRealFillColor(color: string) {
+    const realFillColor = this.computedStyle.getPropertyValue(color as string);
+    if (!this.isTransparent(color)) return realFillColor;
+
+    return 'transparent';
+  }
+
   constructor(
     edgeless: EdgelessPageBlockComponent,
     type: string,
@@ -288,24 +312,18 @@ export class ShapeOverlay extends ToolOverlay {
       SHAPE_OVERLAY_WIDTH,
       SHAPE_OVERLAY_HEIGHT,
     ] as XYWH;
-    const { shapeStyle } = style;
+    const { shapeStyle, fillColor, strokeColor } = style;
+    options.fill = this._getRealFillColor(fillColor);
+    options.stroke = this._getRealStrokeColor(strokeColor);
     this.shape = ShapeFactory.createShape(xywh, type, options, shapeStyle);
     this.disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
         if (edgelessTool.type !== 'shape') return;
         const shapeType = edgelessTool.shapeType;
-
-        const computedStyle = getComputedStyle(edgeless);
-        const strokeColor = computedStyle.getPropertyValue(
-          style.strokeColor as string
-        );
-        const fillColor = computedStyle.getPropertyValue(
-          style.fillColor as string
-        );
         const newOptions = {
           ...options,
-          stroke: strokeColor,
-          fill: fillColor,
+          stroke: this._getRealStrokeColor(strokeColor),
+          fill: this._getRealFillColor(fillColor),
         };
 
         let { x, y } = this;
@@ -347,15 +365,26 @@ export class ShapeOverlay extends ToolOverlay {
 
 export class NoteOverlay extends ToolOverlay {
   public text = '';
-  public themeMode = 'light';
+  public backgroundColor = 'transparent';
 
   private _getOverlayText(text: string): string {
     return text[0].toUpperCase() + text.slice(1);
   }
 
-  constructor(edgeless: EdgelessPageBlockComponent) {
+  private _getRealBackgroundColor(color: CssVariableName) {
+    const realStrokeColor = this.computedStyle.getPropertyValue(color);
+    if (!this.isTransparent(color)) return realStrokeColor;
+
+    return 'transparent';
+  }
+
+  constructor(
+    edgeless: EdgelessPageBlockComponent,
+    background: CssVariableName
+  ) {
     super(edgeless);
     this.globalAlpha = 0;
+    this.backgroundColor = this._getRealBackgroundColor(background);
     this.disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
         // when change note child type, update overlay text
@@ -374,10 +403,7 @@ export class NoteOverlay extends ToolOverlay {
     const computedStyle = getComputedStyle(this.edgeless);
     ctx.strokeStyle = computedStyle.getPropertyValue(NOTE_OVERLAY_STOKE_COLOR);
     // Draw the overlay rectangle
-    ctx.fillStyle =
-      this.themeMode === 'light'
-        ? NOTE_OVERLAY_LIGHT_BACKGROUND_COLOR
-        : NOTE_OVERLAY_DARK_BACKGROUND_COLOR;
+    ctx.fillStyle = this.backgroundColor;
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(overlayX + NOTE_OVERLAY_CORNER_RADIUS, overlayY);
@@ -437,5 +463,45 @@ export class NoteOverlay extends ToolOverlay {
     }
 
     ctx.fillText(this.text, overlayX + 10, overlayY + NOTE_OVERLAY_HEIGHT / 2);
+  }
+}
+
+export class DraggingNoteOverlay extends NoteOverlay {
+  slots: {
+    draggingNoteUpdated: Slot<{ xywh: XYWH }>;
+  };
+  width: number;
+  height: number;
+  constructor(
+    edgeless: EdgelessPageBlockComponent,
+    background: CssVariableName
+  ) {
+    super(edgeless, background);
+    this.slots = {
+      draggingNoteUpdated: new Slot<{
+        xywh: XYWH;
+      }>(),
+    };
+    this.width = 0;
+    this.height = 0;
+    this.disposables.add(
+      this.slots.draggingNoteUpdated.on(({ xywh }) => {
+        [this.x, this.y, this.width, this.height] = xywh;
+        this.edgeless.surface.refresh();
+      })
+    );
+  }
+
+  override render(ctx: CanvasRenderingContext2D): void {
+    // draw a rounded rectangle with provided background color and xywh
+    ctx.globalAlpha = 0.8;
+    ctx.fillStyle = this.backgroundColor;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.10)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(this.x, this.y, this.width, this.height, 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
   }
 }

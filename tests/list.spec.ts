@@ -602,8 +602,9 @@ test.describe('indent correctly when deleting list item', () => {
     await pressBackspace(page);
     await pressBackspace(page);
     await pressBackspace(page);
-    await pressEnter(page);
+    await assertRichTexts(page, ['a', 'b', 'c', '']);
 
+    await pressEnter(page);
     await type(page, '- d');
     await pressEnter(page);
     await pressTab(page);
@@ -617,6 +618,7 @@ test.describe('indent correctly when deleting list item', () => {
     await pressBackspace(page);
     await pressBackspace(page);
 
+    await assertRichTexts(page, ['a', 'b', '', 'd', 'e', 'f']);
     await assertBlockChildrenIds(page, '1', ['3', '9']);
     await assertBlockChildrenIds(page, '3', ['4']);
     await assertBlockChildrenIds(page, '4', ['5']);
@@ -726,6 +728,7 @@ test.describe('toggle list', () => {
 
     await expect(prefixes).toHaveCount(3);
     await parentPrefix.hover();
+    await waitNextFrame(page);
     await assertToggleIconVisible(toggleIcon);
 
     await toggleIcon.click();

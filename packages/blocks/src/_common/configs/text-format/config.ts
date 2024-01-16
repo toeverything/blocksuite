@@ -103,7 +103,14 @@ export const textFormatConfigs: TextFormatConfig[] = [
         return;
       }
 
-      toggleLinkPopup(inlineEditor, 'create', targetInlineRange);
+      const abortController = new AbortController();
+      const popup = toggleLinkPopup(
+        inlineEditor,
+        'create',
+        targetInlineRange,
+        abortController
+      );
+      abortController.signal.addEventListener('abort', () => popup.remove());
     },
   },
 ];
