@@ -261,10 +261,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             this._updateIndexLabel();
           }, this);
         }
-        // TODO: need to optimize, should only update index label when note display mode changed
-        if (type === 'update' && flavour === 'affine:note') {
-          this.requestUpdate();
-        }
       })
     );
 
@@ -290,6 +286,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     _disposables.add(
       edgeless.slots.elementResizeEnd.on(() => {
         this._isResizing = false;
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
+        const element = edgeless.surface.pickById(id);
+        if (isNoteBlock(element) && props && props['displayMode']) {
+          this.requestUpdate();
+        }
       })
     );
   }
