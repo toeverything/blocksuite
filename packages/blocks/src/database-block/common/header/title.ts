@@ -39,14 +39,14 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       overflow: hidden;
     }
 
-    .database-title-empty [data-v-root='true']::before {
+    .affine-database-title [data-title-empty='true']::before {
       content: 'Untitled';
       position: absolute;
       pointer-events: none;
       color: var(--affine-text-primary-color);
     }
 
-    .database-title-empty [data-v-root='true']:focus::before {
+    .affine-database-title [data-title-focus='true']::before {
       color: var(--affine-placeholder-color);
     }
   `;
@@ -141,7 +141,6 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
     const classList = classMap({
       'database-title': true,
-      'database-title-empty': isEmpty,
       ellipsis: !this.isActive,
     });
     return html`<div class="affine-database-title">
@@ -151,6 +150,8 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
         .enableFormat=${false}
         .readonly=${this.readonly}
         class="${classList}"
+        data-title-empty="${isEmpty}"
+        data-title-focus="${this.isActive}"
         data-block-is-database-title="true"
         title="${this.titleText.toString()}"
       ></rich-text>

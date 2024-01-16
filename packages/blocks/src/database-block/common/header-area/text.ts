@@ -155,7 +155,7 @@ export class HeaderAreaTextCell extends BaseTextCell {
       <rich-text
         .yText=${yText}
         .inlineEventSource=${this.topContenteditableElement}
-        .readonly=${false}
+        .readonly=${true}
         class="data-view-header-area-rich-text"
       ></rich-text>`;
   }
