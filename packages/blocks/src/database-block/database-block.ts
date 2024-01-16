@@ -46,10 +46,14 @@ import type { SingleViewSource, ViewSource } from './common/view-source.js';
 import type { DataViewNative, DataViewNativeConfig } from './data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
+import type { DatabaseService } from './database-service.js';
 import type { InsertToPosition } from './types.js';
 
 @customElement('affine-database')
-export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
+export class DatabaseBlockComponent extends BlockElement<
+  DatabaseBlockModel,
+  DatabaseService
+> {
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-database'))}
     affine-database {
