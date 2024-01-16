@@ -53,6 +53,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   private _loading = false;
 
   @state()
+  private _abstractText = '';
+
+  @state()
   private _isBannerEmpty = false;
 
   @state()
@@ -65,8 +68,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   private _bannerContainer!: Promise<HTMLDivElement>;
 
   private _pageMode: 'page' | 'edgeless' = 'page';
-
-  private _abstractText = '';
 
   private _pageUpdatedAt: Date = new Date();
 
@@ -86,10 +87,20 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   private _load() {
-    const onLoad = () => {
-      this._loading = false;
+    const displayLinkedPageInfo = () => {
       this._abstractText = this._getAbstractText();
       this._prepareSurfaceRefRenderer();
+      this._loading = false;
+    };
+
+    const onLoad = () => {
+      if (this._linkedDoc?.root) {
+        displayLinkedPageInfo();
+      } else {
+        this._linkedDoc?.slots.rootAdded.once(() => {
+          displayLinkedPageInfo();
+        });
+      }
     };
 
     const { pageId } = this.model;
@@ -474,6 +485,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
     const dateText = this._pageUpdatedAt.toLocaleTimeString();
 
+    const showDefaultBanner = isDeleted || isEmpty;
+
+    const defaultBanner = isDeleted
+      ? LinkedDocDeletedBanner
+      : LinkedDocEmptyBanner;
+
     return this.renderEmbed(
       () => html`
         <div
@@ -511,13 +528,11 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
             <div class="affine-embed-linked-doc-banner render"></div>
 
-            <div class="affine-embed-linked-doc-banner default">
-              ${isDeleted
-                ? LinkedDocDeletedBanner
-                : isEmpty
-                  ? LinkedDocEmptyBanner
-                  : nothing}
-            </div>
+            ${showDefaultBanner
+              ? html`<div class="affine-embed-linked-doc-banner default">
+                  ${defaultBanner}
+                </div>`
+              : nothing}
           </div>
 
           <embed-card-caption

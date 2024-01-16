@@ -7,7 +7,11 @@ import { html, type TemplateResult } from 'lit';
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { createSimplePortal } from '../../components/portal.js';
 import { toast } from '../../components/toast.js';
-import { CopyIcon, DatabaseTableViewIcon20 } from '../../icons/index.js';
+import {
+  CopyIcon,
+  DatabaseTableViewIcon20,
+  FontLinkedPageIcon,
+} from '../../icons/index.js';
 import { getChainWithHost } from '../../utils/command.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
@@ -51,7 +55,6 @@ export const quickActionConfig: QuickActionConfig[] = [
     disabledToolTip:
       'Contains Block types that cannot be converted to Database',
     icon: DatabaseTableViewIcon20,
-    hotkey: `Mod-g`,
     showWhen: host => {
       const selectedModels = host.command.getChainCtx(
         getChainWithHost(host.std).getSelectedModels({
@@ -86,6 +89,78 @@ export const quickActionConfig: QuickActionConfig[] = [
           .host=${host}
         ></database-convert-view>`,
       });
+    },
+  },
+  {
+    id: 'convert-to-linked-doc',
+    name: 'Create Linked Doc',
+    icon: FontLinkedPageIcon,
+    hotkey: `Mod-g`,
+    showWhen: host => {
+      const selectedModels = host.command.getChainCtx(
+        getChainWithHost(host.std).getSelectedModels({
+          types: ['block'],
+        })
+      ).selectedModels;
+      return !!selectedModels && selectedModels.length > 0;
+    },
+    enabledWhen: host => {
+      const selectedModels = host.command.getChainCtx(
+        getChainWithHost(host.std).getSelectedModels({
+          types: ['block'],
+        })
+      ).selectedModels;
+      return !!selectedModels && selectedModels.length > 0;
+    },
+    action: host => {
+      const selectedModels = host.command.getChainCtx(
+        getChainWithHost(host.std).getSelectedModels({
+          types: ['block'],
+        })
+      ).selectedModels;
+      assertExists(selectedModels);
+
+      const firstBlock = selectedModels[0];
+      assertExists(firstBlock);
+
+      const page = host.page;
+      const newPage = page.workspace.createPage({});
+
+      newPage
+        .load(() => {
+          const pageBlockId = newPage.addBlock('affine:page', {
+            title: new page.Text(''),
+          });
+          newPage.addBlock('affine:surface', {}, pageBlockId);
+          const noteId = newPage.addBlock('affine:note', {}, pageBlockId);
+
+          selectedModels.forEach(model => {
+            const keys = model.keys as (keyof typeof model)[];
+            const values = keys.map(key => model[key]);
+            const blockProps = Object.fromEntries(
+              keys.map((key, i) => [key, values[i]])
+            );
+            newPage.addBlock(model.flavour, blockProps, noteId);
+          });
+        })
+        .catch(console.error);
+
+      page.addSiblingBlocks(
+        firstBlock,
+        [
+          {
+            flavour: 'affine:embed-linked-doc',
+            pageId: newPage.id,
+          },
+        ],
+        'before'
+      )[0];
+
+      selectedModels.forEach(model => {
+        page.deleteBlock(model);
+      });
+
+      host.selection.clear();
     },
   },
 ];
