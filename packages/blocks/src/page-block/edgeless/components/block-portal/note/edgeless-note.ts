@@ -8,8 +8,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
-import { NoteDisplayMode } from '../../../../../_common/types.js';
 import { MoreIndicatorIcon } from '../../../../../_common/icons/edgeless.js';
+import { NoteDisplayMode } from '../../../../../_common/types.js';
 import { almostEqual } from '../../../../../_common/utils/math.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
@@ -270,6 +270,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
     const observer = new MutationObserver(() => {
       const affineNote = this._affineNote;
+      if (!this._affineNote) return;
       const rect = affineNote.getBoundingClientRect();
       const zoom = this.surface.viewport.zoom;
       this._noteFullHeight =

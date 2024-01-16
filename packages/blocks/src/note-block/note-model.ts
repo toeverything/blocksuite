@@ -75,10 +75,24 @@ type NoteEdgelessProps = {
 };
 
 export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
+  private _isSelectable(): boolean {
+    return this.displayMode !== NoteDisplayMode.PageOnly;
+  }
+
   override hitTest(x: number, y: number): boolean {
-    if (this.displayMode === NoteDisplayMode.PageOnly) return false;
+    if (!this._isSelectable()) return false;
 
     const bound = Bound.deserialize(this.xywh);
     return bound.isPointInBound([x, y], 0);
+  }
+
+  override containedByBounds(bounds: Bound): boolean {
+    if (!this._isSelectable()) return false;
+    return super.containedByBounds(bounds);
+  }
+
+  override boxSelect(bound: Bound): boolean {
+    if (!this._isSelectable()) return false;
+    return super.boxSelect(bound);
   }
 }

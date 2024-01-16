@@ -337,8 +337,19 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       this._selected = [id];
     }
 
+    // When edgeless mode, should select notes which display in both mode
+    const selectedIds = this._pageVisibleNotes.reduce((ids, item) => {
+      const note = item.note;
+      if (
+        this._selected.includes(note.id) &&
+        note.displayMode === NoteDisplayMode.PageAndEdgeless
+      ) {
+        ids.push(note.id);
+      }
+      return ids;
+    }, [] as string[]);
     this.edgeless?.selectionManager.set({
-      elements: this._selected,
+      elements: selectedIds,
       editing: false,
     });
   }
