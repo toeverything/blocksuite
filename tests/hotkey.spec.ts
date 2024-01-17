@@ -26,6 +26,7 @@ import {
   redoByKeyboard,
   resetHistory,
   setInlineRangeInSelectedRichText,
+  SHIFT_KEY,
   SHORT_KEY,
   strikethrough,
   type,
@@ -1313,7 +1314,9 @@ test('enter in title should move cursor in new paragraph block', async ({
   await assertRichTexts(page, ['world', '']);
 });
 
-test('should support ctrl/cmd+g convert to database', async ({ page }) => {
+test('should support ctrl/cmd+shift+g convert to linked doc', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -1327,13 +1330,18 @@ test('should support ctrl/cmd+g convert to database', async ({ page }) => {
   );
 
   await waitNextFrame(page);
-  await page.keyboard.press(`${SHORT_KEY}+g`);
-  const tableView = page.locator('.modal-view-item.table');
-  await tableView.click();
-  const database = page.locator('affine-database');
-  await expect(database).toBeVisible();
-  const rows = page.locator('.affine-database-block-row');
-  expect(await rows.count()).toBe(3);
+  await page.keyboard.press(`${SHORT_KEY}+${SHIFT_KEY}+l`);
+
+  const linkedDocCard = page.locator('affine-embed-linked-doc-block');
+  await expect(linkedDocCard).toBeVisible();
+
+  const title = page.locator('.affine-embed-linked-doc-content-title-text');
+  expect(await title.innerText()).toBe('Untitled');
+
+  const description = page.locator(
+    '.affine-embed-linked-doc-content-description'
+  );
+  expect(await description.innerText()).toBe('123');
 });
 
 test('should forwardDelete works when delete single character', async ({
