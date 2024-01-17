@@ -53,6 +53,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   private _loading = false;
 
   @state()
+  private _abstractText = '';
+
+  @state()
   private _isBannerEmpty = false;
 
   @state()
@@ -65,8 +68,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   private _bannerContainer!: Promise<HTMLDivElement>;
 
   private _pageMode: 'page' | 'edgeless' = 'page';
-
-  private _abstractText = '';
 
   private _pageUpdatedAt: Date = new Date();
 
@@ -86,27 +87,40 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   private _load() {
-    const onLoad = () => {
-      this._loading = false;
+    const linkedDoc = this._linkedDoc;
+    if (!linkedDoc) {
+      return;
+    }
+
+    const displayLinkedPageInfo = () => {
       this._abstractText = this._getAbstractText();
       this._prepareSurfaceRefRenderer();
     };
+
+    const onLoad = () => {
+      if (linkedDoc.root) {
+        displayLinkedPageInfo();
+        this._loading = false;
+      } else {
+        linkedDoc.slots.rootAdded.once(() => {
+          displayLinkedPageInfo();
+          this._loading = false;
+        });
+      }
+    };
+
+    this._loading = true;
+    this._abstractText = '';
+    this._isBannerEmpty = true;
 
     const { pageId } = this.model;
     this._pageMode = this._service.getPageMode(pageId);
     this._pageUpdatedAt = this._service.getPageUpdatedAt(pageId);
 
-    if (!this._linkedDoc) {
-      return;
-    }
-
-    this._loading = true;
-    this._isBannerEmpty = true;
-
-    if (this._linkedDoc.loaded) {
+    if (linkedDoc.loaded) {
       onLoad();
     } else {
-      this._linkedDoc
+      linkedDoc
         .load()
         .then(() => onLoad())
         .catch(e => {
@@ -370,6 +384,14 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
     this._load();
 
+    const linkedDoc = this._linkedDoc;
+    if (linkedDoc) {
+      this.disposables.add(
+        linkedDoc.workspace.meta.pageMetasUpdated.on(() => this._load())
+      );
+      this.disposables.add(linkedDoc.slots.blockUpdated.on(() => this._load()));
+    }
+
     this.model.propsUpdated.on(({ key }) => {
       this.requestUpdate();
       if (key === 'pageId') {
@@ -474,6 +496,12 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
     const dateText = this._pageUpdatedAt.toLocaleTimeString();
 
+    const showDefaultBanner = isDeleted || isEmpty;
+
+    const defaultBanner = isDeleted
+      ? LinkedDocDeletedBanner
+      : LinkedDocEmptyBanner;
+
     return this.renderEmbed(
       () => html`
         <div
@@ -511,13 +539,11 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
             <div class="affine-embed-linked-doc-banner render"></div>
 
-            <div class="affine-embed-linked-doc-banner default">
-              ${isDeleted
-                ? LinkedDocDeletedBanner
-                : isEmpty
-                  ? LinkedDocEmptyBanner
-                  : nothing}
-            </div>
+            ${showDefaultBanner
+              ? html`<div class="affine-embed-linked-doc-banner default">
+                  ${defaultBanner}
+                </div>`
+              : nothing}
           </div>
 
           <embed-card-caption
