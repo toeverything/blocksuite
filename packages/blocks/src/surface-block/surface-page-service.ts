@@ -12,7 +12,20 @@ export class SurfacePageService extends BlockService<SurfaceBlockModel> {
     this.surface = this.page.getBlockByFlavour(
       'affine:surface'
     )[0] as SurfaceBlockModel;
-    this.layer = LayerManager.create(this.page, this.surface);
+
+    if (!this.surface) {
+      const disposable = this.page.slots.blockUpdated.on(payload => {
+        if (payload.flavour === 'affine:surface') {
+          disposable.dispose();
+          this.surface = this.page.getBlockById(
+            payload.id
+          ) as SurfaceBlockModel;
+          this.layer = LayerManager.create(this.page, this.surface);
+        }
+      });
+    } else {
+      this.layer = LayerManager.create(this.page, this.surface);
+    }
   }
 
   override unmounted(): void {
