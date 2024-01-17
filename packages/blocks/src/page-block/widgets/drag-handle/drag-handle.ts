@@ -36,7 +36,7 @@ import {
 } from '../../../page-block/edgeless/utils/query.js';
 import { autoScroll } from '../../../page-block/text-selection/utils.js';
 import type { IVec } from '../../../surface-block/index.js';
-import type { EdgelessBlock } from '../../edgeless/type.js';
+import type { EdgelessBlockModel } from '../../edgeless/type.js';
 import { DragPreview } from './components/drag-preview.js';
 import { DropIndicator } from './components/drop-indicator.js';
 import type { DragHandleOption, DropResult, DropType } from './config.js';
@@ -143,7 +143,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     return this._getBlockElementFromViewStore(this._anchorBlockPath);
   }
 
-  get anchorEdgelessElement(): EdgelessBlock | null {
+  get anchorEdgelessElement(): EdgelessBlockModel | null {
     if (isInsideDocEditor(this.host) || !this._anchorBlockId) return null;
     const { service } = this.pageBlockElement as EdgelessPageBlockComponent;
     const edgelessElement = service.getElementById(this._anchorBlockId);
@@ -741,7 +741,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   };
 
   private _getHoverAreaRectTopLevelBlock(
-    edgelessElement: EdgelessBlock
+    edgelessElement: EdgelessBlockModel
   ): Rect | null {
     if (isInsideDocEditor(this.host)) return null;
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { DEFAULT_ROUGHNESS, ShapeStyle, StrokeStyle } from '../../consts.js';
-import { CanvasElementType } from '../edgeless-element.js';
+import { CanvasElementType } from '../../element-model/index.js';
 
 export enum ShapeType {
   Rect = 'rect',

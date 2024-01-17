@@ -1,15 +1,15 @@
 import type { HitTestOptions } from '../../page-block/edgeless/type.js';
-import { getBezierParameters } from '../canvas-renderer/element-renderer/connector/utils.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
-import { type SerializedXYWH } from '../index.js';
 import { Bound } from '../utils/bound.js';
 import { getBezierNearestPoint } from '../utils/curve.js';
+import { getBezierParameters } from '../utils/curve.js';
 import {
   linePolylineIntersects,
   polyLineNearestPoint,
 } from '../utils/math-utils.js';
 import { PointLocation } from '../utils/point-location.js';
 import { type IVec2, Vec } from '../utils/vec.js';
+import { type SerializedXYWH } from '../utils/xywh.js';
 import { type BaseProps, ElementModel } from './base.js';
 import type { StrokeStyle } from './common.js';
 import { derive, local, yfield } from './decorators.js';
@@ -129,7 +129,7 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
   ): boolean {
     const point =
       this.mode === ConnectorMode.Curve
-        ? getBezierNearestPoint(getBezierParameters(this), [x, y])
+        ? getBezierNearestPoint(getBezierParameters(this.absolutePath), [x, y])
         : polyLineNearestPoint(this.absolutePath, [x, y]);
 
     return (

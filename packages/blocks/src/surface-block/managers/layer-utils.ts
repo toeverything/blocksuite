@@ -1,7 +1,7 @@
 import type { Page } from '@blocksuite/store';
 
 import type {
-  EdgelessBlock,
+  EdgelessBlockModel,
   EdgelessElement,
 } from '../../page-block/edgeless/type.js';
 import { GroupElementModel } from '../index.js';
@@ -88,7 +88,7 @@ export function isInRange(
 export function renderableInEdgeless(
   page: Page,
   surface: SurfaceBlockModel,
-  block: EdgelessBlock
+  block: EdgelessBlockModel
 ) {
   const parent = page.getParent(block);
 

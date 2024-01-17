@@ -19,10 +19,10 @@ import {
   createModelFromProps,
   propsToY,
 } from './element-model/index.js';
-import { generateElementId } from './index.js';
 import { connectorMiddleware } from './middlewares/connector.js';
 import { groupMiddleware } from './middlewares/group.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
+import { generateElementId } from './utils/index.js';
 
 export type SurfaceBlockProps = {
   elements: Boxed<Y.Map<Y.Map<unknown>>>;

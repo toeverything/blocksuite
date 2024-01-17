@@ -4,33 +4,31 @@ import {
   type Connectable,
   type EdgelessElement,
   type Selectable,
-} from '../../../_common/types.js';
+} from '../../_common/types.js';
+import type { EdgelessPageService } from '../../page-block/edgeless/edgeless-page-service.js';
+import { Overlay } from '../canvas-renderer/renderer.js';
+import type { IBound } from '../consts.js';
 import type {
   Connection,
   ConnectorElementModel,
-} from '../../../surface-block/element-model/connector.js';
-import { ConnectorMode } from '../../../surface-block/element-model/connector.js';
+} from '../element-model/connector.js';
+import { ConnectorMode } from '../element-model/connector.js';
+import { AStarRunner } from '../utils/a-star.js';
+import { Bound, getBoundFromPoints } from '../utils/bound.js';
 import {
   almostEqual,
-  AStarRunner,
-  Bound,
   clamp,
-  getBoundFromPoints,
   getBoundsWithRotation,
   getPointFromBoundsWithRotation,
-  type IBound,
   isOverlap,
-  type IVec,
+  isVecZero,
   lineIntersects,
-  Overlay,
-  PointLocation,
   sign,
   toRadian,
-  Vec,
-} from '../../../surface-block/index.js';
-import { isVecZero } from '../../../surface-block/utils/math-utils.js';
-import type { IVec2 } from '../../../surface-block/utils/vec.js';
-import type { EdgelessPageService } from '../edgeless-page-service.js';
+} from '../utils/math-utils.js';
+import { PointLocation } from '../utils/point-location.js';
+import type { IVec, IVec2 } from '../utils/vec.js';
+import { Vec } from '../utils/vec.js';
 
 export type OrthogonalConnectorInput = {
   startBound: Bound | null;

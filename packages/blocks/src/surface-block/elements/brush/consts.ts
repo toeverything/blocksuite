@@ -1,4 +1,4 @@
-import { CanvasElementType } from '../edgeless-element.js';
+import { CanvasElementType } from '../../element-model/index.js';
 
 export const BrushElementDefaultProps = {
   type: CanvasElementType.BRUSH,

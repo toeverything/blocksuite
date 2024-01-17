@@ -4,6 +4,7 @@ import {
   type BezierCurveParameters,
   getBezierTangent,
 } from '../../utils/curve.js';
+import { getBezierParameters } from '../../utils/curve.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import { type IVec, Vec } from '../../utils/vec.js';
 import {
@@ -295,12 +296,6 @@ export function renderCircle(
   }
 }
 
-export function getBezierParameters(model: ConnectorElementModel) {
-  const p = model.absolutePath;
-
-  return [p[0], p[0].absOut, p[1].absIn, p[1]];
-}
-
 export function getArrowOptions(
   end: 'Front' | 'Rear',
   model: ConnectorElementModel,
@@ -319,6 +314,6 @@ export function getArrowOptions(
     strokeWidth: model.strokeWidth,
     fillColor: realStrokeColor,
     fillStyle: 'solid',
-    bezierParameters: getBezierParameters(model),
+    bezierParameters: getBezierParameters(model.absolutePath),
   };
 }

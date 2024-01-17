@@ -3,7 +3,7 @@ import { Workspace } from '@blocksuite/store';
 
 import { keys } from '../../_common/utils/iterable.js';
 import type {
-  EdgelessBlock,
+  EdgelessBlockModel,
   IEdgelessElement,
 } from '../../page-block/edgeless/type.js';
 import { Bound } from '../utils/bound.js';
@@ -89,7 +89,7 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     for (const key of keys) {
       const element =
         this.surface.getElementById(key) ||
-        (this.surface.page.getBlockById(key) as EdgelessBlock);
+        (this.surface.page.getBlockById(key) as EdgelessBlockModel);
 
       element && elements.push(element);
     }

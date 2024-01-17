@@ -4,10 +4,10 @@ import type {
 } from '../../../element-model/connector.js';
 import { ConnectorMode } from '../../../element-model/connector.js';
 import type { PointLocation } from '../../../index.js';
+import { getBezierParameters } from '../../../utils/curve.js';
 import type { Renderer } from '../../renderer.js';
 import {
   getArrowOptions,
-  getBezierParameters,
   renderArrow,
   renderCircle,
   renderDiamond,
@@ -71,7 +71,7 @@ function renderPoints(
       strokeWidth,
     };
     if (curve) {
-      const b = getBezierParameters(model);
+      const b = getBezierParameters(model.absolutePath);
       rc.path(
         `M${b[0][0]},${b[0][1]} C${b[1][0]},${b[1][1]} ${b[2][0]},${b[2][1]}  ${b[3][0]},${b[3][1]} `,
         options

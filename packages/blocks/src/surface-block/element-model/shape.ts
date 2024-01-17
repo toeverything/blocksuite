@@ -1,6 +1,6 @@
 import { Workspace, type Y } from '@blocksuite/store';
 
-import { type HitTestOptions } from '../../page-block/edgeless/type.js';
+import type { HitTestOptions } from '../../page-block/edgeless/type.js';
 import { DEFAULT_ROUGHNESS } from '../consts.js';
 import type { SerializedXYWH } from '../index.js';
 import type { Bound } from '../utils/bound.js';

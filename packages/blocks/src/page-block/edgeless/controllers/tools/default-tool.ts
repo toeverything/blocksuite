@@ -19,9 +19,9 @@ import {
   ConnectorElementModel,
   type IVec,
 } from '../../../../surface-block/index.js';
-import { isConnectorAndBindingsAllSelected } from '../../managers/connector-manager.js';
+import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import type {
-  EdgelessBlock,
+  EdgelessBlockModel,
   EdgelessElement,
   HitTestOptions,
 } from '../../type.js';
@@ -190,7 +190,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _handleBlockDragMove(
-    block: EdgelessBlock,
+    block: EdgelessBlockModel,
     initialBound: Bound,
     delta: IVec
   ) {
@@ -569,7 +569,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             );
           } else {
             this._handleBlockDragMove(
-              element as EdgelessBlock,
+              element as EdgelessBlockModel,
               this._selectedBounds[index],
               delta
             );

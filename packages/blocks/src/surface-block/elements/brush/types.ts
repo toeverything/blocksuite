@@ -1,4 +1,4 @@
-import type { CanvasElementType } from '../edgeless-element.js';
+import type { CanvasElementType } from '../../element-model/index.js';
 import type { ISurfaceElement } from '../surface-element.js';
 
 export interface IBrush extends ISurfaceElement {

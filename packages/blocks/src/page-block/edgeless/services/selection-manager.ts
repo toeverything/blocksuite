@@ -3,8 +3,10 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import { assertType, DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import { groupBy } from '../../../_common/utils/iterable.js';
-import type { SurfaceBlockModel } from '../../../index.js';
-import { GroupElementModel } from '../../../index.js';
+import {
+  GroupElementModel,
+  type SurfaceBlockModel,
+} from '../../../surface-block/index.js';
 import type { EdgelessPageService } from '../edgeless-page-service.js';
 import type { EdgelessElement } from '../type.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';

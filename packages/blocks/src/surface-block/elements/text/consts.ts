@@ -5,8 +5,8 @@ import {
   CanvasTextFontStyle,
   CanvasTextFontWeight,
 } from '../../consts.js';
+import { CanvasElementType } from '../../element-model/index.js';
 import { TextAlign } from '../consts.js';
-import { CanvasElementType } from '../edgeless-element.js';
 
 export const TextElementDefaultProps = {
   type: CanvasElementType.TEXT,

@@ -26,13 +26,13 @@ import {
   ShapeElementModel,
   TextElementModel,
 } from '../../../surface-block/index.js';
-import type { EdgelessBlock, EdgelessElement } from '../type.js';
+import type { EdgelessBlockModel, EdgelessElement } from '../type.js';
 import { getElementsWithoutGroup } from './group.js';
 import type { Viewport } from './viewport.js';
 
 export function isTopLevelBlock(
   selectable: BlockModel | Selectable | BlockModel | null
-): selectable is EdgelessBlock {
+): selectable is EdgelessBlockModel {
   return !!selectable && 'flavour' in selectable;
 }
 

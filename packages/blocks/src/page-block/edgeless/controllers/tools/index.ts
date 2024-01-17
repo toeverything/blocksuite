@@ -4,7 +4,7 @@ import type { EdgelessTool as EdgelessTool } from '../../../../_common/utils/ind
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessPageService } from '../../edgeless-page-service.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
-import type { EdgelessBlock } from '../../type.js';
+import type { EdgelessBlockModel } from '../../type.js';
 
 export abstract class EdgelessToolController<
   Tool extends EdgelessTool = EdgelessTool,
@@ -37,7 +37,7 @@ export abstract class EdgelessToolController<
     return this._edgeless.page;
   }
 
-  protected get _blocks(): EdgelessBlock[] {
+  protected get _blocks(): EdgelessBlockModel[] {
     return this._edgeless.service.blocks;
   }
 

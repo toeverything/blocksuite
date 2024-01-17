@@ -42,8 +42,8 @@ import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
+import { CanvasElementType } from '../../../surface-block/element-model/index.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
-import { CanvasElementType } from '../../../surface-block/elements/edgeless-element.js';
 import {
   type CanvasElement,
   GroupElementModel,

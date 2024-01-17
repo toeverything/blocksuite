@@ -1,5 +1,5 @@
 import { DEFAULT_ROUGHNESS, StrokeStyle } from '../../consts.js';
-import { CanvasElementType } from '../edgeless-element.js';
+import { CanvasElementType } from '../../element-model/index.js';
 import { ConnectorMode } from './types.js';
 
 export const ConnectorElementDefaultProps = {

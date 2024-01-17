@@ -4,6 +4,7 @@ import type { PointLocation } from '../../../index.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import {
   type BezierCurveParameters,
+  getBezierParameters,
   getBezierTangent,
 } from '../../../utils/curve.js';
 import { type IVec, Vec } from '../../../utils/vec.js';
@@ -129,7 +130,7 @@ export function getArrowOptions(
     strokeWidth: model.strokeWidth,
     fillColor: realStrokeColor,
     fillStyle: 'solid',
-    bezierParameters: getBezierParameters(model),
+    bezierParameters: getBezierParameters(model.absolutePath),
   };
 }
 
@@ -304,12 +305,4 @@ export function renderCircle(
     ctx.stroke();
     ctx.restore();
   }
-}
-
-export function getBezierParameters(
-  model: ConnectorElementModel
-): BezierCurveParameters {
-  const p = model.absolutePath;
-
-  return [p[0], p[0].absOut, p[1].absIn, p[1]];
 }

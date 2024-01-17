@@ -5,8 +5,8 @@ import type {
   CanvasTextFontStyle,
   CanvasTextFontWeight,
 } from '../../consts.js';
+import type { CanvasElementType } from '../../element-model/index.js';
 import type { TextAlign } from '../consts.js';
-import type { CanvasElementType } from '../edgeless-element.js';
 import { type ISurfaceElement } from '../surface-element.js';
 
 export interface IText extends ISurfaceElement {

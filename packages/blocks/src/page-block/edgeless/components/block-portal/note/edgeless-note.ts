@@ -17,7 +17,7 @@ import {
   deserializeXYWH,
   serializeXYWH,
 } from '../../../../../surface-block/utils/xywh.js';
-import type { EdgelessBlock } from '../../../type.js';
+import type { EdgelessBlockModel } from '../../../type.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const ACTIVE_NOTE_EXTRA_PADDING = 20;
@@ -245,7 +245,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
     _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
-        if (selection.elements.includes(this.model as EdgelessBlock)) {
+        if (selection.elements.includes(this.model as EdgelessBlockModel)) {
           this._isResizing = true;
         }
       })

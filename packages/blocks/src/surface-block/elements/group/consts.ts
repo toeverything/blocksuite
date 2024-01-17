@@ -1,6 +1,6 @@
 import { Workspace } from '@blocksuite/store';
 
-import { CanvasElementType } from '../edgeless-element.js';
+import { CanvasElementType } from '../../element-model/index.js';
 
 export const GROUP_ROOT = { id: 'GROUP_ROOT' };
 

@@ -1,17 +1,21 @@
 import { type BlockModel } from '@blocksuite/store';
 
 import { last } from '../../_common/utils/iterable.js';
-import type { CanvasElementType } from '../../index.js';
-import { GroupElementModel } from '../../index.js';
 import type { SurfaceBlockModel } from '../../models.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../surface-block/edgeless-types.js';
+import type { CanvasElementType } from '../../surface-block/element-model/index.js';
+import { GroupElementModel } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { PageService } from '../page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
-import type { EdgelessBlock, EdgelessElement, HitTestOptions } from './type.js';
+import type {
+  EdgelessBlockModel,
+  EdgelessElement,
+  HitTestOptions,
+} from './type.js';
 import { Viewport } from './utils/viewport.js';
 
 export class EdgelessPageService extends PageService {
@@ -68,7 +72,7 @@ export class EdgelessPageService extends PageService {
   }
 
   get blocks() {
-    return (this.frames as EdgelessBlock[]).concat(this._layer.blocks);
+    return (this.frames as EdgelessBlockModel[]).concat(this._layer.blocks);
   }
 
   generateIndex(type: string) {
@@ -131,7 +135,7 @@ export class EdgelessPageService extends PageService {
   getElementById(id: string) {
     return (
       this._surfaceModel.getElementById(id) ??
-      (this.page.getBlockById(id) as EdgelessBlock)
+      (this.page.getBlockById(id) as EdgelessBlockModel)
     );
   }
 
@@ -190,7 +194,10 @@ export class EdgelessPageService extends PageService {
   }
 
   pickElementsByBound(bound: IBound | Bound, type?: 'all'): EdgelessElement[];
-  pickElementsByBound(bound: IBound | Bound, type: 'blocks'): EdgelessBlock[];
+  pickElementsByBound(
+    bound: IBound | Bound,
+    type: 'blocks'
+  ): EdgelessBlockModel[];
   pickElementsByBound(
     bound: IBound | Bound,
     type: 'frame' | 'blocks' | 'canvas' | 'all' = 'all'

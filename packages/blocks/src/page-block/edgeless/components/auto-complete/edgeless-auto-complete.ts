@@ -29,8 +29,8 @@ import {
   type RoughCanvas,
   Vec,
 } from '../../../../surface-block/index.js';
+import { ConnectorPathGenerator } from '../../../../surface-block/managers/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { ConnectorPathGenerator } from '../../managers/connector-manager.js';
 import { NOTE_INIT_HEIGHT } from '../../utils/consts.js';
 import { mountShapeTextEditor } from '../../utils/text.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';

@@ -13,13 +13,13 @@ import {
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
+import type { EdgelessBlockModel } from '../../page-block/edgeless/type.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import { getBackgroundGrid } from '../../page-block/edgeless/utils/query.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { ElementModel } from '../../surface-block/element-model/index.js';
 import type { Renderer } from '../../surface-block/index.js';
 import { Bound } from '../../surface-block/utils/bound.js';
-import type { EdgelessBlock } from '../edgeless/mixin/index.js';
 import { FileExporter } from './file-exporter.js';
 
 type Html2CanvasFunction = typeof import('html2canvas').default;
@@ -189,7 +189,7 @@ export class ExportManager {
     bound: IBound,
     blockElementGetter: (model: BlockModel) => Element | null = () => null,
     edgeless?: EdgelessPageBlockComponent,
-    nodes?: EdgelessBlock[],
+    nodes?: EdgelessBlockModel[],
     surfaces?: ElementModel[],
     edgelessBackground?: {
       zoom: number;

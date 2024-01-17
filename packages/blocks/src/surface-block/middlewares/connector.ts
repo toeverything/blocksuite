@@ -1,6 +1,6 @@
-import { ConnectorPathGenerator } from '../../page-block/edgeless/managers/connector-manager.js';
 import type { EdgelessElement } from '../../page-block/edgeless/type.js';
 import type { ConnectorElementModel } from '../index.js';
+import { ConnectorPathGenerator } from '../managers/connector-manager.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 
 export function connectorMiddleware(surface: SurfaceBlockModel) {

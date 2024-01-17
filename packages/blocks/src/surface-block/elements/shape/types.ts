@@ -7,8 +7,8 @@ import type {
   ShapeStyle,
   StrokeStyle,
 } from '../../consts.js';
+import type { CanvasElementType } from '../../element-model/index.js';
 import type { TextAlign, TextVerticalAlign } from '../consts.js';
-import type { CanvasElementType } from '../edgeless-element.js';
 import type { ISurfaceElement } from '../surface-element.js';
 import type { SHAPE_TEXT_FONT_SIZE, ShapeType } from './consts.js';
 
