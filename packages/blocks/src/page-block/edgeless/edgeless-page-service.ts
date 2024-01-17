@@ -5,6 +5,7 @@ import type { CanvasElementType } from '../../index.js';
 import { GroupElementModel } from '../../index.js';
 import type { SurfaceBlockModel } from '../../models.js';
 import type { IBound } from '../../surface-block/consts.js';
+import type { EdgelessElementType } from '../../surface-block/edgeless-types.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { Bound } from '../../surface-block/utils/bound.js';
@@ -33,7 +34,6 @@ export class EdgelessPageService extends PageService {
     this._layer = LayerManager.create(this.page, this._surfaceModel);
     this._viewport = new Viewport();
     this._selection = new EdgelessSelectionManager(this);
-    this.editSession.listen(this._surfaceModel);
   }
 
   override unmounted() {
@@ -98,14 +98,20 @@ export class EdgelessPageService extends PageService {
   ) {
     props['index'] = this.generateIndex(flavour);
 
+    this.editSession.apply(flavour as EdgelessElementType, props);
+
     return this.page.addBlock(flavour, props, parent, parentIndex);
   }
 
   updateElement(id: string, props: Record<string, unknown>) {
     if (this._surfaceModel.getElementById(id)) {
+      const element = this._surfaceModel.getElementById(id)!;
+      this.editSession.record(element.type as EdgelessElementType, props);
       this._surfaceModel.updateElement(id, props);
     } else if (this.page.getBlockById(id)) {
       const block = this.page.getBlockById(id)!;
+
+      this.editSession.record(block.flavour as EdgelessElementType, props);
       this.page.updateBlock(block, props);
     }
   }

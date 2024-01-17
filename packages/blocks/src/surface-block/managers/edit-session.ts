@@ -37,7 +37,6 @@ import {
   ShapeType,
   StrokeColorsSchema,
 } from '../elements/shape/consts.js';
-import type { SurfaceBlockModel } from '../surface-model.js';
 
 const ConnectorEndpointSchema = z.nativeEnum(ConnectorEndpointStyle);
 const StrokeStyleSchema = z.nativeEnum(StrokeStyle);
@@ -139,17 +138,6 @@ export type SerializedViewport = z.infer<
 >;
 
 export class EditSessionStorage {
-  static create(
-    service: BlockService<SurfaceBlockModel>,
-    surface: SurfaceBlockModel
-  ) {
-    const editSession = new EditSessionStorage(service);
-
-    editSession.listen(surface);
-
-    return editSession;
-  }
-
   private _lastProps: LastProps = {
     connector: {
       frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
@@ -213,18 +201,6 @@ export class EditSessionStorage {
         this._lastProps = result.data;
       }
     }
-  }
-
-  listen(model: SurfaceBlockModel) {
-    this._disposables.add(
-      model.elementUpdated.on(({ id, props }) => {
-        const element = model.getElementById(id);
-
-        if (!element) return;
-
-        this.record(element.type as EdgelessElementType, props);
-      })
-    );
   }
 
   getLastProps<T extends keyof LastProps>(type: T) {
