@@ -73,8 +73,13 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
         clientX - viewportRect.left,
         clientY - viewportRect.top
       );
-      connector[connection === 'source' ? 'target' : 'source'] =
-        surface.overlays.connector.renderConnector(modelXY);
+      const otherSideId =
+        connector[connection === 'source' ? 'target' : 'source'].id;
+
+      connector[connection] = surface.overlays.connector.renderConnector(
+        modelXY,
+        otherSideId ? [otherSideId] : []
+      );
       this.requestUpdate();
     });
 

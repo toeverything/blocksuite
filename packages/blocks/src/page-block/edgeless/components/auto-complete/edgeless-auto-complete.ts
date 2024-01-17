@@ -228,8 +228,12 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       }
       if (this._isMoving) {
         assertExists(connector);
-        connector['source'] =
-          this._surface.overlays.connector.renderConnector(point);
+        const otherSideId = connector.source.id;
+
+        connector.target = this._surface.overlays.connector.renderConnector(
+          point,
+          otherSideId ? [otherSideId] : []
+        );
       }
     });
 

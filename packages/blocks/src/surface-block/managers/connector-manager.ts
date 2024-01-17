@@ -900,6 +900,7 @@ export class ConnectorPathGenerator {
     if (connection.id) {
       const connectable = this._getConnectorEndElement(connector, type);
       assertExists(connectable);
+
       if (!connection.position) {
         const otherPoint = this._getConnectionPoint(connector, anotherType);
         return getNearestConnectableAnchor(connectable, otherPoint);
@@ -1115,12 +1116,12 @@ export class ConnectorPathGenerator {
 
     const bound = getBoundFromPoints(points);
     const relativePoints = points.map(p => {
-      p.setVec(Vec.sub(p, [bound.x, bound.y]));
-      return p;
+      return p.setVec(Vec.sub(p, [bound.x, bound.y]));
     });
 
-    connector.path = relativePoints;
+    // the property assignment order matters
     connector.xywh = bound.serialize();
+    connector.path = relativePoints;
   }
 
   generateOrthogonalConnectorPath(input: OrthogonalConnectorInput) {

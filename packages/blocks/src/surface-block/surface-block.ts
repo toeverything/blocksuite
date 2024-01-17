@@ -197,7 +197,7 @@ export class SurfaceBlockComponent extends BlockElement<
   private _updateIndexCanvases() {
     const evt = new CustomEvent('indexedcanvasupdate', {
       detail: {
-        content: this.renderCanvas(),
+        content: this._createIndexedCanvases(),
       },
     }) as IndexedCanvasUpdateEvent;
 
@@ -205,7 +205,7 @@ export class SurfaceBlockComponent extends BlockElement<
     this.refresh();
   }
 
-  renderCanvas() {
+  private _createIndexedCanvases() {
     /**
      * we already have a main canvas, so the last layer should be deleted
      */
@@ -241,7 +241,6 @@ export class SurfaceBlockComponent extends BlockElement<
 
     this.indexedCanvases = canvases;
     this._renderer.setIndexedCanvas(this.indexedCanvases);
-    this.refresh();
 
     return this.indexedCanvases;
   }
