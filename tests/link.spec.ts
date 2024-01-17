@@ -89,7 +89,7 @@ test('basic link', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -380,7 +380,7 @@ test('convert link to card', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -471,7 +471,7 @@ test.skip('convert link to embed', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {

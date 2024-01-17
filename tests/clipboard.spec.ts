@@ -813,7 +813,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -873,7 +873,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -938,7 +938,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -983,7 +983,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -993,7 +993,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
           "shadowType": "--affine-note-shadow-box",
         },
       }
-    }    
+    }
     prop:index="a0"
   >
     <affine:database
@@ -1125,7 +1125,7 @@ test(
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1159,7 +1159,7 @@ test(
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1278,7 +1278,7 @@ test(scoped`auto identify url`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {

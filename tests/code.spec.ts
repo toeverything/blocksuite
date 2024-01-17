@@ -98,7 +98,7 @@ test('use markdown syntax can create code block', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
-  prop:displayMode="In Both"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -141,7 +141,7 @@ test('use markdown syntax can create code block', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
-  prop:displayMode="In Both"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -395,7 +395,7 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -449,7 +449,7 @@ test.fixme(
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {

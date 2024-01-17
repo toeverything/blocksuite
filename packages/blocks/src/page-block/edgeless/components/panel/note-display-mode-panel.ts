@@ -75,6 +75,17 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
     }
   }
 
+  private _DisplayModeLabel(mode: NoteDisplayMode) {
+    switch (mode) {
+      case NoteDisplayMode.PageAndEdgeless:
+        return 'In Both';
+      case NoteDisplayMode.PageOnly:
+        return 'In Page Only';
+      case NoteDisplayMode.EdgelessOnly:
+        return 'In Edgeless Only';
+    }
+  }
+
   override render() {
     const displayModes = Object.keys(NoteDisplayMode);
 
@@ -87,7 +98,7 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
           NoteDisplayMode[mode as keyof typeof NoteDisplayMode];
         const isSelected = displayMode === this.displayMode;
         return html`<div
-          class="item ${isSelected ? 'selected' : ''}"
+          class="item ${isSelected ? 'selected' : ''} ${displayMode}"
           @click=${(e: MouseEvent) => {
             e.stopPropagation();
             this.onSelect(displayMode);
@@ -95,7 +106,7 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
           @dblclick=${stopPropagation}
           @pointerdown=${stopPropagation}
         >
-          <div class="item-label">${displayMode}</div>
+          <div class="item-label">${this._DisplayModeLabel(displayMode)}</div>
           <div class="item-icon">${this._DisplayModeIcon(displayMode)}</div>
         </div>`;
       }

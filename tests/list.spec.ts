@@ -209,7 +209,7 @@ test('nested list blocks', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -255,7 +255,7 @@ test('nested list blocks', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -333,7 +333,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -365,7 +365,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -399,7 +399,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:displayMode="In Both"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -442,7 +442,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
-  prop:displayMode="In Both"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -475,7 +475,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
-  prop:displayMode="In Both"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -738,7 +738,7 @@ test.describe('toggle list', () => {
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
-  prop:displayMode="In Both"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -785,7 +785,7 @@ test.describe('toggle list', () => {
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
-  prop:displayMode="In Both"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {

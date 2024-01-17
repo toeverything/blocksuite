@@ -1,3 +1,4 @@
+import { NoteDisplayMode } from '@blocks/_common/types.js';
 import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
@@ -7,6 +8,7 @@ import {
   addNote,
   assertEdgelessTool,
   changeEdgelessNoteBackground,
+  changeNoteDisplayMode,
   countBlock,
   exitEditing,
   getNoteRect,
@@ -864,7 +866,9 @@ test('when no visible note block, clicking in page mode will auto add a new note
   await assertNoteSequence(page, '1');
   await assertBlockCount(page, 'note', 1);
   // hide note
-  await page.locator('edgeless-change-note-button .hidden-status').click();
+  await triggerComponentToolbarAction(page, 'changeNoteDisplayMode');
+  await waitNextFrame(page);
+  await changeNoteDisplayMode(page, NoteDisplayMode.EdgelessOnly);
 
   await switchEditorMode(page);
   let note = await page.evaluate(() => {

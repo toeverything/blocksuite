@@ -374,7 +374,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       edgeless.style;
 
     const { collapse } = edgeless;
-    const currentMode = displayMode.split(' ')[1];
+    const currentMode =
+      displayMode.charAt(0).toUpperCase() + displayMode.slice(1);
 
     return html`
       ${length === 1
@@ -393,8 +394,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             </div>
             <note-display-mode-panel
               .displayMode=${displayMode}
-              .onSelect=${(newMode: NoteDisplayMode) =>
-                this._setDisplayMode(note, newMode)}
+              .onSelect=${(newMode: NoteDisplayMode) => {
+                this._setDisplayMode(note, newMode);
+                this._displayModePopper?.hide();
+              }}
             >
             </note-display-mode-panel>
 

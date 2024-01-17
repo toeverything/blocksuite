@@ -141,6 +141,7 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -151,7 +152,6 @@ test('native range delete with indent', async ({ page }) => {
       },
     }
   }
-  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -234,6 +234,7 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -244,7 +245,6 @@ test('native range delete with indent', async ({ page }) => {
       },
     }
   }
-  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -284,6 +284,7 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -294,7 +295,6 @@ test('native range delete with indent', async ({ page }) => {
       },
     }
   }
-  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -1293,6 +1293,7 @@ test('should ndent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1303,7 +1304,6 @@ test('should ndent native multi-selection block', async ({ page }) => {
         },
       }
     }
-    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -1347,6 +1347,7 @@ test('should unindent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1357,7 +1358,6 @@ test('should unindent native multi-selection block', async ({ page }) => {
         },
       }
     }
-    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -1394,6 +1394,7 @@ test('should unindent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1404,7 +1405,6 @@ test('should unindent native multi-selection block', async ({ page }) => {
         },
       }
     }
-    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
