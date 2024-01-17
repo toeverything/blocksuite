@@ -173,7 +173,7 @@ export class EditSessionStorage {
     },
     'affine:note': {
       background: DEFAULT_NOTE_COLOR,
-      displayMode: NoteDisplayMode.PageAndEdgeless,
+      displayMode: NoteDisplayMode.DocAndEdgeless,
       edgeless: {
         style: {
           borderRadius: 8,

@@ -69,6 +69,7 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:bookmark
@@ -121,6 +122,7 @@ test.skip(scoped`create bookmark by blockhub`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -162,6 +164,7 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -209,6 +212,7 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -266,6 +270,7 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -306,6 +311,7 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:bookmark
@@ -360,6 +366,7 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:bookmark
@@ -421,6 +428,7 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph

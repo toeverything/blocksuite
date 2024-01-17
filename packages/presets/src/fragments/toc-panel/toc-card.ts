@@ -2,7 +2,7 @@ import {
   createButtonPopper,
   getThemeMode,
   type NoteBlockModel,
-  type NoteDisplayMode,
+  NoteDisplayMode,
   on,
   once,
 } from '@blocksuite/blocks';
@@ -289,6 +289,17 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     );
   }
 
+  private _getCurrentModeLabel(mode: NoteDisplayMode) {
+    switch (mode) {
+      case NoteDisplayMode.DocAndEdgeless:
+        return 'Both';
+      case NoteDisplayMode.EdgelessOnly:
+        return 'Edgeless';
+      case NoteDisplayMode.DocOnly:
+        return 'Page';
+    }
+  }
+
   override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('note') || _changedProperties.has('index')) {
       this._setNoteDisposables();
@@ -401,8 +412,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
     const mode = getThemeMode();
     const { children, displayMode } = this.note;
-    const currentMode =
-      displayMode.charAt(0).toUpperCase() + displayMode.slice(1);
+    const currentMode = this._getCurrentModeLabel(displayMode);
     const cardHeaderClasses = classMap({
       'card-header-container': true,
       'enable-sorting': this.enableNotesSorting,

@@ -342,7 +342,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       const note = item.note;
       if (
         this._selected.includes(note.id) &&
-        note.displayMode === NoteDisplayMode.PageAndEdgeless
+        note.displayMode === NoteDisplayMode.DocAndEdgeless
       ) {
         ids.push(note.id);
       }
@@ -521,7 +521,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     // When the display mode of a note changed to page only
     // We should check if the note is selected in edgeless mode
     // If so, we should de-select it
-    if (newMode === NoteDisplayMode.PageOnly) {
+    if (newMode === NoteDisplayMode.DocOnly) {
       this._deSelectNoteInEdgelessMode(note);
     }
   }

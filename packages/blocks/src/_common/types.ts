@@ -209,9 +209,9 @@ export type NoteTool = {
 };
 
 export enum NoteDisplayMode {
-  PageAndEdgeless = 'both',
+  DocAndEdgeless = 'both',
   EdgelessOnly = 'edgeless',
-  PageOnly = 'page',
+  DocOnly = 'doc',
 }
 
 export type ConnectorTool = {

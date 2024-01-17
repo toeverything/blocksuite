@@ -66,9 +66,9 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
 
   private _DisplayModeIcon(mode: NoteDisplayMode) {
     switch (mode) {
-      case NoteDisplayMode.PageAndEdgeless:
+      case NoteDisplayMode.DocAndEdgeless:
         return html`${DocIcon} ${EdgelessIcon}`;
-      case NoteDisplayMode.PageOnly:
+      case NoteDisplayMode.DocOnly:
         return html`${DocIcon}`;
       case NoteDisplayMode.EdgelessOnly:
         return html`${EdgelessIcon}`;
@@ -77,9 +77,9 @@ export class NoteDisplayModePanel extends WithDisposable(LitElement) {
 
   private _DisplayModeLabel(mode: NoteDisplayMode) {
     switch (mode) {
-      case NoteDisplayMode.PageAndEdgeless:
+      case NoteDisplayMode.DocAndEdgeless:
         return 'In Both';
-      case NoteDisplayMode.PageOnly:
+      case NoteDisplayMode.DocOnly:
         return 'In Page Only';
       case NoteDisplayMode.EdgelessOnly:
         return 'In Edgeless Only';

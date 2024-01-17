@@ -240,7 +240,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     }
 
     // if change note to page only, should clear the selection
-    if (newMode === NoteDisplayMode.PageOnly) {
+    if (newMode === NoteDisplayMode.DocOnly) {
       this.surface.edgeless.selectionManager.clear();
     }
 
@@ -315,6 +315,17 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.requestUpdate();
   }
 
+  private _getCurrentModeLabel(mode: NoteDisplayMode) {
+    switch (mode) {
+      case NoteDisplayMode.DocAndEdgeless:
+        return 'Both';
+      case NoteDisplayMode.EdgelessOnly:
+        return 'Edgeless';
+      case NoteDisplayMode.DocOnly:
+        return 'Page';
+    }
+  }
+
   override updated(_changedProperties: PropertyValues) {
     const { _disposables } = this;
     if (_changedProperties.has('_queryCache')) {
@@ -374,8 +385,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       edgeless.style;
 
     const { collapse } = edgeless;
-    const currentMode =
-      displayMode.charAt(0).toUpperCase() + displayMode.slice(1);
+    const currentMode = this._getCurrentModeLabel(displayMode);
 
     return html`
       ${length === 1
@@ -405,7 +415,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
               .vertical=${true}
             ></component-toolbar-menu-divider>`
         : nothing}
-      ${displayMode === NoteDisplayMode.PageOnly
+      ${displayMode === NoteDisplayMode.DocOnly
         ? nothing
         : html`
             <edgeless-tool-icon-button

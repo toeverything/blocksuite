@@ -156,6 +156,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -219,6 +220,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -255,6 +257,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -356,6 +359,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -408,6 +412,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -464,6 +469,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -520,6 +526,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -591,6 +598,7 @@ test('should single line format hotkey work', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -644,6 +652,7 @@ test('should single line format hotkey work', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -690,6 +699,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -771,6 +781,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -816,6 +827,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -842,6 +854,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -869,6 +882,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:list
@@ -898,6 +912,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:list
@@ -926,6 +941,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -953,6 +969,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -1009,6 +1026,7 @@ test('should cut work single line', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -1037,6 +1055,7 @@ test('should cut work single line', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -1074,6 +1093,7 @@ test.skip('should cut work multiple line', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -1102,6 +1122,7 @@ test.skip('should cut work multiple line', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -1479,6 +1500,7 @@ test('Enter key should as expected after setting heading by shortkey', async ({
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph

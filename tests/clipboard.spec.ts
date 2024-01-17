@@ -824,6 +824,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -883,7 +884,8 @@ test.skip('cut will delete all content, and copy will reappear content', async (
           "shadowType": "--affine-note-shadow-box",
         },
       }
-    }    
+    }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -949,6 +951,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:database
@@ -994,6 +997,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:database
@@ -1136,6 +1140,7 @@ test(
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -1170,6 +1175,7 @@ test(
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -1289,6 +1295,7 @@ test(scoped`auto identify url`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph

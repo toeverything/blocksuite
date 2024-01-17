@@ -523,6 +523,7 @@ test(scoped`automatic identify url text`, async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph

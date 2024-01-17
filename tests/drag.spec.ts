@@ -206,6 +206,7 @@ test('move to the last block of each level in multi-level nesting', async ({
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -276,6 +277,7 @@ test('move to the last block of each level in multi-level nesting', async ({
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -352,6 +354,7 @@ test('move to the last block of each level in multi-level nesting', async ({
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -429,6 +432,7 @@ test('move to the last block of each level in multi-level nesting', async ({
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -575,6 +579,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -658,6 +663,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list

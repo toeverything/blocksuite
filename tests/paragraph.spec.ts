@@ -449,6 +449,7 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -502,6 +503,7 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -554,6 +556,7 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -606,6 +609,7 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -659,6 +663,7 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -715,6 +720,7 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -768,6 +774,7 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -830,6 +837,7 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -883,6 +891,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -916,6 +925,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -963,6 +973,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -998,6 +1009,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -1499,6 +1511,7 @@ test('delete empty text paragraph block should keep children blocks when followi
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:divider />
@@ -1541,6 +1554,7 @@ test('delete empty text paragraph block should keep children blocks when followi
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:divider />
@@ -1613,6 +1627,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -1663,6 +1678,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -1707,6 +1723,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -1746,6 +1763,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph

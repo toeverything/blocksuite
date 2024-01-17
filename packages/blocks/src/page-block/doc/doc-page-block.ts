@@ -216,6 +216,18 @@ export class DocPageBlockComponent extends BlockElement<
 
   override firstUpdated() {
     this._initViewportResizeEffect();
+    const noteModels = this.model.children.filter(model =>
+      matchFlavours(model, ['affine:note'])
+    );
+    noteModels.forEach(note => {
+      this.disposables.add(
+        note.propsUpdated.on(({ key }) => {
+          if (key === 'displayMode') {
+            this.requestUpdate();
+          }
+        })
+      );
+    });
   }
 
   override connectedCallback() {

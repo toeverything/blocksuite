@@ -19,7 +19,8 @@ export const NoteBlockSchema = defineBlockSchema({
     xywh: `[0,0,${NOTE_WIDTH},95]`,
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
-    displayMode: NoteDisplayMode.PageAndEdgeless,
+    hidden: false,
+    displayMode: NoteDisplayMode.DocAndEdgeless,
     edgeless: {
       style: {
         borderRadius: 8,
@@ -59,6 +60,15 @@ type NoteProps = {
   index: string;
   displayMode: NoteDisplayMode;
   edgeless: NoteEdgelessProps;
+  /**
+   * @deprecated
+   * use `displayMode` instead
+   * hidden:true -> displayMode:NoteDisplayMode.EdgelessOnly:
+   *  means the note is visible only in the edgeless mode
+   * hidden:false -> displayMode:NoteDisplayMode.DocAndEdgeless:
+   *  means the note is visible in the doc and edgeless mode
+   */
+  hidden: boolean;
 };
 
 type NoteEdgelessProps = {
@@ -74,7 +84,7 @@ type NoteEdgelessProps = {
 
 export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
   private _isSelectable(): boolean {
-    return this.displayMode !== NoteDisplayMode.PageOnly;
+    return this.displayMode !== NoteDisplayMode.DocOnly;
   }
 
   override hitTest(x: number, y: number): boolean {

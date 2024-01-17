@@ -100,6 +100,7 @@ test('basic link', async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -391,6 +392,7 @@ test('convert link to card', async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -482,6 +484,7 @@ test.skip('convert link to embed', async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph

@@ -26,17 +26,17 @@ test.describe('auto-connect', () => {
     await changeNoteDisplayModeWithId(
       page,
       id1,
-      NoteDisplayMode.PageAndEdgeless
+      NoteDisplayMode.DocAndEdgeless
     );
     await changeNoteDisplayModeWithId(
       page,
       id2,
-      NoteDisplayMode.PageAndEdgeless
+      NoteDisplayMode.DocAndEdgeless
     );
     await changeNoteDisplayModeWithId(
       page,
       id3,
-      NoteDisplayMode.PageAndEdgeless
+      NoteDisplayMode.DocAndEdgeless
     );
 
     await selectNoteInEdgeless(page, id1);

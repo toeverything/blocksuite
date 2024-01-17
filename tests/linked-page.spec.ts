@@ -123,6 +123,7 @@ test.describe('multiple page', () => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -161,6 +162,7 @@ test.describe('multiple page', () => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -546,6 +548,7 @@ test.describe('reference node', () => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -579,6 +582,7 @@ test.describe('reference node', () => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -801,6 +805,7 @@ test.describe.skip('linked page with clipboard', () => {
       },
     }
   }
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph

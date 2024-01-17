@@ -272,6 +272,7 @@ test('should indent multi-selection block', async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -326,6 +327,7 @@ test('should unindent multi-selection block', async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -374,6 +376,7 @@ test('should unindent multi-selection block', async ({ page }) => {
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -1199,6 +1202,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -1342,6 +1346,7 @@ test('click bottom of page and if the last is embed block, editor should insert 
         },
       }
     }
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:image
