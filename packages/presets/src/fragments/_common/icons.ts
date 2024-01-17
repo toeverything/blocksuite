@@ -310,6 +310,42 @@ export const SortingIcon = html`<svg
   />
 </svg>`;
 
+export const ArrowLeftIcon = html`<svg
+  width="20"
+  height="20"
+  viewBox="0 0 20 20"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M13.0265 9.4584C13.4358 9.69904 13.4358 10.3006 13.0265 10.5413L8.42122 13.2485C8.01186 13.4891 7.50016 13.1883 7.50016 12.707L7.50016 7.29264C7.50016 6.81136 8.01186 6.51056 8.42122 6.7512L13.0265 9.4584Z"
+    fill="#77757D"
+  />
+</svg> `;
+
+export const ArrowJumpIcon = html`<svg
+  width="20"
+  height="20"
+  viewBox="0 0 20 20"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_3398_22894)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M10.8359 5.4105C10.6024 5.66474 10.6192 6.06011 10.8735 6.29359L14.2287 9.37492L4.16658 9.37492C3.82141 9.37492 3.54158 9.65474 3.54158 9.99992C3.54158 10.3451 3.82141 10.6249 4.16658 10.6249L14.2287 10.6249L10.8735 13.7063C10.6192 13.9397 10.6024 14.3351 10.8359 14.5893C11.0694 14.8436 11.4647 14.8604 11.719 14.6269L16.256 10.4603C16.3849 10.3419 16.4583 10.1749 16.4583 9.99992C16.4583 9.82493 16.3849 9.65796 16.256 9.53959L11.719 5.37292C11.4647 5.13944 11.0694 5.15627 10.8359 5.4105Z"
+      fill="#77757D"
+      fill-opacity="0.6"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_3398_22894">
+      <rect width="20" height="20" fill="white" />
+    </clipPath>
+  </defs>
+</svg> `;
+
 export const HiddenIcon = html`<svg
   width="20"
   height="20"

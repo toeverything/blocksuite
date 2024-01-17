@@ -155,7 +155,7 @@ export class ListBlockComponent extends BlockElement<
     const collapsed = this.page.readonly
       ? this._isCollapsedWhenReadOnly
       : !!model.collapsed;
-    const listIcon = ListIcon(model, index, deep, !collapsed, _onClickIcon);
+    const listIcon = ListIcon(model, !collapsed, _onClickIcon);
 
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
