@@ -401,7 +401,8 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
     const mode = getThemeMode();
     const { children, displayMode } = this.note;
-    const currentMode = displayMode.split(' ')[1];
+    const currentMode =
+      displayMode.charAt(0).toUpperCase() + displayMode.slice(1);
     const cardHeaderClasses = classMap({
       'card-header-container': true,
       'enable-sorting': this.enableNotesSorting,
