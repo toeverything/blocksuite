@@ -1,7 +1,7 @@
 import '../fragments/doc-title/doc-title.js';
 import '../fragments/page-meta-tags/page-meta-tags.js';
 import './doc-editor.js';
-import '../fragments/dual-links/dual-links.js';
+import '../fragments/bi-directional-link/bi-directional-link-panel.js';
 
 import { DocEditorBlockSpecs } from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -53,6 +53,7 @@ export class AffineDocEditor extends WithDisposable(ShadowlessElement) {
 
         doc-editor {
           flex-grow: 1;
+          min-height: 640px;
         }
       </style>
       <div class="affine-doc-viewport">
@@ -63,7 +64,9 @@ export class AffineDocEditor extends WithDisposable(ShadowlessElement) {
           .specs=${this.specs}
           .hasViewport=${false}
         ></doc-editor>
-        <dual-links .page=${this.page}></dual-links>
+        <bi-directional-link-panel
+          .page=${this.page}
+        ></bi-directional-link-panel>
       </div>
     `;
   }
