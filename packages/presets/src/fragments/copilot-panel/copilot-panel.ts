@@ -15,13 +15,7 @@ import { copilotConfig } from './copilot-service/copilot-config.js';
 import { CreateNewService } from './copilot-service/index.js';
 import { allKindService } from './copilot-service/service-base.js';
 import type { AIEdgelessLogic } from './edgeless/logic.js';
-import {
-  AddCursorIcon,
-  ChatIcon,
-  EdgelessIcon,
-  SettingIcon,
-  StarIcon,
-} from './icons.js';
+import { AddCursorIcon, StarIcon } from './icons.js';
 import { AILogic } from './logic.js';
 import { getSurfaceElementFromEditor } from './utils/selection-utils.js';
 
@@ -106,6 +100,16 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
     .copilot-box {
       margin-bottom: 64px;
     }
+
+    .service-provider-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .service-type {
+      font-size: 14px;
+      color: var(--affine-text-secondary-color);
+    }
   `;
 
   @property({ attribute: false })
@@ -181,42 +185,40 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   panels: Record<
     string,
     {
-      icon: TemplateResult;
       render: () => TemplateResult;
     }
   > = {
-    chat: {
-      icon: ChatIcon,
+    Chat: {
       render: () => {
         return html` <copilot-chat-panel
           .logic="${this.logic}"
         ></copilot-chat-panel>`;
       },
     },
-    edgeless: {
-      icon: EdgelessIcon,
+    Edgeless: {
       render: () => {
         return html` <copilot-edgeless-panel
           .logic="${this.logic}"
         ></copilot-edgeless-panel>`;
       },
     },
-    config: {
-      icon: SettingIcon,
+    Config: {
       render: this.config,
     },
   };
   @state()
-  currentPanel: keyof typeof this.panels = 'chat';
+  currentPanel: keyof typeof this.panels = 'Chat';
 
   override render() {
     const panel = this.panels[this.currentPanel];
     return html`
       <div
-        style="display:flex;flex-direction: column;padding: 12px;height: 100%"
+        style="display:flex;flex-direction: column;height: 100%"
         class="blocksuite-overlay"
       >
-        <div style="display:flex;align-items:center;justify-content:center;">
+        <div
+          style="display:flex;align-items:center;justify-content:center; padding-top: 17px;"
+        >
           <div
             style="display:flex;align-items:center;justify-content:center;cursor: pointer;user-select: none;width: max-content;padding: 4px; background-color: var(--affine-hover-color);border-radius: 12px;"
           >
@@ -229,11 +231,18 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
                   this.currentPanel === key ? 'white' : 'transparent',
                 padding: '4px 8px',
                 'border-radius': '8px',
+                width: '91px',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 500,
+                color:
+                  key === this.currentPanel
+                    ? 'var(--affine-text-primary-color)'
+                    : 'var(--affine-text-secondary-color)',
               });
               return html` <div style="${style}" @click="${changePanel}">
-                ${this.panels[key].icon}
+                ${key}
               </div>`;
             })}
           </div>
@@ -294,7 +303,13 @@ AffineFormatBarWidget.registerCustomRenderer({
       </style>
       <div class="copilot-format-bar-item">
         <sl-dropdown>
-          <div slot="trigger" caret>${StarIcon} Ask AI</div>
+          <div
+            slot="trigger"
+            style="display:flex;align-items:center;gap: 4px;"
+            caret
+          >
+            ${StarIcon} Ask AI
+          </div>
           <sl-menu>
             ${repeat(copilot.aiLogic?.chat.actionList ?? [], renderItem)}
           </sl-menu>

@@ -6,7 +6,7 @@ import { customElement } from 'lit/decorators.js';
 export class SidePanel extends ShadowlessElement {
   static override styles = css`
     side-panel {
-      width: 300px;
+      width: 395px;
       background-color: var(--affine-background-secondary-color);
       position: absolute;
       top: 0;

@@ -9,6 +9,7 @@ import {
   EmbeddingServiceKind,
 } from '../copilot-service/service-base.js';
 import { ChatFeatureKey } from '../doc/api.js';
+import { StopIcon } from '../icons.js';
 import type { AILogic } from '../logic.js';
 import type { ChatMessage, ChatReactiveData, EmbeddedPage } from './logic.js';
 
@@ -30,10 +31,11 @@ export class CopilotChatPanel
     }
 
     .copilot-chat-prompt-container {
+      border-top: 0.5px solid var(--affine-border-color);
+      height: 189px;
+      padding: 8px;
       display: flex;
-      gap: 8px;
-      height: 30px;
-      margin-top: 24px;
+      gap: 10px;
     }
 
     .copilot-chat-prompt {
@@ -42,13 +44,14 @@ export class CopilotChatPanel
       border-radius: 4px;
       padding: 4px 8px;
       outline: none;
-      background-color: white;
+      background-color: transparent;
     }
 
     .send-button {
-      width: 36px;
+      height: 32px;
+      border-radius: 50%;
+      width: 32px;
       background-color: var(--affine-primary-color);
-      border-radius: 4px;
       color: white;
       display: flex;
       align-items: center;
@@ -73,11 +76,18 @@ export class CopilotChatPanel
     }
 
     .history-item {
+      position: relative;
+      max-width: calc(100% - 78px);
       display: flex;
       flex-direction: column;
-      padding: 4px 8px;
-      border-radius: 4px;
+      padding: 10px;
+      border-radius: 8px;
       font-size: 14px;
+      border: 0.5px solid var(--affine-border-color);
+      background-color: var(--affine-background-primary-color);
+      white-space: pre-wrap;
+      line-height: 22px;
+      color: var(--affine-text-primary-color);
     }
 
     .history-refs {
@@ -95,7 +105,44 @@ export class CopilotChatPanel
     return this.logic.editor;
   }
   @state()
-  history: ChatMessage[] = [];
+  history: ChatMessage[] = [
+    {
+      role: 'user',
+      content: [
+        {
+          text: `I've been thinking about how file managers could be improved. What do you think?`,
+          type: 'text',
+        },
+      ],
+    },
+    {
+      role: 'assistant',
+      content: `That could definitely save time and make the whole process of file management more efficient :
+
+1. File managers need to become more intelligent and intuitive.
+2. Learn from user behavior patterns and predict which files they may need to access next.
+3. Integrated search functionality that can search based on file content, not just file names.`,
+      sources: [],
+    },
+    {
+      role: 'assistant',
+      content: `That could definitely save time and make the whole process of file management more efficient :
+
+1. File managers need to become more intelligent and intuitive.
+2. Learn from user behavior patterns and predict which files they may need to access next.
+3. Integrated search functionality that can search based on file content, not just file names.`,
+      sources: [],
+    },
+    {
+      role: 'assistant',
+      content: `That could definitely save time and make the whole process of file management more efficient :
+
+1. File managers need to become more intelligent and intuitive.
+2. Learn from user behavior patterns and predict which files they may need to access next.
+3. Integrated search functionality that can search based on file content, not just file names.`,
+      sources: [],
+    },
+  ];
   @state()
   loading: boolean = false;
 
@@ -147,7 +194,7 @@ export class CopilotChatPanel
     }
     if (message.role === 'user') {
       const style = styleMap({
-        alignItems: 'flex-end',
+        alignSelf: 'flex-end',
       });
       return html` <div class="history-item" style="${style}">
         ${repeat(message.content, item => {
@@ -166,55 +213,69 @@ export class CopilotChatPanel
     if (message.role === 'assistant') {
       const style = styleMap({
         alignItems: 'flex-start',
-        backgroundColor: 'var(--affine-hover-color)',
+        backgroundColor: 'var(--affine-blue-100)',
       });
-      return html` <div class="history-item" style="${style}">
-        <div style="width: fit-content">${message.content}</div>
-        ${message.sources?.length
-          ? html` <div class="history-refs">
-              <div style="margin-top: 8px;">sources:</div>
-              <div
-                style="display: flex;flex-direction: column;gap: 4px;padding: 4px;"
-              >
-                ${repeat(message.sources, ref => {
-                  const page = this.editor.page.workspace.getPage(ref.id);
-                  if (!page) {
-                    return;
-                  }
-                  const title = page.meta.title || 'Untitled';
-                  const jumpTo = () => {
-                    this.editor.page = page;
-                  };
-                  return html` <a @click="${jumpTo}" style="cursor: pointer"
-                    >${title}</a
-                  >`;
-                })}
-              </div>
-            </div>`
-          : null}
-        ${this.docSelection
-          ? html`
-              <div
-                style="display:flex;align-items:center;gap: 8px;margin-top: 8px;user-select: none"
-              >
+      return html`
+        <div class="history-item" style="${style}">
+          <div style="width: fit-content">${message.content}</div>
+          ${message.sources?.length
+            ? html` <div class="history-refs">
+                <div style="margin-top: 8px;">sources:</div>
                 <div
-                  @click="${() =>
-                    this.chat.replaceSelectedContent(message.content)}"
-                  style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
+                  style="display: flex;flex-direction: column;gap: 4px;padding: 4px;"
                 >
-                  replace
+                  ${repeat(message.sources, ref => {
+                    const page = this.editor.page.workspace.getPage(ref.id);
+                    if (!page) {
+                      return;
+                    }
+                    const title = page.meta.title || 'Untitled';
+                    const jumpTo = () => {
+                      this.editor.page = page;
+                    };
+                    return html` <a @click="${jumpTo}" style="cursor: pointer"
+                      >${title}</a
+                    >`;
+                  })}
                 </div>
+              </div>`
+            : null}
+          ${this.docSelection
+            ? html`
                 <div
-                  @click="${() =>
-                    this.chat.insertBelowSelectedContent(message.content)}"
-                  style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
+                  style="
+                  position:absolute;
+                  bottom:-35px;
+                  left: 0;
+                  display:flex;
+                  align-items:center;
+                  gap: 8px;
+                  user-select: none;
+                  height: 28px;
+                  white-space: nowrap;
+                  width: 100%;
+                  justify-content: flex-end;
+"
                 >
-                  insert below
+                  <div
+                    @click="${() =>
+                      this.chat.replaceSelectedContent(message.content)}"
+                    style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
+                  >
+                    replace
+                  </div>
+                  <div
+                    @click="${() =>
+                      this.chat.insertBelowSelectedContent(message.content)}"
+                    style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
+                  >
+                    insert below
+                  </div>
                 </div>
-              </div>
-            `
-          : null}
-      </div>`;
+              `
+            : null}
+        </div>
+      `;
     }
     return null;
   };
@@ -235,84 +296,74 @@ export class CopilotChatPanel
       opacity: !this.loading ? '1' : '0.5',
     });
     return html`
-      <div
-        style="display:flex;flex-direction: column;justify-content: space-between;height: 100%"
-      >
+      <div style="display:flex;flex-direction: column;height: 100%">
+        <div
+          style="display:flex;flex-direction: column;gap: 12px;margin-bottom: 12px;padding: 0 17px"
+        >
+          <div class="service-provider-container">
+            <div class="service-type">Embedding Service</div>
+            <vendor-service-select
+              .featureKey="${ChatFeatureKey}"
+              .service="${EmbeddingServiceKind}"
+            ></vendor-service-select>
+          </div>
+          <div class="service-provider-container">
+            <div class="service-type">Chat Service</div>
+            <vendor-service-select
+              .featureKey="${ChatFeatureKey}"
+              .service="${ChatServiceKind}"
+            ></vendor-service-select>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction: column;flex: 1;overflow: auto">
+          <div
+            style="flex:1;gap:42px;flex-direction: column;display:flex;padding: 0 7px 42px"
+          >
+            ${repeat(this.history, this.renderMessage)}
+          </div>
+        </div>
         <div>
-          ${repeat(this.history, this.renderMessage)}
+          <div
+            style="display:flex;gap:12px;padding: 4px;font-size: 12px;line-height: 20px;color:var(--affine-text-secondary-color)"
+          >
+            <div
+              style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 8px 2px 4px;cursor: pointer;display:flex;align-items:center;gap: 4px;"
+            >
+              ${StopIcon} Stop
+            </div>
+            <div
+              style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 10px;cursor: pointer"
+            >
+              Longer
+            </div>
+            <div
+              style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 10px;cursor: pointer"
+            >
+              Shorter
+            </div>
+          </div>
           <div class="copilot-chat-prompt-container">
-            <input
+            <textarea
               @keydown="${keydown}"
               autocomplete="off"
               data-1p-ignore
-              type="text"
+              placeholder="Type here ask Copilot some thing..."
               class="copilot-chat-panel-chat-input copilot-chat-prompt"
+              style="resize: none;"
               .value="${this.value}"
               @input="${(e: InputEvent) => {
                 this.value = (e.target as HTMLInputElement).value;
               }}"
-            />
-            <div
-              @click="${getAnswer}"
-              style="${sendButtonStyle}"
-              class="send-button"
-            >
-              <sl-icon name="stars"></sl-icon>
-            </div>
-          </div>
-          ${this.surfaceSelection || this.docSelection
-            ? html`<div
-                @click="${this.addSelectionBackground}"
-                style="border-radius: 4px;background-color: rgba(0,0,0,0.2);padding: 4px 8px;font-size: 12px;margin-top: 8px;width: max-content;cursor: pointer;user-select: none"
-              >
-                insert selected content
-              </div>`
-            : null}
-        </div>
-        <div>
-          <div
-            style="display:flex;flex-direction: column;gap: 12px;margin-bottom: 12px;"
-          >
-            <div style="display:flex;gap: 8px;flex-direction: column">
+            ></textarea>
+            <div>
               <div
-                style="font-size: 12px;color:var(--affine-text-secondary-color);"
+                @click="${getAnswer}"
+                style="${sendButtonStyle}"
+                class="send-button"
               >
-                embedding service:
+                <sl-icon name="stars"></sl-icon>
               </div>
-              <vendor-service-select
-                .featureKey="${ChatFeatureKey}"
-                .service="${EmbeddingServiceKind}"
-              ></vendor-service-select>
             </div>
-            <div style="display:flex;gap: 8px;flex-direction: column">
-              <div
-                style="font-size: 12px;color:var(--affine-text-secondary-color);"
-              >
-                chat service:
-              </div>
-              <vendor-service-select
-                .featureKey="${ChatFeatureKey}"
-                .service="${ChatServiceKind}"
-              ></vendor-service-select>
-            </div>
-          </div>
-          <div class="synced-page-list">
-            <div style="margin-bottom: 8px;">Synced pages:</div>
-            ${this.syncedPages.length
-              ? repeat(this.syncedPages, page => {
-                  const title =
-                    this.editor.page.workspace.getPage(page.id)?.meta.title ??
-                    'Untitled';
-                  return html` <div>${title}</div>`;
-                })
-              : 'Empty'}
-          </div>
-          <div
-            class="sync-workspace-button"
-            style="margin-bottom: 12px"
-            @click="${this.chat.syncWorkspace}"
-          >
-            Sync Workspace
           </div>
         </div>
       </div>
