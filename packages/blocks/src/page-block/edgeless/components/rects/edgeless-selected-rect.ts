@@ -475,9 +475,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         const curBound = Bound.deserialize(element.xywh);
         const props: Partial<NoteBlockModel> = {};
 
-        let width = element.edgeless.width ?? curBound.w;
-        let height = element.edgeless.height ?? curBound.h;
         let scale = element.edgeless.scale ?? 1;
+        let width = curBound.w / scale;
+        let height = curBound.h / scale;
 
         if (this._shiftKey) {
           scale = bound.w / width;
@@ -499,7 +499,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         this._isNoteWidthLimit = width === NOTE_MIN_WIDTH ? true : false;
         this._isNoteHeightLimit = height === NOTE_MIN_HEIGHT ? true : false;
 
-        props.edgeless = { ...element.edgeless, width, height, scale };
+        props.edgeless = { ...element.edgeless, scale };
         props.xywh = bound.serialize();
         edgeless.surface.updateElement(element.id, props);
       } else if (
