@@ -95,6 +95,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         border-radius: 4px;
         background-color: var(--affine-hover-color);
         align-items: center;
+        gap: 2px;
+        padding: 2px;
       }
 
       .current-mode-label {

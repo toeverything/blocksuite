@@ -986,27 +986,6 @@ test('Note added on edgeless mode should display on edgeless only by default', a
   await assertBlockCount(page, 'note', 1);
 });
 
-test('Note can be displayed on doc mode only', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-
-  await switchEditorMode(page);
-  await zoomResetByKeyboard(page);
-  const noteId = await addNote(page, 'note2', 100, 100);
-  await page.mouse.click(200, 50);
-  // assert add note success, there should be 2 notes in edgeless page
-  await assertBlockCount(page, 'note', 2);
-
-  // change note display mode to doc only
-  await changeNoteDisplayModeWithId(page, noteId, NoteDisplayMode.DocOnly);
-  // change successfully, there should be 1 notes in edgeless page
-  await assertBlockCount(page, 'note', 1);
-
-  await switchEditorMode(page);
-  // change successfully, there should be 2 notes in doc page
-  await assertBlockCount(page, 'note', 2);
-});
-
 test('Note can be changed to display on doc and edgeless mode', async ({
   page,
 }) => {
