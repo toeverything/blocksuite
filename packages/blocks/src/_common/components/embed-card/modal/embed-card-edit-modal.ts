@@ -24,6 +24,9 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   model!: EmbedCardModel;
 
+  @property({ attribute: false })
+  host!: EditorHost;
+
   @query('.title')
   titleInput!: HTMLInputElement;
 
@@ -66,7 +69,7 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
   private _onSave() {
     const title = this.titleInput.value;
     if (title.length === 0) {
-      toast('Link title can not be empty');
+      toast(this.host, 'Link title can not be empty');
       return;
     }
 
@@ -136,6 +139,7 @@ export function toggleEmbedCardEditModal(
   host.selection.clear();
   const embedCardEditModal = new EmbedCardEditModal();
   embedCardEditModal.model = embedCardModel;
+  embedCardEditModal.host = host;
   document.body.appendChild(embedCardEditModal);
 }
 

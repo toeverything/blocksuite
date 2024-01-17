@@ -45,7 +45,7 @@ export class AIEdgelessLogic {
       this.unsub = undefined;
       return;
     }
-    const edgeless = getEdgelessPageBlockFromEditor(this.editor);
+    const edgeless = getEdgelessPageBlockFromEditor(this.editor.host);
     this.unsub = edgeless.slots.elementUpdated.on(() => {
       this.createImageFromFrame().catch(console.error);
     }).dispose;
@@ -62,12 +62,12 @@ export class AIEdgelessLogic {
   constructor(private editor: AffineEditorContainer) {}
 
   makeItReal = async () => {
-    const png = await selectedToPng(this.editor);
+    const png = await selectedToPng(this.editor.host);
     if (!png) {
       alert('Please select some shapes first');
       return;
     }
-    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
+    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor.host);
     const { notes } = BlocksUtils.splitElements(
       edgelessPage.selectionManager.elements
     );
@@ -96,7 +96,7 @@ export class AIEdgelessLogic {
   };
 
   htmlBlockDemo = async () => {
-    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
+    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor.host);
     edgelessPage.page.addBlock(
       EmbedHtmlBlockSpec.schema.model.flavour,
       { html: demoScript, xywh: '[0, 400, 400, 200]' },
@@ -105,7 +105,7 @@ export class AIEdgelessLogic {
   };
 
   editImage = async () => {
-    const canvas = await selectedToCanvas(this.editor);
+    const canvas = await selectedToCanvas(this.editor.host);
     if (!canvas) {
       alert('Please select some shapes first');
       return;
@@ -124,7 +124,9 @@ export class AIEdgelessLogic {
               return;
             }
             const imgFile = jpegBase64ToFile(b64, 'img');
-            const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
+            const edgelessPage = getEdgelessPageBlockFromEditor(
+              this.editor.host
+            );
             edgelessPage.addImages([imgFile]).catch(console.error);
           })
           .catch(console.error);
@@ -133,7 +135,7 @@ export class AIEdgelessLogic {
   };
 
   createImage = async () => {
-    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor);
+    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor.host);
     const prompt =
       (
         document.getElementById(
@@ -158,7 +160,7 @@ export class AIEdgelessLogic {
     if (!from) {
       return;
     }
-    const surface = getSurfaceElementFromEditor(this.editor);
+    const surface = getSurfaceElementFromEditor(this.editor.host);
     const targets = surface
       .getElementsByType('connector')
       .filter(v => v.source.id === from.id)
@@ -169,7 +171,7 @@ export class AIEdgelessLogic {
         }
         return [];
       });
-    const canvas = await frameToCanvas(from, this.editor);
+    const canvas = await frameToCanvas(from, this.editor.host);
     if (!canvas) {
       return;
     }
@@ -204,8 +206,8 @@ export class AIEdgelessLogic {
             if (!b64) {
               return;
             }
-            const surface = getSurfaceElementFromEditor(this.editor);
-            let image = getFirstImageInFrame(model, this.editor);
+            const surface = getSurfaceElementFromEditor(this.editor.host);
+            let image = getFirstImageInFrame(model, this.editor.host);
             const imgFile = jpegBase64ToFile(b64, 'img');
             const sourceId = await this.editor.page.workspace.blob.set(imgFile);
             if (!image) {

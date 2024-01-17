@@ -96,7 +96,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   private async _copyBlock() {
     const slice = Slice.fromModels(this.model.page, [this.model]);
     await this.std.clipboard.copySlice(slice);
-    toast('Copied link to clipboard');
+    toast(this.block.host, 'Copied link to clipboard');
     this.abortController.abort();
   }
 

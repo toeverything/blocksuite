@@ -38,7 +38,7 @@ export const quickActionConfig: QuickActionConfig[] = [
         .getSelectedModels()
         .with({
           onCopy: () => {
-            toast('Copied to clipboard');
+            toast(host, 'Copied to clipboard');
           },
         })
         .copySelectedModels()

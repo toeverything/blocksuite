@@ -267,7 +267,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
 
     navigator.clipboard.writeText(this.model.url).catch(console.error);
-    toast('Copied link to clipboard');
+    toast(this.std.host as EditorHost, 'Copied link to clipboard');
     this.surface.selection.clear();
   }
 
