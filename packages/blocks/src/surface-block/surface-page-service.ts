@@ -29,6 +29,6 @@ export class SurfacePageService extends BlockService<SurfaceBlockModel> {
   }
 
   override unmounted(): void {
-    this.layer.dispose();
+    this.layer?.dispose();
   }
 }
