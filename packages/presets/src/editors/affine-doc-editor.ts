@@ -52,6 +52,8 @@ export class AffineDocEditor extends WithDisposable(ShadowlessElement) {
         }
 
         doc-editor {
+          flex-grow: 1;
+          min-height: 64px;
           margin-bottom: 64px;
         }
       </style>
