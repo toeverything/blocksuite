@@ -293,8 +293,9 @@ export class ParagraphBlockComponent extends BlockElement<
 
     this.updateComplete
       .then(() => {
-        const inlineEditor = this._richTextElement?.inlineEditor;
-        assertExists(inlineEditor);
+        const inlineEditor = this.inlineEditor;
+        // should not use `assertExists` here because this block element may have been removed
+        if (!inlineEditor) return;
         this.disposables.add(
           inlineEditor.slots.inputting.on(this._updatePlaceholder)
         );
@@ -303,7 +304,9 @@ export class ParagraphBlockComponent extends BlockElement<
   }
 
   private _updatePlaceholder = () => {
-    if (!this.inlineEditor) return;
+    //TODO(@Flrande) wrap placeholder in `rich-text` or inline-editor to make it more developer-friendly
+    if (!this.inlineEditor || this.host.rangeManager?.binding.isComposing)
+      return;
 
     if (
       this.model.text.length !== 0 ||

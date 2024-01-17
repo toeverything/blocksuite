@@ -67,12 +67,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
   };
 
-  private _isRangeCompletelyInRoot = () => {
-    const selectionRoot = findDocumentOrShadowRoot(this.editor);
-    const selection = selectionRoot.getSelection();
-    if (!selection || selection.rangeCount === 0) return false;
-    const range = selection.getRangeAt(0);
-
+  private _isRangeCompletelyInRoot = (range: Range) => {
     const rootElement = this.editor.rootElement;
     const rootRange = document.createRange();
     rootRange.selectNode(rootElement);
@@ -191,7 +186,13 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
   private _onCompositionUpdate = () => {
     if (!this.editor.rootElement.isConnected) return;
 
-    if (this.editor.isReadonly || !this._isRangeCompletelyInRoot()) return;
+    const range = this.editor.rangeService.getNativeRange();
+    if (
+      this.editor.isReadonly ||
+      !range ||
+      !this._isRangeCompletelyInRoot(range)
+    )
+      return;
 
     this.editor.slots.inputting.emit();
   };
@@ -200,7 +201,13 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     this._isComposing = false;
     if (!this.editor.rootElement.isConnected) return;
 
-    if (this.editor.isReadonly || !this._isRangeCompletelyInRoot()) return;
+    const range = this.editor.rangeService.getNativeRange();
+    if (
+      this.editor.isReadonly ||
+      !range ||
+      !this._isRangeCompletelyInRoot(range)
+    )
+      return;
 
     this.editor.rerenderWholeEditor();
     await this.editor.waitForUpdate();
@@ -239,10 +246,12 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _onBeforeInput = (event: InputEvent) => {
+    const range = this.editor.rangeService.getNativeRange();
     if (
       this.editor.isReadonly ||
       this._isComposing ||
-      !this._isRangeCompletelyInRoot()
+      !range ||
+      !this._isRangeCompletelyInRoot(range)
     )
       return;
 

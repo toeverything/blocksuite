@@ -135,6 +135,8 @@ export class RangeBinding {
     const endText = end.model.text;
     if (!startText || !endText) return;
 
+    event.preventDefault();
+
     this.host.page.transact(() => {
       startText.delete(from.index, from.length);
       startText.insert(event.data ?? '', from.index);
