@@ -71,10 +71,8 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   }
 
   private _handleDoubleClick(event: MouseEvent) {
-    if (!this.bookmark.isInSurface) {
-      event.stopPropagation();
-      this._openLink();
-    }
+    event.stopPropagation();
+    this._openLink();
   }
 
   override render() {

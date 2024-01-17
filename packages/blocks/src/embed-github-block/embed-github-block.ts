@@ -78,10 +78,8 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   }
 
   private _handleDoubleClick(event: MouseEvent) {
-    if (!this.isInSurface) {
-      event.stopPropagation();
-      this.open();
-    }
+    event.stopPropagation();
+    this.open();
   }
 
   private _handleAssigneeClick(assignee: string) {
