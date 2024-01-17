@@ -438,6 +438,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -448,7 +449,6 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -491,6 +491,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -501,7 +502,6 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -543,6 +543,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -553,7 +554,6 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -595,6 +595,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -605,7 +606,6 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -648,6 +648,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -657,8 +658,7 @@ test('should indent and unindent works with children', async ({ page }) => {
         "shadowType": "--affine-note-shadow-box",
       },
     }
-  }
-  prop:displayMode="In Both"
+  }  
   prop:index="a0"
 >
   <affine:paragraph
@@ -704,6 +704,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -714,7 +715,6 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -757,6 +757,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -767,7 +768,6 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -819,6 +819,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -829,7 +830,6 @@ test('should indent and unindent works with children', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -872,6 +872,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -882,7 +883,6 @@ test('paragraph with child block should work at enter', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -905,6 +905,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -915,7 +916,6 @@ test('paragraph with child block should work at enter', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -952,6 +952,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -962,7 +963,6 @@ test('should delete paragraph block child can hold cursor in correct position', 
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -987,6 +987,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -997,7 +998,6 @@ test('should delete paragraph block child can hold cursor in correct position', 
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -1488,6 +1488,7 @@ test('delete empty text paragraph block should keep children blocks when followi
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1498,7 +1499,6 @@ test('delete empty text paragraph block should keep children blocks when followi
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:divider />
@@ -1530,6 +1530,7 @@ test('delete empty text paragraph block should keep children blocks when followi
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1539,8 +1540,7 @@ test('delete empty text paragraph block should keep children blocks when followi
         "shadowType": "--affine-note-shadow-box",
       },
     }
-  }
-  prop:displayMode="In Both"
+  }  
   prop:index="a0"
 >
   <affine:divider />
@@ -1602,6 +1602,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1611,8 +1612,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
         "shadowType": "--affine-note-shadow-box",
       },
     }
-  }
-  prop:displayMode="In Both"
+  }  
   prop:index="a0"
 >
   <affine:paragraph
@@ -1652,6 +1652,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1662,7 +1663,6 @@ test('paragraph indent and delete in line start', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -1696,6 +1696,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1706,7 +1707,6 @@ test('paragraph indent and delete in line start', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -1735,6 +1735,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1745,7 +1746,6 @@ test('paragraph indent and delete in line start', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph

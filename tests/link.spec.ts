@@ -89,6 +89,7 @@ test('basic link', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="In Both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -98,8 +99,7 @@ test('basic link', async ({ page }) => {
           "shadowType": "--affine-note-shadow-box",
         },
       }
-    }
-    prop:displayMode="In Both"
+    }    
     prop:index="a0"
   >
     <affine:paragraph
@@ -380,6 +380,7 @@ test('convert link to card', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="In Both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -389,8 +390,7 @@ test('convert link to card', async ({ page }) => {
           "shadowType": "--affine-note-shadow-box",
         },
       }
-    }
-    prop:displayMode="In Both"
+    }    
     prop:index="a0"
   >
     <affine:paragraph
@@ -471,6 +471,7 @@ test.skip('convert link to embed', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="In Both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -481,7 +482,6 @@ test.skip('convert link to embed', async ({ page }) => {
         },
       }
     }
-    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph

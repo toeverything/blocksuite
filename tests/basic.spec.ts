@@ -512,6 +512,7 @@ test(scoped`automatic identify url text`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="In Both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -522,7 +523,6 @@ test(scoped`automatic identify url text`, async ({ page }) => {
         },
       }
     }
-    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph

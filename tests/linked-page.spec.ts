@@ -112,6 +112,7 @@ test.describe('multiple page', () => {
 >
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="In Both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -121,8 +122,7 @@ test.describe('multiple page', () => {
           "shadowType": "--affine-note-shadow-box",
         },
       }
-    }
-    prop:displayMode="In Both"
+    }    
     prop:index="a0"
   >
     <affine:paragraph
@@ -150,6 +150,7 @@ test.describe('multiple page', () => {
   <affine:surface />
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="In Both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -160,7 +161,6 @@ test.describe('multiple page', () => {
         },
       }
     }
-    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -535,6 +535,7 @@ test.describe('reference node', () => {
   <affine:surface />
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="In Both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -545,7 +546,6 @@ test.describe('reference node', () => {
         },
       }
     }
-    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -568,6 +568,7 @@ test.describe('reference node', () => {
 >
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="In Both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -578,7 +579,6 @@ test.describe('reference node', () => {
         },
       }
     }
-    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph
@@ -790,6 +790,7 @@ test.describe.skip('linked page with clipboard', () => {
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -800,7 +801,6 @@ test.describe.skip('linked page with clipboard', () => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph

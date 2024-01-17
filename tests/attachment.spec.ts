@@ -135,6 +135,7 @@ test('can insert attachment from slash menu', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -145,7 +146,6 @@ test('can insert attachment from slash menu', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:attachment
@@ -176,6 +176,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
     page,
     `  <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -185,8 +186,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
         "shadowType": "--affine-note-shadow-box",
       },
     }
-  }
-  prop:displayMode="In Both"
+  }  
   prop:index="a0"
 >
   <affine:attachment
@@ -207,6 +207,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -217,7 +218,6 @@ test('should undo/redo works for attachment', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -233,6 +233,7 @@ test('should undo/redo works for attachment', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -243,7 +244,6 @@ test('should undo/redo works for attachment', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:attachment
@@ -315,6 +315,7 @@ test('should turn attachment to image works', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -325,7 +326,6 @@ test('should turn attachment to image works', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:image
@@ -346,6 +346,7 @@ test('should turn attachment to image works', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -356,7 +357,6 @@ test('should turn attachment to image works', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:attachment
@@ -389,6 +389,7 @@ test('should attachment can be deleted', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -399,7 +400,6 @@ test('should attachment can be deleted', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -430,6 +430,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     page,
     `  <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -440,7 +441,6 @@ test(`support dragging attachment block directly`, async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:attachment
@@ -480,6 +480,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="In Both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -490,7 +491,6 @@ test(`support dragging attachment block directly`, async ({ page }) => {
         },
       }
     }
-    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:attachment
@@ -535,6 +535,7 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="In Both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -545,7 +546,6 @@ test(`support dragging attachment block directly`, async ({ page }) => {
         },
       }
     }
-    prop:displayMode="In Both"
     prop:index="a0"
   >
     <affine:paragraph

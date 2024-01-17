@@ -357,6 +357,7 @@ test.describe('slash search', () => {
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -367,7 +368,6 @@ test.describe('slash search', () => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:list
@@ -787,6 +787,7 @@ test('delete block by slash menu should remove children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -797,7 +798,6 @@ test('delete block by slash menu should remove children', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:list

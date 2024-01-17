@@ -211,6 +211,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -221,7 +222,6 @@ test('should format quick bar be able to format text', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -268,6 +268,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -278,7 +279,6 @@ test('should format quick bar be able to format text', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -334,6 +334,7 @@ test('should format quick bar be able to change background color', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -344,7 +345,6 @@ test('should format quick bar be able to change background color', async ({
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -381,6 +381,7 @@ test('should format quick bar be able to change background color', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -391,7 +392,6 @@ test('should format quick bar be able to change background color', async ({
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -432,6 +432,7 @@ test('should format quick bar be able to change background color', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -442,7 +443,6 @@ test('should format quick bar be able to change background color', async ({
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -488,6 +488,7 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -498,7 +499,6 @@ test('should format quick bar be able to format text when select multiple line',
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -545,6 +545,7 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -554,8 +555,7 @@ test('should format quick bar be able to format text when select multiple line',
         "shadowType": "--affine-note-shadow-box",
       },
     }
-  }
-  prop:displayMode="In Both"
+  }  
   prop:index="a0"
 >
   <affine:paragraph
@@ -597,6 +597,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -607,7 +608,6 @@ test('should format quick bar be able to link text', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -646,6 +646,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -656,7 +657,6 @@ test('should format quick bar be able to link text', async ({ page }) => {
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -696,6 +696,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -706,7 +707,6 @@ test('should format quick bar be able to change to heading paragraph type', asyn
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -732,6 +732,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -742,7 +743,6 @@ test('should format quick bar be able to change to heading paragraph type', asyn
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:list
@@ -771,6 +771,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -781,7 +782,6 @@ test('should format quick bar be able to change to heading paragraph type', asyn
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -999,6 +999,7 @@ test('should format quick bar work in single block selection', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1009,7 +1010,6 @@ test('should format quick bar work in single block selection', async ({
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -1085,6 +1085,7 @@ test('should format quick bar work in multiple block selection', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1095,7 +1096,6 @@ test('should format quick bar work in multiple block selection', async ({
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -1173,6 +1173,7 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1183,7 +1184,6 @@ test('should format quick bar with block selection works when update block type'
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:list
@@ -1215,6 +1215,7 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1225,7 +1226,6 @@ test('should format quick bar with block selection works when update block type'
       },
     }
   }
-  prop:displayMode="In Both"
   prop:index="a0"
 >
   <affine:paragraph
@@ -1276,6 +1276,7 @@ test('should format quick bar show after convert to code block', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="In Both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1285,8 +1286,7 @@ test('should format quick bar show after convert to code block', async ({
         "shadowType": "--affine-note-shadow-box",
       },
     }
-  }
-  prop:displayMode="In Both"
+  }  
   prop:index="a0"
 >
   <affine:code
