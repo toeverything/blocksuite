@@ -156,6 +156,12 @@ export const quickActionConfig: QuickActionConfig[] = [
               title,
             });
 
+            const pageBlock = linkedPage.getBlockById(pageBlockId);
+            assertExists(pageBlock);
+            linkedPage.updateBlock(pageBlock, {
+              title: new page.Text(title),
+            });
+
             page.deleteBlock(firstBlock);
             selectedModels.shift();
           }
