@@ -19,7 +19,6 @@ import { toast } from '../../_common/components/toast.js';
 import { BLOCK_ID_ATTR } from '../../_common/consts.js';
 import { listenToThemeChange } from '../../_common/theme/utils.js';
 import {
-  type EdgelessElement,
   type EdgelessTool,
   Point,
   requestConnectedFrame,
@@ -46,7 +45,6 @@ import {
   Bound,
   type CanvasElement,
   clamp,
-  type EdgelessBlockType,
   getCommonBound,
   type IBound,
   type IVec,
@@ -185,8 +183,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
       blocks: TopLevelBlockModel[];
       shapes: CanvasElement[];
     }>(),
-    subpageLinked: new Slot<{ pageId: string }>(),
-    subpageUnlinked: new Slot<{ pageId: string }>(),
     pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
     tagClicked: new Slot<{ tagId: string }>(),
     readonlyUpdated: new Slot<boolean>(),
@@ -199,8 +195,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     navigatorFrameChanged: new Slot<FrameBlockModel>(),
     fullScrennToggled: new Slot(),
 
-    elementAdded: new Slot<{ id: string }>(),
-    elementRemoved: new Slot<{ id: string; element: EdgelessElement }>(),
     elementResizeStart: new Slot(),
     elementResizeEnd: new Slot(),
   };
@@ -650,7 +644,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   override firstUpdated() {
-    this._initElementSlot();
     this._initSlotEffects();
     this._initResizeEffect();
     this._initPixelRatioChangeEffect();
@@ -752,46 +745,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     } else {
       run();
     }
-  }
-
-  private _initElementSlot() {
-    this._disposables.add(
-      this.page.slots.blockUpdated.on(event => {
-        if (
-          ![
-            'affine:image',
-            'affine:note',
-            'affine:frame',
-            'affine:bookmark',
-          ].includes(event.flavour as EdgelessBlockType) &&
-          !/affine:embed-*/.test(event.flavour)
-        )
-          return;
-
-        if (
-          event.flavour === 'affine:image' ||
-          event.flavour === 'affine:bookmark' ||
-          event.flavour === 'affine:embed-github' ||
-          event.flavour === 'affine:embed-youtube' ||
-          event.flavour === 'affine:embed-linked-doc'
-        ) {
-          const parent =
-            event.type === 'delete'
-              ? this.page.getParent(event.model)
-              : this.page.getParent(this.page.getBlockById(event.id)!);
-
-          if (parent && parent.id !== this.surfaceBlockModel.id) {
-            return;
-          }
-        }
-
-        switch (event.type) {
-          case 'add':
-            this.slots.elementAdded.emit({ id: event.id });
-            break;
-        }
-      })
-    );
   }
 
   override connectedCallback() {
