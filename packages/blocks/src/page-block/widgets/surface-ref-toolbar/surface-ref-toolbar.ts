@@ -190,7 +190,7 @@ function SurfaceRefToolbarOptions(options: {
               return writeImageBlobToClipboard(blob);
             })
             .then(() => {
-              toast('Copied image to clipboard');
+              toast(blockElement.host, 'Copied image to clipboard');
             })
             .catch(err => {
               console.error(err);

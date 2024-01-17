@@ -1,4 +1,5 @@
 import { BlockService } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/lit';
 import { Slot } from '@blocksuite/store';
 
 import {
@@ -29,6 +30,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
 
       attachmentFiles.forEach(file => {
         addSiblingAttachmentBlock(
+          this.std.host as EditorHost,
           file,
           this.maxFileSize,
           targetModel,

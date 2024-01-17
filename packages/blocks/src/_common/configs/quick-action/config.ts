@@ -43,7 +43,7 @@ export const quickActionConfig: QuickActionConfig[] = [
         .getSelectedModels()
         .with({
           onCopy: () => {
-            toast('Copied to clipboard');
+            toast(host, 'Copied to clipboard');
           },
         })
         .copySelectedModels()
@@ -154,6 +154,12 @@ export const quickActionConfig: QuickActionConfig[] = [
             const title = firstBlock.text.toString();
             linkedPage.workspace.setPageMeta(linkedPage.id, {
               title,
+            });
+
+            const pageBlock = linkedPage.getBlockById(pageBlockId);
+            assertExists(pageBlock);
+            linkedPage.updateBlock(pageBlock, {
+              title: new page.Text(title),
             });
 
             page.deleteBlock(firstBlock);

@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineRange } from '@blocksuite/inline/types';
+import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -63,6 +64,9 @@ export class LinkPopupMoreMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   abortController!: AbortController;
 
+  @property({ attribute: false })
+  host!: EditorHost;
+
   get currentLink() {
     const link = this.inlineEditor.getFormat(this.targetInlineRange).link;
     assertExists(link);
@@ -80,7 +84,7 @@ export class LinkPopupMoreMenu extends WithDisposable(LitElement) {
 
   private _copyUrl() {
     navigator.clipboard.writeText(this.currentLink).catch(console.error);
-    toast('Copied link to clipboard');
+    toast(this.host, 'Copied link to clipboard');
     this.abortController.abort();
   }
 

@@ -36,8 +36,7 @@ import {
   type EditorHost,
   ShadowlessElement,
 } from '@blocksuite/lit';
-import type { CopilotPanel } from '@blocksuite/presets';
-import { AffineEditorContainer } from '@blocksuite/presets';
+import type { AffineEditorContainer, CopilotPanel } from '@blocksuite/presets';
 import type { BlockModel } from '@blocksuite/store';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
@@ -54,13 +53,13 @@ import type { LeftSidePanel } from './left-side-panel.js';
 import type { PagesPanel } from './pages-panel.js';
 import type { SidePanel } from './side-panel.js';
 
-export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
-  const { page } = editor;
+export function getSurfaceElementFromEditor(editorHost: EditorHost) {
+  const { page } = editorHost;
   const surfaceModel = page.getBlockByFlavour('affine:surface')[0];
   assertExists(surfaceModel);
 
   const surfaceId = surfaceModel.id;
-  const surfaceElement = editor.querySelector(
+  const surfaceElement = editorHost.querySelector(
     `affine-surface[data-block-id="${surfaceId}"]`
   ) as SurfaceBlockComponent;
   assertExists(surfaceElement);
@@ -309,16 +308,8 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _switchEditorMode() {
-    const editor = document.querySelector<AffineEditorContainer>(
-      'affine-editor-container'
-    );
-    if (editor instanceof AffineEditorContainer) {
-      const mode = editor.mode === 'page' ? 'edgeless' : 'page';
-      editor.mode = mode;
-    } else {
-      const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
-      this.mode = mode;
-    }
+    const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
+    this.mode = mode;
   }
 
   private _toggleOutlinePanel() {
@@ -376,7 +367,7 @@ export class DebugMenu extends ShadowlessElement {
     };
     // const node: TreeNode = genTree();
     BlocksUtils.mindMap.drawInEdgeless(
-      getSurfaceElementFromEditor(this.editor),
+      getSurfaceElementFromEditor(this.editor.host),
       node
     );
   }

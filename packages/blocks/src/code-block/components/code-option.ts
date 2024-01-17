@@ -58,10 +58,10 @@ export function CodeOptionTemplate({
           anchor.std.clipboard
             .copySlice(slice)
             .then(() => {
-              toast('Copied to clipboard');
+              toast(anchor.host, 'Copied to clipboard');
             })
             .catch(e => {
-              toast('Copied failed, something went wrong');
+              toast(anchor.host, 'Copied failed, something went wrong');
               console.error(e);
             });
         }}
