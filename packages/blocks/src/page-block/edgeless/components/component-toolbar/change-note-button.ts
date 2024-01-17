@@ -323,6 +323,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         return 'Edgeless';
       case NoteDisplayMode.DocOnly:
         return 'Page';
+      default:
+        return 'Both';
     }
   }
 

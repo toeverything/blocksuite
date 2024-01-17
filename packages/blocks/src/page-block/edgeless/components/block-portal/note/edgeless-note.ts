@@ -283,7 +283,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   override render() {
     const { model, surface, index } = this;
     const { displayMode } = model;
-    if (displayMode === NoteDisplayMode.DocOnly) return nothing;
+    if (!!displayMode && displayMode === NoteDisplayMode.DocOnly)
+      return nothing;
 
     const { xywh, background, edgeless } = model;
     const { borderRadius, borderSize, borderStyle, shadowType } =

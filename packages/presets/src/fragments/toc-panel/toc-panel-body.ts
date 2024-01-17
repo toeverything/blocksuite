@@ -280,7 +280,10 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
         number: index + 1,
       };
 
-      if (blockModel.displayMode === NoteDisplayMode.EdgelessOnly) {
+      if (
+        blockModel.displayMode === NoteDisplayMode.EdgelessOnly ||
+        (!blockModel.displayMode && blockModel.hidden)
+      ) {
         edgelessOnlyNotes.push(tocNoteItem);
       } else {
         pageVisibleNotes.push(tocNoteItem);
@@ -342,7 +345,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       const note = item.note;
       if (
         this._selected.includes(note.id) &&
-        note.displayMode === NoteDisplayMode.DocAndEdgeless
+        (!note.displayMode ||
+          note.displayMode === NoteDisplayMode.DocAndEdgeless)
       ) {
         ids.push(note.id);
       }

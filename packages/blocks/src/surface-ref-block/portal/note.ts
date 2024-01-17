@@ -58,7 +58,8 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   override render() {
     const { model, index } = this;
     const { displayMode } = model;
-    if (displayMode === NoteDisplayMode.DocOnly) return nothing;
+    if (!!displayMode && displayMode === NoteDisplayMode.DocOnly)
+      return nothing;
 
     const { xywh, background } = model;
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);

@@ -370,12 +370,14 @@ export class DocPageBlockComponent extends BlockElement<
       const lastNote = this.model.children
         .slice()
         .reverse()
-        .find(
-          child =>
-            child.flavour === 'affine:note' &&
-            (child as NoteBlockModel).displayMode !==
-              NoteDisplayMode.EdgelessOnly
-        );
+        .find(child => {
+          const note = child as NoteBlockModel;
+          const displayOnDoc =
+            !!note.displayMode &&
+            note.displayMode !== NoteDisplayMode.EdgelessOnly;
+          // Should remove deprecated `hidden` property in the future
+          return displayOnDoc || !note.hidden;
+        });
       if (!lastNote) {
         if (readonly) return;
         noteId = this.page.addBlock('affine:note', {}, this.model.id);
@@ -430,13 +432,15 @@ export class DocPageBlockComponent extends BlockElement<
 
   override render() {
     const content = html`${repeat(
-      this.model.children.filter(
-        child =>
-          !(
-            matchFlavours(child, ['affine:note']) &&
-            child.displayMode === NoteDisplayMode.EdgelessOnly
-          )
-      ),
+      this.model.children.filter(child => {
+        const isNote = matchFlavours(child, ['affine:note']);
+        const note = child as NoteBlockModel;
+        const displayOnEdgeless =
+          !!note.displayMode &&
+          note.displayMode === NoteDisplayMode.EdgelessOnly;
+        // Should remove deprecated `hidden` property in the future
+        return !(isNote && (displayOnEdgeless || note.hidden));
+      }),
       child => child.id,
       child => this.renderModel(child)
     )}`;

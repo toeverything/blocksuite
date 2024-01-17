@@ -243,7 +243,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
   private _showPopper = false;
 
   @query('.display-mode-button-group')
-  private _cardHeaderContainer!: HTMLDivElement;
+  private _displayModeButtonGroup!: HTMLDivElement;
   @query('note-display-mode-panel')
   private _displayModePanel!: HTMLDivElement;
   private _displayModePopper: ReturnType<typeof createButtonPopper> | null =
@@ -297,6 +297,8 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
         return 'Edgeless';
       case NoteDisplayMode.DocOnly:
         return 'Page';
+      default:
+        return 'Both';
     }
   }
 
@@ -308,7 +310,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
   override firstUpdated() {
     this._displayModePopper = createButtonPopper(
-      this._cardHeaderContainer,
+      this._displayModeButtonGroup,
       this._displayModePanel,
       ({ display }) => {
         this._showPopper = display === 'show';

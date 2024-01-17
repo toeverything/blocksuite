@@ -313,9 +313,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     notes.forEach(note => {
       if (isNoteBlock(note)) {
-        if (note.displayMode === NoteDisplayMode.EdgelessOnly) {
+        if (
+          note.displayMode === NoteDisplayMode.EdgelessOnly ||
+          (!note.displayMode && note.hidden)
+        ) {
           edgelessOnlyNotesSet.add(note);
-        } else if (note.displayMode === NoteDisplayMode.DocAndEdgeless) {
+        } else if (
+          note.displayMode === NoteDisplayMode.DocAndEdgeless ||
+          (!note.displayMode && !note.hidden)
+        ) {
           pageVisibleBlocks.set(note, 1);
         }
       }
