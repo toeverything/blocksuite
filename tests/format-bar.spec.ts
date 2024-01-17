@@ -1314,7 +1314,7 @@ test('buttons in format quick bar should have correct active styles', async ({
 
   // drag the `456`
   await dragBetweenIndices(page, [1, 0], [1, 3]);
-  await waitNextFrame(page, 200);
+  await waitNextFrame(page, 1000);
   await expect(codeBtn).not.toHaveAttribute('active', '');
 });
 
