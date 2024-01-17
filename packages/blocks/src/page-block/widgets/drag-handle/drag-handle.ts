@@ -37,7 +37,7 @@ import {
   isTopLevelBlock,
 } from '../../../page-block/edgeless/utils/query.js';
 import { autoScroll } from '../../../page-block/text-selection/utils.js';
-import type { IVec } from '../../../surface-block/index.js';
+import { Bound, type IVec } from '../../../surface-block/index.js';
 import { DragPreview } from './components/drag-preview.js';
 import { DropIndicator } from './components/drop-indicator.js';
 import type { DragHandleOption, DropResult, DropType } from './config.js';
@@ -1124,7 +1124,11 @@ export class AffineDragHandleWidget extends WidgetElement<
       const newNoteBlock = this.page.getBlockById(newNoteId) as NoteBlockModel;
       assertExists(newNoteBlock);
 
+      const bound = Bound.deserialize(newNoteBlock.xywh);
+      bound.h *= this.noteScale;
+      bound.w *= this.noteScale;
       this.page.updateBlock(newNoteBlock, {
+        xywh: bound.serialize(),
         edgeless: {
           ...newNoteBlock.edgeless,
           scale: this.noteScale,
