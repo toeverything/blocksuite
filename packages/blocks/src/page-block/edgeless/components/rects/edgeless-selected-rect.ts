@@ -484,7 +484,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         } else if (curBound.h !== bound.h) {
           edgeless.page.updateBlock(element, () => {
             element.edgeless.collapse = true;
-            element.edgeless.collapsedHeight = height;
+            element.edgeless.collapsedHeight = bound.h / scale;
           });
         }
 
