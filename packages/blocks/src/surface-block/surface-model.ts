@@ -17,6 +17,7 @@ import type { GroupElementModel } from './element-model/group.js';
 import {
   createElementModel,
   createModelFromProps,
+  type ElementModelMap,
   propsToY,
 } from './element-model/index.js';
 import { connectorMiddleware } from './middlewares/connector.js';
@@ -464,6 +465,14 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     }
 
     return groups;
+  }
+
+  getElementsByType<K extends keyof ElementModelMap>(
+    type: K
+  ): ElementModelMap[K][] {
+    return this.elementModels.filter(
+      model => model.type === type
+    ) as ElementModelMap[K][];
   }
 
   getElementById(id: string): ElementModel | null {

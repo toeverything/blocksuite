@@ -3,7 +3,7 @@ import '../declare-test-window.js';
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
 import type { IPoint } from '@blocks/_common/types.js';
 import { type NoteBlockModel } from '@blocks/note-block/index.js';
-import type { IVec } from '@blocks/surface-block/index.js';
+import { type IVec } from '@blocks/surface-block/index.js';
 import { assertExists, sleep } from '@global/utils/index.js';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
@@ -304,7 +304,7 @@ export async function getEdgelessSelectedRectModel(page: Page): Promise<Bound> {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    const bound = container.selectionManager.selectedBound;
+    const bound = container.service.selection.selectedBound;
     return [bound.x, bound.y, bound.w, bound.h];
   });
 }
@@ -387,7 +387,7 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
     if (!container) throw new Error('container not found');
 
     return {
-      id: container.selectionManager.selectedIds[0],
+      id: container.service.selection.selectedIds[0],
     };
   });
 
@@ -399,7 +399,7 @@ export async function exitEditing(page: Page) {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
 
-    container.selectionManager.set({
+    container.service.selection.set({
       elements: [],
       editing: false,
     });
@@ -685,8 +685,8 @@ export async function deleteAllConnectors(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    container.surface.getElementsByType('connector').forEach(c => {
-      container.surface.removeElement(c.id);
+    container.service.getElementsByType('connector').forEach(c => {
+      container.service.removeElement(c.id);
     });
   });
 }
@@ -1097,7 +1097,7 @@ export async function toViewCoord(page: Page, point: number[]) {
   return await page.evaluate(point => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    return container.surface.viewport.toViewCoord(point[0], point[1]);
+    return container.service.viewport.toViewCoord(point[0], point[1]);
   }, point);
 }
 
@@ -1115,7 +1115,7 @@ export async function toModelCoord(page: Page, point: number[]) {
   return await page.evaluate(point => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    return container.surface.viewport.toModelCoord(point[0], point[1]);
+    return container.service.viewport.toModelCoord(point[0], point[1]);
   }, point);
 }
 
@@ -1123,7 +1123,7 @@ export async function getConnectorSourceConnection(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    return container.surface.getElementsByType('connector')[0].source;
+    return container.service.getElementsByType('connector')[0].source;
   });
 }
 
@@ -1132,7 +1132,7 @@ export async function getConnectorPath(page: Page, index = 0): Promise<IVec[]> {
     ([index]) => {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
-      const connectors = container.surface.getElementsByType('connector');
+      const connectors = container.service.getElementsByType('connector');
       return connectors[index].absolutePath;
     },
     [index]
@@ -1147,7 +1147,7 @@ export async function getSelectedBound(
     ([index]) => {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
-      const selected = container.selectionManager.elements[index];
+      const selected = container.service.selection.elements[index];
       return JSON.parse(selected.xywh);
     },
     [index]
@@ -1158,9 +1158,7 @@ export async function getGroupIds(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    return container.surface
-      .getElements()
-      .map(g => container.surface.getGroupParent(g).id);
+    return container.service.elements.map(el => el.group?.id).filter(id => id);
   });
 }
 
@@ -1170,7 +1168,7 @@ export async function getGroupChildrenIds(page: Page, index = 0) {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
       return Array.from(
-        container.surface.getElementsByType('group')[index].children.keys()
+        container.service.getElementsByType('group')[index].children.keys()
       );
     },
     [index]
@@ -1181,7 +1179,7 @@ export async function getCanvasElementsCount(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    return container.surface.getElements().length;
+    return container.service.elements.length;
   });
 }
 
@@ -1189,7 +1187,7 @@ export async function getIds(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    return container.surface.getElements().map(e => e.id);
+    return container.service.elements.map(e => e.id);
   });
 }
 
@@ -1197,7 +1195,7 @@ export async function getIndexes(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    return container.surface.getElements().map(e => e.index);
+    return container.service.elements.map(e => e.index);
   });
 }
 
@@ -1205,9 +1203,9 @@ export async function getSortedIdsInViewport(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    const { surface } = container;
-    return surface.viewport.gridManager
-      .search(surface.viewport.viewportBounds)
+    const { service } = container;
+    return service.layer.canvasGrid
+      .search(service.viewport.viewportBounds)
       .map(e => e.id);
   });
 }

@@ -107,6 +107,12 @@ export class EdgelessPageService extends PageService {
     return this.page.addBlock(flavour, props, parent, parentIndex);
   }
 
+  getElementsByType<
+    K extends Parameters<SurfaceBlockModel['getElementsByType']>[0],
+  >(type: K) {
+    return this.surface.getElementsByType(type);
+  }
+
   updateElement(id: string, props: Record<string, unknown>) {
     if (this._surfaceModel.getElementById(id)) {
       const element = this._surfaceModel.getElementById(id)!;

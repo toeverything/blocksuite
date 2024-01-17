@@ -198,6 +198,15 @@ export enum CanvasElementType {
   TEXT = 'text',
   GROUP = 'group',
 }
+
+export type ElementModelMap = {
+  ['shape']: ShapeElementModel;
+  ['brush']: BrushElementModel;
+  ['connector']: ConnectorElementModel;
+  ['text']: TextElementModel;
+  ['group']: GroupElementModel;
+};
+
 export function isCanvasElementType(type: string): type is CanvasElementType {
   return type.toLocaleUpperCase() in CanvasElementType;
 }
