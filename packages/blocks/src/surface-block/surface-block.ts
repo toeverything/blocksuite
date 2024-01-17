@@ -1,6 +1,5 @@
 import '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -12,10 +11,8 @@ import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/compon
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
 import { ConnectionOverlay } from '../page-block/edgeless/managers/connector-manager.js';
-import { isTopLevelBlock } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
-import { type EdgelessElementType } from './edgeless-types.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceService } from './surface-service.js';
 import { Bound } from './utils/bound.js';
@@ -184,24 +181,11 @@ export class SurfaceBlockComponent extends BlockElement<
     );
 
     _disposables.add(
-      this.model.elementUpdated.on(({ id, props }) => {
-        const element = edgeless.service.getElementById(id);
-        assertExists(element);
-
-        this.service!.editSession.record(
-          (isTopLevelBlock(element)
-            ? element.flavour
-            : element.type) as EdgelessElementType,
-          props as Record<string, unknown>
-        );
-      })
-    );
-
-    _disposables.add(
       edgelessService.layer.slots.layerUpdated.on(() => {
         this._updateIndexCanvases();
       })
     );
+    this._updateIndexCanvases();
   }
 
   private _initThemeObserver = () => {

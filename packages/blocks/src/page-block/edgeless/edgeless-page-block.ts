@@ -6,7 +6,6 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
   assertExists,
   assertInstanceOf,
-  debounce,
   Slot,
   throttle,
 } from '@blocksuite/global/utils';
@@ -23,6 +22,7 @@ import {
   type EdgelessElement,
   type EdgelessTool,
   Point,
+  requestConnectedFrame,
   type Selectable,
   type Viewport,
 } from '../../_common/utils/index.js';
@@ -605,17 +605,19 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _initRemoteCursor() {
-    const setRemoteCursor = debounce(
-      (pos: { x: number; y: number }) => {
+    let rafId: number | null = null;
+
+    const setRemoteCursor = (pos: { x: number; y: number }) => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestConnectedFrame(() => {
         const cursorPosition = this.service.viewport.toModelCoord(pos.x, pos.y);
         this.service.selection.setCursor({
           x: cursorPosition[0],
           y: cursorPosition[1],
         });
-      },
-      1000 / 60,
-      { trailing: true }
-    );
+        rafId = null;
+      }, this);
+    };
 
     this.handleEvent('pointerMove', e => {
       const pointerEvent = e.get('pointerState');
@@ -663,15 +665,15 @@ export class EdgelessPageBlockComponent extends BlockElement<
       this.tools.setEdgelessTool({ type: 'pan', panning: true });
     }
 
-    requestAnimationFrame(() => {
+    requestConnectedFrame(() => {
       this._handleToolbarFlag();
       this.requestUpdate();
-    });
+    }, this);
   }
 
   private _getSavedViewport(): SerializedViewport | null {
     let result: SerializedViewport | null = null;
-    const storedViewport = this.surface.service.editSession.getItem('viewport');
+    const storedViewport = this.service.editSession.getItem('viewport');
     if (!storedViewport) return null;
 
     if ('referenceId' in storedViewport) {

@@ -113,9 +113,6 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   frames!: FrameBlockModel[];
 
-  @property({ attribute: false })
-  updateFrames!: () => void;
-
   @query('.edgeelss-frame-order-items-container')
   private _container!: HTMLDivElement;
 
@@ -207,7 +204,6 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
           });
           this.edgeless.page.captureSync();
 
-          this.updateFrames();
           this.requestUpdate();
         }
         this._disposables.dispose();

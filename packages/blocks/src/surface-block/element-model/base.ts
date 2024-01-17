@@ -45,7 +45,11 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   protected _preserved: Map<string, unknown> = new Map();
   protected _stashed: Map<keyof Props | string, unknown>;
   protected _local: Map<string | symbol, unknown> = new Map();
-  protected _onChange: (props: Record<string, { oldValue: unknown }>) => void;
+  protected _onChange: (payload: {
+    props: Record<string, unknown>;
+    oldValues: Record<string, unknown>;
+  }) => void;
+  protected _observerDisposable: Record<string | symbol, () => void> = {};
 
   yMap: Y.Map<unknown>;
   surface!: SurfaceBlockModel;
@@ -79,7 +83,10 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     yMap: Y.Map<unknown>;
     model: SurfaceBlockModel;
     stashedStore: Map<unknown, unknown>;
-    onChange: (props: Record<string, { oldValue: unknown }>) => void;
+    onChange: (payload: {
+      props: Record<string, unknown>;
+      oldValues: Record<string, unknown>;
+    }) => void;
   }) {
     const { yMap, model, stashedStore, onChange } = options;
 
@@ -157,7 +164,14 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
         const oldValue = this._stashed.get(prop);
 
         this._stashed.set(prop, value);
-        this._onChange({ [prop]: { oldValue } });
+        this._onChange({
+          props: {
+            [prop]: value,
+          },
+          oldValues: {
+            [prop]: oldValue,
+          },
+        });
 
         updateDerivedProp(prototype, prop as string, original, this);
       },

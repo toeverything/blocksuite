@@ -132,11 +132,14 @@ describe('group', () => {
     expect(shape2.group).toBe(group);
   });
 
-  test('should return null if group children are updated', () => {
+  test('should return null if children property is updated', async () => {
     const id = model.addElement({
       type: 'shape',
     });
     const id2 = model.addElement({
+      type: 'shape',
+    });
+    const id3 = model.addElement({
       type: 'shape',
     });
 
@@ -145,6 +148,7 @@ describe('group', () => {
       children: {
         [id]: true,
         [id2]: true,
+        [id3]: true,
       },
     });
     const group = model.getElementById(groupId) as GroupElementModel;
@@ -154,6 +158,7 @@ describe('group', () => {
       group.children.delete(id2);
     });
 
+    expect(model.getElementById(groupId)).toBe(group);
     expect(model.getGroup(id)).toBeNull();
     expect(model.getGroup(id2)).toBeNull();
   });

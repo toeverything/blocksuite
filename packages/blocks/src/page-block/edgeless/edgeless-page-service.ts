@@ -1,6 +1,7 @@
 import { type BlockModel } from '@blocksuite/store';
 
 import { last } from '../../_common/utils/iterable.js';
+import type { CanvasElementType } from '../../index.js';
 import { GroupElementModel } from '../../index.js';
 import type { SurfaceBlockModel } from '../../models.js';
 import type { IBound } from '../../surface-block/consts.js';
@@ -32,11 +33,13 @@ export class EdgelessPageService extends PageService {
     this._layer = LayerManager.create(this.page, this._surfaceModel);
     this._viewport = new Viewport();
     this._selection = new EdgelessSelectionManager(this);
+    this.editSession.listen(this._surfaceModel);
   }
 
   override unmounted() {
     super.unmounted();
     this._layer.dispose();
+    this._selection.dispose();
     this.selectionManager.set([]);
   }
 
@@ -78,6 +81,11 @@ export class EdgelessPageService extends PageService {
     props['index'] = this.generateIndex(type);
     // @ts-ignore
     props['type'] = type;
+
+    this.editSession.apply(
+      type as CanvasElementType,
+      props as Record<string, unknown>
+    );
 
     return this._surfaceModel.addElement(props as T & { type: string });
   }

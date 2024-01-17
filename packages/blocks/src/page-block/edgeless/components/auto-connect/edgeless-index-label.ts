@@ -125,6 +125,8 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     );
 
     const requestUpdate = (payload: { id: string }) => {
+      if (!this.isConnected) return;
+
       const element = edgeless.service.getElementById(
         payload.id
       ) as AutoConnectElement;

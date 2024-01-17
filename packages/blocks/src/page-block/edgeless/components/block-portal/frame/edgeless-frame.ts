@@ -87,10 +87,10 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const { edgeless, frame: model, _isNavigator } = this;
-    const { surface, service } = edgeless;
+    const { service } = edgeless;
     const { zoom } = service.viewport;
     const bound = Bound.deserialize(model.xywh);
-    this.isInner = surface.frame.frames.some(frame => {
+    this.isInner = service.frames.some(frame => {
       if (frame.id === model.id) return false;
       if (Bound.deserialize(frame.xywh).contains(bound)) {
         return true;

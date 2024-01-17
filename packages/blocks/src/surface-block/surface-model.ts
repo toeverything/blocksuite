@@ -21,6 +21,7 @@ import {
 } from './element-model/index.js';
 import { generateElementId } from './index.js';
 import { connectorMiddleware } from './middlewares/connector.js';
+import { groupMiddleware } from './middlewares/group.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 
 export type SurfaceBlockProps = {
@@ -156,7 +157,7 @@ export const SurfaceBlockSchema = defineBlockSchema({
 export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   private _elementModels: Map<
     string,
-    { dispose: () => void; model: ElementModel }
+    { mount: () => void; unmount: () => void; model: ElementModel }
   > = new Map();
   private _disposables: Array<() => void> = [];
   private _groupToElements: Map<string, string[]> = new Map();
@@ -166,7 +167,8 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   elementUpdated = new Slot<{
     id: string;
-    props: Record<string, { oldValue: unknown }>;
+    props: Record<string, unknown>;
+    oldValues: Record<string, unknown>;
   }>();
   elementAdded = new Slot<{ id: string }>();
   elementRemoved = new Slot<{
@@ -188,13 +190,13 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   private _init() {
     this._initElementModels();
-    this._initGroup();
-    this._initConnector();
-    this._initMiddlewares();
+    this._watchGroupRelationChange();
+    this._watchConnectorRelationChange();
+    this._applyMiddlewares();
   }
 
-  private _initMiddlewares() {
-    this._disposables.push(connectorMiddleware(this));
+  private _applyMiddlewares() {
+    this._disposables.push(connectorMiddleware(this), groupMiddleware(this));
   }
 
   private _initElementModels() {
@@ -210,27 +212,28 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
           case 'add':
             if (element) {
               if (!this._elementModels.has(id)) {
-                this._elementModels.set(
-                  id,
-                  createElementModel(
-                    element.get('type') as string,
-                    element.get('id') as string,
-                    element,
-                    this,
-                    {
-                      onChange: payload => this.elementUpdated.emit(payload),
-                      skipFieldInit: true,
-                    }
-                  )
+                const model = createElementModel(
+                  element.get('type') as string,
+                  element.get('id') as string,
+                  element,
+                  this,
+                  {
+                    onChange: payload => this.elementUpdated.emit(payload),
+                    skipFieldInit: true,
+                  }
                 );
+
+                this._elementModels.set(id, model);
               }
+              const { mount } = this._elementModels.get(id)!;
+              mount();
               this.elementAdded.emit({ id });
             }
             break;
           case 'delete':
             if (this._elementModels.has(id)) {
-              const { model, dispose } = this._elementModels.get(id)!;
-              dispose();
+              const { model, unmount } = this._elementModels.get(id)!;
+              unmount();
               this.elementRemoved.emit({ id, type: model.type, model });
               this._elementToGroup.delete(id);
               this._elementToConnector.delete(id);
@@ -263,7 +266,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     });
   }
 
-  private _initGroup() {
+  private _watchGroupRelationChange() {
     const addToGroup = (elementId: string, groupId: string) => {
       this._elementToGroup.set(elementId, groupId);
       this._groupToElements.set(
@@ -298,17 +301,21 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       }
     });
 
-    this.elementUpdated.on(({ id, props }) => {
+    this.elementUpdated.on(({ id, oldValues }) => {
       const element = this.getElementById(id)!;
 
-      if (element.type === 'group' && props['children']) {
-        (props['children'].oldValue as Y.Map<boolean>).forEach((_, childId) => {
+      if (element.type === 'group' && oldValues['childIds']) {
+        (oldValues['childIds'] as string[]).forEach(childId => {
           removeFromGroup(childId, id);
         });
 
         (element as GroupElementModel).childIds.forEach(childId => {
           addToGroup(childId, id);
         });
+
+        if ((element as GroupElementModel).childIds.length === 0) {
+          this.removeElement(id);
+        }
       }
     });
 
@@ -331,7 +338,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     });
   }
 
-  private _initConnector() {
+  private _watchConnectorRelationChange() {
     const addConnector = (targetId: string, connectorId: string) => {
       const connectors = this._elementToConnector.get(targetId);
 
@@ -386,18 +393,18 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this.elementModels.forEach(model => updateConnectorMap(model, 'add'));
 
-    this.elementUpdated.on(({ id, props }) => {
+    this.elementUpdated.on(({ id, oldValues }) => {
       const element = this.getElementById(id)!;
 
       if (
         element.type !== 'connector' ||
-        (!props['source'] && !props['target'])
+        (!oldValues['source'] && !oldValues['target'])
       )
         return;
 
       const oldConnected = [
-        (props['source']?.oldValue as Connection)?.id,
-        (props['target']?.oldValue as Connection)?.id,
+        (oldValues['source'] as Connection)?.id,
+        (oldValues['target'] as Connection)?.id,
       ];
 
       oldConnected.forEach(id => {
@@ -429,7 +436,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     this.elementRemoved.dispose();
     this.elementUpdated.dispose();
 
-    this._elementModels.forEach(({ dispose }) => dispose());
+    this._elementModels.forEach(({ unmount }) => unmount());
     this._elementModels.clear();
   }
 

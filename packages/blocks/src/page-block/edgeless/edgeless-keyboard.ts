@@ -33,7 +33,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         l: () => {
-          pageElement.surface.service.editSession.record('connector', {
+          pageElement.service.editSession.record('connector', {
             mode: ConnectorMode.Straight,
           });
           this._setEdgelessTool(pageElement, {
@@ -42,7 +42,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         x: () => {
-          pageElement.surface.service.editSession.record('connector', {
+          pageElement.service.editSession.record('connector', {
             mode: ConnectorMode.Orthogonal,
           });
           this._setEdgelessTool(pageElement, {
@@ -51,7 +51,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         c: () => {
-          pageElement.surface.service.editSession.record('connector', {
+          pageElement.service.editSession.record('connector', {
             mode: ConnectorMode.Curve,
           });
           this._setEdgelessTool(pageElement, {
@@ -85,7 +85,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         s: () => {
           const attributes =
-            pageElement.surface.service.editSession.getLastProps('shape');
+            pageElement.service.editSession.getLastProps('shape');
           this._setEdgelessTool(pageElement, {
             type: 'shape',
             shapeType: attributes.shapeType,

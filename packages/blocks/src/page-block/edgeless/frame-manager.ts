@@ -50,14 +50,8 @@ export class EdgelessFrameManager {
     this._edgeless.surface.renderer.addOverlay(this._frameOverlay);
   }
 
-  get frames() {
-    return this._edgeless.service.blocks.filter(
-      block => block.flavour === 'affine:frame'
-    );
-  }
-
   selectFrame(eles: Selectable[]) {
-    const frames = this._edgeless.surface.frame.frames;
+    const frames = this._edgeless.service.frames;
     if (frames.length === 0) return null;
 
     const selectedFrames = eles.filter(ele => isFrameBlock(ele));
@@ -95,7 +89,7 @@ export class EdgelessFrameManager {
   createFrameOnSelected() {
     const { _edgeless } = this;
     const { surface, service } = _edgeless;
-    const frames = this.frames;
+    const frames = service.frames;
     let bound = edgelessElementsBound(_edgeless.service.selection.elements);
     bound = bound.expand(FRAME_PADDING);
     if (bound.w < MIN_FRAME_WIDTH) {

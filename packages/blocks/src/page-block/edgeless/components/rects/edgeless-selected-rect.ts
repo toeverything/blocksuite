@@ -732,7 +732,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     element: string | { id: string },
     fromRemote: boolean = false
   ) => {
-    if (fromRemote && this._resizeManager.dragging) return;
+    if ((fromRemote && this._resizeManager.dragging) || !this.isConnected)
+      return;
 
     const id = typeof element === 'string' ? element : element.id;
 
@@ -799,6 +800,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   override render() {
+    if (!this.isConnected) return nothing;
+
     const { selection } = this;
     const elements = selection.elements;
 

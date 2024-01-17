@@ -33,14 +33,21 @@ export function yfield(fallback?: unknown): PropertyDecorator {
         const val = convertProps(prototype, prop, originalVal, this);
 
         if (this.yMap) {
-          this.surface.page.transact(() => {
+          if (this.yMap.doc) {
+            this.surface.page.transact(() => {
+              this.yMap.set(prop as string, val);
+            });
+          } else {
             this.yMap.set(prop as string, val);
-          });
+          }
         }
 
         if (!this.yMap.doc) {
           this._preserved.set(prop as string, val);
         }
+
+        updateObserver(prototype, prop as string, this);
+        updateDerivedProp(prototype, prop as string, originalVal, this);
       },
     });
   };
@@ -63,8 +70,11 @@ export function local(): PropertyDecorator {
         updateDerivedProp(target, prop as string, originalValue, this);
 
         this._onChange({
-          [prop]: {
-            oldValue,
+          props: {
+            [prop]: newVal,
+          },
+          oldValues: {
+            [prop]: oldValue,
           },
         });
       },
@@ -155,4 +165,77 @@ export function convertProps(
   const convertFn = getConvertMeta(target, propKey as string)!;
 
   return convertFn ? convertFn(newProp, receiver) : newProp;
+}
+
+const observeSymbol = Symbol('observe');
+
+export function observe<T extends ElementModel>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fn: (event: any, instance: T, type: 'modified' | 'altered') => void
+) {
+  return function observeDecorator(prototype: unknown, prop: string | symbol) {
+    setObjectMeta(observeSymbol, prototype, prop, fn);
+  };
+}
+
+function getObserveMeta(
+  target: unknown,
+  prop: string | symbol
+):
+  | null
+  | ((
+      event: unknown,
+      instance: unknown,
+      type: 'modified' | 'altered'
+    ) => void) {
+  // @ts-ignore
+  return target[observeSymbol]?.[prop] ?? null;
+}
+
+function updateObserver(
+  prototype: unknown,
+  prop: string | symbol,
+  receiver: ElementModel
+) {
+  const observeFn = getObserveMeta(prototype, prop as string)!;
+  const observerDisposable = receiver['_observerDisposable'] ?? {};
+
+  if (observerDisposable[prop]) {
+    observerDisposable[prop]();
+    delete observerDisposable[prop];
+  }
+
+  if (observeFn) {
+    const value = receiver[prop as keyof ElementModel];
+
+    observeFn(null, receiver, 'altered');
+
+    // @ts-ignore
+    try {
+      const fn = (event: unknown) => {
+        observeFn(event, receiver, 'modified');
+      };
+
+      // @ts-ignore
+      value.observe(fn);
+      receiver['_observerDisposable'][prop] = () => {
+        // @ts-ignore
+        value.unobserve(fn);
+      };
+    } catch {
+      throw new Error(
+        `Failed to observe "${prop.toString()}" of ${
+          receiver.type
+        } element, make sure it's a Y type.`
+      );
+    }
+  }
+}
+
+export function initFieldObservers(prototype: unknown, instance: ElementModel) {
+  const observers = instance['_observerDisposable'];
+
+  Object.keys(observers).forEach(prop => {
+    updateObserver(prototype, prop, instance);
+  });
 }

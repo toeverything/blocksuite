@@ -273,7 +273,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
             overflow: this._isShowCollapsedContent ? 'initial' : 'hidden',
           })}
         >
-          ${surface.edgeless.renderModel(model)}
+          ${surface.renderModel(model)}
         </div>
         ${this._collapsedContent()}
         <edgeless-note-mask

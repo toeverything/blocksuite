@@ -20,6 +20,7 @@ describe('default tool', () => {
 
     edgeless = getPageRootBlock(page, editor, 'edgeless');
     surface = getSurface(window.page, window.editor);
+    service = edgeless.service;
 
     edgeless.tools.edgelessTool = {
       type: 'default',

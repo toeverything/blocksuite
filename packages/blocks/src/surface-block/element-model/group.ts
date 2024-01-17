@@ -13,7 +13,7 @@ import type { IVec2 } from '../utils/vec.js';
 import { type SerializedXYWH } from '../utils/xywh.js';
 import type { BaseProps } from './base.js';
 import { ElementModel } from './base.js';
-import { local, yfield } from './decorators.js';
+import { local, observe, yfield } from './decorators.js';
 
 type GroupElementProps = BaseProps & {
   children: Y.Map<boolean>;
@@ -39,6 +39,9 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     return props;
   }
 
+  @observe((_: Y.YMapEvent<unknown>, instance: GroupElementModel) => {
+    instance.childIds = Array.from(instance.children.keys());
+  })
   @yfield()
   children: Y.Map<boolean> = new Workspace.Y.Map<boolean>();
 
@@ -76,9 +79,8 @@ export class GroupElementModel extends ElementModel<GroupElementProps> {
     return 'group';
   }
 
-  get childIds() {
-    return [...this.children.keys()];
-  }
+  @local()
+  childIds: string[] = [];
 
   get childElements() {
     const elements = [];

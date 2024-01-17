@@ -77,38 +77,6 @@ export class LayerManager {
       ).concat(surface.elementModels)
     );
 
-    page.slots.blockUpdated.on(payload => {
-      if (payload.type === 'add') {
-        const block = page.getBlockById(payload.id)!;
-
-        if (
-          block instanceof EdgelessBlock &&
-          renderableInEdgeless(page, surface, block)
-        ) {
-          layerManager.add(block as EdgelessBlock);
-        }
-      }
-      if (payload.type === 'update') {
-        const block = page.getBlockById(payload.id)!;
-
-        if (
-          block instanceof EdgelessBlock &&
-          payload.props.key === 'index' &&
-          renderableInEdgeless(page, surface, block)
-        ) {
-          layerManager.update(block as EdgelessBlock);
-        }
-      }
-      if (payload.type === 'delete') {
-        const block = payload.model;
-
-        // @ts-ignore
-        if (block['edgeless']) {
-          layerManager.delete(block as EdgelessBlock);
-        }
-      }
-    });
-
     layerManager.listen(page, surface);
 
     return layerManager;
@@ -201,9 +169,7 @@ export class LayerManager {
       })
     );
     this._disposables.add(
-      surface.elementRemoved.on(element =>
-        this.delete(surface.getElementById(element.id)!)
-      )
+      surface.elementRemoved.on(element => this.delete(element.model!))
     );
   }
 
@@ -664,6 +630,7 @@ export class LayerManager {
     if (element instanceof ElementModel) {
       deleteType = 'canvas';
       removeFromOrderedArray(this.canvasElements, element);
+      this.canvasGrid.remove(element);
     } else if (matchFlavours(element, ['affine:frame'])) {
       removeFromOrderedArray(this.frames, element);
       this.framesGrid.remove(element as FrameBlockModel);

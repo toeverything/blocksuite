@@ -104,7 +104,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
               (item, index) => html`
                 <div
                   @click=${() => {
-                    const frames = surface.frame.frames;
+                    const frames = edgeless.service.frames;
                     const center = edgeless.service.viewport.center;
                     const bound = new Bound(
                       center.x - item.wh[0] / 2,

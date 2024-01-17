@@ -1,12 +1,9 @@
 import type { EdgelessPageBlockComponent } from '@blocksuite/blocks';
-import { CanvasElementType } from '@blocksuite/blocks';
 import { Workspace } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { getPageRootBlock } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
-
-const { GROUP } = CanvasElementType;
 
 describe('group', () => {
   let service!: EdgelessPageBlockComponent['service'];
@@ -28,7 +25,7 @@ describe('group', () => {
 
       return id;
     });
-    service.addElement(GROUP, { children: map });
+    service.addElement('group', { children: map });
     expect(service.elements.length).toBe(3);
     service.removeElement(ids[0]);
     expect(service.elements.length).toBe(2);
