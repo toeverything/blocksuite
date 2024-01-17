@@ -342,7 +342,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   private _handleDoubleClick(event: MouseEvent) {
-    if (this.isInSurface) return;
     event.stopPropagation();
     this.open();
   }
