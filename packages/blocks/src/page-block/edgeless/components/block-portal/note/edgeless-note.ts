@@ -215,10 +215,10 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
     const rect = this._affineNote.getBoundingClientRect();
     const zoom = this.surface.viewport.zoom;
-    const noteFullHeight =
+    this._noteFullHeight =
       (rect.height + 2 * EDGELESS_BLOCK_CHILD_PADDING * scale) / zoom;
 
-    if (bound.h >= noteFullHeight) {
+    if (bound.h >= this._noteFullHeight) {
       return nothing;
     }
 
@@ -226,9 +226,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       <div
         style=${styleMap({
           width: `${width}px`,
-          height: `${
-            noteFullHeight / scale - EDGELESS_BLOCK_CHILD_PADDING - height
-          }px`,
+          height: `${this._noteFullHeight / scale - height}px`,
           position: 'absolute',
           left: '0px',
           top: `${height}px`,
