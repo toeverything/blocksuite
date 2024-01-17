@@ -774,7 +774,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       slots.pressShiftKeyUpdated.on(pressed => {
         this._shiftKey = pressed;
         this._resizeManager.onPressShiftKey(pressed);
-        this._updateCursor(false);
+        this._updateSelectedRect();
       })
     );
 
