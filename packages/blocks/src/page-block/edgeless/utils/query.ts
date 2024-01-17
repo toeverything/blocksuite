@@ -10,6 +10,7 @@ import {
   type TopLevelBlockModel,
 } from '../../../_common/utils/index.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/index.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
@@ -93,6 +94,16 @@ export function isEmbedYoutubeBlock(
     !!element &&
     'flavour' in element &&
     element.flavour === 'affine:embed-youtube'
+  );
+}
+
+export function isEmbedFigmaBlock(
+  element: BlockModel | EdgelessElement | null
+): element is EmbedFigmaModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === 'affine:embed-figma'
   );
 }
 

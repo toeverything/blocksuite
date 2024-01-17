@@ -13,6 +13,8 @@ import {
   type BookmarkBlockModel,
   BookmarkStyles,
 } from '../../../bookmark-block/bookmark-model.js';
+import type { EmbedFigmaBlockComponent } from '../../../embed-figma-block/embed-figma-block.js';
+import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
@@ -37,6 +39,7 @@ import {
   LinkIcon,
   OpenIcon,
   PaletteIcon,
+  RefreshIcon,
 } from '../../icons/text.js';
 import { createLitPortal } from '../portal.js';
 import { toast } from '../toast.js';
@@ -120,6 +123,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     | BookmarkBlockModel
     | EmbedGithubModel
     | EmbedYoutubeModel
+    | EmbedFigmaModel
     | EmbedLinkedDocModel;
 
   @property({ attribute: false })
@@ -127,6 +131,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     | BookmarkBlockComponent
     | EmbedGithubBlockComponent
     | EmbedYoutubeBlockComponent
+    | EmbedFigmaBlockComponent
     | EmbedLinkedDocBlockComponent;
 
   @property({ attribute: false })
@@ -296,6 +301,11 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
+  private _refreshData() {
+    this.block.refreshData();
+    this.abortController.abort();
+  }
+
   private _toggleCardStyleMenu() {
     if (this._moreMenuAbortController) {
       this._moreMenuAbortController.abort();
@@ -369,9 +379,6 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
                 class="embed-card-toolbar-button url"
                 @click=${() => this._copyUrl()}
               >
-                <affine-tooltip .offset=${12}
-                  >Click to copy link</affine-tooltip
-                >
                 <span>${model.url}</span>
               </div>
 
@@ -423,7 +430,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
             @click=${() => this._turnIntoInlineView()}
           >
             ${LinkIcon}
-            <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
+            <affine-tooltip .offset=${12}>${'Inline view'}</affine-tooltip>
           </icon-button>
 
           <icon-button
@@ -480,6 +487,18 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
         >
           ${CaptionIcon}
           <affine-tooltip .offset=${12}>${'Add Caption'}</affine-tooltip>
+        </icon-button>
+
+        <div class="divider"></div>
+
+        <icon-button
+          size="32px"
+          class="embed-card-toolbar-button reload"
+          ?disabled=${model.page.readonly}
+          @click=${() => this._refreshData()}
+        >
+          ${RefreshIcon}
+          <affine-tooltip .offset=${12}>${'Reload'}</affine-tooltip>
         </icon-button>
 
         <div class="divider"></div>

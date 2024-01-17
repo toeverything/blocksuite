@@ -7,6 +7,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
@@ -41,6 +42,7 @@ export class EmbedCardStyleMenu extends WithDisposable(LitElement) {
     | BookmarkBlockModel
     | EmbedGithubModel
     | EmbedYoutubeModel
+    | EmbedFigmaModel
     | EmbedLinkedDocModel;
 
   @property({ attribute: false })

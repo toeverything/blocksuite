@@ -105,6 +105,7 @@ export const styles = css`
     max-width: 100%;
     cursor: pointer;
   }
+
   .affine-bookmark-content-url > span {
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -122,6 +123,13 @@ export const styles = css`
     font-weight: 400;
     line-height: 20px;
   }
+  .affine-bookmark-content-url:hover > span {
+    color: var(--affine-link-color);
+  }
+  .affine-bookmark-content-url:hover svg {
+    fill: var(--affine-link-color);
+  }
+
   .affine-bookmark-content-url-icon {
     display: flex;
     align-items: center;
@@ -132,6 +140,7 @@ export const styles = css`
   .affine-bookmark-content-url-icon svg {
     height: 12px;
     width: 12px;
+    fill: var(--affine-text-secondary-color);
   }
 
   .affine-bookmark-banner {
@@ -161,6 +170,15 @@ export const styles = css`
   .affine-bookmark-card.loading-failed {
     .affine-bookmark-content-description {
       color: var(--affine-placeholder-color);
+    }
+  }
+
+  .affine-bookmark-card.selected {
+    .affine-bookmark-content-url > span {
+      color: var(--affine-link-color);
+    }
+    .affine-bookmark-content-url svg {
+      fill: var(--affine-link-color);
     }
   }
 

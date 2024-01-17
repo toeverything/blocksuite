@@ -1,6 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { queryUrlDataFromAffineWorker } from '../bookmark-block/utils.js';
 import type { EmbedYoutubeBlockComponent } from './embed-youtube-block.js';
 import type {
   EmbedYoutubeBlockUrlData,
@@ -36,7 +35,7 @@ export async function queryEmbedYoutubeData(
   };
 
   if (youtubeEmbedData.creatorUrl) {
-    const creatorOpenGraphData = await queryUrlDataFromAffineWorker(
+    const creatorOpenGraphData = await queryEmbedYoutubeOpenGraphData(
       youtubeEmbedData.creatorUrl
     );
     youtubeEmbedData.creatorImage = creatorOpenGraphData.image;

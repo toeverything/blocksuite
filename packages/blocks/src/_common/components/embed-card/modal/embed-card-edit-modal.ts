@@ -5,17 +5,24 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
+import type { EmbedFigmaModel } from '../../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../../embed-github-block/embed-github-model.js';
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import { toast } from '../../toast.js';
 import { embedCardModalStyles } from './styles.js';
+
+type EmbedCardModel =
+  | BookmarkBlockModel
+  | EmbedGithubModel
+  | EmbedYoutubeModel
+  | EmbedFigmaModel;
 
 @customElement('embed-card-edit-modal')
 export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
   static override styles = embedCardModalStyles;
 
   @property({ attribute: false })
-  model!: BookmarkBlockModel | EmbedGithubModel | EmbedYoutubeModel;
+  model!: EmbedCardModel;
 
   @query('.title')
   titleInput!: HTMLInputElement;
@@ -124,7 +131,7 @@ export class EmbedCardEditModal extends WithDisposable(ShadowlessElement) {
 
 export function toggleEmbedCardEditModal(
   host: EditorHost,
-  embedCardModel: BookmarkBlockModel | EmbedGithubModel | EmbedYoutubeModel
+  embedCardModel: EmbedCardModel
 ) {
   host.selection.clear();
   const embedCardEditModal = new EmbedCardEditModal();

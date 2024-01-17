@@ -1,6 +1,7 @@
 import { type Slot } from '@blocksuite/global/utils';
 import { type BlockModel, type Page } from '@blocksuite/store';
 
+import type { EmbedFigmaModel } from '../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocModel } from '../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../embed-youtube-block/embed-youtube-model.js';
@@ -125,6 +126,7 @@ export type TopLevelBlockModel =
   | BookmarkBlockModel
   | EmbedGithubModel
   | EmbedYoutubeModel
+  | EmbedFigmaModel
   | EmbedLinkedDocModel;
 
 export type EdgelessElement = TopLevelBlockModel | CanvasElement;
@@ -243,4 +245,5 @@ export type EmbedCardStyle =
   | 'list'
   | 'vertical'
   | 'cube'
-  | 'video';
+  | 'video'
+  | 'figma';
