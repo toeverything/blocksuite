@@ -40,10 +40,12 @@ export {
   TagsIcon,
 } from './_common/icons/index.js';
 export * from './_common/inline/inline-manager.js';
-export type {
-  AffineInlineEditor,
-  AffineTextAttributes,
+export {
+  type AffineInlineEditor,
+  type AffineTextAttributes,
+  getAffineInlineSpecsWithReference,
 } from './_common/inline/presets/affine-inline-specs.js';
+export { ReferenceNodeConfig } from './_common/inline/presets/nodes/reference-node/reference-config.js';
 export { type TreeNode } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export {

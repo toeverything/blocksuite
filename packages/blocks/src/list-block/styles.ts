@@ -1,6 +1,6 @@
 import { css } from 'lit';
 
-const listPrefix = css`
+export const listPrefix = css`
   .affine-list-block__prefix {
     display: flex;
     color: var(--affine-blue-700);
@@ -30,7 +30,7 @@ const listPrefix = css`
   }
 `;
 
-const toggleStyles = css`
+export const toggleStyles = css`
   .toggle-icon {
     display: flex;
     align-items: center;
