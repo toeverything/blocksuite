@@ -241,7 +241,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   private _updateOnSelectedChange = (element: string | { id: string }) => {
     const id = typeof element === 'string' ? element : element.id;
-    if (this.selection.has(id)) {
+    if (!this.isConnected && this.selection.has(id)) {
       this.requestUpdate();
     }
   };
@@ -270,10 +270,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
     _disposables.add(
       this.page.slots.blockUpdated.on(this._updateOnSelectedChange)
-    );
-
-    _disposables.add(
-      edgeless.page.slots.blockUpdated.on(this._updateOnSelectedChange)
     );
   }
 
