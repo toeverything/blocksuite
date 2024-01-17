@@ -1382,7 +1382,7 @@ test('should placeholder works', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  const placeholder = page.locator('.tips-placeholder');
+  const placeholder = page.locator('.affine-paragraph-placeholder.visible');
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toHaveCount(1);
   await expect(placeholder).toContainText("Type '/' for commands");
@@ -1403,8 +1403,6 @@ test('should placeholder works', async ({ page }) => {
 
   await pressEnter(page);
   await expect(placeholder).toHaveCount(1);
-
-  return; // test.skip
 });
 
 test.describe('press ArrowDown when cursor is at the last line of a block', () => {

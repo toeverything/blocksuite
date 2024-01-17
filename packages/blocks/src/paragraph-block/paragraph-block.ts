@@ -1,90 +1,26 @@
 import '../_common/components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import type { InlineRangeProvider } from '@blocksuite/inline';
-import type { EditorHost } from '@blocksuite/lit';
+import { type InlineRangeProvider, ZERO_WIDTH_SPACE } from '@blocksuite/inline';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
-import type { BlockModel } from '@blocksuite/store';
 import { css, html, nothing, type TemplateResult } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { customElement, query } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
-import {
-  isInsideEdgelessEditor,
-  matchFlavours,
-} from '../_common/utils/index.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
-import type { BlockHub } from '../page-block/widgets/block-hub/components/block-hub.js';
-import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
+import type { ParagraphBlockModel } from './paragraph-model.js';
 import type { ParagraphService } from './paragraph-service.js';
 
-function tipsPlaceholderPreventDefault(event: Event) {
-  // Call event.preventDefault() to keep the mouse event from being sent as well.
-  // https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent
-  event.preventDefault();
-}
-
-interface Style {
-  [name: string]: string;
-}
-
-function TipsPlaceholder(
-  editorHost: EditorHost,
-  model: BlockModel,
-  tipsPos: Style
-) {
-  if (!matchFlavours(model, ['affine:paragraph'])) {
-    throw new Error("TipsPlaceholder can't be used for this model");
-  }
+const getPlaceholder = (model: ParagraphBlockModel) => {
   if (model.type === 'text') {
-    if (isInsideEdgelessEditor(editorHost)) {
-      return html`<div
-        contenteditable="false"
-        class="tips-placeholder"
-        style=${styleMap(tipsPos)}
-      >
-        Type '/' for commands
-      </div> `;
-    }
-
-    const blockHub = document.querySelector(
-      'affine-block-hub'
-    ) as BlockHub | null;
-    if (!blockHub) {
-      // Fall back
-      return html`<div
-        contenteditable="false"
-        class="tips-placeholder"
-        style=${styleMap(tipsPos)}
-      >
-        Type '/' for commands
-      </div>`;
-    }
-    const onClick = () => {
-      if (!blockHub) {
-        throw new Error('Failed to find blockHub!');
-      }
-      blockHub.toggleMenu();
-    };
-    return html`
-      <div
-        class="tips-placeholder"
-        contenteditable="false"
-        @click=${onClick}
-        @pointerdown=${tipsPlaceholderPreventDefault}
-        style=${styleMap(tipsPos)}
-      >
-        Type '/' for commands
-      </div>
-    `;
+    return "Type '/' for commands";
   }
 
-  const placeholders: Record<Exclude<ParagraphType, 'text'>, string> = {
+  const placeholders = {
     h1: 'Heading 1',
     h2: 'Heading 2',
     h3: 'Heading 3',
@@ -93,8 +29,8 @@ function TipsPlaceholder(
     h6: 'Heading 6',
     quote: '',
   };
-  return html`<div class="tips-placeholder">${placeholders[model.type]}</div> `;
-}
+  return placeholders[model.type];
+};
 
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends BlockElement<
@@ -201,30 +137,19 @@ export class ParagraphBlockComponent extends BlockElement<
       font-size: var(--affine-font-base);
     }
 
-    .tips-placeholder {
+    .affine-paragraph-placeholder {
       position: absolute;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      display: none;
+      left: 0;
+      bottom: 0;
       pointer-events: none;
       color: var(--affine-black-30);
       fill: var(--affine-black-30);
     }
-
-    .tips-placeholder > svg {
-      cursor: pointer;
-      pointer-events: all;
-    }
-    .tips-placeholder > svg:hover {
-      fill: var(--affine-primary-color);
+    .affine-paragraph-placeholder.visible {
+      display: block;
     }
   `;
-
-  @state()
-  tipsPos = { top: '50%', transform: 'translateY(-50%)', left: '2px' };
-
-  @state()
-  private _tipsPlaceholderTemplate = html``;
 
   get inlineManager() {
     const inlineManager = this.service?.inlineManager;
@@ -249,6 +174,9 @@ export class ParagraphBlockComponent extends BlockElement<
   @query('rich-text')
   private _richTextElement?: RichText;
 
+  @query('.affine-paragraph-placeholder')
+  private _placeholderContainer?: HTMLElement;
+
   override get topContenteditableElement() {
     if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
       const note = this.closest<NoteBlockComponent>('affine-note');
@@ -269,32 +197,20 @@ export class ParagraphBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    // Initial placeholder state
-    this._updatePlaceholder();
     bindContainerHotkey(this);
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
   }
 
   override firstUpdated() {
-    this.model.propsUpdated.on(() => {
-      this._updatePlaceholder();
-    });
-
-    this.page.awarenessStore.slots.update.on(v => {
-      const remoteSelections = this.std.selection.remoteSelections.get(v.id);
-      const textSelection = remoteSelections?.find(
-        selection => selection.type === 'text'
-      );
-      if (textSelection) {
-        this._updatePlaceholder();
-      }
-    });
+    this.model.propsUpdated.on(this._updatePlaceholder);
+    this.host.selection.slots.changed.on(this._updatePlaceholder);
 
     this.updateComplete
       .then(() => {
+        this._updatePlaceholder();
+
         const inlineEditor = this.inlineEditor;
-        // should not use `assertExists` here because this block element may have been removed
         if (!inlineEditor) return;
         this.disposables.add(
           inlineEditor.slots.inputting.on(this._updatePlaceholder)
@@ -303,42 +219,23 @@ export class ParagraphBlockComponent extends BlockElement<
       .catch(console.error);
   }
 
+  //TODO(@Flrande) wrap placeholder in `rich-text` or inline-editor to make it more developer-friendly
   private _updatePlaceholder = () => {
-    //TODO(@Flrande) wrap placeholder in `rich-text` or inline-editor to make it more developer-friendly
-    if (!this.inlineEditor || this.host.rangeManager?.binding.isComposing)
-      return;
+    if (!this._placeholderContainer || !this._richTextElement) return;
 
     if (
-      this.model.text.length !== 0 ||
-      this.inlineEditor.isComposing ||
-      !this.selected
+      (this._richTextElement.textContent &&
+        this._richTextElement.textContent !== ZERO_WIDTH_SPACE) ||
+      !this.selected ||
+      this._isInDatabase()
     ) {
-      this._tipsPlaceholderTemplate = html``;
-      return;
+      this._placeholderContainer.classList.remove('visible');
+    } else {
+      this._placeholderContainer.classList.add('visible');
     }
-
-    if (this._richTextElement) {
-      const parentRect =
-        this._richTextElement.parentElement?.getBoundingClientRect() as DOMRect;
-      const rect = this._richTextElement.getBoundingClientRect();
-
-      const relativeTop = rect.top - parentRect.top;
-      const relativeLeft = rect.left - parentRect.left;
-      this.tipsPos = {
-        top: `${relativeTop}px`,
-        transform: '',
-        left: `${relativeLeft + 2}px`,
-      };
-    }
-
-    this._tipsPlaceholderTemplate = TipsPlaceholder(
-      this.host,
-      this.model,
-      this.tipsPos
-    );
   };
 
-  private isInDatabase = () => {
+  private _isInDatabase = () => {
     let parent = this.parentElement;
     while (parent && parent !== document.body) {
       if (parent.tagName.toLowerCase() === 'affine-database') {
@@ -351,12 +248,6 @@ export class ParagraphBlockComponent extends BlockElement<
 
   override render(): TemplateResult<1> {
     const { type } = this.model;
-
-    // hide placeholder in database
-    const tipsPlaceholderTemplate = this.isInDatabase()
-      ? ''
-      : this._tipsPlaceholderTemplate;
-
     const children = html`<div
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
@@ -367,7 +258,9 @@ export class ParagraphBlockComponent extends BlockElement<
     return html`
       <div class="affine-paragraph-block-container ${type}">
         <div class="affine-paragraph-rich-text-wrapper">
-          ${tipsPlaceholderTemplate}
+          <div class="affine-paragraph-placeholder">
+            ${getPlaceholder(this.model)}
+          </div>
           <rich-text
             .yText=${this.model.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
