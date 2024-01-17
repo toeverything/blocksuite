@@ -170,7 +170,7 @@ export class DualLinks extends WithDisposable(LitElement) {
   `;
 
   @state()
-  private _show = true;
+  private _show = false;
 
   @state()
   private _backLinkShow: boolean[] = [];
