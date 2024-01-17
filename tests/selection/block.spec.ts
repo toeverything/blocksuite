@@ -1315,15 +1315,15 @@ test('click bottom of page and if the last is embed block, editor should insert 
   await activeEmbed(page);
   await dragEmbedResizeByTopLeft(page);
 
-  const pageRect = await page.evaluate(() => {
-    const pageBlock = document.querySelector('editor-host');
-    if (!pageBlock) {
+  const hostRect = await page.evaluate(() => {
+    const host = document.querySelector('editor-host');
+    if (!host) {
       throw new Error("Can't find doc viewport");
     }
-    return pageBlock.getBoundingClientRect();
+    return host.getBoundingClientRect();
   });
 
-  await page.mouse.click(pageRect.x + pageRect.width / 2, pageRect.bottom - 10);
+  await page.mouse.click(hostRect.x + hostRect.width / 2, hostRect.bottom - 10);
 
   await assertStoreMatchJSX(
     page,

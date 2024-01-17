@@ -53,7 +53,6 @@ export class AffineDocEditor extends WithDisposable(ShadowlessElement) {
 
         doc-editor {
           flex-grow: 1;
-          min-height: 640px;
         }
       </style>
       <div class="affine-doc-viewport">
