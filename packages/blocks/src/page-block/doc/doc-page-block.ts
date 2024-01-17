@@ -371,12 +371,13 @@ export class DocPageBlockComponent extends BlockElement<
         .slice()
         .reverse()
         .find(child => {
+          const isNote = matchFlavours(child, ['affine:note']);
+          if (!isNote) return false;
           const note = child as NoteBlockModel;
           const displayOnDoc =
             !!note.displayMode &&
             note.displayMode !== NoteDisplayMode.EdgelessOnly;
-          // Should remove deprecated `hidden` property in the future
-          return displayOnDoc || !note.hidden;
+          return displayOnDoc;
         });
       if (!lastNote) {
         if (readonly) return;
