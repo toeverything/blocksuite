@@ -6,7 +6,7 @@ import type { BlockModel, Page } from '@blocksuite/store';
 import {
   blockElementGetter,
   getBlockComponentByModel,
-  getEditorContainer,
+  getPageByEditorHost,
   isInsideDocEditor,
   matchFlavours,
 } from '../../_common/utils/index.js';
@@ -200,14 +200,17 @@ export class ExportManager {
 
     const pathname = location.pathname;
     const pageMode = isInsideDocEditor(this.editorHost);
-    const editorContainer = getEditorContainer(this.editorHost);
-    const containerComputedStyle = window.getComputedStyle(editorContainer);
+    const pageElement = getPageByEditorHost(this.editorHost);
+    assertExists(pageElement);
+    const viewportElement = pageElement.viewportElement;
+
+    const containerComputedStyle = window.getComputedStyle(viewportElement);
 
     const html2canvas = (element: HTMLElement) =>
       this._html2canvas(element, {
         backgroundColor: containerComputedStyle.backgroundColor,
       });
-    const container = editorContainer.querySelector(
+    const container = pageElement.querySelector(
       '.affine-block-children-container'
     );
 
@@ -312,17 +315,17 @@ export class ExportManager {
     const pathname = location.pathname;
     const pageMode = isInsideDocEditor(this.editorHost);
 
-    const editorContainer = getEditorContainer(this.editorHost);
-    const docViewport = editorContainer.querySelector('.affine-doc-viewport');
-    if (!docViewport) return;
+    const pageElement = getPageByEditorHost(this.editorHost);
+    assertExists(pageElement);
+    const viewportElement = pageElement.viewportElement;
 
-    const pageContainer = docViewport.querySelector(
+    const pageContainer = viewportElement.querySelector(
       '.affine-doc-page-block-container'
     );
     const rect = pageContainer?.getBoundingClientRect();
     const pageWidth = rect?.width;
     const pageLeft = rect?.left;
-    const viewportHeight = docViewport?.scrollHeight;
+    const viewportHeight = viewportElement?.scrollHeight;
 
     const replaceRichTextWithSvgElementFunc =
       this._replaceRichTextWithSvgElement.bind(this);
@@ -351,7 +354,7 @@ export class ExportManager {
         element.style.height = `${viewportHeight}px`;
         await replaceRichTextWithSvgElementFunc(element);
       },
-      backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
+      backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
       x: pageLeft,
       width: pageWidth,
       height: viewportHeight,
@@ -360,7 +363,7 @@ export class ExportManager {
     };
 
     const data = await html2canvas(
-      docViewport as HTMLElement,
+      viewportElement as HTMLElement,
       html2canvasOption
     );
     this._checkCanContinueToCanvas(pathname, pageMode);

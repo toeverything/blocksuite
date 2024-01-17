@@ -312,8 +312,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
         this.clipboardController
           .copyAsPng(blocks, shapes)
-          .then(() => toast('Copied to clipboard'))
-          .catch(() => toast('Failed to copy as PNG'))
+          .then(() => toast(this.host, 'Copied to clipboard'))
+          .catch(() => toast(this.host, 'Failed to copy as PNG'))
           .finally(() => {
             canCopyAsPng = true;
           });
@@ -429,6 +429,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
     if (isSizeExceeded) {
       toast(
+        this.host,
         `You can only upload files less than ${humanFileSize(
           maxFileSize,
           true,

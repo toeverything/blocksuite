@@ -128,6 +128,7 @@ export const getMenus: (ctx: {
           action: () => {
             const onSuccess = (pageIds: string[]) => {
               toast(
+                editorHost,
                 `Successfully imported ${pageIds.length} Page${
                   pageIds.length > 1 ? 's' : ''
                 }.`

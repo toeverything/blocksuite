@@ -70,7 +70,7 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
       targetParent
     );
 
-    toast('Group has been inserted into page');
+    toast(this.surface.host, 'Group has been inserted into page');
   }
 
   protected override render() {

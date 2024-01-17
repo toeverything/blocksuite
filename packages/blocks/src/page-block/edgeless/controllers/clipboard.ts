@@ -25,7 +25,7 @@ import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
   blockElementGetter,
-  getEditorContainer,
+  getPageByEditorHost,
   isInsideDocEditor,
 } from '../../../_common/utils/query.js';
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
@@ -33,6 +33,7 @@ import {
   type BookmarkBlockModel,
   BookmarkStyles,
 } from '../../../bookmark-block/bookmark-model.js';
+import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
@@ -63,6 +64,7 @@ import { deleteElements } from '../utils/crud.js';
 import {
   isBookmarkBlock,
   isCanvasElementWithText,
+  isEmbedFigmaBlock,
   isEmbedGithubBlock,
   isEmbedLinkedDocBlock,
   isEmbedYoutubeBlock,
@@ -528,6 +530,27 @@ export class EdgelessClipboardController extends PageClipboard {
     return embedYoutubeIds;
   }
 
+  private _createFigmaEmbedBlocks(figmaEmbeds: BlockSnapshot[]) {
+    const embedFigmaIds = figmaEmbeds.map(({ props }) => {
+      const { xywh, style, url, caption, title, description } = props;
+
+      const embedFigmaId = this.surface.addElement(
+        'affine:embed-figma',
+        {
+          xywh,
+          style,
+          url,
+          caption,
+          title,
+          description,
+        },
+        this.surface.model.id
+      );
+      return embedFigmaId;
+    });
+    return embedFigmaIds;
+  }
+
   private _createLinkedDocEmbedBlocks(linkedDocEmbeds: BlockSnapshot[]) {
     const embedLinkedDocIds = linkedDocEmbeds.map(({ props }) => {
       const { xywh, style, caption, pageId } = props;
@@ -580,9 +603,11 @@ export class EdgelessClipboardController extends PageClipboard {
                 ? 'githubEmbeds'
                 : isEmbedYoutubeBlock(data as unknown as Selectable)
                   ? 'youtubeEmbeds'
-                  : isEmbedLinkedDocBlock(data as unknown as Selectable)
-                    ? 'linkedDocEmbeds'
-                    : 'elements'
+                  : isEmbedFigmaBlock(data as unknown as Selectable)
+                    ? 'figmaEmbeds'
+                    : isEmbedLinkedDocBlock(data as unknown as Selectable)
+                      ? 'linkedDocEmbeds'
+                      : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];
@@ -590,6 +615,7 @@ export class EdgelessClipboardController extends PageClipboard {
       bookmarks?: BlockSnapshot[];
       githubEmbeds?: BlockSnapshot[];
       youtubeEmbeds?: BlockSnapshot[];
+      figmaEmbeds?: BlockSnapshot[];
       linkedDocEmbeds?: BlockSnapshot[];
       elements?: { type: CanvasElement['type'] }[];
     };
@@ -617,6 +643,9 @@ export class EdgelessClipboardController extends PageClipboard {
     );
     const embedYoutubeIds = this._createYoutubeEmbedBlocks(
       groupedByType.youtubeEmbeds ?? []
+    );
+    const embedFigmaIds = this._createFigmaEmbedBlocks(
+      groupedByType.figmaEmbeds ?? []
     );
     const embedLinkedDocIds = this._createLinkedDocEmbedBlocks(
       groupedByType.linkedDocEmbeds ?? []
@@ -646,6 +675,10 @@ export class EdgelessClipboardController extends PageClipboard {
       this.host.service.getElementById(id)
     ) as EmbedYoutubeModel[];
 
+    const figmaEmbeds = embedFigmaIds.map(id =>
+      this.surface.pickById(id)
+    ) as EmbedFigmaModel[];
+
     const linkedDocEmbeds = embedLinkedDocIds.map(id =>
       this.host.service.getElementById(id)
     ) as EmbedLinkedDocModel[];
@@ -665,6 +698,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...bookmarks,
       ...githubEmbeds,
       ...youtubeEmbeds,
+      ...figmaEmbeds,
       ...linkedDocEmbeds,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
@@ -823,8 +857,11 @@ export class EdgelessClipboardController extends PageClipboard {
     const pathname = location.pathname;
     const pageMode = isInsideDocEditor(host);
 
-    const editorContainer = getEditorContainer(host);
-    const container = editorContainer.querySelector(
+    const pageElement = getPageByEditorHost(host);
+    assertExists(pageElement);
+    const viewportElement = pageElement.viewportElement;
+
+    const container = pageElement.querySelector(
       '.affine-block-children-container'
     );
     if (!container) return;
@@ -884,7 +921,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
         await replaceRichTextWithSvgElementFunc(element);
       },
-      backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
+      backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
       useCORS: _imageProxyEndpoint ? false : true,
       proxy: _imageProxyEndpoint,
     };
@@ -1040,6 +1077,9 @@ export async function prepareClipboardData(
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (isEmbedYoutubeBlock(selected)) {
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
+      } else if (isEmbedFigmaBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (isEmbedLinkedDocBlock(selected)) {

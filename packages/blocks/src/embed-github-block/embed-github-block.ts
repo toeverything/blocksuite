@@ -1,5 +1,6 @@
 import '../_common/components/embed-card/embed-card-caption.js';
 
+import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
@@ -32,7 +33,10 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
+  override _cardStyle: (typeof EmbedGithubStyles)[number] = 'horizontal';
+
+  @state()
+  private _isSelected = false;
 
   @property({ attribute: false })
   loading = false;
@@ -74,10 +78,8 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   }
 
   private _handleDoubleClick(event: MouseEvent) {
-    if (!this.isInSurface) {
-      event.stopPropagation();
-      this.open();
-    }
+    event.stopPropagation();
+    this.open();
   }
 
   private _handleAssigneeClick(assignee: string) {
@@ -117,6 +119,14 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       this.model.propsUpdated.on(({ key }) => {
         this.requestUpdate();
         if (key === 'url') this.refreshData();
+      })
+    );
+
+    this.disposables.add(
+      this.selection.slots.changed.on(sels => {
+        this._isSelected = sels.some(sel =>
+          PathFinder.equals(sel.path, this.path)
+        );
       })
     );
 
@@ -171,9 +181,9 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       style,
     } = this.model;
 
-    this.cardStyle = style;
-    this._width = EMBED_CARD_WIDTH[this.cardStyle];
-    this._height = EMBED_CARD_HEIGHT[this.cardStyle];
+    this._cardStyle = style;
+    this._width = EMBED_CARD_WIDTH[this._cardStyle];
+    this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
     const loading = this.loading;
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
@@ -217,6 +227,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
               'affine-embed-github-block': true,
               loading,
               [style]: true,
+              selected: this._isSelected,
             })}
             @click=${this._handleClick}
             @dblclick=${this._handleDoubleClick}

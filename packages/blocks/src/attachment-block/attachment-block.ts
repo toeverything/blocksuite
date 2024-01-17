@@ -188,7 +188,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   private _downloadAttachment = async () => {
     if (this._isDownloading) {
-      toast('Download in progress...');
+      toast(this.host, 'Download in progress...');
       return;
     }
 
@@ -197,14 +197,14 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         ? this.model.name
         : this.model.name.slice(0, 20) + '...';
 
-    toast(`Downloading ${shortName}`);
+    toast(this.host, `Downloading ${shortName}`);
     this._isDownloading = true;
     // TODO speed up download by using this._blobUrl
     try {
-      await downloadAttachmentBlob(this.model);
+      await downloadAttachmentBlob(this.host, this.model);
     } catch (error) {
       console.error(error);
-      toast(`Failed to download ${shortName}!`);
+      toast(this.host, `Failed to download ${shortName}!`);
     } finally {
       this._isDownloading = false;
     }

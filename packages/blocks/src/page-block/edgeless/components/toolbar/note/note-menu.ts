@@ -8,6 +8,7 @@ import {
   type NoteChildrenFlavour,
   type NoteTool,
 } from '../../../../../_common/utils/index.js';
+import { FigmaIcon } from '../../../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../../../embed-github-block/styles.js';
 import { YoutubeIcon } from '../../../../../embed-youtube-block/styles.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
@@ -128,6 +129,22 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                 )}
             >
               ${YoutubeIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .activeMode=${'background'}
+              .iconContainerPadding=${2}
+              .tooltip=${'Figma'}
+              @click=${() =>
+                toggleEmbedCardCreateModal(
+                  this.edgeless.host,
+                  'Figma',
+                  'The added Figma link will be displayed as an embed view.',
+                  {
+                    mode: 'edgeless',
+                  }
+                )}
+            >
+              ${FigmaIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .activeMode=${'background'}

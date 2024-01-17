@@ -469,7 +469,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       assertInstanceOf(imageService, ImageService);
       const maxFileSize = imageService.maxFileSize;
 
-      addSiblingImageBlock(imageFiles, maxFileSize, lastModelState.model);
+      addSiblingImageBlock(
+        this._editorHost,
+        imageFiles,
+        maxFileSize,
+        lastModelState.model
+      );
     } else if (props.flavour === 'affine:bookmark') {
       if (lastModelState && lastType !== 'none' && lastType !== 'database') {
         const model = lastModelState.model;
@@ -599,6 +604,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       const maxFileSize = imageService.maxFileSize;
 
       const blockIds = addImageBlocks(
+        this._editorHost,
         imageFiles,
         maxFileSize,
         page,

@@ -187,6 +187,13 @@ export const styles = css`
     font-weight: 400;
     line-height: 20px;
   }
+  .affine-embed-github-content-url:hover > span {
+    color: var(--affine-link-color);
+  }
+  .affine-embed-github-content-url:hover svg {
+    fill: var(--affine-link-color);
+  }
+
   .affine-embed-github-content-url-icon {
     display: flex;
     align-items: center;
@@ -197,6 +204,7 @@ export const styles = css`
   .affine-embed-github-content-url-icon svg {
     height: 12px;
     width: 12px;
+    fill: var(--affine-text-secondary-color);
   }
 
   .affine-embed-github-banner {
@@ -220,6 +228,15 @@ export const styles = css`
   .affine-embed-github-block.loading {
     .affine-embed-github-content-title-text {
       color: var(--affine-placeholder-color);
+    }
+  }
+
+  .affine-embed-github-block.selected {
+    .affine-embed-github-content-url > span {
+      color: var(--affine-link-color);
+    }
+    .affine-embed-github-content-url svg {
+      fill: var(--affine-link-color);
     }
   }
 

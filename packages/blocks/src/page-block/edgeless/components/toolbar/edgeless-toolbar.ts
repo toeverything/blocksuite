@@ -185,6 +185,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     this.edgeless = edgeless;
   }
 
+  get host() {
+    return this.edgeless.host;
+  }
+
   get edgelessTool() {
     return this.edgeless.edgelessTool;
   }
@@ -207,7 +211,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const min = 0;
     const max = frames.length - 1;
     if (this._currentFrameIndex === frames.length - 1) {
-      toast('You have reached the last frame');
+      toast(this.host, 'You have reached the last frame');
     } else {
       this._currentFrameIndex = clamp(this._currentFrameIndex + 1, min, max);
     }
@@ -218,7 +222,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const min = 0;
     const max = frames.length - 1;
     if (this._currentFrameIndex === 0) {
-      toast('You have reached the first frame');
+      toast(this.host, 'You have reached the first frame');
     } else {
       this._currentFrameIndex = clamp(this._currentFrameIndex - 1, min, max);
     }
@@ -278,6 +282,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           }
           if (this._frames.length === 0)
             toast(
+              this.host,
               'The presentation requires at least 1 frame. You can firstly create a frame.',
               5000
             );

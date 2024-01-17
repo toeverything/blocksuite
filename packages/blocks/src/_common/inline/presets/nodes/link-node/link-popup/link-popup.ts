@@ -83,9 +83,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
       });
     }
 
-    const parent = this.blockElement.host.page.getParent(
-      this.blockElement.model
-    );
+    const parent = this.blockElement.page.getParent(this.blockElement.model);
     assertExists(parent);
     this.disposables.add(
       parent.childrenUpdated.on(() => {
@@ -159,6 +157,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
     ) as PageService | null;
     assertExists(pageService);
     return pageService;
+  }
+
+  get host() {
+    return this.blockElement.host;
   }
 
   get std() {
@@ -245,7 +247,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
   private _copyUrl() {
     navigator.clipboard.writeText(this.currentLink).catch(console.error);
-    toast('Copied link to clipboard');
+    toast(this.host, 'Copied link to clipboard');
     this.abortController.abort();
   }
 
@@ -293,7 +295,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const url = this.currentLink;
 
     const blockElement = this.blockElement;
-    const page = blockElement.host.page;
+    const page = blockElement.page;
     const parent = page.getParent(blockElement.model);
     assertExists(parent);
     const index = parent.children.indexOf(blockElement.model);
@@ -379,6 +381,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
     linkPopupMoreMenu.abortController = this.abortController;
     linkPopupMoreMenu.inlineEditor = this.inlineEditor;
     linkPopupMoreMenu.targetInlineRange = this.targetInlineRange;
+    linkPopupMoreMenu.host = this.blockElement.host;
 
     createLitPortal({
       template: linkPopupMoreMenu,
@@ -401,7 +404,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
     return html`
       <div class="affine-link-popover view">
         <div class="affine-link-preview" @click=${() => this._copyUrl()}>
-          <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
           <span>${this.currentLink}</span>
         </div>
 
@@ -432,7 +434,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
                   hover="false"
                 >
                   ${LinkIcon}
-                  <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
+                  <affine-tooltip .offset=${12}
+                    >${'Inline view'}</affine-tooltip
+                  >
                 </icon-button>
 
                 <icon-button

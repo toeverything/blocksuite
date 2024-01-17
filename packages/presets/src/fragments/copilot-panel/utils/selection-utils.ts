@@ -5,7 +5,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import { type BlockModel, Slice } from '@blocksuite/store';
 
-import type { AffineEditorContainer } from '../../../editors/index.js';
 import { getMarkdownFromSlice } from './markdown-utils.js';
 
 export function hasSelectedTextContent(host: EditorHost) {
@@ -98,8 +97,10 @@ export async function getSelectedBlocks(host: EditorHost) {
   return blocks;
 }
 
-export function getEdgelessPageBlockFromEditor(editor: AffineEditorContainer) {
-  const edgelessPage = editor.getElementsByTagName('affine-edgeless-page')[0];
+export function getEdgelessPageBlockFromEditor(editorHost: EditorHost) {
+  const edgelessPage = editorHost.getElementsByTagName(
+    'affine-edgeless-page'
+  )[0];
   if (!edgelessPage) {
     alert('Please switch to edgeless mode');
     throw new Error('Please open switch to edgeless mode');
@@ -107,8 +108,8 @@ export function getEdgelessPageBlockFromEditor(editor: AffineEditorContainer) {
   return edgelessPage;
 }
 
-export async function selectedToCanvas(editor: AffineEditorContainer) {
-  const edgelessPage = getEdgelessPageBlockFromEditor(editor);
+export async function selectedToCanvas(editorHost: EditorHost) {
+  const edgelessPage = getEdgelessPageBlockFromEditor(editorHost);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
     edgelessPage.service.selection.elements
   );
@@ -127,10 +128,10 @@ export async function selectedToCanvas(editor: AffineEditorContainer) {
 
 export async function frameToCanvas(
   frame: FrameBlockModel,
-  editor: AffineEditorContainer
+  editorHost: EditorHost
 ) {
-  const surface = getSurfaceElementFromEditor(editor);
-  const edgelessPage = getEdgelessPageBlockFromEditor(editor);
+  const surface = getSurfaceElementFromEditor(editorHost);
+  const edgelessPage = getEdgelessPageBlockFromEditor(editorHost);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
     surface.frame.getElementsInFrame(frame, true)
   );
@@ -147,26 +148,26 @@ export async function frameToCanvas(
   return canvas;
 }
 
-export async function selectedToPng(editor: AffineEditorContainer) {
-  return (await selectedToCanvas(editor))?.toDataURL('image/png');
+export async function selectedToPng(editorHost: EditorHost) {
+  return (await selectedToCanvas(editorHost))?.toDataURL('image/png');
 }
 
-export async function getSelectedTextContent(host: EditorHost) {
-  const slice = await getSelectedTextSlice(host);
-  return await getMarkdownFromSlice(host, slice);
+export async function getSelectedTextContent(editorHost: EditorHost) {
+  const slice = await getSelectedTextSlice(editorHost);
+  return await getMarkdownFromSlice(editorHost, slice);
 }
 
 export const stopPropagation = (e: Event) => {
   e.stopPropagation();
 };
 
-export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
-  const { page } = editor;
+export function getSurfaceElementFromEditor(editorHost: EditorHost) {
+  const { page } = editorHost;
   const surfaceModel = page.getBlockByFlavour('affine:surface')[0];
   assertExists(surfaceModel);
 
   const surfaceId = surfaceModel.id;
-  const surfaceElement = editor.querySelector(
+  const surfaceElement = editorHost.querySelector(
     `affine-surface[data-block-id="${surfaceId}"]`
   ) as SurfaceBlockComponent;
   assertExists(surfaceElement);
@@ -176,9 +177,9 @@ export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
 
 export const getFirstImageInFrame = (
   frame: FrameBlockModel,
-  editor: AffineEditorContainer
+  editorHost: EditorHost
 ) => {
-  const surface = getSurfaceElementFromEditor(editor);
+  const surface = getSurfaceElementFromEditor(editorHost);
   const elements = surface.frame.getElementsInFrame(frame, false);
   const image = elements.find(ele => {
     if (!BlocksUtils.isCanvasElement(ele)) {

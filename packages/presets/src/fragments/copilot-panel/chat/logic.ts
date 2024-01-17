@@ -43,7 +43,7 @@ export class AIChatLogic {
   };
 
   selectShapesForBackground = async () => {
-    const canvas = await selectedToCanvas(this.editor);
+    const canvas = await selectedToCanvas(this.editor.host);
     if (!canvas) {
       alert('Please select some shapes first');
       return;
