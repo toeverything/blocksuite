@@ -38,7 +38,13 @@ export class ImageService extends BlockService<ImageBlockModel> {
       const imageFiles = files.filter(file => file.type.startsWith('image/'));
 
       if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
-        addSiblingImageBlock(imageFiles, this.maxFileSize, targetModel, place);
+        addSiblingImageBlock(
+          this.std.host as EditorHost,
+          imageFiles,
+          this.maxFileSize,
+          targetModel,
+          place
+        );
       } else if (isInsideEdgelessEditor(this.std.host as EditorHost)) {
         const edgelessPage = this
           .pageBlockComponent as EdgelessPageBlockComponent;

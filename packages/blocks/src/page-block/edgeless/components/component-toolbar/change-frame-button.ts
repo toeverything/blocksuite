@@ -134,7 +134,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       targetParent
     );
 
-    toast('Frame has been inserted into page');
+    toast(this.surface.host, 'Frame has been inserted into page');
   }
 
   override firstUpdated() {

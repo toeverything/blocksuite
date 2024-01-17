@@ -83,7 +83,7 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
     const url = this.input.value;
 
     if (!isValidUrl(url)) {
-      toast('Invalid link');
+      toast(this.host, 'Invalid link');
       return;
     }
 

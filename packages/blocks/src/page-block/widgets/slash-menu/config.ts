@@ -264,7 +264,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           assertInstanceOf(imageService, ImageService);
           const maxFileSize = imageService.maxFileSize;
 
-          addSiblingImageBlock(imageFiles, maxFileSize, model);
+          addSiblingImageBlock(
+            pageElement.host,
+            imageFiles,
+            maxFileSize,
+            model
+          );
         }),
       },
       {
@@ -313,9 +318,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           assertInstanceOf(attachmentService, AttachmentService);
           const maxFileSize = attachmentService.maxFileSize;
 
-          addSiblingAttachmentBlock(file, maxFileSize, model).catch(
-            console.error
-          );
+          addSiblingAttachmentBlock(
+            pageElement.host,
+            file,
+            maxFileSize,
+            model
+          ).catch(console.error);
         }),
       },
       {
@@ -642,7 +650,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           pageElement.std.clipboard
             .copy(slice)
             .then(() => {
-              toast('Copied to clipboard');
+              toast(pageElement.host, 'Copied to clipboard');
             })
             .catch(e => {
               console.error(e);

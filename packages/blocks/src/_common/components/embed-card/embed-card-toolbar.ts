@@ -135,7 +135,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     | EmbedLinkedDocBlockComponent;
 
   @property({ attribute: false })
-  host!: HTMLElement;
+  host!: EditorHost;
 
   @property({ attribute: false })
   abortController!: AbortController;
@@ -204,7 +204,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
     }
 
     navigator.clipboard.writeText(this.model.url).catch(console.error);
-    toast('Copied link to clipboard');
+    toast(this.host as EditorHost, 'Copied link to clipboard');
     this.remove();
   }
 
