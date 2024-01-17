@@ -534,7 +534,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const embedFigmaIds = figmaEmbeds.map(({ props }) => {
       const { xywh, style, url, caption, title, description } = props;
 
-      const embedFigmaId = this.surface.addElement(
+      const embedFigmaId = this.host.service.addBlock(
         'affine:embed-figma',
         {
           xywh,
@@ -676,7 +676,7 @@ export class EdgelessClipboardController extends PageClipboard {
     ) as EmbedYoutubeModel[];
 
     const figmaEmbeds = embedFigmaIds.map(id =>
-      this.surface.pickById(id)
+      this.host.service.getElementById(id)
     ) as EmbedFigmaModel[];
 
     const linkedDocEmbeds = embedLinkedDocIds.map(id =>

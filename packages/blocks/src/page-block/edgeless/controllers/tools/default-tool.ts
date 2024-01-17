@@ -68,7 +68,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _dragLastPos: IVec = [0, 0];
   private _dragStartModelCoord: IVec = [0, 0];
   private _dragLastModelCoord: IVec = [0, 0];
-  private _lastMoveDelta: IVec = [0, 0];
   private _lock = false;
   // Do not select the text, when click again after activating the note.
   private _isDoubleClickedOnMask = false;
@@ -581,7 +580,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           ? surface.frame.setHighlight(frame as FrameBlockModel)
           : surface.frame.clearHighlight();
 
-        this._lastMoveDelta = delta;
         break;
       }
       case DefaultModeDragType.NativeEditing: {
@@ -610,7 +608,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = [0, 0];
     this._dragLastPos = [0, 0];
     this._selectedBounds = [];
-    this._lastMoveDelta = [0, 0];
     surface.snap.cleanupAlignables();
     surface.frame.clearHighlight();
     this._addFrames();
