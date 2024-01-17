@@ -80,6 +80,9 @@ type NoteEdgelessProps = {
   };
   collapse?: boolean;
   collapsedHeight?: number;
+  width?: number;
+  height?: number;
+  scale?: number;
 };
 
 export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
