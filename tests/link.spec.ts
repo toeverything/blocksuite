@@ -99,7 +99,7 @@ test('basic link', async ({ page }) => {
           "shadowType": "--affine-note-shadow-box",
         },
       }
-    }    
+    }
     prop:index="a0"
   >
     <affine:paragraph
@@ -390,7 +390,7 @@ test('convert link to card', async ({ page }) => {
           "shadowType": "--affine-note-shadow-box",
         },
       }
-    }    
+    }
     prop:index="a0"
   >
     <affine:paragraph

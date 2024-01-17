@@ -122,7 +122,7 @@ test.describe('multiple page', () => {
           "shadowType": "--affine-note-shadow-box",
         },
       }
-    }    
+    }
     prop:index="a0"
   >
     <affine:paragraph

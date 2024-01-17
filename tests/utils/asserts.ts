@@ -106,7 +106,7 @@ export const defaultStore: SerializedStore = {
           'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
-          'prop:displayMode': 'In Both',
+          'prop:displayMode': 'both',
           'prop:edgeless': {
             style: {
               borderRadius: 8,

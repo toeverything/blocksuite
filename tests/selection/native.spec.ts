@@ -201,6 +201,7 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -211,7 +212,6 @@ test('native range delete with indent', async ({ page }) => {
       },
     }
   }
-  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
