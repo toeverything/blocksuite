@@ -25,7 +25,7 @@ import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
   blockElementGetter,
-  getEditorContainer,
+  getPageByEditorHost,
   isInsideDocEditor,
 } from '../../../_common/utils/query.js';
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
@@ -851,8 +851,11 @@ export class EdgelessClipboardController extends PageClipboard {
     const pathname = location.pathname;
     const pageMode = isInsideDocEditor(host);
 
-    const editorContainer = getEditorContainer(host);
-    const container = editorContainer.querySelector(
+    const pageElement = getPageByEditorHost(host);
+    assertExists(pageElement);
+    const viewportElement = pageElement.viewportElement;
+
+    const container = pageElement.querySelector(
       '.affine-block-children-container'
     );
     if (!container) return;
@@ -912,7 +915,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
         await replaceRichTextWithSvgElementFunc(element);
       },
-      backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
+      backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
       useCORS: _imageProxyEndpoint ? false : true,
       proxy: _imageProxyEndpoint,
     };

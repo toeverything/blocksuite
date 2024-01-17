@@ -79,6 +79,11 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     }
   }
 
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.open();
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -214,6 +219,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
               selected: this._isSelected,
             })}
             @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
           >
             <div class="affine-embed-youtube-video">
               ${videoId

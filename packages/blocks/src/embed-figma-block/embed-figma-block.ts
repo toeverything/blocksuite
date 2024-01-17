@@ -69,6 +69,11 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     }
   }
 
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.open();
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -169,6 +174,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
               selected: this._isSelected,
             })}
             @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
           >
             <div class="affine-embed-figma">
               <div class="affine-embed-figma-iframe-container">
