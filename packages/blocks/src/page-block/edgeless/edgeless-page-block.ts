@@ -166,14 +166,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   clipboardController = new EdgelessClipboardController(this);
 
   slots = {
-    selectedRectUpdated: new Slot<{
-      type: 'move' | 'select' | 'resize';
-      delta?: {
-        x: number;
-        y: number;
-      };
-      dragging?: boolean;
-    }>(),
     edgelessToolUpdated: new Slot<EdgelessTool>(),
     reorderingElements: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),

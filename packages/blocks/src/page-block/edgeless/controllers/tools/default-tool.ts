@@ -18,7 +18,6 @@ import {
   type CanvasElement,
   ConnectorElementModel,
   type IVec,
-  Vec,
 } from '../../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../../managers/connector-manager.js';
 import type {
@@ -225,18 +224,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     );
   }
 
-  private _forceUpdateSelection(
-    type: DefaultModeDragType,
-    dragging = false,
-    delta: IVec = [0, 0]
-  ) {
-    this._edgeless.slots.selectedRectUpdated.emit({
-      type: type === DefaultModeDragType.Selecting ? 'select' : 'move',
-      delta: Vec.toPoint(delta),
-      dragging,
-    });
-  }
-
   onContainerPointerDown(): void {
     noop();
   }
@@ -404,7 +391,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     // Record the last model coordinate for dragging area updating
     this._dragLastModelCoord = [curX, curY];
-    this._forceUpdateSelection(this.dragType, true);
     this._edgeless.slots.draggingAreaUpdated.emit();
   };
 
@@ -595,11 +581,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           ? surface.frame.setHighlight(frame as FrameBlockModel)
           : surface.frame.clearHighlight();
 
-        this._forceUpdateSelection(
-          this.dragType,
-          true,
-          Vec.sub(delta, this._lastMoveDelta)
-        );
         this._lastMoveDelta = delta;
         break;
       }
@@ -635,7 +616,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._addFrames();
     this._frames.clear();
     this._toBeMoved = [];
-    this._forceUpdateSelection(this.dragType);
     this._clearSelectingState();
     this.dragType = DefaultModeDragType.None;
   }
