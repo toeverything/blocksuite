@@ -250,12 +250,25 @@ export class DocPageBlockComponent extends BlockElement<
         )
           return;
 
-        const titleInlineEditor = getDocTitleInlineEditor(this.host);
-        if (titleInlineEditor) {
-          titleInlineEditor.focusEnd();
-          return true;
-        }
-        return;
+        const range = this.host.rangeManager?.value;
+        requestAnimationFrame(() => {
+          const currentRange = this.host.rangeManager?.value;
+
+          if (!range || !currentRange) return;
+
+          // If the range has not changed, it means we need to manually move the cursor to the title.
+          if (
+            range.startContainer === currentRange.startContainer &&
+            range.startOffset === currentRange.startOffset &&
+            range.endContainer === currentRange.endContainer &&
+            range.endOffset === currentRange.endOffset
+          ) {
+            const titleInlineEditor = getDocTitleInlineEditor(this.host);
+            if (titleInlineEditor) {
+              titleInlineEditor.focusEnd();
+            }
+          }
+        });
       },
     });
 
