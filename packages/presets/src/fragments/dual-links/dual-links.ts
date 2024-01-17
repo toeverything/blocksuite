@@ -30,6 +30,7 @@ export class DualLinks extends WithDisposable(LitElement) {
     :host {
       width: 100%;
       max-width: var(--affine-editor-width);
+      margin-top: 8px;
       margin-left: auto;
       margin-right: auto;
       padding-left: var(--affine-editor-side-padding, 24px);
