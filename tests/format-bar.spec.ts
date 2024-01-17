@@ -1309,11 +1309,12 @@ test('buttons in format quick bar should have correct active styles', async ({
   await dragBetweenIndices(page, [1, 0], [1, 2]);
   const { codeBtn } = getFormatBar(page);
   await codeBtn.click();
+  await waitNextFrame(page, 200);
   await expect(codeBtn).toHaveAttribute('active', '');
 
   // drag the `456`
   await dragBetweenIndices(page, [1, 0], [1, 3]);
-  await waitNextFrame(page);
+  await waitNextFrame(page, 200);
   await expect(codeBtn).not.toHaveAttribute('active', '');
 });
 
