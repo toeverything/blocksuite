@@ -5,10 +5,12 @@ import {
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
+  getFirstGroupId,
   getIds,
   getSelectedBound,
   Shape,
   shiftClickView,
+  toIdCountMap,
   toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
@@ -23,11 +25,12 @@ import {
   type,
   undoByKeyboard,
 } from '../utils/actions/keyboard.js';
-import { captureHistory } from '../utils/actions/misc.js';
+import { captureHistory, waitNextFrame } from '../utils/actions/misc.js';
 import {
   assertCanvasElementsCount,
   assertEdgelessCanvasText,
   assertEdgelessNonSelectedRect,
+  assertGroupChildren,
   assertGroupChildrenIds,
   assertGroupIds,
   assertSelectedBound,
@@ -37,10 +40,12 @@ import { test } from '../utils/playwright.js';
 export const GROUP_ROOT_ID = 'GROUP_ROOT';
 
 test.describe('group', () => {
+  let initShapes: string[] = [];
   async function init(page: Page) {
     await edgelessCommonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createShapeElement(page, [100, 0], [200, 100], Shape.Square);
+    initShapes = await getIds(page);
   }
 
   test.describe('group create', () => {
@@ -161,11 +166,18 @@ test.describe('group', () => {
   });
 
   test.describe('group and ungroup in group', () => {
+    let outterGroupId: string;
+    let newAddedShape: string;
+
     test.beforeEach(async ({ page }) => {
       await init(page);
       await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
+      newAddedShape = (await getIds(page)).filter(
+        id => !initShapes.includes(id)
+      )[0];
       await selectAllByKeyboard(page);
       await triggerComponentToolbarAction(page, 'addGroup');
+      outterGroupId = await getFirstGroupId(page);
     });
 
     test('group in group', async ({ page }) => {
@@ -173,32 +185,33 @@ test.describe('group', () => {
       await shiftClickView(page, [150, 50]);
       await captureHistory(page);
       await triggerComponentToolbarAction(page, 'addGroup');
+      const groupId = await getFirstGroupId(page, [outterGroupId]);
       await assertSelectedBound(page, [0, 0, 200, 100]);
-      const ids = await getIds(page);
-      await assertGroupIds(page, [
-        ids[4],
-        ids[4],
-        ids[3],
-        GROUP_ROOT_ID,
-        ids[3],
-      ]);
-      await assertGroupChildrenIds(page, [ids[2], ids[4]]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
+      await assertGroupIds(page, {
+        [groupId]: 2,
+        [outterGroupId]: 2,
+        null: 1,
+      });
+      await assertGroupChildren(page, groupId, 2);
+      await assertGroupChildren(page, outterGroupId, 2);
 
+      // undo the creation
       await undoByKeyboard(page);
-      await assertGroupIds(page, [ids[3], ids[3], ids[3], GROUP_ROOT_ID]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1], ids[2]]);
+      await assertGroupIds(page, {
+        [outterGroupId]: 3,
+        null: 1,
+      });
+      await assertGroupChildren(page, outterGroupId, 3);
 
+      // redo the creation
       await redoByKeyboard(page);
-      await assertGroupIds(page, [
-        ids[4],
-        ids[4],
-        ids[3],
-        GROUP_ROOT_ID,
-        ids[3],
-      ]);
-      await assertGroupChildrenIds(page, [ids[2], ids[4]]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
+      await assertGroupIds(page, {
+        [groupId]: 2,
+        [outterGroupId]: 2,
+        null: 1,
+      });
+      await assertGroupChildren(page, groupId, 2);
+      await assertGroupChildren(page, outterGroupId, 2);
     });
 
     test('ungroup in group', async ({ page }) => {
@@ -206,63 +219,82 @@ test.describe('group', () => {
       await shiftClickView(page, [150, 50]);
       await triggerComponentToolbarAction(page, 'addGroup');
       await captureHistory(page);
-      const ids = await getIds(page);
+      const groupId = await getFirstGroupId(page, [outterGroupId]);
       await triggerComponentToolbarAction(page, 'ungroup');
-      await assertGroupIds(page, [ids[3], ids[3], ids[3], GROUP_ROOT_ID]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1], ids[2]]);
+      await assertGroupIds(page, { [outterGroupId]: 3, null: 1 });
+      await assertGroupChildrenIds(
+        page,
+        toIdCountMap(await getIds(page, true)),
+        outterGroupId
+      );
 
+      // undo, group should in group again
       await undoByKeyboard(page);
-      await assertGroupIds(page, [
-        ids[4],
-        ids[4],
-        ids[3],
-        GROUP_ROOT_ID,
-        ids[3],
-      ]);
-      await assertGroupChildrenIds(page, [ids[2], ids[4]]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
+      await assertGroupIds(page, {
+        [outterGroupId]: 2,
+        [groupId]: 2,
+        null: 1,
+      });
+      await assertGroupChildrenIds(page, toIdCountMap(initShapes), groupId);
+      await assertGroupChildrenIds(
+        page,
+        {
+          [groupId]: 1,
+          [newAddedShape]: 1,
+        },
+        outterGroupId
+      );
 
+      // redo, group should be ungroup again
       await redoByKeyboard(page);
-      await assertGroupIds(page, [ids[3], ids[3], ids[3], GROUP_ROOT_ID]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1], ids[2]]);
+      await assertGroupIds(page, { [outterGroupId]: 3, null: 1 });
+      await assertGroupChildrenIds(
+        page,
+        toIdCountMap(await getIds(page, true)),
+        outterGroupId
+      );
     });
   });
 
   test.describe('release from group', () => {
+    let outterGroupId: string;
+
     test.beforeEach(async ({ page }) => {
       await init(page);
       await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
       await selectAllByKeyboard(page);
       await triggerComponentToolbarAction(page, 'addGroup');
+
+      outterGroupId = await getFirstGroupId(page);
     });
 
     test('release element from group', async ({ page }) => {
       await clickView(page, [50, 50]);
       await captureHistory(page);
       await triggerComponentToolbarAction(page, 'releaseFromGroup');
-      const ids = await getIds(page);
-      await assertGroupIds(page, [
-        GROUP_ROOT_ID,
-        ids[3],
-        ids[3],
-        GROUP_ROOT_ID,
-      ]);
-      await assertGroupChildrenIds(page, [ids[1], ids[2]]);
+      await assertGroupIds(page, {
+        [outterGroupId]: 2,
+        null: 2,
+      });
+      await assertGroupChildren(page, outterGroupId, 2);
       await assertSelectedBound(page, [0, 0, 100, 100]);
 
+      // undo the release
       await undoByKeyboard(page);
-      await assertGroupIds(page, [ids[3], ids[3], ids[3], GROUP_ROOT_ID]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1], ids[2]]);
+      await assertGroupIds(page, {
+        [outterGroupId]: 3,
+        null: 1,
+      });
+      await assertGroupChildren(page, outterGroupId, 3);
       await assertSelectedBound(page, [0, 0, 100, 100]);
 
+      // redo the release
       await redoByKeyboard(page);
-      await assertGroupIds(page, [
-        GROUP_ROOT_ID,
-        ids[3],
-        ids[3],
-        GROUP_ROOT_ID,
-      ]);
-      await assertGroupChildrenIds(page, [ids[1], ids[2]]);
+      await assertGroupIds(page, {
+        [outterGroupId]: 2,
+        null: 2,
+      });
+      await assertGroupChildren(page, outterGroupId, 2);
       await assertSelectedBound(page, [0, 0, 100, 100]);
     });
 
@@ -271,50 +303,45 @@ test.describe('group', () => {
       await shiftClickView(page, [150, 50]);
       await triggerComponentToolbarAction(page, 'addGroup');
       await captureHistory(page);
+      const groupId = await getFirstGroupId(page, [outterGroupId]);
 
-      const ids = await getIds(page);
-      await assertGroupIds(page, [
-        ids[4],
-        ids[4],
-        ids[3],
-        GROUP_ROOT_ID,
-        ids[3],
-      ]);
-      await assertGroupChildrenIds(page, [ids[2], ids[4]]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
+      await assertGroupIds(page, {
+        [groupId]: 2,
+        [outterGroupId]: 2,
+        null: 1,
+      });
+      await assertGroupChildren(page, groupId, 2);
+      await assertGroupChildren(page, outterGroupId, 2);
 
+      // release group from group
       await triggerComponentToolbarAction(page, 'releaseFromGroup');
-      await assertGroupIds(page, [
-        ids[4],
-        ids[4],
-        ids[3],
-        GROUP_ROOT_ID,
-        GROUP_ROOT_ID,
-      ]);
-      await assertGroupChildrenIds(page, [ids[2]]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
+      await assertGroupIds(page, {
+        [groupId]: 2,
+        [outterGroupId]: 1,
+        null: 2,
+      });
+      await assertGroupChildren(page, outterGroupId, 1);
+      await assertGroupChildren(page, groupId, 2);
 
+      // undo the release
       await undoByKeyboard(page);
-      await assertGroupIds(page, [
-        ids[4],
-        ids[4],
-        ids[3],
-        GROUP_ROOT_ID,
-        ids[3],
-      ]);
-      await assertGroupChildrenIds(page, [ids[2], ids[4]]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
+      await assertGroupIds(page, {
+        [groupId]: 2,
+        [outterGroupId]: 2,
+        null: 1,
+      });
+      await assertGroupChildren(page, groupId, 2);
+      await assertGroupChildren(page, outterGroupId, 2);
 
+      // redo the release
       await redoByKeyboard(page);
-      await assertGroupIds(page, [
-        ids[4],
-        ids[4],
-        ids[3],
-        GROUP_ROOT_ID,
-        GROUP_ROOT_ID,
-      ]);
-      await assertGroupChildrenIds(page, [ids[2]]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
+      await assertGroupIds(page, {
+        [groupId]: 2,
+        [outterGroupId]: 1,
+        null: 2,
+      });
+      await assertGroupChildren(page, outterGroupId, 1);
+      await assertGroupChildren(page, groupId, 2);
     });
   });
 
@@ -326,16 +353,21 @@ test.describe('group', () => {
     test('delete root group', async ({ page }) => {
       await selectAllByKeyboard(page);
       await triggerComponentToolbarAction(page, 'addGroup');
-      const ids = await getIds(page);
+      const groupId = await getFirstGroupId(page);
       await captureHistory(page);
       await pressBackspace(page);
       await assertCanvasElementsCount(page, 0);
 
+      // undo the delete
       await undoByKeyboard(page);
       await assertCanvasElementsCount(page, 3);
-      await assertGroupIds(page, [ids[2], ids[2], GROUP_ROOT_ID]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1]]);
+      await assertGroupIds(page, {
+        [groupId]: 2,
+        null: 1,
+      });
+      await assertGroupChildren(page, groupId, 2);
 
+      // redo the delete
       await redoByKeyboard(page);
       await assertCanvasElementsCount(page, 0);
     });
@@ -343,56 +375,76 @@ test.describe('group', () => {
     test('delete sub-element in group', async ({ page }) => {
       await selectAllByKeyboard(page);
       await triggerComponentToolbarAction(page, 'addGroup');
-      const ids = await getIds(page);
+      const groupId = await getFirstGroupId(page);
       await captureHistory(page);
       await clickView(page, [50, 50]);
       await pressBackspace(page);
-      await assertCanvasElementsCount(page, 2);
-      await assertGroupIds(page, [ids[2], GROUP_ROOT_ID]);
-      await assertGroupChildrenIds(page, [ids[1]]);
 
+      await assertCanvasElementsCount(page, 2);
+      await assertGroupIds(page, {
+        [groupId]: 1,
+        null: 1,
+      });
+      await assertGroupChildren(page, groupId, 1);
+
+      // undo the delete
       await undoByKeyboard(page);
       await assertCanvasElementsCount(page, 3);
-      await assertGroupIds(page, [ids[2], GROUP_ROOT_ID, ids[2]]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1]]);
+      await assertGroupIds(page, {
+        [groupId]: 2,
+        null: 1,
+      });
+      await assertGroupChildren(page, groupId, 2);
 
+      // redo the delete
       await redoByKeyboard(page);
       await assertCanvasElementsCount(page, 2);
-      await assertGroupIds(page, [ids[2], GROUP_ROOT_ID]);
-      await assertGroupChildrenIds(page, [ids[1]]);
+      await assertGroupIds(page, {
+        [groupId]: 1,
+        null: 1,
+      });
+      await assertGroupChildren(page, groupId, 1);
     });
 
     test('delete group in group', async ({ page }) => {
       await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
       await selectAllByKeyboard(page);
       await triggerComponentToolbarAction(page, 'addGroup');
+      const firstGroup = await getFirstGroupId(page);
       await clickView(page, [50, 50]);
       await shiftClickView(page, [150, 50]);
       await triggerComponentToolbarAction(page, 'addGroup');
+      const secondGroup = await getFirstGroupId(page, [firstGroup]);
       await captureHistory(page);
 
-      const ids = await getIds(page);
+      // delete group in group
       await pressBackspace(page);
       await assertCanvasElementsCount(page, 2);
-      await assertGroupIds(page, [ids[3], GROUP_ROOT_ID]);
-      await assertGroupChildrenIds(page, [ids[2]]);
+      await assertGroupIds(page, {
+        [firstGroup]: 1,
+        null: 1,
+      });
+      await assertGroupChildren(page, firstGroup, 1);
 
+      // undo the delete
       await undoByKeyboard(page);
       await assertCanvasElementsCount(page, 5);
-      await assertGroupIds(page, [
-        ids[3],
-        GROUP_ROOT_ID,
-        ids[4],
-        ids[4],
-        ids[3],
-      ]);
-      await assertGroupChildrenIds(page, [ids[2], ids[4]]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
+      await assertGroupIds(page, {
+        [firstGroup]: 2,
+        [secondGroup]: 2,
+        null: 1,
+      });
+      await assertGroupChildren(page, firstGroup, 2);
+      await assertGroupChildren(page, secondGroup, 2);
 
+      // redo the delete
       await redoByKeyboard(page);
       await assertCanvasElementsCount(page, 2);
-      await assertGroupIds(page, [ids[3], GROUP_ROOT_ID]);
-      await assertGroupChildrenIds(page, [ids[2]]);
+      await assertGroupIds(page, {
+        [firstGroup]: 1,
+        null: 1,
+      });
+      await assertGroupChildren(page, firstGroup, 1);
     });
   });
 
@@ -454,23 +506,23 @@ test.describe('group', () => {
       await createShapeElement(page, [100, 0], [200, 100], Shape.Square);
       await selectAllByKeyboard(page);
       await triggerComponentToolbarAction(page, 'addGroup');
+      const originGroupId = await getFirstGroupId(page);
 
       await copyByKeyboard(page);
+      await waitNextFrame(page, 100);
       const move = await toViewCoord(page, [100, -50]);
       await page.mouse.click(move[0], move[1]);
       await pasteByKeyboard(page, false);
+      await waitNextFrame(page, 100);
+      const copyedGroupId = await getFirstGroupId(page, [originGroupId]);
 
-      const ids = await getIds(page);
-      await assertGroupIds(page, [
-        ids[2],
-        ids[2],
-        GROUP_ROOT_ID,
-        ids[5],
-        ids[5],
-        GROUP_ROOT_ID,
-      ]);
-      await assertGroupChildrenIds(page, [ids[0], ids[1]]);
-      await assertGroupChildrenIds(page, [ids[3], ids[4]], 1);
+      await assertGroupIds(page, {
+        [originGroupId]: 2,
+        [copyedGroupId]: 2,
+        null: 2,
+      });
+      await assertGroupChildren(page, originGroupId, 2);
+      await assertGroupChildren(page, copyedGroupId, 2);
     });
   });
 });

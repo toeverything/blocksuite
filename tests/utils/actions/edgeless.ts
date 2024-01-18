@@ -1188,24 +1188,38 @@ export async function getSelectedBound(
   );
 }
 
+export async function getGroupOfElements(page: Page, ids: string[]) {
+  return await page.evaluate(
+    ([ids]) => {
+      const container = document.querySelector('affine-edgeless-page');
+      if (!container) throw new Error('container not found');
+
+      return ids.map(id => container.service.surface.getGroup(id)?.id ?? null);
+    },
+    [ids]
+  );
+}
+
 export async function getGroupIds(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    return container.service.elements.map(el => el.group?.id).filter(id => id);
+    return container.service.elements.map(el => el.group?.id ?? 'null');
   });
 }
 
-export async function getGroupChildrenIds(page: Page, index = 0) {
+export async function getGroupChildrenIds(page: Page, id: string) {
   return await page.evaluate(
-    ([index]) => {
+    ([id]) => {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
       return Array.from(
-        container.service.getElementsByType('group')[index].children.keys()
+        container.service
+          .getElementsByType('group')
+          .find(group => group.id === id)?.childIds ?? []
       );
     },
-    [index]
+    [id]
   );
 }
 
@@ -1217,12 +1231,32 @@ export async function getCanvasElementsCount(page: Page) {
   });
 }
 
-export async function getIds(page: Page) {
-  return await page.evaluate(() => {
-    const container = document.querySelector('affine-edgeless-page');
-    if (!container) throw new Error('container not found');
-    return container.service.elements.map(e => e.id);
-  });
+export async function getIds(page: Page, filterGroup = false) {
+  return await page.evaluate(
+    ([filterGroup]) => {
+      const container = document.querySelector('affine-edgeless-page');
+      if (!container) throw new Error('container not found');
+      return container.service.elements
+        .filter(el => !filterGroup || el.type !== 'group')
+        .map(e => e.id);
+    },
+    [filterGroup]
+  );
+}
+
+export async function getFirstGroupId(page: Page, exclude: string[] = []) {
+  return await page.evaluate(
+    ([exclude]) => {
+      const container = document.querySelector('affine-edgeless-page');
+      if (!container) throw new Error('container not found');
+      return (
+        container.service.elements.find(
+          e => e.type === 'group' && !exclude.includes(e.id)
+        )?.id ?? ''
+      );
+    },
+    [exclude]
+  );
 }
 
 export async function getIndexes(page: Page) {
@@ -1289,5 +1323,15 @@ export async function hoverOnNote(page: Page, id: string, offset = [0, 0]) {
   await page.mouse.move(
     blockRect.x + blockRect.width / 2 + offset[0],
     blockRect.y + blockRect.height / 2 + offset[1]
+  );
+}
+
+export function toIdCountMap(ids: string[]) {
+  return ids.reduce(
+    (pre, cur) => {
+      pre[cur] = (pre[cur] ?? 0) + 1;
+      return pre;
+    },
+    {} as Record<string, number>
   );
 }
