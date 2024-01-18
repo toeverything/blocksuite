@@ -1231,6 +1231,14 @@ export async function getCanvasElementsCount(page: Page) {
   });
 }
 
+export async function getSortedIds(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.service.layer.canvasElements.map(e => e.id);
+  });
+}
+
 export async function getIds(page: Page, filterGroup = false) {
   return await page.evaluate(
     ([filterGroup]) => {

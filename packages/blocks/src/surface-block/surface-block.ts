@@ -165,6 +165,11 @@ export class SurfaceBlockComponent extends BlockElement<
         this._renderer.refresh();
       })
     );
+    this._disposables.add(
+      this.edgeless.service.selection.slots.updated.on(() => {
+        this._renderer.refresh();
+      })
+    );
     this._disposables.add(this._renderer.sync(this.edgeless.service.viewport));
   }
 

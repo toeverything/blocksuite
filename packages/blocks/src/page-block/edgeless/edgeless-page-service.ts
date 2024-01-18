@@ -167,21 +167,27 @@ export class EdgelessPageService extends PageService {
     };
     const pickCanvasElement = () => {
       const candidates = this._layer.canvasGrid.search(hitTestBound);
-      const picked = candidates.filter(element =>
-        element.hitTest(x, y, options)
+      const picked = candidates.filter(
+        element =>
+          element.hitTest(x, y, options) ||
+          element.externalBound?.isPointInBound([x, y])
       );
       return picked as EdgelessElement[];
     };
     const pickBlock = () => {
       const candidates = this._layer.blocksGrid.search(hitTestBound);
-      const picked = candidates.filter(element =>
-        element.hitTest(x, y, options)
+      const picked = candidates.filter(
+        element =>
+          element.hitTest(x, y, options) ||
+          element.externalBound?.isPointInBound([x, y])
       );
       return picked as EdgelessElement[];
     };
     const pickFrames = () => {
-      return this._layer.frames.filter(frame =>
-        frame.hitTest(x, y, options)
+      return this._layer.frames.filter(
+        frame =>
+          frame.hitTest(x, y, options) ||
+          frame.externalBound?.isPointInBound([x, y])
       ) as EdgelessElement[];
     };
 
