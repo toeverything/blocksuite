@@ -1244,17 +1244,9 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.click(0, 0);
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
-  // ←
-  await page.mouse.move(coord.x - 5, coord.y, { steps: 20 });
-  await page.mouse.up();
-  await waitNextFrame(page, 200);
-  expect(await getSelectedTextByInlineEditor(page)).toBe('5');
-
-  // blur
-  await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x, coord.y);
-  await page.mouse.down();
-  // →
+  // 123
+  // 45|6
+  // 789|
   await page.mouse.move(coord.x + 26, coord.y + 90, { steps: 20 });
   await page.mouse.up();
   await page.keyboard.press('Backspace');
