@@ -172,6 +172,10 @@ export class EditorHost extends WithDisposable(ShadowlessElement) {
     )}`;
   };
 
+  renderSpecPortal = (page: Page, specs: BlockSpec[]) => {
+    return html`<editor-host .page=${page} .specs=${specs}></editor-host>`;
+  };
+
   private _registerView = () => {
     const blockSelector = `[${this.blockIdAttr}]`;
     const widgetSelector = `[${this.widgetIdAttr}]`;
