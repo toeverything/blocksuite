@@ -1,0 +1,68 @@
+{
+  "hash": "3ae3be15",
+  "browserHash": "f71ab9df",
+  "optimized": {
+    "vue": {
+      "src": "../../../../../node_modules/.pnpm/vue@3.3.8_typescript@5.2.2/node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "e25a4eeb",
+      "needsInterop": false
+    },
+    "vitepress > @vue/devtools-api": {
+      "src": "../../../../../node_modules/.pnpm/@vue+devtools-api@6.5.1/node_modules/@vue/devtools-api/lib/esm/index.js",
+      "file": "vitepress___@vue_devtools-api.js",
+      "fileHash": "e791b27c",
+      "needsInterop": false
+    },
+    "vitepress > @vueuse/integrations/useFocusTrap": {
+      "src": "../../../../../node_modules/.pnpm/@vueuse+integrations@10.5.0_focus-trap@7.5.4_vue@3.3.8/node_modules/@vueuse/integrations/useFocusTrap.mjs",
+      "file": "vitepress___@vueuse_integrations_useFocusTrap.js",
+      "fileHash": "b1042eb7",
+      "needsInterop": false
+    },
+    "vitepress > mark.js/src/vanilla.js": {
+      "src": "../../../../../node_modules/.pnpm/mark.js@8.11.1/node_modules/mark.js/src/vanilla.js",
+      "file": "vitepress___mark__js_src_vanilla__js.js",
+      "fileHash": "85a4fb04",
+      "needsInterop": false
+    },
+    "vitepress > minisearch": {
+      "src": "../../../../../node_modules/.pnpm/minisearch@6.2.0/node_modules/minisearch/dist/es/index.js",
+      "file": "vitepress___minisearch.js",
+      "fileHash": "06f08caf",
+      "needsInterop": false
+    },
+    "vitepress-plugin-sandpack": {
+      "src": "../../../../../node_modules/.pnpm/vitepress-plugin-sandpack@1.1.4_@lezer+common@1.1.0_vite@4.5.0_vitepress@1.0.0-rc.25_vue@3.3.8/node_modules/vitepress-plugin-sandpack/dist/esm/index.mjs",
+      "file": "vitepress-plugin-sandpack.js",
+      "fileHash": "85593212",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "runtime-WAQU3VV5": {
+      "file": "runtime-WAQU3VV5.js"
+    },
+    "chunk-AMJV23EC": {
+      "file": "chunk-AMJV23EC.js"
+    },
+    "node-6JIWURW2": {
+      "file": "node-6JIWURW2.js"
+    },
+    "index-fc68d414-YNDHM6O7": {
+      "file": "index-fc68d414-YNDHM6O7.js"
+    },
+    "chunk-TPAXK3BO": {
+      "file": "chunk-TPAXK3BO.js"
+    },
+    "chunk-JF2Y4BLK": {
+      "file": "chunk-JF2Y4BLK.js"
+    },
+    "chunk-4OFJSVZJ": {
+      "file": "chunk-4OFJSVZJ.js"
+    },
+    "chunk-5WWUZCGV": {
+      "file": "chunk-5WWUZCGV.js"
+    }
+  }
+}
