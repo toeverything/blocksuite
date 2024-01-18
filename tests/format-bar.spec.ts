@@ -22,6 +22,7 @@ import {
   scrollToBottom,
   scrollToTop,
   selectAllByKeyboard,
+  setInlineRangeInInlineEditor,
   setSelection,
   switchReadonly,
   type,
@@ -1322,16 +1323,28 @@ test('buttons in format quick bar should have correct active styles', async ({
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
-  // drag only the `45`
-  await dragBetweenIndices(page, [1, 0], [1, 2], { x: 2, y: 0 });
+  // `45`
+  await setInlineRangeInInlineEditor(
+    page,
+    {
+      index: 0,
+      length: 2,
+    },
+    2
+  );
   const { codeBtn } = getFormatBar(page);
   await codeBtn.click();
-  await waitNextFrame(page, 200);
   await expect(codeBtn).toHaveAttribute('active', '');
 
-  // drag the `456`
-  await dragBetweenIndices(page, [1, 0], [1, 3], { x: 2, y: 0 });
-  await waitNextFrame(page, 1000);
+  // `456`
+  await setInlineRangeInInlineEditor(
+    page,
+    {
+      index: 0,
+      length: 3,
+    },
+    2
+  );
   await expect(codeBtn).not.toHaveAttribute('active', '');
 });
 

@@ -1250,10 +1250,8 @@ test('should select texts on dragging around the page', async ({ page }) => {
   expect(await getSelectedTextByInlineEditor(page)).toBe('45');
 
   // blur
-  await waitNextFrame(page, 200);
   await page.mouse.click(0, 0);
-  await waitNextFrame(page, 200);
-  await page.mouse.move(coord.x, coord.y);
+  await page.mouse.move(coord.x + 3, coord.y - 2);
   await page.mouse.down();
   // →
   await page.mouse.move(coord.x + 26, coord.y + 90, { steps: 20 });
