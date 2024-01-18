@@ -114,7 +114,7 @@ export class ViewStore {
         children,
       };
     };
-    const firstBlock = this.std.host.firstElementChild;
+    const firstBlock = this.std.host.querySelector('[data-block-id]');
     assertExists(firstBlock);
 
     const tree = {
