@@ -85,6 +85,7 @@ export const styles = css`
     flex-grow: 1;
 
     white-space: normal;
+    word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--affine-text-primary-color);
@@ -135,7 +136,7 @@ export const styles = css`
     align-items: center;
     justify-content: center;
     width: 12px;
-    height: 12px;
+    height: 20px;
   }
   .affine-bookmark-content-url-icon svg {
     height: 12px;
@@ -221,6 +222,12 @@ export const styles = css`
 
     .affine-bookmark-content-description {
       -webkit-line-clamp: 6;
+      max-height: 120px;
+    }
+
+    .affine-bookmark-content-url {
+      flex-grow: 1;
+      align-items: flex-end;
     }
 
     .affine-bookmark-banner {
