@@ -2,17 +2,19 @@ import type {
   EdgelessPageBlockComponent,
   NoteBlockModel,
 } from '@blocksuite/blocks';
-import { Bound } from '@blocksuite/blocks';
-import { DisposableGroup, noop } from '@blocksuite/global/utils';
+import { BlocksUtils, Bound, NoteDisplayMode } from '@blocksuite/blocks';
+import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import { type Page } from '@blocksuite/store';
+import { type BlockModel, type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { headingKeys } from './config.js';
 import {
   type ClickBlockEvent,
+  type DisplayModeChangeEvent,
   type FitViewEvent,
   type SelectEvent,
   TOCNoteCard,
@@ -95,27 +97,16 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       font-weight: 400;
       line-height: 24px;
     }
-
-    .hidden-note-divider {
-      width: 100%;
-      padding: 10px 8px;
-      box-sizing: border-box;
-    }
-
-    .hidden-note-divider div {
-      height: 0.5px;
-      background-color: var(--affine-border-color);
-    }
   `;
 
   @state()
   private _dragging = false;
 
   @state()
-  private _notes: TOCNoteItem[] = [];
+  private _pageVisibleNotes: TOCNoteItem[] = [];
 
   @state()
-  private _hiddenNotes: TOCNoteItem[] = [];
+  private _edgelessOnlyNotes: TOCNoteItem[] = [];
 
   @property({ attribute: false })
   page!: Page;
@@ -267,12 +258,12 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     if (this._dragging) return;
 
     if (!root) {
-      this._notes = [];
+      this._pageVisibleNotes = [];
       return;
     }
 
-    const visibleNotes: TOCPanelBody['_notes'] = [];
-    const hiddenNotes: TOCPanelBody['_notes'] = [];
+    const pageVisibleNotes: TOCNoteItem[] = [];
+    const edgelessOnlyNotes: TOCNoteItem[] = [];
     const oldSelectedSet = this._selected.reduce((pre, id) => {
       pre.add(id);
       return pre;
@@ -289,18 +280,21 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
         number: index + 1,
       };
 
-      if (blockModel.hidden) {
-        hiddenNotes.push(tocNoteItem);
+      if (
+        blockModel.displayMode === NoteDisplayMode.EdgelessOnly ||
+        (!blockModel.displayMode && blockModel.hidden)
+      ) {
+        edgelessOnlyNotes.push(tocNoteItem);
       } else {
-        visibleNotes.push(tocNoteItem);
+        pageVisibleNotes.push(tocNoteItem);
         if (oldSelectedSet.has(block.id)) {
           newSelected.push(block.id);
         }
       }
     });
 
-    this._notes = visibleNotes;
-    this._hiddenNotes = hiddenNotes;
+    this._pageVisibleNotes = pageVisibleNotes;
+    this._edgelessOnlyNotes = edgelessOnlyNotes;
     this._selected = newSelected;
   }
 
@@ -346,22 +340,38 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       this._selected = [id];
     }
 
+    // When edgeless mode, should select notes which display in both mode
+    const selectedIds = this._pageVisibleNotes.reduce((ids, item) => {
+      const note = item.note;
+      if (
+        this._selected.includes(note.id) &&
+        (!note.displayMode ||
+          note.displayMode === NoteDisplayMode.DocAndEdgeless)
+      ) {
+        ids.push(note.id);
+      }
+      return ids;
+    }, [] as string[]);
     this.edgeless?.selectionManager.set({
-      elements: this._selected,
+      elements: selectedIds,
       editing: false,
     });
   }
 
   private _drag() {
-    if (!this._selected.length || !this._notes.length || !this.page.root)
+    if (
+      !this._selected.length ||
+      !this._pageVisibleNotes.length ||
+      !this.page.root
+    )
       return;
 
     this._dragging = true;
 
     // cache the notes in case it is changed by other peers
     const children = this.page.root.children.slice() as NoteBlockModel[];
-    const notes = this._notes;
-    const notesMap = this._notes.reduce((map, note, index) => {
+    const notes = this._pageVisibleNotes;
+    const notesMap = this._pageVisibleNotes.reduce((map, note, index) => {
       map.set(note.note.id, {
         ...note,
         number: index + 1,
@@ -471,6 +481,55 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     );
   }
 
+  private _deSelectNoteInEdgelessMode(note: NoteBlockModel) {
+    if (!this._isEdgelessMode() || !this.edgeless) return;
+
+    const { selectionManager } = this.edgeless;
+    if (!selectionManager.has(note.id)) return;
+    const selectedIds = selectionManager.selectedIds.filter(
+      id => id !== note.id
+    );
+    selectionManager.set({
+      elements: selectedIds,
+      editing: false,
+    });
+  }
+
+  // when display mode change to page only, we should de-select the note if it is selected in edgeless mode
+  private _handleDisplayModeChange(e: DisplayModeChangeEvent) {
+    const { note, newMode } = e.detail;
+    const { displayMode: currentMode } = note;
+    if (newMode === currentMode) {
+      return;
+    }
+
+    this.page.updateBlock(note, { displayMode: newMode });
+
+    const noteParent = this.page.getParent(note);
+    assertExists(noteParent);
+    const noteParentChildNotes = noteParent.children.filter(block =>
+      BlocksUtils.matchFlavours(block, ['affine:note'])
+    ) as NoteBlockModel[];
+    const noteParentLastNote =
+      noteParentChildNotes[noteParentChildNotes.length - 1];
+
+    // When the display mode of a note change from edgeless to page visible
+    // We should move the note to the end of the note list
+    if (
+      currentMode === NoteDisplayMode.EdgelessOnly &&
+      note !== noteParentLastNote
+    ) {
+      this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
+    }
+
+    // When the display mode of a note changed to page only
+    // We should check if the note is selected in edgeless mode
+    // If so, we should de-select it
+    if (newMode === NoteDisplayMode.DocOnly) {
+      this._deSelectNoteInEdgelessMode(note);
+    }
+  }
+
   private _scrollToBlock(e: ClickBlockEvent) {
     if (this._isEdgelessMode() || !this.editorHost) return;
 
@@ -527,7 +586,43 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
     });
   }
 
-  private _renderPanelList() {
+  private _isHeadingBlock(block: BlockModel) {
+    return (
+      BlocksUtils.matchFlavours(block, ['affine:paragraph']) &&
+      headingKeys.has(block.type)
+    );
+  }
+
+  /**
+   * There are two cases that we should render note list:
+   * 1. There are headings in the notes
+   * 2. No headings, but there are blocks in the notes and note sorting option is enabled
+   */
+  private _shouldRenderNoteList(noteItems: TOCNoteItem[]) {
+    if (!noteItems.length) return false;
+
+    let hasHeadings = false;
+    let hasChildrenBlocks = false;
+
+    for (const noteItem of noteItems) {
+      for (const block of noteItem.note.children) {
+        hasChildrenBlocks = true;
+
+        if (this._isHeadingBlock(block)) {
+          hasHeadings = true;
+          break;
+        }
+      }
+
+      if (hasHeadings) {
+        break;
+      }
+    }
+
+    return hasHeadings || (this.enableNotesSorting && hasChildrenBlocks);
+  }
+
+  private _PanelList(withEdgelessOnlyNotes: boolean) {
     const selectedNotesSet = new Set(this._selected);
 
     return html`<div class="panel-list">
@@ -537,9 +632,9 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
             style=${`transform: translateY(${this._indicatorTranslateY}px)`}
           ></div>`
         : nothing}
-      ${this._notes.length
+      ${this._pageVisibleNotes.length
         ? repeat(
-            this._notes,
+            this._pageVisibleNotes,
             note => note.note.id,
             (note, idx) => html`
               <toc-note-card
@@ -554,47 +649,41 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
                     ? 'placeholder'
                     : 'selected'
                   : undefined}
-                .showCardNumber=${this._notes.length > 1}
                 .showPreviewIcon=${this.showPreviewIcon}
                 .enableNotesSorting=${this.enableNotesSorting}
                 @select=${this._selectNote}
                 @drag=${this._drag}
                 @fitview=${this._fitToElement}
                 @clickblock=${this._scrollToBlock}
+                @displaymodechange=${this._handleDisplayModeChange}
               ></toc-note-card>
             `
           )
         : html`${nothing}`}
-      ${this._hiddenNotes.length > 0
-        ? html`<div class="hidden-title">Hidden Contents</div>`
-        : nothing}
-      ${this._hiddenNotes.length
-        ? repeat(
-            this._hiddenNotes,
-            note => note.note.id,
-            (note, idx) =>
-              html`<toc-note-card
+      ${withEdgelessOnlyNotes
+        ? html`<div class="hidden-title">Hidden Contents</div>
+            ${repeat(
+              this._edgelessOnlyNotes,
+              note => note.note.id,
+              (note, idx) =>
+                html`<toc-note-card
                   data-note-id=${note.note.id}
                   .note=${note.note}
                   .number=${idx + 1}
                   .index=${note.index}
                   .page=${this.page}
                   .invisible=${true}
-                  .showCardNumber=${false}
                   .showPreviewIcon=${this.showPreviewIcon}
                   .enableNotesSorting=${this.enableNotesSorting}
                   @fitview=${this._fitToElement}
-                ></toc-note-card>
-                ${idx !== this._hiddenNotes.length - 1 &&
-                this.enableNotesSorting
-                  ? html`<div class="hidden-note-divider"><div></div></div>`
-                  : nothing} `
-          )
+                  @displaymodechange=${this._handleDisplayModeChange}
+                ></toc-note-card>`
+            )} `
         : nothing}
     </div>`;
   }
 
-  private _renderEmptyPanel() {
+  private _EmptyPanel() {
     return html`<div class="no-note-container">
       <div class="note-placeholder">
         Use headings to create a table of contents.
@@ -603,11 +692,20 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   }
 
   override render() {
+    const shouldRenderPageVisibleNotes = this._shouldRenderNoteList(
+      this._pageVisibleNotes
+    );
+    const shouldRenderEdgelessOnlyNotes = this._shouldRenderNoteList(
+      this._edgelessOnlyNotes
+    );
+    const shouldRenderEmptyPanel =
+      !shouldRenderPageVisibleNotes && !shouldRenderEdgelessOnlyNotes;
+
     return html`
       <div class="toc-panel-body-container">
-        ${this._notes.length
-          ? this._renderPanelList()
-          : this._renderEmptyPanel()}
+        ${shouldRenderEmptyPanel
+          ? this._EmptyPanel()
+          : this._PanelList(shouldRenderEdgelessOnlyNotes)}
       </div>
     `;
   }

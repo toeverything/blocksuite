@@ -9,6 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../../_common/consts.js';
 import { DEFAULT_NOTE_COLOR } from '../../../../../_common/edgeless/note/consts.js';
 import { MoreIndicatorIcon } from '../../../../../_common/icons/edgeless.js';
+import { NoteDisplayMode } from '../../../../../_common/types.js';
 import { almostEqual } from '../../../../../_common/utils/math.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
@@ -269,6 +270,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
     const observer = new MutationObserver(() => {
       const affineNote = this._affineNote;
+      if (!this._affineNote) return;
       const rect = affineNote.getBoundingClientRect();
       const zoom = this.surface.viewport.zoom;
       this._noteFullHeight =
@@ -280,7 +282,11 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   override render() {
     const { model, surface, index } = this;
-    const { xywh, background, hidden, edgeless } = model;
+    const { displayMode } = model;
+    if (!!displayMode && displayMode === NoteDisplayMode.DocOnly)
+      return nothing;
+
+    const { xywh, background, edgeless } = model;
     const { borderRadius, borderSize, borderStyle, shadowType } =
       edgeless.style;
     const { collapse, collapsedHeight } = edgeless;
@@ -312,17 +318,13 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       transition: this._editing
         ? 'left 0.3s, top 0.3s, width 0.3s, height 0.3s'
         : 'none',
-      background: hidden
-        ? 'transparent'
-        : `var(${background ?? DEFAULT_NOTE_COLOR})`,
-      border: hidden
-        ? `2px dashed var(--affine-black-10)`
-        : `${borderSize}px ${
-            borderStyle === StrokeStyle.Dashed ? 'dashed' : borderStyle
-          } var(--affine-black-10)`,
+      background: `var(${background ?? DEFAULT_NOTE_COLOR})`,
+      border: `${borderSize}px ${
+        borderStyle === StrokeStyle.Dashed ? 'dashed' : borderStyle
+      } var(--affine-black-10)`,
       boxShadow: this._editing
         ? 'var(--affine-active-shadow)'
-        : hidden || !shadowType
+        : !shadowType
           ? 'none'
           : `var(${shadowType})`,
     };

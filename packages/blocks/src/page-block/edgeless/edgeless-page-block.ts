@@ -22,6 +22,7 @@ import { listenToThemeChange } from '../../_common/theme/utils.js';
 import {
   type EdgelessElement,
   type EdgelessTool,
+  NoteDisplayMode,
   Point,
   type Selectable,
   type Viewport,
@@ -429,6 +430,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       'affine:note',
       {
         xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
+        displayMode: NoteDisplayMode.EdgelessOnly,
       },
       parentId,
       noteIndex

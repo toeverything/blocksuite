@@ -1,14 +1,14 @@
 import '../declare-test-window.js';
 
 import type { CssVariableName } from '@blocks/_common/theme/css-variables.js';
-import type { IPoint } from '@blocks/_common/types.js';
+import type { IPoint, NoteDisplayMode } from '@blocks/_common/types.js';
 import { type NoteBlockModel } from '@blocks/note-block/index.js';
 import type { IVec } from '@blocks/surface-block/index.js';
 import { assertExists, sleep } from '@global/utils/index.js';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type { Bound } from '../asserts.js';
+import { type Bound } from '../asserts.js';
 import { clickView } from './click.js';
 import { dragBetweenCoords } from './drag.js';
 import {
@@ -556,6 +556,32 @@ export async function selectNoteInEdgeless(page: Page, noteId: string) {
   await page.mouse.click(bound.x, bound.y);
 }
 
+export function locatorNoteDisplayModeButton(
+  page: Page,
+  mode: NoteDisplayMode
+) {
+  return page
+    .locator('edgeless-change-note-button')
+    .locator('note-display-mode-panel')
+    .locator(`.item.${mode}`);
+}
+
+export async function changeNoteDisplayMode(page: Page, mode: NoteDisplayMode) {
+  const button = locatorNoteDisplayModeButton(page, mode);
+  await button.click();
+}
+
+export async function changeNoteDisplayModeWithId(
+  page: Page,
+  noteId: string,
+  mode: NoteDisplayMode
+) {
+  await selectNoteInEdgeless(page, noteId);
+  await triggerComponentToolbarAction(page, 'changeNoteDisplayMode');
+  await waitNextFrame(page);
+  await changeNoteDisplayMode(page, mode);
+}
+
 export async function updateExistedBrushElementSize(
   page: Page,
   nthSizeButton: 1 | 2 | 3 | 4 | 5 | 6
@@ -721,7 +747,8 @@ type Action =
   | 'createFrameOnMoreOption'
   | 'duplicate'
   | 'renameGroup'
-  | 'autoSize';
+  | 'autoSize'
+  | 'changeNoteDisplayMode';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -899,6 +926,13 @@ export async function triggerComponentToolbarAction(
     case 'autoSize': {
       const button = locatorComponentToolbar(page).locator(
         'edgeless-change-note-button .edgeless-auto-height-button'
+      );
+      await button.click();
+      break;
+    }
+    case 'changeNoteDisplayMode': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-change-note-button .display-mode-button'
       );
       await button.click();
       break;

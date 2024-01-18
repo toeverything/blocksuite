@@ -107,6 +107,7 @@ export const defaultStore: SerializedStore = {
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
           'prop:hidden': false,
+          'prop:displayMode': 'both',
           'prop:edgeless': {
             style: {
               borderRadius: 8,
