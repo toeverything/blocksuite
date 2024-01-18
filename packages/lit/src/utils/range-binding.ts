@@ -100,6 +100,11 @@ export class RangeBinding {
           Node.DOCUMENT_POSITION_PRECEDING);
 
     if (range) {
+      const inlineEditor = this.rangeManager.getClosestInlineEditor(
+        range.commonAncestorContainer
+      );
+      if (inlineEditor && inlineEditor.isComposing) return;
+
       this._prevSelection = this.rangeManager.rangeToTextSelection(
         range,
         isRangeReversed
