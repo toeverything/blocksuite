@@ -63,5 +63,5 @@ export class ImageService extends BlockService<ImageBlockModel> {
     this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
   }
 
-  setImageProxyMiddlewareURL = setImageProxyMiddlewareURL;
+  static setImageProxyURL = setImageProxyMiddlewareURL;
 }

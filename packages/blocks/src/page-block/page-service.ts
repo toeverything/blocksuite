@@ -6,10 +6,8 @@ import {
   FileDropManager,
   type FileDropOptions,
 } from '../_common/components/file-drop-manager.js';
-import {
-  DEFAULT_IMAGE_PROXY_ENDPOINT,
-  ExportManager,
-} from '../_common/export-manager/export-manager.js';
+import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../_common/consts.js';
+import { ExportManager } from '../_common/export-manager/export-manager.js';
 import type { EmbedCardStyle } from '../_common/types.js';
 import { DEFAULT_CANVAS_TEXT_FONT_CONFIG } from '../surface-block/consts.js';
 import {

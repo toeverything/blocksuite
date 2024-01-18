@@ -1,4 +1,4 @@
-import './../button';
+import './../button.js';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/lit';

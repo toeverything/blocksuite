@@ -1,7 +1,7 @@
 /// <reference types="./env.d.ts" />
 import '@blocksuite/blocks';
 import '@blocksuite/presets';
-import './components/start-panel';
+import './components/start-panel.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/presets/themes/affine.css';
 
@@ -12,12 +12,12 @@ import { CopilotPanel } from '@blocksuite/presets';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
 
-import { CustomFramePanel } from './components/custom-frame-panel';
+import { CustomFramePanel } from './components/custom-frame-panel.js';
 import { CustomOutlinePanel } from './components/custom-outline-panel.js';
 import { DebugMenu } from './components/debug-menu.js';
-import { LeftSidePanel } from './components/left-side-panel';
-import { PagesPanel } from './components/pages-panel';
-import { SidePanel } from './components/side-panel';
+import { LeftSidePanel } from './components/left-side-panel.js';
+import { PagesPanel } from './components/pages-panel.js';
+import { SidePanel } from './components/side-panel.js';
 import type { InitFn } from './data';
 import {
   createEditor,

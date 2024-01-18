@@ -13,6 +13,7 @@ import {
 } from '@blocksuite/store';
 
 import {
+  DEFAULT_IMAGE_PROXY_ENDPOINT,
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
@@ -874,14 +875,14 @@ export class EdgelessClipboardController extends PageClipboard {
     const replaceRichTextWithSvgElementFunc =
       this._replaceRichTextWithSvgElement.bind(this);
 
+    // TODO: use image proxy endpoint middleware shared with image block
     let _imageProxyEndpoint: string | undefined;
     if (
       !_imageProxyEndpoint &&
       location.protocol === 'https:' &&
       location.hostname.split('.').includes('affine')
     ) {
-      _imageProxyEndpoint =
-        'https://workers.toeverything.workers.dev/proxy/image';
+      _imageProxyEndpoint = DEFAULT_IMAGE_PROXY_ENDPOINT;
     }
 
     const html2canvasOption = {
