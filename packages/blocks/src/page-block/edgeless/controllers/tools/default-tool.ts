@@ -284,10 +284,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         return;
       }
       if (selected instanceof GroupElementModel) {
-        console.log(
-          selected.externalBound,
-          selected.externalBound?.containsPoint([modelX, modelY])
-        );
         mountGroupTitleEditor(selected, this._edgeless);
         return;
       }
