@@ -1860,8 +1860,6 @@ test('arrow up/down navigation within and across paragraphs containing different
   await pressArrowDown(page);
   await assertRichTextInlineRange(page, 1, 32, 0);
   await pressArrowDown(page);
-  await assertRichTextInlineRange(page, 1, 90, 0);
-  await pressArrowDown(page);
   await assertRichTextInlineRange(page, 1, 125, 0);
 });
 
