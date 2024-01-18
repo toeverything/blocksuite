@@ -17,6 +17,12 @@ import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isNoteBlock } from '../../utils/query.js';
 import type { AutoConnectElement } from '../block-portal/edgeless-block-portal.js';
 
+const PAGE_VISIBLE_INDEX_LABEL_WIDTH = 44;
+const PAGE_VISIBLE_INDEX_LABEL_HEIGHT = 24;
+const EDGELESS_ONLY_INDEX_LABEL_WIDTH = 24;
+const EDGELESS_ONLY_INDEX_LABEL_HEIGHT = 24;
+const INDEX_LABEL_OFFSET = 16;
+
 function calculatePosition(gap: number, count: number, iconWidth: number) {
   const positions = [];
   if (count === 1) {
@@ -297,15 +303,15 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
         const bound = Bound.deserialize(element.xywh);
         const [left, right] = viewport.toViewCoord(bound.x, bound.y);
         const [width, height] = [bound.w * zoom, bound.h * zoom];
-        const iconWidth = 24;
         const style = styleMap({
-          width: '44px',
-          maxWidth: '44px',
-          height: iconWidth + 'px',
+          width: `${PAGE_VISIBLE_INDEX_LABEL_WIDTH}px`,
+          maxWidth: `${PAGE_VISIBLE_INDEX_LABEL_WIDTH}px`,
+          height: `${PAGE_VISIBLE_INDEX_LABEL_HEIGHT}px`,
           position: 'absolute',
-          transform: `translate(${left + width / 2 - 44 / 2}px, ${
-            right + height + 16
-          }px)`,
+          transform: `translate(${
+            left + width / 2 - PAGE_VISIBLE_INDEX_LABEL_WIDTH / 2
+          }px,
+          ${right + height + INDEX_LABEL_OFFSET}px)`,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -313,7 +319,11 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
         const components = [];
         const count = counts[i];
         const initGap = 24 / count - 24;
-        const positions = calculatePosition(initGap, count, iconWidth);
+        const positions = calculatePosition(
+          initGap,
+          count,
+          PAGE_VISIBLE_INDEX_LABEL_HEIGHT
+        );
         for (let j = 0; j < count; j++) {
           index++;
           components.push(html`
@@ -347,11 +357,19 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
         return html`<div
           style=${style}
           @mouseenter=${(e: MouseEvent) => {
-            const positions = calculatePosition(5, count, iconWidth);
+            const positions = calculatePosition(
+              5,
+              count,
+              PAGE_VISIBLE_INDEX_LABEL_HEIGHT
+            );
             updateChildrenPosition(e, positions);
           }}
           @mouseleave=${(e: MouseEvent) => {
-            const positions = calculatePosition(initGap, count, iconWidth);
+            const positions = calculatePosition(
+              initGap,
+              count,
+              PAGE_VISIBLE_INDEX_LABEL_HEIGHT
+            );
             updateChildrenPosition(e, positions);
           }}
         >
@@ -375,16 +393,17 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
         const [left, right] = viewport.toViewCoord(bound.x, bound.y);
         const [width, height] = [bound.w * zoom, bound.h * zoom];
         const style = styleMap({
-          width: '24px',
-          height: '24px',
+          width: `${EDGELESS_ONLY_INDEX_LABEL_WIDTH}px`,
+          height: `${EDGELESS_ONLY_INDEX_LABEL_HEIGHT}px`,
           borderRadius: '50%',
           backgroundColor: 'var(--affine-text-secondary-color)',
           border: '1px solid var(--affine-border-color)',
           color: 'var(--affine-white)',
           position: 'absolute',
-          transform: `translate(${left + width / 2 - 44 / 2}px, ${
-            right + height + 16
-          }px)`,
+          transform: `translate(${
+            left + width / 2 - EDGELESS_ONLY_INDEX_LABEL_WIDTH / 2
+          }px,
+          ${right + height + INDEX_LABEL_OFFSET}px)`,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
