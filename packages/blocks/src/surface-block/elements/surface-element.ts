@@ -12,5 +12,3 @@ export interface ISurfaceElement {
   rotate: number;
   batch: string | null;
 }
-
-export type ComputedValue = (value: string) => string;

@@ -5,6 +5,7 @@ import { connector } from './connector/index.js';
 import { group } from './group/index.js';
 import { shape } from './shape/index.js';
 import { text } from './text/index.js';
+export { normalizeShapeBound } from './shape/utils.js';
 
 export type ElementRenderer<T extends ElementModel = ElementModel> = (
   model: T,

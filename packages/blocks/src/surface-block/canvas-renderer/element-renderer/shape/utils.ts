@@ -3,8 +3,16 @@ import type {
   VerticalAlign,
 } from '../../../element-model/common.js';
 import type { ShapeElementModel } from '../../../element-model/shape.js';
+import type { Bound } from '../../../index.js';
 import type { Renderer } from '../../renderer.js';
-import type { TextDelta } from '../text/utils.js';
+import {
+  deltaInsertsToChunks,
+  getFontString,
+  getLineHeight,
+  getTextWidth,
+  type TextDelta,
+  wrapText,
+} from '../text/utils.js';
 
 export const SHAPE_TEXT_PADDING = 20;
 
@@ -134,4 +142,42 @@ export function verticalOffset(
     : textVerticalAlign === 'top'
       ? SHAPE_TEXT_PADDING
       : height - lineHeight * lines.length - SHAPE_TEXT_PADDING;
+}
+export function normalizeShapeBound(
+  shape: ShapeElementModel,
+  bound: Bound
+): Bound {
+  if (!shape.text) return bound;
+
+  const yText = shape.text;
+  const { fontFamily, fontSize, fontStyle, fontWeight } = shape;
+  const lineHeight = getLineHeight(fontFamily, fontSize);
+  const font = getFontString({
+    fontStyle,
+    fontWeight,
+    fontSize,
+    fontFamily,
+  });
+  const widestCharWidth =
+    [...yText.toString()]
+      .map(char => getTextWidth(char, font))
+      .sort((a, b) => a - b)
+      .pop() ?? getTextWidth('W', font);
+
+  if (bound.w < widestCharWidth + SHAPE_TEXT_PADDING * 2) {
+    bound.w = widestCharWidth + SHAPE_TEXT_PADDING * 2;
+  }
+  const deltas: TextDelta[] = (yText.toDelta() as TextDelta[]).flatMap(
+    delta => ({
+      insert: wrapText(delta.insert, font, bound.w - SHAPE_TEXT_PADDING * 2),
+      attributes: delta.attributes,
+    })
+  ) as TextDelta[];
+  const lines = deltaInsertsToChunks(deltas);
+
+  if (bound.h < lineHeight * lines.length + SHAPE_TEXT_PADDING * 2) {
+    bound.h = lineHeight * lines.length + SHAPE_TEXT_PADDING * 2;
+  }
+
+  return bound;
 }

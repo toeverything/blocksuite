@@ -1,3 +1,4 @@
+export { normalizeShapeBound } from './canvas-renderer/element-renderer/index.js';
 export { Overlay, Renderer } from './canvas-renderer/renderer.js';
 export {
   type IBound,
@@ -26,10 +27,8 @@ export {
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
 } from './elements/connector/types.js';
-export { getArrowPoints } from './elements/connector/utils.js';
 export * from './elements/index.js';
 export { ShapeType } from './elements/shape/consts.js';
-export { type ComputedValue } from './elements/surface-element.js';
 export { getStroke } from './perfect-freehand/getStroke.js';
 export { RoughCanvas } from './rough/canvas.js';
 export type { Options } from './rough/core.js';
