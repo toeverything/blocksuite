@@ -87,7 +87,7 @@ type NodeProps<Node extends object> = {
 };
 
 // Ported from https://github.com/Rich-Harris/estree-walker MIT License
-export class ASTWalker<ONode extends object, TNode extends object> {
+export class ASTWalker<ONode extends object, TNode extends object | never> {
   private _enter: WalkerFn<ONode, TNode> | undefined;
   private _leave: WalkerFn<ONode, TNode> | undefined;
   private _isONode!: (node: unknown) => node is ONode;
@@ -115,6 +115,10 @@ export class ASTWalker<ONode extends object, TNode extends object> {
     await this._visit({ node: oNode, parent: null, prop: null, index: null });
     assertEquals(this.context.stack.length, 1, 'There are unclosed nodes');
     return this.context.currentNode();
+  };
+
+  walkONode = async (oNode: ONode) => {
+    await this._visit({ node: oNode, parent: null, prop: null, index: null });
   };
 
   private _visit = async (o: NodeProps<ONode>) => {

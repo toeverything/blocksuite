@@ -3,8 +3,11 @@ import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSnapshot, Page } from '@blocksuite/store';
 
-import { HtmlAdapter, ImageAdapter } from '../../_common/adapters/index.js';
-import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
+import {
+  HtmlAdapter,
+  ImageAdapter,
+  PlainTextAdapter,
+} from '../../_common/adapters/index.js';
 import {
   defaultImageProxyMiddleware,
   replaceIdMiddleware,
@@ -21,7 +24,7 @@ export class PageClipboard {
   }
 
   private _clipboardAdapter = new ClipboardAdapter();
-  private _markdownAdapter = new MarkdownAdapter();
+  private _plaintextAdapter = new PlainTextAdapter();
   private _htmlAdapter = new HtmlAdapter();
   private _imageAdapter = new ImageAdapter();
 
@@ -63,7 +66,7 @@ export class PageClipboard {
     );
     this._std.clipboard.registerAdapter(
       'text/plain',
-      this._markdownAdapter,
+      this._plaintextAdapter,
       70
     );
     const copy = copyMiddleware(this._std);
