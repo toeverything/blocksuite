@@ -51,6 +51,7 @@ export type OnDragEndProps = {
   dropBlockId: string;
   dropType: DropType | null;
   dragPreview: DragPreview;
+  noteScale: number;
 };
 
 export type DragHandleOption = {

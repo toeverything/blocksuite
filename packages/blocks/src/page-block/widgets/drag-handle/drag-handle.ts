@@ -1277,6 +1277,7 @@ export class AffineDragHandleWidget extends WidgetElement<
           dropBlockId: this.dropBlockId,
           dropType: this.dropType,
           dragPreview: this.dragPreview,
+          noteScale: this.noteScale,
         })
       ) {
         this._hide(true);
