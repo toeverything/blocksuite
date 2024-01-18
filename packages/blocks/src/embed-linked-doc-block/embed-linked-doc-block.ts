@@ -1,6 +1,6 @@
-import '../_common/components/block-selection';
-import '../_common/components/embed-card/embed-card-toolbar';
-import '../_common/components/embed-card/embed-card-caption';
+import '../_common/components/block-selection.js';
+import '../_common/components/embed-card/embed-card-toolbar.js';
+import '../_common/components/embed-card/embed-card-caption.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -347,30 +347,28 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   override updated() {
-    if (this.isInSurface) {
-      // deleted state in horizontal style has 80px height
-      const linkedDoc = this._linkedDoc;
-      const { xywh, style } = this.model;
-      const bound = Bound.deserialize(xywh);
-      if (
-        linkedDoc &&
-        style === 'horizontal' &&
-        bound.h !== EMBED_CARD_HEIGHT.horizontal
-      ) {
-        bound.h = EMBED_CARD_HEIGHT.horizontal;
-        this.page.withoutTransact(() => {
-          this.page.updateBlock(this.model, {
-            xywh: bound.serialize(),
-          });
+    // update card style when linked page deleted
+    const linkedDoc = this._linkedDoc;
+    const { xywh, style } = this.model;
+    const bound = Bound.deserialize(xywh);
+    if (linkedDoc && style === 'horizontalThin') {
+      bound.w = EMBED_CARD_WIDTH.horizontal;
+      bound.h = EMBED_CARD_HEIGHT.horizontal;
+      this.page.withoutTransact(() => {
+        this.page.updateBlock(this.model, {
+          xywh: bound.serialize(),
+          style: 'horizontal',
         });
-      } else if (!linkedDoc && style === 'horizontal' && bound.h !== 80) {
-        bound.h = 80;
-        this.page.withoutTransact(() => {
-          this.page.updateBlock(this.model, {
-            xywh: bound.serialize(),
-          });
+      });
+    } else if (!linkedDoc && style === 'horizontal') {
+      bound.w = EMBED_CARD_WIDTH.horizontalThin;
+      bound.h = EMBED_CARD_HEIGHT.horizontalThin;
+      this.page.withoutTransact(() => {
+        this.page.updateBlock(this.model, {
+          xywh: bound.serialize(),
+          style: 'horizontalThin',
         });
-      }
+      });
     }
   }
 
@@ -448,10 +446,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
     this._cardStyle = this.model.style;
     this._width = EMBED_CARD_WIDTH[this._cardStyle];
-    this._height =
-      isDeleted && this._cardStyle === 'horizontal'
-        ? 80
-        : EMBED_CARD_HEIGHT[this._cardStyle];
+    this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
     const isEmpty = this._isPageEmpty() && this._isBannerEmpty;
 
@@ -459,6 +454,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       loading: isLoading,
       deleted: isDeleted,
       empty: isEmpty,
+      'banner-empty': this._isBannerEmpty,
       [this._cardStyle]: true,
     });
 

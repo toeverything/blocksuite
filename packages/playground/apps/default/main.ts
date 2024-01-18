@@ -14,8 +14,8 @@ import {
   Workspace,
 } from '@blocksuite/store';
 
-import { LeftSidePanel } from '../starter/components/left-side-panel';
-import { PagesPanel } from '../starter/components/pages-panel';
+import { LeftSidePanel } from '../starter/components/left-side-panel.js';
+import { PagesPanel } from '../starter/components/pages-panel.js';
 import { QuickEdgelessMenu } from './components/quick-edgeless-menu.js';
 import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
 import { initCollaborationSocket } from './providers/websocket-channel.js';

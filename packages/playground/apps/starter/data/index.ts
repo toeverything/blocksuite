@@ -4,13 +4,13 @@
  * the page structure will be automatically loaded from provider.
  * In these cases, these functions should not be called.
  */
-export * from './database';
-export * from './embed';
-export * from './empty';
-export * from './heavy';
-export * from './heavy-whiteboard';
-export * from './linked';
-export * from './multiple-editor';
-export * from './pending-structs';
-export * from './preset';
-export type { InitFn } from './utils';
+export * from './database.js';
+export * from './embed.js';
+export * from './empty.js';
+export * from './heavy.js';
+export * from './heavy-whiteboard.js';
+export * from './linked.js';
+export * from './multiple-editor.js';
+export * from './pending-structs.js';
+export * from './preset.js';
+export type { InitFn } from './utils.js';
