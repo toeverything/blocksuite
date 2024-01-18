@@ -57,75 +57,70 @@ export function createEmbedBlock<
 
 // ========== Link Preview ==========
 
-const linkPreviewEndpoint = (() => {
-  let endpoint = DEFAULT_LINK_PREVIEW_ENDPOINT;
-  return {
-    get: () => endpoint,
-    set: (url: string) => {
-      endpoint = url;
-    },
-  };
-})();
+export class LinkPreviewer {
+  endpoint = DEFAULT_LINK_PREVIEW_ENDPOINT;
 
-export const setLinkPreviewEndpoint = linkPreviewEndpoint.set;
-
-export async function queryLinkPreview(
-  url: string
-): Promise<Partial<LinkPreviewData>> {
-  if (
-    (url.startsWith('https://x.com/') ||
-      url.startsWith('https://www.x.com/') ||
-      url.startsWith('https://www.twitter.com/') ||
-      url.startsWith('https://twitter.com/')) &&
-    url.includes('/status/')
-  ) {
-    // use api.fxtwitter.com
-    url = 'https://api.fxtwitter.com/status/' + /\/status\/(.*)/.exec(url)?.[1];
-    try {
-      const { tweet } = await fetch(url).then(res => res.json());
-      return {
-        title: tweet.author.name,
-        icon: tweet.author.avatar_url,
-        description: tweet.text,
-        image: tweet.media?.photos[0].url || tweet.author.banner_url,
-      };
-    } catch (_) {
-      throw new Error('Failed to fetch tweet');
-    }
-  } else {
-    const response = await fetch(linkPreviewEndpoint.get(), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url,
-      }),
-    })
-      .then(r => {
-        if (!r || !r.ok) {
-          throw new Error('Failed to fetch link preview');
-        }
-        return r;
-      })
-      .catch(_ => {
-        throw new Error('Failed to fetch link preview');
-      });
-
-    const data: LinkPreviewResponseData = await response.json();
-    return {
-      title: data.title ? getStringFromHTML(data.title) : null,
-      description: data.description
-        ? getStringFromHTML(data.description)
-        : null,
-      icon: data.favicons?.[0],
-      image: data.images?.[0],
-    };
+  setEndpoint(endpoint: string) {
+    this.endpoint = endpoint;
   }
-}
 
-function getStringFromHTML(html: string) {
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  return div.textContent;
+  async query(url: string): Promise<Partial<LinkPreviewData>> {
+    if (
+      (url.startsWith('https://x.com/') ||
+        url.startsWith('https://www.x.com/') ||
+        url.startsWith('https://www.twitter.com/') ||
+        url.startsWith('https://twitter.com/')) &&
+      url.includes('/status/')
+    ) {
+      // use api.fxtwitter.com
+      url =
+        'https://api.fxtwitter.com/status/' + /\/status\/(.*)/.exec(url)?.[1];
+      try {
+        const { tweet } = await fetch(url).then(res => res.json());
+        return {
+          title: tweet.author.name,
+          icon: tweet.author.avatar_url,
+          description: tweet.text,
+          image: tweet.media?.photos[0].url || tweet.author.banner_url,
+        };
+      } catch (_) {
+        throw new Error('Failed to fetch tweet');
+      }
+    } else {
+      const response = await fetch(this.endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url,
+        }),
+      })
+        .then(r => {
+          if (!r || !r.ok) {
+            throw new Error('Failed to fetch link preview');
+          }
+          return r;
+        })
+        .catch(_ => {
+          throw new Error('Failed to fetch link preview');
+        });
+
+      const data: LinkPreviewResponseData = await response.json();
+      return {
+        title: data.title ? this.getStringFromHTML(data.title) : null,
+        description: data.description
+          ? this.getStringFromHTML(data.description)
+          : null,
+        icon: data.favicons?.[0],
+        image: data.images?.[0],
+      };
+    }
+  }
+
+  private getStringFromHTML(html: string) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent;
+  }
 }

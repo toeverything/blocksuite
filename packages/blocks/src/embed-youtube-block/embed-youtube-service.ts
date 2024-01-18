@@ -1,7 +1,7 @@
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { setLinkPreviewEndpoint } from '../_common/embed-block-helper/index.js';
+import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
 import type { PageService } from '../index.js';
 import {
   type EmbedYoutubeModel,
@@ -11,8 +11,13 @@ import {
 import { queryEmbedYoutubeData } from './utils.js';
 
 export class EmbedYoutubeService extends BlockService<EmbedYoutubeModel> {
+  private static readonly linkPreviewer = new LinkPreviewer();
+
   queryUrlData = (embedYoutubeModel: EmbedYoutubeModel) => {
-    return queryEmbedYoutubeData(embedYoutubeModel);
+    return queryEmbedYoutubeData(
+      embedYoutubeModel,
+      EmbedYoutubeService.linkPreviewer
+    );
   };
 
   override mounted() {
@@ -30,5 +35,5 @@ export class EmbedYoutubeService extends BlockService<EmbedYoutubeModel> {
     });
   }
 
-  static setLinkPreviewEndpoint = setLinkPreviewEndpoint;
+  static setLinkPreviewEndpoint = EmbedYoutubeService.linkPreviewer.setEndpoint;
 }

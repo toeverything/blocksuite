@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { queryLinkPreview } from '../_common/embed-block-helper/index.js';
+import type { LinkPreviewer } from '../_common/embed-block-helper/index.js';
 import type { EmbedYoutubeBlockComponent } from './embed-youtube-block.js';
 import type {
   EmbedYoutubeBlockUrlData,
@@ -8,12 +8,13 @@ import type {
 } from './embed-youtube-model.js';
 
 export async function queryEmbedYoutubeData(
-  embedYoutubeModel: EmbedYoutubeModel
+  embedYoutubeModel: EmbedYoutubeModel,
+  linkPreviewer: LinkPreviewer
 ): Promise<Partial<EmbedYoutubeBlockUrlData>> {
   const url = embedYoutubeModel.url;
 
   const [videoOpenGraphData, videoOEmbedData] = await Promise.all([
-    queryLinkPreview(url),
+    linkPreviewer.query(url),
     queryYoutubeOEmbedData(url),
   ]);
 
@@ -23,7 +24,7 @@ export async function queryEmbedYoutubeData(
   };
 
   if (youtubeEmbedData.creatorUrl) {
-    const creatorOpenGraphData = await queryLinkPreview(
+    const creatorOpenGraphData = await linkPreviewer.query(
       youtubeEmbedData.creatorUrl
     );
     youtubeEmbedData.creatorImage = creatorOpenGraphData.image;

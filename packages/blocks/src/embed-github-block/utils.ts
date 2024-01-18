@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { nothing } from 'lit';
 
-import { queryLinkPreview } from '../_common/embed-block-helper/index.js';
+import type { LinkPreviewer } from '../_common/embed-block-helper/index.js';
 import type { EmbedGithubBlockComponent } from './embed-github-block.js';
 import type {
   EmbedGithubBlockUrlData,
@@ -18,11 +18,12 @@ import {
 } from './styles.js';
 
 export async function queryEmbedGithubData(
-  embedGithubModel: EmbedGithubModel
+  embedGithubModel: EmbedGithubModel,
+  linkPreviewer: LinkPreviewer
 ): Promise<Partial<EmbedGithubBlockUrlData>> {
   const [githubApiData, openGraphData] = await Promise.all([
     queryEmbedGithubApiData(embedGithubModel),
-    queryLinkPreview(embedGithubModel.url),
+    linkPreviewer.query(embedGithubModel.url),
   ]);
   return { ...githubApiData, ...openGraphData };
 }

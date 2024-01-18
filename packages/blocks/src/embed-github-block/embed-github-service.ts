@@ -1,7 +1,7 @@
 import { BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
-import { setLinkPreviewEndpoint } from '../_common/embed-block-helper/index.js';
+import { LinkPreviewer } from '../_common/embed-block-helper/index.js';
 import type { PageService } from '../index.js';
 import {
   type EmbedGithubModel,
@@ -11,8 +11,13 @@ import {
 import { queryEmbedGithubApiData, queryEmbedGithubData } from './utils.js';
 
 export class EmbedGithubService extends BlockService<EmbedGithubModel> {
+  private static readonly linkPreviewer = new LinkPreviewer();
+
   queryUrlData = (embedGithubModel: EmbedGithubModel) => {
-    return queryEmbedGithubData(embedGithubModel);
+    return queryEmbedGithubData(
+      embedGithubModel,
+      EmbedGithubService.linkPreviewer
+    );
   };
 
   queryApiData = (embedGithubModel: EmbedGithubModel) => {
@@ -34,5 +39,5 @@ export class EmbedGithubService extends BlockService<EmbedGithubModel> {
     });
   }
 
-  static setLinkPreviewEndpoint = setLinkPreviewEndpoint;
+  static setLinkPreviewEndpoint = EmbedGithubService.linkPreviewer.setEndpoint;
 }
