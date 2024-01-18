@@ -217,8 +217,8 @@ export class RangeBinding {
 
         // Restore the DOM structure damaged by the composition
         parent.dirty = true;
-        await parent.updateComplete;
-        await parent.updateComplete;
+        await this.host.updateComplete;
+        await this.host.updateComplete;
         parents.push(parent);
       }
 
