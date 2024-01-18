@@ -224,7 +224,7 @@ export const styles = css`
     .affine-embed-youtube-content-url > span {
       color: var(--affine-link-color);
     }
-    .affine-embed-youtube-content-url svg {
+    .affine-embed-youtube-content-url .open-icon {
       fill: var(--affine-link-color);
     }
   }
