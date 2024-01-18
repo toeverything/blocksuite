@@ -248,6 +248,7 @@ export interface Viewport {
 
 export type EmbedCardStyle =
   | 'horizontal'
+  | 'horizontalThin'
   | 'list'
   | 'vertical'
   | 'cube'

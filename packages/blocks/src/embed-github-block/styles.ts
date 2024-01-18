@@ -235,7 +235,7 @@ export const styles = css`
     .affine-embed-github-content-url > span {
       color: var(--affine-link-color);
     }
-    .affine-embed-github-content-url svg {
+    .affine-embed-github-content-url .open-icon {
       fill: var(--affine-link-color);
     }
   }
