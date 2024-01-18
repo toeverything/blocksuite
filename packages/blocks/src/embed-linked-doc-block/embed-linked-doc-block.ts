@@ -1,6 +1,6 @@
-import '../_common/components/block-selection';
-import '../_common/components/embed-card/embed-card-toolbar';
-import '../_common/components/embed-card/embed-card-caption';
+import '../_common/components/block-selection.js';
+import '../_common/components/embed-card/embed-card-toolbar.js';
+import '../_common/components/embed-card/embed-card-caption.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
