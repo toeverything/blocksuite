@@ -2,6 +2,7 @@ packages:
   - 'packages/block-std'
   - 'packages/blocks'
   - 'packages/docs/main'
+  - 'packages/docs/presets'
   - 'packages/global'
   - 'packages/inline'
   - 'packages/lit'

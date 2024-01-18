@@ -1,0 +1,29 @@
+{
+  "name": "@blocksuite/docs-presets",
+  "version": "0.11.0",
+  "description": "BlockSuite presets documentation",
+  "private": true,
+  "keywords": [],
+  "author": "toeverything",
+  "repository": "toeverything/blocksuite",
+  "license": "MPL-2.0",
+  "type": "module",
+  "devDependencies": {
+    "vite-plugin-wasm": "^3.3.0",
+    "vitepress": "1.0.0-rc.35",
+    "vue": "^3.4.5"
+  },
+  "scripts": {
+    "dev": "vitepress dev --port 5201",
+    "build": "vitepress build",
+    "build:vercel": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "dependencies": {
+    "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/presets": "workspace:*",
+    "@blocksuite/store": "workspace:*",
+    "markdown-it-container": "^4.0.0",
+    "vitepress-plugin-sandpack": "^1.1.4"
+  }
+}
