@@ -232,10 +232,11 @@ function updateObserver(
   }
 }
 
-export function initFieldObservers(prototype: unknown, instance: ElementModel) {
-  const observers = instance['_observerDisposable'];
+export function initFieldObservers(prototype: unknown, receiver: ElementModel) {
+  // @ts-ignore
+  const observers = prototype[observeSymbol] ?? {};
 
   Object.keys(observers).forEach(prop => {
-    updateObserver(prototype, prop, instance);
+    updateObserver(prototype, prop, receiver);
   });
 }
