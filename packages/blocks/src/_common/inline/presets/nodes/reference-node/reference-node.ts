@@ -136,10 +136,14 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       page.workspace.slots.pagesUpdated.on(() => this._updateRefMeta(page))
     );
 
-    // observe yText update
-    this.disposables.add(
-      this.inlineEditor.slots.textChange.on(() => this._updateRefMeta(page))
-    );
+    this.updateComplete
+      .then(() => {
+        // observe yText update
+        this.disposables.add(
+          this.inlineEditor.slots.textChange.on(() => this._updateRefMeta(page))
+        );
+      })
+      .catch(console.error);
   }
 
   private _updateRefMeta = (page: Page) => {
