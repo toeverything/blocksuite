@@ -179,7 +179,8 @@ export class BlockElement<
         this.__propertyToAttribute(p, this[p as keyof this])
       ) as undefined;
       //@ts-ignore
-      this.__markUpdated();
+      this._$changedProperties = new Map();
+      this.isUpdatePending = false;
       //@ts-ignore
       this.__childPart = render(nothing, this.renderRoot);
 
