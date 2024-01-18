@@ -1,4 +1,4 @@
-import './surface-ref-portal';
+import './surface-ref-portal.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, type Disposable, noop } from '@blocksuite/global/utils';
