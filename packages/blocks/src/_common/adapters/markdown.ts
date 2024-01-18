@@ -202,6 +202,15 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   async toSliceSnapshot(
     payload: MarkdownToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {
+    payload.file = payload.file
+      .split('\n')
+      .map(line => {
+        if (line.trimStart().startsWith('-')) {
+          return line;
+        }
+        return line.replace(/^ /, '&#x20;');
+      })
+      .join('\n');
     const markdownAst = this._markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
