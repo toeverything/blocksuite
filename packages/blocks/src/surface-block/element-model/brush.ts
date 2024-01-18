@@ -81,6 +81,8 @@ export class BrushElementModel extends ElementModel<BrushProps> {
   color: string = '#000000';
 
   @derive((lineWidth: number, instance: BrushElementModel) => {
+    if (lineWidth === instance.lineWidth) return {};
+
     const bound = instance.elementBound;
     const points = instance.points;
     const transformed = transformPointsToNewBound(
