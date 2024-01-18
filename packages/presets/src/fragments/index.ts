@@ -1,3 +1,4 @@
+export { BiDirectionalLinkPanel } from './bi-directional-link/bi-directional-link-panel.js';
 export * from './copilot-panel/copilot-panel.js';
 export * from './doc-title/doc-title.js';
 export {
