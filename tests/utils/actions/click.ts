@@ -20,6 +20,11 @@ function getDebugMenu(page: Page) {
   };
 }
 
+export async function moveView(page: Page, point: [number, number]) {
+  const [x, y] = await toViewCoord(page, point);
+  await page.mouse.move(x, y);
+}
+
 export async function click(page: Page, point: IPoint) {
   await page.mouse.click(point.x, point.y);
 }

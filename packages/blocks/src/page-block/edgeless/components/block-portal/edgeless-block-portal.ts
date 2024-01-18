@@ -237,7 +237,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      page.slots.blockUpdated.on(({ type, flavour }) => {
+      page.slots.blockUpdated.on(payload => {
+        const { type, flavour } = payload;
         if (
           (type === 'add' || type === 'delete') &&
           (flavour === 'affine:surface-ref' || flavour === 'affine:note')
@@ -246,6 +247,14 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             this._updateReference();
             this._updateIndexLabel();
           }, this);
+        }
+
+        if (
+          type === 'update' &&
+          flavour === 'affine:note' &&
+          payload.props.key === 'displayMode'
+        ) {
+          this.requestUpdate();
         }
       })
     );
