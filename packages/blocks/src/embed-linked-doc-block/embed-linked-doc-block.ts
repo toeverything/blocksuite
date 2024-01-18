@@ -455,6 +455,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
       loading: isLoading,
       deleted: isDeleted,
       empty: isEmpty,
+      'banner-empty': this._isBannerEmpty,
       [this._cardStyle]: true,
     });
 
