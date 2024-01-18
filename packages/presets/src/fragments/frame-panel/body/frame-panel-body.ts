@@ -330,7 +330,7 @@ export class FramePanelBody extends WithDisposable(ShadowlessElement) {
    */
   private _clickBlank = (e: MouseEvent) => {
     e.stopPropagation();
-    // check if click at toc-card, if not, set this._selected to empty
+    // check if click at frame-card, if not, set this._selected to empty
     if (
       (e.target as HTMLElement).closest('frame-card') ||
       this._selected.length === 0

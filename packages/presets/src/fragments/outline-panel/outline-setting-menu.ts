@@ -54,7 +54,7 @@ const styles = css`
   }
 `;
 
-export class TOCNotePreviewSettingMenu extends WithDisposable(LitElement) {
+export class OutlineNotePreviewSettingMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -86,6 +86,6 @@ export class TOCNotePreviewSettingMenu extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'toc-note-preview-setting-menu': TOCNotePreviewSettingMenu;
+    'outline-note-preview-setting-menu': OutlineNotePreviewSettingMenu;
   }
 }

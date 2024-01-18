@@ -14,10 +14,6 @@ import { almostEqual } from '../../../../../_common/utils/math.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
-import {
-  deserializeXYWH,
-  serializeXYWH,
-} from '../../../../../surface-block/utils/xywh.js';
 import type { EdgelessBlockModel } from '../../../type.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
@@ -52,12 +48,16 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
     const observer = new ResizeObserver(entries => {
       for (const entry of entries) {
         if (!this.model.edgeless.collapse) {
-          const [x, y, w, h] = deserializeXYWH(this.model.xywh);
+          const bound = Bound.deserialize(this.model.xywh);
+          const scale = this.model.edgeless.scale ?? 1;
+          const height = entry.contentRect.height * scale;
+          if (almostEqual(bound.h, height)) {
+            return;
+          }
 
-          if (almostEqual(h, entry.contentRect.height)) return;
-
+          bound.h = height;
           this.model.stash('xywh');
-          this.model.xywh = serializeXYWH(x, y, w, entry.contentRect.height);
+          this.model.xywh = bound.serialize();
         }
       }
     });
@@ -153,7 +153,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   private _affineNote!: HTMLDivElement;
 
   private _handleEditingTransition() {
-    const selection = this.surface.edgeless.service.selection;
+    const selection = this.edgeless.service.selection;
     this._disposables.add(
       selection.slots.updated.on(selections => {
         if (selection.has(this.model.id) && selections?.[0].editing) {
@@ -183,17 +183,17 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   private _setCollapse(event: MouseEvent) {
     event.stopImmediatePropagation();
-    const { xywh } = this.model;
+
     const { collapse, collapsedHeight } = this.model.edgeless;
 
-    const bound = Bound.deserialize(xywh);
     if (collapse) {
       this.model.page.updateBlock(this.model, () => {
-        this.model.edgeless.collapsedHeight = bound.h;
         this.model.edgeless.collapse = false;
       });
     } else if (collapsedHeight) {
-      bound.h = collapsedHeight;
+      const { xywh, edgeless } = this.model;
+      const bound = Bound.deserialize(xywh);
+      bound.h = collapsedHeight * (edgeless.scale ?? 1);
       this.model.page.updateBlock(this.model, () => {
         this.model.edgeless.collapse = true;
         this.model.xywh = bound.serialize();
@@ -208,24 +208,30 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       return nothing;
     }
 
-    const { model, edgeless } = this;
-    const bound = Bound.deserialize(model.xywh);
-    if (bound.h >= this._noteFullHeight) {
+    const { xywh, edgeless } = this.model;
+
+    const bound = Bound.deserialize(xywh);
+    const scale = edgeless.scale ?? 1;
+    const width = bound.w / scale;
+    const height = bound.h / scale;
+
+    const rect = this._affineNote.getBoundingClientRect();
+    const zoom = this.edgeless.service.viewport.zoom;
+    this._noteFullHeight =
+      rect.height / scale / zoom + 2 * EDGELESS_BLOCK_CHILD_PADDING;
+
+    if (height >= this._noteFullHeight) {
       return nothing;
     }
-
-    const zoom = edgeless.service.viewport.zoom;
 
     return html`
       <div
         style=${styleMap({
-          width: `${bound.w}px`,
-          height: `${
-            this._noteFullHeight - EDGELESS_BLOCK_CHILD_PADDING / zoom - bound.h
-          }px`,
+          width: `${width}px`,
+          height: `${this._noteFullHeight - height}px`,
           position: 'absolute',
           left: '0px',
-          top: `${bound.h}px`,
+          top: `${height}px`,
           background: 'var(--affine-white)',
           opacity: 0.5,
           pointerEvents: 'none',
@@ -240,7 +246,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   override firstUpdated() {
     const { _disposables, edgeless } = this;
-    const selection = this.surface.edgeless.service.selection;
+    const selection = this.edgeless.service.selection;
 
     this._handleEditingTransition();
 
@@ -273,8 +279,9 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       if (!this._affineNote) return;
       const rect = affineNote.getBoundingClientRect();
       const zoom = this.edgeless.service.viewport.zoom;
+      const scale = this.model.edgeless.scale ?? 1;
       this._noteFullHeight =
-        (rect.height + 2 * EDGELESS_BLOCK_CHILD_PADDING) / zoom;
+        rect.height / scale / zoom + 2 * EDGELESS_BLOCK_CHILD_PADDING;
     });
     observer.observe(this, { childList: true, subtree: true });
     _disposables.add(() => observer.disconnect());
@@ -289,14 +296,17 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     const { xywh, background, edgeless } = model;
     const { borderRadius, borderSize, borderStyle, shadowType } =
       edgeless.style;
-    const { collapse, collapsedHeight } = edgeless;
+    const { collapse, collapsedHeight, scale = 1 } = edgeless;
+
     const bound = Bound.deserialize(xywh);
+    const width = bound.w / scale;
+    const height = bound.h / scale;
 
     const style = {
       position: 'absolute',
       zIndex: `${index}`,
-      width: `${bound.w}px`,
-      height: collapse ? `${bound.h}px` : 'inherit',
+      width: `${width}px`,
+      height: collapse ? `${height}px` : 'inherit',
       left: `${bound.x}px`,
       top: `${bound.y}px`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
@@ -304,6 +314,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       borderRadius: borderRadius + 'px',
       pointerEvents: 'all',
       transformOrigin: '0 0',
+      transform: `scale(${scale})`,
     };
 
     const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
@@ -312,7 +323,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       position: 'absolute',
       left: `${-extra}px`,
       top: `${-extra}px`,
-      width: `${bound.w + extra * 2}px`,
+      width: `${width + extra * 2}px`,
       height: `calc(100% + ${extra * 2}px)`,
       borderRadius: borderRadius + 'px',
       transition: this._editing
@@ -335,8 +346,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       collapsedHeight !== this._noteFullHeight;
 
     const isCollapseArrowUp = collapse
-      ? this._noteFullHeight < bound.h
-      : !!collapsedHeight && this._noteFullHeight > collapsedHeight;
+      ? this._noteFullHeight < height
+      : !!collapsedHeight && collapsedHeight < height;
 
     return html`
       <div

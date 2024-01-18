@@ -324,6 +324,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   @state()
   private _isNoteHeightLimit = false;
 
+  @state()
+  private _shiftKey = false;
+
   @property({ attribute: false })
   toolbarVisible = false;
 
@@ -380,6 +383,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     for (const element of elements) {
       if (isNoteBlock(element)) {
         areAllConnectors = false;
+        if (this._shiftKey) {
+          areAllShapes = false;
+          areAllTexts = false;
+        }
       } else if (isFrameBlock(element)) {
         areAllConnectors = false;
       } else if (
@@ -422,6 +429,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.edgeless.slots.elementResizeStart.emit();
     this.selection.elements.forEach(el => {
       el.stash('xywh');
+      el.stash('edgeless' as 'xywh');
 
       if (rotation) {
         el.stash('rotate' as 'xywh');
@@ -434,6 +442,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
       this._dragEndCallback.push(() => {
         el.pop('xywh');
+        el.pop('edgeless' as 'xywh');
 
         if (rotation) {
           el.pop('rotate' as 'xywh');
@@ -467,18 +476,32 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       if (isNoteBlock(element)) {
         const curBound = Bound.deserialize(element.xywh);
         const props: Partial<NoteBlockModel> = {};
-        if (curBound.h !== bound.h && !element.edgeless.collapse) {
+
+        let scale = element.edgeless.scale ?? 1;
+        let width = curBound.w / scale;
+        let height = curBound.h / scale;
+
+        if (this._shiftKey) {
+          scale = bound.w / width;
+        } else if (curBound.h !== bound.h) {
           edgeless.page.updateBlock(element, () => {
             element.edgeless.collapse = true;
+            element.edgeless.collapsedHeight = bound.h / scale;
           });
         }
 
-        bound.w = clamp(bound.w, NOTE_MIN_WIDTH, Infinity);
-        bound.h = clamp(bound.h, NOTE_MIN_HEIGHT, Infinity);
+        width = bound.w / scale;
+        width = clamp(width, NOTE_MIN_WIDTH, Infinity);
+        bound.w = width * scale;
 
-        this._isNoteWidthLimit = bound.w === NOTE_MIN_WIDTH ? true : false;
-        this._isNoteHeightLimit = bound.h === NOTE_MIN_HEIGHT ? true : false;
+        height = bound.h / scale;
+        height = clamp(height, NOTE_MIN_HEIGHT, Infinity);
+        bound.h = height * scale;
 
+        this._isNoteWidthLimit = width === NOTE_MIN_WIDTH ? true : false;
+        this._isNoteHeightLimit = height === NOTE_MIN_HEIGHT ? true : false;
+
+        props.edgeless = { ...element.edgeless, scale };
         props.xywh = bound.serialize();
         edgeless.service.updateElement(element.id, props);
       } else if (
@@ -758,9 +781,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
 
     _disposables.add(
-      slots.pressShiftKeyUpdated.on(pressed =>
-        this._resizeManager.onPressShiftKey(pressed)
-      )
+      slots.pressShiftKeyUpdated.on(pressed => {
+        this._shiftKey = pressed;
+        this._resizeManager.onPressShiftKey(pressed);
+        this._updateSelectedRect();
+      })
     );
 
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
