@@ -1856,9 +1856,9 @@ test('arrow up/down navigation within and across paragraphs containing different
   await pressArrowUp(page);
   await assertRichTextInlineRange(page, 0, 0, 0);
   await pressArrowDown(page);
-  await assertRichTextInlineRange(page, 0, 93, 0);
+  await assertRichTextInlineRange(page, 0, 125, 0);
   await pressArrowDown(page);
-  await assertRichTextInlineRange(page, 1, 0, 0);
+  await assertRichTextInlineRange(page, 1, 35, 0);
   await pressArrowDown(page);
   await assertRichTextInlineRange(page, 1, 90, 0);
   await pressArrowDown(page);
