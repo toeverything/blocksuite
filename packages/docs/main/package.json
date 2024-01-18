@@ -1,7 +1,7 @@
 {
-  "name": "@blocksuite/docs",
+  "name": "@blocksuite/docs-main",
   "version": "0.11.0",
-  "description": "BlockSuite documentation",
+  "description": "BlockSuite main site documentation",
   "private": true,
   "keywords": [],
   "author": "toeverything",
@@ -16,7 +16,7 @@
     "vue": "^3.4.5"
   },
   "scripts": {
-    "typedoc": "pnpm -C ../.. build:packages && typedoc --options ../../typedoc.json",
+    "typedoc": "pnpm -C ../../.. build:packages && typedoc --options ../../../typedoc.json",
     "dev": "pnpm run typedoc && vitepress dev --port 5200",
     "dev:nobuild": "vitepress dev --port 5200",
     "build": "pnpm run typedoc && vitepress build",
