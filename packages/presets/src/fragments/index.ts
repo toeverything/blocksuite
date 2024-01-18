@@ -4,5 +4,8 @@ export {
   FramePanel,
   registerFramePanelComponents,
 } from './frame-panel/frame-panel.js';
+export {
+  OutlinePanel,
+  registerOutlinePanelComponents,
+} from './outline-panel/outline-panel.js';
 export * from './page-meta-tags/page-meta-tags.js';
-export { registerTOCPanelComponents, TOCPanel } from './toc-panel/toc-panel.js';

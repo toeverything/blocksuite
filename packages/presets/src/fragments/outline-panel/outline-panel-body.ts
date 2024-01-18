@@ -16,12 +16,12 @@ import {
   type ClickBlockEvent,
   type DisplayModeChangeEvent,
   type FitViewEvent,
+  OutlineNoteCard,
   type SelectEvent,
-  TOCNoteCard,
-} from './toc-card.js';
+} from './outline-card.js';
 import { startDragging } from './utils/drag.js';
 
-type TOCNoteItem = {
+type OutlineNoteItem = {
   note: NoteBlockModel;
 
   /**
@@ -30,16 +30,16 @@ type TOCNoteItem = {
   index: number;
 
   /**
-   * the number displayed on the toc panel
+   * the number displayed on the outline panel
    */
   number: number;
 };
 
-noop(TOCNoteCard);
+noop(OutlineNoteCard);
 
-export class TOCPanelBody extends WithDisposable(LitElement) {
+export class OutlinePanelBody extends WithDisposable(LitElement) {
   static override styles = css`
-    .toc-panel-body-container {
+    .outline-panel-body-container {
       position: relative;
       display: flex;
       align-items: start;
@@ -103,10 +103,10 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   private _dragging = false;
 
   @state()
-  private _pageVisibleNotes: TOCNoteItem[] = [];
+  private _pageVisibleNotes: OutlineNoteItem[] = [];
 
   @state()
-  private _edgelessOnlyNotes: TOCNoteItem[] = [];
+  private _edgelessOnlyNotes: OutlineNoteItem[] = [];
 
   @property({ attribute: false })
   page!: Page;
@@ -141,8 +141,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   @query('.panel-list')
   panelListElement!: HTMLElement;
 
-  @query('.toc-panel-body-container')
-  tocPanelContainer!: HTMLElement;
+  @query('.outline-panel-body-container')
+  OutlinePanelContainer!: HTMLElement;
 
   @property({ attribute: false })
   fitPadding!: number[];
@@ -262,8 +262,8 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       return;
     }
 
-    const pageVisibleNotes: TOCNoteItem[] = [];
-    const edgelessOnlyNotes: TOCNoteItem[] = [];
+    const pageVisibleNotes: OutlineNoteItem[] = [];
+    const edgelessOnlyNotes: OutlineNoteItem[] = [];
     const oldSelectedSet = this._selected.reduce((pre, id) => {
       pre.add(id);
       return pre;
@@ -274,7 +274,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       if (!['affine:note'].includes(block.flavour)) return;
 
       const blockModel = block as NoteBlockModel;
-      const tocNoteItem = {
+      const OutlineNoteItem = {
         note: block as NoteBlockModel,
         index,
         number: index + 1,
@@ -284,9 +284,9 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
         blockModel.displayMode === NoteDisplayMode.EdgelessOnly ||
         (!blockModel.displayMode && blockModel.hidden)
       ) {
-        edgelessOnlyNotes.push(tocNoteItem);
+        edgelessOnlyNotes.push(OutlineNoteItem);
       } else {
-        pageVisibleNotes.push(tocNoteItem);
+        pageVisibleNotes.push(OutlineNoteItem);
         if (oldSelectedSet.has(block.id)) {
           newSelected.push(block.id);
         }
@@ -301,13 +301,15 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
   private _moveNotes(
     index: number,
     selected: string[],
-    notesMap: Map<string, TOCNoteItem>,
-    notes: TOCNoteItem[],
+    notesMap: Map<string, OutlineNoteItem>,
+    notes: OutlineNoteItem[],
     children: NoteBlockModel[]
   ) {
     if (!this._isEdgelessMode() || !children.length || !this.page.root) return;
 
-    const blocks = selected.map(id => (notesMap.get(id) as TOCNoteItem).note);
+    const blocks = selected.map(
+      id => (notesMap.get(id) as OutlineNoteItem).note
+    );
     const draggingBlocks = new Set(blocks);
     const targetIndex =
       index === notes.length ? notes[index - 1].index + 1 : notes[index].index;
@@ -377,7 +379,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
         number: index + 1,
       });
       return map;
-    }, new Map<string, TOCNoteItem>());
+    }, new Map<string, OutlineNoteItem>());
     const selected = this._selected.slice();
 
     startDragging({
@@ -385,7 +387,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       doc: this.ownerDocument,
       host: this.domHost ?? this.ownerDocument,
       page: this.page,
-      tocListContainer: this.panelListElement,
+      outlineListContainer: this.panelListElement,
       onDragEnd: insertIdx => {
         this._dragging = false;
         this.insertIndex = undefined;
@@ -406,9 +408,9 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
    */
   private _clickHandler(e: MouseEvent) {
     e.stopPropagation();
-    // check if click at toc-card, if so, do nothing
+    // check if click at outline-card, if so, do nothing
     if (
-      (e.target as HTMLElement).closest('toc-note-card') ||
+      (e.target as HTMLElement).closest('outline-note-card') ||
       this._selected.length === 0
     ) {
       return;
@@ -426,9 +428,9 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
    */
   private _doubleClickHandler(e: MouseEvent) {
     e.stopPropagation();
-    // check if click at toc-card, if so, do nothing
+    // check if click at outline-card, if so, do nothing
     if (
-      (e.target as HTMLElement).closest('toc-note-card') ||
+      (e.target as HTMLElement).closest('outline-note-card') ||
       !this.enableNotesSorting
     ) {
       return;
@@ -598,7 +600,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
    * 1. There are headings in the notes
    * 2. No headings, but there are blocks in the notes and note sorting option is enabled
    */
-  private _shouldRenderNoteList(noteItems: TOCNoteItem[]) {
+  private _shouldRenderNoteList(noteItems: OutlineNoteItem[]) {
     if (!noteItems.length) return false;
 
     let hasHeadings = false;
@@ -637,7 +639,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
             this._pageVisibleNotes,
             note => note.note.id,
             (note, idx) => html`
-              <toc-note-card
+              <outline-note-card
                 data-note-id=${note.note.id}
                 .note=${note.note}
                 .number=${idx + 1}
@@ -656,7 +658,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
                 @fitview=${this._fitToElement}
                 @clickblock=${this._scrollToBlock}
                 @displaymodechange=${this._handleDisplayModeChange}
-              ></toc-note-card>
+              ></outline-note-card>
             `
           )
         : html`${nothing}`}
@@ -666,7 +668,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
               this._edgelessOnlyNotes,
               note => note.note.id,
               (note, idx) =>
-                html`<toc-note-card
+                html`<outline-note-card
                   data-note-id=${note.note.id}
                   .note=${note.note}
                   .number=${idx + 1}
@@ -677,7 +679,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
                   .enableNotesSorting=${this.enableNotesSorting}
                   @fitview=${this._fitToElement}
                   @displaymodechange=${this._handleDisplayModeChange}
-                ></toc-note-card>`
+                ></outline-note-card>`
             )} `
         : nothing}
     </div>`;
@@ -702,7 +704,7 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
       !shouldRenderPageVisibleNotes && !shouldRenderEdgelessOnlyNotes;
 
     return html`
-      <div class="toc-panel-body-container">
+      <div class="outline-panel-body-container">
         ${shouldRenderEmptyPanel
           ? this._EmptyPanel()
           : this._PanelList(shouldRenderEdgelessOnlyNotes)}
@@ -713,6 +715,6 @@ export class TOCPanelBody extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'toc-panel-body': TOCPanelBody;
+    'outline-panel-body': OutlinePanelBody;
   }
 }
