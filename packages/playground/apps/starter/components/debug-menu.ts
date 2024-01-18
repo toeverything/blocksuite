@@ -14,8 +14,8 @@ import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
-import './left-side-panel';
-import './side-panel';
+import './left-side-panel.js';
+import './side-panel.js';
 
 import type { PageService, TreeNode } from '@blocksuite/blocks';
 import {

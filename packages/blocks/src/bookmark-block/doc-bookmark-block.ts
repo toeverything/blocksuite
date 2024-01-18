@@ -1,5 +1,5 @@
 import '../_common/components/embed-card/embed-card-caption.js';
-import '../_common/components/embed-card/embed-card-toolbar';
+import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
