@@ -748,6 +748,7 @@ export default {
             xywh: '[-3230.750686784769,-585.5373386506271,364,187.5747734376902]',
             background: '--affine-tag-yellow',
             index: 'ar',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -816,6 +817,7 @@ export default {
             xywh: '[-3230.7506867847696,-360.3477223992635,364,187.5747734376902]',
             background: '--affine-tag-purple',
             index: 'as',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -858,6 +860,7 @@ export default {
             xywh: '[-3230.7506867847696,-135.15810614789996,364,187.5747734376902]',
             background: '--affine-tag-blue',
             index: 'at',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -900,6 +903,7 @@ export default {
             xywh: '[-3230.7506867847696,90.03151010346357,364,187.5747734376902]',
             background: '--affine-tag-green',
             index: 'au',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -942,6 +946,7 @@ export default {
             xywh: '[-1588.2917100465877,-1062.6691790295056,364,187.5747734376902]',
             background: '--affine-tag-yellow',
             index: 'b0f',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -1010,6 +1015,7 @@ export default {
             xywh: '[-2083.4026303752685,-180.88235683150273,364,187.5747734376902]',
             background: '--affine-tag-green',
             index: 'b0g',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -1052,6 +1058,7 @@ export default {
             xywh: '[-472.3772580133967,-499.5175294092313,364,187.5747734376902]',
             background: '--affine-tag-purple',
             index: 'b0fV',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -1094,6 +1101,7 @@ export default {
             xywh: '[-606.4977725778675,-441.2121382201028,364,187.5747734376902]',
             background: '--affine-tag-blue',
             index: 'b0i',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {

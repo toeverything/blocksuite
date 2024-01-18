@@ -1,4 +1,4 @@
-import './toc-setting-menu.js';
+import './outline-setting-menu.js';
 
 import { createButtonPopper } from '@blocksuite/blocks';
 import { WithDisposable } from '@blocksuite/lit';
@@ -18,7 +18,7 @@ const styles = css`
     padding: 8px 16px;
   }
 
-  .toc-panel-header-container {
+  .outline-panel-header-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -34,7 +34,7 @@ const styles = css`
     gap: 8px;
   }
 
-  .toc-panel-header-label {
+  .outline-panel-header-label {
     width: 119px;
     height: 22px;
     font-size: 14px;
@@ -76,7 +76,7 @@ const styles = css`
   }
 `;
 
-export class TOCPanelHeader extends WithDisposable(LitElement) {
+export class OutlinePanelHeader extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -120,9 +120,9 @@ export class TOCPanelHeader extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="toc-panel-header-container">
+    return html`<div class="outline-panel-header-container">
         <div class="note-setting-container">
-          <span class="toc-panel-header-label">Table of Contents</span>
+          <span class="outline-panel-header-label">Table of Contents</span>
           <edgeless-tool-icon-button
             class="note-setting-button ${this._settingPopperShow
               ? 'active'
@@ -150,16 +150,16 @@ export class TOCPanelHeader extends WithDisposable(LitElement) {
         </edgeless-tool-icon-button>
       </div>
       <div class="note-preview-setting-container">
-        <toc-note-preview-setting-menu
+        <outline-note-preview-setting-menu
           .showPreviewIcon=${this.showPreviewIcon}
           .toggleShowPreviewIcon=${this.toggleShowPreviewIcon}
-        ></toc-note-preview-setting-menu>
+        ></outline-note-preview-setting-menu>
       </div>`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'toc-panel-header': TOCPanelHeader;
+    'outline-panel-header': OutlinePanelHeader;
   }
 }

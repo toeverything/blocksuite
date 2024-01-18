@@ -580,6 +580,39 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context.skipAllChildren();
           break;
         }
+        case 'affine:bookmark': {
+          // Parse bookmark as link
+          if (
+            typeof o.node.props.title !== 'string' ||
+            typeof o.node.props.url !== 'string'
+          ) {
+            break;
+          }
+          context
+            .openNode(
+              {
+                type: 'paragraph',
+                children: [],
+              },
+              'children'
+            )
+            .openNode(
+              {
+                type: 'link',
+                url: o.node.props.url,
+                children: [
+                  {
+                    type: 'text',
+                    value: o.node.props.title,
+                  },
+                ],
+              },
+              'children'
+            )
+            .closeNode()
+            .closeNode();
+          break;
+        }
       }
     });
     walker.setLeave(async (o, context) => {
