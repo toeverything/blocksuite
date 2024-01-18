@@ -139,7 +139,9 @@ export class LayerManager {
               block instanceof EdgelessBlockModel &&
               renderableInEdgeless(page, surface, block))
           ) {
-            this.update(block as EdgelessBlockModel);
+            this.update(block as EdgelessBlockModel, {
+              [payload.props.key]: true,
+            });
           }
         }
         if (payload.type === 'delete') {
@@ -153,23 +155,23 @@ export class LayerManager {
     );
 
     this._disposables.add(
-      surface.elementAdded.on(element =>
-        this.add(surface.getElementById(element.id)!)
+      surface.elementAdded.on(payload =>
+        this.add(surface.getElementById(payload.id)!)
       )
     );
     this._disposables.add(
-      surface.elementUpdated.on(element => {
+      surface.elementUpdated.on(payload => {
         if (
-          element.props['index'] ||
-          element.props['xywh'] ||
-          element.props['externalXYWH']
+          payload.props['index'] ||
+          payload.props['xywh'] ||
+          payload.props['externalXYWH']
         ) {
-          this.update(surface.getElementById(element.id)!);
+          this.update(surface.getElementById(payload.id)!, payload.props);
         }
       })
     );
     this._disposables.add(
-      surface.elementRemoved.on(element => this.delete(element.model!))
+      surface.elementRemoved.on(payload => this.delete(payload.model!))
     );
   }
 

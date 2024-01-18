@@ -793,10 +793,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     )}`;
 
     return html`${this.renderModel(this.surfaceBlockModel)}
-      <edgeless-block-portal-container
-        .edgeless=${this}
-        .frames=${this.service.frames}
-      >
+      <edgeless-block-portal-container .edgeless=${this}>
       </edgeless-block-portal-container>
       <edgeless-frames-container
         .surface=${this.surface}

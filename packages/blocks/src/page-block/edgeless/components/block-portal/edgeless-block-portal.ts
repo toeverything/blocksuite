@@ -13,7 +13,6 @@ import '../presentation/edgeless-navigator-black-background.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BlockModel } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -101,9 +100,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
-
-  @property({ attribute: false })
-  frames!: FrameBlockModel[];
 
   @query('.affine-block-children-container.edgeless')
   container!: HTMLDivElement;
@@ -241,18 +237,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      edgeless.surface.model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-
-    _disposables.add(
-      (page.root as BlockModel).childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-
-    _disposables.add(
       page.slots.blockUpdated.on(({ type, flavour }) => {
         if (
           (type === 'add' || type === 'delete') &&
@@ -338,7 +322,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           <edgeless-frames-container
             .surface=${surface}
             .edgeless=${edgeless}
-            .frames=${this.frames}
+            .frames=${service.layer.frames}
           >
           </edgeless-frames-container>
           ${readonly || this._isResizing
