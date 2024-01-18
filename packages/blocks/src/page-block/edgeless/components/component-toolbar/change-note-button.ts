@@ -3,6 +3,7 @@ import '../toolbar/shape/shape-menu.js';
 import '../panel/color-panel.js';
 import './component-toolbar-menu-divider.js';
 import '../panel/note-shadow-panel.js';
+import '../panel/note-display-mode-panel.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -11,15 +12,14 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import {
   ExpandIcon,
-  HiddenIcon,
   LineStyleIcon,
   NoteCornerIcon,
   NoteShadowIcon,
-  NoteSmallIcon,
   ShrinkIcon,
   SmallArrowDownIcon,
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import { NoteDisplayMode } from '../../../../_common/types.js';
 import { matchFlavours } from '../../../../_common/utils/model.js';
 import { type NoteBlockModel } from '../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../surface-block/index.js';
@@ -59,44 +59,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         gap: 12px;
       }
 
-      .hidden-status {
-        font-size: 12px;
-        color: var(--affine-text-secondary-color);
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        cursor: pointer;
-        width: 151px;
-      }
-
-      .hidden-status:hover {
-        background: var(--affine-hover-color);
-        border-radius: 4px;
-      }
-
-      .hidden-status .unhover {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        gap: 4px;
-      }
-
-      .hidden-status:hover .unhover {
-        display: none;
-      }
-
-      .hidden-status .hover {
-        display: none;
-      }
-
-      .hidden-status:hover .hover {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        gap: 4px;
-      }
-
       .fill-color-container {
         display: flex;
         justify-content: center;
@@ -118,6 +80,31 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         background-color: var(--affine-hover-color);
       }
 
+      .display-mode-button-group {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 20px;
+      }
+
+      .display-mode-button {
+        display: flex;
+        border-radius: 4px;
+        background-color: var(--affine-hover-color);
+        align-items: center;
+        gap: 2px;
+        padding: 2px;
+      }
+
+      .current-mode-label {
+        display: flex;
+        padding: 2px 0px 2px 4px;
+        align-items: center;
+      }
+
       edgeless-size-panel {
         border-radius: 8px;
       }
@@ -132,15 +119,15 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         border-radius: 8px;
       }
 
-      edgeless-color-panel[data-show] {
-        display: flex;
-      }
+      note-display-mode-panel,
       edgeless-note-shadow-panel,
       edgeless-size-panel {
         display: none;
       }
 
+      note-display-mode-panel[data-show],
       edgeless-note-shadow-panel[data-show],
+      edgeless-color-panel[data-show],
       edgeless-size-panel[data-show] {
         display: flex;
       }
@@ -204,6 +191,13 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   private _shadowTypePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  @query('.display-mode-button-group')
+  private _displayModeButtonGroup!: HTMLDivElement;
+  @query('note-display-mode-panel')
+  private _displayModePanel!: HTMLDivElement;
+  private _displayModePopper: ReturnType<typeof createButtonPopper> | null =
+    null;
+
   private get page() {
     return this.surface.page;
   }
@@ -222,8 +216,13 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     });
   }
 
-  private _setNoteHidden(note: NoteBlockModel, hidden: boolean) {
-    this.page.updateBlock(note, { hidden });
+  private _setDisplayMode(note: NoteBlockModel, newMode: NoteDisplayMode) {
+    const { displayMode: currentMode } = note;
+    if (newMode === currentMode) {
+      return;
+    }
+
+    this.page.updateBlock(note, { displayMode: newMode });
 
     const noteParent = this.page.getParent(note);
     assertExists(noteParent);
@@ -233,10 +232,20 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     const noteParentLastNote =
       noteParentChildNotes[noteParentChildNotes.length - 1];
 
-    if (!hidden && note !== noteParentLastNote) {
+    if (
+      currentMode === NoteDisplayMode.EdgelessOnly &&
+      newMode !== NoteDisplayMode.EdgelessOnly &&
+      note !== noteParentLastNote
+    ) {
       // move to the end
       this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
     }
+
+    // if change note to page only, should clear the selection
+    if (newMode === NoteDisplayMode.DocOnly) {
+      this.surface.edgeless.selectionManager.clear();
+    }
+
     this._queryCache = !this._queryCache;
   }
 
@@ -289,16 +298,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.notes.forEach(note => {
       const { collapse, collapsedHeight } = note.edgeless;
 
-      const bound = Bound.deserialize(note.xywh);
       if (collapse) {
         this.page.updateBlock(note, () => {
-          note.edgeless.collapsedHeight = bound.h;
           note.edgeless.collapse = false;
         });
-      } else {
-        if (collapsedHeight) {
-          bound.h = collapsedHeight;
-        }
+      } else if (collapsedHeight) {
+        const { xywh, edgeless } = note;
+        const bound = Bound.deserialize(xywh);
+        bound.h = collapsedHeight * (edgeless.scale ?? 1);
         this.page.updateBlock(note, () => {
           note.edgeless.collapse = true;
           note.xywh = bound.serialize();
@@ -308,9 +315,33 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.requestUpdate();
   }
 
+  private _getCurrentModeLabel(mode: NoteDisplayMode) {
+    switch (mode) {
+      case NoteDisplayMode.DocAndEdgeless:
+        return 'Both';
+      case NoteDisplayMode.EdgelessOnly:
+        return 'Edgeless';
+      case NoteDisplayMode.DocOnly:
+        return 'Page';
+      default:
+        return 'Both';
+    }
+  }
+
   override updated(_changedProperties: PropertyValues) {
     const { _disposables } = this;
     if (_changedProperties.has('_queryCache')) {
+      this._displayModePopper = createButtonPopper(
+        this._displayModeButtonGroup,
+        this._displayModePanel,
+        ({ display }) => {
+          this._showPopper = display === 'show';
+        },
+        -154,
+        90
+      );
+      _disposables.add(this._displayModePopper);
+
       this._fillColorPopper = createButtonPopper(
         this._fillColorButton,
         this._fillColorMenu,
@@ -351,42 +382,42 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   override render() {
     const length = this.notes.length;
     const note = this.notes[0];
-    const { hidden, background, edgeless } = note;
+    const { background, edgeless, displayMode } = note;
     const { shadowType, borderRadius, borderSize, borderStyle } =
       edgeless.style;
 
     const { collapse } = edgeless;
+    const currentMode = this._getCurrentModeLabel(displayMode);
 
     return html`
       ${length === 1
-        ? html`<div
-              class="hidden-status"
-              @click=${() => this._setNoteHidden(note, !hidden)}
-            >
-              ${hidden
-                ? html`<div class="unhover">
-                      ${HiddenIcon} Hide in Page Mode
-                    </div>
-                    <div class="hover">${NoteSmallIcon} Show in Page Mode</div>
-                    <affine-tooltip
-                      >Show this node in both page and edgeless
-                      mode</affine-tooltip
-                    >`
-                : html`<div class="unhover">
-                      ${NoteSmallIcon} Shown in Page Mode
-                    </div>
-                    <div class="hover">${HiddenIcon} Hide in Page Mode</div>
-                    <affine-tooltip
-                      >Only show this note here, but not in page
-                      mode</affine-tooltip
-                    > `}
+        ? html`<div class="display-mode-button-group">
+              <span>Show in</span>
+              <edgeless-tool-icon-button
+                .tooltip=${this._showPopper ? '' : 'Display Mode'}
+                .iconContainerPadding=${0}
+                @click=${() => this._displayModePopper?.toggle()}
+              >
+                <div class="display-mode-button">
+                  <span class="current-mode-label">${currentMode}</span>
+                  ${SmallArrowDownIcon}
+                </div>
+              </edgeless-tool-icon-button>
             </div>
+            <note-display-mode-panel
+              .displayMode=${displayMode}
+              .onSelect=${(newMode: NoteDisplayMode) => {
+                this._setDisplayMode(note, newMode);
+                this._displayModePopper?.hide();
+              }}
+            >
+            </note-display-mode-panel>
 
             <component-toolbar-menu-divider
               .vertical=${true}
             ></component-toolbar-menu-divider>`
         : nothing}
-      ${hidden
+      ${displayMode === NoteDisplayMode.DocOnly
         ? nothing
         : html`
             <edgeless-tool-icon-button

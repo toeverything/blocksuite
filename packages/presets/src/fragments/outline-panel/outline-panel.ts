@@ -5,13 +5,13 @@ import { css, html, LitElement, type PropertyValues, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../editors/editor-container.js';
-import { TOCNoteCard } from './toc-card.js';
-import { TOCPanelBody } from './toc-panel-body.js';
-import { TOCPanelHeader } from './toc-panel-header.js';
-import { TOCBlockPreview } from './toc-preview.js';
-import { TOCNotePreviewSettingMenu } from './toc-setting-menu.js';
+import { OutlineNoteCard } from './outline-card.js';
+import { OutlinePanelBody } from './outline-panel-body.js';
+import { OutlinePanelHeader } from './outline-panel-header.js';
+import { OutlineBlockPreview } from './outline-preview.js';
+import { OutlineNotePreviewSettingMenu } from './outline-setting-menu.js';
 
-export class TOCPanel extends WithDisposable(LitElement) {
+export class OutlinePanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: block;
@@ -19,7 +19,7 @@ export class TOCPanel extends WithDisposable(LitElement) {
       height: 100%;
     }
 
-    .toc-panel-container {
+    .outline-panel-container {
       background-color: var(--affine-background-primary-color);
       box-sizing: border-box;
 
@@ -32,7 +32,7 @@ export class TOCPanel extends WithDisposable(LitElement) {
       padding-top: 8px;
     }
 
-    .toc-panel-body {
+    .outline-panel-body {
       flex-grow: 1;
       width: 100%;
 
@@ -122,15 +122,15 @@ export class TOCPanel extends WithDisposable(LitElement) {
 
   override render() {
     return html`
-      <div class="toc-panel-container">
-        <toc-panel-header
+      <div class="outline-panel-container">
+        <outline-panel-header
           .showPreviewIcon=${this.showPreviewIcon}
           .enableNotesSorting=${this.enableNotesSorting}
           .toggleShowPreviewIcon=${this._toggleShowPreviewIcon}
           .toggleNotesSorting=${this._toggleNotesSorting}
-        ></toc-panel-header>
-        <toc-panel-body
-          class="toc-panel-body"
+        ></outline-panel-header>
+        <outline-panel-body
+          class="outline-panel-body"
           .page=${this.page}
           .fitPadding=${this.fitPadding}
           .edgeless=${this.edgeless}
@@ -140,7 +140,7 @@ export class TOCPanel extends WithDisposable(LitElement) {
           .enableNotesSorting=${this.enableNotesSorting}
           .toggleNotesSorting=${this._toggleNotesSorting}
         >
-        </toc-panel-body>
+        </outline-panel-body>
       </div>
     `;
   }
@@ -148,20 +148,20 @@ export class TOCPanel extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'toc-panel': TOCPanel;
+    'outline-panel': OutlinePanel;
   }
 }
 
 const componentsMap = {
-  'toc-note-card': TOCNoteCard,
-  'toc-block-preview': TOCBlockPreview,
-  'toc-panel': TOCPanel,
-  'toc-note-preview-setting-menu': TOCNotePreviewSettingMenu,
-  'toc-panel-body': TOCPanelBody,
-  'toc-panel-header': TOCPanelHeader,
+  'outline-note-card': OutlineNoteCard,
+  'outline-block-preview': OutlineBlockPreview,
+  'outline-panel': OutlinePanel,
+  'outline-note-preview-setting-menu': OutlineNotePreviewSettingMenu,
+  'outline-panel-body': OutlinePanelBody,
+  'outline-panel-header': OutlinePanelHeader,
 };
 
-export function registerTOCPanelComponents(
+export function registerOutlinePanelComponents(
   callback: (components: typeof componentsMap) => void
 ) {
   callback(componentsMap);

@@ -1,8 +1,8 @@
 import { on, once } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 
-import { type TOCNoteCard } from '../toc-card.js';
-import type { TOCPanelBody } from '../toc-panel-body.js';
+import { type OutlineNoteCard } from '../outline-card.js';
+import type { OutlinePanelBody } from '../outline-panel-body.js';
 
 /**
  * start drag notes
@@ -11,17 +11,19 @@ import type { TOCPanelBody } from '../toc-panel-body.js';
 export function startDragging(options: {
   onDragEnd?: (insertIndex?: number) => void;
   onDragMove?: (insertIdx?: number, indicatorTranslateY?: number) => void;
-  tocListContainer: HTMLElement;
+  outlineListContainer: HTMLElement;
   doc: Document;
   host: Document | HTMLElement;
-  container: TOCPanelBody;
+  container: OutlinePanelBody;
   page: Page;
 }) {
-  const { doc, host, container, onDragMove, onDragEnd, tocListContainer } =
+  const { doc, host, container, onDragMove, onDragEnd, outlineListContainer } =
     options;
   const maskElement = createMaskElement(doc);
-  const listContainerRect = tocListContainer.getBoundingClientRect();
-  const children = Array.from(tocListContainer.children) as TOCNoteCard[];
+  const listContainerRect = outlineListContainer.getBoundingClientRect();
+  const children = Array.from(
+    outlineListContainer.children
+  ) as OutlineNoteCard[];
   let idx: undefined | number;
   let indicatorTranslateY: undefined | number;
 
@@ -48,7 +50,7 @@ export function startDragging(options: {
       if (note.invisible || !note.note) break;
 
       const topBoundary =
-        listContainerRect.top + note.offsetTop - tocListContainer.scrollTop;
+        listContainerRect.top + note.offsetTop - outlineListContainer.scrollTop;
       const midBoundary = topBoundary + note.offsetHeight / 2;
       const bottomBoundary = topBoundary + note.offsetHeight;
 

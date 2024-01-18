@@ -1,17 +1,13 @@
+import '../fragments/doc-title/doc-title.js';
+import '../fragments/page-meta-tags/page-meta-tags.js';
+import './doc-editor.js';
+import '../fragments/bi-directional-link/bi-directional-link-panel.js';
+
 import { DocEditorBlockSpecs } from '@blocksuite/blocks';
-import { noop } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-
-import { DocTitle } from '../fragments/doc-title/doc-title.js';
-import { PageMetaTags } from '../fragments/page-meta-tags/page-meta-tags.js';
-import { DocEditor } from './doc-editor.js';
-
-noop(DocTitle);
-noop(PageMetaTags);
-noop(DocEditor);
 
 @customElement('affine-doc-editor')
 export class AffineDocEditor extends WithDisposable(ShadowlessElement) {
@@ -67,6 +63,9 @@ export class AffineDocEditor extends WithDisposable(ShadowlessElement) {
           .specs=${this.specs}
           .hasViewport=${false}
         ></doc-editor>
+        <bi-directional-link-panel
+          .page=${this.page}
+        ></bi-directional-link-panel>
       </div>
     `;
   }

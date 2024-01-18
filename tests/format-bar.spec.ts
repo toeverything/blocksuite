@@ -211,6 +211,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -268,6 +269,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -334,6 +336,7 @@ test('should format quick bar be able to change background color', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -381,6 +384,7 @@ test('should format quick bar be able to change background color', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -432,6 +436,7 @@ test('should format quick bar be able to change background color', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -488,6 +493,7 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -545,6 +551,7 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -597,6 +604,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -646,6 +654,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -696,6 +705,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -732,6 +742,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -771,6 +782,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -999,6 +1011,7 @@ test('should format quick bar work in single block selection', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1085,6 +1098,7 @@ test('should format quick bar work in multiple block selection', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1173,6 +1187,7 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1215,6 +1230,7 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1276,6 +1292,7 @@ test('should format quick bar show after convert to code block', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {

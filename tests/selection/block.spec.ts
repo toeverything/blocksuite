@@ -8,6 +8,7 @@ import {
   copyByKeyboard,
   dragBetweenCoords,
   dragBetweenIndices,
+  dragEmbedResizeByTopLeft,
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
@@ -261,6 +262,7 @@ test('should indent multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -315,6 +317,7 @@ test('should unindent multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -363,6 +366,7 @@ test('should unindent multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -418,7 +422,7 @@ test('should keep selection state when scrolling backward', async ({
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
 
-  const [viewport, container, distance] = await page.evaluate(() => {
+  const [, container, distance] = await page.evaluate(() => {
     const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
@@ -440,12 +444,11 @@ test('should keep selection state when scrolling backward', async ({
   });
 
   await page.mouse.move(0, 0);
-
   await dragBetweenCoords(
     page,
     {
       x: container.right + 1,
-      y: viewport.height - 1,
+      y: container.bottom,
     },
     {
       x: container.right - 1,
@@ -1188,6 +1191,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1312,18 +1316,18 @@ test('click bottom of page and if the last is embed block, editor should insert 
 }) => {
   await enterPlaygroundRoom(page);
   await initImageState(page);
+  await activeEmbed(page);
+  await dragEmbedResizeByTopLeft(page);
 
-  const pageRect = await page.evaluate(() => {
-    const pageBlock = document.querySelector('.affine-doc-viewport');
-    if (!pageBlock) {
+  const hostRect = await page.evaluate(() => {
+    const host = document.querySelector('editor-host');
+    if (!host) {
       throw new Error("Can't find doc viewport");
     }
-    return pageBlock.getBoundingClientRect();
+    return host.getBoundingClientRect();
   });
 
-  await page
-    .locator('.affine-doc-viewport')
-    .click({ position: { x: pageRect.width / 2, y: pageRect.bottom - 10 } });
+  await page.mouse.click(hostRect.x + hostRect.width / 2, hostRect.bottom - 10);
 
   await assertStoreMatchJSX(
     page,
@@ -1331,6 +1335,7 @@ test('click bottom of page and if the last is embed block, editor should insert 
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1346,12 +1351,12 @@ test('click bottom of page and if the last is embed block, editor should insert 
   >
     <affine:image
       prop:caption=""
-      prop:height={0}
+      prop:height={256.5}
       prop:index="a0"
       prop:rotate={0}
       prop:size={-1}
       prop:sourceId="ejImogf-Tb7AuKY-v94uz1zuOJbClqK-tWBxVr_ksGA="
-      prop:width={0}
+      prop:width={342}
     />
     <affine:paragraph
       prop:type="text"
@@ -1574,5 +1579,5 @@ test('scroll should update dragging area and select blocks when dragging', async
   await page.mouse.up();
 
   rects = page.locator('.selected,affine-block-selection');
-  await expect(rects).toHaveCount(3);
+  await expect(rects).toHaveCount(5);
 });

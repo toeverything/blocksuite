@@ -25,14 +25,14 @@ function assertType<T>(value: unknown): asserts value is T {
   noop(value);
 }
 
-export class TOCBlockPreview extends WithDisposable(LitElement) {
+export class OutlineBlockPreview extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: block;
       width: 100%;
     }
 
-    .toc-block-preview {
+    .outline-block-preview {
       width: 100%;
       box-sizing: border-box;
       padding: 6px 8px;
@@ -106,7 +106,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       padding-left: 24px;
     }
 
-    .toc-block-preview:not(:has(span)) {
+    .outline-block-preview:not(:has(span)) {
       display: none;
     }
 
@@ -319,7 +319,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="toc-block-preview">
+    return html`<div class="outline-block-preview">
       ${this.renderBlockByFlavour()}
     </div>`;
   }
@@ -327,6 +327,6 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'toc-block-preview': TOCBlockPreview;
+    'outline-block-preview': OutlineBlockPreview;
   }
 }

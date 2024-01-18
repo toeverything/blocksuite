@@ -11,6 +11,7 @@ import {
   asyncFocusRichText,
   getDocTitleInlineEditor,
   matchFlavours,
+  NoteDisplayMode,
 } from '../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { PageClipboard } from '../clipboard/index.js';
@@ -211,6 +212,18 @@ export class DocPageBlockComponent extends BlockElement<
 
   override firstUpdated() {
     this._initViewportResizeEffect();
+    const noteModels = this.model.children.filter(model =>
+      matchFlavours(model, ['affine:note'])
+    );
+    noteModels.forEach(note => {
+      this.disposables.add(
+        note.propsUpdated.on(({ key }) => {
+          if (key === 'displayMode') {
+            this.requestUpdate();
+          }
+        })
+      );
+    });
   }
 
   override connectedCallback() {
@@ -302,10 +315,15 @@ export class DocPageBlockComponent extends BlockElement<
       const lastNote = this.model.children
         .slice()
         .reverse()
-        .find(
-          child =>
-            child.flavour === 'affine:note' && !(child as NoteBlockModel).hidden
-        );
+        .find(child => {
+          const isNote = matchFlavours(child, ['affine:note']);
+          if (!isNote) return false;
+          const note = child as NoteBlockModel;
+          const displayOnDoc =
+            !!note.displayMode &&
+            note.displayMode !== NoteDisplayMode.EdgelessOnly;
+          return displayOnDoc;
+        });
       if (!lastNote) {
         if (readonly) return;
         noteId = this.page.addBlock('affine:note', {}, this.model.id);
@@ -359,9 +377,15 @@ export class DocPageBlockComponent extends BlockElement<
 
   override render() {
     const content = html`${repeat(
-      this.model.children.filter(
-        child => !(matchFlavours(child, ['affine:note']) && child.hidden)
-      ),
+      this.model.children.filter(child => {
+        const isNote = matchFlavours(child, ['affine:note']);
+        const note = child as NoteBlockModel;
+        const displayOnEdgeless =
+          !!note.displayMode &&
+          note.displayMode === NoteDisplayMode.EdgelessOnly;
+        // Should remove deprecated `hidden` property in the future
+        return !(isNote && (displayOnEdgeless || note.hidden));
+      }),
       child => child.id,
       child => this.renderModel(child)
     )}`;

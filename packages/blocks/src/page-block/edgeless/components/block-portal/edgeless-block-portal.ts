@@ -7,7 +7,6 @@ import './embed/edgeless-embed.js';
 import '../rects/edgeless-selected-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
 import '../../components/auto-connect/edgeless-index-label.js';
-import '../../components/auto-connect/edgeless-auto-connect-line.js';
 import '../component-toolbar/component-toolbar.js';
 import '../presentation/edgeless-navigator-black-background.js';
 
@@ -26,6 +25,7 @@ import {
 } from '../../../../_common/utils/event.js';
 import {
   matchFlavours,
+  NoteDisplayMode,
   type TopLevelBlockModel,
 } from '../../../../_common/utils/index.js';
 import type { SurfaceBlockComponent } from '../../../../index.js';
@@ -118,7 +118,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   canvasSlot!: HTMLDivElement;
 
   @state()
-  private _showAutoConnect = false;
+  private _showIndexLabel = false;
 
   @state()
   private _toolbarVisible = false;
@@ -188,7 +188,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     });
   }
 
-  private _updateAutoConnect() {
+  private _updateIndexLabel() {
     const { edgeless } = this;
     const { elements } = edgeless.selectionManager;
     if (
@@ -197,9 +197,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       (isNoteBlock(elements[0]) ||
         this._surfaceRefReferenceSet.has(elements[0].id))
     ) {
-      this._showAutoConnect = true;
+      this._showIndexLabel = true;
     } else {
-      this._showAutoConnect = false;
+      this._showIndexLabel = false;
     }
   }
 
@@ -258,7 +258,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         ) {
           requestConnectedFrame(() => {
             this._updateReference();
-            this._updateAutoConnect();
+            this._updateIndexLabel();
           }, this);
         }
       })
@@ -273,7 +273,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         } else {
           this._toolbarVisible = true;
         }
-        this._updateAutoConnect();
+        this._updateIndexLabel();
       })
     );
 
@@ -288,6 +288,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         this._isResizing = false;
       })
     );
+
+    _disposables.add(
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
+        const element = edgeless.surface.pickById(id);
+        if (isNoteBlock(element) && props && props['displayMode']) {
+          this.requestUpdate();
+        }
+      })
+    );
   }
 
   override render() {
@@ -299,23 +308,35 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     const notes = surface.getBlocks(['affine:note']);
     const layers = surface.layer.layers;
-    const autoConnectedBlocks = new Map<AutoConnectElement, number>();
+    const pageVisibleBlocks = new Map<AutoConnectElement, number>();
+    const edgelessOnlyNotesSet = new Set<NoteBlockModel>();
 
     notes.forEach(note => {
-      if (isNoteBlock(note) && !note.hidden) {
-        autoConnectedBlocks.set(note, 1);
+      if (isNoteBlock(note)) {
+        if (
+          note.displayMode === NoteDisplayMode.EdgelessOnly ||
+          (!note.displayMode && note.hidden)
+        ) {
+          edgelessOnlyNotesSet.add(note);
+        } else if (
+          note.displayMode === NoteDisplayMode.DocAndEdgeless ||
+          (!note.displayMode && !note.hidden)
+        ) {
+          pageVisibleBlocks.set(note, 1);
+        }
       }
+
       note.children.forEach(model => {
         if (matchFlavours(model, ['affine:surface-ref'])) {
           const reference = surface.pickById(
             model.reference
           ) as AutoConnectElement;
-          if (!autoConnectedBlocks.has(reference)) {
-            autoConnectedBlocks.set(reference, 1);
+          if (!pageVisibleBlocks.has(reference)) {
+            pageVisibleBlocks.set(reference, 1);
           } else {
-            autoConnectedBlocks.set(
+            pageVisibleBlocks.set(
               reference,
-              autoConnectedBlocks.get(reference)! + 1
+              pageVisibleBlocks.get(reference)! + 1
             );
           }
         }
@@ -324,12 +345,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     return html`
       <div class="affine-block-children-container edgeless">
-        <edgeless-auto-connect-line
-          .surface=${surface}
-          .show=${this._showAutoConnect}
-          .elementsMap=${autoConnectedBlocks}
-        >
-        </edgeless-auto-connect-line>
         <div class="affine-edgeless-layer">
           <edgeless-frames-container
             .surface=${surface}
@@ -398,10 +413,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         }}
       ></edgeless-selected-rect>
       <edgeless-index-label
-        .elementsMap=${autoConnectedBlocks}
+        .pageVisibleElementsMap=${pageVisibleBlocks}
+        .edgelessOnlyNotesSet=${edgelessOnlyNotesSet}
         .surface=${surface}
         .edgeless=${edgeless}
-        .show=${this._showAutoConnect}
+        .show=${this._showIndexLabel}
       ></edgeless-index-label>
       ${this._toolbarVisible && !page.readonly
         ? html`<edgeless-component-toolbar .edgeless=${edgeless}>

@@ -300,7 +300,7 @@ export function createEdgelessElement(
       'affine:note',
       {
         background: current.background,
-        hidden: current.hidden,
+        displayMode: current.displayMode,
         edgeless: current.edgeless,
         xywh: bound.serialize(),
       },

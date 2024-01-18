@@ -100,7 +100,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   undoManager!: Y.UndoManager;
 
-  // If it is true rich-test will prevent events related to clipboard bubbling up and handle them by itself.
+  // If it is true rich-text will prevent events related to clipboard bubbling up and handle them by itself.
   @property({ attribute: false })
   enableClipboard = true;
   // If it is true rich-text will handle undo/redo by itself. (including v-range restore)

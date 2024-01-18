@@ -695,6 +695,7 @@ export const FontPageIcon = fontIcon(PageIconSVG);
 export const FontLinkedPageIcon = fontIcon(LinkedPageSVG);
 
 export const PageIcon = icon(PageIconSVG, 20);
+export const SmallPageIcon = icon(PageIconSVG, 16);
 export const LinkedPageIcon = icon(LinkedPageSVG, 20);
 
 export const NewPageIcon = html`<svg
