@@ -1251,9 +1251,10 @@ test('should select texts on dragging around the page', async ({ page }) => {
 
   // blur
   await page.mouse.click(0, 0);
+  await waitNextFrame(page);
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
-  // ←
+  // →
   await page.mouse.move(coord.x + 26, coord.y + 90, { steps: 20 });
   await page.mouse.up();
   await page.keyboard.press('Backspace');
