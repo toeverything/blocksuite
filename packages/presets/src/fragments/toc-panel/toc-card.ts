@@ -1,6 +1,8 @@
 import {
+  createButtonPopper,
   getThemeMode,
   type NoteBlockModel,
+  NoteDisplayMode,
   on,
   once,
 } from '@blocksuite/blocks';
@@ -16,8 +18,10 @@ import {
   type PropertyValues,
   unsafeCSS,
 } from 'lit';
-import { property } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 
+import { HiddenIcon, SmallArrowDownIcon } from '../_common/icons.js';
 import { TOCBlockPreview } from './toc-preview.js';
 
 noop(TOCBlockPreview);
@@ -43,111 +47,170 @@ export type ClickBlockEvent = CustomEvent<{
   blockPath: string[];
 }>;
 
+export type DisplayModeChangeEvent = CustomEvent<{
+  note: NoteBlockModel;
+  newMode: NoteDisplayMode;
+}>;
+
+const styles = css`
+  :host {
+    display: block;
+    position: relative;
+  }
+
+  .card-container {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .card-preview {
+    position: relative;
+
+    width: 100%;
+
+    border-radius: 4px;
+    background-color: var(--affine-background-primary-color);
+
+    cursor: default;
+    user-select: none;
+  }
+
+  .card-preview:has(.card-header-container) {
+    padding: 4px 0px;
+  }
+
+  .card-preview.edgeless:hover {
+    background: var(--affine-hover-color);
+  }
+
+  .card-header-container {
+    padding: 0 8px;
+    width: 100%;
+    min-height: 28px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+  }
+
+  .card-header-container.enable-sorting {
+    display: flex;
+  }
+
+  .card-header-container .card-number {
+    text-align: center;
+    font-size: var(--affine-font-sm);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+    color: var(--affine-brand-color, #1e96eb);
+    font-weight: 500;
+    line-height: 14px;
+    line-height: 20px;
+  }
+
+  .card-header-container .card-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-header-container .card-divider {
+    height: 1px;
+    flex: 1;
+    border-top: 1px dashed var(--affine-border-color);
+    transform: translateY(50%);
+  }
+
+  .display-mode-button-group {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    padding: 2px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 20px;
+  }
+
+  .card-preview:hover .display-mode-button-group {
+    display: flex;
+  }
+
+  .display-mode-button-label {
+    color: var(--affine-text-primary-color);
+  }
+
+  .display-mode-button {
+    display: flex;
+    border-radius: 4px;
+    background-color: var(--affine-hover-color);
+    align-items: center;
+  }
+
+  .current-mode-label {
+    display: flex;
+    padding: 2px 0px 2px 4px;
+    align-items: center;
+  }
+
+  note-display-mode-panel {
+    display: none;
+  }
+
+  note-display-mode-panel[data-show] {
+    display: flex;
+  }
+
+  .card-content {
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+    user-select: none;
+    color: var(--affine-text-primary-color);
+  }
+
+  .card-preview.edgeless .card-content:hover {
+    cursor: pointer;
+  }
+
+  .card-preview.edgeless .card-header-container:hover {
+    cursor: grab;
+  }
+
+  .card-container.placeholder {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .card-container.selected .card-preview.edgeless {
+    background: var(--affine-hover-color);
+  }
+
+  .card-container.placeholder .card-preview.edgeless {
+    background: var(--affine-hover-color);
+    opacity: 0.9;
+  }
+
+  .card-container[data-sortable='true'] {
+    padding: 2px 0;
+  }
+
+  .card-container[data-invisible='true'] .card-header-container .card-number,
+  .card-container[data-invisible='true']
+    .card-header-container
+    .card-header-icon,
+  .card-container[data-invisible='true'] .card-preview .card-content {
+    color: var(--affine-text-disable-color);
+    pointer-events: none;
+  }
+
+  .card-preview.page toc-block-preview:hover {
+    color: var(--affine-brand-color);
+  }
+`;
+
 export class TOCNoteCard extends WithDisposable(LitElement) {
-  static override styles = css`
-    :host {
-      display: block;
-      position: relative;
-    }
-
-    .card-container {
-      position: relative;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-
-    .card-preview {
-      position: relative;
-
-      width: 100%;
-
-      border-radius: 4px;
-      background-color: var(--affine-background-primary-color);
-
-      cursor: default;
-      user-select: none;
-    }
-
-    .card-preview:has(.card-number-container) {
-      padding: 4px 0px;
-    }
-
-    .card-preview.edgeless:hover {
-      background: var(--affine-hover-color);
-    }
-
-    .card-number-container {
-      padding: 0 8px;
-      width: 100%;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-sizing: border-box;
-    }
-
-    .card-number-container .card-number {
-      text-align: center;
-      font-size: var(--affine-font-sm);
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      color: var(--affine-brand-color, #1e96eb);
-      font-weight: 500;
-      line-height: 14px;
-      line-height: 20px;
-    }
-
-    .card-number-container .card-divider {
-      height: 1px;
-      flex: 1;
-      border-top: 1px dashed var(--affine-border-color);
-      transform: translateY(50%);
-    }
-
-    .card-content {
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      user-select: none;
-      color: var(--affine-text-primary-color);
-    }
-
-    .card-preview.edgeless .card-content:hover {
-      cursor: pointer;
-    }
-
-    .card-preview.edgeless .card-number-container:hover {
-      cursor: grab;
-    }
-
-    .card-container.placeholder {
-      pointer-events: none;
-      opacity: 0.5;
-    }
-
-    .card-container.selected .card-preview.edgeless {
-      background: var(--affine-hover-color);
-    }
-
-    .card-container.placeholder .card-preview.edgeless {
-      background: var(--affine-hover-color);
-      opacity: 0.9;
-    }
-
-    .card-container[data-sortable='true'] {
-      padding: 2px 0;
-    }
-
-    .card-container[data-invisible='true'] .card-number-container .card-number,
-    .card-container[data-invisible='true'] .card-preview .card-content {
-      color: var(--affine-text-disable-color);
-      pointer-events: none;
-    }
-
-    .card-preview.page toc-block-preview:hover {
-      color: var(--affine-brand-color);
-    }
-  `;
+  static override styles = styles;
 
   @property({ attribute: false })
   page!: Page;
@@ -176,8 +239,15 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
   @property({ attribute: false })
   invisible = false;
 
-  @property({ attribute: false })
-  showCardNumber = true;
+  @state()
+  private _showPopper = false;
+
+  @query('.display-mode-button-group')
+  private _displayModeButtonGroup!: HTMLDivElement;
+  @query('note-display-mode-panel')
+  private _displayModePanel!: HTMLDivElement;
+  private _displayModePopper: ReturnType<typeof createButtonPopper> | null =
+    null;
 
   private _noteDisposables: DisposableGroup | null = null;
 
@@ -219,10 +289,37 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     );
   }
 
+  private _getCurrentModeLabel(mode: NoteDisplayMode) {
+    switch (mode) {
+      case NoteDisplayMode.DocAndEdgeless:
+        return 'Both';
+      case NoteDisplayMode.EdgelessOnly:
+        return 'Edgeless';
+      case NoteDisplayMode.DocOnly:
+        return 'Page';
+      default:
+        return 'Both';
+    }
+  }
+
   override updated(_changedProperties: PropertyValues) {
     if (_changedProperties.has('note') || _changedProperties.has('index')) {
       this._setNoteDisposables();
     }
+  }
+
+  override firstUpdated() {
+    this._displayModePopper = createButtonPopper(
+      this._displayModeButtonGroup,
+      this._displayModePanel,
+      ({ display }) => {
+        this._showPopper = display === 'show';
+      },
+      -144,
+      -60
+    );
+
+    this.disposables.add(this._displayModePopper);
   }
 
   private _dispatchSelectEvent(e: MouseEvent) {
@@ -298,11 +395,30 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     this.dispatchEvent(event);
   }
 
+  private _dispatchDisplayModeChangeEvent(
+    note: NoteBlockModel,
+    newMode: NoteDisplayMode
+  ) {
+    const event = new CustomEvent('displaymodechange', {
+      detail: {
+        note,
+        newMode,
+      },
+    });
+
+    this.dispatchEvent(event);
+  }
+
   override render() {
     if (this.note.isEmpty()) return nothing;
 
     const mode = getThemeMode();
-    const { children } = this.note;
+    const { children, displayMode } = this.note;
+    const currentMode = this._getCurrentModeLabel(displayMode);
+    const cardHeaderClasses = classMap({
+      'card-header-container': true,
+      'enable-sorting': this.enableNotesSorting,
+    });
 
     return html`
       <div
@@ -316,14 +432,38 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
           @click=${this._dispatchSelectEvent}
           @dblclick=${this._dispatchFitViewEvent}
         >
-        ${
-          this.showCardNumber && this.enableNotesSorting
-            ? html`<div class="card-number-container">
-                <span class="card-number">${this.number}</span>
-                <span class="card-divider"></span>
-              </div>`
-            : nothing
-        }
+        ${html`<div class=${cardHeaderClasses}>
+          ${this.invisible
+            ? html`<span class="card-header-icon">${HiddenIcon}</span>`
+            : html`<span class="card-number">${this.number}</span>`}
+          <span class="card-divider"></span>
+          <div class="display-mode-button-group">
+            <span class="display-mode-button-label">Show in</span>
+            <edgeless-tool-icon-button
+              .tooltip=${this._showPopper ? '' : 'Display Mode'}
+              .iconContainerPadding=${0}
+              @click=${(e: MouseEvent) => {
+                e.stopPropagation();
+                this._displayModePopper?.toggle();
+              }}
+              @dblclick=${(e: MouseEvent) => e.stopPropagation()}
+            >
+              <div class="display-mode-button">
+                <span class="current-mode-label">${currentMode}</span>
+                ${SmallArrowDownIcon}
+              </div>
+            </edgeless-tool-icon-button>
+          </div>
+          <note-display-mode-panel
+            .displayMode=${displayMode}
+            .panelWidth=${220}
+            .onSelect=${(newMode: NoteDisplayMode) => {
+              this._dispatchDisplayModeChangeEvent(this.note, newMode);
+              this._displayModePopper?.toggle();
+            }}
+          >
+          </note-display-mode-panel>
+        </div>`}
           <div class="card-content">
             ${children.map(block => {
               return html`<toc-block-preview

@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css, html, nothing } from 'lit';
+import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -7,7 +7,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   AutoConnectLeftIcon,
   AutoConnectRightIcon,
+  HiddenIcon,
 } from '../../../../_common/icons/edgeless.js';
+import { SmallPageIcon } from '../../../../_common/icons/text.js';
+import { requestConnectedFrame } from '../../../../_common/utils/event.js';
+import type { NoteBlockModel } from '../../../../models.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -46,6 +50,39 @@ function calculatePosition(gap: number, count: number, iconWidth: number) {
   }
 
   return positions;
+}
+
+function getIndexLabelTooltip(icon: TemplateResult, content: string) {
+  const styles = css`
+    .index-label-tooltip {
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 10px;
+    }
+
+    .index-label-tooltip-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .index-label-tooltip-content {
+      font-size: var(--affine-font-sm);
+
+      display: flex;
+      height: 16px;
+      line-height: 16px;
+    }
+  `;
+
+  return html`<style>
+      ${styles}
+    </style>
+    <div class="index-label-tooltip">
+      <span class="index-label-tooltip-icon">${icon}</span>
+      <span class="index-label-tooltip-content">${content}</span>
+    </div>`;
 }
 
 @customElement('edgeless-index-label')
@@ -110,7 +147,10 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   show = false;
 
   @property({ attribute: false })
-  elementsMap!: Map<AutoConnectElement, number>;
+  pageVisibleElementsMap!: Map<AutoConnectElement, number>;
+
+  @property({ attribute: false })
+  edgelessOnlyNotesSet!: Set<NoteBlockModel>;
 
   @state()
   private _index = -1;
@@ -130,14 +170,24 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
       const element = edgeless.service.getElementById(
         payload.id
       ) as AutoConnectElement;
-      if (element && this.elementsMap.has(element)) {
+      if (element && this.pageVisibleElementsMap.has(element)) {
+        this.requestUpdate();
+      }
+
+      if (isNoteBlock(element) && this.edgelessOnlyNotesSet.has(element)) {
         this.requestUpdate();
       }
     };
-    _disposables.add(edgeless.service.surface.elementUpdated.on(requestUpdate));
 
     _disposables.add(
-      edgeless.service.page.slots.blockUpdated.on(requestUpdate)
+      edgeless.surfaceBlockModel.elementUpdated.on(requestUpdate)
+    );
+    _disposables.add(
+      edgeless.page.slots.blockUpdated.on(payload => {
+        if (payload.type === 'update') {
+          requestUpdate(payload);
+        }
+      })
     );
 
     _disposables.add(
@@ -149,33 +199,29 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    requestAnimationFrame(() => {
-      if (edgeless.isConnected && edgeless.dispatcher) {
-        this._disposables.add(
-          edgeless.dispatcher.add('click', ctx => {
-            const event = ctx.get('pointerState');
-            const { raw } = event;
-            const target = raw.target as HTMLElement;
-            if (!target) return false;
-            if (target.closest('.edgeless-index-label')) {
-              const ele = target.closest('.edgeless-index-label') as Element;
-              const index = Number(ele.getAttribute('index'));
-              this._index = index === this._index ? -1 : index;
-              return true;
-            } else if (target.closest('.edgeless-auto-connect-next-button')) {
-              this._navigateToNext();
-              return true;
-            } else if (
-              target.closest('.edgeless-auto-connect-previous-button')
-            ) {
-              this._navigateToPrev();
-              return true;
-            }
-            return false;
-          })
-        );
-      }
-    });
+    requestConnectedFrame(() => {
+      this._disposables.add(
+        edgeless.dispatcher.add('click', ctx => {
+          const event = ctx.get('pointerState');
+          const { raw } = event;
+          const target = raw.target as HTMLElement;
+          if (!target) return false;
+          if (target.closest('.edgeless-index-label')) {
+            const ele = target.closest('.edgeless-index-label') as Element;
+            const index = Number(ele.getAttribute('index'));
+            this._index = index === this._index ? -1 : index;
+            return true;
+          } else if (target.closest('.edgeless-auto-connect-next-button')) {
+            this._navigateToNext();
+            return true;
+          } else if (target.closest('.edgeless-auto-connect-previous-button')) {
+            this._navigateToPrev();
+            return true;
+          }
+          return false;
+        })
+      );
+    }, edgeless);
   }
 
   override connectedCallback(): void {
@@ -189,7 +235,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   private _getElementsAndCounts() {
     const elements: AutoConnectElement[] = [];
     const counts: number[] = [];
-    for (const [key, value] of this.elementsMap.entries()) {
+    for (const [key, value] of this.pageVisibleElementsMap.entries()) {
       elements.push(key);
       counts.push(value);
     }
@@ -255,12 +301,12 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     </div> `;
   }
 
-  protected override render() {
-    if (!this.show) return nothing;
-
-    const { viewport } = this.surface.edgeless.service;
+  private _PageVisibleIndexLabels(
+    elements: AutoConnectElement[],
+    counts: number[]
+  ) {
+    const { viewport } = this.edgeless.service;
     const { zoom } = viewport;
-    const { elements, counts } = this._getElementsAndCounts();
     let index = 0;
 
     return html`${repeat(
@@ -277,7 +323,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
           height: iconWidth + 'px',
           position: 'absolute',
           transform: `translate(${left + width / 2 - 44 / 2}px, ${
-            right + height - 14
+            right + height + 16
           }px)`,
           display: 'flex',
           justifyContent: 'center',
@@ -301,6 +347,9 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
               class="edgeless-index-label"
             >
               ${index}
+              <affine-tooltip tip-position="bottom">
+                ${getIndexLabelTooltip(SmallPageIcon, 'Page mode index')}
+              </affine-tooltip>
             </div>
           `);
         }
@@ -328,7 +377,54 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
           ${components}
         </div>`;
       }
-    )}
+    )}`;
+  }
+
+  private _EdgelessOnlyLabels() {
+    const { edgelessOnlyNotesSet } = this;
+    if (!edgelessOnlyNotesSet.size) return nothing;
+
+    return html`${repeat(
+      edgelessOnlyNotesSet,
+      note => note.id,
+      note => {
+        const { viewport } = this.edgeless.service;
+        const { zoom } = viewport;
+        const bound = Bound.deserialize(note.xywh);
+        const [left, right] = viewport.toViewCoord(bound.x, bound.y);
+        const [width, height] = [bound.w * zoom, bound.h * zoom];
+        const style = styleMap({
+          width: '24px',
+          height: '24px',
+          borderRadius: '50%',
+          backgroundColor: 'var(--affine-text-secondary-color)',
+          border: '1px solid var(--affine-border-color)',
+          color: 'var(--affine-white)',
+          position: 'absolute',
+          transform: `translate(${left + width / 2 - 44 / 2}px, ${
+            right + height + 16
+          }px)`,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        });
+        return html`<div style=${style}>
+          ${HiddenIcon}
+          <affine-tooltip tip-position="bottom">
+            ${getIndexLabelTooltip(SmallPageIcon, 'Hidden on page')}
+          </affine-tooltip>
+        </div>`;
+      }
+    )}`;
+  }
+
+  protected override render() {
+    if (!this.show) return nothing;
+
+    const { elements, counts } = this._getElementsAndCounts();
+
+    return html`${this._PageVisibleIndexLabels(elements, counts)}
+    ${this._EdgelessOnlyLabels()}
     ${this._index >= 0 && this._index < elements.length
       ? this._NavigatorComponent(elements)
       : nothing} `;

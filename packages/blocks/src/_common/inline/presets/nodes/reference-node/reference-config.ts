@@ -11,6 +11,7 @@ export class ReferenceNodeConfig {
     | ((reference: AffineReference) => TemplateResult)
     | null = null;
   private _page: Page | null = null;
+  private _interactable = true;
 
   get customIcon() {
     return this._customIcon;
@@ -26,6 +27,14 @@ export class ReferenceNodeConfig {
 
   get customContent() {
     return this._customContent;
+  }
+
+  get interactable() {
+    return this._interactable;
+  }
+
+  setInteractable(interactable: boolean) {
+    this._interactable = interactable;
   }
 
   setCustomContent(content: ReferenceNodeConfig['_customContent']) {

@@ -20,6 +20,7 @@ import { BLOCK_ID_ATTR } from '../../_common/consts.js';
 import { listenToThemeChange } from '../../_common/theme/utils.js';
 import {
   type EdgelessTool,
+  NoteDisplayMode,
   Point,
   requestConnectedFrame,
   type Selectable,
@@ -351,6 +352,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       'affine:note',
       {
         xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
+        displayMode: NoteDisplayMode.EdgelessOnly,
       },
       parentId,
       noteIndex

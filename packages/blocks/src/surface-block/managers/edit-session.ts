@@ -9,7 +9,7 @@ import {
   NoteColorsSchema,
   NoteShadowsSchema,
 } from '../../_common/edgeless/note/consts.js';
-import { LineWidth } from '../../_common/types.js';
+import { LineWidth, NoteDisplayMode } from '../../_common/types.js';
 import {
   GET_DEFAULT_LINE_COLOR,
   GET_DEFAULT_TEXT_COLOR,
@@ -49,6 +49,7 @@ const CanvasTextFontStyleSchema = z.nativeEnum(CanvasTextFontStyle);
 const TextAlignSchema = z.nativeEnum(TextAlign);
 const TextVerticalAlignSchema = z.nativeEnum(TextVerticalAlign);
 const ShapeTypeSchema = z.nativeEnum(ShapeType);
+const NoteDisplayModeSchema = z.nativeEnum(NoteDisplayMode);
 
 const LastPropsSchema = z.object({
   connector: z.object({
@@ -93,7 +94,7 @@ const LastPropsSchema = z.object({
   }),
   'affine:note': z.object({
     background: NoteColorsSchema,
-    hidden: z.boolean(),
+    displayMode: NoteDisplayModeSchema.optional(),
     edgeless: z.object({
       style: z.object({
         borderRadius: z.number(),
@@ -172,7 +173,7 @@ export class EditSessionStorage {
     },
     'affine:note': {
       background: DEFAULT_NOTE_COLOR,
-      hidden: false,
+      displayMode: NoteDisplayMode.DocAndEdgeless,
       edgeless: {
         style: {
           borderRadius: 8,

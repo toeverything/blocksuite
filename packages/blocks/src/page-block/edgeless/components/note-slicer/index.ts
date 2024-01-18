@@ -297,7 +297,13 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
     const page = this.edgelessPage.page;
 
-    const { index: originIndex, xywh, background, children } = this._noteModel;
+    const {
+      index: originIndex,
+      xywh,
+      background,
+      children,
+      displayMode,
+    } = this._noteModel;
     const sliceIndex = children.findIndex(
       block => block.id === this._blockModel?.id
     );
@@ -308,6 +314,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       'affine:note',
       {
         background,
+        displayMode,
         xywh: serializeXYWH(
           x,
           sliceVerticalPos + EDGELESS_BLOCK_CHILD_PADDING + 30,

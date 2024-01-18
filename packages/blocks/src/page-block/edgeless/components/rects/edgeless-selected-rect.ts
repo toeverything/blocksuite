@@ -654,17 +654,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       rotate = elements[0].rotate;
     }
 
-    const isSingleNote = elements.length === 1 && isNoteBlock(elements[0]);
-    const isSingleHiddenNote =
-      isSingleNote && isNoteBlock(elements[0]) && elements[0].hidden;
-
     const padding = elements.length > 1 ? SELECTED_RECT_PADDING : 0;
 
     this._selectedRect = {
       width: width + padding * 2,
       height: height + padding * 2,
       borderWidth: selection.editing ? 2 : 1,
-      borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
+      borderStyle: 'solid',
       left: left - padding,
       top: top - padding,
       rotate,
