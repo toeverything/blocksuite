@@ -1729,7 +1729,7 @@ test('should collapse to end when press arrow-right on multi-line selection', as
   expect(await getSelectedText(page)).toBe('12345');
   await pressArrowRight(page);
   await pressBackspace(page);
-  await assertRichTexts(page, ['12', '456', '789']);
+  await assertRichTexts(page, ['123', '46', '789']);
 });
 
 test('should collapse to start when press arrow-left on multi-line selection', async ({
