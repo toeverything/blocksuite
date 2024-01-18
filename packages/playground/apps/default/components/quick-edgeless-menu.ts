@@ -31,13 +31,13 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { LeftSidePanel } from '../../starter/components/left-side-panel';
-import type { PagesPanel } from '../../starter/components/pages-panel';
+import type { LeftSidePanel } from '../../starter/components/left-side-panel.js';
+import type { PagesPanel } from '../../starter/components/pages-panel.js';
 import {
   generateRoomId,
   initCollaborationSocket,
-} from '../providers/websocket-channel';
-import { notify } from '../utils/notify';
+} from '../providers/websocket-channel.js';
+import { notify } from '../utils/notify.js';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -289,7 +289,9 @@ export class QuickEdgelessMenu extends ShadowlessElement {
         provider => provider.flavour === 'websocket-channel'
       )
     ) {
-      notify('There is already a websocket provider exists', 'neutral');
+      notify('There is already a websocket provider exists', 'neutral').catch(
+        console.error
+      );
       return;
     }
 

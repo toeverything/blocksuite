@@ -5,7 +5,7 @@ import {
   presets,
 } from 'vite-plugin-web-components-hmr';
 
-import { fineTuneHmr } from './fine-tune';
+import { fineTuneHmr } from './fine-tune.js';
 
 const customLitPath = path.resolve(
   __dirname,
