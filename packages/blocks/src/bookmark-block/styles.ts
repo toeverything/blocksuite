@@ -177,7 +177,7 @@ export const styles = css`
     .affine-bookmark-content-url > span {
       color: var(--affine-link-color);
     }
-    .affine-bookmark-content-url svg {
+    .affine-bookmark-content-url .open-icon {
       fill: var(--affine-link-color);
     }
   }

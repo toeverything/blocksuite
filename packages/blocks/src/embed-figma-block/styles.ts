@@ -188,7 +188,7 @@ export const styles = css`
     .affine-embed-figma-content-url > span {
       color: var(--affine-link-color);
     }
-    .affine-embed-figma-content-url svg {
+    .affine-embed-figma-content-url .open-icon {
       fill: var(--affine-link-color);
     }
   }

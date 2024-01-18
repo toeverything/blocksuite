@@ -13,6 +13,7 @@ export const PAGE_HEADER_HEIGHT = 53;
 
 export const EMBED_CARD_WIDTH: Record<EmbedCardStyle, number> = {
   horizontal: 752,
+  horizontalThin: 752,
   list: 752,
   vertical: 364,
   cube: 170,
@@ -22,6 +23,7 @@ export const EMBED_CARD_WIDTH: Record<EmbedCardStyle, number> = {
 
 export const EMBED_CARD_HEIGHT: Record<EmbedCardStyle, number> = {
   horizontal: 116,
+  horizontalThin: 80,
   list: 46,
   vertical: 390,
   cube: 114,

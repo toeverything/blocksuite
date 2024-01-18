@@ -8,6 +8,7 @@ export const EmbedLinkedDocStyles: EmbedCardStyle[] = [
   'horizontal',
   'list',
   'cube',
+  'horizontalThin',
 ] as const;
 
 export type EmbedLinkedDocBlockProps = {

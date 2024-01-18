@@ -166,8 +166,8 @@ export const styles = css`
       display: block;
     }
   }
-  .affine-embed-linked-doc-block.horizontal:not(.loading).deleted {
-    height: 80px;
+  .affine-embed-linked-doc-block.horizontalThin {
+    height: ${EMBED_CARD_HEIGHT.horizontalThin}px;
     background: var(--affine-background-secondary-color);
 
     .affine-embed-linked-doc-banner {
