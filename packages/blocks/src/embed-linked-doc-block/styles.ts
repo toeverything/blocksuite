@@ -77,6 +77,7 @@ export const styles = css`
     -webkit-box-orient: vertical;
     flex-grow: 1;
     white-space: normal;
+    word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--affine-text-primary-color);
