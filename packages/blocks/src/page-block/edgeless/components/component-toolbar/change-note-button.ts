@@ -298,16 +298,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.notes.forEach(note => {
       const { collapse, collapsedHeight } = note.edgeless;
 
-      const bound = Bound.deserialize(note.xywh);
       if (collapse) {
         this.page.updateBlock(note, () => {
-          note.edgeless.collapsedHeight = bound.h;
           note.edgeless.collapse = false;
         });
-      } else {
-        if (collapsedHeight) {
-          bound.h = collapsedHeight;
-        }
+      } else if (collapsedHeight) {
+        const { xywh, edgeless } = note;
+        const bound = Bound.deserialize(xywh);
+        bound.h = collapsedHeight * (edgeless.scale ?? 1);
         this.page.updateBlock(note, () => {
           note.edgeless.collapse = true;
           note.xywh = bound.serialize();

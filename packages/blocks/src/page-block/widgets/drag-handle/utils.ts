@@ -358,6 +358,7 @@ export function convertDragPreviewDocToEdgeless({
   cssSelector,
   width,
   height,
+  noteScale,
 }: OnDragEndProps & {
   blockComponent: BlockElement;
   cssSelector: string;
@@ -380,8 +381,8 @@ export function convertDragPreviewDocToEdgeless({
   const bound = new Bound(
     point[0],
     point[1],
-    width ?? previewEl.clientWidth,
-    height ?? previewEl.clientHeight
+    (width ?? previewEl.clientWidth) * noteScale,
+    (height ?? previewEl.clientHeight) * noteScale
   );
 
   const blockModel = blockComponent.model;

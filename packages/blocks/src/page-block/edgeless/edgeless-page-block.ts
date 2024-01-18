@@ -415,6 +415,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       noteIndex?: number;
       offsetX?: number;
       offsetY?: number;
+      scale?: number;
     } = {}
   ) {
     const {
@@ -424,12 +425,18 @@ export class EdgelessPageBlockComponent extends BlockElement<
       offsetY = DEFAULT_NOTE_OFFSET_Y,
       parentId = this.page.root?.id,
       noteIndex: noteIndex,
+      scale = 1,
     } = options;
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
     return this.surface.addElement(
       'affine:note',
       {
-        xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
+        xywh: serializeXYWH(
+          x - offsetX * scale,
+          y - offsetY * scale,
+          width,
+          height
+        ),
         displayMode: NoteDisplayMode.EdgelessOnly,
       },
       parentId,
