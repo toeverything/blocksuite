@@ -132,7 +132,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     const notePortalTop = notePortalRect.top;
     const notePortalBottom = notePortalRect.bottom;
 
-    for (let i = 0; i < this.anchorNote.children.length; i++) {
+    for (let i = 0; i < this.anchorNote.children.length - 1; i++) {
       const child = this.anchorNote.children[i];
       const rect = this.edgeless.host.view
         .viewFromPath('block', buildPath(child))
