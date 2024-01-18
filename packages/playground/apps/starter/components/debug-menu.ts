@@ -676,7 +676,7 @@ export class DebugMenu extends ShadowlessElement {
                 Switch Offset Mode
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleOutlinePanel}>
-                Toggle TOC Outline Panel
+                Toggle Outline Panel
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleFramePanel}>
                 Toggle Frame Panel

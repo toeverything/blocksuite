@@ -22,9 +22,9 @@ import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { HiddenIcon, SmallArrowDownIcon } from '../_common/icons.js';
-import { TOCBlockPreview } from './toc-preview.js';
+import { OutlineBlockPreview } from './outline-preview.js';
 
-noop(TOCBlockPreview);
+noop(OutlineBlockPreview);
 
 export type ReorderEvent = CustomEvent<{
   currentNumber: number;
@@ -204,12 +204,12 @@ const styles = css`
     pointer-events: none;
   }
 
-  .card-preview.page toc-block-preview:hover {
+  .card-preview.page outline-block-preview:hover {
     color: var(--affine-brand-color);
   }
 `;
 
-export class TOCNoteCard extends WithDisposable(LitElement) {
+export class OutlineNoteCard extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
@@ -466,7 +466,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
         </div>`}
           <div class="card-content">
             ${children.map(block => {
-              return html`<toc-block-preview
+              return html`<outline-block-preview
                 .block=${block}
                 .showPreviewIcon=${this.showPreviewIcon}
                 .disabledIcon=${this.invisible}
@@ -476,7 +476,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
                   if (this.editorMode === 'edgeless' || this.invisible) return;
                   this._dispatchClickBlockEvent(block);
                 }}
-              ></toc-block-preview>`;
+              ></outline-block-preview>`;
             })}
             </div>
           </div>
@@ -488,6 +488,6 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'toc-note-card': TOCNoteCard;
+    'outline-note-card': OutlineNoteCard;
   }
 }
