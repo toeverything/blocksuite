@@ -397,7 +397,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     }
   }
 
-  override firstUpdated() {
+  override connectedCallback(): void {
+    super.connectedCallback();
     const enableNoteSlicer =
       this.surface.service.editSession.getItem('enableNoteSlicer');
     this._enableNoteSlicer = enableNoteSlicer ?? false;

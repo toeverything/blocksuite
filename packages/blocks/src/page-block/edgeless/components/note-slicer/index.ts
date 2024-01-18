@@ -107,6 +107,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   private _noteDisposables: DisposableGroup | null = null;
 
   get _noteBlockElement() {
+    if (!this.editorHost) return null;
     const noteBlock = this.editorHost.view.viewFromPath(
       'block',
       buildPath(this.anchorNote)
@@ -114,40 +115,48 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     return noteBlock ? (noteBlock as NoteBlockComponent) : null;
   }
 
-  private _updateDivingLinePositions() {
-    if (!this.anchorNote) {
-      this._divingLinePositions = [];
-      return;
-    }
-
-    const children = this.anchorNote.children.slice(1);
-    this._divingLinePositions = children
-      .map(
-        child =>
-          this.edgeless.host.view
-            .viewFromPath('block', buildPath(child))
-            ?.getBoundingClientRect()
-      )
-      .filter((rect): rect is DOMRect => !!rect)
-      .map(rect => new Point(rect.x, rect.y - DIVIDING_LINE_OFFSET));
-  }
-
-  private _updateBlockIds() {
-    if (!this.anchorNote) {
-      this._noteBlockIds = [];
-      return;
-    }
-    this._noteBlockIds = this.anchorNote.children.map(c => c.id);
+  get _notePortalElement() {
+    return this._noteBlockElement?.closest('.edgeless-block-portal-note');
   }
 
   private _updateDivingLineAndBlockIds() {
-    this._updateDivingLinePositions();
-    this._updateBlockIds();
+    if (!this.anchorNote || !this._notePortalElement) {
+      this._divingLinePositions = [];
+      this._noteBlockIds = [];
+      return;
+    }
+
+    const divingLinePositions: Point[] = [];
+    const noteBlockIds: string[] = [];
+    const notePortalRect = this._notePortalElement.getBoundingClientRect();
+    const notePortalTop = notePortalRect.top;
+    const notePortalBottom = notePortalRect.bottom;
+
+    for (let i = 0; i < this.anchorNote.children.length; i++) {
+      const child = this.anchorNote.children[i];
+      const rect = this.edgeless.host.view
+        .viewFromPath('block', buildPath(child))
+        ?.getBoundingClientRect();
+
+      if (
+        rect &&
+        rect.bottom > notePortalTop &&
+        rect.bottom < notePortalBottom
+      ) {
+        divingLinePositions.push(
+          new Point(rect.x, rect.bottom + DIVIDING_LINE_OFFSET)
+        );
+        noteBlockIds.push(child.id);
+      }
+    }
+
+    this._divingLinePositions = divingLinePositions;
+    this._noteBlockIds = noteBlockIds;
   }
 
   private _updateActiveSlicerIndex(pos: Point) {
     const { _divingLinePositions } = this;
-    const curY = pos.y - DIVIDING_LINE_OFFSET;
+    const curY = pos.y + DIVIDING_LINE_OFFSET;
     let index = -1;
     for (let i = 0; i < _divingLinePositions.length; i++) {
       const { y } = _divingLinePositions[i];
