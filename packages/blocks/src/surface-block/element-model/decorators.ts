@@ -30,6 +30,12 @@ export function yfield(fallback?: unknown): PropertyDecorator {
           return;
         }
 
+        const derivedProps = getDeriveProperties(
+          prototype,
+          prop,
+          originalVal,
+          this
+        );
         const val = convertProps(prototype, prop, originalVal, this);
 
         if (this.yMap) {
@@ -47,7 +53,7 @@ export function yfield(fallback?: unknown): PropertyDecorator {
         }
 
         updateObserver(prototype, prop as string, this);
-        updateDerivedProp(prototype, prop as string, originalVal, this);
+        updateDerivedProp(derivedProps, this);
       },
     });
   };
@@ -63,11 +69,18 @@ export function local(): PropertyDecorator {
         const oldValue = this._local.get(prop);
         const newVal = convertProps(target, prop, originalValue, this);
 
+        const derivedProps = getDeriveProperties(
+          target,
+          prop,
+          originalValue,
+          this
+        );
+
         this._local.set(prop, newVal);
 
         if (state.creating) return;
 
-        updateDerivedProp(target, prop as string, originalValue, this);
+        updateDerivedProp(derivedProps, this);
 
         this._onChange({
           props: {
@@ -96,22 +109,28 @@ function setObjectMeta(
   target[symbol][prop] = val;
 }
 
-export function updateDerivedProp(
-  target: unknown,
+export function getDeriveProperties(
+  prototype: unknown,
   prop: string | symbol,
   propValue: unknown,
   receiver: unknown
 ) {
-  if (state.derive || state.creating) return;
+  if (state.derive || state.creating) return null;
 
-  const deriveFn = getDerivedMeta(target, prop as string)!;
+  const deriveFn = getDerivedMeta(prototype, prop as string)!;
 
-  if (deriveFn) {
+  return deriveFn ? deriveFn(propValue, receiver) : null;
+}
+
+export function updateDerivedProp(
+  derivedProps: Record<string, unknown> | null,
+  receiver: ElementModel
+) {
+  if (derivedProps) {
     state.derive = true;
-    const derived = deriveFn(propValue, receiver);
-    keys(derived).forEach(key => {
+    keys(derivedProps).forEach(key => {
       // @ts-ignore
-      receiver[key] = derived[key];
+      receiver[key] = derivedProps[key];
     });
     state.derive = false;
   }
@@ -125,6 +144,14 @@ function getDerivedMeta(
   return target[deriveSymbol]?.[prop] ?? null;
 }
 
+/**
+ * The derive decorator is used to derive other properties' update when the
+ * decorated property is updated.
+ * The decorator function will be called before the decorated property is updated.
+ * The decorator function will not execute in model creation.
+ * @param fn
+ * @returns
+ */
 export function derive<T extends ElementModel>(
   fn: (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

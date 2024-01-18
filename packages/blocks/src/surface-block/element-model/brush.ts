@@ -80,6 +80,22 @@ export class BrushElementModel extends ElementModel<BrushProps> {
   @yfield()
   color: string = '#000000';
 
+  @derive((lineWidth: number, instance: BrushElementModel) => {
+    const bound = instance.elementBound;
+    const points = instance.points;
+    const transformed = transformPointsToNewBound(
+      points.map(([x, y]) => ({ x, y })),
+      bound,
+      lineWidth / 2,
+      inflateBound(bound, lineWidth - instance.lineWidth),
+      lineWidth / 2
+    );
+
+    return {
+      points: transformed.points.map(p => [p.x, p.y]),
+      xywh: transformed.bound.serialize(),
+    };
+  })
   @yfield()
   lineWidth: number = 4;
 

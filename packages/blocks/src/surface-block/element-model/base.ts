@@ -21,6 +21,7 @@ import type { IVec } from '../utils/vec.js';
 import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
 import {
   convertProps,
+  getDeriveProperties,
   local,
   updateDerivedProp,
   yfield,
@@ -162,6 +163,12 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
       set: (original: unknown) => {
         const value = convertProps(prototype, prop as string, original, this);
         const oldValue = this._stashed.get(prop);
+        const derivedProps = getDeriveProperties(
+          prototype,
+          prop as string,
+          original,
+          this
+        );
 
         this._stashed.set(prop, value);
         this._onChange({
@@ -173,7 +180,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
           },
         });
 
-        updateDerivedProp(prototype, prop as string, original, this);
+        updateDerivedProp(derivedProps, this as unknown as ElementModel);
       },
     });
   }

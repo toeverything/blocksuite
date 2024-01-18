@@ -512,8 +512,8 @@ test.describe('group', () => {
       await waitNextFrame(page, 100);
       const move = await toViewCoord(page, [100, -50]);
       await page.mouse.click(move[0], move[1]);
+      await waitNextFrame(page, 1000);
       await pasteByKeyboard(page, false);
-      await waitNextFrame(page, 100);
       const copyedGroupId = await getFirstGroupId(page, [originGroupId]);
 
       await assertGroupIds(page, {
