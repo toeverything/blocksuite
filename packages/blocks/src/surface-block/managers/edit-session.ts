@@ -130,6 +130,7 @@ const SessionPropsSchema = z.object({
   presentHideToolbar: z.boolean(),
   templateCache: z.string(),
   remoteColor: z.string(),
+  enableNoteSlicer: z.boolean(),
 });
 
 type SessionProps = z.infer<typeof SessionPropsSchema>;
@@ -245,6 +246,8 @@ export class EditSessionStorage {
         return 'blocksuite:' + this._service.page.id + ':templateTool';
       case 'remoteColor':
         return 'blocksuite:remote-color';
+      case 'enableNoteSlicer':
+        return 'blocksuite:enable-note-slicer';
       default:
         return '';
     }

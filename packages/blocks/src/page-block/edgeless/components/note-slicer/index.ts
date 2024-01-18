@@ -5,7 +5,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { ScissorsIcon } from '../../../../_common/icons/edgeless.js';
+import { SmallScissorsIcon } from '../../../../_common/icons/edgeless.js';
 import {
   buildPath,
   getRectByBlockElement,
@@ -54,9 +54,11 @@ const styles = css`
     height: 24px;
     transform-origin: left top;
     z-index: var(--affine-z-index-popover);
+    opacity: 0;
+    transition: opacity 150ms cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
-  .note-slicer-diving-line {
+  .note-slicer-dividing-line {
     display: block;
     position: absolute;
     left: 0;
@@ -70,7 +72,7 @@ const styles = css`
     );
     background-size: 4px 100%;
   }
-  .note-slicer-diving-line.active {
+  .note-slicer-dividing-line.active {
     background-image: linear-gradient(
       to right,
       var(--affine-black-60) 50%,
@@ -176,7 +178,6 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
     disposables.add(
       this.edgeless.slots.viewportUpdated.on(() => {
-        this._updateDivingLinePositions();
         this.requestUpdate();
       })
     );
@@ -301,14 +302,15 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         style=${styleMap({
           left: `${buttonPosition.x - 66}px`,
           top: `${buttonPosition.y}px`,
+          opacity: 1,
           scale: `${this._zoom}`,
         })}
       >
-        ${ScissorsIcon}
+        ${SmallScissorsIcon}
       </div>
       ${this._divingLinePositions.map((pos, idx) => {
         const dividingLineClasses = classMap({
-          'note-slicer-diving-line': true,
+          'note-slicer-dividing-line': true,
           active: idx === this._activeSlicerIndex,
         });
         return html`<div

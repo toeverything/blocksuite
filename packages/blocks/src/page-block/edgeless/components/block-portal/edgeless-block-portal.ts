@@ -216,10 +216,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       elements.length === 1 &&
       isNoteBlock(elements[0])
     ) {
-      this._enableNoteSlicer = true;
       this._slicerAnchorNote = elements[0];
     } else {
-      this._enableNoteSlicer = false;
       this._slicerAnchorNote = null;
     }
   }
@@ -317,6 +315,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           this.requestUpdate();
         }
       })
+    );
+
+    const enableNoteSlicer =
+      edgeless.surface.service.editSession.getItem('enableNoteSlicer');
+    this._enableNoteSlicer = enableNoteSlicer ?? false;
+    _disposables.add(
+      edgeless.slots.noteSlicerSettingUpdated.on(
+        enableNoteSlicer => (this._enableNoteSlicer = enableNoteSlicer)
+      )
     );
   }
 

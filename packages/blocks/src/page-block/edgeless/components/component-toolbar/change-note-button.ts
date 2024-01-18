@@ -15,6 +15,7 @@ import {
   LineStyleIcon,
   NoteCornerIcon,
   NoteShadowIcon,
+  ScissorsIcon,
   ShrinkIcon,
   SmallArrowDownIcon,
 } from '../../../../_common/icons/index.js';
@@ -163,6 +164,9 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   @state()
   private _showPopper = false;
+
+  @state()
+  private _enableNoteSlicer = false;
 
   @query('.fill-color-button')
   private _fillColorButton!: HTMLDivElement;
@@ -315,6 +319,20 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.requestUpdate();
   }
 
+  private _handleNoteSlicerButtonClick() {
+    const surfaceService = this.surface.service;
+    if (!surfaceService) return;
+
+    this._enableNoteSlicer = !this._enableNoteSlicer;
+    this.surface.edgeless.slots.noteSlicerSettingUpdated.emit(
+      this._enableNoteSlicer
+    );
+    surfaceService.editSession.setItem(
+      'enableNoteSlicer',
+      this._enableNoteSlicer
+    );
+  }
+
   private _getCurrentModeLabel(mode: NoteDisplayMode) {
     switch (mode) {
       case NoteDisplayMode.DocAndEdgeless:
@@ -377,6 +395,12 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       );
       _disposables.add(this._borderRadiusPopper);
     }
+  }
+
+  override firstUpdated() {
+    const enableNoteSlicer =
+      this.surface.service.editSession.getItem('enableNoteSlicer');
+    this._enableNoteSlicer = enableNoteSlicer ?? false;
   }
 
   override render() {
@@ -511,6 +535,21 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       >
         ${collapse ? ExpandIcon : ShrinkIcon}
       </edgeless-tool-icon-button>
+
+      ${length === 1
+        ? html`<component-toolbar-menu-divider
+              .vertical=${true}
+            ></component-toolbar-menu-divider>
+            <edgeless-tool-icon-button
+              class="edgeless-note-slicer-button"
+              .tooltip=${'Cutting Mode'}
+              .iconContainerPadding=${2}
+              .active=${this._enableNoteSlicer}
+              @click=${this._handleNoteSlicerButtonClick}
+            >
+              ${ScissorsIcon}
+            </edgeless-tool-icon-button>`
+        : nothing}
     `;
   }
 }

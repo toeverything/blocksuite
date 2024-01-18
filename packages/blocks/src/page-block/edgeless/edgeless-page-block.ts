@@ -217,6 +217,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     elementRemoved: new Slot<{ id: string; element: EdgelessElement }>(),
     elementResizeStart: new Slot(),
     elementResizeEnd: new Slot(),
+    noteSlicerSettingUpdated: new Slot<boolean>(),
   };
 
   @query('affine-surface')

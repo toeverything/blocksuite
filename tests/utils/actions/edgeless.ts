@@ -748,7 +748,8 @@ type Action =
   | 'duplicate'
   | 'renameGroup'
   | 'autoSize'
-  | 'changeNoteDisplayMode';
+  | 'changeNoteDisplayMode'
+  | 'changeNoteSlicerSetting';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -933,6 +934,13 @@ export async function triggerComponentToolbarAction(
     case 'changeNoteDisplayMode': {
       const button = locatorComponentToolbar(page).locator(
         'edgeless-change-note-button .display-mode-button'
+      );
+      await button.click();
+      break;
+    }
+    case 'changeNoteSlicerSetting': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-change-note-button .edgeless-note-slicer-button'
       );
       await button.click();
       break;
