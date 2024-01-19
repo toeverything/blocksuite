@@ -472,7 +472,7 @@ test.describe('note slicer', () => {
     expect(buttonRectMiddle).toBeGreaterThan(
       secondBlockRect.y + secondBlockRect.height
     );
-    expect(buttonRectMiddle).toBeGreaterThan(thirdBlockRect.y);
+    expect(buttonRectMiddle).toBeLessThan(thirdBlockRect.y);
   });
 
   test('note slicer button should appears at right position when editor is not located at left top corner', async ({
