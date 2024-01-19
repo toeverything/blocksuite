@@ -201,16 +201,13 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   }
 
   private get _docPageElement() {
-    const affineDocEditor = this.closest('affine-doc-editor');
-    assertExists(affineDocEditor);
-    const docPageElement = affineDocEditor.querySelector('affine-doc-page');
+    const docPageElement = this.parentElement?.querySelector('affine-doc-page');
     assertExists(docPageElement);
     return docPageElement;
   }
 
   private get _host() {
-    const affineDocEditor = this.closest('affine-doc-editor');
-    return affineDocEditor?.querySelector('editor-host');
+    return this.parentElement?.querySelector('editor-host');
   }
 
   private get _links() {
