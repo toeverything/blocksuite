@@ -10,7 +10,6 @@ export type YBlock = Y.Map<unknown>;
 
 export type BlockOptions = Partial<{
   onChange: (block: Block, key: string, value: unknown) => void;
-  onYBlockUpdated: (block: Block, props: { key: string }) => void;
 }>;
 
 export class Block {
@@ -53,7 +52,6 @@ export class Block {
             this.model[keyName] = proxy;
           });
           this.model.propsUpdated.emit({ key: keyName });
-          this.options.onYBlockUpdated?.(this, { key: keyName });
           return;
         }
         if (type.action === 'delete') {
@@ -230,7 +228,6 @@ export class Block {
           if (this._stashed.has(p)) {
             const result = Reflect.set(target, p, value, receiver);
             this.options.onChange?.(this, p, value);
-            this.options.onYBlockUpdated?.(this, { key: p });
             return result;
           }
 
