@@ -184,8 +184,10 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     const curY = pos.y + DIVIDING_LINE_OFFSET * this._zoom;
     let index = -1;
     for (let i = 0; i < _divingLinePositions.length; i++) {
-      const { y } = _divingLinePositions[i];
-      if (curY < y) {
+      const currentY = _divingLinePositions[i].y;
+      const previousY = i > 0 ? _divingLinePositions[i - 1].y : 0;
+      const midY = (currentY + previousY) / 2;
+      if (curY < midY) {
         break;
       }
       index++;
@@ -336,6 +338,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
           top: `${buttonPosition.y}px`,
           opacity: 1,
           scale: `${this._zoom}`,
+          transform: 'translateY(-50%)',
         })}
       >
         ${SmallScissorsIcon}
