@@ -19,7 +19,7 @@ import {
 } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
-import type { NoteBlockModel } from '../../../../models.js';
+import type { BookmarkBlockModel, NoteBlockModel } from '../../../../models.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { TextElementModel } from '../../../../surface-block/element-model/text.js';
 import type { ElementModel } from '../../../../surface-block/index.js';
@@ -604,7 +604,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         } else {
           this._dragDirection = direction;
 
-          const cardStyle = element.style;
+          const cardStyle = (element as BookmarkBlockModel).style;
           const height = EMBED_CARD_HEIGHT[cardStyle];
           this._scalePercent = `${Math.round((bound.h / height) * 100)}%`;
         }
