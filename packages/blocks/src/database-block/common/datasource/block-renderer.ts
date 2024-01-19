@@ -1,8 +1,10 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { DatabaseBlockComponent } from '../../database-block.js';
 import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';
 import type { DetailSlotProps } from './base.js';
@@ -51,11 +53,18 @@ export class BlockRenderer
     return this.root?.page.getBlockById(this.rowId);
   }
 
+  get topContenteditableElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    assertExists(databaseBlock);
+    return databaseBlock.topContenteditableElement;
+  }
+
   public override connectedCallback() {
     super.connectedCallback();
     this.root = this.closest('editor-host') ?? undefined;
     this._disposables.addFromEvent(
-      this,
+      this.topContenteditableElement ?? this,
       'keydown',
       e => {
         if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {

@@ -127,6 +127,12 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     return inlineEditor;
   }
 
+  get topContenteditableElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    return databaseBlock?.topContenteditableElement;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -145,6 +151,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
     return html`<rich-text
       .yText=${this.value}
+      .inlineEventSource=${this.topContenteditableElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
       .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
@@ -212,6 +219,13 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     return inlineEditor;
   }
 
+  get topContenteditableElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    assertExists(databaseBlock);
+    return databaseBlock.topContenteditableElement;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -221,15 +235,14 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   }
 
   override firstUpdated() {
-    assertExists(this._richTextElement);
-    this.disposables.addFromEvent(
-      this._richTextElement,
-      'keydown',
-      this._handleKeyDown
-    );
-
     this._richTextElement?.updateComplete
-      .then(() => this.inlineEditor.focusEnd())
+      .then(() => {
+        this.disposables.add(
+          this.inlineEditor.slots.keydown.on(this._handleKeyDown)
+        );
+
+        this.inlineEditor.focusEnd();
+      })
       .catch(console.error);
   }
 
@@ -327,6 +340,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
 
     return html`<rich-text
       .yText=${this.value}
+      .inlineEventSource=${this.topContenteditableElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
       .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}

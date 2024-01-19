@@ -57,7 +57,7 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
     const values = this.value;
     const map = new Map<string, SelectTag>(this.options?.map(v => [v.id, v]));
     return html`
-      <div class="affine-select-cell-container">
+      <div contenteditable="false" class="affine-select-cell-container">
         ${repeat(values, id => {
           const option = map.get(id);
           if (!option) {

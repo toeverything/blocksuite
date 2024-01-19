@@ -319,6 +319,7 @@ export class ImageBlockPageComponent extends BlockElement<ImageBlockModel> {
     this.std.event.activate();
     if (e.isComposing) return;
     if (e.key === 'Enter') {
+      e.preventDefault();
       e.stopPropagation();
       const model = this.model;
       const page = model.page;

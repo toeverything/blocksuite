@@ -1515,6 +1515,11 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.disposables.addFromEvent(this, 'pointerdown', e => {
+      e.preventDefault();
+    });
+
     this.handleEvent('pointerMove', this._throttledPointerMoveHandler);
     this.handleEvent('click', this._clickHandler);
     this.handleEvent('dragStart', this._dragStartHandler);

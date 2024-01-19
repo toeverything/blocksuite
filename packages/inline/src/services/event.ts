@@ -1,8 +1,6 @@
-import { assertExists } from '@blocksuite/global/utils';
-
 import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { InlineEditor } from '../inline-editor.js';
-import type { NativePoint } from '../types.js';
+import type { InlineRange, NativePoint } from '../types.js';
 import {
   type BaseTextAttributes,
   findDocumentOrShadowRoot,
@@ -51,6 +49,11 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     );
     this.editor.disposables.addFromEvent(
       eventSource,
+      'compositionupdate',
+      this._onCompositionUpdate
+    );
+    this.editor.disposables.addFromEvent(
+      eventSource,
       'compositionend',
       (event: CompositionEvent) => {
         this._onCompositionEnd(event).catch(console.error);
@@ -64,12 +67,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
   };
 
-  private _isRangeCompletelyInRoot = () => {
-    const selectionRoot = findDocumentOrShadowRoot(this.editor);
-    const selection = selectionRoot.getSelection();
-    if (!selection || selection.rangeCount === 0) return false;
-    const range = selection.getRangeAt(0);
-
+  private _isRangeCompletelyInRoot = (range: Range) => {
     const rootElement = this.editor.rootElement;
     const rootRange = document.createRange();
     rootRange.selectNode(rootElement);
@@ -166,6 +164,7 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     }
   };
 
+  private _compositionInlineRange: InlineRange | null = null;
   private _onCompositionStart = () => {
     this._isComposing = true;
     // embeds is not editable and it will break IME
@@ -175,19 +174,48 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     embeds.forEach(embed => {
       embed.removeAttribute('contenteditable');
     });
+
+    const range = this.editor.rangeService.getNativeRange();
+    if (range) {
+      this._compositionInlineRange = this.editor.toInlineRange(range);
+    } else {
+      this._compositionInlineRange = null;
+    }
+  };
+
+  private _onCompositionUpdate = () => {
+    if (!this.editor.rootElement.isConnected) return;
+
+    const range = this.editor.rangeService.getNativeRange();
+    if (
+      this.editor.isReadonly ||
+      !range ||
+      !this._isRangeCompletelyInRoot(range)
+    )
+      return;
+
+    this.editor.slots.inputting.emit();
   };
 
   private _onCompositionEnd = async (event: CompositionEvent) => {
     this._isComposing = false;
     if (!this.editor.rootElement.isConnected) return;
 
+    const range = this.editor.rangeService.getNativeRange();
+    if (
+      this.editor.isReadonly ||
+      !range ||
+      !this._isRangeCompletelyInRoot(range)
+    )
+      return;
+
     this.editor.rerenderWholeEditor();
     await this.editor.waitForUpdate();
 
-    if (this.editor.isReadonly || !this._isRangeCompletelyInRoot()) return;
-
-    const inlineRange = this.editor.getInlineRange();
+    const inlineRange = this._compositionInlineRange;
     if (!inlineRange) return;
+
+    event.preventDefault();
 
     let ctx: CompositionEndHookCtx<TextAttributes> | null = {
       inlineEditor: this.editor,
@@ -203,73 +231,27 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
     if (!ctx) return;
 
     const { inlineRange: newInlineRange, data: newData } = ctx;
-    if (newInlineRange.index >= 0) {
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount !== 0) {
-        const range = selection.getRangeAt(0);
-        const container = range.startContainer;
-
-        // https://github.com/w3c/input-events/issues/137
-        // IME will directly modify the DOM and is difficult to hijack and cancel.
-        // We need to delete this part of the content and restore the selection.
-        if (container instanceof Text) {
-          if (container.parentElement?.dataset.vText !== 'true') {
-            container.remove();
-          } else {
-            const [text] = this.editor.getTextPoint(newInlineRange.index);
-            const vText = text.parentElement?.closest('v-text');
-            if (vText) {
-              if (vText.str !== text.textContent) {
-                text.textContent = vText.str;
-              }
-            } else {
-              const forgedVText = text.parentElement?.closest(
-                '[data-v-text="true"]'
-              );
-              if (forgedVText instanceof HTMLElement) {
-                if (forgedVText.dataset.vTextValue) {
-                  if (forgedVText.dataset.vTextValue !== text.textContent) {
-                    text.textContent = forgedVText.dataset.vTextValue;
-                  }
-                } else {
-                  throw new Error(
-                    'We detect a forged v-text node but it has no data-v-text-value attribute.'
-                  );
-                }
-              }
-            }
-          }
-
-          const newRange = this.editor.toDomRange(newInlineRange);
-          if (newRange) {
-            assertExists(newRange);
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-          }
-        }
-      }
-
-      if (newData && newData.length > 0) {
-        this.editor.insertText(newInlineRange, newData, ctx.attributes);
-
-        this.editor.setInlineRange(
-          {
-            index: newInlineRange.index + newData.length,
-            length: 0,
-          },
-          false
-        );
-      }
+    if (newData && newData.length > 0) {
+      this.editor.insertText(newInlineRange, newData, ctx.attributes);
+      this.editor.setInlineRange(
+        {
+          index: newInlineRange.index + newData.length,
+          length: 0,
+        },
+        false
+      );
     }
+
+    this.editor.slots.inputting.emit();
   };
 
   private _onBeforeInput = (event: InputEvent) => {
-    event.preventDefault();
-
+    const range = this.editor.rangeService.getNativeRange();
     if (
       this.editor.isReadonly ||
       this._isComposing ||
-      !this._isRangeCompletelyInRoot()
+      !range ||
+      !this._isRangeCompletelyInRoot(range)
     )
       return;
 
@@ -290,6 +272,8 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
 
     const inlineRange = this.editor.getInlineRange();
     if (!inlineRange) return;
+
+    event.preventDefault();
 
     let ctx: BeforeinputHookCtx<TextAttributes> | null = {
       inlineEditor: this.editor,
@@ -312,15 +296,21 @@ export class EventService<TextAttributes extends BaseTextAttributes> {
       newInlineRange,
       this.editor as InlineEditor
     );
+
+    this.editor.slots.inputting.emit();
   };
 
   private _onKeyDown = (event: KeyboardEvent) => {
+    const inlineRange = this.editor.getInlineRange();
+    if (!inlineRange) return;
+
+    this.editor.slots.keydown.emit(event);
+
     if (
       !event.shiftKey &&
       (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
     ) {
-      const inlineRange = this.editor.getInlineRange();
-      if (!inlineRange || inlineRange.length !== 0) return;
+      if (inlineRange.length !== 0) return;
 
       const prevent = () => {
         event.preventDefault();

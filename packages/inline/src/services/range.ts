@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import * as Y from 'yjs';
 
 import type { VLine } from '../components/v-line.js';
 import type { InlineEditor } from '../inline-editor.js';
@@ -18,8 +19,14 @@ import { calculateTextLength, getTextNodesFromElement } from '../utils/text.js';
 
 export class RangeService<TextAttributes extends BaseTextAttributes> {
   private _inlineRange: InlineRange | null = null;
+  private _lastStartRelativePosition: Y.RelativePosition | null = null;
+  private _lastEndRelativePosition: Y.RelativePosition | null = null;
 
   constructor(public readonly editor: InlineEditor<TextAttributes>) {}
+
+  get yText() {
+    return this.editor.yText;
+  }
 
   get inlineRangeProvider() {
     return this.editor.inlineRangeProvider;
@@ -27,6 +34,13 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
 
   get rootElement() {
     return this.editor.rootElement;
+  }
+
+  get lastStartRelativePosition() {
+    return this._lastStartRelativePosition;
+  }
+  get lastEndRelativePosition() {
+    return this._lastEndRelativePosition;
   }
 
   onInlineRangeUpdated = async ([
@@ -39,6 +53,20 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     }
 
     this._inlineRange = newInlineRange;
+
+    if (newInlineRange) {
+      this._lastStartRelativePosition = Y.createRelativePositionFromTypeIndex(
+        this.yText,
+        newInlineRange.index
+      );
+      this._lastEndRelativePosition = Y.createRelativePositionFromTypeIndex(
+        this.yText,
+        newInlineRange.index + newInlineRange.length
+      );
+    } else {
+      this._lastStartRelativePosition = null;
+      this._lastEndRelativePosition = null;
+    }
 
     // try to trigger update because the `selected` state of inline editor element may change
     if (this.editor.mounted) {
@@ -83,6 +111,12 @@ export class RangeService<TextAttributes extends BaseTextAttributes> {
     if (selection.rangeCount === 0) return null;
 
     return selection;
+  }
+
+  getNativeRange(): Range | null {
+    const selection = this.getNativeSelection();
+    if (!selection) return null;
+    return selection.getRangeAt(0);
   }
 
   getInlineRange = (): InlineRange | null => {

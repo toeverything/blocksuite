@@ -1,4 +1,8 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import {
+  RangeManager,
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import { nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -50,7 +54,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
       });
 
       blockElements.forEach(element => {
-        element.setAttribute('data-queryable', 'false');
+        element.setAttribute(RangeManager.rangeQueryExcludeAttr, 'true');
       });
     }, 500);
   }

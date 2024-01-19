@@ -6,7 +6,7 @@ import type { BlockSnapshot, Page } from '@blocksuite/store';
 import {
   HtmlAdapter,
   ImageAdapter,
-  PlainTextAdapter,
+  MixTextAdapter,
 } from '../../_common/adapters/index.js';
 import {
   defaultImageProxyMiddleware,
@@ -24,7 +24,7 @@ export class PageClipboard {
   }
 
   private _clipboardAdapter = new ClipboardAdapter();
-  private _plaintextAdapter = new PlainTextAdapter();
+  private _mixtextAdapter = new MixTextAdapter();
   private _htmlAdapter = new HtmlAdapter();
   private _imageAdapter = new ImageAdapter();
 
@@ -64,11 +64,7 @@ export class PageClipboard {
     ].map(type =>
       this._std.clipboard.registerAdapter(type, this._imageAdapter, 80)
     );
-    this._std.clipboard.registerAdapter(
-      'text/plain',
-      this._plaintextAdapter,
-      70
-    );
+    this._std.clipboard.registerAdapter('text/plain', this._mixtextAdapter, 70);
     const copy = copyMiddleware(this._std);
     const paste = pasteMiddleware(this._std);
     this._std.clipboard.use(copy);
