@@ -15,6 +15,7 @@ import {
   LineStyleIcon,
   NoteCornerIcon,
   NoteShadowIcon,
+  ScissorsIcon,
   ShrinkIcon,
   SmallArrowDownIcon,
 } from '../../../../_common/icons/index.js';
@@ -30,7 +31,7 @@ import {
   type LineStylesPanelClickedButton,
   lineStylesPanelStyles,
 } from '../panel/line-styles-panel.js';
-import { createButtonPopper } from '../utils.js';
+import { createButtonPopper, getTooltipWithShortcut } from '../utils.js';
 
 const NOTE_BACKGROUND: CssVariableName[] = [
   '--affine-tag-red',
@@ -163,6 +164,9 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   @state()
   private _showPopper = false;
+
+  @state()
+  private _enableNoteSlicer = false;
 
   @query('.fill-color-button')
   private _fillColorButton!: HTMLDivElement;
@@ -315,6 +319,13 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.requestUpdate();
   }
 
+  private _handleNoteSlicerButtonClick() {
+    const surfaceService = this.surface.service;
+    if (!surfaceService) return;
+
+    this.surface.edgeless.slots.toggleNoteSlicer.emit();
+  }
+
   private _getCurrentModeLabel(mode: NoteDisplayMode) {
     switch (mode) {
       case NoteDisplayMode.DocAndEdgeless:
@@ -377,6 +388,21 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       );
       _disposables.add(this._borderRadiusPopper);
     }
+  }
+
+  override firstUpdated() {
+    const { edgeless } = this.surface;
+    this.disposables.add(
+      edgeless.slots.toggleNoteSlicer.on(() => {
+        this._enableNoteSlicer = !this._enableNoteSlicer;
+      })
+    );
+
+    this.disposables.add(
+      edgeless.selectionManager.slots.updated.on(() => {
+        this._enableNoteSlicer = false;
+      })
+    );
   }
 
   override render() {
@@ -511,6 +537,21 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       >
         ${collapse ? ExpandIcon : ShrinkIcon}
       </edgeless-tool-icon-button>
+
+      ${length === 1
+        ? html`<component-toolbar-menu-divider
+              .vertical=${true}
+            ></component-toolbar-menu-divider>
+            <edgeless-tool-icon-button
+              class="edgeless-note-slicer-button"
+              .tooltip=${getTooltipWithShortcut('Cutting Mode', '-')}
+              .iconContainerPadding=${2}
+              .active=${this._enableNoteSlicer}
+              @click=${this._handleNoteSlicerButtonClick}
+            >
+              ${ScissorsIcon}
+            </edgeless-tool-icon-button>`
+        : nothing}
     `;
   }
 }

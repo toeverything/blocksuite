@@ -409,6 +409,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _shiftKey = false;
 
   @property({ attribute: false })
+  autoCompleteOff = false;
+
+  @property({ attribute: false })
   toolbarVisible = false;
 
   @property({ attribute: false })
@@ -898,6 +901,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _canAutoComplete() {
     return (
+      !this.autoCompleteOff &&
       !this._isResizing &&
       this.selection.elements.length === 1 &&
       (this.selection.elements[0] instanceof ShapeElement ||
