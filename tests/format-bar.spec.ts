@@ -1415,6 +1415,8 @@ test('should the database action icon show correctly', async ({ page }) => {
   const codeBlock = page.locator('affine-code');
   const codeBox = await codeBlock.boundingBox();
   if (!codeBox) throw new Error('Missing code block box');
+
+  await page.keyboard.type('hello world');
   const position = {
     startX: codeBox.x,
     startY: codeBox.y + codeBox.height / 2,
@@ -1424,7 +1426,7 @@ test('should the database action icon show correctly', async ({ page }) => {
   await page.mouse.click(position.endX + 150, position.endY + 150);
   await dragBetweenCoords(
     page,
-    { x: position.startX - 10, y: position.startY - 10 },
+    { x: position.startX + 10, y: position.startY - 10 },
     { x: position.endX, y: position.endY },
     { steps: 20 }
   );
