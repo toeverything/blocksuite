@@ -437,6 +437,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         .setToolbarVisible=${(v: boolean) => {
           this._toolbarVisible = v;
         }}
+        .autoCompleteOff=${this._enableNoteSlicer}
       ></edgeless-selected-rect>
       <edgeless-index-label
         .pageVisibleElementsMap=${pageVisibleBlocks}
