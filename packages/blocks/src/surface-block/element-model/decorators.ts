@@ -36,7 +36,9 @@ export function yfield(fallback?: unknown): PropertyDecorator {
           originalVal,
           this
         );
-        const val = convertProps(prototype, prop, originalVal, this);
+        const val = state.creating
+          ? originalVal
+          : convertProps(prototype, prop, originalVal, this);
 
         if (this.yMap) {
           if (this.yMap.doc) {
@@ -67,7 +69,9 @@ export function local(): PropertyDecorator {
       },
       set(this: ElementModel, originalValue: unknown) {
         const oldValue = this._local.get(prop);
-        const newVal = convertProps(target, prop, originalValue, this);
+        const newVal = state.creating
+          ? originalValue
+          : convertProps(target, prop, originalValue, this);
 
         const derivedProps = getDeriveProperties(
           target,
@@ -166,6 +170,13 @@ export function derive<T extends ElementModel>(
 
 const convertSymbol = Symbol('convert');
 
+/**
+ * The convert decorator is used to convert the property value before it's
+ * set to the Y map.
+ * This decorator function will not execute in model creation.
+ * @param fn
+ * @returns
+ */
 export function convert<T extends ElementModel>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: (propValue: any, instance: T) => unknown

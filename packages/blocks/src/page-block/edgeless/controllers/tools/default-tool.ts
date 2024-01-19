@@ -497,7 +497,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartModelCoord = [startX, startY];
     this._dragLastModelCoord = [startX, startY];
 
-    this._selectedBounds = this._toBeMoved.map(element => element.elementBound);
+    this._selectedBounds = this._toBeMoved.map(element =>
+      Bound.deserialize(element.xywh)
+    );
     this._alignBound = this._surface.snap.setupAlignables(this._toBeMoved);
 
     // If the drag type is selecting, set up the dragging area disposable group

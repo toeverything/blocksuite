@@ -110,13 +110,14 @@ export class BrushElementModel extends ElementModel<BrushProps> {
   }
 
   override hitTest(px: number, py: number, options?: HitTestOptions): boolean {
-    return isPointOnlines(
-      this.elementBound,
+    const hit = isPointOnlines(
+      Bound.deserialize(this.xywh),
       this.points as [number, number][],
       this.rotate,
       [px, py],
-      (options?.expand ?? 10) / (options?.zoom ?? 1)
+      (options?.expand ?? 10) / Math.min(options?.zoom ?? 1, 1)
     );
+    return hit;
   }
 
   override containedByBounds(bounds: Bound) {

@@ -43,6 +43,11 @@ export interface IEdgelessElement {
   rotate: number;
   connectable: boolean;
   index: string;
+
+  /**
+   * The bound of the element after rotation.
+   * The bound without rotation should be created by `Bound.deserialize(this.xywh)`.
+   */
   elementBound: Bound;
   group: GroupElementModel | null;
   groups: GroupElementModel[];

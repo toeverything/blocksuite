@@ -570,7 +570,7 @@ export class LayerManager {
     if (!type.startsWith('affine:')) {
       updateType = 'canvas';
       updateArray(this.canvasElements, element);
-      this.canvasGrid.add(element as ElementModel);
+      this.canvasGrid.update(element as ElementModel);
 
       if (type === 'group' && indexChanged) {
         (element as GroupElementModel).childElements.forEach(
@@ -579,11 +579,11 @@ export class LayerManager {
       }
     } else if (matchFlavours(element as BlockModel, ['affine:frame'])) {
       updateArray(this.frames, element);
-      this.framesGrid.add(element as FrameBlockModel);
+      this.framesGrid.update(element as FrameBlockModel);
     } else {
       updateType = 'block';
       updateArray(this.blocks, element);
-      this.blocksGrid.add(element as EdgelessBlockModel);
+      this.blocksGrid.update(element as EdgelessBlockModel);
     }
 
     if (updateType && indexChanged) {

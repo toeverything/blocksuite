@@ -78,7 +78,7 @@ export class GridManager<T extends EdgelessElement> {
     return this._grids.size === 0;
   }
 
-  private _addTOExternalGrids(element: T) {
+  private _addToExternalGrids(element: T) {
     const range = rangeFromElementExternal(element);
 
     if (!range) {
@@ -111,8 +111,13 @@ export class GridManager<T extends EdgelessElement> {
     }
   }
 
+  update(element: T) {
+    this.remove(element);
+    this.add(element);
+  }
+
   add(element: T) {
-    this._addTOExternalGrids(element);
+    this._addToExternalGrids(element);
 
     const [minRow, maxRow, minCol, maxCol] = rangeFromElement(element);
     const grids = new Set<Set<T>>();
@@ -138,12 +143,7 @@ export class GridManager<T extends EdgelessElement> {
       }
     }
 
-    const externalGrid = this._externalElementToGrids.get(element);
-    if (externalGrid) {
-      for (const grid of externalGrid) {
-        grid.delete(element);
-      }
-    }
+    this._removeFromExternalGrids(element);
   }
 
   boundHasChanged(a: IBound, b: IBound) {
