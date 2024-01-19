@@ -47,7 +47,7 @@ export class HoverController implements ReactiveController {
   protected _disposables = new DisposableGroup();
   host: ReactiveControllerHost;
 
-  private _abortController?: AbortController;
+  private static _abortController?: AbortController;
   private _setReference?: (element?: Element | undefined) => void;
   private _portal?: HTMLDivElement;
   private readonly _onHover: (
@@ -83,7 +83,7 @@ export class HoverController implements ReactiveController {
     // Start a timer when the host is connected
     const { setReference, setFloating, dispose } = whenHover(isHover => {
       if (!isHover) {
-        const abortController = this._abortController;
+        const abortController = HoverController._abortController;
         if (!abortController) return;
         if (!this._portal || !this._hoverOptions.transition) {
           abortController.abort();
@@ -100,22 +100,24 @@ export class HoverController implements ReactiveController {
         );
         return;
       }
-      if (this._abortController) return;
-      this._abortController = new AbortController();
-      this._abortController.signal.addEventListener('abort', () => {
-        this._abortController = undefined;
+      if (HoverController._abortController) {
+        HoverController._abortController.abort();
+      }
+      HoverController._abortController = new AbortController();
+      HoverController._abortController.signal.addEventListener('abort', () => {
+        HoverController._abortController = undefined;
       });
       const portalOptions = this._onHover({
         setReference,
-        abortController: this._abortController,
+        abortController: HoverController._abortController,
       });
       if (!portalOptions) {
-        this._abortController.abort();
+        HoverController._abortController.abort();
         return;
       }
       this._portal = createLitPortal({
         ...portalOptions,
-        abortController: this._abortController,
+        abortController: HoverController._abortController,
       });
 
       const transition = this._hoverOptions.transition;
@@ -136,7 +138,7 @@ export class HoverController implements ReactiveController {
   }
 
   hostDisconnected() {
-    this._abortController?.abort();
+    HoverController._abortController?.abort();
     this._disposables.dispose();
   }
 }
