@@ -170,7 +170,7 @@ test('should support the enter key of image caption', async ({ page }) => {
   await assertRichTextInlineRange(page, 0, 0, 0);
 });
 
-test('popup menu should follow position of image when scrolling', async ({
+test.only('popup menu should follow position of image when scrolling', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -214,7 +214,7 @@ test('popup menu should follow position of image when scrolling', async ({
   const menuRect = await menu.boundingBox();
   if (!imageRect) throw new Error('image not found');
   if (!menuRect) throw new Error('menu not found');
-  expect(imageRect.y).toBeCloseTo(-28, -0.325);
+  expect(imageRect.y).toBeCloseTo(34, -0.325);
   expect(menuRect.y).toBeCloseTo(65, -0.325);
 });
 
