@@ -35,6 +35,7 @@ import { listenToThemeChange } from '../_common/theme/utils.js';
 import { getThemeMode } from '../_common/utils/index.js';
 import type { NoteBlockComponent } from '../note-block/note-block.js';
 import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
+import { CodeClipboardController } from './clipboard/index.js';
 import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { LangList } from './components/lang-list.js';
@@ -144,6 +145,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   @state()
   private _langListAbortController?: AbortController;
+
+  clipboardController = new CodeClipboardController(this);
 
   private get _showLangList() {
     return !!this._langListAbortController;
@@ -275,6 +278,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     // set highlight options getter used by "exportToHtml"
+    this.clipboardController.hostConnected();
     this.setHighlightOptionsGetter(() => {
       return {
         lang: this._perviousLanguage.id as Lang,
@@ -448,6 +452,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this.clipboardController.hostDisconnected();
     this._richTextResizeObserver.disconnect();
   }
 
