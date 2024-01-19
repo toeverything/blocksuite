@@ -23,7 +23,7 @@ import {
 import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 
 const DIVIDING_LINE_OFFSET = 4;
-const NEW_NOTE_GAP = 20;
+const NEW_NOTE_GAP = 40;
 const HIDDEN_ZOOM = 0.75;
 
 const styles = css`
@@ -108,9 +108,13 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   private _noteBlockIds: string[] = [];
   private _noteDisposables: DisposableGroup | null = null;
 
+  get _editorHost() {
+    return this.edgeless.host;
+  }
+
   get _noteBlockElement() {
-    if (!this.editorHost) return null;
-    const noteBlock = this.editorHost.view.viewFromPath(
+    if (!this._editorHost) return null;
+    const noteBlock = this._editorHost.view.viewFromPath(
       'block',
       buildPath(this.anchorNote)
     );
@@ -119,6 +123,22 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
   get _notePortalElement() {
     return this._noteBlockElement?.closest('.edgeless-block-portal-note');
+  }
+
+  get _viewportOffset() {
+    const { viewport } = this.edgeless;
+    return {
+      left: viewport.left ?? 0,
+      top: viewport.top ?? 0,
+    };
+  }
+
+  get _selection() {
+    return this.edgeless.selectionManager;
+  }
+
+  get _zoom() {
+    return this.edgeless?.surface?.viewport.zoom;
   }
 
   private _updateDivingLineAndBlockIds() {
@@ -145,9 +165,12 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         rect.bottom > notePortalTop &&
         rect.bottom < notePortalBottom
       ) {
-        divingLinePositions.push(
-          new Point(rect.x, rect.bottom + DIVIDING_LINE_OFFSET * this._zoom)
-        );
+        const x = rect.x - this._viewportOffset.left;
+        const y =
+          rect.bottom +
+          DIVIDING_LINE_OFFSET * this._zoom -
+          this._viewportOffset.top;
+        divingLinePositions.push(new Point(x, y));
         noteBlockIds.push(child.id);
       }
     }
@@ -184,8 +207,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         if (this._zoom < HIDDEN_ZOOM) return;
         if (this._hidden) this._hidden = false;
 
-        const e = ctx.get('pointerState');
-        const pos = new Point(e.x, e.y);
+        const state = ctx.get('pointerState');
+        const pos = new Point(state.x, state.y);
         this._updateActiveSlicerIndex(pos);
       })
     );
@@ -252,18 +275,6 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     this._noteDisposables = null;
   }
 
-  private get selection() {
-    return this.edgeless.selectionManager;
-  }
-
-  private get _zoom() {
-    return this.edgeless?.surface?.viewport.zoom;
-  }
-
-  get editorHost() {
-    return this.edgeless.host;
-  }
-
   private _sliceNote() {
     if (!this.anchorNote || !this._noteBlockIds.length) return;
     const page = this.edgeless.page;
@@ -282,17 +293,13 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     const [x, , width] = deserializeXYWH(xywh);
     const sliceVerticalPos =
       this._divingLinePositions[this._activeSlicerIndex].y;
+    const newY = this.edgeless.surface.toModelCoord(x, sliceVerticalPos)[1];
     const newNoteId = this.edgeless.surface.addElement(
       'affine:note',
       {
         background,
         displayMode,
-        xywh: serializeXYWH(
-          x,
-          sliceVerticalPos + NEW_NOTE_GAP,
-          width,
-          DEFAULT_NOTE_HEIGHT
-        ),
+        xywh: serializeXYWH(x, newY + NEW_NOTE_GAP, width, DEFAULT_NOTE_HEIGHT),
         index: originIndex + 1,
       },
       page.root?.id
@@ -304,7 +311,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     );
 
     this._activeSlicerIndex = 0;
-    this.selection.set({
+    this._selection.set({
       elements: [newNoteId],
       editing: false,
     });
