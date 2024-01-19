@@ -27,6 +27,7 @@ type HoverOptions = {
    * @default true
    */
   setPortalAsFloating: boolean;
+  allowMultiple?: boolean;
 } & WhenHoverOptions;
 
 const DEFAULT_HOVER_OPTIONS: HoverOptions = {
@@ -41,13 +42,16 @@ const DEFAULT_HOVER_OPTIONS: HoverOptions = {
     },
   },
   setPortalAsFloating: true,
+  allowMultiple: false,
 };
 
 export class HoverController implements ReactiveController {
   protected _disposables = new DisposableGroup();
   host: ReactiveControllerHost;
 
-  private static _abortController?: AbortController;
+  private static _globalAbortController?: AbortController;
+
+  private _abortController?: AbortController;
   private _setReference?: (element?: Element | undefined) => void;
   private _portal?: HTMLDivElement;
   private readonly _onHover: (
@@ -83,7 +87,7 @@ export class HoverController implements ReactiveController {
     // Start a timer when the host is connected
     const { setReference, setFloating, dispose } = whenHover(isHover => {
       if (!isHover) {
-        const abortController = HoverController._abortController;
+        const abortController = this._abortController;
         if (!abortController) return;
         if (!this._portal || !this._hoverOptions.transition) {
           abortController.abort();
@@ -100,24 +104,31 @@ export class HoverController implements ReactiveController {
         );
         return;
       }
-      if (HoverController._abortController) {
-        HoverController._abortController.abort();
+      if (this._abortController) {
+        return;
       }
-      HoverController._abortController = new AbortController();
-      HoverController._abortController.signal.addEventListener('abort', () => {
-        HoverController._abortController = undefined;
+
+      this._abortController = new AbortController();
+      this._abortController.signal.addEventListener('abort', () => {
+        this._abortController = undefined;
       });
+
+      if (!this._hoverOptions.allowMultiple) {
+        HoverController._globalAbortController?.abort();
+        HoverController._globalAbortController = this._abortController;
+      }
+
       const portalOptions = this._onHover({
         setReference,
-        abortController: HoverController._abortController,
+        abortController: this._abortController,
       });
       if (!portalOptions) {
-        HoverController._abortController.abort();
+        this._abortController.abort();
         return;
       }
       this._portal = createLitPortal({
         ...portalOptions,
-        abortController: HoverController._abortController,
+        abortController: this._abortController,
       });
 
       const transition = this._hoverOptions.transition;
@@ -138,7 +149,7 @@ export class HoverController implements ReactiveController {
   }
 
   hostDisconnected() {
-    HoverController._abortController?.abort();
+    this._abortController?.abort();
     this._disposables.dispose();
   }
 }
