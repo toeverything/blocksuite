@@ -131,11 +131,11 @@ async function initWorkspace(workspace: Workspace) {
     (!databaseExists && !params.get('room')) || params.get('init');
 
   if (shouldInit) {
-    const deleteResult = await new Promise(resovle => {
+    const deleteResult = await new Promise(resolve => {
       const req = indexedDB.deleteDatabase(INDEXED_DB_NAME);
-      req.onerror = resovle;
-      req.onblocked = resovle;
-      req.onsuccess = resovle;
+      req.onerror = resolve;
+      req.onblocked = resolve;
+      req.onsuccess = resolve;
     });
 
     console.info('Delete database: ', deleteResult);
