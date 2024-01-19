@@ -1,6 +1,6 @@
 import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { nothing, render } from 'lit';
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
 
 import { INLINE_ROOT_ATTR } from './consts.js';
 import { InlineHookService } from './services/hook.js';
@@ -282,7 +282,7 @@ export class InlineEditor<
     doc.transact(fn, doc.clientID);
   }
 
-  private _onYTextChange = () => {
+  private _onYTextChange = (_: Y.YTextEvent, transaction: Y.Transaction) => {
     if (this.yText.toString().includes('\r')) {
       throw new Error(
         'yText must not contain "\\r" because it will break the range synchronization'
@@ -292,7 +292,41 @@ export class InlineEditor<
     this.slots.textChange.emit();
 
     Promise.resolve()
-      .then(() => this.deltaService.render())
+      .then(() => {
+        this.deltaService.render().catch(console.error);
+
+        const inlineRange = this.rangeService.getInlineRange();
+        if (!inlineRange || transaction.local) return;
+
+        const lastStartRelativePosition =
+          this.rangeService.lastStartRelativePosition;
+        const lastEndRelativePosition =
+          this.rangeService.lastEndRelativePosition;
+        if (!lastStartRelativePosition || !lastEndRelativePosition) return;
+
+        const doc = this.yText.doc;
+        assertExists(doc);
+        const absoluteStart = Y.createAbsolutePositionFromRelativePosition(
+          lastStartRelativePosition,
+          doc
+        );
+        const absoluteEnd = Y.createAbsolutePositionFromRelativePosition(
+          lastEndRelativePosition,
+          doc
+        );
+
+        const startIndex = absoluteStart?.index;
+        const endIndex = absoluteEnd?.index;
+        if (!startIndex || !endIndex) return;
+
+        const newInlineRange: InlineRange = {
+          index: startIndex,
+          length: endIndex - startIndex,
+        };
+        if (!this.isValidInlineRange(newInlineRange)) return;
+
+        this.setInlineRange(newInlineRange);
+      })
       .catch(console.error);
   };
 
