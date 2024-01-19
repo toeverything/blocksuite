@@ -7,6 +7,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import type {
   EdgelessElement,
   IPoint,
@@ -298,6 +299,81 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label='bottom'] .resize:after {
       bottom: -0.5px;
     }
+
+    .affine-edgeless-selected-rect::before {
+      content: '';
+      display: none;
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-image: url("data:image/svg+xml,%3Csvg width='26' height='26' viewBox='0 0 26 26' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M23 3H19C10.1634 3 3 10.1634 3 19V23' stroke='black' stroke-opacity='0.3' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+    .affine-edgeless-selected-rect[data-direction='top-left']::before {
+      display: block;
+      top: 0px;
+      left: 0px;
+      transform-origin: bottom right;
+      transform: translate(-100%, -100%);
+    }
+    .affine-edgeless-selected-rect[data-direction='top-right']::before {
+      display: block;
+      top: 0px;
+      right: 0px;
+      transform: translate(100%, -100%) rotate(90deg);
+    }
+    .affine-edgeless-selected-rect[data-direction='bottom-right']::before {
+      display: block;
+      bottom: 0px;
+      right: 0px;
+      transform: translate(100%, 100%) rotate(180deg);
+    }
+    .affine-edgeless-selected-rect[data-direction='bottom-left']::before {
+      display: block;
+      bottom: 0px;
+      left: 0px;
+      transform: translate(-100%, 100%) rotate(-90deg);
+    }
+
+    .affine-edgeless-selected-rect::after {
+      content: attr(data-scale-percent);
+      display: none;
+      position: absolute;
+      color: var(--affine-icon-color);
+      font-feature-settings:
+        'clig' off,
+        'liga' off;
+      font-family: var(--affine-font-family);
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 24px;
+    }
+    .affine-edgeless-selected-rect[data-direction='top-left']::after {
+      display: block;
+      top: -20px;
+      left: -20px;
+      transform: translate(-100%, -100%);
+    }
+    .affine-edgeless-selected-rect[data-direction='top-right']::after {
+      display: block;
+      top: -20px;
+      right: -20px;
+      transform: translate(100%, -100%);
+    }
+    .affine-edgeless-selected-rect[data-direction='bottom-right']::after {
+      display: block;
+      bottom: -20px;
+      right: -20px;
+      transform: translate(100%, 100%);
+    }
+    .affine-edgeless-selected-rect[data-direction='bottom-left']::after {
+      display: block;
+      bottom: -20px;
+      left: -20px;
+      transform: translate(-100%, 100%);
+    }
   `;
 
   @property({ attribute: false })
@@ -316,6 +392,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   @state()
   private _isResizing = false;
+
+  @state()
+  private _dragDirection: HandleDirection | null = null;
+
+  @state()
+  private _scalePercent: string | null = null;
 
   @state()
   private _isNoteWidthLimit = false;
@@ -481,6 +563,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
         if (this._shiftKey) {
           scale = bound.w / width;
+          this._dragDirection = direction;
+          this._scalePercent = `${Math.round(scale * 100)}%`;
         } else if (curBound.h !== bound.h) {
           edgeless.page.updateBlock(element, () => {
             element.edgeless.collapse = true;
@@ -508,6 +592,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         isEmbeddedBlock(element)
       ) {
         const curBound = Bound.deserialize(element.xywh);
+
+        if (isImageBlock(element)) {
+          const { height } = element;
+          if (height) {
+            this._dragDirection = direction;
+            this._scalePercent = `${Math.round((bound.h / height) * 100)}%`;
+          }
+        } else {
+          this._dragDirection = direction;
+
+          const cardStyle = element.style;
+          const height = EMBED_CARD_HEIGHT[cardStyle];
+          this._scalePercent = `${Math.round((bound.h / height) * 100)}%`;
+        }
         if (
           direction === HandleDirection.Left ||
           direction === HandleDirection.Right
@@ -589,6 +687,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _onDragEnd = () => {
+    this._dragDirection = null;
+    this._scalePercent = null;
+
     this.page.transact(() => {
       this._dragEndCallback.forEach(cb => cb());
     });
@@ -931,6 +1032,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           transform: `translate(${_selectedRect.left}px, ${_selectedRect.top}px) rotate(${_selectedRect.rotate}deg)`,
         })}
         disabled="true"
+        data-scale-percent=${this._scalePercent ?? ''}
+        data-direction=${this._dragDirection ?? ''}
       >
         ${resizeHandles} ${connectorHandle} ${elementHandle}
       </div>
