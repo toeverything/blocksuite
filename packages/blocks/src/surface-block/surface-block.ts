@@ -171,6 +171,9 @@ export class SurfaceBlockComponent extends BlockElement<
       })
     );
     this._disposables.add(this._renderer.sync(this.edgeless.service.viewport));
+    this._disposables.add(() => {
+      this._renderer.dispose();
+    });
   }
 
   private _initEvents() {

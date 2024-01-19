@@ -319,4 +319,9 @@ export class Viewport {
       disposables.forEach(disposable => disposable.dispose());
     };
   }
+
+  dispose() {
+    this.sizeUpdated.dispose();
+    this.viewportUpdated.dispose();
+  }
 }

@@ -45,6 +45,7 @@ export class EdgelessPageService extends PageService {
     this._layer.dispose();
     this._selection.dispose();
     this.selectionManager.set([]);
+    this.viewport.dispose();
   }
 
   get surface() {

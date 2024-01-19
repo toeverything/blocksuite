@@ -564,7 +564,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     const onPixelRatioChange = () => {
       if (media) {
-        this.surface?.onResize();
+        this.service.viewport.onResize();
         media.removeEventListener('change', onPixelRatioChange);
       }
 

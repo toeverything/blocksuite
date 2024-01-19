@@ -56,9 +56,16 @@ export class Renderer extends Viewport {
     this.viewportUpdated.on(() => {
       this._shouldUpdate = true;
     });
+
+    let sizeUpdatedRafId: number | null = null;
     this.sizeUpdated.on(() => {
-      this._resetSize();
-      this._shouldUpdate = true;
+      if (sizeUpdatedRafId) return;
+      requestConnectedFrame(() => {
+        this._resetSize();
+        this._render();
+        sizeUpdatedRafId = null;
+        this._shouldUpdate = false;
+      }, this._el);
     });
   }
 
@@ -75,7 +82,7 @@ export class Renderer extends Viewport {
    * @param container
    */
   attach(container: HTMLElement) {
-    this._el = container;
+    this.setContainer(container);
     container.appendChild(this.canvas);
 
     this._resetSize();
