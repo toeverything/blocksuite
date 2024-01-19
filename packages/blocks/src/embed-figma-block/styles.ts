@@ -167,7 +167,7 @@ export const styles = css`
   .affine-embed-figma-content-url:hover > span {
     color: var(--affine-link-color);
   }
-  .affine-embed-figma-content-url:hover svg {
+  .affine-embed-figma-content-url:hover .open-icon {
     fill: var(--affine-link-color);
   }
 
@@ -178,7 +178,7 @@ export const styles = css`
     width: 12px;
     height: 12px;
   }
-  .affine-embed-figma-content-url-icon svg {
+  .affine-embed-figma-content-url-icon .open-icon {
     height: 12px;
     width: 12px;
     fill: var(--affine-text-secondary-color);
