@@ -485,7 +485,6 @@ test.describe('note slicer', () => {
 
     await switchEditorMode(page);
     await selectNoteInEdgeless(page, noteId);
-    await triggerComponentToolbarAction(page, 'changeNoteSlicerSetting');
 
     await page.evaluate(() => {
       const el = document.createElement('div');
@@ -508,6 +507,8 @@ test.describe('note slicer', () => {
     assertRectExist(firstBlockRect);
     const secondBlockRect = await blocks[1].boundingBox();
     assertRectExist(secondBlockRect);
+
+    await triggerComponentToolbarAction(page, 'changeNoteSlicerSetting');
     await page.mouse.move(
       secondBlockRect.x + 1,
       secondBlockRect.y + secondBlockRect.height / 2
