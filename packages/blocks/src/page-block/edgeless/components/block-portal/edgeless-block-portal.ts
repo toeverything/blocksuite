@@ -122,6 +122,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @state()
   private _isResizing = false;
 
+  @state()
+  private _enableNoteSlicer = false;
+
+  @state()
+  private _slicerAnchorNote: NoteBlockModel | null = null;
   private _surfaceRefReferenceSet = new Set<string>();
 
   private _clearWillChangeId: null | ReturnType<typeof setTimeout> = null;
@@ -201,6 +206,20 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     }
   }
 
+  private _updateNoteSlicer() {
+    const { edgeless } = this;
+    const { elements } = edgeless.service.selection;
+    if (
+      !edgeless.service.selection.editing &&
+      elements.length === 1 &&
+      isNoteBlock(elements[0])
+    ) {
+      this._slicerAnchorNote = elements[0];
+    } else {
+      this._slicerAnchorNote = null;
+    }
+  }
+
   private _getLayerViewport(negative = false) {
     const { service } = this.edgeless;
     const { translateX, translateY, zoom } = service.viewport;
@@ -268,7 +287,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         } else {
           this._toolbarVisible = true;
         }
+        this._enableNoteSlicer = false;
         this._updateIndexLabel();
+        this._updateNoteSlicer();
       })
     );
 
@@ -290,6 +311,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         if (isNoteBlock(element) && props && props['displayMode']) {
           this.requestUpdate();
         }
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.toggleNoteSlicer.on(() => {
+        this._enableNoteSlicer = !this._enableNoteSlicer;
       })
     );
   }
@@ -337,7 +364,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         }
       });
     });
-
     return html`
       <div class="affine-block-children-container edgeless">
         <div class="affine-edgeless-layer">
@@ -347,11 +373,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             .frames=${service.layer.frames}
           >
           </edgeless-frames-container>
-          ${readonly || this._isResizing
-            ? nothing
-            : html`<affine-note-slicer
-                .edgelessPage=${edgeless}
-              ></affine-note-slicer>`}
           <div class="canvas-slot"></div>
           ${layers
             .filter(layer => layer.type === 'block')
@@ -399,6 +420,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       <edgeless-dragging-area-rect
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>
+      ${readonly || this._isResizing || !this._enableNoteSlicer
+        ? nothing
+        : html`<note-slicer
+            .edgeless=${edgeless}
+            .anchorNote=${this._slicerAnchorNote}
+          ></note-slicer>`}
 
       <edgeless-selected-rect
         .edgeless=${edgeless}
@@ -406,6 +433,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         .setToolbarVisible=${(v: boolean) => {
           this._toolbarVisible = v;
         }}
+        .autoCompleteOff=${this._enableNoteSlicer}
       ></edgeless-selected-rect>
       <edgeless-index-label
         .pageVisibleElementsMap=${pageVisibleBlocks}

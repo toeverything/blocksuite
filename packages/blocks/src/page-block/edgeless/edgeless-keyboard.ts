@@ -15,7 +15,7 @@ import {
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
-import { isCanvasElement } from './utils/query.js';
+import { isCanvasElement, isNoteBlock } from './utils/query.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override pageElement: EdgelessPageBlockComponent) {
@@ -99,6 +99,16 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             pageElement.surface.frame.createFrameOnSelected();
           } else if (!this.pageElement.service.selection.editing) {
             this._setEdgelessTool(pageElement, { type: 'frame' });
+          }
+        },
+        '-': () => {
+          const { elements } = pageElement.selectionManager;
+          if (
+            !pageElement.selectionManager.editing &&
+            elements.length === 1 &&
+            isNoteBlock(elements[0])
+          ) {
+            pageElement.slots.toggleNoteSlicer.emit();
           }
         },
         'Mod-g': ctx => {
