@@ -233,13 +233,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    const { service } = this.edgeless.surface;
-    const enableNoteSlicer = service.editSession.getItem('enableNoteSlicer');
-    this._enableNoteSlicer = enableNoteSlicer ?? false;
-  }
-
   override firstUpdated() {
     this._updateReference();
     const { _disposables, edgeless } = this;
@@ -298,6 +291,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         } else {
           this._toolbarVisible = true;
         }
+        this._enableNoteSlicer = false;
         this._updateIndexLabel();
         this._updateNoteSlicer();
       })
@@ -325,9 +319,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      edgeless.slots.noteSlicerSettingUpdated.on(
-        enableNoteSlicer => (this._enableNoteSlicer = enableNoteSlicer)
-      )
+      edgeless.slots.toggleNoteSlicer.on(() => {
+        this._enableNoteSlicer = !this._enableNoteSlicer;
+      })
     );
   }
 

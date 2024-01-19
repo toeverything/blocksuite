@@ -31,7 +31,7 @@ import {
   type LineStylesPanelClickedButton,
   lineStylesPanelStyles,
 } from '../panel/line-styles-panel.js';
-import { createButtonPopper } from '../utils.js';
+import { createButtonPopper, getTooltipWithShortcut } from '../utils.js';
 
 const NOTE_BACKGROUND: CssVariableName[] = [
   '--affine-tag-red',
@@ -323,14 +323,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     const surfaceService = this.surface.service;
     if (!surfaceService) return;
 
-    this._enableNoteSlicer = !this._enableNoteSlicer;
-    this.surface.edgeless.slots.noteSlicerSettingUpdated.emit(
-      this._enableNoteSlicer
-    );
-    surfaceService.editSession.setItem(
-      'enableNoteSlicer',
-      this._enableNoteSlicer
-    );
+    this.surface.edgeless.slots.toggleNoteSlicer.emit();
   }
 
   private _getCurrentModeLabel(mode: NoteDisplayMode) {
@@ -397,11 +390,19 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     }
   }
 
-  override connectedCallback(): void {
-    super.connectedCallback();
-    const enableNoteSlicer =
-      this.surface.service.editSession.getItem('enableNoteSlicer');
-    this._enableNoteSlicer = enableNoteSlicer ?? false;
+  override firstUpdated() {
+    const { edgeless } = this.surface;
+    this.disposables.add(
+      edgeless.slots.toggleNoteSlicer.on(() => {
+        this._enableNoteSlicer = !this._enableNoteSlicer;
+      })
+    );
+
+    this.disposables.add(
+      edgeless.selectionManager.slots.updated.on(() => {
+        this._enableNoteSlicer = false;
+      })
+    );
   }
 
   override render() {
@@ -543,7 +544,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
             ></component-toolbar-menu-divider>
             <edgeless-tool-icon-button
               class="edgeless-note-slicer-button"
-              .tooltip=${'Cutting Mode'}
+              .tooltip=${getTooltipWithShortcut('Cutting Mode', '-')}
               .iconContainerPadding=${2}
               .active=${this._enableNoteSlicer}
               @click=${this._handleNoteSlicerButtonClick}
