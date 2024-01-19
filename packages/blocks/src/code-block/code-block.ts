@@ -235,39 +235,58 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  private _whenHover = new HoverController(this, ({ abortController }) => ({
-    template: ({ updatePortal }) =>
-      CodeOptionTemplate({
-        anchor: this,
-        model: this.model,
-        wrap: this._wrap,
-        onClickWrap: () => {
-          this._wrap = !this._wrap;
-          updatePortal();
-        },
-        abortController,
-      }),
-    computePosition: {
-      referenceElement: this,
-      placement: 'right-start',
-      middleware: [
-        offset({
-          mainAxis: 12,
-          crossAxis: 10,
-        }),
-        shift({
-          crossAxis: true,
-          padding: {
-            top: PAGE_HEADER_HEIGHT + 12,
-            bottom: 12,
-            right: 12,
+  private _whenHover = new HoverController(this, ({ abortController }) => {
+    const selection = this.host.selection;
+    const textSelection = selection.find('text');
+    if (
+      !!textSelection &&
+      (!!textSelection.to || textSelection.from.length > 1)
+    ) {
+      return null;
+    }
+
+    const blockSelections = selection.filter('block');
+    if (
+      blockSelections.length > 1 ||
+      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
+    ) {
+      return null;
+    }
+
+    return {
+      template: ({ updatePortal }) =>
+        CodeOptionTemplate({
+          anchor: this,
+          model: this.model,
+          wrap: this._wrap,
+          onClickWrap: () => {
+            this._wrap = !this._wrap;
+            updatePortal();
           },
-          limiter: limitShift(),
+          abortController,
         }),
-      ],
-      autoUpdate: true,
-    },
-  }));
+      computePosition: {
+        referenceElement: this,
+        placement: 'right-start',
+        middleware: [
+          offset({
+            mainAxis: 12,
+            crossAxis: 10,
+          }),
+          shift({
+            crossAxis: true,
+            padding: {
+              top: PAGE_HEADER_HEIGHT + 12,
+              bottom: 12,
+              right: 12,
+            },
+            limiter: limitShift(),
+          }),
+        ],
+        autoUpdate: true,
+      },
+    };
+  });
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();

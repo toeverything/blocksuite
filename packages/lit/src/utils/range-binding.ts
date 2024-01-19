@@ -244,7 +244,7 @@ export class RangeBinding {
       const selection = this.selectionManager.create('text', {
         from: {
           path: from.path,
-          index: from.index + event.data?.length ?? 0,
+          index: from.index + (event.data?.length ?? 0),
           length: 0,
         },
         to: null,

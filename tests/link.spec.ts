@@ -54,6 +54,9 @@ test('basic link', async ({ page }) => {
   const linkLocator = page.locator('affine-link a');
   await expect(linkLocator).toHaveAttribute('href', link);
 
+  // clear text selection
+  await page.keyboard.press('ArrowLeft');
+
   const viewLinkPopoverLocator = page.locator('.affine-link-popover.view');
   // Hover link
   await expect(viewLinkPopoverLocator).not.toBeVisible();

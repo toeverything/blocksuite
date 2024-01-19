@@ -29,6 +29,26 @@ export class AffineSurfaceRefToolbar extends WidgetElement<SurfaceRefBlockCompon
   private _hoverController = new HoverController(
     this,
     ({ abortController }) => {
+      const surfaceRefBlock = this.blockElement;
+      const selection = this.host.selection;
+
+      const textSelection = selection.find('text');
+      if (
+        !!textSelection &&
+        (!!textSelection.to || textSelection.from.length > 1)
+      ) {
+        return null;
+      }
+
+      const blockSelections = selection.filter('block');
+      if (
+        blockSelections.length > 1 ||
+        (blockSelections.length === 1 &&
+          blockSelections[0].path !== surfaceRefBlock.path)
+      ) {
+        return null;
+      }
+
       return {
         template: SurfaceRefToolbarOptions({
           blockElement: this.blockElement,
