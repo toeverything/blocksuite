@@ -185,15 +185,20 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     if (textSelection) {
       const rangeManager = this.host.rangeManager;
       assertExists(rangeManager);
-      const range = rangeManager.pointToRange({
-        path: textSelection.to
-          ? textSelection.to.path
-          : textSelection.from.path,
-        index: textSelection.to
-          ? textSelection.to.index + textSelection.to.length
-          : textSelection.from.index + textSelection.from.length,
-        length: 0,
-      });
+      const range = rangeManager.textSelectionToRange(
+        this._selectionManager.create('text', {
+          from: {
+            path: textSelection.to
+              ? textSelection.to.path
+              : textSelection.from.path,
+            index: textSelection.to
+              ? textSelection.to.index + textSelection.to.length
+              : textSelection.from.index + textSelection.from.length,
+            length: 0,
+          },
+          to: null,
+        })
+      );
 
       if (!range) {
         return null;

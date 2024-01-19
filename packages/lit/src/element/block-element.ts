@@ -5,7 +5,7 @@ import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
+import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 import { WithDisposable } from '../with-disposable.js';
@@ -45,6 +45,9 @@ export class BlockElement<
   @property({ attribute: false })
   page!: Page;
 
+  @property({ attribute: false })
+  dirty = false;
+
   @state({
     hasChanged(value: BaseSelection | null, oldValue: BaseSelection | null) {
       if (!value || !oldValue) {
@@ -75,6 +78,19 @@ export class BlockElement<
     return children
       .filter(child => child.type === 'block')
       .map(child => child.view as BlockElement);
+  }
+
+  get rootBlockElement() {
+    const rootElement = this.host.view.viewFromPath(
+      'block',
+      this.path.slice(0, 1)
+    );
+    assertExists(rootElement);
+    return rootElement;
+  }
+
+  get topContenteditableElement(): BlockElement | null {
+    return this.rootBlockElement;
   }
 
   get flavour(): string {
@@ -132,7 +148,10 @@ export class BlockElement<
         : options?.flavour
           ? this.model.flavour
           : undefined,
-      path: options?.global || options?.flavour ? undefined : this.path,
+      path:
+        options?.global || options?.flavour
+          ? undefined
+          : this.topContenteditableElement?.path ?? this.path,
     };
     this._disposables.add(this.host.event.bindHotkey(keymap, config));
   }
@@ -149,6 +168,30 @@ export class BlockElement<
     const result = await super.getUpdateComplete();
     await Promise.all(this.childBlockElements.map(el => el.updateComplete));
     return result;
+  }
+  protected override update(changedProperties: PropertyValues): void {
+    // In some cases, the DOM structure is directly modified, causing Lit to lose synchronization with the DOM structure.
+    // We can restore this state through the `dirty` property.
+    if (this.dirty) {
+      //@ts-ignore
+      this.__reflectingProperties &&= this.__reflectingProperties.forEach(p =>
+        //@ts-ignore
+        this.__propertyToAttribute(p, this[p as keyof this])
+      ) as undefined;
+      //@ts-ignore
+      this._$changedProperties = new Map();
+      this.isUpdatePending = false;
+      //@ts-ignore
+      this.__childPart = render(nothing, this.renderRoot);
+
+      this.updateComplete
+        .then(() => {
+          this.dirty = false;
+        })
+        .catch(console.error);
+    } else {
+      super.update(changedProperties);
+    }
   }
 
   override connectedCallback() {

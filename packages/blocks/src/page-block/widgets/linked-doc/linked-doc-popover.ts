@@ -77,6 +77,8 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     super.connectedCallback();
     const richText = getRichTextByModel(this.editorHost, this.model);
     assertExists(richText, 'RichText not found');
+    const inlineEditor = richText.inlineEditor;
+    assertExists(inlineEditor, 'RichText InlineEditor not found');
 
     // init
     this._updateActionList();
@@ -91,7 +93,8 @@ export class LinkedDocPopover extends WithDisposable(LitElement) {
     });
 
     createKeydownObserver({
-      target: richText,
+      target: inlineEditor.eventSource,
+      inlineEditor,
       onUpdateQuery: str => {
         this._query = str;
         this._activatedItemIndex = 0;

@@ -114,7 +114,7 @@ export class ViewStore {
         children,
       };
     };
-    const firstBlock = this.std.host.firstElementChild;
+    const firstBlock = this.std.host.querySelector('[data-block-id]');
     assertExists(firstBlock);
 
     const tree = {
@@ -195,7 +195,7 @@ export class ViewStore {
       nodeView: NodeViewTree,
       index: number,
       parent: NodeViewTree
-    ) => undefined | null | true
+    ) => undefined | null | boolean
   ): NodeViewTree | null => {
     const getPrev = (path: string[]) => {
       const parent = this.getParent(path);

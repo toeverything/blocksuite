@@ -45,9 +45,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return sel;
       });
     });
-    blockElement
-      .querySelector<InlineRootElement>(`[${INLINE_ROOT_ATTR}]`)
-      ?.blur();
     return true;
   };
 
@@ -116,62 +113,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   };
 
   blockElement.bindHotKey({
-    ArrowUp: ctx => {
-      _preventDefault(ctx);
-    },
-    ArrowDown: ctx => {
-      _preventDefault(ctx);
-    },
-    ArrowRight: ctx => {
-      if (blockElement.selected?.is('block')) {
-        return _selectText(false);
-      }
-
-      if (!blockElement.selected?.is('text')) return;
-      const inlineEditor = _getInlineEditor();
-      const inlineRange = inlineEditor.getInlineRange();
-      if (!inlineRange) {
-        return;
-      }
-
-      if (
-        inlineRange.length === 0 &&
-        inlineRange.index === inlineEditor.yText.length
-      ) {
-        _preventDefault(ctx);
-        return;
-      }
-
-      return true;
-    },
-    ArrowLeft: ctx => {
-      if (blockElement.selected?.is('block')) {
-        return _selectText(true);
-      }
-      if (!blockElement.selected?.is('text')) return;
-      const inlineEditor = _getInlineEditor();
-      const inlineRange = inlineEditor.getInlineRange();
-      if (!inlineRange) return;
-
-      if (inlineRange.length === 0 && inlineRange.index === 0) {
-        _preventDefault(ctx);
-        return;
-      }
-
-      return true;
-    },
-    'Shift-ArrowUp': ctx => {
-      _preventDefault(ctx);
-    },
-    'Shift-ArrowDown': ctx => {
-      _preventDefault(ctx);
-    },
-    'Shift-ArrowRight': ctx => {
-      _preventDefault(ctx);
-    },
-    'Shift-ArrowLeft': ctx => {
-      _preventDefault(ctx);
-    },
     Escape: () => {
       if (blockElement.selected?.is('text')) {
         return _selectBlock();
@@ -179,6 +120,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       return;
     },
     Enter: ctx => {
+      _preventDefault(ctx);
+
       if (blockElement.selected?.is('block')) return _selectText(false);
 
       const target = ctx.get('defaultState').event.target as Node;
@@ -200,13 +143,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           inlineRange
         )
       ) {
-        _preventDefault(ctx);
         return true;
       }
 
       const state = ctx.get('keyboardState');
       hardEnter(editorHost, model, inlineRange, inlineEditor, state.raw);
-      _preventDefault(ctx);
 
       return true;
     },

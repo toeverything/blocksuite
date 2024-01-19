@@ -1,4 +1,4 @@
-import type { PointerEventState } from '@blocksuite/block-std';
+import { PathFinder, type PointerEventState } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
@@ -18,8 +18,6 @@ import { PageClipboard } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
-import { Gesture } from '../text-selection/gesture.js';
-import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
 import type { DocPageService } from './doc-page-service.js';
 
 const PAGE_BLOCK_CHILD_PADDING = 24;
@@ -94,8 +92,6 @@ export class DocPageBlockComponent extends BlockElement<
   `;
 
   keyboardManager: PageKeyboardManager | null = null;
-
-  gesture: Gesture | null = null;
 
   clipboardController = new PageClipboard(this);
 
@@ -234,9 +230,6 @@ export class DocPageBlockComponent extends BlockElement<
     super.connectedCallback();
     this.clipboardController.hostConnected();
 
-    this.host.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
-
-    this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);
 
     this.bindHotKey({
@@ -247,96 +240,48 @@ export class DocPageBlockComponent extends BlockElement<
           sel => sel.is('text') || sel.is('block')
         );
         if (!sel) return;
-        const focus = view.findPrev(sel.path, (nodeView, _index, parent) => {
-          if (nodeView.type === 'block' && parent.view === this) {
-            return true;
+        const focusNote = view.findPrev(
+          sel.path,
+          (nodeView, _index, parent) => {
+            if (nodeView.type === 'block' && parent.view === this) {
+              return true;
+            }
+            return;
           }
-          return;
-        });
-        if (!focus) return;
+        );
+        if (!focusNote) return;
         const notes = this.childBlockElements.filter(
           el => el.model.flavour === 'affine:note'
         );
-        const index = notes.indexOf(focus.view as BlockElement);
-        if (index !== 0) {
-          const prev = notes[index - 1];
-          const lastNoteChild = sel.is('text')
-            ? prev.childBlockElements.reverse().find(el => !!el.model.text)
-            : prev.childBlockElements.at(-1);
-          if (!lastNoteChild) return;
-          selection.update(selList =>
-            selList
-              .filter(sel => !sel.is('text') && !sel.is('block'))
-              .concat([
-                sel.is('text')
-                  ? selection.create('text', {
-                      from: {
-                        path: lastNoteChild.path,
-                        index: lastNoteChild.model.text?.length ?? 0,
-                        length: 0,
-                      },
-                      to: null,
-                    })
-                  : selection.create('block', {
-                      path: lastNoteChild.path,
-                    }),
-              ])
-          );
-          return true;
-        } else {
-          const titleInlineEditor = getDocTitleInlineEditor(this.host);
-          if (titleInlineEditor) {
-            titleInlineEditor.focusEnd();
-            return true;
-          }
+        const index = notes.indexOf(focusNote.view as BlockElement);
+        if (index !== 0) return;
+
+        const firstNoteChild = focusNote.children[0];
+        if (
+          !firstNoteChild ||
+          !PathFinder.equals(firstNoteChild.path, sel.path)
+        )
           return;
-        }
-      },
-      ArrowDown: () => {
-        const view = this.host.view;
-        const selection = this.host.selection;
-        const sel = selection.value.find(
-          sel => sel.is('text') || sel.is('block')
-        );
-        if (!sel) return;
-        const focus = view.findPrev(sel.path, (nodeView, _index, parent) => {
-          if (nodeView.type === 'block' && parent.view === this) {
-            return true;
+
+        const range = this.host.rangeManager?.value;
+        requestAnimationFrame(() => {
+          const currentRange = this.host.rangeManager?.value;
+
+          if (!range || !currentRange) return;
+
+          // If the range has not changed, it means we need to manually move the cursor to the title.
+          if (
+            range.startContainer === currentRange.startContainer &&
+            range.startOffset === currentRange.startOffset &&
+            range.endContainer === currentRange.endContainer &&
+            range.endOffset === currentRange.endOffset
+          ) {
+            const titleInlineEditor = getDocTitleInlineEditor(this.host);
+            if (titleInlineEditor) {
+              titleInlineEditor.focusEnd();
+            }
           }
-          return;
         });
-        if (!focus) return;
-        const notes = this.childBlockElements.filter(
-          el => el.model.flavour === 'affine:note'
-        );
-        const index = notes.indexOf(focus.view as BlockElement);
-        if (index < notes.length - 1) {
-          const prev = notes[index + 1];
-          const firstNoteChild = sel.is('text')
-            ? prev.childBlockElements.find(x => !!x.model.text)
-            : prev.childBlockElements.at(0);
-          if (!firstNoteChild) return;
-          selection.update(selList =>
-            selList
-              .filter(sel => !sel.is('text') && !sel.is('block'))
-              .concat([
-                sel.is('text')
-                  ? selection.create('text', {
-                      from: {
-                        path: firstNoteChild.path,
-                        index: 0,
-                        length: 0,
-                      },
-                      to: null,
-                    })
-                  : selection.create('block', {
-                      path: firstNoteChild.path,
-                    }),
-              ])
-          );
-          return true;
-        }
-        return;
       },
     });
 
@@ -427,7 +372,6 @@ export class DocPageBlockComponent extends BlockElement<
     super.disconnectedCallback();
     this.clipboardController.hostDisconnected();
     this._disposables.dispose();
-    this.gesture = null;
     this.keyboardManager = null;
   }
 
