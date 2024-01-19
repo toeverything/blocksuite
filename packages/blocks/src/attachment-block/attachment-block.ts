@@ -59,26 +59,45 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   private _hoverController = new HoverController(
     this,
-    ({ abortController }) => ({
-      template: AttachmentOptionsTemplate({
-        anchor: this,
-        model: this.model,
-        showCaption: () => {
-          this._showCaption = true;
-          requestAnimationFrame(() => {
-            this._captionInput.focus();
-          });
+    ({ abortController }) => {
+      const selection = this.host.selection;
+      const textSelection = selection.find('text');
+      if (
+        !!textSelection &&
+        (!!textSelection.to || textSelection.from.length > 1)
+      ) {
+        return null;
+      }
+
+      const blockSelections = selection.filter('block');
+      if (
+        blockSelections.length > 1 ||
+        (blockSelections.length === 1 && blockSelections[0].path !== this.path)
+      ) {
+        return null;
+      }
+
+      return {
+        template: AttachmentOptionsTemplate({
+          anchor: this,
+          model: this.model,
+          showCaption: () => {
+            this._showCaption = true;
+            requestAnimationFrame(() => {
+              this._captionInput.focus();
+            });
+          },
+          downloadAttachment: this._downloadAttachment,
+          abortController,
+        }),
+        computePosition: {
+          referenceElement: this,
+          placement: 'top-end',
+          middleware: [flip(), offset(4)],
+          autoUpdate: true,
         },
-        downloadAttachment: this._downloadAttachment,
-        abortController,
-      }),
-      computePosition: {
-        referenceElement: this,
-        placement: 'top-end',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-    })
+      };
+    }
   );
 
   override connectedCallback() {

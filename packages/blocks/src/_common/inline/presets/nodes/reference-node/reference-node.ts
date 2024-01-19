@@ -7,6 +7,7 @@ import {
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
+import type { BlockElement } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page, PageMeta } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -15,6 +16,7 @@ import { ref } from 'lit/directives/ref.js';
 
 import type { PageBlockComponent } from '../../../../../page-block/types.js';
 import { HoverController } from '../../../../components/hover/controller.js';
+import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/text.js';
 import {
   getModelByElement,
@@ -101,6 +103,20 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     return selfInlineRange;
   }
 
+  get blockElement() {
+    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
+      `[${BLOCK_ID_ATTR}]`
+    );
+    assertExists(blockElement);
+    return blockElement;
+  }
+
+  get std() {
+    const std = this.blockElement.std;
+    assertExists(std);
+    return std;
+  }
+
   get page() {
     const page = this.config.page;
     assertExists(page, '`reference-node` need `Page`.');
@@ -183,6 +199,20 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
+    const selection = this.std.selection;
+    const textSelection = selection.find('text');
+    if (
+      !!textSelection &&
+      (!!textSelection.to || textSelection.from.length > 1)
+    ) {
+      return null;
+    }
+
+    const blockSelections = selection.filter('block');
+    if (blockSelections.length) {
+      return null;
+    }
+
     return {
       template: toggleReferencePopup(
         this.inlineEditor,

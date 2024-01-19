@@ -15,8 +15,30 @@ export class AffineImageToolbarWidget extends WidgetElement<ImageBlockComponent>
     this,
     ({ abortController }) => {
       const imageBlock = this.blockElement;
+      const selection = this.host.selection;
+
+      const textSelection = selection.find('text');
+      if (
+        !!textSelection &&
+        (!!textSelection.to || textSelection.from.length > 1)
+      ) {
+        return null;
+      }
+
+      const blockSelections = selection.filter('block');
+      if (
+        blockSelections.length > 1 ||
+        (blockSelections.length === 1 &&
+          blockSelections[0].path !== imageBlock.path)
+      ) {
+        return null;
+      }
+
       const imageContainer = imageBlock.resizeImg;
-      if (!imageContainer) return null;
+      if (!imageContainer) {
+        return null;
+      }
+
       return {
         template: ImageOptionsTemplate({
           editorHost: this.host,

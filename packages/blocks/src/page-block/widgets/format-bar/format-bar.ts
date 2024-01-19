@@ -13,6 +13,7 @@ import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../_common/utils/event.js';
+import { matchFlavours } from '../../../_common/utils/model.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
 import { ActionItems } from './components/action-items.js';
 import { InlineItems } from './components/inline-items.js';
@@ -125,6 +126,18 @@ export class AffineFormatBarWidget extends WidgetElement {
       this._selectedBlockElements?.[0]?.flavour === 'affine:surface-ref'
     ) {
       return false;
+    }
+
+    if (
+      this.displayType === 'block' &&
+      this._selectedBlockElements.length === 1
+    ) {
+      const selectedBlock = this._selectedBlockElements[0];
+      if (
+        !matchFlavours(selectedBlock.model, ['affine:paragraph', 'affine:list'])
+      ) {
+        return false;
+      }
     }
 
     const readonly = this.page.awarenessStore.isReadonly(this.page);

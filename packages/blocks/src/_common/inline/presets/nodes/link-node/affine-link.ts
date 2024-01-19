@@ -5,6 +5,7 @@ import {
   type InlineRootElement,
   ZERO_WIDTH_SPACE,
 } from '@blocksuite/inline';
+import type { BlockElement } from '@blocksuite/lit';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -12,6 +13,7 @@ import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { HoverController } from '../../../../components/hover/index.js';
+import { BLOCK_ID_ATTR } from '../../../../consts.js';
 import type { AffineTextAttributes } from '../../affine-inline-specs.js';
 import { affineTextStyles } from '../affine-text.js';
 import { toggleLinkPopup } from './link-popup/toggle-link-popup.js';
@@ -45,6 +47,20 @@ export class AffineLink extends ShadowlessElement {
     return selfInlineRange;
   }
 
+  get blockElement() {
+    const blockElement = this.inlineEditor.rootElement.closest<BlockElement>(
+      `[${BLOCK_ID_ATTR}]`
+    );
+    assertExists(blockElement);
+    return blockElement;
+  }
+
+  get std() {
+    const std = this.blockElement.std;
+    assertExists(std);
+    return std;
+  }
+
   static override styles = css`
     affine-link > a {
       white-space: nowrap;
@@ -65,6 +81,20 @@ export class AffineLink extends ShadowlessElement {
   `;
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
+    const selection = this.std.selection;
+    const textSelection = selection.find('text');
+    if (
+      !!textSelection &&
+      (!!textSelection.to || textSelection.from.length > 1)
+    ) {
+      return null;
+    }
+
+    const blockSelections = selection.filter('block');
+    if (blockSelections.length) {
+      return null;
+    }
+
     return {
       template: toggleLinkPopup(
         this.inlineEditor,
