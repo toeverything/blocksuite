@@ -24,6 +24,7 @@ import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 
 const DIVIDING_LINE_OFFSET = 4;
 const NEW_NOTE_GAP = 20;
+const HIDDEN_ZOOM = 0.75;
 
 const styles = css`
   :host {
@@ -102,6 +103,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   @state()
   private _activeSlicerIndex = 0;
 
+  private _hidden = false;
   private _divingLinePositions: Point[] = [];
   private _noteBlockIds: string[] = [];
   private _noteDisposables: DisposableGroup | null = null;
@@ -144,7 +146,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         rect.bottom < notePortalBottom
       ) {
         divingLinePositions.push(
-          new Point(rect.x, rect.bottom + DIVIDING_LINE_OFFSET)
+          new Point(rect.x, rect.bottom + DIVIDING_LINE_OFFSET * this._zoom)
         );
         noteBlockIds.push(child.id);
       }
@@ -156,7 +158,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
   private _updateActiveSlicerIndex(pos: Point) {
     const { _divingLinePositions } = this;
-    const curY = pos.y + DIVIDING_LINE_OFFSET;
+    const curY = pos.y + DIVIDING_LINE_OFFSET * this._zoom;
     let index = -1;
     for (let i = 0; i < _divingLinePositions.length; i++) {
       const { y } = _divingLinePositions[i];
@@ -179,6 +181,9 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
     disposables.add(
       this.edgeless.service.uiEventDispatcher.add('pointerMove', ctx => {
+        if (this._zoom < HIDDEN_ZOOM) return;
+        if (this._hidden) this._hidden = false;
+
         const e = ctx.get('pointerState');
         const pos = new Point(e.x, e.y);
         this._updateActiveSlicerIndex(pos);
@@ -187,6 +192,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
     disposables.add(
       this.edgeless.slots.viewportUpdated.on(() => {
+        this._hidden = true;
         this.requestUpdate();
       })
     );
@@ -229,6 +235,16 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     }
   }
 
+  override firstUpdated() {
+    if (!this.edgeless.service) return;
+    this.disposables.add(
+      this.edgeless.service.uiEventDispatcher.add('wheel', () => {
+        this._hidden = true;
+        this.requestUpdate();
+      })
+    );
+  }
+
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     this.disposables.dispose();
@@ -241,7 +257,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   private get _zoom() {
-    return this.edgeless?.surface?.viewport.zoom ?? 1;
+    return this.edgeless?.surface?.viewport.zoom;
   }
 
   get editorHost() {
@@ -295,7 +311,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (!this.anchorNote) return nothing;
+    if (!this.anchorNote || this._hidden) return nothing;
     this._updateDivingLineAndBlockIds();
 
     const noteBlockElement = this._noteBlockElement;
@@ -309,7 +325,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       <div
         class="note-slicer-button"
         style=${styleMap({
-          left: `${buttonPosition.x - 66}px`,
+          left: `${buttonPosition.x - 66 * this._zoom}px`,
           top: `${buttonPosition.y}px`,
           opacity: 1,
           scale: `${this._zoom}`,
