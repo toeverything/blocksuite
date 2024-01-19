@@ -52,6 +52,7 @@ export class Block {
             this.model[keyName] = proxy;
           });
           this.model.propsUpdated.emit({ key: keyName });
+          this.options.onChange?.(this, keyName, value);
           return;
         }
         if (type.action === 'delete') {
