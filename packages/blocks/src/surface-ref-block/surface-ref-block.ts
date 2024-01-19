@@ -19,10 +19,10 @@ import {
   getEditorContainer,
   isInsideDocEditor,
 } from '../_common/utils/query.js';
-import type { SurfaceService } from '../index.js';
+import type { PageService } from '../index.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
-import type { Renderer } from '../surface-block/renderer.js';
+import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';
@@ -614,8 +614,8 @@ export class SurfaceRefBlockComponent extends BlockElement<
         referenceId: this.model.reference,
         padding: [60, 20, 20, 20] as [number, number, number, number],
       };
-      (<SurfaceService>(
-        this.std.spec.getService('affine:surface')
+      (<PageService>(
+        this.std.spec.getService('affine:page')
       )).editSession.setItem('viewport', viewport);
     }
 

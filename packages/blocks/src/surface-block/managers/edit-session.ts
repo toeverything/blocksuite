@@ -1,4 +1,5 @@
-import { Slot } from '@blocksuite/global/utils';
+import type { BlockService } from '@blocksuite/block-std';
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { isPlainObject, recursive } from 'merge';
 import { z } from 'zod';
 
@@ -36,7 +37,6 @@ import {
   ShapeType,
   StrokeColorsSchema,
 } from '../elements/shape/consts.js';
-import type { SurfaceService } from '../surface-service.js';
 
 const ConnectorEndpointSchema = z.nativeEnum(ConnectorEndpointStyle);
 const StrokeStyleSchema = z.nativeEnum(StrokeStyle);
@@ -185,6 +185,8 @@ export class EditSessionStorage {
     },
   };
 
+  private _disposables = new DisposableGroup();
+
   slots = {
     lastPropsUpdated: new Slot<{
       type: keyof LastProps;
@@ -192,7 +194,7 @@ export class EditSessionStorage {
     }>(),
   };
 
-  constructor(private _service: SurfaceService) {
+  constructor(private _service: BlockService) {
     const props = sessionStorage.getItem(SESSION_PROP_KEY);
     if (props) {
       const result = LastPropsSchema.safeParse(JSON.parse(props));
@@ -264,6 +266,11 @@ export class EditSessionStorage {
     } catch {
       return null;
     }
+  }
+
+  dispose() {
+    this._disposables.dispose();
+    this.slots.lastPropsUpdated.dispose();
   }
 }
 

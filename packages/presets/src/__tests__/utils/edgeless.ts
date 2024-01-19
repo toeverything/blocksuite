@@ -3,6 +3,7 @@ import type {
   DocPageBlockComponent,
   EdgelessPageBlockComponent,
   SurfaceBlockComponent,
+  SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 
@@ -16,6 +17,10 @@ export function getSurface(page: Page, editor: AffineEditorContainer) {
     page.root!.id,
     surfaceModel[0]!.id,
   ]) as SurfaceBlockComponent;
+}
+
+export function getSurfaceModel(page: Page) {
+  return page.getBlockByFlavour('affine:surface')[0] as SurfaceBlockModel;
 }
 
 export function getPageRootBlock(
@@ -36,39 +41,6 @@ export function getPageRootBlock(
   return editor.host!.view.viewFromPath('block', [page.root!.id]) as
     | EdgelessPageBlockComponent
     | DocPageBlockComponent;
-}
-
-const defaultProps = {
-  shape: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rect: (props: any) => {
-      return {
-        xywh: '[10, 10, 100, 100]',
-        strokeColor: 'red',
-        fillColor: '--affine-palette-transparent',
-        filled: props.fillColor === '--affine-palette-transparent',
-        radius: 0,
-        strokeWidth: 4,
-        strokeStyle: 'solid',
-        shapeStyle: 'General',
-      };
-    },
-  } as Record<string, any>,
-};
-
-export function addElement(
-  type: string,
-  props: Record<string, any>,
-  surface: SurfaceBlockComponent
-) {
-  props =
-    type === 'shape'
-      ? Object.assign(
-          props,
-          defaultProps.shape[props.shapeType as string]?.(props) ?? props
-        )
-      : props;
-  return surface.addElement(type as any, props);
 }
 
 export function addNote(page: Page, props: Record<string, any> = {}) {

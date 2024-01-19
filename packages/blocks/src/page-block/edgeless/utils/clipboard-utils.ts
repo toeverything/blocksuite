@@ -4,13 +4,13 @@ import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { type CanvasElement } from '../../../surface-block/index.js';
-import { getElementsWithoutGroup } from '../../../surface-block/managers/group-manager.js';
 import {
   getCopyElements,
   prepareClipboardData,
 } from '../controllers/clipboard.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from './bound-utils.js';
+import { getElementsWithoutGroup } from './group.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
 
 const offset = 10;
@@ -38,7 +38,7 @@ export async function duplicate(
   edgeless.surface.fitToViewport(totalBound);
 
   if (select) {
-    edgeless.selectionManager.set({
+    edgeless.service.selection.set({
       elements: newElements.map(e => e.id),
       editing: false,
     });

@@ -16,7 +16,6 @@ import type {
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import type { SurfaceBlockModel } from '../../../../surface-block/surface-model.js';
-import type { SurfaceService } from '../../../../surface-block/surface-service.js';
 import { Bound } from '../../../../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
 import type { SurfaceRefPortal } from '../../../../surface-ref-block/surface-ref-portal.js';
@@ -175,12 +174,8 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   }
 
   private _tryLoadFillScreen() {
-    const surfaceService = this.host.spec.getService(
-      'affine:surface'
-    ) as SurfaceService;
-
     this.fillScreen =
-      surfaceService.editSession.getItem('presentFillScreen') ?? false;
+      this.edgeless!.service.editSession.getItem('presentFillScreen') ?? false;
   }
 
   private _getViewportWH = (referencedModel: RefElement) => {

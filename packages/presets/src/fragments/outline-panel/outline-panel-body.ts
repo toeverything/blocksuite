@@ -196,7 +196,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
 
       if (!edgeless) return;
 
-      edgeless.surface.viewport.setViewport(
+      edgeless.service.viewport.setViewport(
         this._oldViewport.zoom,
         [this._oldViewport.center.x, this._oldViewport.center.y],
         true
@@ -354,7 +354,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       }
       return ids;
     }, [] as string[]);
-    this.edgeless?.selectionManager.set({
+    this.edgeless?.service.selection.set({
       elements: selectedIds,
       editing: false,
     });
@@ -417,7 +417,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     }
 
     this._selected = [];
-    this.edgeless?.selectionManager.set({
+    this.edgeless?.service.selection.set({
       elements: this._selected,
       editing: false,
     });
@@ -449,19 +449,18 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
 
     if (!edgeless) return;
 
-    const { surface } = edgeless;
     const bound = edgeless.getElementsBound();
 
     if (!bound) return;
 
     this._oldViewport = {
-      zoom: surface.viewport.zoom,
+      zoom: edgeless.service.viewport.zoom,
       center: {
-        x: surface.viewport.center.x,
-        y: surface.viewport.center.y,
+        x: edgeless.service.viewport.center.x,
+        y: edgeless.service.viewport.center.y,
       },
     };
-    surface.viewport.setViewportByBound(
+    edgeless.service.viewport.setViewportByBound(
       new Bound(bound.x, bound.y, bound.w, bound.h),
       this.viewportPadding,
       true
@@ -476,7 +475,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     const { block } = e.detail;
     const bound = Bound.deserialize(block.xywh);
 
-    edgeless.surface.viewport.setViewportByBound(
+    edgeless.service.viewport.setViewportByBound(
       bound,
       this.viewportPadding,
       true
@@ -486,12 +485,10 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   private _deSelectNoteInEdgelessMode(note: NoteBlockModel) {
     if (!this._isEdgelessMode() || !this.edgeless) return;
 
-    const { selectionManager } = this.edgeless;
-    if (!selectionManager.has(note.id)) return;
-    const selectedIds = selectionManager.selectedIds.filter(
-      id => id !== note.id
-    );
-    selectionManager.set({
+    const { selection } = this.edgeless.service;
+    if (!selection.has(note.id)) return;
+    const selectedIds = selection.selectedIds.filter(id => id !== note.id);
+    selection.set({
       elements: selectedIds,
       editing: false,
     });

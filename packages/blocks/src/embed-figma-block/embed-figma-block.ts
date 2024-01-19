@@ -116,10 +116,8 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
       const surface = this.surface;
       assertExists(surface);
       this.disposables.add(
-        surface.edgeless.slots.elementUpdated.on(({ id }) => {
-          if (id === this.model.id) {
-            this.requestUpdate();
-          }
+        this.model.propsUpdated.on(() => {
+          this.requestUpdate();
         })
       );
     }

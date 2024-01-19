@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 
-import { clickView } from '../utils/actions/click.js';
+import { clickView, moveView } from '../utils/actions/click.js';
 import {
   addNote,
   createShapeElement,
@@ -65,6 +65,7 @@ test.describe('auto-complete', () => {
       await page.mouse.click(300, 50);
       await page.mouse.click(150, 120);
       const rect = await getEdgelessSelectedRectModel(page);
+      await moveView(page, [rect[0] + rect[2] + 30, rect[1] + rect[3] / 2]);
       await clickView(page, [rect[0] + rect[2] + 30, rect[1] + rect[3] / 2]);
       const newRect = await getEdgelessSelectedRectModel(page);
       expect(rect[0]).not.toEqual(newRect[0]);

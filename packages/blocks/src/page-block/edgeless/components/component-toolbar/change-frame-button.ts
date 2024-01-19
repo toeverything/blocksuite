@@ -92,9 +92,13 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   private _fillColorMenu!: HTMLDivElement;
   private _frameBackground: ReturnType<typeof createButtonPopper> | null = null;
 
+  get service() {
+    return this.surface.edgeless.service;
+  }
+
   private _setFrameBackground(color: CssVariableName) {
     this.frames.forEach(frame => {
-      this.surface.updateElement(frame.id, { background: color });
+      this.service.updateElement(frame.id, { background: color });
     });
   }
 

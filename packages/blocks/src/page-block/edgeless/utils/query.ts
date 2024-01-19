@@ -1,13 +1,10 @@
 import type { BlockModel } from '@blocksuite/store';
-import { type Page } from '@blocksuite/store';
 
 import type { EmbedBlockModel } from '../../../_common/embed-block-helper/embed-block-model.js';
 import {
   type Connectable,
-  type EdgelessElement,
   type EdgelessTool,
   type Selectable,
-  type TopLevelBlockModel,
 } from '../../../_common/utils/index.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
@@ -26,16 +23,16 @@ import {
   getQuadBoundsWithRotation,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
-  ShapeElement,
-  type SurfaceViewport,
-  TextElement,
+  ShapeElementModel,
+  TextElementModel,
 } from '../../../surface-block/index.js';
-import { getElementsWithoutGroup } from '../../../surface-block/managers/group-manager.js';
-import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
+import type { EdgelessBlockModel, EdgelessElement } from '../type.js';
+import { getElementsWithoutGroup } from './group.js';
+import type { Viewport } from './viewport.js';
 
 export function isTopLevelBlock(
   selectable: BlockModel | Selectable | BlockModel | null
-): selectable is TopLevelBlockModel {
+): selectable is EdgelessBlockModel {
   return !!selectable && 'flavour' in selectable;
 }
 
@@ -126,7 +123,9 @@ export function isCanvasElement(
 export function isCanvasElementWithText(
   element: Selectable
 ): element is CanvasElementWithText {
-  return element instanceof TextElement || element instanceof ShapeElement;
+  return (
+    element instanceof TextElementModel || element instanceof ShapeElementModel
+  );
 }
 
 export function isConnectable(
@@ -135,7 +134,7 @@ export function isConnectable(
   return !!element && element.connectable;
 }
 
-export function getSelectionBoxBound(viewport: SurfaceViewport, bound: Bound) {
+export function getSelectionBoxBound(viewport: Viewport, bound: Bound) {
   const { w, h } = bound;
   const [x, y] = viewport.toViewCoord(bound.x, bound.y);
   return new DOMRect(x, y, w * viewport.zoom, h * viewport.zoom);
@@ -159,19 +158,6 @@ export function getCursorMode(edgelessTool: EdgelessTool) {
     default:
       return 'default';
   }
-}
-
-export function pickSurfaceElementById(
-  surface: SurfaceBlockComponent,
-  page: Page,
-  id: string
-) {
-  const blocks =
-    (page.root?.children.filter(
-      child => child.flavour === 'affine:note'
-    ) as TopLevelBlockModel[]) ?? [];
-  const element = surface.pickById(id) || blocks.find(b => b.id === id);
-  return element;
 }
 
 export function getBackgroundGrid(zoom: number, showGrid: boolean) {

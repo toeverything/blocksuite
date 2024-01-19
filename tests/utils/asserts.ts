@@ -30,10 +30,12 @@ import {
   getEdgelessSelectedRectModel,
   getGroupChildrenIds,
   getGroupIds,
+  getGroupOfElements,
   getNoteRect,
   getSelectedBound,
   getSortedIdsInViewport,
   getZoomLevel,
+  toIdCountMap,
 } from './actions/edgeless.js';
 import {
   pressArrowLeft,
@@ -922,9 +924,19 @@ export async function assertSelectedBound(
   assertBound(bound, expected);
 }
 
-export async function assertGroupIds(page: Page, expected: string[]) {
+/**
+ * asserts all groups and they children count at the same time
+ * @param page
+ * @param expected the expected group id and the count of of its children
+ */
+export async function assertGroupIds(
+  page: Page,
+  expected: Record<string, number>
+) {
   const ids = await getGroupIds(page);
-  expect(ids).toEqual(expected);
+  const result = toIdCountMap(ids);
+
+  expect(result).toEqual(expected);
 }
 
 export async function assertSortedIds(page: Page, expected: string[]) {
@@ -934,11 +946,43 @@ export async function assertSortedIds(page: Page, expected: string[]) {
 
 export async function assertGroupChildrenIds(
   page: Page,
-  expected: string[],
-  index = 0
+  expected: Record<string, number>,
+  id: string
 ) {
-  const ids = await getGroupChildrenIds(page, index);
-  expect(ids).toEqual(expected);
+  const ids = await getGroupChildrenIds(page, id);
+  const result = toIdCountMap(ids);
+
+  expect(result).toEqual(expected);
+}
+
+export async function assertGroupOfElements(
+  page: Page,
+  elements: string[],
+  groupId: string
+) {
+  const elementGroups = await getGroupOfElements(page, elements);
+
+  elementGroups.forEach(elementGroup => {
+    expect(elementGroup).toEqual(groupId);
+  });
+}
+
+/**
+ * Assert the given group has the expected children count.
+ * And the children's group id should equal to the given group id.
+ * @param page
+ * @param groupId
+ * @param childrenCount
+ */
+export async function assertGroupChildren(
+  page: Page,
+  groupId: string,
+  childrenCount: number
+) {
+  const ids = await getGroupChildrenIds(page, groupId);
+
+  await assertGroupOfElements(page, ids, groupId);
+  expect(new Set(ids).size).toBe(childrenCount);
 }
 
 export async function assertCanvasElementsCount(page: Page, expected: number) {

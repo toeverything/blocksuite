@@ -16,8 +16,8 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
     return html`<edgeless-tool-icon-button
       .iconContainerPadding=${2}
       @click=${() => {
-        this.surface.group.releaseFromGroup(
-          this.surface.edgeless.selectionManager.firstElement
+        this.surface.edgeless.service.releaseFromGroup(
+          this.surface.edgeless.service.selection.firstElement
         );
       }}
       .tooltip=${'Release From Group'}

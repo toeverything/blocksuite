@@ -1,4 +1,5 @@
 import type { FrameBlockModel, ImageBlockModel } from '@blocksuite/blocks';
+import type { EdgelessBlock } from '@blocksuite/blocks';
 import { BlocksUtils, type SurfaceBlockComponent } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
@@ -110,7 +111,7 @@ export function getEdgelessPageBlockFromEditor(editorHost: EditorHost) {
 export async function selectedToCanvas(editorHost: EditorHost) {
   const edgelessPage = getEdgelessPageBlockFromEditor(editorHost);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
-    edgelessPage.selectionManager.elements
+    edgelessPage.service.selection.elements
   );
   if (notes.length + frames.length + images.length + shapes.length === 0) {
     return;
@@ -182,7 +183,7 @@ export const getFirstImageInFrame = (
   const elements = surface.frame.getElementsInFrame(frame, false);
   const image = elements.find(ele => {
     if (!BlocksUtils.isCanvasElement(ele)) {
-      return ele.flavour === 'affine:image';
+      return (ele as EdgelessBlock).flavour === 'affine:image';
     }
     return false;
   }) as ImageBlockModel | undefined;

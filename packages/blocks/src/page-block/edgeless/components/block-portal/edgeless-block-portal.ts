@@ -12,7 +12,6 @@ import '../presentation/edgeless-navigator-black-background.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BlockModel } from '@blocksuite/store';
 import { css, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -31,7 +30,7 @@ import {
 import type { SurfaceBlockComponent } from '../../../../index.js';
 import type { FrameBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
-import type { GroupElement } from '../../../../surface-block/index.js';
+import type { GroupElementModel } from '../../../../surface-block/index.js';
 import { type EdgelessBlockType } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
@@ -40,7 +39,7 @@ import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect.js';
 export type AutoConnectElement =
   | NoteBlockModel
   | FrameBlockModel
-  | GroupElement;
+  | GroupElementModel;
 
 const portalMap = new Map<EdgelessBlockType | RegExp, string>([
   ['affine:frame', 'edgeless-block-portal-frame'],
@@ -102,9 +101,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property({ attribute: false })
-  frames!: FrameBlockModel[];
-
   @query('.affine-block-children-container.edgeless')
   container!: HTMLDivElement;
 
@@ -142,8 +138,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   refreshLayerViewport = batchToAnimationFrame(() => {
     if (!this.edgeless || !this.edgeless.surface) return;
 
-    const { surface } = this.edgeless;
-    const { zoom, translateX, translateY } = surface.viewport;
+    const { service } = this.edgeless;
+    const { zoom, translateX, translateY } = service.viewport;
     const { gap } = getBackgroundGrid(zoom, true);
 
     this.container.style.setProperty(
@@ -184,20 +180,22 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   private _updateReference() {
     const { _surfaceRefReferenceSet, edgeless } = this;
-    edgeless.surface.getBlocks('affine:note').forEach(note => {
-      note.children.forEach(model => {
-        if (matchFlavours(model, ['affine:surface-ref'])) {
-          _surfaceRefReferenceSet.add(model.reference);
-        }
+    edgeless.service.blocks
+      .filter(block => block.flavour === 'affine:note')
+      .forEach(note => {
+        note.children.forEach(model => {
+          if (matchFlavours(model, ['affine:surface-ref'])) {
+            _surfaceRefReferenceSet.add(model.reference);
+          }
+        });
       });
-    });
   }
 
   private _updateIndexLabel() {
     const { edgeless } = this;
-    const { elements } = edgeless.selectionManager;
+    const { elements } = edgeless.service.selection;
     if (
-      !edgeless.selectionManager.editing &&
+      !edgeless.service.selection.editing &&
       elements.length === 1 &&
       (isNoteBlock(elements[0]) ||
         this._surfaceRefReferenceSet.has(elements[0].id))
@@ -210,9 +208,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   private _updateNoteSlicer() {
     const { edgeless } = this;
-    const { elements } = edgeless.selectionManager;
+    const { elements } = edgeless.service.selection;
     if (
-      !edgeless.selectionManager.editing &&
+      !edgeless.service.selection.editing &&
       elements.length === 1 &&
       isNoteBlock(elements[0])
     ) {
@@ -223,8 +221,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   }
 
   private _getLayerViewport(negative = false) {
-    const { surface } = this.edgeless;
-    const { translateX, translateY, zoom } = surface.viewport;
+    const { service } = this.edgeless;
+    const { translateX, translateY, zoom } = service.viewport;
 
     if (negative) {
       return `scale(${1 / zoom}) translate(${-translateX}px, ${-translateY}px)`;
@@ -239,14 +237,14 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     const { page } = edgeless;
 
     _disposables.add(
-      edgeless.slots.viewportUpdated.on(() => {
+      edgeless.service.viewport.viewportUpdated.on(() => {
         this._applyWillChangeProp();
         this.refreshLayerViewport();
       })
     );
 
     _disposables.add(
-      edgeless.surface.layer.slots.layerUpdated.on(() => {
+      edgeless.service.layer.slots.layerUpdated.on(() => {
         this.requestUpdate();
       })
     );
@@ -258,19 +256,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      edgeless.surface.model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-
-    _disposables.add(
-      (page.root as BlockModel).childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-
-    _disposables.add(
-      page.slots.blockUpdated.on(({ type, flavour }) => {
+      page.slots.blockUpdated.on(payload => {
+        const { type, flavour } = payload;
         if (
           (type === 'add' || type === 'delete') &&
           (flavour === 'affine:surface-ref' || flavour === 'affine:note')
@@ -280,12 +267,21 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             this._updateIndexLabel();
           }, this);
         }
+
+        if (
+          type === 'update' &&
+          flavour === 'affine:note' &&
+          payload.props.key === 'displayMode'
+        ) {
+          this.requestUpdate();
+        }
       })
     );
 
     _disposables.add(
-      edgeless.selectionManager.slots.updated.on(() => {
-        const selection = edgeless.selectionManager;
+      edgeless.service.selection.slots.updated.on(() => {
+        const selection = edgeless.service.selection;
+
         if (selection.selectedIds.length === 0 || selection.editing) {
           this._toolbarVisible = false;
         } else {
@@ -310,8 +306,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id, props }) => {
-        const element = edgeless.surface.pickById(id);
+      edgeless.surfaceBlockModel.elementUpdated.on(({ id, props }) => {
+        const element = edgeless.service.getElementById(id);
         if (isNoteBlock(element) && props && props['displayMode']) {
           this.requestUpdate();
         }
@@ -327,13 +323,13 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   override render() {
     const { edgeless } = this;
-    const { surface, page } = edgeless;
+    const { surface, page, service } = edgeless;
     const { readonly } = page;
 
     if (!surface) return nothing;
 
-    const notes = surface.getBlocks(['affine:note']);
-    const layers = surface.layer.layers;
+    const notes = page.getBlockByFlavour(['affine:note']) as NoteBlockModel[];
+    const layers = service.layer.layers;
     const pageVisibleBlocks = new Map<AutoConnectElement, number>();
     const edgelessOnlyNotesSet = new Set<NoteBlockModel>();
 
@@ -354,7 +350,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
       note.children.forEach(model => {
         if (matchFlavours(model, ['affine:surface-ref'])) {
-          const reference = surface.pickById(
+          const reference = service.getElementById(
             model.reference
           ) as AutoConnectElement;
           if (!pageVisibleBlocks.has(reference)) {
@@ -374,7 +370,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           <edgeless-frames-container
             .surface=${surface}
             .edgeless=${edgeless}
-            .frames=${this.frames}
+            .frames=${service.layer.frames}
           >
           </edgeless-frames-container>
           <div class="canvas-slot"></div>

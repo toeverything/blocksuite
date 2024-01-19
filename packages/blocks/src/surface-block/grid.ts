@@ -1,6 +1,6 @@
-import type { EdgelessElement } from '../_common/types.js';
+import type { EdgelessElement } from '../page-block/edgeless/type.js';
 import { GRID_SIZE, type IBound } from './consts.js';
-import { compare } from './managers/group-manager.js';
+import { compare } from './managers/layer-utils.js';
 import { Bound } from './utils/bound.js';
 import {
   getBoundsWithRotation,
@@ -30,9 +30,25 @@ function rangeFromElement<T extends EdgelessElement>(ele: T): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
+function rangeFromElementExternal<T extends EdgelessElement>(
+  ele: T
+): number[] | null {
+  if (!ele.externalXYWH) return null;
+
+  const bound = Bound.deserialize(ele.externalXYWH);
+  const minRow = getGridIndex(bound.x);
+  const maxRow = getGridIndex(bound.maxX);
+  const minCol = getGridIndex(bound.y);
+  const maxCol = getGridIndex(bound.maxY);
+  return [minRow, maxRow, minCol, maxCol];
+}
+
 export class GridManager<T extends EdgelessElement> {
   private _grids: Map<string, Set<T>> = new Map();
   private _elementToGrids: Map<T, Set<Set<T>>> = new Map();
+
+  private _externalGrids: Map<string, Set<T>> = new Map();
+  private _externalElementToGrids: Map<T, Set<Set<T>>> = new Map();
 
   private _createGrid(row: number, col: number) {
     const id = row + '|' + col;
@@ -41,16 +57,68 @@ export class GridManager<T extends EdgelessElement> {
     return elements;
   }
 
+  private _createExternalGrid(row: number, col: number) {
+    const id = row + '|' + col;
+    const elements: Set<T> = new Set();
+    this._externalGrids.set(id, elements);
+    return elements;
+  }
+
   private _getGrid(row: number, col: number) {
     const id = row + '|' + col;
     return this._grids.get(id);
+  }
+
+  private _getExternalGrid(row: number, col: number) {
+    const id = row + '|' + col;
+    return this._externalGrids.get(id);
   }
 
   get isEmpty() {
     return this._grids.size === 0;
   }
 
+  private _addToExternalGrids(element: T) {
+    const range = rangeFromElementExternal(element);
+
+    if (!range) {
+      this._removeFromExternalGrids(element);
+      return;
+    }
+
+    const [minRow, maxRow, minCol, maxCol] = range;
+    const grids = new Set<Set<T>>();
+    this._externalElementToGrids.set(element, grids);
+
+    for (let i = minRow; i <= maxRow; i++) {
+      for (let j = minCol; j <= maxCol; j++) {
+        let grid = this._getExternalGrid(i, j);
+        if (!grid) {
+          grid = this._createExternalGrid(i, j);
+        }
+        grid.add(element);
+        grids.add(grid);
+      }
+    }
+  }
+
+  private _removeFromExternalGrids(element: T) {
+    const grids = this._externalElementToGrids.get(element);
+    if (grids) {
+      for (const grid of grids) {
+        grid.delete(element);
+      }
+    }
+  }
+
+  update(element: T) {
+    this.remove(element);
+    this.add(element);
+  }
+
   add(element: T) {
+    this._addToExternalGrids(element);
+
     const [minRow, maxRow, minCol, maxCol] = rangeFromElement(element);
     const grids = new Set<Set<T>>();
     this._elementToGrids.set(element, grids);
@@ -69,11 +137,13 @@ export class GridManager<T extends EdgelessElement> {
 
   remove(element: T) {
     const grids = this._elementToGrids.get(element);
-    if (!grids) return;
-
-    for (const grid of grids) {
-      grid.delete(element);
+    if (grids) {
+      for (const grid of grids) {
+        grid.delete(element);
+      }
     }
+
+    this._removeFromExternalGrids(element);
   }
 
   boundHasChanged(a: IBound, b: IBound) {
@@ -87,9 +157,36 @@ export class GridManager<T extends EdgelessElement> {
     );
   }
 
-  search(bound: IBound, strict = false): T[] {
+  private _searchExternal(bound: IBound, strict = false): Set<T> {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const results: Set<T> = new Set();
+    const b = Bound.from(bound);
+
+    for (let i = minRow; i <= maxRow; i++) {
+      for (let j = minCol; j <= maxCol; j++) {
+        const gridElements = this._getExternalGrid(i, j);
+        if (!gridElements) continue;
+
+        for (const element of gridElements) {
+          const externalBound = element.externalBound;
+          if (
+            externalBound &&
+            (strict
+              ? b.contains(externalBound)
+              : intersects(externalBound, bound))
+          ) {
+            results.add(element);
+          }
+        }
+      }
+    }
+
+    return results;
+  }
+
+  search(bound: IBound, strict = false): T[] {
+    const results: Set<T> = this._searchExternal(bound, strict);
+    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const b = Bound.from(bound);
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {

@@ -231,7 +231,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     } else {
       state.scale = (
         this._pageBlockElement as EdgelessPageBlockComponent
-      ).surface.viewport.zoom;
+      ).service.viewport.zoom;
       const container = getHoveringNote(point);
       if (container) {
         state.rect = Rect.fromDOM(container);

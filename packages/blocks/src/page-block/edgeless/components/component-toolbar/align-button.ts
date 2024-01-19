@@ -20,8 +20,8 @@ import {
 import type { EdgelessElement } from '../../../../_common/utils/index.js';
 import {
   Bound,
-  ConnectorElement,
-  GroupElement,
+  ConnectorElementModel,
+  GroupElementModel,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
@@ -31,21 +31,21 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
   edgeless!: EdgelessPageBlockComponent;
 
   private get elements() {
-    return this.edgeless.selectionManager.elements;
+    return this.edgeless.service.selection.elements;
   }
 
   override firstUpdated() {
     this._disposables.add(
-      this.edgeless.selectionManager.slots.updated.on(() =>
+      this.edgeless.service.selection.slots.updated.on(() =>
         this.requestUpdate()
       )
     );
   }
 
   private _updateXYWH(ele: EdgelessElement, bound: Bound) {
-    if (ele instanceof ConnectorElement) {
-      this.edgeless.surface.connector.updateXYWH(ele, bound);
-    } else if (ele instanceof GroupElement) {
+    if (ele instanceof ConnectorElementModel) {
+      ele.moveTo(bound);
+    } else if (ele instanceof GroupElementModel) {
       const groupBound = Bound.deserialize(ele.xywh);
       ele.childElements.forEach(child => {
         const newBound = Bound.deserialize(child.xywh);
@@ -54,7 +54,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
         this._updateXYWH(child, newBound);
       });
     } else {
-      this.edgeless.surface.updateElement(ele.id, {
+      this.edgeless.service.updateElement(ele.id, {
         xywh: bound.serialize(),
       });
     }

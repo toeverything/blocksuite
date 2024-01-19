@@ -10,6 +10,7 @@ import {
   HiddenIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { SmallPageIcon } from '../../../../_common/icons/text.js';
+import { requestConnectedFrame } from '../../../../_common/utils/event.js';
 import type { NoteBlockModel } from '../../../../models.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
@@ -161,62 +162,72 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   private _index = -1;
 
   protected override firstUpdated(): void {
-    const { _disposables, surface, edgeless } = this;
+    const { _disposables, edgeless } = this;
 
     _disposables.add(
-      surface.viewport.slots.viewportUpdated.on(() => {
+      edgeless.service.viewport.viewportUpdated.on(() => {
         this.requestUpdate();
       })
     );
 
+    const requestUpdate = (payload: { id: string }) => {
+      if (!this.isConnected) return;
+
+      const element = edgeless.service.getElementById(
+        payload.id
+      ) as AutoConnectElement;
+      if (element && this.pageVisibleElementsMap.has(element)) {
+        this.requestUpdate();
+      }
+
+      if (isNoteBlock(element) && this.edgelessOnlyNotesSet.has(element)) {
+        this.requestUpdate();
+      }
+    };
+
     _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id }) => {
-        const element = surface.pickById(id) as AutoConnectElement;
-        if (element && this.pageVisibleElementsMap.has(element)) {
-          this.requestUpdate();
-        }
-        if (isNoteBlock(element) && this.edgelessOnlyNotesSet.has(element)) {
-          this.requestUpdate();
+      edgeless.surfaceBlockModel.elementUpdated.on(requestUpdate)
+    );
+    _disposables.add(
+      edgeless.page.slots.blockUpdated.on(payload => {
+        if (payload.type === 'update') {
+          requestUpdate(payload);
         }
       })
     );
 
     _disposables.add(
-      edgeless.selectionManager.slots.updated.on(() => {
-        const { elements } = edgeless.selectionManager;
+      edgeless.service.selection.slots.updated.on(() => {
+        const { elements } = edgeless.service.selection;
         if (!(elements.length === 1 && isNoteBlock(elements[0]))) {
           this._index = -1;
         }
       })
     );
 
-    requestAnimationFrame(() => {
-      if (surface.isConnected && surface.edgeless.dispatcher) {
-        this._disposables.add(
-          surface.edgeless.dispatcher.add('click', ctx => {
-            const event = ctx.get('pointerState');
-            const { raw } = event;
-            const target = raw.target as HTMLElement;
-            if (!target) return false;
-            if (target.closest('.edgeless-index-label')) {
-              const ele = target.closest('.edgeless-index-label') as Element;
-              const index = Number(ele.getAttribute('index'));
-              this._index = index === this._index ? -1 : index;
-              return true;
-            } else if (target.closest('.edgeless-auto-connect-next-button')) {
-              this._navigateToNext();
-              return true;
-            } else if (
-              target.closest('.edgeless-auto-connect-previous-button')
-            ) {
-              this._navigateToPrev();
-              return true;
-            }
-            return false;
-          })
-        );
-      }
-    });
+    requestConnectedFrame(() => {
+      this._disposables.add(
+        edgeless.dispatcher.add('click', ctx => {
+          const event = ctx.get('pointerState');
+          const { raw } = event;
+          const target = raw.target as HTMLElement;
+          if (!target) return false;
+          if (target.closest('.edgeless-index-label')) {
+            const ele = target.closest('.edgeless-index-label') as Element;
+            const index = Number(ele.getAttribute('index'));
+            this._index = index === this._index ? -1 : index;
+            return true;
+          } else if (target.closest('.edgeless-auto-connect-next-button')) {
+            this._navigateToNext();
+            return true;
+          } else if (target.closest('.edgeless-auto-connect-previous-button')) {
+            this._navigateToPrev();
+            return true;
+          }
+          return false;
+        })
+      );
+    }, edgeless);
   }
 
   override connectedCallback(): void {
@@ -243,11 +254,15 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     this._index = this._index + 1;
     const element = elements[this._index];
     const bound = Bound.deserialize(element.xywh);
-    this.surface.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [element.id],
       editing: false,
     });
-    this.surface.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
+    this.edgeless.service.viewport.setViewportByBound(
+      bound,
+      [80, 80, 80, 80],
+      true
+    );
   }
 
   private _navigateToPrev() {
@@ -256,15 +271,19 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     this._index = this._index - 1;
     const element = elements[this._index];
     const bound = Bound.deserialize(element.xywh);
-    this.surface.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [element.id],
       editing: false,
     });
-    this.surface.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
+    this.edgeless.service.viewport.setViewportByBound(
+      bound,
+      [80, 80, 80, 80],
+      true
+    );
   }
 
   private _NavigatorComponent(elements: AutoConnectElement[]) {
-    const { viewport } = this.surface;
+    const { viewport } = this.surface.edgeless.service;
     const { zoom } = viewport;
     const classname = `navigator ${this._index >= 0 ? 'show' : 'hidden'}`;
     const element = elements[this._index];
@@ -292,7 +311,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     elements: AutoConnectElement[],
     counts: number[]
   ) {
-    const { viewport } = this.surface;
+    const { viewport } = this.edgeless.service;
     const { zoom } = viewport;
     let index = 0;
 
@@ -387,7 +406,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
       edgelessOnlyNotesSet,
       note => note.id,
       note => {
-        const { viewport } = this.surface;
+        const { viewport } = this.edgeless.service;
         const { zoom } = viewport;
         const bound = Bound.deserialize(note.xywh);
         const [left, right] = viewport.toViewCoord(bound.x, bound.y);

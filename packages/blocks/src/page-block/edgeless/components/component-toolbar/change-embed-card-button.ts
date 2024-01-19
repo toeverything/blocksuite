@@ -167,6 +167,10 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return this.model.page;
   }
 
+  private get edgeless() {
+    return this.surface.edgeless;
+  }
+
   private _embedOptions: EmbedOptions | null = null;
 
   private _embedCardStylePopper: ReturnType<typeof createButtonPopper> | null =
@@ -182,7 +186,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
   private get _blockElement() {
     const blockSelection =
-      this.surface.edgeless.selectionManager.selections.filter(sel =>
+      this.surface.edgeless.service.selection.selections.filter(sel =>
         sel.elements.includes(this.model.id)
       );
     if (blockSelection.length !== 1) {
@@ -302,12 +306,12 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     bound.w = EMBED_CARD_WIDTH[targetStyle];
     bound.h = EMBED_CARD_HEIGHT[targetStyle];
 
-    const blockId = this.surface.addElement(
+    const blockId = this.edgeless.service.addBlock(
       targetFlavour as EdgelessBlockType,
       { url, xywh: bound.serialize(), style: targetStyle },
       this.surface.model
     );
-    this.surface.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       editing: false,
       elements: [blockId],
     });
@@ -331,7 +335,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     bound.w = EMBED_CARD_WIDTH[targetStyle];
     bound.h = EMBED_CARD_HEIGHT[targetStyle];
 
-    const blockId = this.surface.addElement(
+    const blockId = this.edgeless.service.addBlock(
       flavour as EdgelessBlockType,
       {
         url,
@@ -340,7 +344,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       },
       this.surface.model
     );
-    this.surface.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       editing: false,
       elements: [blockId],
     });

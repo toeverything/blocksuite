@@ -5,7 +5,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { UngroupButtonIcon } from '../../../../_common/icons/index.js';
-import { GroupElement } from '../../../../surface-block/index.js';
+import { GroupElementModel } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 
 @customElement('edgeless-ungroup-button')
@@ -18,9 +18,11 @@ export class EdgelessUngroupButton extends WithDisposable(LitElement) {
       .class=${'edgeless-component-toolbar-ungroup-button'}
       .iconContainerPadding=${2}
       @click=${() => {
-        const { selectionManager } = this.surface.edgeless;
-        if (selectionManager.firstElement instanceof GroupElement) {
-          this.surface.group.ungroup(selectionManager.firstElement);
+        const service = this.surface.edgeless.service;
+        const selectionManager = service.selection;
+
+        if (selectionManager.firstElement instanceof GroupElementModel) {
+          service.ungroup(selectionManager.firstElement);
         }
       }}
       .tooltip=${'Ungroup'}

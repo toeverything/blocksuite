@@ -41,6 +41,11 @@ export class EmbedBlockElement<
     return this._isInSurface;
   }
 
+  get edgeless() {
+    if (this._isInSurface) return null;
+    return this.host.querySelector('affine-edgeless-page');
+  }
+
   get surface() {
     if (!this.isInSurface) return null;
     return this.host.querySelector('affine-surface');
@@ -48,7 +53,7 @@ export class EmbedBlockElement<
 
   get bound(): Bound {
     return Bound.deserialize(
-      (this.surface?.pickById(this.model.id) ?? this.model).xywh
+      (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
     );
   }
 
@@ -188,7 +193,7 @@ export class EmbedBlockElement<
     const width = this._width;
     const height = this._height;
     const bound = Bound.deserialize(
-      (surface.pickById(this.model.id) ?? this.model).xywh
+      (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
     );
     const scaleX = bound.w / width;
     const scaleY = bound.h / height;

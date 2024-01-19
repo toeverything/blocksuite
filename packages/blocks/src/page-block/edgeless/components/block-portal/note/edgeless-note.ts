@@ -14,6 +14,7 @@ import { almostEqual } from '../../../../../_common/utils/math.js';
 import { type NoteBlockModel } from '../../../../../note-block/note-model.js';
 import { Bound, StrokeStyle } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
+import type { EdgelessBlockModel } from '../../../type.js';
 import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const ACTIVE_NOTE_EXTRA_PADDING = 20;
@@ -38,7 +39,7 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 
   protected override firstUpdated() {
     this._disposables.add(
-      this.edgeless.selectionManager.slots.updated.on(() => {
+      this.edgeless.service.selection.slots.updated.on(() => {
         this.requestUpdate();
       })
     );
@@ -74,8 +75,8 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const selected =
-      this.edgeless?.selectionManager.has(this.model.id) &&
-      this.edgeless?.selectionManager.selections.some(
+      this.edgeless.service.selection.has(this.model.id) &&
+      this.edgeless.service.selection.selections.some(
         sel => sel.elements.includes(this.model.id) && sel.editing
       );
 
@@ -88,7 +89,8 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
       zIndex: '1',
       pointerEvents: selected ? 'none' : 'auto',
       borderRadius: `${
-        this.model.edgeless.style.borderRadius * this.surface.viewport.zoom
+        this.model.edgeless.style.borderRadius *
+        this.edgeless.service.viewport.zoom
       }px`,
     };
 
@@ -151,7 +153,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   private _affineNote!: HTMLDivElement;
 
   private _handleEditingTransition() {
-    const selection = this.surface.edgeless.selectionManager;
+    const selection = this.edgeless.service.selection;
     this._disposables.add(
       selection.slots.updated.on(selections => {
         if (selection.has(this.model.id) && selections?.[0].editing) {
@@ -168,7 +170,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   }
 
   private _hovered() {
-    if (!this._isHover && this.edgeless.selectionManager.has(this.model.id)) {
+    if (!this._isHover && this.edgeless.service.selection.has(this.model.id)) {
       this._isHover = true;
     }
   }
@@ -198,7 +200,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       });
     }
 
-    this.edgeless.selectionManager.clear();
+    this.edgeless.service.selection.clear();
   }
 
   private _collapsedContent() {
@@ -214,7 +216,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     const height = bound.h / scale;
 
     const rect = this._affineNote.getBoundingClientRect();
-    const zoom = this.surface.viewport.zoom;
+    const zoom = this.edgeless.service.viewport.zoom;
     this._noteFullHeight =
       rect.height / scale / zoom + 2 * EDGELESS_BLOCK_CHILD_PADDING;
 
@@ -244,13 +246,13 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
 
   override firstUpdated() {
     const { _disposables, edgeless } = this;
-    const selection = this.surface.edgeless.selectionManager;
+    const selection = this.edgeless.service.selection;
 
     this._handleEditingTransition();
 
     _disposables.add(
       edgeless.slots.elementResizeStart.on(() => {
-        if (selection.elements.includes(this.model)) {
+        if (selection.elements.includes(this.model as EdgelessBlockModel)) {
           this._isResizing = true;
         }
       })
@@ -263,10 +265,8 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     );
 
     _disposables.add(
-      edgeless.selectionManager.slots.updated.on(() => {
-        this._isSelected = edgeless.selectionManager.elements.includes(
-          this.model
-        );
+      edgeless.service.selection.slots.updated.on(() => {
+        this._isSelected = edgeless.service.selection.has(this.model.id);
 
         this._isHover =
           this._isSelected &&
@@ -278,7 +278,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       const affineNote = this._affineNote;
       if (!this._affineNote) return;
       const rect = affineNote.getBoundingClientRect();
-      const zoom = this.surface.viewport.zoom;
+      const zoom = this.edgeless.service.viewport.zoom;
       const scale = this.model.edgeless.scale ?? 1;
       this._noteFullHeight =
         rect.height / scale / zoom + 2 * EDGELESS_BLOCK_CHILD_PADDING;
@@ -367,7 +367,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
             overflow: this._isShowCollapsedContent ? 'initial' : 'hidden',
           })}
         >
-          ${surface.edgeless.renderModel(model)}
+          ${surface.renderModel(model)}
         </div>
 
         ${isCollapsable

@@ -29,14 +29,12 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  private get _service() {
-    return this.edgeless.surface.service;
-  }
-
   private _blackBackground = false;
 
   private _tryLoadBlackBackground() {
-    const value = this._service.editSession.getItem('presentBlackBackground');
+    const value = this.edgeless.service.editSession.getItem(
+      'presentBlackBackground'
+    );
     this._blackBackground = value ? value : true;
   }
 
@@ -51,7 +49,7 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
     _disposables.add(
       edgeless.slots.navigatorSettingUpdated.on(({ blackBackground }) => {
         if (blackBackground !== undefined) {
-          this._service.editSession.setItem(
+          this.edgeless.service.editSession.setItem(
             'presentBlackBackground',
             blackBackground
           );
@@ -92,10 +90,10 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
     if (!show || !frame) return nothing;
 
     const bound = Bound.deserialize(frame.xywh);
-    const zoom = edgeless.surface.viewport.zoom;
+    const zoom = edgeless.service.viewport.zoom;
     const width = bound.w * zoom;
     const height = bound.h * zoom;
-    const [x, y] = edgeless.surface.viewport.toViewCoord(bound.x, bound.y);
+    const [x, y] = edgeless.service.viewport.toViewCoord(bound.x, bound.y);
 
     return html` <style>
         .edgeless-navigator-black-background {

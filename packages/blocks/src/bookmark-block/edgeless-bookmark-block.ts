@@ -33,7 +33,7 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
     super.connectedCallback();
 
     this.disposables.add(
-      this.edgeless.slots.elementUpdated.on(({ id }) => {
+      this.model.page.slots.blockUpdated.on(({ id }) => {
         if (id === this.model.id) {
           this.requestUpdate();
         }
@@ -48,8 +48,9 @@ export class EdgelessBookmarkBlockComponent extends WithDisposable(
 
     const bound = Bound.deserialize(
       (
-        (this.edgeless.surface.pickById(this.model.id) as BookmarkBlockModel) ??
-        this.model
+        (this.edgeless.service.getElementById(
+          this.model.id
+        ) as BookmarkBlockModel) ?? this.model
       ).xywh
     );
     const scaleX = bound.w / width;

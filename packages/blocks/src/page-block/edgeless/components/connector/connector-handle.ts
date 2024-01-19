@@ -4,7 +4,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { ConnectorElement } from '../../../../surface-block/index.js';
+import type { ConnectorElementModel } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-connector-handle')
@@ -36,7 +36,7 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  connector!: ConnectorElement;
+  connector!: ConnectorElementModel;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -51,9 +51,9 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
 
   override firstUpdated() {
     const { edgeless } = this;
-    const { viewport } = edgeless.surface;
+    const { viewport } = edgeless.service;
     this._lastZoom = viewport.zoom;
-    this.edgeless.slots.viewportUpdated.on(() => {
+    this.edgeless.service.viewport.viewportUpdated.on(() => {
       if (viewport.zoom !== this._lastZoom) {
         this._lastZoom = viewport.zoom;
         this.requestUpdate();
@@ -64,21 +64,27 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
 
   private _capPointerDown(e: PointerEvent, connection: 'target' | 'source') {
     const { edgeless, connector, _disposables } = this;
-    const { surface } = edgeless;
+    const { service, surface } = edgeless;
     e.stopPropagation();
     _disposables.addFromEvent(document, 'pointermove', e => {
       const { clientX, clientY } = e;
-      const viewportRect = edgeless.surface.viewport.boundingClientRect;
-      const modelXY = edgeless.surface.viewport.toModelCoord(
+      const viewportRect = service.viewport.boundingClientRect;
+      const modelXY = service.viewport.toModelCoord(
         clientX - viewportRect.left,
         clientY - viewportRect.top
       );
-      surface.connector.updateConnection(connector, modelXY, connection);
+      const otherSideId =
+        connector[connection === 'source' ? 'target' : 'source'].id;
+
+      connector[connection] = surface.overlays.connector.renderConnector(
+        modelXY,
+        otherSideId ? [otherSideId] : []
+      );
       this.requestUpdate();
     });
 
     _disposables.addFromEvent(document, 'pointerup', () => {
-      surface.connector.clear();
+      surface.overlays.connector.clear();
       edgeless.page.captureSync();
       _disposables.dispose();
       this._disposables = new DisposableGroup();
@@ -96,10 +102,10 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const { surface } = this.edgeless;
+    const { service } = this.edgeless;
     // path is relative to the element's xywh
     const { path } = this.connector;
-    const zoom = surface.viewport.zoom;
+    const zoom = service.viewport.zoom;
     const start = {
       position: 'absolute',
       left: `${path[0][0] * zoom}px`,

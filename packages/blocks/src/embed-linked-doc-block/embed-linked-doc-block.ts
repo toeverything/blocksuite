@@ -223,9 +223,9 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     renderer.attach(container);
 
     // TODO: we may also need to get bounds of surface block's children
-    const bounds = Array.from(this._surfaceRefRenderer.elements.values()).map(
-      element => Bound.deserialize(element.xywh)
-    );
+    const bounds = Array.from(
+      this._surfaceRefRenderer.surfaceModel?.elementModels ?? []
+    ).map(element => Bound.deserialize(element.xywh));
     const bound = getCommonBound(bounds);
     if (bound) {
       renderer.onResize();
@@ -399,11 +399,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     if (this.isInSurface) {
       const surface = this.surface;
       assertExists(surface);
+
       this.disposables.add(
-        surface.edgeless.slots.elementUpdated.on(({ id }) => {
-          if (id === this.model.id) {
-            this.requestUpdate();
-          }
+        this.model.propsUpdated.on(() => {
+          this.requestUpdate();
         })
       );
     }

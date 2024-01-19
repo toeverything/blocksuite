@@ -40,14 +40,16 @@ import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-yo
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
-import { GROUP_ROOT } from '../../../../surface-block/elements/group/consts.js';
-import type { GroupElement } from '../../../../surface-block/index.js';
+import type {
+  ElementModel,
+  GroupElementModel,
+} from '../../../../surface-block/index.js';
 import {
-  type BrushElement,
+  type BrushElementModel,
   clamp,
-  type ConnectorElement,
-  type ShapeElement,
-  type TextElement,
+  type ConnectorElementModel,
+  type ShapeElementModel,
+  type TextElementModel,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
@@ -60,11 +62,11 @@ import {
 } from '../../utils/query.js';
 
 type CategorizedElements = {
-  shape?: ShapeElement[];
-  brush?: BrushElement[];
-  text?: TextElement[];
-  group?: GroupElement[];
-  connector?: ConnectorElement[];
+  shape?: ShapeElementModel[];
+  brush?: BrushElementModel[];
+  text?: TextElementModel[];
+  group?: GroupElementModel[];
+  connector?: ConnectorElementModel[];
   note?: NoteBlockModel[];
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
@@ -113,7 +115,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   get selection() {
-    return this.edgeless.selectionManager;
+    return this.edgeless.service.selection;
   }
 
   get slots() {
@@ -135,12 +137,13 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       } else if (isBookmarkBlock(model) || isEmbeddedBlock(model)) {
         return 'embedCard';
       }
-      return model.type;
+
+      return (model as ElementModel).type;
     });
     return result as CategorizedElements;
   }
 
-  private _ShapeButton(shapeElements?: ShapeElement[]) {
+  private _ShapeButton(shapeElements?: ShapeElementModel[]) {
     const shapeButton = shapeElements?.length
       ? html`<edgeless-change-shape-button
           .elements=${shapeElements}
@@ -152,7 +155,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return shapeButton;
   }
 
-  private _BrushButton(brushElements?: BrushElement[]) {
+  private _BrushButton(brushElements?: BrushElementModel[]) {
     return brushElements?.length
       ? html`<edgeless-change-brush-button
           .elements=${brushElements}
@@ -163,7 +166,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _ConnectorButton(connectorElements?: ConnectorElement[]) {
+  private _ConnectorButton(connectorElements?: ConnectorElementModel[]) {
     return connectorElements?.length
       ? html` <edgeless-change-connector-button
           .elements=${connectorElements}
@@ -199,7 +202,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     `;
   }
 
-  private _TextButton(textElements?: TextElement[]) {
+  private _TextButton(textElements?: TextElementModel[]) {
     return textElements?.length
       ? html`<edgeless-change-text-button
           .texts=${textElements}
@@ -222,7 +225,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _GroupButton(groups?: GroupElement[]) {
+  private _GroupButton(groups?: GroupElementModel[]) {
     return groups?.length
       ? html`<edgeless-change-group-button
           .surface=${this.surface}
@@ -238,15 +241,16 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   private _updateOnSelectedChange = (element: string | { id: string }) => {
     const id = typeof element === 'string' ? element : element.id;
-    if (this.selection.has(id)) {
+
+    if (this.isConnected && this.selection.has(id)) {
       this.requestUpdate();
     }
   };
 
   protected override firstUpdated() {
-    const { _disposables, edgeless, surface } = this;
+    const { _disposables, edgeless } = this;
     _disposables.add(
-      surface.viewport.slots.viewportUpdated.on(() => {
+      edgeless.service.viewport.viewportUpdated.on(() => {
         const [left, top] = this._computePosition();
         this.left = left;
         this.top = top;
@@ -259,14 +263,14 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       })
     );
 
-    pickValues(this.edgeless.slots, [
+    pickValues(this.edgeless.service.surface, [
       'elementAdded',
       'elementRemoved',
       'elementUpdated',
     ]).forEach(slot => _disposables.add(slot.on(this._updateOnSelectedChange)));
 
     _disposables.add(
-      edgeless.page.slots.blockUpdated.on(this._updateOnSelectedChange)
+      this.page.slots.blockUpdated.on(this._updateOnSelectedChange)
     );
   }
 
@@ -307,11 +311,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   private _computePosition() {
-    const { selectionManager } = this.edgeless;
+    const { selection, viewport } = this.edgeless.service;
 
-    const bound = edgelessElementsBound(selectionManager.elements);
+    const bound = edgelessElementsBound(selection.elements);
 
-    const { viewport } = this.edgeless.surface;
     const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
 
@@ -374,7 +377,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     }
 
     if (elements.length === 1) {
-      if (this.surface.getGroupParent(selection.firstElement) !== GROUP_ROOT) {
+      if (selection.firstElement.group !== null) {
         buttons.unshift(this._Divider());
         buttons.unshift(this._ReleaseFromGroupButton());
       }

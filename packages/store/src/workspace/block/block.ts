@@ -10,7 +10,6 @@ export type YBlock = Y.Map<unknown>;
 
 export type BlockOptions = Partial<{
   onChange: (block: Block, key: string, value: unknown) => void;
-  onYBlockUpdated: (block: Block) => void;
 }>;
 
 export class Block {
@@ -52,7 +51,7 @@ export class Block {
             // @ts-ignore
             this.model[keyName] = proxy;
           });
-          this.model.propsUpdated.emit({ key: keyName });
+          this.options.onChange?.(this, keyName, value);
           return;
         }
         if (type.action === 'delete') {
@@ -61,14 +60,10 @@ export class Block {
             // @ts-ignore
             delete this.model[keyName];
           });
-          this.model.propsUpdated.emit({ key: keyName });
+          this.options.onChange?.(this, keyName, undefined);
           return;
         }
       });
-    });
-
-    this.yBlock.observeDeep(() => {
-      this.options.onYBlockUpdated?.(this);
     });
   }
 

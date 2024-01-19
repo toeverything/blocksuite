@@ -134,11 +134,11 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   get _selection() {
-    return this.edgeless.selectionManager;
+    return this.edgeless.service.selection;
   }
 
   get _zoom() {
-    return this.edgeless?.surface?.viewport.zoom;
+    return this.edgeless.service.viewport.zoom;
   }
 
   private _updateDivingLineAndBlockIds() {
@@ -216,7 +216,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     );
 
     disposables.add(
-      this.edgeless.slots.viewportUpdated.on(() => {
+      this.edgeless.service.viewport.viewportUpdated.on(() => {
         this._hidden = true;
         this.requestUpdate();
       })
@@ -295,8 +295,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     const [x, , width] = deserializeXYWH(xywh);
     const sliceVerticalPos =
       this._divingLinePositions[this._activeSlicerIndex].y;
-    const newY = this.edgeless.surface.toModelCoord(x, sliceVerticalPos)[1];
-    const newNoteId = this.edgeless.surface.addElement(
+    const newY = this.edgeless.service.toModelCoord(x, sliceVerticalPos)[1];
+    const newNoteId = this.edgeless.service.addBlock(
       'affine:note',
       {
         background,

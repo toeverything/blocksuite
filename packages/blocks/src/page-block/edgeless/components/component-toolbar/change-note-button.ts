@@ -247,7 +247,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     // if change note to page only, should clear the selection
     if (newMode === NoteDisplayMode.DocOnly) {
-      this.surface.edgeless.selectionManager.clear();
+      this.surface.edgeless.service.selection.clear();
     }
 
     this._queryCache = !this._queryCache;
@@ -399,7 +399,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     );
 
     this.disposables.add(
-      edgeless.selectionManager.slots.updated.on(() => {
+      edgeless.service.selection.slots.updated.on(() => {
         this._enableNoteSlicer = false;
       })
     );

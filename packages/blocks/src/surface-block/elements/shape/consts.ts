@@ -1,10 +1,6 @@
 import { z } from 'zod';
 
-import { DEFAULT_ROUGHNESS, ShapeStyle, StrokeStyle } from '../../consts.js';
-import {
-  CanvasElementType,
-  type IElementDefaultProps,
-} from '../edgeless-element.js';
+import type { StrokeStyle } from '../../consts.js';
 
 export enum ShapeType {
   Rect = 'rect',
@@ -12,23 +8,6 @@ export enum ShapeType {
   Ellipse = 'ellipse',
   Diamond = 'diamond',
 }
-
-export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
-  type: CanvasElementType.SHAPE,
-  xywh: '[0,0,0,0]',
-
-  rotate: 0,
-
-  shapeType: ShapeType.Rect,
-  shapeStyle: ShapeStyle.General,
-  radius: 0,
-  filled: false,
-  fillColor: '#ffffff',
-  strokeWidth: 4,
-  strokeColor: '#000000',
-  strokeStyle: StrokeStyle.Solid,
-  roughness: DEFAULT_ROUGHNESS,
-};
 
 export enum SHAPE_TEXT_FONT_SIZE {
   SMALL = 12,

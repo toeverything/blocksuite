@@ -64,11 +64,11 @@ export class EdgelessEditor extends WithDisposable(ShadowlessElement) {
 
     if (!surface) return;
 
-    const { service, viewport } = surface;
-    service.editSession.setItem('viewport', {
-      centerX: viewport.centerX,
-      centerY: viewport.centerY,
-      zoom: viewport.zoom,
+    const { edgeless } = surface;
+    edgeless.service.editSession.setItem('viewport', {
+      centerX: edgeless.service.viewport.centerX,
+      centerY: edgeless.service.viewport.centerY,
+      zoom: edgeless.service.viewport.zoom,
     });
   }
 }

@@ -2,7 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
 import type { BrushTool } from '../../../../_common/utils/index.js';
-import type { BrushElement } from '../../../../surface-block/index.js';
+import type { BrushElementModel } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
   type IVec,
@@ -14,7 +14,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     type: 'brush',
   };
 
-  private _draggingElement: BrushElement | null = null;
+  private _draggingElement: BrushElementModel | null = null;
   private _draggingElementId: string | null = null;
   protected _draggingPathPoints: number[][] | null = null;
   private _lastPoint: IVec | null = null;
@@ -42,17 +42,17 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
   onContainerDragStart(e: PointerEventState) {
     this._page.captureSync();
-    const { viewport } = this._edgeless.surface;
+    const { viewport } = this._edgeless.service;
 
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
     const points = [[modelX, modelY]];
 
-    const id = this._surface.addElement(CanvasElementType.BRUSH, {
+    const id = this._service.addElement(CanvasElementType.BRUSH, {
       points,
     });
 
-    const element = this._surface.pickById(id) as BrushElement;
+    const element = this._service.getElementById(id) as BrushElementModel;
 
     element.stash('points');
     element.stash('xywh');
@@ -86,7 +86,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       this._straightLineType = null;
     }
 
-    const [modelX, modelY] = this._edgeless.surface.toModelCoord(
+    const [modelX, modelY] = this._service.viewport.toModelCoord(
       pointX,
       pointY
     );
@@ -96,7 +96,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     this._lastPoint = [pointX, pointY];
     this._draggingPathPoints = points;
 
-    this._edgeless.surface.updateElement(this._draggingElementId, {
+    this._edgeless.service.updateElement(this._draggingElementId, {
       points,
     });
   }
