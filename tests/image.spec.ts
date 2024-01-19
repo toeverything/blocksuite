@@ -170,7 +170,7 @@ test('should support the enter key of image caption', async ({ page }) => {
   await assertRichTextInlineRange(page, 0, 0, 0);
 });
 
-test.only('popup menu should follow position of image when scrolling', async ({
+test('popup menu should follow position of image when scrolling', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
