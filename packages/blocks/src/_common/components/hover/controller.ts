@@ -49,7 +49,7 @@ export class HoverController implements ReactiveController {
   protected _disposables = new DisposableGroup();
   host: ReactiveControllerHost;
 
-  private static _globalAbortController?: AbortController;
+  static globalAbortController?: AbortController;
 
   private _abortController?: AbortController;
   private _setReference?: (element?: Element | undefined) => void;
@@ -114,8 +114,8 @@ export class HoverController implements ReactiveController {
       });
 
       if (!this._hoverOptions.allowMultiple) {
-        HoverController._globalAbortController?.abort();
-        HoverController._globalAbortController = this._abortController;
+        HoverController.globalAbortController?.abort();
+        HoverController.globalAbortController = this._abortController;
       }
 
       const portalOptions = this._onHover({

@@ -12,6 +12,7 @@ import {
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
+import { HoverController } from '../../../_common/components/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { matchFlavours } from '../../../_common/utils/model.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
@@ -312,6 +313,7 @@ export class AffineFormatBarWidget extends WidgetElement {
         getClientRects: () => range.getClientRects(),
       };
 
+      HoverController.globalAbortController?.abort();
       this._floatDisposables.add(
         autoUpdate(
           visualElement,
@@ -377,6 +379,7 @@ export class AffineFormatBarWidget extends WidgetElement {
           this._selectedBlockElements.map(el => el.getBoundingClientRect()),
       };
 
+      HoverController.globalAbortController?.abort();
       this._floatDisposables.add(
         autoUpdate(
           visualElement,
