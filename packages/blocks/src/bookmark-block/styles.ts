@@ -127,7 +127,7 @@ export const styles = css`
   .affine-bookmark-content-url:hover > span {
     color: var(--affine-link-color);
   }
-  .affine-bookmark-content-url:hover svg {
+  .affine-bookmark-content-url:hover .open-icon {
     fill: var(--affine-link-color);
   }
 
@@ -138,7 +138,7 @@ export const styles = css`
     width: 12px;
     height: 20px;
   }
-  .affine-bookmark-content-url-icon svg {
+  .affine-bookmark-content-url-icon .open-icon {
     height: 12px;
     width: 12px;
     fill: var(--affine-text-secondary-color);

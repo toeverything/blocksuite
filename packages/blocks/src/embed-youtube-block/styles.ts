@@ -197,7 +197,7 @@ export const styles = css`
   .affine-embed-youtube-content-url:hover > span {
     color: var(--affine-link-color);
   }
-  .affine-embed-youtube-content-url:hover svg {
+  .affine-embed-youtube-content-url:hover .open-icon {
     fill: var(--affine-link-color);
   }
 
@@ -208,7 +208,7 @@ export const styles = css`
     width: 12px;
     height: 12px;
   }
-  .affine-embed-youtube-content-url-icon svg {
+  .affine-embed-youtube-content-url-icon .open-icon {
     height: 12px;
     width: 12px;
     fill: var(--affine-text-secondary-color);

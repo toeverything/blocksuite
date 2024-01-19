@@ -190,7 +190,7 @@ export const styles = css`
   .affine-embed-github-content-url:hover > span {
     color: var(--affine-link-color);
   }
-  .affine-embed-github-content-url:hover svg {
+  .affine-embed-github-content-url:hover .open-icon {
     fill: var(--affine-link-color);
   }
 
@@ -201,7 +201,7 @@ export const styles = css`
     width: 12px;
     height: 12px;
   }
-  .affine-embed-github-content-url-icon svg {
+  .affine-embed-github-content-url-icon .open-icon {
     height: 12px;
     width: 12px;
     fill: var(--affine-text-secondary-color);

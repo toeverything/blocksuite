@@ -418,7 +418,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     const textSelection = selection.find('text');
     if (
       !!textSelection &&
-      (!!textSelection.to || textSelection.from.length > 1)
+      (!!textSelection.to || !!textSelection.from.length)
     ) {
       return null;
     }
