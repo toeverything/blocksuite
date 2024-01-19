@@ -1,7 +1,7 @@
 // related component
 import '../database-block/table/table-view.js';
 
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement, RangeManager } from '@blocksuite/lit';
 import { nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -9,6 +9,11 @@ import type { DataViewBlockModel } from './data-view-model.js';
 
 @customElement('affine-data-view')
 export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
+  override connectedCallback() {
+    super.connectedCallback();
+    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+  }
+
   override render() {
     // data-view block has been deprecated
     return nothing;

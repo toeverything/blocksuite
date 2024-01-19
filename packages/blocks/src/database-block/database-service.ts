@@ -23,8 +23,6 @@ export class DatabaseService<
     super.mounted();
     this.selectionManager.register(DatabaseSelection);
 
-    this.handleEvent('selectionChange', () => true);
-
     this.referenceNodeConfig.setPage(this.page);
 
     const inlineSpecs = getAffineInlineSpecsWithReference(

@@ -10,9 +10,6 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 
 import {
   type EdgelessTool,
-  isDatabaseInput,
-  isInsideDocTitle,
-  isInsideEdgelessTextEditor,
   isMiddleButtonPressed,
   isPinchEvent,
   Point,
@@ -34,32 +31,6 @@ import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { getSelectionBoxBound } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
-
-function shouldFilterMouseEvent(event: Event): boolean {
-  const target = event.target;
-  if (!target || !(target instanceof HTMLElement)) {
-    return false;
-  }
-
-  if (target.tagName === 'INPUT') {
-    return true;
-  }
-  if (target.tagName === 'FORMAT-QUICK-BAR') {
-    return true;
-  }
-  if (target.tagName === 'AFFINE-DRAG-HANDLE') {
-    return true;
-  }
-  if (
-    target.tagName === 'EDGELESS-TOOLBAR' ||
-    target.tagName === 'EDGELESS-ZOOM-TOOLBAR' ||
-    target.tagName === 'ZOOM-BAR-TOGGLE-BUTTON'
-  ) {
-    return true;
-  }
-
-  return false;
-}
 
 export interface EdgelessHoverState {
   rect: DOMRect;
@@ -184,38 +155,15 @@ export class EdgelessToolsManager {
     this._add('dragStart', ctx => {
       this._dragging = true;
       const event = ctx.get('pointerState');
-      if (shouldFilterMouseEvent(event.raw)) return;
-      if (
-        !isInsideDocTitle(this.container.host, event.raw.target) &&
-        !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(this.container.host, event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
       this._onContainerDragStart(event);
     });
     this._add('dragMove', ctx => {
       const event = ctx.get('pointerState');
-      if (shouldFilterMouseEvent(event.raw)) return;
-      if (
-        !isInsideDocTitle(this.container.host, event.raw.target) &&
-        !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(this.container.host, event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
       this._onContainerDragMove(event);
     });
     this._add('dragEnd', ctx => {
       this._dragging = false;
       const event = ctx.get('pointerState');
-      if (
-        !isInsideDocTitle(this.container.host, event.raw.target) &&
-        !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(this.container.host, event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
       this._onContainerDragEnd(event);
     });
     this._add('click', ctx => {
@@ -224,24 +172,14 @@ export class EdgelessToolsManager {
     });
     this._add('doubleClick', ctx => {
       const event = ctx.get('pointerState');
-      if (shouldFilterMouseEvent(event.raw)) return;
       this._onContainerDblClick(event);
     });
     this._add('tripleClick', ctx => {
       const event = ctx.get('pointerState');
-      if (shouldFilterMouseEvent(event.raw)) return;
       this._onContainerTripleClick(event);
     });
     this._add('pointerMove', ctx => {
       const event = ctx.get('pointerState');
-      if (shouldFilterMouseEvent(event.raw)) return;
-      if (
-        !isInsideDocTitle(this.container.host, event.raw.target) &&
-        !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(this.container.host, event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
       this._onContainerPointerMove(event);
     });
     this._add('pointerDown', ctx => {

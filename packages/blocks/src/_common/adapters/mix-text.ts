@@ -20,10 +20,10 @@ import {
 
 import { MarkdownAdapter } from './markdown.js';
 
-export type PlainText = string;
+export type MixText = string;
 
-type PlainTextToSliceSnapshotPayload = {
-  file: PlainText;
+type MixTextToSliceSnapshotPayload = {
+  file: MixText;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
   pageVersion: number;
@@ -32,7 +32,7 @@ type PlainTextToSliceSnapshotPayload = {
   pageId: string;
 };
 
-export class PlainTextAdapter extends BaseAdapter<PlainText> {
+export class MixTextAdapter extends BaseAdapter<MixText> {
   private _markdownAdapter: MarkdownAdapter;
   constructor() {
     super();
@@ -41,7 +41,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
   async fromPageSnapshot({
     snapshot,
     assets,
-  }: FromPageSnapshotPayload): Promise<FromPageSnapshotResult<PlainText>> {
+  }: FromPageSnapshotPayload): Promise<FromPageSnapshotResult<MixText>> {
     let buffer = '';
     if (snapshot.meta.title) {
       buffer += `${snapshot.meta.title}\n\n`;
@@ -59,33 +59,33 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
 
   async fromBlockSnapshot({
     snapshot,
-  }: FromBlockSnapshotPayload): Promise<FromBlockSnapshotResult<PlainText>> {
-    const { plaintext } = await this._traverseSnapshot(snapshot);
+  }: FromBlockSnapshotPayload): Promise<FromBlockSnapshotResult<MixText>> {
+    const { mixtext } = await this._traverseSnapshot(snapshot);
     return {
-      file: plaintext,
+      file: mixtext,
       assetsIds: [],
     };
   }
 
   async fromSliceSnapshot({
     snapshot,
-  }: FromSliceSnapshotPayload): Promise<FromSliceSnapshotResult<PlainText>> {
+  }: FromSliceSnapshotPayload): Promise<FromSliceSnapshotResult<MixText>> {
     let buffer = '';
     const sliceAssetsIds: string[] = [];
     for (const contentSlice of snapshot.content) {
-      const { plaintext } = await this._traverseSnapshot(contentSlice);
-      buffer += plaintext;
+      const { mixtext } = await this._traverseSnapshot(contentSlice);
+      buffer += mixtext;
     }
-    const plaintext =
+    const mixtext =
       buffer.match(/\n/g)?.length === 1 ? buffer.trimEnd() : buffer;
     return {
-      file: plaintext,
+      file: mixtext,
       assetsIds: sliceAssetsIds,
     };
   }
 
   async toPageSnapshot(
-    payload: ToPageSnapshotPayload<PlainText>
+    payload: ToPageSnapshotPayload<MixText>
   ): Promise<PageSnapshot> {
     payload.file = payload.file.replaceAll('\r', '');
     return {
@@ -156,7 +156,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
   }
 
   async toBlockSnapshot(
-    payload: ToBlockSnapshotPayload<PlainText>
+    payload: ToBlockSnapshotPayload<MixText>
   ): Promise<BlockSnapshot> {
     payload.file = payload.file.replaceAll('\r', '');
     return {
@@ -192,57 +192,28 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
   }
 
   async toSliceSnapshot(
-    payload: PlainTextToSliceSnapshotPayload
+    payload: MixTextToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {
     this._markdownAdapter.applyConfigs(this.configs);
     if (payload.file.trim().length === 0) {
       return null;
     }
     payload.file = payload.file.replaceAll('\r', '');
-    const contentSlice = {
-      type: 'block',
-      id: nanoid('block'),
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: '--affine-background-secondary-color',
-        index: 'a0',
-        hidden: false,
-      },
-      children: payload.file.split('\n').map((line): BlockSnapshot => {
-        return {
-          type: 'block',
-          id: nanoid('block'),
-          flavour: 'affine:paragraph',
-          props: {
-            type: 'text',
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: line,
-                },
-              ],
-            },
-          },
-          children: [],
-        };
-      }),
-    } as BlockSnapshot;
-    return {
-      type: 'slice',
-      content: [contentSlice],
+    const sliceSnapshot = await this._markdownAdapter.toSliceSnapshot({
+      file: payload.file,
+      assets: payload.assets,
       blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
       pageId: payload.pageId,
-    };
+    });
+    return sliceSnapshot;
   }
 
   private async _traverseSnapshot(
     snapshot: BlockSnapshot
-  ): Promise<{ plaintext: string }> {
+  ): Promise<{ mixtext: string }> {
     let buffer = '';
     const walker = new ASTWalker<BlockSnapshot, never>();
     walker.setONodeTypeGuard(
@@ -277,7 +248,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     });
     await walker.walkONode(snapshot);
     return {
-      plaintext: buffer,
+      mixtext: buffer,
     };
   }
 }

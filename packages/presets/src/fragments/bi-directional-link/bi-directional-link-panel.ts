@@ -1,4 +1,4 @@
-import type { ListService } from '@blocksuite/blocks';
+import type { DocPageBlockComponent, ListService } from '@blocksuite/blocks';
 import {
   type AffineTextAttributes,
   getAffineInlineSpecsWithReference,
@@ -178,6 +178,9 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   page!: Page;
 
+  @property({ attribute: false })
+  docPageBlock!: DocPageBlockComponent;
+
   private _inlineManager = new InlineManager();
 
   override connectedCallback(): void {
@@ -200,17 +203,8 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     this._show = !this._show;
   }
 
-  private get _docPageElement() {
-    const affineDocEditor = this.closest('affine-doc-editor');
-    assertExists(affineDocEditor);
-    const docPageElement = affineDocEditor.querySelector('affine-doc-page');
-    assertExists(docPageElement);
-    return docPageElement;
-  }
-
   private get _host() {
-    const affineDocEditor = this.closest('affine-doc-editor');
-    return affineDocEditor?.querySelector('editor-host');
+    return this.docPageBlock.host;
   }
 
   private get _links() {
@@ -243,7 +237,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
           return html`<div
             class="link"
             @click=${() => {
-              this._docPageElement.slots.pageLinkClicked.emit({
+              this.docPageBlock.slots.pageLinkClicked.emit({
                 pageId: id,
               });
             }}
@@ -351,7 +345,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
                           return html`<div
                             class=${`rich-text-container ${model.type}`}
                             @click=${() =>
-                              this._docPageElement.slots.pageLinkClicked.emit({
+                              this.docPageBlock.slots.pageLinkClicked.emit({
                                 pageId,
                                 blockId,
                               })}

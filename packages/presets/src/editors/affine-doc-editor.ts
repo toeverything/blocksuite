@@ -63,9 +63,6 @@ export class AffineDocEditor extends WithDisposable(ShadowlessElement) {
           .specs=${this.specs}
           .hasViewport=${false}
         ></doc-editor>
-        <bi-directional-link-panel
-          .page=${this.page}
-        ></bi-directional-link-panel>
       </div>
     `;
   }

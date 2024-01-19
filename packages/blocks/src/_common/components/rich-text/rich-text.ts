@@ -74,6 +74,9 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   attributeRenderer?: AttributeRenderer;
 
   @property({ attribute: false })
+  inlineEventSource?: HTMLElement;
+
+  @property({ attribute: false })
   markdownShortcutHandler?: <
     TextAttributes extends AffineTextAttributes = AffineTextAttributes,
   >(
@@ -158,7 +161,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       });
 
       inlineEditor.disposables.addFromEvent(
-        this.inlineEditorContainer,
+        this.inlineEventSource ?? this.inlineEditorContainer,
         'keydown',
         keyDownHandler
       );
@@ -212,7 +215,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    inlineEditor.mount(this.inlineEditorContainer);
+    inlineEditor.mount(this.inlineEditorContainer, this.inlineEventSource);
     inlineEditor.setReadonly(this.readonly);
   }
 

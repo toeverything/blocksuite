@@ -643,7 +643,7 @@ test('press ArrowUp after code block can enter code block', async ({
   await page.keyboard.press('ArrowUp');
 
   const index = await getInlineSelectionIndex(page);
-  expect(index).toBe(code.length);
+  expect(index).toBe(0);
 
   const text = await getInlineSelectionText(page);
   expect(text).toBe(code);
