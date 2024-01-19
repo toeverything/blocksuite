@@ -51,7 +51,6 @@ export class Block {
             // @ts-ignore
             this.model[keyName] = proxy;
           });
-          this.model.propsUpdated.emit({ key: keyName });
           this.options.onChange?.(this, keyName, value);
           return;
         }
@@ -61,7 +60,7 @@ export class Block {
             // @ts-ignore
             delete this.model[keyName];
           });
-          this.model.propsUpdated.emit({ key: keyName });
+          this.options.onChange?.(this, keyName, undefined);
           return;
         }
       });
