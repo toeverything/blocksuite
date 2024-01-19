@@ -102,9 +102,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
         },
         '-': () => {
-          const { elements } = pageElement.selectionManager;
+          const { elements } = pageElement.service.selection;
           if (
-            !pageElement.selectionManager.editing &&
+            !pageElement.service.selection.editing &&
             elements.length === 1 &&
             isNoteBlock(elements[0])
           ) {

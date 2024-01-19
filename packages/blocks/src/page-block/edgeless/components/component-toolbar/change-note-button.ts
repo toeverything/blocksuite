@@ -399,7 +399,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     );
 
     this.disposables.add(
-      edgeless.selectionManager.slots.updated.on(() => {
+      edgeless.service.selection.slots.updated.on(() => {
         this._enableNoteSlicer = false;
       })
     );
