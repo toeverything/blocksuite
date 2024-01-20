@@ -13,4 +13,5 @@ export * from './linked.js';
 export * from './multiple-editor.js';
 export * from './pending-structs.js';
 export * from './preset.js';
+export * from './synced.js';
 export type { InitFn } from './utils.js';
