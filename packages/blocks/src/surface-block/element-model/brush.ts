@@ -33,9 +33,9 @@ export class BrushElementModel extends ElementModel<BrushProps> {
     return props;
   }
 
-  @derive((props: number[][], instance: BrushElementModel) => {
+  @derive((points: number[][], instance: BrushElementModel) => {
     const lineWidth = instance.lineWidth;
-    const bound = getBoundFromPoints(props);
+    const bound = getBoundFromPoints(points);
     const boundWidthLineWidth = inflateBound(bound, lineWidth);
 
     return {
