@@ -396,8 +396,8 @@ describe('stash/pop', () => {
   });
 });
 
-describe('derive prop', () => {
-  test('derived prop should work correctly', () => {
+describe('derive decorator', () => {
+  test('derived decorator should work correctly', () => {
     const id = model.addElement({
       type: 'brush',
       points: [
@@ -413,8 +413,8 @@ describe('derive prop', () => {
   });
 });
 
-describe('local', () => {
-  test('local prop should work correctly', () => {
+describe('local decorator', () => {
+  test('local decorator should work correctly', () => {
     const id = model.addElement({
       type: 'shape',
     });
@@ -442,5 +442,28 @@ describe('local', () => {
 
     expect(elementModel.display).toBe(false);
     expect(onchange).toHaveBeenCalledWith(id);
+  });
+});
+
+describe('convert decorator', () => {
+  test('convert decorator', () => {
+    const id = model.addElement({
+      type: 'brush',
+      points: [
+        [50, 25],
+        [200, 200],
+        [300, 300],
+      ],
+    });
+    const elementModel = model.getElementById(id)! as BrushElementModel;
+    const halfLineWidth = elementModel.lineWidth / 2;
+    const xOffset = 50 - halfLineWidth;
+    const yOffset = 25 - halfLineWidth;
+
+    expect(elementModel.points).toEqual([
+      [50 - xOffset, 25 - yOffset],
+      [200 - xOffset, 200 - yOffset],
+      [300 - xOffset, 300 - yOffset],
+    ]);
   });
 });
