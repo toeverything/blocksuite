@@ -50,6 +50,7 @@ export class SurfaceRefRenderer {
         getVariableColor: (variable: string) =>
           themeObserver.getVariableValue(variable),
       },
+      enableStackingCanvas: true,
     });
 
     themeObserver.observe(document.documentElement);

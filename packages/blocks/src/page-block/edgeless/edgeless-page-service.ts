@@ -16,7 +16,7 @@ import { PageService } from '../page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import type {
   EdgelessBlockModel,
-  EdgelessElement,
+  EdgelessModel,
   HitTestOptions,
 } from './type.js';
 import { Viewport } from './utils/viewport.js';
@@ -133,7 +133,7 @@ export class EdgelessPageService extends PageService {
     }
   }
 
-  removeElement(id: string | EdgelessElement) {
+  removeElement(id: string | EdgelessModel) {
     id = typeof id === 'string' ? id : id.id;
 
     if (this._surface.getElementById(id)) {
@@ -152,17 +152,17 @@ export class EdgelessPageService extends PageService {
     );
   }
 
-  pickElement(x: number, y: number, options: { all: true }): EdgelessElement[];
+  pickElement(x: number, y: number, options: { all: true }): EdgelessModel[];
   pickElement(
     x: number,
     y: number,
     options?: { all: false }
-  ): EdgelessElement | null;
+  ): EdgelessModel | null;
   pickElement(
     x: number,
     y: number,
     options: HitTestOptions = { all: false, expand: 10 }
-  ): EdgelessElement[] | EdgelessElement | null {
+  ): EdgelessModel[] | EdgelessModel | null {
     options.expand ??= 10;
     options.zoom = this._viewport.zoom;
 
@@ -179,7 +179,7 @@ export class EdgelessPageService extends PageService {
           element.hitTest(x, y, options) ||
           element.externalBound?.isPointInBound([x, y])
       );
-      return picked as EdgelessElement[];
+      return picked as EdgelessModel[];
     };
     const pickBlock = () => {
       const candidates = this._layer.blocksGrid.search(hitTestBound);
@@ -188,14 +188,14 @@ export class EdgelessPageService extends PageService {
           element.hitTest(x, y, options) ||
           element.externalBound?.isPointInBound([x, y])
       );
-      return picked as EdgelessElement[];
+      return picked as EdgelessModel[];
     };
     const pickFrames = () => {
       return this._layer.frames.filter(
         frame =>
           frame.hitTest(x, y, options) ||
           frame.externalBound?.isPointInBound([x, y])
-      ) as EdgelessElement[];
+      ) as EdgelessModel[];
     };
 
     let results = pickCanvasElement().concat(pickBlock());
@@ -212,7 +212,7 @@ export class EdgelessPageService extends PageService {
     return options.all ? results : last(results) ?? null;
   }
 
-  pickElementsByBound(bound: IBound | Bound, type?: 'all'): EdgelessElement[];
+  pickElementsByBound(bound: IBound | Bound, type?: 'all'): EdgelessModel[];
   pickElementsByBound(
     bound: IBound | Bound,
     type: 'blocks'
@@ -220,7 +220,7 @@ export class EdgelessPageService extends PageService {
   pickElementsByBound(
     bound: IBound | Bound,
     type: 'frame' | 'blocks' | 'canvas' | 'all' = 'all'
-  ): EdgelessElement[] {
+  ): EdgelessModel[] {
     bound = new Bound(bound.x, bound.y, bound.w, bound.h);
 
     const pickCanvasElement = () => {
@@ -228,20 +228,20 @@ export class EdgelessPageService extends PageService {
       const picked = candidates.filter(element =>
         element.boxSelect(bound as Bound)
       );
-      return picked as EdgelessElement[];
+      return picked as EdgelessModel[];
     };
     const pickBlock = () => {
       const candidates = this._layer.blocksGrid.search(bound);
       const picked = candidates.filter(element =>
         element.boxSelect(bound as Bound)
       );
-      return picked as EdgelessElement[];
+      return picked as EdgelessModel[];
     };
     const pickFrames = () => {
       const candidates = this._layer.framesGrid.search(bound);
       return candidates.filter(frame =>
         frame.boxSelect(bound as Bound)
-      ) as EdgelessElement[];
+      ) as EdgelessModel[];
     };
 
     switch (type) {
@@ -268,12 +268,12 @@ export class EdgelessPageService extends PageService {
     x: number,
     y: number,
     options?: HitTestOptions
-  ): EdgelessElement | null {
+  ): EdgelessModel | null {
     const selectionManager = this._selection;
     const results = this.pickElement(x, y, {
       ...options,
       all: true,
-    }) as EdgelessElement[];
+    }) as EdgelessModel[];
 
     let picked = last(results) ?? null;
     const { activeGroup } = selectionManager;
@@ -299,16 +299,16 @@ export class EdgelessPageService extends PageService {
       }
     }
 
-    return (picked ?? first) as EdgelessElement | null;
+    return (picked ?? first) as EdgelessModel | null;
   }
 
-  reorderElement(element: EdgelessElement, direction: ReorderingDirection) {
+  reorderElement(element: EdgelessModel, direction: ReorderingDirection) {
     const index = this._layer.getReorderedIndex(element, direction);
 
     element.index = index;
   }
 
-  createGroup(elements: EdgelessElement[] | string[]) {
+  createGroup(elements: EdgelessModel[] | string[]) {
     const groups = this.elements.filter(
       el => el.type === 'group'
     ) as GroupElementModel[];
@@ -392,7 +392,7 @@ export class EdgelessPageService extends PageService {
     });
   }
 
-  getConnectors(element: EdgelessElement | string) {
+  getConnectors(element: EdgelessModel | string) {
     const id = typeof element === 'string' ? element : element.id;
 
     return this.surface.getConnectors(id) as ConnectorElementModel[];

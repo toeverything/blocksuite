@@ -161,4 +161,4 @@ export class EdgelessBlockModel<
   }
 }
 
-export type EdgelessElement = EdgelessBlockModel | ElementModel;
+export type EdgelessModel = EdgelessBlockModel | ElementModel;

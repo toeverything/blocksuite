@@ -1,8 +1,8 @@
 import { GroupElementModel } from '../../../surface-block/index.js';
-import type { EdgelessElement } from '../type.js';
+import type { EdgelessModel } from '../type.js';
 
-export function getElementsWithoutGroup(elements: EdgelessElement[]) {
-  const set = new Set<EdgelessElement>();
+export function getElementsWithoutGroup(elements: EdgelessModel[]) {
+  const set = new Set<EdgelessModel>();
 
   elements.forEach(element => {
     if (element instanceof GroupElementModel) {

@@ -22,7 +22,7 @@ import {
 import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
 import type {
   EdgelessBlockModel,
-  EdgelessElement,
+  EdgelessModel,
   HitTestOptions,
 } from '../../type.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
@@ -73,7 +73,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _isDoubleClickedOnMask = false;
   private _alignBound = new Bound();
   private _selectedBounds: Bound[] = [];
-  private _toBeMoved: EdgelessElement[] = [];
+  private _toBeMoved: EdgelessModel[] = [];
   private _autoPanTimer: number | null = null;
   private _dragging = false;
   private _draggingAreaDisposables: DisposableGroup | null = null;
@@ -125,10 +125,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _handleClickOnSelected(
-    element: EdgelessElement,
-    e: PointerEventState
-  ) {
+  private _handleClickOnSelected(element: EdgelessModel, e: PointerEventState) {
     const { selectedIds, selections } = this.selection;
     const editing = selections[0]?.editing ?? false;
 
