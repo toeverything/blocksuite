@@ -344,6 +344,10 @@ describe('stash/pop', () => {
     elementModel.pop('strokeWidth');
     expect(elementModel.strokeWidth).toBe(10);
     expect(elementModel.yMap.get('strokeWidth')).toBe(10);
+
+    elementModel.strokeWidth = 6;
+    expect(elementModel.strokeWidth).toBe(6);
+    expect(elementModel.yMap.get('strokeWidth')).toBe(6);
   });
 
   test('assign stashed property should emit event', async () => {
@@ -360,6 +364,35 @@ describe('stash/pop', () => {
 
     elementModel.strokeWidth = 10;
     expect(onchange).toHaveBeenCalledWith(id);
+  });
+
+  test('stashed property should also trigger derive decorator', async () => {
+    const id = model.addElement({
+      type: 'brush',
+      points: [
+        [0, 0],
+        [100, 100],
+        [120, 150],
+      ],
+    });
+    const elementModel = model.getElementById(id)! as BrushElementModel;
+
+    elementModel.stash('points');
+    elementModel.points = [
+      [0, 0],
+      [50, 50],
+      [135, 145],
+      [150, 170],
+      [200, 180],
+    ];
+    const points = elementModel.points;
+
+    expect(elementModel.w).toBe(200 + elementModel.lineWidth);
+    expect(elementModel.h).toBe(180 + elementModel.lineWidth);
+
+    expect(elementModel.yMap.get('points')).not.toEqual(points);
+    expect(elementModel.w).toBe(200 + elementModel.lineWidth);
+    expect(elementModel.h).toBe(180 + elementModel.lineWidth);
   });
 });
 
