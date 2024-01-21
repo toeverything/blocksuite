@@ -74,7 +74,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _alignBound = new Bound();
   private _selectedBounds: Bound[] = [];
   private _toBeMoved: EdgelessElement[] = [];
-  private _frames = new Set<FrameBlockModel>();
   private _autoPanTimer: number | null = null;
   private _dragging = false;
   private _draggingAreaDisposables: DisposableGroup | null = null;
@@ -344,19 +343,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     );
   }
 
-  private _addFrames() {
-    this.selection.elements.forEach(ele => {
-      if (isFrameBlock(ele)) {
-        this._frames.add(ele);
-      } else {
-        const frame = this._edgeless.surface.frame.selectFrame([ele]);
-        if (frame) {
-          this._frames.add(frame as FrameBlockModel);
-        }
-      }
-    });
-  }
-
   private _updateSelectingState = () => {
     const { tools, service } = this._edgeless;
     const { selection } = service;
@@ -449,7 +435,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._toBeMoved.sort((a, _) =>
       a instanceof ConnectorElementModel ? -1 : 1
     );
-    this._addFrames();
     // Set up drag state
     this.initializeDragState(e, dragType);
   }
@@ -576,8 +561,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         });
         const frame = surface.frame.selectFrame(this._toBeMoved);
         frame
-          ? surface.frame.setHighlight(frame as FrameBlockModel)
-          : surface.frame.clearHighlight();
+          ? surface.overlays.frame.highlight(frame as FrameBlockModel)
+          : surface.overlays.frame.clear();
 
         break;
       }
@@ -608,9 +593,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragLastPos = [0, 0];
     this._selectedBounds = [];
     surface.snap.cleanupAlignables();
-    surface.frame.clearHighlight();
-    this._addFrames();
-    this._frames.clear();
+    surface.overlays.frame.clear();
     this._toBeMoved = [];
     this._clearSelectingState();
     this.dragType = DefaultModeDragType.None;

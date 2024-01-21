@@ -220,7 +220,7 @@ export class EdgelessClipboardController extends PageClipboard {
     if (isUrlInClipboard(data)) {
       const url = data.getData('text/plain');
       const { lastMousePos } = this.toolManager;
-      const [x, y] = this.host.service.toModelCoord(
+      const [x, y] = this.host.service.viewport.toModelCoord(
         lastMousePos.x,
         lastMousePos.y
       );
@@ -931,10 +931,8 @@ export class EdgelessClipboardController extends PageClipboard {
       block: TopLevelBlockModel,
       isInFrame = false
     ) => {
-      let blockElement = blockElementGetter(
-        block,
-        this.std.view
-      )?.parentElement;
+      let blockElement = blockElementGetter(block, this.std.view)
+        ?.parentElement;
       const blockPortalSelector = block.flavour.replace(
         'affine:',
         '.edgeless-block-portal-'

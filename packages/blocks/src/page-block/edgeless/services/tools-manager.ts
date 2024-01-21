@@ -351,7 +351,7 @@ export class EdgelessToolsManager {
       return null;
     }
     const { x, y } = this._lastMousePos;
-    const [modelX, modelY] = this.service.toModelCoord(x, y);
+    const [modelX, modelY] = this.service.viewport.toModelCoord(x, y);
     const hovered = this.service.pickElement(modelX, modelY);
 
     if (!hovered || this.selection?.editing) {
@@ -359,7 +359,7 @@ export class EdgelessToolsManager {
     }
 
     return {
-      rect: this.service.toViewBound(edgelessElementsBound([hovered])),
+      rect: this.service.viewport.toViewBound(edgelessElementsBound([hovered])),
       content: hovered,
     };
   }

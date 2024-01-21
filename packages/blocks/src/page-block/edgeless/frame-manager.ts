@@ -31,8 +31,9 @@ export function removeContainedFrames(frames: FrameBlockModel[]) {
   });
 }
 
-class FrameOverlay extends Overlay {
+export class FrameOverlay extends Overlay {
   bound: Bound | null = null;
+
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas): void {
     if (!this.bound) return;
     const { x, y, w, h } = this.bound;
@@ -42,13 +43,22 @@ class FrameOverlay extends Overlay {
     ctx.roundRect(x, y, w, h, 8);
     ctx.stroke();
   }
+
+  highlight(frame: FrameBlockModel) {
+    const bound = Bound.deserialize(frame.xywh);
+
+    this.bound = bound;
+    this._renderer.refresh();
+  }
+
+  clear() {
+    this.bound = null;
+    this._renderer.refresh();
+  }
 }
 
 export class EdgelessFrameManager {
-  private _frameOverlay = new FrameOverlay();
-  constructor(private _edgeless: EdgelessPageBlockComponent) {
-    this._edgeless.surface.renderer.addOverlay(this._frameOverlay);
-  }
+  constructor(private _edgeless: EdgelessPageBlockComponent) {}
 
   selectFrame(eles: Selectable[]) {
     const frames = this._edgeless.service.frames;
@@ -64,16 +74,6 @@ export class EdgelessFrameManager {
       }
     }
     return null;
-  }
-
-  setHighlight(frame: FrameBlockModel) {
-    const bound = Bound.deserialize(frame.xywh);
-    this._frameOverlay.bound = bound;
-    this._edgeless.surface.refresh();
-  }
-
-  clearHighlight() {
-    this._frameOverlay.bound = null;
   }
 
   getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {

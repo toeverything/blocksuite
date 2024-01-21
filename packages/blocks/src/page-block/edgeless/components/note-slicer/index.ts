@@ -295,7 +295,10 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     const [x, , width] = deserializeXYWH(xywh);
     const sliceVerticalPos =
       this._divingLinePositions[this._activeSlicerIndex].y;
-    const newY = this.edgeless.service.toModelCoord(x, sliceVerticalPos)[1];
+    const newY = this.edgeless.service.viewport.toModelCoord(
+      x,
+      sliceVerticalPos
+    )[1];
     const newNoteId = this.edgeless.service.addBlock(
       'affine:note',
       {
