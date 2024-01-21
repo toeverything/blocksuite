@@ -23,7 +23,12 @@ export class PathFinder {
     return PathFinder.pathToKey(path1) === PathFinder.pathToKey(path2);
   };
 
-  // check if path1 includes path2
+  /**
+   * check if path1 includes path2
+   *
+   * @example
+   * includes(['a', 'b', 'c'], ['a', 'b']) // true
+   */
   static includes = (path1: string[], path2: string[]) => {
     return PathFinder.pathToKey(path1).startsWith(PathFinder.pathToKey(path2));
   };

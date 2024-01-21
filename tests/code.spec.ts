@@ -16,6 +16,7 @@ import {
   pasteByKeyboard,
   pressArrowLeft,
   pressArrowUp,
+  pressBackspace,
   pressEnter,
   pressEnterWithShortkey,
   pressShiftTab,
@@ -29,9 +30,11 @@ import {
   updateBlockType,
 } from './utils/actions/index.js';
 import {
+  assertBlockCount,
   assertRichTextInlineRange,
   assertRichTexts,
   assertStoreMatchJSX,
+  assertTitle,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -847,4 +850,25 @@ test('auto scroll horizontally when typing', async ({ page }) => {
   });
 
   expect(richTextScrollLeft2).toEqual(richTextScrollLeft1);
+});
+
+test('code hotkey should not effect in global', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await pressEnter(page);
+  await type(page, '``` ');
+
+  await assertTitle(page, '');
+  await assertBlockCount(page, 'paragraph', 1);
+  await assertBlockCount(page, 'code', 1);
+
+  await pressArrowUp(page);
+  await pressBackspace(page);
+  await type(page, 'aaa');
+
+  await assertTitle(page, 'aaa');
+  await assertBlockCount(page, 'paragraph', 0);
+  await assertBlockCount(page, 'code', 1);
 });
