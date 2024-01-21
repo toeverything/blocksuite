@@ -4,7 +4,10 @@ import { last } from '../../_common/utils/iterable.js';
 import type { SurfaceBlockModel } from '../../models.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../surface-block/edgeless-types.js';
-import type { CanvasElementType } from '../../surface-block/element-model/index.js';
+import type {
+  CanvasElementType,
+  ConnectorElementModel,
+} from '../../surface-block/element-model/index.js';
 import { GroupElementModel } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
@@ -19,7 +22,7 @@ import type {
 import { Viewport } from './utils/viewport.js';
 
 export class EdgelessPageService extends PageService {
-  private _surfaceModel!: SurfaceBlockModel;
+  private _surface!: SurfaceBlockModel;
   private _layer!: LayerManager;
   private _selection!: EdgelessSelectionManager;
   private _viewport!: Viewport;
@@ -27,15 +30,15 @@ export class EdgelessPageService extends PageService {
   override mounted() {
     super.mounted();
 
-    this._surfaceModel = this.page.getBlockByFlavour(
+    this._surface = this.page.getBlockByFlavour(
       'affine:surface'
     )[0] as SurfaceBlockModel;
 
-    if (!this._surfaceModel) {
+    if (!this._surface) {
       throw new Error('surface block not found');
     }
 
-    this._layer = LayerManager.create(this.page, this._surfaceModel);
+    this._layer = LayerManager.create(this.page, this._surface);
     this._viewport = new Viewport();
     this._selection = new EdgelessSelectionManager(this);
   }
@@ -49,7 +52,7 @@ export class EdgelessPageService extends PageService {
   }
 
   get surface() {
-    return this._surfaceModel;
+    return this._surface;
   }
 
   get layer() {
@@ -64,6 +67,9 @@ export class EdgelessPageService extends PageService {
     return this._viewport;
   }
 
+  /**
+   * sorted canvas elements
+   */
   get elements() {
     return this._layer.canvasElements;
   }
@@ -92,7 +98,7 @@ export class EdgelessPageService extends PageService {
       props as Record<string, unknown>
     );
 
-    return this._surfaceModel.addElement(props as T & { type: string });
+    return this._surface.addElement(props as T & { type: string });
   }
 
   addBlock(
@@ -115,10 +121,10 @@ export class EdgelessPageService extends PageService {
   }
 
   updateElement(id: string, props: Record<string, unknown>) {
-    if (this._surfaceModel.getElementById(id)) {
-      const element = this._surfaceModel.getElementById(id)!;
+    if (this._surface.getElementById(id)) {
+      const element = this._surface.getElementById(id)!;
       this.editSession.record(element.type as EdgelessElementType, props);
-      this._surfaceModel.updateElement(id, props);
+      this._surface.updateElement(id, props);
     } else if (this.page.getBlockById(id)) {
       const block = this.page.getBlockById(id)!;
 
@@ -130,8 +136,8 @@ export class EdgelessPageService extends PageService {
   removeElement(id: string | EdgelessElement) {
     id = typeof id === 'string' ? id : id.id;
 
-    if (this._surfaceModel.getElementById(id)) {
-      this._surfaceModel.removeElement(id);
+    if (this._surface.getElementById(id)) {
+      this._surface.removeElement(id);
     } else if (this.page.getBlockById(id)) {
       const block = this.page.getBlockById(id)!;
 
@@ -141,7 +147,7 @@ export class EdgelessPageService extends PageService {
 
   getElementById(id: string) {
     return (
-      this._surfaceModel.getElementById(id) ??
+      this._surface.getElementById(id) ??
       (this.page.getBlockById(id) as EdgelessBlockModel)
     );
   }
@@ -296,23 +302,6 @@ export class EdgelessPageService extends PageService {
     return (picked ?? first) as EdgelessElement | null;
   }
 
-  toModelCoord(viewX: number, viewY: number): [number, number] {
-    const { viewportX, viewportY, zoom } = this._viewport;
-    return [viewportX + viewX / zoom, viewportY + viewY / zoom];
-  }
-
-  toViewCoord(modelX: number, modelY: number): [number, number] {
-    const { viewportX, viewportY, zoom } = this._viewport;
-    return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
-  }
-
-  toViewBound(bound: Bound) {
-    const { w, h } = bound;
-    const [x, y] = this.toViewCoord(bound.x, bound.y);
-
-    return new Bound(x, y, w * this._viewport.zoom, h * this._viewport.zoom);
-  }
-
   reorderElement(element: EdgelessElement, direction: ReorderingDirection) {
     const index = this._layer.getReorderedIndex(element, direction);
 
@@ -323,7 +312,7 @@ export class EdgelessPageService extends PageService {
     const groups = this.elements.filter(
       el => el.type === 'group'
     ) as GroupElementModel[];
-    const groupId = this._surfaceModel.addElement({
+    const groupId = this._surface.addElement({
       type: 'group',
       children: elements.reduce(
         (pre, el) => {
@@ -369,6 +358,8 @@ export class EdgelessPageService extends PageService {
       editing: false,
       elements: [groupId],
     });
+
+    return groupId;
   }
 
   ungroup(group: GroupElementModel) {
@@ -401,37 +392,9 @@ export class EdgelessPageService extends PageService {
     });
   }
 
-  releaseFromGroup(element: EdgelessElement) {
-    if (element.group === null) return;
+  getConnectors(element: EdgelessElement | string) {
+    const id = typeof element === 'string' ? element : element.id;
 
-    const group = element.group;
-
-    group.removeChild(element.id);
-
-    element.index = this.layer.generateIndex(
-      'flavour' in element ? element.flavour : element.type
-    );
-
-    const parent = group.group;
-    if (parent != null) {
-      parent.addChild(element.id);
-    }
-  }
-
-  getConnectedElements(element: EdgelessElement) {
-    return this.surface.getConnectors(element.id).reduce((prev, current) => {
-      if (current.target.id === element.id && current.source.id) {
-        prev.push(this.getElementById(current.source.id));
-      }
-      if (current.source.id === element.id && current.target.id) {
-        prev.push(this.getElementById(current.target.id));
-      }
-
-      return prev;
-    }, [] as EdgelessElement[]);
-  }
-
-  getConnectors(element: EdgelessElement) {
-    return this.surface.getConnectors(element.id);
+    return this.surface.getConnectors(id) as ConnectorElementModel[];
   }
 }

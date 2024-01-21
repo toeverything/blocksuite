@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { EdgelessPageBlockComponent } from '@blocksuite/blocks';
+import type {
+  EdgelessPageBlockComponent,
+  ElementModel,
+  NoteBlockModel,
+} from '@blocksuite/blocks';
 import type { BlockElement } from '@blocksuite/lit';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -422,5 +426,50 @@ test('the actual rendering order of blocks should satisfy the logic order of the
     expect(
       service.layer.compare(prevModel as any, model as any)
     ).toBeLessThanOrEqual(0);
+  });
+});
+
+describe('index generator', () => {
+  let preinsertedShape: ElementModel;
+  let preinsertedNote: NoteBlockModel;
+
+  beforeEach(() => {
+    const shapeId = service.addElement('shape', {
+      shapeType: 'rect',
+    });
+    const noteId = addNote(page, {
+      index: service.layer.generateIndex('affine:block'),
+    });
+
+    preinsertedShape = service.getElementById(shapeId)! as ElementModel;
+    preinsertedNote = service.getElementById(noteId)! as NoteBlockModel;
+  });
+
+  test('generator should remember the index it generated', () => {
+    const generator = service.layer.createIndexGenerator();
+
+    const indexA = generator('shape');
+    const indexB = generator('shape');
+    const blockIndex = generator('affine:block');
+
+    expect(indexA > preinsertedShape.index).toBe(true);
+    expect(indexB).not.toBe(indexA);
+    expect(indexB > indexA).toBe(true);
+    expect(blockIndex > preinsertedNote.index).toBe(true);
+    expect(blockIndex < indexA).toBe(true);
+  });
+
+  test('generator can generate incrementing indices regardless the element type', () => {
+    const generator = service.layer.createIndexGenerator(true);
+
+    const indexA = generator('shape');
+    const indexB = generator('shape');
+    const blockIndexA = generator('affine:block');
+    const blockIndexB = generator('affine:block');
+
+    expect(indexA > preinsertedShape.index).toBe(true);
+    expect(indexB > indexA).toBe(true);
+    expect(blockIndexA > indexB).toBe(true);
+    expect(blockIndexB > blockIndexA).toBe(true);
   });
 });

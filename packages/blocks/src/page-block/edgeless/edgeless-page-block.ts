@@ -23,14 +23,12 @@ import {
   NoteDisplayMode,
   Point,
   requestConnectedFrame,
-  type Selectable,
   type Viewport,
 } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
   on,
-  type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
@@ -164,7 +162,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   slots = {
     edgelessToolUpdated: new Slot<EdgelessTool>(),
-    reorderingElements: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
     cursorUpdated: new Slot<string>(),
@@ -346,7 +343,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       noteIndex: noteIndex,
       scale = 1,
     } = options;
-    const [x, y] = this.service.toModelCoord(point.x, point.y);
+    const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
     return this.service.addBlock(
       'affine:note',
       {
@@ -413,7 +410,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       delete model.width;
       delete model.height;
     }
-    point = this.service.toModelCoord(point[0], point[1]);
+    point = this.service.viewport.toModelCoord(point[0], point[1]);
     const bound = new Bound(point[0], point[1], options.width, options.height);
     return this.service.addBlock(
       'affine:image',
@@ -620,7 +617,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   private _initSurface() {
     const appendIndexedCanvasToPortal = (
-      canvases: HTMLCanvasElement[] = this.surface.indexedCanvases
+      canvases: HTMLCanvasElement[] = this.surface.renderer.stackingCanvas
     ) => {
       this.pageBlockContainer.setSlotContent(canvases);
     };

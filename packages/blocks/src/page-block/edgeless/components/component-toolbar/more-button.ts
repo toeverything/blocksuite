@@ -240,9 +240,8 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'forward':
       case 'backward':
       case 'back': {
-        this.edgeless.slots.reorderingElements.emit({
-          elements: this.selection.elements,
-          type,
+        this.selection.elements.forEach(el => {
+          this.edgeless.service.reorderElement(el, type);
         });
         break;
       }

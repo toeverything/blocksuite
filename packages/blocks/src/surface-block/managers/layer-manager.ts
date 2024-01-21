@@ -705,16 +705,17 @@ export class LayerManager {
 
   /**
    * In some cases, we need to generate a bunch of indexes in advance before acutally adding the elements to the layer manager.
-   * Eg. when importing a template. The `generateIndex` is a pure function which depends on the current state of the manager.
-   * We cannot use it because it will always return the same index if the element is not added to manager.
-   * So we need to create a generator that can "remember" the index it generated without actually adding the element to the manager.
+   * Eg. when importing a template. The `generateIndex` is a function only depends on the current state of the manager.
+   * So we cannot use it because it will always return the same index if the element is not added to manager.
    *
-   * This is what this function does.
+   * This function return a index generator that can "remember" the index it generated without actually adding the element to the manager.
+   *
+   * @note The generator cannot work with `group` element.
    *
    * @param ignoreRule If true, the generator will not distinguish between `block` and `canvas` elements.
    * @returns
    */
-  preservedIndexGenerator(ignoreRule: boolean) {
+  createIndexGenerator(ignoreRule: boolean = false) {
     const manager = new LayerManager();
 
     manager.frames = [...this.frames];
@@ -741,7 +742,7 @@ export class LayerManager {
 
       if (elementType === 'group') elementType = 'shape';
 
-      manager.add({
+      const mockedFakeElement = {
         index: idx,
         flavour: elementType,
         x: 0,
@@ -750,7 +751,11 @@ export class LayerManager {
         h: 10,
         elementBound: bound,
         xywh: '[0, 0, 10, 10]',
-      } as unknown as EdgelessElement);
+        group: () => null,
+        groups: () => [],
+      };
+
+      manager.add(mockedFakeElement as unknown as EdgelessElement);
 
       return idx;
     };
