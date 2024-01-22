@@ -282,7 +282,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           flavour === 'affine:page' &&
           payload.props.key === 'sys:children'
         ) {
-          console.log('page children updated');
           this.requestUpdate();
         }
       })
