@@ -51,7 +51,11 @@ const toGPTMessages = (
 
 const askGPT = async (
   apiKey: string,
-  model: 'gpt-4' | 'gpt-3.5-turbo-1106' | 'gpt-4-vision-preview',
+  model:
+    | 'gpt-4'
+    | 'gpt-3.5-turbo-1106'
+    | 'gpt-4-vision-preview'
+    | 'gpt-4-turbo',
   messages: Array<ChatMessage>
 ) => {
   const openai = new OpenAI({

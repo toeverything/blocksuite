@@ -1,9 +1,9 @@
-import type { AffineEditorContainer } from '../../../editors/index.js';
+import type { EditorHost } from '@blocksuite/lit';
 
 export class AIDocLogic {
-  constructor(private editor: AffineEditorContainer) {}
+  constructor(private getHost: () => EditorHost) {}
 
   get host() {
-    return this.editor.host;
+    return this.getHost();
   }
 }

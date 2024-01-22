@@ -21,6 +21,7 @@ import {
   LitElement,
   nothing,
   type PropertyValues,
+  type TemplateResult,
   unsafeCSS,
 } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -73,6 +74,18 @@ type CategorizedElements = {
     EmbedLinkedDocModel[];
 };
 
+type ToolBarCustomAction = {
+  disable?: (formatBar: EdgelessComponentToolbar) => boolean;
+  icon(formatBar: EdgelessComponentToolbar): string | undefined;
+  onClick(formatBar: EdgelessComponentToolbar): void;
+};
+type ToolBarCustomElement = {
+  showWhen?(formatBar: EdgelessComponentToolbar): boolean;
+  init(formatBar: EdgelessComponentToolbar): HTMLElement;
+};
+type ToolBarCustomRenderer = {
+  render(formatBar: EdgelessComponentToolbar): TemplateResult | undefined;
+};
 @customElement('edgeless-component-toolbar')
 export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   static override styles = css`
@@ -93,6 +106,49 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       height: 24px;
     }
   `;
+  private static readonly _customElements: Set<ToolBarCustomRenderer> =
+    new Set<ToolBarCustomRenderer>();
+
+  static registerCustomRenderer(render: ToolBarCustomRenderer) {
+    this._customElements.add(render);
+  }
+  static registerCustomElement(element: ToolBarCustomElement) {
+    let elementInstance: HTMLElement | undefined;
+    this._customElements.add({
+      ...element,
+      render: formatBar => {
+        if (!elementInstance) {
+          elementInstance = element.init(formatBar);
+        }
+        const show = element.showWhen?.(formatBar) ?? true;
+        return show ? html`${elementInstance}` : undefined;
+      },
+    });
+  }
+
+  static registerCustomAction(action: ToolBarCustomAction) {
+    this._customElements.add({
+      render: formatBar => {
+        const url = action.icon(formatBar);
+        if (url == null) {
+          return;
+        }
+        const disable = action.disable ? action.disable(formatBar) : false;
+        const click = () => {
+          if (!disable) {
+            action.onClick(formatBar);
+          }
+        };
+        return html`<icon-button
+          size="32px"
+          ?disabled=${disable}
+          @click=${click}
+        >
+          <img src="${url}" alt="" />
+        </icon-button>`;
+      },
+    });
+  }
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -337,6 +393,23 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return [left, top];
   }
 
+  private _customRender() {
+    const result: TemplateResult[] = [];
+    EdgelessComponentToolbar._customElements.forEach(render => {
+      const element = render.render(this);
+      if (element) {
+        result.push(element);
+      }
+    });
+    return result.length > 0
+      ? html` <div
+          style="display: flex;align-items: center;justify-content: center"
+        >
+          ${result}
+        </div>`
+      : null;
+  }
+
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless, selection } = this;
@@ -386,7 +459,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     ) {
       buttons.push(this._Divider());
     }
-
+    buttons.unshift(this._Divider());
+    buttons.unshift(this._customRender() ?? nothing);
     return html` <style>
         :host {
           position: absolute;

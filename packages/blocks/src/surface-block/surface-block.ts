@@ -2,8 +2,7 @@ import '../page-block/edgeless/components/block-portal/edgeless-block-portal.js'
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import type { BlockProps } from '@blocksuite/store';
-import type { BlockModel } from '@blocksuite/store';
+import type { BlockModel, BlockProps } from '@blocksuite/store';
 import { Workspace, type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -22,6 +21,7 @@ import {
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
 import { last } from '../_common/utils/iterable.js';
+import { isShape } from '../page-block/edgeless/components/auto-complete/utils.js';
 import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
@@ -35,8 +35,8 @@ import { type IBound } from './consts.js';
 import {
   type EdgelessBlockModelMap,
   type EdgelessElementType,
+  type IEdgelessElementCreateProps,
 } from './edgeless-types.js';
-import { type IEdgelessElementCreateProps } from './edgeless-types.js';
 import {
   type HitTestOptions,
   type ICanvasElementType,
@@ -67,8 +67,7 @@ import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceService } from './surface-service.js';
-import { Bound } from './utils/bound.js';
-import { getCommonBound } from './utils/bound.js';
+import { Bound, getCommonBound } from './utils/bound.js';
 import {
   generateElementId,
   generateNKeysBetween,
@@ -982,6 +981,7 @@ export class SurfaceBlockComponent extends BlockElement<
       element => element.type === type
     ) as unknown as ICanvasElementType[T][];
   }
+  static isShape = isShape;
 }
 
 declare global {

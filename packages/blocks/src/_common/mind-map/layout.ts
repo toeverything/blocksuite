@@ -18,6 +18,8 @@ export type LayoutNodeResult = {
 export type LayoutOptions = {
   gapVertical?: number;
   gapHorizontal?: number;
+  x?: number;
+  y?: number;
 };
 export type Layout = (
   node: LayoutNode,
@@ -27,6 +29,8 @@ type LayoutOptionsRequired = Required<LayoutOptions>;
 const defaultOptions: LayoutOptionsRequired = {
   gapHorizontal: 130,
   gapVertical: 10,
+  x: 0,
+  y: 0,
 };
 type BoxWithHeight = {
   self: LayoutNode;
@@ -90,7 +94,13 @@ const rightLayout: Layout = (node, options) => {
   const realOptions = { ...defaultOptions, ...options };
 
   const box = computeBoxHeight(node, realOptions);
-  return computePositionRight(box, 0, 0, null, realOptions);
+  return computePositionRight(
+    box,
+    realOptions.x,
+    realOptions.y,
+    null,
+    realOptions
+  );
 };
 
 const computePositionLeft = (

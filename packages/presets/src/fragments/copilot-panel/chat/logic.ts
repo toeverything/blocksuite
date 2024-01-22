@@ -1,46 +1,89 @@
-import { MarkdownAdapter } from '@blocksuite/blocks';
-import { Job, type Page } from '@blocksuite/store';
+import {
+  Bound,
+  MarkdownAdapter,
+  SurfaceBlockComponent,
+  type TreeNode,
+} from '@blocksuite/blocks';
+import type { EditorHost } from '@blocksuite/lit';
+import {
+  type BlockSnapshot,
+  Job,
+  type Page,
+  Workspace,
+} from '@blocksuite/store';
 
-import type { AffineEditorContainer } from '../../../editors/index.js';
 import { LANGUAGE, TONE } from '../config.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import { EmbeddingServiceKind } from '../copilot-service/service-base.js';
-import { getChatService } from '../doc/api.js';
-import { runChangeToneAction } from '../doc/change-tone.js';
-import { runFixSpellingAction } from '../doc/fix-spelling.js';
-import { runGenerateAction } from '../doc/generate.js';
-import { runImproveWritingAction } from '../doc/improve-writing.js';
-import { runMakeLongerAction } from '../doc/make-longer.js';
-import { runMakeShorterAction } from '../doc/make-shorter.js';
-import { runRefineAction } from '../doc/refine.js';
-import { runSimplifyWritingAction } from '../doc/simplify-language.js';
-import { runSummaryAction } from '../doc/summary.js';
-import { runTranslateAction } from '../doc/translate.js';
-import { insertFromMarkdown } from '../utils/markdown-utils.js';
 import {
+  runAnalysisAction,
+  runChangeToneAction,
+  runFixSpellingAction,
+  runGenerateAction,
+  runImproveWritingAction,
+  runMakeLongerAction,
+  runMakeShorterAction,
+  runPartAnalysisAction,
+  runRefineAction,
+  runSimplifyWritingAction,
+  runSummaryAction,
+  runTranslateAction,
+} from '../doc/actions.js';
+import { getChatService } from '../doc/api.js';
+import type { AILogic } from '../logic.js';
+import { getConnectorPath } from '../utils/connector.js';
+import {
+  insertFromMarkdown,
+  markdownToSnapshot,
+} from '../utils/markdown-utils.js';
+import {
+  getEdgelessPageBlockFromEditor,
   getSelectedBlocks,
   getSelectedTextContent,
+  getSurfaceElementFromEditor,
   selectedToCanvas,
 } from '../utils/selection-utils.js';
 
 export type ChatReactiveData = {
   history: ChatMessage[];
-  loading: boolean;
   syncedPages: EmbeddedPage[];
   value: string;
+  currentRequest?: number;
 };
 
 export class AIChatLogic {
-  constructor(private editor: AffineEditorContainer) {}
+  constructor(
+    private logic: AILogic,
+    private getHost: () => EditorHost
+  ) {}
+
+  get loading() {
+    return this.reactiveData.currentRequest != null;
+  }
 
   get host() {
-    return this.editor.host;
+    return this.getHost();
   }
 
   reactiveData!: ChatReactiveData;
+  private requestId = 0;
+
+  async startRequest<T>(p: () => Promise<T>): Promise<T> {
+    const id = this.requestId++;
+    this.reactiveData.currentRequest = id;
+    try {
+      const result = await p();
+      if (id === this.reactiveData.currentRequest) {
+        return result;
+      }
+    } finally {
+      this.reactiveData.currentRequest = undefined;
+    }
+    return new Promise(() => {});
+  }
 
   getSelectedText = async () => {
-    const text = await getSelectedTextContent(this.editor.host);
+    const text = await getSelectedTextContent(this.host);
     return text;
   };
 
@@ -59,7 +102,7 @@ export class AIChatLogic {
   };
 
   selectShapesForBackground = async () => {
-    const canvas = await selectedToCanvas(this.editor);
+    const canvas = await selectedToCanvas(this.host);
     if (!canvas) {
       alert('Please select some shapes first');
       return;
@@ -104,36 +147,37 @@ export class AIChatLogic {
 
   syncWorkspace = async () => {
     this.reactiveData.syncedPages = await this.embeddingPages([
-      ...this.editor.page.workspace.pages.values(),
+      ...this.host.page.workspace.pages.values(),
     ]);
   };
 
-  genAnswer = async () => {
-    if (this.reactiveData.loading) {
+  genAnswer = async (text: string) => {
+    if (this.loading) {
       return;
     }
-    this.reactiveData.loading = true;
-    try {
-      const value = this.reactiveData.value;
-      this.reactiveData.history.push({
+    this.reactiveData.history = [
+      ...this.reactiveData.history,
+      {
         role: 'user',
-        content: [{ text: value, type: 'text' }],
-      });
-      const background = await this.getBackground();
-      this.reactiveData.value = '';
-      const r = await getChatService().chat([
+        content: [{ text: text, type: 'text' }],
+      },
+    ];
+    const background = await this.getBackground();
+    this.reactiveData.value = '';
+    const r = await this.startRequest(() =>
+      getChatService().chat([
         ...background.messages,
         ...this.reactiveData.history,
-      ]);
-
-      this.reactiveData.history.push({
+      ])
+    );
+    this.reactiveData.history = [
+      ...this.reactiveData.history,
+      {
         role: 'assistant',
         content: r ?? '',
         sources: background.sources,
-      });
-    } finally {
-      this.reactiveData.loading = false;
-    }
+      },
+    ];
   };
 
   async getBackground(): Promise<{
@@ -196,7 +240,7 @@ export class AIChatLogic {
       child => child.id === firstBlock.model.id
     ) as number;
     selectedBlocks.forEach(block => {
-      this.editor.page.deleteBlock(block.model);
+      this.host.page.deleteBlock(block.model);
     });
 
     const models = await insertFromMarkdown(
@@ -244,12 +288,12 @@ export class AIChatLogic {
     }, 0);
   }
 
-  createAction(
-    name: string,
-    action: (input: string) => Promise<string>
-  ): (input: string) => Promise<void> {
-    return async (input: string) => {
-      const result = await action(input);
+  createAction(name: string, action: (input: string) => Promise<string>) {
+    return async (text?: string): Promise<void> => {
+      const input = text ? text : await this.getSelectedText();
+      if (!input) {
+        return;
+      }
       this.reactiveData.history = [
         ...this.reactiveData.history,
         {
@@ -260,6 +304,10 @@ export class AIChatLogic {
           role: 'user',
           content: [{ text: name, type: 'text' }],
         },
+      ];
+      const result = await this.startRequest(() => action(input));
+      this.reactiveData.history = [
+        ...this.reactiveData.history,
         {
           role: 'assistant',
           content: result,
@@ -269,7 +317,7 @@ export class AIChatLogic {
     };
   }
 
-  actionList: AllAction[] = [
+  docSelectionActionList: AllAction[] = [
     {
       type: 'group',
       name: 'Translate',
@@ -348,8 +396,50 @@ export class AIChatLogic {
     },
     {
       type: 'action',
+      name: 'Create mind-map',
+      action: this.createAction('Create mind-map', async input => {
+        const surface = getSurfaceElementFromEditor(this.host);
+        const id = surface.addElement('shape', {
+          text: new Workspace.Y.Text('Analyzing...'),
+          shapeType: 'rect',
+          xywh: Bound.fromXYWH([
+            surface.viewport.centerX,
+            surface.viewport.centerY,
+            200,
+            80,
+          ]).serialize(),
+        });
+        const text = await runAnalysisAction({ input });
+        const snapshot = await markdownToSnapshot(text, this.host);
+        const block = snapshot.snapshot.content[0];
+        const toTreeNode = (block: BlockSnapshot): TreeNode => {
+          return {
+            // @ts-ignore
+            text: block.props.text?.delta?.[0]?.insert ?? '',
+            children: block.children.map(toTreeNode),
+          };
+        };
+        const ele = surface.pickById(id);
+        if (!ele) {
+          return new Promise(() => {});
+        }
+        const { x, y } = Bound.deserialize(ele.xywh);
+        surface.removeElement(id);
+        await this.logic.edgeless.drawMindMap(toTreeNode(block.children[0]), {
+          x,
+          y,
+        });
+        return text;
+      }),
+    },
+    {
+      type: 'action',
       name: 'Insert into Chat',
-      action: async input => {
+      action: async () => {
+        const input = await this.getSelectedText();
+        if (!input) {
+          return;
+        }
         this.reactiveData.history = [
           ...this.reactiveData.history,
           {
@@ -360,12 +450,55 @@ export class AIChatLogic {
       },
     },
   ];
+  edgelessSelectionActionList: AllAction[] = [
+    {
+      type: 'action',
+      name: 'Continue',
+      action: async () => {
+        const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
+        const ele = edgelessPage.selectionManager.elements[0];
+        if (!SurfaceBlockComponent.isShape(ele)) {
+          return;
+        }
+        const text = ele.text?.toString();
+        if (!text) {
+          return;
+        }
+        const surface = getSurfaceElementFromEditor(this.host);
+        const pathIds = getConnectorPath(ele.id, surface);
+        const path = pathIds.map(id => {
+          const ele = surface.pickById(id);
+          if (ele && SurfaceBlockComponent.isShape(ele)) {
+            return ele.text?.toString() ?? '';
+          }
+          return '';
+        });
+        await this.createAction('Part analysis', async input => {
+          const result = await runPartAnalysisAction({ input, path });
+          const snapshot = await markdownToSnapshot(result, this.host);
+          const block = snapshot.snapshot.content[0];
+          const toTreeNode = (block: BlockSnapshot): TreeNode => {
+            return {
+              // @ts-ignore
+              text: block.props.text?.delta?.[0]?.insert ?? '',
+              children: block.children.map(toTreeNode),
+            };
+          };
+          await this.logic.edgeless.drawMindMap(toTreeNode(block.children[0]), {
+            rootId: ele.id,
+          });
+          return result;
+        })(text);
+      },
+    },
+  ];
 }
 
 type Action = {
   type: 'action';
   name: string;
-  action: (input: string) => Promise<void>;
+  hide?: boolean;
+  action: () => Promise<void>;
 };
 type ActionGroup = {
   type: 'group';

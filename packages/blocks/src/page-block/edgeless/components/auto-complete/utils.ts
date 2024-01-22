@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
+import type { EdgelessElement } from '../../../../_common/types.js';
 import type { NoteBlockModel } from '../../../../models.js';
 import {
   CanvasTextFontFamily,
@@ -271,9 +272,7 @@ export function getPosition(type: Direction) {
   return { startPosition, endPosition };
 }
 
-export function isShape(
-  element: ShapeElement | NoteBlockModel
-): element is ShapeElement {
+export function isShape(element: EdgelessElement): element is ShapeElement {
   return element instanceof ShapeElement;
 }
 

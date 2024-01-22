@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css, html } from 'lit';
+import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -101,50 +101,71 @@ export class CopilotChatPanel
   get chat() {
     return this.logic.chat;
   }
-  get editor() {
-    return this.logic.editor;
+  get host() {
+    return this.logic.getHost();
   }
+  @query('.chat-messages-container')
+  chatMessagesContainer!: HTMLDivElement;
+  protected override updated(_changedProperties: PropertyValues) {
+    super.updated(_changedProperties);
+    if (_changedProperties.has('history')) {
+      this.chatMessagesContainer.scrollTop =
+        this.chatMessagesContainer.scrollHeight;
+    }
+  }
+
   @state()
   history: ChatMessage[] = [
     {
       role: 'user',
       content: [
         {
-          text: `I've been thinking about how file managers could be improved. What do you think?`,
+          text: `大语言模型是什么？Please use the nested unordered list syntax in Markdown to create a mind map-like structure.`,
           type: 'text',
         },
       ],
     },
     {
       role: 'assistant',
-      content: `That could definitely save time and make the whole process of file management more efficient :
+      content: `* 大语言模型
 
-1. File managers need to become more intelligent and intuitive.
-2. Learn from user behavior patterns and predict which files they may need to access next.
-3. Integrated search functionality that can search based on file content, not just file names.`,
-      sources: [],
-    },
-    {
-      role: 'assistant',
-      content: `That could definitely save time and make the whole process of file management more efficient :
+  * 定义
 
-1. File managers need to become more intelligent and intuitive.
-2. Learn from user behavior patterns and predict which files they may need to access next.
-3. Integrated search functionality that can search based on file content, not just file names.`,
-      sources: [],
-    },
-    {
-      role: 'assistant',
-      content: `That could definitely save time and make the whole process of file management more efficient :
+    * 语言模型是一种基于概率的计算机模型，用于预测文本序列中的下一个词或字符。
 
-1. File managers need to become more intelligent and intuitive.
-2. Learn from user behavior patterns and predict which files they may need to access next.
-3. Integrated search functionality that can search based on file content, not just file names.`,
+    - 大语言模型是指模型的规模非常大，通常包含数十亿个参数，能够理解和生成人类语言的复杂模式。
+
+  - 作用
+
+    * 文本生成
+
+    - 问答系统
+
+    * 机器翻译
+
+  * 优点
+
+    * 强大的理解和生成能力
+
+    - 广泛的应用
+
+  - 缺点
+
+    * 训练成本高
+
+    - 难以解释
+
+    * 可能产生偏见
+`,
       sources: [],
     },
   ];
   @state()
-  loading: boolean = false;
+  currentRequest?: number;
+
+  get loading(): boolean {
+    return this.currentRequest != null;
+  }
 
   @state()
   value = '';
@@ -159,13 +180,13 @@ export class CopilotChatPanel
     super.connectedCallback();
     this.logic.chat.reactiveData = this;
     this.disposables.add(
-      this.editor.page.workspace.slots.pagesUpdated.on(() => {
+      this.host.page.workspace.slots.pagesUpdated.on(() => {
         this.requestUpdate();
       })
     );
     this.checkSelection();
     this.disposables.add(
-      this.editor.host.selection.slots.changed.on(() => {
+      this.host.selection.slots.changed.on(() => {
         this.checkSelection();
       })
     );
@@ -173,9 +194,9 @@ export class CopilotChatPanel
 
   checkSelection() {
     this.surfaceSelection =
-      this.editor.host.selection.value.find(v => v.type === 'surface') != null;
+      this.host.selection.value.find(v => v.type === 'surface') != null;
     this.docSelection =
-      this.editor.host.selection.value.find(v => v.type === 'block') != null;
+      this.host.selection.value.find(v => v.type === 'block') != null;
   }
 
   addSelectionBackground = async () => {
@@ -225,13 +246,13 @@ export class CopilotChatPanel
                   style="display: flex;flex-direction: column;gap: 4px;padding: 4px;"
                 >
                   ${repeat(message.sources, ref => {
-                    const page = this.editor.page.workspace.getPage(ref.id);
+                    const page = this.host.page.workspace.getPage(ref.id);
                     if (!page) {
                       return;
                     }
                     const title = page.meta.title || 'Untitled';
                     const jumpTo = () => {
-                      this.editor.page = page;
+                      this.host.page = page;
                     };
                     return html` <a @click="${jumpTo}" style="cursor: pointer"
                       >${title}</a
@@ -240,10 +261,9 @@ export class CopilotChatPanel
                 </div>
               </div>`
             : null}
-          ${this.docSelection
-            ? html`
-                <div
-                  style="
+
+          <div
+            style="
                   position:absolute;
                   bottom:-35px;
                   left: 0;
@@ -256,24 +276,22 @@ export class CopilotChatPanel
                   width: 100%;
                   justify-content: flex-end;
 "
-                >
-                  <div
-                    @click="${() =>
-                      this.chat.replaceSelectedContent(message.content)}"
-                    style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
-                  >
-                    replace
-                  </div>
-                  <div
-                    @click="${() =>
-                      this.chat.insertBelowSelectedContent(message.content)}"
-                    style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
-                  >
-                    insert below
-                  </div>
-                </div>
-              `
-            : null}
+          >
+            <div
+              @click="${() =>
+                this.chat.replaceSelectedContent(message.content)}"
+              style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
+            >
+              replace
+            </div>
+            <div
+              @click="${() =>
+                this.chat.insertBelowSelectedContent(message.content)}"
+              style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 6px;cursor: pointer"
+            >
+              insert below
+            </div>
+          </div>
         </div>
       `;
     }
@@ -284,17 +302,21 @@ export class CopilotChatPanel
   protected override render(): unknown {
     const getAnswer = async () => {
       this.input.focus();
-      await this.chat.genAnswer();
+      const text = this.input.value;
+      this.input.value = '';
+      await this.chat.genAnswer(text);
     };
     const keydown = async (e: KeyboardEvent) => {
       e.stopPropagation();
-      if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+      if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.isComposing) {
+        e.preventDefault();
         await getAnswer();
       }
     };
     const sendButtonStyle = styleMap({
       opacity: !this.loading ? '1' : '0.5',
     });
+    const lastMessage = this.history[this.history.length - 1];
     return html`
       <div style="display:flex;flex-direction: column;height: 100%">
         <div
@@ -315,7 +337,10 @@ export class CopilotChatPanel
             ></vendor-service-select>
           </div>
         </div>
-        <div style="display:flex;flex-direction: column;flex: 1;overflow: auto">
+        <div
+          class="chat-messages-container"
+          style="display:flex;flex-direction: column;flex: 1;overflow: auto"
+        >
           <div
             style="flex:1;gap:42px;flex-direction: column;display:flex;padding: 0 7px 42px"
           >
@@ -326,21 +351,26 @@ export class CopilotChatPanel
           <div
             style="display:flex;gap:12px;padding: 4px;font-size: 12px;line-height: 20px;color:var(--affine-text-secondary-color)"
           >
-            <div
-              style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 8px 2px 4px;cursor: pointer;display:flex;align-items:center;gap: 4px;"
-            >
-              ${StopIcon} Stop
-            </div>
-            <div
-              style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 10px;cursor: pointer"
-            >
-              Longer
-            </div>
-            <div
-              style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 10px;cursor: pointer"
-            >
-              Shorter
-            </div>
+            ${this.loading
+              ? html`<div
+                  style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 8px 2px 4px;cursor: pointer;display:flex;align-items:center;gap: 4px;"
+                  @click="${() => (this.currentRequest = undefined)}"
+                >
+                  ${StopIcon} Stop
+                </div>`
+              : nothing}
+            ${!this.loading && lastMessage.role === 'assistant'
+              ? html`<div
+                    style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 10px;cursor: pointer"
+                  >
+                    Longer
+                  </div>
+                  <div
+                    style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 10px;cursor: pointer"
+                  >
+                    Shorter
+                  </div>`
+              : nothing}
           </div>
           <div class="copilot-chat-prompt-container">
             <textarea
@@ -350,10 +380,6 @@ export class CopilotChatPanel
               placeholder="Type here ask Copilot some thing..."
               class="copilot-chat-panel-chat-input copilot-chat-prompt"
               style="resize: none;"
-              .value="${this.value}"
-              @input="${(e: InputEvent) => {
-                this.value = (e.target as HTMLInputElement).value;
-              }}"
             ></textarea>
             <div>
               <div

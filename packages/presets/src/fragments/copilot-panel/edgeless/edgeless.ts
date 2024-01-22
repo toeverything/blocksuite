@@ -21,14 +21,12 @@ export class CopilotEdgelessPanel extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   logic!: AILogic;
 
-  get editor() {
-    return this.logic.editor;
+  get host() {
+    return this.logic.getHost();
   }
 
   protected override render(): unknown {
-    const frames = getSurfaceElementFromEditor(
-      this.editor
-    ).model.children.filter(
+    const frames = getSurfaceElementFromEditor(this.host).model.children.filter(
       v => v instanceof FrameBlockModel
     ) as FrameBlockModel[];
     const changeFromFrame = (e: Event) => {

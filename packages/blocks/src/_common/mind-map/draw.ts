@@ -20,8 +20,8 @@ import { layout, type LayoutNode, type LayoutNodeResult } from './layout.js';
 
 export const DEFAULT_SHAPE_PROPS: Partial<IShape> = {
   shapeType: 'rect' as ShapeType,
-  strokeColor: '--affine-palette-line-black',
-  filled: false,
+  strokeColor: '--affine-palette-line-blue',
+  fillColor: '--affine-palette-shape-blue',
   radius: 0.1,
   strokeWidth: 2,
   strokeStyle: StrokeStyle.Solid,
@@ -60,7 +60,15 @@ const directionMap: Record<string, { from: number[]; to: number[] }> = {
   },
 };
 
-const drawAllNode = (node: TreeNode, surface: SurfaceBlockComponent) => {
+const drawAllNode = (
+  node: TreeNode,
+  surface: SurfaceBlockComponent,
+  options?: {
+    rootId?: string;
+    x?: number;
+    y?: number;
+  }
+) => {
   const shapeIds: string[] = [];
   const connectorIds: string[] = [];
   const connectors: { from: string; to: string }[] = [];
@@ -68,13 +76,16 @@ const drawAllNode = (node: TreeNode, surface: SurfaceBlockComponent) => {
     id: string;
     children: LayoutNode_[];
   };
-  const drawNode = (node: TreeNode): LayoutNode_ => {
+  const drawNode = (node: TreeNode, isRoot = false): LayoutNode_ => {
     const { text, children } = node;
-    const id = surface.addElement(CanvasElementType.SHAPE, {
-      ...DEFAULT_SHAPE_PROPS,
-      xywh: `[${0},${0},${0},${0}]`,
-      text: new Workspace.Y.Text(text),
-    });
+    const id =
+      isRoot && options?.rootId
+        ? options.rootId
+        : surface.addElement(CanvasElementType.SHAPE, {
+            ...DEFAULT_SHAPE_PROPS,
+            xywh: `[${0},${0},${0},${0}]`,
+            text: new Workspace.Y.Text(text),
+          });
     shapeIds.push(id);
     const ele = surface.pickById(id) as ShapeElement;
     const maxWidth =
@@ -82,7 +93,7 @@ const drawAllNode = (node: TreeNode, surface: SurfaceBlockComponent) => {
       SHAPE_TEXT_PADDING * 2;
     const bound = normalizeShapeBound(
       ele,
-      new Bound(0, 0, Math.min(600, maxWidth), 0)
+      new Bound(0, 0, Math.max(148, Math.min(600, maxWidth)), 78)
     );
     return {
       id,
@@ -95,10 +106,15 @@ const drawAllNode = (node: TreeNode, surface: SurfaceBlockComponent) => {
       }),
     };
   };
-  const layoutNode = drawNode(node);
-  const result = layout.leftRight(layoutNode, {
+  const layoutNode = drawNode(node, true);
+  const root = options?.rootId
+    ? (surface.pickById(options.rootId) as ShapeElement)
+    : undefined;
+  const result = layout.right(layoutNode, {
     gapHorizontal: 130,
     gapVertical: 10,
+    x: root ? root.x : options?.x ?? 0,
+    y: root ? root.y : options?.y ?? 0,
   });
   const updatePosition = (node: LayoutNode_, result: LayoutNodeResult) => {
     const { id, width, height } = node;
@@ -131,9 +147,14 @@ const drawAllNode = (node: TreeNode, surface: SurfaceBlockComponent) => {
 };
 export function drawMindMap(
   surfaceElement: SurfaceBlockComponent,
-  mindMap: TreeNode
+  mindMap: TreeNode,
+  ops?: {
+    rootId?: string;
+    x?: number;
+    y?: number;
+  }
 ) {
-  const { shapeIds, connectorIds } = drawAllNode(mindMap, surfaceElement);
+  const { shapeIds, connectorIds } = drawAllNode(mindMap, surfaceElement, ops);
   const { edgeless } = surfaceElement;
   edgeless.selectionManager.set({
     elements: [...shapeIds, ...connectorIds],

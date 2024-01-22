@@ -78,6 +78,7 @@ export * from './image-block/index.js';
 export * from './list-block/index.js';
 export * from './models.js';
 export * from './note-block/index.js';
+export { EdgelessComponentToolbar } from './page-block/edgeless/components/component-toolbar/component-toolbar.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export {
@@ -101,7 +102,6 @@ export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
-
 export const BlocksUtils = {
   splitElements,
   matchFlavours,

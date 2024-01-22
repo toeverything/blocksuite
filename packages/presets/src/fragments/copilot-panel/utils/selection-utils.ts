@@ -4,7 +4,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import { type BlockModel, Slice } from '@blocksuite/store';
 
-import type { AffineEditorContainer } from '../../../editors/index.js';
 import { getMarkdownFromSlice } from './markdown-utils.js';
 
 export function hasSelectedTextContent(host: EditorHost) {
@@ -97,7 +96,7 @@ export async function getSelectedBlocks(host: EditorHost) {
   return blocks;
 }
 
-export function getEdgelessPageBlockFromEditor(editor: AffineEditorContainer) {
+export function getEdgelessPageBlockFromEditor(editor: EditorHost) {
   const edgelessPage = editor.getElementsByTagName('affine-edgeless-page')[0];
   if (!edgelessPage) {
     alert('Please switch to edgeless mode');
@@ -106,7 +105,7 @@ export function getEdgelessPageBlockFromEditor(editor: AffineEditorContainer) {
   return edgelessPage;
 }
 
-export async function selectedToCanvas(editor: AffineEditorContainer) {
+export async function selectedToCanvas(editor: EditorHost) {
   const edgelessPage = getEdgelessPageBlockFromEditor(editor);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
     edgelessPage.selectionManager.elements
@@ -126,7 +125,7 @@ export async function selectedToCanvas(editor: AffineEditorContainer) {
 
 export async function frameToCanvas(
   frame: FrameBlockModel,
-  editor: AffineEditorContainer
+  editor: EditorHost
 ) {
   const surface = getSurfaceElementFromEditor(editor);
   const edgelessPage = getEdgelessPageBlockFromEditor(editor);
@@ -146,7 +145,7 @@ export async function frameToCanvas(
   return canvas;
 }
 
-export async function selectedToPng(editor: AffineEditorContainer) {
+export async function selectedToPng(editor: EditorHost) {
   return (await selectedToCanvas(editor))?.toDataURL('image/png');
 }
 
@@ -159,7 +158,7 @@ export const stopPropagation = (e: Event) => {
   e.stopPropagation();
 };
 
-export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
+export function getSurfaceElementFromEditor(editor: EditorHost) {
   const { page } = editor;
   const surfaceModel = page.getBlockByFlavour('affine:surface')[0];
   assertExists(surfaceModel);
@@ -175,7 +174,7 @@ export function getSurfaceElementFromEditor(editor: AffineEditorContainer) {
 
 export const getFirstImageInFrame = (
   frame: FrameBlockModel,
-  editor: AffineEditorContainer
+  editor: EditorHost
 ) => {
   const surface = getSurfaceElementFromEditor(editor);
   const elements = surface.frame.getElementsInFrame(frame, false);

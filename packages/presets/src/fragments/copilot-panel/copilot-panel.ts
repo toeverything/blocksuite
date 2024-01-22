@@ -2,7 +2,10 @@ import './chat/chat.js';
 import './edgeless/edgeless.js';
 import './copilot-service';
 
-import { AffineFormatBarWidget } from '@blocksuite/blocks';
+import {
+  AffineFormatBarWidget,
+  EdgelessComponentToolbar,
+} from '@blocksuite/blocks';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -117,9 +120,13 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   editorWithAI?: AIEdgelessLogic;
   aiLogic?: AILogic;
 
+  get host() {
+    return this.editor.host;
+  }
+
   get logic() {
     if (!this.aiLogic) {
-      this.aiLogic = new AILogic(this.editor);
+      this.aiLogic = new AILogic(() => this.host);
     }
     return this.aiLogic;
   }
@@ -127,7 +134,7 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   public override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
-      getSurfaceElementFromEditor(this.editor).model.childrenUpdated.on(() => {
+      getSurfaceElementFromEditor(this.host).model.childrenUpdated.on(() => {
         this.requestUpdate();
       })
     );
@@ -228,7 +235,9 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
               };
               const style = styleMap({
                 'background-color':
-                  this.currentPanel === key ? 'white' : 'transparent',
+                  this.currentPanel === key
+                    ? 'var(--affine-hover-color)'
+                    : 'transparent',
                 padding: '4px 8px',
                 'border-radius': '8px',
                 width: '91px',
@@ -275,15 +284,10 @@ AffineFormatBarWidget.registerCustomRenderer({
           </sl-menu-item>
         `;
       }
-      const onClick = async () => {
-        const text = await copilot.aiLogic?.chat.getSelectedText();
-        if (!text) {
-          return;
-        }
-        await item.action(text);
-      };
       return html`
-        <sl-menu-item @click="${onClick}">${item.name}</sl-menu-item>
+        <sl-menu-item @click="${() => item.action()}"
+          >${item.name}</sl-menu-item
+        >
       `;
     };
     return html`
@@ -311,7 +315,69 @@ AffineFormatBarWidget.registerCustomRenderer({
             ${StarIcon} Ask AI
           </div>
           <sl-menu>
-            ${repeat(copilot.aiLogic?.chat.actionList ?? [], renderItem)}
+            ${repeat(
+              copilot.aiLogic?.chat.docSelectionActionList ?? [],
+              renderItem
+            )}
+          </sl-menu>
+        </sl-dropdown>
+      </div>
+    `;
+  },
+});
+
+EdgelessComponentToolbar.registerCustomRenderer({
+  render(): TemplateResult | undefined {
+    const copilot = document.querySelector('copilot-panel');
+    if (!copilot) {
+      return;
+    }
+    const renderItem = (item: AllAction): TemplateResult => {
+      if (item.type === 'group') {
+        return html`
+          <sl-menu-item>
+            ${item.name}
+            <sl-menu slot="submenu">
+              ${repeat(item.children, renderItem)}
+            </sl-menu>
+          </sl-menu-item>
+        `;
+      }
+      return html`
+        <sl-menu-item @click="${() => item.action()}"
+          >${item.name}</sl-menu-item
+        >
+      `;
+    };
+    return html`
+      <style>
+        .copilot-format-bar-item {
+          padding: 4px;
+          border-radius: 4px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--affine-icon-color);
+        }
+        .copilot-format-bar-item:hover {
+          background-color: var(--affine-hover-color);
+        }
+      </style>
+      <div class="copilot-format-bar-item">
+        <sl-dropdown>
+          <div
+            slot="trigger"
+            style="display:flex;align-items:center;gap: 4px;"
+            caret
+          >
+            ${StarIcon} Ask AI
+          </div>
+          <sl-menu>
+            ${repeat(
+              copilot.aiLogic?.chat.edgelessSelectionActionList ?? [],
+              renderItem
+            )}
           </sl-menu>
         </sl-dropdown>
       </div>
