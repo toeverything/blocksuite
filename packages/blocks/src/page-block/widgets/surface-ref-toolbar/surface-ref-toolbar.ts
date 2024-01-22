@@ -178,7 +178,7 @@ function SurfaceRefToolbarOptions(options: {
             surfaceRefBlock: blockElement,
             surfaceRenderer: blockElement.surfaceRenderer,
             edgelessElement: referencedModel,
-            blockContainer: blockElement.blocksPortal,
+            blockContainer: blockElement.portal,
           })
             .then(blob => {
               const fileName =
@@ -204,7 +204,7 @@ function SurfaceRefToolbarOptions(options: {
             surfaceRefBlock: blockElement,
             surfaceRenderer: blockElement.surfaceRenderer,
             edgelessElement: blockElement.referenceModel as EdgelessElement,
-            blockContainer: blockElement.blocksPortal,
+            blockContainer: blockElement.portal,
           })
             .then(blob => {
               return writeImageBlobToClipboard(blob);
