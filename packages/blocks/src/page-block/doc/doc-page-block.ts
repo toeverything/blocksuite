@@ -6,6 +6,7 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { textFormatConfigs } from '../../_common/configs/text-format/config.js';
 import type { EditingState, Viewport } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
@@ -283,6 +284,30 @@ export class DocPageBlockComponent extends BlockElement<
           }
         });
       },
+    });
+
+    textFormatConfigs.forEach(config => {
+      if (!config.hotkey) return;
+
+      this.bindHotKey(
+        {
+          [config.hotkey]: ctx => {
+            if (this.page.readonly) return;
+
+            const textSelection = this.selection.find('text');
+            if (!textSelection) return;
+
+            const state = ctx.get('defaultState');
+            state.event.preventDefault();
+
+            config.action(this.host);
+            return true;
+          },
+        },
+        {
+          global: true,
+        }
+      );
     });
 
     this.handleEvent('click', ctx => {

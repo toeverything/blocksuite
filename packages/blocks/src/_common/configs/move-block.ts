@@ -34,10 +34,8 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
       const page = blockElement.page;
       const textSelection = getTextSelection(blockElement);
       if (textSelection) {
-        const currentModel = pathToBlock(
-          blockElement,
-          textSelection.from.path
-        )?.model;
+        const currentModel = pathToBlock(blockElement, textSelection.from.path)
+          ?.model;
         if (!currentModel) return;
 
         const previousSiblingModel = page.getPreviousSibling(currentModel);
@@ -63,10 +61,8 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
       }
       const blockSelection = getBlockSelectionBySide(blockElement, true);
       if (blockSelection) {
-        const currentModel = pathToBlock(
-          blockElement,
-          blockSelection.path
-        )?.model;
+        const currentModel = pathToBlock(blockElement, blockSelection.path)
+          ?.model;
         if (!currentModel) return;
 
         const previousSiblingModel = page.getPreviousSibling(currentModel);
@@ -93,10 +89,8 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
       const page = blockElement.page;
       const textSelection = getTextSelection(blockElement);
       if (textSelection) {
-        const currentModel = pathToBlock(
-          blockElement,
-          textSelection.from.path
-        )?.model;
+        const currentModel = pathToBlock(blockElement, textSelection.from.path)
+          ?.model;
         if (!currentModel) return;
 
         const nextSiblingModel = page.getNextSibling(currentModel);
@@ -118,10 +112,8 @@ export const moveBlockConfigs: MoveBlockConfig[] = [
       }
       const blockSelection = getBlockSelectionBySide(blockElement, true);
       if (blockSelection) {
-        const currentModel = pathToBlock(
-          blockElement,
-          blockSelection.path
-        )?.model;
+        const currentModel = pathToBlock(blockElement, blockSelection.path)
+          ?.model;
         if (!currentModel) return;
 
         const nextSiblingModel = page.getNextSibling(currentModel);

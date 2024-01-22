@@ -284,8 +284,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     _disposables.add(this.tools);
     _disposables.add(this.service.selection);
     _disposables.add(
-      slots.zoomUpdated.on((action: ZoomAction) =>
-        this.components.zoomToolbar?.setZoomByAction(action)
+      slots.zoomUpdated.on(
+        (action: ZoomAction) =>
+          this.components.zoomToolbar?.setZoomByAction(action)
       )
     );
     _disposables.add(

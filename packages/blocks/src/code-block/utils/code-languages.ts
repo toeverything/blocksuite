@@ -121,8 +121,8 @@ export const getStandardLanguage = (
   if (language) return language;
   if (strict) return null;
 
-  const aliasLanguage = BUNDLED_LANGUAGES.find(codeLanguage =>
-    codeLanguage.aliases?.includes(languageName.toLowerCase())
+  const aliasLanguage = BUNDLED_LANGUAGES.find(
+    codeLanguage => codeLanguage.aliases?.includes(languageName.toLowerCase())
   );
   return aliasLanguage ?? null;
 };

@@ -12,7 +12,6 @@ import type { BlockElement } from '@blocksuite/lit';
 import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { PageBlockComponent } from '../../../../page-block/types.js';
 import { insertLinkedNode } from '../../../../page-block/widgets/linked-doc/config.js';
-import { textFormatConfigs } from '../../../configs/text-format/config.js';
 import { getChainWithHost } from '../../../utils/command.js';
 import { createDefaultPage } from '../../../utils/init.js';
 import { buildPath } from '../../../utils/query.js';
@@ -328,24 +327,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     },
   });
 
-  textFormatConfigs.forEach(config => {
-    if (!config.hotkey) return;
-
-    blockElement.bindHotKey({
-      [config.hotkey]: ctx => {
-        if (blockElement.page.readonly) return;
-
-        const textSelection = blockElement.selection.find('text');
-        if (!textSelection) return;
-
-        _preventDefault(ctx);
-
-        config.action(editorHost);
-        return true;
-      },
-    });
-  });
-
   function handleMarkdown(ctx: UIEventStateContext) {
     if (!blockElement.selected?.is('text')) return;
 
@@ -415,6 +396,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     return true;
   }
 
+  //TODO(@Flrande): move to code-block
   // Bracket auto complete
   bracketPairs.forEach(pair => {
     blockElement.bindHotKey({
@@ -460,6 +442,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     });
   });
 
+  //TODO(@Flrande): move to code-block
   // Skip redundant right bracket
   bracketPairs.forEach(pair => {
     blockElement.bindHotKey({

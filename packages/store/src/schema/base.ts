@@ -57,8 +57,9 @@ export type BlockSchemaType = z.infer<typeof BlockSchema>;
 export type PropsGetter<Props> = (
   internalPrimitives: InternalPrimitives
 ) => Props;
-export type PropsFromGetter<T> =
-  T extends PropsGetter<infer Props> ? Props : never;
+export type PropsFromGetter<T> = T extends PropsGetter<infer Props>
+  ? Props
+  : never;
 
 export type SchemaToModel<
   Schema extends {
