@@ -10,7 +10,9 @@ import type {
 } from '../../surface-block/element-model/index.js';
 import { GroupElementModel } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
-import { LayerManager } from '../../surface-block/managers/layer-manager.js';
+import type { LayerManager } from '../../surface-block/managers/layer-manager.js';
+import { TemplateJob } from '../../surface-block/service/template.js';
+import type { SurfaceService } from '../../surface-block/surface-service.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { PageService } from '../page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
@@ -22,23 +24,27 @@ import type {
 import { Viewport } from './utils/viewport.js';
 
 export class EdgelessPageService extends PageService {
+  TemplateJob = TemplateJob;
+
   private _surface!: SurfaceBlockModel;
   private _layer!: LayerManager;
   private _selection!: EdgelessSelectionManager;
   private _viewport!: Viewport;
+  private _surfaceService!: SurfaceService;
 
   override mounted() {
     super.mounted();
 
-    this._surface = this.page.getBlockByFlavour(
+    this._surfaceService = this.std.spec.getService(
       'affine:surface'
-    )[0] as SurfaceBlockModel;
+    ) as SurfaceService;
+    this._surface = this._surfaceService.surface!;
 
     if (!this._surface) {
       throw new Error('surface block not found');
     }
 
-    this._layer = LayerManager.create(this.page, this._surface);
+    this._layer = this._surfaceService.layer;
     this._viewport = new Viewport();
     this._selection = new EdgelessSelectionManager(this);
   }

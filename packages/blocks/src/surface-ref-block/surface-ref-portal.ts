@@ -18,7 +18,7 @@ import type { EdgelessBlockModel } from '../page-block/edgeless/type.js';
 import { type EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type { GroupElementModel } from '../surface-block/element-model/group.js';
 import type { BlockLayer } from '../surface-block/managers/layer-manager.js';
-import type { SurfacePageService } from '../surface-block/surface-page-service.js';
+import type { SurfaceService } from '../surface-block/surface-service.js';
 
 const portalMap = {
   'affine:note': 'surface-ref-note-portal',
@@ -69,9 +69,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   canvasSlot!: HTMLDivElement;
 
   get surfaceService() {
-    return this.host.std.spec.getService(
-      'affine:surface'
-    ) as SurfacePageService;
+    return this.host.std.spec.getService('affine:surface') as SurfaceService;
   }
 
   setStackingCanvas(canvases: HTMLCanvasElement[]) {

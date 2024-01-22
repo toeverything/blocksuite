@@ -362,10 +362,12 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
 
     const noteId = page.addBlock('affine:note', {}, pageId);
     const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
+    const surfaceId = page.addBlock('affine:surface', {}, pageId);
+
     // page.addBlock('affine:surface', {}, pageId);
     page.captureSync();
 
-    return { pageId, noteId, paragraphId };
+    return { pageId, noteId, paragraphId, surfaceId };
   }, pageId);
   return ids;
 }

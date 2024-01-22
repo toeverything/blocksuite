@@ -331,7 +331,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
     middlewares.push(replaceIdMiddleware);
 
-    return this.edgeless.surface.service.TemplateJob.create({
+    return this.edgeless.service.TemplateJob.create({
       model: this.edgeless.surfaceBlockModel,
       type,
       middlewares,
