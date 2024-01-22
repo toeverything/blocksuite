@@ -314,7 +314,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
         middlewares.push(createInsertPlaceMiddleware(currentContentBound));
       }
 
-      const idxGenerator = service.layer.preservedIndexGenerator(true);
+      const idxGenerator = service.layer.createIndexGenerator(true);
 
       middlewares.push(
         createRegenerateIndexMiddleware((type: string) => idxGenerator(type))

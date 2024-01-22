@@ -12,13 +12,31 @@ export class EdgelessReleaseFromGroupButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
+  private _releaseFromGroup() {
+    const service = this.surface.edgeless.service;
+    const element = service.selection.firstElement;
+
+    if (element.group === null) return;
+
+    const group = element.group;
+
+    group.removeChild(element.id);
+
+    element.index = service.layer.generateIndex(
+      'flavour' in element ? element.flavour : element.type
+    );
+
+    const parent = group.group;
+    if (parent != null) {
+      parent.addChild(element.id);
+    }
+  }
+
   protected override render() {
     return html`<edgeless-tool-icon-button
       .iconContainerPadding=${2}
       @click=${() => {
-        this.surface.edgeless.service.releaseFromGroup(
-          this.surface.edgeless.service.selection.firstElement
-        );
+        this._releaseFromGroup();
       }}
       .tooltip=${'Release From Group'}
       .tipPosition=${'bottom'}

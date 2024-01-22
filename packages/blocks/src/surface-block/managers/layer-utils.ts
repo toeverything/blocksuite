@@ -2,7 +2,7 @@ import type { Page } from '@blocksuite/store';
 
 import type {
   EdgelessBlockModel,
-  EdgelessElement,
+  EdgelessModel,
 } from '../../page-block/edgeless/type.js';
 import { GroupElementModel } from '../index.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
@@ -35,7 +35,7 @@ export function updateLayersIndex(layers: Layer[], startIdx: number) {
   }
 }
 
-export function getElementIndex(indexable: EdgelessElement) {
+export function getElementIndex(indexable: EdgelessModel) {
   const groups = indexable.groups;
 
   if (groups.length > 1) {
@@ -56,8 +56,8 @@ export function ungroupIndex(index: string) {
 }
 
 export function insertToOrderedArray(
-  array: EdgelessElement[],
-  element: EdgelessElement
+  array: EdgelessModel[],
+  element: EdgelessModel
 ) {
   let idx = 0;
   while (idx < array.length && compare(array[idx], element) < 0) {
@@ -68,8 +68,8 @@ export function insertToOrderedArray(
 }
 
 export function removeFromOrderedArray(
-  array: EdgelessElement[],
-  element: EdgelessElement
+  array: EdgelessModel[],
+  element: EdgelessModel
 ) {
   const idx = array.indexOf(element);
 
@@ -79,8 +79,8 @@ export function removeFromOrderedArray(
 }
 
 export function isInRange(
-  edges: [EdgelessElement, EdgelessElement],
-  target: EdgelessElement
+  edges: [EdgelessModel, EdgelessModel],
+  target: EdgelessModel
 ) {
   return compare(target, edges[0]) >= 0 && compare(target, edges[1]) < 0;
 }
@@ -95,7 +95,7 @@ export function renderableInEdgeless(
   return parent === page.root || parent === surface;
 }
 
-export function compare(a: EdgelessElement, b: EdgelessElement) {
+export function compare(a: EdgelessModel, b: EdgelessModel) {
   if (a instanceof GroupElementModel && a.hasDescendant(b)) {
     return -1;
   } else if (b instanceof GroupElementModel && b.hasDescendant(a)) {

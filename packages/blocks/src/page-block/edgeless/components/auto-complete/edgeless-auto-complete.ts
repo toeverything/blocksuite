@@ -328,11 +328,30 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     surface.refresh();
   }
 
+  private _getConnectedElements(element: ShapeElementModel) {
+    const service = this.edgeless.service;
+
+    return service.getConnectors(element.id).reduce((prev, current) => {
+      if (current.target.id === element.id && current.source.id) {
+        prev.push(
+          service.getElementById(current.source.id) as ShapeElementModel
+        );
+      }
+      if (current.source.id === element.id && current.target.id) {
+        prev.push(
+          service.getElementById(current.target.id) as ShapeElementModel
+        );
+      }
+
+      return prev;
+    }, [] as ShapeElementModel[]);
+  }
+
   private _computeNextBound(type: Direction) {
     if (isShape(this.current)) {
-      const connectedShapes = this.edgeless.service
-        .getConnectedElements(this.current)
-        .filter(e => e instanceof ShapeElementModel) as ShapeElementModel[];
+      const connectedShapes = this._getConnectedElements(this.current).filter(
+        e => e instanceof ShapeElementModel
+      ) as ShapeElementModel[];
       return nextBound(type, this.current, connectedShapes);
     } else {
       const bound = this.current.elementBound;

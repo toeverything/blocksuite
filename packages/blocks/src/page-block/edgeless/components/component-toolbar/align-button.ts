@@ -17,7 +17,7 @@ import {
   AlignVerticallyIcon,
   SmallArrowDownIcon,
 } from '../../../../_common/icons/index.js';
-import type { EdgelessElement } from '../../../../_common/utils/index.js';
+import type { EdgelessModel } from '../../../../_common/utils/index.js';
 import {
   Bound,
   ConnectorElementModel,
@@ -42,7 +42,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     );
   }
 
-  private _updateXYWH(ele: EdgelessElement, bound: Bound) {
+  private _updateXYWH(ele: EdgelessModel, bound: Bound) {
     if (ele instanceof ConnectorElementModel) {
       ele.moveTo(bound);
     } else if (ele instanceof GroupElementModel) {
