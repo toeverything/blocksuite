@@ -183,11 +183,15 @@ export class Block {
     assertExists(id, 'Block id is not found');
     assertExists(flavour, 'Block flavour is not found');
     assertExists(yChildren, 'Block children is not found');
-    assertExists(version, 'Block version is not found');
 
     const schema = this.schema.flavourSchemaMap.get(flavour);
     assertExists(schema, `Cannot find schema for flavour ${flavour}`);
     const defaultProps = schema.model.props?.(internalPrimitives);
+
+    if (typeof version !== 'number') {
+      // no version found in data, set to schema version
+      version = schema.version;
+    }
 
     // Set default props if not exists
     if (defaultProps) {
