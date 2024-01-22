@@ -40,7 +40,7 @@ type BaseLayer<T> = {
   indexes: [string, string];
 };
 
-type BlockLayer = BaseLayer<EdgelessBlockModel> & {
+export type BlockLayer = BaseLayer<EdgelessBlockModel> & {
   type: 'block';
   /**
    * The computed DOM z-index used for rendering blocks.
@@ -50,7 +50,7 @@ type BlockLayer = BaseLayer<EdgelessBlockModel> & {
   zIndexes: [number, number];
 };
 
-type CanvasLayer = BaseLayer<ElementModel> & {
+export type CanvasLayer = BaseLayer<ElementModel> & {
   type: 'canvas';
   /**
    * The computed DOM z-index used for rendering this canvas layer.

@@ -14,11 +14,7 @@ import {
 } from '../_common/icons/index.js';
 import type { EdgelessElement } from '../_common/types.js';
 import { stopPropagation } from '../_common/utils/event.js';
-import {
-  buildPath,
-  getEditorContainer,
-  isInsideDocEditor,
-} from '../_common/utils/query.js';
+import { buildPath, getEditorContainer } from '../_common/utils/query.js';
 import type { PageService } from '../index.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
@@ -63,7 +59,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
       margin: 10px 0;
     }
 
-    .surface-empty-placeholder {
+    .ref-placeholder {
       padding: 26px 0px 0px;
     }
 
@@ -127,7 +123,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
       background-color: var(--affine-background-error-color);
     }
 
-    .surface-container {
+    .ref-content {
       position: relative;
       padding: 20px;
       background-color: var(--affine-background-primary-color);
@@ -137,7 +133,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
       );
     }
 
-    .surface-viewport {
+    .ref-viewport {
       max-width: 100%;
       margin: 0 auto;
       position: relative;
@@ -146,12 +142,12 @@ export class SurfaceRefBlockComponent extends BlockElement<
       user-select: none;
     }
 
-    .surface-viewport.frame {
+    .ref-viewport.frame {
       border-radius: 2px;
       border: 1px solid var(--affine-black-30);
     }
 
-    .surface-canvas-container {
+    .ref-canvas-container {
       height: 100%;
       width: 100%;
       position: relative;
@@ -191,6 +187,8 @@ export class SurfaceRefBlockComponent extends BlockElement<
       background: var(--affine-background-primary-color);
 
       font-size: 12px;
+
+      user-select: none;
     }
 
     .ref-label .title {
@@ -198,8 +196,6 @@ export class SurfaceRefBlockComponent extends BlockElement<
       font-weight: 600;
       font-family: var(--affine-font-family);
       line-height: 20px;
-
-      gap: 4px;
 
       color: var(--affine-text-secondary-color);
     }
@@ -257,11 +253,19 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
   private _referencedModel: RefElement | null = null;
 
-  @query('.surface-canvas-container')
+  @query('.ref-canvas-container')
   container!: HTMLDivElement;
 
   @query('surface-ref-portal')
-  blocksPortal!: SurfaceRefPortal;
+  portal!: SurfaceRefPortal;
+
+  private get _shouldRender() {
+    return (
+      this.isConnected &&
+      this.parentElement &&
+      !this.parentBlockElement.closest('affine-surface-ref')
+    );
+  }
 
   get surfaceRenderer() {
     return this._surfaceRefRenderer.surfaceRenderer;
@@ -273,7 +277,9 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    if (!this._shouldRender()) return;
+
+    if (!this._shouldRender) return;
+
     const service = this.service;
     assertExists(service, `Surface ref block must run with its service.`);
     this._surfaceRefRenderer = service.getRenderer(PathFinder.id(this.path));
@@ -301,6 +307,15 @@ export class SurfaceRefBlockComponent extends BlockElement<
         this._disposables.add(() => observer.disconnect());
       })
     );
+    this._disposables.add(
+      this._surfaceRefRenderer.surfaceService.layer.slots.layerUpdated.on(
+        () => {
+          this.portal.setStackingCanvas(
+            this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
+          );
+        }
+      )
+    );
     this._surfaceRefRenderer.mount();
     this._initHotkey();
     this._initReferencedModel();
@@ -308,22 +323,39 @@ export class SurfaceRefBlockComponent extends BlockElement<
   }
 
   override disconnectedCallback() {
+    if (!this._shouldRender) return;
     this.service?.removeRenderer(this._surfaceRefRenderer.id);
     super.disconnectedCallback();
   }
 
   override updated() {
+    if (!this._shouldRender) return;
+
     this._attachRenderer();
   }
 
   private _attachRenderer() {
     if (
       this._surfaceRefRenderer?.surfaceRenderer.canvas.isConnected ||
-      !this.container
+      !this.container ||
+      !this.portal
     )
       return;
 
     this.surfaceRenderer.attach(this.container);
+    if (this.portal.isUpdatePending) {
+      this.portal.updateComplete
+        .then(() => {
+          this.portal.setStackingCanvas(
+            this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
+          );
+        })
+        .catch(console.error);
+    } else {
+      this.portal.setStackingCanvas(
+        this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
+      );
+    }
   }
 
   private _initHotkey() {
@@ -448,7 +480,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
         );
 
         // update portal transform
-        this.blocksPortal?.setViewport(this.surfaceRenderer);
+        this.portal?.setViewport(this.surfaceRenderer);
       })
       .catch(console.error);
   }
@@ -461,87 +493,6 @@ export class SurfaceRefBlockComponent extends BlockElement<
     this.selection.update(() => {
       return [this.selection.create('block', { path: this.path })];
     });
-  }
-
-  private _renderMask(referencedModel: RefElement, flavourOrType: string) {
-    const title = 'title' in referencedModel ? referencedModel.title : '';
-
-    return html`
-      <div class="surface-ref-mask">
-        <div class="ref-label">
-          <div class="title">
-            ${REF_LABEL_ICON[flavourOrType ?? 'DEFAULT'] ??
-            REF_LABEL_ICON.DEFAULT}
-            <span>${title}</span>
-          </div>
-          <div class="suffix">from edgeless mode</div>
-        </div>
-      </div>
-    `;
-  }
-
-  private _renderEmptyPlaceholder(model: SurfaceRefBlockModel) {
-    return html`<div class="surface-empty-placeholder">
-      <div class="placeholder-image">${noContentPlaceholder}</div>
-      <div class="placeholder-text">
-        No Such
-        ${NO_CONTENT_TITLE[model.refFlavour ?? 'DEFAULT'] ??
-        NO_CONTENT_TITLE.DEFAULT}
-      </div>
-      <div class="placeholder-action">
-        <button class="delete-button" type="button" @click=${this._deleteThis}>
-          <span class="icon">${MoreDeleteIcon}</span
-          ><span>Delete this block</span>
-        </button>
-      </div>
-      <div class="placeholder-reason">
-        ${NO_CONTENT_REASON[model.refFlavour ?? 'DEFAULT'] ??
-        NO_CONTENT_REASON.DEFAULT}
-      </div>
-    </div>`;
-  }
-
-  private _renderSurfaceContent(
-    referencedModel: RefElement,
-    renderer: Renderer
-  ) {
-    const [, , w, h] = deserializeXYWH(referencedModel.xywh);
-    const { zoom } = renderer;
-    const { gap } = getBackgroundGrid(zoom, true);
-    const flavourOrType =
-      'flavour' in referencedModel
-        ? referencedModel.flavour
-        : referencedModel.type;
-
-    return html`<div
-      class="surface-container"
-      style=${styleMap({
-        backgroundSize: `${gap}px ${gap}px`,
-      })}
-    >
-      <div
-        class="surface-viewport ${flavourOrType === 'affine:frame'
-          ? 'frame'
-          : ''}"
-        style=${styleMap({
-          width: `${w}px`,
-          aspectRatio: `${w} / ${h}`,
-        })}
-      >
-        ${flavourOrType === 'affine:frame' || flavourOrType === 'group'
-          ? html`<surface-ref-portal
-              .page=${this.page}
-              .host=${this.host}
-              .containerModel=${referencedModel}
-              .renderModel=${this.renderModel}
-            ></surface-ref-portal>`
-          : nothing}
-        <div class="surface-canvas-container">
-          <!-- attach canvas here -->
-        </div>
-      </div>
-      ${this._renderMask(referencedModel, flavourOrType)}
-    </div>`;
   }
 
   private _updateCaption() {
@@ -624,20 +575,93 @@ export class SurfaceRefBlockComponent extends BlockElement<
     });
   }
 
-  private _shouldRender() {
-    return (
-      isInsideDocEditor(this.host) &&
-      this.parentElement &&
-      !this.parentElement.closest('affine-surface-ref')
-    );
+  private _renderMask(referencedModel: RefElement, flavourOrType: string) {
+    const title = 'title' in referencedModel ? referencedModel.title : '';
+
+    return html`
+      <div class="surface-ref-mask">
+        <div class="ref-label">
+          <div class="title">
+            ${REF_LABEL_ICON[flavourOrType ?? 'DEFAULT'] ??
+            REF_LABEL_ICON.DEFAULT}
+            <span>${title}</span>
+          </div>
+          <div class="suffix">from edgeless mode</div>
+        </div>
+      </div>
+    `;
   }
 
-  override renderBlock() {
-    if (!this._shouldRender()) return nothing;
+  private _renderRefPlaceholder(model: SurfaceRefBlockModel) {
+    return html`<div class="ref-placeholder">
+      <div class="placeholder-image">${noContentPlaceholder}</div>
+      <div class="placeholder-text">
+        No Such
+        ${NO_CONTENT_TITLE[model.refFlavour ?? 'DEFAULT'] ??
+        NO_CONTENT_TITLE.DEFAULT}
+      </div>
+      <div class="placeholder-action">
+        <button class="delete-button" type="button" @click=${this._deleteThis}>
+          <span class="icon">${MoreDeleteIcon}</span
+          ><span>Delete this block</span>
+        </button>
+      </div>
+      <div class="placeholder-reason">
+        ${NO_CONTENT_REASON[model.refFlavour ?? 'DEFAULT'] ??
+        NO_CONTENT_REASON.DEFAULT}
+      </div>
+    </div>`;
+  }
+
+  private _renderRefContent(referencedModel: RefElement, renderer: Renderer) {
+    const [, , w, h] = deserializeXYWH(referencedModel.xywh);
+    const { zoom } = renderer;
+    const { gap } = getBackgroundGrid(zoom, true);
+    const flavourOrType =
+      'flavour' in referencedModel
+        ? referencedModel.flavour
+        : referencedModel.type;
+    const edgelessBlocks =
+      flavourOrType === 'affine:frame' || flavourOrType === 'group'
+        ? html`<surface-ref-portal
+            .page=${this.page}
+            .host=${this.host}
+            .refModel=${referencedModel}
+            .renderModel=${this.renderModel}
+          ></surface-ref-portal>`
+        : nothing;
+
+    return html`<div
+      class="ref-content"
+      style=${styleMap({
+        backgroundSize: `${gap}px ${gap}px`,
+      })}
+    >
+      <div
+        class="ref-viewport ${flavourOrType === 'affine:frame' ? 'frame' : ''}"
+        style=${styleMap({
+          width: `${w}px`,
+          aspectRatio: `${w} / ${h}`,
+        })}
+      >
+        ${edgelessBlocks}
+        <div class="ref-canvas-container">
+          <!-- attach canvas here -->
+        </div>
+      </div>
+      ${this._renderMask(referencedModel, flavourOrType)}
+    </div>`;
+  }
+
+  override render() {
+    if (!this._shouldRender) return;
 
     const { _surfaceModel, _referencedModel, surfaceRenderer, model } = this;
-    const noContent =
+    const isEmpty =
       !_surfaceModel || !_referencedModel || !_referencedModel.xywh;
+    const content = isEmpty
+      ? this._renderRefPlaceholder(model)
+      : this._renderRefContent(_referencedModel, surfaceRenderer);
 
     return html`
       <div
@@ -649,10 +673,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
             : undefined,
         })}
       >
-        ${noContent
-          ? this._renderEmptyPlaceholder(model)
-          : this._renderSurfaceContent(_referencedModel, surfaceRenderer)}
-        ${this._renderCaption()}
+        ${content} ${this._renderCaption()}
       </div>
       ${Object.values(this.widgets)}
     `;

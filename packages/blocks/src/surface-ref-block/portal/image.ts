@@ -1,6 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
+import { css, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -10,6 +10,12 @@ import { Bound } from '../../surface-block/utils/bound.js';
 
 @customElement('surface-ref-image-portal')
 export class SurfaceRefImagePortal extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    surface-ref-image-portal {
+      position: relative;
+    }
+  `;
+
   @property({ attribute: false })
   index!: number;
 
