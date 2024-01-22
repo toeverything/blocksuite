@@ -7,7 +7,6 @@ type SliceData = {
   content: BlockModel[];
   workspaceId: string;
   pageId: string;
-  blockVersions: Record<string, number>;
   pageVersion: number;
   workspaceVersion: number;
 };
@@ -22,7 +21,6 @@ export class Slice {
       content: models,
       workspaceId: page.workspace.id,
       pageId: page.id,
-      blockVersions: { ...meta.blockVersions },
       pageVersion,
       workspaceVersion,
     });
@@ -32,10 +30,6 @@ export class Slice {
 
   get content() {
     return this.data.content;
-  }
-
-  get blockVersions() {
-    return this.data.blockVersions;
   }
 
   get pageVersion() {

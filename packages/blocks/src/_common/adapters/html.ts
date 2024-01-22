@@ -226,7 +226,6 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     return {
       type: 'slice',
       content: [contentSlice],
-      blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,

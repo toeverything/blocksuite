@@ -55,7 +55,6 @@ export async function importMarkdown({
   const snapshot = await adapter.toSliceSnapshot({
     file: markdown,
     assets: job.assetsManager,
-    blockVersions: page.workspace.meta.blockVersions!,
     pageVersion: page.workspace.meta.pageVersion!,
     workspaceVersion: page.workspace.meta.workspaceVersion!,
     workspaceId: page.workspace.id,

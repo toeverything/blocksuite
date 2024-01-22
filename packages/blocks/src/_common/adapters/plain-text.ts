@@ -232,7 +232,6 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     return {
       type: 'slice',
       content: [contentSlice],
-      blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
