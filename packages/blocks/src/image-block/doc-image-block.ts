@@ -346,7 +346,7 @@ export class ImageBlockPageComponent extends BlockElement<ImageBlockModel> {
     }
   }
 
-  override render() {
+  override renderBlock() {
     const resizeImgStyle = this._normalizeImageSize();
 
     return html`

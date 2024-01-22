@@ -261,7 +261,7 @@ export class SurfaceBlockComponent extends BlockElement<
     return this.indexedCanvases;
   }
 
-  override render() {
+  override renderBlock() {
     if (!this._isEdgeless) return nothing;
 
     return html`
