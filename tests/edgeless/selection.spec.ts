@@ -271,13 +271,15 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   await expect(selectedRect).toBeHidden();
   // Click to start selection and hold the mouse to trigger auto panning to the right
   await page.mouse.move(800, 600);
+  await page.waitForTimeout(200);
   await page.mouse.down();
+  await page.waitForTimeout(200);
   await page.mouse.move(960, 300, { steps: 20 });
   await page.waitForTimeout(800);
   await page.mouse.up();
 
   // Expect to select the empty note
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(800);
   await expect(selectedRect).toBeVisible();
 
   // Panning to the bottom
