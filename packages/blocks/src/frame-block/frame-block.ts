@@ -67,7 +67,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     });
   }
 
-  override render() {
+  override renderBlock() {
     const { model, _isNavigator } = this;
     const bound = Bound.deserialize(model.xywh);
 

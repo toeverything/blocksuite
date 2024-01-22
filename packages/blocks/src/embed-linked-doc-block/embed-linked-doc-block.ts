@@ -455,7 +455,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     };
   });
 
-  override render() {
+  override renderBlock() {
     const linkedDoc = this._linkedDoc;
     const isDeleted = !linkedDoc;
     const isLoading = this._loading;

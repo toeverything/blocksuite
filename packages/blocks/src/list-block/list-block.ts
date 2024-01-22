@@ -159,7 +159,7 @@ export class ListBlockComponent extends BlockElement<
     return isCollapsed ? toggleRightTemplate : toggleDownTemplate;
   }
 
-  override render(): TemplateResult<1> {
+  override renderBlock(): TemplateResult<1> {
     const { deep, index } = getListInfo(this.model);
     const { model, _onClickIcon } = this;
     const collapsed = this.page.readonly

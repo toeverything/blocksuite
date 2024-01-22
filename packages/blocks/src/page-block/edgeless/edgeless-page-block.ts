@@ -281,8 +281,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     _disposables.add(this.tools);
     _disposables.add(this.service.selection);
     _disposables.add(
-      slots.zoomUpdated.on((action: ZoomAction) =>
-        this.components.zoomToolbar?.setZoomByAction(action)
+      slots.zoomUpdated.on(
+        (action: ZoomAction) =>
+          this.components.zoomToolbar?.setZoomByAction(action)
       )
     );
     _disposables.add(
@@ -782,7 +783,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.tools.dispose();
   }
 
-  override render() {
+  override renderBlock() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const widgets = html`${repeat(

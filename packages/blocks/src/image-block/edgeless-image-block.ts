@@ -15,7 +15,7 @@ export class ImageBlockEdgelessComponent extends BlockElement<ImageBlockModel> {
     return this.host.querySelector('affine-edgeless-page');
   }
 
-  override render() {
+  override renderBlock() {
     const bound = Bound.deserialize(
       (
         (this.edgeless?.service.getElementById(

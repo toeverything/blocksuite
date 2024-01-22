@@ -654,7 +654,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
   }
 
   override render() {
-    if (!this._shouldRender) return;
+    if (!this._shouldRender) return nothing;
 
     const { _surfaceModel, _referencedModel, surfaceRenderer, model } = this;
     const isEmpty =
