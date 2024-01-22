@@ -5,7 +5,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 
-import { SettingsIcon, SortingIcon } from '../_common/icons.js';
+import { SettingsIcon, SortingIcon } from '../../_common/icons.js';
 
 const styles = css`
   :host {
@@ -25,7 +25,7 @@ const styles = css`
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    padding-right: 16px;
+    padding-right: 6px;
   }
 
   .note-setting-container {

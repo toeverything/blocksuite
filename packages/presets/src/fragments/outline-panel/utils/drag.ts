@@ -1,8 +1,8 @@
 import { on, once } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 
-import { type OutlineNoteCard } from '../outline-card.js';
-import type { OutlinePanelBody } from '../outline-panel-body.js';
+import type { OutlinePanelBody } from '../body/outline-panel-body.js';
+import { type OutlineNoteCard } from '../card/outline-card.js';
 
 /**
  * start drag notes
