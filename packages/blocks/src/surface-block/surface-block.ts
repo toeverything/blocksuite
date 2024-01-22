@@ -5,7 +5,10 @@ import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { isInsideEdgelessEditor } from '../_common/utils/index.js';
+import {
+  type EdgelessElement,
+  isInsideEdgelessEditor,
+} from '../_common/utils/index.js';
 import { values } from '../_common/utils/iterable.js';
 import { isShape } from '../page-block/edgeless/components/auto-complete/utils.js';
 import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
@@ -13,6 +16,7 @@ import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
+import { ConnectorElementModel } from './element-model/index.js';
 import { ConnectionOverlay } from './managers/connector-manager.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 import type { SurfaceService } from './surface-service.js';
@@ -329,6 +333,11 @@ export class SurfaceBlockComponent extends BlockElement<
     });
   }
   static isShape = isShape;
+  static isConnector = (
+    element: EdgelessElement
+  ): element is ConnectorElementModel => {
+    return element instanceof ConnectorElementModel;
+  };
 }
 
 declare global {

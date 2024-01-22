@@ -1,21 +1,15 @@
-import type { SurfaceBlockComponent } from '@blocksuite/blocks';
+import type { EdgelessPageService } from '@blocksuite/blocks';
+import {
+  type ConnectorElementModel,
+  SurfaceBlockComponent,
+} from '@blocksuite/blocks';
 
-export const getConnectorFromId = (
-  id: string,
-  surface: SurfaceBlockComponent
-) => {
-  return surface.getElementsByType('connector').filter(v => v.source.id === id);
+export const getConnectorToId = (id: string, surface: EdgelessPageService) => {
+  return surface.elements.filter(
+    v => SurfaceBlockComponent.isConnector(v) && v.target.id === id
+  ) as ConnectorElementModel[];
 };
-export const getConnectorToId = (
-  id: string,
-  surface: SurfaceBlockComponent
-) => {
-  return surface.getElementsByType('connector').filter(v => v.target.id === id);
-};
-export const getConnectorPath = (
-  id: string,
-  surface: SurfaceBlockComponent
-) => {
+export const getConnectorPath = (id: string, surface: EdgelessPageService) => {
   let current: string | undefined = id;
   const set = new Set<string>();
   const result: string[] = [];

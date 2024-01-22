@@ -40,7 +40,6 @@ import {
   getEdgelessPageBlockFromEditor,
   getSelectedBlocks,
   getSelectedTextContent,
-  getSurfaceElementFromEditor,
   selectedToCanvas,
 } from '../utils/selection-utils.js';
 
@@ -398,13 +397,13 @@ export class AIChatLogic {
       type: 'action',
       name: 'Create mind-map',
       action: this.createAction('Create mind-map', async input => {
-        const surface = getSurfaceElementFromEditor(this.host);
-        const id = surface.addElement('shape', {
+        const service = getEdgelessPageBlockFromEditor(this.host).service;
+        const id = service.addElement('shape', {
           text: new Workspace.Y.Text('Analyzing...'),
           shapeType: 'rect',
           xywh: Bound.fromXYWH([
-            surface.viewport.centerX,
-            surface.viewport.centerY,
+            service.viewport.centerX,
+            service.viewport.centerY,
             200,
             80,
           ]).serialize(),
@@ -419,12 +418,12 @@ export class AIChatLogic {
             children: block.children.map(toTreeNode),
           };
         };
-        const ele = surface.pickById(id);
+        const ele = service.getElementById(id);
         if (!ele) {
           return new Promise(() => {});
         }
         const { x, y } = Bound.deserialize(ele.xywh);
-        surface.removeElement(id);
+        service.removeElement(id);
         await this.logic.edgeless.drawMindMap(toTreeNode(block.children[0]), {
           x,
           y,
@@ -455,8 +454,8 @@ export class AIChatLogic {
       type: 'action',
       name: 'Continue',
       action: async () => {
-        const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
-        const ele = edgelessPage.selectionManager.elements[0];
+        const service = getEdgelessPageBlockFromEditor(this.host).service;
+        const ele = service.selection.elements[0];
         if (!SurfaceBlockComponent.isShape(ele)) {
           return;
         }
@@ -464,10 +463,10 @@ export class AIChatLogic {
         if (!text) {
           return;
         }
-        const surface = getSurfaceElementFromEditor(this.host);
-        const pathIds = getConnectorPath(ele.id, surface);
+        const surface = getEdgelessPageBlockFromEditor(this.host);
+        const pathIds = getConnectorPath(ele.id, service);
         const path = pathIds.map(id => {
-          const ele = surface.pickById(id);
+          const ele = surface.service.getElementById(id);
           if (ele && SurfaceBlockComponent.isShape(ele)) {
             return ele.text?.toString() ?? '';
           }

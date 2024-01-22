@@ -82,6 +82,7 @@ export * from './list-block/index.js';
 export * from './models.js';
 export * from './note-block/index.js';
 export { EdgelessComponentToolbar } from './page-block/edgeless/components/component-toolbar/component-toolbar.js';
+export { EdgelessPageService } from './page-block/edgeless/edgeless-page-service.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export {
