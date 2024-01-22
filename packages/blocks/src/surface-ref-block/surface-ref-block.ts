@@ -12,13 +12,16 @@ import {
   FrameIcon,
   MoreDeleteIcon,
 } from '../_common/icons/index.js';
-import type { EdgelessModel } from '../_common/types.js';
-import { stopPropagation } from '../_common/utils/event.js';
+import {
+  requestConnectedFrame,
+  stopPropagation,
+} from '../_common/utils/event.js';
 import { buildPath, getEditorContainer } from '../_common/utils/query.js';
 import type { PageService } from '../index.js';
-import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
+import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
 import type { Renderer } from '../surface-block/canvas-renderer/renderer.js';
+import type { ElementModel } from '../surface-block/element-model/base.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';
@@ -45,7 +48,7 @@ const NO_CONTENT_REASON = {
   DEFAULT: 'This content was deleted on edgeless mode',
 } as Record<string, string>;
 
-type RefElement = Exclude<EdgelessModel, NoteBlockModel>;
+type RefElement = ElementModel | FrameBlockModel;
 
 @customElement('affine-surface-ref')
 export class SurfaceRefBlockComponent extends BlockElement<
@@ -282,7 +285,11 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
     const service = this.service;
     assertExists(service, `Surface ref block must run with its service.`);
-    this._surfaceRefRenderer = service.getRenderer(PathFinder.id(this.path));
+    this._surfaceRefRenderer = service.getRenderer(
+      PathFinder.id(this.path),
+      this.page,
+      true
+    );
     this._disposables.add(
       this._surfaceRefRenderer.slots.surfaceModelChanged.on(model => {
         this._surfaceModel = model;
@@ -370,7 +377,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
       ]);
       const path = buildPath(this.page.getBlockById(paragraphId));
 
-      requestAnimationFrame(() => {
+      requestConnectedFrame(() => {
         selection.update(selList => {
           return selList
             .filter(sel => !sel.is('block'))
@@ -385,7 +392,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
               })
             );
         });
-      });
+      }, this);
     };
 
     this.bindHotKey({
@@ -404,7 +411,7 @@ export class SurfaceRefBlockComponent extends BlockElement<
 
       const referencedModel = this._surfaceRefRenderer.getModel(
         this.model.reference
-      );
+      ) as RefElement;
       this._referencedModel =
         referencedModel && 'xywh' in referencedModel ? referencedModel : null;
 

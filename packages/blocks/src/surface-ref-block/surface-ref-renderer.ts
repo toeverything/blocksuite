@@ -10,8 +10,6 @@ import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 import type { SurfacePageService } from '../surface-block/surface-page-service.js';
 import { getSurfaceBlock } from './utils.js';
 
-type RefElement = Exclude<EdgelessModel, NoteBlockModel>;
-
 export class SurfaceRefRenderer {
   private readonly _surfaceRenderer: Renderer;
 
@@ -41,11 +39,17 @@ export class SurfaceRefRenderer {
   constructor(
     public readonly id: string,
     public readonly page: Page,
-    public readonly std: BlockStdScope
+    public readonly std: BlockStdScope,
+    options: {
+      enableStackingCanvas?: boolean;
+    } = {
+      enableStackingCanvas: false,
+    }
   ) {
     const themeObserver = new ThemeObserver();
     const renderer = new Renderer({
       layerManager: this.surfaceService.layer,
+      enableStackingCanvas: options.enableStackingCanvas,
       provider: {
         getVariableColor: (variable: string) =>
           themeObserver.getVariableValue(variable),
@@ -74,7 +78,7 @@ export class SurfaceRefRenderer {
     this.slots.unmounted.emit();
   }
 
-  getModel(id: string): RefElement | null {
+  getModel(id: string): EdgelessModel | null {
     return (
       (this.page.getBlockById(id) as Exclude<
         TopLevelBlockModel,
