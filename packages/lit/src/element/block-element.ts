@@ -7,6 +7,8 @@ import type { BlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
 import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
+import { when } from 'lit/directives/when.js';
+import { html } from 'lit/static-html.js';
 
 import { WithDisposable } from '../with-disposable.js';
 import type { EditorHost } from './lit-host.js';
@@ -120,6 +122,24 @@ export class BlockElement<
     return this.host.std;
   }
 
+  get isVersionMismatch() {
+    const schema = this.page.schema.flavourSchemaMap.get(this.model.flavour);
+    assertExists(
+      schema,
+      `Cannot find schema for flavour ${this.model.flavour}`
+    );
+    const expectedVersion = schema.version;
+    const actualVersion = this.model.version;
+    if (expectedVersion !== actualVersion) {
+      console.warn(
+        `Version mismatch for block ${this.model.id}, expected ${expectedVersion}, actual ${actualVersion}`
+      );
+      return true;
+    }
+
+    return false;
+  }
+
   handleEvent = (
     name: EventName,
     handler: UIEventHandler,
@@ -231,7 +251,43 @@ export class BlockElement<
     super.disconnectedCallback();
   }
 
-  override render(): unknown {
-    return null;
+  renderBlock(): TemplateResult {
+    return html`${nothing}`;
+  }
+
+  renderVersionMismatch(
+    expectedVersion: number,
+    actualVersion: number
+  ): TemplateResult {
+    return html`
+      <div>
+        <h4>Block Version Mismatched</h4>
+        <p>
+          We can not render this ${this.model.flavour} block because the version
+          is mismatched.
+        </p>
+        <p>Expected version: ${expectedVersion}</p>
+        <p>Actual version: ${actualVersion}</p>
+      </div>
+    `;
+  }
+
+  override render() {
+    return when(
+      this.isVersionMismatch,
+      () => {
+        const schema = this.page.schema.flavourSchemaMap.get(
+          this.model.flavour
+        );
+        assertExists(
+          schema,
+          `Cannot find schema for flavour ${this.model.flavour}`
+        );
+        const expectedVersion = schema.version;
+        const actualVersion = this.model.version;
+        return this.renderVersionMismatch(expectedVersion, actualVersion);
+      },
+      () => this.renderBlock()
+    );
   }
 }

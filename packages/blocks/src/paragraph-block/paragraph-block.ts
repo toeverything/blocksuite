@@ -246,7 +246,7 @@ export class ParagraphBlockComponent extends BlockElement<
     return false;
   };
 
-  override render(): TemplateResult<1> {
+  override renderBlock(): TemplateResult<1> {
     const { type } = this.model;
     const children = html`<div
       class="affine-block-children-container"
