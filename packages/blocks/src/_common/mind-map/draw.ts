@@ -77,15 +77,17 @@ const drawAllNode = (
     id: string;
     children: LayoutNode_[];
   };
+  const { service } = surface.edgeless;
   const drawNode = (node: TreeNode, isRoot = false): LayoutNode_ => {
     const { text, children } = node;
-    const service =
-      isRoot && options?.rootId ? options.rootId : surface.edgeless.service;
-    const id = service.addElement(CanvasElementType.SHAPE, {
-      ...DEFAULT_SHAPE_PROPS,
-      xywh: `[${0},${0},${0},${0}]`,
-      text: new Workspace.Y.Text(text),
-    });
+    const id =
+      isRoot && options?.rootId
+        ? options.rootId
+        : service.addElement(CanvasElementType.SHAPE, {
+            ...DEFAULT_SHAPE_PROPS,
+            xywh: `[${0},${0},${0},${0}]`,
+            text: new Workspace.Y.Text(text),
+          });
     shapeIds.push(id);
     const ele = service.getElementById(id) as ShapeElementModel;
     const maxWidth =
@@ -110,7 +112,7 @@ const drawAllNode = (
   };
   const layoutNode = drawNode(node, true);
   const root = options?.rootId
-    ? (surface.pickById(options.rootId) as ShapeElement)
+    ? (service.getElementById(options.rootId) as ShapeElementModel)
     : undefined;
   const result = layout.right(layoutNode, {
     gapHorizontal: 130,
