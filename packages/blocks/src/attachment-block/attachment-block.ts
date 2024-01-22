@@ -102,6 +102,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.contentEditable = 'false';
+
     if (this.model.caption) {
       this._showCaption = true;
     }

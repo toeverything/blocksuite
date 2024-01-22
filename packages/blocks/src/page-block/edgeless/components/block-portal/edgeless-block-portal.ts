@@ -267,11 +267,20 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             this._updateIndexLabel();
           }, this);
         }
-
+        // When note display mode is changed, we need to update the portal
         if (
           type === 'update' &&
           flavour === 'affine:note' &&
           payload.props.key === 'displayMode'
+        ) {
+          this.requestUpdate();
+        }
+
+        // When page children is updated, we need to update the portal
+        if (
+          type === 'update' &&
+          flavour === 'affine:page' &&
+          payload.props.key === 'sys:children'
         ) {
           this.requestUpdate();
         }
@@ -328,7 +337,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     if (!surface) return nothing;
 
-    const notes = page.getBlockByFlavour(['affine:note']) as NoteBlockModel[];
+    const notes = page.root?.children.filter(child =>
+      matchFlavours(child, ['affine:note'])
+    ) as NoteBlockModel[];
     const layers = service.layer.layers;
     const pageVisibleBlocks = new Map<AutoConnectElement, number>();
     const edgelessOnlyNotesSet = new Set<NoteBlockModel>();
