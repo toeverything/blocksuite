@@ -11,8 +11,9 @@ import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import { assertExists } from '@blocksuite/global/utils';
 import { Text, type Workspace } from '@blocksuite/store';
 
-import { type InitFn } from './utils';
+import { type InitFn } from './utils.js';
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const database: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
   page.awarenessStore.setFlag('enable_expand_database_block', true);
