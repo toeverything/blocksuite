@@ -251,8 +251,8 @@ export class BlockElement<
     super.disconnectedCallback();
   }
 
-  renderBlock(): TemplateResult {
-    return html`${nothing}`;
+  renderBlock(): unknown {
+    return nothing;
   }
 
   renderVersionMismatch(

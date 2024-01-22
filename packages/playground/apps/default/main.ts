@@ -1,4 +1,4 @@
-/// <reference types="../starter/env" />
+/// <reference types="../starter/env.js" />
 import '@blocksuite/blocks';
 import '@blocksuite/presets';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
