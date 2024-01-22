@@ -260,14 +260,14 @@ export class BlockElement<
     actualVersion: number
   ): TemplateResult {
     return html`
-      <div>
+      <div class="version-mismatch-warning" contenteditable="false">
         <h4>Block Version Mismatched</h4>
         <p>
-          We can not render this ${this.model.flavour} block because the version
-          is mismatched.
+          We can not render this <mark>${this.model.flavour}</mark> block
+          because the version is mismatched.
         </p>
-        <p>Expected version: ${expectedVersion}</p>
-        <p>Actual version: ${actualVersion}</p>
+        <p>Editor version: <strong>${expectedVersion}</strong></p>
+        <p>Data version: <strong>${actualVersion}</strong></p>
       </div>
     `;
   }
