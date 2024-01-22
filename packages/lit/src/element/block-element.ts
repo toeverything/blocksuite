@@ -266,7 +266,7 @@ export class BlockElement<
         </dt>
         <dd>
           <p>
-            We can not render this <mark>${this.model.flavour}</mark> block
+            We can not render this <var>${this.model.flavour}</var> block
             because the version is mismatched.
           </p>
           <p>Editor version: <var>${expectedVersion}</var></p>
