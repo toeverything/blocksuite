@@ -185,10 +185,8 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   }
 
   private _showTextOverlay() {
-    const xywh = this._getTargetXYWH(
-      DEFAULT_TEXT_WIDTH,
-      DEFAULT_TEXT_HEIGHT
-    )?.xywh;
+    const xywh = this._getTargetXYWH(DEFAULT_TEXT_WIDTH, DEFAULT_TEXT_HEIGHT)
+      ?.xywh;
     if (!xywh) return;
 
     this._overlay = new AutoCompleteTextOverlay(xywh);

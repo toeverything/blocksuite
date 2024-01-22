@@ -87,9 +87,8 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
         return;
       }
       e.stopPropagation();
-      const selectionElement = this.closest(
-        'affine-data-view-kanban'
-      )?.selectionController;
+      const selectionElement = this.closest('affine-data-view-kanban')
+        ?.selectionController;
       if (!selectionElement) return;
       if (e.shiftKey) return;
 
@@ -100,9 +99,8 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
   }
 
   selectCurrentCell = (editing: boolean) => {
-    const selectionElement = this.closest(
-      'affine-data-view-kanban'
-    )?.selectionController;
+    const selectionElement = this.closest('affine-data-view-kanban')
+      ?.selectionController;
     if (!selectionElement) return;
 
     selectionElement.selection = {

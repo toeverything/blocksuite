@@ -5,12 +5,11 @@ import { Boxed } from './boxed.js';
 import type { ProxyOptions } from './proxy.js';
 import { Text } from './text.js';
 
-export type Native2Y<T> =
-  T extends Record<string, infer U>
-    ? YMap<U>
-    : T extends Array<infer U>
-      ? YArray<U>
-      : T;
+export type Native2Y<T> = T extends Record<string, infer U>
+  ? YMap<U>
+  : T extends Array<infer U>
+    ? YArray<U>
+    : T;
 
 export function isPureObject(value: unknown): value is object {
   return (

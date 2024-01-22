@@ -10,5 +10,6 @@ export type NodeViewTree<T = BlockSuite.NodeView> = NodeView<T> & {
   children: NodeViewTree<T>[];
 };
 
-export type SpecToNodeView<T> =
-  T extends BlockSuiteViewSpec<infer U> ? U : unknown;
+export type SpecToNodeView<T> = T extends BlockSuiteViewSpec<infer U>
+  ? U
+  : unknown;
