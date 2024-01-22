@@ -400,7 +400,7 @@ export class DocPageBlockComponent extends BlockElement<
     this.keyboardManager = null;
   }
 
-  override render() {
+  override renderBlock() {
     const content = html`${repeat(
       this.model.children.filter(child => {
         const isNote = matchFlavours(child, ['affine:note']);

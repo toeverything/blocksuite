@@ -183,7 +183,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     };
   });
 
-  override render() {
+  override renderBlock() {
     const {
       title = 'GitHub',
       githubType,

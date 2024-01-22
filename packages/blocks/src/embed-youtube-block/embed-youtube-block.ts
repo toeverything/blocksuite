@@ -185,7 +185,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     };
   });
 
-  override render() {
+  override renderBlock() {
     const {
       image,
       title = 'YouTube',

@@ -6,11 +6,12 @@ import {
   type Workspace,
 } from '@blocksuite/store';
 
-import { getOptions } from '../utils';
-import { type InitFn } from './utils';
+import { getOptions } from '../utils.js';
+import { type InitFn } from './utils.js';
 
 const SHAPE_TYPES = ['rect', 'triangle', 'ellipse', 'diamond'];
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const heavyWhiteboard: InitFn = async (
   workspace: Workspace,
   id: string

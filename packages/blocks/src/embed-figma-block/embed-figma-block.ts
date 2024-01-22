@@ -165,7 +165,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     };
   });
 
-  override render() {
+  override renderBlock() {
     const { title, description, style, url } = this.model;
 
     this._cardStyle = style;

@@ -102,6 +102,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.contentEditable = 'false';
+
     if (this.model.caption) {
       this._showCaption = true;
     }
@@ -269,7 +272,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     />`;
   };
 
-  override render() {
+  override renderBlock() {
     const isLoading = isAttachmentLoading(this.model.id);
     const isError = this._error || (!isLoading && !this.model.sourceId);
 
