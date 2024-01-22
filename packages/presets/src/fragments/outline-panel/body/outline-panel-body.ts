@@ -1,3 +1,5 @@
+import './outline-notice.js';
+
 import type {
   EdgelessPageBlockComponent,
   NoteBlockModel,
@@ -11,15 +13,15 @@ import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { headingKeys } from './config.js';
 import {
   type ClickBlockEvent,
   type DisplayModeChangeEvent,
   type FitViewEvent,
   OutlineNoteCard,
   type SelectEvent,
-} from './outline-card.js';
-import { startDragging } from './utils/drag.js';
+} from '../card/outline-card.js';
+import { headingKeys } from '../config.js';
+import { startDragging } from '../utils/drag.js';
 
 type OutlineNoteItem = {
   note: NoteBlockModel;
@@ -46,7 +48,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       box-sizing: border-box;
       flex-direction: column;
       width: 100%;
-      position: relative;
+      height: 100%;
       padding: 0 8px;
     }
 
@@ -222,7 +224,9 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       this._clearPageDisposables();
       this._pageDisposables = new DisposableGroup();
       this._pageDisposables.add(
-        root.childrenUpdated.on(() => this._updateNotes())
+        root.childrenUpdated.on(() => {
+          this._updateNotes();
+        })
       );
     });
 

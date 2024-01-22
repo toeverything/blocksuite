@@ -16,8 +16,8 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import { SmallLinkedPageIcon } from '../_common/icons.js';
-import { headingKeys, placeholderMap, previewIconMap } from './config.js';
+import { SmallLinkedPageIcon } from '../../_common/icons.js';
+import { headingKeys, placeholderMap, previewIconMap } from '../config.js';
 
 type ValuesOf<T, K extends keyof T = keyof T> = T[K];
 

@@ -5,40 +5,57 @@ import { css, html, LitElement, type PropertyValues, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { AffineEditorContainer } from '../../editors/editor-container.js';
-import { OutlineNoteCard } from './outline-card.js';
-import { OutlinePanelBody } from './outline-panel-body.js';
-import { OutlinePanelHeader } from './outline-panel-header.js';
-import { OutlineBlockPreview } from './outline-preview.js';
-import { OutlineNotePreviewSettingMenu } from './outline-setting-menu.js';
+import { OutlineNotice } from './body/outline-notice.js';
+import { OutlinePanelBody } from './body/outline-panel-body.js';
+import { OutlineNoteCard } from './card/outline-card.js';
+import { OutlineBlockPreview } from './card/outline-preview.js';
+import { OutlinePanelHeader } from './header/outline-panel-header.js';
+import { OutlineNotePreviewSettingMenu } from './header/outline-setting-menu.js';
 
+const styles = css`
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .outline-panel-container {
+    background-color: var(--affine-background-primary-color);
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    height: 100%;
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+    padding-top: 8px;
+    position: relative;
+  }
+  .outline-panel-body {
+    flex-grow: 1;
+    width: 100%;
+
+    overflow-y: scroll;
+  }
+  .outline-panel-body::-webkit-scrollbar {
+    width: 4px;
+  }
+  .outline-panel-body::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+  }
+  .outline-panel-body:hover::-webkit-scrollbar-thumb {
+    background-color: var(--affine-black-30);
+  }
+  .outline-panel-body::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  .outline-panel-body::-webkit-scrollbar-corner {
+    display: none;
+  }
+`;
 export class OutlinePanel extends WithDisposable(LitElement) {
-  static override styles = css`
-    :host {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
+  static override styles = styles;
 
-    .outline-panel-container {
-      background-color: var(--affine-background-primary-color);
-      box-sizing: border-box;
-
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-
-      height: 100%;
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-      padding-top: 8px;
-    }
-
-    .outline-panel-body {
-      flex-grow: 1;
-      width: 100%;
-
-      overflow-y: scroll;
-    }
-  `;
   @property({ attribute: false })
   editor!: AffineEditorContainer;
 
@@ -141,6 +158,9 @@ export class OutlinePanel extends WithDisposable(LitElement) {
           .toggleNotesSorting=${this._toggleNotesSorting}
         >
         </outline-panel-body>
+        <outline-notice
+          .toggleNotesSorting=${this._toggleNotesSorting}
+        ></outline-notice>
       </div>
     `;
   }
@@ -159,6 +179,7 @@ const componentsMap = {
   'outline-note-preview-setting-menu': OutlineNotePreviewSettingMenu,
   'outline-panel-body': OutlinePanelBody,
   'outline-panel-header': OutlinePanelHeader,
+  'outline-notice': OutlineNotice,
 };
 
 export function registerOutlinePanelComponents(

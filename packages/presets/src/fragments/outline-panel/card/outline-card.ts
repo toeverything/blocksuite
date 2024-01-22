@@ -21,7 +21,7 @@ import {
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { HiddenIcon, SmallArrowDownIcon } from '../_common/icons.js';
+import { HiddenIcon, SmallArrowDownIcon } from '../../_common/icons.js';
 import { OutlineBlockPreview } from './outline-preview.js';
 
 noop(OutlineBlockPreview);
@@ -132,6 +132,7 @@ const styles = css`
     font-size: 12px;
     font-weight: 500;
     line-height: 20px;
+    position: relative;
   }
 
   .card-preview:hover .display-mode-button-group {
@@ -156,6 +157,7 @@ const styles = css`
   }
 
   note-display-mode-panel {
+    position: absolute;
     display: none;
   }
 
@@ -441,6 +443,7 @@ export class OutlineNoteCard extends WithDisposable(LitElement) {
             <span class="display-mode-button-label">Show in</span>
             <edgeless-tool-icon-button
               .tooltip=${this._showPopper ? '' : 'Display Mode'}
+              .tipPosition=${'left-start'}
               .iconContainerPadding=${0}
               @click=${(e: MouseEvent) => {
                 e.stopPropagation();
@@ -459,7 +462,7 @@ export class OutlineNoteCard extends WithDisposable(LitElement) {
             .panelWidth=${220}
             .onSelect=${(newMode: NoteDisplayMode) => {
               this._dispatchDisplayModeChangeEvent(this.note, newMode);
-              this._displayModePopper?.toggle();
+              this._displayModePopper?.hide();
             }}
           >
           </note-display-mode-panel>
