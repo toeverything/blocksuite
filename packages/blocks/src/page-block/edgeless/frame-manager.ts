@@ -3,7 +3,7 @@ import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
 import type {
-  EdgelessElement,
+  EdgelessModel,
   Selectable,
   TopLevelBlockModel,
 } from '../../_common/types.js';
@@ -78,7 +78,7 @@ export class EdgelessFrameManager {
 
   getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
-    const elements: EdgelessElement[] =
+    const elements: EdgelessModel[] =
       this._edgeless.service.layer.canvasGrid.search(bound, true);
 
     return elements.concat(

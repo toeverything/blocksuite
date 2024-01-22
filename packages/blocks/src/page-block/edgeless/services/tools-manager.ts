@@ -29,13 +29,13 @@ import { ShapeToolController } from '../controllers/tools/shape-tool.js';
 import { TextToolController } from '../controllers/tools/text-tool.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { EdgelessPageService } from '../edgeless-page-service.js';
-import type { EdgelessElement } from '../type.js';
+import type { EdgelessModel } from '../type.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
 export interface EdgelessHoverState {
   rect: Bound;
-  content: EdgelessElement;
+  content: EdgelessModel;
 }
 
 export interface SelectionArea {

@@ -18,7 +18,7 @@ import {
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
 import type {
-  EdgelessElement,
+  EdgelessModel,
   Selectable,
   TopLevelBlockModel,
 } from '../../../_common/types.js';
@@ -1013,9 +1013,9 @@ export class EdgelessClipboardController extends PageClipboard {
 
 export function getCopyElements(
   surface: SurfaceBlockComponent,
-  elements: EdgelessElement[]
+  elements: EdgelessModel[]
 ) {
-  const set = new Set<EdgelessElement>();
+  const set = new Set<EdgelessModel>();
 
   elements.forEach(element => {
     if (isFrameBlock(element)) {

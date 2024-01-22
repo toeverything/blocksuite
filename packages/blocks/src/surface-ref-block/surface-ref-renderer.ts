@@ -3,14 +3,14 @@ import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import type { EdgelessElement, TopLevelBlockModel } from '../_common/types.js';
+import type { EdgelessModel, TopLevelBlockModel } from '../_common/types.js';
 import type { NoteBlockModel } from '../note-block/index.js';
 import { Renderer } from '../surface-block/index.js';
 import type { SurfaceBlockModel } from '../surface-block/surface-model.js';
 import type { SurfacePageService } from '../surface-block/surface-page-service.js';
 import { getSurfaceBlock } from './utils.js';
 
-type RefElement = Exclude<EdgelessElement, NoteBlockModel>;
+type RefElement = Exclude<EdgelessModel, NoteBlockModel>;
 
 export class SurfaceRefRenderer {
   private readonly _surfaceRenderer: Renderer;

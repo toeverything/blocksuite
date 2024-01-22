@@ -9,7 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import type {
-  EdgelessElement,
+  EdgelessModel,
   IPoint,
   Selectable,
 } from '../../../../_common/types.js';
@@ -675,7 +675,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         isImageBlock(element) ||
         (isCanvasElement(element) &&
           element.type !== CanvasElementType.CONNECTOR)
-    ) as EdgelessElement[];
+    ) as EdgelessModel[];
 
     getElementsWithoutGroup(elements).forEach(element => {
       const { id, rotate } = element;

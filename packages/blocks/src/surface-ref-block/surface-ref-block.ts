@@ -12,7 +12,7 @@ import {
   FrameIcon,
   MoreDeleteIcon,
 } from '../_common/icons/index.js';
-import type { EdgelessElement } from '../_common/types.js';
+import type { EdgelessModel } from '../_common/types.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import { buildPath, getEditorContainer } from '../_common/utils/query.js';
 import type { PageService } from '../index.js';
@@ -45,7 +45,7 @@ const NO_CONTENT_REASON = {
   DEFAULT: 'This content was deleted on edgeless mode',
 } as Record<string, string>;
 
-type RefElement = Exclude<EdgelessElement, NoteBlockModel>;
+type RefElement = Exclude<EdgelessModel, NoteBlockModel>;
 
 @customElement('affine-surface-ref')
 export class SurfaceRefBlockComponent extends BlockElement<

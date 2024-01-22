@@ -9,7 +9,7 @@ import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
 import type { BookmarkBlockModel } from '../models.js';
 import type { NoteBlockModel } from '../note-block/index.js';
-import type { EdgelessElement } from '../page-block/edgeless/type.js';
+import type { EdgelessModel } from '../page-block/edgeless/type.js';
 import type { ConnectorMode } from '../surface-block/element-model/connector.js';
 import type {
   BrushElementModel,
@@ -130,13 +130,13 @@ export type TopLevelBlockModel =
   | EmbedFigmaModel
   | EmbedLinkedDocModel;
 
-export type { EdgelessElement };
+export type { EdgelessModel as EdgelessModel };
 
-export type Alignable = EdgelessElement;
+export type Alignable = EdgelessModel;
 
-export type Selectable = EdgelessElement;
+export type Selectable = EdgelessModel;
 
-export type Erasable = EdgelessElement;
+export type Erasable = EdgelessModel;
 
 export type Connectable =
   | TopLevelBlockModel
