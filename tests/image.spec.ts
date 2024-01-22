@@ -19,6 +19,7 @@ import {
   moveToImage,
   pasteByKeyboard,
   pressArrowLeft,
+  pressBackspace,
   pressEnter,
   redoByKeyboard,
   scrollToTop,
@@ -27,6 +28,7 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
+  assertBlockSelections,
   assertImageOption,
   assertImageSize,
   assertRichDragButton,
@@ -376,4 +378,18 @@ test('image loaded successfully', async ({ page }) => {
   await expect(img).toBeVisible();
   const src = await img.getAttribute('src');
   expect(src).toBeDefined();
+});
+
+test('press backspace after image block can select image block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await assertRichImage(page, 1);
+
+  await activeEmbed(page);
+  await pressEnter(page);
+  await assertRichTextInlineRange(page, 0, 0);
+  await pressBackspace(page);
+  await assertBlockSelections(page, [['0', '1', '2']]);
 });

@@ -31,6 +31,7 @@ import {
 } from './utils/actions/index.js';
 import {
   assertBlockCount,
+  assertBlockSelections,
   assertRichTextInlineRange,
   assertRichTexts,
   assertStoreMatchJSX,
@@ -614,7 +615,7 @@ test('press backspace inside should select code block', async ({ page }) => {
   await expect(codeBlock).toBeHidden();
 });
 
-test('press backspace after code block can enter code block', async ({
+test('press backspace after code block can select code block', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -623,14 +624,11 @@ test('press backspace after code block can enter code block', async ({
   const code = 'const a = 1;';
   await type(page, code);
 
+  await assertRichTextInlineRange(page, 0, 12);
   await pressEnterWithShortkey(page);
-  await page.keyboard.press('Backspace');
-
-  const index = await getInlineSelectionIndex(page);
-  expect(index).toBe(code.length);
-
-  const text = await getInlineSelectionText(page);
-  expect(text).toBe(code);
+  await assertRichTextInlineRange(page, 1, 0);
+  await pressBackspace(page);
+  await assertBlockSelections(page, [['0', '1', '2']]);
 });
 
 test('press ArrowUp after code block can enter code block', async ({

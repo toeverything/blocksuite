@@ -11,6 +11,8 @@ import {
   initEmptyEdgelessState,
   initEmptyParagraphState,
   pressArrowRight,
+  pressArrowUp,
+  pressBackspace,
   pressEnter,
   selectAllByKeyboard,
   setInlineRangeInSelectedRichText,
@@ -20,7 +22,11 @@ import {
   waitForInlineEditorStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
-import { assertStoreMatchJSX } from './utils/asserts.js';
+import {
+  assertBlockSelections,
+  assertRichTextInlineRange,
+  assertStoreMatchJSX,
+} from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
 const inputUrl = 'http://localhost';
@@ -457,4 +463,24 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
   </affine:note>
 </affine:page>`
   );
+});
+
+test('press backspace after bookmark block can select bookmark block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await pressEnter(page);
+  await pressArrowUp(page);
+  await type(page, '/links');
+  await pressEnter(page);
+  await type(page, inputUrl);
+  await pressEnter(page);
+
+  await focusRichText(page);
+  await assertRichTextInlineRange(page, 0, 0);
+  await pressBackspace(page);
+  await assertBlockSelections(page, [['0', '1', '4']]);
 });
