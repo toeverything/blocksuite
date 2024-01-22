@@ -28,6 +28,7 @@ overrides:
   has-symbols: npm:@nolyfill/has-symbols@latest
   hasown: npm:@nolyfill/hasown@latest
   isarray: npm:@nolyfill/isarray@latest
+  set-function-length: npm:@nolyfill/set-function-length@latest
 
 importers:
 
@@ -1671,16 +1672,6 @@ packages:
     engines: {node: '>=12.4.0'}
     dev: true
 
-  /@nolyfill/gopd@1.0.24:
-    resolution: {integrity: sha512-//EzMxdolcfpMEpF6vZxzx3XZcOScEcdb7dG24R7POD0fvG+WmugQwcqwDbS/wFQ3Kv9NIXka8zbSKLFENyFoA==}
-    engines: {node: '>=12.4.0'}
-    dev: true
-
-  /@nolyfill/has-property-descriptors@1.0.24:
-    resolution: {integrity: sha512-VHFqPtkvE+jw/SO+6uPsVWtcT2eWHQk0jIU3Re9I03A696amtMVo3lQZeTTJ8HSBke9i5oYpbTogwzIJiDKaoA==}
-    engines: {node: '>=12.4.0'}
-    dev: true
-
   /@nolyfill/has-proto@1.0.24:
     resolution: {integrity: sha512-BzN7A7nxXiYzrM82XULGpnX7wIjJ19UC9/3Qy5oN+0+GwrOPt+UtIdiMGPi3+jiOAzkoivW2bhraa482nvj8FA==}
     engines: {node: '>=12.4.0'}
@@ -1705,6 +1696,11 @@ packages:
     resolution: {integrity: sha512-wAC/8sqF2qaHrZpIxTR/9qc0XFyLW4WHX6gHVNpzKtCP8DuAL3L7eQwsMUWCg1ANL/Da3XiuueTx1J/S9piqtQ==}
     engines: {node: '>=12.4.0'}
     dev: false
+
+  /@nolyfill/set-function-length@1.0.25:
+    resolution: {integrity: sha512-Gcr9ienJBibryVC62vkV4k3Od0IZBUgwwiO+snBtK6M8oGuI0PPptzwBDQWqkJsYlXPacrebBk8J2w1X/JhdTw==}
+    engines: {node: '>=12.4.0'}
+    dev: true
 
   /@open-draft/deferred-promise@2.2.0:
     resolution: {integrity: sha512-CecwLWx3rhxVQF6V4bAgPS5t+So2sTbPgAzafKkVizyi7tlwpcFpdFqq+wqF2OwNBmqFuu6tOyouTuxgpMfzmA==}
@@ -3014,7 +3010,7 @@ packages:
     dependencies:
       function-bind: /@nolyfill/function-bind@1.0.21
       get-intrinsic: 1.2.2
-      set-function-length: 1.2.0
+      set-function-length: /@nolyfill/set-function-length@1.0.25
     dev: true
 
   /callsites@3.1.0:
@@ -3465,15 +3461,6 @@ packages:
     resolution: {integrity: sha512-eFuaLoy/Rxalv2kr+lqMlUnrDWV+3j4pljOIJgLIhI058IQfWJ7vXhyEIHu+HtC738klGALYxOKDO0bQP3tg8A==}
     dependencies:
       clone: 1.0.4
-    dev: true
-
-  /define-data-property@1.1.1:
-    resolution: {integrity: sha512-E7uGkTzkk1d0ByLeSc6ZsFS79Axg+m1P/VsgYsxHgiuc3tFSj+MjMIwe90FC4lOAZzNBdY7kkO2P2wKdsQ1vgQ==}
-    engines: {node: '>= 0.4'}
-    dependencies:
-      get-intrinsic: 1.2.2
-      gopd: /@nolyfill/gopd@1.0.24
-      has-property-descriptors: /@nolyfill/has-property-descriptors@1.0.24
     dev: true
 
   /delayed-stream@1.0.0:
@@ -6891,17 +6878,6 @@ packages:
 
   /set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
-    dev: true
-
-  /set-function-length@1.2.0:
-    resolution: {integrity: sha512-4DBHDoyHlM1IRPGYcoxexgh67y4ueR53FKV1yyxwFMY7aCqcN/38M1+SwZ/qJQ8iLv7+ck385ot4CcisOAPT9w==}
-    engines: {node: '>= 0.4'}
-    dependencies:
-      define-data-property: 1.1.1
-      function-bind: /@nolyfill/function-bind@1.0.21
-      get-intrinsic: 1.2.2
-      gopd: /@nolyfill/gopd@1.0.24
-      has-property-descriptors: /@nolyfill/has-property-descriptors@1.0.24
     dev: true
 
   /setimmediate@1.0.5:
