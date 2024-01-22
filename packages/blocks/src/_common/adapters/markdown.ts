@@ -45,7 +45,6 @@ type MarkdownAST =
 type MarkdownToSliceSnapshotPayload = {
   file: Markdown;
   assets?: AssetsManager;
-  blockVersions: Record<string, number>;
   pageVersion: number;
   workspaceVersion: number;
   workspaceId: string;
@@ -235,7 +234,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return {
       type: 'slice',
       content: [contentSlice],
-      blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,

@@ -150,7 +150,7 @@ export class TemplateJob {
     }
   }
 
-  private _getMergeBlockId(modelData: SnapshotReturn<object>) {
+  private _getMergeBlockId(modelData: BlockSnapshot) {
     switch (modelData.flavour as MergeBlockFlavour) {
       case 'affine:page':
         return this.model.page.root!.id;

@@ -202,7 +202,6 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     const sliceSnapshot = await this._markdownAdapter.toSliceSnapshot({
       file: payload.file,
       assets: payload.assets,
-      blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
