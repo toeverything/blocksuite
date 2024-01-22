@@ -232,7 +232,7 @@ export const EdgelessEditorBlockSpecs: BlockSpec[] = [
     schema: SurfaceRefBlockSchema,
     service: SurfaceRefBlockService,
     view: {
-      component: literal`affine-surface-ref-edgeless`,
+      component: literal`affine-edgeless-surface-ref`,
     },
   },
 ];
