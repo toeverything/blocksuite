@@ -1,10 +1,4 @@
-import type {
-  DocPageBlockComponent,
-  EmbedLinkedDocModel,
-  ListBlockModel,
-  ListService,
-  ParagraphBlockModel,
-} from '@blocksuite/blocks';
+import type { DocPageBlockComponent, ListService } from '@blocksuite/blocks';
 import {
   type AffineTextAttributes,
   getAffineInlineSpecsWithReference,
@@ -14,7 +8,7 @@ import { BlocksUtils, InlineManager, RichText } from '@blocksuite/blocks';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import { WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -29,11 +23,6 @@ import {
 noop(RichText);
 
 const { matchFlavours } = BlocksUtils;
-
-type BackLinkBlockModel =
-  | ParagraphBlockModel
-  | ListBlockModel
-  | EmbedLinkedDocModel;
 
 @customElement('bi-directional-link-panel')
 export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
@@ -215,8 +204,6 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   }
 
   private get _host() {
-    console.log(this.docPageBlock.host);
-
     return this.docPageBlock.host;
   }
 
@@ -342,16 +329,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
                         blockId => blockId,
                         blockId => {
                           const model = page.getBlockById(blockId);
-
-                          if (
-                            !matchFlavours(model, [
-                              'affine:paragraph',
-                              'affine:list',
-                              'affine:embed-linked-doc',
-                            ])
-                          )
-                            return nothing;
-
+                          if (!model) return nothing;
                           return this._backlink(model, pageId, blockId);
                         }
                       )
@@ -365,10 +343,19 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   }
 
   private _backlink(
-    model: BackLinkBlockModel,
+    model: BlockModel<object>,
     pageId: string,
     blockId: string
   ) {
+    if (
+      !matchFlavours(model, [
+        'affine:paragraph',
+        'affine:list',
+        'affine:embed-linked-doc',
+      ])
+    )
+      return nothing;
+
     let icon: TemplateResult<1> | null = null;
     if (matchFlavours(model, ['affine:list'])) {
       const listService = this._host!.spec.getService(
@@ -380,7 +367,6 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     const type = matchFlavours(model, ['affine:embed-linked-doc'])
       ? ''
       : model.type;
-    console.log(this.page.id, pageId);
 
     return html` <style>
         .linked-page-container {
