@@ -931,8 +931,10 @@ export class EdgelessClipboardController extends PageClipboard {
       block: TopLevelBlockModel,
       isInFrame = false
     ) => {
-      let blockElement = blockElementGetter(block, this.std.view)
-        ?.parentElement;
+      let blockElement = blockElementGetter(
+        block,
+        this.std.view
+      )?.parentElement;
       const blockPortalSelector = block.flavour.replace(
         'affine:',
         '.edgeless-block-portal-'
