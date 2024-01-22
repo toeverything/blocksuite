@@ -1377,14 +1377,10 @@ test('should select blocks when pressing escape', async ({ page }) => {
   await expect(page.locator('.selected,affine-block-selection')).toHaveCount(1);
   await page.keyboard.press('Escape');
 
-  const cords = await getIndexCoordinate(page, [1, 2]);
-  await page.mouse.move(cords.x + 10, cords.y + 10, { steps: 20 });
-  await page.mouse.down();
-  await page.mouse.move(cords.x + 20, cords.y + 30, { steps: 20 });
-  await page.mouse.up();
+  await dragBetweenIndices(page, [0, 1], [2, 2]);
 
   await page.keyboard.press('Escape');
-  await expect(page.locator('.selected,affine-block-selection')).toHaveCount(1);
+  await expect(page.locator('.selected,affine-block-selection')).toHaveCount(3);
 });
 
 test('should un-select blocks when pressing escape', async ({ page }) => {

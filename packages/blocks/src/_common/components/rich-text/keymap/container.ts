@@ -17,12 +17,8 @@ import { createDefaultPage } from '../../../utils/init.js';
 import { buildPath } from '../../../utils/query.js';
 import { tryConvertBlock } from '../markdown/block.js';
 import {
-  handleIndent,
-  handleMultiBlockIndent,
-  handleMultiBlockOutdent,
   handleRemoveAllIndent,
   handleRemoveAllIndentForMultiBlocks,
-  handleUnindent,
 } from '../rich-text-operations.js';
 import { bracketPairs } from './bracket-pairs.js';
 import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
@@ -112,12 +108,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   };
 
   blockElement.bindHotKey({
-    Escape: () => {
-      if (blockElement.selected?.is('text')) {
-        return _selectBlock();
-      }
-      return;
-    },
     Enter: ctx => {
       _preventDefault(ctx);
 
@@ -181,39 +171,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       return _selectAllText();
     },
-    Tab: ctx => {
-      if (
-        !(
-          blockElement.selected?.is('block') ||
-          blockElement.selected?.is('text')
-        )
-      )
-        return;
-
-      const textModels = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
-          types: ['text'],
-        })
-      ).selectedModels;
-      if (textModels && textModels.length === 1) {
-        const inlineEditor = _getInlineEditor();
-        const inilneRange = inlineEditor.getInlineRange();
-        assertExists(inilneRange);
-        handleIndent(blockElement.host, model, inilneRange.index);
-        _preventDefault(ctx);
-
-        return true;
-      }
-
-      const models = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
-          types: ['text', 'block'],
-        })
-      ).selectedModels;
-      if (!models) return;
-      handleMultiBlockIndent(blockElement.host, models);
-      return true;
-    },
     'Mod-Backspace': ctx => {
       if (
         !(
@@ -252,44 +209,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       ).selectedModels;
       if (!models) return;
       handleRemoveAllIndentForMultiBlocks(blockElement.host, models);
-      return true;
-    },
-    'Shift-Tab': ctx => {
-      if (
-        !(
-          blockElement.selected?.is('block') ||
-          blockElement.selected?.is('text')
-        )
-      )
-        return;
-
-      const page = blockElement.closest<PageBlockComponent>(
-        'affine-doc-page,affine-edgeless-page'
-      );
-      if (!page) return;
-
-      const textModels = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
-          types: ['text'],
-        })
-      ).selectedModels;
-      if (textModels && textModels.length === 1) {
-        const inlineEditor = _getInlineEditor();
-        const inlineRange = inlineEditor.getInlineRange();
-        assertExists(inlineRange);
-        handleUnindent(blockElement.host, model, inlineRange.index);
-        _preventDefault(ctx);
-
-        return true;
-      }
-
-      const models = command.getChainCtx(
-        getChainWithHost(std).getSelectedModels({
-          types: ['text', 'block'],
-        })
-      ).selectedModels;
-      if (!models) return;
-      handleMultiBlockOutdent(blockElement.host, models);
       return true;
     },
     Backspace: ctx => {

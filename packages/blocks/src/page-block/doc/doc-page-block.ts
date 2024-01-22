@@ -6,7 +6,14 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import {
+  handleIndent,
+  handleMultiBlockIndent,
+  handleMultiBlockOutdent,
+  handleUnindent,
+} from '../../_common/components/rich-text/rich-text-operations.js';
 import { textFormatConfigs } from '../../_common/configs/text-format/config.js';
+import { getChainWithHost } from '../../_common/utils/command.js';
 import type { EditingState, Viewport } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
@@ -283,6 +290,69 @@ export class DocPageBlockComponent extends BlockElement<
             }
           }
         });
+      },
+      Escape: () => {
+        const selectedBlocks = this.host.command.getChainCtx(
+          getChainWithHost(this.std).getTextSelection().getSelectedBlocks()
+        ).selectedBlocks;
+        if (!selectedBlocks || selectedBlocks.length === 0) return;
+
+        const blockSelections = selectedBlocks.map(block => {
+          return this.selection.create('block', {
+            path: block.path,
+          });
+        });
+        this.selection.setGroup('note', blockSelections);
+      },
+      Tab: ctx => {
+        const textModels = this.host.command.getChainCtx(
+          getChainWithHost(this.std).getSelectedModels({
+            types: ['text'],
+          })
+        ).selectedModels;
+        if (textModels && textModels.length === 1) {
+          const textSelection = this.host.selection.find('text');
+          if (!textSelection) return;
+          handleIndent(this.host, textModels[0], textSelection.from.index);
+          const state = ctx.get('defaultState');
+          state.event.preventDefault();
+
+          return true;
+        }
+
+        const models = this.host.command.getChainCtx(
+          getChainWithHost(this.std).getSelectedModels({
+            types: ['text', 'block'],
+          })
+        ).selectedModels;
+        if (!models) return;
+        handleMultiBlockIndent(this.host, models);
+        return true;
+      },
+      'Shift-Tab': ctx => {
+        const textModels = this.host.command.getChainCtx(
+          getChainWithHost(this.std).getSelectedModels({
+            types: ['text'],
+          })
+        ).selectedModels;
+        if (textModels && textModels.length === 1) {
+          const textSelection = this.host.selection.find('text');
+          if (!textSelection) return;
+          handleUnindent(this.host, textModels[0], textSelection.from.index);
+          const state = ctx.get('defaultState');
+          state.event.preventDefault();
+
+          return true;
+        }
+
+        const models = this.host.command.getChainCtx(
+          getChainWithHost(this.std).getSelectedModels({
+            types: ['text', 'block'],
+          })
+        ).selectedModels;
+        if (!models) return;
+        handleMultiBlockOutdent(this.host, models);
+        return true;
       },
     });
 
