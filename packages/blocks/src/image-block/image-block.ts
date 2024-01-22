@@ -229,7 +229,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     super.disconnectedCallback();
   }
 
-  override render() {
+  override renderBlock() {
     const imageState = isImageLoading(this.model.id)
       ? ImageState.Loading
       : this._imageState;

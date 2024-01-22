@@ -35,7 +35,7 @@ export class EmbedHtmlBlock extends EmbedBlockElement<EmbedHtmlModel> {
     this.updateWH();
   }
 
-  override render(): unknown {
+  override renderBlock(): unknown {
     return this.renderEmbed(() => {
       if (!this.model.html) {
         return html` <div class="affine-html-empty">Empty</div>`;

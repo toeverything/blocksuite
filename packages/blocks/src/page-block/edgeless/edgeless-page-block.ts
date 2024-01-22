@@ -785,7 +785,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.tools.dispose();
   }
 
-  override render() {
+  override renderBlock() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const widgets = html`${repeat(

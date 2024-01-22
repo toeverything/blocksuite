@@ -14,7 +14,7 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
     this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
   }
 
-  override render() {
+  override renderBlock() {
     // data-view block has been deprecated
     return nothing;
   }
