@@ -20,14 +20,19 @@ export const versionMismatch: InitFn = async (
       { xywh: '[0, 100, 800, 640]' },
       pageBlockId
     );
+    const paragraphId = tempPage.addBlock('affine:paragraph', {}, noteId);
     const blocks = tempPage.spaceDoc.get('blocks') as Y.Map<unknown>;
-    const note = blocks.get(noteId) as Y.Map<unknown>;
-    note.set('sys:version', (note.get('sys:version') as number) + 1);
+    const paragraph = blocks.get(paragraphId) as Y.Map<unknown>;
+    paragraph.set('sys:version', (paragraph.get('sys:version') as number) + 1);
 
     const update = Workspace.Y.encodeStateAsUpdate(tempPage.spaceDoc);
 
     Workspace.Y.applyUpdate(page.spaceDoc, update);
+    page.addBlock('affine:paragraph', {}, noteId);
   });
+
+  workspace.removePage('tempPage');
+  page.resetHistory();
 };
 
 versionMismatch.id = 'version-mismatch';
