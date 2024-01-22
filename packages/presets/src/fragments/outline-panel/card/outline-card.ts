@@ -79,10 +79,6 @@ const styles = css`
     user-select: none;
   }
 
-  .card-preview:has(.card-header-container) {
-    padding: 4px 0px;
-  }
-
   .card-preview.edgeless:hover {
     background: var(--affine-hover-color);
   }

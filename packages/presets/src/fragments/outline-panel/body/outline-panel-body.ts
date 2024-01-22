@@ -39,67 +39,69 @@ type OutlineNoteItem = {
 
 noop(OutlineNoteCard);
 
+const styles = css`
+  .outline-panel-body-container {
+    position: relative;
+    display: flex;
+    align-items: start;
+    box-sizing: border-box;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 0 8px;
+  }
+
+  .panel-list {
+    position: relative;
+    width: 100%;
+  }
+
+  .panel-list .hidden-title {
+    width: 100%;
+    font-size: 14px;
+    line-height: 24px;
+    font-weight: 500;
+    color: var(--affine-text-secondary-color);
+    padding-left: 8px;
+    height: 40px;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    margin-top: 8px;
+  }
+
+  .insert-indicator {
+    height: 2px;
+    border-radius: 1px;
+    background-color: var(--affine-brand-color);
+    border-radius: 1px;
+    position: absolute;
+    contain: layout size;
+    width: 100%;
+  }
+
+  .no-note-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .note-placeholder {
+    margin-top: 240px;
+    align-self: center;
+    width: 190px;
+    height: 48px;
+    color: var(--affine-text-secondary-color, #8e8d91);
+    text-align: center;
+    /* light/base */
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+  }
+`;
+
 export class OutlinePanelBody extends WithDisposable(LitElement) {
-  static override styles = css`
-    .outline-panel-body-container {
-      position: relative;
-      display: flex;
-      align-items: start;
-      box-sizing: border-box;
-      flex-direction: column;
-      width: 100%;
-      height: 100%;
-      padding: 0 8px;
-    }
-
-    .panel-list {
-      position: relative;
-      width: 100%;
-    }
-
-    .panel-list .hidden-title {
-      width: 100%;
-      font-size: 14px;
-      line-height: 24px;
-      font-weight: 500;
-      color: var(--affine-text-secondary-color);
-      padding-left: 8px;
-      height: 40px;
-      box-sizing: border-box;
-      padding: 6px 8px;
-      margin-top: 8px;
-    }
-
-    .insert-indicator {
-      height: 2px;
-      border-radius: 1px;
-      background-color: var(--affine-brand-color);
-      border-radius: 1px;
-      position: absolute;
-      contain: layout size;
-      width: 100%;
-    }
-
-    .no-note-container {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-    }
-
-    .note-placeholder {
-      margin-top: 240px;
-      align-self: center;
-      width: 190px;
-      height: 48px;
-      color: var(--affine-text-secondary-color, #8e8d91);
-      text-align: center;
-      /* light/base */
-      font-size: 15px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 24px;
-    }
-  `;
+  static override styles = styles;
 
   @state()
   private _dragging = false;
@@ -132,7 +134,13 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
   enableNotesSorting!: boolean;
 
   @property({ attribute: false })
+  noticeVisible!: boolean;
+
+  @property({ attribute: false })
   toggleNotesSorting!: () => void;
+
+  @property({ attribute: false })
+  setNoticeVisibility!: (visibility: boolean) => void;
 
   /**
    * store the id of selected notes
@@ -214,6 +222,23 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     this._pageDisposables = null;
   }
 
+  private _updateNoticeVisibility() {
+    if (this.enableNotesSorting) {
+      if (this.noticeVisible) {
+        this.setNoticeVisibility(false);
+      }
+      return;
+    }
+
+    const shouldShowNotice = this._pageVisibleNotes.some(
+      note => note.note.displayMode === NoteDisplayMode.DocOnly
+    );
+
+    if (shouldShowNotice && !this.noticeVisible) {
+      this.setNoticeVisibility(true);
+    }
+  }
+
   private _setPageDisposables() {
     const { slots, root } = this.page;
     const slotsForUpdate = root
@@ -226,6 +251,7 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
       this._pageDisposables.add(
         root.childrenUpdated.on(() => {
           this._updateNotes();
+          this._updateNoticeVisibility();
         })
       );
     });
@@ -233,10 +259,16 @@ export class OutlinePanelBody extends WithDisposable(LitElement) {
     slotsForUpdate.forEach(slot => {
       this._clearPageDisposables();
       this._pageDisposables = new DisposableGroup();
-      this._pageDisposables.add(slot.on(() => this._updateNotes()));
+      this._pageDisposables.add(
+        slot.on(() => {
+          this._updateNotes();
+          this._updateNoticeVisibility();
+        })
+      );
     });
 
     this._updateNotes();
+    this._updateNoticeVisibility();
   }
 
   override updated(_changedProperties: PropertyValues) {

@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import { SmallCloseIcon, SortingIcon } from '../../_common/icons.js';
@@ -83,24 +83,36 @@ export class OutlineNotice extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
+  noticeVisible!: boolean;
+
+  @property({ attribute: false })
   toggleNotesSorting!: () => void;
+
+  @property({ attribute: false })
+  setNoticeVisibility!: (visibility: boolean) => void;
 
   private _handleNoticeButtonClick() {
     this.toggleNotesSorting();
-    this.remove();
+    this.setNoticeVisibility(false);
   }
 
   override render() {
+    if (!this.noticeVisible) {
+      return nothing;
+    }
+
     return html`<div class="outline-notice-container">
       <div class="outline-notice-header">
-        <span class="outline-notice-label">SOME CONTENT HIDDEN</span>
-        <span class="outline-notice-close-button" @click=${() => this.remove()}
+        <span class="outline-notice-label">SOME CONTENTS HIDDEN</span>
+        <span
+          class="outline-notice-close-button"
+          @click=${() => this.setNoticeVisibility(false)}
           >${SmallCloseIcon}</span
         >
       </div>
       <div class="outline-notice-body">
         <div class="outline-notice-item notice">
-          Some content are not visible on edgeless.
+          Some contents are not visible on edgeless.
         </div>
         <div
           class="outline-notice-item button"

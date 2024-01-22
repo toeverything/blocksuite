@@ -25,121 +25,123 @@ function assertType<T>(value: unknown): asserts value is T {
   noop(value);
 }
 
+const styles = css`
+  :host {
+    display: block;
+    width: 100%;
+  }
+
+  .outline-block-preview {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    white-space: nowrap;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    box-sizing: border-box;
+    padding: 4px;
+    background: var(--affine-background-secondary-color);
+    border-radius: 4px;
+    color: var(--affine-icon-color);
+  }
+
+  .icon.disabled {
+    color: var(--affine-disabled-icon-color);
+  }
+
+  .text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+
+    font-size: var(--affine-font-sm);
+    line-height: 24px;
+    height: 24px;
+  }
+
+  .text.general,
+  .subtype.text,
+  .subtype.quote {
+    font-weight: 400;
+    padding-left: 28px;
+  }
+
+  .subtype.h1,
+  .subtype.h2,
+  .subtype.h3,
+  .subtype.h4,
+  .subtype.h5,
+  .subtype.h6 {
+    font-weight: 600;
+  }
+
+  .subtype.h1 {
+    padding-left: 0;
+  }
+  .subtype.h2 {
+    padding-left: 4px;
+  }
+  .subtype.h3 {
+    padding-left: 12px;
+  }
+  .subtype.h4 {
+    padding-left: 16px;
+  }
+  .subtype.h5 {
+    padding-left: 20px;
+  }
+  .subtype.h6 {
+    padding-left: 24px;
+  }
+
+  .outline-block-preview:not(:has(span)) {
+    display: none;
+  }
+
+  .text span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .linked-doc-preview svg {
+    width: 1.1em;
+    height: 1.1em;
+    vertical-align: middle;
+    font-size: inherit;
+    margin-bottom: 0.1em;
+  }
+
+  .linked-doc-text {
+    font-size: inherit;
+    border-bottom: 0.5px solid var(--affine-divider-color);
+    white-space: break-spaces;
+    margin-right: 2px;
+  }
+
+  .linked-doc-preview.unavailable svg {
+    color: var(--affine-text-disable-color);
+  }
+
+  .linked-doc-preview.unavailable .linked-doc-text {
+    color: var(--affine-text-disable-color);
+    text-decoration: line-through;
+  }
+`;
+
 export class OutlineBlockPreview extends WithDisposable(LitElement) {
-  static override styles = css`
-    :host {
-      display: block;
-      width: 100%;
-    }
-
-    .outline-block-preview {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 6px 8px;
-      white-space: nowrap;
-      display: flex;
-      justify-content: start;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      box-sizing: border-box;
-      padding: 4px;
-      background: var(--affine-background-secondary-color);
-      border-radius: 4px;
-      color: var(--affine-icon-color);
-    }
-
-    .icon.disabled {
-      color: var(--affine-disabled-icon-color);
-    }
-
-    .text {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 1;
-
-      font-size: var(--affine-font-sm);
-      line-height: 24px;
-      height: 24px;
-    }
-
-    .text.general,
-    .subtype.text,
-    .subtype.quote {
-      font-weight: 400;
-      padding-left: 28px;
-    }
-
-    .subtype.h1,
-    .subtype.h2,
-    .subtype.h3,
-    .subtype.h4,
-    .subtype.h5,
-    .subtype.h6 {
-      font-weight: 600;
-    }
-
-    .subtype.h1 {
-      padding-left: 0;
-    }
-    .subtype.h2 {
-      padding-left: 4px;
-    }
-    .subtype.h3 {
-      padding-left: 12px;
-    }
-    .subtype.h4 {
-      padding-left: 16px;
-    }
-    .subtype.h5 {
-      padding-left: 20px;
-    }
-    .subtype.h6 {
-      padding-left: 24px;
-    }
-
-    .outline-block-preview:not(:has(span)) {
-      display: none;
-    }
-
-    .text span {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .linked-doc-preview svg {
-      width: 1.1em;
-      height: 1.1em;
-      vertical-align: middle;
-      font-size: inherit;
-      margin-bottom: 0.1em;
-    }
-
-    .linked-doc-text {
-      font-size: inherit;
-      border-bottom: 0.5px solid var(--affine-divider-color);
-      white-space: break-spaces;
-      margin-right: 2px;
-    }
-
-    .linked-doc-preview.unavailable svg {
-      color: var(--affine-text-disable-color);
-    }
-
-    .linked-doc-preview.unavailable .linked-doc-text {
-      color: var(--affine-text-disable-color);
-      text-decoration: line-through;
-    }
-  `;
+  static override styles = styles;
 
   @property({ attribute: false })
   block!: ValuesOf<BlockModels>;
