@@ -1,16 +1,50 @@
+import type { EditorHost } from '@blocksuite/lit';
 import { type Y } from '@blocksuite/store';
 
+import type {
+  HitTestOptions,
+  IEdgelessElement,
+} from '../../page-block/edgeless/type.js';
+import { randomSeed } from '../rough/math.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { Bound } from '../utils/bound.js';
-import { getBoundsWithRotation } from '../utils/math-utils.js';
+import {
+  getBoundsWithRotation,
+  getPointsFromBoundsWithRotation,
+  linePolygonIntersects,
+  polygonGetPointTangent,
+  polygonNearestPoint,
+  rotatePoints,
+} from '../utils/math-utils.js';
+import { PointLocation } from '../utils/point-location.js';
+import type { IVec } from '../utils/vec.js';
 import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
-import { local, updateDerivedProp, yfield } from './decorators.js';
+import {
+  convertProps,
+  getDeriveProperties,
+  local,
+  updateDerivedProp,
+  yfield,
+} from './decorators.js';
+import type { OmitFunctionsAndKeysAndReadOnly } from './utility-type.js';
+
+export type ModelToProps<
+  T extends ElementModel,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  K extends keyof any,
+> = OmitFunctionsAndKeysAndReadOnly<
+  T,
+  K | 'yMap' | 'surface' | 'display' | 'opacity' | 'externalXYWH'
+>;
 
 export type BaseProps = {
   index: string;
+  seed: number;
 };
 
-export abstract class ElementModel<Props extends BaseProps = BaseProps> {
+export abstract class ElementModel<Props extends BaseProps = BaseProps>
+  implements IEdgelessElement
+{
   static propsToY(props: Record<string, unknown>) {
     return props;
   }
@@ -20,12 +54,16 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
    * But sometimes we need to access the value when creating the element model, those temporary values are stored here.
    */
   protected _preserved: Map<string, unknown> = new Map();
-  protected _stashed: Map<keyof Props, unknown>;
+  protected _stashed: Map<keyof Props | string, unknown>;
   protected _local: Map<string | symbol, unknown> = new Map();
-  protected _onChange: (props: Record<string, { oldValue: unknown }>) => void;
+  protected _onChange: (payload: {
+    props: Record<string, unknown>;
+    oldValues: Record<string, unknown>;
+  }) => void;
+  protected _observerDisposable: Record<string | symbol, () => void> = {};
 
   yMap: Y.Map<unknown>;
-  surfaceModel!: SurfaceBlockModel;
+  surface!: SurfaceBlockModel;
 
   abstract rotate: number;
 
@@ -36,28 +74,46 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
   @yfield()
   index!: string;
 
+  @yfield()
+  seed!: number;
+
   @local()
   display: boolean = true;
 
   @local()
   opacity: number = 1;
 
+  @local()
+  externalXYWH: SerializedXYWH | undefined = undefined;
+
+  get externalBound(): Bound | null {
+    return this.externalXYWH ? Bound.deserialize(this.externalXYWH) : null;
+  }
+
   constructor(options: {
     yMap: Y.Map<unknown>;
     model: SurfaceBlockModel;
     stashedStore: Map<unknown, unknown>;
-    onChange: (props: Record<string, { oldValue: unknown }>) => void;
+    onChange: (payload: {
+      props: Record<string, unknown>;
+      oldValues: Record<string, unknown>;
+    }) => void;
   }) {
     const { yMap, model, stashedStore, onChange } = options;
 
     this.yMap = yMap;
-    this.surfaceModel = model;
+    this.surface = model;
     this._stashed = stashedStore as Map<keyof Props, unknown>;
     this._onChange = onChange;
 
     // base class property field is assigned before yMap is set
     // so we need to manually assign the default value here
     this.index = 'a0';
+    this.seed = randomSeed();
+  }
+
+  get connectable() {
+    return true;
   }
 
   get deserializedXYWH() {
@@ -81,7 +137,11 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
   }
 
   get group() {
-    return this.surfaceModel.getGroup(this.id);
+    return this.surface.getGroup(this.id);
+  }
+
+  get groups() {
+    return this.surface.getGroups(this.id);
   }
 
   get id() {
@@ -96,12 +156,12 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     return Bound.deserialize(this.xywh);
   }
 
-  stash(prop: keyof Props) {
+  stash(prop: keyof Props | string) {
     if (this._stashed.has(prop)) {
       return;
     }
 
-    const curVal = this.yMap.get(prop as string);
+    const curVal = this[prop as unknown as keyof ElementModel];
     const prototype = Object.getPrototypeOf(this);
 
     this._stashed.set(prop, curVal);
@@ -110,18 +170,32 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
       configurable: true,
       enumerable: true,
       get: () => this._stashed.get(prop),
-      set: (value: unknown) => {
+      set: (original: unknown) => {
+        const value = convertProps(prototype, prop as string, original, this);
         const oldValue = this._stashed.get(prop);
+        const derivedProps = getDeriveProperties(
+          prototype,
+          prop as string,
+          original,
+          this
+        );
 
         this._stashed.set(prop, value);
-        this._onChange({ [prop]: { oldValue } });
+        this._onChange({
+          props: {
+            [prop]: value,
+          },
+          oldValues: {
+            [prop]: oldValue,
+          },
+        });
 
-        updateDerivedProp(prototype, prop as string, this);
+        updateDerivedProp(derivedProps, this as unknown as ElementModel);
       },
     });
   }
 
-  pop(prop: keyof Props) {
+  pop(prop: keyof Props | string) {
     if (!this._stashed.has(prop)) {
       return;
     }
@@ -130,6 +204,51 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps> {
     this._stashed.delete(prop);
     // @ts-ignore
     delete this[prop];
-    this.yMap.set(prop as string, value);
+
+    this.surface.page.transact(() => {
+      this.yMap.set(prop as string, value);
+    });
+  }
+
+  containedByBounds(bounds: Bound): boolean {
+    return getPointsFromBoundsWithRotation(this).some(point =>
+      bounds.containsPoint(point)
+    );
+  }
+
+  getNearestPoint(point: IVec) {
+    const points = getPointsFromBoundsWithRotation(this);
+    return polygonNearestPoint(points, point);
+  }
+
+  intersectWithLine(start: IVec, end: IVec) {
+    const points = getPointsFromBoundsWithRotation(this);
+    return linePolygonIntersects(start, end, points);
+  }
+
+  getRelativePointLocation(relativePoint: IVec) {
+    const bound = Bound.deserialize(this.xywh);
+    const point = bound.getRelativePoint(relativePoint);
+    const rotatePoint = rotatePoints([point], bound.center, this.rotate)[0];
+    const points = rotatePoints(bound.points, bound.center, this.rotate);
+    const tangent = polygonGetPointTangent(points, rotatePoint);
+    return new PointLocation(rotatePoint, tangent);
+  }
+
+  boxSelect(bound: Bound): boolean {
+    return (
+      this.containedByBounds(bound) ||
+      bound.points.some((point, i, points) =>
+        this.intersectWithLine(point, points[(i + 1) % points.length])
+      )
+    );
+  }
+
+  hitTest(x: number, y: number, _: HitTestOptions, __?: EditorHost): boolean {
+    return this.elementBound.isPointInBound([x, y]);
+  }
+
+  serialize() {
+    return this.yMap.toJSON();
   }
 }

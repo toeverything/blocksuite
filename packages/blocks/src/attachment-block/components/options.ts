@@ -14,6 +14,7 @@ import {
   ViewIcon,
 } from '../../_common/icons/index.js';
 import { stopPropagation } from '../../_common/utils/event.js';
+import type { AttachmentBlockComponent } from '../attachment-block.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
 import { allowEmbed, turnIntoEmbedAction } from '../embed.js';
 import { MoreMenu } from './more-menu.js';
@@ -28,7 +29,7 @@ export function AttachmentOptionsTemplate({
   abortController,
   ref: refOrCallback = createRef<HTMLDivElement>(),
 }: {
-  anchor: HTMLElement;
+  anchor: AttachmentBlockComponent;
   model: AttachmentBlockModel;
   downloadAttachment: (model: AttachmentBlockModel) => void | Promise<void>;
   showCaption: () => void;
@@ -109,6 +110,7 @@ export function AttachmentOptionsTemplate({
           const renameAbortController = new AbortController();
           createLitPortal({
             template: RenameModal({
+              editorHost: anchor.host,
               model,
               abortController: renameAbortController,
             }),

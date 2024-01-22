@@ -202,6 +202,15 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   async toSliceSnapshot(
     payload: MarkdownToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {
+    payload.file = payload.file
+      .split('\n')
+      .map(line => {
+        if (line.trimStart().startsWith('-')) {
+          return line;
+        }
+        return line.replace(/^ /, '&#x20;');
+      })
+      .join('\n');
     const markdownAst = this._markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
@@ -578,6 +587,39 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .closeNode();
 
           context.skipAllChildren();
+          break;
+        }
+        case 'affine:bookmark': {
+          // Parse bookmark as link
+          if (
+            typeof o.node.props.title !== 'string' ||
+            typeof o.node.props.url !== 'string'
+          ) {
+            break;
+          }
+          context
+            .openNode(
+              {
+                type: 'paragraph',
+                children: [],
+              },
+              'children'
+            )
+            .openNode(
+              {
+                type: 'link',
+                url: o.node.props.url,
+                children: [
+                  {
+                    type: 'text',
+                    value: o.node.props.title,
+                  },
+                ],
+              },
+              'children'
+            )
+            .closeNode()
+            .closeNode();
           break;
         }
       }

@@ -2,7 +2,7 @@ import './frames-setting-menu.js';
 
 import type {
   EdgelessPageBlockComponent,
-  SurfaceService,
+  PageService,
 } from '@blocksuite/blocks';
 import { type NavigatorMode } from '@blocksuite/blocks';
 import { createButtonPopper } from '@blocksuite/blocks';
@@ -143,8 +143,8 @@ export class FramePanelHeader extends WithDisposable(LitElement) {
   };
 
   private _tryLoadNavigatorStateLocalRecord() {
-    this._navigatorMode = (<SurfaceService>(
-      this.editorHost.spec.getService('affine:surface')
+    this._navigatorMode = (<PageService>(
+      this.editorHost.spec.getService('affine:page')
     )).editSession.getItem('presentFillScreen')
       ? 'fill'
       : 'fit';

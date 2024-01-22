@@ -85,6 +85,7 @@ export const styles = css`
     flex-grow: 1;
 
     white-space: normal;
+    word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--affine-text-primary-color);
@@ -105,6 +106,7 @@ export const styles = css`
     max-width: 100%;
     cursor: pointer;
   }
+
   .affine-bookmark-content-url > span {
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -122,16 +124,24 @@ export const styles = css`
     font-weight: 400;
     line-height: 20px;
   }
+  .affine-bookmark-content-url:hover > span {
+    color: var(--affine-link-color);
+  }
+  .affine-bookmark-content-url:hover .open-icon {
+    fill: var(--affine-link-color);
+  }
+
   .affine-bookmark-content-url-icon {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 12px;
-    height: 12px;
+    height: 20px;
   }
-  .affine-bookmark-content-url-icon svg {
+  .affine-bookmark-content-url-icon .open-icon {
     height: 12px;
     width: 12px;
+    fill: var(--affine-text-secondary-color);
   }
 
   .affine-bookmark-banner {
@@ -161,6 +171,15 @@ export const styles = css`
   .affine-bookmark-card.loading-failed {
     .affine-bookmark-content-description {
       color: var(--affine-placeholder-color);
+    }
+  }
+
+  .affine-bookmark-card.selected {
+    .affine-bookmark-content-url > span {
+      color: var(--affine-link-color);
+    }
+    .affine-bookmark-content-url .open-icon {
+      fill: var(--affine-link-color);
     }
   }
 
@@ -203,6 +222,12 @@ export const styles = css`
 
     .affine-bookmark-content-description {
       -webkit-line-clamp: 6;
+      max-height: 120px;
+    }
+
+    .affine-bookmark-content-url {
+      flex-grow: 1;
+      align-items: flex-end;
     }
 
     .affine-bookmark-banner {

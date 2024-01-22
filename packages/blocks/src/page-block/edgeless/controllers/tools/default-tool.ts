@@ -6,22 +6,25 @@ import {
   handleNativeRangeAtPoint,
   resetNativeSelection,
   type Selectable,
-  type TopLevelBlockModel,
 } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import type { HitTestOptions } from '../../../../surface-block/elements/edgeless-element.js';
+import {
+  GroupElementModel,
+  ShapeElementModel,
+  TextElementModel,
+} from '../../../../surface-block/element-model/index.js';
 import {
   Bound,
   type CanvasElement,
-  ConnectorElement,
-  GroupElement,
+  ConnectorElementModel,
   type IVec,
-  ShapeElement,
-  TextElement,
-  Vec,
 } from '../../../../surface-block/index.js';
-import { getElementsFromGroup } from '../../../../surface-block/managers/group-manager.js';
-import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
+import { isConnectorAndBindingsAllSelected } from '../../../../surface-block/managers/connector-manager.js';
+import type {
+  EdgelessBlockModel,
+  EdgelessElement,
+  HitTestOptions,
+} from '../../type.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { calPanDelta } from '../../utils/panning-utils.js';
 import {
@@ -65,13 +68,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _dragLastPos: IVec = [0, 0];
   private _dragStartModelCoord: IVec = [0, 0];
   private _dragLastModelCoord: IVec = [0, 0];
-  private _lastMoveDelta: IVec = [0, 0];
   private _lock = false;
   // Do not select the text, when click again after activating the note.
   private _isDoubleClickedOnMask = false;
   private _alignBound = new Bound();
   private _selectedBounds: Bound[] = [];
-  private _toBeMoved: Selectable[] = [];
+  private _toBeMoved: EdgelessElement[] = [];
   private _frames = new Set<FrameBlockModel>();
   private _autoPanTimer: number | null = null;
   private _dragging = false;
@@ -79,11 +81,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
-      const [startX, startY] = this._surface.toViewCoord(
+      const [startX, startY] = this._service.viewport.toViewCoord(
         this._dragStartModelCoord[0],
         this._dragStartModelCoord[1]
       );
-      const [endX, endY] = this._surface.toViewCoord(
+      const [endX, endY] = this._service.viewport.toViewCoord(
         this._dragLastModelCoord[0],
         this._dragLastModelCoord[1]
       );
@@ -96,7 +98,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   get selection() {
-    return this._edgeless.selectionManager;
+    return this._edgeless.service.selection;
   }
 
   get state() {
@@ -104,11 +106,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _pick(x: number, y: number, options?: HitTestOptions) {
-    const { surface } = this._edgeless;
-    return surface.pickTopWithGroup(
-      surface.viewport.toModelCoord(x, y),
-      options
-    );
+    const service = this._service;
+    const modelPos = service.viewport.toModelCoord(x, y);
+
+    return service.pickElementInGroup(modelPos[0], modelPos[1], options);
   }
 
   private _setNoneSelectionState() {
@@ -125,7 +126,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _handleClickOnSelected(element: Selectable, e: PointerEventState) {
+  private _handleClickOnSelected(
+    element: EdgelessElement,
+    e: PointerEventState
+  ) {
     const { selectedIds, selections } = this.selection;
     const editing = selections[0]?.editing ?? false;
 
@@ -172,22 +176,21 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._page.captureSync();
     }
 
-    const { surface } = this._edgeless;
     const bound = initialBound.clone();
     bound.x += delta[0];
     bound.y += delta[1];
 
-    if (selected instanceof ConnectorElement) {
-      surface.connector.updateXYWH(selected, bound);
+    if (selected instanceof ConnectorElementModel) {
+      selected.moveTo(bound);
     }
 
-    this._surface.updateElement(selected.id, {
+    this._service.updateElement(selected.id, {
       xywh: bound.serialize(),
     });
   }
 
   private _handleBlockDragMove(
-    block: TopLevelBlockModel,
+    block: EdgelessBlockModel,
     initialBound: Bound,
     delta: IVec
   ) {
@@ -195,7 +198,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.x += delta[0];
     bound.y += delta[1];
 
-    this._surface.updateElement(block.id, {
+    this._service.updateElement(block.id, {
       xywh: bound.serialize(),
     });
   }
@@ -206,7 +209,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     const commonBound = edgelessElementsBound(selected);
 
-    const [modelX, modelY] = this._surface.toModelCoord(viewX, viewY);
+    const [modelX, modelY] = this._service.viewport.toModelCoord(viewX, viewY);
     if (commonBound && commonBound.isPointInBound([modelX, modelY])) {
       return true;
     }
@@ -215,21 +218,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _isDraggable(element: Selectable) {
     return !(
-      element instanceof ConnectorElement &&
+      element instanceof ConnectorElementModel &&
       !isConnectorAndBindingsAllSelected(element, this._toBeMoved)
     );
-  }
-
-  private _forceUpdateSelection(
-    type: DefaultModeDragType,
-    dragging = false,
-    delta: IVec = [0, 0]
-  ) {
-    this._edgeless.slots.selectedRectUpdated.emit({
-      type: type === DefaultModeDragType.Selecting ? 'select' : 'move',
-      delta: Vec.toPoint(delta),
-      dragging,
-    });
   }
 
   onContainerPointerDown(): void {
@@ -255,7 +246,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   onContainerDblClick(e: PointerEventState) {
     if (this._page.readonly) {
-      const viewport = this._surface.viewport;
+      const viewport = this._service.viewport;
       if (viewport.zoom === 1) {
         // Fit to Screen
         const { centerX, centerY, zoom } = this._edgeless.getFitToScreenData();
@@ -276,18 +267,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       addText(this._edgeless, e);
       return;
     } else {
-      const [modelX, modelY] = this._edgeless.surface.viewport.toModelCoord(
-        e.x,
-        e.y
-      );
-      if (selected instanceof TextElement) {
+      const [modelX, modelY] = this._service.viewport.toModelCoord(e.x, e.y);
+      if (selected instanceof TextElementModel) {
         mountTextElementEditor(selected, this._edgeless, {
           x: modelX,
           y: modelY,
         });
         return;
       }
-      if (selected instanceof ShapeElement) {
+      if (selected instanceof ShapeElementModel) {
         mountShapeTextEditor(selected, this._edgeless);
         return;
       }
@@ -295,10 +283,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         mountFrameTitleEditor(selected, this._edgeless);
         return;
       }
-      if (
-        selected instanceof GroupElement &&
-        selected.titleBound.containsPoint([modelX, modelY])
-      ) {
+      if (selected instanceof GroupElementModel) {
         mountGroupTitleEditor(selected, this._edgeless);
         return;
       }
@@ -373,12 +358,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _updateSelectingState = () => {
-    const { surface, tools, selectionManager } = this._edgeless;
-    const { viewport } = surface;
+    const { tools, service } = this._edgeless;
+    const { selection } = service;
     const startX = this._dragStartModelCoord[0];
     const startY = this._dragStartModelCoord[1];
     // Should convert the last drag position to model coordinate
-    const [curX, curY] = viewport.toModelCoord(
+    const [curX, curY] = service.viewport.toModelCoord(
       this._dragLastPos[0],
       this._dragLastPos[1]
     );
@@ -389,10 +374,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const h = Math.abs(startY - curY);
     const bound = new Bound(x, y, w, h);
 
-    const elements = surface.pickByBound(bound);
+    const elements = service.pickElementsByBound(bound);
 
     const set = new Set(
-      tools.shiftKey ? [...elements, ...selectionManager.elements] : elements
+      tools.shiftKey ? [...elements, ...selection.elements] : elements
     );
 
     this._setSelectionState(
@@ -402,12 +387,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     // Record the last model coordinate for dragging area updating
     this._dragLastModelCoord = [curX, curY];
-    this._forceUpdateSelection(this.dragType, true);
     this._edgeless.slots.draggingAreaUpdated.emit();
   };
 
   private _panViewport = (delta: IVec) => {
-    const { viewport } = this._edgeless.surface;
+    const { viewport } = this._service;
     viewport.applyDeltaCenter(delta[0], delta[1]);
   };
 
@@ -462,7 +446,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
 
     // Connector needs to be updated first
-    this._toBeMoved.sort((a, _) => (a instanceof ConnectorElement ? -1 : 1));
+    this._toBeMoved.sort((a, _) =>
+      a instanceof ConnectorElementModel ? -1 : 1
+    );
     this._addFrames();
     // Set up drag state
     this.initializeDragState(e, dragType);
@@ -470,7 +456,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _filterConnectedConnector() {
     this._toBeMoved = this._toBeMoved.filter(ele => {
-      if (ele instanceof ConnectorElement && ele.source.id && ele.target.id) {
+      if (
+        ele instanceof ConnectorElementModel &&
+        ele.source.id &&
+        ele.target.id
+      ) {
         if (
           !!this._toBeMoved.find(e => e.id === ele.source.id) &&
           !!this._toBeMoved.find(e => e.id === ele.target.id)
@@ -490,8 +480,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         this._surface.frame
           .getElementsInFrame(element)
           .forEach(ele => toBeMoved.add(ele));
-      } else if (element instanceof GroupElement) {
-        getElementsFromGroup(element).forEach(ele => toBeMoved.add(ele));
+      } else if (element instanceof GroupElementModel) {
+        element.decendants().forEach(ele => toBeMoved.add(ele));
       }
     });
     this._toBeMoved = Array.from(toBeMoved);
@@ -503,15 +493,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragging = true;
     this._dragStartPos = [x, y];
     this._dragLastPos = [x, y];
-    const [startX, startY] = this._surface.toModelCoord(x, y);
+    const [startX, startY] = this._service.viewport.toModelCoord(x, y);
     this._dragStartModelCoord = [startX, startY];
     this._dragLastModelCoord = [startX, startY];
-
-    this._alignBound = this._surface.snap.setupAlignables(this._toBeMoved);
 
     this._selectedBounds = this._toBeMoved.map(element =>
       Bound.deserialize(element.xywh)
     );
+    this._alignBound = this._surface.snap.setupAlignables(this._toBeMoved);
 
     // If the drag type is selecting, set up the dragging area disposable group
     // If the viewport updates when dragging, should update the dragging area and selection
@@ -520,7 +509,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
       this._draggingAreaDisposables = new DisposableGroup();
       this._draggingAreaDisposables.add(
-        this._edgeless.slots.viewportUpdated.on(() => {
+        this._edgeless.service.viewport.viewportUpdated.on(() => {
           if (
             this.dragType === DefaultModeDragType.Selecting &&
             this._dragging &&
@@ -535,7 +524,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   onContainerDragMove(e: PointerEventState) {
     const { surface } = this._edgeless;
-    const { viewport } = surface;
+    const { viewport } = this._service;
     const zoom = viewport.zoom;
     switch (this.dragType) {
       case DefaultModeDragType.Selecting: {
@@ -579,7 +568,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             );
           } else {
             this._handleBlockDragMove(
-              element,
+              element as EdgelessBlockModel,
               this._selectedBounds[index],
               delta
             );
@@ -590,12 +579,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           ? surface.frame.setHighlight(frame as FrameBlockModel)
           : surface.frame.clearHighlight();
 
-        this._forceUpdateSelection(
-          this.dragType,
-          true,
-          Vec.sub(delta, this._lastMoveDelta)
-        );
-        this._lastMoveDelta = delta;
         break;
       }
       case DefaultModeDragType.NativeEditing: {
@@ -624,13 +607,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = [0, 0];
     this._dragLastPos = [0, 0];
     this._selectedBounds = [];
-    this._lastMoveDelta = [0, 0];
     surface.snap.cleanupAlignables();
     surface.frame.clearHighlight();
     this._addFrames();
     this._frames.clear();
     this._toBeMoved = [];
-    this._forceUpdateSelection(this.dragType);
     this._clearSelectingState();
     this.dragType = DefaultModeDragType.None;
   }

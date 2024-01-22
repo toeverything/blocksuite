@@ -99,11 +99,8 @@ export class TableSelectionController implements ReactiveController {
   }
 
   private handleDragEvent() {
-    let isDragging = false;
     this.host.disposables.add(
       this.host.handleEvent('dragStart', context => {
-        isDragging = true;
-
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (target instanceof Element) {
@@ -124,23 +121,6 @@ export class TableSelectionController implements ReactiveController {
           }
           return false;
         }
-        return false;
-      })
-    );
-
-    this.host.disposables.add(
-      this.host.handleEvent('dragMove', context => {
-        if (isDragging) {
-          const event = context.get('pointerState').raw;
-          event.preventDefault();
-        }
-        return false;
-      })
-    );
-
-    this.host.disposables.add(
-      this.host.handleEvent('dragEnd', () => {
-        isDragging = false;
         return false;
       })
     );

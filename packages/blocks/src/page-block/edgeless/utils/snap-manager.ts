@@ -1,5 +1,6 @@
 import type { Alignable } from '../../../_common/types.js';
 import { Point } from '../../../_common/utils/rect.js';
+import type { ConnectorElementModel } from '../../../surface-block/index.js';
 import {
   Bound,
   deserializeXYWH,
@@ -51,19 +52,24 @@ export class EdgelessSnapManager extends Overlay {
 
   setupAlignables(alignables: Alignable[]): Bound {
     if (alignables.length === 0) return new Bound();
-    const { surface } = this.container;
-    const connectors = surface.connector.getConnecttedConnectors(
-      alignables.filter(isConnectable)
-    );
+    const { surface, service } = this.container;
+    const connectors = alignables.filter(isConnectable).reduce((prev, el) => {
+      const connectors = service.getConnectors(el);
 
-    const { viewport } = surface;
+      if (connectors.length > 0) {
+        prev = prev.concat(connectors);
+      }
+
+      return prev;
+    }, [] as ConnectorElementModel[]);
+
+    const { viewport } = service;
     const viewportBounds = Bound.from(viewport.viewportBounds);
-    viewport.addOverlay(this);
-
-    const canvasElements = surface.getElements();
+    surface.renderer.addOverlay(this);
+    const canvasElements = service.elements;
     const excludes = [...alignables, ...connectors];
     this._alignableBounds = [];
-    (<Alignable[]>[...surface.blocks, ...canvasElements]).forEach(alignable => {
+    (<Alignable[]>[...service.blocks, ...canvasElements]).forEach(alignable => {
       const bounds = this._getBoundsWithRotationByAlignable(alignable);
       if (
         viewportBounds.isOverlapWithBound(bounds) &&
@@ -80,18 +86,18 @@ export class EdgelessSnapManager extends Overlay {
   }
 
   cleanupAlignables() {
-    const { viewport } = this.container.surface;
+    const { renderer } = this.container.surface;
     this._alignableBounds = [];
     this._intraGraphicAlignLines = [];
     this._distributedAlignLines = [];
-    viewport.removeOverlay(this);
+    renderer.removeOverlay(this);
   }
 
   align(bound: Bound): { dx: number; dy: number } {
     const rst = { dx: 0, dy: 0 };
     const threshold = ALIGN_THRESHOLD;
-    const { surface } = this.container;
-    const { viewport } = surface;
+    const { service } = this.container;
+    const { viewport } = service;
 
     this._intraGraphicAlignLines = [];
     this._distributedAlignLines = [];
@@ -389,7 +395,7 @@ export class EdgelessSnapManager extends Overlay {
       this._distributedAlignLines.length === 0
     )
       return;
-    const { viewport } = this.container.surface;
+    const { viewport } = this.container.service;
     const strokeWidth = 1 / viewport.zoom;
     const offset = 5 / viewport.zoom;
     ctx.strokeStyle = '#1672F3';

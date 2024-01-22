@@ -2,6 +2,8 @@
 // Credits to tldraw
 // import { almostEqual } from './math-utils.js';
 
+export type IVec2 = [number, number];
+
 export type IVec = number[];
 export class Vec {
   /**

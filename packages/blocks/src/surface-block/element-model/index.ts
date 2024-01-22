@@ -1,10 +1,11 @@
 import { Workspace, type Y } from '@blocksuite/store';
 
+import { values } from '../../_common/utils/iterable.js';
 import type { SurfaceBlockModel } from '../surface-model.js';
 import { ElementModel } from './base.js';
 import { BrushElementModel } from './brush.js';
 import { ConnectorElementModel } from './connector.js';
-import { setCreateState } from './decorators.js';
+import { initFieldObservers, setCreateState } from './decorators.js';
 import { GroupElementModel } from './group.js';
 import { ShapeElementModel } from './shape.js';
 import { TextElementModel } from './text.js';
@@ -25,13 +26,15 @@ export function createElementModel(
   options: {
     onChange: (payload: {
       id: string;
-      props: Record<string, { oldValue: unknown }>;
+      props: Record<string, unknown>;
+      oldValues: Record<string, unknown>;
     }) => void;
     skipFieldInit?: boolean;
   }
 ): {
   model: ElementModel;
-  dispose: () => void;
+  unmount: () => void;
+  mount: () => void;
 } {
   const stashed = new Map<string | symbol, unknown>();
   const Ctor = elementsCtorMap[type as keyof typeof elementsCtorMap];
@@ -42,35 +45,55 @@ export function createElementModel(
 
   setCreateState(true, options.skipFieldInit ?? false);
 
+  let mounted = false;
   const elementModel = new Ctor({
     yMap,
     model,
     stashedStore: stashed,
-    onChange: props => options.onChange({ id, props }),
+    onChange: props => mounted && options.onChange({ id, ...props }),
   }) as ElementModel;
 
   setCreateState(false, false);
 
-  const dispose = onElementChange(yMap, props => {
-    options.onChange({
-      id,
-      props,
+  let disposable: () => void;
+
+  const unmount = () => {
+    mounted = false;
+    values(elementModel['_observerDisposable'] ?? {}).forEach(dispose =>
+      dispose()
+    );
+    disposable?.();
+  };
+
+  const mount = () => {
+    initFieldObservers(Ctor.prototype, elementModel);
+    disposable = onElementChange(yMap, payload => {
+      mounted &&
+        options.onChange({
+          id,
+          ...payload,
+        });
     });
-  });
+    mounted = true;
+  };
 
   return {
     model: elementModel,
-    dispose,
+    mount,
+    unmount,
   };
 }
 
 function onElementChange(
   yMap: Y.Map<unknown>,
-  callback: (props: Record<string, { oldValue: unknown }>) => void
+  callback: (payload: {
+    props: Record<string, unknown>;
+    oldValues: Record<string, unknown>;
+  }) => void
 ) {
-  const observer = (events: Y.YEvent<Y.Map<unknown>>[]) => {
-    const props: Record<string, { oldValue: unknown }> = {};
-    const event = events[0] as Y.YMapEvent<unknown>;
+  const observer = (event: Y.YMapEvent<unknown>) => {
+    const props: Record<string, unknown> = {};
+    const oldValues: Record<string, unknown> = {};
 
     event.keysChanged.forEach(key => {
       const type = event.changes.keys.get(key);
@@ -81,17 +104,21 @@ function onElementChange(
       }
 
       if (type.action === 'update' || type.action === 'add') {
-        props[key] = { oldValue };
+        props[key] = yMap.get(key);
+        oldValues[key] = oldValue;
       }
     });
 
-    callback(props);
+    callback({
+      props,
+      oldValues,
+    });
   };
 
-  yMap.observeDeep(observer);
+  yMap.observe(observer);
 
   return () => {
-    yMap.observeDeep(observer);
+    yMap.observe(observer);
   };
 }
 
@@ -112,7 +139,8 @@ export function createModelFromProps(
   options: {
     onChange: (payload: {
       id: string;
-      props: Record<string, { oldValue: unknown }>;
+      props: Record<string, unknown>;
+      oldValues: Record<string, unknown>;
     }) => void;
   }
 ) {
@@ -145,4 +173,40 @@ export function createModelFromProps(
   elementModel.model._preserved.clear();
 
   return elementModel;
+}
+
+export {
+  BrushElementModel,
+  ConnectorElementModel,
+  ElementModel,
+  GroupElementModel,
+  ShapeElementModel,
+  TextElementModel,
+};
+
+export type CanvasElement =
+  | BrushElementModel
+  | ConnectorElementModel
+  | ShapeElementModel
+  | TextElementModel
+  | GroupElementModel;
+
+export enum CanvasElementType {
+  SHAPE = 'shape',
+  BRUSH = 'brush',
+  CONNECTOR = 'connector',
+  TEXT = 'text',
+  GROUP = 'group',
+}
+
+export type ElementModelMap = {
+  ['shape']: ShapeElementModel;
+  ['brush']: BrushElementModel;
+  ['connector']: ConnectorElementModel;
+  ['text']: TextElementModel;
+  ['group']: GroupElementModel;
+};
+
+export function isCanvasElementType(type: string): type is CanvasElementType {
+  return type.toLocaleUpperCase() in CanvasElementType;
 }

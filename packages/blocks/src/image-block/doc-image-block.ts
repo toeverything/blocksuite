@@ -316,10 +316,11 @@ export class ImageBlockPageComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _onCaptionKeydown(e: KeyboardEvent) {
+    e.stopPropagation();
     this.std.event.activate();
     if (e.isComposing) return;
     if (e.key === 'Enter') {
-      e.stopPropagation();
+      e.preventDefault();
       const model = this.model;
       const page = model.page;
       const target = e.target as HTMLInputElement;

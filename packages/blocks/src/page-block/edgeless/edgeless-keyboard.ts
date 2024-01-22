@@ -3,9 +3,9 @@ import { IS_MAC } from '@blocksuite/global/env';
 import { type EdgelessTool } from '../../_common/types.js';
 import {
   Bound,
-  ConnectorElement,
+  ConnectorElementModel,
   ConnectorMode,
-  GroupElement,
+  GroupElementModel,
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
@@ -15,7 +15,7 @@ import {
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
-import { isCanvasElement } from './utils/query.js';
+import { isCanvasElement, isNoteBlock } from './utils/query.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override pageElement: EdgelessPageBlockComponent) {
@@ -33,7 +33,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         l: () => {
-          pageElement.surface.service.editSession.record('connector', {
+          pageElement.service.editSession.record('connector', {
             mode: ConnectorMode.Straight,
           });
           this._setEdgelessTool(pageElement, {
@@ -42,7 +42,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         x: () => {
-          pageElement.surface.service.editSession.record('connector', {
+          pageElement.service.editSession.record('connector', {
             mode: ConnectorMode.Orthogonal,
           });
           this._setEdgelessTool(pageElement, {
@@ -51,7 +51,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         c: () => {
-          pageElement.surface.service.editSession.record('connector', {
+          pageElement.service.editSession.record('connector', {
             mode: ConnectorMode.Curve,
           });
           this._setEdgelessTool(pageElement, {
@@ -85,7 +85,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         s: () => {
           const attributes =
-            pageElement.surface.service.editSession.getLastProps('shape');
+            pageElement.service.editSession.getLastProps('shape');
           this._setEdgelessTool(pageElement, {
             type: 'shape',
             shapeType: attributes.shapeType,
@@ -93,47 +93,57 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         f: () => {
           if (
-            this.pageElement.selectionManager.elements.length !== 0 &&
-            !this.pageElement.selectionManager.editing
+            this.pageElement.service.selection.elements.length !== 0 &&
+            !this.pageElement.service.selection.editing
           ) {
             pageElement.surface.frame.createFrameOnSelected();
-          } else if (!this.pageElement.selectionManager.editing) {
+          } else if (!this.pageElement.service.selection.editing) {
             this._setEdgelessTool(pageElement, { type: 'frame' });
+          }
+        },
+        '-': () => {
+          const { elements } = pageElement.service.selection;
+          if (
+            !pageElement.service.selection.editing &&
+            elements.length === 1 &&
+            isNoteBlock(elements[0])
+          ) {
+            pageElement.slots.toggleNoteSlicer.emit();
           }
         },
         'Mod-g': ctx => {
           if (
-            this.pageElement.selectionManager.elements.length > 1 &&
-            !this.pageElement.selectionManager.editing
+            this.pageElement.service.selection.elements.length > 1 &&
+            !this.pageElement.service.selection.editing
           ) {
             ctx.get('keyboardState').event.preventDefault();
-            pageElement.surface.group.createGroupOnSelected();
+            pageElement.service.createGroupFromSelected();
           }
         },
         'Shift-Mod-g': ctx => {
-          const { selectionManager, surface } = this.pageElement;
+          const { selection } = this.pageElement.service;
           if (
-            selectionManager.elements.length === 1 &&
-            selectionManager.firstElement instanceof GroupElement
+            selection.elements.length === 1 &&
+            selection.firstElement instanceof GroupElementModel
           ) {
             ctx.get('keyboardState').event.preventDefault();
-            surface.group.ungroup(selectionManager.firstElement);
+            pageElement.service.ungroup(selection.firstElement);
           }
         },
         'Mod-a': ctx => {
-          if (this.pageElement.selectionManager.editing) {
+          if (this.pageElement.service.selection.editing) {
             return;
           }
 
           ctx.get('defaultState').event.preventDefault();
-          const { surface } = this.pageElement;
-          this.pageElement.selectionManager.set({
+          const { service } = this.pageElement;
+          this.pageElement.service.selection.set({
             elements: [
-              ...surface.group
-                .getRootElements(this.pageElement.surface.blocks)
+              ...service.blocks
+                .filter(block => block.group === null)
                 .map(block => block.id),
-              ...surface.group
-                .getRootElements(this.pageElement.surface.getElements())
+              ...service.elements
+                .filter(el => el.group === null)
                 .map(el => el.id),
             ],
             editing: false,
@@ -178,8 +188,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._move('ArrowRight');
         },
         Escape: () => {
-          if (!this.pageElement.selectionManager.empty) {
-            pageElement.selectionManager.clear();
+          if (!this.pageElement.service.selection.empty) {
+            pageElement.selection.clear();
           }
         },
       },
@@ -238,7 +248,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _space(event: KeyboardEvent) {
     const edgeless = this.pageElement;
     const type = edgeless.edgelessTool.type;
-    const selection = edgeless.selectionManager;
+    const selection = edgeless.service.selection;
 
     if (type !== 'default' && type !== 'pan') {
       return;
@@ -265,14 +275,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _delete() {
     const edgeless = this.pageElement;
 
-    if (edgeless.selectionManager.editing) {
+    if (edgeless.service.selection.editing) {
       return;
     }
 
-    deleteElements(edgeless.surface, edgeless.selectionManager.elements);
+    deleteElements(edgeless.surface, edgeless.service.selection.elements);
 
-    edgeless.selectionManager.clear();
-    edgeless.selectionManager.set(edgeless.selectionManager.selections);
+    edgeless.service.selection.clear();
+    edgeless.service.selection.set(edgeless.service.selection.selections);
   }
 
   private _setEdgelessTool(
@@ -281,7 +291,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     ignoreActiveState = false
   ) {
     // when editing, should not update mouse mode by shortcut
-    if (!ignoreActiveState && edgeless.selectionManager.editing) {
+    if (!ignoreActiveState && edgeless.service.selection.editing) {
       return;
     }
     edgeless.tools.setEdgelessTool(edgelessTool);
@@ -289,9 +299,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
   private _move(key: string) {
     const edgeless = this.pageElement;
-    if (edgeless.selectionManager.editing) return;
-    const { surface } = edgeless;
-    const { elements } = edgeless.selectionManager;
+    if (edgeless.service.selection.editing) return;
+    const { elements } = edgeless.service.selection;
     elements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
 
@@ -311,14 +320,13 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       }
 
       if (isCanvasElement(element)) {
-        if (element instanceof ConnectorElement) {
-          surface.connector.updateXYWH(element, bound);
+        if (element instanceof ConnectorElementModel) {
+          element.moveTo(bound);
         }
-        surface.setElementBound(element.id, bound);
+        element['xywh'] = bound.serialize();
       } else {
-        this.pageElement.page.updateBlock(element, { xywh: bound.serialize() });
+        element['xywh'] = bound.serialize();
       }
-      this.pageElement.slots.hoverUpdated.emit();
     });
   }
 }

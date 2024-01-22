@@ -1,6 +1,7 @@
 import { type Slot } from '@blocksuite/global/utils';
 import { type BlockModel, type Page } from '@blocksuite/store';
 
+import type { EmbedFigmaModel } from '../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocModel } from '../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../embed-youtube-block/embed-youtube-model.js';
@@ -8,13 +9,14 @@ import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
 import type { BookmarkBlockModel } from '../models.js';
 import type { NoteBlockModel } from '../note-block/index.js';
-import {
-  type BrushElement,
-  type CanvasElement,
-  type ConnectorElement,
-  type ConnectorMode,
-  type GroupElement,
-} from '../surface-block/elements/index.js';
+import type { EdgelessElement } from '../page-block/edgeless/type.js';
+import type { ConnectorMode } from '../surface-block/element-model/connector.js';
+import type {
+  BrushElementModel,
+  ConnectorElementModel,
+  GroupElementModel,
+} from '../surface-block/element-model/index.js';
+import { type CanvasElement } from '../surface-block/element-model/index.js';
 import type { ShapeType } from '../surface-block/index.js';
 import type { NavigatorMode } from './edgeless/frame/consts.js';
 import type { RefNodeSlots } from './inline/presets/nodes/reference-node/reference-node.js';
@@ -125,9 +127,10 @@ export type TopLevelBlockModel =
   | BookmarkBlockModel
   | EmbedGithubModel
   | EmbedYoutubeModel
+  | EmbedFigmaModel
   | EmbedLinkedDocModel;
 
-export type EdgelessElement = TopLevelBlockModel | CanvasElement;
+export type { EdgelessElement };
 
 export type Alignable = EdgelessElement;
 
@@ -137,7 +140,10 @@ export type Erasable = EdgelessElement;
 
 export type Connectable =
   | TopLevelBlockModel
-  | Exclude<CanvasElement, ConnectorElement | BrushElement | GroupElement>;
+  | Exclude<
+      CanvasElement,
+      ConnectorElementModel | BrushElementModel | GroupElementModel
+    >;
 
 export type DefaultTool = {
   type: 'default';
@@ -206,6 +212,12 @@ export type NoteTool = {
   tip: string;
 };
 
+export enum NoteDisplayMode {
+  DocAndEdgeless = 'both',
+  EdgelessOnly = 'edgeless',
+  DocOnly = 'doc',
+}
+
 export type ConnectorTool = {
   type: 'connector';
   mode: ConnectorMode;
@@ -240,7 +252,9 @@ export interface Viewport {
 
 export type EmbedCardStyle =
   | 'horizontal'
+  | 'horizontalThin'
   | 'list'
   | 'vertical'
   | 'cube'
-  | 'video';
+  | 'video'
+  | 'figma';

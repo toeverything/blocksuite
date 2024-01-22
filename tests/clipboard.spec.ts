@@ -813,6 +813,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -873,6 +874,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -924,7 +926,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'abc', true);
   await pressEscape(page);
-  await focusRichText(page, 1);
+  await focusRichText(page, 2);
   await selectAllByKeyboard(page);
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);
@@ -938,6 +940,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -983,6 +986,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1125,6 +1129,7 @@ test(
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1159,6 +1164,7 @@ test(
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1278,6 +1284,7 @@ test(scoped`auto identify url`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {

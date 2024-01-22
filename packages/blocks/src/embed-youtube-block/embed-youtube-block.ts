@@ -31,10 +31,13 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 > {
   static override styles = styles;
 
-  override cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
+  override _cardStyle: (typeof EmbedYoutubeStyles)[number] = 'video';
 
   @property({ attribute: false })
   loading = false;
+
+  @state()
+  private _isSelected = false;
 
   @state()
   private _showOverlay = true;
@@ -76,6 +79,11 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     }
   }
 
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.open();
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -112,10 +120,10 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     // this is required to prevent iframe from capturing pointer events
     this.disposables.add(
       this.std.selection.slots.changed.on(sels => {
-        if (this._isDragging) return;
-        this._showOverlay = !sels.some(sel =>
+        this._isSelected = sels.some(sel =>
           PathFinder.equals(sel.path, this.path)
         );
+        this._showOverlay = this._isDragging || !this._isSelected;
       })
     );
     // this is required to prevent iframe from capturing pointer events
@@ -128,16 +136,31 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       const surface = this.surface;
       assertExists(surface);
       this.disposables.add(
-        surface.edgeless.slots.elementUpdated.on(({ id }) => {
-          if (id === this.model.id) {
-            this.requestUpdate();
-          }
+        this.model.propsUpdated.on(() => {
+          this.requestUpdate();
         })
       );
     }
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
+    const selection = this.host.selection;
+    const textSelection = selection.find('text');
+    if (
+      !!textSelection &&
+      (!!textSelection.to || !!textSelection.from.length)
+    ) {
+      return null;
+    }
+
+    const blockSelections = selection.filter('block');
+    if (
+      blockSelections.length > 1 ||
+      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
+    ) {
+      return null;
+    }
+
     return {
       template: html`
         <style>
@@ -173,9 +196,9 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
       style,
     } = this.model;
 
-    this.cardStyle = style;
-    this._width = EMBED_CARD_WIDTH[this.cardStyle];
-    this._height = EMBED_CARD_HEIGHT[this.cardStyle];
+    this._cardStyle = style;
+    this._width = EMBED_CARD_WIDTH[this._cardStyle];
+    this._height = EMBED_CARD_HEIGHT[this._cardStyle];
 
     const loading = this.loading;
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons();
@@ -208,8 +231,10 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
             class=${classMap({
               'affine-embed-youtube-block': true,
               loading,
+              selected: this._isSelected,
             })}
             @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
           >
             <div class="affine-embed-youtube-video">
               ${videoId

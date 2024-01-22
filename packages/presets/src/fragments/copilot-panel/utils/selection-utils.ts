@@ -1,4 +1,8 @@
-import type { FrameBlockModel, ImageBlockModel } from '@blocksuite/blocks';
+import type {
+  EdgelessBlock,
+  FrameBlockModel,
+  ImageBlockModel,
+} from '@blocksuite/blocks';
 import { BlocksUtils, type SurfaceBlockComponent } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
@@ -108,7 +112,7 @@ export function getEdgelessPageBlockFromEditor(editor: EditorHost) {
 export async function selectedToCanvas(editor: EditorHost) {
   const edgelessPage = getEdgelessPageBlockFromEditor(editor);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
-    edgelessPage.selectionManager.elements
+    edgelessPage.service.selection.elements
   );
   if (notes.length + frames.length + images.length + shapes.length === 0) {
     return;
@@ -149,9 +153,9 @@ export async function selectedToPng(editor: EditorHost) {
   return (await selectedToCanvas(editor))?.toDataURL('image/png');
 }
 
-export async function getSelectedTextContent(host: EditorHost) {
-  const slice = await getSelectedTextSlice(host);
-  return await getMarkdownFromSlice(host, slice);
+export async function getSelectedTextContent(editorHost: EditorHost) {
+  const slice = await getSelectedTextSlice(editorHost);
+  return await getMarkdownFromSlice(editorHost, slice);
 }
 
 export const stopPropagation = (e: Event) => {
@@ -180,7 +184,7 @@ export const getFirstImageInFrame = (
   const elements = surface.frame.getElementsInFrame(frame, false);
   const image = elements.find(ele => {
     if (!BlocksUtils.isCanvasElement(ele)) {
-      return ele.flavour === 'affine:image';
+      return (ele as EdgelessBlock).flavour === 'affine:image';
     }
     return false;
   }) as ImageBlockModel | undefined;

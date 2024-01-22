@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { type BlobManager, type BlockModel } from '@blocksuite/store';
 
@@ -45,11 +46,12 @@ export async function getAttachmentBlob(model: AttachmentBlockModel) {
  * the download process may take a long time!
  */
 export async function downloadAttachmentBlob(
+  editorHost: EditorHost,
   attachmentModel: AttachmentBlockModel
 ) {
   const attachment = await getAttachmentBlob(attachmentModel);
   if (!attachment) {
-    toast('Failed to download attachment!');
+    toast(editorHost, 'Failed to download attachment!');
     console.error(
       'attachment load failed! sourceId:',
       attachmentModel.sourceId,
@@ -118,6 +120,7 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
  * @internal
  */
 async function uploadBlobForAttachment(
+  editorHost: EditorHost,
   page: Page,
   attachmentModelId: string,
   blob: Blob
@@ -155,6 +158,7 @@ async function uploadBlobForAttachment(
     console.error(error);
     if (error instanceof Error) {
       toast(
+        editorHost,
         `Failed to upload attachment! ${error.message || error.toString()}`
       );
     }
@@ -168,6 +172,7 @@ async function uploadBlobForAttachment(
  * Add a new attachment block before / after the specified block.
  */
 export async function addSiblingAttachmentBlock(
+  editorHost: EditorHost,
   file: File,
   maxFileSize: number,
   model: BlockModel,
@@ -175,6 +180,7 @@ export async function addSiblingAttachmentBlock(
 ): Promise<string | null> {
   if (file.size > maxFileSize) {
     toast(
+      editorHost,
       `You can only upload files less than ${humanFileSize(
         maxFileSize,
         true,
@@ -199,7 +205,7 @@ export async function addSiblingAttachmentBlock(
   };
   const [newBlockId] = page.addSiblingBlocks(model, [props], place);
   // Do not add await here, because upload may take a long time, we want to do it in the background.
-  return uploadBlobForAttachment(page, newBlockId, file);
+  return uploadBlobForAttachment(editorHost, page, newBlockId, file);
 }
 
 const attachmentLoadingMap = new Set<string>();

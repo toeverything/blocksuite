@@ -14,8 +14,8 @@ import {
   Workspace,
 } from '@blocksuite/store';
 
-import { LeftSidePanel } from '../starter/components/left-side-panel';
-import { PagesPanel } from '../starter/components/pages-panel';
+import { LeftSidePanel } from '../starter/components/left-side-panel.js';
+import { PagesPanel } from '../starter/components/pages-panel.js';
 import { QuickEdgelessMenu } from './components/quick-edgeless-menu.js';
 import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
 import { initCollaborationSocket } from './providers/websocket-channel.js';
@@ -131,11 +131,11 @@ async function initWorkspace(workspace: Workspace) {
     (!databaseExists && !params.get('room')) || params.get('init');
 
   if (shouldInit) {
-    const deleteResult = await new Promise(resovle => {
+    const deleteResult = await new Promise(resolve => {
       const req = indexedDB.deleteDatabase(INDEXED_DB_NAME);
-      req.onerror = resovle;
-      req.onblocked = resovle;
-      req.onsuccess = resovle;
+      req.onerror = resolve;
+      req.onblocked = resolve;
+      req.onsuccess = resolve;
     });
 
     console.info('Delete database: ', deleteResult);

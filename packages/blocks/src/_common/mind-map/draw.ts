@@ -1,5 +1,7 @@
 import { Workspace } from '@blocksuite/store';
 
+import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import type { ShapeElementModel } from '../../surface-block/index.js';
 import {
   Bound,
   CanvasElementType,
@@ -10,7 +12,6 @@ import {
   type IShape,
   normalizeShapeBound,
   SHAPE_TEXT_PADDING,
-  type ShapeElement,
   ShapeStyle,
   type ShapeType,
   StrokeStyle,
@@ -78,18 +79,19 @@ const drawAllNode = (
   };
   const drawNode = (node: TreeNode, isRoot = false): LayoutNode_ => {
     const { text, children } = node;
-    const id =
-      isRoot && options?.rootId
-        ? options.rootId
-        : surface.addElement(CanvasElementType.SHAPE, {
-            ...DEFAULT_SHAPE_PROPS,
-            xywh: `[${0},${0},${0},${0}]`,
-            text: new Workspace.Y.Text(text),
-          });
+    const service =
+      isRoot && options?.rootId ? options.rootId : surface.edgeless.service;
+    const id = service.addElement(CanvasElementType.SHAPE, {
+      ...DEFAULT_SHAPE_PROPS,
+      xywh: `[${0},${0},${0},${0}]`,
+      text: new Workspace.Y.Text(text),
+    });
     shapeIds.push(id);
-    const ele = surface.pickById(id) as ShapeElement;
+    const ele = service.getElementById(id) as ShapeElementModel;
     const maxWidth =
-      Math.max(...text.split('\n').map(line => getLineWidth(line, ele.font))) +
+      Math.max(
+        ...text.split('\n').map(line => getLineWidth(line, getFontString(ele)))
+      ) +
       SHAPE_TEXT_PADDING * 2;
     const bound = normalizeShapeBound(
       ele,
@@ -119,7 +121,9 @@ const drawAllNode = (
   const updatePosition = (node: LayoutNode_, result: LayoutNodeResult) => {
     const { id, width, height } = node;
     const { x, y } = result.self;
-    surface.updateElement(id, {
+    const service = surface.edgeless.service;
+
+    service.updateElement(id, {
       xywh: `[${x},${y},${width},${height}]`,
     });
     node.children.forEach((child, index) => {
@@ -127,7 +131,7 @@ const drawAllNode = (
       updatePosition(child, layoutNodeResult);
       if (layoutNodeResult.connector) {
         const direction = directionMap[layoutNodeResult.connector.direction];
-        const connectorId = surface.addElement(CanvasElementType.CONNECTOR, {
+        const connectorId = service.addElement(CanvasElementType.CONNECTOR, {
           ...DEFAULT_CONNECTOR_PROPS,
           source: {
             id: id,
@@ -156,9 +160,10 @@ export function drawMindMap(
 ) {
   const { shapeIds, connectorIds } = drawAllNode(mindMap, surfaceElement, ops);
   const { edgeless } = surfaceElement;
-  edgeless.selectionManager.set({
+
+  edgeless.service.selection.set({
     elements: [...shapeIds, ...connectorIds],
     editing: false,
   });
-  surfaceElement.group.createGroupOnSelected();
+  surfaceElement.edgeless.service.createGroupFromSelected();
 }

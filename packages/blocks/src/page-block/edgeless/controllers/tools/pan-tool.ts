@@ -42,7 +42,7 @@ export class PanToolController extends EdgelessToolController<PanTool> {
   onContainerDragMove(e: PointerEventState) {
     if (!this._lastPoint) return;
 
-    const { viewport } = this._edgeless.surface;
+    const { viewport } = this._service;
     const { zoom } = viewport;
 
     const [lastX, lastY] = this._lastPoint;

@@ -17,3 +17,9 @@ export const enum FontWeight {
 }
 
 export type FontStyle = 'normal' | 'italic';
+
+export type TextAlign = 'left' | 'center' | 'right';
+
+export type VerticalAlign = 'top' | 'center' | 'bottom';
+
+export const DEFAULT_CENTRAL_AREA_RATIO = 0.3;

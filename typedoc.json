@@ -8,7 +8,7 @@
     "packages/inline"
   ],
   "plugin": ["typedoc-plugin-markdown"],
-  "out": "packages/docs/api",
+  "out": "packages/docs/main/api",
   "entryPointStrategy": "packages",
   "includeVersion": false,
   "logLevel": "Error",

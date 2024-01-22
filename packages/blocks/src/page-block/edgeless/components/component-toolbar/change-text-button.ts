@@ -6,7 +6,7 @@ import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { TextElement } from '../../../../surface-block/index.js';
+import type { TextElementModel } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 
 @customElement('edgeless-change-text-button')
@@ -22,7 +22,7 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  texts: TextElement[] = [];
+  texts: TextElementModel[] = [];
 
   @property({ attribute: false })
   page!: Page;

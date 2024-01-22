@@ -2,8 +2,7 @@ import type {
   Connectable,
   EdgelessElement,
 } from '../../../_common/utils/index.js';
-import { GroupElement } from '../../../surface-block/index.js';
-import { getElementsFromGroup } from '../../../surface-block/managers/group-manager.js';
+import { GroupElementModel } from '../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { isConnectable, isNoteBlock } from './query.js';
 
@@ -12,16 +11,16 @@ export function deleteElements(
   elements: EdgelessElement[]
 ) {
   const set = new Set(elements);
+  const service = surface.edgeless.service;
+
   elements.forEach(element => {
     if (isConnectable(element)) {
-      const connectors = surface.connector.getConnecttedConnectors([
-        element as Connectable,
-      ]);
+      const connectors = service.getConnectors(element as Connectable);
       connectors.forEach(connector => set.add(connector));
     }
 
-    if (element instanceof GroupElement) {
-      getElementsFromGroup(element).forEach(child => {
+    if (element instanceof GroupElementModel) {
+      element.decendants().forEach(child => {
         set.add(child);
       });
     }
@@ -35,7 +34,7 @@ export function deleteElements(
         surface.page.deleteBlock(element);
       }
     } else {
-      surface.removeElement(element.id);
+      service.removeElement(element.id);
     }
   });
 }

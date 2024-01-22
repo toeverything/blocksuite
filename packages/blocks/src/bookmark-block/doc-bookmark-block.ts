@@ -1,5 +1,5 @@
 import '../_common/components/embed-card/embed-card-caption.js';
-import '../_common/components/embed-card/embed-card-toolbar';
+import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
@@ -38,6 +38,24 @@ export class DocBookmarkBlockComponent extends WithDisposable(
   }
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
+    const selection = this.host.selection;
+    const textSelection = selection.find('text');
+    if (
+      !!textSelection &&
+      (!!textSelection.to || !!textSelection.from.length)
+    ) {
+      return null;
+    }
+
+    const blockSelections = selection.filter('block');
+    if (
+      blockSelections.length > 1 ||
+      (blockSelections.length === 1 &&
+        blockSelections[0].path !== this.block.path)
+    ) {
+      return null;
+    }
+
     return {
       template: html`
         <style>

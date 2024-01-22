@@ -34,35 +34,37 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
 
   override firstUpdated() {
     const { _disposables, edgeless } = this;
-    const { surface } = edgeless;
+    const { service, surface } = edgeless;
 
     _disposables.add(
-      surface.viewport.slots.viewportUpdated.on(() => {
+      service.viewport.viewportUpdated.on(() => {
         this.requestUpdate();
       })
     );
 
     _disposables.add(
-      edgeless.slots.elementUpdated.on(({ id }) => {
-        if (id === this.frame.id) {
-          this.requestUpdate();
-        }
+      this.frame.propsUpdated.on(() => {
+        this.requestUpdate();
       })
     );
 
     _disposables.add(
-      edgeless.slots.elementRemoved.on(({ id }) => {
-        if (id === this.frame.id) {
+      this.frame.page.slots.blockUpdated.on(({ type, id }) => {
+        if (type === 'update' && id === this.frame.id) {
+          this.requestUpdate();
+        }
+
+        if (type === 'delete' && id === this.frame.id) {
           this.remove();
         }
       })
     );
 
     _disposables.add(
-      edgeless.selectionManager.slots.updated.on(() => {
+      edgeless.service.selection.slots.updated.on(() => {
         if (
-          edgeless.selectionManager.selectedIds[0] === this.frame.id &&
-          edgeless.selectionManager.editing
+          edgeless.service.selection.selectedIds[0] === this.frame.id &&
+          edgeless.service.selection.editing
         ) {
           this._editing = true;
         } else {
@@ -85,10 +87,10 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const { edgeless, frame: model, _isNavigator } = this;
-    const { surface } = edgeless;
-    const { zoom } = surface.viewport;
+    const { service } = edgeless;
+    const { zoom } = service.viewport;
     const bound = Bound.deserialize(model.xywh);
-    this.isInner = surface.frame.frames.some(frame => {
+    this.isInner = service.frames.some(frame => {
       if (frame.id === model.id) return false;
       if (Bound.deserialize(frame.xywh).contains(bound)) {
         return true;
@@ -96,7 +98,7 @@ export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
       return false;
     });
 
-    const [x, y] = surface.viewport.toViewCoord(bound.x, bound.y);
+    const [x, y] = service.viewport.toViewCoord(bound.x, bound.y);
     const { isInner } = this;
     const text = model.title.toString();
 

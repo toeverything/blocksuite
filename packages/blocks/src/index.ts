@@ -40,10 +40,12 @@ export {
   TagsIcon,
 } from './_common/icons/index.js';
 export * from './_common/inline/inline-manager.js';
-export type {
-  AffineInlineEditor,
-  AffineTextAttributes,
+export {
+  type AffineInlineEditor,
+  type AffineTextAttributes,
+  getAffineInlineSpecsWithReference,
 } from './_common/inline/presets/affine-inline-specs.js';
+export { ReferenceNodeConfig } from './_common/inline/presets/nodes/reference-node/reference-config.js';
 export { type TreeNode } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export {
@@ -57,7 +59,7 @@ export {
   ThemeObserver,
 } from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
-export { type AbstractEditor } from './_common/types.js';
+export { type AbstractEditor, NoteDisplayMode } from './_common/types.js';
 export { on, once } from './_common/utils/event.js';
 export { createDefaultPage } from './_common/utils/init.js';
 export type { BlockModels } from './_common/utils/model.js';
@@ -69,10 +71,11 @@ export * from './code-block/index.js';
 export * from './data-view-block/index.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
-export * from './embed-html-block/embed-html-block.js';
-export * from './embed-html-block/embed-html-model.js';
-export * from './embed-html-block/embed-html-service.js';
-export * from './embed-html-block/embed-html-spec.js';
+export * from './embed-figma-block/index.js';
+export * from './embed-github-block/index.js';
+export * from './embed-html-block/index.js';
+export * from './embed-linked-doc-block/index.js';
+export * from './embed-youtube-block/index.js';
 export * from './frame-block/index.js';
 export * from './image-block/index.js';
 export * from './list-block/index.js';
@@ -83,20 +86,18 @@ export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export {
   Bound,
-  type BrushElement,
   BrushElementModel,
   CanvasElementType,
-  type ConnectorElement,
   ConnectorElementModel,
   ConnectorEndpointStyle,
   ConnectorMode,
+  ElementModel,
   generateKeyBetween,
   GroupElementModel,
-  type ShapeElement,
   ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
-  type TextElement,
+  TextElementModel,
 } from './surface-block/index.js';
 export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';

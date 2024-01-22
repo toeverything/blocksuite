@@ -129,6 +129,7 @@ test.skip('auto-scroll should be activate when adding blank lines or blocks', as
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -271,6 +272,7 @@ test.skip('drag blank line into text area', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -342,6 +344,7 @@ test.skip('drag Heading1 block from text menu into text area and blockHub text c
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -412,6 +415,7 @@ test.skip('drag numbered list block from list menu into text area and blockHub l
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -536,6 +540,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
       /*xml*/ `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -585,6 +590,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
       /*xml*/ `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {

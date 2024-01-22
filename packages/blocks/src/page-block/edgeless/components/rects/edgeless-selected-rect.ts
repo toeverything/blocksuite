@@ -1,12 +1,13 @@
 import '../connector/connector-handle.js';
 import '../auto-complete/edgeless-auto-complete.js';
 
-import type { Disposable } from '@blocksuite/global/utils';
+import { assertType, type Disposable } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
 import type {
   EdgelessElement,
   IPoint,
@@ -18,30 +19,31 @@ import {
 } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
-import type { NoteBlockModel } from '../../../../models.js';
+import type { BookmarkBlockModel, NoteBlockModel } from '../../../../models.js';
+import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import { TextElementModel } from '../../../../surface-block/element-model/text.js';
+import type { ElementModel } from '../../../../surface-block/index.js';
 import {
   CanvasElementType,
   deserializeXYWH,
-  GroupElement,
-  normalizeTextBound,
+  GroupElementModel,
+  ShapeElementModel,
 } from '../../../../surface-block/index.js';
 import {
   Bound,
-  ConnectorElement,
+  ConnectorElementModel,
   type IVec,
   normalizeDegAngle,
   normalizeShapeBound,
   serializeXYWH,
-  ShapeElement,
-  TextElement,
 } from '../../../../surface-block/index.js';
-import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import {
   NOTE_MIN_HEIGHT,
   NOTE_MIN_WIDTH,
   SELECTED_RECT_PADDING,
 } from '../../utils/consts.js';
+import { getElementsWithoutGroup } from '../../utils/group.js';
 import {
   getSelectableBounds,
   getSelectedRect,
@@ -298,6 +300,81 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label='bottom'] .resize:after {
       bottom: -0.5px;
     }
+
+    .affine-edgeless-selected-rect::before {
+      content: '';
+      display: none;
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-image: url("data:image/svg+xml,%3Csvg width='26' height='26' viewBox='0 0 26 26' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M23 3H19C10.1634 3 3 10.1634 3 19V23' stroke='black' stroke-opacity='0.3' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+    .affine-edgeless-selected-rect[data-direction='top-left']::before {
+      display: block;
+      top: 0px;
+      left: 0px;
+      transform-origin: bottom right;
+      transform: translate(-100%, -100%);
+    }
+    .affine-edgeless-selected-rect[data-direction='top-right']::before {
+      display: block;
+      top: 0px;
+      right: 0px;
+      transform: translate(100%, -100%) rotate(90deg);
+    }
+    .affine-edgeless-selected-rect[data-direction='bottom-right']::before {
+      display: block;
+      bottom: 0px;
+      right: 0px;
+      transform: translate(100%, 100%) rotate(180deg);
+    }
+    .affine-edgeless-selected-rect[data-direction='bottom-left']::before {
+      display: block;
+      bottom: 0px;
+      left: 0px;
+      transform: translate(-100%, 100%) rotate(-90deg);
+    }
+
+    .affine-edgeless-selected-rect::after {
+      content: attr(data-scale-percent);
+      display: none;
+      position: absolute;
+      color: var(--affine-icon-color);
+      font-feature-settings:
+        'clig' off,
+        'liga' off;
+      font-family: var(--affine-font-family);
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 24px;
+    }
+    .affine-edgeless-selected-rect[data-direction='top-left']::after {
+      display: block;
+      top: -20px;
+      left: -20px;
+      transform: translate(-100%, -100%);
+    }
+    .affine-edgeless-selected-rect[data-direction='top-right']::after {
+      display: block;
+      top: -20px;
+      right: -20px;
+      transform: translate(100%, -100%);
+    }
+    .affine-edgeless-selected-rect[data-direction='bottom-right']::after {
+      display: block;
+      bottom: -20px;
+      right: -20px;
+      transform: translate(100%, 100%);
+    }
+    .affine-edgeless-selected-rect[data-direction='bottom-left']::after {
+      display: block;
+      bottom: -20px;
+      left: -20px;
+      transform: translate(-100%, 100%);
+    }
   `;
 
   @property({ attribute: false })
@@ -318,10 +395,22 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _isResizing = false;
 
   @state()
+  private _dragDirection: HandleDirection | null = null;
+
+  @state()
+  private _scalePercent: string | null = null;
+
+  @state()
   private _isNoteWidthLimit = false;
 
   @state()
   private _isNoteHeightLimit = false;
+
+  @state()
+  private _shiftKey = false;
+
+  @property({ attribute: false })
+  autoCompleteOff = false;
 
   @property({ attribute: false })
   toolbarVisible = false;
@@ -350,7 +439,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   get selection() {
-    return this.edgeless.selectionManager;
+    return this.edgeless.service.selection;
   }
 
   get page() {
@@ -366,7 +455,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   get zoom() {
-    return this.surface.viewport.zoom;
+    return this.edgeless.service.viewport.zoom;
   }
 
   get resizeMode(): ResizeMode {
@@ -379,6 +468,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     for (const element of elements) {
       if (isNoteBlock(element)) {
         areAllConnectors = false;
+        if (this._shiftKey) {
+          areAllShapes = false;
+          areAllTexts = false;
+        }
       } else if (isFrameBlock(element)) {
         areAllConnectors = false;
       } else if (
@@ -390,6 +483,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         areAllShapes = false;
         areAllTexts = false;
       } else {
+        assertType<ElementModel>(element);
         if (element.type !== CanvasElementType.CONNECTOR)
           areAllConnectors = false;
         if (
@@ -420,24 +514,26 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.edgeless.slots.elementResizeStart.emit();
     this.selection.elements.forEach(el => {
       el.stash('xywh');
+      el.stash('edgeless' as 'xywh');
 
       if (rotation) {
         el.stash('rotate' as 'xywh');
       }
 
-      if (el instanceof TextElement && !rotation) {
+      if (el instanceof TextElementModel && !rotation) {
         el.stash('fontSize');
         el.stash('hasMaxWidth');
       }
 
       this._dragEndCallback.push(() => {
         el.pop('xywh');
+        el.pop('edgeless' as 'xywh');
 
         if (rotation) {
           el.pop('rotate' as 'xywh');
         }
 
-        if (el instanceof TextElement && !rotation) {
+        if (el instanceof TextElementModel && !rotation) {
           el.pop('fontSize');
           el.pop('hasMaxWidth');
         }
@@ -456,35 +552,65 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     >,
     direction: HandleDirection
   ) => {
-    const { surface, edgeless } = this;
+    const { edgeless } = this;
 
     newBounds.forEach(({ bound }, id) => {
-      const element = surface.pickById(id);
+      const element = edgeless.service.getElementById(id);
       if (!element) return;
 
       if (isNoteBlock(element)) {
         const curBound = Bound.deserialize(element.xywh);
         const props: Partial<NoteBlockModel> = {};
-        if (curBound.h !== bound.h && !element.edgeless.collapse) {
+
+        let scale = element.edgeless.scale ?? 1;
+        let width = curBound.w / scale;
+        let height = curBound.h / scale;
+
+        if (this._shiftKey) {
+          scale = bound.w / width;
+          this._dragDirection = direction;
+          this._scalePercent = `${Math.round(scale * 100)}%`;
+        } else if (curBound.h !== bound.h) {
           edgeless.page.updateBlock(element, () => {
             element.edgeless.collapse = true;
+            element.edgeless.collapsedHeight = bound.h / scale;
           });
         }
 
-        bound.w = clamp(bound.w, NOTE_MIN_WIDTH, Infinity);
-        bound.h = clamp(bound.h, NOTE_MIN_HEIGHT, Infinity);
+        width = bound.w / scale;
+        width = clamp(width, NOTE_MIN_WIDTH, Infinity);
+        bound.w = width * scale;
 
-        this._isNoteWidthLimit = bound.w === NOTE_MIN_WIDTH ? true : false;
-        this._isNoteHeightLimit = bound.h === NOTE_MIN_HEIGHT ? true : false;
+        height = bound.h / scale;
+        height = clamp(height, NOTE_MIN_HEIGHT, Infinity);
+        bound.h = height * scale;
 
+        this._isNoteWidthLimit = width === NOTE_MIN_WIDTH ? true : false;
+        this._isNoteHeightLimit = height === NOTE_MIN_HEIGHT ? true : false;
+
+        props.edgeless = { ...element.edgeless, scale };
         props.xywh = bound.serialize();
-        edgeless.surface.updateElement(element.id, props);
+        edgeless.service.updateElement(element.id, props);
       } else if (
         isImageBlock(element) ||
         isBookmarkBlock(element) ||
         isEmbeddedBlock(element)
       ) {
         const curBound = Bound.deserialize(element.xywh);
+
+        if (isImageBlock(element)) {
+          const { height } = element;
+          if (height) {
+            this._dragDirection = direction;
+            this._scalePercent = `${Math.round((bound.h / height) * 100)}%`;
+          }
+        } else {
+          this._dragDirection = direction;
+
+          const cardStyle = (element as BookmarkBlockModel).style;
+          const height = EMBED_CARD_HEIGHT[cardStyle];
+          this._scalePercent = `${Math.round((bound.h / height) * 100)}%`;
+        }
         if (
           direction === HandleDirection.Left ||
           direction === HandleDirection.Right
@@ -497,11 +623,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           bound.w = (curBound.w / curBound.h) * bound.h;
         }
 
-        edgeless.surface.updateElement(element.id, {
+        edgeless.service.updateElement(element.id, {
           xywh: bound.serialize(),
         });
       } else {
-        if (element instanceof TextElement) {
+        if (element instanceof TextElementModel) {
           let p = 1;
           if (
             direction === HandleDirection.Left ||
@@ -510,7 +636,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             bound = normalizeTextBound(element, bound, true);
             // If the width of the text element has been changed by dragging,
             // We need to set hasMaxWidth to true for wrapping the text
-            edgeless.surface.updateElement(id, {
+            edgeless.service.updateElement(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
               hasMaxWidth: true,
@@ -520,16 +646,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             // const newFontsize = element.fontSize * p;
             // bound = normalizeTextBound(element, bound, false, newFontsize);
 
-            edgeless.surface.updateElement(id, {
+            edgeless.service.updateElement(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
             });
           }
         } else {
-          if (element instanceof ShapeElement) {
+          if (element instanceof ShapeElementModel) {
             bound = normalizeShapeBound(element, bound);
           }
-          edgeless.surface.updateElement(id, {
+          edgeless.service.updateElement(id, {
             xywh: bound.serialize(),
           });
         }
@@ -538,7 +664,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _onDragRotate = (center: IPoint, delta: number) => {
-    const { surface, selection } = this;
+    const { selection } = this;
     const m = new DOMMatrix()
       .translateSelf(center.x, center.y)
       .rotateSelf(delta)
@@ -556,7 +682,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       const { x, y, w, h } = Bound.deserialize(element.xywh);
       const center = new DOMPoint(x + w / 2, y + h / 2).matrixTransform(m);
 
-      surface.updateElement(id, {
+      this.edgeless.service.updateElement(id, {
         xywh: serializeXYWH(center.x - w / 2, center.y - h / 2, w, h),
         rotate: normalizeDegAngle(rotate + delta),
       });
@@ -566,6 +692,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _onDragEnd = () => {
+    this._dragDirection = null;
+    this._scalePercent = null;
+
     this.page.transact(() => {
       this._dragEndCallback.forEach(cb => cb());
     });
@@ -634,14 +763,17 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _updateSelectedRect = batchToAnimationFrame(() => {
-    const { surface, zoom, selection } = this;
+    const { zoom, selection, edgeless } = this;
 
     const elements = selection.elements;
     // in surface
     const rect = getSelectedRect(elements);
 
     // in viewport
-    const [left, top] = surface.toViewCoord(rect.left, rect.top);
+    const [left, top] = edgeless.service.viewport.toViewCoord(
+      rect.left,
+      rect.top
+    );
     const [width, height] = [rect.width * zoom, rect.height * zoom];
 
     let rotate = 0;
@@ -649,17 +781,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       rotate = elements[0].rotate;
     }
 
-    const isSingleNote = elements.length === 1 && isNoteBlock(elements[0]);
-    const isSingleHiddenNote =
-      isSingleNote && isNoteBlock(elements[0]) && elements[0].hidden;
-
     const padding = elements.length > 1 ? SELECTED_RECT_PADDING : 0;
 
     this._selectedRect = {
       width: width + padding * 2,
       height: height + padding * 2,
       borderWidth: selection.editing ? 2 : 1,
-      borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
+      borderStyle: 'solid',
       left: left - padding,
       top: top - padding,
       rotate,
@@ -727,7 +855,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     element: string | { id: string },
     fromRemote: boolean = false
   ) => {
-    if (fromRemote && this._resizeManager.dragging) return;
+    if ((fromRemote && this._resizeManager.dragging) || !this.isConnected)
+      return;
 
     const id = typeof element === 'string' ? element : element.id;
 
@@ -740,10 +869,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     _disposables.add(
       // viewport zooming / scrolling
-      slots.viewportUpdated.on(this._updateOnViewportChange)
+      edgeless.service.viewport.viewportUpdated.on(this._updateOnViewportChange)
     );
 
-    pickValues(edgeless.slots, [
+    pickValues(edgeless.service.surface, [
       'elementAdded',
       'elementRemoved',
       'elementUpdated',
@@ -752,9 +881,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     });
 
     _disposables.add(
-      slots.pressShiftKeyUpdated.on(pressed =>
-        this._resizeManager.onPressShiftKey(pressed)
-      )
+      this.page.slots.blockUpdated.on(this._updateOnElementChange)
+    );
+
+    _disposables.add(
+      slots.pressShiftKeyUpdated.on(pressed => {
+        this._shiftKey = pressed;
+        this._resizeManager.onPressShiftKey(pressed);
+        this._updateSelectedRect();
+      })
     );
 
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
@@ -776,9 +911,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _canAutoComplete() {
     return (
+      !this.autoCompleteOff &&
       !this._isResizing &&
       this.selection.elements.length === 1 &&
-      (this.selection.elements[0] instanceof ShapeElement ||
+      (this.selection.elements[0] instanceof ShapeElementModel ||
         isNoteBlock(this.selection.elements[0]))
     );
   }
@@ -790,6 +926,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   override render() {
+    if (!this.isConnected) return nothing;
+
     const { selection } = this;
     const elements = selection.elements;
 
@@ -814,7 +952,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             if (target.classList.contains('rotate') && !this._canRotate()) {
               return;
             }
-            const proportional = elements.some(el => el instanceof TextElement);
+            const proportional = elements.some(
+              el => el instanceof TextElementModel
+            );
             _resizeManager.onPointerDown(e, direction, proportional);
           },
           (
@@ -833,7 +973,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       : nothing;
 
     const connectorHandle =
-      elements.length === 1 && elements[0] instanceof ConnectorElement
+      elements.length === 1 && elements[0] instanceof ConnectorElementModel
         ? html`<edgeless-connector-handle
             .connector=${elements[0]}
             .edgeless=${edgeless}
@@ -844,7 +984,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       elements.length > 1
         ? elements.map(element => {
             const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
-            const [x, y] = this.surface.toViewCoord(modelX, modelY);
+            const [x, y] = edgeless.service.viewport.toViewCoord(
+              modelX,
+              modelY
+            );
             const { left, top, borderWidth } = this._selectedRect;
             const style = {
               position: 'absolute',
@@ -863,7 +1006,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         : nothing;
 
     const isSingleGroup =
-      elements.length === 1 && elements[0] instanceof GroupElement;
+      elements.length === 1 && elements[0] instanceof GroupElementModel;
     _selectedRect.borderStyle = isSingleGroup ? 'dashed' : 'solid';
 
     return html`
@@ -910,6 +1053,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           transform: `translate(${_selectedRect.left}px, ${_selectedRect.top}px) rotate(${_selectedRect.rotate}deg)`,
         })}
         disabled="true"
+        data-scale-percent=${this._scalePercent ?? ''}
+        data-direction=${this._dragDirection ?? ''}
       >
         ${resizeHandles} ${connectorHandle} ${elementHandle}
       </div>

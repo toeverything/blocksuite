@@ -27,8 +27,8 @@ import {
   matchFlavours,
   Point,
   Rect,
-  type TopLevelBlockModel,
 } from '../../../_common/utils/index.js';
+import type { NoteBlockComponent, NoteBlockModel } from '../../../index.js';
 import { DocPageBlockComponent } from '../../../page-block/doc/doc-page-block.js';
 import { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import {
@@ -36,7 +36,8 @@ import {
   isTopLevelBlock,
 } from '../../../page-block/edgeless/utils/query.js';
 import { autoScroll } from '../../../page-block/text-selection/utils.js';
-import type { IVec } from '../../../surface-block/index.js';
+import { Bound, type IVec } from '../../../surface-block/index.js';
+import type { EdgelessBlockModel } from '../../edgeless/type.js';
 import { DragPreview } from './components/drag-preview.js';
 import { DropIndicator } from './components/drop-indicator.js';
 import type { DragHandleOption, DropResult, DropType } from './config.js';
@@ -99,6 +100,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   dropIndicator: DropIndicator | null = null;
   lastDragPointerState: PointerEventState | null = null;
   scale = 1;
+  noteScale = 1;
   center: IVec = [0, 0];
   rafID = 0;
 
@@ -143,10 +145,10 @@ export class AffineDragHandleWidget extends WidgetElement<
     return this._getBlockElementFromViewStore(this._anchorBlockPath);
   }
 
-  get anchorEdgelessElement(): TopLevelBlockModel | null {
+  get anchorEdgelessElement(): EdgelessBlockModel | null {
     if (isInsideDocEditor(this.host) || !this._anchorBlockId) return null;
-    const { surface } = this.pageBlockElement as EdgelessPageBlockComponent;
-    const edgelessElement = surface.pickById(this._anchorBlockId);
+    const { service } = this.pageBlockElement as EdgelessPageBlockComponent;
+    const edgelessElement = service.getElementById(this._anchorBlockId);
     return isTopLevelBlock(edgelessElement) ? edgelessElement : null;
   }
 
@@ -367,7 +369,9 @@ export class AffineDragHandleWidget extends WidgetElement<
 
       dragPreview = new DragPreview(offset);
       dragPreview.style.width = `${width / this.scale}px`;
-      dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this.scale})`;
+      dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
+        this.scale * this.noteScale
+      })`;
       dragPreview.appendChild(fragment);
     }
     this.pageBlockElement.appendChild(dragPreview);
@@ -398,7 +402,9 @@ export class AffineDragHandleWidget extends WidgetElement<
       posY = scrollHeight - height;
     }
 
-    this.dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this.scale})`;
+    this.dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
+      this.scale * this.noteScale
+    })`;
   };
 
   private _updateDragPreviewOnViewportUpdate = () => {
@@ -562,25 +568,29 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const posLeft =
       left -
-      (DRAG_HANDLE_CONTAINER_WIDTH + offsetLeft) * this.scale +
+      (DRAG_HANDLE_CONTAINER_WIDTH + offsetLeft) * this.scale * this.noteScale +
       this._viewportOffset.left;
     const posTop = this._getTopWithBlockElement(blockElement);
 
     const rowPaddingY =
-      ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this.scale;
+      ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) *
+      this.scale *
+      this.noteScale;
 
     // use padding to control grabber's height
     const paddingTop = rowPaddingY + posTop - draggingAreaRect.top;
     const paddingBottom =
       draggingAreaRect.height -
       paddingTop -
-      DRAG_HANDLE_GRABBER_HEIGHT * this.scale;
+      DRAG_HANDLE_GRABBER_HEIGHT * this.scale * this.noteScale;
 
     const applyStyle = (transition?: boolean) => {
       container.style.transition = transition ? 'padding 0.25s ease' : 'none';
       container.style.paddingTop = `${paddingTop}px`;
       container.style.paddingBottom = `${paddingBottom}px`;
-      container.style.width = `${DRAG_HANDLE_CONTAINER_WIDTH * this.scale}px`;
+      container.style.width = `${
+        DRAG_HANDLE_CONTAINER_WIDTH * this.scale * this.noteScale
+      }px`;
       container.style.left = `${posLeft}px`;
       container.style.top = `${draggingAreaRect.top}px`;
       container.style.display = 'flex';
@@ -600,9 +610,11 @@ export class AffineDragHandleWidget extends WidgetElement<
       applyStyle(false);
     }
 
-    grabber.style.width = `${DRAG_HANDLE_GRABBER_WIDTH * this.scale}px`;
+    grabber.style.width = `${
+      DRAG_HANDLE_GRABBER_WIDTH * this.scale * this.noteScale
+    }px`;
     grabber.style.borderRadius = `${
-      DRAG_HANDLE_GRABBER_BORDER_RADIUS * this.scale
+      DRAG_HANDLE_GRABBER_BORDER_RADIUS * this.scale * this.noteScale
     }px`;
 
     this._handleAnchorModelDisposables(blockElement.model);
@@ -625,7 +637,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     const blockElement = this.anchorBlockElement;
     assertExists(blockElement);
 
-    const edgelessElement = edgelessPage.surface.pickById(
+    const edgelessElement = edgelessPage.service.getElementById(
       blockElement.model.id
     );
     assertExists(edgelessElement);
@@ -635,7 +647,10 @@ export class AffineDragHandleWidget extends WidgetElement<
     if (!container || !grabber) return;
 
     const rect = getSelectedRect([edgelessElement]);
-    const [left, top] = edgelessPage.surface.toViewCoord(rect.left, rect.top);
+    const [left, top] = edgelessPage.service.viewport.toViewCoord(
+      rect.left,
+      rect.top
+    );
     const height = rect.height * this.scale;
 
     const posLeft =
@@ -724,7 +739,8 @@ export class AffineDragHandleWidget extends WidgetElement<
     const offsetLeft = getDragHandleLeftPadding(blockElements);
 
     // Add padding to hover rect
-    left -= (DRAG_HANDLE_CONTAINER_WIDTH + offsetLeft) * this.scale;
+    left -=
+      (DRAG_HANDLE_CONTAINER_WIDTH + offsetLeft) * this.scale * this.noteScale;
     top -= DRAG_HOVER_RECT_PADDING * this.scale;
     right += DRAG_HOVER_RECT_PADDING * this.scale;
     bottom += DRAG_HOVER_RECT_PADDING * this.scale;
@@ -738,13 +754,16 @@ export class AffineDragHandleWidget extends WidgetElement<
   };
 
   private _getHoverAreaRectTopLevelBlock(
-    edgelessElement: TopLevelBlockModel
+    edgelessElement: EdgelessBlockModel
   ): Rect | null {
     if (isInsideDocEditor(this.host)) return null;
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
 
     const rect = getSelectedRect([edgelessElement]);
-    let [left, top] = edgelessPage.surface.toViewCoord(rect.left, rect.top);
+    let [left, top] = edgelessPage.service.viewport.toViewCoord(
+      rect.left,
+      rect.top
+    );
     const width = rect.width * this.scale;
     const height = rect.height * this.scale;
 
@@ -813,8 +832,8 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
     return (
-      edgelessPage.selectionManager.editing &&
-      edgelessPage.selectionManager.selectedIds[0] === noteBlockId
+      edgelessPage.service.selection.editing &&
+      edgelessPage.service.selection.selectedIds[0] === noteBlockId
     );
   };
 
@@ -829,8 +848,8 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     const edgelessPage = this.pageBlockElement as EdgelessPageBlockComponent;
-    const editing = edgelessPage.selectionManager.editing;
-    const selectedElements = edgelessPage.selectionManager.elements;
+    const editing = edgelessPage.service.selection.editing;
+    const selectedElements = edgelessPage.service.selection.elements;
     if (editing || selectedElements.length !== 1) {
       this._hide();
       return;
@@ -849,7 +868,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       return;
     }
 
-    const selections = edgelessPage.selectionManager.selections;
+    const selections = edgelessPage.service.selection.selections;
 
     this._anchorBlockId = selectedElement.id;
     this._anchorBlockPath = selections[0].path;
@@ -922,16 +941,21 @@ export class AffineDragHandleWidget extends WidgetElement<
       this.host,
       this.pageBlockElement,
       point
-    ) as BlockElement | null;
+    ) as NoteBlockComponent | null;
+    this.noteScale = closestNoteBlock?.model.edgeless.scale ?? 1;
     if (
       closestNoteBlock &&
       this._canEditing(closestNoteBlock) &&
-      !isOutOfNoteBlock(this.host, closestNoteBlock, point, this.scale)
+      !isOutOfNoteBlock(
+        this.host,
+        closestNoteBlock,
+        point,
+        this.scale * this.noteScale
+      )
     ) {
       this._pointerMoveOnBlock(state);
       return true;
     }
-
     this._hide();
     return false;
   };
@@ -1098,10 +1122,24 @@ export class AffineDragHandleWidget extends WidgetElement<
       const { left: viewportLeft, top: viewportTop } = edgelessPage.viewport;
 
       const newNoteId = edgelessPage.addNoteWithPoint(
-        new Point(state.raw.x - viewportLeft, state.raw.y - viewportTop)
+        new Point(state.raw.x - viewportLeft, state.raw.y - viewportTop),
+        {
+          scale: this.noteScale,
+        }
       );
-      const newNoteBlock = this.page.getBlockById(newNoteId);
+      const newNoteBlock = this.page.getBlockById(newNoteId) as NoteBlockModel;
       assertExists(newNoteBlock);
+
+      const bound = Bound.deserialize(newNoteBlock.xywh);
+      bound.h *= this.noteScale;
+      bound.w *= this.noteScale;
+      this.page.updateBlock(newNoteBlock, {
+        xywh: bound.serialize(),
+        edgeless: {
+          ...newNoteBlock.edgeless,
+          scale: this.noteScale,
+        },
+      });
 
       this.page.moveBlocks(selectedBlocks, newNoteBlock);
 
@@ -1245,6 +1283,7 @@ export class AffineDragHandleWidget extends WidgetElement<
           dropBlockId: this.dropBlockId,
           dropType: this.dropType,
           dragPreview: this.dragPreview,
+          noteScale: this.noteScale,
         })
       ) {
         this._hide(true);
@@ -1297,10 +1336,10 @@ export class AffineDragHandleWidget extends WidgetElement<
       container.style.transition = `padding 0.25s ease`;
 
       grabber.style.width = `${
-        DRAG_HANDLE_GRABBER_WIDTH_HOVERED * this.scale
+        DRAG_HANDLE_GRABBER_WIDTH_HOVERED * this.scale * this.noteScale
       }px`;
       grabber.style.borderRadius = `${
-        DRAG_HANDLE_GRABBER_BORDER_RADIUS * this.scale
+        DRAG_HANDLE_GRABBER_BORDER_RADIUS * this.scale * this.noteScale
       }px`;
 
       this._isDragHandleHovered = true;
@@ -1437,13 +1476,13 @@ export class AffineDragHandleWidget extends WidgetElement<
       );
 
       this._disposables.add(
-        edgelessPage.slots.viewportUpdated.on(
+        edgelessPage.service.viewport.viewportUpdated.on(
           this._handleEdgelessViewPortUpdated
         )
       );
 
       this._disposables.add(
-        edgelessPage.selectionManager.slots.updated.on(() => {
+        edgelessPage.service.selection.slots.updated.on(() => {
           this._checkTopLevelBlockSelection();
         })
       );
@@ -1476,6 +1515,11 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.disposables.addFromEvent(this, 'pointerdown', e => {
+      e.preventDefault();
+    });
+
     this.handleEvent('pointerMove', this._throttledPointerMoveHandler);
     this.handleEvent('click', this._clickHandler);
     this.handleEvent('dragStart', this._dragStartHandler);
