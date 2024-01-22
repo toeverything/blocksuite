@@ -87,15 +87,12 @@ export class Job {
 
   private _getWorkspaceMeta() {
     const { meta } = this._workspace;
-    const { blockVersions, pageVersion, workspaceVersion, properties, pages } =
-      meta;
-    assertExists(blockVersions);
+    const { pageVersion, workspaceVersion, properties, pages } = meta;
     assertExists(pageVersion);
     assertExists(workspaceVersion);
     assertExists(properties);
     assertExists(pages);
     return {
-      blockVersions: { ...blockVersions },
       pageVersion,
       workspaceVersion,
       properties: JSON.parse(JSON.stringify(properties)) as PagesPropertiesMeta,
@@ -338,14 +335,8 @@ export class Job {
       type: 'slice',
       slice,
     });
-    const {
-      content,
-      blockVersions,
-      pageVersion,
-      workspaceVersion,
-      pageId,
-      workspaceId,
-    } = slice.data;
+    const { content, pageVersion, workspaceVersion, pageId, workspaceId } =
+      slice.data;
     const contentSnapshot = [];
     for (const block of content) {
       contentSnapshot.push(await this.blockToSnapshot(block));
@@ -354,7 +345,6 @@ export class Job {
       type: 'slice',
       workspaceId,
       pageId,
-      blockVersions,
       pageVersion,
       workspaceVersion,
       content: contentSnapshot,
@@ -380,14 +370,8 @@ export class Job {
       snapshot,
     });
     SliceSnapshotSchema.parse(snapshot);
-    const {
-      content,
-      blockVersions,
-      pageVersion,
-      workspaceVersion,
-      workspaceId,
-      pageId,
-    } = snapshot;
+    const { content, pageVersion, workspaceVersion, workspaceId, pageId } =
+      snapshot;
     const contentBlocks = [];
     for (const [i, block] of content.entries()) {
       contentBlocks.push(
@@ -396,7 +380,6 @@ export class Job {
     }
     const slice = new Slice({
       content: contentBlocks,
-      blockVersions,
       pageVersion,
       workspaceVersion,
       workspaceId,
