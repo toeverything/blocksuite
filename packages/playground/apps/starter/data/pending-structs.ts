@@ -1,8 +1,9 @@
 import { Workspace } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
-import type { InitFn } from './utils';
+import type { InitFn } from './utils.js';
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const pendingStructs: InitFn = async (
   workspace: Workspace,
   id: string

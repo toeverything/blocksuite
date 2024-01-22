@@ -34,7 +34,7 @@ export class DatabaseTableViewFullScreen extends BlockElement<DatabaseBlockModel
     `;
   };
 
-  override render() {
+  override renderBlock() {
     return html`<div class="table-view-full-modal-overlay">
       <div class="table-view-full-modal-container">
         <div class="table-view-full-header">

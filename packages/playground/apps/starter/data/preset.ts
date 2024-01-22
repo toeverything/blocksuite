@@ -1,7 +1,7 @@
 import { MarkdownTransformer } from '@blocksuite/blocks';
 import { Text, type Workspace } from '@blocksuite/store';
 
-import { type InitFn } from './utils';
+import { type InitFn } from './utils.js';
 
 const presetMarkdown = `This playground is designed to:
 
@@ -22,6 +22,7 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
   await page.load(async () => {

@@ -618,7 +618,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     );
   }
 
-  override render(): TemplateResult<1> {
+  override renderBlock(): TemplateResult<1> {
     return html`<div
       ${ref(this._whenHover.setReference)}
       class=${classMap({
