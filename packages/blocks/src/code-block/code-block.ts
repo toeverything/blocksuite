@@ -344,133 +344,127 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       return indexArr;
     };
 
-    this.bindHotKey(
-      {
-        Backspace: ctx => {
-          const state = ctx.get('keyboardState');
-          const textSelection = selectionManager.find('text');
-          if (!textSelection) {
-            state.raw.preventDefault();
-            return;
-          }
-
-          const from = textSelection.from;
-
-          if (from.index === 0 && from.length === 0) {
-            state.raw.preventDefault();
-            selectionManager.setGroup('note', [
-              selectionManager.create('block', { path: this.path }),
-            ]);
-            return true;
-          }
-
+    this.bindHotKey({
+      Backspace: ctx => {
+        const state = ctx.get('keyboardState');
+        const textSelection = selectionManager.find('text');
+        if (!textSelection) {
+          state.raw.preventDefault();
           return;
-        },
-        Tab: ctx => {
-          const state = ctx.get('keyboardState');
-          const event = state.raw;
-          const inlineEditor = this.inlineEditor;
-          const inlineRange = inlineEditor.getInlineRange();
-          if (inlineRange) {
-            event.stopPropagation();
-            event.preventDefault();
+        }
 
-            const text = this.inlineEditor.yText.toString();
-            const index = text.lastIndexOf(
-              LINE_BREAK_SYMBOL,
-              inlineRange.index - 1
+        const from = textSelection.from;
+
+        if (from.index === 0 && from.length === 0) {
+          state.raw.preventDefault();
+          selectionManager.setGroup('note', [
+            selectionManager.create('block', { path: this.path }),
+          ]);
+          return true;
+        }
+
+        return;
+      },
+      Tab: ctx => {
+        const state = ctx.get('keyboardState');
+        const event = state.raw;
+        const inlineEditor = this.inlineEditor;
+        const inlineRange = inlineEditor.getInlineRange();
+        if (inlineRange) {
+          event.stopPropagation();
+          event.preventDefault();
+
+          const text = this.inlineEditor.yText.toString();
+          const index = text.lastIndexOf(
+            LINE_BREAK_SYMBOL,
+            inlineRange.index - 1
+          );
+          const indexArr = allIndexOf(
+            text,
+            LINE_BREAK_SYMBOL,
+            inlineRange.index,
+            inlineRange.index + inlineRange.length
+          )
+            .map(i => i + 1)
+            .reverse();
+          if (index !== -1) {
+            indexArr.push(index + 1);
+          } else {
+            indexArr.push(0);
+          }
+          indexArr.forEach(i => {
+            this.inlineEditor.insertText(
+              {
+                index: i,
+                length: 0,
+              },
+              INDENT_SYMBOL
             );
-            const indexArr = allIndexOf(
-              text,
-              LINE_BREAK_SYMBOL,
-              inlineRange.index,
-              inlineRange.index + inlineRange.length
-            )
-              .map(i => i + 1)
-              .reverse();
-            if (index !== -1) {
-              indexArr.push(index + 1);
-            } else {
-              indexArr.push(0);
-            }
-            indexArr.forEach(i => {
-              this.inlineEditor.insertText(
-                {
-                  index: i,
-                  length: 0,
-                },
-                INDENT_SYMBOL
-              );
+          });
+          this.inlineEditor.setInlineRange({
+            index: inlineRange.index + 2,
+            length:
+              inlineRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
+          });
+
+          return true;
+        }
+
+        return;
+      },
+      'Shift-Tab': ctx => {
+        const state = ctx.get('keyboardState');
+        const event = state.raw;
+        const inlineEditor = this.inlineEditor;
+        const inlineRange = inlineEditor.getInlineRange();
+        if (inlineRange) {
+          event.stopPropagation();
+          event.preventDefault();
+
+          const text = this.inlineEditor.yText.toString();
+          const index = text.lastIndexOf(
+            LINE_BREAK_SYMBOL,
+            inlineRange.index - 1
+          );
+          let indexArr = allIndexOf(
+            text,
+            LINE_BREAK_SYMBOL,
+            inlineRange.index,
+            inlineRange.index + inlineRange.length
+          )
+            .map(i => i + 1)
+            .reverse();
+          if (index !== -1) {
+            indexArr.push(index + 1);
+          } else {
+            indexArr.push(0);
+          }
+          indexArr = indexArr.filter(
+            i => text.slice(i, i + 2) === INDENT_SYMBOL
+          );
+          indexArr.forEach(i => {
+            this.inlineEditor.deleteText({
+              index: i,
+              length: 2,
             });
+          });
+          if (indexArr.length > 0) {
             this.inlineEditor.setInlineRange({
-              index: inlineRange.index + 2,
+              index:
+                inlineRange.index -
+                (indexArr[indexArr.length - 1] < inlineRange.index ? 2 : 0),
               length:
-                inlineRange.length +
+                inlineRange.length -
                 (indexArr.length - 1) * INDENT_SYMBOL.length,
             });
-
-            return true;
           }
 
-          return;
-        },
-        'Shift-Tab': ctx => {
-          const state = ctx.get('keyboardState');
-          const event = state.raw;
-          const inlineEditor = this.inlineEditor;
-          const inlineRange = inlineEditor.getInlineRange();
-          if (inlineRange) {
-            event.stopPropagation();
-            event.preventDefault();
+          return true;
+        }
 
-            const text = this.inlineEditor.yText.toString();
-            const index = text.lastIndexOf(
-              LINE_BREAK_SYMBOL,
-              inlineRange.index - 1
-            );
-            let indexArr = allIndexOf(
-              text,
-              LINE_BREAK_SYMBOL,
-              inlineRange.index,
-              inlineRange.index + inlineRange.length
-            )
-              .map(i => i + 1)
-              .reverse();
-            if (index !== -1) {
-              indexArr.push(index + 1);
-            } else {
-              indexArr.push(0);
-            }
-            indexArr = indexArr.filter(
-              i => text.slice(i, i + 2) === INDENT_SYMBOL
-            );
-            indexArr.forEach(i => {
-              this.inlineEditor.deleteText({
-                index: i,
-                length: 2,
-              });
-            });
-            if (indexArr.length > 0) {
-              this.inlineEditor.setInlineRange({
-                index:
-                  inlineRange.index -
-                  (indexArr[indexArr.length - 1] < inlineRange.index ? 2 : 0),
-                length:
-                  inlineRange.length -
-                  (indexArr.length - 1) * INDENT_SYMBOL.length,
-              });
-            }
-
-            return true;
-          }
-
-          return;
-        },
+        return;
       },
-      {
-        flavour: true,
-      }
-    );
+    });
 
     this._inlineRangeProvider = getInlineRangeProvider(this);
   }

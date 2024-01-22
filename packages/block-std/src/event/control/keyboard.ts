@@ -9,6 +9,17 @@ export class KeyboardControl {
   constructor(private _dispatcher: UIEventDispatcher) {}
 
   private _createContext(event: Event, keyboardState: KeyboardEventState) {
+    const selection = window.getSelection();
+    if (selection) {
+      const range = selection.getRangeAt(0);
+      if (range) {
+        return UIEventStateContext.from(
+          new UIEventState(event, range.commonAncestorContainer),
+          keyboardState
+        );
+      }
+    }
+
     return UIEventStateContext.from(new UIEventState(event), keyboardState);
   }
 

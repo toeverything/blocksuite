@@ -8,7 +8,10 @@ export class UIEventState {
   /** when extends, override it with pattern `xxxState` */
   type = 'defaultState';
 
-  constructor(public event: Event) {}
+  constructor(
+    public event: Event,
+    public target = event.target
+  ) {}
 }
 
 export class UIEventStateContext {

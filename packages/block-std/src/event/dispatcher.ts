@@ -121,9 +121,8 @@ export class UIEventDispatcher {
   }
 
   run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
-    const { event } = context.get('defaultState');
     if (!scope) {
-      scope = this._getEventScope(name, event);
+      scope = this._getEventScope(name, context);
       if (!scope) {
         return;
       }
@@ -161,14 +160,15 @@ export class UIEventDispatcher {
     return this.std.selection.value;
   }
 
-  private _getEventScope(name: EventName, event: Event) {
+  private _getEventScope(name: EventName, context: UIEventStateContext) {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
     let output: EventScope | undefined;
 
-    if (event.target && event.target instanceof Node) {
-      output = this._buildEventScopeByTarget(name, event.target);
+    const target = context.get('defaultState').target;
+    if (target && target instanceof Node) {
+      output = this._buildEventScopeByTarget(name, target);
     }
 
     if (!output) {
