@@ -3,6 +3,7 @@
     "type": "block",
     "id": "3",
     "flavour": "affine:list",
+    "version": 1,
     "props": {
       "type": "bulleted",
       "text": {
@@ -21,6 +22,7 @@
         "type": "block",
         "id": "4",
         "flavour": "affine:list",
+        "version": 1,
         "props": {
           "type": "bulleted",
           "text": {
@@ -39,6 +41,7 @@
             "type": "block",
             "id": "5",
             "flavour": "affine:list",
+            "version": 1,
             "props": {
               "type": "bulleted",
               "text": {
