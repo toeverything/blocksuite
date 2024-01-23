@@ -425,7 +425,7 @@ export class EdgelessPageService extends PageService {
         middlewares.push(createInsertPlaceMiddleware(currentContentBound));
       }
 
-      const idxGenerator = this.layer.preservedIndexGenerator(true);
+      const idxGenerator = this.layer.createIndexGenerator(true);
 
       middlewares.push(
         createRegenerateIndexMiddleware((type: string) => idxGenerator(type))

@@ -181,6 +181,7 @@ export const runPPTGenerateAction = (payload: { input: string }) => {
 I want to write a PPT, each page has 1 to 4 sections,
 each section has a title of no more than 30 words and no more than 100 words of content,
 but also need some keywords that match the content of the paragraph used to generate images,
+Try to have a different number of section per page
 this is a template:
 - page name
     - section name

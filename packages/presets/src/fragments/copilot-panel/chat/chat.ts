@@ -9,7 +9,6 @@ import {
   EmbeddingServiceKind,
 } from '../copilot-service/service-base.js';
 import { ChatFeatureKey } from '../doc/api.js';
-import { StopIcon } from '../icons.js';
 import type { AILogic } from '../logic.js';
 import type { ChatMessage, ChatReactiveData, EmbeddedPage } from './logic.js';
 
@@ -120,43 +119,7 @@ export class CopilotChatPanel
   @state()
   tempMessage?: string;
   @state()
-  history: ChatMessage[] = [
-    {
-      role: 'user',
-      content: [
-        {
-          text: `大语言模型是什么？Please use the nested unordered list syntax in Markdown to create a mind map-like structure.`,
-          type: 'text',
-        },
-      ],
-    },
-    {
-      role: 'assistant',
-      content: `- CRDT
-  - 定义
-    - CRDT 是 Conflict-free Replicated Data Type 的缩写，中文名为“无冲突复制数据类型”。
-    - 它是一种可以在多个设备之间复制和同步，而不需要进行复杂的冲突解决的数据结构。
-  - 类型
-    - State-based CRDTs
-      - 也被称为 Convergent Replicated Data Types 或 CVRDTs。
-      - 每个副本都可以独立地进行更新，然后通过合并操作来解决冲突。
-    - Operation-based CRDTs
-      - 也被称为 Commutative Replicated Data Types 或 CmRDTs。
-      - 每个副本都会广播它的更新操作，其他副本会接收并应用这些操作。
-  - 应用
-    - 分布式系统
-      - CRDTs 可以在没有中央协调者的情况下，保证数据的一致性。
-    - 实时协作应用
-      - 如 Google Docs，可以允许多个用户同时编辑同一份文档，而不会产生冲突。
-  - 优点
-    - 可以在网络分区或延迟的情况下工作。
-    - 不需要复杂的冲突解决策略。
-  - 缺点
-    - 需要更多的存储空间和带宽。
-    - 实现起来相对复杂。`,
-      sources: [],
-    },
-  ];
+  history: ChatMessage[] = [];
   @state()
   currentRequest?: number;
 
@@ -294,6 +257,33 @@ export class CopilotChatPanel
     }
     return null;
   };
+  toolbar() {
+    // const lastMessage = this.history[this.history.length - 1];
+    // return html`<div
+    //   style="display:flex;gap:12px;padding: 4px;font-size: 12px;line-height: 20px;color:var(--affine-text-secondary-color)"
+    // >
+    //   ${this.loading
+    //     ? html`<div
+    //         style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 8px 2px 4px;cursor: pointer;display:flex;align-items:center;gap: 4px;"
+    //         @click="${() => (this.currentRequest = undefined)}"
+    //       >
+    //         ${StopIcon} Stop
+    //       </div>`
+    //     : nothing}
+    //   ${!this.loading && lastMessage.role === 'assistant'
+    //     ? html`<div
+    //           style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 10px;cursor: pointer"
+    //         >
+    //           Longer
+    //         </div>
+    //         <div
+    //           style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 10px;cursor: pointer"
+    //         >
+    //           Shorter
+    //         </div>`
+    //     : nothing}
+    // </div>`;
+  }
   @query('.copilot-chat-panel-chat-input')
   input!: HTMLInputElement;
   protected override render(): unknown {
@@ -313,7 +303,7 @@ export class CopilotChatPanel
     const sendButtonStyle = styleMap({
       opacity: !this.loading ? '1' : '0.5',
     });
-    const lastMessage = this.history[this.history.length - 1];
+
     return html`
       <div style="display:flex;flex-direction: column;height: 100%">
         <div
@@ -352,30 +342,7 @@ export class CopilotChatPanel
           </div>
         </div>
         <div>
-          <div
-            style="display:flex;gap:12px;padding: 4px;font-size: 12px;line-height: 20px;color:var(--affine-text-secondary-color)"
-          >
-            ${this.loading
-              ? html`<div
-                  style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 8px 2px 4px;cursor: pointer;display:flex;align-items:center;gap: 4px;"
-                  @click="${() => (this.currentRequest = undefined)}"
-                >
-                  ${StopIcon} Stop
-                </div>`
-              : nothing}
-            ${!this.loading && lastMessage.role === 'assistant'
-              ? html`<div
-                    style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 10px;cursor: pointer"
-                  >
-                    Longer
-                  </div>
-                  <div
-                    style="border-radius: 4px;border: 1px solid rgba(0,0,0,0.1);padding: 2px 10px;cursor: pointer"
-                  >
-                    Shorter
-                  </div>`
-              : nothing}
-          </div>
+          ${this.toolbar()}
           <div class="copilot-chat-prompt-container">
             <textarea
               @keydown="${keydown}"

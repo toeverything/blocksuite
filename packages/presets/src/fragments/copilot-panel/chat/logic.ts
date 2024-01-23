@@ -462,10 +462,11 @@ export class AIChatLogic {
             yield item;
             text += item;
             if (text) {
-              await build(text);
+              await build.process(text);
             }
             reactiveData.tempMessage = text;
           }
+          await build.done(text);
         })();
       }),
     },
@@ -712,16 +713,29 @@ const pptBuilder = (host: EditorHost) => {
     const job = service.createTemplateJob('template');
     const { images, content } = await basicTheme(page);
     if (images.length) {
-      /* empty */
+      await Promise.all(
+        images.map(({ id, url }) =>
+          fetch(url)
+            .then(res => res.blob())
+            .then(blob => job.job.assets.set(id, blob))
+        )
+      );
     }
     await job.insertTemplate(content);
   };
-  return async (text: string) => {
-    const snapshot = await markdownToSnapshot(text, host);
-    const block = snapshot.snapshot.content[0];
-    if (block.children.length > pages.length + 1) {
-      await addPage(block.children[pages.length]);
-    }
+  return {
+    process: async (text: string) => {
+      const snapshot = await markdownToSnapshot(text, host);
+      const block = snapshot.snapshot.content[0];
+      if (block.children.length > pages.length + 1) {
+        await addPage(block.children[pages.length]);
+      }
+    },
+    done: async (text: string) => {
+      const snapshot = await markdownToSnapshot(text, host);
+      const block = snapshot.snapshot.content[0];
+      await addPage(block.children[block.children.length - 1]);
+    },
   };
 };
 const getText = (block: BlockSnapshot) => {

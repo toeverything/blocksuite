@@ -222,7 +222,7 @@ export const basic4 = () => ({
                 '$blocksuite:internal:text$': true,
                 delta: [
                   {
-                    insert: 'Frame 3',
+                    insert: 'title',
                   },
                 ],
               },

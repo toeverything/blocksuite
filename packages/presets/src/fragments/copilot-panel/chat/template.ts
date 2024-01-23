@@ -17,6 +17,26 @@ const replaceText = (text: Record<string, string>, template: any) => {
     return;
   }
 };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getImages = (template: any) => {
+  const imgs: Record<string, string> = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const run = (data: any) => {
+    if (data != null && typeof data === 'object') {
+      if (Array.isArray(data)) {
+        data.forEach(v => run(v));
+        return;
+      }
+      if (typeof data.caption === 'string') {
+        imgs[data.caption] = data.sourceId;
+      }
+      Object.values(data).forEach(v => run(v));
+      return;
+    }
+  };
+  run(template);
+  return imgs;
+};
 export type PPTSection = {
   title: string;
   content: string;
@@ -31,18 +51,23 @@ type PageTemplate = {
 };
 const basic1section = async (
   title: string,
-  section: PPTSection
+  section1: PPTSection
 ): Promise<PageTemplate> => {
   const template = basic1();
   replaceText(
     {
-      'section.title': section.title,
-      'section.content': section.content,
+      title: title,
+      'section1.title': section1.title,
+      'section1.content': section1.content,
     },
     template
   );
+  const imgs = getImages(template);
   return {
-    images: [],
+    images: Object.entries(imgs).map(([_, id]) => ({
+      id,
+      url: 'https://images.unsplash.com/photo-1682687982167-d7fb3ed8541d?q=80&w=5071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    })),
     content: template,
   };
 };
@@ -54,6 +79,7 @@ const basic2section = async (
   const template = basic2();
   replaceText(
     {
+      title: title,
       'section1.title': section1.title,
       'section1.content': section1.content,
       'section2.title': section2.title,
@@ -61,8 +87,12 @@ const basic2section = async (
     },
     template
   );
+  const imgs = getImages(template);
   return {
-    images: [],
+    images: Object.entries(imgs).map(([_, id]) => ({
+      id,
+      url: 'https://images.unsplash.com/photo-1682687982167-d7fb3ed8541d?q=80&w=5071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    })),
     content: template,
   };
 };
@@ -75,6 +105,7 @@ const basic3section = async (
   const template = basic3();
   replaceText(
     {
+      title: title,
       'section1.title': section1.title,
       'section1.content': section1.content,
       'section2.title': section2.title,
@@ -84,8 +115,12 @@ const basic3section = async (
     },
     template
   );
+  const imgs = getImages(template);
   return {
-    images: [],
+    images: Object.entries(imgs).map(([_, id]) => ({
+      id,
+      url: 'https://images.unsplash.com/photo-1682687982167-d7fb3ed8541d?q=80&w=5071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    })),
     content: template,
   };
 };
@@ -99,6 +134,7 @@ const basic4section = async (
   const template = basic4();
   replaceText(
     {
+      title: title,
       'section1.title': section1.title,
       'section1.content': section1.content,
       'section2.title': section2.title,
@@ -110,8 +146,12 @@ const basic4section = async (
     },
     template
   );
+  const imgs = getImages(template);
   return {
-    images: [],
+    images: Object.entries(imgs).map(([_, id]) => ({
+      id,
+      url: 'https://images.unsplash.com/photo-1682687982167-d7fb3ed8541d?q=80&w=5071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    })),
     content: template,
   };
 };

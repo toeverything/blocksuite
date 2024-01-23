@@ -74,7 +74,7 @@ export const basic2 = () => ({
             d0P7NN0Rj2: {
               index: 'a4',
               seed: 1525437043,
-              xywh: '[-5191.047608974944,-2933.457725813176,658,80]',
+              xywh: '[-5191.047608974944,-2933.457725813176,708,80]',
               rotate: 0,
               text: {
                 'affine:surface:text': true,
@@ -130,7 +130,7 @@ export const basic2 = () => ({
                 '$blocksuite:internal:text$': true,
                 delta: [
                   {
-                    insert: 'Frame 4',
+                    insert: 'title',
                   },
                 ],
               },
