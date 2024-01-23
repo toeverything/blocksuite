@@ -11,10 +11,7 @@ import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import {
   type EdgelessTool,
   isMiddleButtonPressed,
-  isPinchEvent,
-  Point,
 } from '../../../_common/utils/index.js';
-import { normalizeWheelDeltaY } from '../../../surface-block/index.js';
 import type { Bound } from '../../../surface-block/utils/bound.js';
 import { BrushToolController } from '../controllers/tools/brush-tool.js';
 import { ConnectorToolController } from '../controllers/tools/connector-tool.js';
@@ -195,34 +192,6 @@ export class EdgelessToolsManager {
     this._add('contextMenu', ctx => {
       const event = ctx.get('defaultState');
       this._onContainerContextMenu(event);
-    });
-    this._add('wheel', ctx => {
-      const state = ctx.get('defaultState');
-      const e = state.event;
-      if (!(e instanceof WheelEvent)) return;
-
-      e.preventDefault();
-
-      const container = this.container;
-      const { viewport } = this.service;
-      // pan
-      if (!isPinchEvent(e)) {
-        const dx = e.deltaX / viewport.zoom;
-        const dy = e.deltaY / viewport.zoom;
-        viewport.applyDeltaCenter(dx, dy);
-      }
-      // zoom
-      else {
-        const rect = container.getBoundingClientRect();
-        // Perform zooming relative to the mouse position
-        const [baseX, baseY] = container.service.viewport.toModelCoord(
-          e.clientX - rect.x,
-          e.clientY - rect.y
-        );
-
-        const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
-        viewport.setZoom(zoom, new Point(baseX, baseY));
-      }
     });
   }
 

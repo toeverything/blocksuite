@@ -20,6 +20,7 @@ import { BLOCK_ID_ATTR } from '../../_common/consts.js';
 import { listenToThemeChange } from '../../_common/theme/utils.js';
 import {
   type EdgelessTool,
+  isPinchEvent,
   NoteDisplayMode,
   Point,
   requestConnectedFrame,
@@ -47,6 +48,7 @@ import {
   getCommonBound,
   type IBound,
   type IVec,
+  normalizeWheelDeltaY,
   serializeXYWH,
   Vec,
   ZOOM_MIN,
@@ -638,6 +640,36 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }
   }
 
+  private _initWheel() {
+    this.handleEvent('wheel', ctx => {
+      const state = ctx.get('defaultState');
+      const e = state.event;
+      if (!(e instanceof WheelEvent)) return;
+
+      e.preventDefault();
+
+      const { viewport } = this.service;
+      // pan
+      if (!isPinchEvent(e)) {
+        const dx = e.deltaX / viewport.zoom;
+        const dy = e.deltaY / viewport.zoom;
+        viewport.applyDeltaCenter(dx, dy);
+      }
+      // zoom
+      else {
+        const rect = this.getBoundingClientRect();
+        // Perform zooming relative to the mouse position
+        const [baseX, baseY] = this.service.viewport.toModelCoord(
+          e.clientX - rect.x,
+          e.clientY - rect.y
+        );
+
+        const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
+        viewport.setZoom(zoom, new Point(baseX, baseY));
+      }
+    });
+  }
+
   override firstUpdated() {
     this._initSlotEffects();
     this._initResizeEffect();
@@ -646,6 +678,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initReadonlyListener();
     this._initRemoteCursor();
     this._initSurface();
+    this._initWheel();
 
     this._initViewport();
 
