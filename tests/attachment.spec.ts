@@ -69,7 +69,7 @@ function getAttachment(page: Page) {
   };
 
   const getName = () =>
-    attachment.locator('.affine-attachment-name').innerText();
+    attachment.locator('.affine-attachment-content-title-text').innerText();
 
   return {
     // locators
@@ -86,7 +86,8 @@ function getAttachment(page: Page) {
      */
     waitLoading: () => loading.waitFor({ state: 'hidden' }),
     getName,
-    getSize: () => attachment.locator('.affine-attachment-desc').innerText(),
+    getSize: () =>
+      attachment.locator('.affine-attachment-content-info').innerText(),
 
     turnToEmbed: async () => {
       await expect(turnToEmbedBtn).toBeVisible();
@@ -155,9 +156,12 @@ test('can insert attachment from slash menu', async ({ page }) => {
 >
   <affine:attachment
     prop:embed={false}
+    prop:index="a0"
     prop:name="${FILE_NAME}"
+    prop:rotate={0}
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
+    prop:style="horizontalThin"
     prop:type="image/png"
   />
 </affine:note>`,
@@ -197,9 +201,12 @@ test('should undo/redo works for attachment', async ({ page }) => {
 >
   <affine:attachment
     prop:embed={false}
+    prop:index="a0"
     prop:name="${FILE_NAME}"
+    prop:rotate={0}
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
+    prop:style="horizontalThin"
     prop:type="image/png"
   />
 </affine:note>`,
@@ -256,9 +263,12 @@ test('should undo/redo works for attachment', async ({ page }) => {
 >
   <affine:attachment
     prop:embed={false}
+    prop:index="a0"
     prop:name="${FILE_NAME}"
+    prop:rotate={0}
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
+    prop:style="horizontalThin"
     prop:type="image/png"
   />
 </affine:note>`,
@@ -372,9 +382,12 @@ test('should turn attachment to image works', async ({ page }) => {
   <affine:attachment
     prop:caption=""
     prop:embed={false}
+    prop:index="a0"
     prop:name="${FILE_NAME}"
+    prop:rotate={0}
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
+    prop:style="horizontalThin"
     prop:type="image/png"
   />
 </affine:note>`,
@@ -457,9 +470,12 @@ test(`support dragging attachment block directly`, async ({ page }) => {
 >
   <affine:attachment
     prop:embed={false}
+    prop:index="a0"
     prop:name="${FILE_NAME}"
+    prop:rotate={0}
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
+    prop:style="horizontalThin"
     prop:type="image/png"
   />
 </affine:note>`,
@@ -508,9 +524,12 @@ test(`support dragging attachment block directly`, async ({ page }) => {
   >
     <affine:attachment
       prop:embed={false}
+      prop:index="a0"
       prop:name="${FILE_NAME}"
+      prop:rotate={0}
       prop:size={${FILE_SIZE}}
       prop:sourceId="${FILE_ID}"
+      prop:style="horizontalThin"
       prop:type="image/png"
     />
     <affine:paragraph
@@ -532,13 +551,8 @@ test(`support dragging attachment block directly`, async ({ page }) => {
   // drag bookmark block
   await page.mouse.move(rect.x + 20, rect.y + 20);
   await page.mouse.down();
-  await page.waitForTimeout(200);
-
-  await page.mouse.move(rect.x + 40, rect.y + rect.height + 80);
-  await page.waitForTimeout(200);
-
+  await page.mouse.move(rect.x + 40, rect.y + rect.height + 80, { steps: 20 });
   await page.mouse.up();
-  await page.waitForTimeout(200);
 
   const rects = page.locator('affine-block-selection');
   await expect(rects).toHaveCount(1);
@@ -572,9 +586,12 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     />
     <affine:attachment
       prop:embed={false}
+      prop:index="a0"
       prop:name="${FILE_NAME}"
+      prop:rotate={0}
       prop:size={${FILE_SIZE}}
       prop:sourceId="${FILE_ID}"
+      prop:style="horizontalThin"
       prop:type="image/png"
     />
     <affine:paragraph
