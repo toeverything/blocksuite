@@ -1,16 +1,13 @@
 import {
-  Bound,
+  BlocksUtils,
   MarkdownAdapter,
+  type ShapeElementModel,
   SurfaceBlockComponent,
-  type TreeNode,
+  type TreeNodeWithId,
 } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
-import {
-  type BlockSnapshot,
-  Job,
-  type Page,
-  Workspace,
-} from '@blocksuite/store';
+import { type BlockSnapshot, Job, type Page } from '@blocksuite/store';
 
 import { LANGUAGE, TONE } from '../config.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
@@ -24,6 +21,7 @@ import {
   runMakeLongerAction,
   runMakeShorterAction,
   runPartAnalysisAction,
+  runPPTGenerateAction,
   runRefineAction,
   runSimplifyWritingAction,
   runSummaryAction,
@@ -31,7 +29,7 @@ import {
 } from '../doc/actions.js';
 import { getChatService } from '../doc/api.js';
 import type { AILogic } from '../logic.js';
-import { getConnectorPath } from '../utils/connector.js';
+import { findLeaf, findTree, getConnectorPath } from '../utils/connector.js';
 import {
   insertFromMarkdown,
   markdownToSnapshot,
@@ -42,12 +40,14 @@ import {
   getSelectedTextContent,
   selectedToCanvas,
 } from '../utils/selection-utils.js';
+import { basicTheme, type PPTPage, type PPTSection } from './template.js';
 
 export type ChatReactiveData = {
   history: ChatMessage[];
   syncedPages: EmbeddedPage[];
   value: string;
   currentRequest?: number;
+  tempMessage?: string;
 };
 
 export class AIChatLogic {
@@ -163,12 +163,19 @@ export class AIChatLogic {
     ];
     const background = await this.getBackground();
     this.reactiveData.value = '';
-    const r = await this.startRequest(() =>
-      getChatService().chat([
+    const r = await this.startRequest(async () => {
+      const iter = getChatService().chat([
         ...background.messages,
         ...this.reactiveData.history,
-      ])
-    );
+      ]);
+      let result = '';
+      for await (const item of iter) {
+        result += item;
+        this.reactiveData.tempMessage = result;
+      }
+      this.reactiveData.tempMessage = undefined;
+      return result;
+    });
     this.reactiveData.history = [
       ...this.reactiveData.history,
       {
@@ -287,7 +294,12 @@ export class AIChatLogic {
     }, 0);
   }
 
-  createAction(name: string, action: (input: string) => Promise<string>) {
+  createAction(
+    name: string,
+    action: (
+      input: string
+    ) => Promise<AsyncIterable<string>> | AsyncIterable<string>
+  ) {
     return async (text?: string): Promise<void> => {
       const input = text ? text : await this.getSelectedText();
       if (!input) {
@@ -304,7 +316,16 @@ export class AIChatLogic {
           content: [{ text: name, type: 'text' }],
         },
       ];
-      const result = await this.startRequest(() => action(input));
+      const result = await this.startRequest(async () => {
+        const strings = await action(input);
+        let r = '';
+        for await (const item of strings) {
+          r += item;
+          this.reactiveData.tempMessage = r;
+        }
+        this.reactiveData.tempMessage = undefined;
+        return r;
+      });
       this.reactiveData.history = [
         ...this.reactiveData.history,
         {
@@ -398,37 +419,54 @@ export class AIChatLogic {
       name: 'Create mind-map',
       action: this.createAction('Create mind-map', async input => {
         const service = getEdgelessPageBlockFromEditor(this.host).service;
-        const id = service.addElement('shape', {
-          text: new Workspace.Y.Text('Analyzing...'),
-          shapeType: 'rect',
-          xywh: Bound.fromXYWH([
-            service.viewport.centerX,
-            service.viewport.centerY,
-            200,
-            80,
-          ]).serialize(),
-        });
-        const text = await runAnalysisAction({ input });
-        const snapshot = await markdownToSnapshot(text, this.host);
-        const block = snapshot.snapshot.content[0];
-        const toTreeNode = (block: BlockSnapshot): TreeNode => {
-          return {
-            // @ts-ignore
-            text: block.props.text?.delta?.[0]?.insert ?? '',
-            children: block.children.map(toTreeNode),
-          };
-        };
-        const ele = service.getElementById(id);
-        if (!ele) {
-          return new Promise(() => {});
-        }
-        const { x, y } = Bound.deserialize(ele.xywh);
-        service.removeElement(id);
-        await this.logic.edgeless.drawMindMap(toTreeNode(block.children[0]), {
-          x,
-          y,
-        });
-        return text;
+        const [x, y] = [service.viewport.centerX, service.viewport.centerY];
+        const reactiveData = this.reactiveData;
+        const build = mindMapBuilder(this.host, x, y);
+        return (async function* () {
+          const strings = runAnalysisAction({ input });
+          let text = '';
+          for await (const item of strings) {
+            yield item;
+            text += item;
+            if (text) {
+              await build(text);
+            }
+            reactiveData.tempMessage = text;
+          }
+        })();
+      }),
+    },
+    {
+      type: 'action',
+      name: 'Create presentation',
+      action: this.createAction('Create mind-map', async input => {
+        const reactiveData = this.reactiveData;
+        // const service = getEdgelessPageBlockFromEditor(this.host).service;
+        const build = pptBuilder(this.host);
+        // const job = service.createTemplateJob('template');
+        // const { assets, content } = await createTemplate();
+        // if (assets) {
+        //   await Promise.all(
+        //     Object.entries(assets).map(([key, value]) =>
+        //       fetch(value)
+        //         .then(res => res.blob())
+        //         .then(blob => job.job.assets.set(key, blob))
+        //     )
+        //   );
+        // }
+        // await job.insertTemplate(content);
+        return (async function* () {
+          const strings = runPPTGenerateAction({ input });
+          let text = '';
+          for await (const item of strings) {
+            yield item;
+            text += item;
+            if (text) {
+              await build(text);
+            }
+            reactiveData.tempMessage = text;
+          }
+        })();
       }),
     },
     {
@@ -453,7 +491,13 @@ export class AIChatLogic {
     {
       type: 'action',
       name: 'Continue',
+      hide: () => {
+        const service = getEdgelessPageBlockFromEditor(this.host).service;
+        const ele = service.selection.elements[0];
+        return !SurfaceBlockComponent.isShape(ele);
+      },
       action: async () => {
+        const reactiveData = this.reactiveData;
         const service = getEdgelessPageBlockFromEditor(this.host).service;
         const ele = service.selection.elements[0];
         if (!SurfaceBlockComponent.isShape(ele)) {
@@ -465,6 +509,8 @@ export class AIChatLogic {
         }
         const surface = getEdgelessPageBlockFromEditor(this.host);
         const pathIds = getConnectorPath(ele.id, service);
+        const rootId = [...pathIds, ele.id][0];
+        const rootEle = service.getElementById(rootId) as ShapeElementModel;
         const path = pathIds.map(id => {
           const ele = surface.service.getElementById(id);
           if (ele && SurfaceBlockComponent.isShape(ele)) {
@@ -472,21 +518,32 @@ export class AIChatLogic {
           }
           return '';
         });
+        const oldTree = findTree(rootId, service);
+        const target = findLeaf(oldTree, ele.id);
+        assertExists(target);
+        const build = mindMapBuilder(
+          this.host,
+          rootEle.x,
+          rootEle.y,
+          ele.id,
+          tree => {
+            target.children = tree.children;
+            return oldTree;
+          }
+        );
         await this.createAction('Part analysis', async input => {
-          const result = await runPartAnalysisAction({ input, path });
-          const snapshot = await markdownToSnapshot(result, this.host);
-          const block = snapshot.snapshot.content[0];
-          const toTreeNode = (block: BlockSnapshot): TreeNode => {
-            return {
-              // @ts-ignore
-              text: block.props.text?.delta?.[0]?.insert ?? '',
-              children: block.children.map(toTreeNode),
-            };
-          };
-          await this.logic.edgeless.drawMindMap(toTreeNode(block.children[0]), {
-            rootId: ele.id,
-          });
-          return result;
+          return (async function* () {
+            const strings = runPartAnalysisAction({ input, path });
+            let text = '';
+            for await (const item of strings) {
+              yield item;
+              text += item;
+              if (text) {
+                await build(text);
+              }
+              reactiveData.tempMessage = text;
+            }
+          })();
         })(text);
       },
     },
@@ -496,7 +553,7 @@ export class AIChatLogic {
 type Action = {
   type: 'action';
   name: string;
-  hide?: boolean;
+  hide?: () => boolean;
   action: () => Promise<void>;
 };
 type ActionGroup = {
@@ -589,4 +646,85 @@ export type EmbeddedPage = {
     vector: number[];
     text: string;
   }[];
+};
+const mindMapBuilder = (
+  host: EditorHost,
+  x: number,
+  y: number,
+  rootId?: string,
+  wrapTree?: (tree: TreeNodeWithId) => TreeNodeWithId
+) => {
+  const service = getEdgelessPageBlockFromEditor(host).service;
+  const ids: string[] = rootId ? [rootId] : [];
+  const buildTree = async (text: string) => {
+    const snapshot = await markdownToSnapshot(text, host);
+    const block = snapshot.snapshot.content[0];
+    let i = 0;
+    const toTreeNode = (
+      block: BlockSnapshot,
+      parentId?: string
+    ): TreeNodeWithId => {
+      const text = getText(block);
+      if (ids[i] == null) {
+        ids[i] = BlocksUtils.mindMap.createNode(
+          text,
+          service,
+          parentId ? { direction: 'right', parentId } : undefined
+        );
+      }
+      const selfId = ids[i];
+      const shape = service.getElementById(selfId) as ShapeElementModel;
+      if (shape.text?.toString() !== text) {
+        BlocksUtils.mindMap.changeText(selfId, text, service);
+      }
+      return {
+        id: ids[i++],
+        children: block.children.map(id => toTreeNode(id, selfId)),
+      };
+    };
+    const tree = toTreeNode(block.children[0]);
+    BlocksUtils.mindMap.layoutInEdgeless(service, wrapTree?.(tree) ?? tree, {
+      x,
+      y,
+    });
+  };
+  return buildTree;
+};
+const pptBuilder = (host: EditorHost) => {
+  const service = getEdgelessPageBlockFromEditor(host).service;
+  const pages: PPTPage[] = [];
+  const addPage = async (block: BlockSnapshot) => {
+    const sections = block.children.map(v => {
+      const title = getText(v);
+      const keywords = getText(v.children[0]);
+      const content = getText(v.children[1]);
+      return {
+        title,
+        keywords,
+        content,
+      } satisfies PPTSection;
+    });
+    const page: PPTPage = {
+      title: getText(block),
+      sections,
+    };
+    pages.push(page);
+    const job = service.createTemplateJob('template');
+    const { images, content } = await basicTheme(page);
+    if (images.length) {
+      /* empty */
+    }
+    await job.insertTemplate(content);
+  };
+  return async (text: string) => {
+    const snapshot = await markdownToSnapshot(text, host);
+    const block = snapshot.snapshot.content[0];
+    if (block.children.length > pages.length + 1) {
+      await addPage(block.children[pages.length]);
+    }
+  };
+};
+const getText = (block: BlockSnapshot) => {
+  // @ts-ignore
+  return block.props.text?.delta?.[0]?.insert ?? '';
 };

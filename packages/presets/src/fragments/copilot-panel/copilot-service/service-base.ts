@@ -51,7 +51,7 @@ export const TextServiceKind = createServiceKind<{
   title: 'Text service',
 });
 export const ChatServiceKind = createServiceKind<{
-  chat(messages: Array<ChatMessage>): Promise<string>;
+  chat(messages: Array<ChatMessage>): AsyncIterable<string>;
 }>({
   type: 'chat-service',
   title: 'Chat service',

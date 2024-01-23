@@ -70,6 +70,30 @@ const askGPT = async (
   });
   return result.choices[0].message;
 };
+const askGPTStream = async function* (
+  apiKey: string,
+  model:
+    | 'gpt-4'
+    | 'gpt-3.5-turbo-1106'
+    | 'gpt-4-vision-preview'
+    | 'gpt-4-turbo',
+  messages: Array<ChatMessage>
+): AsyncIterable<string> {
+  const openai = new OpenAI({
+    apiKey: apiKey,
+    dangerouslyAllowBrowser: true,
+  });
+  const result = await openai.chat.completions.create({
+    stream: true,
+    messages: toGPTMessages(messages),
+    model: model,
+    temperature: 0,
+    max_tokens: 4096,
+  });
+  for await (const message of result) {
+    yield message.choices[0].delta.content ?? '';
+  }
+};
 
 TextServiceKind.implService({
   name: 'GPT3.5 Turbo',
@@ -95,9 +119,8 @@ TextServiceKind.implService({
 ChatServiceKind.implService({
   name: 'GPT3.5 Turbo',
   method: data => ({
-    chat: async messages => {
-      const result = await askGPT(data.apiKey, 'gpt-3.5-turbo-1106', messages);
-      return result.content ?? '';
+    chat: messages => {
+      return askGPTStream(data.apiKey, 'gpt-3.5-turbo-1106', messages);
     },
   }),
   vendor: openaiVendor,
@@ -106,24 +129,15 @@ ChatServiceKind.implService({
 ChatServiceKind.implService({
   name: 'GPT4',
   method: data => ({
-    chat: async messages => {
-      const result = await askGPT(data.apiKey, 'gpt-4', messages);
-      return result.content ?? '';
-    },
+    chat: messages => askGPTStream(data.apiKey, 'gpt-4', messages),
   }),
   vendor: openaiVendor,
 });
 ChatServiceKind.implService({
   name: 'GPT4-Vision',
   method: data => ({
-    chat: async messages => {
-      const result = await askGPT(
-        data.apiKey,
-        'gpt-4-vision-preview',
-        messages
-      );
-      return result.content ?? '';
-    },
+    chat: messages =>
+      askGPTStream(data.apiKey, 'gpt-4-vision-preview', messages),
   }),
   vendor: openaiVendor,
 });

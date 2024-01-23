@@ -279,7 +279,7 @@ export class AIEdgelessLogic {
     options?: { rootId?: string; x?: number; y?: number }
   ) {
     BlocksUtils.mindMap.drawInEdgeless(
-      getSurfaceElementFromEditor(this.host),
+      getEdgelessPageBlockFromEditor(this.host).service,
       treeNode,
       options
     );

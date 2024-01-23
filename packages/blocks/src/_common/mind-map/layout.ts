@@ -3,10 +3,12 @@ export type LayoutNode = {
   height: number;
   children: LayoutNode[];
 };
+export type Connector = {
+  direction: 'left' | 'right' | 'top' | 'bottom';
+  parentId: string;
+} | null;
 export type LayoutNodeResult = {
-  connector: {
-    direction: 'left' | 'right' | 'top' | 'bottom';
-  } | null;
+  connector: Connector;
   self: {
     x: number;
     y: number;

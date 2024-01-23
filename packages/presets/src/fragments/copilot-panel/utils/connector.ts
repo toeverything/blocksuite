@@ -3,7 +3,16 @@ import {
   type ConnectorElementModel,
   SurfaceBlockComponent,
 } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 
+export const getConnectorFromId = (
+  id: string,
+  surface: EdgelessPageService
+) => {
+  return surface.elements.filter(
+    v => SurfaceBlockComponent.isConnector(v) && v.source.id === id
+  ) as ConnectorElementModel[];
+};
 export const getConnectorToId = (id: string, surface: EdgelessPageService) => {
   return surface.elements.filter(
     v => SurfaceBlockComponent.isConnector(v) && v.target.id === id
@@ -28,4 +37,52 @@ export const getConnectorPath = (id: string, surface: EdgelessPageService) => {
     }
   }
   return result;
+};
+type ElementTree = {
+  id: string;
+  children: ElementTree[];
+};
+export const findTree = (
+  rootId: string,
+  surface: EdgelessPageService
+): ElementTree => {
+  const set = new Set<string>();
+  const run = (id: string): ElementTree | undefined => {
+    if (set.has(id)) {
+      return;
+    }
+    set.add(id);
+    const children = getConnectorFromId(id, surface);
+    return {
+      id,
+      children: children.flatMap(model => {
+        const childId = model.target.id;
+        if (childId) {
+          const elementTree = run(childId);
+          if (elementTree) {
+            return [elementTree];
+          }
+        }
+        return [];
+      }),
+    };
+  };
+  const tree = run(rootId);
+  assertExists(tree);
+  return tree;
+};
+export const findLeaf = (
+  tree: ElementTree,
+  id: string
+): ElementTree | undefined => {
+  if (tree.id === id) {
+    return tree;
+  }
+  for (const child of tree.children) {
+    const result = findLeaf(child, id);
+    if (result) {
+      return result;
+    }
+  }
+  return;
 };

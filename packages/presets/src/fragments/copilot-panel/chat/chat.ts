@@ -108,12 +108,17 @@ export class CopilotChatPanel
   chatMessagesContainer!: HTMLDivElement;
   protected override updated(_changedProperties: PropertyValues) {
     super.updated(_changedProperties);
-    if (_changedProperties.has('history')) {
+    if (
+      _changedProperties.has('history') ||
+      _changedProperties.has('tempMessage')
+    ) {
       this.chatMessagesContainer.scrollTop =
         this.chatMessagesContainer.scrollHeight;
     }
   }
 
+  @state()
+  tempMessage?: string;
   @state()
   history: ChatMessage[] = [
     {
@@ -127,36 +132,28 @@ export class CopilotChatPanel
     },
     {
       role: 'assistant',
-      content: `* 大语言模型
-
-  * 定义
-
-    * 语言模型是一种基于概率的计算机模型，用于预测文本序列中的下一个词或字符。
-
-    - 大语言模型是指模型的规模非常大，通常包含数十亿个参数，能够理解和生成人类语言的复杂模式。
-
-  - 作用
-
-    * 文本生成
-
-    - 问答系统
-
-    * 机器翻译
-
-  * 优点
-
-    * 强大的理解和生成能力
-
-    - 广泛的应用
-
+      content: `- CRDT
+  - 定义
+    - CRDT 是 Conflict-free Replicated Data Type 的缩写，中文名为“无冲突复制数据类型”。
+    - 它是一种可以在多个设备之间复制和同步，而不需要进行复杂的冲突解决的数据结构。
+  - 类型
+    - State-based CRDTs
+      - 也被称为 Convergent Replicated Data Types 或 CVRDTs。
+      - 每个副本都可以独立地进行更新，然后通过合并操作来解决冲突。
+    - Operation-based CRDTs
+      - 也被称为 Commutative Replicated Data Types 或 CmRDTs。
+      - 每个副本都会广播它的更新操作，其他副本会接收并应用这些操作。
+  - 应用
+    - 分布式系统
+      - CRDTs 可以在没有中央协调者的情况下，保证数据的一致性。
+    - 实时协作应用
+      - 如 Google Docs，可以允许多个用户同时编辑同一份文档，而不会产生冲突。
+  - 优点
+    - 可以在网络分区或延迟的情况下工作。
+    - 不需要复杂的冲突解决策略。
   - 缺点
-
-    * 训练成本高
-
-    - 难以解释
-
-    * 可能产生偏见
-`,
+    - 需要更多的存储空间和带宽。
+    - 实现起来相对复杂。`,
       sources: [],
     },
   ];
@@ -345,6 +342,13 @@ export class CopilotChatPanel
             style="flex:1;gap:42px;flex-direction: column;display:flex;padding: 0 7px 42px"
           >
             ${repeat(this.history, this.renderMessage)}
+            ${this.tempMessage
+              ? this.renderMessage({
+                  role: 'assistant',
+                  content: this.tempMessage,
+                  sources: [],
+                })
+              : nothing}
           </div>
         </div>
         <div>

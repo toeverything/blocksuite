@@ -343,6 +343,9 @@ EdgelessComponentToolbar.registerCustomRenderer({
           </sl-menu-item>
         `;
       }
+      if (item.hide?.() === true) {
+        return html``;
+      }
       return html`
         <sl-menu-item @click="${() => item.action()}"
           >${item.name}</sl-menu-item

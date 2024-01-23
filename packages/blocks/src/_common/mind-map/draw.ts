@@ -1,5 +1,6 @@
 import { Workspace } from '@blocksuite/store';
 
+import type { EdgelessPageService } from '../../page-block/edgeless/edgeless-page-service.js';
 import { getFontString } from '../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import type { ShapeElementModel } from '../../surface-block/index.js';
 import {
@@ -16,8 +17,12 @@ import {
   type ShapeType,
   StrokeStyle,
 } from '../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
-import { layout, type LayoutNode, type LayoutNodeResult } from './layout.js';
+import {
+  type Connector,
+  layout,
+  type LayoutNode,
+  type LayoutNodeResult,
+} from './layout.js';
 
 export const DEFAULT_SHAPE_PROPS: Partial<IShape> = {
   shapeType: 'rect' as ShapeType,
@@ -39,8 +44,14 @@ export const DEFAULT_CONNECTOR_PROPS: Partial<IConnector> = {
   rearEndpointStyle: ConnectorEndpointStyle.None,
 };
 export type TreeNode = {
+  // element id in edgeless if it already exists
+  id?: string;
   text: string;
   children: TreeNode[];
+};
+export type TreeNodeWithId = {
+  id: string;
+  children: TreeNodeWithId[];
 };
 const directionMap: Record<string, { from: number[]; to: number[] }> = {
   left: {
@@ -63,7 +74,7 @@ const directionMap: Record<string, { from: number[]; to: number[] }> = {
 
 const drawAllNode = (
   node: TreeNode,
-  surface: SurfaceBlockComponent,
+  service: EdgelessPageService,
   options?: {
     rootId?: string;
     x?: number;
@@ -77,11 +88,11 @@ const drawAllNode = (
     id: string;
     children: LayoutNode_[];
   };
-  const { service } = surface.edgeless;
   const drawNode = (node: TreeNode, isRoot = false): LayoutNode_ => {
     const { text, children } = node;
-    const id =
-      isRoot && options?.rootId
+    const id = node.id
+      ? node.id
+      : isRoot && options?.rootId
         ? options.rootId
         : service.addElement(CanvasElementType.SHAPE, {
             ...DEFAULT_SHAPE_PROPS,
@@ -123,7 +134,6 @@ const drawAllNode = (
   const updatePosition = (node: LayoutNode_, result: LayoutNodeResult) => {
     const { id, width, height } = node;
     const { x, y } = result.self;
-    const service = surface.edgeless.service;
 
     service.updateElement(id, {
       xywh: `[${x},${y},${width},${height}]`,
@@ -151,8 +161,55 @@ const drawAllNode = (
   updatePosition(layoutNode, result);
   return { shapeIds, connectorIds };
 };
+const layoutAllNode = (
+  node: TreeNodeWithId,
+  service: EdgelessPageService,
+  options?: {
+    rootId?: string;
+    x?: number;
+    y?: number;
+  }
+) => {
+  type LayoutNode_ = Omit<LayoutNode, 'children'> & {
+    id: string;
+    children: LayoutNode_[];
+  };
+  const getLayoutNode = (node: TreeNodeWithId): LayoutNode_ => {
+    const { children, id } = node;
+    const ele = service.getElementById(id) as ShapeElementModel;
+    return {
+      id,
+      width: ele.w,
+      height: ele.h,
+      children: children.map(child => getLayoutNode(child)),
+    };
+  };
+  const layoutNode = getLayoutNode(node);
+  const root = options?.rootId
+    ? (service.getElementById(options.rootId) as ShapeElementModel)
+    : undefined;
+  const result = layout.right(layoutNode, {
+    gapHorizontal: 130,
+    gapVertical: 10,
+    x: root ? root.x : options?.x ?? 0,
+    y: root ? root.y : options?.y ?? 0,
+  });
+  const updatePosition = (node: LayoutNode_, result: LayoutNodeResult) => {
+    const { id, width, height } = node;
+    const { x, y } = result.self;
+
+    service.updateElement(id, {
+      xywh: `[${x},${y},${width},${height}]`,
+    });
+    node.children.forEach((child, index) => {
+      const layoutNodeResult = result.children[index];
+      updatePosition(child, layoutNodeResult);
+    });
+  };
+  updatePosition(layoutNode, result);
+};
 export function drawMindMap(
-  surfaceElement: SurfaceBlockComponent,
+  service: EdgelessPageService,
   mindMap: TreeNode,
   ops?: {
     rootId?: string;
@@ -160,12 +217,85 @@ export function drawMindMap(
     y?: number;
   }
 ) {
-  const { shapeIds, connectorIds } = drawAllNode(mindMap, surfaceElement, ops);
-  const { edgeless } = surfaceElement;
+  const { shapeIds, connectorIds } = drawAllNode(mindMap, service, ops);
 
-  edgeless.service.selection.set({
+  service.selection.set({
     elements: [...shapeIds, ...connectorIds],
     editing: false,
   });
-  surfaceElement.edgeless.service.createGroupFromSelected();
+  service.createGroupFromSelected();
 }
+export function layoutMindMap(
+  service: EdgelessPageService,
+  mindMap: TreeNodeWithId,
+  ops?: {
+    rootId?: string;
+    x?: number;
+    y?: number;
+  }
+) {
+  layoutAllNode(mindMap, service, ops);
+}
+export const createNode = (
+  text: string,
+  service: EdgelessPageService,
+  connector?: Connector
+) => {
+  const id = service.addElement(CanvasElementType.SHAPE, {
+    ...DEFAULT_SHAPE_PROPS,
+    xywh: `[${0},${0},${0},${0}]`,
+    text: new Workspace.Y.Text(text),
+  });
+  const ele = service.getElementById(id) as ShapeElementModel;
+  const maxWidth =
+    Math.max(
+      ...text.split('\n').map(line => getLineWidth(line, getFontString(ele)))
+    ) +
+    SHAPE_TEXT_PADDING * 2;
+  const bound = normalizeShapeBound(
+    ele,
+    new Bound(0, 0, Math.max(148, Math.min(600, maxWidth)), 78)
+  );
+  service.updateElement(id, {
+    xywh: bound.serialize(),
+  });
+  if (connector) {
+    const direction = directionMap[connector.direction];
+    service.addElement(CanvasElementType.CONNECTOR, {
+      ...DEFAULT_CONNECTOR_PROPS,
+      source: {
+        id: connector.parentId,
+        position: direction.from,
+      },
+      target: {
+        id: id,
+        position: direction.to,
+      },
+    });
+  }
+
+  return id;
+};
+
+export const changeText = (
+  id: string,
+  text: string,
+  service: EdgelessPageService
+) => {
+  service.updateElement(id, {
+    text: new Workspace.Y.Text(text),
+  });
+  const ele = service.getElementById(id) as ShapeElementModel;
+  const maxWidth =
+    Math.max(
+      ...text.split('\n').map(line => getLineWidth(line, getFontString(ele)))
+    ) +
+    SHAPE_TEXT_PADDING * 2;
+  const bound = normalizeShapeBound(
+    ele,
+    new Bound(0, 0, Math.max(148, Math.min(600, maxWidth)), 78)
+  );
+  service.updateElement(id, {
+    xywh: bound.serialize(),
+  });
+};

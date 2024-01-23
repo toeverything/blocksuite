@@ -46,6 +46,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
+import { getEdgelessPageBlockFromEditor } from '../../../../presets/src/fragments/copilot-panel/utils/selection-utils.js';
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';
@@ -361,7 +362,7 @@ export class DebugMenu extends ShadowlessElement {
       };
     }
     BlocksUtils.mindMap.drawInEdgeless(
-      getSurfaceElementFromEditor(this.editor.host),
+      getEdgelessPageBlockFromEditor(this.editor.host).service,
       node
     );
   }

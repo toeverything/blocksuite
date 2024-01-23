@@ -1,13 +1,13 @@
 import { getChatService, userText } from './api.js';
 
-export async function runChangeToneAction({
+export function runChangeToneAction({
   input,
   tone,
 }: {
   input: string;
   tone: string;
 }) {
-  const result = await getChatService().chat([
+  return getChatService().chat([
     {
       role: 'system',
       content: 'You are assisting the user in writing high quality content.',
@@ -17,12 +17,11 @@ export async function runChangeToneAction({
       `Change the tone the of Markdown text to ${tone}, preserving the formatting, like bold, italic, link, highlight. Please be sure to only return the content.`
     ),
   ]);
-  return result;
 }
 
-export async function runFixSpellingAction(payload: { input: string }) {
+export function runFixSpellingAction(payload: { input: string }) {
   const { input } = payload;
-  const result = await getChatService().chat([
+  return getChatService().chat([
     {
       role: 'system',
       content: 'You are a professional writing assisting',
@@ -32,12 +31,11 @@ export async function runFixSpellingAction(payload: { input: string }) {
       'Fix the spelling and grammar of the text, preserving the markdown formatting, like bold, italic, link, highlight. To make sure do your best'
     ),
   ]);
-  return result;
 }
 
-export async function runGenerateAction(payload: { input: string }) {
+export function runGenerateAction(payload: { input: string }) {
   const { input } = payload;
-  const result = await getChatService().chat([
+  return getChatService().chat([
     {
       role: 'system',
       content:
@@ -46,12 +44,11 @@ export async function runGenerateAction(payload: { input: string }) {
     userText(input),
     userText('Generate more content based on the current input.'),
   ]);
-  return result;
 }
 
-export async function runImproveWritingAction(payload: { input: string }) {
+export function runImproveWritingAction(payload: { input: string }) {
   const { input } = payload;
-  const completion = await getChatService().chat([
+  return getChatService().chat([
     {
       role: 'system',
       content: 'You are a professional writing assisting',
@@ -61,12 +58,11 @@ export async function runImproveWritingAction(payload: { input: string }) {
       'Improve the writing of the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. To make sure do your best'
     ),
   ]);
-  return completion;
 }
 
-export async function runMakeLongerAction(payload: { input: string }) {
+export function runMakeLongerAction(payload: { input: string }) {
   const { input } = payload;
-  const completion = await getChatService().chat([
+  return getChatService().chat([
     {
       role: 'system',
       content: 'You are a professional writing assisting',
@@ -76,12 +72,11 @@ export async function runMakeLongerAction(payload: { input: string }) {
       'Make the input text longer, preserving the markdown formatting, like bold, italic, link, highlight. To make sure do your best'
     ),
   ]);
-  return completion;
 }
 
-export async function runMakeShorterAction(payload: { input: string }) {
+export function runMakeShorterAction(payload: { input: string }) {
   const { input } = payload;
-  const completion = await getChatService().chat([
+  return getChatService().chat([
     {
       role: 'system',
       content: 'You are a professional writing assisting',
@@ -91,13 +86,11 @@ export async function runMakeShorterAction(payload: { input: string }) {
       'Make the input text shorter, preserving the markdown formatting, like bold, italic, link, highlight. To make sure do your best'
     ),
   ]);
-
-  return completion;
 }
 
-export async function runRefineAction(payload: { input: string }) {
+export function runRefineAction(payload: { input: string }) {
   const { input } = payload;
-  const completion = await getChatService().chat([
+  return getChatService().chat([
     {
       role: 'system',
       content:
@@ -106,13 +99,11 @@ export async function runRefineAction(payload: { input: string }) {
     userText(input),
     userText('Refine this text.'),
   ]);
-
-  return completion;
 }
 
-export async function runSimplifyWritingAction(payload: { input: string }) {
+export function runSimplifyWritingAction(payload: { input: string }) {
   const { input } = payload;
-  const completion = await getChatService().chat([
+  return getChatService().chat([
     {
       role: 'system',
       content: 'You are a professional writing assisting',
@@ -122,13 +113,11 @@ export async function runSimplifyWritingAction(payload: { input: string }) {
       'Simplify the text, preserving the markdown formatting if needed, like bold, italic, link, highlight. To make sure do your best'
     ),
   ]);
-
-  return completion;
 }
 
-export async function runSummaryAction(payload: { input: string }) {
+export function runSummaryAction(payload: { input: string }) {
   const { input } = payload;
-  const completion = await getChatService().chat([
+  return getChatService().chat([
     {
       role: 'system',
       content: 'You are a professional writing assisting.',
@@ -136,16 +125,14 @@ export async function runSummaryAction(payload: { input: string }) {
     userText(input),
     userText('Summarize this text. To make sure do your best.'),
   ]);
-
-  return completion;
 }
 
-export async function runTranslateAction(payload: {
+export function runTranslateAction(payload: {
   input: string;
   language: string;
 }) {
   const { input, language } = payload;
-  const completion = await getChatService().chat([
+  return getChatService().chat([
     {
       role: 'system',
       content: 'You are assisting the user in translating the content.',
@@ -158,37 +145,82 @@ export async function runTranslateAction(payload: {
       to ${language} while preserving the formatting, like bold, italic, link, highlight. Please only return the result of translate.`
     ),
   ]);
-
-  return completion;
 }
 
-export async function runAnalysisAction(payload: { input: string }) {
+export function runAnalysisAction(payload: { input: string }) {
   const { input } = payload;
-  const completion = await getChatService().chat([
+  return getChatService().chat([
     userText(
       `Use the nested unordered list syntax in Markdown to create a structure similar to a mind map. 
       Analysis the following questions:
       ${input}`
     ),
   ]);
-
-  return completion;
 }
 
-export async function runPartAnalysisAction(payload: {
+export function runPartAnalysisAction(payload: {
   input: string;
   path: string[];
 }) {
   const { input, path } = payload;
-  const completion = await getChatService().chat([
+  return getChatService().chat([
     userText(
-      `The following is a small part of a mind map. You need to use the markdown unordered list nesting syntax to analyze the issue in a structure similar to the mind map. Only output the supplementary content starting from the issue node; do not output any additional content.Do not output nodes that already exist in path.
+      `The following is a small part of a mind map. You need to use the markdown unordered list starts with \`-\` nesting syntax to analyze the issue in a structure similar to the mind map. Only output the supplementary content starting from the issue node; do not output any additional content.Do not output nodes that already exist in path.
 Issue Path:
-${[...path, input].join('->')}
+${path.join('->')}
 Issue Node:
 ${input}`
     ),
   ]);
-
-  return completion;
 }
+export const runPPTGenerateAction = (payload: { input: string }) => {
+  const { input } = payload;
+  return getChatService().chat([
+    userText(
+      `
+I want to write a PPT, each page has 1 to 4 sections,
+each section has a title of no more than 30 words and no more than 100 words of content,
+but also need some keywords that match the content of the paragraph used to generate images,
+this is a template:
+- page name
+    - section name
+      - keywords
+      - content
+    - section name
+      - keywords
+      - content
+- page name
+    - section name
+      - keywords
+      - content
+    - section name
+      - keywords
+      - content
+    - section name
+      - keywords
+      - content
+- page name
+    - section name
+      - keywords
+      - content
+    - section name
+      - keywords
+      - content
+    - section name
+      - keywords
+      - content
+    - section name
+      - keywords
+      - content
+- page name
+    - section name
+      - keywords
+      - content
+
+
+please help me to write this ppt, do not output any content that does not belong to the ppt content itself outside of the content, Directly output the title content keywords without identifying what this is in front of it
+The PPT is based on the following topics:
+${input}`
+    ),
+  ]);
+};

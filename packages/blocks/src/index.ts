@@ -46,7 +46,7 @@ export {
   getAffineInlineSpecsWithReference,
 } from './_common/inline/presets/affine-inline-specs.js';
 export { ReferenceNodeConfig } from './_common/inline/presets/nodes/reference-node/reference-config.js';
-export { type TreeNode } from './_common/mind-map/draw.js';
+export { type TreeNode, type TreeNodeWithId } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export {
   ColorVariables,

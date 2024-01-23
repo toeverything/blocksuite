@@ -5,9 +5,20 @@ import type { SurfaceBlockModel } from '../../models.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../surface-block/edgeless-types.js';
 import type { CanvasElementType } from '../../surface-block/element-model/index.js';
-import { GroupElementModel } from '../../surface-block/index.js';
+import {
+  getCommonBound,
+  GroupElementModel,
+} from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
+import type { TemplateJob } from '../../surface-block/service/template.js';
+import {
+  createInsertPlaceMiddleware,
+  createRegenerateIndexMiddleware,
+  createStickerMiddleware,
+  replaceIdMiddleware,
+} from '../../surface-block/service/template-middlewares.js';
+import type { SurfaceService } from '../../surface-block/surface-service.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { PageService } from '../page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
@@ -433,5 +444,47 @@ export class EdgelessPageService extends PageService {
 
   getConnectors(element: EdgelessElement) {
     return this.surface.getConnectors(element.id);
+  }
+
+  createTemplateJob(type: 'template' | 'sticker') {
+    const middlewares: ((job: TemplateJob) => void)[] = [];
+
+    if (type === 'template') {
+      const currentContentBound = getCommonBound(
+        (
+          this.blocks.map(block => Bound.deserialize(block.xywh)) as IBound[]
+        ).concat(this.elements)
+      );
+
+      if (currentContentBound) {
+        currentContentBound.x +=
+          currentContentBound.w + 20 / this.viewport.zoom;
+        middlewares.push(createInsertPlaceMiddleware(currentContentBound));
+      }
+
+      const idxGenerator = this.layer.preservedIndexGenerator(true);
+
+      middlewares.push(
+        createRegenerateIndexMiddleware((type: string) => idxGenerator(type))
+      );
+    }
+
+    if (type === 'sticker') {
+      middlewares.push(
+        createStickerMiddleware(this.viewport.center, () =>
+          this.layer.generateIndex('affine:image')
+        )
+      );
+    }
+
+    middlewares.push(replaceIdMiddleware);
+    const TemplateJob = (
+      this.std.spec.getService('affine:surface') as SurfaceService
+    ).TemplateJob;
+    return TemplateJob.create({
+      model: this.surface,
+      type,
+      middlewares,
+    });
   }
 }
