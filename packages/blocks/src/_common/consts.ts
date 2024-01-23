@@ -13,16 +13,27 @@ export const PAGE_HEADER_HEIGHT = 53;
 
 export const EMBED_CARD_WIDTH: Record<EmbedCardStyle, number> = {
   horizontal: 752,
+  horizontalThin: 752,
   list: 752,
   vertical: 364,
   cube: 170,
   video: 752,
+  figma: 752,
 };
 
 export const EMBED_CARD_HEIGHT: Record<EmbedCardStyle, number> = {
   horizontal: 116,
+  horizontalThin: 80,
   list: 46,
   vertical: 390,
   cube: 114,
   video: 544,
+  figma: 544,
 };
+
+export const DEFAULT_IMAGE_PROXY_ENDPOINT =
+  'https://affine-worker.toeverything.workers.dev/api/worker/image-proxy';
+
+// https://github.com/toeverything/affine-workers/tree/main/packages/link-preview
+export const DEFAULT_LINK_PREVIEW_ENDPOINT =
+  'https://affine-worker.toeverything.workers.dev/api/worker/link-preview';

@@ -115,7 +115,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   }
 
   get viewport() {
-    return this.edgeless.surface.viewport;
+    return this.edgeless.service.viewport;
   }
 
   private _setZoomByStep(step: number) {
@@ -158,7 +158,11 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
         this.requestUpdate();
       })
     );
-    _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      this.edgeless.service.viewport.viewportUpdated.on(() =>
+        this.requestUpdate()
+      )
+    );
     _disposables.add(
       slots.navigatorSettingUpdated.on(({ hideToolbar }) => {
         if (hideToolbar !== undefined) {

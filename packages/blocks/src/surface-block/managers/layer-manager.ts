@@ -1,43 +1,33 @@
-import { assertType, Slot } from '@blocksuite/global/utils';
+import { assertType, DisposableGroup, Slot } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
 import type { BlockModel } from '@blocksuite/store';
 import { generateKeyBetween } from 'fractional-indexing';
 
-import { type EdgelessElement } from '../../_common/types.js';
 import { last, nToLast } from '../../_common/utils/iterable.js';
 import { matchFlavours } from '../../_common/utils/model.js';
-import type { BookmarkBlockModel } from '../../bookmark-block/bookmark-model.js';
-import type { EmbedGithubModel } from '../../embed-github-block/index.js';
-import type { EmbedLinkedDocModel } from '../../embed-linked-doc-block/embed-linked-doc-model.js';
-import type { EmbedYoutubeModel } from '../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
-import type { ImageBlockModel } from '../../image-block/image-model.js';
-import type { NoteBlockModel } from '../../note-block/note-model.js';
-import type { CanvasElement } from '../../surface-block/elements/index.js';
-import type { GroupElement } from '../../surface-block/elements/index.js';
-import { Bound } from '../../surface-block/utils/bound.js';
-import { GROUP_ROOT } from '../elements/group/consts.js';
-import { SurfaceElement } from '../elements/surface-element.js';
-import { GridManager } from '../grid.js';
-import { compare, getGroupParent } from './group-manager.js';
 import {
+  EdgelessBlockModel,
+  type EdgelessModel,
+} from '../../page-block/edgeless/type.js';
+import { Bound } from '../../surface-block/utils/bound.js';
+import { ElementModel } from '../element-model/base.js';
+import type { GroupElementModel } from '../element-model/group.js';
+import { GridManager } from '../grid.js';
+import type { SurfaceBlockModel } from '../surface-model.js';
+import {
+  compare,
   getElementIndex,
   getLayerZIndex,
   insertToOrderedArray,
   isInRange,
   removeFromOrderedArray,
+  renderableInEdgeless,
   ungroupIndex,
   updateLayersIndex,
 } from './layer-utils.js';
 
-export type IndexableBlock =
-  | ImageBlockModel
-  | NoteBlockModel
-  | BookmarkBlockModel
-  | EmbedGithubModel
-  | EmbedYoutubeModel
-  | EmbedLinkedDocModel;
-
-export type Indexable = CanvasElement | IndexableBlock;
+export type ReorderingDirection = 'front' | 'forward' | 'backward' | 'back';
 
 type BaseLayer<T> = {
   set: Set<T>;
@@ -50,7 +40,7 @@ type BaseLayer<T> = {
   indexes: [string, string];
 };
 
-type BlockLayer = BaseLayer<IndexableBlock> & {
+export type BlockLayer = BaseLayer<EdgelessBlockModel> & {
   type: 'block';
   /**
    * The computed DOM z-index used for rendering blocks.
@@ -60,7 +50,7 @@ type BlockLayer = BaseLayer<IndexableBlock> & {
   zIndexes: [number, number];
 };
 
-type CanvasLayer = BaseLayer<CanvasElement> & {
+export type CanvasLayer = BaseLayer<ElementModel> & {
   type: 'canvas';
   /**
    * The computed DOM z-index used for rendering this canvas layer.
@@ -74,19 +64,38 @@ export type Layer = BlockLayer | CanvasLayer;
 
 export class LayerManager {
   static INITAL_INDEX = 'a0';
+  static create(page: Page, surface: SurfaceBlockModel) {
+    const layerManager = new LayerManager(
+      (
+        page
+          .getBlocks()
+          .filter(
+            model =>
+              model instanceof EdgelessBlockModel &&
+              renderableInEdgeless(page, surface, model)
+          ) as EdgelessModel[]
+      ).concat(surface.elementModels)
+    );
+
+    layerManager.listen(page, surface);
+
+    return layerManager;
+  }
+
+  private _disposables = new DisposableGroup();
 
   slots = {
     layerUpdated: new Slot(),
   };
 
-  canvasElements!: SurfaceElement[];
-  blocks!: IndexableBlock[];
+  canvasElements!: ElementModel[];
+  blocks!: EdgelessBlockModel[];
   frames!: FrameBlockModel[];
 
   layers!: Layer[];
 
   canvasLayers!: {
-    set: Set<CanvasElement>;
+    set: Set<ElementModel>;
     /**
      * fractional index
      */
@@ -95,26 +104,86 @@ export class LayerManager {
      * z-index, used for actual rendering
      */
     zIndexes: number;
-    elements: Array<CanvasElement>;
+    elements: Array<ElementModel>;
   }[];
 
-  blocksGrid = new GridManager<IndexableBlock>();
+  blocksGrid = new GridManager<EdgelessBlockModel>();
   framesGrid = new GridManager<FrameBlockModel>();
+  canvasGrid = new GridManager<ElementModel>();
 
-  constructor(elements?: EdgelessElement[]) {
+  constructor(elements?: EdgelessModel[]) {
     if (elements) {
-      this.init(elements);
+      this._init(elements);
     }
   }
 
-  init(elements: EdgelessElement[]) {
+  private listen(page: Page, surface: SurfaceBlockModel) {
+    this._disposables.add(
+      page.slots.blockUpdated.on(payload => {
+        if (payload.type === 'add') {
+          const block = page.getBlockById(payload.id)!;
+
+          if (
+            block instanceof EdgelessBlockModel &&
+            renderableInEdgeless(page, surface, block)
+          ) {
+            this.add(block as EdgelessBlockModel);
+          }
+        }
+        if (payload.type === 'update') {
+          const block = page.getBlockById(payload.id)!;
+
+          if (
+            payload.props.key === 'index' ||
+            (payload.props.key === 'xywh' &&
+              block instanceof EdgelessBlockModel &&
+              renderableInEdgeless(page, surface, block))
+          ) {
+            this.update(block as EdgelessBlockModel, {
+              [payload.props.key]: true,
+            });
+          }
+        }
+        if (payload.type === 'delete') {
+          const block = payload.model;
+
+          if (block instanceof EdgelessBlockModel) {
+            this.delete(block as EdgelessBlockModel);
+          }
+        }
+      })
+    );
+
+    this._disposables.add(
+      surface.elementAdded.on(payload =>
+        this.add(surface.getElementById(payload.id)!)
+      )
+    );
+    this._disposables.add(
+      surface.elementUpdated.on(payload => {
+        if (
+          payload.props['index'] ||
+          payload.props['xywh'] ||
+          payload.props['externalXYWH']
+        ) {
+          this.update(surface.getElementById(payload.id)!, payload.props);
+        }
+      })
+    );
+    this._disposables.add(
+      surface.elementRemoved.on(payload => this.delete(payload.model!))
+    );
+  }
+
+  private _init(elements: EdgelessModel[]) {
     this.canvasElements = [];
     this.blocks = [];
     this.frames = [];
 
     elements.forEach(element => {
-      if (element instanceof SurfaceElement) {
+      if (element instanceof ElementModel) {
         this.canvasElements.push(element);
+        this.canvasGrid.add(element);
       } else if (matchFlavours(element, ['affine:frame'])) {
         this.framesGrid.add(element);
         this.frames.push(element);
@@ -272,7 +341,7 @@ export class LayerManager {
     this.layers = layers;
   }
 
-  private _insertIntoLayer(target: Indexable, type: 'block' | 'canvas') {
+  private _insertIntoLayer(target: EdgelessModel, type: 'block' | 'canvas') {
     if (this.layers.length === 0) {
       this._initLayers();
       return;
@@ -283,11 +352,11 @@ export class LayerManager {
 
     const addToLayer = (
       layer: Layer,
-      element: Indexable,
+      element: EdgelessModel,
       position: number | 'tail'
     ) => {
       assertType<CanvasLayer>(layer);
-      assertType<CanvasElement>(element);
+      assertType<ElementModel>(element);
 
       if (position === 'tail') {
         layer.elements.push(element);
@@ -310,7 +379,7 @@ export class LayerManager {
     };
     const createLayer = (
       type: 'block' | 'canvas',
-      targets: Indexable[],
+      targets: EdgelessModel[],
       curZIndex: number
     ): Layer => {
       const newLayer = {
@@ -360,7 +429,7 @@ export class LayerManager {
             updateLayersIndex(layers, cur);
           } else {
             const splicedElements = layer.elements.splice(insertIdx);
-            layer.set = new Set(layer.elements as CanvasElement[]);
+            layer.set = new Set(layer.elements as ElementModel[]);
 
             layers.splice(
               cur + 1,
@@ -397,13 +466,13 @@ export class LayerManager {
     }
   }
 
-  private _removeFromLayer(target: Indexable, type: 'block' | 'canvas') {
+  private _removeFromLayer(target: EdgelessModel, type: 'block' | 'canvas') {
     const layers = this.layers;
     const index = layers.findIndex(layer => {
       if (layer.type !== type) return false;
 
       assertType<CanvasLayer>(layer);
-      assertType<CanvasElement>(target);
+      assertType<ElementModel>(target);
 
       if (layer.set.has(target)) {
         layer.set.delete(target);
@@ -482,17 +551,14 @@ export class LayerManager {
    * @returns a boolean value to indicate whether the layers have been updated
    */
   private _updateLayer(
-    element: Indexable | FrameBlockModel,
+    element: EdgelessModel,
     props?: Record<string, unknown>
   ) {
     let updateType: 'block' | 'canvas' | undefined = undefined;
     const type = 'type' in element ? element.type : element.flavour;
 
     const indexChanged = !props || 'index' in props;
-    const updateArray = (
-      array: EdgelessElement[],
-      element: EdgelessElement
-    ) => {
+    const updateArray = (array: EdgelessModel[], element: EdgelessModel) => {
       if (!indexChanged) return;
       removeFromOrderedArray(array, element);
       insertToOrderedArray(array, element);
@@ -501,24 +567,25 @@ export class LayerManager {
     if (!type.startsWith('affine:')) {
       updateType = 'canvas';
       updateArray(this.canvasElements, element);
+      this.canvasGrid.update(element as ElementModel);
 
       if (type === 'group' && indexChanged) {
-        (element as GroupElement).childElements.forEach(
+        (element as GroupElementModel).childElements.forEach(
           child => child && this._updateLayer(child)
         );
       }
     } else if (matchFlavours(element as BlockModel, ['affine:frame'])) {
       updateArray(this.frames, element);
-      this.framesGrid.add(element as FrameBlockModel);
+      this.framesGrid.update(element as FrameBlockModel);
     } else {
       updateType = 'block';
       updateArray(this.blocks, element);
-      this.blocksGrid.add(element as IndexableBlock);
+      this.blocksGrid.update(element as EdgelessBlockModel);
     }
 
     if (updateType && indexChanged) {
-      this._removeFromLayer(element as Indexable, updateType);
-      this._insertIntoLayer(element as Indexable, updateType);
+      this._removeFromLayer(element as EdgelessModel, updateType);
+      this._insertIntoLayer(element as EdgelessModel, updateType);
 
       return true;
     }
@@ -526,16 +593,17 @@ export class LayerManager {
     return false;
   }
 
-  add(element: Indexable | FrameBlockModel) {
+  add(element: EdgelessModel) {
     let insertType: 'block' | 'canvas' | undefined = undefined;
     const type = 'type' in element ? element.type : element.flavour;
 
     if (!type.startsWith('affine:')) {
       insertType = 'canvas';
       insertToOrderedArray(this.canvasElements, element);
+      this.canvasGrid.add(element as ElementModel);
 
       if (type === 'group') {
-        (element as GroupElement).childElements.forEach(
+        (element as GroupElementModel).childElements.forEach(
           child => child && this._updateLayer(child)
         );
       }
@@ -545,22 +613,23 @@ export class LayerManager {
     } else {
       insertType = 'block';
       insertToOrderedArray(this.blocks, element);
-      this.blocksGrid.add(element as IndexableBlock);
+      this.blocksGrid.add(element as EdgelessBlockModel);
     }
 
     if (insertType) {
-      this._insertIntoLayer(element as Indexable, insertType);
+      this._insertIntoLayer(element as EdgelessModel, insertType);
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit();
     }
   }
 
-  delete(element: Indexable | FrameBlockModel) {
+  delete(element: EdgelessModel) {
     let deleteType: 'canvas' | 'block' | undefined = undefined;
 
-    if (element instanceof SurfaceElement) {
+    if (element instanceof ElementModel) {
       deleteType = 'canvas';
       removeFromOrderedArray(this.canvasElements, element);
+      this.canvasGrid.remove(element);
     } else if (matchFlavours(element, ['affine:frame'])) {
       removeFromOrderedArray(this.frames, element);
       this.framesGrid.remove(element as FrameBlockModel);
@@ -571,16 +640,13 @@ export class LayerManager {
     }
 
     if (deleteType) {
-      this._removeFromLayer(element as Indexable, deleteType);
+      this._removeFromLayer(element, deleteType);
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit();
     }
   }
 
-  update(
-    element: Indexable | FrameBlockModel,
-    props?: Record<string, unknown>
-  ) {
+  update(element: EdgelessModel, props?: Record<string, unknown>) {
     if (this._updateLayer(element, props)) {
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit();
@@ -636,16 +702,17 @@ export class LayerManager {
 
   /**
    * In some cases, we need to generate a bunch of indexes in advance before acutally adding the elements to the layer manager.
-   * Eg. when importing a template. The `generateIndex` is a pure function which depends on the current state of the manager.
-   * We cannot use it because it will always return the same index if the element is not added to manager.
-   * So we need to create a generator that can "remember" the index it generated without actually adding the element to the manager.
+   * Eg. when importing a template. The `generateIndex` is a function only depends on the current state of the manager.
+   * So we cannot use it because it will always return the same index if the element is not added to manager.
    *
-   * This is what this function does.
+   * This function return a index generator that can "remember" the index it generated without actually adding the element to the manager.
+   *
+   * @note The generator cannot work with `group` element.
    *
    * @param ignoreRule If true, the generator will not distinguish between `block` and `canvas` elements.
    * @returns
    */
-  preservedIndexGenerator(ignoreRule: boolean) {
+  createIndexGenerator(ignoreRule: boolean = false) {
     const manager = new LayerManager();
 
     manager.frames = [...this.frames];
@@ -672,7 +739,7 @@ export class LayerManager {
 
       if (elementType === 'group') elementType = 'shape';
 
-      manager.add({
+      const mockedFakeElement = {
         index: idx,
         flavour: elementType,
         x: 0,
@@ -681,23 +748,27 @@ export class LayerManager {
         h: 10,
         elementBound: bound,
         xywh: '[0, 0, 10, 10]',
-      } as unknown as Indexable);
+        group: () => null,
+        groups: () => [],
+      };
+
+      manager.add(mockedFakeElement as unknown as EdgelessModel);
 
       return idx;
     };
   }
 
   getReorderedIndex(
-    element: Indexable | FrameBlockModel,
-    direction: 'front' | 'forward' | 'back' | 'backward'
+    element: EdgelessModel,
+    direction: ReorderingDirection
   ): string {
-    const group = getGroupParent(element);
+    const group = element.group;
     const isFrameBlock =
       (element as FrameBlockModel).flavour === 'affine:frame';
 
-    let elements: (Indexable | FrameBlockModel)[];
+    let elements: EdgelessModel[];
 
-    if (group !== GROUP_ROOT) {
+    if (group !== null) {
       elements = group.childElements.filter(
         element =>
           ((element as FrameBlockModel)?.flavour === 'affine:frame') ===
@@ -709,12 +780,8 @@ export class LayerManager {
       elements = this.frames;
     } else {
       elements = this.layers.reduce(
-        (pre: Indexable[], current) =>
-          pre.concat(
-            current.elements.filter(
-              element => getGroupParent(element) == GROUP_ROOT
-            )
-          ),
+        (pre: EdgelessModel[], current) =>
+          pre.concat(current.elements.filter(element => element.group == null)),
         []
       );
     }
@@ -757,5 +824,17 @@ export class LayerManager {
           return generateKeyBetween(pre2?.index ?? null, pre.index);
         }
     }
+  }
+
+  /**
+   * Pass to the `Array.sort` to  sort the elements by their index
+   */
+  compare(a: EdgelessModel, b: EdgelessModel) {
+    return compare(a, b);
+  }
+
+  dispose() {
+    this.slots.layerUpdated.dispose();
+    this._disposables.dispose();
   }
 }

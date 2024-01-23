@@ -29,9 +29,6 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   frames!: FrameBlockModel[];
 
-  @property({ attribute: false })
-  updateFrames!: () => void;
-
   @query('.edgeless-frame-order-button')
   private _edgelessFrameOrderButton!: HTMLElement;
 
@@ -73,7 +70,6 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
       <edgeless-frame-order-menu
         .edgeless=${this.edgeless}
         .frames=${this.frames}
-        .updateFrames=${this.updateFrames}
       >
       </edgeless-frame-order-menu>
     `;

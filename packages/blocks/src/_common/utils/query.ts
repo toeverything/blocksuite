@@ -1,7 +1,6 @@
 import type { ViewStore } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { InlineEditor } from '@blocksuite/inline';
-import { INLINE_ROOT_ATTR } from '@blocksuite/inline';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -394,36 +393,6 @@ export function getDocTitleInlineEditor(
   const titleRichText = docTitle.querySelector<RichText>('rich-text');
   assertExists(titleRichText);
   return titleRichText.inlineEditor;
-}
-
-export function isInsideDocTitle(
-  editorHost: EditorHost,
-  element: unknown
-): boolean {
-  const titleElement = getDocTitleByEditorHost(editorHost);
-  if (!titleElement) return false;
-  return titleElement.contains(element as Node);
-}
-
-export function isInsideEdgelessTextEditor(
-  editorHost: EditorHost,
-  element: unknown
-): boolean {
-  const edgelessPageElement = getEdgelessPageByEditorHost(editorHost);
-  const textElement = getEdgelessCanvasTextEditor(
-    edgelessPageElement ?? document
-  );
-  if (!textElement) return false;
-
-  return textElement.contains(element as Node);
-}
-
-export function isDatabaseInput(element: unknown): boolean {
-  return (
-    element instanceof HTMLElement &&
-    element.getAttribute(INLINE_ROOT_ATTR) === 'true' &&
-    !!element.closest('affine-database')
-  );
 }
 
 /**

@@ -59,30 +59,52 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   private _hoverController = new HoverController(
     this,
-    ({ abortController }) => ({
-      template: AttachmentOptionsTemplate({
-        anchor: this,
-        model: this.model,
-        showCaption: () => {
-          this._showCaption = true;
-          requestAnimationFrame(() => {
-            this._captionInput.focus();
-          });
+    ({ abortController }) => {
+      const selection = this.host.selection;
+      const textSelection = selection.find('text');
+      if (
+        !!textSelection &&
+        (!!textSelection.to || !!textSelection.from.length)
+      ) {
+        return null;
+      }
+
+      const blockSelections = selection.filter('block');
+      if (
+        blockSelections.length > 1 ||
+        (blockSelections.length === 1 && blockSelections[0].path !== this.path)
+      ) {
+        return null;
+      }
+
+      return {
+        template: AttachmentOptionsTemplate({
+          anchor: this,
+          model: this.model,
+          showCaption: () => {
+            this._showCaption = true;
+            requestAnimationFrame(() => {
+              this._captionInput.focus();
+            });
+          },
+          downloadAttachment: this._downloadAttachment,
+          abortController,
+        }),
+        computePosition: {
+          referenceElement: this,
+          placement: 'top-end',
+          middleware: [flip(), offset(4)],
+          autoUpdate: true,
         },
-        downloadAttachment: this._downloadAttachment,
-        abortController,
-      }),
-      computePosition: {
-        referenceElement: this,
-        placement: 'top-end',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-    })
+      };
+    }
   );
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.contentEditable = 'false';
+
     if (this.model.caption) {
       this._showCaption = true;
     }
@@ -188,7 +210,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   private _downloadAttachment = async () => {
     if (this._isDownloading) {
-      toast('Download in progress...');
+      toast(this.host, 'Download in progress...');
       return;
     }
 
@@ -197,14 +219,14 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         ? this.model.name
         : this.model.name.slice(0, 20) + '...';
 
-    toast(`Downloading ${shortName}`);
+    toast(this.host, `Downloading ${shortName}`);
     this._isDownloading = true;
     // TODO speed up download by using this._blobUrl
     try {
-      await downloadAttachmentBlob(this.model);
+      await downloadAttachmentBlob(this.host, this.model);
     } catch (error) {
       console.error(error);
-      toast(`Failed to download ${shortName}!`);
+      toast(this.host, `Failed to download ${shortName}!`);
     } finally {
       this._isDownloading = false;
     }
@@ -253,7 +275,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     />`;
   };
 
-  override render() {
+  override renderBlock() {
     const isLoading = isAttachmentLoading(this.model.id);
     const isError = this._error || (!isLoading && !this.model.sourceId);
 

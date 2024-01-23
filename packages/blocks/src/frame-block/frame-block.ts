@@ -32,11 +32,15 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     return this.closest('affine-edgeless-page')!.surface;
   }
 
+  get edgeless() {
+    return this.closest('affine-edgeless-page');
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     let lastZoom = 0;
     this._disposables.add(
-      this.surface.viewport.slots.viewportUpdated.on(({ zoom }) => {
+      this.edgeless!.service.viewport.viewportUpdated.on(({ zoom }) => {
         if (zoom !== lastZoom) {
           this.requestUpdate();
           lastZoom = zoom;
@@ -45,8 +49,8 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     );
 
     this._disposables.add(
-      this.surface.edgeless.slots.elementUpdated.on(({ id }) => {
-        if (id === this.model.id) {
+      this.model.page.slots.blockUpdated.on(({ type, id }) => {
+        if (id === this.model.id && type === 'update') {
           this.requestUpdate();
         }
       })
@@ -63,7 +67,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     });
   }
 
-  override render() {
+  override renderBlock() {
     const { model, _isNavigator } = this;
     const bound = Bound.deserialize(model.xywh);
 

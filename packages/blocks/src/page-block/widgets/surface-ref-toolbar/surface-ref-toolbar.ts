@@ -14,7 +14,7 @@ import {
   DeleteIcon,
   DownloadIcon,
 } from '../../../_common/icons/text.js';
-import type { EdgelessElement } from '../../../_common/types.js';
+import type { EdgelessModel } from '../../../_common/types.js';
 import { downloadBlob } from '../../../_common/utils/filesys.js';
 import {
   type SurfaceRefBlockComponent,
@@ -29,6 +29,26 @@ export class AffineSurfaceRefToolbar extends WidgetElement<SurfaceRefBlockCompon
   private _hoverController = new HoverController(
     this,
     ({ abortController }) => {
+      const surfaceRefBlock = this.blockElement;
+      const selection = this.host.selection;
+
+      const textSelection = selection.find('text');
+      if (
+        !!textSelection &&
+        (!!textSelection.to || !!textSelection.from.length)
+      ) {
+        return null;
+      }
+
+      const blockSelections = selection.filter('block');
+      if (
+        blockSelections.length > 1 ||
+        (blockSelections.length === 1 &&
+          blockSelections[0].path !== surfaceRefBlock.path)
+      ) {
+        return null;
+      }
+
       return {
         template: SurfaceRefToolbarOptions({
           blockElement: this.blockElement,
@@ -158,7 +178,7 @@ function SurfaceRefToolbarOptions(options: {
             surfaceRefBlock: blockElement,
             surfaceRenderer: blockElement.surfaceRenderer,
             edgelessElement: referencedModel,
-            blockContainer: blockElement.blocksPortal,
+            blockContainer: blockElement.portal,
           })
             .then(blob => {
               const fileName =
@@ -183,14 +203,14 @@ function SurfaceRefToolbarOptions(options: {
           edgelessToBlob(blockElement.host, {
             surfaceRefBlock: blockElement,
             surfaceRenderer: blockElement.surfaceRenderer,
-            edgelessElement: blockElement.referenceModel as EdgelessElement,
-            blockContainer: blockElement.blocksPortal,
+            edgelessElement: blockElement.referenceModel as EdgelessModel,
+            blockContainer: blockElement.portal,
           })
             .then(blob => {
               return writeImageBlobToClipboard(blob);
             })
             .then(() => {
-              toast('Copied image to clipboard');
+              toast(blockElement.host, 'Copied image to clipboard');
             })
             .catch(err => {
               console.error(err);

@@ -8,7 +8,7 @@ import './data-view.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement, RangeManager } from '@blocksuite/lit';
 import { Slice } from '@blocksuite/store';
 import { css, nothing, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -26,6 +26,8 @@ import {
 } from '../_common/icons/index.js';
 import type { DataViewSelection } from '../_common/utils/index.js';
 import { Rect } from '../_common/utils/index.js';
+import type { NoteBlockComponent } from '../note-block/note-block.js';
+import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
@@ -44,10 +46,14 @@ import type { SingleViewSource, ViewSource } from './common/view-source.js';
 import type { DataViewNative, DataViewNativeConfig } from './data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
+import type { DatabaseService } from './database-service.js';
 import type { InsertToPosition } from './types.js';
 
 @customElement('affine-database')
-export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
+export class DatabaseBlockComponent extends BlockElement<
+  DatabaseBlockModel,
+  DatabaseService
+> {
   static override styles = css`
     ${unsafeCSS(dataViewCommonStyle('affine-database'))}
     affine-database {
@@ -173,8 +179,19 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     </div>`;
   }
 
+  override get topContenteditableElement() {
+    if (this.rootBlockElement instanceof EdgelessPageBlockComponent) {
+      const note = this.closest<NoteBlockComponent>('affine-note');
+      return note;
+    }
+    return this.rootBlockElement;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
+
+    this.setAttribute(RangeManager.rangeSyncExcludeAttr, 'true');
+
     this._disposables.add(
       this.selection.slots.changed.on(selections => {
         const databaseSelection = selections.find(
@@ -193,12 +210,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         this.viewSource.updateSlot.emit();
       })
     );
-    this.handleEvent('selectionChange', () => {
-      const selection = this.service?.selectionManager.value.find(selection =>
-        PathFinder.equals(selection.path, this.path)
-      );
-      return !!selection;
-    });
     let canDrop = false;
     this.disposables.add(
       AffineDragHandleWidget.registerOption({
@@ -282,7 +293,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     ></affine-database-title>`;
   };
   private renderReference = () => {
-    return html` <div></div>`;
+    return html`<div></div>`;
   };
 
   headerComponent = defineUniComponent(
@@ -337,7 +348,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
       dispose: this.host.event.bindHotkey(hotkeys, {
-        path: this.path,
+        path: this.topContenteditableElement?.path ?? this.path,
       }),
     };
   };
@@ -349,7 +360,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     };
   };
 
-  override render() {
+  override renderBlock() {
     const config: DataViewNativeConfig = {
       bindHotkey: this._bindHotkey,
       handleEvent: this._handleEvent,
@@ -363,7 +374,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       std: this.std,
     };
     return html`
-      <div style="position: relative">
+      <div contenteditable="false" style="position: relative">
         <affine-data-view-native
           ${ref(this._view)}
           .config="${config}"

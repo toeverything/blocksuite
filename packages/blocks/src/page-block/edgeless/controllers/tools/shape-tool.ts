@@ -6,12 +6,8 @@ import type {
   ShapeTool,
 } from '../../../../_common/utils/index.js';
 import { hasClassNameInList } from '../../../../_common/utils/index.js';
-import type { ShapeElement } from '../../../../surface-block/index.js';
-import {
-  Bound,
-  CanvasElementType,
-  StrokeStyle,
-} from '../../../../surface-block/index.js';
+import type { ShapeElementModel } from '../../../../surface-block/index.js';
+import { Bound, CanvasElementType } from '../../../../surface-block/index.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
@@ -28,7 +24,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     shapeType: 'rect',
   };
 
-  private _draggingElement: ShapeElement | null = null;
+  private _draggingElement: ShapeElementModel | null = null;
   private _draggingElementId: string | null = null;
 
   // shape overlay
@@ -41,9 +37,8 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     width: number,
     height: number
   ): string {
-    const { viewport } = this._edgeless.surface;
-    const attributes =
-      this._edgeless.surface.service.editSession.getLastProps('shape');
+    const { viewport } = this._service;
+    const attributes = this._edgeless.service.editSession.getLastProps('shape');
     const { shapeType } = this.tool;
     if (shapeType === 'rect' && attributes.radius > 0) {
       width += 40;
@@ -52,7 +47,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
     const bound = new Bound(modelX, modelY, width, height);
 
-    const id = this._surface.addElement(CanvasElementType.SHAPE, {
+    const id = this._service.addElement(CanvasElementType.SHAPE, {
       shapeType: shapeType,
       xywh: bound.serialize(),
       radius: attributes.radius,
@@ -68,7 +63,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const id = this._addNewShape(e, SHAPE_OVERLAY_WIDTH, SHAPE_OVERLAY_HEIGHT);
 
-    const element = this._surface.pickById(id);
+    const element = this._service.getElementById(id);
     assertExists(element);
 
     this._edgeless.tools.switchToDefaultMode({
@@ -101,7 +96,9 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const id = this._addNewShape(e, 0, 0);
 
     this._draggingElementId = id;
-    this._draggingElement = this._surface.pickById(id) as ShapeElement;
+    this._draggingElement = this._service.getElementById(
+      id
+    ) as ShapeElementModel;
     this._draggingElement.stash('xywh');
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
@@ -138,7 +135,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
         this._draggingArea?.end.y - this._draggingArea?.start.y
       );
       if (width < 20 && height < 20) {
-        this._surface.removeElement(id);
+        this._service.removeElement(id);
         return;
       }
     }
@@ -149,7 +146,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     this._page.captureSync();
 
-    const element = this._surface.pickById(id);
+    const element = this._service.getElementById(id);
     assertExists(element);
     this._edgeless.tools.switchToDefaultMode({
       elements: [element.id],
@@ -165,12 +162,11 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   private _resize(shift = false) {
-    const { _draggingElementId: id, _draggingArea, _edgeless } = this;
+    const { _draggingElementId: id, _draggingArea } = this;
     assertExists(id);
     assertExists(_draggingArea);
 
-    const { surface } = _edgeless;
-    const { viewport } = surface;
+    const { viewport } = this._service;
     const { zoom } = viewport;
     const {
       start: { x: startX, y: startY },
@@ -195,7 +191,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const bound = new Bound(x, y, w, h);
 
-    this._surface.updateElement(id, {
+    this._service.updateElement(id, {
       xywh: bound.serialize(),
     });
   }
@@ -211,7 +207,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     if (!this._shapeOverlay) return;
 
     this._shapeOverlay.dispose();
-    this._edgeless.surface.viewport.removeOverlay(this._shapeOverlay);
+    this._edgeless.surface.renderer.removeOverlay(this._shapeOverlay);
     this._shapeOverlay = null;
     this._edgeless.surface.refresh();
   }
@@ -228,7 +224,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     // shpae options, like stroke color, fill color, etc.
     if (this._shapeOverlay.globalAlpha === 0)
       this._shapeOverlay.globalAlpha = 1;
-    const [x, y] = this._surface.viewport.toModelCoord(e.x, e.y);
+    const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
     this._updateOverlayPosition(x, y);
   }
 
@@ -256,15 +252,15 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   createOverlay() {
     this.clearOverlay();
     const options = SHAPE_OVERLAY_OPTIONS;
-    const attributes =
-      this._edgeless.surface.service.editSession.getLastProps('shape');
+    const attributes = this._edgeless.service.editSession.getLastProps('shape');
     options.stroke = attributes.strokeColor;
     options.fill = attributes.fillColor;
-    switch (attributes.strokeStyle) {
-      case StrokeStyle.Dashed:
+
+    switch (attributes.strokeStyle!) {
+      case 'dash':
         options.strokeLineDash = [12, 12];
         break;
-      case StrokeStyle.None:
+      case 'none':
         options.strokeLineDash = [];
         options.stroke = 'transparent';
         break;
@@ -280,6 +276,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       fillColor: options.fill,
       strokeColor: options.stroke,
     });
-    this._edgeless.surface.viewport.addOverlay(this._shapeOverlay);
+    this._edgeless.surface.renderer.addOverlay(this._shapeOverlay);
   }
 }

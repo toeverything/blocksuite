@@ -124,9 +124,11 @@ export class CopilotPanel extends WithDisposable(ShadowlessElement) {
   public override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
-      getSurfaceElementFromEditor(this.editor).model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
+      getSurfaceElementFromEditor(this.editor.host).model.childrenUpdated.on(
+        () => {
+          this.requestUpdate();
+        }
+      )
     );
   }
 

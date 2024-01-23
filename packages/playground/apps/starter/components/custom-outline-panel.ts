@@ -1,7 +1,7 @@
 import { WithDisposable } from '@blocksuite/lit';
 import {
   type AffineEditorContainer,
-  registerTOCPanelComponents,
+  registerOutlinePanelComponents,
 } from '@blocksuite/presets';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -28,10 +28,10 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
   editor!: AffineEditorContainer;
 
   private _renderPanel() {
-    return html`<toc-panel
+    return html`<outline-panel
       .editor=${this.editor}
       .fitPadding=${[50, 360, 50, 50]}
-    ></toc-panel>`;
+    ></outline-panel>`;
   }
 
   public toggleDisplay() {
@@ -41,7 +41,7 @@ export class CustomOutlinePanel extends WithDisposable(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
 
-    registerTOCPanelComponents(components => {
+    registerOutlinePanelComponents(components => {
       Object.entries(components).forEach(([name, component]) => {
         customElements.define(name, component);
       });

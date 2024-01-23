@@ -27,6 +27,7 @@ type HoverOptions = {
    * @default true
    */
   setPortalAsFloating: boolean;
+  allowMultiple?: boolean;
 } & WhenHoverOptions;
 
 const DEFAULT_HOVER_OPTIONS: HoverOptions = {
@@ -41,11 +42,14 @@ const DEFAULT_HOVER_OPTIONS: HoverOptions = {
     },
   },
   setPortalAsFloating: true,
+  allowMultiple: false,
 };
 
 export class HoverController implements ReactiveController {
   protected _disposables = new DisposableGroup();
   host: ReactiveControllerHost;
+
+  static globalAbortController?: AbortController;
 
   private _abortController?: AbortController;
   private _setReference?: (element?: Element | undefined) => void;
@@ -100,11 +104,20 @@ export class HoverController implements ReactiveController {
         );
         return;
       }
-      if (this._abortController) return;
+      if (this._abortController) {
+        return;
+      }
+
       this._abortController = new AbortController();
       this._abortController.signal.addEventListener('abort', () => {
         this._abortController = undefined;
       });
+
+      if (!this._hoverOptions.allowMultiple) {
+        HoverController.globalAbortController?.abort();
+        HoverController.globalAbortController = this._abortController;
+      }
+
       const portalOptions = this._onHover({
         setReference,
         abortController: this._abortController,

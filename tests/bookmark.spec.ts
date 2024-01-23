@@ -58,6 +58,7 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -110,6 +111,7 @@ test.skip(scoped`create bookmark by blockhub`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -151,6 +153,7 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -198,6 +201,7 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -255,6 +259,7 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
   <affine:surface />
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -295,6 +300,7 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -349,6 +355,7 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -410,6 +417,7 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {

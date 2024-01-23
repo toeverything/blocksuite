@@ -3,6 +3,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
+import type { EmbedFigmaBlockComponent } from '../../../embed-figma-block/embed-figma-block.js';
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
 import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
@@ -32,6 +33,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
     | BookmarkBlockComponent
     | EmbedGithubBlockComponent
     | EmbedYoutubeBlockComponent
+    | EmbedFigmaBlockComponent
     | EmbedLinkedDocBlockComponent;
 
   @property({ attribute: false })

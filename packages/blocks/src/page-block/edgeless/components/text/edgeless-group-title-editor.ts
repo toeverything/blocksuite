@@ -5,7 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import type { GroupElement } from '../../../../surface-block/index.js';
+import type { GroupElementModel } from '../../../../surface-block/element-model/group.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
@@ -17,7 +17,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
   richText!: RichText;
 
   @property({ attribute: false })
-  group!: GroupElement;
+  group!: GroupElementModel;
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -63,7 +63,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
           })
         );
         this.disposables.add(
-          this.edgeless.slots.viewportUpdated.on(() => {
+          this.edgeless.service.viewport.viewportUpdated.on(() => {
             this.requestUpdate();
           })
         );
@@ -85,7 +85,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
     this.group.showTitle = true;
-    this.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [this.group.id],
       editing: false,
     });
@@ -93,7 +93,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
   }
 
   override render() {
-    const viewport = this.edgeless.surface.viewport;
+    const viewport = this.edgeless.service.viewport;
     const bound = Bound.deserialize(this.group.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const inlineEditorStyle = styleMap({

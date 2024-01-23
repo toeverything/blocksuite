@@ -7,18 +7,20 @@ import {
   CanvasTextFontStyle,
   CanvasTextFontWeight,
 } from '../../../../surface-block/consts.js';
+import type { Connection } from '../../../../surface-block/element-model/connector.js';
+import { ShapeElementModel } from '../../../../surface-block/element-model/index.js';
+import { GroupElementModel } from '../../../../surface-block/element-model/index.js';
+import type {
+  ShapeStyle,
+  ShapeType,
+} from '../../../../surface-block/element-model/shape.js';
 import {
   Bound,
   CanvasElementType,
-  type Connection,
-  GroupElement,
   normalizeDegAngle,
   type Options,
   Overlay,
   type RoughCanvas,
-  ShapeElement,
-  type ShapeStyle,
-  type ShapeType,
   type XYWH,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -182,8 +184,8 @@ export class AutoCompleteShapeOverlay extends Overlay {
 
 export function nextBound(
   type: Direction,
-  curShape: ShapeElement,
-  elements: ShapeElement[]
+  curShape: ShapeElementModel,
+  elements: ShapeElementModel[]
 ) {
   const bound = Bound.deserialize(curShape.xywh);
   const { x, y, w, h } = bound;
@@ -248,8 +250,9 @@ export function nextBound(
 }
 
 export function getPosition(type: Direction) {
-  let startPosition: Connection['position'] = [],
-    endPosition: Connection['position'] = [];
+  let startPosition: Connection['position'];
+  let endPosition: Connection['position'];
+
   switch (type) {
     case Direction.Right:
       startPosition = [1, 0.5];
@@ -272,9 +275,9 @@ export function getPosition(type: Direction) {
 }
 
 export function isShape(
-  element: ShapeElement | NoteBlockModel
-): element is ShapeElement {
-  return element instanceof ShapeElement;
+  element: ShapeElementModel | NoteBlockModel
+): element is ShapeElementModel {
+  return element instanceof ShapeElementModel;
 }
 
 export function capitalizeFirstLetter(str: string) {
@@ -283,13 +286,14 @@ export function capitalizeFirstLetter(str: string) {
 
 export function createEdgelessElement(
   edgeless: EdgelessPageBlockComponent,
-  current: ShapeElement | NoteBlockModel,
+  current: ShapeElementModel | NoteBlockModel,
   bound: Bound
 ) {
   let id;
-  const { surface } = edgeless;
+  const { service } = edgeless;
+
   if (isShape(current)) {
-    id = edgeless.surface.addElement(current.type, {
+    id = service.addElement(current.type, {
       ...current.serialize(),
       text: new Workspace.Y.Text(),
       xywh: bound.serialize(),
@@ -300,7 +304,7 @@ export function createEdgelessElement(
       'affine:note',
       {
         background: current.background,
-        hidden: current.hidden,
+        displayMode: current.displayMode,
         edgeless: current.edgeless,
         xywh: bound.serialize(),
       },
@@ -313,38 +317,38 @@ export function createEdgelessElement(
     });
     page.addBlock('affine:paragraph', {}, note.id);
   }
-  const group = surface.getGroupParent(current);
-  if (group instanceof GroupElement) {
-    surface.group.addChild(group, id);
+  const group = current.group;
+  if (group instanceof GroupElementModel) {
+    group.addChild(id);
   }
   return id;
 }
 
 export async function createShapeElement(
   edgeless: EdgelessPageBlockComponent,
-  current: ShapeElement,
+  current: ShapeElementModel,
   targetType: TARGET_SHAPE_TYPE
 ) {
-  const { surface } = edgeless;
-  const id = edgeless.surface.addElement(current.type, {
+  const service = edgeless.service!;
+
+  const id = service.addElement(current.type, {
     ...current.serialize(),
     shapeType: targetType === 'roundedRect' ? 'rect' : targetType,
     radius: targetType === 'roundedRect' ? 0.1 : 0,
     text: new Workspace.Y.Text(),
   });
-  const group = surface.getGroupParent(current);
-  if (group instanceof GroupElement) {
-    surface.group.addChild(group, id);
+  const group = current.group;
+  if (group instanceof GroupElementModel) {
+    group.addChild(id);
   }
   return id;
 }
 
 export async function createTextElement(
   edgeless: EdgelessPageBlockComponent,
-  current: ShapeElement
+  current: ShapeElementModel
 ) {
-  const { surface } = edgeless;
-  const id = edgeless.surface.addElement(CanvasElementType.TEXT, {
+  const id = edgeless.service.addElement(CanvasElementType.TEXT, {
     text: new Workspace.Y.Text(),
     textAlign: 'left',
     fontSize: 24,
@@ -353,9 +357,9 @@ export async function createTextElement(
     fontWeight: CanvasTextFontWeight.Regular,
     fontStyle: CanvasTextFontStyle.Normal,
   });
-  const group = surface.getGroupParent(current);
-  if (group instanceof GroupElement) {
-    surface.group.addChild(group, id);
+  const group = current.group;
+  if (group instanceof GroupElementModel) {
+    group.addChild(id);
   }
   return id;
 }

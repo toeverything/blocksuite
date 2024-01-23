@@ -37,6 +37,7 @@ import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-ed
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
 import type { DatabaseService } from '../../../database-block/database-service.js';
+import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
 import { YoutubeIcon } from '../../../embed-youtube-block/styles.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
@@ -263,7 +264,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           assertInstanceOf(imageService, ImageService);
           const maxFileSize = imageService.maxFileSize;
 
-          addSiblingImageBlock(imageFiles, maxFileSize, model);
+          addSiblingImageBlock(
+            pageElement.host,
+            imageFiles,
+            maxFileSize,
+            model
+          );
         }),
       },
       {
@@ -312,9 +318,12 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           assertInstanceOf(attachmentService, AttachmentService);
           const maxFileSize = attachmentService.maxFileSize;
 
-          addSiblingAttachmentBlock(file, maxFileSize, model).catch(
-            console.error
-          );
+          addSiblingAttachmentBlock(
+            pageElement.host,
+            file,
+            maxFileSize,
+            model
+          ).catch(console.error);
         }),
       },
       {
@@ -336,6 +345,29 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             pageElement.host,
             'YouTube',
             'The added YouTube video link will be displayed as an embed view.',
+            { mode: 'page', parentModel, index }
+          );
+        }),
+      },
+      {
+        name: 'Figma',
+        icon: FigmaIcon,
+        showWhen: model => {
+          if (!model.page.schema.flavourSchemaMap.has('affine:embed-figma')) {
+            return false;
+          }
+          return !insideDatabase(model);
+        },
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+          const parentModel = pageElement.page.getParent(model);
+          if (!parentModel) {
+            return;
+          }
+          const index = parentModel.children.indexOf(model) + 1;
+          await toggleEmbedCardCreateModal(
+            pageElement.host,
+            'Figma',
+            'The added Figma link will be displayed as an embed view.',
             { mode: 'page', parentModel, index }
           );
         }),
@@ -618,7 +650,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           pageElement.std.clipboard
             .copy(slice)
             .then(() => {
-              toast('Copied to clipboard');
+              toast(pageElement.host, 'Copied to clipboard');
             })
             .catch(e => {
               console.error(e);

@@ -65,7 +65,10 @@ function convertToPng(blob: Blob): Promise<Blob | null> {
   });
 }
 
-export async function copyImage(model: ImageBlockModel) {
+export async function copyImage(
+  editorHost: EditorHost,
+  model: ImageBlockModel
+) {
   let blob = await getImageBlob(model);
   if (!blob) return;
 
@@ -88,7 +91,7 @@ export async function copyImage(model: ImageBlockModel) {
         new ClipboardItem({ [blob.type]: blob }),
       ]);
     }
-    toast('Copied image to clipboard');
+    toast(editorHost, 'Copied image to clipboard');
   } catch (err) {
     console.error(err);
   }
@@ -127,6 +130,7 @@ export function shouldResizeImage(node: Node, target: EventTarget | null) {
 }
 
 export async function uploadBlobForImage(
+  editorHost: EditorHost,
   page: Page,
   blockId: string,
   blob: Blob
@@ -154,6 +158,7 @@ export async function uploadBlobForImage(
     setImageLoading(blockId, false);
     if (error instanceof Error) {
       toast(
+        editorHost,
         `Failed to upload attachment! ${error.message || error.toString()}`
       );
     }
@@ -183,6 +188,7 @@ export function isImageLoading(blockId: string) {
 }
 
 export function addSiblingImageBlock(
+  editorHost: EditorHost,
   files: File[],
   maxFileSize: number,
   targetModel: BlockModel,
@@ -192,6 +198,7 @@ export function addSiblingImageBlock(
   const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
   if (isSizeExceeded) {
     toast(
+      editorHost,
       `You can only upload files less than ${humanFileSize(
         maxFileSize,
         true,
@@ -213,12 +220,13 @@ export function addSiblingImageBlock(
   const blockIds = page.addSiblingBlocks(targetModel, imageBlockProps, place);
   blockIds.map(
     (blockId, index) =>
-      void uploadBlobForImage(page, blockId, imageFiles[index])
+      void uploadBlobForImage(editorHost, page, blockId, imageFiles[index])
   );
   return blockIds;
 }
 
 export function addImageBlocks(
+  editorHost: EditorHost,
   files: File[],
   maxFileSize: number,
   page: Page,
@@ -229,6 +237,7 @@ export function addImageBlocks(
   const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
   if (isSizeExceeded) {
     toast(
+      editorHost,
       `You can only upload files less than ${humanFileSize(
         maxFileSize,
         true,
@@ -248,7 +257,7 @@ export function addImageBlocks(
   );
   blockIds.map(
     (blockId, index) =>
-      void uploadBlobForImage(page, blockId, imageFiles[index])
+      void uploadBlobForImage(editorHost, page, blockId, imageFiles[index])
   );
   return blockIds;
 }

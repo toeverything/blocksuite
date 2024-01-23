@@ -67,7 +67,7 @@ export class EdgelessConnectorToolButton extends EdgelessToolButton<
       this._menu.element.edgeless = this.edgeless;
       this.updateMenu();
       this._menu.element.onChange = (props: Record<string, unknown>) => {
-        this.edgeless.surface.service.editSession.record(this._type, props);
+        this.edgeless.service.editSession.record(this._type, props);
       };
     }
   }

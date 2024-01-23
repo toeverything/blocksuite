@@ -1,3 +1,4 @@
+import type { EditorHost } from '@blocksuite/lit';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 
@@ -7,9 +8,11 @@ import type { AttachmentBlockModel } from '../attachment-model.js';
 import { renameStyles } from './styles.js';
 
 export const RenameModal = ({
+  editorHost,
   model,
   abortController,
 }: {
+  editorHost: EditorHost;
   model: AttachmentBlockModel;
   abortController: AbortController;
 }) => {
@@ -34,7 +37,7 @@ export const RenameModal = ({
   const onConfirm = () => {
     const newFileName = fileName + extension;
     if (!newFileName) {
-      toast('File name cannot be empty');
+      toast(editorHost, 'File name cannot be empty');
       return;
     }
     model.page.updateBlock(model, {

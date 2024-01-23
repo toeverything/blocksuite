@@ -17,7 +17,7 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
     return html` <edgeless-tool-icon-button
       .iconContainerPadding=${2}
       @click=${() => {
-        this.edgeless.surface.group.createGroupOnSelected();
+        this.edgeless.service.createGroupFromSelected();
       }}
       .tooltip=${'Group'}
       .tipPosition=${'bottom'}

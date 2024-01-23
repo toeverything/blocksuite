@@ -98,6 +98,7 @@ test('use markdown syntax can create code block', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -141,6 +142,7 @@ test('use markdown syntax can create code block', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -395,6 +397,7 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -449,6 +452,7 @@ test.fixme(
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -639,7 +643,7 @@ test('press ArrowUp after code block can enter code block', async ({
   await page.keyboard.press('ArrowUp');
 
   const index = await getInlineSelectionIndex(page);
-  expect(index).toBe(code.length);
+  expect(index).toBe(0);
 
   const text = await getInlineSelectionText(page);
   expect(text).toBe(code);

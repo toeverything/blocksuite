@@ -145,14 +145,14 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
           props.shapeType = 'rect';
           props.radius = 0.1;
         }
-        this.surface.service.editSession.record(this._type, props);
+        this.edgeless.service.editSession.record(this._type, props);
       };
     }
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.surface.service.editSession.slots.lastPropsUpdated.on(
+    this.edgeless.service.editSession.slots.lastPropsUpdated.on(
       ({ type, props }) => {
         if (type === 'shape' && props.shapeType) {
           let { shapeType } = props;
@@ -167,19 +167,21 @@ export class EdgelessShapeToolButton extends EdgelessToolButton<
 
   protected override initLastPropsSlot(): void {
     this._disposables.add(
-      this.service.editSession.slots.lastPropsUpdated.on(({ type, props }) => {
-        if (type === this._type) {
-          this._states.forEach(_key => {
-            const key = _key as string;
-            if (key === 'rect' && (props.radius as number) > 0) {
-              return;
-            }
-            if (props[key] != undefined) {
-              Object.assign(this, { [key]: props[key] });
-            }
-          });
+      this.edgeless.service.editSession.slots.lastPropsUpdated.on(
+        ({ type, props }) => {
+          if (type === this._type) {
+            this._states.forEach(_key => {
+              const key = _key as string;
+              if (key === 'rect' && (props.radius as number) > 0) {
+                return;
+              }
+              if (props[key] != undefined) {
+                Object.assign(this, { [key]: props[key] });
+              }
+            });
+          }
         }
-      })
+      )
     );
   }
 

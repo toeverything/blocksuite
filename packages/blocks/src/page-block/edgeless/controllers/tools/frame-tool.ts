@@ -19,7 +19,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
   private _frame: FrameBlockModel | null = null;
 
   private _toModelCoord(p: IPoint): IVec {
-    return this._surface.viewport.toModelCoord(p.x, p.y);
+    return this._service.viewport.toModelCoord(p.x, p.y);
   }
 
   override onContainerPointerDown(): void {
@@ -32,27 +32,26 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
   }
   override onContainerDragMove(e: PointerEventState): void {
     const currentPoint = this._toModelCoord(e.point);
-    const surface = this._surface;
     assertExists(this._startPoint);
     if (Vec.dist(this._startPoint, currentPoint) < 8 && !this._frame) return;
     if (!this._frame) {
-      const frames = surface.frame.frames;
+      const frames = this._service.frames;
 
-      const id = surface.addElement(
+      const id = this._service.addBlock(
         'affine:frame',
         {
           title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
           xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
         },
-        surface.model
+        this._service.surface
       );
-      this._frame = surface.pickById(id) as FrameBlockModel;
+      this._frame = this._service.getElementById(id) as FrameBlockModel;
       this._frame.stash('xywh');
       return;
     }
     assertExists(this._frame);
 
-    this._surface.updateElement(this._frame.id, {
+    this._service.updateElement(this._frame.id, {
       xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
     });
   }
@@ -63,7 +62,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
         frame.pop('xywh');
       });
       this._edgeless.tools.setEdgelessTool({ type: 'default' });
-      this._edgeless.selectionManager.set({
+      this._edgeless.service.selection.set({
         elements: [this._frame.id],
         editing: false,
       });

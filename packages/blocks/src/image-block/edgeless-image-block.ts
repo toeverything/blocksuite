@@ -11,14 +11,17 @@ export class ImageBlockEdgelessComponent extends BlockElement<ImageBlockModel> {
   @property()
   source!: string;
 
-  get surface() {
-    return this.closest('affine-edgeless-page')?.surface;
+  get edgeless() {
+    return this.host.querySelector('affine-edgeless-page');
   }
 
-  override render() {
+  override renderBlock() {
     const bound = Bound.deserialize(
-      ((this.surface?.pickById(this.model.id) as ImageBlockModel) ?? this.model)
-        .xywh
+      (
+        (this.edgeless?.service.getElementById(
+          this.model.id
+        ) as ImageBlockModel) ?? this.model
+      ).xywh
     );
 
     return html`<img

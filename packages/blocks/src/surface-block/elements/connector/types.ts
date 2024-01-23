@@ -1,6 +1,6 @@
 import type { StrokeStyle } from '../../consts.js';
+import type { CanvasElementType } from '../../element-model/index.js';
 import type { IVec } from '../../utils/vec.js';
-import type { CanvasElementType } from '../edgeless-element.js';
 import type { ISurfaceElement } from '../surface-element.js';
 
 export enum ConnectorMode {

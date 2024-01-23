@@ -39,8 +39,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     assertExists(_draggingArea);
     assertExists(_draggingNoteOverlay);
 
-    const { surface } = _edgeless;
-    const { viewport } = surface;
+    const { viewport } = _edgeless.service;
     const { zoom } = viewport;
     const {
       start: { x: startX, y: startY },
@@ -101,13 +100,13 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     this._clearOverlay();
 
     const attributes =
-      this._edgeless.surface.service.editSession.getLastProps('affine:note');
+      this._edgeless.service.editSession.getLastProps('affine:note');
     const background = attributes.background;
     this._draggingNoteOverlay = new DraggingNoteOverlay(
       this._edgeless,
       background
     );
-    this._edgeless.surface.viewport.addOverlay(this._draggingNoteOverlay);
+    this._edgeless.surface.renderer.addOverlay(this._draggingNoteOverlay);
 
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
@@ -142,7 +141,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
       childType,
       collapse: true,
     };
-    const [viewX, viewY] = this._surface.viewport.toViewCoord(x, y);
+    const [viewX, viewY] = this._edgeless.service.viewport.toViewCoord(x, y);
     const point = new Point(viewX, viewY);
 
     this._page.captureSync();
@@ -160,7 +159,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     if (!overlay) return null;
 
     overlay.dispose();
-    this._edgeless.surface.viewport.removeOverlay(overlay);
+    this._edgeless.surface.renderer.removeOverlay(overlay);
     return null;
   }
 
@@ -184,7 +183,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
 
     // if mouse is in viewport and move, update overlay pointion and show overlay
     if (this._noteOverlay.globalAlpha === 0) this._noteOverlay.globalAlpha = 1;
-    const [x, y] = this._surface.viewport.toModelCoord(e.x, e.y);
+    const [x, y] = this._service.viewport.toModelCoord(e.x, e.y);
     this._updateOverlayPosition(x, y);
   }
 
@@ -209,10 +208,10 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     if (newTool.type !== 'affine:note') return;
 
     const attributes =
-      this._edgeless.surface.service.editSession.getLastProps('affine:note');
+      this._edgeless.service.editSession.getLastProps('affine:note');
     const background = attributes.background;
     this._noteOverlay = new NoteOverlay(this._edgeless, background);
     this._noteOverlay.text = newTool.tip;
-    this._edgeless.surface.viewport.addOverlay(this._noteOverlay);
+    this._edgeless.surface.renderer.addOverlay(this._noteOverlay);
   }
 }

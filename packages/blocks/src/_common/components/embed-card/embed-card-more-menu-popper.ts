@@ -4,6 +4,8 @@ import { Slice } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { EmbedFigmaBlockComponent } from '../../../embed-figma-block/embed-figma-block.js';
+import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
@@ -69,6 +71,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     | BookmarkBlockModel
     | EmbedGithubModel
     | EmbedYoutubeModel
+    | EmbedFigmaModel
     | EmbedLinkedDocModel;
 
   @property({ attribute: false })
@@ -76,6 +79,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
     | BookmarkBlockComponent
     | EmbedGithubBlockComponent
     | EmbedYoutubeBlockComponent
+    | EmbedFigmaBlockComponent
     | EmbedLinkedDocBlockComponent;
 
   @property({ attribute: false })
@@ -92,7 +96,7 @@ export class EmbedCardMoreMenu extends WithDisposable(LitElement) {
   private async _copyBlock() {
     const slice = Slice.fromModels(this.model.page, [this.model]);
     await this.std.clipboard.copySlice(slice);
-    toast('Copied link to clipboard');
+    toast(this.block.host, 'Copied link to clipboard');
     this.abortController.abort();
   }
 

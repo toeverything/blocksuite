@@ -195,6 +195,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -265,6 +266,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -341,6 +343,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -418,6 +421,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -564,6 +568,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -647,6 +652,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {

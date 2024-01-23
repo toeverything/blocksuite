@@ -718,7 +718,10 @@ export async function getSelectedTextByInlineEditor(page: Page) {
     if (!inlineRange) return '';
 
     const { index, length } = inlineRange;
-    return component?.inlineEditor?.yText.toString().slice(index, length) || '';
+    return (
+      component?.inlineEditor?.yText.toString().slice(index, index + length) ||
+      ''
+    );
   });
 }
 

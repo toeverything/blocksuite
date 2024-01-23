@@ -77,6 +77,7 @@ export const styles = css`
     -webkit-box-orient: vertical;
     flex-grow: 1;
     white-space: normal;
+    word-break: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--affine-text-primary-color);
@@ -147,6 +148,20 @@ export const styles = css`
       display: block;
     }
   }
+  .affine-embed-linked-doc-block:not(.loading):not(.empty).banner-empty {
+    .affine-embed-linked-doc-content {
+      width: 100%;
+      height: 100%;
+    }
+
+    .affine-embed-linked-doc-banner.render {
+      display: none;
+    }
+
+    .affine-embed-linked-doc-banner.default {
+      display: none;
+    }
+  }
   .affine-embed-linked-doc-block:not(.loading).deleted {
     background: var(--affine-background-secondary-color);
 
@@ -166,8 +181,8 @@ export const styles = css`
       display: block;
     }
   }
-  .affine-embed-linked-doc-block.horizontal:not(.loading).deleted {
-    height: 80px;
+  .affine-embed-linked-doc-block.horizontalThin {
+    height: ${EMBED_CARD_HEIGHT.horizontalThin}px;
     background: var(--affine-background-secondary-color);
 
     .affine-embed-linked-doc-banner {
@@ -221,6 +236,12 @@ export const styles = css`
 
     .affine-embed-linked-doc-content-description {
       -webkit-line-clamp: 6;
+      max-height: 120px;
+    }
+
+    .affine-embed-linked-doc-content-date {
+      flex-grow: 1;
+      align-items: flex-end;
     }
 
     .affine-embed-linked-doc-banner {
@@ -233,6 +254,32 @@ export const styles = css`
     .affine-embed-linked-doc-banner svg {
       width: 340px;
       height: 170px;
+    }
+  }
+  .affine-embed-linked-doc-block.vertical:not(.loading):not(
+      .empty
+    ).banner-empty {
+    .affine-embed-linked-doc-content {
+      width: 100%;
+      height: 100%;
+    }
+
+    .affine-embed-linked-doc-banner.render {
+      display: none;
+    }
+
+    .affine-embed-linked-doc-banner.default {
+      display: none;
+    }
+
+    .affine-embed-linked-doc-content-description {
+      -webkit-line-clamp: 16;
+      max-height: 320px;
+    }
+
+    .affine-embed-linked-doc-content-date {
+      flex-grow: unset;
+      align-items: center;
     }
   }
   .affine-embed-linked-doc-block.cube {
