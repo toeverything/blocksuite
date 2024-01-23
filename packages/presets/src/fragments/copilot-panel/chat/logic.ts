@@ -54,7 +54,9 @@ export class AIChatLogic {
   constructor(
     private logic: AILogic,
     private getHost: () => EditorHost
-  ) {}
+  ) {
+    this.logic;
+  }
 
   get loading() {
     return this.reactiveData.currentRequest != null;
