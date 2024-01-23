@@ -227,7 +227,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
       await Promise.all([
         this.host.addImages(imageFiles, point),
-        this.host.addAttachments([...files], point),
+        this.host.addAttachments(attachmentFiles, point),
       ]);
 
       return;
