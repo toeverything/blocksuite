@@ -137,7 +137,7 @@ export class Workspace extends WorkspaceAddonType {
     }
     // End of migration guide. Remove this in the next major version
 
-    const { id: pageId = this.idGenerator('page') } = options;
+    const { id: pageId = this.idGenerator('unknown') } = options;
     if (this._hasPage(pageId)) {
       throw new Error('page already exists');
     }
