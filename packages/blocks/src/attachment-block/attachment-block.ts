@@ -272,7 +272,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     />`;
   };
 
-  override render() {
+  override renderBlock() {
     const isLoading = isAttachmentLoading(this.model.id);
     const isError = this._error || (!isLoading && !this.model.sourceId);
 

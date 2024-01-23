@@ -215,7 +215,7 @@ export class BookmarkBlockComponent extends BlockElement<
     }
   }
 
-  override render() {
+  override renderBlock() {
     return html`${this.isInSurface
       ? html`<affine-edgeless-bookmark
           .block=${this}
