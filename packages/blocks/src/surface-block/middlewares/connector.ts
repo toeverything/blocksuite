@@ -12,10 +12,10 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
   });
   const updateConnectorPath = (connector: ConnectorElementModel) => {
     if (
-      ((connector?.source.id && getElementById(connector.source.id)) ||
-        connector?.source.position) &&
-      ((connector?.target.id && getElementById(connector.target.id)) ||
-        connector?.target.position)
+      ((connector.source?.id && getElementById(connector.source.id)) ||
+        connector.source?.position) &&
+      ((connector.target?.id && getElementById(connector.target.id)) ||
+        connector.target?.position)
     ) {
       pathGenerator.updatePath(connector);
     }
