@@ -67,6 +67,10 @@ export class Block {
         }
       });
     });
+
+    this.yBlock.observeDeep(() => {
+      this.options.onChange?.(this, '', undefined);
+    });
   }
 
   stash = (prop: string) => {
