@@ -152,7 +152,7 @@ describe('basic', () => {
     const workspace = new Workspace({
       ...options,
       idGenerator: type => {
-        assert.equal(type, 'page');
+        assert.equal(type, 'unknown');
         return String(id++);
       },
     });
