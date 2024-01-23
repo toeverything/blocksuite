@@ -40,7 +40,7 @@ export const heavyWhiteboard: InitFn = async (
     for (; i < count; i++) {
       const x = Math.random() * count * 2;
       const y = Math.random() * count * 2;
-      const id = nanoid('block');
+      const id = nanoid();
       surfaceBlockElements[id] = native2Y(
         {
           id,

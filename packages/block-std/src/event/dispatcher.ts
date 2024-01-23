@@ -1,12 +1,16 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
 
 import { PathFinder } from '../utils/index.js';
-import type { UIEventHandler } from './base.js';
-import { UIEventState, UIEventStateContext } from './base.js';
+import {
+  type UIEventHandler,
+  UIEventState,
+  UIEventStateContext,
+} from './base.js';
 import { ClipboardControl } from './control/clipboard.js';
 import { KeyboardControl } from './control/keyboard.js';
 import { PointerControl } from './control/pointer.js';
 import { RangeControl } from './control/range.js';
+import { EventScopeSourceType, EventSourceState } from './state/source.js';
 import { toLowerCase } from './utils.js';
 
 const bypassEventNames = [
@@ -121,9 +125,9 @@ export class UIEventDispatcher {
   }
 
   run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
-    const { event } = context.get('defaultState');
+    const sourceState = context.get('sourceState');
     if (!scope) {
-      scope = this._getEventScope(name, event);
+      scope = this._getEventScope(name, sourceState);
       if (!scope) {
         return;
       }
@@ -161,18 +165,27 @@ export class UIEventDispatcher {
     return this.std.selection.value;
   }
 
-  private _getEventScope(name: EventName, event: Event) {
+  private _getEventScope(name: EventName, state: EventSourceState) {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
     let output: EventScope | undefined;
 
-    if (event.target && event.target instanceof Node) {
-      output = this._buildEventScopeByTarget(name, event.target);
-    }
-
-    if (!output) {
-      output = this._buildEventScopeBySelection(name);
+    switch (state.sourceType) {
+      case EventScopeSourceType.Selection: {
+        output = this._buildEventScopeBySelection(name);
+        break;
+      }
+      case EventScopeSourceType.Target: {
+        output = this._buildEventScopeByTarget(
+          name,
+          state.event.target as Node
+        );
+        break;
+      }
+      default: {
+        throw new Error(`Unknown event scope source: ${state.sourceType}`);
+      }
     }
 
     return output;
@@ -212,7 +225,9 @@ export class UIEventDispatcher {
     if (!handlers) return;
 
     const path = this.std.view.getNodeView(target)?.path;
-    if (!path) return;
+    if (!path) {
+      return this._buildEventScopeBySelection(name);
+    }
 
     const flavours = path
       .map(blockId => {
@@ -261,7 +276,13 @@ export class UIEventDispatcher {
         event => {
           this.run(
             eventName,
-            UIEventStateContext.from(new UIEventState(event))
+            UIEventStateContext.from(
+              new UIEventState(event),
+              new EventSourceState({
+                event,
+                sourceType: EventScopeSourceType.Selection,
+              })
+            )
           );
         }
       );

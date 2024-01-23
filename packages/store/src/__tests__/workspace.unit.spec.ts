@@ -151,8 +151,7 @@ describe('basic', () => {
     let id = 100;
     const workspace = new Workspace({
       ...options,
-      idGenerator: type => {
-        assert.equal(type, 'page');
+      idGenerator: () => {
         return String(id++);
       },
     });

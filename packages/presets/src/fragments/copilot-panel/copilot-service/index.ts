@@ -61,7 +61,7 @@ export class CreateNewService extends WithDisposable(ShadowlessElement) {
       return;
     }
     this.onSave({
-      id: nanoid('unknown'),
+      id: nanoid(),
       vendorKey: this.key,
       name: this.name,
       data: this.data,

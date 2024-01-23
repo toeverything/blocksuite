@@ -91,7 +91,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   @state()
   private _surfaceModel: SurfaceBlockModel | null = null;
 
-  private _surfaceRefRendererId: string = nanoid('unknown');
+  private _surfaceRefRendererId: string = nanoid();
   private _surfaceRefRenderer!: SurfaceRefRenderer;
 
   private _edgelessDisposables: DisposableGroup | null = null;
