@@ -58,7 +58,7 @@ TextServiceKind.implService({
 ChatServiceKind.implService({
   name: 'llama2',
   method: data => ({
-    chat: async messages => {
+    chat: messages => {
       const llama2Messages = messages.map(message => {
         if (message.role === 'user') {
           let text = '';
@@ -79,20 +79,22 @@ ChatServiceKind.implService({
         }
         return message;
       });
-      const result: {
-        message: {
-          role: string;
-          content: string;
-        };
-      } = await fetch(`${data.host}/api/chat`, {
-        method: 'POST',
-        body: JSON.stringify({
-          model: 'llama2',
-          messages: llama2Messages,
-          stream: false,
-        }),
-      }).then(res => res.json());
-      return result.message.content;
+      return (async function* () {
+        const result: {
+          message: {
+            role: string;
+            content: string;
+          };
+        } = await fetch(`${data.host}/api/chat`, {
+          method: 'POST',
+          body: JSON.stringify({
+            model: 'llama2',
+            messages: llama2Messages,
+            stream: false,
+          }),
+        }).then(res => res.json());
+        yield result.message.content;
+      })();
     },
   }),
   vendor: llama2Vendor,
