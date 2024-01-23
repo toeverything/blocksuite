@@ -12,13 +12,26 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
   });
   const updateConnectorPath = (connector: ConnectorElementModel) => {
     if (
-      ((connector.source.id && getElementById(connector.source.id)) ||
-        connector.source.position) &&
-      ((connector.target.id && getElementById(connector.target.id)) ||
-        connector.target.position)
+      ((connector?.source.id && getElementById(connector.source.id)) ||
+        connector?.source.position) &&
+      ((connector?.target.id && getElementById(connector.target.id)) ||
+        connector?.target.position)
     ) {
       pathGenerator.updatePath(connector);
     }
+  };
+  const pendingList = new Set<ConnectorElementModel>();
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  const addToUpdateList = (connector: ConnectorElementModel) => {
+    pendingList.add(connector);
+
+    if (timeoutId) return;
+
+    timeoutId = setTimeout(() => {
+      pendingList.forEach(updateConnectorPath);
+      pendingList.clear();
+      timeoutId = null;
+    }, 0);
   };
 
   const disposables = [
@@ -28,16 +41,16 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
       if (!element) return;
 
       if ('type' in element && element.type === 'connector') {
-        updateConnectorPath(element as ConnectorElementModel);
+        addToUpdateList(element as ConnectorElementModel);
       } else {
-        surface.getConnectors(id).forEach(updateConnectorPath);
+        surface.getConnectors(id).forEach(addToUpdateList);
       }
     }),
     surface.elementUpdated.on(({ id, props }) => {
       const element = getElementById(id);
 
       if (props['xywh'] || props['rotate']) {
-        surface.getConnectors(id).forEach(updateConnectorPath);
+        surface.getConnectors(id).forEach(addToUpdateList);
       }
 
       if (
@@ -45,12 +58,12 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
         element.type === 'connector' &&
         (props['target'] || props['source'])
       ) {
-        updateConnectorPath(element as ConnectorElementModel);
+        addToUpdateList(element as ConnectorElementModel);
       }
     }),
     surface.page.slots.blockUpdated.on(payload => {
       if (payload.type === 'update' && payload.props.key === 'xywh') {
-        surface.getConnectors(payload.id).forEach(updateConnectorPath);
+        surface.getConnectors(payload.id).forEach(addToUpdateList);
       }
     }),
   ];
