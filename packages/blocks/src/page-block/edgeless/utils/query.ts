@@ -59,19 +59,19 @@ export function isImageBlock(
   );
 }
 
-export function isBookmarkBlock(
-  element: BlockModel | EdgelessModel | null
-): element is BookmarkBlockModel {
-  return (
-    !!element && 'flavour' in element && element.flavour === 'affine:bookmark'
-  );
-}
-
 export function isAttachmentBlock(
   element: BlockModel | EdgelessModel | null
 ): element is AttachmentBlockModel {
   return (
     !!element && 'flavour' in element && element.flavour === 'affine:attachment'
+  );
+}
+
+export function isBookmarkBlock(
+  element: BlockModel | EdgelessModel | null
+): element is BookmarkBlockModel {
+  return (
+    !!element && 'flavour' in element && element.flavour === 'affine:bookmark'
   );
 }
 
