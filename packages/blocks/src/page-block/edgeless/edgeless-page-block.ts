@@ -16,7 +16,11 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { toast } from '../../_common/components/toast.js';
-import { BLOCK_ID_ATTR } from '../../_common/consts.js';
+import {
+  BLOCK_ID_ATTR,
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '../../_common/consts.js';
 import { listenToThemeChange } from '../../_common/theme/utils.js';
 import {
   type EdgelessTool,
@@ -32,12 +36,18 @@ import {
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
+import { AttachmentService } from '../../attachment-block/attachment-service.js';
+import {
+  setAttachmentUploaded,
+  setAttachmentUploading,
+} from '../../attachment-block/utils.js';
 import {
   SURFACE_IMAGE_CARD_HEIGHT,
   SURFACE_IMAGE_CARD_WIDTH,
 } from '../../image-block/components/image-card.js';
 import type { ImageBlockProps } from '../../image-block/image-model.js';
 import { ImageService } from '../../image-block/image-service.js';
+import type { AttachmentBlockProps } from '../../index.js';
 import type { FrameBlockModel, ImageBlockModel } from '../../models.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import {
@@ -281,8 +291,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     _disposables.add(this.tools);
     _disposables.add(this.service.selection);
     _disposables.add(
-      slots.zoomUpdated.on((action: ZoomAction) =>
-        this.components.zoomToolbar?.setZoomByAction(action)
+      slots.zoomUpdated.on(
+        (action: ZoomAction) =>
+          this.components.zoomToolbar?.setZoomByAction(action)
       )
     );
     _disposables.add(
@@ -496,6 +507,93 @@ export class EdgelessPageBlockComponent extends BlockElement<
       elements: blockIds,
       editing: false,
     });
+    return blockIds;
+  }
+
+  async addFiles(files: File[], point?: Point): Promise<string[]> {
+    if (!files.length) return [];
+
+    const attachmentService = this.host.spec.getService('affine:attachment');
+    assertExists(attachmentService);
+    assertInstanceOf(attachmentService, AttachmentService);
+    const maxFileSize = attachmentService.maxFileSize;
+    const isSizeExceeded = files.some(file => file.size > maxFileSize);
+    if (isSizeExceeded) {
+      toast(
+        this.host,
+        `You can only upload files less than ${humanFileSize(
+          maxFileSize,
+          true,
+          0
+        )}`
+      );
+      return [];
+    }
+
+    let { x, y } = this.service.viewport.center;
+    if (point) [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
+
+    const CARD_STACK_GAP = 32;
+
+    const dropInfos: { blockId: string; file: File }[] = files.map(
+      (file, index) => {
+        const point = new Point(
+          x + index * CARD_STACK_GAP,
+          y + index * CARD_STACK_GAP
+        );
+        const center = Vec.toVec(point);
+        const bound = Bound.fromCenter(
+          center,
+          EMBED_CARD_WIDTH.cubeThick,
+          EMBED_CARD_HEIGHT.cubeThick
+        );
+        const blockId = this.service.addBlock(
+          'affine:attachment',
+          {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            style: 'cubeThick',
+            xywh: bound.serialize(),
+          } satisfies Partial<AttachmentBlockProps>,
+          this.surface.model
+        );
+
+        return { blockId, file };
+      }
+    );
+
+    // upload file and update the attachment model
+    const uploadPromises = dropInfos.map(async ({ blockId, file }) => {
+      let sourceId: string | undefined;
+      try {
+        setAttachmentUploading(blockId);
+        sourceId = await this.page.blob.set(file);
+      } catch (error) {
+        console.error(error);
+        if (error instanceof Error) {
+          toast(
+            this.host,
+            `Failed to upload attachment! ${error.message || error.toString()}`
+          );
+        }
+      } finally {
+        setAttachmentUploaded(blockId);
+        this.page.withoutTransact(() => {
+          this.service.updateElement(blockId, {
+            sourceId,
+          } satisfies Partial<AttachmentBlockProps>);
+        });
+      }
+      return blockId;
+    });
+    const blockIds = await Promise.all(uploadPromises);
+
+    this.service.selection.set({
+      elements: blockIds,
+      editing: false,
+    });
+
     return blockIds;
   }
 

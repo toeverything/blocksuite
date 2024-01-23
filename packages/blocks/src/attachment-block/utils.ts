@@ -4,8 +4,6 @@ import type { BlockModel } from '@blocksuite/store';
 
 import { toast } from '../_common/components/toast.js';
 import { humanFileSize } from '../_common/utils/math.js';
-import { buildPath } from '../_common/utils/query.js';
-import type { PageBlockComponent } from '../page-block/types.js';
 import type { AttachmentBlockComponent } from './attachment-block.js';
 import type {
   AttachmentBlockModel,
@@ -27,10 +25,10 @@ export function cloneAttachmentProperties(model: AttachmentBlockModel) {
 }
 
 const attachmentUploads = new Set<string>();
-function setAttachmentUploading(blockId: string) {
+export function setAttachmentUploading(blockId: string) {
   attachmentUploads.add(blockId);
 }
-function setAttachmentUploaded(blockId: string) {
+export function setAttachmentUploaded(blockId: string) {
   attachmentUploads.delete(blockId);
 }
 function isAttachmentUploading(blockId: string) {
@@ -44,26 +42,17 @@ async function uploadAttachmentBlob(
   editorHost: EditorHost,
   blockId: string,
   blob: Blob
-): Promise<string> {
+): Promise<void> {
   if (isAttachmentUploading(blockId)) {
     throw new Error('The attachment is already uploading!');
   }
 
-  setAttachmentUploading(blockId);
-
   const page = editorHost.page;
-  const attachmentModel = page.getBlockById(
-    blockId
-  ) as AttachmentBlockModel | null;
-  assertExists(attachmentModel);
+  let sourceId: string | undefined;
 
   try {
-    const sourceId = await page.blob.set(blob);
-    page.withoutTransact(() => {
-      page.updateBlock(attachmentModel, {
-        sourceId,
-      } satisfies Partial<AttachmentBlockProps>);
-    });
+    setAttachmentUploading(blockId);
+    sourceId = await page.blob.set(blob);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -75,22 +64,17 @@ async function uploadAttachmentBlob(
   } finally {
     setAttachmentUploaded(blockId);
 
-    const pageElement = editorHost.view.viewFromPath('block', [
-      page.root?.id ?? '',
-    ]) as PageBlockComponent | null;
-    assertExists(pageElement);
+    const attachmentModel = page.getBlockById(
+      blockId
+    ) as AttachmentBlockModel | null;
+    assertExists(attachmentModel);
 
-    await pageElement.updateComplete;
-
-    const attachmentElement = editorHost.view.viewFromPath(
-      'block',
-      buildPath(attachmentModel)
-    ) as AttachmentBlockComponent | null;
-    assertExists(attachmentElement);
-
-    attachmentElement.refreshData();
+    page.withoutTransact(() => {
+      page.updateBlock(attachmentModel, {
+        sourceId,
+      } satisfies Partial<AttachmentBlockProps>);
+    });
   }
-  return blockId;
 }
 
 export async function getAttachmentBlob(model: AttachmentBlockModel) {
@@ -184,14 +168,17 @@ export async function downloadAttachmentBlob(block: AttachmentBlockComponent) {
 /**
  * Add a new attachment block before / after the specified block.
  */
-export async function addSiblingAttachmentBlock(
+export function addSiblingAttachmentBlock(
   editorHost: EditorHost,
-  file: File,
+  files: File[],
   maxFileSize: number,
-  model: BlockModel,
+  targetModel: BlockModel,
   place: 'before' | 'after' = 'after'
-): Promise<string | null> {
-  if (file.size > maxFileSize) {
+) {
+  if (!files.length) return;
+
+  const isSizeExceeded = files.some(file => file.size > maxFileSize);
+  if (isSizeExceeded) {
     toast(
       editorHost,
       `You can only upload files less than ${humanFileSize(
@@ -200,19 +187,29 @@ export async function addSiblingAttachmentBlock(
         0
       )}`
     );
-    return null;
+    return;
   }
 
-  const page = model.page;
-  const props: Partial<AttachmentBlockProps> & {
+  const page = targetModel.page;
+  const attachmentBlockProps: (Partial<AttachmentBlockProps> & {
     flavour: 'affine:attachment';
-  } = {
+  })[] = files.map(file => ({
     flavour: 'affine:attachment',
     name: file.name,
     size: file.size,
     type: file.type,
-  };
-  const [blockId] = page.addSiblingBlocks(model, [props], place);
+  }));
 
-  return uploadAttachmentBlob(editorHost, blockId, file);
+  const blockIds = page.addSiblingBlocks(
+    targetModel,
+    attachmentBlockProps,
+    place
+  );
+
+  blockIds.map(
+    (blockId, index) =>
+      void uploadAttachmentBlob(editorHost, blockId, files[index])
+  );
+
+  return blockIds;
 }

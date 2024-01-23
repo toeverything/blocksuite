@@ -320,10 +320,10 @@ export const menuGroups: SlashMenuOptions['menus'] = [
 
           addSiblingAttachmentBlock(
             pageElement.host,
-            file,
+            [file],
             maxFileSize,
             model
-          ).catch(console.error);
+          );
         }),
       },
       {
