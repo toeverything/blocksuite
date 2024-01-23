@@ -1,4 +1,4 @@
-import { IS_MAC } from '@blocksuite/global/env';
+import { IS_WINDOWS } from '@blocksuite/global/env';
 
 import { type EdgelessTool } from '../../_common/types.js';
 import {
@@ -6,6 +6,7 @@ import {
   ConnectorElement,
   ConnectorMode,
   GroupElement,
+  ShapeElement,
 } from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
@@ -14,7 +15,7 @@ import {
   DEFAULT_NOTE_CHILD_TYPE,
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
-import { deleteElements } from './utils/crud.js';
+import { deleteElements, duplicateElements } from './utils/crud.js';
 import { isCanvasElement } from './utils/query.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
@@ -161,9 +162,13 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         Delete: () => {
           this._delete();
         },
-        'Control-d': () => {
-          if (!IS_MAC) return;
-          this._delete();
+        'Control-d': ctx => {
+          if (IS_WINDOWS) {
+            // console.log('windows');
+            ctx.get('defaultState').event.preventDefault();
+          }
+          this._duplicate();
+          return true;
         },
         ArrowUp: () => {
           this._move('ArrowUp');
@@ -259,6 +264,19 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       edgeless.slots.pressShiftKeyUpdated.emit(true);
     } else {
       edgeless.slots.pressShiftKeyUpdated.emit(false);
+    }
+  }
+
+  private _duplicate() {
+    const edgeless = this.pageElement;
+
+    if (edgeless.selectionManager.editing) {
+      return;
+    }
+    const selectedElement = edgeless.selectionManager.firstElement;
+    // console.log('duplicate', selectedElement instanceof ShapeElement);
+    if (selectedElement instanceof ShapeElement) {
+      duplicateElements(edgeless.surface, selectedElement);
     }
   }
 

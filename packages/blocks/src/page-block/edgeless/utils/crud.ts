@@ -2,6 +2,7 @@ import type {
   Connectable,
   EdgelessElement,
 } from '../../../_common/utils/index.js';
+import type { ShapeElement } from '../../../surface-block/index.js';
 import { GroupElement } from '../../../surface-block/index.js';
 import { getElementsFromGroup } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
@@ -38,4 +39,11 @@ export function deleteElements(
       surface.removeElement(element.id);
     }
   });
+}
+
+export function duplicateElements(
+  surface: SurfaceBlockComponent,
+  element: ShapeElement
+) {
+  surface.addElement(element.type, { shapeType: element.shapeType });
 }
