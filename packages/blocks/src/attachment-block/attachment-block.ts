@@ -247,6 +247,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       @input=${this._onInput}
       @blur=${this._onBlur}
       @pointerdown=${stopPropagation}
+      @paste=${stopPropagation}
+      @cut=${stopPropagation}
+      @copy=${stopPropagation}
     />`;
   };
 
