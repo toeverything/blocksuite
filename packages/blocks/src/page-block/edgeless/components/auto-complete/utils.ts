@@ -1,7 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import type { EdgelessElement } from '../../../../_common/types.js';
 import type { NoteBlockModel } from '../../../../models.js';
 import {
   CanvasTextFontFamily,
@@ -9,8 +8,10 @@ import {
   CanvasTextFontWeight,
 } from '../../../../surface-block/consts.js';
 import type { Connection } from '../../../../surface-block/element-model/connector.js';
-import { ShapeElementModel } from '../../../../surface-block/element-model/index.js';
-import { GroupElementModel } from '../../../../surface-block/element-model/index.js';
+import {
+  GroupElementModel,
+  ShapeElementModel,
+} from '../../../../surface-block/element-model/index.js';
 import type {
   ShapeStyle,
   ShapeType,
@@ -275,9 +276,7 @@ export function getPosition(type: Direction) {
   return { startPosition, endPosition };
 }
 
-export function isShape(
-  element: EdgelessElement
-): element is ShapeElementModel {
+export function isShape(element: unknown): element is ShapeElementModel {
   return element instanceof ShapeElementModel;
 }
 
