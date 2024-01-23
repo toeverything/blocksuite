@@ -1,5 +1,6 @@
 import '../_common/components/embed-card/embed-card-caption.js';
 
+import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
@@ -67,7 +68,11 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   captionElement!: EmbedCardCaption;
 
   @state()
-  private _pointerPressed = false;
+  private _showOverlay = true;
+
+  private _isSelected = false;
+
+  private _isDragging = false;
 
   private readonly _themeObserver = new ThemeObserver();
 
@@ -80,6 +85,11 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   get edgeless() {
     if (this._isInSurface) return null;
     return this.host.querySelector('affine-edgeless-page');
+  }
+
+  private get _embedView() {
+    if (this.isInSurface || !this.model.embed || !this.blobUrl) return;
+    return renderEmbedView(this.model, this.blobUrl);
   }
 
   private _dragHandleOption: DragHandleOption = {
@@ -172,17 +182,19 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
           ...props,
         });
       } else if (isTargetEdgelessContainer) {
-        const style = blockComponent.model.style ?? 'horizontalThin';
+        let style = blockComponent.model.style ?? 'cubeThick';
         const embed = blockComponent.model.embed;
         if (embed) {
+          style = 'cubeThick';
           this.page.updateBlock(blockComponent.model, {
+            style,
             embed: false,
           });
         }
 
         return convertDragPreviewDocToEdgeless({
           blockComponent,
-          cssSelector: '.affine-attachment-card',
+          cssSelector: '.affine-attachment-container',
           width: EMBED_CARD_WIDTH[style],
           height: EMBED_CARD_HEIGHT[style],
           ...props,
@@ -235,23 +247,20 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       }
     });
 
+    // this is required to prevent iframe from capturing pointer events
     this.disposables.add(
-      this.std.event.add('pointerDown', e => {
-        const event = e.get('pointerState');
-        // 0: Main button pressed, usually the left button or the un-initialized state
-        // See https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
-        if (event.button !== 0) return;
-        this._pointerPressed = true;
+      this.std.selection.slots.changed.on(sels => {
+        this._isSelected = sels.some(sel =>
+          PathFinder.equals(sel.path, this.path)
+        );
+        this._showOverlay = this._isDragging || !this._isSelected;
       })
     );
-    this.disposables.add(
-      this.std.event.add('pointerUp', e => {
-        const event = e.get('pointerState');
-        // 0: Main button pressed, usually the left button or the un-initialized state
-        if (event.button !== 0) return;
-        this._pointerPressed = false;
-      })
-    );
+    // this is required to prevent iframe from capturing pointer events
+    this.handleEvent('pointerMove', ctx => {
+      this._isDragging = ctx.get('pointerState').dragging;
+      if (this._isDragging) this._showOverlay = true;
+    });
   }
 
   override disconnectedCallback() {
@@ -340,7 +349,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   });
 
   override renderBlock() {
-    const { embed, name, size, style, caption } = this.model;
+    const { name, size, style, caption } = this.model;
     const cardStyle = style ?? AttachmentBlockStyles[1];
 
     const { LoadingIcon } = getEmbedCardIcons();
@@ -351,37 +360,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
     const fileType = name.split('.').pop() ?? '';
     const FileTypeIcon = getAttachmentFileIcons(fileType);
-
-    if (embed && this.blobUrl) {
-      const embedView = renderEmbedView(this.model, this.blobUrl);
-      if (embedView) {
-        // See https://github.com/toeverything/blocksuite/issues/5579
-        const selectionMask = this._pointerPressed
-          ? html`<div class="overlay-mask"></div>`
-          : null;
-        return html`<div
-            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
-            class="affine-attachment-embed-container"
-          >
-            ${selectionMask} ${embedView}
-            ${this.selected?.is('block')
-              ? html`<affine-block-selection></affine-block-selection>`
-              : null}
-          </div>
-
-          <embed-card-caption
-            .block=${this}
-            .display=${this.showCaption}
-            @blur=${() => {
-              if (!caption) this.showCaption = false;
-            }}
-          ></embed-card-caption>
-
-          ${this.selected?.is('block')
-            ? html`<affine-block-selection></affine-block-selection>`
-            : nothing}`;
-      }
-    }
 
     let containerStyleMap = styleMap({
       position: 'relative',
@@ -405,34 +383,55 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       });
     }
 
+    const embedView = this._embedView;
+
     return html`<div
       ${this.isInSurface ? null : ref(this._whenHover.setReference)}
       class="affine-attachment-container"
       style=${containerStyleMap}
     >
-      <div
-        class=${classMap({
-          'affine-attachment-card': true,
-          [cardStyle]: true,
-          loading: this.loading,
-          error: this.error,
-          unsynced: false,
-        })}
-        @click=${this._handleClick}
-        @dblclick=${this._handleDoubleClick}
-      >
-        <div class="affine-attachment-content">
-          <div class="affine-attachment-content-title">
-            <div class="affine-attachment-content-title-icon">${titleIcon}</div>
+      ${embedView
+        ? html`<div
+            class="affine-attachment-embed-container"
+            @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
+          >
+            ${embedView}
 
-            <div class="affine-attachment-content-title-text">${titleText}</div>
-          </div>
+            <div
+              class=${classMap({
+                'affine-attachment-iframe-overlay': true,
+                hide: !this._showOverlay,
+              })}
+            ></div>
+          </div>`
+        : html`<div
+            class=${classMap({
+              'affine-attachment-card': true,
+              [cardStyle]: true,
+              loading: this.loading,
+              error: this.error,
+              unsynced: false,
+            })}
+            @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
+          >
+            <div class="affine-attachment-content">
+              <div class="affine-attachment-content-title">
+                <div class="affine-attachment-content-title-icon">
+                  ${titleIcon}
+                </div>
 
-          <div class="affine-attachment-content-info">${infoText}</div>
-        </div>
+                <div class="affine-attachment-content-title-text">
+                  ${titleText}
+                </div>
+              </div>
 
-        <div class="affine-attachment-banner">${FileTypeIcon}</div>
-      </div>
+              <div class="affine-attachment-content-info">${infoText}</div>
+            </div>
+
+            <div class="affine-attachment-banner">${FileTypeIcon}</div>
+          </div>`}
 
       <embed-card-caption
         .block=${this}

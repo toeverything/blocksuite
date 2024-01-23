@@ -72,6 +72,10 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
       @pointerup=${stopPropagation}
       @click=${stopPropagation}
       @dblclick=${stopPropagation}
+      @paste=${stopPropagation}
+      @cut=${stopPropagation}
+      @copy=${stopPropagation}
+      @keyup=${stopPropagation}
     />`;
   }
 }
