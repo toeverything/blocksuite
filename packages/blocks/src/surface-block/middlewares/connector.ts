@@ -55,6 +55,12 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
     }),
   ];
 
+  surface
+    .getElementsByType('connector')
+    .forEach(connector =>
+      updateConnectorPath(connector as ConnectorElementModel)
+    );
+
   return () => {
     disposables.forEach(d => d.dispose());
   };
