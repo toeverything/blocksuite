@@ -13,6 +13,7 @@ import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
+import type { AttachmentBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import {
   Bound,
@@ -63,6 +64,14 @@ export function isBookmarkBlock(
 ): element is BookmarkBlockModel {
   return (
     !!element && 'flavour' in element && element.flavour === 'affine:bookmark'
+  );
+}
+
+export function isAttachmentBlock(
+  element: BlockModel | EdgelessModel | null
+): element is AttachmentBlockModel {
+  return (
+    !!element && 'flavour' in element && element.flavour === 'affine:attachment'
   );
 }
 

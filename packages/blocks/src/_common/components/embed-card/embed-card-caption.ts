@@ -69,6 +69,9 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
       @input=${this._onInputChange}
       @blur=${this._onInputBlur}
       @pointerdown=${stopPropagation}
+      @pointerup=${stopPropagation}
+      @click=${stopPropagation}
+      @dblclick=${stopPropagation}
     />`;
   }
 }

@@ -48,6 +48,7 @@ import { getElementsWithoutGroup } from '../../utils/group.js';
 import {
   getSelectableBounds,
   getSelectedRect,
+  isAttachmentBlock,
   isBookmarkBlock,
   isCanvasElement,
   isEmbeddedBlock,
@@ -478,6 +479,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } else if (
         isImageBlock(element) ||
         isBookmarkBlock(element) ||
+        isAttachmentBlock(element) ||
         isEmbeddedBlock(element)
       ) {
         areAllConnectors = false;
@@ -601,6 +603,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } else if (
         isImageBlock(element) ||
         isBookmarkBlock(element) ||
+        isAttachmentBlock(element) ||
         isEmbeddedBlock(element)
       ) {
         const curBound = Bound.deserialize(element.xywh);
@@ -815,7 +818,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const rect = getSelectedRect(elements);
     const proportion = elements.some(
-      ele => isImageBlock(ele) || isBookmarkBlock(ele) || isEmbeddedBlock(ele)
+      ele =>
+        isImageBlock(ele) ||
+        isBookmarkBlock(ele) ||
+        isAttachmentBlock(ele) ||
+        isEmbeddedBlock(ele)
     );
     // if there are more than one element, we need to refresh the state of resize manager
     if (elements.length > 1) refresh = true;
@@ -928,7 +935,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _canRotate() {
     return !this.selection.elements.every(
-      ele => isNoteBlock(ele) || isFrameBlock(ele) || isBookmarkBlock(ele)
+      ele =>
+        isNoteBlock(ele) ||
+        isFrameBlock(ele) ||
+        isBookmarkBlock(ele) ||
+        isAttachmentBlock(ele) ||
+        isEmbeddedBlock(ele)
     );
   }
 

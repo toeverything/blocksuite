@@ -41,7 +41,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   @property({ attribute: false })
   loading = false;
 
-  @state()
+  @property({ attribute: false })
   showCaption = false;
 
   @query('embed-card-caption')
@@ -239,7 +239,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
           })}
         >
           <div
-            ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
+            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
             class=${classMap({
               'affine-embed-github-block': true,
               loading,

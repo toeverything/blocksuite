@@ -1,7 +1,18 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { html, type TemplateResult } from 'lit';
 
-import type { AttachmentBlockModel } from './attachment-model.js';
-import { turnIntoImage } from './utils.js';
+import { withTempBlobData } from '../_common/utils/filesys.js';
+import type {
+  ImageBlockModel,
+  ImageBlockProps,
+} from '../image-block/image-model.js';
+import { transformModel } from '../page-block/utils/operations/model.js';
+import type {
+  AttachmentBlockModel,
+  AttachmentBlockProps,
+} from './attachment-model.js';
+
+const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
 
 type EmbedConfig = {
   name: string;
@@ -31,7 +42,7 @@ const embedConfig: EmbedConfig[] = [
     check: model =>
       model.page.schema.flavourSchemaMap.has('affine:image') &&
       model.type.startsWith('image/'),
-    action: model => turnIntoImage(model),
+    action: model => turnIntoImageBlock(model),
   },
   {
     name: 'pdf',
@@ -73,7 +84,7 @@ export function allowEmbed(model: AttachmentBlockModel) {
   return embedConfig.some(config => config.check(model));
 }
 
-export function turnIntoEmbedAction(model: AttachmentBlockModel) {
+export function convertToEmbed(model: AttachmentBlockModel) {
   const config = embedConfig.find(config => config.check(model));
   if (!config || !config.action) {
     model.page.updateBlock<Partial<AttachmentBlockModel>>(model, {
@@ -91,4 +102,56 @@ export function renderEmbedView(model: AttachmentBlockModel, blobUrl: string) {
     return null;
   }
   return config.template(model, blobUrl);
+}
+
+/**
+ * Turn the attachment block into an image block.
+ */
+export async function turnIntoImageBlock(model: AttachmentBlockModel) {
+  if (!model.page.schema.flavourSchemaMap.has('affine:image'))
+    throw new Error('The image flavour is not supported!');
+
+  const sourceId = model.sourceId;
+  assertExists(sourceId);
+
+  const { saveAttachmentData, getImageData } = withTempBlobData();
+  saveAttachmentData(sourceId, { name: model.name });
+
+  const imageConvertData = model.sourceId
+    ? getImageData(model.sourceId)
+    : undefined;
+
+  const imageProp: Partial<ImageBlockProps> = {
+    sourceId,
+    caption: model.caption,
+    size: model.size,
+    ...imageConvertData,
+  };
+  transformModel(model, 'affine:image', imageProp);
+}
+
+/**
+ * Turn the image block into a attachment block.
+ */
+export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
+  if (!model.page.schema.flavourSchemaMap.has('affine:attachment'))
+    throw new Error('The attachment flavour is not supported!');
+
+  if (!model.sourceId) throw new Error('Image data not available');
+
+  const sourceId = model.sourceId;
+  assertExists(sourceId);
+
+  const { saveImageData, getAttachmentData } = withTempBlobData();
+  saveImageData(sourceId, { width: model.width, height: model.height });
+  const attachmentConvertData = getAttachmentData(model.sourceId);
+  const attachmentProp: Partial<AttachmentBlockProps> = {
+    sourceId,
+    name: DEFAULT_ATTACHMENT_NAME,
+    size: blob.size,
+    type: blob.type,
+    caption: model.caption,
+    ...attachmentConvertData,
+  };
+  transformModel(model, 'affine:attachment', attachmentProp);
 }

@@ -139,8 +139,9 @@ export const SurfaceBlockSchema = defineBlockSchema({
     children: [
       'affine:frame',
       'affine:image',
-      'affine:embed-*',
       'affine:bookmark',
+      'affine:attachment',
+      'affine:embed-*',
     ],
   },
   onUpgrade: (data, previousVersion, version) => {

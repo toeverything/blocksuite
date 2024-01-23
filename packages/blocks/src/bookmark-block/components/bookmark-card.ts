@@ -1,7 +1,7 @@
 import { PathFinder } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { OpenIcon, WebIcon16 } from '../../_common/icons/text.js';
@@ -14,7 +14,7 @@ import { styles } from '../styles.js';
 export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
-  @state()
+  @property({ attribute: false })
   bookmark!: BookmarkBlockComponent;
 
   @state()

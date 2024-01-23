@@ -6,10 +6,7 @@ import {
   DownloadIcon,
   DuplicateIcon,
 } from '../../_common/icons/index.js';
-import type {
-  AttachmentBlockModel,
-  AttachmentBlockProps,
-} from '../attachment-model.js';
+import type { AttachmentBlockModel } from '../attachment-model.js';
 import { cloneAttachmentProperties } from '../utils.js';
 import { moreMenuStyles } from './styles.js';
 
@@ -43,11 +40,10 @@ export const MoreMenu = ({
         text="Duplicate"
         ?hidden=${readonly}
         @click="${() => {
-          const prop: { flavour: 'affine:attachment' } & AttachmentBlockProps =
-            {
-              flavour: 'affine:attachment',
-              ...cloneAttachmentProperties(model),
-            };
+          const prop: { flavour: 'affine:attachment' } = {
+            flavour: 'affine:attachment',
+            ...cloneAttachmentProperties(model),
+          };
           model.page.addSiblingBlocks(model, [prop]);
         }}"
       >
