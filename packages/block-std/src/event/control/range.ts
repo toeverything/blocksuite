@@ -4,6 +4,7 @@ import type {
   EventScope,
   UIEventDispatcher,
 } from '../dispatcher.js';
+import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 
 export class RangeControl {
   private _prev: Range | null = null;
@@ -63,7 +64,13 @@ export class RangeControl {
   };
 
   private _createContext(event: Event) {
-    return UIEventStateContext.from(new UIEventState(event));
+    return UIEventStateContext.from(
+      new UIEventState(event),
+      new EventSourceState({
+        event,
+        sourceType: EventScopeSourceType.Selection,
+      })
+    );
   }
 
   private _buildScope = (eventName: EventName) => {
