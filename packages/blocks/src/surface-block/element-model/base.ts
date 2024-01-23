@@ -50,8 +50,11 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
   }
 
   /**
-   * When the ymap is not connected to the doc, the value cannot be accessed.
-   * But sometimes we need to access the value when creating the element model, those temporary values are stored here.
+   * When the ymap is not connected to the doc, its value cannot be read.
+   * But we need to use those value during the creation, so the yfied decorated field's value will
+   * be stored in this map too during the creation.
+   *
+   * After the ymap is connected to the doc, this map will be cleared.
    */
   protected _preserved: Map<string, unknown> = new Map();
   protected _stashed: Map<keyof Props | string, unknown>;
