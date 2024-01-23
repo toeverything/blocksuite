@@ -104,11 +104,11 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
     Icon: TemplateResult<1>;
     tooltip: string;
   }[] {
-    const { EmbedCardHorizontalIcon, EmbedCardCubeIcon } = getEmbedCardIcons();
+    const { EmbedCardListIcon, EmbedCardCubeIcon } = getEmbedCardIcons();
     return [
       {
         style: 'horizontalThin',
-        Icon: EmbedCardHorizontalIcon,
+        Icon: EmbedCardListIcon,
         tooltip: 'Horizontal style',
       },
       {
@@ -167,14 +167,14 @@ export class EdgelessChangeAttachmentButton extends WithDisposable(LitElement) {
           >
             ${PaletteIcon}
           </edgeless-tool-icon-button>
-        </div>
 
-        <card-style-panel
-          .value=${model.style}
-          .options=${this._getCardStyleOptions}
-          .onSelect=${(value: EmbedCardStyle) => this._setCardStyle(value)}
-        >
-        </card-style-panel>
+          <card-style-panel
+            .value=${model.style}
+            .options=${this._getCardStyleOptions}
+            .onSelect=${(value: EmbedCardStyle) => this._setCardStyle(value)}
+          >
+          </card-style-panel>
+        </div>
 
         <component-toolbar-menu-divider
           .vertical=${true}

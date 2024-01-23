@@ -53,7 +53,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
       } else if (isInsideEdgelessEditor(this.std.host as EditorHost)) {
         const edgelessPage = this
           .pageBlockComponent as EdgelessPageBlockComponent;
-        await edgelessPage.addFiles(attachmentFiles, point);
+        await edgelessPage.addAttachments(attachmentFiles, point);
       }
 
       this.slots.onFilesDropped.emit(attachmentFiles);

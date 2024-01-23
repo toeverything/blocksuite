@@ -504,15 +504,15 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   >
                     ${PaletteIcon}
                   </edgeless-tool-icon-button>
-                </div>
 
-                <card-style-panel
-                  .value=${model.style}
-                  .options=${this._getCardStyleOptions}
-                  .onSelect=${(value: EmbedCardStyle) =>
-                    this._setCardStyle(value)}
-                >
-                </card-style-panel>
+                  <card-style-panel
+                    .value=${model.style}
+                    .options=${this._getCardStyleOptions}
+                    .onSelect=${(value: EmbedCardStyle) =>
+                      this._setCardStyle(value)}
+                  >
+                  </card-style-panel>
+                </div>
               `
             : nothing}
         </div>

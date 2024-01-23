@@ -509,7 +509,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return blockIds;
   }
 
-  async addFiles(files: File[], point?: Point): Promise<string[]> {
+  async addAttachments(files: File[], point?: Point): Promise<string[]> {
     if (!files.length) return [];
 
     const attachmentService = this.host.spec.getService('affine:attachment');

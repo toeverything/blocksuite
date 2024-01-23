@@ -36,7 +36,7 @@ const FILE_SIZE = 45801;
 
 function getAttachment(page: Page) {
   const attachment = page.locator('affine-attachment');
-  const loading = attachment.locator('.affine-attachment-loading');
+  const loading = attachment.locator('.affine-attachment-card.loading');
   const options = page.locator('.affine-attachment-options');
   const turnToEmbedBtn = options
     .locator('icon-button')
