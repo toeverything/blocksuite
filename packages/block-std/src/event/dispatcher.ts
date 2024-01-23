@@ -2,7 +2,6 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 
 import { PathFinder } from '../utils/index.js';
 import {
-  EventScopeSourceType,
   type UIEventHandler,
   UIEventState,
   UIEventStateContext,
@@ -11,6 +10,7 @@ import { ClipboardControl } from './control/clipboard.js';
 import { KeyboardControl } from './control/keyboard.js';
 import { PointerControl } from './control/pointer.js';
 import { RangeControl } from './control/range.js';
+import { EventScopeSourceType, EventSourceState } from './state/source.js';
 import { toLowerCase } from './utils.js';
 
 const bypassEventNames = [
@@ -125,9 +125,9 @@ export class UIEventDispatcher {
   }
 
   run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
-    const defaultState = context.get('defaultState');
+    const sourceState = context.get('sourceState');
     if (!scope) {
-      scope = this._getEventScope(name, defaultState);
+      scope = this._getEventScope(name, sourceState);
       if (!scope) {
         return;
       }
@@ -165,7 +165,7 @@ export class UIEventDispatcher {
     return this.std.selection.value;
   }
 
-  private _getEventScope(name: EventName, state: UIEventState) {
+  private _getEventScope(name: EventName, state: EventSourceState) {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
@@ -275,7 +275,11 @@ export class UIEventDispatcher {
           this.run(
             eventName,
             UIEventStateContext.from(
-              new UIEventState(event, EventScopeSourceType.Selection)
+              new UIEventState(event),
+              new EventSourceState({
+                event,
+                sourceType: EventScopeSourceType.Selection,
+              })
             )
           );
         }

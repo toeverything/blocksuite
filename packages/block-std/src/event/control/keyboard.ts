@@ -1,5 +1,4 @@
 import {
-  EventScopeSourceType,
   type UIEventHandler,
   UIEventState,
   UIEventStateContext,
@@ -7,6 +6,7 @@ import {
 import type { EventOptions, UIEventDispatcher } from '../dispatcher.js';
 import { bindKeymap } from '../keymap.js';
 import { KeyboardEventState } from '../state/index.js';
+import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 
 export class KeyboardControl {
   private composition = false;
@@ -14,7 +14,11 @@ export class KeyboardControl {
 
   private _createContext(event: Event, keyboardState: KeyboardEventState) {
     return UIEventStateContext.from(
-      new UIEventState(event, EventScopeSourceType.Selection),
+      new UIEventState(event),
+      new EventSourceState({
+        event,
+        sourceType: EventScopeSourceType.Selection,
+      }),
       keyboardState
     );
   }

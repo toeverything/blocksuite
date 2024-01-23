@@ -4,22 +4,11 @@ type MatchEvent<T extends string> = T extends UIEventStateType
   ? BlockSuiteUIEventState[T]
   : UIEventState;
 
-export enum EventScopeSourceType {
-  // The event scope should be built by selection path
-  Selection = 'selection',
-
-  // The event scope should be built by event target
-  Target = 'target',
-}
-
 export class UIEventState {
   /** when extends, override it with pattern `xxxState` */
   type = 'defaultState';
 
-  constructor(
-    public event: Event,
-    public sourceType: EventScopeSourceType
-  ) {}
+  constructor(public event: Event) {}
 }
 
 export class UIEventStateContext {
