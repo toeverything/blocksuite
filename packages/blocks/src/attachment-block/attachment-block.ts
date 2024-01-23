@@ -10,6 +10,7 @@ import { AttachmentIcon16 } from '../_common/icons/index.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import { humanFileSize } from '../_common/utils/math.js';
+import { asyncFocusRichText } from '../_common/utils/selection.js';
 import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
 import { captureEventTarget } from '../page-block/widgets/drag-handle/utils.js';
 import {
@@ -55,6 +56,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _pointerPressed = false;
 
+  get caption() {
+    return this.model.caption ?? '';
+  }
   private readonly _themeObserver = new ThemeObserver();
 
   private _hoverController = new HoverController(
@@ -237,19 +241,52 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     `;
   };
 
+  private _onCaptionKeydown(e: KeyboardEvent) {
+    e.stopPropagation();
+
+    if (e.isComposing) return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const model = this.model;
+      const page = model.page;
+      const target = e.target as HTMLInputElement;
+      const start = target.selectionStart;
+      if (start === null) return;
+
+      const value = target.value;
+      const caption = value.slice(0, start);
+      target.value = caption;
+      page.updateBlock(model, { caption });
+
+      const nextBlockText = value.slice(start);
+      const parent = page.getParent(model);
+      if (!parent) return;
+      const index = parent.children.indexOf(model);
+      const id = page.addBlock(
+        'affine:paragraph',
+        { text: new Text(nextBlockText) },
+        parent,
+        index + 1
+      );
+      asyncFocusRichText(this.host, model.page, id)?.catch(console.error);
+    }
+  }
+
   private _captionTemplate = () => {
     return html`<input
       ?hidden=${!this._showCaption}
       .disabled=${this.model.page.readonly}
       class="affine-attachment-caption"
       placeholder="Write a caption"
-      value=${this.model.caption ?? ''}
+      value=${this.caption}
       @input=${this._onInput}
       @blur=${this._onBlur}
       @pointerdown=${stopPropagation}
       @paste=${stopPropagation}
       @cut=${stopPropagation}
       @copy=${stopPropagation}
+      @keydown=${this._onCaptionKeydown}
+      @keyup=${stopPropagation}
     />`;
   };
 

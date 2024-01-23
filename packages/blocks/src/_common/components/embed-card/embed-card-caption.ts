@@ -7,6 +7,7 @@ import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embe
 import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 import { stopPropagation } from '../../utils/event.js';
+import { asyncFocusRichText } from '../../utils/selection.js';
 
 @customElement('embed-card-caption')
 export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
@@ -40,6 +41,44 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
   @query('.affine-embed-card-caption')
   input!: HTMLInputElement;
 
+  private _onCaptionKeydown(e: KeyboardEvent) {
+    e.stopPropagation();
+
+    if (e.isComposing) return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const model = this.model;
+      const page = model.page;
+      const target = e.target as HTMLInputElement;
+      const start = target.selectionStart;
+      if (start === null) return;
+
+      const value = target.value;
+      const caption = value.slice(0, start);
+      target.value = caption;
+      page.updateBlock(model, { caption });
+
+      const nextBlockText = value.slice(start);
+      const parent = page.getParent(model);
+      if (!parent) return;
+      const index = parent.children.indexOf(model);
+      const id = page.addBlock(
+        'affine:paragraph',
+        { text: new Text(nextBlockText) },
+        parent,
+        index + 1
+      );
+      asyncFocusRichText(this.host, model.page, id)?.catch(console.error);
+    }
+  }
+  get model() {
+    return this.block.model;
+  }
+
+  get host() {
+    return this.block.host;
+  }
+
   get caption() {
     return this.block.model.caption ?? '';
   }
@@ -70,6 +109,8 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
       @paste=${stopPropagation}
       @cut=${stopPropagation}
       @copy=${stopPropagation}
+      @keydown=${this._onCaptionKeydown}
+      @keyup=${stopPropagation}
     />`;
   }
 }
