@@ -706,7 +706,10 @@ export class Page extends Space<FlatBlockMap> {
 
     this._blockTree.onBlockAdded(id, this, {
       onChange: (block, key) => {
-        block.model.propsUpdated.emit({ key });
+        if (key) {
+          block.model.propsUpdated.emit({ key });
+        }
+
         this.slots.blockUpdated.emit({
           type: 'update',
           id,
