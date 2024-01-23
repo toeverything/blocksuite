@@ -82,7 +82,7 @@ export async function importNotion(workspace: Workspace, file: File) {
             continue;
           }
         }
-        pageMap.set(file, workspace.idGenerator('page'));
+        pageMap.set(file, workspace.idGenerator('unknown'));
       }
       if (i === 0 && fileName.endsWith('.csv')) {
         window.open(

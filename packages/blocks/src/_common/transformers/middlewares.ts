@@ -55,7 +55,7 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
   });
   slots.beforeImport.on(payload => {
     if (payload.type === 'page') {
-      const newId = workspace.idGenerator('page');
+      const newId = workspace.idGenerator('unknown');
       idMap.set(payload.snapshot.meta.id, newId);
       payload.snapshot.meta.id = newId;
       return;
