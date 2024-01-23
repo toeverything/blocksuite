@@ -59,7 +59,6 @@ export class EdgelessBrushToolButton extends EdgelessToolButton<
   protected override readonly _states = ['color', 'lineWidth'] as const;
 
   private _toggleBrushMenu() {
-    const { surface } = this.edgeless;
     if (this._menu) {
       this._disposeMenu();
     } else {
@@ -73,7 +72,7 @@ export class EdgelessBrushToolButton extends EdgelessToolButton<
       this._menu.element.edgeless = this.edgeless;
       this.updateMenu();
       this._menu.element.onChange = (props: Record<string, unknown>) => {
-        surface.service.editSession.record(this._type, props);
+        this.edgeless.service.editSession.record(this._type, props);
       };
     }
   }

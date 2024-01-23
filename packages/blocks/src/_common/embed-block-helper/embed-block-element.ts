@@ -31,7 +31,7 @@ export class EmbedBlockElement<
   Service extends BlockService = BlockService,
   WidgetName extends string = string,
 > extends BlockElement<Model, Service, WidgetName> {
-  protected cardStyle: EmbedCardStyle = 'horizontal';
+  protected _cardStyle: EmbedCardStyle = 'horizontal';
   protected _width = EMBED_CARD_WIDTH.horizontal;
   protected _height = EMBED_CARD_HEIGHT.horizontal;
 
@@ -41,6 +41,11 @@ export class EmbedBlockElement<
     return this._isInSurface;
   }
 
+  get edgeless() {
+    if (this._isInSurface) return null;
+    return this.host.querySelector('affine-edgeless-page');
+  }
+
   get surface() {
     if (!this.isInSurface) return null;
     return this.host.querySelector('affine-surface');
@@ -48,7 +53,7 @@ export class EmbedBlockElement<
 
   get bound(): Bound {
     return Bound.deserialize(
-      (this.surface?.pickById(this.model.id) ?? this.model).xywh
+      (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
     );
   }
 
@@ -124,7 +129,7 @@ export class EmbedBlockElement<
 
       if (isInSurface) {
         if (dropBlockId) {
-          const style = blockComponent.cardStyle;
+          const style = blockComponent._cardStyle;
           if (style === 'vertical' || style === 'cube') {
             const { xywh } = blockComponent.model;
             const bound = Bound.deserialize(xywh);
@@ -141,7 +146,7 @@ export class EmbedBlockElement<
           ...props,
         });
       } else if (isTargetEdgelessContainer) {
-        const style = blockComponent.cardStyle;
+        const style = blockComponent._cardStyle;
 
         return convertDragPreviewDocToEdgeless({
           blockComponent,
@@ -188,7 +193,7 @@ export class EmbedBlockElement<
     const width = this._width;
     const height = this._height;
     const bound = Bound.deserialize(
-      (surface.pickById(this.model.id) ?? this.model).xywh
+      (this.edgeless?.service.getElementById(this.model.id) ?? this.model).xywh
     );
     const scaleX = bound.w / width;
     const scaleY = bound.h / height;

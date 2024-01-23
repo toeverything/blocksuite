@@ -226,7 +226,6 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     return {
       type: 'slice',
       content: [contentSlice],
-      blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
@@ -716,8 +715,8 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                 blobId = await sha(await clonedRes.arrayBuffer());
                 assets?.getAssets().set(blobId, file);
                 await assets?.writeToBlob(blobId);
-              } catch (e) {
-                console.error(e);
+              } catch (_) {
+                break;
               }
             }
             context

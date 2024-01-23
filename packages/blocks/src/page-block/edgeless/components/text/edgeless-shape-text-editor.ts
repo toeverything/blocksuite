@@ -6,12 +6,9 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
+import { wrapFontFamily } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import type { ShapeElementModel } from '../../../../surface-block/element-model/index.js';
 import { SHAPE_TEXT_PADDING } from '../../../../surface-block/elements/shape/consts.js';
-import { wrapFontFamily } from '../../../../surface-block/elements/text/utils.js';
-import type {
-  CanvasElementType,
-  ShapeElement,
-} from '../../../../surface-block/index.js';
 import { Bound, toRadian, Vec } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getSelectedRect } from '../../utils/query.js';
@@ -22,7 +19,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   richText!: RichText;
 
   @property({ attribute: false })
-  element!: ShapeElement;
+  element!: ShapeElementModel;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -53,25 +50,20 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         toRadian(-this.element.rotate)
       );
 
-      const [modelLeftTopX, modelLeftTopY] = this.edgeless.surface.toModelCoord(
-        leftTopX,
-        leftTopY
-      );
+      const [modelLeftTopX, modelLeftTopY] =
+        this.edgeless.service.viewport.toModelCoord(leftTopX, leftTopY);
 
-      this.edgeless.surface.updateElement<CanvasElementType.SHAPE>(
-        this.element.id,
-        {
-          xywh: new Bound(
-            modelLeftTopX,
-            modelLeftTopY,
-            this.element.w,
-            containerHeight
-          ).serialize(),
-        }
-      );
+      this.edgeless.service.updateElement(this.element.id, {
+        xywh: new Bound(
+          modelLeftTopX,
+          modelLeftTopY,
+          this.element.w,
+          containerHeight
+        ).serialize(),
+      });
       this.richText.style.minHeight = `${containerHeight}px`;
     }
-    this.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [this.element.id],
       editing: true,
     });
@@ -84,7 +76,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     this.element.textDisplay = false;
 
     this.disposables.add(
-      this.edgeless.slots.viewportUpdated.on(() => {
+      this.edgeless.service.viewport.viewportUpdated.on(() => {
         this.requestUpdate();
         this.updateComplete
           .then(() => {
@@ -138,7 +130,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     this.element.textDisplay = true;
 
     this.remove();
-    this.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [],
       editing: false,
     });
@@ -149,7 +141,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       throw new Error('Failed to mount shape editor because of no text.');
     }
 
-    const viewport = this.edgeless.surface.viewport;
+    const viewport = this.edgeless.service.viewport;
     const zoom = viewport.zoom;
     const rect = getSelectedRect([this.element]);
     const rotate = this.element.rotate;
@@ -158,7 +150,10 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       [rect.left + rect.width / 2, rect.top + rect.height / 2],
       toRadian(rotate)
     );
-    const [x, y] = this.edgeless.surface.toViewCoord(leftTopX, leftTopY);
+    const [x, y] = this.edgeless.service.viewport.toViewCoord(
+      leftTopX,
+      leftTopY
+    );
 
     const inlineEditorStyle = styleMap({
       position: 'absolute',

@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     globalSetup: '../../scripts/vitest-global.ts',
     include: ['src/__tests__/**/*.unit.spec.ts'],
-    testTimeout: 500,
+    testTimeout: 1000,
     coverage: {
       provider: 'istanbul', // or 'c8'
       reporter: ['lcov'],

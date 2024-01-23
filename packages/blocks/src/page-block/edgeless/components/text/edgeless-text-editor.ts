@@ -8,16 +8,9 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
-import {
-  getLineHeight,
-  wrapFontFamily,
-} from '../../../../surface-block/elements/text/utils.js';
-import {
-  Bound,
-  type TextElement,
-  toRadian,
-  Vec,
-} from '../../../../surface-block/index.js';
+import { getLineHeight } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
+import type { TextElementModel } from '../../../../surface-block/element-model/text.js';
+import { Bound, toRadian, Vec } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
@@ -67,7 +60,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   richText!: RichText;
 
   @property({ attribute: false })
-  element!: TextElement;
+  element!: TextElementModel;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -229,12 +222,12 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         break;
     }
 
-    edgeless.surface.updateElement(element.id, {
+    edgeless.service.updateElement(element.id, {
       xywh: bound.serialize(),
     });
   };
 
-  getVisualPosition(element: TextElement) {
+  getVisualPosition(element: TextElementModel) {
     const { x, y, w, h, rotate } = element;
     return Vec.rotWith([x, y], [x + w / 2, y + h / 2], toRadian(rotate));
   }
@@ -271,13 +264,13 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         });
 
         this.disposables.add(
-          edgeless.slots.elementUpdated.on(({ id }) => {
+          edgeless.service.surface.elementUpdated.on(({ id }) => {
             if (id === element.id) this.requestUpdate();
           })
         );
 
         this.disposables.add(
-          edgeless.surface.viewport.slots.viewportUpdated.on(() => {
+          edgeless.service.viewport.viewportUpdated.on(() => {
             this.requestUpdate();
           })
         );
@@ -292,7 +285,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
             deleteElements(edgeless.surface, [element]);
           }
 
-          edgeless.selectionManager.set({
+          edgeless.service.selection.set({
             elements: [],
             editing: false,
           });
@@ -347,7 +340,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     const lineHeight = getLineHeight(fontFamily, fontSize);
     const rect = getSelectedRect([this.element]);
 
-    const { translateX, translateY, zoom } = this.edgeless.surface.viewport;
+    const { translateX, translateY, zoom } = this.edgeless.service.viewport;
     const [visualX, visualY] = this.getVisualPosition(this.element);
     const containerOffset = this.getContainerOffset();
     const transformOperation = [
@@ -365,7 +358,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         transform: transformOperation.join(' '),
         minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
         maxWidth: hasMaxWidth ? `${w}px` : 'none',
-        fontFamily: wrapFontFamily(fontFamily),
+        fontFamily: `"${fontFamily}"`,
         fontSize: `${fontSize}px`,
         fontWeight,
         color: isCssVariable(color) ? `var(${color})` : color,

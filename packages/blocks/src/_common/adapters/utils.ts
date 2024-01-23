@@ -6,13 +6,17 @@ export const fetchImage = async (
   init?: RequestInit,
   proxy?: string
 ) => {
-  if (!proxy) {
-    return fetch(url, init);
+  try {
+    if (!proxy) {
+      return await fetch(url, init);
+    }
+    return await fetch(proxy + '?url=' + encodeURIComponent(url), init).catch(
+      () => fetch(url, init)
+    );
+  } catch (error) {
+    console.warn('Error fetching image:', error);
+    throw error;
   }
-  return fetch(proxy + '?url=' + encodeURIComponent(url), init).catch(() => {
-    console.warn('Failed to fetch image from proxy, fallback to originial url');
-    return fetch(url, init);
-  });
 };
 
 export const mergeDeltas = (

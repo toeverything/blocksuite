@@ -77,7 +77,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
           })
         );
         this.disposables.add(
-          this.edgeless.slots.viewportUpdated.on(() => {
+          this.edgeless.service.viewport.viewportUpdated.on(() => {
             this.requestUpdate();
           })
         );
@@ -98,7 +98,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
-    this.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       elements: [],
       editing: false,
     });
@@ -106,7 +106,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   }
 
   override render() {
-    const viewport = this.edgeless.surface.viewport;
+    const viewport = this.edgeless.service.viewport;
     const frameBlock = this.frameBlock;
     const bound = Bound.deserialize(this.frameModel.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);

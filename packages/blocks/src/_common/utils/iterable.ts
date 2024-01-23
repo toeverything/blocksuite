@@ -181,6 +181,10 @@ export function keys<T>(obj: T): (keyof T)[] {
   return Object.keys(obj as object) as (keyof T)[];
 }
 
+export function values<T>(obj: T): T[keyof T][] {
+  return Object.values(obj as object);
+}
+
 type IterableType<T> = T extends Array<infer U> ? U : T;
 
 export function last<T extends Iterable<unknown>>(

@@ -27,7 +27,7 @@ export class CopilotEdgelessPanel extends WithDisposable(ShadowlessElement) {
 
   protected override render(): unknown {
     const frames = getSurfaceElementFromEditor(
-      this.editor
+      this.editor.host
     ).model.children.filter(
       v => v instanceof FrameBlockModel
     ) as FrameBlockModel[];

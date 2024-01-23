@@ -6,7 +6,12 @@ import {
   DEFAULT_NOTE_COLOR,
   NOTE_SHADOWS,
 } from '../_common/edgeless/note/consts.js';
-import { type SerializedXYWH, StrokeStyle } from '../surface-block/index.js';
+import { NoteDisplayMode } from '../_common/types.js';
+import {
+  Bound,
+  type SerializedXYWH,
+  StrokeStyle,
+} from '../surface-block/index.js';
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
@@ -15,6 +20,7 @@ export const NoteBlockSchema = defineBlockSchema({
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
     hidden: false,
+    displayMode: NoteDisplayMode.DocAndEdgeless,
     edgeless: {
       style: {
         borderRadius: 8,
@@ -52,8 +58,17 @@ type NoteProps = {
   xywh: SerializedXYWH;
   background: string;
   index: string;
-  hidden: boolean;
+  displayMode: NoteDisplayMode;
   edgeless: NoteEdgelessProps;
+  /**
+   * @deprecated
+   * use `displayMode` instead
+   * hidden:true -> displayMode:NoteDisplayMode.EdgelessOnly:
+   *  means the note is visible only in the edgeless mode
+   * hidden:false -> displayMode:NoteDisplayMode.DocAndEdgeless:
+   *  means the note is visible in the doc and edgeless mode
+   */
+  hidden: boolean;
 };
 
 type NoteEdgelessProps = {
@@ -65,6 +80,28 @@ type NoteEdgelessProps = {
   };
   collapse?: boolean;
   collapsedHeight?: number;
+  scale?: number;
 };
 
-export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {}
+export class NoteBlockModel extends selectable<NoteProps>(BlockModel) {
+  private _isSelectable(): boolean {
+    return this.displayMode !== NoteDisplayMode.DocOnly;
+  }
+
+  override hitTest(x: number, y: number): boolean {
+    if (!this._isSelectable()) return false;
+
+    const bound = Bound.deserialize(this.xywh);
+    return bound.isPointInBound([x, y], 0);
+  }
+
+  override containedByBounds(bounds: Bound): boolean {
+    if (!this._isSelectable()) return false;
+    return super.containedByBounds(bounds);
+  }
+
+  override boxSelect(bound: Bound): boolean {
+    if (!this._isSelectable()) return false;
+    return super.boxSelect(bound);
+  }
+}

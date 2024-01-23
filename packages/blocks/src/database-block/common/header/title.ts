@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { InlineRange } from '@blocksuite/inline';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -6,6 +7,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import type { RichText } from '../../../_common/components/rich-text/rich-text.js';
+import type { DatabaseBlockComponent } from '../../database-block.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
@@ -37,14 +39,14 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       overflow: hidden;
     }
 
-    .database-title-empty [data-v-root='true']::before {
+    .affine-database-title [data-title-empty='true']::before {
       content: 'Untitled';
       position: absolute;
       pointer-events: none;
       color: var(--affine-text-primary-color);
     }
 
-    .database-title-empty [data-v-root='true']:focus::before {
+    .affine-database-title [data-title-focus='true']::before {
       color: var(--affine-placeholder-color);
     }
   `;
@@ -70,6 +72,12 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   get inlineEditorContainer() {
     return this.inlineEditor.rootElement;
   }
+  get topContenteditableElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    assertExists(databaseBlock);
+    return databaseBlock.topContenteditableElement;
+  }
 
   override firstUpdated() {
     // for title placeholder
@@ -79,34 +87,30 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
     this.updateComplete
       .then(() => {
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'focus',
-          this._onTitleFocus
+        this.disposables.add(
+          this.inlineEditor.slots.keydown.on(this._onKeyDown)
         );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'blur',
-          this._onTitleBlur
+
+        this.disposables.add(
+          this.inlineEditor.slots.inputting.on(() => {
+            this.isComposing = this.inlineEditor.isComposing;
+          })
         );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'compositionstart',
-          () => {
-            this.isComposing = true;
-          }
-        );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'compositionend',
-          () => {
-            this.isComposing = false;
-          }
-        );
-        this.disposables.addFromEvent(
-          this.inlineEditorContainer,
-          'keydown',
-          this._onKeyDown
+
+        let beforeInlineRange: InlineRange | null = null;
+        this.disposables.add(
+          this.inlineEditor.slots.inlineRangeUpdate.on(([inlineRange]) => {
+            if (inlineRange) {
+              if (!beforeInlineRange) {
+                this.isActive = true;
+              }
+            } else {
+              if (beforeInlineRange) {
+                this.isActive = false;
+              }
+            }
+            beforeInlineRange = inlineRange;
+          })
         );
       })
       .catch(console.error);
@@ -130,12 +134,6 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   @state()
   private isActive = false;
-  private _onTitleFocus = () => {
-    this.isActive = true;
-  };
-  private _onTitleBlur = () => {
-    this.isActive = false;
-  };
 
   override render() {
     const isEmpty =
@@ -143,15 +141,17 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
     const classList = classMap({
       'database-title': true,
-      'database-title-empty': isEmpty,
       ellipsis: !this.isActive,
     });
     return html`<div class="affine-database-title">
       <rich-text
         .yText=${this.titleText.yText}
+        .inlineEventSource=${this.topContenteditableElement}
         .enableFormat=${false}
         .readonly=${this.readonly}
         class="${classList}"
+        data-title-empty="${isEmpty}"
+        data-title-focus="${this.isActive}"
         data-block-is-database-title="true"
         title="${this.titleText.toString()}"
       ></rich-text>

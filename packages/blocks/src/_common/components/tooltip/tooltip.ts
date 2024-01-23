@@ -220,6 +220,7 @@ export class Tooltip extends LitElement {
       leaveDelay: 0,
       // The tooltip is not interactive by default
       safeBridge: false,
+      allowMultiple: true,
     }
   );
 

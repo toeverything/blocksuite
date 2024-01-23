@@ -17,15 +17,19 @@ import {
 } from '../../../../_common/consts.js';
 import { BookmarkIcon } from '../../../../_common/icons/edgeless.js';
 import {
+  CaptionIcon,
   CopyIcon,
   EditIcon,
   EmbedWebIcon,
   OpenIcon,
   PaletteIcon,
+  RefreshIcon,
 } from '../../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../../_common/types.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import { BookmarkStyles } from '../../../../bookmark-block/bookmark-model.js';
+import type { EmbedFigmaBlockComponent } from '../../../../embed-figma-block/embed-figma-block.js';
+import type { EmbedFigmaModel } from '../../../../embed-figma-block/embed-figma-model.js';
 import type {
   EmbedGithubBlockComponent,
   EmbedGithubModel,
@@ -54,10 +58,11 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     .change-embed-card-container {
       display: flex;
       align-items: center;
+      gap: 12px;
     }
 
     .change-embed-card-button {
-      width: 40px;
+      width: 24px;
       height: 24px;
       border-radius: 4px;
       display: flex;
@@ -125,7 +130,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
     component-toolbar-menu-divider {
       height: 24px;
-      margin: 0 12px;
     }
 
     embed-card-style-panel {
@@ -141,6 +145,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | BookmarkBlockModel
     | EmbedGithubModel
     | EmbedYoutubeModel
+    | EmbedFigmaModel
     | EmbedLinkedDocModel;
 
   @property({ attribute: false })
@@ -162,6 +167,10 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     return this.model.page;
   }
 
+  private get edgeless() {
+    return this.surface.edgeless;
+  }
+
   private _embedOptions: EmbedOptions | null = null;
 
   private _embedCardStylePopper: ReturnType<typeof createButtonPopper> | null =
@@ -173,6 +182,30 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     ) as PageService | null;
     assertExists(pageService);
     return pageService;
+  }
+
+  private get _blockElement() {
+    const blockSelection =
+      this.surface.edgeless.service.selection.selections.filter(sel =>
+        sel.elements.includes(this.model.id)
+      );
+    if (blockSelection.length !== 1) {
+      return;
+    }
+
+    const blockElement = this.std.view.viewFromPath(
+      'block',
+      blockSelection[0].path
+    ) as
+      | BookmarkBlockComponent
+      | EmbedGithubBlockComponent
+      | EmbedYoutubeBlockComponent
+      | EmbedFigmaBlockComponent
+      | EmbedLinkedDocBlockComponent
+      | null;
+    assertExists(blockElement);
+
+    return blockElement;
   }
 
   private get _canShowUrlOptions() {
@@ -215,25 +248,21 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _open() {
-    const blockSelection =
-      this.surface.edgeless.selectionManager.selections.filter(sel =>
-        sel.elements.includes(this.model.id)
-      );
-    if (blockSelection.length !== 1) {
-      return;
-    }
+    this._blockElement?.open();
+  }
 
-    const blockElement = this.std.view.viewFromPath(
-      'block',
-      blockSelection[0].path
-    ) as
-      | BookmarkBlockComponent
-      | EmbedGithubBlockComponent
-      | EmbedYoutubeBlockComponent
-      | EmbedLinkedDocBlockComponent
-      | null;
-    assertExists(blockElement);
-    blockElement.open();
+  private _showCaption() {
+    const blockElement = this._blockElement;
+    if (blockElement) {
+      blockElement.showCaption = true;
+      blockElement.updateComplete
+        .then(() => blockElement.captionElement.input.focus())
+        .catch(console.error);
+    }
+  }
+
+  private _refreshData() {
+    this._blockElement?.refreshData();
   }
 
   private _copyUrl() {
@@ -242,7 +271,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     }
 
     navigator.clipboard.writeText(this.model.url).catch(console.error);
-    toast('Copied link to clipboard');
+    toast(this.std.host as EditorHost, 'Copied link to clipboard');
     this.surface.selection.clear();
   }
 
@@ -277,12 +306,12 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     bound.w = EMBED_CARD_WIDTH[targetStyle];
     bound.h = EMBED_CARD_HEIGHT[targetStyle];
 
-    const blockId = this.surface.addElement(
+    const blockId = this.edgeless.service.addBlock(
       targetFlavour as EdgelessBlockType,
       { url, xywh: bound.serialize(), style: targetStyle },
       this.surface.model
     );
-    this.surface.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       editing: false,
       elements: [blockId],
     });
@@ -306,7 +335,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     bound.w = EMBED_CARD_WIDTH[targetStyle];
     bound.h = EMBED_CARD_HEIGHT[targetStyle];
 
-    const blockId = this.surface.addElement(
+    const blockId = this.edgeless.service.addBlock(
       flavour as EdgelessBlockType,
       {
         url,
@@ -315,7 +344,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       },
       this.surface.model
     );
-    this.surface.edgeless.selectionManager.set({
+    this.edgeless.service.selection.set({
       editing: false,
       elements: [blockId],
     });
@@ -353,9 +382,6 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                 class="change-embed-card-button url"
                 @click=${this._copyUrl}
               >
-                <affine-tooltip .offset=${12}
-                  >Click to copy link</affine-tooltip
-                >
                 <span>${model.url}</span>
               </div>
 
@@ -453,6 +479,32 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
               `
             : nothing}
         </div>
+
+        <component-toolbar-menu-divider
+          .vertical=${true}
+        ></component-toolbar-menu-divider>
+
+        <edgeless-tool-icon-button
+          .tooltip=${'Add Caption'}
+          class="change-embed-card-button caption"
+          ?disabled=${this._page.readonly}
+          @click=${() => this._showCaption()}
+        >
+          ${CaptionIcon}
+        </edgeless-tool-icon-button>
+
+        <component-toolbar-menu-divider
+          .vertical=${true}
+        ></component-toolbar-menu-divider>
+
+        <edgeless-tool-icon-button
+          .tooltip=${'Reload'}
+          class="change-embed-card-button reload"
+          ?disabled=${this._page.readonly}
+          @click=${() => this._refreshData()}
+        >
+          ${RefreshIcon}
+        </edgeless-tool-icon-button>
       </div>
     `;
   }

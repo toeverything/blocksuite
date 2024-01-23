@@ -9,13 +9,13 @@ export class ASTWalkerContext<TNode extends object> {
 
   private _globalContext: Record<string, unknown> = Object.create(null);
 
-  private _defautltProp: Keyof<TNode> = 'children' as unknown as Keyof<TNode>;
+  private _defaultProp: Keyof<TNode> = 'children' as unknown as Keyof<TNode>;
 
   _skip = false;
   _skipChildrenNum = 0;
 
   setDefaultProp = (parentProp: Keyof<TNode>) => {
-    this._defautltProp = parentProp;
+    this._defaultProp = parentProp;
   };
 
   get stack() {
@@ -33,7 +33,7 @@ export class ASTWalkerContext<TNode extends object> {
   openNode(node: TNode, parentProp?: Keyof<TNode>) {
     this._stack.push({
       node,
-      prop: parentProp ?? this._defautltProp,
+      prop: parentProp ?? this._defaultProp,
       context: Object.create(null),
     });
     return this;

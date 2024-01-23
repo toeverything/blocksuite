@@ -10,13 +10,13 @@ export type YBlock = Y.Map<unknown>;
 
 export type BlockOptions = Partial<{
   onChange: (block: Block, key: string, value: unknown) => void;
-  onYBlockUpdated: (block: Block) => void;
 }>;
 
 export class Block {
   readonly model: BlockModel;
   readonly id: string;
   readonly flavour: string;
+  readonly version: number;
   readonly yChildren: Y.Array<string[]>;
   private _byPassProxy: boolean = false;
   private readonly _stashed: Set<string | number> = new Set();
@@ -26,11 +26,12 @@ export class Block {
     readonly yBlock: YBlock,
     readonly options: BlockOptions = {}
   ) {
-    const { id, flavour, yChildren, props } = this._parseYBlock();
+    const { id, flavour, version, yChildren, props } = this._parseYBlock();
 
     this.id = id;
     this.flavour = flavour;
     this.yChildren = yChildren;
+    this.version = version;
 
     this.model = this._createModel(props);
 
@@ -52,7 +53,7 @@ export class Block {
             // @ts-ignore
             this.model[keyName] = proxy;
           });
-          this.model.propsUpdated.emit({ key: keyName });
+          this.options.onChange?.(this, keyName, value);
           return;
         }
         if (type.action === 'delete') {
@@ -61,14 +62,10 @@ export class Block {
             // @ts-ignore
             delete this.model[keyName];
           });
-          this.model.propsUpdated.emit({ key: keyName });
+          this.options.onChange?.(this, keyName, undefined);
           return;
         }
       });
-    });
-
-    this.yBlock.observeDeep(() => {
-      this.options.onYBlockUpdated?.(this);
     });
   }
 
@@ -155,6 +152,7 @@ export class Block {
   private _parseYBlock() {
     let id: string | undefined;
     let flavour: string | undefined;
+    let version: number | undefined;
     let yChildren: Y.Array<string[]> | undefined;
     const props: Record<string, unknown> = {};
 
@@ -176,6 +174,10 @@ export class Block {
         yChildren = value;
         return;
       }
+      if (key === 'sys:version' && typeof value === 'number') {
+        version = value;
+        return;
+      }
     });
 
     assertExists(id, 'Block id is not found');
@@ -185,6 +187,11 @@ export class Block {
     const schema = this.schema.flavourSchemaMap.get(flavour);
     assertExists(schema, `Cannot find schema for flavour ${flavour}`);
     const defaultProps = schema.model.props?.(internalPrimitives);
+
+    if (typeof version !== 'number') {
+      // no version found in data, set to schema version
+      version = schema.version;
+    }
 
     // Set default props if not exists
     if (defaultProps) {
@@ -200,6 +207,7 @@ export class Block {
     return {
       id,
       flavour,
+      version,
       props,
       yChildren,
     };
@@ -213,6 +221,7 @@ export class Block {
     Object.assign(model, props);
 
     model.id = this.id;
+    model.version = this.version;
     model.keys = Object.keys(props);
     model.flavour = schema.model.flavour;
     model.role = schema.model.role;

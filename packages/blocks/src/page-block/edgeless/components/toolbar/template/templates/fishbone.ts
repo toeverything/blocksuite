@@ -1261,6 +1261,7 @@ export default {
             xywh: '[-2861.9332343849437,-1621.274707988944,756.8380038322657,787.9602056072466]',
             background: '--affine-background-secondary-color',
             index: 'b0SV',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {

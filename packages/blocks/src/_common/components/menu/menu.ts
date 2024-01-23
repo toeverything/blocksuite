@@ -132,6 +132,10 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       z-index: 999;
     }
 
+    affine-menu * {
+      box-sizing: border-box;
+    }
+
     .affine-menu-body {
       display: flex;
       flex-direction: column;

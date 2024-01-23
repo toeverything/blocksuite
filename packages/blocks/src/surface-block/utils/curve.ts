@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import { CURVETIME_EPSILON, isZero } from './math-utils.js';
+import type { PointLocation } from './point-location.js';
 import { type IVec, Vec } from './vec.js';
 
 // control coords are not relative to start or end
@@ -140,4 +141,10 @@ export function getBezierNearestPoint(
   const pointOnCurve = getBezierPoint(values, t);
   assertExists(pointOnCurve);
   return pointOnCurve;
+}
+
+export function getBezierParameters(
+  points: PointLocation[]
+): BezierCurveParameters {
+  return [points[0], points[0].absOut, points[1].absIn, points[1]];
 }

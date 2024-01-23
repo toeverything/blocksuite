@@ -1,22 +1,22 @@
-import type { EdgelessElement } from '../../../_common/utils/index.js';
+import type { EdgelessModel } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { type CanvasElement } from '../../../surface-block/index.js';
-import { getElementsWithoutGroup } from '../../../surface-block/managers/group-manager.js';
 import {
   getCopyElements,
   prepareClipboardData,
 } from '../controllers/clipboard.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from './bound-utils.js';
+import { getElementsWithoutGroup } from './group.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
 
 const offset = 10;
 export async function duplicate(
   edgeless: EdgelessPageBlockComponent,
-  elements: EdgelessElement[],
+  elements: EdgelessModel[],
   select = true
 ) {
   const { clipboardController } = edgeless;
@@ -38,13 +38,13 @@ export async function duplicate(
   edgeless.surface.fitToViewport(totalBound);
 
   if (select) {
-    edgeless.selectionManager.set({
+    edgeless.service.selection.set({
       elements: newElements.map(e => e.id),
       editing: false,
     });
   }
 }
-export const splitElements = (elements: EdgelessElement[]) => {
+export const splitElements = (elements: EdgelessModel[]) => {
   const { notes, frames, shapes, images } = groupBy(
     getElementsWithoutGroup(elements),
     element => {

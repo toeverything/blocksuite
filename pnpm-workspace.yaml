@@ -1,2 +1,10 @@
 packages:
-  - 'packages/*'
+  - 'packages/block-std'
+  - 'packages/blocks'
+  - 'packages/docs/main'
+  - 'packages/global'
+  - 'packages/inline'
+  - 'packages/lit'
+  - 'packages/playground'
+  - 'packages/presets'
+  - 'packages/store'

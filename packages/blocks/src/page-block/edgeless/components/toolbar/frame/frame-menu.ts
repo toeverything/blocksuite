@@ -104,15 +104,15 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
               (item, index) => html`
                 <div
                   @click=${() => {
-                    const frames = surface.frame.frames;
-                    const center = edgeless.surface.viewport.center;
+                    const frames = edgeless.service.frames;
+                    const center = edgeless.service.viewport.center;
                     const bound = new Bound(
                       center.x - item.wh[0] / 2,
                       center.y - item.wh[1] / 2,
                       item.wh[0],
                       item.wh[1]
                     );
-                    const id = edgeless.surface.addElement(
+                    const id = edgeless.service.addBlock(
                       'affine:frame',
                       {
                         title: new Workspace.Y.Text(
@@ -123,10 +123,10 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                       surface.model
                     );
                     edgeless.page.captureSync();
-                    const frame = edgeless.surface.pickById(id);
+                    const frame = edgeless.service.getElementById(id);
                     assertExists(frame);
                     edgeless.tools.setEdgelessTool({ type: 'default' });
-                    edgeless.selectionManager.set({
+                    edgeless.service.selection.set({
                       elements: [frame.id],
                       editing: false,
                     });

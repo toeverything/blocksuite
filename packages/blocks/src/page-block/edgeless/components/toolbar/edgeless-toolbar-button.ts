@@ -40,16 +40,11 @@ export class EdgelessToolButton<
     return this.edgeless.surface;
   }
 
-  protected get service() {
-    return this.surface.service;
-  }
-
   override connectedCallback() {
     super.connectedCallback();
-    const { _disposables, edgeless, service } = this;
-    const { editSession } = service;
+    const { _disposables, edgeless } = this;
 
-    const attributes = editSession.getLastProps(this._type);
+    const attributes = edgeless.service.editSession.getLastProps(this._type);
 
     this._states.forEach(key => {
       const value = attributes[key];
@@ -80,16 +75,18 @@ export class EdgelessToolButton<
 
   protected initLastPropsSlot() {
     this._disposables.add(
-      this.service.editSession.slots.lastPropsUpdated.on(({ type, props }) => {
-        if (type === this._type) {
-          this._states.forEach(_key => {
-            const key = _key as string;
-            if (props[key] != undefined) {
-              Object.assign(this, { [key]: props[key] });
-            }
-          });
+      this.edgeless.service.editSession.slots.lastPropsUpdated.on(
+        ({ type, props }) => {
+          if (type === this._type) {
+            this._states.forEach(_key => {
+              const key = _key as string;
+              if (props[key] != undefined) {
+                Object.assign(this, { [key]: props[key] });
+              }
+            });
+          }
         }
-      })
+      )
     );
   }
 

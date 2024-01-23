@@ -29,6 +29,8 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
 
+    this.contentEditable = 'false';
+
     this.handleEvent('click', () => {
       this.host.selection.set([
         this.host.selection.create('block', {
@@ -38,7 +40,7 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
     });
   }
 
-  override render() {
+  override renderBlock() {
     const children = html`<div
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"

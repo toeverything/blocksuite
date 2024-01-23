@@ -4,7 +4,10 @@ import type { AssetsManager } from './assets.js';
 import { fromJSON, toJSON } from './json.js';
 import type { BlockSnapshot } from './type.js';
 
-type BlockSnapshotLeaf = Pick<BlockSnapshot, 'id' | 'flavour' | 'props'>;
+type BlockSnapshotLeaf = Pick<
+  BlockSnapshot,
+  'id' | 'flavour' | 'props' | 'version'
+>;
 
 export type FromSnapshotPayload = {
   json: BlockSnapshotLeaf;
@@ -20,6 +23,7 @@ export type ToSnapshotPayload<Props extends object> = {
 export type SnapshotReturn<Props extends object> = {
   id: string;
   flavour: string;
+  version: number;
   props: Props;
 };
 
@@ -46,13 +50,14 @@ export class BaseBlockTransformer<Props extends object = object> {
   async fromSnapshot({
     json,
   }: FromSnapshotPayload): Promise<SnapshotReturn<Props>> {
-    const { flavour, id, props: _props } = json;
+    const { flavour, id, version, props: _props } = json;
 
     const props = this._propsFromSnapshot(_props);
 
     return {
       id,
       flavour,
+      version: version ?? -1,
       props,
     };
   }
@@ -60,13 +65,14 @@ export class BaseBlockTransformer<Props extends object = object> {
   async toSnapshot({
     model,
   }: ToSnapshotPayload<Props>): Promise<BlockSnapshotLeaf> {
-    const { id, flavour } = model;
+    const { id, flavour, version } = model;
 
     const props = this._propsToSnapshot(model);
 
     return {
       id,
       flavour,
+      version,
       props,
     };
   }

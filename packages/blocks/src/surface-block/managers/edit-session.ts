@@ -1,4 +1,5 @@
-import { Slot } from '@blocksuite/global/utils';
+import type { BlockService } from '@blocksuite/block-std';
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { isPlainObject, recursive } from 'merge';
 import { z } from 'zod';
 
@@ -8,7 +9,7 @@ import {
   NoteColorsSchema,
   NoteShadowsSchema,
 } from '../../_common/edgeless/note/consts.js';
-import { LineWidth } from '../../_common/types.js';
+import { LineWidth, NoteDisplayMode } from '../../_common/types.js';
 import {
   GET_DEFAULT_LINE_COLOR,
   GET_DEFAULT_TEXT_COLOR,
@@ -36,7 +37,6 @@ import {
   ShapeType,
   StrokeColorsSchema,
 } from '../elements/shape/consts.js';
-import type { SurfaceService } from '../surface-service.js';
 
 const ConnectorEndpointSchema = z.nativeEnum(ConnectorEndpointStyle);
 const StrokeStyleSchema = z.nativeEnum(StrokeStyle);
@@ -49,6 +49,7 @@ const CanvasTextFontStyleSchema = z.nativeEnum(CanvasTextFontStyle);
 const TextAlignSchema = z.nativeEnum(TextAlign);
 const TextVerticalAlignSchema = z.nativeEnum(TextVerticalAlign);
 const ShapeTypeSchema = z.nativeEnum(ShapeType);
+const NoteDisplayModeSchema = z.nativeEnum(NoteDisplayMode);
 
 const LastPropsSchema = z.object({
   connector: z.object({
@@ -93,7 +94,7 @@ const LastPropsSchema = z.object({
   }),
   'affine:note': z.object({
     background: NoteColorsSchema,
-    hidden: z.boolean(),
+    displayMode: NoteDisplayModeSchema.optional(),
     edgeless: z.object({
       style: z.object({
         borderRadius: z.number(),
@@ -172,7 +173,7 @@ export class EditSessionStorage {
     },
     'affine:note': {
       background: DEFAULT_NOTE_COLOR,
-      hidden: false,
+      displayMode: NoteDisplayMode.DocAndEdgeless,
       edgeless: {
         style: {
           borderRadius: 8,
@@ -184,6 +185,8 @@ export class EditSessionStorage {
     },
   };
 
+  private _disposables = new DisposableGroup();
+
   slots = {
     lastPropsUpdated: new Slot<{
       type: keyof LastProps;
@@ -191,7 +194,7 @@ export class EditSessionStorage {
     }>(),
   };
 
-  constructor(private _service: SurfaceService) {
+  constructor(private _service: BlockService) {
     const props = sessionStorage.getItem(SESSION_PROP_KEY);
     if (props) {
       const result = LastPropsSchema.safeParse(JSON.parse(props));
@@ -263,6 +266,11 @@ export class EditSessionStorage {
     } catch {
       return null;
     }
+  }
+
+  dispose() {
+    this._disposables.dispose();
+    this.slots.lastPropsUpdated.dispose();
   }
 }
 

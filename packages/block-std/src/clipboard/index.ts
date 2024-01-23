@@ -46,16 +46,30 @@ export class Clipboard {
     });
   }
 
-  private _getDataByType = (data: DataTransfer, type: string) => {
-    const item = data.getData(type);
-    if (item) {
-      return item;
+  // Gated by https://developer.mozilla.org/en-US/docs/Glossary/Transient_activation
+  // Need to be cloned to a map for later use
+  private _getDataByType = (clipboardData: DataTransfer) => {
+    const data = new Map<string, string | File[]>();
+    for (const type of clipboardData.types) {
+      if (type === 'Files') {
+        data.set(type, Array.from(clipboardData.files));
+      } else {
+        data.set(type, clipboardData.getData(type));
+      }
     }
-    const files = Array.from(data.files).filter(f => f.type === type);
-    if (files) {
-      return files;
-    }
-    return '';
+    return (type: string) => {
+      const item = data.get(type);
+      if (item) {
+        return item;
+      }
+      const files = ((data.get('Files') ?? []) as File[]).filter(
+        f => f.type === type
+      );
+      if (files.length > 0) {
+        return files;
+      }
+      return '';
+    };
   };
 
   private async _getClipboardItem(slice: Slice, type: string) {
@@ -134,8 +148,9 @@ export class Clipboard {
       assertExists(slice);
       return slice;
     } catch {
+      const getDataByType = this._getDataByType(data);
       const slice = await this._getSnapshotByPriority(
-        type => this._getDataByType(data, type),
+        type => getDataByType(type),
         page,
         parent,
         index

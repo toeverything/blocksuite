@@ -164,6 +164,8 @@ export class BacklinkIndexer {
           const pageId = block.get('prop:pageId');
           if (typeof pageId === 'string') {
             links = [...links, { pageId, blockId, type: 'LinkedPage' }];
+          } else {
+            console.warn('Unexpected prop:pageId type', pageId);
           }
         }
 

@@ -20,6 +20,7 @@ import type { DatabaseBlockModel } from './database-block/database-model.js';
 import { DatabaseBlockSchema } from './database-block/database-model.js';
 import type { DividerBlockModel } from './divider-block/divider-model.js';
 import { DividerBlockSchema } from './divider-block/divider-model.js';
+import { EmbedFigmaBlockSpec } from './embed-figma-block/embed-figma-spec.js';
 import { EmbedGithubBlockSpec } from './embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from './embed-html-block/embed-html-spec.js';
 import { EmbedLinkedDocBlockSpec } from './embed-linked-doc-block/index.js';
@@ -77,6 +78,7 @@ export const __unstableSchemas = [
   DataViewBlockSchema,
   AttachmentBlockSchema,
   EmbedYoutubeBlockSpec.schema,
+  EmbedFigmaBlockSpec.schema,
   EmbedGithubBlockSpec.schema,
   EmbedHtmlBlockSpec.schema,
   EmbedLinkedDocBlockSpec.schema,
