@@ -136,7 +136,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return {
       type: 'page',
       meta: {
-        id: nanoid('page'),
+        id: nanoid('unknown'),
         title: 'Untitled',
         createDate: +new Date(),
         tags: [],

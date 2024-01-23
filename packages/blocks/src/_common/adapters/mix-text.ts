@@ -91,7 +91,7 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
     return {
       type: 'page',
       meta: {
-        id: nanoid('page'),
+        id: nanoid('unknown'),
         title: 'Untitled',
         createDate: +new Date(),
         tags: [],

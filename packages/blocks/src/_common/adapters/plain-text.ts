@@ -91,7 +91,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     return {
       type: 'page',
       meta: {
-        id: nanoid('page'),
+        id: nanoid('unknown'),
         title: 'Untitled',
         createDate: +new Date(),
         tags: [],

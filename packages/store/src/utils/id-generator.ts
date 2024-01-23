@@ -1,9 +1,7 @@
 import { uuidv4 as uuidv4IdGenerator } from 'lib0/random.js';
 import { nanoid as nanoidGenerator } from 'nanoid';
 
-export type IdGenerator = (
-  type: 'workspace' | 'page' | 'block' | 'unknown'
-) => string;
+export type IdGenerator = (type: 'workspace' | 'block' | 'unknown') => string;
 
 export function createAutoIncrementIdGenerator(): IdGenerator {
   let i = 0;
