@@ -20,6 +20,7 @@ import { PointLocation } from '../utils/point-location.js';
 import type { IVec } from '../utils/vec.js';
 import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
 import {
+  cache,
   convertProps,
   getDeriveProperties,
   local,
@@ -61,6 +62,13 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     oldValues: Record<string, unknown>;
   }) => void;
   protected _observerDisposable: Record<string | symbol, () => void> = {};
+  protected _cache = new Map<
+    string | symbol,
+    {
+      deps: unknown[];
+      val: unknown;
+    }
+  >();
 
   yMap: Y.Map<unknown>;
   surface!: SurfaceBlockModel;
@@ -116,6 +124,7 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     return true;
   }
 
+  @cache(['xywh'])
   get deserializedXYWH() {
     return deserializeXYWH(this.xywh);
   }

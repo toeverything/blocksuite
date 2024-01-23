@@ -278,3 +278,39 @@ export function initFieldObservers(prototype: unknown, receiver: ElementModel) {
     updateObserver(prototype, prop, receiver);
   });
 }
+
+export function cache(keys: string[]) {
+  return function cacheDecorator(prototype: unknown, prop: string | symbol) {
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, prop);
+
+    if (!descriptor?.get) {
+      throw new Error(`The property "${prop.toString()}" must be a getter.`);
+    }
+
+    const getter = descriptor.get;
+
+    Object.defineProperty(prototype, prop, {
+      get(this: ElementModel) {
+        const values = keys.map(key => {
+          return this[key as keyof ElementModel];
+        }) as unknown[];
+
+        if (this._cache.has(prop)) {
+          const deps = this._cache.get(prop)!.deps;
+
+          if (deps.every((val, i) => val === values[i])) {
+            return this._cache.get(prop)!.val;
+          }
+        }
+
+        const val = getter.call(this);
+        this._cache.set(prop, {
+          deps: values,
+          val,
+        });
+
+        return val;
+      },
+    });
+  };
+}
