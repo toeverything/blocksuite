@@ -315,6 +315,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       pointerEvents: 'all',
       transformOrigin: '0 0',
       transform: `scale(${scale})`,
+      userSelect: this._editing ? 'auto' : 'none',
     };
 
     const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
