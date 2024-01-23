@@ -76,7 +76,7 @@ export class ImageAdapter extends BaseAdapter<Image> {
       content.push({
         type: 'block',
         flavour: 'affine:image',
-        id: nanoid('block'),
+        id: nanoid(),
         props: {
           sourceId: blobId,
         },

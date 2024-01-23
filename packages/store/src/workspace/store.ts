@@ -74,7 +74,7 @@ export class Store {
       awareness,
       idGenerator,
       defaultFlags,
-    }: StoreOptions = { id: nanoid('workspace') }
+    }: StoreOptions = { id: nanoid() }
   ) {
     this.id = id || '';
     this.doc = new BlockSuiteDoc({ guid: id });

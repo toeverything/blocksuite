@@ -27,7 +27,7 @@ export const multiSelectPureColumnConfig = columnManager.register<
     return {
       options: [
         ...oldData.options,
-        { id: nanoid('unknown'), value: text, color: getTagColor() },
+        { id: nanoid(), value: text, color: getTagColor() },
       ],
     };
   },
@@ -52,7 +52,7 @@ export const multiSelectPureColumnConfig = columnManager.register<
     optionNames.forEach(name => {
       if (!optionMap[name]) {
         const newOption: SelectTag = {
-          id: nanoid('unknown'),
+          id: nanoid(),
           value: name,
           color: getTagColor(),
         };

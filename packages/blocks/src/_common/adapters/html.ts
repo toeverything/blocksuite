@@ -125,7 +125,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     const titleAst = hastQuerySelector(htmlAst, 'title');
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
@@ -138,14 +138,14 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     return {
       type: 'page',
       meta: {
-        id: nanoid('page'),
+        id: nanoid(),
         title: hastGetTextContent(titleAst, 'Untitled'),
         createDate: +new Date(),
         tags: [],
       },
       blocks: {
         type: 'block',
-        id: nanoid('block'),
+        id: nanoid(),
         flavour: 'affine:page',
         props: {
           title: {
@@ -161,7 +161,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         children: [
           {
             type: 'block',
-            id: nanoid('block'),
+            id: nanoid(),
             flavour: 'affine:surface',
             props: {
               elements: {},
@@ -183,7 +183,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     const htmlAst = this._htmlToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
@@ -205,7 +205,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     const htmlAst = this._htmlToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
@@ -723,7 +723,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:image',
                   props: {
                     sourceId: blobId,
@@ -761,7 +761,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:code',
                 props: {
                   language: codeLang ?? 'Plain Text',
@@ -789,7 +789,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:paragraph',
                   props: {
                     type: 'quote',
@@ -835,7 +835,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:paragraph',
                   props: {
                     type: 'text',
@@ -857,7 +857,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           context.openNode(
             {
               type: 'block',
-              id: nanoid('block'),
+              id: nanoid(),
               flavour: 'affine:paragraph',
               props: {
                 type: context.getGlobalContext('hast:blockquote')
@@ -896,7 +896,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           context.openNode(
             {
               type: 'block',
-              id: nanoid('block'),
+              id: nanoid(),
               flavour: 'affine:list',
               props: {
                 type: listType,
@@ -935,7 +935,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:divider',
                 props: {},
                 children: [],
@@ -955,7 +955,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:paragraph',
                 props: {
                   type: o.node.tagName,
@@ -976,7 +976,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:paragraph',
                 props: {
                   type: 'text',

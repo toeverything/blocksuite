@@ -91,14 +91,14 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     return {
       type: 'page',
       meta: {
-        id: nanoid('page'),
+        id: nanoid(),
         title: 'Untitled',
         createDate: +new Date(),
         tags: [],
       },
       blocks: {
         type: 'block',
-        id: nanoid('block'),
+        id: nanoid(),
         flavour: 'affine:page',
         props: {
           title: {
@@ -113,7 +113,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
         children: [
           {
             type: 'block',
-            id: nanoid('block'),
+            id: nanoid(),
             flavour: 'affine:surface',
             props: {
               elements: {},
@@ -122,7 +122,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
           },
           {
             type: 'block',
-            id: nanoid('block'),
+            id: nanoid(),
             flavour: 'affine:note',
             props: {
               xywh: '[0,0,800,95]',
@@ -133,7 +133,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
             children: payload.file.split('\n').map((line): BlockSnapshot => {
               return {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:paragraph',
                 props: {
                   type: 'text',
@@ -161,7 +161,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     payload.file = payload.file.replaceAll('\r', '');
     return {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
@@ -172,7 +172,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
       children: payload.file.split('\n').map((line): BlockSnapshot => {
         return {
           type: 'block',
-          id: nanoid('block'),
+          id: nanoid(),
           flavour: 'affine:paragraph',
           props: {
             type: 'text',
@@ -201,7 +201,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
     payload.file = payload.file.replaceAll('\r', '');
     const contentSlice = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
@@ -212,7 +212,7 @@ export class PlainTextAdapter extends BaseAdapter<PlainText> {
       children: payload.file.split('\n').map((line): BlockSnapshot => {
         return {
           type: 'block',
-          id: nanoid('block'),
+          id: nanoid(),
           flavour: 'affine:paragraph',
           props: {
             type: 'text',
