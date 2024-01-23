@@ -1,6 +1,6 @@
 import type {
   Connectable,
-  EdgelessElement,
+  EdgelessModel,
 } from '../../../_common/utils/index.js';
 import { GroupElementModel } from '../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
@@ -8,7 +8,7 @@ import { isConnectable, isNoteBlock } from './query.js';
 
 export function deleteElements(
   surface: SurfaceBlockComponent,
-  elements: EdgelessElement[]
+  elements: EdgelessModel[]
 ) {
   const set = new Set(elements);
   const service = surface.edgeless.service;

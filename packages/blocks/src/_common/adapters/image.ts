@@ -76,7 +76,7 @@ export class ImageAdapter extends BaseAdapter<Image> {
       content.push({
         type: 'block',
         flavour: 'affine:image',
-        id: nanoid('block'),
+        id: nanoid(),
         props: {
           sourceId: blobId,
         },
@@ -89,7 +89,6 @@ export class ImageAdapter extends BaseAdapter<Image> {
     return {
       type: 'slice',
       content,
-      blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,

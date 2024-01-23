@@ -1,3 +1,5 @@
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
+
 import { requestConnectedFrame } from '../../_common/utils/event.js';
 import { Viewport } from '../../page-block/edgeless/utils/viewport.js';
 import { type IBound } from '../consts.js';
@@ -30,19 +32,33 @@ type EnvProvider = {
   selectedElements?: () => string[];
 };
 
+type RendererOptions = {
+  layerManager: LayerManager;
+  provider: EnvProvider;
+  enableStackingCanvas?: boolean;
+  onStackingCanvasCreated?: (canvas: HTMLCanvasElement) => void;
+};
+
 export class Renderer extends Viewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   rc: RoughCanvas;
-  indexedCanvases: HTMLCanvasElement[] = [];
   layerManager: LayerManager;
 
   provider: Partial<EnvProvider>;
 
+  stackingCanvasUpdated = new Slot<HTMLCanvasElement[]>();
+
+  private _stackingCanvas: HTMLCanvasElement[] = [];
   private _overlays: Set<Overlay> = new Set();
   private _shouldUpdate = false;
+  private _disposables = new DisposableGroup();
 
-  constructor(options: { layerManager: LayerManager; provider: EnvProvider }) {
+  get stackingCanvas() {
+    return this._stackingCanvas;
+  }
+
+  constructor(options: RendererOptions) {
     super();
 
     const canvas = document.createElement('canvas');
@@ -52,7 +68,15 @@ export class Renderer extends Viewport {
     this.rc = new RoughCanvas(canvas);
     this.layerManager = options.layerManager;
     this.provider = options.provider ?? {};
+    this._initViewport();
 
+    options.enableStackingCanvas = options.enableStackingCanvas ?? false;
+    if (options.enableStackingCanvas) {
+      this._initStackingCanvas(options.onStackingCanvasCreated);
+    }
+  }
+
+  private _initViewport() {
     this.viewportUpdated.on(() => {
       this._shouldUpdate = true;
     });
@@ -67,6 +91,68 @@ export class Renderer extends Viewport {
         this._shouldUpdate = false;
       }, this._el);
     });
+  }
+
+  private _initStackingCanvas(onCreated?: (canvas: HTMLCanvasElement) => void) {
+    const layer = this.layerManager;
+    const updateStackingCanvasSize = (canvases: HTMLCanvasElement[]) => {
+      this._stackingCanvas = canvases;
+
+      const dpr = window.devicePixelRatio;
+      const width = Math.ceil(this._width * dpr);
+      const height = Math.ceil(this._height * dpr);
+
+      canvases.forEach(canvas => {
+        if (canvas.width === width && canvas.height === height) {
+          return;
+        }
+
+        canvas.style.setProperty('width', `${this._width}px`);
+        canvas.style.setProperty('height', `${this._height}px`);
+        canvas.width = width;
+        canvas.height = height;
+      });
+    };
+    const updateStackingCanvas = () => {
+      /**
+       * we already have a main canvas, so the last layer should be skipped
+       */
+      const canvasLayers = layer.getCanvasLayers().slice(0, -1);
+      const canvases = [];
+      const currentCanvases = this._stackingCanvas;
+
+      for (let i = 0; i < canvasLayers.length; ++i) {
+        const layer = canvasLayers[i];
+        const created = i < currentCanvases.length;
+        const canvas = created
+          ? currentCanvases[i]
+          : document.createElement('canvas');
+
+        if (!created) {
+          this._stackingCanvas.push(canvas);
+          onCreated?.(canvas);
+        }
+
+        canvas.setAttribute(
+          'data-layer-id',
+          `[${layer.indexes[0]}--${layer.indexes[1]}]`
+        );
+        canvas.style.setProperty('z-index', layer.zIndexes.toString());
+        canvases.push(canvas);
+      }
+
+      this._stackingCanvas = canvases;
+      updateStackingCanvasSize(canvases);
+      this.stackingCanvasUpdated.emit(canvases);
+    };
+
+    this._disposables.add(
+      this.layerManager.slots.layerUpdated.on(() => {
+        updateStackingCanvas();
+      })
+    );
+
+    updateStackingCanvas();
   }
 
   getVariableColor(val: string) {
@@ -89,25 +175,6 @@ export class Renderer extends Viewport {
     this._loop();
   }
 
-  setIndexedCanvas(canvases: HTMLCanvasElement[]) {
-    this.indexedCanvases = canvases;
-
-    const dpr = window.devicePixelRatio;
-    const width = Math.ceil(this._width * dpr);
-    const height = Math.ceil(this._height * dpr);
-
-    canvases.forEach(canvas => {
-      if (canvas.width === width && canvas.height === height) {
-        return;
-      }
-
-      canvas.style.setProperty('width', `${this._width}px`);
-      canvas.style.setProperty('height', `${this._height}px`);
-      canvas.width = width;
-      canvas.height = height;
-    });
-  }
-
   private _resetSize() {
     const { canvas } = this;
     const dpr = window.devicePixelRatio;
@@ -122,12 +189,12 @@ export class Renderer extends Viewport {
     canvas.width = actualWidth;
     canvas.height = actualHeight;
 
-    this.indexedCanvases.forEach(indexedCanvas => {
-      indexedCanvas.width = actualWidth;
-      indexedCanvas.height = actualHeight;
+    this._stackingCanvas.forEach(canvas => {
+      canvas.width = actualWidth;
+      canvas.height = actualHeight;
 
-      indexedCanvas.style.width = `${bbox.width}px`;
-      indexedCanvas.style.height = `${bbox.height}px`;
+      canvas.style.width = `${bbox.width}px`;
+      canvas.style.height = `${bbox.height}px`;
     });
 
     this._shouldUpdate = true;
@@ -156,12 +223,12 @@ export class Renderer extends Viewport {
     let fallbackElement: ElementModel[] = [];
 
     this.layerManager.getCanvasLayers().forEach((layer, idx) => {
-      if (!this.indexedCanvases[idx]) {
+      if (!this._stackingCanvas[idx]) {
         fallbackElement = fallbackElement.concat(layer.elements);
         return;
       }
 
-      const canvas = this.indexedCanvases[idx];
+      const canvas = this._stackingCanvas[idx];
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -265,5 +332,9 @@ export class Renderer extends Viewport {
     overlay.setRenderer(null);
     this._overlays.delete(overlay);
     this._shouldUpdate = true;
+  }
+
+  override dispose(): void {
+    super.dispose();
   }
 }

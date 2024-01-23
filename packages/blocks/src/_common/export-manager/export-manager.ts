@@ -320,8 +320,9 @@ export class ExportManager {
       '.affine-doc-page-block-container'
     );
     const rect = pageContainer?.getBoundingClientRect();
+    const { viewport } = pageElement;
     const pageWidth = rect?.width;
-    const pageLeft = rect?.left;
+    const pageLeft = rect?.left ?? 0;
     const viewportHeight = viewportElement?.scrollHeight;
 
     const replaceRichTextWithSvgElementFunc =
@@ -352,7 +353,7 @@ export class ExportManager {
         await replaceRichTextWithSvgElementFunc(element);
       },
       backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
-      x: pageLeft,
+      x: pageLeft - viewport.left,
       width: pageWidth,
       height: viewportHeight,
       useCORS: this._exportOptions.imageProxyEndpoint ? false : true,

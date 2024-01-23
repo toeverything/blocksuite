@@ -29,13 +29,13 @@ import { ShapeToolController } from '../controllers/tools/shape-tool.js';
 import { TextToolController } from '../controllers/tools/text-tool.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { EdgelessPageService } from '../edgeless-page-service.js';
-import type { EdgelessElement } from '../type.js';
+import type { EdgelessModel } from '../type.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
 export interface EdgelessHoverState {
   rect: Bound;
-  content: EdgelessElement;
+  content: EdgelessModel;
 }
 
 export interface SelectionArea {
@@ -351,7 +351,7 @@ export class EdgelessToolsManager {
       return null;
     }
     const { x, y } = this._lastMousePos;
-    const [modelX, modelY] = this.service.toModelCoord(x, y);
+    const [modelX, modelY] = this.service.viewport.toModelCoord(x, y);
     const hovered = this.service.pickElement(modelX, modelY);
 
     if (!hovered || this.selection?.editing) {
@@ -359,7 +359,7 @@ export class EdgelessToolsManager {
     }
 
     return {
-      rect: this.service.toViewBound(edgelessElementsBound([hovered])),
+      rect: this.service.viewport.toViewBound(edgelessElementsBound([hovered])),
       content: hovered,
     };
   }

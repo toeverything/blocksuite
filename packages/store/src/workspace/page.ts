@@ -193,7 +193,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   generateBlockId() {
-    return this._idGenerator('block');
+    return this._idGenerator();
   }
 
   getBlockById<Model extends BlockModel = BlockModel>(
@@ -357,7 +357,7 @@ export class Page extends Space<FlatBlockMap> {
       blockProps.children?.map(child => child.flavour)
     );
 
-    const id = blockProps.id ?? this._idGenerator('block');
+    const id = blockProps.id ?? this._idGenerator();
     const clonedProps: BlockSysProps & Partial<BlockProps> = {
       id,
       flavour,

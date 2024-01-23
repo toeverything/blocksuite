@@ -344,6 +344,10 @@ describe('stash/pop', () => {
     elementModel.pop('strokeWidth');
     expect(elementModel.strokeWidth).toBe(10);
     expect(elementModel.yMap.get('strokeWidth')).toBe(10);
+
+    elementModel.strokeWidth = 6;
+    expect(elementModel.strokeWidth).toBe(6);
+    expect(elementModel.yMap.get('strokeWidth')).toBe(6);
   });
 
   test('assign stashed property should emit event', async () => {
@@ -361,10 +365,39 @@ describe('stash/pop', () => {
     elementModel.strokeWidth = 10;
     expect(onchange).toHaveBeenCalledWith(id);
   });
+
+  test('stashed property should also trigger derive decorator', async () => {
+    const id = model.addElement({
+      type: 'brush',
+      points: [
+        [0, 0],
+        [100, 100],
+        [120, 150],
+      ],
+    });
+    const elementModel = model.getElementById(id)! as BrushElementModel;
+
+    elementModel.stash('points');
+    elementModel.points = [
+      [0, 0],
+      [50, 50],
+      [135, 145],
+      [150, 170],
+      [200, 180],
+    ];
+    const points = elementModel.points;
+
+    expect(elementModel.w).toBe(200 + elementModel.lineWidth);
+    expect(elementModel.h).toBe(180 + elementModel.lineWidth);
+
+    expect(elementModel.yMap.get('points')).not.toEqual(points);
+    expect(elementModel.w).toBe(200 + elementModel.lineWidth);
+    expect(elementModel.h).toBe(180 + elementModel.lineWidth);
+  });
 });
 
-describe('derive prop', () => {
-  test('derived prop should work correctly', () => {
+describe('derive decorator', () => {
+  test('derived decorator should work correctly', () => {
     const id = model.addElement({
       type: 'brush',
       points: [
@@ -380,8 +413,8 @@ describe('derive prop', () => {
   });
 });
 
-describe('local', () => {
-  test('local prop should work correctly', () => {
+describe('local decorator', () => {
+  test('local decorator should work correctly', () => {
     const id = model.addElement({
       type: 'shape',
     });
@@ -409,5 +442,28 @@ describe('local', () => {
 
     expect(elementModel.display).toBe(false);
     expect(onchange).toHaveBeenCalledWith(id);
+  });
+});
+
+describe('convert decorator', () => {
+  test('convert decorator', () => {
+    const id = model.addElement({
+      type: 'brush',
+      points: [
+        [50, 25],
+        [200, 200],
+        [300, 300],
+      ],
+    });
+    const elementModel = model.getElementById(id)! as BrushElementModel;
+    const halfLineWidth = elementModel.lineWidth / 2;
+    const xOffset = 50 - halfLineWidth;
+    const yOffset = 25 - halfLineWidth;
+
+    expect(elementModel.points).toEqual([
+      [50 - xOffset, 25 - yOffset],
+      [200 - xOffset, 200 - yOffset],
+      [300 - xOffset, 300 - yOffset],
+    ]);
   });
 });

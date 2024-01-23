@@ -8,7 +8,7 @@ import {
   type SurfaceBlockModel,
 } from '../../../surface-block/index.js';
 import type { EdgelessPageService } from '../edgeless-page-service.js';
-import type { EdgelessElement } from '../type.js';
+import type { EdgelessModel } from '../type.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 
 export interface EdgelessSelectionState {
@@ -79,7 +79,7 @@ export class EdgelessSelectionManager {
    * models of the selected elements
    */
   get elements() {
-    const elements: EdgelessElement[] = [];
+    const elements: EdgelessModel[] = [];
 
     this._selectedIds.forEach(id => {
       const el = this.service.getElementById(id);

@@ -144,6 +144,13 @@ export class Viewport {
     return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
   }
 
+  toViewBound(bound: Bound) {
+    const { w, h } = bound;
+    const [x, y] = this.toViewCoord(bound.x, bound.y);
+
+    return new Bound(x, y, w * this.zoom, h * this.zoom);
+  }
+
   setCenter(centerX: number, centerY: number) {
     this._center.x = centerX;
     this._center.y = centerY;

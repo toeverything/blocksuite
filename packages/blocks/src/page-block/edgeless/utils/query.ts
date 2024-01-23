@@ -26,7 +26,7 @@ import {
   ShapeElementModel,
   TextElementModel,
 } from '../../../surface-block/index.js';
-import type { EdgelessBlockModel, EdgelessElement } from '../type.js';
+import type { EdgelessBlockModel, EdgelessModel } from '../type.js';
 import { getElementsWithoutGroup } from './group.js';
 import type { Viewport } from './viewport.js';
 
@@ -37,13 +37,13 @@ export function isTopLevelBlock(
 }
 
 export function isNoteBlock(
-  element: BlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessModel | null
 ): element is NoteBlockModel {
   return !!element && 'flavour' in element && element.flavour === 'affine:note';
 }
 
 export function isFrameBlock(
-  element: BlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessModel | null
 ): element is FrameBlockModel {
   return (
     !!element && 'flavour' in element && element.flavour === 'affine:frame'
@@ -51,7 +51,7 @@ export function isFrameBlock(
 }
 
 export function isImageBlock(
-  element: BlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessModel | null
 ): element is ImageBlockModel {
   return (
     !!element && 'flavour' in element && element.flavour === 'affine:image'
@@ -59,7 +59,7 @@ export function isImageBlock(
 }
 
 export function isBookmarkBlock(
-  element: BlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessModel | null
 ): element is BookmarkBlockModel {
   return (
     !!element && 'flavour' in element && element.flavour === 'affine:bookmark'
@@ -67,7 +67,7 @@ export function isBookmarkBlock(
 }
 
 export function isEmbeddedBlock(
-  element: BlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessModel | null
 ): element is EmbedBlockModel {
   return (
     !!element && 'flavour' in element && /affine:embed-*/.test(element.flavour)
@@ -75,7 +75,7 @@ export function isEmbeddedBlock(
 }
 
 export function isEmbedGithubBlock(
-  element: BlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessModel | null
 ): element is EmbedGithubModel {
   return (
     !!element &&
@@ -85,7 +85,7 @@ export function isEmbedGithubBlock(
 }
 
 export function isEmbedYoutubeBlock(
-  element: BlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessModel | null
 ): element is EmbedYoutubeModel {
   return (
     !!element &&
@@ -95,7 +95,7 @@ export function isEmbedYoutubeBlock(
 }
 
 export function isEmbedFigmaBlock(
-  element: BlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessModel | null
 ): element is EmbedFigmaModel {
   return (
     !!element &&
@@ -105,7 +105,7 @@ export function isEmbedFigmaBlock(
 }
 
 export function isEmbedLinkedDocBlock(
-  element: BlockModel | EdgelessElement | null
+  element: BlockModel | EdgelessModel | null
 ): element is EmbedLinkedDocModel {
   return (
     !!element &&
@@ -129,7 +129,7 @@ export function isCanvasElementWithText(
 }
 
 export function isConnectable(
-  element: EdgelessElement | null
+  element: EdgelessModel | null
 ): element is Connectable {
   return !!element && element.connectable;
 }

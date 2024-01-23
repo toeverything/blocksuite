@@ -4,7 +4,7 @@ import {
   WithDisposable,
 } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
-import { nothing, type TemplateResult } from 'lit';
+import { css, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -20,6 +20,12 @@ import { deserializeXYWH } from '../../surface-block/index.js';
 
 @customElement('surface-ref-note-portal')
 export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    surface-ref-note-portal {
+      position: relative;
+    }
+  `;
+
   @property({ attribute: false })
   index!: number;
 

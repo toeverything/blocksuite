@@ -103,7 +103,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     const titleAst = hastQuerySelector(notionHtmlAst, 'title');
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
@@ -116,14 +116,14 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     return {
       type: 'page',
       meta: {
-        id: payload.pageId ?? nanoid('page'),
+        id: payload.pageId ?? nanoid(),
         title: hastGetTextContent(titleAst, 'Untitled'),
         createDate: +new Date(),
         tags: [],
       },
       blocks: {
         type: 'block',
-        id: nanoid('block'),
+        id: nanoid(),
         flavour: 'affine:page',
         props: {
           title: {
@@ -139,7 +139,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         children: [
           {
             type: 'block',
-            id: nanoid('block'),
+            id: nanoid(),
             flavour: 'affine:surface',
             props: {
               elements: {},
@@ -162,7 +162,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     const notionHtmlAst = this._htmlToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
@@ -185,7 +185,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     const notionHtmlAst = this._htmlToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
@@ -206,7 +206,6 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
     return {
       type: 'slice',
       content: [contentSlice],
-      blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
@@ -280,7 +279,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:image',
                   props: {
                     sourceId: blobId,
@@ -308,7 +307,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:code',
                 props: {
                   language: 'Plain Text',
@@ -331,7 +330,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:paragraph',
                 props: {
                   type: 'quote',
@@ -359,7 +358,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           context.openNode(
             {
               type: 'block',
-              id: nanoid('block'),
+              id: nanoid(),
               flavour: 'affine:paragraph',
               props: {
                 type: context.getGlobalContext('hast:blockquote')
@@ -386,7 +385,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:paragraph',
                 props: {
                   type: o.node.tagName,
@@ -424,7 +423,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           context.openNode(
             {
               type: 'block',
-              id: nanoid('block'),
+              id: nanoid(),
               flavour: 'affine:list',
               props: {
                 type: listType,
@@ -464,7 +463,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:divider',
                 props: {},
                 children: [],
@@ -481,7 +480,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:paragraph',
                   props: {
                     type: 'text',
@@ -504,7 +503,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:paragraph',
                   props: {
                     type: 'text',
@@ -540,7 +539,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:bookmark',
                   props: {
                     type: 'card',
@@ -598,7 +597,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:image',
                   props: {
                     sourceId: blobId,
@@ -657,7 +656,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:attachment',
                   props: {
                     name,
@@ -676,7 +675,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
           break;
         }
         case 'th': {
-          const columnId = nanoid('unknown');
+          const columnId = nanoid();
           const columnTypeClass = hastQuerySelector(o.node, 'svg')?.properties
             ?.className;
           const columnType = Array.isArray(columnTypeClass)
@@ -706,7 +705,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   'hast:table:children',
                   {
                     type: 'block',
-                    id: nanoid('block'),
+                    id: nanoid(),
                     flavour: 'affine:paragraph',
                     props: {
                       text: {
@@ -743,7 +742,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                     );
                     const id = filteredArray?.length
                       ? filteredArray[0].id
-                      : nanoid('unknown');
+                      : nanoid();
                     if (!filteredArray?.length) {
                       columns[index].data.options?.push({
                         id,
@@ -855,18 +854,18 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
                   row[columnId].value = (row[columnId].value as string[])[0];
                 }
               });
-              cells[children.at(i)?.id ?? nanoid('block')] = row;
+              cells[children.at(i)?.id ?? nanoid()] = row;
             });
           context.setGlobalContextStack('hast:table:cells', []);
           context.openNode(
             {
               type: 'block',
-              id: nanoid('block'),
+              id: nanoid(),
               flavour: 'affine:database',
               props: {
                 views: [
                   {
-                    id: nanoid('block'),
+                    id: nanoid(),
                     name: 'Table View',
                     mode: 'table',
                     columns: [],

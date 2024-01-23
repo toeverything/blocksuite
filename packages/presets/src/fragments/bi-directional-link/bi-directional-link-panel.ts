@@ -8,7 +8,7 @@ import { BlocksUtils, InlineManager, RichText } from '@blocksuite/blocks';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import { WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -212,16 +212,23 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     const { workspace } = page;
     const ids = new Set<string>();
     page
-      .getBlockByFlavour(['affine:paragraph', 'affine:list'])
+      .getBlockByFlavour([
+        'affine:paragraph',
+        'affine:list',
+        'affine:embed-linked-doc',
+      ])
       .forEach(model => {
-        if (!model.text) return;
-        const deltas: DeltaInsert<AffineTextAttributes>[] =
-          model.text.yText.toDelta();
+        if (model.text) {
+          const deltas: DeltaInsert<AffineTextAttributes>[] =
+            model.text.yText.toDelta();
 
-        deltas.forEach(delta => {
-          if (!delta.attributes || !delta.attributes.reference) return;
-          ids.add(delta.attributes.reference.pageId);
-        });
+          deltas.forEach(delta => {
+            if (!delta.attributes || !delta.attributes.reference) return;
+            ids.add(delta.attributes.reference.pageId);
+          });
+        } else if (matchFlavours(model, ['affine:embed-linked-doc'])) {
+          ids.add(model.pageId);
+        }
       });
 
     if (ids.size === 0) return nothing;
@@ -322,46 +329,8 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
                         blockId => blockId,
                         blockId => {
                           const model = page.getBlockById(blockId);
-
-                          if (
-                            !matchFlavours(model, [
-                              'affine:paragraph',
-                              'affine:list',
-                            ])
-                          )
-                            return nothing;
-                          let icon: TemplateResult<1> | null = null;
-                          if (matchFlavours(model, ['affine:list'])) {
-                            const listService = this._host!.spec.getService(
-                              'affine:list'
-                            ) as ListService;
-
-                            icon = listService.styles.icon(
-                              model,
-                              false,
-                              () => {}
-                            );
-                          }
-                          return html`<div
-                            class=${`rich-text-container ${model.type}`}
-                            @click=${() =>
-                              this.docPageBlock.slots.pageLinkClicked.emit({
-                                pageId,
-                                blockId,
-                              })}
-                          >
-                            <div class="rich-text">
-                              ${icon ?? nothing}
-                              <rich-text
-                                .yText=${model.text}
-                                .readonly=${true}
-                                .attributesSchema=${this._inlineManager.getSchema()}
-                                .attributeRenderer=${this._inlineManager.getRenderer()}
-                              ></rich-text>
-                            </div>
-
-                            <div class="arrow-link">${ArrowJumpIcon}</div>
-                          </div>`;
+                          if (!model) return nothing;
+                          return this._backlink(model, pageId, blockId);
                         }
                       )
                     : nothing}
@@ -371,6 +340,69 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         }
       )}
     </div>`;
+  }
+
+  private _backlink(
+    model: BlockModel<object>,
+    pageId: string,
+    blockId: string
+  ) {
+    if (
+      !matchFlavours(model, [
+        'affine:paragraph',
+        'affine:list',
+        'affine:embed-linked-doc',
+      ])
+    )
+      return nothing;
+
+    let icon: TemplateResult<1> | null = null;
+    if (matchFlavours(model, ['affine:list'])) {
+      const listService = this._host!.spec.getService(
+        'affine:list'
+      ) as ListService;
+
+      icon = listService.styles.icon(model, false, () => {});
+    }
+    const type = matchFlavours(model, ['affine:embed-linked-doc'])
+      ? ''
+      : model.type;
+
+    return html` <style>
+        .linked-page-container {
+          display: flex;
+          align-items: center;
+          padding-left: 2px;
+          gap: 2px;
+        }
+        .linked-page-container svg {
+          scale: 1.2;
+        }
+      </style>
+      <div
+        class=${`rich-text-container ${type}`}
+        @click=${() =>
+          this.docPageBlock.slots.pageLinkClicked.emit({
+            pageId,
+            blockId,
+          })}
+      >
+        <div class="rich-text">
+          ${type
+            ? html`${icon ?? nothing}
+                <rich-text
+                  .yText=${model.text}
+                  .readonly=${true}
+                  .attributesSchema=${this._inlineManager.getSchema()}
+                  .attributeRenderer=${this._inlineManager.getRenderer()}
+                ></rich-text>`
+            : html`<div class="linked-page-container">
+                ${SmallLinkedPageIcon} ${this.page.meta.title}
+              </div>`}
+        </div>
+
+        <div class="arrow-link">${ArrowJumpIcon}</div>
+      </div>`;
   }
 
   private _divider(visible: boolean) {

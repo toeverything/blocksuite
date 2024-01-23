@@ -14,6 +14,7 @@ import { isShape } from '../page-block/edgeless/components/auto-complete/utils.j
 import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
+import { FrameOverlay } from '../page-block/edgeless/frame-manager.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
 import { ConnectorElementModel } from './element-model/index.js';
@@ -93,8 +94,6 @@ export class SurfaceBlockComponent extends BlockElement<
 
   private _renderer!: Renderer;
 
-  indexedCanvases: HTMLCanvasElement[] = [];
-
   snap!: EdgelessSnapManager;
   frame!: EdgelessFrameManager;
 
@@ -105,6 +104,7 @@ export class SurfaceBlockComponent extends BlockElement<
 
   overlays!: {
     connector: ConnectionOverlay;
+    frame: FrameOverlay;
   };
 
   @query('edgeless-block-portal-container')
@@ -140,7 +140,6 @@ export class SurfaceBlockComponent extends BlockElement<
 
     this._initThemeObserver();
     this._initRenderer();
-    this._initEvents();
     this._initOverlay();
 
     this.frame = new EdgelessFrameManager(edgeless);
@@ -150,7 +149,9 @@ export class SurfaceBlockComponent extends BlockElement<
   private _initOverlay() {
     this.overlays = {
       connector: new ConnectionOverlay(this.edgeless.service),
+      frame: new FrameOverlay(),
     };
+
     values(this.overlays).forEach(overlay => {
       this._renderer.addOverlay(overlay);
     });
@@ -161,10 +162,18 @@ export class SurfaceBlockComponent extends BlockElement<
 
     this._renderer = new Renderer({
       layerManager: service.layer,
+      enableStackingCanvas: true,
       provider: {
         selectedElements: () => service.selection.selectedIds,
         getVariableColor: (val: string) =>
           this.themeObserver.getVariableValue(val),
+      },
+      onStackingCanvasCreated(canvas) {
+        canvas.className = 'indexable-canvas';
+
+        canvas.style.setProperty('transform-origin', '0 0');
+        canvas.style.setProperty('position', 'absolute');
+        canvas.style.setProperty('pointer-events', 'none');
       },
     });
 
@@ -182,26 +191,11 @@ export class SurfaceBlockComponent extends BlockElement<
     this._disposables.add(() => {
       this._renderer.dispose();
     });
-  }
-
-  private _initEvents() {
-    const { _disposables, edgeless } = this;
-    const edgelessService = edgeless.service!;
-
-    _disposables.add(
-      edgeless.slots.reorderingElements.on(({ elements, type }) => {
-        elements.forEach(element => {
-          this.edgeless.service.reorderElement(element, type);
-        });
+    this._disposables.add(
+      this._renderer.stackingCanvasUpdated.on(() => {
+        this._emitStackingCanvasUpdate();
       })
     );
-
-    _disposables.add(
-      edgelessService.layer.slots.layerUpdated.on(() => {
-        this._updateIndexCanvases();
-      })
-    );
-    this._updateIndexCanvases();
   }
 
   private _initThemeObserver = () => {
@@ -210,67 +204,6 @@ export class SurfaceBlockComponent extends BlockElement<
     this.disposables.add(() => this.themeObserver.dispose());
   };
 
-  private _updateIndexCanvases() {
-    const evt = new CustomEvent('indexedcanvasupdate', {
-      detail: {
-        content: this._createIndexedCanvases(),
-      },
-    }) as IndexedCanvasUpdateEvent;
-
-    this.dispatchEvent(evt);
-    this.refresh();
-  }
-
-  private _createIndexedCanvases() {
-    /**
-     * we already have a main canvas, so the last layer should be deleted
-     */
-    const canvasLayers = this.edgeless.service.layer
-      .getCanvasLayers()
-      .slice(0, -1);
-    const canvases = [];
-    const currentCanvases = this.indexedCanvases;
-
-    for (let i = 0; i < canvasLayers.length; ++i) {
-      const layer = canvasLayers[i];
-      const created = i < currentCanvases.length;
-      const canvas = created
-        ? currentCanvases[i]
-        : document.createElement('canvas');
-
-      if (!created) {
-        canvas.className = 'indexable-canvas';
-
-        canvas.style.setProperty('transform-origin', '0 0');
-        canvas.style.setProperty('position', 'absolute');
-        canvas.style.setProperty('pointer-events', 'none');
-      }
-
-      canvas.setAttribute(
-        'data-fractional',
-        `${layer.indexes[0]}-${layer.indexes[1]}`
-      );
-      canvas.style.setProperty('z-index', layer.zIndexes.toString());
-
-      canvases.push(canvas);
-    }
-
-    this.indexedCanvases = canvases;
-    this._renderer.setIndexedCanvas(this.indexedCanvases);
-
-    return this.indexedCanvases;
-  }
-
-  override renderBlock() {
-    if (!this._isEdgeless) return nothing;
-
-    return html`
-      <div class="affine-edgeless-surface-block-container">
-        <!-- attach canvas later in renderer -->
-      </div>
-    `;
-  }
-
   override firstUpdated() {
     if (!this._isEdgeless) return;
 
@@ -278,8 +211,14 @@ export class SurfaceBlockComponent extends BlockElement<
     this._initResizeEffect();
   }
 
-  override updated() {
-    if (!this._isEdgeless) return;
+  private _emitStackingCanvasUpdate() {
+    const evt = new CustomEvent('indexedcanvasupdate', {
+      detail: {
+        content: this._renderer.stackingCanvas,
+      },
+    }) as IndexedCanvasUpdateEvent;
+
+    this.dispatchEvent(evt);
   }
 
   private _initResizeEffect() {
@@ -295,10 +234,6 @@ export class SurfaceBlockComponent extends BlockElement<
 
   refresh() {
     this._renderer.refresh();
-  }
-
-  onResize() {
-    this._renderer.onResize();
   }
 
   fitToViewport(bound: Bound) {
@@ -331,6 +266,16 @@ export class SurfaceBlockComponent extends BlockElement<
         _renderer.setZoom(zoom);
       }
     });
+  }
+
+  override render() {
+    if (!this._isEdgeless) return nothing;
+
+    return html`
+      <div class="affine-edgeless-surface-block-container">
+        <!-- attach canvas later in renderer -->
+      </div>
+    `;
   }
   static isShape = isShape;
   static isConnector = (

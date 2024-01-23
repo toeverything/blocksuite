@@ -10,7 +10,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type {
-  EdgelessElement,
+  EdgelessModel,
   TopLevelBlockModel,
 } from '../../../../_common/types.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
@@ -23,7 +23,7 @@ import type { SurfaceRefRenderer } from '../../../../surface-ref-block/surface-r
 import type { SurfaceRefBlockService } from '../../../../surface-ref-block/surface-ref-service.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
-type RefElement = Exclude<EdgelessElement, NoteBlockModel>;
+type RefElement = Exclude<EdgelessModel, NoteBlockModel>;
 
 const DEFAULT_PREVIEW_CONTAINER_WIDTH = 280;
 const DEFAULT_PREVIEW_CONTAINER_HEIGHT = 166;
@@ -91,7 +91,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   @state()
   private _surfaceModel: SurfaceBlockModel | null = null;
 
-  private _surfaceRefRendererId: string = nanoid('unknown');
+  private _surfaceRefRendererId: string = nanoid();
   private _surfaceRefRenderer!: SurfaceRefRenderer;
 
   private _edgelessDisposables: DisposableGroup | null = null;
