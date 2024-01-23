@@ -208,9 +208,8 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     // @ts-ignore
     delete this[prop];
 
-    this.surface.page.transact(() => {
-      this.yMap.set(prop as string, value);
-    });
+    // @ts-ignore
+    this[prop] = value;
   }
 
   containedByBounds(bounds: Bound): boolean {

@@ -21,17 +21,18 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
     }
   };
   const pendingList = new Set<ConnectorElementModel>();
-  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  let pendingFlag = false;
   const addToUpdateList = (connector: ConnectorElementModel) => {
     pendingList.add(connector);
 
-    if (timeoutId) return;
-
-    timeoutId = setTimeout(() => {
-      pendingList.forEach(updateConnectorPath);
-      pendingList.clear();
-      timeoutId = null;
-    }, 0);
+    if (!pendingFlag) {
+      pendingFlag = true;
+      queueMicrotask(() => {
+        pendingList.forEach(updateConnectorPath);
+        pendingList.clear();
+        pendingFlag = false;
+      });
+    }
   };
 
   const disposables = [
@@ -56,7 +57,9 @@ export function connectorMiddleware(surface: SurfaceBlockModel) {
       if (
         'type' in element &&
         element.type === 'connector' &&
-        (props['target'] || props['source'])
+        (props['target'] ||
+          props['source'] ||
+          (props['xywh'] && !(element as ConnectorElementModel).updatingPath))
       ) {
         addToUpdateList(element as ConnectorElementModel);
       }
