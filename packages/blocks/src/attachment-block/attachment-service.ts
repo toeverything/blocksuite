@@ -12,7 +12,7 @@ import { isInsideEdgelessEditor } from '../_common/utils/query.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import type { PageBlockComponent } from '../page-block/types.js';
 import type { AttachmentBlockModel } from './attachment-model.js';
-import { addSiblingAttachmentBlock } from './utils.js';
+import { addSiblingAttachmentBlocks } from './utils.js';
 
 export class AttachmentService extends BlockService<AttachmentBlockModel> {
   get pageBlockComponent(): PageBlockComponent {
@@ -43,7 +43,7 @@ export class AttachmentService extends BlockService<AttachmentBlockModel> {
       );
 
       if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
-        addSiblingAttachmentBlock(
+        addSiblingAttachmentBlocks(
           this.std.host as EditorHost,
           attachmentFiles,
           this.maxFileSize,

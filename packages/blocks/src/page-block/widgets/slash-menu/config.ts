@@ -35,7 +35,7 @@ import {
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/inline-editor.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
-import { addSiblingAttachmentBlock } from '../../../attachment-block/utils.js';
+import { addSiblingAttachmentBlocks } from '../../../attachment-block/utils.js';
 import type { DatabaseService } from '../../../database-block/database-service.js';
 import { FigmaIcon } from '../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../embed-github-block/styles.js';
@@ -318,7 +318,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           assertInstanceOf(attachmentService, AttachmentService);
           const maxFileSize = attachmentService.maxFileSize;
 
-          addSiblingAttachmentBlock(
+          addSiblingAttachmentBlocks(
             pageElement.host,
             [file],
             maxFileSize,

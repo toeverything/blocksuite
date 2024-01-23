@@ -168,7 +168,7 @@ export async function downloadAttachmentBlob(block: AttachmentBlockComponent) {
 /**
  * Add a new attachment block before / after the specified block.
  */
-export function addSiblingAttachmentBlock(
+export function addSiblingAttachmentBlocks(
   editorHost: EditorHost,
   files: File[],
   maxFileSize: number,
