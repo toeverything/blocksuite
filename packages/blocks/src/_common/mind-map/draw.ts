@@ -141,21 +141,6 @@ const drawAllNode = (
     node.children.forEach((child, index) => {
       const layoutNodeResult = result.children[index];
       updatePosition(child, layoutNodeResult);
-      if (layoutNodeResult.connector) {
-        const direction = directionMap[layoutNodeResult.connector.direction];
-        const connectorId = service.addElement(CanvasElementType.CONNECTOR, {
-          ...DEFAULT_CONNECTOR_PROPS,
-          source: {
-            id: id,
-            position: direction.from,
-          },
-          target: {
-            id: child.id,
-            position: direction.to,
-          },
-        });
-        connectorIds.push(connectorId);
-      }
     });
   };
   updatePosition(layoutNode, result);
