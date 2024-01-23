@@ -1,4 +1,8 @@
-import { UIEventState, UIEventStateContext } from '../base.js';
+import {
+  EventScopeSourceType,
+  UIEventState,
+  UIEventStateContext,
+} from '../base.js';
 import type {
   EventName,
   EventScope,
@@ -63,7 +67,9 @@ export class RangeControl {
   };
 
   private _createContext(event: Event) {
-    return UIEventStateContext.from(new UIEventState(event));
+    return UIEventStateContext.from(
+      new UIEventState(event, EventScopeSourceType.Selection)
+    );
   }
 
   private _buildScope = (eventName: EventName) => {
