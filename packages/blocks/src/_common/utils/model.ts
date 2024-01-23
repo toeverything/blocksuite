@@ -13,6 +13,10 @@ import type {
   DataViewBlockSchema,
   DividerBlockModel,
   DividerBlockSchema,
+  EmbedFigmaModel,
+  EmbedGithubModel,
+  EmbedLinkedDocModel,
+  EmbedYoutubeModel,
   FrameBlockModel,
   FrameBlockSchema,
   ImageBlockModel,
@@ -45,6 +49,10 @@ export type BlockModels = {
   'affine:bookmark': BookmarkBlockModel;
   'affine:attachment': AttachmentBlockModel;
   'affine:surface-ref': SurfaceRefBlockModel;
+  'affine:embed-github': EmbedGithubModel;
+  'affine:embed-youtube': EmbedYoutubeModel;
+  'affine:embed-figma': EmbedFigmaModel;
+  'affine:embed-linked-doc': EmbedLinkedDocModel;
 };
 
 export type BlockSchemas = {
