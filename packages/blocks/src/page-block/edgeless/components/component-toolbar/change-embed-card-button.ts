@@ -1,11 +1,12 @@
 import '../buttons/tool-icon-button.js';
-import '../panel/embed-card-style-panel.js';
+import '../panel/card-style-panel.js';
+import './component-toolbar-menu-divider.js';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -26,6 +27,7 @@ import {
   RefreshIcon,
 } from '../../../../_common/icons/text.js';
 import type { EmbedCardStyle } from '../../../../_common/types.js';
+import { getEmbedCardIcons } from '../../../../_common/utils/url.js';
 import type { BookmarkBlockModel } from '../../../../bookmark-block/bookmark-model.js';
 import { BookmarkStyles } from '../../../../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaBlockComponent } from '../../../../embed-figma-block/embed-figma-block.js';
@@ -132,10 +134,10 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       height: 24px;
     }
 
-    embed-card-style-panel {
+    card-style-panel {
       display: none;
     }
-    embed-card-style-panel[data-show] {
+    card-style-panel[data-show] {
       display: flex;
     }
   `;
@@ -158,10 +160,10 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   private _showPopper = false;
 
   @query('.change-embed-card-button.card-style')
-  private _embedCardStyleButton!: HTMLDivElement;
+  private _cardStyleButton!: HTMLDivElement;
 
-  @query('embed-card-style-panel')
-  private _embedCardStylePanel!: HTMLDivElement;
+  @query('card-style-panel')
+  private _cardStylePanel!: HTMLDivElement;
 
   private get _page() {
     return this.model.page;
@@ -173,8 +175,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
   private _embedOptions: EmbedOptions | null = null;
 
-  private _embedCardStylePopper: ReturnType<typeof createButtonPopper> | null =
-    null;
+  private _cardStylePopper: ReturnType<typeof createButtonPopper> | null = null;
 
   private get _pageService() {
     const pageService = this.surface.std.spec.getService(
@@ -247,6 +248,41 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     );
   }
 
+  private get _getCardStyleOptions(): {
+    style: EmbedCardStyle;
+    Icon: TemplateResult<1>;
+    tooltip: string;
+  }[] {
+    const {
+      EmbedCardHorizontalIcon,
+      EmbedCardListIcon,
+      EmbedCardVerticalIcon,
+      EmbedCardCubeIcon,
+    } = getEmbedCardIcons();
+    return [
+      {
+        style: 'horizontal',
+        Icon: EmbedCardHorizontalIcon,
+        tooltip: 'Large horizontal style',
+      },
+      {
+        style: 'list',
+        Icon: EmbedCardListIcon,
+        tooltip: 'Small horizontal style',
+      },
+      {
+        style: 'vertical',
+        Icon: EmbedCardVerticalIcon,
+        tooltip: 'Large vertical style',
+      },
+      {
+        style: 'cube',
+        Icon: EmbedCardCubeIcon,
+        tooltip: 'Small vertical style',
+      },
+    ];
+  }
+
   private _open() {
     this._blockElement?.open();
   }
@@ -275,13 +311,13 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     this.surface.selection.clear();
   }
 
-  private _setEmbedCardStyle(style: EmbedCardStyle) {
+  private _setCardStyle(style: EmbedCardStyle) {
     const bounds = Bound.deserialize(this.model.xywh);
     bounds.w = EMBED_CARD_WIDTH[style];
     bounds.h = EMBED_CARD_HEIGHT[style];
     const xywh = bounds.serialize();
     this.model.page.updateBlock(this.model, { style, xywh });
-    this._embedCardStylePopper?.hide();
+    this._cardStylePopper?.hide();
   }
 
   private _convertToCardView() {
@@ -352,19 +388,19 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   override updated(changedProperties: Map<string, unknown>) {
-    this._embedCardStylePopper?.dispose();
+    this._cardStylePopper?.dispose();
     if (this._canShowCardStylePanel) {
-      this._embedCardStylePopper = createButtonPopper(
-        this._embedCardStyleButton,
-        this._embedCardStylePanel,
+      this._cardStylePopper = createButtonPopper(
+        this._cardStyleButton,
+        this._cardStylePanel,
         ({ display }) => {
           this._showPopper = display === 'show';
         }
       );
-      this._disposables.add(this._embedCardStylePopper);
+      this._disposables.add(this._cardStylePopper);
     }
 
-    super.firstUpdated(changedProperties);
+    super.updated(changedProperties);
   }
 
   override render() {
@@ -464,18 +500,19 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   <edgeless-tool-icon-button
                     .tooltip=${this._showPopper ? '' : 'Card style'}
                     ?disabled=${this._page.readonly}
-                    @click=${() => this._embedCardStylePopper?.toggle()}
+                    @click=${() => this._cardStylePopper?.toggle()}
                   >
                     ${PaletteIcon}
                   </edgeless-tool-icon-button>
                 </div>
 
-                <embed-card-style-panel
+                <card-style-panel
                   .value=${model.style}
+                  .options=${this._getCardStyleOptions}
                   .onSelect=${(value: EmbedCardStyle) =>
-                    this._setEmbedCardStyle(value)}
+                    this._setCardStyle(value)}
                 >
-                </embed-card-style-panel>
+                </card-style-panel>
               `
             : nothing}
         </div>

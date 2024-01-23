@@ -1,3 +1,5 @@
+import '../_common/components/embed-card/embed-card-caption.js';
+
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
@@ -171,6 +173,12 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         });
       } else if (isTargetEdgelessContainer) {
         const style = blockComponent.model.style ?? 'horizontalThin';
+        const embed = blockComponent.model.embed;
+        if (embed) {
+          this.page.updateBlock(blockComponent.model, {
+            embed: false,
+          });
+        }
 
         return convertDragPreviewDocToEdgeless({
           blockComponent,
@@ -398,11 +406,11 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     }
 
     return html`<div
+      ${this.isInSurface ? null : ref(this._whenHover.setReference)}
       class="affine-attachment-container"
       style=${containerStyleMap}
     >
       <div
-        ${this.isInSurface ? null : ref(this._whenHover.setReference)}
         class=${classMap({
           'affine-attachment-card': true,
           [cardStyle]: true,

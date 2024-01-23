@@ -22,7 +22,7 @@ import type {
   Selectable,
   TopLevelBlockModel,
 } from '../../../_common/types.js';
-import { matchFlavours } from '../../../_common/utils/index.js';
+import { matchFlavours, Point } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
   blockElementGetter,
@@ -211,6 +211,9 @@ export class EdgelessClipboardController extends PageClipboard {
       const files = data.files;
       if (files.length === 0) return;
 
+      const { lastMousePos } = this.toolManager;
+      const point = new Point(lastMousePos.x, lastMousePos.y);
+
       const imageFiles: File[] = [],
         attachmentFiles: File[] = [];
 
@@ -222,10 +225,14 @@ export class EdgelessClipboardController extends PageClipboard {
         }
       });
 
-      await Promise.all([
-        this.host.addImages(imageFiles),
-        this.host.addFiles(attachmentFiles),
-      ]);
+      // if only image files, add all files as image blocks
+      if (imageFiles.length && attachmentFiles.length === 0) {
+        await Promise.all([this.host.addImages(imageFiles, point)]);
+      }
+      // if a mix of files, add all files as attachment blocks
+      else {
+        await Promise.all([this.host.addFiles([...files], point)]);
+      }
 
       return;
     }

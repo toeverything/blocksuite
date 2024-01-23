@@ -1,4 +1,5 @@
 import '../_common/components/embed-card/embed-card-caption.js';
+import '../_common/components/block-selection.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
