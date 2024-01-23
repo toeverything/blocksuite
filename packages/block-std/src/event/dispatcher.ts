@@ -225,7 +225,9 @@ export class UIEventDispatcher {
     if (!handlers) return;
 
     const path = this.std.view.getNodeView(target)?.path;
-    if (!path) return;
+    if (!path) {
+      return this._buildEventScopeBySelection(name);
+    }
 
     const flavours = path
       .map(blockId => {
