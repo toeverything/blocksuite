@@ -146,8 +146,9 @@ export function calcDropTarget(
         next = null;
       }
     } else {
-      next = getClosestBlockElementByElement(element.parentElement)
-        ?.nextElementSibling;
+      next = getClosestBlockElementByElement(
+        element.parentElement
+      )?.nextElementSibling;
     }
 
     if (next) {

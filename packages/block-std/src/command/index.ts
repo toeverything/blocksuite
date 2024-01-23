@@ -4,11 +4,8 @@
 // type TestA = MakeOptionalIfEmpty<A>;  // void | {}
 // type TestB = MakeOptionalIfEmpty<B>;  // void | { prop?: string }
 // type TestC = MakeOptionalIfEmpty<C>;  // { prop: string }
-type IfAllKeysOptional<T, Yes, No> = Partial<T> extends T
-  ? T extends Partial<T>
-    ? Yes
-    : No
-  : No;
+type IfAllKeysOptional<T, Yes, No> =
+  Partial<T> extends T ? (T extends Partial<T> ? Yes : No) : No;
 type MakeOptionalIfEmpty<T> = IfAllKeysOptional<T, void | T, T>;
 
 export interface InitCommandCtx {
