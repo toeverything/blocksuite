@@ -35,7 +35,7 @@ import {
   markdownToSnapshot,
 } from '../utils/markdown-utils.js';
 import {
-  getEdgelessPageBlockFromEditor,
+  getEdgelessService,
   getSelectedBlocks,
   getSelectedTextContent,
   selectedToCanvas,
@@ -420,7 +420,7 @@ export class AIChatLogic {
       type: 'action',
       name: 'Create mind-map',
       action: this.createAction('Create mind-map', async input => {
-        const service = getEdgelessPageBlockFromEditor(this.host).service;
+        const service = getEdgelessService(this.host);
         const [x, y] = [service.viewport.centerX, service.viewport.centerY];
         const reactiveData = this.reactiveData;
         const build = mindMapBuilder(this.host, x, y);
@@ -495,13 +495,13 @@ export class AIChatLogic {
       type: 'action',
       name: 'Create mind-map',
       hide: () => {
-        const service = getEdgelessPageBlockFromEditor(this.host).service;
+        const service = getEdgelessService(this.host);
         const ele = service.selection.elements[0];
         return !SurfaceBlockComponent.isShape(ele);
       },
       action: async () => {
         const reactiveData = this.reactiveData;
-        const service = getEdgelessPageBlockFromEditor(this.host).service;
+        const service = getEdgelessService(this.host);
         const ele = service.selection.elements[0];
         if (!SurfaceBlockComponent.isShape(ele)) {
           return;
@@ -510,12 +510,11 @@ export class AIChatLogic {
         if (!text) {
           return;
         }
-        const surface = getEdgelessPageBlockFromEditor(this.host);
         const pathIds = getConnectorPath(ele.id, service);
         const rootId = [...pathIds, ele.id][0];
         const rootEle = service.getElementById(rootId) as ShapeElementModel;
         const path = pathIds.map(id => {
-          const ele = surface.service.getElementById(id);
+          const ele = service.getElementById(id);
           if (ele && SurfaceBlockComponent.isShape(ele)) {
             return ele.text?.toString() ?? '';
           }
@@ -657,7 +656,7 @@ const mindMapBuilder = (
   rootId?: string,
   wrapTree?: (tree: TreeNodeWithId) => TreeNodeWithId
 ) => {
-  const service = getEdgelessPageBlockFromEditor(host).service;
+  const service = getEdgelessService(host);
   const ids: string[] = rootId ? [rootId] : [];
   const buildTree = async (text: string) => {
     const snapshot = await markdownToSnapshot(text, host);
@@ -718,7 +717,7 @@ const createTaskQueue = () => {
 };
 const addPPTTaskQueue = createTaskQueue();
 const pptBuilder = (host: EditorHost) => {
-  const service = getEdgelessPageBlockFromEditor(host).service;
+  const service = getEdgelessService(host);
   const pages: PPTPage[] = [];
   const addPage = async (block: BlockSnapshot) => {
     const sections = block.children.map(v => {

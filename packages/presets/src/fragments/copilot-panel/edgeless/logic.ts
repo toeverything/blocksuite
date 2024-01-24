@@ -19,6 +19,7 @@ import { demoScript } from '../demo-script.js';
 import {
   frameToCanvas,
   getEdgelessPageBlockFromEditor,
+  getEdgelessService,
   getFirstImageInFrame,
   getSelectedBlocks,
   getSurfaceElementFromEditor,
@@ -279,7 +280,7 @@ export class AIEdgelessLogic {
     options?: { rootId?: string; x?: number; y?: number }
   ) {
     BlocksUtils.mindMap.drawInEdgeless(
-      getEdgelessPageBlockFromEditor(this.host).service,
+      getEdgelessService(this.host),
       treeNode,
       options
     );

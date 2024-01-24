@@ -1,9 +1,11 @@
-import type {
-  EdgelessBlock,
-  FrameBlockModel,
-  ImageBlockModel,
+import {
+  BlocksUtils,
+  type EdgelessBlock,
+  EdgelessPageService,
+  type FrameBlockModel,
+  type ImageBlockModel,
+  type SurfaceBlockComponent,
 } from '@blocksuite/blocks';
-import { BlocksUtils, type SurfaceBlockComponent } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, EditorHost } from '@blocksuite/lit';
 import { type BlockModel, Slice } from '@blocksuite/store';
@@ -107,6 +109,14 @@ export function getEdgelessPageBlockFromEditor(editor: EditorHost) {
     throw new Error('Please open switch to edgeless mode');
   }
   return edgelessPage;
+}
+export function getEdgelessService(editor: EditorHost) {
+  const service = editor.std.spec.getService('affine:page');
+  if (service instanceof EdgelessPageService) {
+    return service;
+  }
+  alert('Please switch to edgeless mode');
+  throw new Error('Please open switch to edgeless mode');
 }
 
 export async function selectedToCanvas(editor: EditorHost) {
