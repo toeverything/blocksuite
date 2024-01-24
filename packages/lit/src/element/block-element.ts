@@ -190,6 +190,10 @@ export class BlockElement<
     // In some cases, the DOM structure is directly modified, causing Lit to lose synchronization with the DOM structure.
     // We can restore this state through the `dirty` property.
     if (this.dirty) {
+      // Here we made some hacks by referring to the source code of Lit.
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/lit-element/src/lit-element.ts#L162-L163
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1586-L1589
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1509-L1512
       //@ts-ignore
       this.__reflectingProperties &&= this.__reflectingProperties.forEach(p =>
         //@ts-ignore
