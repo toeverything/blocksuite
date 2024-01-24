@@ -183,6 +183,8 @@ export class BookmarkBlockComponent extends BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    this.contentEditable = 'false';
+
     if (!!this.model.caption && this.model.caption.length > 0) {
       this.showCaption = true;
     }
