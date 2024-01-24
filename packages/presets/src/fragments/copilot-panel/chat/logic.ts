@@ -493,7 +493,7 @@ export class AIChatLogic {
   edgelessSelectionActionList: AllAction[] = [
     {
       type: 'action',
-      name: 'Continue',
+      name: 'Create mind-map',
       hide: () => {
         const service = getEdgelessPageBlockFromEditor(this.host).service;
         const ele = service.selection.elements[0];
