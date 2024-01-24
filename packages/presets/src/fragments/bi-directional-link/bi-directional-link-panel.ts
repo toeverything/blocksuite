@@ -1,4 +1,8 @@
-import type { DocPageBlockComponent, ListService } from '@blocksuite/blocks';
+import type {
+  DocPageBlockComponent,
+  ListService,
+  PageService,
+} from '@blocksuite/blocks';
 import {
   type AffineTextAttributes,
   getAffineInlineSpecsWithReference,
@@ -124,14 +128,18 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
     .rich-text-container {
       width: 100%;
-      height: 40px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: start;
       cursor: pointer;
       border-radius: 4px;
-      padding-left: 8px;
-      padding-right: 8px;
+      padding: 0px 8px;
+      padding-top: 8px;
+    }
+
+    .rich-text {
+      max-width: 96%;
+      padding-bottom: 8px;
     }
 
     .arrow-link {
@@ -167,6 +175,16 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       background: var(--affine-quote-color);
       border-radius: 18px;
     }
+
+    .linked-page-container {
+      display: flex;
+      align-items: center;
+      padding-left: 2px;
+      gap: 2px;
+    }
+    .linked-page-container svg {
+      scale: 1.2;
+    }
   `;
 
   @state()
@@ -188,6 +206,17 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     const config = new ReferenceNodeConfig();
     config.setInteractable(false);
     config.setPage(this.page);
+    config.setCustomContent(reference => {
+      return html`<style>
+          .custom-reference-content svg {
+            position: relative;
+            top: 2px;
+          }
+        </style>
+        <span class="custom-reference-content">
+          ${SmallLinkedPageIcon} ${reference.page.meta.title ?? 'Untitled'}
+        </span> `;
+    });
     this._inlineManager.registerSpecs(
       getAffineInlineSpecsWithReference(config)
     );
@@ -197,10 +226,19 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         this.requestUpdate();
       })
     );
+
+    const pageService = this._host.spec.getService(
+      'affine:page'
+    ) as PageService;
+    this._show = !!pageService.editSession.getItem('showBidirectional');
   }
 
   private _toggleShow() {
     this._show = !this._show;
+    const pageService = this._host.spec.getService(
+      'affine:page'
+    ) as PageService;
+    pageService.editSession.setItem('showBidirectional', this._show);
   }
 
   private get _host() {
@@ -241,6 +279,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         id => {
           const page = workspace.getPage(id);
           assertExists(page);
+          const title = page.meta.title ? page.meta.title : 'Untitled';
           return html`<div
             class="link"
             @click=${() => {
@@ -250,7 +289,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
             }}
           >
             ${SmallLinkedPageIcon}
-            <div>${page.meta.title}</div>
+            <div>${title}</div>
           </div>`;
         }
       )}
@@ -316,7 +355,11 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
                 >
                   ${ArrowLeftIcon}
                 </div>
-                <div>${SmallLinkedPageIcon}${page.meta.title}</div>
+                <div>
+                  ${SmallLinkedPageIcon}${page.meta.title
+                    ? page.meta.title
+                    : 'Untitled'}
+                </div>
               </div>
               <div class="back-links-container">
                 <div class="back-links-container-left-divider">
@@ -368,41 +411,31 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       ? ''
       : model.type;
 
-    return html` <style>
-        .linked-page-container {
-          display: flex;
-          align-items: center;
-          padding-left: 2px;
-          gap: 2px;
-        }
-        .linked-page-container svg {
-          scale: 1.2;
-        }
-      </style>
-      <div
-        class=${`rich-text-container ${type}`}
-        @click=${() =>
-          this.docPageBlock.slots.pageLinkClicked.emit({
-            pageId,
-            blockId,
-          })}
-      >
-        <div class="rich-text">
-          ${type
-            ? html`${icon ?? nothing}
-                <rich-text
-                  .yText=${model.text}
-                  .readonly=${true}
-                  .attributesSchema=${this._inlineManager.getSchema()}
-                  .attributeRenderer=${this._inlineManager.getRenderer()}
-                ></rich-text>`
-            : html`<div class="linked-page-container">
-                ${SmallLinkedPageIcon} ${this.page.meta.title}
-              </div>`}
-        </div>
+    return html` <div
+      class=${`rich-text-container ${type}`}
+      @click=${() =>
+        this.docPageBlock.slots.pageLinkClicked.emit({
+          pageId,
+          blockId,
+        })}
+    >
+      <div class="rich-text">
+        ${type
+          ? html`${icon ?? nothing}
+              <rich-text
+                .yText=${model.text}
+                .readonly=${true}
+                .attributesSchema=${this._inlineManager.getSchema()}
+                .attributeRenderer=${this._inlineManager.getRenderer()}
+              ></rich-text>`
+          : html`<div class="linked-page-container">
+              ${SmallLinkedPageIcon}
+              ${this.page.meta.title ? this.page.meta.title : 'Untitled'}
+            </div>`}
+      </div>
 
-        <div class="arrow-link">${ArrowJumpIcon}</div>
-      </div>`;
+      <div class="arrow-link">${ArrowJumpIcon}</div>
+    </div>`;
   }
 
   private _divider(visible: boolean) {
