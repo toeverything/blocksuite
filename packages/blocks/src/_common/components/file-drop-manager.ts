@@ -103,7 +103,10 @@ export class FileDropManager {
     let result: DropResult | null = null;
     if (element) {
       const model = getModelByBlockComponent(element);
-      result = calcDropTarget(point, model, element);
+      const parent = this.editorHost.page.getParent(model);
+      if (!matchFlavours(parent, ['affine:surface'])) {
+        result = calcDropTarget(point, model, element);
+      }
     }
     if (result) {
       FileDropManager._dropResult = result;
