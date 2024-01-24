@@ -3,10 +3,11 @@ import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
 import './change-note-button.js';
-import './change-embed-card-button.js';
 import './change-text-button.js';
 import './change-frame-button.js';
 import './change-group-button.js';
+import './change-embed-card-button.js';
+import './change-attachment-button.js';
 import './add-frame-button.js';
 import './add-group-button.js';
 import './release-from-group-button.js';
@@ -40,6 +41,7 @@ import type { EmbedLinkedDocModel } from '../../../../embed-linked-doc-block/emb
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
+import type { AttachmentBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type {
   ElementModel,
@@ -55,6 +57,7 @@ import {
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import {
+  isAttachmentBlock,
   isBookmarkBlock,
   isEmbeddedBlock,
   isFrameBlock,
@@ -71,6 +74,7 @@ type CategorizedElements = {
   note?: NoteBlockModel[];
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
+  attachment?: AttachmentBlockModel[];
   embedCard?: BookmarkBlockModel[] &
     EmbedGithubModel[] &
     EmbedYoutubeModel[] &
@@ -190,6 +194,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         return 'frame';
       } else if (isImageBlock(model)) {
         return 'image';
+      } else if (isAttachmentBlock(model)) {
+        return 'attachment';
       } else if (isBookmarkBlock(model) || isEmbeddedBlock(model)) {
         return 'embedCard';
       }
@@ -244,20 +250,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _EmbedCardButton(embedCards?: CategorizedElements['embedCard']) {
-    if (embedCards?.length !== 1) return nothing;
-
-    const embedCard = embedCards[0];
-
-    return html`
-      <edgeless-change-embed-card-button
-        .model=${embedCard}
-        .std=${this.edgeless.std}
-        .surface=${this.surface}
-      ></edgeless-change-embed-card-button>
-    `;
-  }
-
   private _TextButton(textElements?: TextElementModel[]) {
     return textElements?.length
       ? html`<edgeless-change-text-button
@@ -289,6 +281,30 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         >
         </edgeless-change-group-button>`
       : nothing;
+  }
+
+  private _EmbedCardButton(embedCards?: CategorizedElements['embedCard']) {
+    if (embedCards?.length !== 1) return nothing;
+
+    return html`
+      <edgeless-change-embed-card-button
+        .model=${embedCards[0]}
+        .std=${this.edgeless.std}
+        .surface=${this.surface}
+      ></edgeless-change-embed-card-button>
+    `;
+  }
+
+  private _AttachmentButton(attachments?: CategorizedElements['attachment']) {
+    if (attachments?.length !== 1) return nothing;
+
+    return html`
+      <edgeless-change-attachment-button
+        .model=${attachments[0]}
+        .std=${this.edgeless.std}
+        .surface=${this.surface}
+      ></edgeless-change-attachment-button>
+    `;
   }
 
   protected togglePopper = (showPopper: boolean) => {
@@ -418,8 +434,17 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless, selection } = this;
-    const { shape, brush, connector, note, text, frame, group, embedCard } =
-      groupedSelected;
+    const {
+      shape,
+      brush,
+      connector,
+      note,
+      text,
+      frame,
+      group,
+      embedCard,
+      attachment,
+    } = groupedSelected;
     const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
       Object.values(groupedSelected),
@@ -434,10 +459,11 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._BrushButton(brush),
           this._ConnectorButton(connector),
           this._NoteButton(note),
-          this._EmbedCardButton(embedCard),
           this._TextButton(text),
           this._FrameButton(frame),
           this._GroupButton(group),
+          this._EmbedCardButton(embedCard),
+          this._AttachmentButton(attachment),
         ].filter(b => !!b && b !== nothing);
 
     if (elements.length > 1) {

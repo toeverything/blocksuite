@@ -6,7 +6,7 @@ import './edgeless-bookmark-block.js';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { html, render } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
@@ -42,7 +42,7 @@ export class BookmarkBlockComponent extends BlockElement<
   @property({ attribute: false })
   loadingFailed = false;
 
-  @state()
+  @property({ attribute: false })
   showCaption = false;
 
   @query('affine-edgeless-bookmark, affine-doc-bookmark')
@@ -182,6 +182,8 @@ export class BookmarkBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.contentEditable = 'false';
 
     if (!!this.model.caption && this.model.caption.length > 0) {
       this.showCaption = true;

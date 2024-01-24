@@ -22,7 +22,7 @@ import type {
   Selectable,
   TopLevelBlockModel,
 } from '../../../_common/types.js';
-import { matchFlavours } from '../../../_common/utils/index.js';
+import { matchFlavours, Point } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
   blockElementGetter,
@@ -40,6 +40,7 @@ import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
+import type { AttachmentBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
@@ -63,6 +64,7 @@ import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { deleteElements } from '../utils/crud.js';
 import {
+  isAttachmentBlock,
   isBookmarkBlock,
   isCanvasElementWithText,
   isEmbedFigmaBlock,
@@ -209,10 +211,24 @@ export class EdgelessClipboardController extends PageClipboard {
       const files = data.files;
       if (files.length === 0) return;
 
-      const imageFiles = [...files].filter(file =>
-        file.type.startsWith('image/')
-      );
-      await this.host.addImages(imageFiles);
+      const { lastMousePos } = this.toolManager;
+      const point = new Point(lastMousePos.x, lastMousePos.y);
+
+      const imageFiles: File[] = [],
+        attachmentFiles: File[] = [];
+
+      [...files].forEach(file => {
+        if (file.type.startsWith('image/')) {
+          imageFiles.push(file);
+        } else {
+          attachmentFiles.push(file);
+        }
+      });
+
+      await Promise.all([
+        this.host.addImages(imageFiles, point),
+        this.host.addAttachments(attachmentFiles, point),
+      ]);
 
       return;
     }
@@ -409,19 +425,44 @@ export class EdgelessClipboardController extends PageClipboard {
 
   private _createImageBlocks(images: BlockSnapshot[]) {
     const imageIds = images.map(({ props }) => {
-      const { xywh, sourceId, rotate } = props;
+      const { xywh, rotate, sourceId, size, width, height } = props;
       const imageId = this.host.service.addBlock(
         'affine:image',
         {
-          xywh,
           sourceId,
+          xywh,
           rotate,
+          size,
+          width,
+          height,
         },
         this.surface.model.id
       );
       return imageId;
     });
     return imageIds;
+  }
+
+  private _createAttachmentBlocks(attachments: BlockSnapshot[]) {
+    const attachmentIds = attachments.map(({ props }) => {
+      const { xywh, rotate, sourceId, name, size, type, embed, style } = props;
+      const attachmentId = this.host.service.addBlock(
+        'affine:attachment',
+        {
+          xywh,
+          rotate,
+          sourceId,
+          name,
+          size,
+          type,
+          embed,
+          style,
+        },
+        this.surface.model.id
+      );
+      return attachmentId;
+    });
+    return attachmentIds;
   }
 
   private _createBookmarkBlocks(bookmarks: BlockSnapshot[]) {
@@ -598,21 +639,24 @@ export class EdgelessClipboardController extends PageClipboard {
           ? 'frames'
           : isImageBlock(data as unknown as Selectable)
             ? 'images'
-            : isBookmarkBlock(data as unknown as Selectable)
-              ? 'bookmarks'
-              : isEmbedGithubBlock(data as unknown as Selectable)
-                ? 'githubEmbeds'
-                : isEmbedYoutubeBlock(data as unknown as Selectable)
-                  ? 'youtubeEmbeds'
-                  : isEmbedFigmaBlock(data as unknown as Selectable)
-                    ? 'figmaEmbeds'
-                    : isEmbedLinkedDocBlock(data as unknown as Selectable)
-                      ? 'linkedDocEmbeds'
-                      : 'elements'
+            : isAttachmentBlock(data as unknown as Selectable)
+              ? 'attachments'
+              : isBookmarkBlock(data as unknown as Selectable)
+                ? 'bookmarks'
+                : isEmbedGithubBlock(data as unknown as Selectable)
+                  ? 'githubEmbeds'
+                  : isEmbedYoutubeBlock(data as unknown as Selectable)
+                    ? 'youtubeEmbeds'
+                    : isEmbedFigmaBlock(data as unknown as Selectable)
+                      ? 'figmaEmbeds'
+                      : isEmbedLinkedDocBlock(data as unknown as Selectable)
+                        ? 'linkedDocEmbeds'
+                        : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];
       images?: BlockSnapshot[];
+      attachments?: BlockSnapshot[];
       bookmarks?: BlockSnapshot[];
       githubEmbeds?: BlockSnapshot[];
       youtubeEmbeds?: BlockSnapshot[];
@@ -636,6 +680,9 @@ export class EdgelessClipboardController extends PageClipboard {
     );
     const frameIds = this._createFrameBlocks(groupedByType.frames ?? []);
     const imageIds = this._createImageBlocks(groupedByType.images ?? []);
+    const attachmentIds = this._createAttachmentBlocks(
+      groupedByType.attachments ?? []
+    );
     const bookmarkIds = this._createBookmarkBlocks(
       groupedByType.bookmarks ?? []
     );
@@ -663,6 +710,10 @@ export class EdgelessClipboardController extends PageClipboard {
     const images = imageIds.map(id =>
       this.host.service.getElementById(id)
     ) as ImageBlockModel[];
+
+    const attachments = attachmentIds.map(id =>
+      this.host.service.getElementById(id)
+    ) as AttachmentBlockModel[];
 
     const bookmarks = bookmarkIds.map(id =>
       this.host.service.getElementById(id)
@@ -696,6 +747,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...notes,
       ...frames,
       ...images,
+      ...attachments,
       ...bookmarks,
       ...githubEmbeds,
       ...youtubeEmbeds,
@@ -722,7 +774,17 @@ export class EdgelessClipboardController extends PageClipboard {
       }
     });
 
-    const blocks = [...notes, ...frames, ...images, ...bookmarks];
+    const blocks = [
+      ...notes,
+      ...frames,
+      ...images,
+      ...attachments,
+      ...bookmarks,
+      ...githubEmbeds,
+      ...youtubeEmbeds,
+      ...figmaEmbeds,
+      ...linkedDocEmbeds,
+    ];
     blocks.forEach(block => {
       const bound = Bound.deserialize(block.xywh);
 
@@ -1071,6 +1133,9 @@ export async function prepareClipboardData(
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (isImageBlock(selected)) {
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
+      } else if (isAttachmentBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
       } else if (isBookmarkBlock(selected)) {

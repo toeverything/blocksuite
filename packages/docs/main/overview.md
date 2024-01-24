@@ -1,19 +1,13 @@
 # BlockSuite Overview
 
-BlockSuite is a toolkit for building collaborative editors and applications. It embraces the [**_document-centric_**](./design-philosophy) approach to facilitate the development of more flexible, diverse, and scalable editable interfaces.
-
-We believe that for modern collaborative editing applications, the overall application data flow should be consistently modeled and reused on a larger scale, reducing the interoperability cost between editor and non-editor components. **This is why BlockSuite completely separates the collaborative document model from the editor**. This separation allows any UI component, whether part of an editor or not, to function effectively by simply attaching it to the same document, offering a more flexible editing experience.
-
-![showcase-doc-edgeless-editors](./images/showcase-doc-edgeless-editors.jpg)
-
-> For an understanding of the design philosophy advocated by BlockSuite, welcome to read our [_Document-Centric, CRDT-Native_](./design-philosophy) post.
-
-Based on this concept, BlockSuite starts with a foundational block-based document model and independently implements a series of collaborative editing infrastructures, including editors. This means that with BlockSuite, you can choose to:
+BlockSuite is a toolkit for building collaborative editors and applications. It starts with a foundational block-based document model and independently implements a series of collaborative editing infrastructures, including editors. With BlockSuite, you can choose to:
 
 - Build new editors from the ground up based on the BlockSuite framework.
 - Or, reuse multiple first-party BlockSuite editors right out of the box:
   - [**`DocEditor`**](./presets/doc-editor): **Built entirely from scratch**, `DocEditor` is a comprehensive block-based document editor, offering extensive customization and flexibility.
   - [**`EdgelessEditor`**](./presets/edgeless-editor): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
+
+![showcase-doc-edgeless-editors](./images/showcase-doc-edgeless-editors.jpg)
 
 The BlockSuite project is structured around key packages that are categorized into two groups: a headless framework and prebuilt editing components.
 

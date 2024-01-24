@@ -42,7 +42,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   @state()
   private _showOverlay = true;
 
-  @state()
+  @property({ attribute: false })
   showCaption = false;
 
   @query('.affine-embed-youtube-block')
@@ -227,7 +227,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
           })}
         >
           <div
-            ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
+            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
             class=${classMap({
               'affine-embed-youtube-block': true,
               loading,

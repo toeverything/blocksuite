@@ -11,21 +11,20 @@ import {
   isInsideEdgelessEditor,
   matchFlavours,
 } from '../_common/utils/index.js';
-import type { DocPageBlockComponent } from '../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
+import type { PageBlockComponent } from '../page-block/types.js';
 import type { ImageBlockModel } from './image-model.js';
 import { ImageSelection } from './image-selection.js';
 import { addSiblingImageBlock } from './utils.js';
 
 export class ImageService extends BlockService<ImageBlockModel> {
-  get pageBlockComponent(): DocPageBlockComponent | EdgelessPageBlockComponent {
+  get pageBlockComponent(): PageBlockComponent {
     const pageBlock = this.page.root;
     assertExists(pageBlock);
 
-    const pageElement = this.std.view.viewFromPath('block', [pageBlock.id]) as
-      | DocPageBlockComponent
-      | EdgelessPageBlockComponent
-      | null;
+    const pageElement = this.std.view.viewFromPath('block', [
+      pageBlock.id,
+    ]) as PageBlockComponent | null;
     assertExists(pageElement);
     return pageElement;
   }
@@ -36,6 +35,7 @@ export class ImageService extends BlockService<ImageBlockModel> {
     flavour: this.flavour,
     onDrop: async ({ files, targetModel, place, point }) => {
       const imageFiles = files.filter(file => file.type.startsWith('image/'));
+      if (!imageFiles.length) return false;
 
       if (targetModel && !matchFlavours(targetModel, ['affine:surface'])) {
         addSiblingImageBlock(

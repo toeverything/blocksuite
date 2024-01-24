@@ -7,6 +7,7 @@ import { describe, expect, test } from 'vitest';
 
 import { NotionHtmlAdapter } from '../../_common/adapters/notion-html.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
+import { NoteDisplayMode } from '../../_common/types.js';
 
 describe('notion html to snapshot', () => {
   test('code', async () => {
@@ -27,6 +28,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -81,6 +83,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -195,6 +198,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -362,6 +366,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -797,6 +802,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -896,6 +902,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -941,6 +948,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1009,6 +1017,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1057,6 +1066,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1103,6 +1113,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1146,6 +1157,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1262,6 +1274,7 @@ describe('notion html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {

@@ -67,6 +67,15 @@ export class Block {
         }
       });
     });
+
+    this.yBlock.observeDeep(evtArr => {
+      const evt = evtArr[0];
+      // filter out events from itself
+      // as this event is triggered in observe function
+      if (!evt || evt.currentTarget === evt.target) return;
+
+      this.options.onChange?.(this, '', undefined);
+    });
   }
 
   stash = (prop: string) => {

@@ -30,7 +30,6 @@ export function connector(
   // points might not be build yet in some senarios
   // eg. undo/redo, copy/paste
   if (!points.length || points.length < 2) {
-    console.warn('connector points not ready yet, there is something wrong.');
     return;
   }
 

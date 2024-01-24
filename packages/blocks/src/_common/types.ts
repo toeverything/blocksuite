@@ -256,5 +256,6 @@ export type EmbedCardStyle =
   | 'list'
   | 'vertical'
   | 'cube'
+  | 'cubeThick'
   | 'video'
   | 'figma';
