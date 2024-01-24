@@ -38,6 +38,7 @@ import {
   getEdgelessService,
   getPageService,
   getSelectedTextContent,
+  getSurfaceElementFromEditor,
   selectedToCanvas,
 } from '../utils/selection-utils.js';
 import { basicTheme, type PPTPage, type PPTSection } from './template.js';
@@ -443,20 +444,7 @@ export class AIChatLogic {
       name: 'Create presentation',
       action: this.createAction('Create mind-map', async input => {
         const reactiveData = this.reactiveData;
-        // const service = getEdgelessPageBlockFromEditor(this.host).service;
         const build = pptBuilder(this.host);
-        // const job = service.createTemplateJob('template');
-        // const { assets, content } = await createTemplate();
-        // if (assets) {
-        //   await Promise.all(
-        //     Object.entries(assets).map(([key, value]) =>
-        //       fetch(value)
-        //         .then(res => res.blob())
-        //         .then(blob => job.job.assets.set(key, blob))
-        //     )
-        //   );
-        // }
-        // await job.insertTemplate(content);
         return (async function* () {
           const strings = runPPTGenerateAction({ input });
           let text = '';
@@ -747,6 +735,7 @@ const pptBuilder = (host: EditorHost) => {
       );
     }
     await job.insertTemplate(content);
+    getSurfaceElementFromEditor(host).refresh();
   };
   return {
     process: async (text: string) => {

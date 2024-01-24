@@ -51,7 +51,7 @@ export const basic2 = () => ({
             '2-o2vSTr83': {
               index: 'a3',
               seed: 1525437043,
-              xywh: '[-4240.023850269911,-2785.732755425506,827,30]',
+              xywh: '[-4240.023850269911,-2785.732755425506,827,300]',
               rotate: 0,
               text: {
                 'affine:surface:text': true,
@@ -97,7 +97,7 @@ export const basic2 = () => ({
             PfkjJZQNR4: {
               index: 'a5',
               seed: 1525437043,
-              xywh: '[-5191.047608974944,-2785.732755425506,827,30]',
+              xywh: '[-5191.047608974944,-2785.732755425506,827,300]',
               rotate: 0,
               text: {
                 'affine:surface:text': true,

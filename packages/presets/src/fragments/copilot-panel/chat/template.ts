@@ -1,4 +1,5 @@
 import { Bound } from '@blocksuite/blocks';
+import { nanoid } from '@blocksuite/store';
 
 import { basic1 } from './templates/basic1.js';
 import { basic2 } from './templates/basic2.js';
@@ -41,8 +42,10 @@ const getImages = async (
       }
       if (typeof data.caption === 'string') {
         const bound = Bound.deserialize(data.xywh);
+        const id = nanoid();
+        data.sourceId = id;
         imgs[data.caption] = {
-          id: data.sourceId,
+          id: id,
           width: bound.w,
           height: bound.h,
         };

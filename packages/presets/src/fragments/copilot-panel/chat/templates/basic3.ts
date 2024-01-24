@@ -28,7 +28,7 @@ export const basic3 = () => ({
             EbPjqOX34z: {
               index: 'a0',
               seed: 1525437043,
-              xywh: '[-6138.796810364429,-3020.9727586380354,433,30]',
+              xywh: '[-6138.796810364429,-3020.9727586380354,433,300]',
               rotate: 0,
               text: {
                 'affine:surface:text': true,
@@ -74,7 +74,7 @@ export const basic3 = () => ({
             yai4NWtp2Y: {
               index: 'a2',
               seed: 1525437043,
-              xywh: '[-5530.17922930313,-2653.9171026216713,433,30]',
+              xywh: '[-5530.17922930313,-2653.9171026216713,433,300]',
               rotate: 0,
               text: {
                 'affine:surface:text': true,
@@ -120,7 +120,7 @@ export const basic3 = () => ({
             tayZcvDcuX: {
               index: 'a4',
               seed: 1525437043,
-              xywh: '[-4922.582395015353,-3020.9727586380354,433,30]',
+              xywh: '[-4922.582395015353,-3020.9727586380354,433,300]',
               rotate: 0,
               text: {
                 'affine:surface:text': true,

@@ -51,7 +51,7 @@ export const basic1 = () => ({
             f5tO75kpt5: {
               index: 'a3',
               seed: 1525437043,
-              xywh: '[-651.0631714866877,-1501.2828544307822,827,30]',
+              xywh: '[-651.0631714866877,-1501.2828544307822,827,300]',
               rotate: 0,
               text: {
                 'affine:surface:text': true,
