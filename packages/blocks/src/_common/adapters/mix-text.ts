@@ -18,6 +18,7 @@ import {
   type ToPageSnapshotPayload,
 } from '@blocksuite/store';
 
+import { NoteDisplayMode } from '../types.js';
 import { MarkdownAdapter } from './markdown.js';
 
 export type MixText = string;
@@ -129,6 +130,7 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
               background: '--affine-background-secondary-color',
               index: 'a0',
               hidden: false,
+              displayMode: NoteDisplayMode.DocAndEdgeless,
             },
             children: payload.file.split('\n').map((line): BlockSnapshot => {
               return {
@@ -168,6 +170,7 @@ export class MixTextAdapter extends BaseAdapter<MixText> {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: payload.file.split('\n').map((line): BlockSnapshot => {
         return {

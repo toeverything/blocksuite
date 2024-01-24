@@ -20,6 +20,7 @@ import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
 
 import { getTagColor } from '../components/tags/colors.js';
+import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import {
   hastGetElementChildren,
@@ -110,6 +111,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
@@ -169,6 +171,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
@@ -192,6 +195,7 @@ export class NotionHtmlAdapter extends BaseAdapter<NotionHtml> {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };

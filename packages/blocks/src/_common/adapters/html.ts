@@ -34,6 +34,7 @@ import {
   highlightCache,
   type highlightCacheKey,
 } from '../../code-block/utils/highlight-cache.js';
+import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import {
   hastGetElementChildren,
@@ -132,6 +133,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
@@ -190,6 +192,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
@@ -212,6 +215,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
