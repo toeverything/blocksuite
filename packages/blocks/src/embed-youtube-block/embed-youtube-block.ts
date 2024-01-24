@@ -214,9 +214,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
     const creatorImageEl =
       !loading && creatorImage
-        ? html`<object type="image/webp" data=${creatorImage}>
-            ${EmbedCardBannerIcon}
-          </object>`
+        ? html`<object type="image/webp" data=${creatorImage}></object>`
         : nothing;
 
     return this.renderEmbed(
