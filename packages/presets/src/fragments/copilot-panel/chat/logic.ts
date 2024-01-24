@@ -693,6 +693,30 @@ const mindMapBuilder = (
   };
   return buildTree;
 };
+const createTaskQueue = () => {
+  const queue: Array<() => Promise<void>> = [];
+  let current: Promise<void> | undefined;
+  const runTask = () => {
+    if (current) {
+      return;
+    }
+    const task = queue.shift();
+    if (!task) {
+      return;
+    }
+    current = task().finally(() => {
+      current = undefined;
+      runTask();
+    });
+  };
+  return {
+    add: (task: () => Promise<void>) => {
+      queue.push(task);
+      runTask();
+    },
+  };
+};
+const addPPTTaskQueue = createTaskQueue();
 const pptBuilder = (host: EditorHost) => {
   const service = getEdgelessPageBlockFromEditor(host).service;
   const pages: PPTPage[] = [];
@@ -730,13 +754,15 @@ const pptBuilder = (host: EditorHost) => {
       const snapshot = await markdownToSnapshot(text, host);
       const block = snapshot.snapshot.content[0];
       if (block.children.length > pages.length + 1) {
-        await addPage(block.children[pages.length]);
+        addPPTTaskQueue.add(() => addPage(block.children[pages.length]));
       }
     },
     done: async (text: string) => {
       const snapshot = await markdownToSnapshot(text, host);
       const block = snapshot.snapshot.content[0];
-      await addPage(block.children[block.children.length - 1]);
+      addPPTTaskQueue.add(() =>
+        addPage(block.children[block.children.length - 1])
+      );
     },
   };
 };
