@@ -420,10 +420,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _mode: 'resize' | 'scale' | 'rotate' = 'resize';
 
   @state()
-  private _scalePercent: string | undefined = undefined;
+  private _scalePercent?: string;
 
   @state()
-  private _scaleDirection: HandleDirection | undefined = undefined;
+  private _scaleDirection?: HandleDirection;
 
   @state()
   private _isNoteWidthLimit = false;
