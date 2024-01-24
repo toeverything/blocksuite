@@ -5,6 +5,7 @@ import { assertType, type Disposable } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EMBED_CARD_HEIGHT } from '../../../../_common/consts.js';
@@ -19,7 +20,8 @@ import {
 } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
-import type { BookmarkBlockModel, NoteBlockModel } from '../../../../models.js';
+import type { BookmarkBlockModel } from '../../../../models.js';
+import { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { TextElementModel } from '../../../../surface-block/element-model/text.js';
 import type { ElementModel } from '../../../../surface-block/index.js';
@@ -47,6 +49,7 @@ import { getElementsWithoutGroup } from '../../utils/group.js';
 import {
   getSelectableBounds,
   getSelectedRect,
+  isAttachmentBlock,
   isBookmarkBlock,
   isCanvasElement,
   isEmbeddedBlock,
@@ -301,7 +304,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       bottom: -0.5px;
     }
 
-    .affine-edgeless-selected-rect::before {
+    .affine-edgeless-selected-rect .handle .resize::before {
       content: '';
       display: none;
       position: absolute;
@@ -311,26 +314,45 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       background-size: contain;
       background-repeat: no-repeat;
     }
-    .affine-edgeless-selected-rect[data-direction='top-left']::before {
+    .affine-edgeless-selected-rect[data-mode='scale']
+      .handle[aria-label='top-left']
+      .resize:hover::before,
+    .affine-edgeless-selected-rect[data-scale-direction='top-left'][data-scale-percent]
+      .handle[aria-label='top-left']
+      .resize::before {
       display: block;
       top: 0px;
       left: 0px;
-      transform-origin: bottom right;
       transform: translate(-100%, -100%);
     }
-    .affine-edgeless-selected-rect[data-direction='top-right']::before {
+    .affine-edgeless-selected-rect[data-mode='scale']
+      .handle[aria-label='top-right']
+      .resize:hover::before,
+    .affine-edgeless-selected-rect[data-scale-direction='top-right'][data-scale-percent]
+      .handle[aria-label='top-right']
+      .resize::before {
       display: block;
       top: 0px;
       right: 0px;
       transform: translate(100%, -100%) rotate(90deg);
     }
-    .affine-edgeless-selected-rect[data-direction='bottom-right']::before {
+    .affine-edgeless-selected-rect[data-mode='scale']
+      .handle[aria-label='bottom-right']
+      .resize:hover::before,
+    .affine-edgeless-selected-rect[data-scale-direction='bottom-right'][data-scale-percent]
+      .handle[aria-label='bottom-right']
+      .resize::before {
       display: block;
       bottom: 0px;
       right: 0px;
       transform: translate(100%, 100%) rotate(180deg);
     }
-    .affine-edgeless-selected-rect[data-direction='bottom-left']::before {
+    .affine-edgeless-selected-rect[data-mode='scale']
+      .handle[aria-label='bottom-left']
+      .resize:hover::before,
+    .affine-edgeless-selected-rect[data-scale-direction='bottom-left'][data-scale-percent]
+      .handle[aria-label='bottom-left']
+      .resize::before {
       display: block;
       bottom: 0px;
       left: 0px;
@@ -351,25 +373,25 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       font-weight: 400;
       line-height: 24px;
     }
-    .affine-edgeless-selected-rect[data-direction='top-left']::after {
+    .affine-edgeless-selected-rect[data-scale-direction='top-left']::after {
       display: block;
       top: -20px;
       left: -20px;
       transform: translate(-100%, -100%);
     }
-    .affine-edgeless-selected-rect[data-direction='top-right']::after {
+    .affine-edgeless-selected-rect[data-scale-direction='top-right']::after {
       display: block;
       top: -20px;
       right: -20px;
       transform: translate(100%, -100%);
     }
-    .affine-edgeless-selected-rect[data-direction='bottom-right']::after {
+    .affine-edgeless-selected-rect[data-scale-direction='bottom-right']::after {
       display: block;
       bottom: -20px;
       right: -20px;
       transform: translate(100%, 100%);
     }
-    .affine-edgeless-selected-rect[data-direction='bottom-left']::after {
+    .affine-edgeless-selected-rect[data-scale-direction='bottom-left']::after {
       display: block;
       bottom: -20px;
       left: -20px;
@@ -395,10 +417,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _isResizing = false;
 
   @state()
-  private _dragDirection: HandleDirection | null = null;
+  private _mode: 'resize' | 'scale' | 'rotate' = 'resize';
 
   @state()
-  private _scalePercent: string | null = null;
+  private _scalePercent?: string;
+
+  @state()
+  private _scaleDirection?: HandleDirection;
 
   @state()
   private _isNoteWidthLimit = false;
@@ -474,11 +499,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         }
       } else if (isFrameBlock(element)) {
         areAllConnectors = false;
-      } else if (
-        isImageBlock(element) ||
-        isBookmarkBlock(element) ||
-        isEmbeddedBlock(element)
-      ) {
+      } else if (this._isProportionalElement(element)) {
         areAllConnectors = false;
         areAllShapes = false;
         areAllTexts = false;
@@ -502,6 +523,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     return 'corner';
   }
 
+  private _isProportionalElement(element: EdgelessModel) {
+    return (
+      isImageBlock(element) ||
+      isBookmarkBlock(element) ||
+      isAttachmentBlock(element) ||
+      isEmbeddedBlock(element)
+    );
+  }
+
   private _shouldRenderSelection(elements?: Selectable[]) {
     elements = elements ?? this.selection.elements;
     return elements.length > 0 && !this.selection.editing;
@@ -514,7 +544,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.edgeless.slots.elementResizeStart.emit();
     this.selection.elements.forEach(el => {
       el.stash('xywh');
-      el.stash('edgeless' as 'xywh');
+
+      if (el instanceof NoteBlockModel) {
+        el.stash('edgeless');
+      }
 
       if (rotation) {
         el.stash('rotate' as 'xywh');
@@ -527,7 +560,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
       this._dragEndCallback.push(() => {
         el.pop('xywh');
-        el.pop('edgeless' as 'xywh');
+
+        if (el instanceof NoteBlockModel) {
+          el.pop('edgeless');
+        }
 
         if (rotation) {
           el.pop('rotate' as 'xywh');
@@ -568,8 +604,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
         if (this._shiftKey) {
           scale = bound.w / width;
-          this._dragDirection = direction;
           this._scalePercent = `${Math.round(scale * 100)}%`;
+          this._scaleDirection = direction;
         } else if (curBound.h !== bound.h) {
           edgeless.page.updateBlock(element, () => {
             element.edgeless.collapse = true;
@@ -591,25 +627,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         props.edgeless = { ...element.edgeless, scale };
         props.xywh = bound.serialize();
         edgeless.service.updateElement(element.id, props);
-      } else if (
-        isImageBlock(element) ||
-        isBookmarkBlock(element) ||
-        isEmbeddedBlock(element)
-      ) {
+      } else if (this._isProportionalElement(element)) {
         const curBound = Bound.deserialize(element.xywh);
 
         if (isImageBlock(element)) {
           const { height } = element;
           if (height) {
-            this._dragDirection = direction;
             this._scalePercent = `${Math.round((bound.h / height) * 100)}%`;
+            this._scaleDirection = direction;
           }
         } else {
-          this._dragDirection = direction;
-
           const cardStyle = (element as BookmarkBlockModel).style;
           const height = EMBED_CARD_HEIGHT[cardStyle];
           this._scalePercent = `${Math.round((bound.h / height) * 100)}%`;
+          this._scaleDirection = direction;
         }
         if (
           direction === HandleDirection.Left ||
@@ -689,12 +720,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     });
 
     this._updateCursor(true, { type: 'rotate', angle: delta });
+    this._updateMode();
   };
 
   private _onDragEnd = () => {
-    this._dragDirection = null;
-    this._scalePercent = null;
-
     this.page.transact(() => {
       this._dragEndCallback.forEach(cb => cb());
     });
@@ -704,8 +733,40 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._isNoteHeightLimit = false;
 
     this._updateCursor(false);
+
+    this._scalePercent = undefined;
+    this._scaleDirection = undefined;
+    this._updateMode();
+
     this.setToolbarVisible(true);
     this.edgeless.slots.elementResizeEnd.emit();
+  };
+
+  private _updateMode = () => {
+    if (this._cursorRotate) {
+      this._mode = 'rotate';
+      return;
+    }
+
+    const { selection } = this;
+    const elements = selection.elements;
+
+    if (elements.length !== 1) this._mode = 'scale';
+
+    const element = elements[0];
+
+    if (isNoteBlock(element)) {
+      this._mode = this._shiftKey ? 'scale' : 'resize';
+    } else if (this._isProportionalElement(element)) {
+      this._mode = 'scale';
+    } else {
+      this._mode = 'resize';
+    }
+
+    if (this._mode !== 'scale') {
+      this._scalePercent = undefined;
+      this._scaleDirection = undefined;
+    }
   };
 
   private _updateCursor = (
@@ -807,8 +868,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     } = this;
 
     const rect = getSelectedRect(elements);
-    const proportion = elements.some(
-      ele => isImageBlock(ele) || isBookmarkBlock(ele) || isEmbeddedBlock(ele)
+    const proportion = elements.some(element =>
+      this._isProportionalElement(element)
     );
     // if there are more than one element, we need to refresh the state of resize manager
     if (elements.length > 1) refresh = true;
@@ -826,6 +887,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _updateOnViewportChange = () => {
     this._updateSelectedRect();
+    this._updateMode();
   };
 
   private _initSelectedSlot = () => {
@@ -849,19 +911,23 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._updateResizeManagerState(true);
     // Reset the cursor
     this._updateCursor(false);
+    this._updateMode();
   };
 
   private _updateOnElementChange = (
     element: string | { id: string },
     fromRemote: boolean = false
   ) => {
-    if ((fromRemote && this._resizeManager.dragging) || !this.isConnected)
+    if ((fromRemote && this._resizeManager.dragging) || !this.isConnected) {
       return;
+    }
 
     const id = typeof element === 'string' ? element : element.id;
 
-    if (this._resizeManager.bounds.has(id) || this.selection.has(id))
+    if (this._resizeManager.bounds.has(id) || this.selection.has(id)) {
       this._updateSelectedRect();
+      this._updateMode();
+    }
   };
 
   override firstUpdated() {
@@ -889,6 +955,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         this._shiftKey = pressed;
         this._resizeManager.onPressShiftKey(pressed);
         this._updateSelectedRect();
+        this._updateMode();
       })
     );
 
@@ -921,7 +988,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _canRotate() {
     return !this.selection.elements.every(
-      ele => isNoteBlock(ele) || isFrameBlock(ele) || isBookmarkBlock(ele)
+      ele =>
+        isNoteBlock(ele) ||
+        isFrameBlock(ele) ||
+        isBookmarkBlock(ele) ||
+        isAttachmentBlock(ele) ||
+        isEmbeddedBlock(ele)
     );
   }
 
@@ -1035,6 +1107,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           filter: drop-shadow(-6px 0px 12px rgba(235, 67, 53, 0.35));
         }
       </style>
+
       ${!page.readonly && this._canAutoComplete()
         ? html`<edgeless-auto-complete
             .current=${this.selection.elements[0]}
@@ -1043,6 +1116,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           >
           </edgeless-auto-complete>`
         : nothing}
+
       <div
         class="affine-edgeless-selected-rect"
         style=${styleMap({
@@ -1053,8 +1127,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           transform: `translate(${_selectedRect.left}px, ${_selectedRect.top}px) rotate(${_selectedRect.rotate}deg)`,
         })}
         disabled="true"
-        data-scale-percent=${this._scalePercent ?? ''}
-        data-direction=${this._dragDirection ?? ''}
+        data-mode=${this._mode}
+        data-scale-percent=${ifDefined(this._scalePercent)}
+        data-scale-direction=${ifDefined(this._scaleDirection)}
       >
         ${resizeHandles} ${connectorHandle} ${elementHandle}
       </div>

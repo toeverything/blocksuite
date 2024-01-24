@@ -10,6 +10,7 @@ import {
   matchFlavours,
 } from '../../../_common/utils/model.js';
 import {
+  getBlockComponentByModel,
   getDocTitleByEditorHost,
   getInlineEditorByModel,
   getNextBlock,
@@ -639,6 +640,28 @@ function handleParagraphDeleteActions(
       index: lengthBeforeJoin,
       length: 0,
     }).catch(console.error);
+    return true;
+  } else if (
+    matchFlavours(previousSibling, [
+      'affine:attachment',
+      'affine:bookmark',
+      'affine:code',
+      'affine:image',
+    ])
+  ) {
+    page.deleteBlock(model, {
+      bringChildrenTo: parent,
+    });
+    const previousSiblingElement = getBlockComponentByModel(
+      editorHost,
+      previousSibling
+    );
+    assertExists(previousSiblingElement);
+    const selection = editorHost.selection.create('block', {
+      path: previousSiblingElement.path,
+    });
+    editorHost.selection.setGroup('note', [selection]);
+
     return true;
   }
 

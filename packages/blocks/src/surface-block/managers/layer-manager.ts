@@ -555,7 +555,7 @@ export class LayerManager {
     props?: Record<string, unknown>
   ) {
     let updateType: 'block' | 'canvas' | undefined = undefined;
-    const type = 'type' in element ? element.type : element.flavour;
+    const type = 'flavour' in element ? element.flavour : element.type;
 
     const indexChanged = !props || 'index' in props;
     const updateArray = (array: EdgelessModel[], element: EdgelessModel) => {
@@ -595,7 +595,7 @@ export class LayerManager {
 
   add(element: EdgelessModel) {
     let insertType: 'block' | 'canvas' | undefined = undefined;
-    const type = 'type' in element ? element.type : element.flavour;
+    const type = 'flavour' in element ? element.flavour : element.type;
 
     if (!type.startsWith('affine:')) {
       insertType = 'canvas';

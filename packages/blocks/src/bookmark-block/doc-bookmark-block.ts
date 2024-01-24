@@ -91,6 +91,7 @@ export class DocBookmarkBlockComponent extends WithDisposable(
         })}
       >
         <bookmark-card .bookmark=${this.block}></bookmark-card>
+
         <embed-card-caption
           .block=${this.block}
           .display=${this.block.showCaption}
@@ -98,6 +99,7 @@ export class DocBookmarkBlockComponent extends WithDisposable(
             if (!this.model.caption) this.block.showCaption = false;
           }}
         ></embed-card-caption>
+
         ${this.block.selected?.is('block')
           ? html`<affine-block-selection></affine-block-selection>`
           : nothing}

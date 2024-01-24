@@ -202,6 +202,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
 
+    this.contentEditable = 'false';
+
     this.disposables.add(
       AffineDragHandleWidget.registerOption(this._dragHandleOption)
     );

@@ -1,5 +1,9 @@
 import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 
+import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
+import type { EmbedCardStyle } from '../_common/types.js';
+import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+
 /**
  * When the attachment is uploading, the `sourceId` is `undefined`.
  * And we can query the upload status by the `isAttachmentLoading` function.
@@ -18,6 +22,17 @@ import { BlockModel, defineBlockSchema } from '@blocksuite/store';
  */
 type BackwardCompatibleUndefined = undefined;
 
+export const AttachmentBlockStyles: EmbedCardStyle[] = [
+  'cubeThick',
+  'horizontalThin',
+] as const;
+
+export interface AttachmentBlockEdgelessProps {
+  index: string;
+  xywh: SerializedXYWH;
+  rotate: number;
+}
+
 export type AttachmentBlockProps = {
   name: string;
   size: number;
@@ -35,7 +50,9 @@ export type AttachmentBlockProps = {
    * Whether to show the attachment as an embed view.
    */
   embed: boolean | BackwardCompatibleUndefined;
-};
+
+  style?: (typeof AttachmentBlockStyles)[number];
+} & AttachmentBlockEdgelessProps;
 
 export const defaultAttachmentProps: AttachmentBlockProps = {
   name: '',
@@ -44,6 +61,10 @@ export const defaultAttachmentProps: AttachmentBlockProps = {
   sourceId: undefined,
   caption: undefined,
   embed: false,
+  style: AttachmentBlockStyles[1],
+  index: 'a0',
+  xywh: '[0,0,0,0]',
+  rotate: 0,
 };
 
 export const AttachmentBlockSchema = defineBlockSchema({
@@ -52,9 +73,11 @@ export const AttachmentBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'content',
-    parent: ['affine:note'],
+    parent: ['affine:note', 'affine:surface'],
   },
   toModel: () => new AttachmentBlockModel(),
 });
 
-export class AttachmentBlockModel extends BlockModel<AttachmentBlockProps> {}
+export class AttachmentBlockModel extends selectable<AttachmentBlockProps>(
+  BlockModel
+) {}

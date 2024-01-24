@@ -1,6 +1,7 @@
 import { type Page } from '@blocksuite/store';
 
 import {
+  asyncFocusRichText,
   handleNativeRangeAtPoint,
   type NoteChildrenFlavour,
   type Point,
@@ -8,7 +9,11 @@ import {
 } from '../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from './consts.js';
+import {
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+  NOTE_MIN_HEIGHT,
+} from './consts.js';
 
 export type NoteOptions = {
   childFlavour: NoteChildrenFlavour;
@@ -29,10 +34,17 @@ export function addNote(
     height,
   });
 
-  page.addBlock(options.childFlavour, { type: options.childType }, noteId);
-  if (options.collapse) {
+  const blockId = page.addBlock(
+    options.childFlavour,
+    { type: options.childType },
+    noteId
+  );
+  if (options.collapse && height > NOTE_MIN_HEIGHT) {
     const note = page.getBlockById(noteId) as NoteBlockModel;
-    page.updateBlock(note, () => (note.edgeless.collapse = true));
+    page.updateBlock(note, () => {
+      note.edgeless.collapse = true;
+      note.edgeless.collapsedHeight = height;
+    });
   }
   edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
 
@@ -52,9 +64,15 @@ export function addNote(
       // Waiting dom updated, `note mask` is removed
       edgeless.updateComplete
         .then(() => {
-          // Cannot reuse `handleNativeRangeClick` directly here,
-          // since `retargetClick` will re-target to pervious editor
-          handleNativeRangeAtPoint(point.x, point.y);
+          if (blockId) {
+            asyncFocusRichText(edgeless.host, page, blockId)?.catch(
+              console.error
+            );
+          } else {
+            // Cannot reuse `handleNativeRangeClick` directly here,
+            // since `retargetClick` will re-target to pervious editor
+            handleNativeRangeAtPoint(point.x, point.y);
+          }
         })
         .catch(console.error);
     }

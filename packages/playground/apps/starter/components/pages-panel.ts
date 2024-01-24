@@ -89,6 +89,7 @@ export class PagesPanel extends WithDisposable(ShadowlessElement) {
           });
           const click = () => {
             this.editor.page = page;
+            this.editor.page.resetHistory();
             this.requestUpdate();
           };
           const deletePage = () => {

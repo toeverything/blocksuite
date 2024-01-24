@@ -1,3 +1,4 @@
+import type { AttachmentBlockModel } from '../attachment-block/attachment-model.js';
 import type { BookmarkBlockModel } from '../bookmark-block/bookmark-model.js';
 import type { EmbedFigmaModel } from '../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../embed-github-block/embed-github-model.js';
@@ -12,6 +13,7 @@ export type EdgelessBlockModelMap = {
   'affine:note': NoteBlockModel;
   'affine:image': ImageBlockModel;
   'affine:bookmark': BookmarkBlockModel;
+  'affine:attachment': AttachmentBlockModel;
   'affine:embed-github': EmbedGithubModel;
   'affine:embed-youtube': EmbedYoutubeModel;
   'affine:embed-figma': EmbedFigmaModel;
@@ -23,6 +25,7 @@ export type EdgelessBlockType =
   | 'affine:note'
   | 'affine:image'
   | 'affine:bookmark'
+  | 'affine:attachment'
   | 'affine:embed-github'
   | 'affine:embed-youtube'
   | 'affine:embed-figma'

@@ -131,7 +131,6 @@ export function shouldResizeImage(node: Node, target: EventTarget | null) {
 
 export async function uploadBlobForImage(
   editorHost: EditorHost,
-  page: Page,
   blockId: string,
   blob: Blob
 ): Promise<string> {
@@ -140,6 +139,7 @@ export async function uploadBlobForImage(
     throw new Error('the image is already uploading!');
   }
   setImageLoading(blockId, true);
+  const page = editorHost.page;
   const storage = page.blob;
   let sourceId = '';
   let imageBlock: BlockModel | null = null;
@@ -195,6 +195,8 @@ export function addSiblingImageBlock(
   place: 'after' | 'before' = 'after'
 ) {
   const imageFiles = files.filter(file => file.type.startsWith('image/'));
+  if (!imageFiles.length) return;
+
   const isSizeExceeded = imageFiles.some(file => file.size > maxFileSize);
   if (isSizeExceeded) {
     toast(
@@ -205,7 +207,7 @@ export function addSiblingImageBlock(
         0
       )}`
     );
-    return [];
+    return;
   }
 
   const imageBlockProps: Partial<ImageBlockProps> &
@@ -220,7 +222,7 @@ export function addSiblingImageBlock(
   const blockIds = page.addSiblingBlocks(targetModel, imageBlockProps, place);
   blockIds.map(
     (blockId, index) =>
-      void uploadBlobForImage(editorHost, page, blockId, imageFiles[index])
+      void uploadBlobForImage(editorHost, blockId, imageFiles[index])
   );
   return blockIds;
 }
@@ -257,7 +259,7 @@ export function addImageBlocks(
   );
   blockIds.map(
     (blockId, index) =>
-      void uploadBlobForImage(editorHost, page, blockId, imageFiles[index])
+      void uploadBlobForImage(editorHost, blockId, imageFiles[index])
   );
   return blockIds;
 }
