@@ -9,7 +9,11 @@ import {
 } from '../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { DEFAULT_NOTE_HEIGHT, DEFAULT_NOTE_WIDTH } from './consts.js';
+import {
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+  NOTE_MIN_HEIGHT,
+} from './consts.js';
 
 export type NoteOptions = {
   childFlavour: NoteChildrenFlavour;
@@ -35,9 +39,12 @@ export function addNote(
     { type: options.childType },
     noteId
   );
-  if (options.collapse) {
+  if (options.collapse && height > NOTE_MIN_HEIGHT) {
     const note = page.getBlockById(noteId) as NoteBlockModel;
-    page.updateBlock(note, () => (note.edgeless.collapse = true));
+    page.updateBlock(note, () => {
+      note.edgeless.collapse = true;
+      note.edgeless.collapsedHeight = height;
+    });
   }
   edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
 
