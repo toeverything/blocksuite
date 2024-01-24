@@ -1,35 +1,96 @@
-import { MarkdownAdapter } from '@blocksuite/blocks';
-import { Job, type Page } from '@blocksuite/store';
+import {
+  BlocksUtils,
+  MarkdownAdapter,
+  type ShapeElementModel,
+  SurfaceBlockComponent,
+  type TreeNodeWithId,
+} from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
+import type { EditorHost } from '@blocksuite/lit';
+import { type BlockSnapshot, Job, type Page } from '@blocksuite/store';
 
-import type { AffineEditorContainer } from '../../../editors/index.js';
+import { LANGUAGE, TONE } from '../config.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import { EmbeddingServiceKind } from '../copilot-service/service-base.js';
-import { getChatService } from '../doc/api.js';
-import { insertFromMarkdown } from '../utils/markdown-utils.js';
 import {
-  getSelectedBlocks,
+  runAnalysisAction,
+  runChangeToneAction,
+  runFixSpellingAction,
+  runGenerateAction,
+  runImproveWritingAction,
+  runMakeLongerAction,
+  runMakeShorterAction,
+  runPartAnalysisAction,
+  runPPTGenerateAction,
+  runRefineAction,
+  runSimplifyWritingAction,
+  runSummaryAction,
+  runTranslateAction,
+} from '../doc/actions.js';
+import { getChatService } from '../doc/api.js';
+import type { AILogic } from '../logic.js';
+import { findLeaf, findTree, getConnectorPath } from '../utils/connector.js';
+import {
+  insertFromMarkdown,
+  markdownToSnapshot,
+} from '../utils/markdown-utils.js';
+import {
+  getEdgelessService,
+  getPageService,
   getSelectedTextContent,
+  getSurfaceElementFromEditor,
   selectedToCanvas,
 } from '../utils/selection-utils.js';
+import { basicTheme, type PPTPage, type PPTSection } from './template.js';
 
 export type ChatReactiveData = {
   history: ChatMessage[];
-  loading: boolean;
   syncedPages: EmbeddedPage[];
   value: string;
+  currentRequest?: number;
+  tempMessage?: string;
 };
 
 export class AIChatLogic {
-  constructor(private editor: AffineEditorContainer) {}
+  constructor(
+    private logic: AILogic,
+    private getHost: () => EditorHost
+  ) {
+    this.logic;
+  }
+
+  get loading() {
+    return this.reactiveData.currentRequest != null;
+  }
 
   get host() {
-    return this.editor.host;
+    return this.getHost();
   }
 
   reactiveData!: ChatReactiveData;
+  private requestId = 0;
+
+  async startRequest<T>(p: () => Promise<T>): Promise<T> {
+    const id = this.requestId++;
+    this.reactiveData.currentRequest = id;
+    try {
+      const result = await p();
+      if (id === this.reactiveData.currentRequest) {
+        return result;
+      }
+    } finally {
+      this.reactiveData.currentRequest = undefined;
+    }
+    return new Promise(() => {});
+  }
+
+  getSelectedText = async () => {
+    const text = await getSelectedTextContent(this.host);
+    return text;
+  };
 
   selectTextForBackground = async () => {
-    const text = await getSelectedTextContent(this.editor.host);
+    const text = await this.getSelectedText();
     if (!text) return;
     this.reactiveData.history.push({
       role: 'user',
@@ -43,7 +104,7 @@ export class AIChatLogic {
   };
 
   selectShapesForBackground = async () => {
-    const canvas = await selectedToCanvas(this.editor.host);
+    const canvas = await selectedToCanvas(this.host);
     if (!canvas) {
       alert('Please select some shapes first');
       return;
@@ -88,36 +149,44 @@ export class AIChatLogic {
 
   syncWorkspace = async () => {
     this.reactiveData.syncedPages = await this.embeddingPages([
-      ...this.editor.page.workspace.pages.values(),
+      ...this.host.page.workspace.pages.values(),
     ]);
   };
 
-  genAnswer = async () => {
-    if (this.reactiveData.loading) {
+  genAnswer = async (text: string) => {
+    if (this.loading) {
       return;
     }
-    this.reactiveData.loading = true;
-    try {
-      const value = this.reactiveData.value;
-      this.reactiveData.history.push({
+    this.reactiveData.history = [
+      ...this.reactiveData.history,
+      {
         role: 'user',
-        content: [{ text: value, type: 'text' }],
-      });
-      const background = await this.getBackground();
-      this.reactiveData.value = '';
-      const r = await getChatService().chat([
+        content: [{ text: text, type: 'text' }],
+      },
+    ];
+    const background = await this.getBackground();
+    this.reactiveData.value = '';
+    const r = await this.startRequest(async () => {
+      const iter = getChatService().chat([
         ...background.messages,
         ...this.reactiveData.history,
       ]);
-
-      this.reactiveData.history.push({
+      let result = '';
+      for await (const item of iter) {
+        result += item;
+        this.reactiveData.tempMessage = result;
+      }
+      this.reactiveData.tempMessage = undefined;
+      return result;
+    });
+    this.reactiveData.history = [
+      ...this.reactiveData.history,
+      {
         role: 'assistant',
         content: r ?? '',
         sources: background.sources,
-      });
-    } finally {
-      this.reactiveData.loading = false;
-    }
+      },
+    ];
   };
 
   async getBackground(): Promise<{
@@ -169,7 +238,7 @@ export class AIChatLogic {
 
   async replaceSelectedContent(text: string) {
     if (!text) return;
-    const selectedBlocks = await getSelectedBlocks(this.host);
+    const selectedBlocks = getPageService(this.host).selectedBlocks;
     if (!selectedBlocks.length) return;
 
     const firstBlock = selectedBlocks[0];
@@ -180,7 +249,7 @@ export class AIChatLogic {
       child => child.id === firstBlock.model.id
     ) as number;
     selectedBlocks.forEach(block => {
-      this.editor.page.deleteBlock(block.model);
+      this.host.page.deleteBlock(block.model);
     });
 
     const models = await insertFromMarkdown(
@@ -201,7 +270,7 @@ export class AIChatLogic {
   async insertBelowSelectedContent(text: string) {
     if (!text) return;
 
-    const selectedBlocks = await getSelectedBlocks(this.host);
+    const selectedBlocks = getPageService(this.host).selectedBlocks;
     const blockLength = selectedBlocks.length;
     if (!blockLength) return;
 
@@ -227,8 +296,262 @@ export class AIChatLogic {
       this.host.selection.setGroup('note', selections);
     }, 0);
   }
+
+  createAction(
+    name: string,
+    action: (
+      input: string
+    ) => Promise<AsyncIterable<string>> | AsyncIterable<string>
+  ) {
+    return async (text?: string): Promise<void> => {
+      const input = text ? text : await this.getSelectedText();
+      if (!input) {
+        return;
+      }
+      this.reactiveData.history = [
+        ...this.reactiveData.history,
+        {
+          role: 'user',
+          content: [{ text: input, type: 'text' }],
+        },
+        {
+          role: 'user',
+          content: [{ text: name, type: 'text' }],
+        },
+      ];
+      const result = await this.startRequest(async () => {
+        const strings = await action(input);
+        let r = '';
+        for await (const item of strings) {
+          r += item;
+          this.reactiveData.tempMessage = r;
+        }
+        this.reactiveData.tempMessage = undefined;
+        return r;
+      });
+      this.reactiveData.history = [
+        ...this.reactiveData.history,
+        {
+          role: 'assistant',
+          content: result,
+          sources: [],
+        },
+      ];
+    };
+  }
+
+  docSelectionActionList: AllAction[] = [
+    {
+      type: 'group',
+      name: 'Translate',
+      children: LANGUAGE.map(language => ({
+        type: 'action',
+        name: language,
+        action: this.createAction(`Translate to ${language}`, input =>
+          runTranslateAction({ input, language })
+        ),
+      })),
+    },
+    {
+      type: 'group',
+      name: 'Change tone',
+      children: TONE.map(tone => ({
+        type: 'action',
+        name: tone,
+        action: this.createAction(`Make more ${tone}`, input =>
+          runChangeToneAction({ input, tone })
+        ),
+      })),
+    },
+    {
+      type: 'action',
+      name: 'Refine',
+      action: this.createAction('Refine', input => runRefineAction({ input })),
+    },
+    {
+      type: 'action',
+      name: 'Generate',
+      action: this.createAction('Generate', input =>
+        runGenerateAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Summary',
+      action: this.createAction('Summary', input =>
+        runSummaryAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Improve writing',
+      action: this.createAction('Improve writing', input =>
+        runImproveWritingAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Fix spelling',
+      action: this.createAction('Fix spelling', input =>
+        runFixSpellingAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Make shorter',
+      action: this.createAction('Make shorter', input =>
+        runMakeShorterAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Make longer',
+      action: this.createAction('Make longer', input =>
+        runMakeLongerAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Simplify language',
+      action: this.createAction('Simplify language', input =>
+        runSimplifyWritingAction({ input })
+      ),
+    },
+    {
+      type: 'action',
+      name: 'Create mind-map',
+      action: this.createAction('Create mind-map', async input => {
+        const service = getEdgelessService(this.host);
+        const [x, y] = [service.viewport.centerX, service.viewport.centerY];
+        const reactiveData = this.reactiveData;
+        const build = mindMapBuilder(this.host, x, y);
+        return (async function* () {
+          const strings = runAnalysisAction({ input });
+          let text = '';
+          for await (const item of strings) {
+            yield item;
+            text += item;
+            if (text) {
+              await build(text);
+            }
+            reactiveData.tempMessage = text;
+          }
+        })();
+      }),
+    },
+    {
+      type: 'action',
+      name: 'Create presentation',
+      action: this.createAction('Create mind-map', async input => {
+        const reactiveData = this.reactiveData;
+        const build = pptBuilder(this.host);
+        return (async function* () {
+          const strings = runPPTGenerateAction({ input });
+          let text = '';
+          for await (const item of strings) {
+            yield item;
+            text += item;
+            if (text) {
+              await build.process(text);
+            }
+            reactiveData.tempMessage = text;
+          }
+          await build.done(text);
+        })();
+      }),
+    },
+    {
+      type: 'action',
+      name: 'Insert into Chat',
+      action: async () => {
+        const input = await this.getSelectedText();
+        if (!input) {
+          return;
+        }
+        this.reactiveData.history = [
+          ...this.reactiveData.history,
+          {
+            role: 'user',
+            content: [{ text: input, type: 'text' }],
+          },
+        ];
+      },
+    },
+  ];
+  edgelessSelectionActionList: AllAction[] = [
+    {
+      type: 'action',
+      name: 'Create mind-map',
+      hide: () => {
+        const service = getEdgelessService(this.host);
+        const ele = service.selection.elements[0];
+        return !SurfaceBlockComponent.isShape(ele);
+      },
+      action: async () => {
+        const reactiveData = this.reactiveData;
+        const service = getEdgelessService(this.host);
+        const ele = service.selection.elements[0];
+        if (!SurfaceBlockComponent.isShape(ele)) {
+          return;
+        }
+        const text = ele.text?.toString();
+        if (!text) {
+          return;
+        }
+        const pathIds = getConnectorPath(ele.id, service);
+        const rootId = [...pathIds, ele.id][0];
+        const rootEle = service.getElementById(rootId) as ShapeElementModel;
+        const path = pathIds.map(id => {
+          const ele = service.getElementById(id);
+          if (ele && SurfaceBlockComponent.isShape(ele)) {
+            return ele.text?.toString() ?? '';
+          }
+          return '';
+        });
+        const oldTree = findTree(rootId, service);
+        const target = findLeaf(oldTree, ele.id);
+        assertExists(target);
+        const build = mindMapBuilder(
+          this.host,
+          rootEle.x,
+          rootEle.y,
+          ele.id,
+          tree => {
+            target.children = tree.children;
+            return oldTree;
+          }
+        );
+        await this.createAction('Part analysis', async input => {
+          return (async function* () {
+            const strings = runPartAnalysisAction({ input, path });
+            let text = '';
+            for await (const item of strings) {
+              yield item;
+              text += item;
+              if (text) {
+                await build(text);
+              }
+              reactiveData.tempMessage = text;
+            }
+          })();
+        })(text);
+      },
+    },
+  ];
 }
 
+type Action = {
+  type: 'action';
+  name: string;
+  hide?: () => boolean;
+  action: () => Promise<void>;
+};
+type ActionGroup = {
+  type: 'group';
+  name: string;
+  children: AllAction[];
+};
+export type AllAction = Action | ActionGroup;
 type MessageContent =
   | {
       type: 'text';
@@ -313,4 +636,125 @@ export type EmbeddedPage = {
     vector: number[];
     text: string;
   }[];
+};
+const mindMapBuilder = (
+  host: EditorHost,
+  x: number,
+  y: number,
+  rootId?: string,
+  wrapTree?: (tree: TreeNodeWithId) => TreeNodeWithId
+) => {
+  const service = getEdgelessService(host);
+  const ids: string[] = rootId ? [rootId] : [];
+  const buildTree = async (text: string) => {
+    const snapshot = await markdownToSnapshot(text, host);
+    const block = snapshot.snapshot.content[0];
+    let i = 0;
+    const toTreeNode = (
+      block: BlockSnapshot,
+      parentId?: string
+    ): TreeNodeWithId => {
+      const text = getText(block);
+      if (ids[i] == null) {
+        ids[i] = BlocksUtils.mindMap.createNode(
+          text,
+          service,
+          parentId ? { direction: 'right', parentId } : undefined
+        );
+      }
+      const selfId = ids[i];
+      const shape = service.getElementById(selfId) as ShapeElementModel;
+      if (shape.text?.toString() !== text) {
+        BlocksUtils.mindMap.changeText(selfId, text, service);
+      }
+      return {
+        id: ids[i++],
+        children: block.children.map(id => toTreeNode(id, selfId)),
+      };
+    };
+    const tree = toTreeNode(block.children[0]);
+    BlocksUtils.mindMap.layoutInEdgeless(service, wrapTree?.(tree) ?? tree, {
+      x,
+      y,
+    });
+  };
+  return buildTree;
+};
+const createTaskQueue = () => {
+  const queue: Array<() => Promise<void>> = [];
+  let current: Promise<void> | undefined;
+  const runTask = () => {
+    if (current) {
+      return;
+    }
+    const task = queue.shift();
+    if (!task) {
+      return;
+    }
+    current = task().finally(() => {
+      current = undefined;
+      runTask();
+    });
+  };
+  return {
+    add: (task: () => Promise<void>) => {
+      queue.push(task);
+      runTask();
+    },
+  };
+};
+const addPPTTaskQueue = createTaskQueue();
+const pptBuilder = (host: EditorHost) => {
+  const service = getEdgelessService(host);
+  const pages: PPTPage[] = [];
+  const addPage = async (block: BlockSnapshot) => {
+    const sections = block.children.map(v => {
+      const title = getText(v);
+      const keywords = getText(v.children[0]);
+      const content = getText(v.children[1]);
+      return {
+        title,
+        keywords,
+        content,
+      } satisfies PPTSection;
+    });
+    const page: PPTPage = {
+      title: getText(block),
+      sections,
+    };
+    pages.push(page);
+    const job = service.createTemplateJob('template');
+    const { images, content } = await basicTheme(page);
+    if (images.length) {
+      await Promise.all(
+        images.map(({ id, url }) =>
+          fetch(url)
+            .then(res => res.blob())
+            .then(blob => job.job.assets.set(id, blob))
+        )
+      );
+    }
+    await job.insertTemplate(content);
+    getSurfaceElementFromEditor(host).refresh();
+  };
+  return {
+    process: async (text: string) => {
+      const snapshot = await markdownToSnapshot(text, host);
+      const block = snapshot.snapshot.content[0];
+      if (block.children.length > pages.length + 1) {
+        addPPTTaskQueue.add(() => addPage(block.children[pages.length]));
+      }
+    },
+    done: async (text: string) => {
+      const snapshot = await markdownToSnapshot(text, host);
+      const block = snapshot.snapshot.content[0];
+      addPPTTaskQueue.add(() =>
+        addPage(block.children[block.children.length - 1])
+      );
+    },
+  };
+};
+const getText = (block: BlockSnapshot) => {
+  // @ts-ignore
+  return block.props.text?.delta?.[0]?.insert ?? '';
 };

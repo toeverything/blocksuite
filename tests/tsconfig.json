@@ -13,8 +13,8 @@
       "@store/provider/*": ["../packages/store/provider/*"],
       "@store/*": ["../packages/store/src/*"],
       "@presets/*": ["../packages/presets/src/*"],
-      "@playground/*": ["../packages/playground/*"],
-    },
+      "@playground/*": ["../packages/playground/*"]
+    }
   },
-  "include": ["**.spec.ts", "**.test.ts", "**/**.ts"],
+  "include": ["**.spec.ts", "**.test.ts", "**/**.ts"]
 }
