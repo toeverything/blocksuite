@@ -1,5 +1,5 @@
-import '../../../../_common/components/button';
-import '../../../../_common/components/tooltip/tooltip';
+import '../../../../_common/components/button.js';
+import '../../../../_common/components/tooltip/tooltip.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';

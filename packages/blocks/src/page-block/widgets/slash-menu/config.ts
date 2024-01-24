@@ -305,10 +305,6 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return !insideDatabase(model);
         },
         action: withRemoveEmptyLine(async ({ pageElement, model }) => {
-          const page = pageElement.page;
-          const parent = page.getParent(model);
-          if (!parent) return;
-
           const file = await openFileOrFiles();
           if (!file) return;
 
