@@ -763,7 +763,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._mode = 'resize';
     }
 
-    if (this._mode === 'resize') {
+    if (this._mode !== 'scale') {
       this._scalePercent = undefined;
       this._scaleDirection = undefined;
     }
