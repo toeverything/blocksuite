@@ -20,8 +20,34 @@ const replaceText = (text: Record<string, string>, template: any) => {
     return;
   }
 };
+const getImageUrlByKeyword =
+  (keyword: string) =>
+  async (w: number, h: number): Promise<string> => {
+    const url = new URL('https://api.unsplash.com/search/photos');
+    const params = new URLSearchParams(window.location.search);
+    const unsplashKey = params.get('unsplashKey');
+    url.searchParams.set('client_id', unsplashKey ?? '');
+    url.searchParams.set('query', keyword);
+    const result: {
+      results: {
+        urls: {
+          regular: string;
+        };
+      }[];
+    } = await fetch(url.toString()).then(res => res.json());
+    const randomImage =
+      result.results[Math.floor(Math.random() * result.results.length)].urls
+        .regular;
+    const image = new URL(randomImage);
+    image.searchParams.set('fit', 'crop');
+    image.searchParams.set('crop', 'edges');
+    image.searchParams.set('dpr', '3');
+    image.searchParams.set('w', `${w}`);
+    image.searchParams.set('height', `${h}`);
+    return image.toString();
+  };
 const getImages = async (
-  keywords: Record<string, string>,
+  images: Record<string, (w: number, h: number) => Promise<string>>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   template: any
 ): Promise<TemplateImage[]> => {
@@ -57,30 +83,13 @@ const getImages = async (
   run(template);
   const list = await Promise.all(
     Object.entries(imgs).map(async ([name, data]) => {
-      const keyword = keywords[name];
-      if (!keyword) {
+      const getImage = images[name];
+      if (!getImage) {
         return;
       }
-      const url = new URL('https://api.unsplash.com/search/photos');
-      const params = new URLSearchParams(window.location.search);
-      const unsplashKey = params.get('unsplashKey');
-      url.searchParams.set('client_id', unsplashKey ?? '');
-      url.searchParams.set('query', keyword);
-      const result: { results: { urls: { regular: string } }[] } = await fetch(
-        url.toString()
-      ).then(res => res.json());
-      const randomImage =
-        result.results[Math.floor(Math.random() * result.results.length)].urls
-          .regular;
-      const image = new URL(randomImage);
-      image.searchParams.set('fit', 'crop');
-      image.searchParams.set('crop', 'edges');
-      image.searchParams.set('dpr', '3');
-      image.searchParams.set('w', `${data.width}`);
-      image.searchParams.set('height', `${data.height}`);
       return {
         id: data.id,
-        url: image.toString(),
+        url: await getImage(data.width, data.height),
       } satisfies TemplateImage;
     })
   );
@@ -116,7 +125,14 @@ const basic1section = async (
     template
   );
   return {
-    images: await getImages({ 'section1.image': section1.keywords }, template),
+    images: await getImages(
+      {
+        'section1.image': getImageUrlByKeyword(section1.keywords),
+        background: async () =>
+          'https://cdn.affine.pro/ppt-images/background/basic_1_selection_background.png',
+      },
+      template
+    ),
     content: template,
   };
 };
@@ -139,8 +155,10 @@ const basic2section = async (
   return {
     images: await getImages(
       {
-        'section1.image': section1.keywords,
-        'section2.image': section2.keywords,
+        'section1.image': getImageUrlByKeyword(section1.keywords),
+        'section2.image': getImageUrlByKeyword(section2.keywords),
+        background: async () =>
+          'https://cdn.affine.pro/ppt-images/background/basic_2_selection_background.png',
       },
       template
     ),
@@ -169,9 +187,11 @@ const basic3section = async (
   return {
     images: await getImages(
       {
-        'section1.image': section1.keywords,
-        'section2.image': section2.keywords,
-        'section3.image': section3.keywords,
+        'section1.image': getImageUrlByKeyword(section1.keywords),
+        'section2.image': getImageUrlByKeyword(section2.keywords),
+        'section3.image': getImageUrlByKeyword(section3.keywords),
+        background: async () =>
+          'https://cdn.affine.pro/ppt-images/background/basic_3_selection_background.png',
       },
       template
     ),
@@ -203,10 +223,12 @@ const basic4section = async (
   return {
     images: await getImages(
       {
-        'section1.image': section1.keywords,
-        'section2.image': section2.keywords,
-        'section3.image': section3.keywords,
-        'section4.image': section4.keywords,
+        'section1.image': getImageUrlByKeyword(section1.keywords),
+        'section2.image': getImageUrlByKeyword(section2.keywords),
+        'section3.image': getImageUrlByKeyword(section3.keywords),
+        'section4.image': getImageUrlByKeyword(section4.keywords),
+        background: async () =>
+          'https://cdn.affine.pro/ppt-images/background/basic_4_selection_background.png',
       },
       template
     ),
