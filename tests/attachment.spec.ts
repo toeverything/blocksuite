@@ -2,6 +2,7 @@ import { expect, type Page } from '@playwright/test';
 
 import { moveToImage } from './utils/actions/drag.js';
 import {
+  pressArrowUp,
   pressBackspace,
   pressEnter,
   pressEscape,
@@ -18,9 +19,12 @@ import {
   waitNextFrame,
 } from './utils/actions/misc.js';
 import {
+  assertBlockCount,
+  assertBlockSelections,
   assertImageOption,
   assertKeyboardWorkInInput,
   assertRichImage,
+  assertRichTextInlineRange,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -580,4 +584,26 @@ test(`support dragging attachment block directly`, async ({ page }) => {
   </affine:note>
 </affine:page>`
   );
+});
+
+test('press backspace after bookmark block can select bookmark block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  const { insertAttachment, waitLoading } = getAttachment(page);
+
+  await focusRichText(page);
+  await pressEnter(page);
+  await pressArrowUp(page);
+  await insertAttachment();
+  // Wait for the attachment to be uploaded
+  await waitLoading();
+
+  await focusRichText(page);
+  await assertBlockCount(page, 'paragraph', 1);
+  await assertRichTextInlineRange(page, 0, 0);
+  await pressBackspace(page);
+  await assertBlockSelections(page, [['0', '1', '4']]);
+  await assertBlockCount(page, 'paragraph', 0);
 });
