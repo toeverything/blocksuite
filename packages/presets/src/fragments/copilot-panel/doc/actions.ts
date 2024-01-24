@@ -182,7 +182,7 @@ I want to write a PPT, that has many pages, each page has 1 to 4 sections,
 each section has a title of no more than 30 words and no more than 500 words of content,
 but also need some keywords that match the content of the paragraph used to generate images,
 Try to have a different number of section per page
-The first page is the cover, which generates a general title (no more than 4 words) and blurb based on the theme
+The first page is the cover, which generates a general title (no more than 4 words) and description based on the topic
 this is a template:
 - page name
   - title
