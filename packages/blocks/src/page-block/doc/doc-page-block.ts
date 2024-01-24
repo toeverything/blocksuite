@@ -306,7 +306,10 @@ export class DocPageBlockComponent extends BlockElement<
         parseFloat(paddingLeft),
         parseFloat(paddingRight)
       );
-      if (isClickOnBlankArea) return;
+      if (isClickOnBlankArea) {
+        this.host.selection.clear(['block']);
+        return;
+      }
 
       let newTextSelectionPath: string[] | null = null;
       const readonly = this.model.page.readonly;
