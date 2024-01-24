@@ -1,3 +1,4 @@
+import type { PageService } from '@blocksuite/blocks';
 import {
   BlocksUtils,
   type EdgelessBlock,
@@ -7,100 +8,14 @@ import {
   type SurfaceBlockComponent,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement, EditorHost } from '@blocksuite/lit';
-import { type BlockModel, Slice } from '@blocksuite/store';
+import type { EditorHost } from '@blocksuite/lit';
+import { Slice } from '@blocksuite/store';
 
 import { getMarkdownFromSlice } from './markdown-utils.js';
 
-export function hasSelectedTextContent(host: EditorHost) {
-  let result = false;
-
-  host.std.command
-    .pipe()
-    .getBlockSelections()
-    .inline((ctx, next) => {
-      const selections = ctx.currentBlockSelections;
-      if (!selections) return;
-
-      result = selections
-        .map(
-          selection => ctx.std.view.viewFromPath('block', selection.path)?.model
-        )
-        .some(
-          model =>
-            model &&
-            BlocksUtils.matchFlavours(model, [
-              'affine:paragraph',
-              'affine:list',
-              'affine:code',
-            ])
-        );
-      return next();
-    })
-    .run();
-
-  return result;
-}
-
-export async function getSelectedTextSlice(host: EditorHost) {
-  let models: BlockModel[] = [];
-
-  host.std.command
-    .pipe()
-    .getBlockSelections()
-    .inline((ctx, next) => {
-      const selections = ctx.currentBlockSelections;
-      if (!selections) return;
-
-      models = selections
-        .map(
-          selection => ctx.std.view.viewFromPath('block', selection.path)?.model
-        )
-        .filter(
-          (model): model is BlockModel<object> =>
-            model !== undefined &&
-            BlocksUtils.matchFlavours(model, [
-              'affine:paragraph',
-              'affine:list',
-              'affine:code',
-            ])
-        );
-
-      return next();
-    })
-    .run();
-
-  return Slice.fromModels(host.std.page, models);
-}
-
-export async function getSelectedBlocks(host: EditorHost) {
-  let blocks: BlockElement[] = [];
-
-  host.std.command
-    .pipe()
-    .getBlockSelections()
-    .inline((ctx, next) => {
-      const selections = ctx.currentBlockSelections;
-      if (!selections) return;
-
-      blocks = selections
-        .map(selection => ctx.std.view.viewFromPath('block', selection.path))
-        .filter(
-          (block): block is BlockElement =>
-            block !== null &&
-            BlocksUtils.matchFlavours(block.model, [
-              'affine:paragraph',
-              'affine:list',
-              'affine:code',
-            ])
-        );
-
-      return next();
-    })
-    .run();
-
-  return blocks;
-}
+export const getPageService = (host: EditorHost) => {
+  return host.std.spec.getService('affine:page') as PageService;
+};
 
 export function getEdgelessPageBlockFromEditor(editor: EditorHost) {
   const edgelessPage = editor.getElementsByTagName('affine-edgeless-page')[0];
@@ -164,7 +79,10 @@ export async function selectedToPng(editor: EditorHost) {
 }
 
 export async function getSelectedTextContent(editorHost: EditorHost) {
-  const slice = await getSelectedTextSlice(editorHost);
+  const slice = Slice.fromModels(
+    editorHost.std.page,
+    getPageService(editorHost).selectedModels
+  );
   return await getMarkdownFromSlice(editorHost, slice);
 }
 

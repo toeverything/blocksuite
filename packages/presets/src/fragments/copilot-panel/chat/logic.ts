@@ -36,7 +36,7 @@ import {
 } from '../utils/markdown-utils.js';
 import {
   getEdgelessService,
-  getSelectedBlocks,
+  getPageService,
   getSelectedTextContent,
   selectedToCanvas,
 } from '../utils/selection-utils.js';
@@ -237,7 +237,7 @@ export class AIChatLogic {
 
   async replaceSelectedContent(text: string) {
     if (!text) return;
-    const selectedBlocks = await getSelectedBlocks(this.host);
+    const selectedBlocks = getPageService(this.host).selectedBlocks;
     if (!selectedBlocks.length) return;
 
     const firstBlock = selectedBlocks[0];
@@ -269,7 +269,7 @@ export class AIChatLogic {
   async insertBelowSelectedContent(text: string) {
     if (!text) return;
 
-    const selectedBlocks = await getSelectedBlocks(this.host);
+    const selectedBlocks = getPageService(this.host).selectedBlocks;
     const blockLength = selectedBlocks.length;
     if (!blockLength) return;
 

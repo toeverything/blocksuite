@@ -21,7 +21,7 @@ import {
   getEdgelessPageBlockFromEditor,
   getEdgelessService,
   getFirstImageInFrame,
-  getSelectedBlocks,
+  getPageService,
   getSurfaceElementFromEditor,
   selectedToCanvas,
   selectedToPng,
@@ -241,7 +241,7 @@ export class AIEdgelessLogic {
   };
 
   async convertToMindMap() {
-    const blocks = await getSelectedBlocks(this.host);
+    const blocks = getPageService(this.host).selectedBlocks;
     const toTreeNode = (block: BlockModel): TreeNode => {
       return {
         text: block.text?.toString() ?? '',
