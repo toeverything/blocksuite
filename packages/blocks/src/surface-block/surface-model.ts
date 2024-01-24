@@ -246,19 +246,19 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     };
 
     elementsYMap.forEach((val, key) => {
-      this._elementModels.set(
-        key,
-        createElementModel(
-          val.get('type') as string,
-          val.get('id') as string,
-          val,
-          this,
-          {
-            onChange: payload => this.elementUpdated.emit(payload),
-            skipFieldInit: true,
-          }
-        )
+      const model = createElementModel(
+        val.get('type') as string,
+        val.get('id') as string,
+        val,
+        this,
+        {
+          onChange: payload => this.elementUpdated.emit(payload),
+          skipFieldInit: true,
+        }
       );
+
+      this._elementModels.set(key, model);
+      model.mount();
     });
     elementsYMap.observe(onElementsMapChange);
 

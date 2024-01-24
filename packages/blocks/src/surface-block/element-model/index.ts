@@ -74,6 +74,7 @@ export function createElementModel(
           ...payload,
         });
     });
+    elementModel['_preserved'].clear();
     mounted = true;
   };
 
@@ -168,9 +169,6 @@ export function createModelFromProps(
     // @ts-ignore
     elementModel.model[key] = props[key];
   });
-
-  // @ts-ignore
-  elementModel.model._preserved.clear();
 
   return elementModel;
 }

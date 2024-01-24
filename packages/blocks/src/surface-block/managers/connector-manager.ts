@@ -1119,9 +1119,11 @@ export class ConnectorPathGenerator {
       return p.setVec(Vec.sub(p, [bound.x, bound.y]));
     });
 
+    connector.updatingPath = true;
     // the property assignment order matters
     connector.xywh = bound.serialize();
     connector.path = relativePoints;
+    connector.updatingPath = false;
   }
 
   generateOrthogonalConnectorPath(input: OrthogonalConnectorInput) {
