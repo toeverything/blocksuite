@@ -27,6 +27,7 @@ import { unified } from 'unified';
 
 import type { SerializedCells } from '../../database-block/database-model.js';
 import type { Column } from '../../database-block/types.js';
+import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { remarkGfm } from './gfm.js';
 import { fetchImage } from './utils.js';
@@ -130,6 +131,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
@@ -188,6 +190,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
@@ -220,6 +223,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };

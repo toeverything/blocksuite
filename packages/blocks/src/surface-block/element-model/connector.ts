@@ -42,6 +42,8 @@ type ConnectorElementProps = BaseProps & {
 };
 
 export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
+  updatingPath = false;
+
   get type() {
     return 'connector';
   }
@@ -153,5 +155,11 @@ export class ConnectorElementModel extends ElementModel<ConnectorElementProps> {
     return new PointLocation(
       Bound.deserialize(this.xywh).getRelativePoint(point)
     );
+  }
+
+  override serialize() {
+    const result = super.serialize();
+    result.xywh = this.xywh;
+    return result;
   }
 }

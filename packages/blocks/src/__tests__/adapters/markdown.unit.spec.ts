@@ -5,6 +5,7 @@ import { describe, expect, test } from 'vitest';
 
 import { MarkdownAdapter } from '../../_common/adapters/markdown.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
+import { NoteDisplayMode } from '../../_common/types.js';
 
 describe('snapshot to markdown', () => {
   test('code', async () => {
@@ -37,6 +38,7 @@ describe('snapshot to markdown', () => {
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -100,6 +102,7 @@ describe('snapshot to markdown', () => {
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -298,6 +301,7 @@ hhh
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -449,6 +453,7 @@ hhh
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -600,6 +605,7 @@ hhh
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -671,6 +677,7 @@ hhh
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -742,6 +749,7 @@ hhh
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -810,6 +818,7 @@ hhh
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -882,6 +891,7 @@ hhh
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -954,6 +964,7 @@ hhh
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -1238,6 +1249,7 @@ describe('markdown to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1294,6 +1306,7 @@ hhh
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1463,6 +1476,7 @@ hhh
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1593,6 +1607,7 @@ hhh
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1713,6 +1728,7 @@ hhh
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1762,6 +1778,7 @@ hhh
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1811,6 +1828,7 @@ hhh
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1861,6 +1879,7 @@ hhh
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1911,6 +1930,7 @@ hhh
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -1964,6 +1984,7 @@ hhh
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -2067,6 +2088,7 @@ hhh
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {

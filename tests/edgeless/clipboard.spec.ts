@@ -9,6 +9,7 @@ import {
   edgelessCommonSetup as commonSetup,
   pasteByKeyboard,
   selectAllByKeyboard,
+  waitNextFrame,
 } from '../utils/actions/index.js';
 import { assertConnectorPath } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -19,10 +20,12 @@ test.describe('connector clipboard', () => {
   }) => {
     await commonSetup(page);
     await createConnectorElement(page, [0, 0], [200, 100]);
+    await waitNextFrame(page);
     await copyByKeyboard(page);
     const move = await toViewCoord(page, [100, -50]);
     await page.mouse.click(move[0], move[1]);
     await pasteByKeyboard(page, false);
+    await waitNextFrame(page);
     await assertConnectorPath(
       page,
       [
@@ -48,6 +51,7 @@ test.describe('connector clipboard', () => {
     const move = await toViewCoord(page, [150, -50]);
     await page.mouse.click(move[0], move[1]);
     await pasteByKeyboard(page, false);
+    await waitNextFrame(page);
     await assertConnectorPath(
       page,
       [
@@ -70,6 +74,7 @@ test.describe('connector clipboard', () => {
     const move = await toViewCoord(page, [150, -49.5]);
     await page.mouse.move(move[0], move[1]);
     await pasteByKeyboard(page, false);
+    await waitNextFrame(page);
     await assertConnectorPath(
       page,
       [

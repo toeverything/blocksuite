@@ -1,6 +1,7 @@
 import { type Page } from '@blocksuite/store';
 
 import {
+  asyncFocusRichText,
   handleNativeRangeAtPoint,
   type NoteChildrenFlavour,
   type Point,
@@ -29,7 +30,11 @@ export function addNote(
     height,
   });
 
-  page.addBlock(options.childFlavour, { type: options.childType }, noteId);
+  const blockId = page.addBlock(
+    options.childFlavour,
+    { type: options.childType },
+    noteId
+  );
   if (options.collapse) {
     const note = page.getBlockById(noteId) as NoteBlockModel;
     page.updateBlock(note, () => (note.edgeless.collapse = true));
@@ -52,9 +57,15 @@ export function addNote(
       // Waiting dom updated, `note mask` is removed
       edgeless.updateComplete
         .then(() => {
-          // Cannot reuse `handleNativeRangeClick` directly here,
-          // since `retargetClick` will re-target to pervious editor
-          handleNativeRangeAtPoint(point.x, point.y);
+          if (blockId) {
+            asyncFocusRichText(edgeless.host, page, blockId)?.catch(
+              console.error
+            );
+          } else {
+            // Cannot reuse `handleNativeRangeClick` directly here,
+            // since `retargetClick` will re-target to pervious editor
+            handleNativeRangeAtPoint(point.x, point.y);
+          }
         })
         .catch(console.error);
     }

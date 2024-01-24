@@ -19,7 +19,8 @@ import {
 } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
-import type { BookmarkBlockModel, NoteBlockModel } from '../../../../models.js';
+import type { BookmarkBlockModel } from '../../../../models.js';
+import { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
 import { TextElementModel } from '../../../../surface-block/element-model/text.js';
 import type { ElementModel } from '../../../../surface-block/index.js';
@@ -514,7 +515,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.edgeless.slots.elementResizeStart.emit();
     this.selection.elements.forEach(el => {
       el.stash('xywh');
-      el.stash('edgeless' as 'xywh');
+
+      if (el instanceof NoteBlockModel) {
+        el.stash('edgeless');
+      }
 
       if (rotation) {
         el.stash('rotate' as 'xywh');
@@ -527,7 +531,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
       this._dragEndCallback.push(() => {
         el.pop('xywh');
-        el.pop('edgeless' as 'xywh');
+
+        if (el instanceof NoteBlockModel) {
+          el.pop('edgeless');
+        }
 
         if (rotation) {
           el.pop('rotate' as 'xywh');

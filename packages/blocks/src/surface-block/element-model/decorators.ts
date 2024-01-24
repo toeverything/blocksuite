@@ -17,6 +17,13 @@ export function setCreateState(
 
 export function yfield(fallback?: unknown): PropertyDecorator {
   return function yDecorator(prototype: unknown, prop: string | symbol) {
+    // @ts-ignore
+    const yProps = prototype['_yProps'] ?? new Set();
+    // @ts-ignore
+    prototype['_yProps'] = yProps;
+
+    yProps.add(prop);
+
     Object.defineProperty(prototype, prop, {
       get(this: ElementModel) {
         return (
@@ -62,8 +69,15 @@ export function yfield(fallback?: unknown): PropertyDecorator {
 }
 
 export function local(): PropertyDecorator {
-  return function localDecorator(target: unknown, prop: string | symbol) {
-    Object.defineProperty(target, prop, {
+  return function localDecorator(prototype: unknown, prop: string | symbol) {
+    // @ts-ignore
+    const localProps = prototype['_localProps'] ?? new Set();
+    // @ts-ignore
+    prototype['_localProps'] = localProps;
+
+    localProps.add(prop);
+
+    Object.defineProperty(prototype, prop, {
       get(this: ElementModel) {
         return this._local.get(prop);
       },
@@ -71,10 +85,10 @@ export function local(): PropertyDecorator {
         const oldValue = this._local.get(prop);
         const newVal = state.creating
           ? originalValue
-          : convertProps(target, prop, originalValue, this);
+          : convertProps(prototype, prop, originalValue, this);
 
         const derivedProps = getDeriveProperties(
-          target,
+          prototype,
           prop,
           originalValue,
           this

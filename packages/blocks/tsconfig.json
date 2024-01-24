@@ -3,24 +3,24 @@
   "compilerOptions": {
     "rootDir": "./src/",
     "outDir": "./dist/",
-    "noEmit": false
+    "noEmit": false,
   },
   "include": ["./src"],
   "references": [
     {
-      "path": "../global"
+      "path": "../global",
     },
     {
-      "path": "../store"
+      "path": "../store",
     },
     {
-      "path": "../block-std"
+      "path": "../block-std",
     },
     {
-      "path": "../lit"
+      "path": "../lit",
     },
     {
-      "path": "../inline"
-    }
-  ]
+      "path": "../inline",
+    },
+  ],
 }
