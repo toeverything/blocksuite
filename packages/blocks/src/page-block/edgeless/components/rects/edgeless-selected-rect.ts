@@ -48,6 +48,7 @@ import { getElementsWithoutGroup } from '../../utils/group.js';
 import {
   getSelectableBounds,
   getSelectedRect,
+  isAttachmentBlock,
   isBookmarkBlock,
   isCanvasElement,
   isEmbeddedBlock,
@@ -475,11 +476,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         }
       } else if (isFrameBlock(element)) {
         areAllConnectors = false;
-      } else if (
-        isImageBlock(element) ||
-        isBookmarkBlock(element) ||
-        isEmbeddedBlock(element)
-      ) {
+      } else if (this._isProportionalElement(element)) {
         areAllConnectors = false;
         areAllShapes = false;
         areAllTexts = false;
@@ -501,6 +498,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     if (areAllTexts) return 'edgeAndCorner';
 
     return 'corner';
+  }
+
+  private _isProportionalElement(element: EdgelessModel) {
+    return (
+      isImageBlock(element) ||
+      isBookmarkBlock(element) ||
+      isAttachmentBlock(element) ||
+      isEmbeddedBlock(element)
+    );
   }
 
   private _shouldRenderSelection(elements?: Selectable[]) {
@@ -598,11 +604,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         props.edgeless = { ...element.edgeless, scale };
         props.xywh = bound.serialize();
         edgeless.service.updateElement(element.id, props);
-      } else if (
-        isImageBlock(element) ||
-        isBookmarkBlock(element) ||
-        isEmbeddedBlock(element)
-      ) {
+      } else if (this._isProportionalElement(element)) {
         const curBound = Bound.deserialize(element.xywh);
 
         if (isImageBlock(element)) {
@@ -814,8 +816,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     } = this;
 
     const rect = getSelectedRect(elements);
-    const proportion = elements.some(
-      ele => isImageBlock(ele) || isBookmarkBlock(ele) || isEmbeddedBlock(ele)
+    const proportion = elements.some(element =>
+      this._isProportionalElement(element)
     );
     // if there are more than one element, we need to refresh the state of resize manager
     if (elements.length > 1) refresh = true;
@@ -928,7 +930,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _canRotate() {
     return !this.selection.elements.every(
-      ele => isNoteBlock(ele) || isFrameBlock(ele) || isBookmarkBlock(ele)
+      ele =>
+        isNoteBlock(ele) ||
+        isFrameBlock(ele) ||
+        isBookmarkBlock(ele) ||
+        isAttachmentBlock(ele) ||
+        isEmbeddedBlock(ele)
     );
   }
 

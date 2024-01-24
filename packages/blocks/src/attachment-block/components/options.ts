@@ -16,7 +16,7 @@ import {
 import { stopPropagation } from '../../_common/utils/event.js';
 import type { AttachmentBlockComponent } from '../attachment-block.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
-import { allowEmbed, turnIntoEmbedAction } from '../embed.js';
+import { allowEmbed, convertToEmbed } from '../embed.js';
 import { MoreMenu } from './more-menu.js';
 import { RenameModal } from './rename-model.js';
 import { styles } from './styles.js';
@@ -93,7 +93,7 @@ export function AttachmentOptionsTemplate({
         ?hidden=${model.embed}
         ?disabled=${readonly || disableEmbed}
         @click="${() => {
-          turnIntoEmbedAction(model);
+          convertToEmbed(model);
           abortController.abort();
         }}"
       >

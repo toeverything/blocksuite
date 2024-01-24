@@ -1,5 +1,5 @@
 import type { BlockService } from '@blocksuite/block-std';
-import { assertExists, throttle } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -89,7 +89,7 @@ export class FileDropManager {
     return targetModel;
   }
 
-  private _onDragOver = (event: DragEvent) => {
+  onDragOver = (event: DragEvent) => {
     event.preventDefault();
 
     // allow only external drag-and-drop files
@@ -113,8 +113,6 @@ export class FileDropManager {
       this._indicator.rect = null;
     }
   };
-
-  onDragOver = throttle(this._onDragOver, 1000 / 60);
 
   private _onDrop = (event: DragEvent) => {
     const { onDrop } = this._fileDropOptions;

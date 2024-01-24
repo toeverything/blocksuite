@@ -163,7 +163,7 @@ export function isUrlInClipboard(clipboardData: DataTransfer) {
   return isValidUrl(url);
 }
 
-type EmbedCardImages = {
+type EmbedCardIcons = {
   LoadingIcon: TemplateResult<1>;
   EmbedCardBannerIcon: TemplateResult<1>;
   EmbedCardHorizontalIcon: TemplateResult<1>;
@@ -172,7 +172,7 @@ type EmbedCardImages = {
   EmbedCardCubeIcon: TemplateResult<1>;
 };
 
-export function getEmbedCardIcons(): EmbedCardImages {
+export function getEmbedCardIcons(): EmbedCardIcons {
   const theme = getThemeMode();
   if (theme === 'light') {
     return {

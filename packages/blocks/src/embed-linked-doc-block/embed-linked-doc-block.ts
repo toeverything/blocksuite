@@ -7,7 +7,13 @@ import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Workspace } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing, render, type TemplateResult } from 'lit';
-import { customElement, query, queryAsync, state } from 'lit/decorators.js';
+import {
+  customElement,
+  property,
+  query,
+  queryAsync,
+  state,
+} from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -58,7 +64,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   @state()
   private _isBannerEmpty = false;
 
-  @state()
+  @property({ attribute: false })
   showCaption = false;
 
   @query('embed-card-caption')
@@ -521,7 +527,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
           })}
         >
           <div
-            ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
+            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
             class="affine-embed-linked-doc-block${cardClassMap}"
             @click=${this._handleClick}
             @dblclick=${this._handleDoubleClick}
