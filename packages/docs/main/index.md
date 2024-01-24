@@ -23,7 +23,6 @@ hero:
 features:
   - title: 🧩 Headless Editor Framework
     details: BlockSuite defines the meta framework for building various editors, enabling the design of diverse and adaptable editing interfaces.
-    # link: /design-philosophy
     link: /overview
     linkText: Learn More
   - title: 🧬 Collaborative at Core
