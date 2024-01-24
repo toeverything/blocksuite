@@ -209,7 +209,17 @@ export abstract class ElementModel<Props extends BaseProps = BaseProps>
     delete this[prop];
 
     // @ts-ignore
-    this[prop] = value;
+    if (this['_yProps']?.has(prop)) {
+      this.surface.page.transact(() => {
+        this.yMap.set(prop as string, value);
+      });
+    }
+    // @ts-ignore
+    else if (this['_localProps']?.has(prop)) {
+      this._local.set(prop as string, value);
+    } else {
+      console.warn('pop a prop that is not yfield or local:', prop);
+    }
   }
 
   containedByBounds(bounds: Bound): boolean {
