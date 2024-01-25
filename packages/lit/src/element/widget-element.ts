@@ -1,4 +1,5 @@
-import type { EventName, UIEventHandler } from '@blocksuite/block-std';
+import type { BlockService } from '@blocksuite/block-std';
+import { type EventName, type UIEventHandler } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import { LitElement } from 'lit';
@@ -19,20 +20,16 @@ export class WidgetElement<
 
   path!: string[];
 
+  service!: BlockService;
+
+  blockElement!: B;
+
   get widgetName(): string {
     return this.path[this.path.length - 1];
   }
 
   get hostPath() {
     return this.path.slice(0, -1);
-  }
-
-  get blockElement(): B {
-    const parentElement = this.parentElement;
-    assertExists(parentElement);
-    const nodeView = this.host.view.getNodeView(parentElement);
-    assertExists(nodeView);
-    return nodeView.view as B;
   }
 
   get flavour(): string {
@@ -69,19 +66,25 @@ export class WidgetElement<
 
   override connectedCallback() {
     super.connectedCallback();
+    const parentElement = this.parentElement;
+    assertExists(parentElement);
+    const nodeView = this.host.view.getNodeView(parentElement);
+    assertExists(nodeView);
+    this.blockElement = nodeView.view as B;
+    this.service = this.blockElement.service;
     this.path = this.host.view.calculatePath(this);
-    this.blockElement.service.specSlots.widgetConnected.emit({
+    this.service.specSlots.widgetConnected.emit({
       service: this.blockElement.service,
       component: this,
     });
   }
 
   override disconnectedCallback() {
-    this.blockElement.service.specSlots.widgetDisconnected.emit({
+    super.disconnectedCallback();
+    this.service.specSlots.widgetDisconnected.emit({
       service: this.blockElement.service,
       component: this,
     });
-    super.disconnectedCallback();
   }
 
   override render(): unknown {

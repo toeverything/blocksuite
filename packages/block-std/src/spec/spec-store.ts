@@ -1,8 +1,8 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
 
 import { BlockService } from '../service/index.js';
-import { getSlots } from './container.js';
 import type { BlockSpec } from './index.js';
+import { getSlots } from './slots.js';
 
 export class SpecStore {
   private _specs: Map<string, BlockSpec> = new Map();

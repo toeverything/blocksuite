@@ -3,7 +3,7 @@ import { type BlockSchemaType } from '@blocksuite/store';
 
 import type { BlockService } from '../service/index.js';
 import { type BlockServiceConstructor } from '../service/index.js';
-import type { BlockSpecSlots } from './container.js';
+import type { BlockSpecSlots } from './slots.js';
 
 export interface BlockView<WidgetNames extends string = string> {
   component: BlockSuite.Component;

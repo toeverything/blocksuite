@@ -3,7 +3,7 @@ import type { BlockModel } from '@blocksuite/store';
 
 import type { EventName, UIEventHandler } from '../event/index.js';
 import type { BlockStdScope } from '../scope/index.js';
-import type { BlockSpecSlots } from '../spec/container.js';
+import type { BlockSpecSlots } from '../spec/slots.js';
 
 export interface BlockServiceOptions {
   flavour: string;
