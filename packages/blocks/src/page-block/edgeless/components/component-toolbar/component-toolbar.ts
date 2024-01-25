@@ -490,8 +490,11 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     ) {
       buttons.push(this._Divider());
     }
-    buttons.unshift(this._Divider());
-    buttons.unshift(this._customRender() ?? nothing);
+    const customRenderResult = this._customRender();
+    if (customRenderResult) {
+      buttons.unshift(this._Divider());
+      buttons.unshift(customRenderResult);
+    }
     return html` <style>
         :host {
           position: absolute;
