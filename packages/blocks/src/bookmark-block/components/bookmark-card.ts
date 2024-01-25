@@ -110,7 +110,11 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     const titleIcon = loading
       ? LoadingIcon
       : icon
-        ? html`<object type="image/${titleIconType}" data=${icon}>
+        ? html`<object
+            type="image/${titleIconType}"
+            data=${icon}
+            draggable="false"
+          >
             ${WebIcon16}
           </object>`
         : WebIcon16;
@@ -125,7 +129,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
     const bannerImage =
       !loading && image
-        ? html`<object type="image/webp" data=${image}>
+        ? html`<object type="image/webp" data=${image} draggable="false">
             ${EmbedCardBannerIcon}
           </object>`
         : EmbedCardBannerIcon;

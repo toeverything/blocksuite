@@ -207,14 +207,14 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     const descriptionText = loading ? '' : description;
     const bannerImage =
       !loading && image
-        ? html`<object type="image/webp" data=${image}>
+        ? html`<object type="image/webp" data=${image} draggable="false">
             ${EmbedCardBannerIcon}
           </object>`
         : EmbedCardBannerIcon;
 
     const creatorImageEl =
       !loading && creatorImage
-        ? html`<object type="image/webp" data=${creatorImage}>
+        ? html`<object type="image/webp" data=${creatorImage} draggable="false">
             ${EmbedCardBannerIcon}
           </object>`
         : nothing;
