@@ -17,6 +17,12 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   bookmark!: BookmarkBlockComponent;
 
+  @property({ attribute: false })
+  loading!: boolean;
+
+  @property({ attribute: false })
+  loadingFailed!: boolean;
+
   @state()
   private _isSelected = false;
 
@@ -29,10 +35,6 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       this.bookmark.model.propsUpdated.on(() => {
         this.requestUpdate();
       })
-    );
-
-    this.disposables.add(
-      this.bookmark.slots.loadingUpdated.on(() => this.requestUpdate())
     );
 
     this._themeObserver.observe(document.documentElement);
@@ -56,14 +58,6 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     selectionManager.setGroup('note', [blockSelection]);
   }
 
-  private _openLink() {
-    let link = this.bookmark.model.url;
-    if (!link.match(/^[a-zA-Z]+:\/\//)) {
-      link = 'https://' + link;
-    }
-    window.open(link, '_blank');
-  }
-
   private _handleClick() {
     if (!this.bookmark.isInSurface) {
       this._selectBlock();
@@ -72,18 +66,15 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
   private _handleDoubleClick(event: MouseEvent) {
     event.stopPropagation();
-    this._openLink();
+    this.bookmark.open();
   }
 
   override render() {
     const { icon, title, url, description, image, style } = this.bookmark.model;
 
-    const loading = this.bookmark.loading;
-    const loadingFailed = this.bookmark.loadingFailed;
-
     const cardClassMap = classMap({
-      loading,
-      'loading-failed': loadingFailed,
+      loading: this.loading,
+      'loading-failed': this.loadingFailed,
       [style]: true,
       selected: this._isSelected,
     });
@@ -92,10 +83,10 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
       /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n]+)/im
     )?.[1];
 
-    const titleText = loading
+    const titleText = this.loading
       ? 'Loading...'
       : !title
-        ? loadingFailed
+        ? this.loadingFailed
           ? domainName ?? 'Link card'
           : ''
         : title;
@@ -107,7 +98,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
         ? 'svg+xml'
         : icon?.split('.').pop();
 
-    const titleIcon = loading
+    const titleIcon = this.loading
       ? LoadingIcon
       : icon
         ? html`<object
@@ -119,16 +110,16 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
           </object>`
         : WebIcon16;
 
-    const descriptionText = loading
+    const descriptionText = this.loading
       ? ''
       : !description
-        ? loadingFailed
+        ? this.loadingFailed
           ? 'Failed to retrieve link information.'
           : url
         : description ?? '';
 
     const bannerImage =
-      !loading && image
+      !this.loading && image
         ? html`<object type="image/webp" data=${image} draggable="false">
             ${EmbedCardBannerIcon}
           </object>`
@@ -148,7 +139,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
           <div class="affine-bookmark-content-description">
             ${descriptionText}
           </div>
-          <div class="affine-bookmark-content-url" @click=${this._openLink}>
+          <div class="affine-bookmark-content-url" @click=${this.bookmark.open}>
             <span>${url}</span>
             <div class="affine-bookmark-content-url-icon">${OpenIcon}</div>
           </div>
