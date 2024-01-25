@@ -4,10 +4,10 @@ BlockSuite is a toolkit for building collaborative editors and applications. It 
 
 - Build new editors from the ground up based on the BlockSuite framework.
 - Or, reuse multiple first-party BlockSuite editors right out of the box:
-  - [**`DocEditor`**](./presets/doc-editor): **Built entirely from scratch**, `DocEditor` is a comprehensive block-based document editor, offering extensive customization and flexibility.
-  - [**`EdgelessEditor`**](./presets/edgeless-editor): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
+  - [**`DocEditor`**](../presets/doc-editor): **Built entirely from scratch**, `DocEditor` is a comprehensive block-based document editor, offering extensive customization and flexibility.
+  - [**`EdgelessEditor`**](../presets/edgeless-editor): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
 
-![showcase-doc-edgeless-editors](./images/showcase-doc-edgeless-editors.jpg)
+![showcase-doc-edgeless-editors](../images/showcase-doc-edgeless-editors.jpg)
 
 The BlockSuite project is structured around key packages that are categorized into two groups: a headless framework and prebuilt editing components.
 
@@ -49,7 +49,7 @@ The BlockSuite project is structured around key packages that are categorized in
 
 This can be illustrated as the diagram below:
 
-![package-overview.png](./images/package-overview.png)
+![package-overview.png](../images/package-overview.png)
 
 In addition to extending custom blocks, here are what you can also conveniently achieve with BlockSuite:
 

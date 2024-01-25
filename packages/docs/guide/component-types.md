@@ -12,7 +12,7 @@ The `@blocksuite/presets` package includes reusable editors like `DocEditor` and
 
 The distinction between editors and fragments lies in their complexity and functionality. **Fragments typically offer more simplified capabilities, serving specific UI purposes, whereas editors provide comprehensive editing capabilities over the block tree**. Nevertheless, both editors and fragments shares similar tech stacks and [data flows](./crdt-native-data-flow).
 
-![showcase-fragments-2](./images/showcase-fragments-2.jpg)
+![showcase-fragments-2](../images/showcase-fragments-2.jpg)
 
 ## Blocks and Widgets
 
@@ -20,7 +20,7 @@ To address the complexity and diversity of editing needs, BlockSuite architects 
 
 Within each block spec, there can be [`Widget`](./block-widgets)s specific to that block's implementation, enhancing interactivity within the editor. BlockSuite leverages this widget mechanism to register dynamic UI components such as drag handles and slash menus within the doc editor.
 
-![component-types](./images/component-types.png)
+![component-types](../images/component-types.png)
 
 ## Composing Editors by Blocks
 
@@ -66,7 +66,7 @@ With very little overhead.
 
 So, as long as there is a corresponding `host` implementation, you can use the component model of frameworks like react or vue to implement your BlockSuite editors:
 
-![framework-agnostic](./images/framework-agnostic.png)
+![framework-agnostic](../images/framework-agnostic.png)
 
 Explore the [`DocEditor` source code](https://github.com/toeverything/blocksuite/blob/master/packages/presets/src/editors/doc-editor.ts) to see how this pattern allows composing minimal real-world editors.
 
@@ -74,7 +74,7 @@ Explore the [`DocEditor` source code](https://github.com/toeverything/blocksuite
 
 BlockSuite encourages the derivation of various block spec implementations from a single block model to enrich the editing experience. For instance, the root node of the block tree, the _page block_, is implemented differently for `DocEditor` and `EdgelessEditor` through two different specs **but with the same shared `PageBlockModel`**. The two block specs serve as the top-level UI components for their respective editors:
 
-![showcase-doc-edgeless-editors](./images/showcase-doc-edgeless-editors.jpg)
+![showcase-doc-edgeless-editors](../images/showcase-doc-edgeless-editors.jpg)
 
 This allows you to **implement various editors easily on top of the same document**, providing diverse editing experiences and great potentials in customizability.
 

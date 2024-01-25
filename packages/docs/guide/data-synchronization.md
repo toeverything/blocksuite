@@ -81,6 +81,6 @@ In both cases, whether the document is **loaded** or **created**, the [`page.slo
 
 Furthermore, by connecting multiple providers, documents can automatically be synchronized to a variety of different backends:
 
-![pluggable-providers](./images/pluggable-providers.png)
+![pluggable-providers](../images/pluggable-providers.png)
 
 This brings great flexibility and is the pattern currently being used in [AFFiNE](https://github.com/toeverything/AFFiNE).
