@@ -62,9 +62,7 @@ export class Clipboard {
       if (item) {
         return item;
       }
-      const files = ((data.get('Files') ?? []) as File[]).filter(
-        f => f.type === type
-      );
+      const files = (data.get('Files') ?? []) as File[];
       if (files.length > 0) {
         return files;
       }
@@ -99,7 +97,12 @@ export class Clipboard {
         if (item.length === 0) {
           continue;
         }
-        if (!item.map(f => f.type === type).reduce((a, b) => a || b, false)) {
+        if (
+          // if all files are not the same target type, fallback to */*
+          !item
+            .map(f => f.type === type || type === '*/*')
+            .reduce((a, b) => a && b, true)
+        ) {
           continue;
         }
       }
