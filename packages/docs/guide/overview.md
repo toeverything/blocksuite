@@ -7,7 +7,7 @@ BlockSuite is a toolkit for building collaborative editors and applications. It 
   - [**`DocEditor`**](../presets/doc-editor): **Built entirely from scratch**, `DocEditor` is a comprehensive block-based document editor, offering extensive customization and flexibility.
   - [**`EdgelessEditor`**](../presets/edgeless-editor): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
 
-![showcase-doc-edgeless-editors](../images/showcase-doc-edgeless-editors.jpg)
+<iframe src="https://try-blocksuite.vercel.app/starter/?init" width="100%" height="500"></iframe>
 
 The BlockSuite project is structured around key packages that are categorized into two groups: a headless framework and prebuilt editing components.
 

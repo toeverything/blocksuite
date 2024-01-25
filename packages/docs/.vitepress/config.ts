@@ -134,6 +134,11 @@ const reference: DefaultTheme.NavItem[] = [
   },
 ];
 
+const presets: DefaultTheme.NavItem[] = [
+  { text: '📝 DocEditor', link: 'presets/doc-editor' },
+  { text: '🎨 EdgelessEditor', link: 'presets/edgeless-editor' },
+];
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   vite: {
@@ -167,6 +172,7 @@ export default defineConfig({
     sidebar: {
       '/guide/': { base: '/', items: guide },
       '/api/': { base: '/', items: reference },
+      '/presets/': { base: '/', items: presets },
     },
 
     socialLinks: [
