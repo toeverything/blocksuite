@@ -17,7 +17,11 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
 import './side-panel.js';
 
-import type { PageService, TreeNode } from '@blocksuite/blocks';
+import type {
+  AffineTextAttributes,
+  PageService,
+  TreeNode,
+} from '@blocksuite/blocks';
 import {
   BlocksUtils,
   ColorVariables,
@@ -31,6 +35,7 @@ import {
   ZipTransformer,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
+import type { DeltaInsert } from '@blocksuite/inline/types';
 import {
   type BlockElement,
   type EditorHost,
@@ -38,7 +43,7 @@ import {
 } from '@blocksuite/lit';
 import type { AffineEditorContainer, CopilotPanel } from '@blocksuite/presets';
 import type { BlockModel } from '@blocksuite/store';
-import { Utils, type Workspace } from '@blocksuite/store';
+import { Text, Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
@@ -425,7 +430,28 @@ export class DebugMenu extends ShadowlessElement {
         return;
       }
       try {
-        await ZipTransformer.importPages(this.workspace, file);
+        const pages = await ZipTransformer.importPages(this.workspace, file);
+        for (const page of pages) {
+          const noteBlock = window.page.getBlockByFlavour('affine:note');
+          window.page.addBlock(
+            'affine:paragraph',
+            {
+              type: 'text',
+              text: new Text([
+                {
+                  insert: ' ',
+                  attributes: {
+                    reference: {
+                      type: 'LinkedPage',
+                      pageId: page.id,
+                    },
+                  },
+                } as DeltaInsert<AffineTextAttributes>,
+              ]),
+            },
+            noteBlock[0].id
+          );
+        }
         this.requestUpdate();
       } catch (e) {
         console.error('Invalid snapshot.');
