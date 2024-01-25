@@ -164,6 +164,8 @@ export class EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    this.contentEditable = 'false';
+
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
