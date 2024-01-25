@@ -14,17 +14,16 @@ import {
 } from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
-import type { TemplateJob } from '../../surface-block/service/template.js';
+import { Bound } from '../../surface-block/utils/bound.js';
+import { PageService } from '../page-service.js';
+import { EdgelessSelectionManager } from './services/selection-manager.js';
+import { TemplateJob } from './services/template.js';
 import {
   createInsertPlaceMiddleware,
   createRegenerateIndexMiddleware,
   createStickerMiddleware,
   replaceIdMiddleware,
-} from '../../surface-block/service/template-middlewares.js';
-import type { SurfaceService } from '../../surface-block/surface-service.js';
-import { Bound } from '../../surface-block/utils/bound.js';
-import { PageService } from '../page-service.js';
-import { EdgelessSelectionManager } from './services/selection-manager.js';
+} from './services/template-middlewares.js';
 import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import { EdgelessToolsManager } from './services/tools-manager.js';
 import type {
@@ -35,6 +34,8 @@ import type {
 import { Viewport } from './utils/viewport.js';
 
 export class EdgelessPageService extends PageService {
+  TemplateJob = TemplateJob;
+
   private _surface!: SurfaceBlockModel;
   private _layer!: LayerManager;
   private _selection!: EdgelessSelectionManager;
@@ -454,9 +455,7 @@ export class EdgelessPageService extends PageService {
     }
 
     middlewares.push(replaceIdMiddleware);
-    const TemplateJob = (
-      this.std.spec.getService('affine:surface') as SurfaceService
-    ).TemplateJob;
+
     return TemplateJob.create({
       model: this.surface,
       type,
