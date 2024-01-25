@@ -212,6 +212,17 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     };
   };
 
+  private _updateOnElementChange = (element: string | { id: string }) => {
+    const id = typeof element === 'string' ? element : element.id;
+    const ele = this.edgeless?.service.getElementById(id);
+    if (!ele || !ele.xywh) return;
+    const frameBound = Bound.deserialize(this.frame.xywh);
+    const eleBound = Bound.deserialize(ele.xywh);
+    if (!frameBound.isOverlapWithBound(eleBound)) return;
+
+    this._refreshViewport();
+  };
+
   private _clearEdgelessDisposables = () => {
     this._edgelessDisposables?.dispose();
     this._edgelessDisposables = null;
@@ -237,6 +248,17 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
           this.fillScreen = fillScreen;
           this._refreshViewport();
         }
+      })
+    );
+    this._edgelessDisposables.add(
+      edgeless.service.surface.elementAdded.on(this._updateOnElementChange)
+    );
+    this._edgelessDisposables.add(
+      edgeless.service.surface.elementUpdated.on(this._updateOnElementChange)
+    );
+    this._edgelessDisposables.add(
+      edgeless.service.surface.elementRemoved.on(() => {
+        this._refreshViewport();
       })
     );
   }
