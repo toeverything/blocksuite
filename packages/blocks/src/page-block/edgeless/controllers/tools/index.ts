@@ -9,7 +9,7 @@ import type { EdgelessBlockModel } from '../../type.js';
 export abstract class EdgelessToolController<
   Tool extends EdgelessTool = EdgelessTool,
 > {
-  protected readonly _edgeless: EdgelessPageBlockComponent;
+  protected _edgeless!: EdgelessPageBlockComponent;
 
   protected _draggingArea: SelectionArea | null = null;
 
@@ -17,12 +17,12 @@ export abstract class EdgelessToolController<
 
   enableHover = false;
 
-  constructor(
-    edgeless: EdgelessPageBlockComponent,
-    service: EdgelessPageService
-  ) {
-    this._edgeless = edgeless;
+  constructor(service: EdgelessPageService) {
     this._service = service;
+  }
+
+  mount(edgeless: EdgelessPageBlockComponent) {
+    this._edgeless = edgeless;
   }
 
   get draggingArea() {
