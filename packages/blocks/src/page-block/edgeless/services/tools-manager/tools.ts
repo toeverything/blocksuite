@@ -4,19 +4,25 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 
-import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import type { EdgelessPageService } from '../edgeless-page-service.js';
+import type { IPoint } from '../../../../surface-block/utils/point.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import type { EdgelessPageService } from '../../edgeless-page-service.js';
 
 type HookContext = {
   store: Record<string, unknown>;
   abort: () => void;
 };
+
 type HookHandler = (event: UIEventStateContext, ctx: HookContext) => void;
+
+type ToolSwitchHandler = (tool: ToolController) => void;
 
 export class EdgelessToolsManager {
   private _tools: Map<string, ToolController> = new Map();
-  private _handlers: Map<ToolController, Record<string, UIEventHandler>> =
-    new Map();
+  private _handlers: Map<
+    ToolController,
+    Record<string, (UIEventHandler | ToolSwitchHandler)[]>
+  > = new Map();
   private _hooks: Map<string, HookHandler[]> = new Map();
   private _mounted = false;
   private _service!: EdgelessPageService;
@@ -37,7 +43,7 @@ export class EdgelessToolsManager {
   }
 
   private _mountController(tool: ToolController) {
-    tool['_container'] = this._container;
+    tool['_edgeless'] = this._container;
     tool['_service'] = this._service;
     tool['_tool'] = this;
     tool.mount();
@@ -73,7 +79,10 @@ export class EdgelessToolsManager {
 
         const tool = this.currentTool;
         if (tool && options?.stopDefaultHandler !== true) {
-          this._handlers.get(tool)?.[eventName]?.(evtCtx);
+          const handlers = this._handlers.get(tool)?.[eventName];
+          handlers?.forEach(handler => {
+            (handler as UIEventHandler)?.(evtCtx);
+          });
         }
       });
     };
@@ -122,13 +131,37 @@ export class EdgelessToolsManager {
   }
 
   protected _add(
+    eventName: 'beforeswitch' | 'afterswitch',
+    handler: ToolSwitchHandler,
+    tool: ToolController
+  ): void;
+  protected _add(
+    eventName: EventName,
+    handler: UIEventHandler,
+    tool: ToolController
+  ): void;
+  protected _add(
+    eventName: EventName | 'beforeswitch' | 'afterswitch',
+    handler: UIEventHandler | ToolSwitchHandler,
+    tool: ToolController
+  ) {
+    const handlers = this._handlers.get(tool) ?? {};
+    handlers[eventName] = handlers[eventName] ?? [];
+    handlers[eventName].push(handler);
+    this._handlers.set(tool, handlers);
+  }
+
+  protected _remove(
     eventName: EventName,
     handler: UIEventHandler,
     tool: ToolController
   ) {
     const handlers = this._handlers.get(tool) || {};
-    handlers[eventName] = handler;
-    this._handlers.set(tool, handlers);
+    const index = handlers[eventName]?.indexOf(handler);
+
+    if (index >= 0) {
+      handlers[eventName].splice(index, 1);
+    }
   }
 
   protected _hook(eventName: EventName, handler: HookHandler) {
@@ -136,19 +169,79 @@ export class EdgelessToolsManager {
     hooks.push(handler);
     this._hooks.set(eventName, hooks);
   }
+
+  protected _unhook(eventName: EventName, handler: HookHandler) {
+    const hooks = this._hooks.get(eventName) || [];
+    const index = hooks.indexOf(handler);
+    if (index >= 0) {
+      hooks.splice(index, 1);
+    }
+  }
 }
 
+type SelectionArea = {
+  start: IPoint;
+  end: IPoint;
+};
+
 export abstract class ToolController {
-  protected _container!: EdgelessPageBlockComponent;
+  protected _edgeless!: EdgelessPageBlockComponent;
   protected _service!: EdgelessPageService;
   protected _tool!: EdgelessToolsManager;
+  protected _draggingArea!: SelectionArea | null;
 
-  protected on(eventName: EventName, handler: UIEventHandler) {
+  get _page() {
+    return this._service.page;
+  }
+
+  get _surface() {
+    return this._edgeless.surface;
+  }
+
+  get draggingArea() {
+    return this._draggingArea;
+  }
+
+  /**
+   * Attach event handler. The handler will be excuted when tool is activated.
+   * By default, the handler will be removed automatically in unmount stage.
+   * But you can still remove it manually through `off` method.
+   *
+   * @param eventName
+   * @param handler
+   */
+  protected on(
+    eventName: 'beforeswitch' | 'afterswitch',
+    handler: ToolSwitchHandler
+  ): void;
+  protected on(eventName: EventName, handler: UIEventHandler): void;
+  protected on(
+    eventName: EventName | 'beforeswitch' | 'afterswitch',
+    handler: UIEventHandler | ToolSwitchHandler
+  ): void {
+    // @ts-ignore
     this._tool['_add'](eventName, handler, this);
+  }
+
+  protected off(
+    eventName: 'beforeswitch' | 'afterswitch',
+    handler: ToolSwitchHandler
+  ): void;
+  protected off(eventName: EventName, handler: UIEventHandler): void;
+  protected off(
+    eventName: EventName | 'beforeswitch' | 'afterswitch',
+    handler: UIEventHandler | ToolSwitchHandler
+  ): void {
+    // @ts-ignore
+    this._tool['_remove'](eventName, handler, this);
   }
 
   protected hook(eventName: EventName, handler: HookHandler) {
     this._tool['_hook'](eventName, handler);
+  }
+
+  protected unhook(eventName: EventName, handler: HookHandler) {
+    this._tool['_unhook'](eventName, handler);
   }
 
   abstract readonly name: string;
