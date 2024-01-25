@@ -223,7 +223,6 @@ export class EditSessionStorage {
 
     recursive(props, overrideProps);
     this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
-    sessionStorage.setItem(SESSION_PROP_KEY, JSON.stringify(this._lastProps));
   }
 
   apply(type: EdgelessElementType, props: Record<string, unknown>) {
