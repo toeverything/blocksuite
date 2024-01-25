@@ -321,6 +321,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     this._frameDisposables = new DisposableGroup();
     this._frameDisposables.add(
       frame.propsUpdated.on(() => {
+        this.requestUpdate();
         this._refreshViewport();
       })
     );
