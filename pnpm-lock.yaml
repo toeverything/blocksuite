@@ -295,17 +295,17 @@ importers:
         specifier: ^1.15.7
         version: 1.15.7
 
-  packages/docs/main:
+  packages/docs:
     dependencies:
       '@blocksuite/blocks':
         specifier: workspace:*
-        version: link:../../blocks
+        version: link:../blocks
       '@blocksuite/presets':
         specifier: workspace:*
-        version: link:../../presets
+        version: link:../presets
       '@blocksuite/store':
         specifier: workspace:*
-        version: link:../../store
+        version: link:../store
       markdown-it-container:
         specifier: ^4.0.0
         version: 4.0.0

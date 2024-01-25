@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /overview
+      link: /guide/overview
     - theme: alt
       text: DocEditor
       link: /presets/doc-editor
@@ -23,14 +23,14 @@ hero:
 features:
   - title: 🧩 Headless Editor Framework
     details: BlockSuite defines the meta framework for building various editors, enabling the design of diverse and adaptable editing interfaces.
-    link: /overview
+    link: /guide/overview
     linkText: Learn More
   - title: 🧬 Collaborative at Core
     details: Powered by CRDT, BlockSuite supports document streaming and conflict resolution at its heart, ready for collaboration inherently.
-    link: /crdt-native-data-flow
+    link: /guide/crdt-native-data-flow
     linkText: Learn More
   - title: 🎨 Extensive Components
     details: BlockSuite ships a comprehensive set of editing component presets, assisting development with adaptable building blocks.
-    link: /component-types
+    link: /guide/component-types
     linkText: Learn More
 ---

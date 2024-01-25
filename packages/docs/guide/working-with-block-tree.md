@@ -42,9 +42,9 @@ page.deleteBlock(modelA);
 
 This example creates a subset of the block tree hierarchy defaultly used in `@blocksuite/presets`, illustrated as follows:
 
-![block-nesting](./images/block-nesting.png)
+![block-nesting](../images/block-nesting.png)
 
-As a document-centric framework, **you need to initialize a valid document structure before attaching it to editors**, which is also why it requires `init()` after `createEmptyPage()`. See [creating new block tree](./data-synchronization#creating-new-block-tree) for more details.
+In BlockSuite, you need to initialize a valid document structure before attaching it to editors, which is also why it requires `init()` after `createEmptyPage()`.
 
 ::: info
 The block tree hierarchy is specific to the preset editors. At the framework level, `@blocksuite/store` does **NOT** treat the "first-party" `affine:*` blocks with any special way. Feel free to add blocks from different namespaces for the block tree!
@@ -87,7 +87,7 @@ Firstly, let's explain the newly introduced `host` and `std`, which are determin
 
 As the runtime for the block tree, this is the mental model inside the `editor`:
 
-![editor-structure](./images/editor-structure.png)
+![editor-structure](../images/editor-structure.png)
 
 ## Selecting Blocks
 
@@ -111,7 +111,7 @@ In `block-std`, BlockSuite implements several atomic selection types for `Select
 
 This allows the selection manager to handle different types of selections, as shown in the following illustration, using the same API:
 
-![selection-types](./images/selection-types.png)
+![selection-types](../images/selection-types.png)
 
 In `selection.value`, different types of selection states can coexist simultaneously. Each selection object records at least the `id` and `path` of the corresponding selected block (i.e., the sequence of ids of all blocks from the root block to that block). Moreover, you can further categorize different types of selections using the `group` field. For example in `DocEditor`, both `TextSelection` and `BlockSelection` belong to the `note` group. Hence, the example structure of block selection in the above image is as follows:
 
@@ -132,7 +132,7 @@ In `selection.value`, different types of selection states can coexist simultaneo
 
 For the more complex native [selection](https://developer.mozilla.org/en-US/docs/Web/API/Selection), the `TextSelection` can be used to model it. It marks the start and end positions of the native selection in the block through the `from` and `to` fields, recording only the `index` and `length` of the inline text sequence in the respective block. This simplification is made possible by the architecture of BlockSuite, where editable blocks use `@blocksuite/inline` as the rich text editing component. Each block tree node's rich text content is rendered independently into different inline editors, eliminating nesting between rich text instances:
 
-![flat-inlines](./images/flat-inlines.png)
+![flat-inlines](../images/flat-inlines.png)
 
 Additionally, the entire `selection.value` object is isolated under the `clientId` scope of the current session. During collaborative editing, selection instances between different clients will be distributed in real-time (via [providers](./data-synchronization#document-streaming)), facilitating the implementation of UI states like remote cursors.
 
@@ -300,7 +300,7 @@ This design aims at balancing ease of use with customizability. Both the service
 - A single block to be configured with different widget combinations. For instance, you can remove all widgets to compose read-only editors.
 - A single block to even be implemented based on different frontend frameworks, by simply providing an `EditorHost` middleware implementation for the respective framework.
 
-![framework-agnostic](./images/framework-agnostic.png)
+![framework-agnostic](../images/framework-agnostic.png)
 
 ::: info
 
