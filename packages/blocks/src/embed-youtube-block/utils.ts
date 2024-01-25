@@ -58,29 +58,40 @@ export async function queryYoutubeOEmbedData(
 export async function refreshEmbedYoutubeUrlData(
   embedYoutubeElement: EmbedYoutubeBlockComponent
 ) {
-  embedYoutubeElement.loading = true;
-
-  const queryUrlData = embedYoutubeElement.service?.queryUrlData;
-  assertExists(queryUrlData);
-  const youtubeUrlData = await queryUrlData(embedYoutubeElement.model);
-
-  const {
-    image = null,
+  let image = null,
     title = null,
     description = null,
     creator = null,
     creatorUrl = null,
-    creatorImage = null,
-  } = youtubeUrlData;
+    creatorImage = null;
 
-  embedYoutubeElement.page.updateBlock(embedYoutubeElement.model, {
-    image,
-    title,
-    description,
-    creator,
-    creatorUrl,
-    creatorImage,
-  });
+  try {
+    embedYoutubeElement.loading = true;
 
-  embedYoutubeElement.loading = false;
+    const queryUrlData = embedYoutubeElement.service?.queryUrlData;
+    assertExists(queryUrlData);
+
+    const youtubeUrlData = await queryUrlData(embedYoutubeElement.model);
+    ({
+      image = null,
+      title = null,
+      description = null,
+      creator = null,
+      creatorUrl = null,
+      creatorImage = null,
+    } = youtubeUrlData);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    embedYoutubeElement.page.updateBlock(embedYoutubeElement.model, {
+      image,
+      title,
+      description,
+      creator,
+      creatorUrl,
+      creatorImage,
+    });
+
+    embedYoutubeElement.loading = false;
+  }
 }
