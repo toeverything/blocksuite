@@ -1,11 +1,11 @@
 import { Bound } from '@blocksuite/blocks';
 import { nanoid } from '@blocksuite/store';
 
+import { basicCover } from './templates/basic-cover.js';
 import { basic1 } from './templates/basic1.js';
 import { basic2 } from './templates/basic2.js';
 import { basic3 } from './templates/basic3.js';
 import { basic4 } from './templates/basic4.js';
-import { basicCover } from './templates/basicCover.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const replaceText = (text: Record<string, string>, template: any) => {
