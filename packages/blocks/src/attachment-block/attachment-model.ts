@@ -3,6 +3,7 @@ import { BlockModel, defineBlockSchema } from '@blocksuite/store';
 import { selectable } from '../_common/edgeless/mixin/edgeless-selectable.js';
 import type { EmbedCardStyle } from '../_common/types.js';
 import type { SerializedXYWH } from '../surface-block/utils/xywh.js';
+import { AttachmentBlockTransformer } from './attachment-transformer.js';
 
 /**
  * When the attachment is uploading, the `sourceId` is `undefined`.
@@ -75,6 +76,7 @@ export const AttachmentBlockSchema = defineBlockSchema({
     role: 'content',
     parent: ['affine:note', 'affine:surface'],
   },
+  transformer: () => new AttachmentBlockTransformer(),
   toModel: () => new AttachmentBlockModel(),
 });
 
