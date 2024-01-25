@@ -225,10 +225,12 @@ export class EdgelessClipboardController extends PageClipboard {
         }
       });
 
-      await Promise.all([
-        this.host.addImages(imageFiles, point),
-        this.host.addAttachments(attachmentFiles, point),
-      ]);
+      // when only images in clipboard, add image-blocks else add all files as attachments
+      if (attachmentFiles.length === 0) {
+        await this.host.addImages(imageFiles, point);
+      } else {
+        await this.host.addAttachments([...files], point);
+      }
 
       return;
     }
