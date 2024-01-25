@@ -906,9 +906,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }
 
     this.keyboardManager = null;
-
-    this.tools.clear();
-    this.tools.dispose();
   }
 
   override renderBlock() {
