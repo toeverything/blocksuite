@@ -1,6 +1,6 @@
 import '../../../../surface-ref-block/surface-ref-portal.js';
 
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import {
   type EditorHost,
   ShadowlessElement,
@@ -15,6 +15,7 @@ import type {
   EdgelessModel,
   TopLevelBlockModel,
 } from '../../../../_common/types.js';
+import { buildPath } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import type { SurfaceBlockModel } from '../../../../surface-block/surface-model.js';
@@ -76,9 +77,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   frame!: FrameBlockModel;
 
   @property({ attribute: false })
-  page!: Page;
-
-  @property({ attribute: false })
   host!: EditorHost;
 
   @property({ attribute: false })
@@ -106,6 +104,10 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   @query('.frame-preview-surface-container surface-ref-portal')
   blocksPortal!: SurfaceRefPortal;
 
+  get page() {
+    return this.host.page;
+  }
+
   get surfaceRenderer() {
     return this._surfaceRefRenderer.surfaceRenderer;
   }
@@ -113,11 +115,25 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   private _attachRenderer() {
     if (
       this._surfaceRefRenderer?.surfaceRenderer.canvas.isConnected ||
-      !this.container
+      !this.container ||
+      !this.blocksPortal
     )
       return;
 
     this.surfaceRenderer.attach(this.container);
+    if (this.blocksPortal.isUpdatePending) {
+      this.blocksPortal.updateComplete
+        .then(() => {
+          this.blocksPortal.setStackingCanvas(
+            this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
+          );
+        })
+        .catch(console.error);
+    } else {
+      this.blocksPortal.setStackingCanvas(
+        this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
+      );
+    }
   }
 
   private get _surfaceRefService() {
@@ -125,12 +141,12 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       | SurfaceRefBlockService
       | undefined;
 
-    assertExists(service, 'SurfaceRefBlockService not found');
     return service;
   }
 
   private _setupSurfaceRefRenderer() {
     const surfaceRefService = this._surfaceRefService;
+    if (!surfaceRefService) return;
     const renderer = surfaceRefService.getRenderer(
       this._surfaceRefRendererId,
       this.page,
@@ -164,6 +180,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   private _cleanupSurfaceRefRenderer() {
     const surfaceRefService = this._surfaceRefService;
+    if (!surfaceRefService) return;
     surfaceRefService.removeRenderer(this._surfaceRefRendererId);
   }
 
@@ -176,7 +193,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
     // trigger a rerender to update element's size
     // and set viewport after element's size has been updated
-    this.requestUpdate();
     this.updateComplete
       .then(() => {
         this.surfaceRenderer.onResize();
@@ -283,10 +299,14 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
             this._refreshViewport();
           }
         } else {
-          const topLevelBlock = page.getBlockById(event.id);
+          const topLevelModel = page.getBlockById(event.id);
+          const topLevelBlock = this.host.view.viewFromPath(
+            'block',
+            buildPath(topLevelModel)
+          );
           if (!topLevelBlock) return;
           const newBound = Bound.deserialize(
-            (topLevelBlock as TopLevelBlockModel).xywh
+            (topLevelModel as TopLevelBlockModel).xywh
           );
           if (frameBound.containsPoint([newBound.x, newBound.y])) {
             this._refreshViewport();
@@ -351,15 +371,14 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     this._setupSurfaceRefRenderer();
     this._setPageDisposables(this.page);
     this._setEdgelessDisposables(this.edgeless);
+  }
+
+  override firstUpdated() {
+    this._refreshViewport();
     this._setFrameDisposables(this.frame);
   }
 
   override updated(_changedProperties: PropertyValues) {
-    if (_changedProperties.has('frame')) {
-      this._refreshViewport();
-      this._setFrameDisposables(this.frame);
-    }
-
     if (_changedProperties.has('edgeless')) {
       if (this.edgeless) {
         this._setEdgelessDisposables(this.edgeless);
@@ -368,8 +387,10 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       }
     }
 
-    if (_changedProperties.has('page')) {
-      this._setPageDisposables(this.page);
+    if (_changedProperties.has('host')) {
+      if (this.page) {
+        this._setPageDisposables(this.page);
+      }
     }
 
     this._attachRenderer();
