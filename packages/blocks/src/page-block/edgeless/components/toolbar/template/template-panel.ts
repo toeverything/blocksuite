@@ -11,18 +11,18 @@ import {
   stopPropagation,
 } from '../../../../../_common/utils/event.js';
 import { type IBound } from '../../../../../surface-block/consts.js';
-import type { TemplateJob } from '../../../../../surface-block/service/template.js';
-import {
-  createInsertPlaceMiddleware,
-  createRegenerateIndexMiddleware,
-  createStickerMiddleware,
-  replaceIdMiddleware,
-} from '../../../../../surface-block/service/template-middlewares.js';
 import {
   Bound,
   getCommonBound,
 } from '../../../../../surface-block/utils/bound.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import type { TemplateJob } from '../../../services/template.js';
+import {
+  createInsertPlaceMiddleware,
+  createRegenerateIndexMiddleware,
+  createStickerMiddleware,
+  replaceIdMiddleware,
+} from '../../../services/template-middlewares.js';
 import { builtInTemplates } from './builtin-templates.js';
 import { ArrowIcon, defaultPreview } from './icon.js';
 import type { Template } from './template-type.js';
@@ -331,7 +331,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
     middlewares.push(replaceIdMiddleware);
 
-    return this.edgeless.surface.service.TemplateJob.create({
+    return this.edgeless.service.TemplateJob.create({
       model: this.edgeless.surfaceBlockModel,
       type,
       middlewares,
