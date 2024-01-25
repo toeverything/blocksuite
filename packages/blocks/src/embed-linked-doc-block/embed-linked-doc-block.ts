@@ -381,9 +381,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!!this.model.caption && !!this.model.caption.length) {
-      this.showCaption = true;
-    }
+    this.showCaption = !!this.model.caption?.length;
 
     this._load();
 
@@ -396,9 +394,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     }
 
     this.model.propsUpdated.on(({ key }) => {
-      this.requestUpdate();
       if (key === 'pageId') {
         this._load();
+      } else if (key === 'caption') {
+        this.showCaption = !!this.model.caption?.length;
       }
     });
 
