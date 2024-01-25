@@ -425,8 +425,11 @@ export class EdgelessClipboardController extends PageClipboard {
     return frameIds;
   }
 
-  private _createImageBlocks(images: BlockSnapshot[]) {
-    const imageIds = images.map(({ props }) => {
+  private _createImageBlocks(
+    images: BlockSnapshot[],
+    oldToNewIdMap: Map<string, string>
+  ) {
+    const imageIds = images.map(({ props, id }) => {
       const { xywh, rotate, sourceId, size, width, height } = props;
       const imageId = this.host.service.addBlock(
         'affine:image',
@@ -440,6 +443,7 @@ export class EdgelessClipboardController extends PageClipboard {
         },
         this.surface.model.id
       );
+      if (id) oldToNewIdMap.set(id, imageId);
       return imageId;
     });
     return imageIds;
@@ -681,7 +685,10 @@ export class EdgelessClipboardController extends PageClipboard {
       oldIdToNewIdMap
     );
     const frameIds = this._createFrameBlocks(groupedByType.frames ?? []);
-    const imageIds = this._createImageBlocks(groupedByType.images ?? []);
+    const imageIds = this._createImageBlocks(
+      groupedByType.images ?? [],
+      oldIdToNewIdMap
+    );
     const attachmentIds = this._createAttachmentBlocks(
       groupedByType.attachments ?? []
     );
