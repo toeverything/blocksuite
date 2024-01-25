@@ -247,7 +247,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
   private get _links() {
     const { page } = this;
-    const { workspace } = page;
+
     const ids = new Set<string>();
     page
       .getBlockByFlavour([
@@ -269,12 +269,16 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         }
       });
 
-    if (ids.size === 0) return nothing;
+    return Array.from(ids);
+  }
+
+  private _renderLinks(ids: string[]) {
+    const { workspace } = this.page;
 
     return html`<div class="links">
-      <div class="links-title">Outgoing links · ${ids.size}</div>
+      <div class="links-title">Outgoing links · ${ids.length}</div>
       ${repeat(
-        Array.from(ids),
+        ids,
         id => id,
         id => {
           const page = workspace.getPage(id);
@@ -309,8 +313,14 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       }
       return map;
     }, backLinks);
+
+    return backLinks;
+  }
+
+  private _renderBackLinks(backLinks: Map<string, string[]>) {
+    const { page } = this;
+    const { workspace } = page;
     const length = backLinks.size;
-    if (!length) return nothing;
 
     return html` <div class="back-links">
       <div class="back-links-title">${`Backlinks · ${length}`}</div>
@@ -466,6 +476,12 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   }
 
   protected override render() {
+    const links = this._links;
+    const backLinks = this._backLinks;
+    console.log(links, backLinks);
+
+    if (links.length + backLinks.size === 0) return nothing;
+
     return html`<style>
         .title {
           font-weight: 500;
@@ -497,7 +513,9 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         </div>
       </div>
       ${this._divider(this._show)}
-      ${this._show ? html`${this._backLinks} ${this._links} ` : nothing} `;
+      ${this._show
+        ? html`${this._renderBackLinks(backLinks)} ${this._renderLinks(links)} `
+        : nothing} `;
   }
 }
 
