@@ -478,7 +478,6 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   protected override render() {
     const links = this._links;
     const backLinks = this._backLinks;
-    console.log(links, backLinks);
 
     if (links.length + backLinks.size === 0) return nothing;
 
