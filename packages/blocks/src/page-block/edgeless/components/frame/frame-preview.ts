@@ -1,3 +1,5 @@
+import '../../../../surface-ref-block/surface-ref-portal.js';
+
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import {
   type EditorHost,
@@ -129,7 +131,11 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   private _setupSurfaceRefRenderer() {
     const surfaceRefService = this._surfaceRefService;
-    const renderer = surfaceRefService.getRenderer(this._surfaceRefRendererId);
+    const renderer = surfaceRefService.getRenderer(
+      this._surfaceRefRendererId,
+      this.page,
+      true
+    );
     this._surfaceRefRenderer = renderer;
 
     this._disposables.add(
@@ -141,6 +147,16 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       renderer.slots.surfaceRendererRefresh.on(() => {
         this.requestUpdate();
       })
+    );
+
+    this._disposables.add(
+      this._surfaceRefRenderer.surfaceService.layer.slots.layerUpdated.on(
+        () => {
+          this.blocksPortal.setStackingCanvas(
+            this._surfaceRefRenderer.surfaceRenderer.stackingCanvas
+          );
+        }
+      )
     );
 
     renderer.mount();
@@ -174,8 +190,10 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   }
 
   private _tryLoadFillScreen() {
+    if (!this.edgeless) return;
+
     this.fillScreen =
-      this.edgeless!.service.editSession.getItem('presentFillScreen') ?? false;
+      this.edgeless.service.editSession.getItem('presentFillScreen') ?? false;
   }
 
   private _getViewportWH = (referencedModel: RefElement) => {
@@ -294,7 +312,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
           <surface-ref-portal
             .page=${this.page}
             .host=${this.host}
-            .containerModel=${referencedModel}
+            .refModel=${referencedModel}
             .renderModel=${this.host.renderModel}
           ></surface-ref-portal>
           <div class="frame-preview-surface-canvas-container">
@@ -331,6 +349,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     if (_changedProperties.has('page')) {
       this._setPageDisposables(this.page);
     }
+
     this._attachRenderer();
   }
 

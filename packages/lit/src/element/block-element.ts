@@ -83,10 +83,9 @@ export class BlockElement<
   }
 
   get rootBlockElement() {
-    const rootElement = this.host.view.viewFromPath(
-      'block',
-      this.path.slice(0, 1)
-    );
+    const rootElement = this.host.view.viewFromPath('block', [
+      this.page.root!.id,
+    ]);
     assertExists(rootElement);
     return rootElement;
   }
