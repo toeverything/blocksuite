@@ -77,11 +77,11 @@ export class WidgetElement<
   }
 
   override disconnectedCallback() {
-    super.disconnectedCallback();
     this.blockElement.service.specSlots.widgetDisconnected.emit({
       service: this.blockElement.service,
       component: this,
     });
+    super.disconnectedCallback();
   }
 
   override render(): unknown {

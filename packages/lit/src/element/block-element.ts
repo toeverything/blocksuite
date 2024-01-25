@@ -252,11 +252,11 @@ export class BlockElement<
   }
 
   override disconnectedCallback() {
-    super.disconnectedCallback();
     this.service.specSlots.viewDisconnected.emit({
       service: this.service,
       component: this,
     });
+    super.disconnectedCallback();
   }
 
   renderBlock(): unknown {
