@@ -1,4 +1,5 @@
 import type {
+  AffineReference,
   DocPageBlockComponent,
   ListService,
   PageService,
@@ -206,7 +207,8 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     const config = new ReferenceNodeConfig();
     config.setInteractable(false);
     config.setPage(this.page);
-    config.setCustomContent(reference => {
+    config.setCustomContent((reference: AffineReference) => {
+      const title = reference.page.meta.title ?? 'Untitled';
       return html`<style>
           .custom-reference-content svg {
             position: relative;
@@ -214,7 +216,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
           }
         </style>
         <span class="custom-reference-content">
-          ${SmallLinkedPageIcon} ${reference.page.meta.title ?? 'Untitled'}
+          ${SmallLinkedPageIcon} ${title}
         </span> `;
     });
     this._inlineManager.registerSpecs(
