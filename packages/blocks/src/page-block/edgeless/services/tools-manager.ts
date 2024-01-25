@@ -2,7 +2,6 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
   type EventName,
   PointerEventState,
-  type UIEventDispatcher,
   type UIEventHandler,
   type UIEventState,
 } from '@blocksuite/block-std';
@@ -16,22 +15,21 @@ import {
 } from '../../../_common/utils/index.js';
 import { normalizeWheelDeltaY } from '../../../surface-block/index.js';
 import type { Bound } from '../../../surface-block/utils/bound.js';
-import { BrushToolController } from '../controllers/tools/brush-tool.js';
-import { ConnectorToolController } from '../controllers/tools/connector-tool.js';
-import { DefaultToolController } from '../controllers/tools/default-tool.js';
-import { EraserToolController } from '../controllers/tools/eraser-tool.js';
-import { PresentToolController } from '../controllers/tools/frame-navigator-tool.js';
-import { FrameToolController } from '../controllers/tools/frame-tool.js';
 import type { EdgelessToolController } from '../controllers/tools/index.js';
-import { NoteToolController } from '../controllers/tools/note-tool.js';
-import { PanToolController } from '../controllers/tools/pan-tool.js';
-import { ShapeToolController } from '../controllers/tools/shape-tool.js';
-import { TextToolController } from '../controllers/tools/text-tool.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { EdgelessPageService } from '../edgeless-page-service.js';
 import type { EdgelessModel } from '../type.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Constructor<T = object> = new (...args: any[]) => T;
+type AbstractClassConstructor<T = object> = Constructor<T> & {
+  prototype: T;
+};
+
+export type EdgelessToolConstructor =
+  AbstractClassConstructor<EdgelessToolController>;
 
 export interface EdgelessHoverState {
   rect: Bound;
@@ -44,11 +42,31 @@ export interface SelectionArea {
 }
 
 export class EdgelessToolsManager {
+  static create(
+    service: EdgelessPageService,
+    controllers: AbstractClassConstructor<EdgelessToolController>[]
+  ) {
+    const manager = new EdgelessToolsManager(service);
+
+    controllers.forEach(controller => {
+      manager.register(controller);
+    });
+
+    return manager;
+  }
+
   private _edgelessTool: EdgelessTool = {
     type: 'default',
   };
 
-  private _controllers: Record<EdgelessTool['type'], EdgelessToolController>;
+  private _container!: EdgelessPageBlockComponent;
+  private _service!: EdgelessPageService;
+  private _controllers: Record<
+    EdgelessTool['type'] | string,
+    EdgelessToolController
+  > = {};
+
+  private _mounted = false;
 
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
@@ -117,29 +135,42 @@ export class EdgelessToolsManager {
   }
 
   get service() {
-    return this.container.service as EdgelessPageService;
+    return this._service;
+  }
+
+  get container() {
+    return this._container;
+  }
+
+  get dispatcher() {
+    return this.container.dispatcher;
   }
 
   protected readonly _disposables = new DisposableGroup();
 
-  constructor(
-    public readonly container: EdgelessPageBlockComponent,
-    protected readonly dispatcher: UIEventDispatcher
-  ) {
-    this._controllers = {
-      default: new DefaultToolController(container, container.service),
-      text: new TextToolController(container, container.service),
-      shape: new ShapeToolController(container, container.service),
-      brush: new BrushToolController(container, container.service),
-      pan: new PanToolController(container, container.service),
-      'affine:note': new NoteToolController(container, container.service),
-      connector: new ConnectorToolController(container, container.service),
-      eraser: new EraserToolController(container, container.service),
-      frame: new FrameToolController(container, container.service),
-      frameNavigator: new PresentToolController(container, container.service),
-    };
+  constructor(service: EdgelessPageService) {
+    this._service = service;
+  }
+
+  mount(container: EdgelessPageBlockComponent) {
+    this._container = container;
+    this._mounted = true;
+
+    Object.values(this._controllers).forEach(controller => {
+      controller.mount(container);
+    });
 
     this._initMouseAndWheelEvents().catch(console.error);
+  }
+
+  register(Tool: EdgelessToolConstructor) {
+    const tool = new Tool(this.service);
+
+    this._controllers[tool.tool.type] = tool;
+
+    if (this._mounted) {
+      tool.mount(this.container);
+    }
   }
 
   private _updateLastMousePos(e: PointerEventState) {
@@ -215,7 +246,7 @@ export class EdgelessToolsManager {
       else {
         const rect = container.getBoundingClientRect();
         // Perform zooming relative to the mouse position
-        const [baseX, baseY] = container.service.viewport.toModelCoord(
+        const [baseX, baseY] = this.service.viewport.toModelCoord(
           e.clientX - rect.x,
           e.clientY - rect.y
         );

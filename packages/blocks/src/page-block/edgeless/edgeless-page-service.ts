@@ -25,6 +25,8 @@ import type { SurfaceService } from '../../surface-block/surface-service.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { PageService } from '../page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
+import type { EdgelessToolConstructor } from './services/tools-manager.js';
+import { EdgelessToolsManager } from './services/tools-manager.js';
 import type {
   EdgelessBlockModel,
   EdgelessModel,
@@ -37,6 +39,7 @@ export class EdgelessPageService extends PageService {
   private _layer!: LayerManager;
   private _selection!: EdgelessSelectionManager;
   private _viewport!: Viewport;
+  private _tool!: EdgelessToolsManager;
 
   override mounted() {
     super.mounted();
@@ -52,6 +55,7 @@ export class EdgelessPageService extends PageService {
     this._layer = LayerManager.create(this.page, this._surface);
     this._viewport = new Viewport();
     this._selection = new EdgelessSelectionManager(this);
+    this._tool = EdgelessToolsManager.create(this, []);
   }
 
   override unmounted() {
@@ -60,6 +64,11 @@ export class EdgelessPageService extends PageService {
     this._selection.dispose();
     this.selectionManager.set([]);
     this.viewport.dispose();
+    this.tool.dispose();
+  }
+
+  get tool() {
+    return this._tool;
   }
 
   get surface() {
@@ -401,6 +410,10 @@ export class EdgelessPageService extends PageService {
       editing: false,
       elements: elements.map(ele => ele.id),
     });
+  }
+
+  registerTool(Tool: EdgelessToolConstructor) {
+    return this.tool.register(Tool);
   }
 
   getConnectors(element: EdgelessModel | string) {
