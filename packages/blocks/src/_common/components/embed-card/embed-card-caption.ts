@@ -58,12 +58,10 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
     this.dispatchEvent(new CustomEvent('blur', { bubbles: true }));
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-
+  override firstUpdated() {
     this.disposables.add(
       this.block.model.propsUpdated.on(({ key }) => {
-        if (key === 'caption') {
+        if (this.display && key === 'caption') {
           this.input.value = this.block.model.caption ?? '';
         }
       })
