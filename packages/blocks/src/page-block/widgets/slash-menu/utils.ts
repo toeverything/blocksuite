@@ -98,14 +98,8 @@ export function insideDataView(model: BlockModel) {
   return isInsideBlockByFlavour(model.page, model, 'affine:data-view');
 }
 
-export function withRemoveEmptyLine(
-  fn: SlashItem['action']
-): SlashItem['action'] {
-  return async args => {
-    await fn(args);
-    const { model } = args;
-    if (!model.text?.length) {
-      model.page.deleteBlock(model);
-    }
-  };
+export function tryRemoveEmptyLine(model: BlockModel) {
+  if (!model.text?.length) {
+    model.page.deleteBlock(model);
+  }
 }

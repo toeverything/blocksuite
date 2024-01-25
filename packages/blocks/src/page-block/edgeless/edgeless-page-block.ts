@@ -79,9 +79,19 @@ import {
   type ZoomAction,
 } from './components/zoom/zoom-toolbar.js';
 import { EdgelessClipboardController } from './controllers/clipboard.js';
+import { BrushToolController } from './controllers/tools/brush-tool.js';
+import { ConnectorToolController } from './controllers/tools/connector-tool.js';
+import { DefaultToolController } from './controllers/tools/default-tool.js';
+import { EraserToolController } from './controllers/tools/eraser-tool.js';
+import { PresentToolController } from './controllers/tools/frame-navigator-tool.js';
+import { FrameToolController } from './controllers/tools/frame-tool.js';
+import { NoteToolController } from './controllers/tools/note-tool.js';
+import { PanToolController } from './controllers/tools/pan-tool.js';
+import { ShapeToolController } from './controllers/tools/shape-tool.js';
+import { TextToolController } from './controllers/tools/text-tool.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
-import { EdgelessToolsManager } from './services/tools-manager.js';
+import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import {
   DEFAULT_NOTE_HEIGHT,
@@ -201,7 +211,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   fontLoader!: FontLoader;
 
-  tools!: EdgelessToolsManager;
+  get tools() {
+    return this.service.tool;
+  }
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
@@ -839,6 +851,26 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }
   }
 
+  private _initTools() {
+    const tools = [
+      DefaultToolController,
+      BrushToolController,
+      EraserToolController,
+      TextToolController,
+      ShapeToolController,
+      ConnectorToolController,
+      NoteToolController,
+      FrameToolController,
+      PanToolController,
+      PresentToolController,
+    ] as EdgelessToolConstructor[];
+
+    tools.forEach(tool => {
+      this.service.registerTool(tool);
+    });
+    this.service.tool.mount(this);
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this.clipboardController.hostConnected();
@@ -862,7 +894,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
-    this.tools = new EdgelessToolsManager(this, this.host.event);
+    this._initTools();
   }
 
   override disconnectedCallback() {
@@ -874,9 +906,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }
 
     this.keyboardManager = null;
-
-    this.tools.clear();
-    this.tools.dispose();
   }
 
   override renderBlock() {

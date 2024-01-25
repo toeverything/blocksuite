@@ -65,6 +65,10 @@ export class FileDropManager {
     return this._blockService.std.host as EditorHost;
   }
 
+  get page() {
+    return this._blockService.page;
+  }
+
   get type(): 'before' | 'after' {
     return !FileDropManager._dropResult ||
       FileDropManager._dropResult.type !== 'before'
@@ -73,19 +77,35 @@ export class FileDropManager {
   }
 
   get targetModel(): BlockModel | null {
-    const pageBlock = this._blockService.page.root;
-    assertExists(pageBlock);
-
     let targetModel = FileDropManager._dropResult?.modelState.model || null;
 
     if (!targetModel && isInsideDocEditor(this.editorHost)) {
-      const lastNote = pageBlock.children[pageBlock.children.length - 1];
-      if (!matchFlavours(lastNote, ['affine:note'])) {
-        throw new Error('The last block is not a note block.');
-      }
-      targetModel = lastNote.lastItem();
-    }
+      const pageModel = this.page.root;
+      assertExists(pageModel);
 
+      let lastNote = pageModel.children[pageModel.children.length - 1];
+      if (!lastNote || !matchFlavours(lastNote, ['affine:note'])) {
+        const newNoteId = this.page.addBlock('affine:note', {}, pageModel.id);
+        const newNote = this.page.getBlockById(newNoteId);
+        assertExists(newNote);
+        lastNote = newNote;
+      }
+
+      const lastItem = lastNote.lastItem();
+      if (lastItem && !matchFlavours(lastItem, ['affine:note'])) {
+        targetModel = lastItem;
+      } else {
+        const newParagraphId = this.page.addBlock(
+          'affine:paragraph',
+          {},
+          lastNote,
+          0
+        );
+        const newParagraph = this.page.getBlockById(newParagraphId);
+        assertExists(newParagraph);
+        targetModel = newParagraph;
+      }
+    }
     return targetModel;
   }
 
@@ -94,7 +114,9 @@ export class FileDropManager {
 
     // allow only external drag-and-drop files
     const effectAllowed = event.dataTransfer?.effectAllowed ?? 'none';
-    if (effectAllowed !== 'all') return;
+    if (effectAllowed !== 'all') {
+      return;
+    }
 
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
@@ -103,7 +125,10 @@ export class FileDropManager {
     let result: DropResult | null = null;
     if (element) {
       const model = getModelByBlockComponent(element);
-      result = calcDropTarget(point, model, element);
+      const parent = this.page.getParent(model);
+      if (!matchFlavours(parent, ['affine:surface'])) {
+        result = calcDropTarget(point, model, element);
+      }
     }
     if (result) {
       FileDropManager._dropResult = result;
@@ -114,18 +139,31 @@ export class FileDropManager {
     }
   };
 
+  onDragLeave = () => {
+    FileDropManager._dropResult = null;
+    this._indicator.rect = null;
+  };
+
   private _onDrop = (event: DragEvent) => {
+    this._indicator.rect = null;
+
     const { onDrop } = this._fileDropOptions;
-    if (!onDrop) return;
+    if (!onDrop) {
+      return;
+    }
 
     event.preventDefault();
 
     // allow only external drag-and-drop files
     const effectAllowed = event.dataTransfer?.effectAllowed ?? 'none';
-    if (effectAllowed !== 'all') return;
+    if (effectAllowed !== 'all') {
+      return;
+    }
 
     const droppedFiles = event.dataTransfer?.files;
-    if (!droppedFiles || !droppedFiles.length) return;
+    if (!droppedFiles || !droppedFiles.length) {
+      return;
+    }
 
     const targetModel = this.targetModel;
     const place = this.type;
@@ -136,7 +174,5 @@ export class FileDropManager {
     onDrop({ files: [...droppedFiles], targetModel, place, point })?.catch(
       console.error
     );
-
-    this._indicator.rect = null;
   };
 }

@@ -16,6 +16,7 @@ import '@shoelace-style/shoelace/dist/components/alert/alert.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 
+import type { AffineTextAttributes } from '@blocksuite/blocks';
 import {
   ColorVariables,
   extractCssVariables,
@@ -24,9 +25,10 @@ import {
   type PageService,
   ZipTransformer,
 } from '@blocksuite/blocks';
+import type { DeltaInsert } from '@blocksuite/inline';
 import { ShadowlessElement } from '@blocksuite/lit';
 import type { AffineEditorContainer } from '@blocksuite/presets';
-import { Utils, type Workspace } from '@blocksuite/store';
+import { Text, Utils, type Workspace } from '@blocksuite/store';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -220,7 +222,28 @@ export class QuickEdgelessMenu extends ShadowlessElement {
         return;
       }
       try {
-        await ZipTransformer.importPages(this.workspace, file);
+        const pages = await ZipTransformer.importPages(this.workspace, file);
+        for (const page of pages) {
+          const noteBlock = window.page.getBlockByFlavour('affine:note');
+          window.page.addBlock(
+            'affine:paragraph',
+            {
+              type: 'text',
+              text: new Text([
+                {
+                  insert: ' ',
+                  attributes: {
+                    reference: {
+                      type: 'LinkedPage',
+                      pageId: page.id,
+                    },
+                  },
+                } as DeltaInsert<AffineTextAttributes>,
+              ]),
+            },
+            noteBlock[0].id
+          );
+        }
         this.requestUpdate();
       } catch (e) {
         console.error('Invalid snapshot.');

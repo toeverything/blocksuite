@@ -1,3 +1,4 @@
+export * from './attachment.js';
 export * from './html.js';
 export * from './image.js';
 export * from './markdown.js';

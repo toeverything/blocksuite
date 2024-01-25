@@ -23,7 +23,7 @@ Page Block
 
 So if you select the text partially via mouse drag as following:
 
-![text-selection-example](./images/text-selection-example.png)
+![text-selection-example](../images/text-selection-example.png)
 
 The selection model will be:
 
@@ -48,7 +48,7 @@ The selection model will be:
 
 If you select the blocks via block level selection like this:
 
-![block-selection-example](./images/block-selection-example.png)
+![block-selection-example](../images/block-selection-example.png)
 
 The selection model will be:
 

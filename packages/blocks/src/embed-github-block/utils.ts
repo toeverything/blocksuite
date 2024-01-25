@@ -72,33 +72,45 @@ export async function queryEmbedGithubApiData(
 export async function refreshEmbedGithubUrlData(
   embedGithubElement: EmbedGithubBlockComponent
 ) {
-  embedGithubElement.loading = true;
-
-  const queryUrlData = embedGithubElement.service?.queryUrlData;
-  assertExists(queryUrlData);
-  const githubUrlData = await queryUrlData(embedGithubElement.model);
-
-  const {
-    image = null,
+  let image = null,
     status = null,
     statusReason = null,
     title = null,
     description = null,
     createdAt = null,
-    assignees = null,
-  } = githubUrlData;
+    assignees = null;
 
-  embedGithubElement.page.updateBlock(embedGithubElement.model, {
-    image,
-    status,
-    statusReason,
-    title,
-    description,
-    createdAt,
-    assignees,
-  });
+  try {
+    embedGithubElement.loading = true;
 
-  embedGithubElement.loading = false;
+    const queryUrlData = embedGithubElement.service?.queryUrlData;
+    assertExists(queryUrlData);
+
+    const githubUrlData = await queryUrlData(embedGithubElement.model);
+    ({
+      image = null,
+      status = null,
+      statusReason = null,
+      title = null,
+      description = null,
+      createdAt = null,
+      assignees = null,
+    } = githubUrlData);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    embedGithubElement.page.updateBlock(embedGithubElement.model, {
+      image,
+      status,
+      statusReason,
+      title,
+      description,
+      createdAt,
+      assignees,
+    });
+
+    embedGithubElement.loading = false;
+  }
 }
 
 export async function refreshEmbedGithubStatus(
@@ -112,6 +124,9 @@ export async function refreshEmbedGithubStatus(
 
   embedGithubElement.page.updateBlock(embedGithubElement.model, {
     status: githubApiData.status,
+    statusReason: githubApiData.statusReason,
+    createdAt: githubApiData.createdAt,
+    assignees: githubApiData.assignees,
   });
 }
 

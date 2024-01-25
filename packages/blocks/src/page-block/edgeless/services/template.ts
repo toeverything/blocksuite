@@ -8,9 +8,13 @@ import {
   type SnapshotReturn,
 } from '@blocksuite/store';
 
-import { Bound, getCommonBound, type IConnector } from '../index.js';
-import type { SurfaceBlockModel } from '../surface-model.js';
-import type { SurfaceBlockTransformer } from '../surface-transformer.js';
+import {
+  Bound,
+  getCommonBound,
+  type IConnector,
+} from '../../../surface-block/index.js';
+import type { SurfaceBlockModel } from '../../../surface-block/surface-model.js';
+import type { SurfaceBlockTransformer } from '../../../surface-block/surface-transformer.js';
 
 /**
  * Those block contains other block's id

@@ -10,7 +10,7 @@ A block spec contains the following properties:
   - `component`: The primary user interface element of the block.
   - `widgets`: Additional interactive elements enhancing the block's functionality.
 
-![block-spec](./images/block-spec.png)
+![block-spec](../images/block-spec.png)
 
 ## Lit-Based Example
 

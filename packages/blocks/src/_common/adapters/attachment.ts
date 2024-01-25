@@ -16,10 +16,10 @@ import {
   type ToPageSnapshotPayload,
 } from '@blocksuite/store';
 
-export type Image = File[];
+export type Attachment = File[];
 
 type PngToSliceSnapshotPayload = {
-  file: Image;
+  file: Attachment;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
   pageVersion: number;
@@ -28,44 +28,44 @@ type PngToSliceSnapshotPayload = {
   pageId: string;
 };
 
-export class ImageAdapter extends BaseAdapter<Image> {
+export class AttachmentAdapter extends BaseAdapter<Attachment> {
   override fromPageSnapshot(
     _payload: FromPageSnapshotPayload
-  ): Promise<FromPageSnapshotResult<Image>> {
+  ): Promise<FromPageSnapshotResult<Attachment>> {
     throw new Error('Method not implemented.');
   }
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
-  ): Promise<FromBlockSnapshotResult<Image>> {
+  ): Promise<FromBlockSnapshotResult<Attachment>> {
     throw new Error('Method not implemented.');
   }
   override fromSliceSnapshot(
     payload: FromSliceSnapshotPayload
-  ): Promise<FromSliceSnapshotResult<Image>> {
-    const images: Image = [];
+  ): Promise<FromSliceSnapshotResult<Attachment>> {
+    const attachments: Attachment = [];
     for (const contentSlice of payload.snapshot.content) {
       if (contentSlice.type === 'block') {
         const { flavour, props } = contentSlice;
-        if (flavour === 'affine:image') {
+        if (flavour === 'affine:attachment') {
           const { sourceId } = props;
           const file = payload.assets?.getAssets().get(sourceId as string) as
             | File
             | undefined;
           if (file) {
-            images.push(file);
+            attachments.push(file);
           }
         }
       }
     }
-    return Promise.resolve({ file: images, assetsIds: [] });
+    return Promise.resolve({ file: attachments, assetsIds: [] });
   }
   override toPageSnapshot(
-    _payload: ToPageSnapshotPayload<Image>
+    _payload: ToPageSnapshotPayload<Attachment>
   ): Promise<PageSnapshot> {
     throw new Error('Method not implemented.');
   }
   override toBlockSnapshot(
-    _payload: ToBlockSnapshotPayload<Image>
+    _payload: ToBlockSnapshotPayload<Attachment>
   ): Promise<BlockSnapshot> {
     throw new Error('Method not implemented.');
   }
@@ -79,9 +79,17 @@ export class ImageAdapter extends BaseAdapter<Image> {
       await payload.assets?.writeToBlob(blobId);
       content.push({
         type: 'block',
-        flavour: 'affine:image',
+        flavour: 'affine:attachment',
         id: nanoid(),
         props: {
+          name: item.name,
+          size: item.size,
+          type: item.type,
+          embed: false,
+          style: 'horizontalThin',
+          index: 'a0',
+          xywh: '[0,0,0,0]',
+          rotate: 0,
           sourceId: blobId,
         },
         children: [],

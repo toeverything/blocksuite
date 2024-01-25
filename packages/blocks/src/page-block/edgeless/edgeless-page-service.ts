@@ -8,12 +8,24 @@ import type {
   CanvasElementType,
   ConnectorElementModel,
 } from '../../surface-block/element-model/index.js';
-import { GroupElementModel } from '../../surface-block/index.js';
+import {
+  getCommonBound,
+  GroupElementModel,
+} from '../../surface-block/index.js';
 import type { ReorderingDirection } from '../../surface-block/managers/layer-manager.js';
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { PageService } from '../page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
+import { TemplateJob } from './services/template.js';
+import {
+  createInsertPlaceMiddleware,
+  createRegenerateIndexMiddleware,
+  createStickerMiddleware,
+  replaceIdMiddleware,
+} from './services/template-middlewares.js';
+import type { EdgelessToolConstructor } from './services/tools-manager.js';
+import { EdgelessToolsManager } from './services/tools-manager.js';
 import type {
   EdgelessBlockModel,
   EdgelessModel,
@@ -22,10 +34,13 @@ import type {
 import { Viewport } from './utils/viewport.js';
 
 export class EdgelessPageService extends PageService {
+  TemplateJob = TemplateJob;
+
   private _surface!: SurfaceBlockModel;
   private _layer!: LayerManager;
   private _selection!: EdgelessSelectionManager;
   private _viewport!: Viewport;
+  private _tool!: EdgelessToolsManager;
 
   override mounted() {
     super.mounted();
@@ -41,6 +56,7 @@ export class EdgelessPageService extends PageService {
     this._layer = LayerManager.create(this.page, this._surface);
     this._viewport = new Viewport();
     this._selection = new EdgelessSelectionManager(this);
+    this._tool = EdgelessToolsManager.create(this, []);
   }
 
   override unmounted() {
@@ -49,6 +65,11 @@ export class EdgelessPageService extends PageService {
     this._selection.dispose();
     this.selectionManager.set([]);
     this.viewport.dispose();
+    this.tool.dispose();
+  }
+
+  get tool() {
+    return this._tool;
   }
 
   get surface() {
@@ -392,9 +413,53 @@ export class EdgelessPageService extends PageService {
     });
   }
 
+  registerTool(Tool: EdgelessToolConstructor) {
+    return this.tool.register(Tool);
+  }
+
   getConnectors(element: EdgelessModel | string) {
     const id = typeof element === 'string' ? element : element.id;
 
     return this.surface.getConnectors(id) as ConnectorElementModel[];
+  }
+
+  createTemplateJob(type: 'template' | 'sticker') {
+    const middlewares: ((job: TemplateJob) => void)[] = [];
+
+    if (type === 'template') {
+      const currentContentBound = getCommonBound(
+        (
+          this.blocks.map(block => Bound.deserialize(block.xywh)) as IBound[]
+        ).concat(this.elements)
+      );
+
+      if (currentContentBound) {
+        currentContentBound.x +=
+          currentContentBound.w + 20 / this.viewport.zoom;
+        middlewares.push(createInsertPlaceMiddleware(currentContentBound));
+      }
+
+      const idxGenerator = this.layer.createIndexGenerator(true);
+
+      middlewares.push(
+        createRegenerateIndexMiddleware((type: string) => idxGenerator(type))
+      );
+    }
+
+    if (type === 'sticker') {
+      middlewares.push(
+        createStickerMiddleware(this.viewport.center, () =>
+          this.layer.generateIndex('affine:image')
+        )
+      );
+    }
+
+    middlewares.push(replaceIdMiddleware);
+
+    return TemplateJob.create({
+      model: this.surface,
+      type,
+      middlewares,
+    });
   }
 }

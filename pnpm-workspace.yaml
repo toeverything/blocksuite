@@ -1,7 +1,7 @@
 packages:
   - 'packages/block-std'
   - 'packages/blocks'
-  - 'packages/docs/main'
+  - 'packages/docs'
   - 'packages/global'
   - 'packages/inline'
   - 'packages/lit'

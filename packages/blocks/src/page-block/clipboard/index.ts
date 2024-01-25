@@ -4,6 +4,7 @@ import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSnapshot, Page } from '@blocksuite/store';
 
 import {
+  AttachmentAdapter,
   HtmlAdapter,
   ImageAdapter,
   MixTextAdapter,
@@ -27,6 +28,7 @@ export class PageClipboard {
   private _mixtextAdapter = new MixTextAdapter();
   private _htmlAdapter = new HtmlAdapter();
   private _imageAdapter = new ImageAdapter();
+  private _attachmentAdapter = new AttachmentAdapter();
 
   constructor(host: BlockElement) {
     this.host = host;
@@ -65,6 +67,7 @@ export class PageClipboard {
       this._std.clipboard.registerAdapter(type, this._imageAdapter, 80)
     );
     this._std.clipboard.registerAdapter('text/plain', this._mixtextAdapter, 70);
+    this._std.clipboard.registerAdapter('*/*', this._attachmentAdapter, 60);
     const copy = copyMiddleware(this._std);
     const paste = pasteMiddleware(this._std);
     this._std.clipboard.use(copy);
@@ -86,6 +89,7 @@ export class PageClipboard {
           'image/webp',
         ].map(type => this._std.clipboard.unregisterAdapter(type));
         this._std.clipboard.unregisterAdapter('text/html');
+        this._std.clipboard.unregisterAdapter('*/*');
         this._std.clipboard.unuse(copy);
         this._std.clipboard.unuse(paste);
         this._std.clipboard.unuse(replaceIdMiddleware);

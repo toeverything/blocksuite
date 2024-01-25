@@ -15,7 +15,7 @@ Traditionally, CRDTs have often been seen as a technology specialized in conflic
 - When the local model is updated, the state of the native model is synchronized to the CRDT model.
 - When a remote peer is updated, the data resolved from the CRDT model is synchronized back to the native model.
 
-![bidirectional-data-flow](./images/bidirectional-data-flow.png)
+![bidirectional-data-flow](../images/bidirectional-data-flow.png)
 
 Although this is an intuitive and common practice, it requires synchronization between two heterogeneous models, resulting in a bidirectional data flow. The main issues here are:
 
@@ -30,7 +30,7 @@ As an alternative, BlockSuite chooses to directly use the CRDT model as the sing
 
 This design can be represented by the following diagram:
 
-![crdt-native-data-flow](./images/crdt-native-data-flow.png)
+![crdt-native-data-flow](../images/crdt-native-data-flow.png)
 
 The advantage of this approach is that the application-layer code can **completely ignore whether updates to the block model come from local editing, history stack, or collaboration with other users**. Just subscribing to model update events is adequate.
 
@@ -46,7 +46,7 @@ The complete state update process in BlockSuite involves several distinct steps,
 2. **State Manipulation via Commands**: Commands can manipulate the editor state to accomplish UI updates.
 3. **State-Driven View Updates**: Upon state changes, slot events are used to notify and update view components accordingly.
 
-![block-std-data-flow](./images/block-std-data-flow.png)
+![block-std-data-flow](../images/block-std-data-flow.png)
 
 This update mechanism is depicted in the diagram above. Concepts such as [command](./command), [view](./block-view) and [event](./event) are further elaborated in other documentation sections for detailed understanding.
 
