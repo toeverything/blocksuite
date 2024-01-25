@@ -46,7 +46,7 @@ export {
   getAffineInlineSpecsWithReference,
 } from './_common/inline/presets/affine-inline-specs.js';
 export { ReferenceNodeConfig } from './_common/inline/presets/nodes/reference-node/reference-config.js';
-export { type TreeNode } from './_common/mind-map/draw.js';
+export { type TreeNode, type TreeNodeWithId } from './_common/mind-map/draw.js';
 export * from './_common/test-utils/test-utils.js';
 export {
   ColorVariables,
@@ -81,6 +81,8 @@ export * from './image-block/index.js';
 export * from './list-block/index.js';
 export * from './models.js';
 export * from './note-block/index.js';
+export { EdgelessComponentToolbar } from './page-block/edgeless/components/component-toolbar/component-toolbar.js';
+export { EdgelessPageService } from './page-block/edgeless/edgeless-page-service.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export {
@@ -102,7 +104,6 @@ export { SurfaceBlockComponent } from './surface-block/surface-block.js';
 export { SurfaceBlockSchema } from './surface-block/surface-model.js';
 export * from './surface-block/surface-service.js';
 export * from './surface-ref-block/index.js';
-
 export const BlocksUtils = {
   splitElements,
   matchFlavours,

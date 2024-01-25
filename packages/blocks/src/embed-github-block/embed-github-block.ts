@@ -214,7 +214,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     const descriptionText = loading ? '' : description;
     const bannerImage =
       !loading && image
-        ? html`<object type="image/webp" data=${image}>
+        ? html`<object type="image/webp" data=${image} draggable="false">
             ${EmbedCardBannerIcon}
           </object>`
         : EmbedCardBannerIcon;

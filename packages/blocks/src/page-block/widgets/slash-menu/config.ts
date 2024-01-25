@@ -56,7 +56,7 @@ import {
   insideDatabase,
   type SlashItem,
   type SlashMenuOptions,
-  withRemoveEmptyLine,
+  tryRemoveEmptyLine,
 } from './utils.js';
 
 export const menuGroups: SlashMenuOptions['menus'] = [
@@ -251,7 +251,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return true;
         },
-        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+        action: async ({ pageElement, model }) => {
           const parent = pageElement.page.getParent(model);
           if (!parent) {
             return;
@@ -270,7 +270,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             maxFileSize,
             model
           );
-        }),
+          tryRemoveEmptyLine(model);
+        },
       },
       {
         name: 'Links',
@@ -281,7 +282,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return !insideDatabase(model);
         },
-        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+        action: async ({ pageElement, model }) => {
           const parentModel = pageElement.page.getParent(model);
           if (!parentModel) {
             return;
@@ -293,7 +294,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             'The added link will be displayed as a card view.',
             { mode: 'page', parentModel, index }
           );
-        }),
+          tryRemoveEmptyLine(model);
+        },
       },
       {
         name: 'File',
@@ -304,7 +306,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             return false;
           return !insideDatabase(model);
         },
-        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+        action: async ({ pageElement, model }) => {
           const file = await openFileOrFiles();
           if (!file) return;
 
@@ -320,7 +322,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             maxFileSize,
             model
           );
-        }),
+          tryRemoveEmptyLine(model);
+        },
       },
       {
         name: 'YouTube',
@@ -331,7 +334,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return !insideDatabase(model);
         },
-        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+        action: async ({ pageElement, model }) => {
           const parentModel = pageElement.page.getParent(model);
           if (!parentModel) {
             return;
@@ -343,7 +346,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             'The added YouTube video link will be displayed as an embed view.',
             { mode: 'page', parentModel, index }
           );
-        }),
+          tryRemoveEmptyLine(model);
+        },
       },
       {
         name: 'Figma',
@@ -354,7 +358,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return !insideDatabase(model);
         },
-        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+        action: async ({ pageElement, model }) => {
           const parentModel = pageElement.page.getParent(model);
           if (!parentModel) {
             return;
@@ -366,7 +370,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             'The added Figma link will be displayed as an embed view.',
             { mode: 'page', parentModel, index }
           );
-        }),
+          tryRemoveEmptyLine(model);
+        },
       },
       {
         name: 'GitHub',
@@ -377,7 +382,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return !insideDatabase(model);
         },
-        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+        action: async ({ pageElement, model }) => {
           const parentModel = pageElement.page.getParent(model);
           if (!parentModel) {
             return;
@@ -389,7 +394,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             'The added GitHub issue or pull request link will be displayed as a card view.',
             { mode: 'page', parentModel, index }
           );
-        }),
+          tryRemoveEmptyLine(model);
+        },
       },
     ],
   },
@@ -458,7 +464,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return true;
         },
-        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+        action: async ({ pageElement, model }) => {
           const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
@@ -479,7 +485,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             'table',
             false
           );
-        }),
+          tryRemoveEmptyLine(model);
+        },
       },
       {
         name: 'Kanban View',
@@ -496,7 +503,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           }
           return true;
         },
-        action: withRemoveEmptyLine(async ({ model, pageElement }) => {
+        action: async ({ model, pageElement }) => {
           const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
@@ -517,7 +524,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             'kanban',
             false
           );
-        }),
+          tryRemoveEmptyLine(model);
+        },
       },
     ],
   },

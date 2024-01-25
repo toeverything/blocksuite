@@ -124,6 +124,9 @@ export async function refreshEmbedGithubStatus(
 
   embedGithubElement.page.updateBlock(embedGithubElement.model, {
     status: githubApiData.status,
+    statusReason: githubApiData.statusReason,
+    createdAt: githubApiData.createdAt,
+    assignees: githubApiData.assignees,
   });
 }
 
