@@ -14,11 +14,8 @@ hero:
       text: Get Started
       link: /guide/overview
     - theme: alt
-      text: DocEditor
-      link: /presets/doc-editor
-    - theme: alt
-      text: EdgelessEditor
-      link: /presets/edgeless-editor
+      text: View on GitHub
+      link: https://github.com/toeverything/blocksuite
 
 features:
   - title: 🧩 Headless Editor Framework
