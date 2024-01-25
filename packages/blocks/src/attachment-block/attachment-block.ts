@@ -212,12 +212,10 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
     this.contentEditable = 'false';
 
+    this.showCaption = !!this.model.caption?.length;
+
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
-
-    if (!!this.model.caption && !!this.model.caption.length) {
-      this.showCaption = true;
-    }
 
     if (!this.model.style) {
       this.page.withoutTransact(() => {
@@ -244,6 +242,8 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
           this.blobUrl = undefined;
         }
         this.refreshData();
+      } else if (key === 'caption') {
+        this.showCaption = !!this.model.caption?.length;
       }
     });
 

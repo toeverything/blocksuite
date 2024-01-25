@@ -87,9 +87,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!!this.model.caption && !!this.model.caption.length) {
-      this.showCaption = true;
-    }
+    this.showCaption = !!this.model.caption?.length;
 
     if (!this.model.videoId) {
       this.page.withoutTransact(() => {
@@ -113,7 +111,11 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
         this.requestUpdate();
-        if (key === 'url') this.refreshData();
+        if (key === 'url') {
+          this.refreshData();
+        } else if (key === 'caption') {
+          this.showCaption = !!this.model.caption?.length;
+        }
       })
     );
 

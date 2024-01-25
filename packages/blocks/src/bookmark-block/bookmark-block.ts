@@ -186,9 +186,7 @@ export class BookmarkBlockComponent extends BlockElement<
 
     this.contentEditable = 'false';
 
-    if (!!this.model.caption && this.model.caption.length > 0) {
-      this.showCaption = true;
-    }
+    this.showCaption = !!this.model.caption?.length;
 
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
@@ -201,6 +199,8 @@ export class BookmarkBlockComponent extends BlockElement<
       this.model.propsUpdated.on(({ key }) => {
         if (key === 'url') {
           this.refreshData();
+        } else if (key === 'caption') {
+          this.showCaption = !!this.model.caption?.length;
         }
       })
     );

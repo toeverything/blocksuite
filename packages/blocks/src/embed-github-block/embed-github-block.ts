@@ -91,9 +91,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!!this.model.caption && !!this.model.caption.length) {
-      this.showCaption = true;
-    }
+    this.showCaption = !!this.model.caption?.length;
 
     if (!this.model.owner || !this.model.repo || !this.model.githubId) {
       this.page.withoutTransact(() => {
@@ -112,14 +110,20 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     }
 
     this.page.withoutTransact(() => {
-      if (!this.model.description && !this.model.title) this.refreshData();
-      else this.refreshStatus();
+      if (!this.model.description && !this.model.title) {
+        this.refreshData();
+      } else {
+        this.refreshStatus();
+      }
     });
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
-        this.requestUpdate();
-        if (key === 'url') this.refreshData();
+        if (key === 'url') {
+          this.refreshData();
+        } else if (key === 'caption') {
+          this.showCaption = !!this.model.caption?.length;
+        }
       })
     );
 
