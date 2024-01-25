@@ -719,6 +719,7 @@ const pptBuilder = (host: EditorHost) => {
       } satisfies PPTSection;
     });
     const page: PPTPage = {
+      isCover: pages.length === 0,
       title: getText(block),
       sections,
     };

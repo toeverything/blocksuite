@@ -1,6 +1,7 @@
 import { Bound } from '@blocksuite/blocks';
 import { nanoid } from '@blocksuite/store';
 
+import { basicCover } from './templates/basic-cover.js';
 import { basic1 } from './templates/basic1.js';
 import { basic2 } from './templates/basic2.js';
 import { basic3 } from './templates/basic3.js';
@@ -110,6 +111,31 @@ type TemplateImage = {
 type PageTemplate = {
   images: TemplateImage[];
   content: unknown;
+};
+const createBasicCover = async (
+  title: string,
+  section1: PPTSection
+): Promise<PageTemplate> => {
+  const template = basicCover();
+  replaceText(
+    {
+      title: title,
+      'section1.title': section1.title,
+      'section1.content': section1.content,
+    },
+    template
+  );
+  return {
+    images: await getImages(
+      {
+        'section1.image': getImageUrlByKeyword(section1.keywords),
+        background: async () =>
+          'https://cdn.affine.pro/ppt-images/background/basic_cover_background.png',
+      },
+      template
+    ),
+    content: template,
+  };
 };
 const basic1section = async (
   title: string,
@@ -236,10 +262,14 @@ const basic4section = async (
   };
 };
 export type PPTPage = {
+  isCover: boolean;
   title: string;
   sections: PPTSection[];
 };
 export const basicTheme = (page: PPTPage) => {
+  if (page.isCover) {
+    return createBasicCover(page.title, page.sections[0]);
+  }
   if (page.sections.length === 1) {
     return basic1section(page.title, page.sections[0]);
   }
