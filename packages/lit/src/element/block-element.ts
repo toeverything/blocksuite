@@ -108,10 +108,8 @@ export class BlockElement<
     }, {});
   }
 
-  get service(): Service | undefined {
-    return this.host.std.spec.getService(this.model.flavour) as
-      | Service
-      | undefined;
+  get service(): Service {
+    return this.host.std.spec.getService(this.model.flavour) as Service;
   }
 
   get selection() {
@@ -246,10 +244,19 @@ export class BlockElement<
         this.selected = selection;
       })
     );
+
+    this.service.specSlots.viewConnected.emit({
+      service: this.service,
+      component: this,
+    });
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this.service.specSlots.viewDisconnected.emit({
+      service: this.service,
+      component: this,
+    });
   }
 
   renderBlock(): unknown {

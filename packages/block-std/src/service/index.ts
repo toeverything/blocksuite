@@ -3,20 +3,24 @@ import type { BlockModel } from '@blocksuite/store';
 
 import type { EventName, UIEventHandler } from '../event/index.js';
 import type { BlockStdScope } from '../scope/index.js';
+import type { BlockSpecSlots } from '../spec/container.js';
 
 export interface BlockServiceOptions {
   flavour: string;
   std: BlockStdScope;
+  slots: BlockSpecSlots;
 }
 
 export class BlockService<_Model extends BlockModel = BlockModel> {
   readonly std: BlockStdScope;
   readonly flavour: string;
   readonly disposables = new DisposableGroup();
+  readonly specSlots: BlockSpecSlots;
 
   constructor(options: BlockServiceOptions) {
     this.flavour = options.flavour;
     this.std = options.std;
+    this.specSlots = options.slots;
   }
 
   get workspace() {
@@ -41,11 +45,11 @@ export class BlockService<_Model extends BlockModel = BlockModel> {
   }
 
   mounted() {
-    // do nothing
+    this.specSlots.mounted.emit({ service: this });
   }
 
   unmounted() {
-    // do nothing
+    this.specSlots.unmounted.emit({ service: this });
   }
   // life cycle end
 
@@ -75,6 +79,5 @@ export class BlockService<_Model extends BlockModel = BlockModel> {
   // event handlers end
 }
 
-export type BlockServiceConstructor = new (
-  options: BlockServiceOptions
-) => BlockService;
+export type BlockServiceConstructor<T extends BlockService = BlockService> =
+  new (options: BlockServiceOptions) => T;

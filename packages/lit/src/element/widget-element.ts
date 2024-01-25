@@ -70,6 +70,18 @@ export class WidgetElement<
   override connectedCallback() {
     super.connectedCallback();
     this.path = this.host.view.calculatePath(this);
+    this.blockElement.service.specSlots.widgetConnected.emit({
+      service: this.blockElement.service,
+      component: this,
+    });
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.blockElement.service.specSlots.widgetDisconnected.emit({
+      service: this.blockElement.service,
+      component: this,
+    });
   }
 
   override render(): unknown {
