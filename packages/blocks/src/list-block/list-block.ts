@@ -143,6 +143,7 @@ export class ListBlockComponent extends BlockElement<
     if (noChildren) return nothing;
 
     const toggleDownTemplate = html`<div
+      contenteditable="false"
       class="toggle-icon"
       @click=${this._toggleChildren}
     >
@@ -150,6 +151,7 @@ export class ListBlockComponent extends BlockElement<
     </div>`;
 
     const toggleRightTemplate = html`<div
+      contenteditable="false"
       class="toggle-icon toggle-icon__collapsed"
       @click=${this._toggleChildren}
     >
