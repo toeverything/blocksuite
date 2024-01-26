@@ -121,10 +121,6 @@ export class SurfaceBlockComponent extends BlockElement<
     return isInsideEdgelessEditor(this.host);
   }
 
-  override get service() {
-    return super.service as SurfaceService;
-  }
-
   @query('.affine-edgeless-surface-block-container')
   private _surfaceContainer!: HTMLElement;
 

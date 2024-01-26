@@ -219,10 +219,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return this.service?.uiEventDispatcher;
   }
 
-  override get service() {
-    return super.service!;
-  }
-
   private _viewportElement: HTMLElement | null = null;
 
   get viewportElement(): HTMLElement {

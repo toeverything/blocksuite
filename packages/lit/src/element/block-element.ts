@@ -60,6 +60,7 @@ export class BlockElement<
     },
   })
   selected: BaseSelection | null = null;
+  service!: Service;
 
   path!: string[];
 
@@ -106,12 +107,6 @@ export class BlockElement<
         [key]: this.host.view.viewFromPath('widget', [...this.path, key]),
       };
     }, {});
-  }
-
-  get service(): Service | undefined {
-    return this.host.std.spec.getService(this.model.flavour) as
-      | Service
-      | undefined;
   }
 
   get selection() {
@@ -218,6 +213,7 @@ export class BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    this.service = this.host.std.spec.getService(this.model.flavour) as Service;
     this.path = this.host.view.calculatePath(this);
 
     this._disposables.add(
@@ -246,10 +242,19 @@ export class BlockElement<
         this.selected = selection;
       })
     );
+
+    this.service.specSlots.viewConnected.emit({
+      service: this.service,
+      component: this,
+    });
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this.service.specSlots.viewDisconnected.emit({
+      service: this.service,
+      component: this,
+    });
   }
 
   renderBlock(): unknown {
