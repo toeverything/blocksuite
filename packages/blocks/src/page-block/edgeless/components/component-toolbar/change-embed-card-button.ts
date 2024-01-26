@@ -288,13 +288,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
   }
 
   private _showCaption() {
-    const blockElement = this._blockElement;
-    if (blockElement) {
-      blockElement.showCaption = true;
-      blockElement.updateComplete
-        .then(() => blockElement.captionElement.input.focus())
-        .catch(console.error);
-    }
+    this._blockElement?.captionElement.show();
   }
 
   private _refreshData() {
@@ -425,7 +419,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                 .tooltip=${'Click to copy link'}
                 class="change-embed-card-button copy"
                 ?disabled=${this._page.readonly}
-                @click=${() => this._copyUrl()}
+                @click=${this._copyUrl}
               >
                 ${CopyIcon}
               </edgeless-tool-icon-button>
@@ -472,7 +466,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                     ?disabled=${this._page.readonly}
                     .iconContainerPadding=${2}
                     .hover=${false}
-                    @click=${() => this._convertToCardView()}
+                    @click=${this._convertToCardView}
                   >
                     ${BookmarkIcon}
                   </edgeless-tool-icon-button>
@@ -487,7 +481,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                     ?disabled=${this._page.readonly}
                     .iconContainerPadding=${2}
                     .hover=${false}
-                    @click=${() => this._convertToEmbedView()}
+                    @click=${this._convertToEmbedView}
                   >
                     ${EmbedWebIcon}
                   </edgeless-tool-icon-button>
@@ -508,8 +502,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                   <card-style-panel
                     .value=${model.style}
                     .options=${this._getCardStyleOptions}
-                    .onSelect=${(value: EmbedCardStyle) =>
-                      this._setCardStyle(value)}
+                    .onSelect=${this._setCardStyle}
                   >
                   </card-style-panel>
                 </div>
@@ -525,7 +518,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           .tooltip=${'Add Caption'}
           class="change-embed-card-button caption"
           ?disabled=${this._page.readonly}
-          @click=${() => this._showCaption()}
+          @click=${this._showCaption}
         >
           ${CaptionIcon}
         </edgeless-tool-icon-button>
@@ -538,7 +531,7 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
           .tooltip=${'Reload'}
           class="change-embed-card-button reload"
           ?disabled=${this._page.readonly}
-          @click=${() => this._refreshData()}
+          @click=${this._refreshData}
         >
           ${RefreshIcon}
         </edgeless-tool-icon-button>

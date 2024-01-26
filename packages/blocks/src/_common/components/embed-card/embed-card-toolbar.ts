@@ -296,10 +296,7 @@ export class EmbedCardToolbar extends WithDisposable(LitElement) {
   }
 
   private _showCaption() {
-    this.block.showCaption = true;
-    this.block.updateComplete
-      .then(() => this.block.captionElement.input.focus())
-      .catch(console.error);
+    this.block.captionElement.show();
     this.abortController.abort();
   }
 

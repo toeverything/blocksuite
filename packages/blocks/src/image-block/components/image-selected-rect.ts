@@ -56,7 +56,7 @@ const styles = html`<style>
   }
 </style>`;
 
-export function ImageSelectedRectsContainer(readonly: boolean) {
+export function ImageSelectedRect(readonly: boolean) {
   if (readonly) {
     return html`${styles}
       <div

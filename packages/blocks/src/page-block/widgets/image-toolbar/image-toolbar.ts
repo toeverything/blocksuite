@@ -41,11 +41,8 @@ export class AffineImageToolbarWidget extends WidgetElement<ImageBlockComponent>
 
       return {
         template: ImageOptionsTemplate({
-          editorHost: this.host,
-          model: imageBlock.model,
-          blob: imageBlock.blob,
+          blockElement: imageBlock,
           abortController,
-          host: this.blockElement.host,
         }),
         computePosition: {
           referenceElement: imageContainer,
@@ -53,7 +50,6 @@ export class AffineImageToolbarWidget extends WidgetElement<ImageBlockComponent>
           middleware: [
             offset({
               mainAxis: 12,
-              crossAxis: 10,
             }),
             shift({
               crossAxis: true,

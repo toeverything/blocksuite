@@ -607,11 +607,10 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         this._editorHost,
         imageFiles,
         maxFileSize,
-        page,
         defaultNoteBlock
       );
 
-      lastId = blockIds[blockIds.length - 1];
+      lastId = blockIds?.[blockIds.length - 1];
     } else if (data.flavour === 'affine:bookmark') {
       await toggleEmbedCardCreateModal(
         this._editorHost,

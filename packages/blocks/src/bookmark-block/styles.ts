@@ -168,7 +168,7 @@ export const styles = css`
     }
   }
 
-  .affine-bookmark-card.loading-failed {
+  .affine-bookmark-card.error {
     .affine-bookmark-content-description {
       color: var(--affine-placeholder-color);
     }
