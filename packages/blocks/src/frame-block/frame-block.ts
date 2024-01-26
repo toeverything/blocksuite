@@ -5,7 +5,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isCssVariable } from '../_common/theme/css-variables.js';
-import type { EdgeelssFrameTitle } from '../page-block/edgeless/components/block-portal/frame/edgeless-frame.js';
+import type { EdgelessFrameTitle } from '../page-block/edgeless/components/block-portal/frame/edgeless-frame.js';
 import { Bound } from '../surface-block/index.js';
 import type { FrameBlockModel } from './frame-model.js';
 
@@ -14,7 +14,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   @state()
   private _isNavigator = false;
 
-  get titleElement(): EdgeelssFrameTitle | null {
+  get titleElement(): EdgelessFrameTitle | null {
     return (
       this.closest('affine-edgeless-page')?.querySelector?.(
         `[data-frame-title-id="${this.model.id}"]`

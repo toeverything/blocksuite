@@ -284,7 +284,6 @@ export class FrameCard extends WithDisposable(ShadowlessElement) {
           : html`<frame-preview
               .edgeless=${this.edgeless}
               .host=${this.host}
-              .page=${this.page}
               .frame=${this.frame}
             ></frame-preview>`}
         ${this._DraggingCardNumber()}

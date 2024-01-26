@@ -4,15 +4,15 @@ set -eu -o pipefail
 
 # ALL_PACKAGES
 packages=(
-  "blocks-std"
+  "framework/block-std"
+  "framework/global"
+  "framework/lit"
+  "framework/store"
+  "framework/inline"
   "blocks"
   "docs"
   "presets"
-  "global"
-  "lit"
   "playground"
-  "store"
-  "inline"
 )
 
 for package in "${packages[@]}"

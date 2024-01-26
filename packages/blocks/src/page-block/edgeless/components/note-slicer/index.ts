@@ -24,7 +24,6 @@ import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 
 const DIVIDING_LINE_OFFSET = 4;
 const NEW_NOTE_GAP = 40;
-const HIDDEN_ZOOM = 0.75;
 
 const styles = css`
   :host {
@@ -46,10 +45,8 @@ const styles = css`
     align-items: center;
     color: var(--affine-icon-color);
     border: 1px solid var(--affine-border-color);
-    background-color: var(--affine-white);
-    box-shadow:
-      0px 0px 12px 0px rgba(66, 65, 73, 0.14),
-      0px 0px 0px 0.5px #e3e3e4 inset;
+    background-color: var(--affine-background-overlay-panel-color);
+    box-shadow: var(--affine-menu-shadow);
     cursor: pointer;
     width: 24px;
     height: 24px;
@@ -59,12 +56,20 @@ const styles = css`
     transition: opacity 150ms cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
-  .note-slicer-dividing-line {
-    display: block;
+  .note-slicer-dividing-line-container {
+    display: flex;
+    align-items: center;
     position: absolute;
     left: 0;
     top: 0;
+    height: 4px;
+    cursor: pointer;
+  }
+
+  .note-slicer-dividing-line {
+    display: block;
     height: 1px;
+    width: 100%;
     z-index: var(--affine-z-index-popover);
     background-image: linear-gradient(
       to right,
@@ -73,7 +78,7 @@ const styles = css`
     );
     background-size: 4px 100%;
   }
-  .note-slicer-dividing-line.active {
+  .note-slicer-dividing-line-container.active .note-slicer-dividing-line {
     background-image: linear-gradient(
       to right,
       var(--affine-black-60) 50%,
@@ -206,7 +211,6 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
     disposables.add(
       this.edgeless.service.uiEventDispatcher.add('pointerMove', ctx => {
-        if (this._zoom < HIDDEN_ZOOM) return;
         if (this._hidden) this._hidden = false;
 
         const state = ctx.get('pointerState');
@@ -348,7 +352,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       </div>
       ${this._divingLinePositions.map((pos, idx) => {
         const dividingLineClasses = classMap({
-          'note-slicer-dividing-line': true,
+          'note-slicer-dividing-line-container': true,
           active: idx === this._activeSlicerIndex,
         });
         return html`<div
@@ -358,7 +362,9 @@ export class NoteSlicer extends WithDisposable(LitElement) {
             top: `${pos.y}px`,
             width: `${width}px`,
           })}
-        ></div>`;
+        >
+          <span class="note-slicer-dividing-line"></span>
+        </div>`;
       })}
     </div> `;
   }

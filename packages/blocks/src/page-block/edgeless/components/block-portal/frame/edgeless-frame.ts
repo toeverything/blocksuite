@@ -13,7 +13,7 @@ import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 const FRAME_OFFSET = 8;
 
 @customElement('edgeless-frame-title')
-export class EdgeelssFrameTitle extends WithDisposable(ShadowlessElement) {
+export class EdgelessFrameTitle extends WithDisposable(ShadowlessElement) {
   isInner = false;
 
   @state()
@@ -221,6 +221,6 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-frames-container': EdgelessFramesContainer;
     'edgeless-block-portal-frame': EdgelessBlockPortalFrame;
-    'edgeless-frame-title': EdgeelssFrameTitle;
+    'edgeless-frame-title': EdgelessFrameTitle;
   }
 }

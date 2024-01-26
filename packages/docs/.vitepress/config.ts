@@ -46,16 +46,6 @@ const guide: DefaultTheme.NavItem[] = [
     ],
   },
   {
-    text: 'Editor In-Depth',
-    items: [
-      // { text: 'Design Philosophy', link: 'guide/design-philosophy' },
-      {
-        text: 'CRDT-Native Data Flow',
-        link: 'guide/crdt-native-data-flow',
-      },
-    ],
-  },
-  {
     text: 'API Walkthrough',
     items: [
       {
@@ -149,7 +139,7 @@ export default defineConfig({
   },
   lang: 'en-US',
   title: 'BlockSuite',
-  description: 'The Editor Framework',
+  description: 'Content Editing Tech Stack for the Web',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
@@ -162,7 +152,7 @@ export default defineConfig({
       },
       { text: 'Guide', link: '/guide/overview' },
       { text: 'API', link: '/api/' },
-      // { text: 'Blog', link: '#' },
+      // { text: 'Blog', link: '/blog/' },
       {
         text: 'Releases',
         link: 'https://github.com/toeverything/blocksuite/releases',
