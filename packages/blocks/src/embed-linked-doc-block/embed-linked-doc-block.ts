@@ -87,9 +87,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   private get _service() {
-    const service = super.service;
-    assertExists(service, `Linked page block must run with its service.`);
-    return service;
+    return this.service;
   }
 
   private _load() {

@@ -40,13 +40,14 @@ export class BlockStdScope {
     this.selection.mount();
     this.event.mount();
     this.view.mount();
+    this.spec.mount();
   }
 
   unmount() {
     this.event.unmount();
     this.selection.unmount();
     this.view.unmount();
-    this.spec.dispose();
+    this.spec.unmount();
   }
 }
 
