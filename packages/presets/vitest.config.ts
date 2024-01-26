@@ -32,16 +32,16 @@ export default defineConfig(_configEnv =>
           fileURLToPath(new URL('../blocks/src/*', import.meta.url))
         ),
         '@blocksuite/global/*': path.resolve(
-          fileURLToPath(new URL('../global/src/*', import.meta.url))
+          fileURLToPath(new URL('../framework/global/src/*', import.meta.url))
         ),
         '@blocksuite/store': path.resolve(
-          fileURLToPath(new URL('../store/src', import.meta.url))
+          fileURLToPath(new URL('../framework/store/src', import.meta.url))
         ),
         '@blocksuite/inline': path.resolve(
-          fileURLToPath(new URL('../inline/src', import.meta.url))
+          fileURLToPath(new URL('../framework/inline/src', import.meta.url))
         ),
         '@blocksuite/inline/*': path.resolve(
-          fileURLToPath(new URL('../inline/src/*', import.meta.url))
+          fileURLToPath(new URL('../framework/inline/src/*', import.meta.url))
         ),
       },
     },
