@@ -4,15 +4,15 @@
 
 # ALL_PACKAGES
 packages=(
+  "framework/block-std"
+  "framework/global"
+  "framework/lit"
+  "framework/store"
+  "framework/inline"
   "blocks"
-  # "docs" # NOT PUBLISHED
+  # "docs" # NOT PUBLISHING
   "presets"
-  "global"
-  # "playground" # NOT PUBLISHED
-  "store"
-  "inline"
-  "lit"
-  "block-std"
+  # "playground" # NOT PUBLISHING
 )
 
 replace() {
@@ -29,8 +29,9 @@ replace() {
 
 for package in "${packages[@]}"
 do
+  unprefixed_package="${package//framework\//}"
   cd "packages/$package"
-  jq ".name = \"@blocksuite/${package}\"" package.json > package-modified.json
+  jq ".name = \"@blocksuite/${unprefixed_package}\"" package.json > package-modified.json
   replace
   cd ../../
 done

@@ -8,19 +8,19 @@
   "include": ["./src"],
   "references": [
     {
-      "path": "../global",
+      "path": "../framework/global",
     },
     {
-      "path": "../store",
+      "path": "../framework/store",
     },
     {
-      "path": "../block-std",
+      "path": "../framework/block-std",
     },
     {
-      "path": "../lit",
+      "path": "../framework/lit",
     },
     {
-      "path": "../blocks",
+      "path": "../framework/blocks",
     },
   ],
 }

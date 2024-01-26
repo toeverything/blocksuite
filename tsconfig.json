@@ -27,40 +27,40 @@
         "name": "ts-lit-plugin",
         "strict": true,
         "rules": {
-          "no-incompatible-type-binding": "off"
-        }
-      }
-    ]
+          "no-incompatible-type-binding": "off",
+        },
+      },
+    ],
   },
   "files": [],
   "references": [
     {
-      "path": "./packages/block-std"
+      "path": "./packages/framework/block-std",
     },
     {
-      "path": "./packages/blocks"
+      "path": "./packages/blocks",
     },
     {
-      "path": "./packages/presets"
+      "path": "./packages/presets",
     },
     {
-      "path": "./packages/playground"
+      "path": "./packages/playground",
     },
     {
-      "path": "./packages/store"
+      "path": "./packages/framework/store",
     },
     {
-      "path": "./packages/global"
+      "path": "./packages/framework/global",
     },
     {
-      "path": "./packages/inline"
+      "path": "./packages/framework/inline",
     },
     {
-      "path": "./tests"
+      "path": "./tests",
     },
     {
-      "path": "./scripts"
-    }
+      "path": "./scripts",
+    },
   ],
   "ts-node": {
     "esm": true,
@@ -68,7 +68,7 @@
     "compilerOptions": {
       "noUnusedLocals": false,
       "noUnusedParameters": false,
-      "noImplicitReturns": false
-    }
-  }
+      "noImplicitReturns": false,
+    },
+  },
 }

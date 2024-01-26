@@ -155,42 +155,23 @@ importers:
         specifier: 1.1.3
         version: 1.1.3(@types/node@20.11.5)(@vitest/browser@1.1.3)(@vitest/ui@1.1.3)(happy-dom@13.2.0)(terser@5.27.0)
 
-  packages/block-std:
-    dependencies:
-      '@blocksuite/global':
-        specifier: workspace:*
-        version: link:../global
-      lz-string:
-        specifier: ^1.5.0
-        version: 1.5.0
-      w3c-keyname:
-        specifier: ^2.2.8
-        version: 2.2.8
-      zod:
-        specifier: ^3.22.4
-        version: 3.22.4
-    devDependencies:
-      '@blocksuite/store':
-        specifier: workspace:*
-        version: link:../store
-
   packages/blocks:
     dependencies:
       '@blocksuite/block-std':
         specifier: workspace:*
-        version: link:../block-std
+        version: link:../framework/block-std
       '@blocksuite/global':
         specifier: workspace:*
-        version: link:../global
+        version: link:../framework/global
       '@blocksuite/inline':
         specifier: workspace:*
-        version: link:../inline
+        version: link:../framework/inline
       '@blocksuite/lit':
         specifier: workspace:*
-        version: link:../lit
+        version: link:../framework/lit
       '@blocksuite/store':
         specifier: workspace:*
-        version: link:../store
+        version: link:../framework/store
       '@floating-ui/dom':
         specifier: ^1.5.4
         version: 1.5.4
@@ -305,7 +286,7 @@ importers:
         version: link:../presets
       '@blocksuite/store':
         specifier: workspace:*
-        version: link:../store
+        version: link:../framework/store
       markdown-it-container:
         specifier: ^4.0.0
         version: 4.0.0
@@ -329,13 +310,32 @@ importers:
         specifier: ^3.4.15
         version: 3.4.15(typescript@5.3.3)
 
-  packages/global:
+  packages/framework/block-std:
+    dependencies:
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../global
+      lz-string:
+        specifier: ^1.5.0
+        version: 1.5.0
+      w3c-keyname:
+        specifier: ^2.2.8
+        version: 2.2.8
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../store
+
+  packages/framework/global:
     dependencies:
       zod:
         specifier: ^3.22.4
         version: 3.22.4
 
-  packages/inline:
+  packages/framework/inline:
     dependencies:
       '@blocksuite/global':
         specifier: workspace:*
@@ -351,7 +351,7 @@ importers:
         specifier: ^13.6.11
         version: 13.6.11
 
-  packages/lit:
+  packages/framework/lit:
     dependencies:
       '@blocksuite/global':
         specifier: workspace:*
@@ -370,6 +370,52 @@ importers:
         specifier: workspace:*
         version: link:../store
 
+  packages/framework/store:
+    dependencies:
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../global
+      '@blocksuite/inline':
+        specifier: workspace:*
+        version: link:../inline
+      '@types/flexsearch':
+        specifier: ^0.7.6
+        version: 0.7.6
+      flexsearch:
+        specifier: 0.7.43
+        version: 0.7.43
+      idb-keyval:
+        specifier: ^6.2.1
+        version: 6.2.1
+      lib0:
+        specifier: ^0.2.88
+        version: 0.2.88
+      merge:
+        specifier: ^2.1.1
+        version: 2.1.1
+      minimatch:
+        specifier: ^9.0.3
+        version: 9.0.3
+      nanoid:
+        specifier: ^5.0.4
+        version: 5.0.4
+      y-protocols:
+        specifier: ^1.0.6
+        version: 1.0.6(yjs@13.6.11)
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      async-call-rpc:
+        specifier: ^6.3.1
+        version: 6.3.1
+      lit:
+        specifier: ^3.1.1
+        version: 3.1.1
+      yjs:
+        specifier: ^13.6.11
+        version: 13.6.11
+
   packages/playground:
     dependencies:
       '@blocksuite/blocks':
@@ -377,19 +423,19 @@ importers:
         version: link:../blocks
       '@blocksuite/global':
         specifier: workspace:*
-        version: link:../global
+        version: link:../framework/global
       '@blocksuite/inline':
         specifier: workspace:*
-        version: link:../inline
+        version: link:../framework/inline
       '@blocksuite/lit':
         specifier: workspace:*
-        version: link:../lit
+        version: link:../framework/lit
       '@blocksuite/presets':
         specifier: workspace:*
         version: link:../presets
       '@blocksuite/store':
         specifier: workspace:*
-        version: link:../store
+        version: link:../framework/store
       '@shoelace-style/shoelace':
         specifier: 2.12.0
         version: 2.12.0(@types/react@18.2.48)
@@ -453,22 +499,22 @@ importers:
     dependencies:
       '@blocksuite/block-std':
         specifier: workspace:*
-        version: link:../block-std
+        version: link:../framework/block-std
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
       '@blocksuite/global':
         specifier: workspace:*
-        version: link:../global
+        version: link:../framework/global
       '@blocksuite/inline':
         specifier: workspace:*
-        version: link:../inline
+        version: link:../framework/inline
       '@blocksuite/lit':
         specifier: workspace:*
-        version: link:../lit
+        version: link:../framework/lit
       '@blocksuite/store':
         specifier: workspace:*
-        version: link:../store
+        version: link:../framework/store
       '@fal-ai/serverless-client':
         specifier: ^0.8.2
         version: 0.8.2
@@ -484,52 +530,6 @@ importers:
       openai:
         specifier: ^4.25.0
         version: 4.25.0
-
-  packages/store:
-    dependencies:
-      '@blocksuite/global':
-        specifier: workspace:*
-        version: link:../global
-      '@blocksuite/inline':
-        specifier: workspace:*
-        version: link:../inline
-      '@types/flexsearch':
-        specifier: ^0.7.6
-        version: 0.7.6
-      flexsearch:
-        specifier: 0.7.43
-        version: 0.7.43
-      idb-keyval:
-        specifier: ^6.2.1
-        version: 6.2.1
-      lib0:
-        specifier: ^0.2.88
-        version: 0.2.88
-      merge:
-        specifier: ^2.1.1
-        version: 2.1.1
-      minimatch:
-        specifier: ^9.0.3
-        version: 9.0.3
-      nanoid:
-        specifier: ^5.0.4
-        version: 5.0.4
-      y-protocols:
-        specifier: ^1.0.6
-        version: 1.0.6(yjs@13.6.11)
-      zod:
-        specifier: ^3.22.4
-        version: 3.22.4
-    devDependencies:
-      async-call-rpc:
-        specifier: ^6.3.1
-        version: 6.3.1
-      lit:
-        specifier: ^3.1.1
-        version: 3.1.1
-      yjs:
-        specifier: ^13.6.11
-        version: 13.6.11
 
 packages:
 
