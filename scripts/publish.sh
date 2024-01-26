@@ -4,15 +4,15 @@
 
 # ALL_PACKAGES
 packages=(
+  "framework/block-std"
+  "framework/global"
+  "framework/lit"
+  "framework/store"
+  "framework/inline"
   "blocks"
-  "block-std"
-  # "docs" # NOT PUBLISHED
+  # "docs" # NOT PUBLISHING
   "presets"
-  "global"
-  # "playground" # NOT PUBLISHED
-  "store"
-  "inline"
-  "lit"
+  # "playground" # NOT PUBLISHING
 )
 
 npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
@@ -29,5 +29,9 @@ do
     pnpm publish
   fi
 
-  cd ../../
+  if [[ $package == framework/* ]]; then
+    cd ../../../
+  else
+    cd ../../
+  fi
 done

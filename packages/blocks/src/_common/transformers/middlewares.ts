@@ -31,15 +31,22 @@ export const replaceIdMiddleware: JobMiddleware = ({ slots, workspace }) => {
       const delta: DeltaOperation[] = [];
       for (const d of model.text.toDelta()) {
         if (d.attributes?.reference?.pageId) {
+          const newId = idMap.get(d.attributes.reference.pageId);
+          if (!newId) {
+            prev += d.insert?.length ?? 0;
+            continue;
+          }
+
           if (prev > 0) {
             delta.push({ retain: prev });
           }
+
           delta.push({
             retain: d.insert?.length ?? 0,
             attributes: {
               reference: {
                 ...d.attributes.reference,
-                pageId: idMap.get(d.attributes.reference.pageId)!,
+                pageId: newId,
               },
             },
           });

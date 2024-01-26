@@ -41,6 +41,7 @@ import type { SurfaceBlockModel } from './surface-block/surface-model.js';
 import { SurfaceBlockSchema } from './surface-block/surface-model.js';
 import type { SurfaceRefBlockModel } from './surface-ref-block/surface-ref-model.js';
 import { SurfaceRefBlockSchema } from './surface-ref-block/surface-ref-model.js';
+import { SyncedBlockSchema } from './synced-block/index.js';
 
 export type {
   AttachmentBlockModel,
@@ -82,6 +83,7 @@ export const __unstableSchemas = [
   EmbedGithubBlockSpec.schema,
   EmbedHtmlBlockSpec.schema,
   EmbedLinkedDocBlockSpec.schema,
+  SyncedBlockSchema,
 ] satisfies z.infer<typeof BlockSchema>[];
 
 // TODO support dynamic register

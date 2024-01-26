@@ -1,16 +1,15 @@
 /* eslint-disable no-undef */
 // ALL_PACKAGES
 const allPackages = [
-  'block-std',
+  'framework/block-std',
+  'framework/global',
+  'frameworlk/inline',
+  'framework/lit',
+  'framework/store',
   'blocks',
   'docs',
-  'global',
-  'inline',
-  'lit',
   'playground',
   'presets',
-  'store',
-  'virgo',
 ];
 
 const createPattern = packageName => [
