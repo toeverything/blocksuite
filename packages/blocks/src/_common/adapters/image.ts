@@ -18,7 +18,7 @@ import {
 
 export type Image = File[];
 
-type PngToSliceSnapshotPayload = {
+type ImageToSliceSnapshotPayload = {
   file: Image;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
@@ -70,7 +70,7 @@ export class ImageAdapter extends BaseAdapter<Image> {
     throw new Error('Method not implemented.');
   }
   override async toSliceSnapshot(
-    payload: PngToSliceSnapshotPayload
+    payload: ImageToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {
     const content: SliceSnapshot['content'] = [];
     for (const item of payload.file) {

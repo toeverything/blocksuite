@@ -18,7 +18,7 @@ import {
 
 export type Attachment = File[];
 
-type PngToSliceSnapshotPayload = {
+type AttachmentToSliceSnapshotPayload = {
   file: Attachment;
   assets?: AssetsManager;
   blockVersions: Record<string, number>;
@@ -70,7 +70,7 @@ export class AttachmentAdapter extends BaseAdapter<Attachment> {
     throw new Error('Method not implemented.');
   }
   override async toSliceSnapshot(
-    payload: PngToSliceSnapshotPayload
+    payload: AttachmentToSliceSnapshotPayload
   ): Promise<SliceSnapshot | null> {
     const content: SliceSnapshot['content'] = [];
     for (const item of payload.file) {
