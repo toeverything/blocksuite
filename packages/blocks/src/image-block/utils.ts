@@ -2,7 +2,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import { Buffer } from 'buffer';
-import FileType from 'file-type/browser.js';
 
 import { withTempBlobData } from '../_common/utils/filesys.js';
 import { humanFileSize } from '../_common/utils/math.js';
@@ -73,7 +72,11 @@ async function getImageBlob(model: ImageBlockModel) {
   const page = model.page;
   const blob = await page.blob.get(sourceId);
 
-  if (blob && !blob.type) {
+  if (!blob) {
+    return null;
+  }
+
+  if (!blob.type) {
     // FIXME: See https://github.com/toeverything/AFFiNE/issues/3245
     // https://github.com/toeverything/AFFiNE/pull/4845
     // https://github.com/toeverything/blocksuite/issues/5097
@@ -81,14 +84,20 @@ async function getImageBlob(model: ImageBlockModel) {
     if (window.Buffer === undefined) {
       window.Buffer = Buffer;
     }
-    const buffer = await blob.arrayBuffer();
-    const fileType = await FileType.fromBuffer(buffer);
 
-    if (!fileType?.mime.match(/^image\/(gif|png|jpe?g)$/)) {
+    const buffer = await blob.arrayBuffer();
+
+    const FileType = await import('file-type/browser.js');
+    const fileType = await FileType.fromBuffer(buffer);
+    if (!fileType?.mime.startsWith('image/')) {
       return null;
     }
 
     return new Blob([buffer], { type: fileType.mime });
+  }
+
+  if (!blob.type.startsWith('image/')) {
+    return null;
   }
 
   return blob;
