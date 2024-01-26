@@ -33,5 +33,10 @@ do
   cd "packages/$package"
   jq ".name = \"@blocksuite/${unprefixed_package}\"" package.json > package-modified.json
   replace
-  cd ../../
+
+  if [[ $package == framework/* ]]; then
+    cd ../../../
+  else
+    cd ../../
+  fi
 done

@@ -29,5 +29,9 @@ do
     pnpm publish
   fi
 
-  cd ../../
+  if [[ $package == framework/* ]]; then
+    cd ../../../
+  else
+    cd ../../
+  fi
 done
