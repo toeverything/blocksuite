@@ -1,3 +1,7 @@
+---
+layout: doc
+---
+
 # Document-Centric, CRDT-Native: How We Build Collaborative Applications
 
 ::: info

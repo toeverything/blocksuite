@@ -162,7 +162,7 @@ export default defineConfig({
       },
       { text: 'Guide', link: '/guide/overview' },
       { text: 'API', link: '/api/' },
-      // { text: 'Blog', link: '#' },
+      { text: 'Blog', link: '/blog/design-philosophy' },
       {
         text: 'Releases',
         link: 'https://github.com/toeverything/blocksuite/releases',
