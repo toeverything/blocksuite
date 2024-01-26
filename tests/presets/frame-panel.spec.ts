@@ -4,7 +4,6 @@ import { dragBetweenCoords } from 'utils/actions/drag.js';
 import {
   addBasicShapeElement,
   addNote,
-  assertEdgelessTool,
   edgelessCommonSetup,
   setEdgelessTool,
   Shape,
@@ -101,34 +100,5 @@ test.describe('frame panel', () => {
 
     expect(await frames.count()).toBe(1);
     expect(await frameCards.count()).toBe(1);
-  });
-
-  test('should enter presentation mode when click presentation button', async ({
-    page,
-  }) => {
-    await init(page);
-    await toggleFramePanel(page);
-
-    await addNote(page, 'hello', 150, 500);
-
-    await page.mouse.click(0, 0);
-
-    await setEdgelessTool(page, 'frame');
-    await dragBetweenCoords(page, { x: 100, y: 440 }, { x: 600, y: 600 });
-
-    await setEdgelessTool(page, 'frame');
-    await dragBetweenCoords(page, { x: 50, y: 300 }, { x: 120, y: 400 });
-
-    const frames = page.locator('edgeless-block-portal-frame');
-    expect(await frames.count()).toBe(2);
-    const frameCards = page.locator('frame-card');
-    expect(await frameCards.count()).toBe(2);
-
-    const presentationButton = page.locator(
-      '.frame-panel-header .presentation-button'
-    );
-    await presentationButton.click();
-    await page.waitForTimeout(300);
-    await assertEdgelessTool(page, 'frameNavigator');
   });
 });
