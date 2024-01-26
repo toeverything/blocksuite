@@ -1,13 +1,26 @@
 # BlockSuite Overview
 
-BlockSuite is a toolkit for building collaborative editors and applications. It starts with a foundational block-based document model and independently implements a series of collaborative editing infrastructures, including editors. With BlockSuite, you can choose to:
+BlockSuite is a toolkit for building diverse collaborative editors and applications. It implements a series of collaborative editing infrastructures and editors independently. With BlockSuite, you can choose to:
 
 - Build new editors from the ground up based on the BlockSuite framework.
 - Or, reuse multiple first-party BlockSuite editors right out of the box:
   - [**`DocEditor`**](../presets/doc-editor): **Built entirely from scratch**, `DocEditor` is a comprehensive block-based document editor, offering extensive customization and flexibility.
   - [**`EdgelessEditor`**](../presets/edgeless-editor): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
 
+These editors are being used in [AFFiNE](https://github.com/toeverything/AFFiNE), click 🔁 in following example to switch between them dynamically - they are fully compatible!
+
 <iframe src="https://try-blocksuite.vercel.app/starter/?init" width="100%" height="500"></iframe>
+
+In addition to [extending custom blocks](./working-with-block-tree#defining-new-blocks), here are what you can also conveniently achieve with BlockSuite:
+
+- Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the [document streaming](./data-synchronization#document-streaming) mechanism.
+- Writing type-safe complex editing logic based on the [command](./command) mechanism, similar to react hooks designed for document editing.
+- Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshot](./data-synchronization#snapshot-api) and transformer.
+- State scheduling across multiple documents and reusing one document in multiple editors.
+
+To try out BlockSuite, refer to the [Quick Start](./quick-start) document and start with the preset editors in `@blocksuite/presets`.
+
+---
 
 The BlockSuite project is structured around key packages that are categorized into two groups: a headless framework and prebuilt editing components.
 
@@ -50,14 +63,5 @@ The BlockSuite project is structured around key packages that are categorized in
 This can be illustrated as the diagram below:
 
 ![package-overview.png](../images/package-overview.png)
-
-In addition to extending custom blocks, here are what you can also conveniently achieve with BlockSuite:
-
-- Writing type-safe complex editing logic based on the [command](./command) mechanism, similar to react hooks designed for document editing.
-- Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshot](./data-synchronization#snapshot-api) and transformer.
-- Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the [document streaming](./data-synchronization#document-streaming) mechanism.
-- State scheduling across multiple documents and reusing one document in multiple editors.
-
-To try out BlockSuite, refer to the [Quick Start](./quick-start) document and start with the preset editors in `@blocksuite/presets`.
 
 > 🚧 BlockSuite is currently in its early stage, with some extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!

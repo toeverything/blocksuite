@@ -1,9 +1,5 @@
 # CRDT-Native Data Flow
 
-::: info
-🌐 This documentation has a [Chinese translation](https://insider.affine.pro/share/af3478a2-9c9c-4d16-864d-bffa1eb10eb6/I9qBPLR9WvuNE92BLm1L2).
-:::
-
 To make the editor logic based on BlockSuite intuitive and collaboration-ready, there is one major goal in BlockSuite: **Regardless of whether it is in a multi-user collaboration state, the application-layer code based on BlockSuite should be unaware of it**.
 
 We will introduce how this design is embodied in BlockSuite.
@@ -48,7 +44,7 @@ The complete state update process in BlockSuite involves several distinct steps,
 
 ![block-std-data-flow](../images/block-std-data-flow.png)
 
-This update mechanism is depicted in the diagram above. Concepts such as [command](./command), [view](./block-view) and [event](./event) are further elaborated in other documentation sections for detailed understanding.
+This update mechanism is depicted in the diagram above. Concepts such as [command](../guide/command), [view](../guide/block-view) and [event](../guide/event) are further elaborated in other documentation sections for detailed understanding.
 
 ## Summary
 
