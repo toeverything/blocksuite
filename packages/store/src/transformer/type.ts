@@ -6,6 +6,7 @@ export type BlockSnapshot = {
   type: 'block';
   id: string;
   flavour: string;
+  version?: number;
   props: Record<string, unknown>;
   children: BlockSnapshot[];
 };
@@ -14,6 +15,7 @@ export const BlockSnapshotSchema: z.ZodType<BlockSnapshot> = z.object({
   type: z.literal('block'),
   id: z.string(),
   flavour: z.string(),
+  version: z.number().optional(),
   props: z.record(z.unknown()),
   children: z.lazy(() => BlockSnapshotSchema.array()),
 });
@@ -21,7 +23,6 @@ export const BlockSnapshotSchema: z.ZodType<BlockSnapshot> = z.object({
 export type SliceSnapshot = {
   type: 'slice';
   content: BlockSnapshot[];
-  blockVersions: Record<string, number>;
   pageVersion: number;
   workspaceVersion: number;
   workspaceId: string;
@@ -31,7 +32,6 @@ export type SliceSnapshot = {
 export const SliceSnapshotSchema: z.ZodType<SliceSnapshot> = z.object({
   type: z.literal('slice'),
   content: BlockSnapshotSchema.array(),
-  blockVersions: z.record(z.number()),
   pageVersion: z.number(),
   workspaceVersion: z.number(),
   workspaceId: z.string(),
@@ -41,7 +41,6 @@ export const SliceSnapshotSchema: z.ZodType<SliceSnapshot> = z.object({
 export type WorkspaceInfoSnapshot = {
   id: string;
   type: 'info';
-  blockVersions: Record<string, number>;
   pageVersion: number;
   workspaceVersion: number;
   properties: PagesPropertiesMeta;
@@ -51,7 +50,6 @@ export const WorkspaceInfoSnapshotSchema: z.ZodType<WorkspaceInfoSnapshot> =
   z.object({
     id: z.string(),
     type: z.literal('info'),
-    blockVersions: z.record(z.number()),
     pageVersion: z.number(),
     workspaceVersion: z.number(),
     properties: z.record(z.any()),

@@ -2,6 +2,7 @@
 import './note/edgeless-note.js';
 import './image/edgeless-image.js';
 import './bookmark/edgeless-bookmark.js';
+import './attachment/edgeless-attachment.js';
 import './frame/edgeless-frame.js';
 import './embed/edgeless-embed.js';
 import '../rects/edgeless-selected-rect.js';
@@ -46,6 +47,7 @@ const portalMap = new Map<EdgelessBlockType | RegExp, string>([
   ['affine:note', 'edgeless-block-portal-note'],
   ['affine:image', 'edgeless-block-portal-image'],
   ['affine:bookmark', 'edgeless-block-portal-bookmark'],
+  ['affine:attachment', 'edgeless-block-portal-attachment'],
   [/affine:embed-*/, 'edgeless-block-portal-embed'],
 ]);
 
@@ -54,6 +56,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   ShadowlessElement
 ) {
   static override styles = css`
+    .affine-block-children-container.edgeless {
+      user-select: none;
+    }
+
     .surface-layer {
       position: absolute;
     }
@@ -267,11 +273,20 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             this._updateIndexLabel();
           }, this);
         }
-
+        // When note display mode is changed, we need to update the portal
         if (
           type === 'update' &&
           flavour === 'affine:note' &&
           payload.props.key === 'displayMode'
+        ) {
+          this.requestUpdate();
+        }
+
+        // When page children is updated, we need to update the portal
+        if (
+          type === 'update' &&
+          flavour === 'affine:page' &&
+          payload.props.key === 'sys:children'
         ) {
           this.requestUpdate();
         }
@@ -328,7 +343,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     if (!surface) return nothing;
 
-    const notes = page.getBlockByFlavour(['affine:note']) as NoteBlockModel[];
+    const notes = page.root?.children.filter(child =>
+      matchFlavours(child, ['affine:note'])
+    ) as NoteBlockModel[];
     const layers = service.layer.layers;
     const pageVisibleBlocks = new Map<AutoConnectElement, number>();
     const edgelessOnlyNotesSet = new Set<NoteBlockModel>();

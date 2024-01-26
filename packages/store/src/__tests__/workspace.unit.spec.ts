@@ -151,8 +151,7 @@ describe('basic', () => {
     let id = 100;
     const workspace = new Workspace({
       ...options,
-      idGenerator: type => {
-        assert.equal(type, 'page');
+      idGenerator: () => {
         return String(id++);
       },
     });
@@ -238,6 +237,7 @@ describe('basic', () => {
               'sys:children': [],
               'sys:flavour': 'affine:page',
               'sys:id': '0',
+              'sys:version': 2,
             },
           },
         },
@@ -266,6 +266,7 @@ describe('addBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:version': 2,
       },
     });
   });
@@ -280,6 +281,7 @@ describe('addBlock', () => {
         'sys:flavour': 'affine:page',
         'sys:id': '0',
         'prop:title': 'hello',
+        'sys:version': 2,
       },
     });
   });
@@ -305,11 +307,13 @@ describe('addBlock', () => {
         'sys:flavour': 'affine:page',
         'sys:id': '0',
         'prop:title': '',
+        'sys:version': 2,
       },
       '1': {
         'sys:children': ['2', '3', '4'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'sys:version': 1,
       },
       '2': {
         'sys:children': [],
@@ -317,6 +321,7 @@ describe('addBlock', () => {
         'sys:id': '2',
         'prop:text': '',
         'prop:type': 'text',
+        'sys:version': 1,
       },
       '3': {
         'sys:children': [],
@@ -324,6 +329,7 @@ describe('addBlock', () => {
         'sys:id': '3',
         'prop:text': '',
         'prop:type': 'h1',
+        'sys:version': 1,
       },
       '4': {
         'sys:children': [],
@@ -331,6 +337,7 @@ describe('addBlock', () => {
         'sys:id': '4',
         'prop:text': '',
         'prop:type': 'h2',
+        'sys:version': 1,
       },
     });
   });
@@ -479,11 +486,13 @@ describe('deleteBlock', () => {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:version': 2,
       },
       '1': {
         'sys:children': ['2', '3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'sys:version': 1,
       },
       '2': {
         'prop:text': '',
@@ -491,6 +500,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '2',
+        'sys:version': 1,
       },
       '3': {
         'prop:text': '',
@@ -498,6 +508,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '3',
+        'sys:version': 1,
       },
     });
 
@@ -510,6 +521,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:version': 2,
       },
     });
   });
@@ -529,11 +541,13 @@ describe('deleteBlock', () => {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:version': 2,
       },
       '1': {
         'sys:children': ['2'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'sys:version': 1,
       },
       '2': {
         'prop:text': '',
@@ -541,6 +555,7 @@ describe('deleteBlock', () => {
         'sys:children': ['3', '4'],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '2',
+        'sys:version': 1,
       },
       '3': {
         'prop:text': '',
@@ -548,6 +563,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '3',
+        'sys:version': 1,
       },
       '4': {
         'prop:text': '',
@@ -555,6 +571,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '4',
+        'sys:version': 1,
       },
     });
 
@@ -570,11 +587,13 @@ describe('deleteBlock', () => {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:version': 2,
       },
       '1': {
         'sys:children': ['3', '4'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'sys:version': 1,
       },
       '3': {
         'prop:text': '',
@@ -582,6 +601,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '3',
+        'sys:version': 1,
       },
       '4': {
         'prop:text': '',
@@ -589,6 +609,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '4',
+        'sys:version': 1,
       },
     });
   });
@@ -610,11 +631,13 @@ describe('deleteBlock', () => {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:version': 2,
       },
       '1': {
         'sys:children': ['2', '3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'sys:version': 1,
       },
       '2': {
         'prop:text': '',
@@ -622,6 +645,7 @@ describe('deleteBlock', () => {
         'sys:children': ['4', '5'],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '2',
+        'sys:version': 1,
       },
       '3': {
         'prop:text': '',
@@ -629,6 +653,7 @@ describe('deleteBlock', () => {
         'sys:children': ['6'],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '3',
+        'sys:version': 1,
       },
       '4': {
         'prop:text': '',
@@ -636,6 +661,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '4',
+        'sys:version': 1,
       },
       '5': {
         'prop:text': '',
@@ -643,6 +669,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '5',
+        'sys:version': 1,
       },
       '6': {
         'prop:text': '',
@@ -650,6 +677,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '6',
+        'sys:version': 1,
       },
     });
 
@@ -665,11 +693,13 @@ describe('deleteBlock', () => {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:version': 2,
       },
       '1': {
         'sys:children': ['3'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'sys:version': 1,
       },
       '3': {
         'prop:text': '',
@@ -677,6 +707,7 @@ describe('deleteBlock', () => {
         'sys:children': ['6', '4', '5'],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '3',
+        'sys:version': 1,
       },
       '4': {
         'prop:text': '',
@@ -684,6 +715,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '4',
+        'sys:version': 1,
       },
       '5': {
         'prop:text': '',
@@ -691,6 +723,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '5',
+        'sys:version': 1,
       },
       '6': {
         'prop:text': '',
@@ -698,6 +731,7 @@ describe('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:paragraph',
         'sys:id': '6',
+        'sys:version': 1,
       },
     });
   });
@@ -716,11 +750,13 @@ describe('deleteBlock', () => {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:version': 2,
       },
       '1': {
         'sys:children': ['2'],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'sys:version': 1,
       },
       '2': {
         'sys:children': [],
@@ -728,6 +764,7 @@ describe('deleteBlock', () => {
         'sys:id': '2',
         'prop:text': '',
         'prop:type': 'text',
+        'sys:version': 1,
       },
     });
 
@@ -740,11 +777,13 @@ describe('deleteBlock', () => {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:version': 2,
       },
       '1': {
         'sys:children': [],
         'sys:flavour': 'affine:note',
         'sys:id': '1',
+        'sys:version': 1,
       },
     });
     assert.equal(root.children.length, 1);

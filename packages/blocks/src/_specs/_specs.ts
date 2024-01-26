@@ -184,16 +184,6 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     },
     service: AttachmentService,
   },
-  {
-    schema: SurfaceRefBlockSchema,
-    service: SurfaceRefBlockService,
-    view: {
-      component: literal`affine-surface-ref`,
-      widgets: {
-        surfaceToolbar: literal`affine-surface-ref-toolbar`,
-      },
-    },
-  },
   EmbedFigmaBlockSpec,
   EmbedYoutubeBlockSpec,
   EmbedGithubBlockSpec,
@@ -212,6 +202,16 @@ export const DocEditorBlockSpecs: BlockSpec[] = [
     },
     service: SurfacePageService,
   },
+  {
+    schema: SurfaceRefBlockSchema,
+    service: SurfaceRefBlockService,
+    view: {
+      component: literal`affine-surface-ref`,
+      widgets: {
+        surfaceToolbar: literal`affine-surface-ref-toolbar`,
+      },
+    },
+  },
 ];
 
 export const EdgelessEditorBlockSpecs: BlockSpec[] = [
@@ -228,6 +228,13 @@ export const EdgelessEditorBlockSpecs: BlockSpec[] = [
     schema: FrameBlockSchema,
     view: {
       component: literal`affine-frame`,
+    },
+  },
+  {
+    schema: SurfaceRefBlockSchema,
+    service: SurfaceRefBlockService,
+    view: {
+      component: literal`affine-edgeless-surface-ref`,
     },
   },
 ];

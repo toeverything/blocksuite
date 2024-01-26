@@ -258,8 +258,9 @@ export function calcDropTarget(
         next = null;
       }
     } else {
-      next = getClosestBlockElementByElement(element.parentElement)
-        ?.nextElementSibling;
+      next = getClosestBlockElementByElement(
+        element.parentElement
+      )?.nextElementSibling;
     }
 
     if (next) {
@@ -374,7 +375,7 @@ export function convertDragPreviewDocToEdgeless({
   assertExists(previewEl);
   const rect = previewEl.getBoundingClientRect();
   const { left: viewportLeft, top: viewportTop } = edgelessPage.viewport;
-  const point = edgelessPage.service.toModelCoord(
+  const point = edgelessPage.service.viewport.toModelCoord(
     rect.x - viewportLeft,
     rect.y - viewportTop
   );

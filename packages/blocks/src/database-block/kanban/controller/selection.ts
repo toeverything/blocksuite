@@ -76,8 +76,9 @@ export class KanbanSelectionController implements ReactiveController {
 
     const selection = this.selection;
     const target = event.target as HTMLElement;
-    const closestCardId = target.closest('affine-data-view-kanban-card')
-      ?.cardId;
+    const closestCardId = target.closest(
+      'affine-data-view-kanban-card'
+    )?.cardId;
     const closestGroupKey = target.closest('affine-data-view-kanban-group')
       ?.group.key;
     if (!closestCardId) return;

@@ -1,12 +1,18 @@
+import '../../buttons/tool-icon-button.js';
+import '../common/slide-menu.js';
+
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import { toggleEmbedCardCreateModal } from '../../../../../_common/components/embed-card/modal/index.js';
 import { BookmarkIcon } from '../../../../../_common/icons/edgeless.js';
+import { AttachmentIcon } from '../../../../../_common/icons/text.js';
 import {
   type NoteChildrenFlavour,
   type NoteTool,
+  openFileOrFiles,
 } from '../../../../../_common/utils/index.js';
 import { FigmaIcon } from '../../../../../embed-figma-block/styles.js';
 import { GithubIcon } from '../../../../../embed-github-block/styles.js';
@@ -80,8 +86,10 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
         <div class="menu-content">
           <div class="button-group-label">Blocks</div>
           <div class="button-group-container">
-            ${NOTE_MENU_ITEMS.map(item => {
-              return html`
+            ${repeat(
+              NOTE_MENU_ITEMS,
+              item => item.childFlavour,
+              item => html`
                 <edgeless-tool-icon-button
                   .active=${childType === item.childType}
                   .activeMode=${'background'}
@@ -96,8 +104,9 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                 >
                   ${item.icon}
                 </edgeless-tool-icon-button>
-              `;
-            })}
+              `
+            )}
+
             <edgeless-tool-icon-button
               .activeMode=${'background'}
               .iconContainerPadding=${2}
@@ -114,6 +123,20 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
             >
               ${BookmarkIcon}
             </edgeless-tool-icon-button>
+
+            <edgeless-tool-icon-button
+              .activeMode=${'background'}
+              .iconContainerPadding=${2}
+              .tooltip=${'File'}
+              @click=${async () => {
+                const file = await openFileOrFiles();
+                if (!file) return;
+                await this.edgeless.addAttachments([file]);
+              }}
+            >
+              ${AttachmentIcon}
+            </edgeless-tool-icon-button>
+
             <edgeless-tool-icon-button
               .activeMode=${'background'}
               .iconContainerPadding=${2}
@@ -130,6 +153,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
             >
               ${YoutubeIcon}
             </edgeless-tool-icon-button>
+
             <edgeless-tool-icon-button
               .activeMode=${'background'}
               .iconContainerPadding=${2}
@@ -146,6 +170,7 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
             >
               ${FigmaIcon}
             </edgeless-tool-icon-button>
+
             <edgeless-tool-icon-button
               .activeMode=${'background'}
               .iconContainerPadding=${2}

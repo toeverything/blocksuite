@@ -3,6 +3,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { UIEventState, UIEventStateContext } from '../base.js';
 import type { UIEventDispatcher } from '../dispatcher.js';
 import { PointerEventState } from '../state/index.js';
+import { EventScopeSourceType, EventSourceState } from '../state/source.js';
 import { isFarEnough } from '../utils.js';
 
 export class PointerControl {
@@ -46,7 +47,14 @@ export class PointerControl {
   };
 
   private _createContext(event: Event, pointerState: PointerEventState) {
-    return UIEventStateContext.from(new UIEventState(event), pointerState);
+    return UIEventStateContext.from(
+      new UIEventState(event),
+      new EventSourceState({
+        event,
+        sourceType: EventScopeSourceType.Target,
+      }),
+      pointerState
+    );
   }
 
   private _down = (event: PointerEvent) => {

@@ -1,9 +1,10 @@
 import { AffineEditorContainer } from '@blocksuite/presets';
 import { Text, type Workspace } from '@blocksuite/store';
 
-import { createEditor } from '../utils';
-import { type InitFn } from './utils';
+import { createEditor } from '../utils.js';
+import { type InitFn } from './utils.js';
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const multiEditor: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
   await page.load(() => {
@@ -38,6 +39,7 @@ multiEditor.id = 'multiple-editor';
 multiEditor.displayName = 'Multiple Editor Example';
 multiEditor.description = 'Multiple Editor basic example';
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const multiEditorVertical: InitFn = async (
   workspace: Workspace,
   pageId: string

@@ -1,4 +1,4 @@
-import type { EdgelessElement } from '../page-block/edgeless/type.js';
+import type { EdgelessModel } from '../page-block/edgeless/type.js';
 import { GRID_SIZE, type IBound } from './consts.js';
 import { compare } from './managers/layer-utils.js';
 import { Bound } from './utils/bound.js';
@@ -21,7 +21,7 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElement<T extends EdgelessElement>(ele: T): number[] {
+function rangeFromElement<T extends EdgelessModel>(ele: T): number[] {
   const bound = ele.elementBound;
   const minRow = getGridIndex(bound.x);
   const maxRow = getGridIndex(bound.maxX);
@@ -30,7 +30,7 @@ function rangeFromElement<T extends EdgelessElement>(ele: T): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function rangeFromElementExternal<T extends EdgelessElement>(
+function rangeFromElementExternal<T extends EdgelessModel>(
   ele: T
 ): number[] | null {
   if (!ele.externalXYWH) return null;
@@ -43,7 +43,7 @@ function rangeFromElementExternal<T extends EdgelessElement>(
   return [minRow, maxRow, minCol, maxCol];
 }
 
-export class GridManager<T extends EdgelessElement> {
+export class GridManager<T extends EdgelessModel> {
   private _grids: Map<string, Set<T>> = new Map();
   private _elementToGrids: Map<T, Set<Set<T>>> = new Map();
 

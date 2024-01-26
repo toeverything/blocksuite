@@ -316,11 +316,11 @@ export class ImageBlockPageComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _onCaptionKeydown(e: KeyboardEvent) {
+    e.stopPropagation();
     this.std.event.activate();
     if (e.isComposing) return;
     if (e.key === 'Enter') {
       e.preventDefault();
-      e.stopPropagation();
       const model = this.model;
       const page = model.page;
       const target = e.target as HTMLInputElement;
@@ -346,7 +346,7 @@ export class ImageBlockPageComponent extends BlockElement<ImageBlockModel> {
     }
   }
 
-  override render() {
+  override renderBlock() {
     const resizeImgStyle = this._normalizeImageSize();
 
     return html`

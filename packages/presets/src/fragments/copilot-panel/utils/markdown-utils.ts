@@ -15,13 +15,10 @@ export async function getMarkdownFromSlice(host: EditorHost, slice: Slice) {
 
   return markdown.file;
 }
-
-export async function insertFromMarkdown(
-  host: EditorHost,
+export const markdownToSnapshot = async (
   markdown: string,
-  parent?: string,
-  index?: number
-) {
+  host: EditorHost
+) => {
   const job = new Job({ workspace: host.std.page.workspace });
   const markdownAdapter = new MarkdownAdapter();
   const { blockVersions, workspaceVersion, pageVersion } =
@@ -43,6 +40,19 @@ export async function insertFromMarkdown(
 
   const snapshot = await markdownAdapter.toSliceSnapshot(payload);
   assertExists(snapshot, 'import markdown failed, expected to get a snapshot');
+
+  return {
+    snapshot,
+    job,
+  };
+};
+export async function insertFromMarkdown(
+  host: EditorHost,
+  markdown: string,
+  parent?: string,
+  index?: number
+) {
+  const { snapshot, job } = await markdownToSnapshot(markdown, host);
 
   const snapshots = snapshot.content[0].children;
 

@@ -42,7 +42,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   @state()
   private _showOverlay = true;
 
-  @state()
+  @property({ attribute: false })
   showCaption = false;
 
   @query('.affine-embed-youtube-block')
@@ -87,9 +87,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!!this.model.caption && !!this.model.caption.length) {
-      this.showCaption = true;
-    }
+    this.showCaption = !!this.model.caption?.length;
 
     if (!this.model.videoId) {
       this.page.withoutTransact(() => {
@@ -113,7 +111,11 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
         this.requestUpdate();
-        if (key === 'url') this.refreshData();
+        if (key === 'url') {
+          this.refreshData();
+        } else if (key === 'caption') {
+          this.showCaption = !!this.model.caption?.length;
+        }
       })
     );
 
@@ -185,7 +187,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     };
   });
 
-  override render() {
+  override renderBlock() {
     const {
       image,
       title = 'YouTube',
@@ -207,16 +209,18 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     const descriptionText = loading ? '' : description;
     const bannerImage =
       !loading && image
-        ? html`<object type="image/webp" data=${image}>
+        ? html`<object type="image/webp" data=${image} draggable="false">
             ${EmbedCardBannerIcon}
           </object>`
         : EmbedCardBannerIcon;
 
     const creatorImageEl =
       !loading && creatorImage
-        ? html`<object type="image/webp" data=${creatorImage}>
-            ${EmbedCardBannerIcon}
-          </object>`
+        ? html`<object
+            type="image/webp"
+            data=${creatorImage}
+            draggable="false"
+          ></object>`
         : nothing;
 
     return this.renderEmbed(
@@ -227,7 +231,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
           })}
         >
           <div
-            ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
+            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
             class=${classMap({
               'affine-embed-youtube-block': true,
               loading,

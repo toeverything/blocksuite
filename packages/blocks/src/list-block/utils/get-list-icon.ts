@@ -19,11 +19,16 @@ export function ListIcon(
   const { index, deep } = getListInfo(model);
   switch (model.type) {
     case 'bulleted':
-      return html`<div class="affine-list-block__prefix" @click=${onClick}>
+      return html`<div
+        contenteditable="false"
+        class="affine-list-block__prefix"
+        @click=${onClick}
+      >
         ${points[deep % points.length]}
       </div>`;
     case 'numbered':
       return html`<div
+        contenteditable="false"
         class="affine-list-block__prefix affine-list-block__numbered"
         @click=${onClick}
       >
@@ -31,13 +36,18 @@ export function ListIcon(
       </div>`;
     case 'todo':
       return html`<div
+        contenteditable="false"
         class="affine-list-block__prefix affine-list-block__todo-prefix"
         @click=${onClick}
       >
         ${model.checked ? checkboxChecked() : checkboxUnchecked()}
       </div>`;
     case 'toggle':
-      return html`<div class="affine-list-block__prefix" @click=${onClick}>
+      return html`<div
+        contenteditable="false"
+        class="affine-list-block__prefix"
+        @click=${onClick}
+      >
         ${showChildren ? toggleDown : toggleRight}
       </div>`;
     default:

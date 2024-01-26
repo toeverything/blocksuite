@@ -6,11 +6,12 @@ import {
   type Workspace,
 } from '@blocksuite/store';
 
-import { getOptions } from '../utils';
-import { type InitFn } from './utils';
+import { getOptions } from '../utils.js';
+import { type InitFn } from './utils.js';
 
 const SHAPE_TYPES = ['rect', 'triangle', 'ellipse', 'diamond'];
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const heavyWhiteboard: InitFn = async (
   workspace: Workspace,
   id: string
@@ -39,7 +40,7 @@ export const heavyWhiteboard: InitFn = async (
     for (; i < count; i++) {
       const x = Math.random() * count * 2;
       const y = Math.random() * count * 2;
-      const id = nanoid('block');
+      const id = nanoid();
       surfaceBlockElements[id] = native2Y(
         {
           id,

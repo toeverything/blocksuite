@@ -48,7 +48,7 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
   }
 
   initTemplate(viewType: DataViewTypes) {
-    const ids = [nanoid('unknown'), nanoid('unknown'), nanoid('unknown')];
+    const ids = [nanoid(), nanoid(), nanoid()];
     const statusId = this.addColumn(
       'end',
       selectPureColumnConfig.create('Status', {
@@ -267,7 +267,7 @@ export class DatabaseBlockModel extends BlockModel<DatabaseBlockProps> {
 
 const migration = {
   toV3: data => {
-    const id = nanoid('unknown');
+    const id = nanoid();
     // @ts-expect-error
     const title = data['titleColumnName'];
     // @ts-expect-error

@@ -7,6 +7,7 @@ import type { EmbedFigmaBlockComponent } from '../../../embed-figma-block/embed-
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
 import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
+import type { AttachmentBlockComponent } from '../../../index.js';
 import { stopPropagation } from '../../utils/event.js';
 
 @customElement('embed-card-caption')
@@ -30,6 +31,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   block!:
+    | AttachmentBlockComponent
     | BookmarkBlockComponent
     | EmbedGithubBlockComponent
     | EmbedYoutubeBlockComponent
@@ -50,11 +52,20 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
     this.block.model.page.updateBlock(this.block.model, {
       caption: this.input.value,
     });
-    this.requestUpdate();
   }
 
   private _onInputBlur() {
     this.dispatchEvent(new CustomEvent('blur', { bubbles: true }));
+  }
+
+  override firstUpdated() {
+    this.disposables.add(
+      this.block.model.propsUpdated.on(({ key }) => {
+        if (this.display && key === 'caption') {
+          this.input.value = this.block.model.caption ?? '';
+        }
+      })
+    );
   }
 
   override render() {
@@ -69,6 +80,14 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
       @input=${this._onInputChange}
       @blur=${this._onInputBlur}
       @pointerdown=${stopPropagation}
+      @pointerup=${stopPropagation}
+      @click=${stopPropagation}
+      @dblclick=${stopPropagation}
+      @cut=${stopPropagation}
+      @copy=${stopPropagation}
+      @paste=${stopPropagation}
+      @keydown=${stopPropagation}
+      @keyup=${stopPropagation}
     />`;
   }
 }

@@ -27,6 +27,7 @@ import { unified } from 'unified';
 
 import type { SerializedCells } from '../../database-block/database-model.js';
 import type { Column } from '../../database-block/types.js';
+import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { remarkGfm } from './gfm.js';
 import { fetchImage } from './utils.js';
@@ -45,7 +46,6 @@ type MarkdownAST =
 type MarkdownToSliceSnapshotPayload = {
   file: Markdown;
   assets?: AssetsManager;
-  blockVersions: Record<string, number>;
   pageVersion: number;
   workspaceVersion: number;
   workspaceId: string;
@@ -124,27 +124,28 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     const markdownAst = this._markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
     return {
       type: 'page',
       meta: {
-        id: nanoid('page'),
+        id: nanoid(),
         title: 'Untitled',
         createDate: +new Date(),
         tags: [],
       },
       blocks: {
         type: 'block',
-        id: nanoid('block'),
+        id: nanoid(),
         flavour: 'affine:page',
         props: {
           title: {
@@ -159,7 +160,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         children: [
           {
             type: 'block',
-            id: nanoid('block'),
+            id: nanoid(),
             flavour: 'affine:surface',
             props: {
               elements: {},
@@ -182,13 +183,14 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     const markdownAst = this._markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
@@ -214,13 +216,14 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     const markdownAst = this._markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
@@ -235,7 +238,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return {
       type: 'slice',
       content: [contentSlice],
-      blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
@@ -677,7 +679,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:paragraph',
                 props: {
                   type: 'text',
@@ -702,7 +704,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:code',
                 props: {
                   language: o.node.lang,
@@ -727,7 +729,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:paragraph',
                 props: {
                   type: 'text',
@@ -748,7 +750,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:paragraph',
                 props: {
                   type: `h${o.node.depth}`,
@@ -769,7 +771,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:paragraph',
                 props: {
                   type: 'quote',
@@ -794,7 +796,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context.openNode(
             {
               type: 'block',
-              id: nanoid('block'),
+              id: nanoid(),
               flavour: 'affine:list',
               props: {
                 type:
@@ -828,7 +830,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:divider',
                 props: {},
                 children: [],
@@ -874,7 +876,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:image',
                 props: {
                   sourceId: blobId,
@@ -889,14 +891,14 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         case 'table': {
           const viewsColumns = o.node.children[0].children.map(() => {
             return {
-              id: nanoid('block'),
+              id: nanoid(),
               hide: false,
               width: 180,
             };
           });
           const cells = Object.create(null);
           o.node.children.slice(1).forEach(row => {
-            const rowId = nanoid('block');
+            const rowId = nanoid();
             cells[rowId] = Object.create(null);
             row.children.slice(1).forEach((cell, index) => {
               cells[rowId][viewsColumns[index + 1].id] = {
@@ -920,12 +922,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context.openNode(
             {
               type: 'block',
-              id: nanoid('block'),
+              id: nanoid(),
               flavour: 'affine:database',
               props: {
                 views: [
                   {
-                    id: nanoid('block'),
+                    id: nanoid(),
                     name: 'Table View',
                     mode: 'table',
                     columns: [],
@@ -962,7 +964,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               id:
                 (
                   context.getNodeContext('affine:table:rowid') as Array<string>
-                ).shift() ?? nanoid('block'),
+                ).shift() ?? nanoid(),
               flavour: 'affine:paragraph',
               props: {
                 text: {

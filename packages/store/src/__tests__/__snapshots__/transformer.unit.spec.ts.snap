@@ -53,5 +53,6 @@ exports[`model to snapshot 1`] = `
       ],
     },
   },
+  "version": 1,
 }
 `;

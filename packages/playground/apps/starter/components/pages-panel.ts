@@ -89,6 +89,7 @@ export class PagesPanel extends WithDisposable(ShadowlessElement) {
           });
           const click = () => {
             this.editor.page = page;
+            this.editor.page.resetHistory();
             this.requestUpdate();
           };
           const deletePage = () => {
@@ -111,7 +112,7 @@ export class PagesPanel extends WithDisposable(ShadowlessElement) {
 }
 
 function createPageBlock(workspace: Workspace) {
-  const id = workspace.idGenerator('page');
+  const id = workspace.idGenerator();
   createDefaultPage(workspace, { id }).catch(console.error);
 }
 

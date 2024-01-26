@@ -1,14 +1,18 @@
 import './components/bookmark-card.js';
-import '../_common/components/button.js';
-import './doc-bookmark-block.js';
-import './edgeless-bookmark-block.js';
+import '../_common/components/block-selection.js';
+import '../_common/components/embed-card/embed-card-caption.js';
+import '../_common/components/embed-card/embed-card-toolbar.js';
 
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { html, render } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { flip, offset } from '@floating-ui/dom';
+import { html, nothing, render } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
+import { ref } from 'lit/directives/ref.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
+import { HoverController } from '../_common/components/hover/controller.js';
 import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
 import { matchFlavours } from '../_common/utils/index.js';
 import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
@@ -27,8 +31,6 @@ import {
   BookmarkBlockSchema,
 } from './bookmark-model.js';
 import type { BookmarkService } from './bookmark-service.js';
-import type { DocBookmarkBlockComponent } from './doc-bookmark-block.js';
-import type { EdgelessBookmarkBlockComponent } from './edgeless-bookmark-block.js';
 import { refreshBookmarkUrlData } from './utils.js';
 
 @customElement('affine-bookmark')
@@ -42,13 +44,11 @@ export class BookmarkBlockComponent extends BlockElement<
   @property({ attribute: false })
   loadingFailed = false;
 
-  @state()
+  @property({ attribute: false })
   showCaption = false;
 
-  @query('affine-edgeless-bookmark, affine-doc-bookmark')
-  edgelessOrDocBookmark?:
-    | EdgelessBookmarkBlockComponent
-    | DocBookmarkBlockComponent;
+  @query('bookmark-card')
+  bookmarkCard!: HTMLElement;
 
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
@@ -59,9 +59,10 @@ export class BookmarkBlockComponent extends BlockElement<
     return this._isInSurface;
   }
 
-  readonly slots = {
-    loadingUpdated: new Slot(),
-  };
+  get edgeless() {
+    if (this._isInSurface) return null;
+    return this.host.querySelector('affine-edgeless-page');
+  }
 
   private _dragHandleOption: DragHandleOption = {
     flavour: BookmarkBlockSchema.model.flavour,
@@ -157,7 +158,7 @@ export class BookmarkBlockComponent extends BlockElement<
 
         return convertDragPreviewDocToEdgeless({
           blockComponent,
-          cssSelector: '.affine-bookmark-card',
+          cssSelector: 'bookmark-card',
           width: EMBED_CARD_WIDTH[style],
           height: EMBED_CARD_HEIGHT[style],
           ...props,
@@ -183,9 +184,9 @@ export class BookmarkBlockComponent extends BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!!this.model.caption && this.model.caption.length > 0) {
-      this.showCaption = true;
-    }
+    this.contentEditable = 'false';
+
+    this.showCaption = !!this.model.caption?.length;
 
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
@@ -196,9 +197,10 @@ export class BookmarkBlockComponent extends BlockElement<
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
-        this.edgelessOrDocBookmark?.requestUpdate();
         if (key === 'url') {
           this.refreshData();
+        } else if (key === 'caption') {
+          this.showCaption = !!this.model.caption?.length;
         }
       })
     );
@@ -208,19 +210,96 @@ export class BookmarkBlockComponent extends BlockElement<
     );
   }
 
-  override updated(changedProperties: Map<string, unknown>) {
-    super.updated(changedProperties);
-    if (changedProperties.has('loading')) {
-      this.slots.loadingUpdated.emit();
+  private _whenHover = new HoverController(this, ({ abortController }) => {
+    const selection = this.host.selection;
+    const textSelection = selection.find('text');
+    if (
+      !!textSelection &&
+      (!!textSelection.to || !!textSelection.from.length)
+    ) {
+      return null;
     }
-  }
 
-  override render() {
-    return html`${this.isInSurface
-      ? html`<affine-edgeless-bookmark
+    const blockSelections = selection.filter('block');
+    if (
+      blockSelections.length > 1 ||
+      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
+    ) {
+      return null;
+    }
+
+    return {
+      template: html`
+        <style>
+          :host {
+            z-index: 1;
+          }
+        </style>
+        <embed-card-toolbar
+          .model=${this.model}
           .block=${this}
-        ></affine-edgeless-bookmark>`
-      : html`<affine-doc-bookmark .block=${this}></affine-doc-bookmark>`} `;
+          .host=${this.host}
+          .abortController=${abortController}
+          .std=${this.std}
+        ></embed-card-toolbar>
+      `,
+      computePosition: {
+        referenceElement: this.bookmarkCard,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+    };
+  });
+
+  override renderBlock() {
+    const { caption, style } = this.model;
+
+    let containerStyleMap = styleMap({
+      position: 'relative',
+      width: '100%',
+      margin: '18px 0px',
+    });
+    if (this.isInSurface) {
+      const width = EMBED_CARD_WIDTH[style];
+      const height = EMBED_CARD_HEIGHT[style];
+      const bound = Bound.deserialize(
+        (this.edgeless?.service.getElementById(this.model.id) ?? this.model)
+          .xywh
+      );
+      const scaleX = bound.w / width;
+      const scaleY = bound.h / height;
+      containerStyleMap = styleMap({
+        width: `${width}px`,
+        height: `${height}px`,
+        transform: `scale(${scaleX}, ${scaleY})`,
+        transformOrigin: '0 0',
+      });
+    }
+
+    return html`<div
+      ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+      class="affine-bookmark-container"
+      style=${containerStyleMap}
+    >
+      <bookmark-card
+        .bookmark=${this}
+        .loading=${this.loading}
+        .loadingFailed=${this.loadingFailed}
+      ></bookmark-card>
+
+      <embed-card-caption
+        .block=${this}
+        .display=${this.showCaption}
+        @blur=${() => {
+          if (!caption) this.showCaption = false;
+        }}
+      ></embed-card-caption>
+
+      ${this.selected?.is('block')
+        ? html`<affine-block-selection></affine-block-selection>`
+        : nothing}
+    </div> `;
   }
 }
 

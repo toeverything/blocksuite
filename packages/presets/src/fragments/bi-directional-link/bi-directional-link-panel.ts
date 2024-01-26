@@ -1,4 +1,9 @@
-import type { DocPageBlockComponent, ListService } from '@blocksuite/blocks';
+import type {
+  AffineReference,
+  DocPageBlockComponent,
+  ListService,
+  PageService,
+} from '@blocksuite/blocks';
 import {
   type AffineTextAttributes,
   getAffineInlineSpecsWithReference,
@@ -8,7 +13,7 @@ import { BlocksUtils, InlineManager, RichText } from '@blocksuite/blocks';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import type { DeltaInsert } from '@blocksuite/inline';
 import { WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
+import type { BlockModel, Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -124,14 +129,18 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
     .rich-text-container {
       width: 100%;
-      height: 40px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: start;
       cursor: pointer;
       border-radius: 4px;
-      padding-left: 8px;
-      padding-right: 8px;
+      padding: 0px 8px;
+      padding-top: 8px;
+    }
+
+    .rich-text {
+      max-width: 96%;
+      padding-bottom: 8px;
     }
 
     .arrow-link {
@@ -167,6 +176,16 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       background: var(--affine-quote-color);
       border-radius: 18px;
     }
+
+    .linked-page-container {
+      display: flex;
+      align-items: center;
+      padding-left: 2px;
+      gap: 2px;
+    }
+    .linked-page-container svg {
+      scale: 1.2;
+    }
   `;
 
   @state()
@@ -188,6 +207,18 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     const config = new ReferenceNodeConfig();
     config.setInteractable(false);
     config.setPage(this.page);
+    config.setCustomContent((reference: AffineReference) => {
+      const title = reference.page.meta.title ?? 'Untitled';
+      return html`<style>
+          .custom-reference-content svg {
+            position: relative;
+            top: 2px;
+          }
+        </style>
+        <span class="custom-reference-content">
+          ${SmallLinkedPageIcon} ${title}
+        </span> `;
+    });
     this._inlineManager.registerSpecs(
       getAffineInlineSpecsWithReference(config)
     );
@@ -197,10 +228,19 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         this.requestUpdate();
       })
     );
+
+    const pageService = this._host.spec.getService(
+      'affine:page'
+    ) as PageService;
+    this._show = !!pageService.editSession.getItem('showBidirectional');
   }
 
   private _toggleShow() {
     this._show = !this._show;
+    const pageService = this._host.spec.getService(
+      'affine:page'
+    ) as PageService;
+    pageService.editSession.setItem('showBidirectional', this._show);
   }
 
   private get _host() {
@@ -209,31 +249,43 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
 
   private get _links() {
     const { page } = this;
-    const { workspace } = page;
+
     const ids = new Set<string>();
     page
-      .getBlockByFlavour(['affine:paragraph', 'affine:list'])
+      .getBlockByFlavour([
+        'affine:paragraph',
+        'affine:list',
+        'affine:embed-linked-doc',
+      ])
       .forEach(model => {
-        if (!model.text) return;
-        const deltas: DeltaInsert<AffineTextAttributes>[] =
-          model.text.yText.toDelta();
+        if (model.text) {
+          const deltas: DeltaInsert<AffineTextAttributes>[] =
+            model.text.yText.toDelta();
 
-        deltas.forEach(delta => {
-          if (!delta.attributes || !delta.attributes.reference) return;
-          ids.add(delta.attributes.reference.pageId);
-        });
+          deltas.forEach(delta => {
+            if (!delta.attributes || !delta.attributes.reference) return;
+            ids.add(delta.attributes.reference.pageId);
+          });
+        } else if (matchFlavours(model, ['affine:embed-linked-doc'])) {
+          ids.add(model.pageId);
+        }
       });
 
-    if (ids.size === 0) return nothing;
+    return Array.from(ids);
+  }
+
+  private _renderLinks(ids: string[]) {
+    const { workspace } = this.page;
 
     return html`<div class="links">
-      <div class="links-title">Outgoing links · ${ids.size}</div>
+      <div class="links-title">Outgoing links · ${ids.length}</div>
       ${repeat(
-        Array.from(ids),
+        ids,
         id => id,
         id => {
           const page = workspace.getPage(id);
           assertExists(page);
+          const title = page.meta.title ? page.meta.title : 'Untitled';
           return html`<div
             class="link"
             @click=${() => {
@@ -243,7 +295,7 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
             }}
           >
             ${SmallLinkedPageIcon}
-            <div>${page.meta.title}</div>
+            <div>${title}</div>
           </div>`;
         }
       )}
@@ -263,8 +315,14 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
       }
       return map;
     }, backLinks);
+
+    return backLinks;
+  }
+
+  private _renderBackLinks(backLinks: Map<string, string[]>) {
+    const { page } = this;
+    const { workspace } = page;
     const length = backLinks.size;
-    if (!length) return nothing;
 
     return html` <div class="back-links">
       <div class="back-links-title">${`Backlinks · ${length}`}</div>
@@ -309,7 +367,11 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
                 >
                   ${ArrowLeftIcon}
                 </div>
-                <div>${SmallLinkedPageIcon}${page.meta.title}</div>
+                <div>
+                  ${SmallLinkedPageIcon}${page.meta.title
+                    ? page.meta.title
+                    : 'Untitled'}
+                </div>
               </div>
               <div class="back-links-container">
                 <div class="back-links-container-left-divider">
@@ -322,46 +384,8 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
                         blockId => blockId,
                         blockId => {
                           const model = page.getBlockById(blockId);
-
-                          if (
-                            !matchFlavours(model, [
-                              'affine:paragraph',
-                              'affine:list',
-                            ])
-                          )
-                            return nothing;
-                          let icon: TemplateResult<1> | null = null;
-                          if (matchFlavours(model, ['affine:list'])) {
-                            const listService = this._host!.spec.getService(
-                              'affine:list'
-                            ) as ListService;
-
-                            icon = listService.styles.icon(
-                              model,
-                              false,
-                              () => {}
-                            );
-                          }
-                          return html`<div
-                            class=${`rich-text-container ${model.type}`}
-                            @click=${() =>
-                              this.docPageBlock.slots.pageLinkClicked.emit({
-                                pageId,
-                                blockId,
-                              })}
-                          >
-                            <div class="rich-text">
-                              ${icon ?? nothing}
-                              <rich-text
-                                .yText=${model.text}
-                                .readonly=${true}
-                                .attributesSchema=${this._inlineManager.getSchema()}
-                                .attributeRenderer=${this._inlineManager.getRenderer()}
-                              ></rich-text>
-                            </div>
-
-                            <div class="arrow-link">${ArrowJumpIcon}</div>
-                          </div>`;
+                          if (!model) return nothing;
+                          return this._backlink(model, pageId, blockId);
                         }
                       )
                     : nothing}
@@ -370,6 +394,59 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
             </div>`;
         }
       )}
+    </div>`;
+  }
+
+  private _backlink(
+    model: BlockModel<object>,
+    pageId: string,
+    blockId: string
+  ) {
+    if (
+      !matchFlavours(model, [
+        'affine:paragraph',
+        'affine:list',
+        'affine:embed-linked-doc',
+      ])
+    )
+      return nothing;
+
+    let icon: TemplateResult<1> | null = null;
+    if (matchFlavours(model, ['affine:list'])) {
+      const listService = this._host!.spec.getService(
+        'affine:list'
+      ) as ListService;
+
+      icon = listService.styles.icon(model, false, () => {});
+    }
+    const type = matchFlavours(model, ['affine:embed-linked-doc'])
+      ? ''
+      : model.type;
+
+    return html` <div
+      class=${`rich-text-container ${type}`}
+      @click=${() =>
+        this.docPageBlock.slots.pageLinkClicked.emit({
+          pageId,
+          blockId,
+        })}
+    >
+      <div class="rich-text">
+        ${type
+          ? html`${icon ?? nothing}
+              <rich-text
+                .yText=${model.text}
+                .readonly=${true}
+                .attributesSchema=${this._inlineManager.getSchema()}
+                .attributeRenderer=${this._inlineManager.getRenderer()}
+              ></rich-text>`
+          : html`<div class="linked-page-container">
+              ${SmallLinkedPageIcon}
+              ${this.page.meta.title ? this.page.meta.title : 'Untitled'}
+            </div>`}
+      </div>
+
+      <div class="arrow-link">${ArrowJumpIcon}</div>
     </div>`;
   }
 
@@ -401,6 +478,11 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
   }
 
   protected override render() {
+    const links = this._links;
+    const backLinks = this._backLinks;
+
+    if (links.length + backLinks.size === 0) return nothing;
+
     return html`<style>
         .title {
           font-weight: 500;
@@ -432,7 +514,9 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
         </div>
       </div>
       ${this._divider(this._show)}
-      ${this._show ? html`${this._backLinks} ${this._links} ` : nothing} `;
+      ${this._show
+        ? html`${this._renderBackLinks(backLinks)} ${this._renderLinks(links)} `
+        : nothing} `;
   }
 }
 

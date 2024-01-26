@@ -5,6 +5,7 @@ import { describe, expect, test } from 'vitest';
 
 import { HtmlAdapter } from '../../_common/adapters/html.js';
 import { nanoidReplacement } from '../../_common/test-utils/test-utils.js';
+import { NoteDisplayMode } from '../../_common/types.js';
 
 const template = (html: string) =>
   `
@@ -77,6 +78,7 @@ describe('snapshot to html', () => {
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -142,6 +144,7 @@ describe('snapshot to html', () => {
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -327,6 +330,7 @@ describe('snapshot to html', () => {
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -471,6 +475,7 @@ describe('snapshot to html', () => {
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -544,6 +549,7 @@ describe('snapshot to html', () => {
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -617,6 +623,7 @@ describe('snapshot to html', () => {
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -691,6 +698,7 @@ describe('snapshot to html', () => {
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -765,6 +773,7 @@ describe('snapshot to html', () => {
             background: '--affine-background-secondary-color',
             index: 'a0',
             hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
           },
           children: [
             {
@@ -835,6 +844,7 @@ describe('html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {
@@ -876,6 +886,7 @@ describe('html to snapshot', () => {
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [
         {

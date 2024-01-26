@@ -1,3 +1,5 @@
+import '../tooltip/tooltip.js';
+
 import type { BlockStdScope } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';

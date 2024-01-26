@@ -11,7 +11,7 @@ import {
   HighLightDuotoneIcon,
 } from '../../../_common/icons/index.js';
 import { stopPropagation } from '../../../_common/utils/event.js';
-import { turnImageIntoCardView } from '../../../attachment-block/utils.js';
+import { turnImageIntoCardView } from '../../../attachment-block/embed.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import { openLeditsEditor } from '../../../image-block/ledits/main.js';
 import {

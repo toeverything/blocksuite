@@ -13,7 +13,7 @@ import type {
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils/index.js';
 import type { InlineRootElement } from '@inline/inline-editor.js';
-import type { BlockElement } from '@lit/element/index.js';
+import type { BlockElement, EditorHost } from '@lit/element/index.js';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import { PAGE_VERSION, WORKSPACE_VERSION } from '@store/consts.js';
@@ -100,11 +100,13 @@ export const defaultStore: SerializedStore = {
           'sys:id': '0',
           'sys:flavour': 'affine:page',
           'sys:children': ['1'],
+          'sys:version': 2,
         },
         '1': {
           'sys:flavour': 'affine:note',
           'sys:id': '1',
           'sys:children': ['2'],
+          'sys:version': 1,
           'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
@@ -123,6 +125,7 @@ export const defaultStore: SerializedStore = {
           'sys:flavour': 'affine:paragraph',
           'sys:id': '2',
           'sys:children': [],
+          'sys:version': 1,
           'prop:text': 'hello',
           'prop:type': 'text',
         },
@@ -1050,4 +1053,16 @@ export async function assertNotHasClass(locator: Locator, className: string) {
 export async function assertNoteSequence(page: Page, expected: string) {
   const actual = await page.locator('.edgeless-index-label').innerText();
   expect(expected).toBe(actual);
+}
+
+export async function assertBlockSelections(page: Page, paths: string[][]) {
+  const selections = await page.evaluate(() => {
+    const host = document.querySelector<EditorHost>('editor-host');
+    if (!host) {
+      throw new Error('editor-host host not found');
+    }
+    return host.selection.filter('block');
+  });
+  const actualPaths = selections.map(selection => selection.path);
+  expect(actualPaths).toEqual(paths);
 }

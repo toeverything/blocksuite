@@ -143,6 +143,7 @@ export class ListBlockComponent extends BlockElement<
     if (noChildren) return nothing;
 
     const toggleDownTemplate = html`<div
+      contenteditable="false"
       class="toggle-icon"
       @click=${this._toggleChildren}
     >
@@ -150,6 +151,7 @@ export class ListBlockComponent extends BlockElement<
     </div>`;
 
     const toggleRightTemplate = html`<div
+      contenteditable="false"
       class="toggle-icon toggle-icon__collapsed"
       @click=${this._toggleChildren}
     >
@@ -159,7 +161,7 @@ export class ListBlockComponent extends BlockElement<
     return isCollapsed ? toggleRightTemplate : toggleDownTemplate;
   }
 
-  override render(): TemplateResult<1> {
+  override renderBlock(): TemplateResult<1> {
     const { deep, index } = getListInfo(this.model);
     const { model, _onClickIcon } = this;
     const collapsed = this.page.readonly

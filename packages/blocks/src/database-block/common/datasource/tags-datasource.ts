@@ -152,7 +152,7 @@ export class TagsDatasource extends BaseDataSource {
   }
 
   public rowAdd(_insertPosition: InsertToPosition | number): string {
-    const id = nanoid('unknown');
+    const id = nanoid();
     this.changeTags([
       ...this.tags,
       {

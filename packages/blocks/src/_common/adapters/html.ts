@@ -34,6 +34,7 @@ import {
   highlightCache,
   type highlightCacheKey,
 } from '../../code-block/utils/highlight-cache.js';
+import { NoteDisplayMode } from '../types.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import {
   hastGetElementChildren,
@@ -125,27 +126,28 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     const titleAst = hastQuerySelector(htmlAst, 'title');
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
     return {
       type: 'page',
       meta: {
-        id: nanoid('page'),
+        id: nanoid(),
         title: hastGetTextContent(titleAst, 'Untitled'),
         createDate: +new Date(),
         tags: [],
       },
       blocks: {
         type: 'block',
-        id: nanoid('block'),
+        id: nanoid(),
         flavour: 'affine:page',
         props: {
           title: {
@@ -161,7 +163,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
         children: [
           {
             type: 'block',
-            id: nanoid('block'),
+            id: nanoid(),
             flavour: 'affine:surface',
             props: {
               elements: {},
@@ -183,13 +185,14 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     const htmlAst = this._htmlToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
@@ -205,13 +208,14 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     const htmlAst = this._htmlToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
-      id: nanoid('block'),
+      id: nanoid(),
       flavour: 'affine:note',
       props: {
         xywh: '[0,0,800,95]',
         background: '--affine-background-secondary-color',
         index: 'a0',
         hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
       },
       children: [],
     };
@@ -226,7 +230,6 @@ export class HtmlAdapter extends BaseAdapter<Html> {
     return {
       type: 'slice',
       content: [contentSlice],
-      blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,
@@ -724,7 +727,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:image',
                   props: {
                     sourceId: blobId,
@@ -762,7 +765,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:code',
                 props: {
                   language: codeLang ?? 'Plain Text',
@@ -790,7 +793,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:paragraph',
                   props: {
                     type: 'quote',
@@ -836,7 +839,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
               .openNode(
                 {
                   type: 'block',
-                  id: nanoid('block'),
+                  id: nanoid(),
                   flavour: 'affine:paragraph',
                   props: {
                     type: 'text',
@@ -858,7 +861,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           context.openNode(
             {
               type: 'block',
-              id: nanoid('block'),
+              id: nanoid(),
               flavour: 'affine:paragraph',
               props: {
                 type: context.getGlobalContext('hast:blockquote')
@@ -897,7 +900,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           context.openNode(
             {
               type: 'block',
-              id: nanoid('block'),
+              id: nanoid(),
               flavour: 'affine:list',
               props: {
                 type: listType,
@@ -936,7 +939,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:divider',
                 props: {},
                 children: [],
@@ -956,7 +959,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:paragraph',
                 props: {
                   type: o.node.tagName,
@@ -977,7 +980,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
             .openNode(
               {
                 type: 'block',
-                id: nanoid('block'),
+                id: nanoid(),
                 flavour: 'affine:paragraph',
                 props: {
                   type: 'text',

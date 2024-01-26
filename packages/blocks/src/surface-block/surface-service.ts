@@ -1,51 +1,34 @@
 import { BlockService } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 
-import type { NavigatorMode } from '../_common/edgeless/frame/consts.js';
-import { buildPath } from '../_common/utils/query.js';
-import { TemplateJob } from './service/template.js';
-import type { SurfaceBlockComponent } from './surface-block.js';
+import { LayerManager } from './managers/layer-manager.js';
 import type { SurfaceBlockModel } from './surface-model.js';
 
 export class SurfaceService extends BlockService<SurfaceBlockModel> {
-  TemplateJob = TemplateJob;
+  layer!: LayerManager;
+  surface!: SurfaceBlockModel;
 
   override mounted(): void {
     super.mounted();
-    const surface = this.page.getBlockByFlavour('affine:surface')[0];
+    this.surface = this.page.getBlockByFlavour(
+      'affine:surface'
+    )[0] as SurfaceBlockModel;
 
-    assertExists(surface, 'surface block not found');
-  }
-
-  private get _surfaceView() {
-    const [surface] = this.page.getBlockByFlavour('affine:surface');
-    const view = this.std.view.viewFromPath(
-      'block',
-      buildPath(surface)
-    ) as SurfaceBlockComponent;
-    return view;
-  }
-
-  get currentTool() {
-    const view = this._surfaceView;
-    if (!view) return null;
-
-    const { edgeless } = view;
-    return edgeless.edgelessTool;
-  }
-
-  setNavigatorMode(on: boolean, mode?: NavigatorMode) {
-    const view = this._surfaceView;
-    if (!view) return;
-
-    const { edgeless } = view;
-    if (on && edgeless.edgelessTool.type === 'frameNavigator') return;
-    if (!on && edgeless.edgelessTool.type !== 'frameNavigator') return;
-
-    if (on) {
-      edgeless.tools.setEdgelessTool({ type: 'frameNavigator', mode });
+    if (!this.surface) {
+      const disposable = this.page.slots.blockUpdated.on(payload => {
+        if (payload.flavour === 'affine:surface') {
+          disposable.dispose();
+          this.surface = this.page.getBlockById(
+            payload.id
+          ) as SurfaceBlockModel;
+          this.layer = LayerManager.create(this.page, this.surface);
+        }
+      });
     } else {
-      edgeless.tools.setEdgelessTool({ type: 'default' });
+      this.layer = LayerManager.create(this.page, this.surface);
     }
+  }
+
+  override unmounted(): void {
+    this.layer?.dispose();
   }
 }

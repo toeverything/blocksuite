@@ -360,7 +360,7 @@ export class DatabaseBlockComponent extends BlockElement<
     };
   };
 
-  override render() {
+  override renderBlock() {
     const config: DataViewNativeConfig = {
       bindHotkey: this._bindHotkey,
       handleEvent: this._handleEvent,

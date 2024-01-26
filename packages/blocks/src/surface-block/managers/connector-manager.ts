@@ -2,7 +2,7 @@ import { assertEquals, assertExists } from '@blocksuite/global/utils';
 
 import {
   type Connectable,
-  type EdgelessElement,
+  type EdgelessModel,
   type Selectable,
 } from '../../_common/types.js';
 import type { EdgelessPageService } from '../../page-block/edgeless/edgeless-page-service.js';
@@ -37,7 +37,7 @@ export type OrthogonalConnectorInput = {
   endPoint: PointLocation;
 };
 
-function rBound(ele: EdgelessElement, anti = false): IBound {
+function rBound(ele: EdgelessModel, anti = false): IBound {
   const bound = Bound.deserialize(ele.xywh);
   return { ...bound, rotate: anti ? -ele.rotate : ele.rotate };
 }
@@ -68,7 +68,7 @@ export function isConnectorAndBindingsAllSelected(
   return false;
 }
 
-export function getAnchors(ele: EdgelessElement) {
+export function getAnchors(ele: EdgelessModel) {
   const bound = Bound.deserialize(ele.xywh);
   const offset = 10;
   const anchors: { point: PointLocation; coord: IVec }[] = [];
@@ -94,7 +94,7 @@ export function getAnchors(ele: EdgelessElement) {
 }
 
 function getConnectableRelativePosition(
-  connectable: EdgelessElement,
+  connectable: EdgelessModel,
   position: IVec
 ) {
   const location = connectable.getRelativePointLocation(position);
@@ -873,7 +873,7 @@ export class ConnectorPathGenerator {
 
   constructor(
     private options: {
-      getElementById: (id: string) => EdgelessElement | Connectable | null;
+      getElementById: (id: string) => EdgelessModel | Connectable | null;
     }
   ) {}
 
@@ -1119,9 +1119,11 @@ export class ConnectorPathGenerator {
       return p.setVec(Vec.sub(p, [bound.x, bound.y]));
     });
 
+    connector.updatingPath = true;
     // the property assignment order matters
     connector.xywh = bound.serialize();
     connector.path = relativePoints;
+    connector.updatingPath = false;
   }
 
   generateOrthogonalConnectorPath(input: OrthogonalConnectorInput) {

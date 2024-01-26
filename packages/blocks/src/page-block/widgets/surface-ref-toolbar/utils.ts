@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { EditorHost } from '@blocksuite/lit';
 
-import { type EdgelessElement } from '../../../_common/types.js';
+import { type EdgelessModel } from '../../../_common/types.js';
 import { isTopLevelBlock } from '../../../page-block/edgeless/utils/query.js';
 import type { Renderer } from '../../../surface-block/canvas-renderer/renderer.js';
 import { Bound } from '../../../surface-block/utils/bound.js';
@@ -13,7 +13,7 @@ export const edgelessToBlob = async (
   options: {
     surfaceRefBlock: SurfaceRefBlockComponent;
     surfaceRenderer: Renderer;
-    edgelessElement: EdgelessElement;
+    edgelessElement: EdgelessModel;
     blockContainer: HTMLElement;
   }
 ): Promise<Blob> => {

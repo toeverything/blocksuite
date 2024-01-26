@@ -7,7 +7,13 @@ import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Workspace } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing, render, type TemplateResult } from 'lit';
-import { customElement, query, queryAsync, state } from 'lit/decorators.js';
+import {
+  customElement,
+  property,
+  query,
+  queryAsync,
+  state,
+} from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -58,7 +64,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   @state()
   private _isBannerEmpty = false;
 
-  @state()
+  @property({ attribute: false })
   showCaption = false;
 
   @query('embed-card-caption')
@@ -81,9 +87,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   }
 
   private get _service() {
-    const service = super.service;
-    assertExists(service, `Linked page block must run with its service.`);
-    return service;
+    return this.service;
   }
 
   private _load() {
@@ -375,9 +379,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!!this.model.caption && !!this.model.caption.length) {
-      this.showCaption = true;
-    }
+    this.showCaption = !!this.model.caption?.length;
 
     this._load();
 
@@ -390,9 +392,10 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     }
 
     this.model.propsUpdated.on(({ key }) => {
-      this.requestUpdate();
       if (key === 'pageId') {
         this._load();
+      } else if (key === 'caption') {
+        this.showCaption = !!this.model.caption?.length;
       }
     });
 
@@ -455,7 +458,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     };
   });
 
-  override render() {
+  override renderBlock() {
     const linkedDoc = this._linkedDoc;
     const isDeleted = !linkedDoc;
     const isLoading = this._loading;
@@ -521,7 +524,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
           })}
         >
           <div
-            ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
+            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
             class="affine-embed-linked-doc-block${cardClassMap}"
             @click=${this._handleClick}
             @dblclick=${this._handleDoubleClick}

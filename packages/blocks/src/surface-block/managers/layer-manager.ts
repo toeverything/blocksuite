@@ -8,7 +8,7 @@ import { matchFlavours } from '../../_common/utils/model.js';
 import type { FrameBlockModel } from '../../frame-block/frame-model.js';
 import {
   EdgelessBlockModel,
-  type EdgelessElement,
+  type EdgelessModel,
 } from '../../page-block/edgeless/type.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { ElementModel } from '../element-model/base.js';
@@ -40,7 +40,7 @@ type BaseLayer<T> = {
   indexes: [string, string];
 };
 
-type BlockLayer = BaseLayer<EdgelessBlockModel> & {
+export type BlockLayer = BaseLayer<EdgelessBlockModel> & {
   type: 'block';
   /**
    * The computed DOM z-index used for rendering blocks.
@@ -50,7 +50,7 @@ type BlockLayer = BaseLayer<EdgelessBlockModel> & {
   zIndexes: [number, number];
 };
 
-type CanvasLayer = BaseLayer<ElementModel> & {
+export type CanvasLayer = BaseLayer<ElementModel> & {
   type: 'canvas';
   /**
    * The computed DOM z-index used for rendering this canvas layer.
@@ -73,7 +73,7 @@ export class LayerManager {
             model =>
               model instanceof EdgelessBlockModel &&
               renderableInEdgeless(page, surface, model)
-          ) as EdgelessElement[]
+          ) as EdgelessModel[]
       ).concat(surface.elementModels)
     );
 
@@ -111,7 +111,7 @@ export class LayerManager {
   framesGrid = new GridManager<FrameBlockModel>();
   canvasGrid = new GridManager<ElementModel>();
 
-  constructor(elements?: EdgelessElement[]) {
+  constructor(elements?: EdgelessModel[]) {
     if (elements) {
       this._init(elements);
     }
@@ -175,7 +175,7 @@ export class LayerManager {
     );
   }
 
-  private _init(elements: EdgelessElement[]) {
+  private _init(elements: EdgelessModel[]) {
     this.canvasElements = [];
     this.blocks = [];
     this.frames = [];
@@ -341,7 +341,7 @@ export class LayerManager {
     this.layers = layers;
   }
 
-  private _insertIntoLayer(target: EdgelessElement, type: 'block' | 'canvas') {
+  private _insertIntoLayer(target: EdgelessModel, type: 'block' | 'canvas') {
     if (this.layers.length === 0) {
       this._initLayers();
       return;
@@ -352,7 +352,7 @@ export class LayerManager {
 
     const addToLayer = (
       layer: Layer,
-      element: EdgelessElement,
+      element: EdgelessModel,
       position: number | 'tail'
     ) => {
       assertType<CanvasLayer>(layer);
@@ -379,7 +379,7 @@ export class LayerManager {
     };
     const createLayer = (
       type: 'block' | 'canvas',
-      targets: EdgelessElement[],
+      targets: EdgelessModel[],
       curZIndex: number
     ): Layer => {
       const newLayer = {
@@ -466,7 +466,7 @@ export class LayerManager {
     }
   }
 
-  private _removeFromLayer(target: EdgelessElement, type: 'block' | 'canvas') {
+  private _removeFromLayer(target: EdgelessModel, type: 'block' | 'canvas') {
     const layers = this.layers;
     const index = layers.findIndex(layer => {
       if (layer.type !== type) return false;
@@ -551,17 +551,14 @@ export class LayerManager {
    * @returns a boolean value to indicate whether the layers have been updated
    */
   private _updateLayer(
-    element: EdgelessElement,
+    element: EdgelessModel,
     props?: Record<string, unknown>
   ) {
     let updateType: 'block' | 'canvas' | undefined = undefined;
-    const type = 'type' in element ? element.type : element.flavour;
+    const type = 'flavour' in element ? element.flavour : element.type;
 
     const indexChanged = !props || 'index' in props;
-    const updateArray = (
-      array: EdgelessElement[],
-      element: EdgelessElement
-    ) => {
+    const updateArray = (array: EdgelessModel[], element: EdgelessModel) => {
       if (!indexChanged) return;
       removeFromOrderedArray(array, element);
       insertToOrderedArray(array, element);
@@ -587,8 +584,8 @@ export class LayerManager {
     }
 
     if (updateType && indexChanged) {
-      this._removeFromLayer(element as EdgelessElement, updateType);
-      this._insertIntoLayer(element as EdgelessElement, updateType);
+      this._removeFromLayer(element as EdgelessModel, updateType);
+      this._insertIntoLayer(element as EdgelessModel, updateType);
 
       return true;
     }
@@ -596,9 +593,9 @@ export class LayerManager {
     return false;
   }
 
-  add(element: EdgelessElement) {
+  add(element: EdgelessModel) {
     let insertType: 'block' | 'canvas' | undefined = undefined;
-    const type = 'type' in element ? element.type : element.flavour;
+    const type = 'flavour' in element ? element.flavour : element.type;
 
     if (!type.startsWith('affine:')) {
       insertType = 'canvas';
@@ -620,13 +617,13 @@ export class LayerManager {
     }
 
     if (insertType) {
-      this._insertIntoLayer(element as EdgelessElement, insertType);
+      this._insertIntoLayer(element as EdgelessModel, insertType);
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit();
     }
   }
 
-  delete(element: EdgelessElement) {
+  delete(element: EdgelessModel) {
     let deleteType: 'canvas' | 'block' | undefined = undefined;
 
     if (element instanceof ElementModel) {
@@ -649,7 +646,7 @@ export class LayerManager {
     }
   }
 
-  update(element: EdgelessElement, props?: Record<string, unknown>) {
+  update(element: EdgelessModel, props?: Record<string, unknown>) {
     if (this._updateLayer(element, props)) {
       this._buildCanvasLayers();
       this.slots.layerUpdated.emit();
@@ -705,16 +702,17 @@ export class LayerManager {
 
   /**
    * In some cases, we need to generate a bunch of indexes in advance before acutally adding the elements to the layer manager.
-   * Eg. when importing a template. The `generateIndex` is a pure function which depends on the current state of the manager.
-   * We cannot use it because it will always return the same index if the element is not added to manager.
-   * So we need to create a generator that can "remember" the index it generated without actually adding the element to the manager.
+   * Eg. when importing a template. The `generateIndex` is a function only depends on the current state of the manager.
+   * So we cannot use it because it will always return the same index if the element is not added to manager.
    *
-   * This is what this function does.
+   * This function return a index generator that can "remember" the index it generated without actually adding the element to the manager.
+   *
+   * @note The generator cannot work with `group` element.
    *
    * @param ignoreRule If true, the generator will not distinguish between `block` and `canvas` elements.
    * @returns
    */
-  preservedIndexGenerator(ignoreRule: boolean) {
+  createIndexGenerator(ignoreRule: boolean = false) {
     const manager = new LayerManager();
 
     manager.frames = [...this.frames];
@@ -741,7 +739,7 @@ export class LayerManager {
 
       if (elementType === 'group') elementType = 'shape';
 
-      manager.add({
+      const mockedFakeElement = {
         index: idx,
         flavour: elementType,
         x: 0,
@@ -750,21 +748,25 @@ export class LayerManager {
         h: 10,
         elementBound: bound,
         xywh: '[0, 0, 10, 10]',
-      } as unknown as EdgelessElement);
+        group: () => null,
+        groups: () => [],
+      };
+
+      manager.add(mockedFakeElement as unknown as EdgelessModel);
 
       return idx;
     };
   }
 
   getReorderedIndex(
-    element: EdgelessElement,
+    element: EdgelessModel,
     direction: ReorderingDirection
   ): string {
     const group = element.group;
     const isFrameBlock =
       (element as FrameBlockModel).flavour === 'affine:frame';
 
-    let elements: EdgelessElement[];
+    let elements: EdgelessModel[];
 
     if (group !== null) {
       elements = group.childElements.filter(
@@ -778,7 +780,7 @@ export class LayerManager {
       elements = this.frames;
     } else {
       elements = this.layers.reduce(
-        (pre: EdgelessElement[], current) =>
+        (pre: EdgelessModel[], current) =>
           pre.concat(current.elements.filter(element => element.group == null)),
         []
       );
@@ -827,7 +829,7 @@ export class LayerManager {
   /**
    * Pass to the `Array.sort` to  sort the elements by their index
    */
-  compare(a: EdgelessElement, b: EdgelessElement) {
+  compare(a: EdgelessModel, b: EdgelessModel) {
     return compare(a, b);
   }
 

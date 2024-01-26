@@ -152,19 +152,19 @@ export class PageService extends BlockService<PageBlockModel> {
 
     this.loadFonts();
 
-    this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
     this.exportManager = new ExportManager(this, this._exportOptions);
+
+    this.fileDropManager = new FileDropManager(this, this._fileDropOptions);
     this.disposables.addFromEvent(
       this.std.host,
       'dragover',
       this.fileDropManager.onDragOver
     );
 
-    this.disposables.add(
-      this.std.event.add('pointerDown', ctx => {
-        const state = ctx.get('pointerState');
-        state.raw.stopPropagation();
-      })
+    this.disposables.addFromEvent(
+      this.std.host,
+      'dragleave',
+      this.fileDropManager.onDragLeave
     );
   }
 

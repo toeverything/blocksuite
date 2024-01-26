@@ -109,7 +109,7 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
     );
   }
 
-  override render() {
+  override renderBlock() {
     return html`
       <div class="affine-note-block-container">
         <div class="affine-block-children-container">

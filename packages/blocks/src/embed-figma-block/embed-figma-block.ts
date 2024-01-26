@@ -4,7 +4,7 @@ import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -34,7 +34,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   @state()
   private _showOverlay = true;
 
-  @state()
+  @property({ attribute: false })
   showCaption = false;
 
   @query('.affine-embed-figma-block')
@@ -77,9 +77,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!!this.model.caption && !!this.model.caption.length) {
-      this.showCaption = true;
-    }
+    this.showCaption = !!this.model.caption?.length;
 
     if (!this.model.description && !this.model.title) {
       this.page.withoutTransact(() => {
@@ -92,8 +90,11 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
-        this.requestUpdate();
-        if (key === 'url') this.refreshData();
+        if (key === 'url') {
+          this.refreshData();
+        } else if (key === 'caption') {
+          this.showCaption = !!this.model.caption?.length;
+        }
       })
     );
 
@@ -165,7 +166,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     };
   });
 
-  override render() {
+  override renderBlock() {
     const { title, description, style, url } = this.model;
 
     this._cardStyle = style;
@@ -183,7 +184,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
           })}
         >
           <div
-            ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
+            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
             class=${classMap({
               'affine-embed-figma-block': true,
               selected: this._isSelected,

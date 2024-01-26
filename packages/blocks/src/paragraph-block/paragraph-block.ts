@@ -1,7 +1,7 @@
 import '../_common/components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { type InlineRangeProvider, ZERO_WIDTH_SPACE } from '@blocksuite/inline';
+import { type InlineRangeProvider } from '@blocksuite/inline';
 import { BlockElement, getInlineRangeProvider } from '@blocksuite/lit';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -221,11 +221,16 @@ export class ParagraphBlockComponent extends BlockElement<
 
   //TODO(@Flrande) wrap placeholder in `rich-text` or inline-editor to make it more developer-friendly
   private _updatePlaceholder = () => {
-    if (!this._placeholderContainer || !this._richTextElement) return;
+    if (
+      !this._placeholderContainer ||
+      !this._richTextElement ||
+      !this.inlineEditor
+    )
+      return;
 
     if (
-      (this._richTextElement.textContent &&
-        this._richTextElement.textContent !== ZERO_WIDTH_SPACE) ||
+      this.inlineEditor.yTextLength > 0 ||
+      this.inlineEditor.isComposing ||
       !this.selected ||
       this._isInDatabase()
     ) {
@@ -246,7 +251,7 @@ export class ParagraphBlockComponent extends BlockElement<
     return false;
   };
 
-  override render(): TemplateResult<1> {
+  override renderBlock(): TemplateResult<1> {
     const { type } = this.model;
     const children = html`<div
       class="affine-block-children-container"

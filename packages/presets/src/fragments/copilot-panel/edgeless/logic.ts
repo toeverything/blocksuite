@@ -5,10 +5,11 @@ import {
   EmbedHtmlModel,
   FrameBlockModel,
   type ImageBlockProps,
+  type TreeNode,
 } from '@blocksuite/blocks';
-import type { Workspace } from '@blocksuite/store';
+import type { EditorHost } from '@blocksuite/lit';
+import type { BlockModel, Workspace } from '@blocksuite/store';
 
-import type { AffineEditorContainer } from '../../../editors/index.js';
 import { copilotConfig } from '../copilot-service/copilot-config.js';
 import {
   FastImage2ImageServiceKind,
@@ -18,7 +19,9 @@ import { demoScript } from '../demo-script.js';
 import {
   frameToCanvas,
   getEdgelessPageBlockFromEditor,
+  getEdgelessService,
   getFirstImageInFrame,
+  getPageService,
   getSurfaceElementFromEditor,
   selectedToCanvas,
   selectedToPng,
@@ -39,6 +42,7 @@ export class AIEdgelessLogic {
   public get autoGen() {
     return this.unsub !== undefined;
   }
+
   private unsub?: () => void;
   public toggleAutoGen = () => {
     if (this.unsub) {
@@ -46,29 +50,29 @@ export class AIEdgelessLogic {
       this.unsub = undefined;
       return;
     }
-    const edgeless = getEdgelessPageBlockFromEditor(this.editor.host);
+    const edgeless = getEdgelessPageBlockFromEditor(this.host);
     this.unsub = edgeless.surfaceBlockModel.elementUpdated.on(() => {
       this.createImageFromFrame().catch(console.error);
     }).dispose;
   };
 
   get workspace(): Workspace {
-    return this.editor.page.workspace;
+    return this.host.page.workspace;
   }
+
+  constructor(private getHost: () => EditorHost) {}
 
   get host() {
-    return this.editor.host;
+    return this.getHost();
   }
 
-  constructor(private editor: AffineEditorContainer) {}
-
   makeItReal = async () => {
-    const png = await selectedToPng(this.editor.host);
+    const png = await selectedToPng(this.host);
     if (!png) {
       alert('Please select some shapes first');
       return;
     }
-    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor.host);
+    const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
     const { notes } = BlocksUtils.splitElements(
       edgelessPage.service.selection.elements
     );
@@ -97,7 +101,7 @@ export class AIEdgelessLogic {
   };
 
   htmlBlockDemo = async () => {
-    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor.host);
+    const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
     edgelessPage.page.addBlock(
       EmbedHtmlBlockSpec.schema.model.flavour,
       { html: demoScript, xywh: '[0, 400, 400, 200]' },
@@ -106,7 +110,7 @@ export class AIEdgelessLogic {
   };
 
   editImage = async () => {
-    const canvas = await selectedToCanvas(this.editor.host);
+    const canvas = await selectedToCanvas(this.host);
     if (!canvas) {
       alert('Please select some shapes first');
       return;
@@ -125,9 +129,7 @@ export class AIEdgelessLogic {
               return;
             }
             const imgFile = jpegBase64ToFile(b64, 'img');
-            const edgelessPage = getEdgelessPageBlockFromEditor(
-              this.editor.host
-            );
+            const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
             edgelessPage.addImages([imgFile]).catch(console.error);
           })
           .catch(console.error);
@@ -136,7 +138,7 @@ export class AIEdgelessLogic {
   };
 
   createImage = async () => {
-    const edgelessPage = getEdgelessPageBlockFromEditor(this.editor.host);
+    const edgelessPage = getEdgelessPageBlockFromEditor(this.host);
     const prompt =
       (
         document.getElementById(
@@ -155,13 +157,13 @@ export class AIEdgelessLogic {
     }
   };
   createImageFromFrame = async () => {
-    const from = this.editor.page.getBlockById(
+    const from = this.host.page.getBlockById(
       this.fromFrame ?? ''
     ) as FrameBlockModel;
     if (!from) {
       return;
     }
-    const surface = getSurfaceElementFromEditor(this.editor.host);
+    const surface = getSurfaceElementFromEditor(this.host);
     const targets = (
       surface.model.elementModels.filter(
         el => el.type === 'connector'
@@ -169,13 +171,13 @@ export class AIEdgelessLogic {
     )
       .filter(v => v.source.id === from.id)
       .flatMap(v => {
-        const block = this.editor.page.getBlockById(v.target.id ?? '');
+        const block = this.host.page.getBlockById(v.target.id ?? '');
         if (block instanceof FrameBlockModel) {
           return [block];
         }
         return [];
       });
-    const canvas = await frameToCanvas(from, this.editor.host);
+    const canvas = await frameToCanvas(from, this.host);
     if (!canvas) {
       return;
     }
@@ -210,10 +212,10 @@ export class AIEdgelessLogic {
             if (!b64) {
               return;
             }
-            const surface = getSurfaceElementFromEditor(this.editor.host);
-            let image = getFirstImageInFrame(model, this.editor.host);
+            const surface = getSurfaceElementFromEditor(this.host);
+            let image = getFirstImageInFrame(model, this.host);
             const imgFile = jpegBase64ToFile(b64, 'img');
-            const sourceId = await this.editor.page.workspace.blob.set(imgFile);
+            const sourceId = await this.host.page.workspace.blob.set(imgFile);
             if (!image) {
               image = surface.edgeless.service.addBlock(
                 'affine:image',
@@ -237,4 +239,50 @@ export class AIEdgelessLogic {
     };
     canvas.toBlob(callback);
   };
+
+  async convertToMindMap() {
+    const blocks = getPageService(this.host).selectedBlocks;
+    const toTreeNode = (block: BlockModel): TreeNode => {
+      return {
+        text: block.text?.toString() ?? '',
+        children: block.children.map(toTreeNode),
+      };
+    };
+
+    const texts: BlockModel[] = [];
+    const others: BlockModel[] = [];
+    blocks.forEach(v => {
+      if (v.model.flavour === 'affine:paragraph') {
+        texts.push(v.model);
+      } else {
+        others.push(v.model);
+      }
+    });
+    let node: TreeNode;
+    if (texts.length === 1) {
+      node = {
+        text: texts[0].text?.toString() ?? '',
+        children: others.map(v => toTreeNode(v)),
+      };
+    } else if (blocks.length === 1) {
+      node = toTreeNode(blocks[0].model);
+    } else {
+      node = {
+        text: 'Root',
+        children: blocks.map(v => toTreeNode(v.model)),
+      };
+    }
+    await this.drawMindMap(node);
+  }
+
+  async drawMindMap(
+    treeNode: TreeNode,
+    options?: { rootId?: string; x?: number; y?: number }
+  ) {
+    BlocksUtils.mindMap.drawInEdgeless(
+      getEdgelessService(this.host),
+      treeNode,
+      options
+    );
+  }
 }

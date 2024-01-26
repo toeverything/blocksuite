@@ -48,8 +48,12 @@ export class ImageAdapter extends BaseAdapter<Image> {
         const { flavour, props } = contentSlice;
         if (flavour === 'affine:image') {
           const { sourceId } = props;
-          const file = payload.assets?.getAssets().get(sourceId as string);
-          images.push(file as File);
+          const file = payload.assets?.getAssets().get(sourceId as string) as
+            | File
+            | undefined;
+          if (file) {
+            images.push(file);
+          }
         }
       }
     }
@@ -76,7 +80,7 @@ export class ImageAdapter extends BaseAdapter<Image> {
       content.push({
         type: 'block',
         flavour: 'affine:image',
-        id: nanoid('block'),
+        id: nanoid(),
         props: {
           sourceId: blobId,
         },
@@ -89,7 +93,6 @@ export class ImageAdapter extends BaseAdapter<Image> {
     return {
       type: 'slice',
       content,
-      blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,

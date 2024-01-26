@@ -3,10 +3,11 @@ import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
 import './change-note-button.js';
-import './change-embed-card-button.js';
 import './change-text-button.js';
 import './change-frame-button.js';
 import './change-group-button.js';
+import './change-embed-card-button.js';
+import './change-attachment-button.js';
 import './add-frame-button.js';
 import './add-group-button.js';
 import './release-from-group-button.js';
@@ -21,6 +22,7 @@ import {
   LitElement,
   nothing,
   type PropertyValues,
+  type TemplateResult,
   unsafeCSS,
 } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -39,6 +41,7 @@ import type { EmbedLinkedDocModel } from '../../../../embed-linked-doc-block/emb
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
+import type { AttachmentBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type {
   ElementModel,
@@ -54,6 +57,7 @@ import {
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import {
+  isAttachmentBlock,
   isBookmarkBlock,
   isEmbeddedBlock,
   isFrameBlock,
@@ -70,6 +74,7 @@ type CategorizedElements = {
   note?: NoteBlockModel[];
   frame?: FrameBlockModel[];
   image?: ImageBlockModel[];
+  attachment?: AttachmentBlockModel[];
   embedCard?: BookmarkBlockModel[] &
     EmbedGithubModel[] &
     EmbedYoutubeModel[] &
@@ -77,6 +82,18 @@ type CategorizedElements = {
     EmbedLinkedDocModel[];
 };
 
+type ToolBarCustomAction = {
+  disable?: (formatBar: EdgelessComponentToolbar) => boolean;
+  icon(formatBar: EdgelessComponentToolbar): string | undefined;
+  onClick(formatBar: EdgelessComponentToolbar): void;
+};
+type ToolBarCustomElement = {
+  showWhen?(formatBar: EdgelessComponentToolbar): boolean;
+  init(formatBar: EdgelessComponentToolbar): HTMLElement;
+};
+type ToolBarCustomRenderer = {
+  render(formatBar: EdgelessComponentToolbar): TemplateResult | undefined;
+};
 @customElement('edgeless-component-toolbar')
 export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   static override styles = css`
@@ -97,6 +114,49 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       height: 24px;
     }
   `;
+  private static readonly _customElements: Set<ToolBarCustomRenderer> =
+    new Set<ToolBarCustomRenderer>();
+
+  static registerCustomRenderer(render: ToolBarCustomRenderer) {
+    this._customElements.add(render);
+  }
+  static registerCustomElement(element: ToolBarCustomElement) {
+    let elementInstance: HTMLElement | undefined;
+    this._customElements.add({
+      ...element,
+      render: formatBar => {
+        if (!elementInstance) {
+          elementInstance = element.init(formatBar);
+        }
+        const show = element.showWhen?.(formatBar) ?? true;
+        return show ? html`${elementInstance}` : undefined;
+      },
+    });
+  }
+
+  static registerCustomAction(action: ToolBarCustomAction) {
+    this._customElements.add({
+      render: formatBar => {
+        const url = action.icon(formatBar);
+        if (url == null) {
+          return;
+        }
+        const disable = action.disable ? action.disable(formatBar) : false;
+        const click = () => {
+          if (!disable) {
+            action.onClick(formatBar);
+          }
+        };
+        return html`<icon-button
+          size="32px"
+          ?disabled=${disable}
+          @click=${click}
+        >
+          <img src="${url}" alt="" />
+        </icon-button>`;
+      },
+    });
+  }
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -134,6 +194,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         return 'frame';
       } else if (isImageBlock(model)) {
         return 'image';
+      } else if (isAttachmentBlock(model)) {
+        return 'attachment';
       } else if (isBookmarkBlock(model) || isEmbeddedBlock(model)) {
         return 'embedCard';
       }
@@ -188,20 +250,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _EmbedCardButton(embedCards?: CategorizedElements['embedCard']) {
-    if (embedCards?.length !== 1) return nothing;
-
-    const embedCard = embedCards[0];
-
-    return html`
-      <edgeless-change-embed-card-button
-        .model=${embedCard}
-        .std=${this.edgeless.std}
-        .surface=${this.surface}
-      ></edgeless-change-embed-card-button>
-    `;
-  }
-
   private _TextButton(textElements?: TextElementModel[]) {
     return textElements?.length
       ? html`<edgeless-change-text-button
@@ -233,6 +281,30 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         >
         </edgeless-change-group-button>`
       : nothing;
+  }
+
+  private _EmbedCardButton(embedCards?: CategorizedElements['embedCard']) {
+    if (embedCards?.length !== 1) return nothing;
+
+    return html`
+      <edgeless-change-embed-card-button
+        .model=${embedCards[0]}
+        .std=${this.edgeless.std}
+        .surface=${this.surface}
+      ></edgeless-change-embed-card-button>
+    `;
+  }
+
+  private _AttachmentButton(attachments?: CategorizedElements['attachment']) {
+    if (attachments?.length !== 1) return nothing;
+
+    return html`
+      <edgeless-change-attachment-button
+        .model=${attachments[0]}
+        .std=${this.edgeless.std}
+        .surface=${this.surface}
+      ></edgeless-change-attachment-button>
+    `;
   }
 
   protected togglePopper = (showPopper: boolean) => {
@@ -342,11 +414,37 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return [left, top];
   }
 
+  private _customRender() {
+    const result: TemplateResult[] = [];
+    EdgelessComponentToolbar._customElements.forEach(render => {
+      const element = render.render(this);
+      if (element) {
+        result.push(element);
+      }
+    });
+    return result.length > 0
+      ? html` <div
+          style="display: flex;align-items: center;justify-content: center"
+        >
+          ${result}
+        </div>`
+      : null;
+  }
+
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless, selection } = this;
-    const { shape, brush, connector, note, text, frame, group, embedCard } =
-      groupedSelected;
+    const {
+      shape,
+      brush,
+      connector,
+      note,
+      text,
+      frame,
+      group,
+      embedCard,
+      attachment,
+    } = groupedSelected;
     const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
       Object.values(groupedSelected),
@@ -361,10 +459,11 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._BrushButton(brush),
           this._ConnectorButton(connector),
           this._NoteButton(note),
-          this._EmbedCardButton(embedCard),
           this._TextButton(text),
           this._FrameButton(frame),
           this._GroupButton(group),
+          this._EmbedCardButton(embedCard),
+          this._AttachmentButton(attachment),
         ].filter(b => !!b && b !== nothing);
 
     if (elements.length > 1) {
@@ -391,7 +490,11 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     ) {
       buttons.push(this._Divider());
     }
-
+    const customRenderResult = this._customRender();
+    if (customRenderResult) {
+      buttons.unshift(this._Divider());
+      buttons.unshift(customRenderResult);
+    }
     return html` <style>
         :host {
           position: absolute;

@@ -51,7 +51,7 @@ export const TextServiceKind = createServiceKind<{
   title: 'Text service',
 });
 export const ChatServiceKind = createServiceKind<{
-  chat(messages: Array<ChatMessage>): Promise<string>;
+  chat(messages: Array<ChatMessage>): AsyncIterable<string>;
 }>({
   type: 'chat-service',
   title: 'Chat service',
@@ -106,8 +106,5 @@ export const allKindService = [
 export type AllServiceKind = (typeof allKindService)[number];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type GetMethod<Kind extends ServiceKind<any>> = Kind extends ServiceKind<
-  infer M
->
-  ? M
-  : never;
+export type GetMethod<Kind extends ServiceKind<any>> =
+  Kind extends ServiceKind<infer M> ? M : never;

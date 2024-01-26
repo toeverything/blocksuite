@@ -16,30 +16,38 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { toast } from '../../_common/components/toast.js';
-import { BLOCK_ID_ATTR } from '../../_common/consts.js';
+import {
+  BLOCK_ID_ATTR,
+  EMBED_CARD_HEIGHT,
+  EMBED_CARD_WIDTH,
+} from '../../_common/consts.js';
 import { listenToThemeChange } from '../../_common/theme/utils.js';
 import {
   type EdgelessTool,
   NoteDisplayMode,
   Point,
   requestConnectedFrame,
-  type Selectable,
   type Viewport,
 } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
   on,
-  type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
+import { AttachmentService } from '../../attachment-block/attachment-service.js';
+import {
+  setAttachmentUploaded,
+  setAttachmentUploading,
+} from '../../attachment-block/utils.js';
 import {
   SURFACE_IMAGE_CARD_HEIGHT,
   SURFACE_IMAGE_CARD_WIDTH,
 } from '../../image-block/components/image-card.js';
 import type { ImageBlockProps } from '../../image-block/image-model.js';
 import { ImageService } from '../../image-block/image-service.js';
+import type { AttachmentBlockProps } from '../../index.js';
 import type { FrameBlockModel, ImageBlockModel } from '../../models.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import {
@@ -71,9 +79,19 @@ import {
   type ZoomAction,
 } from './components/zoom/zoom-toolbar.js';
 import { EdgelessClipboardController } from './controllers/clipboard.js';
+import { BrushToolController } from './controllers/tools/brush-tool.js';
+import { ConnectorToolController } from './controllers/tools/connector-tool.js';
+import { DefaultToolController } from './controllers/tools/default-tool.js';
+import { EraserToolController } from './controllers/tools/eraser-tool.js';
+import { PresentToolController } from './controllers/tools/frame-navigator-tool.js';
+import { FrameToolController } from './controllers/tools/frame-tool.js';
+import { NoteToolController } from './controllers/tools/note-tool.js';
+import { PanToolController } from './controllers/tools/pan-tool.js';
+import { ShapeToolController } from './controllers/tools/shape-tool.js';
+import { TextToolController } from './controllers/tools/text-tool.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
-import { EdgelessToolsManager } from './services/tools-manager.js';
+import type { EdgelessToolConstructor } from './services/tools-manager.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import {
   DEFAULT_NOTE_HEIGHT,
@@ -164,7 +182,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   slots = {
     edgelessToolUpdated: new Slot<EdgelessTool>(),
-    reorderingElements: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
     cursorUpdated: new Slot<string>(),
@@ -194,14 +211,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   fontLoader!: FontLoader;
 
-  tools!: EdgelessToolsManager;
+  get tools() {
+    return this.service.tool;
+  }
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
-  }
-
-  override get service() {
-    return super.service!;
   }
 
   private _viewportElement: HTMLElement | null = null;
@@ -284,9 +299,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
     _disposables.add(this.tools);
     _disposables.add(this.service.selection);
     _disposables.add(
-      slots.zoomUpdated.on(
-        (action: ZoomAction) =>
-          this.components.zoomToolbar?.setZoomByAction(action)
+      slots.zoomUpdated.on((action: ZoomAction) =>
+        this.components.zoomToolbar?.setZoomByAction(action)
       )
     );
     _disposables.add(
@@ -346,7 +360,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       noteIndex: noteIndex,
       scale = 1,
     } = options;
-    const [x, y] = this.service.toModelCoord(point.x, point.y);
+    const [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
     return this.service.addBlock(
       'affine:note',
       {
@@ -413,7 +427,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       delete model.width;
       delete model.height;
     }
-    point = this.service.toModelCoord(point[0], point[1]);
+    point = this.service.viewport.toModelCoord(point[0], point[1]);
     const bound = new Bound(point[0], point[1], options.width, options.height);
     return this.service.addBlock(
       'affine:image',
@@ -500,6 +514,93 @@ export class EdgelessPageBlockComponent extends BlockElement<
       elements: blockIds,
       editing: false,
     });
+    return blockIds;
+  }
+
+  async addAttachments(files: File[], point?: Point): Promise<string[]> {
+    if (!files.length) return [];
+
+    const attachmentService = this.host.spec.getService('affine:attachment');
+    assertExists(attachmentService);
+    assertInstanceOf(attachmentService, AttachmentService);
+    const maxFileSize = attachmentService.maxFileSize;
+    const isSizeExceeded = files.some(file => file.size > maxFileSize);
+    if (isSizeExceeded) {
+      toast(
+        this.host,
+        `You can only upload files less than ${humanFileSize(
+          maxFileSize,
+          true,
+          0
+        )}`
+      );
+      return [];
+    }
+
+    let { x, y } = this.service.viewport.center;
+    if (point) [x, y] = this.service.viewport.toModelCoord(point.x, point.y);
+
+    const CARD_STACK_GAP = 32;
+
+    const dropInfos: { blockId: string; file: File }[] = files.map(
+      (file, index) => {
+        const point = new Point(
+          x + index * CARD_STACK_GAP,
+          y + index * CARD_STACK_GAP
+        );
+        const center = Vec.toVec(point);
+        const bound = Bound.fromCenter(
+          center,
+          EMBED_CARD_WIDTH.cubeThick,
+          EMBED_CARD_HEIGHT.cubeThick
+        );
+        const blockId = this.service.addBlock(
+          'affine:attachment',
+          {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            style: 'cubeThick',
+            xywh: bound.serialize(),
+          } satisfies Partial<AttachmentBlockProps>,
+          this.surface.model
+        );
+
+        return { blockId, file };
+      }
+    );
+
+    // upload file and update the attachment model
+    const uploadPromises = dropInfos.map(async ({ blockId, file }) => {
+      let sourceId: string | undefined;
+      try {
+        setAttachmentUploading(blockId);
+        sourceId = await this.page.blob.set(file);
+      } catch (error) {
+        console.error(error);
+        if (error instanceof Error) {
+          toast(
+            this.host,
+            `Failed to upload attachment! ${error.message || error.toString()}`
+          );
+        }
+      } finally {
+        setAttachmentUploaded(blockId);
+        this.page.withoutTransact(() => {
+          this.service.updateElement(blockId, {
+            sourceId,
+          } satisfies Partial<AttachmentBlockProps>);
+        });
+      }
+      return blockId;
+    });
+    const blockIds = await Promise.all(uploadPromises);
+
+    this.service.selection.set({
+      elements: blockIds,
+      editing: false,
+    });
+
     return blockIds;
   }
 
@@ -620,7 +721,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   private _initSurface() {
     const appendIndexedCanvasToPortal = (
-      canvases: HTMLCanvasElement[] = this.surface.indexedCanvases
+      canvases: HTMLCanvasElement[] = this.surface.renderer.stackingCanvas
     ) => {
       this.pageBlockContainer.setSlotContent(canvases);
     };
@@ -746,6 +847,26 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }
   }
 
+  private _initTools() {
+    const tools = [
+      DefaultToolController,
+      BrushToolController,
+      EraserToolController,
+      TextToolController,
+      ShapeToolController,
+      ConnectorToolController,
+      NoteToolController,
+      FrameToolController,
+      PanToolController,
+      PresentToolController,
+    ] as EdgelessToolConstructor[];
+
+    tools.forEach(tool => {
+      this.service.registerTool(tool);
+    });
+    this.service.tool.mount(this);
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this.clipboardController.hostConnected();
@@ -769,7 +890,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
-    this.tools = new EdgelessToolsManager(this, this.host.event);
+    this._initTools();
   }
 
   override disconnectedCallback() {
@@ -781,12 +902,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }
 
     this.keyboardManager = null;
-
-    this.tools.clear();
-    this.tools.dispose();
   }
 
-  override render() {
+  override renderBlock() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const widgets = html`${repeat(

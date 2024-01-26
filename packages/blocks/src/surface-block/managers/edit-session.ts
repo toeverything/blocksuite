@@ -130,6 +130,7 @@ const SessionPropsSchema = z.object({
   presentHideToolbar: z.boolean(),
   templateCache: z.string(),
   remoteColor: z.string(),
+  showBidirectional: z.boolean(),
 });
 
 type SessionProps = z.infer<typeof SessionPropsSchema>;
@@ -223,7 +224,6 @@ export class EditSessionStorage {
 
     recursive(props, overrideProps);
     this.slots.lastPropsUpdated.emit({ type, props: overrideProps });
-    sessionStorage.setItem(SESSION_PROP_KEY, JSON.stringify(this._lastProps));
   }
 
   apply(type: EdgelessElementType, props: Record<string, unknown>) {
@@ -234,9 +234,10 @@ export class EditSessionStorage {
   }
 
   private _getKey<T extends keyof SessionProps>(key: T) {
+    const id = this._service.page.id;
     switch (key) {
       case 'viewport':
-        return 'blocksuite:' + this._service.page.id + ':edgelessViewport';
+        return 'blocksuite:' + id + ':edgelessViewport';
       case 'presentBlackBackground':
         return 'blocksuite:presentation:blackBackground';
       case 'presentFillScreen':
@@ -244,11 +245,13 @@ export class EditSessionStorage {
       case 'presentHideToolbar':
         return 'blocksuite:presentation:hideToolbar';
       case 'templateCache':
-        return 'blocksuite:' + this._service.page.id + ':templateTool';
+        return 'blocksuite:' + id + ':templateTool';
       case 'remoteColor':
         return 'blocksuite:remote-color';
+      case 'showBidirectional':
+        return 'blocksuite:' + id + ':showBidirectional';
       default:
-        return '';
+        return key;
     }
   }
 

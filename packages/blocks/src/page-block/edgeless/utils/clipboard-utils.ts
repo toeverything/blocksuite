@@ -1,4 +1,4 @@
-import type { EdgelessElement } from '../../../_common/utils/index.js';
+import type { EdgelessModel } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
@@ -16,7 +16,7 @@ import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
 const offset = 10;
 export async function duplicate(
   edgeless: EdgelessPageBlockComponent,
-  elements: EdgelessElement[],
+  elements: EdgelessModel[],
   select = true
 ) {
   const { clipboardController } = edgeless;
@@ -44,7 +44,7 @@ export async function duplicate(
     });
   }
 }
-export const splitElements = (elements: EdgelessElement[]) => {
+export const splitElements = (elements: EdgelessModel[]) => {
   const { notes, frames, shapes, images } = groupBy(
     getElementsWithoutGroup(elements),
     element => {

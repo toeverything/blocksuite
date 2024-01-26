@@ -7,6 +7,8 @@ import type { BlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
 import { nothing, type PropertyValues, render, type TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
+import { when } from 'lit/directives/when.js';
+import { html } from 'lit/static-html.js';
 
 import { WithDisposable } from '../with-disposable.js';
 import type { EditorHost } from './lit-host.js';
@@ -58,6 +60,7 @@ export class BlockElement<
     },
   })
   selected: BaseSelection | null = null;
+  service!: Service;
 
   path!: string[];
 
@@ -81,10 +84,9 @@ export class BlockElement<
   }
 
   get rootBlockElement() {
-    const rootElement = this.host.view.viewFromPath(
-      'block',
-      this.path.slice(0, 1)
-    );
+    const rootElement = this.host.view.viewFromPath('block', [
+      this.page.root!.id,
+    ]);
     assertExists(rootElement);
     return rootElement;
   }
@@ -106,18 +108,30 @@ export class BlockElement<
     }, {});
   }
 
-  get service(): Service | undefined {
-    return this.host.std.spec.getService(this.model.flavour) as
-      | Service
-      | undefined;
-  }
-
   get selection() {
     return this.host.selection;
   }
 
   get std() {
     return this.host.std;
+  }
+
+  get isVersionMismatch() {
+    const schema = this.page.schema.flavourSchemaMap.get(this.model.flavour);
+    assertExists(
+      schema,
+      `Cannot find schema for flavour ${this.model.flavour}`
+    );
+    const expectedVersion = schema.version;
+    const actualVersion = this.model.version;
+    if (expectedVersion !== actualVersion) {
+      console.warn(
+        `Version mismatch for block ${this.model.id}, expected ${expectedVersion}, actual ${actualVersion}`
+      );
+      return true;
+    }
+
+    return false;
   }
 
   handleEvent = (
@@ -148,10 +162,7 @@ export class BlockElement<
         : options?.flavour
           ? this.model.flavour
           : undefined,
-      path:
-        options?.global || options?.flavour
-          ? undefined
-          : this.topContenteditableElement?.path ?? this.path,
+      path: options?.global || options?.flavour ? undefined : this.path,
     };
     this._disposables.add(this.host.event.bindHotkey(keymap, config));
   }
@@ -173,6 +184,10 @@ export class BlockElement<
     // In some cases, the DOM structure is directly modified, causing Lit to lose synchronization with the DOM structure.
     // We can restore this state through the `dirty` property.
     if (this.dirty) {
+      // Here we made some hacks by referring to the source code of Lit.
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/lit-element/src/lit-element.ts#L162-L163
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1586-L1589
+      // https://github.com/lit/lit/blob/273ad4e23b8ec97f1a5015dbf398104f535f9c34/packages/reactive-element/src/reactive-element.ts#L1509-L1512
       //@ts-ignore
       this.__reflectingProperties &&= this.__reflectingProperties.forEach(p =>
         //@ts-ignore
@@ -197,6 +212,7 @@ export class BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    this.service = this.host.std.spec.getService(this.model.flavour) as Service;
     this.path = this.host.view.calculatePath(this);
 
     this._disposables.add(
@@ -225,13 +241,62 @@ export class BlockElement<
         this.selected = selection;
       })
     );
+
+    this.service.specSlots.viewConnected.emit({
+      service: this.service,
+      component: this,
+    });
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this.service.specSlots.viewDisconnected.emit({
+      service: this.service,
+      component: this,
+    });
   }
 
-  override render(): unknown {
-    return null;
+  renderBlock(): unknown {
+    return nothing;
+  }
+
+  renderVersionMismatch(
+    expectedVersion: number,
+    actualVersion: number
+  ): TemplateResult {
+    return html`
+      <dl class="version-mismatch-warning" contenteditable="false">
+        <dt>
+          <h4>Block Version Mismatched</h4>
+        </dt>
+        <dd>
+          <p>
+            We can not render this <var>${this.model.flavour}</var> block
+            because the version is mismatched.
+          </p>
+          <p>Editor version: <var>${expectedVersion}</var></p>
+          <p>Data version: <var>${actualVersion}</var></p>
+        </dd>
+      </dl>
+    `;
+  }
+
+  override render() {
+    return when(
+      this.isVersionMismatch,
+      () => {
+        const schema = this.page.schema.flavourSchemaMap.get(
+          this.model.flavour
+        );
+        assertExists(
+          schema,
+          `Cannot find schema for flavour ${this.model.flavour}`
+        );
+        const expectedVersion = schema.version;
+        const actualVersion = this.model.version;
+        return this.renderVersionMismatch(expectedVersion, actualVersion);
+      },
+      () => this.renderBlock()
+    );
   }
 }

@@ -588,6 +588,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       getStandardLanguage(this.model.language) ?? PLAIN_TEXT_REGISTRATION;
     const curLanguageDisplayName = curLanguage.displayName ?? curLanguage.id;
     return html`<div
+      contenteditable="false"
       class="lang-list-wrapper caret-ignore"
       style="${this._showLangList ? 'visibility: visible;' : ''}"
     >
@@ -618,7 +619,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     );
   }
 
-  override render(): TemplateResult<1> {
+  override renderBlock(): TemplateResult<1> {
     return html`<div
       ${ref(this._whenHover.setReference)}
       class=${classMap({
@@ -628,7 +629,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     >
       ${this._curLanguageButtonTemplate()}
       <div class="rich-text-container">
-        <div id="line-numbers"></div>
+        <div contenteditable="false" id="line-numbers"></div>
         <rich-text
           .yText=${this.model.text.yText}
           .inlineEventSource=${this.topContenteditableElement ?? nothing}

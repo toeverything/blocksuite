@@ -1,18 +1,29 @@
-import type { BlockService } from '../service/index.js';
+import { DisposableGroup } from '@blocksuite/global/utils';
+
+import { BlockService } from '../service/index.js';
 import type { BlockSpec } from './index.js';
+import { getSlots } from './slots.js';
 
 export class SpecStore {
   private _specs: Map<string, BlockSpec> = new Map();
   private _services: Map<string, BlockService> = new Map();
+  private _disposables = new DisposableGroup();
 
   constructor(public std: BlockSuite.Std) {}
 
-  dispose() {
+  mount() {
+    if (this._disposables.disposed) {
+      this._disposables = new DisposableGroup();
+    }
+  }
+
+  unmount() {
     this._services.forEach(service => {
       service.dispose();
       service.unmounted();
     });
     this._services.clear();
+    this._disposables.dispose();
   }
 
   applySpecs(specs: BlockSpec[]) {
@@ -59,14 +70,16 @@ export class SpecStore {
         return;
       }
 
-      if (!newSpec.service) {
-        return;
-      }
+      const Service = newSpec.service ?? BlockService;
 
-      const service = new newSpec.service({
+      const slots = getSlots();
+      const service = new Service({
         flavour,
         std: this.std,
+        slots,
       });
+
+      newSpec.setup?.(slots, this._disposables);
       this._services.set(flavour, service);
       service.mounted();
     });

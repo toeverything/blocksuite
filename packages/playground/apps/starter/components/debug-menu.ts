@@ -17,7 +17,11 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
 import './side-panel.js';
 
-import type { PageService, TreeNode } from '@blocksuite/blocks';
+import type {
+  AffineTextAttributes,
+  PageService,
+  TreeNode,
+} from '@blocksuite/blocks';
 import {
   BlocksUtils,
   ColorVariables,
@@ -31,6 +35,7 @@ import {
   ZipTransformer,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
+import type { DeltaInsert } from '@blocksuite/inline/types';
 import {
   type BlockElement,
   type EditorHost,
@@ -38,7 +43,7 @@ import {
 } from '@blocksuite/lit';
 import type { AffineEditorContainer, CopilotPanel } from '@blocksuite/presets';
 import type { BlockModel } from '@blocksuite/store';
-import { Utils, type Workspace } from '@blocksuite/store';
+import { Text, Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
@@ -46,6 +51,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
 
+import { getEdgelessService } from '../../../../presets/src/fragments/copilot-panel/utils/selection-utils.js';
 import { extendFormatBar } from './custom-format-bar.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';
@@ -150,6 +156,7 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
     });
   }
 }
+
 export function getSelectedBlocks(host: EditorHost) {
   let blocks: BlockElement[] = [];
 
@@ -323,37 +330,12 @@ export class DebugMenu extends ShadowlessElement {
   private _toggleCopilotPanel() {
     this.sidePanel.toggle(this.copilotPanel);
   }
+
   private _togglePagesPanel() {
     this.leftSidePanel.toggle(this.pagesPanel);
   }
 
   private _createMindMap() {
-    function makeid(length: number) {
-      let result = '';
-      const characters =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      const charactersLength = characters.length;
-      let counter = 0;
-      while (counter < length) {
-        result += characters.charAt(
-          Math.floor(Math.random() * charactersLength)
-        );
-        counter += 1;
-      }
-      return result;
-    }
-
-    const _genTree = (deep: number = 0): TreeNode => {
-      const count = Math.floor(Math.random() * 10) - deep - 2;
-      const children: TreeNode[] = [];
-      for (let i = 0; i < count; i++) {
-        children.push(_genTree(deep + 1));
-      }
-      return {
-        text: makeid(Math.random() * 200 + 30),
-        children,
-      };
-    };
     const blocks = getSelectedBlocks(this.editor.host!);
     const toTreeNode = (block: BlockModel): TreeNode => {
       return {
@@ -361,13 +343,31 @@ export class DebugMenu extends ShadowlessElement {
         children: block.children.map(toTreeNode),
       };
     };
-    const node = {
-      text: 'Root',
-      children: blocks.map(v => toTreeNode(v.model)),
-    };
-    // const node: TreeNode = genTree();
+    const texts: BlockModel[] = [];
+    const others: BlockModel[] = [];
+    blocks.forEach(v => {
+      if (v.model.flavour === 'affine:paragraph') {
+        texts.push(v.model);
+      } else {
+        others.push(v.model);
+      }
+    });
+    let node: TreeNode;
+    if (texts.length === 1) {
+      node = {
+        text: texts[0].text?.toString() ?? '',
+        children: others.map(v => toTreeNode(v)),
+      };
+    } else if (blocks.length === 1) {
+      node = toTreeNode(blocks[0].model);
+    } else {
+      node = {
+        text: 'Root',
+        children: blocks.map(v => toTreeNode(v.model)),
+      };
+    }
     BlocksUtils.mindMap.drawInEdgeless(
-      getSurfaceElementFromEditor(this.editor.host),
+      getEdgelessService(this.editor.host),
       node
     );
   }
@@ -430,7 +430,28 @@ export class DebugMenu extends ShadowlessElement {
         return;
       }
       try {
-        await ZipTransformer.importPages(this.workspace, file);
+        const pages = await ZipTransformer.importPages(this.workspace, file);
+        for (const page of pages) {
+          const noteBlock = window.page.getBlockByFlavour('affine:note');
+          window.page.addBlock(
+            'affine:paragraph',
+            {
+              type: 'text',
+              text: new Text([
+                {
+                  insert: ' ',
+                  attributes: {
+                    reference: {
+                      type: 'LinkedPage',
+                      pageId: page.id,
+                    },
+                  },
+                } as DeltaInsert<AffineTextAttributes>,
+              ]),
+            },
+            noteBlock[0].id
+          );
+        }
         this.requestUpdate();
       } catch (e) {
         console.error('Invalid snapshot.');
@@ -617,8 +638,8 @@ export class DebugMenu extends ShadowlessElement {
             <sl-tooltip content="Undo" placement="bottom" hoist>
               <sl-button
                 size="small"
-                .disabled=${!this._canUndo}
-                @click=${() => this.page.undo()}
+                .disabled="${!this._canUndo}"
+                @click="${() => this.page.undo()}"
               >
                 <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
               </sl-button>
@@ -627,8 +648,8 @@ export class DebugMenu extends ShadowlessElement {
             <sl-tooltip content="Redo" placement="bottom" hoist>
               <sl-button
                 size="small"
-                .disabled=${!this._canRedo}
-                @click=${() => this.page.redo()}
+                .disabled="${!this._canRedo}"
+                @click="${() => this.page.redo()}"
               >
                 <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
               </sl-button>
@@ -641,66 +662,66 @@ export class DebugMenu extends ShadowlessElement {
               Test Operations
             </sl-button>
             <sl-menu>
-              <sl-menu-item @click=${this._toggleConnection}>
+              <sl-menu-item @click="${this._toggleConnection}">
                 ${this._connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
-              <sl-menu-item @click=${this._exportMarkDown}>
+              <sl-menu-item @click="${this._exportMarkDown}">
                 Export Markdown
               </sl-menu-item>
-              <sl-menu-item @click=${this._exportHtml}>
+              <sl-menu-item @click="${this._exportHtml}">
                 Export HTML
               </sl-menu-item>
-              <sl-menu-item @click=${this._exportPdf}>
+              <sl-menu-item @click="${this._exportPdf}">
                 Export PDF
               </sl-menu-item>
-              <sl-menu-item @click=${this._exportPng}>
+              <sl-menu-item @click="${this._exportPng}">
                 Export PNG
               </sl-menu-item>
-              <sl-menu-item @click=${this._exportSnapshot}>
+              <sl-menu-item @click="${this._exportSnapshot}">
                 Export Snapshot
               </sl-menu-item>
-              <sl-menu-item @click=${this._importSnapshot}>
+              <sl-menu-item @click="${this._importSnapshot}">
                 Import Snapshot
               </sl-menu-item>
-              <sl-menu-item @click=${this._shareUrl}>Share URL</sl-menu-item>
-              <sl-menu-item @click=${this._toggleStyleDebugMenu}>
+              <sl-menu-item @click="${this._shareUrl}">Share URL</sl-menu-item>
+              <sl-menu-item @click="${this._toggleStyleDebugMenu}">
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._toggleReadonly}>
+              <sl-menu-item @click="${this._toggleReadonly}">
                 Toggle Readonly
               </sl-menu-item>
-              <sl-menu-item @click=${this._shareSelection}>
+              <sl-menu-item @click="${this._shareSelection}">
                 Share Selection
               </sl-menu-item>
-              <sl-menu-item @click=${this._switchOffsetMode}>
+              <sl-menu-item @click="${this._switchOffsetMode}">
                 Switch Offset Mode
               </sl-menu-item>
-              <sl-menu-item @click=${this._toggleOutlinePanel}>
+              <sl-menu-item @click="${this._toggleOutlinePanel}">
                 Toggle Outline Panel
               </sl-menu-item>
-              <sl-menu-item @click=${this._toggleFramePanel}>
+              <sl-menu-item @click="${this._toggleFramePanel}">
                 Toggle Frame Panel
               </sl-menu-item>
-              <sl-menu-item @click=${this._extendFormatBar}>
+              <sl-menu-item @click="${this._extendFormatBar}">
                 Extend Format Bar
               </sl-menu-item>
-              <sl-menu-item @click=${this._createMindMap}>
+              <sl-menu-item @click="${this._createMindMap}">
                 Create Mind Map
               </sl-menu-item>
-              <sl-menu-item @click=${this._addNote}>Add Note</sl-menu-item>
+              <sl-menu-item @click="${this._addNote}">Add Note</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
           <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
-            <sl-button size="small" @click=${this._switchEditorMode}>
+            <sl-button size="small" @click="${this._switchEditorMode}">
               <sl-icon name="repeat"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
           <sl-tooltip content="Toggle Dark Mode" placement="bottom" hoist>
-            <sl-button size="small" @click=${this._toggleDarkMode}>
+            <sl-button size="small" @click="${this._toggleDarkMode}">
               <sl-icon
-                name=${this._dark ? 'moon' : 'brightness-high'}
+                name="${this._dark ? 'moon' : 'brightness-high'}"
               ></sl-icon>
             </sl-button>
           </sl-tooltip>
@@ -710,14 +731,14 @@ export class DebugMenu extends ShadowlessElement {
             placement="bottom"
             hoist
           >
-            <sl-button size="small" @click=${this._toggleCopilotPanel}>
+            <sl-button size="small" @click="${this._toggleCopilotPanel}">
               <sl-icon name="stars"></sl-icon>
             </sl-button>
           </sl-tooltip>
           <sl-button
             data-testid="pages-button"
             size="small"
-            @click=${this._togglePagesPanel}
+            @click="${this._togglePagesPanel}"
           >
             Pages
           </sl-button>

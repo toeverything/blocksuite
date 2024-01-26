@@ -306,11 +306,12 @@ export class DocPageBlockComponent extends BlockElement<
         parseFloat(paddingLeft),
         parseFloat(paddingRight)
       );
-      if (isClickOnBlankArea) return;
+      if (isClickOnBlankArea) {
+        this.host.selection.clear(['block']);
+        return;
+      }
 
-      let noteId: string;
-      let paragraphId: string;
-      let index = 0;
+      let newTextSelectionPath: string[] | null = null;
       const readonly = this.model.page.readonly;
       const lastNote = this.model.children
         .slice()
@@ -326,10 +327,10 @@ export class DocPageBlockComponent extends BlockElement<
         });
       if (!lastNote) {
         if (readonly) return;
-        noteId = this.page.addBlock('affine:note', {}, this.model.id);
-        paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
+        const noteId = this.page.addBlock('affine:note', {}, this.model.id);
+        const paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
+        newTextSelectionPath = [this.model.id, noteId, paragraphId];
       } else {
-        noteId = lastNote.id;
         const last = lastNote.children.at(-1);
         if (
           !last ||
@@ -346,25 +347,30 @@ export class DocPageBlockComponent extends BlockElement<
           /affine:embed-*/.test(last.flavour)
         ) {
           if (readonly) return;
-          paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
-        } else {
-          paragraphId = last.id;
-          index = last.text?.length ?? 0;
+          const paragraphId = this.page.addBlock(
+            'affine:paragraph',
+            {},
+            lastNote.id
+          );
+          newTextSelectionPath = [this.model.id, lastNote.id, paragraphId];
         }
       }
 
-      requestAnimationFrame(() => {
-        this.host.selection.setGroup('note', [
-          this.host.selection.create('text', {
-            from: {
-              path: [this.model.id, noteId, paragraphId],
-              index,
-              length: 0,
-            },
-            to: null,
-          }),
-        ]);
-      });
+      this.updateComplete
+        .then(() => {
+          if (!newTextSelectionPath) return;
+          this.host.selection.setGroup('note', [
+            this.host.selection.create('text', {
+              from: {
+                path: newTextSelectionPath,
+                index: 0,
+                length: 0,
+              },
+              to: null,
+            }),
+          ]);
+        })
+        .catch(console.error);
     });
   }
 
@@ -375,7 +381,7 @@ export class DocPageBlockComponent extends BlockElement<
     this.keyboardManager = null;
   }
 
-  override render() {
+  override renderBlock() {
     const content = html`${repeat(
       this.model.children.filter(child => {
         const isNote = matchFlavours(child, ['affine:note']);

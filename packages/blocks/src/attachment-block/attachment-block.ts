@@ -1,112 +1,233 @@
+import '../_common/components/embed-card/embed-card-caption.js';
+
+import { PathFinder } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
-import { html } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { html, nothing, render } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import { HoverController } from '../_common/components/index.js';
-import { toast } from '../_common/components/toast.js';
-import { AttachmentIcon16 } from '../_common/icons/index.js';
+import { EMBED_CARD_HEIGHT, EMBED_CARD_WIDTH } from '../_common/consts.js';
+import {
+  AttachmentIcon16,
+  getAttachmentFileIcons,
+} from '../_common/icons/index.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
-import { stopPropagation } from '../_common/utils/event.js';
 import { humanFileSize } from '../_common/utils/math.js';
-import { AffineDragHandleWidget } from '../page-block/widgets/drag-handle/drag-handle.js';
-import { captureEventTarget } from '../page-block/widgets/drag-handle/utils.js';
+import { matchFlavours } from '../_common/utils/model.js';
+import { getEmbedCardIcons } from '../_common/utils/url.js';
+import type { DragHandleOption } from '../page-block/widgets/drag-handle/config.js';
+import {
+  AFFINE_DRAG_HANDLE_WIDGET,
+  AffineDragHandleWidget,
+} from '../page-block/widgets/drag-handle/drag-handle.js';
+import {
+  captureEventTarget,
+  convertDragPreviewDocToEdgeless,
+  convertDragPreviewEdgelessToDoc,
+} from '../page-block/widgets/drag-handle/utils.js';
+import { Bound } from '../surface-block/utils/bound.js';
 import {
   type AttachmentBlockModel,
-  type AttachmentBlockProps,
   AttachmentBlockSchema,
+  AttachmentBlockStyles,
 } from './attachment-model.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
-import { allowEmbed, renderEmbedView } from './embed.js';
-import {
-  AttachmentBanner,
-  ErrorBanner,
-  LoadingIcon,
-  styles,
-} from './styles.js';
-import {
-  downloadAttachmentBlob,
-  getAttachmentBlob,
-  isAttachmentLoading,
-} from './utils.js';
+import { renderEmbedView } from './embed.js';
+import { styles } from './styles.js';
+import { checkAttachmentBlob, downloadAttachmentBlob } from './utils.js';
 
 @customElement('affine-attachment')
 export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel> {
   static override styles = styles;
 
-  @state()
-  private _showCaption = false;
+  @property({ attribute: false })
+  loading = false;
 
-  @query('input.affine-attachment-caption')
-  private _captionInput!: HTMLInputElement;
+  @property({ attribute: false })
+  error = false;
 
-  // Sometimes the attachment is unavailable
-  // e.g. paste a attachment block from another workspace
-  @state()
-  private _error = false;
+  @property({ attribute: false })
+  downloading = false;
+
+  @property({ attribute: false })
+  blobUrl?: string;
+
+  @property({ attribute: false })
+  allowEmbed = false;
+
+  @property({ attribute: false })
+  showCaption = false;
+
+  @query('embed-card-caption')
+  captionElement!: EmbedCardCaption;
 
   @state()
-  private _isDownloading = false;
+  private _showOverlay = true;
 
-  @state()
-  private _blobUrl?: string;
+  private _isSelected = false;
 
-  @state()
-  private _pointerPressed = false;
+  private _isDragging = false;
 
   private readonly _themeObserver = new ThemeObserver();
 
-  private _hoverController = new HoverController(
-    this,
-    ({ abortController }) => {
-      const selection = this.host.selection;
-      const textSelection = selection.find('text');
-      if (
-        !!textSelection &&
-        (!!textSelection.to || !!textSelection.from.length)
-      ) {
-        return null;
-      }
+  private _isInSurface = false;
 
-      const blockSelections = selection.filter('block');
-      if (
-        blockSelections.length > 1 ||
-        (blockSelections.length === 1 && blockSelections[0].path !== this.path)
-      ) {
-        return null;
-      }
+  get isInSurface() {
+    return this._isInSurface;
+  }
 
-      return {
-        template: AttachmentOptionsTemplate({
-          anchor: this,
-          model: this.model,
-          showCaption: () => {
-            this._showCaption = true;
-            requestAnimationFrame(() => {
-              this._captionInput.focus();
+  get edgeless() {
+    if (this._isInSurface) return null;
+    return this.host.querySelector('affine-edgeless-page');
+  }
+
+  private get _embedView() {
+    if (this.isInSurface || !this.model.embed || !this.blobUrl) return;
+    return renderEmbedView(this.model, this.blobUrl);
+  }
+
+  private _dragHandleOption: DragHandleOption = {
+    flavour: AttachmentBlockSchema.model.flavour,
+    edgeless: true,
+    onDragStart: ({ state, startDragging, anchorBlockPath }) => {
+      if (!anchorBlockPath) return false;
+      const anchorComponent = this.std.view.viewFromPath(
+        'block',
+        anchorBlockPath
+      );
+      if (
+        !anchorComponent ||
+        !matchFlavours(anchorComponent.model, [
+          AttachmentBlockSchema.model.flavour,
+        ])
+      )
+        return false;
+
+      const blockComponent = anchorComponent as AttachmentBlockComponent;
+      const element = captureEventTarget(state.raw.target);
+
+      const isDraggingByDragHandle = !!element?.closest(
+        AFFINE_DRAG_HANDLE_WIDGET
+      );
+      const isDraggingByComponent = blockComponent.contains(element);
+      const isInSurface = blockComponent.isInSurface;
+
+      if (!isInSurface && (isDraggingByDragHandle || isDraggingByComponent)) {
+        this.host.selection.setGroup('note', [
+          this.host.selection.create('block', {
+            path: blockComponent.path,
+          }),
+        ]);
+        startDragging([blockComponent], state);
+        return true;
+      } else if (isInSurface && isDraggingByDragHandle) {
+        const attachmentPortal = blockComponent.closest(
+          '.edgeless-block-portal-attachment'
+        );
+        assertExists(attachmentPortal);
+        const dragPreviewEl = attachmentPortal.cloneNode() as HTMLElement;
+        dragPreviewEl.style.transform = '';
+        dragPreviewEl.style.left = '0';
+        dragPreviewEl.style.top = '0';
+        render(
+          blockComponent.host.renderModel(blockComponent.model),
+          dragPreviewEl
+        );
+
+        startDragging([blockComponent], state, dragPreviewEl);
+        return true;
+      }
+      return false;
+    },
+    onDragEnd: props => {
+      const { state, draggingElements, dropBlockId } = props;
+      if (
+        draggingElements.length !== 1 ||
+        !matchFlavours(draggingElements[0].model, [
+          AttachmentBlockSchema.model.flavour,
+        ])
+      )
+        return false;
+
+      const blockComponent = draggingElements[0] as AttachmentBlockComponent;
+      const isInSurface = blockComponent.isInSurface;
+      const target = captureEventTarget(state.raw.target);
+      const isTargetEdgelessContainer =
+        target?.classList.contains('edgeless') &&
+        target?.classList.contains('affine-block-children-container');
+
+      if (isInSurface) {
+        if (dropBlockId) {
+          const style = blockComponent.model.style;
+          if (style === 'cubeThick') {
+            const { xywh } = blockComponent.model;
+            const bound = Bound.deserialize(xywh);
+            bound.w = EMBED_CARD_WIDTH.horizontalThin;
+            bound.h = EMBED_CARD_HEIGHT.horizontalThin;
+            this.page.updateBlock(blockComponent.model, {
+              style: 'horizontalThin',
+              xywh: bound.serialize(),
             });
-          },
-          downloadAttachment: this._downloadAttachment,
-          abortController,
-        }),
-        computePosition: {
-          referenceElement: this,
-          placement: 'top-end',
-          middleware: [flip(), offset(4)],
-          autoUpdate: true,
-        },
-      };
-    }
-  );
+          }
+        }
+
+        return convertDragPreviewEdgelessToDoc({
+          blockComponent,
+          ...props,
+        });
+      } else if (isTargetEdgelessContainer) {
+        let style = blockComponent.model.style ?? 'cubeThick';
+        const embed = blockComponent.model.embed;
+        if (embed) {
+          style = 'cubeThick';
+          this.page.updateBlock(blockComponent.model, {
+            style,
+            embed: false,
+          });
+        }
+
+        return convertDragPreviewDocToEdgeless({
+          blockComponent,
+          cssSelector: '.affine-attachment-container',
+          width: EMBED_CARD_WIDTH[style],
+          height: EMBED_CARD_HEIGHT[style],
+          ...props,
+        });
+      }
+
+      return false;
+    },
+  };
 
   override connectedCallback() {
     super.connectedCallback();
-    if (this.model.caption) {
-      this._showCaption = true;
+
+    this.refreshData();
+
+    this.contentEditable = 'false';
+
+    this.showCaption = !!this.model.caption?.length;
+
+    const parent = this.host.page.getParent(this.model);
+    this._isInSurface = parent?.flavour === 'affine:surface';
+
+    if (!this.model.style) {
+      this.page.withoutTransact(() => {
+        this.page.updateBlock(this.model, {
+          style: AttachmentBlockStyles[1],
+        });
+      });
     }
-    this._checkBlob().catch(console.error);
-    this._registerDragHandleOption();
+
+    this.disposables.add(
+      AffineDragHandleWidget.registerOption(this._dragHandleOption)
+    );
 
     // Workaround for https://github.com/toeverything/blocksuite/issues/4724
     this._themeObserver.observe(document.documentElement);
@@ -116,229 +237,214 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     this.model.propsUpdated.on(({ key }) => {
       if (key === 'sourceId') {
         // Reset the blob url when the sourceId is changed
-        if (this._blobUrl) {
-          URL.revokeObjectURL(this._blobUrl);
-          this._blobUrl = undefined;
+        if (this.blobUrl) {
+          URL.revokeObjectURL(this.blobUrl);
+          this.blobUrl = undefined;
         }
-        this._checkBlob().catch(console.error);
+        this.refreshData();
+      } else if (key === 'caption') {
+        this.showCaption = !!this.model.caption?.length;
       }
     });
 
+    // this is required to prevent iframe from capturing pointer events
     this.disposables.add(
-      this.std.event.add('pointerDown', e => {
-        const event = e.get('pointerState');
-        // 0: Main button pressed, usually the left button or the un-initialized state
-        // See https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
-        if (event.button !== 0) return;
-        this._pointerPressed = true;
+      this.std.selection.slots.changed.on(sels => {
+        this._isSelected = sels.some(sel =>
+          PathFinder.equals(sel.path, this.path)
+        );
+        this._showOverlay = this._isDragging || !this._isSelected;
       })
     );
-    this.disposables.add(
-      this.std.event.add('pointerUp', e => {
-        const event = e.get('pointerState');
-        // 0: Main button pressed, usually the left button or the un-initialized state
-        if (event.button !== 0) return;
-        this._pointerPressed = false;
-      })
-    );
+    // this is required to prevent iframe from capturing pointer events
+    this.handleEvent('pointerMove', ctx => {
+      this._isDragging = ctx.get('pointerState').dragging;
+      if (this._isDragging) this._showOverlay = true;
+    });
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    if (this._blobUrl) {
-      URL.revokeObjectURL(this._blobUrl);
+    if (this.blobUrl) {
+      URL.revokeObjectURL(this.blobUrl);
     }
   }
 
-  private _registerDragHandleOption = () => {
-    this._disposables.add(
-      AffineDragHandleWidget.registerOption({
-        flavour: AttachmentBlockSchema.model.flavour,
-        onDragStart: ({ state, startDragging }) => {
-          // Check if start dragging from the attachment block
-          const target = captureEventTarget(state.raw.target);
-          const attachmentBlock = target?.closest('affine-attachment');
-          if (!attachmentBlock) return false;
-
-          // If start dragging from the attachment element
-          // Set selection and take over dragStart event to start dragging
-          this.host.selection.set([
-            this.host.selection.create('block', {
-              path: attachmentBlock.path,
-            }),
-          ]);
-          startDragging([attachmentBlock], state);
-          return true;
-        },
-      })
-    );
-  };
-
-  /**
-   * Check if the blob is available. It is necessary since the block may be copied from another workspace.
-   */
-  private _checkBlob = async () => {
-    const sourceId = this.model.sourceId;
-    if (!sourceId) return;
-    try {
-      const blob = await getAttachmentBlob(this.model);
-      if (!blob) throw new Error('Blob is missing!');
-      // TODO we no need to create blob url when the attachment is not embedded
-      if (allowEmbed(this.model)) {
-        this._blobUrl = URL.createObjectURL(blob);
-      }
-    } catch (_) {
-      this._error = true;
-      console.warn(
-        'The attachment is unavailable since the blob is missing!',
-        this.model,
-        sourceId
-      );
+  open = () => {
+    if (!this.blobUrl) {
+      return;
     }
+    window.open(this.blobUrl, '_blank');
   };
 
-  private _focusAttachment = () => {
+  download = () => {
+    downloadAttachmentBlob(this).catch(console.error);
+  };
+
+  refreshData = () => {
+    checkAttachmentBlob(this).catch(console.error);
+  };
+
+  private _selectBlock() {
     const selectionManager = this.host.selection;
     const blockSelection = selectionManager.create('block', {
       path: this.path,
     });
     selectionManager.setGroup('note', [blockSelection]);
-  };
+  }
 
-  private _downloadAttachment = async () => {
-    if (this._isDownloading) {
-      toast(this.host, 'Download in progress...');
-      return;
+  private _handleClick() {
+    if (!this.isInSurface) {
+      this._selectBlock();
+    }
+  }
+
+  private _handleDoubleClick(event: MouseEvent) {
+    event.stopPropagation();
+    if (this.allowEmbed) {
+      this.open();
+    } else {
+      this.download();
+    }
+  }
+
+  private _whenHover = new HoverController(this, ({ abortController }) => {
+    const selection = this.host.selection;
+    const textSelection = selection.find('text');
+    if (
+      !!textSelection &&
+      (!!textSelection.to || !!textSelection.from.length)
+    ) {
+      return null;
     }
 
-    const shortName =
-      this.model.name.length < 20
-        ? this.model.name
-        : this.model.name.slice(0, 20) + '...';
-
-    toast(this.host, `Downloading ${shortName}`);
-    this._isDownloading = true;
-    // TODO speed up download by using this._blobUrl
-    try {
-      await downloadAttachmentBlob(this.host, this.model);
-    } catch (error) {
-      console.error(error);
-      toast(this.host, `Failed to download ${shortName}!`);
-    } finally {
-      this._isDownloading = false;
-    }
-  };
-
-  private _onBlur = () => {
-    if (!this.model.caption) {
-      this._showCaption = false;
-    }
-  };
-
-  private _onInput = (e: InputEvent) => {
-    const caption = (e.target as HTMLInputElement).value;
-    this.model.page.updateBlock(this.model, {
-      caption,
-    } satisfies Partial<AttachmentBlockProps>);
-  };
-
-  private _attachmentTail = (isError: boolean) => {
-    return html`
-      <div class="affine-attachment-banner">
-        ${isError ? ErrorBanner() : AttachmentBanner()}
-      </div>
-      ${this.selected?.is('block')
-        ? html`<affine-block-selection
-            .borderRadius=${12}
-            .borderWidth=${3}
-          ></affine-block-selection>`
-        : null}
-    `;
-  };
-
-  private _captionTemplate = () => {
-    return html`<input
-      ?hidden=${!this._showCaption}
-      .disabled=${this.model.page.readonly}
-      class="affine-attachment-caption"
-      placeholder="Write a caption"
-      value=${this.model.caption ?? ''}
-      @input=${this._onInput}
-      @blur=${this._onBlur}
-      @pointerdown=${stopPropagation}
-    />`;
-  };
-
-  override render() {
-    const isLoading = isAttachmentLoading(this.model.id);
-    const isError = this._error || (!isLoading && !this.model.sourceId);
-
-    if (isLoading) {
-      return html`<div
-        class="affine-attachment-container"
-        @click=${this._focusAttachment}
-      >
-        <div class="affine-attachment-loading">${LoadingIcon}Loading...</div>
-        <div class="affine-attachment-desc">
-          ${humanFileSize(this.model.size)}
-        </div>
-        ${this._attachmentTail(isError)}
-      </div>`;
-    }
-    if (isError) {
-      return html`<div
-        class="affine-attachment-container"
-        @click=${this._focusAttachment}
-      >
-        <div class="affine-attachment-title">
-          ${AttachmentIcon16}
-          <span class="affine-attachment-name">${this.model.name}</span>
-        </div>
-        <div class="affine-attachment-desc">
-          Unable to upload or download attachment
-        </div>
-        ${this._attachmentTail(isError)}
-      </div>`;
+    const blockSelections = selection.filter('block');
+    if (
+      blockSelections.length > 1 ||
+      (blockSelections.length === 1 && blockSelections[0].path !== this.path)
+    ) {
+      return null;
     }
 
-    if (this.model.embed && this._blobUrl) {
-      const embedView = renderEmbedView(this.model, this._blobUrl);
-      if (embedView) {
-        // See https://github.com/toeverything/blocksuite/issues/5579
-        const selectionMask = this._pointerPressed
-          ? html`<div class="overlay-mask"></div>`
-          : null;
-        return html`<div
-            ${ref(this._hoverController.setReference)}
-            class="affine-attachment-embed-container"
-          >
-            ${selectionMask} ${embedView}
-            ${this.selected?.is('block')
-              ? html`<affine-block-selection></affine-block-selection>`
-              : null}
-          </div>
-          ${this._captionTemplate()}`;
-      }
+    return {
+      template: AttachmentOptionsTemplate({
+        anchor: this,
+        model: this.model,
+        showCaption: () => {
+          this.showCaption = true;
+          requestAnimationFrame(() => {
+            this.captionElement.focus();
+          });
+        },
+        downloadAttachment: this.download,
+        abortController,
+      }),
+      computePosition: {
+        referenceElement: this,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+    };
+  });
+
+  override renderBlock() {
+    const { name, size, style, caption } = this.model;
+    const cardStyle = style ?? AttachmentBlockStyles[1];
+
+    const { LoadingIcon } = getEmbedCardIcons();
+
+    const titleIcon = this.loading ? LoadingIcon : AttachmentIcon16;
+    const titleText = this.loading ? 'Loading...' : name;
+    const infoText = this.error ? 'File loading failed.' : humanFileSize(size);
+
+    const fileType = name.split('.').pop() ?? '';
+    const FileTypeIcon = getAttachmentFileIcons(fileType);
+
+    let containerStyleMap = styleMap({
+      position: 'relative',
+      width: '100%',
+      margin: '18px 0px',
+    });
+    if (this.isInSurface) {
+      const width = EMBED_CARD_WIDTH[cardStyle];
+      const height = EMBED_CARD_HEIGHT[cardStyle];
+      const bound = Bound.deserialize(
+        (this.edgeless?.service.getElementById(this.model.id) ?? this.model)
+          .xywh
+      );
+      const scaleX = bound.w / width;
+      const scaleY = bound.h / height;
+      containerStyleMap = styleMap({
+        width: `${width}px`,
+        height: `${height}px`,
+        transform: `scale(${scaleX}, ${scaleY})`,
+        transformOrigin: '0 0',
+      });
     }
-    const isDownloadingOrLoadingBlob =
-      this._isDownloading || (this.model.embed && !this._blobUrl);
+
+    const embedView = this._embedView;
 
     return html`<div
-        ${ref(this._hoverController.setReference)}
-        class="affine-attachment-container"
-        @click=${this._focusAttachment}
-        @dblclick=${this._downloadAttachment}
-      >
-        <div class="affine-attachment-title">
-          ${isDownloadingOrLoadingBlob ? LoadingIcon : AttachmentIcon16}
-          <span class="affine-attachment-name">${this.model.name}</span>
-        </div>
-        <div class="affine-attachment-desc">
-          ${humanFileSize(this.model.size)}
-        </div>
-        ${this._attachmentTail(isError)}
-      </div>
-      ${this._captionTemplate()}`;
+      ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+      class="affine-attachment-container"
+      style=${containerStyleMap}
+    >
+      ${embedView
+        ? html`<div
+            class="affine-attachment-embed-container"
+            @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
+          >
+            ${embedView}
+
+            <div
+              class=${classMap({
+                'affine-attachment-iframe-overlay': true,
+                hide: !this._showOverlay,
+              })}
+            ></div>
+          </div>`
+        : html`<div
+            class=${classMap({
+              'affine-attachment-card': true,
+              [cardStyle]: true,
+              loading: this.loading,
+              error: this.error,
+              unsynced: false,
+            })}
+            @click=${this._handleClick}
+            @dblclick=${this._handleDoubleClick}
+          >
+            <div class="affine-attachment-content">
+              <div class="affine-attachment-content-title">
+                <div class="affine-attachment-content-title-icon">
+                  ${titleIcon}
+                </div>
+
+                <div class="affine-attachment-content-title-text">
+                  ${titleText}
+                </div>
+              </div>
+
+              <div class="affine-attachment-content-info">${infoText}</div>
+            </div>
+
+            <div class="affine-attachment-banner">${FileTypeIcon}</div>
+          </div>`}
+
+      <embed-card-caption
+        .block=${this}
+        .display=${this.showCaption}
+        @blur=${() => {
+          if (!caption) this.showCaption = false;
+        }}
+      ></embed-card-caption>
+
+      ${this.selected?.is('block')
+        ? html`<affine-block-selection></affine-block-selection>`
+        : nothing}
+    </div> `;
   }
 }
 

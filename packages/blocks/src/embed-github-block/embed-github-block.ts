@@ -1,4 +1,5 @@
 import '../_common/components/embed-card/embed-card-caption.js';
+import '../_common/components/block-selection.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -41,7 +42,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   @property({ attribute: false })
   loading = false;
 
-  @state()
+  @property({ attribute: false })
   showCaption = false;
 
   @query('embed-card-caption')
@@ -90,9 +91,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    if (!!this.model.caption && !!this.model.caption.length) {
-      this.showCaption = true;
-    }
+    this.showCaption = !!this.model.caption?.length;
 
     if (!this.model.owner || !this.model.repo || !this.model.githubId) {
       this.page.withoutTransact(() => {
@@ -111,14 +110,20 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     }
 
     this.page.withoutTransact(() => {
-      if (!this.model.description && !this.model.title) this.refreshData();
-      else this.refreshStatus();
+      if (!this.model.description && !this.model.title) {
+        this.refreshData();
+      } else {
+        this.refreshStatus();
+      }
     });
 
     this.disposables.add(
       this.model.propsUpdated.on(({ key }) => {
-        this.requestUpdate();
-        if (key === 'url') this.refreshData();
+        if (key === 'url') {
+          this.refreshData();
+        } else if (key === 'caption') {
+          this.showCaption = !!this.model.caption?.length;
+        }
       })
     );
 
@@ -183,7 +188,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     };
   });
 
-  override render() {
+  override renderBlock() {
     const {
       title = 'GitHub',
       githubType,
@@ -213,7 +218,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     const descriptionText = loading ? '' : description;
     const bannerImage =
       !loading && image
-        ? html`<object type="image/webp" data=${image}>
+        ? html`<object type="image/webp" data=${image} draggable="false">
             ${EmbedCardBannerIcon}
           </object>`
         : EmbedCardBannerIcon;
@@ -239,7 +244,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
           })}
         >
           <div
-            ${this.isInSurface ? nothing : ref(this._whenHover.setReference)}
+            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
             class=${classMap({
               'affine-embed-github-block': true,
               loading,
