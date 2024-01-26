@@ -166,6 +166,13 @@ export class PageService extends BlockService<PageBlockModel> {
       'dragleave',
       this.fileDropManager.onDragLeave
     );
+
+    this.disposables.add(
+      this.std.event.add('pointerDown', ctx => {
+        const state = ctx.get('pointerState');
+        state.raw.stopPropagation();
+      })
+    );
   }
 
   get selectedBlocks() {
