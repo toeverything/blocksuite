@@ -281,6 +281,8 @@ export class SurfaceRefBlockComponent extends BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    this.contentEditable = 'false';
+
     if (!this._shouldRender) return;
 
     const service = this.service;
