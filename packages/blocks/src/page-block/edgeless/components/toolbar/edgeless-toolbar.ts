@@ -528,6 +528,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
             ></edgeless-frame-tool-button>`}
 
         <edgeless-tool-icon-button
+          class="edgeless-frame-navigator-button"
           .tooltip=${'Present'}
           .tooltipOffset=${17}
           .iconContainerPadding=${8}

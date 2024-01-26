@@ -10,6 +10,8 @@ import {
 } from '@blocks/index.js';
 import { assertExists } from '@global/utils.js';
 import { type InlineRange, type InlineRootElement } from '@inline/index.js';
+import type { CustomFramePanel } from '@playground/apps/starter/components/custom-frame-panel.js';
+import type { CustomOutlinePanel } from '@playground/apps/starter/components/custom-outline-panel.js';
 import type { DebugMenu } from '@playground/apps/starter/components/debug-menu.js';
 import type { PagesPanel } from '@playground/apps/starter/components/pages-panel.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
@@ -100,14 +102,25 @@ async function initEmptyEditor({
 
         const debugMenu: DebugMenu = document.createElement('debug-menu');
         const pagesPanel: PagesPanel = document.createElement('pages-panel');
+        const framePanel: CustomFramePanel =
+          document.createElement('custom-frame-panel');
+        const outlinePanel: CustomOutlinePanel = document.createElement(
+          'custom-outline-panel'
+        );
         pagesPanel.editor = editor;
+        framePanel.editor = editor;
+        outlinePanel.editor = editor;
         debugMenu.workspace = workspace;
         debugMenu.editor = editor;
         debugMenu.pagesPanel = pagesPanel;
+        debugMenu.framePanel = framePanel;
+        debugMenu.outlinePanel = outlinePanel;
         const leftSidePanel = document.createElement('left-side-panel');
         debugMenu.leftSidePanel = leftSidePanel;
         document.body.appendChild(debugMenu);
         document.body.appendChild(leftSidePanel);
+        document.body.appendChild(framePanel);
+        document.body.appendChild(outlinePanel);
         window.debugMenu = debugMenu;
         window.editor = editor;
         window.page = page;
