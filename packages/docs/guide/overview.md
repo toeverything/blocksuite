@@ -11,7 +11,7 @@ These editors are being used in [AFFiNE](https://github.com/toeverything/AFFiNE)
 
 <iframe src="https://try-blocksuite.vercel.app/starter/?init" width="100%" height="500"></iframe>
 
-In addition to extending custom blocks, here are what you can also conveniently achieve with BlockSuite:
+In addition to [extending custom blocks](./working-with-block-tree#defining-new-blocks), here are what you can also conveniently achieve with BlockSuite:
 
 - Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the [document streaming](./data-synchronization#document-streaming) mechanism.
 - Writing type-safe complex editing logic based on the [command](./command) mechanism, similar to react hooks designed for document editing.

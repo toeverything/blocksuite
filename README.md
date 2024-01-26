@@ -34,14 +34,14 @@ These editors are being used in [AFFiNE](https://github.com/toeverything/AFFiNE)
 
 ![showcase-doc-edgeless-editors](./packages/docs/images/showcase-doc-edgeless-editors.jpg)
 
-In addition to extending custom blocks, here are what you can also conveniently achieve with BlockSuite:
+In addition to [extending custom blocks](https://blocksuite.io/guide/working-with-block-tree.html#defining-new-blocks), here are what you can also conveniently achieve with BlockSuite:
 
-- Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the [document streaming](https://blocksuite.io/data-synchronization.html#document-streaming) mechanism of the document.
-- Writing type-safe complex editing logic based on the [command](https://blocksuite.io/command.html) mechanism, similar to react hooks designed for document editing.
-- Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshot](https://blocksuite.io/data-synchronization.html#snapshot-api) and transformer.
+- Incremental updates, real-time collaboration, local-first state management, and even decentralized data synchronization based on the [document streaming](https://blocksuite.io/guide/data-synchronization.html#document-streaming) mechanism of the document.
+- Writing type-safe complex editing logic based on the [command](https://blocksuite.io/guide/command.html) mechanism, similar to react hooks designed for document editing.
+- Persistence of documents and compatibility with various third-party formats (such as markdown and HTML) based on block [snapshot](https://blocksuite.io/guide/data-synchronization.html#snapshot-api) and transformer.
 - State scheduling across multiple documents and reusing one document in multiple editors.
 
-To try out BlockSuite, refer to the [Quick Start](https://blocksuite.io/quick-start.html) document and start with the preset editors in `@blocksuite/presets`.
+To try out BlockSuite, refer to the [Quick Start](https://blocksuite.io/guide/quick-start.html) document and start with the preset editors in `@blocksuite/presets`.
 
 ---
 
@@ -95,7 +95,7 @@ This can be illustrated as the diagram below:
   - [Nightly Playground](https://try-blocksuite.vercel.app/starter/?init)
   - [BlockSuite Monorepo in StackBlitz](https://stackblitz.com/github/toeverything/blocksuite)
   - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
-- 📝 [Documentation](https://blocksuite.io/quick-start.html)
+- 📝 [Documentation](https://blocksuite.io/guide/quick-start.html)
 - 📍 [Good First Issues](https://github.com/toeverything/blocksuite/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 💬 [Discord Channel](https://discord.gg/9vwSWmYYcZ)
