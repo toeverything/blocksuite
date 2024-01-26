@@ -34,6 +34,10 @@ export class ImageBlockEdgelessComponent extends WithDisposable(
     return this._host.querySelector('affine-edgeless-page');
   }
 
+  private _handleError() {
+    this.block.error = true;
+  }
+
   override render() {
     const resizableImgStyleMap = styleMap({
       width: `100%`,
@@ -47,6 +51,7 @@ export class ImageBlockEdgelessComponent extends WithDisposable(
         class="drag-target"
         src=${this.block.blobUrl ?? ''}
         draggable="false"
+        @error=${this._handleError}
       />
     </div>`;
   }

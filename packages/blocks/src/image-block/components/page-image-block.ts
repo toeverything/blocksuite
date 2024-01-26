@@ -236,6 +236,10 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     );
   }
 
+  private _handleError() {
+    this.block.error = true;
+  }
+
   private _normalizeImageSize() {
     // If is dragging, we should use the real size of the image
     if (this._isDragging && this.resizeImg) {
@@ -272,6 +276,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
           class="drag-target"
           src=${this.block.blobUrl ?? ''}
           draggable="false"
+          @error=${this._handleError}
         />
 
         ${imageSelectedRect}
