@@ -3,12 +3,12 @@
 layout: home
 
 title: BlockSuite
-titleTemplate: The Editor Framework
+titleTemplate: Content Editing Tech Stack
 
 hero:
   name: BlockSuite
-  text: The Framework for Building Editor(s)
-  tagline: BlockSuite is a toolkit for building collaborative editors and applications.
+  text: Content Editing Tech Stack for the Web
+  tagline: BlockSuite is a toolkit for building diverse collaborative editors and applications.
   actions:
     - theme: brand
       text: Get Started
@@ -24,7 +24,7 @@ features:
     linkText: Learn More
   - title: 🧬 Collaborative at Core
     details: Powered by CRDT, BlockSuite supports document streaming and conflict resolution at its heart, ready for collaboration inherently.
-    link: /guide/crdt-native-data-flow
+    link: /blog/crdt-native-data-flow
     linkText: Learn More
   - title: 🎨 Extensive Components
     details: BlockSuite ships a comprehensive set of editing component presets, assisting development with adaptable building blocks.

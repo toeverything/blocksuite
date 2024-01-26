@@ -1,9 +1,5 @@
 # CRDT-Native Data Flow
 
-::: info
-🌐 This documentation has a [Chinese translation](https://insider.affine.pro/share/af3478a2-9c9c-4d16-864d-bffa1eb10eb6/I9qBPLR9WvuNE92BLm1L2).
-:::
-
 To make the editor logic based on BlockSuite intuitive and collaboration-ready, there is one major goal in BlockSuite: **Regardless of whether it is in a multi-user collaboration state, the application-layer code based on BlockSuite should be unaware of it**.
 
 We will introduce how this design is embodied in BlockSuite.
