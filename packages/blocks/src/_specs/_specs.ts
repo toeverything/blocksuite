@@ -47,6 +47,7 @@ import {
   SurfaceRefBlockSchema,
   SurfaceRefBlockService,
 } from '../surface-ref-block/index.js';
+import { SyncedBlockSpec } from '../synced-block/synced-spec.js';
 
 const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
@@ -188,6 +189,7 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   EmbedGithubBlockSpec,
   EmbedHtmlBlockSpec,
   EmbedLinkedDocBlockSpec,
+  SyncedBlockSpec,
 ];
 
 export const DocEditorBlockSpecs: BlockSpec[] = [

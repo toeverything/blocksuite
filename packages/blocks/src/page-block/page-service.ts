@@ -160,10 +160,18 @@ export class PageService extends BlockService<PageBlockModel> {
       'dragover',
       this.fileDropManager.onDragOver
     );
+
     this.disposables.addFromEvent(
       this.std.host,
       'dragleave',
       this.fileDropManager.onDragLeave
+    );
+
+    this.disposables.add(
+      this.std.event.add('pointerDown', ctx => {
+        const state = ctx.get('pointerState');
+        state.raw.stopPropagation();
+      })
     );
   }
 
