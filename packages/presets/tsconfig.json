@@ -20,7 +20,7 @@
       "path": "../framework/lit",
     },
     {
-      "path": "../framework/blocks",
+      "path": "../blocks",
     },
   ],
 }
