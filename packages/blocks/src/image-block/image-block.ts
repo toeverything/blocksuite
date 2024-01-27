@@ -92,6 +92,10 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     return this._imageElement?.resizeImg;
   }
 
+  get imageCard() {
+    return this._imageCard;
+  }
+
   private _dragHandleOption: DragHandleOption = {
     flavour: ImageBlockSchema.model.flavour,
     edgeless: true,
@@ -300,6 +304,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       ${this.selected?.is('block')
         ? html`<affine-block-selection></affine-block-selection>`
         : nothing}
+      ${this.isInSurface ? null : Object.values(this.widgets)}
     </div>`;
   }
 }

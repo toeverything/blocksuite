@@ -34,7 +34,7 @@ export class AffineImageToolbarWidget extends WidgetElement<ImageBlockComponent>
         return null;
       }
 
-      const imageContainer = imageBlock.resizeImg;
+      const imageContainer = imageBlock.resizeImg ?? imageBlock.imageCard;
       if (!imageContainer) {
         return null;
       }

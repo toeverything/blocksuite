@@ -281,8 +281,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
 
         ${imageSelectedRect}
       </div>
-
-      ${Object.values(this.block.widgets)}
     `;
   }
 }
