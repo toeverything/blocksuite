@@ -31,9 +31,9 @@ import type { ImageBlockPageComponent } from './components/page-image-block.js';
 import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 import { openLeditsEditor } from './ledits/main.js';
 import {
-  checkImageBlob,
   copyImageBlob,
   downloadImageBlob,
+  fetchImageBlob,
   resetImageSize,
   turnImageIntoCardView,
 } from './utils.js';
@@ -219,7 +219,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   refreshData = () => {
     this.retryCount = 0;
-    checkImageBlob(this)
+    fetchImageBlob(this)
       .then(() => {
         // add width, height to model to show scale percent
         const { width, height } = this.model;

@@ -3,7 +3,7 @@ import type { EditorHost } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import { Buffer } from 'buffer';
 
-import { withTempBlobData } from '../_common/utils/filesys.js';
+import { downloadBlob, withTempBlobData } from '../_common/utils/filesys.js';
 import { humanFileSize } from '../_common/utils/math.js';
 import type { AttachmentBlockProps } from '../attachment-block/attachment-model.js';
 import { readImageSize } from '../page-block/edgeless/components/utils.js';
@@ -103,7 +103,7 @@ async function getImageBlob(model: ImageBlockModel) {
   return blob;
 }
 
-export async function checkImageBlob(block: ImageBlockComponent) {
+export async function fetchImageBlob(block: ImageBlockComponent) {
   try {
     block.loading = true;
     block.error = false;
@@ -114,7 +114,7 @@ export async function checkImageBlob(block: ImageBlockComponent) {
     }
 
     const { model } = block;
-    const { id, sourceId } = model;
+    const { id, sourceId, page } = model;
 
     if (isImageUploading(id)) {
       return;
@@ -124,13 +124,9 @@ export async function checkImageBlob(block: ImageBlockComponent) {
       throw new Error('Image sourceId is missing!');
     }
 
-    const blob = await getImageBlob(model);
+    const blob = await page.blob.get(sourceId);
     if (!blob) {
       throw new Error('Image blob is missing!');
-    }
-
-    if (!blob.type.startsWith('image/')) {
-      throw new Error('Image blob is not an image!');
     }
 
     block.loading = false;
@@ -142,7 +138,7 @@ export async function checkImageBlob(block: ImageBlockComponent) {
 
     if (block.retryCount < MAX_RETRY_COUNT) {
       setTimeout(() => {
-        checkImageBlob(block).catch(console.error);
+        fetchImageBlob(block).catch(console.error);
         // 1s, 2s, 3s
       }, 1000 * block.retryCount);
     } else {
@@ -153,32 +149,23 @@ export async function checkImageBlob(block: ImageBlockComponent) {
 }
 
 export async function downloadImageBlob(block: ImageBlockComponent) {
-  const { host, loading, error, downloading, blobUrl } = block;
+  const { host, downloading } = block;
   if (downloading) {
     toast(host, 'Download in progress...');
     return;
   }
 
-  if (loading) {
-    toast(host, 'Please wait, image is loading...');
-    return;
-  }
-
-  if (error || !blobUrl) {
-    toast(host, `Failed to download image!`);
-    return;
-  }
-
   block.downloading = true;
 
-  toast(host, `Downloading image`);
+  const blob = await getImageBlob(block.model);
+  if (!blob) {
+    toast(host, `Unable to download image!`);
+    return;
+  }
 
-  const tmpLink = document.createElement('a');
-  const event = new MouseEvent('click');
-  tmpLink.download = 'image';
-  tmpLink.href = blobUrl;
-  tmpLink.dispatchEvent(event);
-  tmpLink.remove();
+  toast(host, `Downloading image...`);
+
+  downloadBlob(blob, 'image');
 
   block.downloading = false;
 }
