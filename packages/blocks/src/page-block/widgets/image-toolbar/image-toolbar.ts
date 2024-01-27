@@ -50,6 +50,7 @@ export class AffineImageToolbarWidget extends WidgetElement<ImageBlockComponent>
           middleware: [
             offset({
               mainAxis: 12,
+              crossAxis: 10,
             }),
             shift({
               crossAxis: true,

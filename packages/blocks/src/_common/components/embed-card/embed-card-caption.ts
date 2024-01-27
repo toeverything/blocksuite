@@ -10,6 +10,7 @@ import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embe
 import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
+import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
 import { stopPropagation } from '../../utils/event.js';
 import { asyncFocusRichText } from '../../utils/selection.js';
 
@@ -17,15 +18,15 @@ import { asyncFocusRichText } from '../../utils/selection.js';
 export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .affine-embed-card-caption {
+      display: inline-block;
       width: 100%;
-      font-size: var(--affine-font-sm);
       outline: none;
       border: 0;
+      background: transparent;
+      color: var(--affine-icon-color);
+      font-size: var(--affine-font-sm);
       font-family: inherit;
       text-align: center;
-      color: var(--affine-icon-color);
-      display: inline-block;
-      background: transparent;
     }
     .affine-embed-card-caption::placeholder {
       color: var(--affine-placeholder-color);
@@ -40,7 +41,8 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
     | EmbedGithubBlockComponent
     | EmbedYoutubeBlockComponent
     | EmbedFigmaBlockComponent
-    | EmbedLinkedDocBlockComponent;
+    | EmbedLinkedDocBlockComponent
+    | SurfaceRefBlockComponent;
 
   @state()
   display = false;
