@@ -270,42 +270,43 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     });
 
     if (this.isInSurface) {
+      const { id, xywh, rotate } = this.model;
       const bound = Bound.deserialize(
-        (this.edgeless?.service.getElementById(this.model.id) ?? this.model)
-          .xywh
+        this.edgeless?.service.getElementById(id)?.xywh ?? xywh
       );
-      const width = this.model.width ? this.model.width : bound.w;
-      const height = this.model.height ? this.model.height : bound.h;
-      const scaleX = bound.w / width;
-      const scaleY = bound.h / height;
       containerStyleMap = styleMap({
-        width: `${width}px`,
-        height: `${height}px`,
-        transform: `scale(${scaleX}, ${scaleY})`,
-        transformOrigin: '0 0',
+        width: `${bound.w}px`,
+        height: `${bound.h}px`,
+        transform: `rotate(${rotate}deg)`,
+        transformOrigin: 'center',
       });
     }
 
-    return html`<div
-      class="affine-image-container"
-      style=${containerStyleMap}
-      @click=${this._handleClick}
-    >
-      ${this.loading || this.error
-        ? html`<affine-image-block-card
-            .block=${this}
-          ></affine-image-block-card>`
-        : this.isInSurface
-          ? html`<affine-edgeless-image .block=${this}></affine-edgeless-image>`
-          : html`<affine-page-image .block=${this}></affine-page-image>`}
+    return html`
+      <div
+        class="affine-image-container"
+        style=${containerStyleMap}
+        @click=${this._handleClick}
+      >
+        ${this.loading || this.error
+          ? html`<affine-image-block-card
+              .block=${this}
+            ></affine-image-block-card>`
+          : this.isInSurface
+            ? html`<affine-edgeless-image
+                .block=${this}
+              ></affine-edgeless-image>`
+            : html`<affine-page-image .block=${this}></affine-page-image>`}
 
-      <embed-card-caption .block=${this}></embed-card-caption>
+        <embed-card-caption .block=${this}></embed-card-caption>
 
-      ${this.selected?.is('block')
-        ? html`<affine-block-selection></affine-block-selection>`
-        : nothing}
+        ${this.selected?.is('block')
+          ? html`<affine-block-selection></affine-block-selection>`
+          : nothing}
+      </div>
+
       ${this.isInSurface ? null : Object.values(this.widgets)}
-    </div>`;
+    `;
   }
 }
 
