@@ -7,6 +7,7 @@ import type { EmbedLinkedDocModel } from '../embed-linked-doc-block/embed-linked
 import type { EmbedYoutubeModel } from '../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../frame-block/index.js';
 import type { ImageBlockModel } from '../image-block/index.js';
+import type { EmbedHtmlModel } from '../index.js';
 import type { BookmarkBlockModel } from '../models.js';
 import type { NoteBlockModel } from '../note-block/index.js';
 import type { EdgelessModel } from '../page-block/edgeless/type.js';
@@ -128,7 +129,8 @@ export type TopLevelBlockModel =
   | EmbedGithubModel
   | EmbedYoutubeModel
   | EmbedFigmaModel
-  | EmbedLinkedDocModel;
+  | EmbedLinkedDocModel
+  | EmbedHtmlModel;
 
 export type { EdgelessModel as EdgelessModel };
 
@@ -258,4 +260,5 @@ export type EmbedCardStyle =
   | 'cube'
   | 'cubeThick'
   | 'video'
-  | 'figma';
+  | 'figma'
+  | 'html';

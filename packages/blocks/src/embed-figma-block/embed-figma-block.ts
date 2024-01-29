@@ -9,7 +9,6 @@ import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import { HoverController } from '../_common/components/hover/controller.js';
@@ -43,6 +42,8 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
   captionElement!: EmbedCardCaption;
 
   private _isDragging = false;
+
+  private _isResizing = false;
 
   open = () => {
     let link = this.model.url;
@@ -100,13 +101,15 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
         this._isSelected = sels.some(sel =>
           PathFinder.equals(sel.path, this.path)
         );
-        this._showOverlay = this._isDragging || !this._isSelected;
+        this._showOverlay =
+          this._isResizing || this._isDragging || !this._isSelected;
       })
     );
     // this is required to prevent iframe from capturing pointer events
     this.handleEvent('pointerMove', ctx => {
       this._isDragging = ctx.get('pointerState').dragging;
-      if (this._isDragging) this._showOverlay = true;
+      this._showOverlay =
+        this._isResizing || this._isDragging || !this._isSelected;
     });
 
     if (this.isInSurface) {
@@ -117,6 +120,17 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
           this.requestUpdate();
         })
       );
+
+      this.edgeless?.slots.elementResizeStart.on(() => {
+        this._isResizing = true;
+        this._showOverlay = true;
+      });
+
+      this.edgeless?.slots.elementResizeEnd.on(() => {
+        this._isResizing = false;
+        this._showOverlay =
+          this._isResizing || this._isDragging || !this._isSelected;
+      });
     }
   }
 
@@ -175,65 +189,57 @@ export class EmbedFigmaBlockComponent extends EmbedBlockElement<
     return this.renderEmbed(
       () => html`
         <div
-          style=${styleMap({
-            position: 'relative',
+          ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+          class=${classMap({
+            'affine-embed-figma-block': true,
+            selected: this._isSelected,
           })}
+          @click=${this._handleClick}
+          @dblclick=${this._handleDoubleClick}
         >
-          <div
-            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
-            class=${classMap({
-              'affine-embed-figma-block': true,
-              selected: this._isSelected,
-            })}
-            @click=${this._handleClick}
-            @dblclick=${this._handleDoubleClick}
-          >
-            <div class="affine-embed-figma">
-              <div class="affine-embed-figma-iframe-container">
-                <iframe
-                  src=${`https://www.figma.com/embed?embed_host=blocksuite&url=${url}`}
-                  allowfullscreen
-                ></iframe>
+          <div class="affine-embed-figma">
+            <div class="affine-embed-figma-iframe-container">
+              <iframe
+                src=${`https://www.figma.com/embed?embed_host=blocksuite&url=${url}`}
+                allowfullscreen
+              ></iframe>
 
-                <div
-                  class=${classMap({
-                    'affine-embed-figma-iframe-overlay': true,
-                    hide: !this._showOverlay,
-                  })}
-                ></div>
-              </div>
-            </div>
-            <div class="affine-embed-figma-content">
-              <div class="affine-embed-figma-content-header">
-                <div class="affine-embed-figma-content-title-icon">
-                  ${FigmaIcon}
-                </div>
-
-                <div class="affine-embed-figma-content-title-text">
-                  ${titleText}
-                </div>
-              </div>
-
-              <div class="affine-embed-figma-content-description">
-                ${descriptionText}
-              </div>
-
-              <div class="affine-embed-figma-content-url" @click=${this.open}>
-                <span>www.figma.com</span>
-
-                <div class="affine-embed-figma-content-url-icon">
-                  ${OpenIcon}
-                </div>
-              </div>
+              <div
+                class=${classMap({
+                  'affine-embed-figma-iframe-overlay': true,
+                  hide: !this._showOverlay,
+                })}
+              ></div>
             </div>
           </div>
+          <div class="affine-embed-figma-content">
+            <div class="affine-embed-figma-content-header">
+              <div class="affine-embed-figma-content-title-icon">
+                ${FigmaIcon}
+              </div>
 
-          <embed-card-caption .block=${this}></embed-card-caption>
+              <div class="affine-embed-figma-content-title-text">
+                ${titleText}
+              </div>
+            </div>
 
-          ${this.selected?.is('block')
-            ? html`<affine-block-selection></affine-block-selection>`
-            : nothing}
+            <div class="affine-embed-figma-content-description">
+              ${descriptionText}
+            </div>
+
+            <div class="affine-embed-figma-content-url" @click=${this.open}>
+              <span>www.figma.com</span>
+
+              <div class="affine-embed-figma-content-url-icon">${OpenIcon}</div>
+            </div>
+          </div>
         </div>
+
+        <embed-card-caption .block=${this}></embed-card-caption>
+
+        ${this.selected?.is('block')
+          ? html`<affine-block-selection></affine-block-selection>`
+          : nothing}
       `
     );
   }

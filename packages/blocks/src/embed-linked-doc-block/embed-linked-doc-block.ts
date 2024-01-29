@@ -10,7 +10,6 @@ import { html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EmbedCardCaption } from '../_common/components/embed-card/embed-card-caption.js';
 import { HoverController } from '../_common/components/hover/controller.js';
@@ -507,53 +506,47 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     return this.renderEmbed(
       () => html`
         <div
-          style=${styleMap({
-            position: 'relative',
-          })}
+          ${this.isInSurface ? null : ref(this._whenHover.setReference)}
+          class="affine-embed-linked-doc-block${cardClassMap}"
+          @click=${this._handleClick}
+          @dblclick=${this._handleDoubleClick}
         >
-          <div
-            ${this.isInSurface ? null : ref(this._whenHover.setReference)}
-            class="affine-embed-linked-doc-block${cardClassMap}"
-            @click=${this._handleClick}
-            @dblclick=${this._handleDoubleClick}
-          >
-            <div class="affine-embed-linked-doc-content">
-              <div class="affine-embed-linked-doc-content-title">
-                <div class="affine-embed-linked-doc-content-title-icon">
-                  ${titleIcon}
-                </div>
-
-                <div class="affine-embed-linked-doc-content-title-text">
-                  ${titleText}
-                </div>
+          <div class="affine-embed-linked-doc-content">
+            <div class="affine-embed-linked-doc-content-title">
+              <div class="affine-embed-linked-doc-content-title-icon">
+                ${titleIcon}
               </div>
 
-              <div class="affine-embed-linked-doc-content-description">
-                ${descriptionText}
-              </div>
-
-              <div class="affine-embed-linked-doc-content-date">
-                <span>Updated</span>
-
-                <span>${dateText}</span>
+              <div class="affine-embed-linked-doc-content-title-text">
+                ${titleText}
               </div>
             </div>
 
-            <div class="affine-embed-linked-doc-banner render"></div>
+            <div class="affine-embed-linked-doc-content-description">
+              ${descriptionText}
+            </div>
 
-            ${showDefaultBanner
-              ? html`<div class="affine-embed-linked-doc-banner default">
-                  ${defaultBanner}
-                </div>`
-              : nothing}
+            <div class="affine-embed-linked-doc-content-date">
+              <span>Updated</span>
+
+              <span>${dateText}</span>
+            </div>
           </div>
 
-          <embed-card-caption .block=${this}></embed-card-caption>
+          <div class="affine-embed-linked-doc-banner render"></div>
 
-          ${this.selected?.is('block')
-            ? html`<affine-block-selection></affine-block-selection>`
+          ${showDefaultBanner
+            ? html`<div class="affine-embed-linked-doc-banner default">
+                ${defaultBanner}
+              </div>`
             : nothing}
         </div>
+
+        <embed-card-caption .block=${this}></embed-card-caption>
+
+        ${this.selected?.is('block')
+          ? html`<affine-block-selection></affine-block-selection>`
+          : nothing}
       `
     );
   }
