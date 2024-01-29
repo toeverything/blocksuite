@@ -115,6 +115,10 @@ export class EdgelessClipboardController extends PageClipboard {
     return pageService;
   }
 
+  private get _exportManager() {
+    return this._pageService.exportManager;
+  }
+
   override hostConnected() {
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
@@ -949,6 +953,7 @@ export class EdgelessClipboardController extends PageClipboard {
     ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    const replaceImgSrcWithSvg = this._exportManager.replaceImgSrcWithSvg;
     const replaceRichTextWithSvgElementFunc =
       this._replaceRichTextWithSvgElement.bind(this);
 
@@ -990,7 +995,7 @@ export class EdgelessClipboardController extends PageClipboard {
             element.style.setProperty('box-shadow', 'none');
           }
         });
-
+        await replaceImgSrcWithSvg(element);
         await replaceRichTextWithSvgElementFunc(element);
       },
       backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
