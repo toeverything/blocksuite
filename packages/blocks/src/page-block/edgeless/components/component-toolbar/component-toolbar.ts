@@ -8,6 +8,7 @@ import './change-frame-button.js';
 import './change-group-button.js';
 import './change-embed-card-button.js';
 import './change-attachment-button.js';
+import './change-image-button.js';
 import './add-frame-button.js';
 import './add-group-button.js';
 import './release-from-group-button.js';
@@ -307,6 +308,18 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     `;
   }
 
+  private _ImageButton(images?: CategorizedElements['image']) {
+    if (images?.length !== 1) return nothing;
+
+    return html`
+      <edgeless-change-image-button
+        .model=${images[0]}
+        .std=${this.edgeless.std}
+        .surface=${this.surface}
+      ></edgeless-change-image-button>
+    `;
+  }
+
   protected togglePopper = (showPopper: boolean) => {
     this._showPopper = showPopper;
   };
@@ -444,6 +457,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       group,
       embedCard,
       attachment,
+      image,
     } = groupedSelected;
     const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -464,6 +478,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._GroupButton(group),
           this._EmbedCardButton(embedCard),
           this._AttachmentButton(attachment),
+          this._ImageButton(image),
         ].filter(b => !!b && b !== nothing);
 
     if (elements.length > 1) {

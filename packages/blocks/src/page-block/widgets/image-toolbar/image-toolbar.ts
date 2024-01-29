@@ -34,18 +34,15 @@ export class AffineImageToolbarWidget extends WidgetElement<ImageBlockComponent>
         return null;
       }
 
-      const imageContainer = imageBlock.resizeImg;
+      const imageContainer = imageBlock.resizeImg ?? imageBlock.imageCard;
       if (!imageContainer) {
         return null;
       }
 
       return {
         template: ImageOptionsTemplate({
-          editorHost: this.host,
-          model: imageBlock.model,
-          blob: imageBlock.blob,
+          blockElement: imageBlock,
           abortController,
-          host: this.blockElement.host,
         }),
         computePosition: {
           referenceElement: imageContainer,

@@ -1,3 +1,4 @@
+import '../_common/components/block-selection.js';
 import '../_common/components/embed-card/embed-card-caption.js';
 
 import { PathFinder } from '@blocksuite/block-std';
@@ -42,9 +43,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
   @state()
   private _showOverlay = true;
 
-  @property({ attribute: false })
-  showCaption = false;
-
   @query('.affine-embed-youtube-block')
   private _youtubeBlockEl!: HTMLDivElement;
 
@@ -73,7 +71,8 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
     selectionManager.setGroup('note', [blockSelection]);
   }
 
-  private _handleClick() {
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
     if (!this.isInSurface) {
       this._selectBlock();
     }
@@ -86,8 +85,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-
-    this.showCaption = !!this.model.caption?.length;
 
     if (!this.model.videoId) {
       this.page.withoutTransact(() => {
@@ -113,8 +110,6 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
         this.requestUpdate();
         if (key === 'url') {
           this.refreshData();
-        } else if (key === 'caption') {
-          this.showCaption = !!this.model.caption?.length;
         }
       })
     );
@@ -295,13 +290,7 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockElement<
             </div>
           </div>
 
-          <embed-card-caption
-            .block=${this}
-            .display=${this.showCaption}
-            @blur=${() => {
-              if (!this.model.caption) this.showCaption = false;
-            }}
-          ></embed-card-caption>
+          <embed-card-caption .block=${this}></embed-card-caption>
 
           ${this.selected?.is('block')
             ? html`<affine-block-selection></affine-block-selection>`

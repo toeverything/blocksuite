@@ -26,11 +26,11 @@ export async function refreshBookmarkUrlData(
     } = bookmarkUrlData);
 
     if (!title && !description && !icon && !image) {
-      bookmarkElement.loadingFailed = true;
+      bookmarkElement.error = true;
     }
   } catch (error) {
     console.error(error);
-    bookmarkElement.loadingFailed = true;
+    bookmarkElement.error = true;
   } finally {
     bookmarkElement.page.updateBlock(bookmarkElement.model, {
       title,

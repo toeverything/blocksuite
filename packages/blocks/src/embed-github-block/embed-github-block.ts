@@ -1,5 +1,6 @@
-import '../_common/components/embed-card/embed-card-caption.js';
 import '../_common/components/block-selection.js';
+import '../_common/components/embed-card/embed-card-caption.js';
+import '../_common/components/embed-card/embed-card-toolbar.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -42,9 +43,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
   @property({ attribute: false })
   loading = false;
 
-  @property({ attribute: false })
-  showCaption = false;
-
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
 
@@ -72,7 +70,8 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
     selectionManager.setGroup('note', [blockSelection]);
   }
 
-  private _handleClick() {
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
     if (!this.isInSurface) {
       this._selectBlock();
     }
@@ -90,8 +89,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-
-    this.showCaption = !!this.model.caption?.length;
 
     if (!this.model.owner || !this.model.repo || !this.model.githubId) {
       this.page.withoutTransact(() => {
@@ -121,8 +118,6 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
       this.model.propsUpdated.on(({ key }) => {
         if (key === 'url') {
           this.refreshData();
-        } else if (key === 'caption') {
-          this.showCaption = !!this.model.caption?.length;
         }
       })
     );
@@ -342,13 +337,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockElement<
             <div class="affine-embed-github-banner">${bannerImage}</div>
           </div>
 
-          <embed-card-caption
-            .block=${this}
-            .display=${this.showCaption}
-            @blur=${() => {
-              if (!this.model.caption) this.showCaption = false;
-            }}
-          ></embed-card-caption>
+          <embed-card-caption .block=${this}></embed-card-caption>
 
           ${this.selected?.is('block')
             ? html`<affine-block-selection></affine-block-selection>`
