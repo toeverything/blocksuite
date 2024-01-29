@@ -4,9 +4,9 @@ import type { ListBlockModel } from '../list-model.js';
 import { getListInfo } from './get-list-info.js';
 import { getNumberPrefix } from './get-number-prefix.js';
 import {
+  BulletIcons,
   checkboxChecked,
   checkboxUnchecked,
-  points,
   toggleDown,
   toggleRight,
 } from './icons.js';
@@ -24,7 +24,7 @@ export function ListIcon(
         class="affine-list-block__prefix"
         @click=${onClick}
       >
-        ${points[deep % points.length]}
+        ${BulletIcons[deep % BulletIcons.length]}
       </div>`;
     case 'numbered':
       return html`<div

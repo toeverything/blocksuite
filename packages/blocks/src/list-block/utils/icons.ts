@@ -1,78 +1,72 @@
 import { html, svg } from 'lit';
 
-export const point1 = () => {
-  return html`
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="6" cy="12" r="2" fill="currentColor" />
-    </svg>
-  `;
-};
+const Level1Icon = html`
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle cx="7" cy="12" r="3" fill="currentColor" />
+  </svg>
+`;
 
-export const point2 = () => {
-  return html`
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
-        d="M6 13.5C6.82843 13.5 7.5 12.8284 7.5 12C7.5 11.1716 6.82843 10.5 6 10.5C5.17157 10.5 4.5 11.1716 4.5 12C4.5 12.8284 5.17157 13.5 6 13.5ZM6 14C7.10457 14 8 13.1046 8 12C8 10.8954 7.10457 10 6 10C4.89543 10 4 10.8954 4 12C4 13.1046 4.89543 14 6 14Z"
-        fill="currentColor"
-      />
-    </svg>
-  `;
-};
+const Level2Icon = html`
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M7 14.25C8.24264 14.25 9.25 13.2426 9.25 12C9.25 10.7574 8.24264 9.75 7 9.75C5.75736 9.75 4.75 10.7574 4.75 12C4.75 13.2426 5.75736 14.25 7 14.25ZM7 15C8.65685 15 10 13.6569 10 12C10 10.3431 8.65685 9 7 9C5.34315 9 4 10.3431 4 12C4 13.6569 5.34315 15 7 15Z"
+      fill="currentColor"
+    />
+  </svg>
+`;
 
-export const point3 = () => {
-  return html`
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M5.60561 10.1634C5.82342 9.94555 6.17658 9.94555 6.39439 10.1634L7.83664 11.6056C8.05445 11.8234 8.05445 12.1766 7.83664 12.3944L6.39439 13.8366C6.17658 14.0545 5.82342 14.0545 5.60561 13.8366L4.16336 12.3944C3.94555 12.1766 3.94555 11.8234 4.16336 11.6056L5.60561 10.1634Z"
-        fill="currentColor"
-      />
-    </svg>
-  `;
-};
+const Level3Icon = html`
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M6.40841 9.24504C6.73514 8.91832 7.26486 8.91832 7.59159 9.24505L9.75496 11.4084C10.0817 11.7351 10.0817 12.2649 9.75495 12.5916L7.59159 14.755C7.26486 15.0817 6.73514 15.0817 6.40841 14.755L4.24504 12.5916C3.91832 12.2649 3.91832 11.7351 4.24505 11.4084L6.40841 9.24504Z"
+      fill="currentColor"
+    />
+  </svg>
+`;
 
-export const point4 = () => {
-  return html`
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
-        d="M7.44224 12L6 10.5578L4.55776 12L6 13.4422L7.44224 12ZM6.39439 10.1634C6.17658 9.94555 5.82342 9.94555 5.60561 10.1634L4.16336 11.6056C3.94555 11.8234 3.94555 12.1766 4.16336 12.3944L5.60561 13.8366C5.82342 14.0545 6.17658 14.0545 6.39439 13.8366L7.83664 12.3944C8.05445 12.1766 8.05445 11.8234 7.83664 11.6056L6.39439 10.1634Z"
-        fill="currentColor"
-      />
-    </svg>
-  `;
-};
+const Level4Icon = html`
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M9.16336 12L7 9.83664L4.83664 12L7 14.1634L9.16336 12ZM7.59159 9.24505C7.26486 8.91832 6.73514 8.91832 6.40841 9.24504L4.24505 11.4084C3.91832 11.7351 3.91832 12.2649 4.24504 12.5916L6.40841 14.755C6.73514 15.0817 7.26486 15.0817 7.59159 14.755L9.75495 12.5916C10.0817 12.2649 10.0817 11.7351 9.75496 11.4084L7.59159 9.24505Z"
+      fill="currentColor"
+    />
+  </svg>
+`;
 
-const toggleSVG = svg`<path
-d="M16.5 11.134C17.1667 11.5189 17.1667 12.4811 16.5 12.866L9 17.1962C8.33333 17.5811 7.5 17.0999 7.5 16.3301L7.5 7.66989C7.5 6.90009 8.33333 6.41896 9 6.80386L16.5 11.134Z"
-fill="#77757D"
-/>`;
+const toggleSVG = svg`
+  <path
+    d="M16.5 11.134C17.1667 11.5189 17.1667 12.4811 16.5 12.866L9 17.1962C8.33333 17.5811 7.5 17.0999 7.5 16.3301L7.5 7.66989C7.5 6.90009 8.33333 6.41896 9 6.80386L16.5 11.134Z"
+    fill="#77757D"
+  />
+`;
 
 export const toggleRight = html`
   <svg
@@ -175,4 +169,4 @@ export const playCheckAnimation = async (
   sparkingEl.remove();
 };
 
-export const points = [point1(), point2(), point3(), point4()];
+export const BulletIcons = [Level1Icon, Level2Icon, Level3Icon, Level4Icon];
