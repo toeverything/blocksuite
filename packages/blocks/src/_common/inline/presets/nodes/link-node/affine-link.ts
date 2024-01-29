@@ -81,6 +81,10 @@ export class AffineLink extends ShadowlessElement {
   `;
 
   private _whenHover = new HoverController(this, ({ abortController }) => {
+    if (this.blockElement.page.readonly) {
+      return null;
+    }
+
     const selection = this.std.selection;
     const textSelection = selection.find('text');
     if (
