@@ -7,13 +7,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { type BlockModel, Workspace } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
 import { html, nothing, render, type TemplateResult } from 'lit';
-import {
-  customElement,
-  property,
-  query,
-  queryAsync,
-  state,
-} from 'lit/decorators.js';
+import { customElement, query, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -63,9 +57,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
 
   @state()
   private _isBannerEmpty = false;
-
-  @property({ attribute: false })
-  showCaption = false;
 
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
@@ -340,7 +331,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     this._load();
   };
 
-  private _handleClick() {
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
     if (this.isInSurface) return;
     this._selectBlock();
   }
@@ -379,8 +371,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
-    this.showCaption = !!this.model.caption?.length;
-
     this._load();
 
     const linkedDoc = this._linkedDoc;
@@ -394,8 +384,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
     this.model.propsUpdated.on(({ key }) => {
       if (key === 'pageId') {
         this._load();
-      } else if (key === 'caption') {
-        this.showCaption = !!this.model.caption?.length;
       }
     });
 
@@ -560,13 +548,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockElement<
               : nothing}
           </div>
 
-          <embed-card-caption
-            .block=${this}
-            .display=${this.showCaption}
-            @blur=${() => {
-              if (!this.model.caption) this.showCaption = false;
-            }}
-          ></embed-card-caption>
+          <embed-card-caption .block=${this}></embed-card-caption>
 
           ${this.selected?.is('block')
             ? html`<affine-block-selection></affine-block-selection>`

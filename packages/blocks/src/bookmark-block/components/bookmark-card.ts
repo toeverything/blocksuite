@@ -21,7 +21,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
   loading!: boolean;
 
   @property({ attribute: false })
-  loadingFailed!: boolean;
+  error!: boolean;
 
   @state()
   private _isSelected = false;
@@ -58,7 +58,8 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     selectionManager.setGroup('note', [blockSelection]);
   }
 
-  private _handleClick() {
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
     if (!this.bookmark.isInSurface) {
       this._selectBlock();
     }
@@ -74,7 +75,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
 
     const cardClassMap = classMap({
       loading: this.loading,
-      'loading-failed': this.loadingFailed,
+      error: this.error,
       [style]: true,
       selected: this._isSelected,
     });
@@ -86,7 +87,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     const titleText = this.loading
       ? 'Loading...'
       : !title
-        ? this.loadingFailed
+        ? this.error
           ? domainName ?? 'Link card'
           : ''
         : title;
@@ -113,7 +114,7 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
     const descriptionText = this.loading
       ? ''
       : !description
-        ? this.loadingFailed
+        ? this.error
           ? 'Failed to retrieve link information.'
           : url
         : description ?? '';

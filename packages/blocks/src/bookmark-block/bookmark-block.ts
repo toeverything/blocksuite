@@ -42,10 +42,7 @@ export class BookmarkBlockComponent extends BlockElement<
   loading = false;
 
   @property({ attribute: false })
-  loadingFailed = false;
-
-  @property({ attribute: false })
-  showCaption = false;
+  error = false;
 
   @query('bookmark-card')
   bookmarkCard!: HTMLElement;
@@ -186,8 +183,6 @@ export class BookmarkBlockComponent extends BlockElement<
 
     this.contentEditable = 'false';
 
-    this.showCaption = !!this.model.caption?.length;
-
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
@@ -199,8 +194,6 @@ export class BookmarkBlockComponent extends BlockElement<
       this.model.propsUpdated.on(({ key }) => {
         if (key === 'url') {
           this.refreshData();
-        } else if (key === 'caption') {
-          this.showCaption = !!this.model.caption?.length;
         }
       })
     );
@@ -253,7 +246,7 @@ export class BookmarkBlockComponent extends BlockElement<
   });
 
   override renderBlock() {
-    const { caption, style } = this.model;
+    const { style } = this.model;
 
     let containerStyleMap = styleMap({
       position: 'relative',
@@ -285,16 +278,10 @@ export class BookmarkBlockComponent extends BlockElement<
       <bookmark-card
         .bookmark=${this}
         .loading=${this.loading}
-        .loadingFailed=${this.loadingFailed}
+        .error=${this.error}
       ></bookmark-card>
 
-      <embed-card-caption
-        .block=${this}
-        .display=${this.showCaption}
-        @blur=${() => {
-          if (!caption) this.showCaption = false;
-        }}
-      ></embed-card-caption>
+      <embed-card-caption .block=${this}></embed-card-caption>
 
       ${this.selected?.is('block')
         ? html`<affine-block-selection></affine-block-selection>`

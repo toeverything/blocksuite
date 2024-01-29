@@ -61,9 +61,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @property({ attribute: false })
   allowEmbed = false;
 
-  @property({ attribute: false })
-  showCaption = false;
-
   @query('embed-card-caption')
   captionElement!: EmbedCardCaption;
 
@@ -212,8 +209,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
     this.contentEditable = 'false';
 
-    this.showCaption = !!this.model.caption?.length;
-
     const parent = this.host.page.getParent(this.model);
     this._isInSurface = parent?.flavour === 'affine:surface';
 
@@ -225,15 +220,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       });
     }
 
-    this.disposables.add(
-      AffineDragHandleWidget.registerOption(this._dragHandleOption)
-    );
-
-    // Workaround for https://github.com/toeverything/blocksuite/issues/4724
-    this._themeObserver.observe(document.documentElement);
-    this._themeObserver.on(() => this.requestUpdate());
-    this.disposables.add(() => this._themeObserver.dispose());
-
     this.model.propsUpdated.on(({ key }) => {
       if (key === 'sourceId') {
         // Reset the blob url when the sourceId is changed
@@ -242,10 +228,17 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
           this.blobUrl = undefined;
         }
         this.refreshData();
-      } else if (key === 'caption') {
-        this.showCaption = !!this.model.caption?.length;
       }
     });
+
+    this.disposables.add(
+      AffineDragHandleWidget.registerOption(this._dragHandleOption)
+    );
+
+    // Workaround for https://github.com/toeverything/blocksuite/issues/4724
+    this._themeObserver.observe(document.documentElement);
+    this._themeObserver.on(() => this.requestUpdate());
+    this.disposables.add(() => this._themeObserver.dispose());
 
     // this is required to prevent iframe from capturing pointer events
     this.disposables.add(
@@ -264,10 +257,10 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   }
 
   override disconnectedCallback() {
-    super.disconnectedCallback();
     if (this.blobUrl) {
       URL.revokeObjectURL(this.blobUrl);
     }
+    super.disconnectedCallback();
   }
 
   open = () => {
@@ -293,7 +286,8 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     selectionManager.setGroup('note', [blockSelection]);
   }
 
-  private _handleClick() {
+  private _handleClick(event: MouseEvent) {
+    event.stopPropagation();
     if (!this.isInSurface) {
       this._selectBlock();
     }
@@ -330,12 +324,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       template: AttachmentOptionsTemplate({
         anchor: this,
         model: this.model,
-        showCaption: () => {
-          this.showCaption = true;
-          requestAnimationFrame(() => {
-            this.captionElement.focus();
-          });
-        },
+        showCaption: () => this.captionElement.show(),
         downloadAttachment: this.download,
         abortController,
       }),
@@ -349,7 +338,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   });
 
   override renderBlock() {
-    const { name, size, style, caption } = this.model;
+    const { name, size, style } = this.model;
     const cardStyle = style ?? AttachmentBlockStyles[1];
 
     const { LoadingIcon } = getEmbedCardIcons();
@@ -433,13 +422,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
             <div class="affine-attachment-banner">${FileTypeIcon}</div>
           </div>`}
 
-      <embed-card-caption
-        .block=${this}
-        .display=${this.showCaption}
-        @blur=${() => {
-          if (!caption) this.showCaption = false;
-        }}
-      ></embed-card-caption>
+      <embed-card-caption .block=${this}></embed-card-caption>
 
       ${this.selected?.is('block')
         ? html`<affine-block-selection></affine-block-selection>`

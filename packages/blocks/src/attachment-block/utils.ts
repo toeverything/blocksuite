@@ -77,14 +77,14 @@ async function uploadAttachmentBlob(
   }
 }
 
-export async function getAttachmentBlob(model: AttachmentBlockModel) {
+async function getAttachmentBlob(model: AttachmentBlockModel) {
   const sourceId = model.sourceId;
   if (!sourceId) {
     return null;
   }
 
-  const blobManager = model.page.blob;
-  const blob = await blobManager.get(sourceId);
+  const page = model.page;
+  const blob = await page.blob.get(sourceId);
   return blob;
 }
 
@@ -94,6 +94,12 @@ export async function checkAttachmentBlob(block: AttachmentBlockComponent) {
 
   if (isAttachmentUploading(id)) {
     block.loading = true;
+    block.error = false;
+    block.allowEmbed = false;
+    if (block.blobUrl) {
+      URL.revokeObjectURL(block.blobUrl);
+      block.blobUrl = undefined;
+    }
     return;
   }
 
@@ -138,13 +144,13 @@ export async function downloadAttachmentBlob(block: AttachmentBlockComponent) {
     return;
   }
 
-  const name = model.name;
-  const shortName = name.length < 20 ? name : name.slice(0, 20) + '...';
-
   if (loading) {
     toast(host, 'Please wait, file is loading...');
     return;
   }
+
+  const name = model.name;
+  const shortName = name.length < 20 ? name : name.slice(0, 20) + '...';
 
   if (error || !blobUrl) {
     toast(host, `Failed to download ${shortName}!`);
@@ -175,7 +181,9 @@ export function addSiblingAttachmentBlocks(
   targetModel: BlockModel,
   place: 'before' | 'after' = 'after'
 ) {
-  if (!files.length) return;
+  if (!files.length) {
+    return;
+  }
 
   const isSizeExceeded = files.some(file => file.size > maxFileSize);
   if (isSizeExceeded) {
