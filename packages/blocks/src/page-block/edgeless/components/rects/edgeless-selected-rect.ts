@@ -636,8 +636,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         height = clamp(height, NOTE_MIN_HEIGHT, Infinity);
         bound.h = height * scale;
 
-        this._isWidthLimit = width === NOTE_MIN_WIDTH ? true : false;
-        this._isHeightLimit = height === NOTE_MIN_HEIGHT ? true : false;
+        this._isWidthLimit = width === NOTE_MIN_WIDTH;
+        this._isHeightLimit = height === NOTE_MIN_HEIGHT;
 
         props.edgeless = { ...element.edgeless, scale };
         props.xywh = bound.serialize();
@@ -646,8 +646,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         bound.w = clamp(bound.w, EMBED_HTML_MIN_WIDTH, Infinity);
         bound.h = clamp(bound.h, EMBED_HTML_MIN_HEIGHT, Infinity);
 
-        this._isWidthLimit = bound.w === EMBED_HTML_MIN_WIDTH ? true : false;
-        this._isHeightLimit = bound.h === EMBED_HTML_MIN_HEIGHT ? true : false;
+        this._isWidthLimit = bound.w === EMBED_HTML_MIN_WIDTH;
+        this._isHeightLimit = bound.h === EMBED_HTML_MIN_HEIGHT;
 
         const props: Partial<EmbedHtmlModel> = {};
         props.xywh = bound.serialize();
