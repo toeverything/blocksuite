@@ -10,6 +10,7 @@ import './code-block/affine-code-line.js';
 import './image-block/index.js';
 import './database-block/index.js';
 import './surface-ref-block/index.js';
+import './pdf-block/index.js';
 
 import { mindMap } from './_common/mind-map/index.js';
 import { matchFlavours, Point } from './_common/utils/index.js';

@@ -37,6 +37,8 @@ import type { PageBlockModel } from './page-block/page-model.js';
 import { PageBlockSchema } from './page-block/page-model.js';
 import type { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
 import { ParagraphBlockSchema } from './paragraph-block/paragraph-model.js';
+import type { PDFBlockModel } from './pdf-block/pdf-model.js';
+import { PDFBlockSchema } from './pdf-block/pdf-model.js';
 import type { SurfaceBlockModel } from './surface-block/surface-model.js';
 import { SurfaceBlockSchema } from './surface-block/surface-model.js';
 import type { SurfaceRefBlockModel } from './surface-ref-block/surface-ref-model.js';
@@ -55,6 +57,7 @@ export type {
   NoteBlockModel,
   PageBlockModel,
   ParagraphBlockModel,
+  PDFBlockModel,
   SurfaceBlockModel,
 };
 
@@ -72,6 +75,7 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   FrameBlockSchema,
   DatabaseBlockSchema,
   SurfaceRefBlockSchema,
+  PDFBlockSchema,
 ];
 
 export const __unstableSchemas = [
