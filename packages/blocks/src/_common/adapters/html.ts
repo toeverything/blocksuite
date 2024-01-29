@@ -610,6 +610,14 @@ export class HtmlAdapter extends BaseAdapter<Html> {
           if (!blob) {
             break;
           }
+          const isScaledImage = o.node.props.width && o.node.props.height;
+          const widthStyle = isScaledImage
+            ? {
+                width: `${o.node.props.width}px`,
+                height: `${o.node.props.height}px`,
+              }
+            : {};
+
           context
             .openNode(
               {
@@ -629,6 +637,7 @@ export class HtmlAdapter extends BaseAdapter<Html> {
                 properties: {
                   src: `assets/${blobName}`,
                   alt: blobName,
+                  ...widthStyle,
                 },
                 children: [],
               },
