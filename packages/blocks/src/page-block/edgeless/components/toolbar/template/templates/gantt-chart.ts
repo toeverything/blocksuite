@@ -608,6 +608,7 @@ export default {
             xywh: '[354.3509961388838,589.2444991125155,433.12456861620115,102]',
             background: '--affine-tag-green',
             index: 'aM',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -648,6 +649,7 @@ export default {
             xywh: '[316.9434255755823,-388.5999870023072,956.5023831485366,102]',
             background: '--affine-tag-orange',
             index: 'aN',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -688,6 +690,7 @@ export default {
             xywh: '[2349.4085591451085,690.5099711329365,917.5646433088205,102]',
             background: '--affine-tag-green',
             index: 'aO',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -728,6 +731,7 @@ export default {
             xywh: '[775.7257472299925,-67.22559886985249,512.2848801152704,102]',
             background: '--affine-tag-pink',
             index: 'aP',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -768,6 +772,7 @@ export default {
             xywh: '[963.8184872780671,56.095071913649605,807.9424593814309,102]',
             background: '--affine-tag-pink',
             index: 'aQ',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -808,6 +813,7 @@ export default {
             xywh: '[1795.969378325836,242.86308190669,760.1443117093463,102.00000000000003]',
             background: '--affine-tag-blue',
             index: 'aR',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -848,6 +854,7 @@ export default {
             xywh: '[963.8184872780671,242.86308190668998,512.2848801152704,102]',
             background: '--affine-tag-blue',
             index: 'aS',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -888,6 +895,7 @@ export default {
             xywh: '[1795.969378325836,365.0437621455573,1463.4164242767897,102]',
             background: '--affine-tag-blue',
             index: 'aT',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -928,6 +936,7 @@ export default {
             xywh: '[2349.4085591451085,-286.5999870023072,454.45160923865933,102]',
             background: '--affine-tag-orange',
             index: 'aU',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {
@@ -968,6 +977,7 @@ export default {
             xywh: '[-1370.2665204062384,-851.4464860788814,920.5142368336792,979.9740584030159]',
             background: '--affine-background-secondary-color',
             index: 'Zz',
+            displayMode: 'edgeless',
             hidden: false,
             edgeless: {
               style: {

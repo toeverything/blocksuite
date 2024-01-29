@@ -31,14 +31,12 @@ export type Command<
 type Omit1<A, B> = [keyof Omit<A, keyof B>] extends [never]
   ? void
   : Omit<A, keyof B>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type InDataOfCommand<C> = C extends Command<infer K, any, infer R>
-  ? CommandKeyToData<K> & R
-  : never;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type OutDataOfCommand<C> = C extends Command<any, infer K, any>
-  ? CommandKeyToData<K>
-  : never;
+type InDataOfCommand<C> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  C extends Command<infer K, any, infer R> ? CommandKeyToData<K> & R : never;
+type OutDataOfCommand<C> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  C extends Command<any, infer K, any> ? CommandKeyToData<K> : never;
 // eslint-disable-next-line @typescript-eslint/ban-types
 type CommonMethods<In extends object = {}> = {
   run(): boolean;

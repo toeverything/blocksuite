@@ -438,6 +438,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -491,6 +492,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -543,6 +545,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -595,6 +598,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -648,6 +652,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -704,6 +709,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -757,6 +763,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -819,6 +826,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -872,6 +880,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -905,6 +914,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -952,6 +962,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -987,6 +998,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1382,7 +1394,7 @@ test('should placeholder works', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  const placeholder = page.locator('.tips-placeholder');
+  const placeholder = page.locator('.affine-paragraph-placeholder.visible');
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toHaveCount(1);
   await expect(placeholder).toContainText("Type '/' for commands");
@@ -1403,8 +1415,6 @@ test('should placeholder works', async ({ page }) => {
 
   await pressEnter(page);
   await expect(placeholder).toHaveCount(1);
-
-  return; // test.skip
 });
 
 test.describe('press ArrowDown when cursor is at the last line of a block', () => {
@@ -1488,6 +1498,7 @@ test('delete empty text paragraph block should keep children blocks when followi
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1530,6 +1541,7 @@ test('delete empty text paragraph block should keep children blocks when followi
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1602,6 +1614,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1652,6 +1665,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1696,6 +1710,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1735,6 +1750,7 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1840,11 +1856,9 @@ test('arrow up/down navigation within and across paragraphs containing different
   await pressArrowUp(page);
   await assertRichTextInlineRange(page, 0, 0, 0);
   await pressArrowDown(page);
-  await assertRichTextInlineRange(page, 0, 93, 0);
+  await assertRichTextInlineRange(page, 0, 125, 0);
   await pressArrowDown(page);
-  await assertRichTextInlineRange(page, 1, 0, 0);
-  await pressArrowDown(page);
-  await assertRichTextInlineRange(page, 1, 90, 0);
+  await assertRichTextInlineRange(page, 1, 32, 0);
   await pressArrowDown(page);
   await assertRichTextInlineRange(page, 1, 125, 0);
 });

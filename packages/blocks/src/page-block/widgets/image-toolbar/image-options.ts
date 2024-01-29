@@ -101,7 +101,7 @@ export function ImageOptionsTemplate({
           ${DownloadIcon}
           <affine-tooltip tip-position="right">Download</affine-tooltip>
         </icon-button>
-        <icon-button size="32px" @click=${() => copyImage(model)}>
+        <icon-button size="32px" @click=${() => copyImage(editorHost, model)}>
           ${CopyIcon}
           <affine-tooltip tip-position="right"
             >Copy to clipboard</affine-tooltip

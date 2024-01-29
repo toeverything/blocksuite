@@ -74,6 +74,9 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   attributeRenderer?: AttributeRenderer;
 
   @property({ attribute: false })
+  inlineEventSource?: HTMLElement;
+
+  @property({ attribute: false })
   markdownShortcutHandler?: <
     TextAttributes extends AffineTextAttributes = AffineTextAttributes,
   >(
@@ -97,7 +100,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   undoManager!: Y.UndoManager;
 
-  // If it is true rich-test will prevent events related to clipboard bubbling up and handle them by itself.
+  // If it is true rich-text will prevent events related to clipboard bubbling up and handle them by itself.
   @property({ attribute: false })
   enableClipboard = true;
   // If it is true rich-text will handle undo/redo by itself. (including v-range restore)
@@ -158,7 +161,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       });
 
       inlineEditor.disposables.addFromEvent(
-        this.inlineEditorContainer,
+        this.inlineEventSource ?? this.inlineEditorContainer,
         'keydown',
         keyDownHandler
       );
@@ -212,7 +215,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       })
     );
 
-    inlineEditor.mount(this.inlineEditorContainer);
+    inlineEditor.mount(this.inlineEditorContainer, this.inlineEventSource);
     inlineEditor.setReadonly(this.readonly);
   }
 

@@ -17,10 +17,13 @@ import type { GroupElementModel } from './element-model/group.js';
 import {
   createElementModel,
   createModelFromProps,
+  type ElementModelMap,
   propsToY,
 } from './element-model/index.js';
-import { generateElementId } from './index.js';
+import { connectorMiddleware } from './middlewares/connector.js';
+import { groupMiddleware } from './middlewares/group.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
+import { generateElementId } from './utils/index.js';
 
 export type SurfaceBlockProps = {
   elements: Boxed<Y.Map<Y.Map<unknown>>>;
@@ -155,7 +158,7 @@ export const SurfaceBlockSchema = defineBlockSchema({
 export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
   private _elementModels: Map<
     string,
-    { dispose: () => void; model: ElementModel }
+    { mount: () => void; unmount: () => void; model: ElementModel }
   > = new Map();
   private _disposables: Array<() => void> = [];
   private _groupToElements: Map<string, string[]> = new Map();
@@ -165,10 +168,15 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   elementUpdated = new Slot<{
     id: string;
-    props: Record<string, { oldValue: unknown }>;
+    props: Record<string, unknown>;
+    oldValues: Record<string, unknown>;
   }>();
   elementAdded = new Slot<{ id: string }>();
-  elementRemoved = new Slot<{ id: string; type: string }>();
+  elementRemoved = new Slot<{
+    id: string;
+    type: string;
+    model: ElementModel;
+  }>();
 
   get elementModels() {
     const models: ElementModel[] = [];
@@ -183,8 +191,13 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
   private _init() {
     this._initElementModels();
-    this._initGroup();
-    this._initConnector();
+    this._watchGroupRelationChange();
+    this._watchConnectorRelationChange();
+    this._applyMiddlewares();
+  }
+
+  private _applyMiddlewares() {
+    this._disposables.push(connectorMiddleware(this), groupMiddleware(this));
   }
 
   private _initElementModels() {
@@ -200,28 +213,29 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
           case 'add':
             if (element) {
               if (!this._elementModels.has(id)) {
-                this._elementModels.set(
-                  id,
-                  createElementModel(
-                    element.get('type') as string,
-                    element.get('id') as string,
-                    element,
-                    this,
-                    {
-                      onChange: payload => this.elementUpdated.emit(payload),
-                      skipFieldInit: true,
-                    }
-                  )
+                const model = createElementModel(
+                  element.get('type') as string,
+                  element.get('id') as string,
+                  element,
+                  this,
+                  {
+                    onChange: payload => this.elementUpdated.emit(payload),
+                    skipFieldInit: true,
+                  }
                 );
+
+                this._elementModels.set(id, model);
               }
+              const { mount } = this._elementModels.get(id)!;
+              mount();
               this.elementAdded.emit({ id });
             }
             break;
           case 'delete':
             if (this._elementModels.has(id)) {
-              const { model, dispose } = this._elementModels.get(id)!;
-              dispose();
-              this.elementRemoved.emit({ id, type: model.type });
+              const { model, unmount } = this._elementModels.get(id)!;
+              unmount();
+              this.elementRemoved.emit({ id, type: model.type, model });
               this._elementToGroup.delete(id);
               this._elementToConnector.delete(id);
               this._elementModels.delete(id);
@@ -253,7 +267,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     });
   }
 
-  private _initGroup() {
+  private _watchGroupRelationChange() {
     const addToGroup = (elementId: string, groupId: string) => {
       this._elementToGroup.set(elementId, groupId);
       this._groupToElements.set(
@@ -282,23 +296,27 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this.elementModels.forEach(model => {
       if (model.type === 'group') {
-        (model as GroupElementModel).childrenIds.forEach(childId => {
+        (model as GroupElementModel).childIds.forEach(childId => {
           addToGroup(childId, model.id);
         });
       }
     });
 
-    this.elementUpdated.on(({ id, props }) => {
+    this.elementUpdated.on(({ id, oldValues }) => {
       const element = this.getElementById(id)!;
 
-      if (element.type === 'group' && props['children']) {
-        (props['children'].oldValue as Y.Map<boolean>).forEach((_, childId) => {
+      if (element.type === 'group' && oldValues['childIds']) {
+        (oldValues['childIds'] as string[]).forEach(childId => {
           removeFromGroup(childId, id);
         });
 
-        (element as GroupElementModel).childrenIds.forEach(childId => {
+        (element as GroupElementModel).childIds.forEach(childId => {
           addToGroup(childId, id);
         });
+
+        if ((element as GroupElementModel).childIds.length === 0) {
+          this.removeElement(id);
+        }
       }
     });
 
@@ -306,7 +324,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
       const element = this.getElementById(id)!;
 
       if (element.type === 'group') {
-        (element as GroupElementModel).childrenIds.forEach(childId => {
+        (element as GroupElementModel).childIds.forEach(childId => {
           addToGroup(childId, id);
         });
       }
@@ -321,7 +339,7 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     });
   }
 
-  private _initConnector() {
+  private _watchConnectorRelationChange() {
     const addConnector = (targetId: string, connectorId: string) => {
       const connectors = this._elementToConnector.get(targetId);
 
@@ -376,15 +394,18 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
 
     this.elementModels.forEach(model => updateConnectorMap(model, 'add'));
 
-    this.elementUpdated.on(({ id, props }) => {
+    this.elementUpdated.on(({ id, oldValues }) => {
       const element = this.getElementById(id)!;
 
-      if (element.type !== 'connector' || !props['source'] || !props['target'])
+      if (
+        element.type !== 'connector' ||
+        (!oldValues['source'] && !oldValues['target'])
+      )
         return;
 
       const oldConnected = [
-        (props['source']?.oldValue as Connection)?.id,
-        (props['target']?.oldValue as Connection)?.id,
+        (oldValues['source'] as Connection)?.id,
+        (oldValues['target'] as Connection)?.id,
       ];
 
       oldConnected.forEach(id => {
@@ -416,14 +437,14 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     this.elementRemoved.dispose();
     this.elementUpdated.dispose();
 
-    this._elementModels.forEach(({ dispose }) => dispose());
+    this._elementModels.forEach(({ unmount }) => unmount());
     this._elementModels.clear();
   }
 
   getConnectors(id: string) {
     return (this._elementToConnector.get(id) || []).map(
       id => this.getElementById(id)!
-    );
+    ) as ConnectorElementModel[];
   }
 
   getGroup(id: string): GroupElementModel | null {
@@ -432,6 +453,26 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
           this._elementToGroup.get(id)!
         ) as GroupElementModel)
       : null;
+  }
+
+  getGroups(id: string): GroupElementModel[] {
+    const groups: GroupElementModel[] = [];
+    let group = this.getGroup(id);
+
+    while (group) {
+      groups.push(group);
+      group = this.getGroup(group.id);
+    }
+
+    return groups;
+  }
+
+  getElementsByType<K extends keyof ElementModelMap>(
+    type: K
+  ): ElementModelMap[K][] {
+    return this.elementModels.filter(
+      model => model.type === type
+    ) as ElementModelMap[K][];
   }
 
   getElementById(id: string): ElementModel | null {

@@ -156,9 +156,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   edgeless: EdgelessPageBlockComponent;
 
   @state()
-  private _frames: FrameBlockModel[] = [];
-
-  @state()
   private _navigatorMode: NavigatorMode = 'fit';
 
   @state()
@@ -179,16 +176,17 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private _timer: ReturnType<typeof setTimeout> | null = null;
   private _cachedIndex = -1;
 
-  private get _service() {
-    return this.edgeless.surface.service;
+  private get _frames(): FrameBlockModel[] {
+    return this.edgeless.service.frames;
   }
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
     this.edgeless = edgeless;
-    this._frames = edgeless.surface.frame.frames.sort(
-      edgeless.surface.compare
-    ) as FrameBlockModel[];
+  }
+
+  get host() {
+    return this.edgeless.host;
   }
 
   get edgelessTool() {
@@ -208,18 +206,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     this._imageLoading = false;
   }
 
-  private _updateFrames() {
-    this._frames = this.edgeless.surface.frame.frames.sort(
-      this.edgeless.surface.compare
-    ) as FrameBlockModel[];
-  }
-
   private _nextFrame() {
     const frames = this._frames;
     const min = 0;
     const max = frames.length - 1;
     if (this._currentFrameIndex === frames.length - 1) {
-      toast('You have reached the last frame');
+      toast(this.host, 'You have reached the last frame');
     } else {
       this._currentFrameIndex = clamp(this._currentFrameIndex + 1, min, max);
     }
@@ -230,7 +222,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const min = 0;
     const max = frames.length - 1;
     if (this._currentFrameIndex === 0) {
-      toast('You have reached the first frame');
+      toast(this.host, 'You have reached the first frame');
     } else {
       this._currentFrameIndex = clamp(this._currentFrameIndex - 1, min, max);
     }
@@ -248,7 +240,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private _tryLoadNavigatorStateLocalRecord() {
     this._navigatorMode =
-      this._service.editSession.getItem('presentFillScreen') === true
+      this.edgeless.service.editSession.getItem('presentFillScreen') === true
         ? 'fill'
         : 'fit';
   }
@@ -258,7 +250,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { slots, page } = edgeless;
 
     this._hideToolbar =
-      !!this._service.editSession.getItem('presentHideToolbar');
+      !!this.edgeless.service.editSession.getItem('presentHideToolbar');
 
     edgeless.bindHotKey(
       {
@@ -283,13 +275,14 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         if (tool.type === 'frameNavigator') {
           this._cachedIndex = this._currentFrameIndex;
           this._navigatorMode = tool.mode ?? this._navigatorMode;
-          if (isFrameBlock(edgeless.selectionManager.elements[0])) {
+          if (isFrameBlock(edgeless.service.selection.elements[0])) {
             this._cachedIndex = this._frames.findIndex(
-              frame => frame.id === edgeless.selectionManager.elements[0].id
+              frame => frame.id === edgeless.service.selection.elements[0].id
             );
           }
           if (this._frames.length === 0)
             toast(
+              this.host,
               'The presentation requires at least 1 frame. You can firstly create a frame.',
               5000
             );
@@ -299,24 +292,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         this.requestUpdate();
       })
     );
-    _disposables.add(
-      page.slots.blockUpdated.on(({ flavour, type }) => {
-        if (flavour === 'affine:frame' && type !== 'update') {
-          requestAnimationFrame(() => {
-            this._updateFrames();
-          });
-        }
-      })
-    );
-    _disposables.add(
-      page.slots.blockUpdated.on(e => {
-        if (e.type === 'update') {
-          this._updateFrames();
-        }
-      })
-    );
     _disposables.add(page.slots.blockUpdated);
-    _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      edgeless.service.viewport.viewportUpdated.on(() => this.requestUpdate())
+    );
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => {
         this.requestUpdate();
@@ -341,7 +320,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private _moveToCurrentFrame() {
     const current = this._currentFrameIndex;
-    const viewport = this.edgeless.surface.viewport;
+    const viewport = this.edgeless.service.viewport;
     const frame = this._frames[current];
 
     if (frame) {
@@ -380,7 +359,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       this.edgeless.slots.navigatorSettingUpdated.emit({
         hideToolbar: this._hideToolbar,
       });
-      this._service.editSession.setItem(
+      this.edgeless.service.editSession.setItem(
         'presentHideToolbar',
         this._hideToolbar
       );
@@ -435,7 +414,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       <div class="short-divider"></div>
       <edgeless-frame-order-button
         .frames=${this._frames}
-        .updateFrames=${this._updateFrames.bind(this)}
         .edgeless=${this.edgeless}
       >
       </edgeless-frame-order-button>

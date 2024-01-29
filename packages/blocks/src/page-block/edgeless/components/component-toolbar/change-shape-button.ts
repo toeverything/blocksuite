@@ -26,9 +26,8 @@ import {
   ShapeType,
   STROKE_COLORS,
 } from '../../../../surface-block/elements/shape/consts.js';
-import type { CanvasElementType } from '../../../../surface-block/index.js';
 import {
-  type ShapeElement,
+  type ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
 } from '../../../../surface-block/index.js';
@@ -56,9 +55,9 @@ import { createButtonPopper } from '../utils.js';
 const ICON_BUTTON_PADDING_TWO = 2;
 
 function getMostCommonShape(
-  elements: ShapeElement[]
+  elements: ShapeElementModel[]
 ): ShapeTool['shapeType'] | null {
-  const shapeTypes = countBy(elements, (ele: ShapeElement) => {
+  const shapeTypes = countBy(elements, (ele: ShapeElementModel) => {
     return ele.shapeType === 'rect' && ele.radius
       ? 'roundedRect'
       : ele.shapeType;
@@ -67,24 +66,26 @@ function getMostCommonShape(
   return max ? (max[0] as ShapeTool['shapeType']) : null;
 }
 
-function getMostCommonFillColor(elements: ShapeElement[]): string | null {
-  const colors = countBy(elements, (ele: ShapeElement) => {
+function getMostCommonFillColor(elements: ShapeElementModel[]): string | null {
+  const colors = countBy(elements, (ele: ShapeElementModel) => {
     return ele.filled ? ele.fillColor : '--affine-palette-transparent';
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as string) : null;
 }
 
-function getMostCommonStrokeColor(elements: ShapeElement[]): string | null {
-  const colors = countBy(elements, (ele: ShapeElement) => {
+function getMostCommonStrokeColor(
+  elements: ShapeElementModel[]
+): string | null {
+  const colors = countBy(elements, (ele: ShapeElementModel) => {
     return ele.strokeColor;
   });
   const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as string) : null;
 }
 
-function getMostCommonLineSize(elements: ShapeElement[]): LineWidth {
-  const sizes = countBy(elements, (ele: ShapeElement) => {
+function getMostCommonLineSize(elements: ShapeElementModel[]): LineWidth {
+  const sizes = countBy(elements, (ele: ShapeElementModel) => {
     return ele.strokeWidth;
   });
   const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
@@ -92,17 +93,17 @@ function getMostCommonLineSize(elements: ShapeElement[]): LineWidth {
 }
 
 function getMostCommonLineStyle(
-  elements: ShapeElement[]
+  elements: ShapeElementModel[]
 ): LineStyleButtonProps['mode'] | null {
-  const sizes = countBy(elements, (ele: ShapeElement) => {
+  const sizes = countBy(elements, (ele: ShapeElementModel) => {
     switch (ele.strokeStyle) {
-      case StrokeStyle.Solid: {
+      case 'solid': {
         return 'solid';
       }
-      case StrokeStyle.Dashed: {
+      case 'dash': {
         return 'dash';
       }
-      case StrokeStyle.None: {
+      case 'none': {
         return 'none';
       }
     }
@@ -111,12 +112,12 @@ function getMostCommonLineStyle(
   return max ? (max[0] as LineStyleButtonProps['mode']) : null;
 }
 
-function doesAllShapesContainText(elements: ShapeElement[]): boolean {
+function doesAllShapesContainText(elements: ShapeElementModel[]): boolean {
   return elements.every(ele => ele.text);
 }
 
-function getMostCommonShapeStyle(elements: ShapeElement[]): ShapeStyle {
-  const roughnesses = countBy(elements, (ele: ShapeElement) => {
+function getMostCommonShapeStyle(elements: ShapeElementModel[]): ShapeStyle {
+  const roughnesses = countBy(elements, (ele: ShapeElementModel) => {
     return ele.shapeStyle;
   });
   const max = maxBy(Object.entries(roughnesses), ([_k, count]) => count);
@@ -230,7 +231,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   ];
 
   @property({ attribute: false })
-  elements: ShapeElement[] = [];
+  elements: ShapeElementModel[] = [];
 
   @property({ attribute: false })
   page!: Page;
@@ -276,6 +277,10 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   private _lineStylesPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  get service() {
+    return this.surface.edgeless.service;
+  }
+
   private _getTextColor(fillColor: CssVariableName) {
     // When the shape is filled with black color, the text color should be white.
     // When the shape is transparent, the text color should be set according to the theme.
@@ -293,7 +298,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     const textColor = this._getTextColor(color);
     const filled = !isTransparent(color);
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
+      this.service.updateElement(ele.id, {
         filled,
         fillColor: color,
         color: textColor,
@@ -303,7 +308,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeColor(color: CssVariableName) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
+      this.service.updateElement(ele.id, {
         strokeColor: color,
       });
     });
@@ -311,7 +316,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeWidth(strokeWidth: number) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
+      this.service.updateElement(ele.id, {
         strokeWidth,
       });
     });
@@ -319,7 +324,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
+      this.service.updateElement(ele.id, {
         strokeStyle,
       });
     });
@@ -349,7 +354,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStyle(shapeStyle: ShapeStyle) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<CanvasElementType.SHAPE>(ele.id, {
+      this.service.updateElement(ele.id, {
         shapeStyle: shapeStyle,
         fontFamily:
           shapeStyle === ShapeStyle.General
@@ -379,10 +384,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
         this.page.captureSync();
         this.elements.forEach(element => {
-          this.surface.updateElement<CanvasElementType.SHAPE>(
-            element.id,
-            updatedProps
-          );
+          this.service.updateElement(element.id, updatedProps);
         });
       })
     );

@@ -1,19 +1,17 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
 import { Text, Workspace } from '@blocksuite/store';
-import { css } from 'lit';
+import { css, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import { InlineManager } from '../../../../_common/inline/inline-manager.js';
 import {
   type AffineInlineEditor,
-  affineInlineSpecs,
   type AffineTextAttributes,
 } from '../../../../_common/inline/presets/affine-inline-specs.js';
-import { affineInlineMarkdownMatches } from '../../../../_common/inline/presets/markdown.js';
+import type { DatabaseBlockComponent } from '../../../database-block.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';
@@ -103,7 +101,15 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     }
   `;
 
-  readonly inlineManager = new InlineManager();
+  get service() {
+    const database = this.closest<DatabaseBlockComponent>('affine-database');
+    return database?.service;
+  }
+
+  get inlineManager() {
+    assertExists(this.service);
+    return this.service.inlineManager;
+  }
   get attributesSchema() {
     return this.inlineManager.getSchema();
   }
@@ -121,11 +127,14 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     return inlineEditor;
   }
 
+  get topContenteditableElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    return databaseBlock?.topContenteditableElement;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
-
-    this.inlineManager.registerSpecs(affineInlineSpecs);
-    this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
 
     if (!this.value || typeof this.value === 'string') {
       this._initYText(this.value);
@@ -138,8 +147,11 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   };
 
   override render() {
+    if (!this.service) return nothing;
+
     return html`<rich-text
       .yText=${this.value}
+      .inlineEventSource=${this.topContenteditableElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
       .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}
@@ -181,7 +193,15 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     }
   `;
 
-  readonly inlineManager = new InlineManager();
+  get service() {
+    const database = this.closest<DatabaseBlockComponent>('affine-database');
+    return database?.service;
+  }
+
+  get inlineManager() {
+    assertExists(this.service);
+    return this.service.inlineManager;
+  }
   get attributesSchema() {
     return this.inlineManager.getSchema();
   }
@@ -199,11 +219,15 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
     return inlineEditor;
   }
 
+  get topContenteditableElement() {
+    const databaseBlock =
+      this.closest<DatabaseBlockComponent>('affine-database');
+    assertExists(databaseBlock);
+    return databaseBlock.topContenteditableElement;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
-
-    this.inlineManager.registerSpecs(affineInlineSpecs);
-    this.inlineManager.registerMarkdownMatches(affineInlineMarkdownMatches);
 
     if (!this.value || typeof this.value === 'string') {
       this._initYText(this.value);
@@ -211,15 +235,14 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   }
 
   override firstUpdated() {
-    assertExists(this._richTextElement);
-    this.disposables.addFromEvent(
-      this._richTextElement,
-      'keydown',
-      this._handleKeyDown
-    );
-
     this._richTextElement?.updateComplete
-      .then(() => this.inlineEditor.focusEnd())
+      .then(() => {
+        this.disposables.add(
+          this.inlineEditor.slots.keydown.on(this._handleKeyDown)
+        );
+
+        this.inlineEditor.focusEnd();
+      })
       .catch(console.error);
   }
 
@@ -313,8 +336,11 @@ export class RichTextCellEditing extends BaseCellRenderer<Text> {
   };
 
   override render() {
+    if (!this.service) return nothing;
+
     return html`<rich-text
       .yText=${this.value}
+      .inlineEventSource=${this.topContenteditableElement}
       .attributesSchema=${this.attributesSchema}
       .attributeRenderer=${this.attributeRenderer}
       .markdownShortcutHandler=${this.inlineManager.markdownShortcutHandler}

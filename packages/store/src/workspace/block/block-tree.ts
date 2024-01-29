@@ -65,8 +65,10 @@ export class BlockTree {
     const yBlock = new Y.Map();
     this._yBlocks.set(id, yBlock);
 
+    const version = schema.version;
     yBlock.set('sys:id', id);
     yBlock.set('sys:flavour', flavour);
+    yBlock.set('sys:version', version);
 
     const defaultProps = schema.model.props?.(internalPrimitives) ?? {};
     const props = {

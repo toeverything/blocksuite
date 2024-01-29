@@ -146,13 +146,13 @@ export class ReferencePopup extends WithDisposable(LitElement) {
       return;
     }
     this._moreMenuAbortController = new AbortController();
-    const linkPopupMoreMenu = new ReferencePopupMoreMenu();
-    linkPopupMoreMenu.abortController = this.abortController;
-    linkPopupMoreMenu.inlineEditor = this.inlineEditor;
-    linkPopupMoreMenu.targetInlineRange = this.targetInlineRange;
+    const referencePopupMoreMenu = new ReferencePopupMoreMenu();
+    referencePopupMoreMenu.abortController = this.abortController;
+    referencePopupMoreMenu.inlineEditor = this.inlineEditor;
+    referencePopupMoreMenu.targetInlineRange = this.targetInlineRange;
 
     createLitPortal({
-      template: linkPopupMoreMenu,
+      template: referencePopupMoreMenu,
       container: this.popupContainer,
       computePosition: {
         referenceElement: this.popupContainer,
@@ -185,7 +185,7 @@ export class ReferencePopup extends WithDisposable(LitElement) {
                 hover="false"
               >
                 ${LinkIcon}
-                <affine-tooltip .offset=${12}>${'Link view'}</affine-tooltip>
+                <affine-tooltip .offset=${12}>${'Inline view'}</affine-tooltip>
               </icon-button>
 
               <icon-button

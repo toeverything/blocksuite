@@ -11,10 +11,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { LineWidth } from '../../../../_common/types.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
-import type {
-  BrushElement,
-  CanvasElementType,
-} from '../../../../surface-block/index.js';
+import type { BrushElementModel } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import {
   type ColorEvent,
@@ -24,14 +21,19 @@ import {
 import type { LineWidthEvent } from '../panel/line-width-panel.js';
 import { createButtonPopper } from '../utils.js';
 
-function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
-  const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
+function getMostCommonColor(
+  elements: BrushElementModel[]
+): CssVariableName | null {
+  const shapeTypes = countBy(elements, (ele: BrushElementModel) => ele.color);
   const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
-function getMostCommonSize(elements: BrushElement[]): LineWidth {
-  const shapeTypes = countBy(elements, (ele: BrushElement) => ele.lineWidth);
+function getMostCommonSize(elements: BrushElementModel[]): LineWidth {
+  const shapeTypes = countBy(
+    elements,
+    (ele: BrushElementModel) => ele.lineWidth
+  );
   const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
   return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
 }
@@ -91,7 +93,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  elements: BrushElement[] = [];
+  elements: BrushElementModel[] = [];
 
   @property({ attribute: false })
   page!: Page;
@@ -114,11 +116,15 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private _colorPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  get service() {
+    return this.surface.edgeless.service;
+  }
+
   private _setLineWidth(size: LineWidth) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.lineWidth !== size) {
-        this.surface.updateElement<CanvasElementType.BRUSH>(element.id, {
+        this.service.updateElement(element.id, {
           lineWidth: size,
         });
       }
@@ -129,7 +135,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
-        this.surface.updateElement<CanvasElementType.BRUSH>(element.id, {
+        this.service.updateElement(element.id, {
           color,
         });
       }

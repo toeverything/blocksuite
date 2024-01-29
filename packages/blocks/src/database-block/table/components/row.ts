@@ -186,8 +186,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
             style="width: 4px;
             border-radius: 2px;
             height: 12px;
-            background-color: var(--affine-placeholder-color);
-"
+            background-color: var(--affine-placeholder-color);"
           ></div>
         </div>
       </div>

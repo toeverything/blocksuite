@@ -1,6 +1,6 @@
 import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { nothing, render } from 'lit';
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
 
 import { INLINE_ROOT_ATTR } from './consts.js';
 import { InlineHookService } from './services/hook.js';
@@ -82,6 +82,14 @@ export class InlineEditor<
     renderComplete: new Slot(),
     inlineRangeUpdate: new Slot<InlineRangeUpdatedProp>(),
     inlineRangeApply: new Slot<Range>(),
+    /**
+     * Corresponding to the `compositionUpdate` and `beforeInput` events, and triggered only when the `inlineRange` is not null.
+     */
+    inputting: new Slot(),
+    /**
+     * Triggered only when the `inlineRange` is not null.
+     */
+    keydown: new Slot<KeyboardEvent>(),
   };
 
   get yText() {
@@ -226,7 +234,9 @@ export class InlineEditor<
     this._eventSource = eventSource;
     render(nothing, this._rootElement);
     this._rootElement.contentEditable = 'true';
+    this._rootElement.style.outline = 'none';
     this._eventSource.contentEditable = 'true';
+    this._eventSource.style.outline = 'none';
     this._rootElement.dataset.vRoot = 'true';
 
     this._bindYTextObserver();
@@ -282,7 +292,7 @@ export class InlineEditor<
     doc.transact(fn, doc.clientID);
   }
 
-  private _onYTextChange = () => {
+  private _onYTextChange = (_: Y.YTextEvent, transaction: Y.Transaction) => {
     if (this.yText.toString().includes('\r')) {
       throw new Error(
         'yText must not contain "\\r" because it will break the range synchronization'
@@ -292,7 +302,41 @@ export class InlineEditor<
     this.slots.textChange.emit();
 
     Promise.resolve()
-      .then(() => this.deltaService.render())
+      .then(() => {
+        this.deltaService.render().catch(console.error);
+
+        const inlineRange = this.rangeService.getInlineRange();
+        if (!inlineRange || transaction.local) return;
+
+        const lastStartRelativePosition =
+          this.rangeService.lastStartRelativePosition;
+        const lastEndRelativePosition =
+          this.rangeService.lastEndRelativePosition;
+        if (!lastStartRelativePosition || !lastEndRelativePosition) return;
+
+        const doc = this.yText.doc;
+        assertExists(doc);
+        const absoluteStart = Y.createAbsolutePositionFromRelativePosition(
+          lastStartRelativePosition,
+          doc
+        );
+        const absoluteEnd = Y.createAbsolutePositionFromRelativePosition(
+          lastEndRelativePosition,
+          doc
+        );
+
+        const startIndex = absoluteStart?.index;
+        const endIndex = absoluteEnd?.index;
+        if (!startIndex || !endIndex) return;
+
+        const newInlineRange: InlineRange = {
+          index: startIndex,
+          length: endIndex - startIndex,
+        };
+        if (!this.isValidInlineRange(newInlineRange)) return;
+
+        this.setInlineRange(newInlineRange);
+      })
       .catch(console.error);
   };
 

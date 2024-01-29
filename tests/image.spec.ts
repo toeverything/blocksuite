@@ -108,7 +108,7 @@ test('can click and copy image', async ({ page }) => {
   await waitNextFrame(page);
 
   await pasteByKeyboard(page);
-  await waitNextFrame(page);
+  await waitNextFrame(page, 200);
   await assertRichImage(page, 2);
 });
 

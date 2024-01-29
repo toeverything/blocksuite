@@ -1,6 +1,6 @@
 import type { EditorHost } from '@blocksuite/lit';
 
-import type { SurfaceService } from '../../surface-block/surface-service.js';
+import type { PageService } from '../page-service.js';
 import { multiPlayersColor } from './color-picker.js';
 
 export class RemoteColorManager {
@@ -8,12 +8,12 @@ export class RemoteColorManager {
     return this.host.page.workspace.awarenessStore;
   }
 
-  private get surfaceService() {
-    return this.host.spec.getService('affine:surface') as SurfaceService;
+  private get pageService() {
+    return this.host.spec.getService('affine:page') as PageService;
   }
 
   constructor(public readonly host: EditorHost) {
-    const sessionColor = this.surfaceService.editSession.getItem('remoteColor');
+    const sessionColor = this.pageService.editSession.getItem('remoteColor');
     if (sessionColor) {
       this.awareness.awareness.setLocalStateField('color', sessionColor);
       return;
@@ -21,7 +21,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awareness.awareness.setLocalStateField('color', pickColor);
-    this.surfaceService.editSession.setItem('remoteColor', pickColor);
+    this.pageService.editSession.setItem('remoteColor', pickColor);
   }
 
   get(id: number) {
@@ -32,7 +32,7 @@ export class RemoteColorManager {
 
     if (id !== this.awareness.awareness.clientID) return null;
 
-    const sessionColor = this.surfaceService.editSession.getItem('remoteColor');
+    const sessionColor = this.pageService.editSession.getItem('remoteColor');
     if (sessionColor) {
       this.awareness.awareness.setLocalStateField('color', sessionColor);
       return sessionColor;
@@ -40,7 +40,7 @@ export class RemoteColorManager {
 
     const pickColor = multiPlayersColor.pick();
     this.awareness.awareness.setLocalStateField('color', pickColor);
-    this.surfaceService.editSession.setItem('remoteColor', pickColor);
+    this.pageService.editSession.setItem('remoteColor', pickColor);
     return pickColor;
   }
 }

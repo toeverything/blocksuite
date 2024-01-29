@@ -2,10 +2,13 @@ import type { CursorSelection } from '@blocksuite/block-std';
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import { assertType, DisposableGroup, Slot } from '@blocksuite/global/utils';
 
-import type { EdgelessElement } from '../../../_common/types.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
-import { GroupElement } from '../../../surface-block/elements/index.js';
-import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import {
+  GroupElementModel,
+  type SurfaceBlockModel,
+} from '../../../surface-block/index.js';
+import type { EdgelessPageService } from '../edgeless-page-service.js';
+import type { EdgelessModel } from '../type.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 
 export interface EdgelessSelectionState {
@@ -26,7 +29,8 @@ export interface CursorSelectionState {
 }
 
 export class EdgelessSelectionManager {
-  container!: EdgelessPageBlockComponent;
+  service!: EdgelessPageService;
+  surfaceModel!: SurfaceBlockModel;
   disposable: DisposableGroup = new DisposableGroup();
 
   slots = {
@@ -44,7 +48,7 @@ export class EdgelessSelectionManager {
   remoteCursor: Map<number, CursorSelection> = new Map();
   remoteSelection: Map<number, SurfaceSelection> = new Map();
 
-  private _activeGroup: GroupElement | null = null;
+  private _activeGroup: GroupElementModel | null = null;
   private _selected: Set<string> = new Set();
   private _selectedIds: string[] = [];
   private _remoteSelected: Set<string> = new Set();
@@ -75,10 +79,10 @@ export class EdgelessSelectionManager {
    * models of the selected elements
    */
   get elements() {
-    const elements: EdgelessElement[] = [];
+    const elements: EdgelessModel[] = [];
 
     this._selectedIds.forEach(id => {
-      const el = this.container.surface.pickById(id);
+      const el = this.service.getElementById(id);
       el && elements.push(el);
     });
 
@@ -94,11 +98,12 @@ export class EdgelessSelectionManager {
   }
 
   private get _selection() {
-    return this.container.host.selection;
+    return this.service.std.selection;
   }
 
-  constructor(container: EdgelessPageBlockComponent) {
-    this.container = container;
+  constructor(service: EdgelessPageService) {
+    this.service = service;
+    this.surfaceModel = service.surface;
     this.mount();
   }
 
@@ -247,9 +252,8 @@ export class EdgelessSelectionManager {
       return;
     }
 
-    const { surface } = this.container;
     const { blocks = [], elements = [] } = groupBy(selection.elements, id => {
-      return this.container.page.getBlockById(id) ? 'blocks' : 'elements';
+      return this.service.page.getBlockById(id) ? 'blocks' : 'elements';
     });
     let instances: (SurfaceSelection | CursorSelection)[] = [];
 
@@ -257,7 +261,7 @@ export class EdgelessSelectionManager {
       instances.push(
         this._selection.create(
           'surface',
-          this.container.surface.path,
+          [this.service.page.root!.id, this.surfaceModel.id],
           elements,
           selection.editing
         )
@@ -269,7 +273,7 @@ export class EdgelessSelectionManager {
         blocks.map(blockId =>
           this._selection.create(
             'surface',
-            [this.container.page.root!.id, blockId],
+            [this.service.page.root!.id, blockId],
             [blockId],
             selection.editing
           )
@@ -285,21 +289,17 @@ export class EdgelessSelectionManager {
 
     if (
       selection.elements.length === 1 &&
-      this.firstElement instanceof GroupElement
+      this.firstElement instanceof GroupElementModel
     ) {
       this._activeGroup = this.firstElement;
     } else {
       if (
-        this.elements.some(ele => {
-          surface.getGroupParent(ele) !== this._activeGroup;
-        }) ||
+        this.elements.some(ele => ele.group !== this._activeGroup) ||
         this.elements.length === 0
       ) {
         this._activeGroup = null;
       }
     }
-
-    surface.refresh();
   }
 
   setCursor(cursor: CursorSelection | CursorSelectionState) {

@@ -89,7 +89,6 @@ export class ImageAdapter extends BaseAdapter<Image> {
     return {
       type: 'slice',
       content,
-      blockVersions: payload.blockVersions,
       pageVersion: payload.pageVersion,
       workspaceVersion: payload.workspaceVersion,
       workspaceId: payload.workspaceId,

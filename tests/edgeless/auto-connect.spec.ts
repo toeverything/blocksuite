@@ -1,7 +1,9 @@
+import { NoteDisplayMode } from '@blocks/_common/types.js';
 import { type Page } from '@playwright/test';
 
 import {
   addNote,
+  changeNoteDisplayModeWithId,
   edgelessCommonSetup,
   getSelectedBound,
   selectNoteInEdgeless,
@@ -16,9 +18,27 @@ test.describe('auto-connect', () => {
   test('navigator', async ({ page }) => {
     await init(page);
     const id1 = await addNote(page, 'page1', 100, 100);
-    await addNote(page, 'page2', 200, 300);
-    await addNote(page, 'page3', 300, 500);
+    const id2 = await addNote(page, 'page2', 200, 300);
+    const id3 = await addNote(page, 'page3', 300, 500);
     await page.mouse.click(200, 50);
+    // Notes added in edgeless mode only visible in edgeless mode
+    // To use index label navigator, we need to change display mode to PageAndEdgeless
+    await changeNoteDisplayModeWithId(
+      page,
+      id1,
+      NoteDisplayMode.DocAndEdgeless
+    );
+    await changeNoteDisplayModeWithId(
+      page,
+      id2,
+      NoteDisplayMode.DocAndEdgeless
+    );
+    await changeNoteDisplayModeWithId(
+      page,
+      id3,
+      NoteDisplayMode.DocAndEdgeless
+    );
+
     await selectNoteInEdgeless(page, id1);
     const bound = await getSelectedBound(page, 0);
     await page.locator('.edgeless-index-label').nth(0).click();

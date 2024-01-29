@@ -64,10 +64,6 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  private get _service() {
-    return this.edgeless.surface.service;
-  }
-
   @query('.navigator-setting-button')
   private _navigatorSettingButton!: HTMLElement;
   @query('.navigator-setting-menu')
@@ -77,7 +73,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
   > | null = null;
 
   private _tryRestoreSettings() {
-    const blackBackground = this._service.editSession.getItem(
+    const blackBackground = this.edgeless.service.editSession.getItem(
       'presentBlackBackground'
     );
     this.blackBackground = blackBackground ? blackBackground : true;

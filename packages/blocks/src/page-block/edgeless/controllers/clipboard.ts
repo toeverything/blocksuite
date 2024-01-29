@@ -13,11 +13,12 @@ import {
 } from '@blocksuite/store';
 
 import {
+  DEFAULT_IMAGE_PROXY_ENDPOINT,
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '../../../_common/consts.js';
 import type {
-  EdgelessElement,
+  EdgelessModel,
   Selectable,
   TopLevelBlockModel,
 } from '../../../_common/types.js';
@@ -25,7 +26,7 @@ import { matchFlavours } from '../../../_common/utils/index.js';
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
   blockElementGetter,
-  getEditorContainer,
+  getPageByEditorHost,
   isInsideDocEditor,
 } from '../../../_common/utils/query.js';
 import { isUrlInClipboard } from '../../../_common/utils/url.js';
@@ -33,6 +34,7 @@ import {
   type BookmarkBlockModel,
   BookmarkStyles,
 } from '../../../bookmark-block/bookmark-model.js';
+import type { EmbedFigmaModel } from '../../../embed-figma-block/embed-figma-model.js';
 import type { EmbedGithubModel } from '../../../embed-github-block/embed-github-model.js';
 import type { EmbedLinkedDocModel } from '../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeModel } from '../../../embed-youtube-block/embed-youtube-model.js';
@@ -41,14 +43,17 @@ import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { IBound } from '../../../surface-block/consts.js';
 import type { EdgelessElementType } from '../../../surface-block/edgeless-types.js';
-import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
+import { CanvasElementType } from '../../../surface-block/element-model/index.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
-import { CanvasElementType } from '../../../surface-block/elements/edgeless-element.js';
 import {
   type CanvasElement,
-  GroupElement,
-} from '../../../surface-block/elements/index.js';
-import { compare } from '../../../surface-block/managers/group-manager.js';
+  GroupElementModel,
+} from '../../../surface-block/index.js';
+import {
+  ConnectorElementModel,
+  type ElementModel,
+} from '../../../surface-block/index.js';
+import { compare } from '../../../surface-block/managers/layer-utils.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import { type IVec, Vec } from '../../../surface-block/utils/vec.js';
@@ -60,6 +65,7 @@ import { deleteElements } from '../utils/crud.js';
 import {
   isBookmarkBlock,
   isCanvasElementWithText,
+  isEmbedFigmaBlock,
   isEmbedGithubBlock,
   isEmbedLinkedDocBlock,
   isEmbedYoutubeBlock,
@@ -96,7 +102,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private get selectionManager() {
-    return this.host.selectionManager;
+    return this.host.service.selection;
   }
 
   private get _pageService() {
@@ -214,7 +220,10 @@ export class EdgelessClipboardController extends PageClipboard {
     if (isUrlInClipboard(data)) {
       const url = data.getData('text/plain');
       const { lastMousePos } = this.toolManager;
-      const [x, y] = this.surface.toModelCoord(lastMousePos.x, lastMousePos.y);
+      const [x, y] = this.host.service.viewport.toModelCoord(
+        lastMousePos.x,
+        lastMousePos.y
+      );
 
       const embedOptions = this._pageService.getEmbedBlockOptions(url);
       const flavour = embedOptions
@@ -224,7 +233,7 @@ export class EdgelessClipboardController extends PageClipboard {
       const width = EMBED_CARD_WIDTH[style];
       const height = EMBED_CARD_HEIGHT[style];
 
-      const id = this.surface.addElement(
+      const id = this.host.service.addBlock(
         flavour,
         {
           xywh: Bound.fromCenter(
@@ -295,11 +304,11 @@ export class EdgelessClipboardController extends PageClipboard {
       }
       clipboardData.children = yMap;
     }
-    const id = this.surface.addElement(
+    const id = this.host.service.addElement(
       clipboardData.type as CanvasElementType,
       clipboardData
     );
-    const element = this.surface.pickById(id) as CanvasElement;
+    const element = this.host.service.getElementById(id) as CanvasElement;
     assertExists(element);
     return element;
   }
@@ -360,16 +369,16 @@ export class EdgelessClipboardController extends PageClipboard {
     notes: BlockSnapshot[],
     oldToNewIdMap: Map<string, string>
   ) {
-    const { surface } = this;
+    const { host } = this;
     const noteIds = notes.map(({ id, props, children }) => {
       delete props.index;
       assertExists(props.xywh);
-      const noteId = this.surface.addElement(
+      const noteId = host.service.addBlock(
         'affine:note',
         props,
-        this.page.root?.id
+        this.page.root!.id
       );
-      const note = surface.pickById(noteId) as NoteBlockModel;
+      const note = host.service.getElementById(noteId) as NoteBlockModel;
       if (id) oldToNewIdMap.set(id, noteId);
       assertExists(note);
 
@@ -384,7 +393,7 @@ export class EdgelessClipboardController extends PageClipboard {
   private _createFrameBlocks(frames: BlockSnapshot[]) {
     const frameIds = frames.map(({ props }) => {
       const { xywh, title, background } = props;
-      const frameId = this.surface.addElement(
+      const frameId = this.host.service.addBlock(
         'affine:frame',
         {
           xywh,
@@ -401,7 +410,7 @@ export class EdgelessClipboardController extends PageClipboard {
   private _createImageBlocks(images: BlockSnapshot[]) {
     const imageIds = images.map(({ props }) => {
       const { xywh, sourceId, rotate } = props;
-      const imageId = this.surface.addElement(
+      const imageId = this.host.service.addBlock(
         'affine:image',
         {
           xywh,
@@ -419,7 +428,7 @@ export class EdgelessClipboardController extends PageClipboard {
     const bookmarkIds = bookmarks.map(({ props }) => {
       const { xywh, style, url, caption, description, icon, image, title } =
         props;
-      const bookmarkId = this.surface.addElement(
+      const bookmarkId = this.host.service.addBlock(
         'affine:bookmark',
         {
           xywh,
@@ -458,7 +467,7 @@ export class EdgelessClipboardController extends PageClipboard {
         assignees,
       } = props;
 
-      const embedGithubId = this.surface.addElement(
+      const embedGithubId = this.host.service.addBlock(
         'affine:embed-github',
         {
           xywh,
@@ -500,7 +509,7 @@ export class EdgelessClipboardController extends PageClipboard {
         creatorImage,
       } = props;
 
-      const embedYoutubeId = this.surface.addElement(
+      const embedYoutubeId = this.host.service.addBlock(
         'affine:embed-youtube',
         {
           xywh,
@@ -522,11 +531,32 @@ export class EdgelessClipboardController extends PageClipboard {
     return embedYoutubeIds;
   }
 
+  private _createFigmaEmbedBlocks(figmaEmbeds: BlockSnapshot[]) {
+    const embedFigmaIds = figmaEmbeds.map(({ props }) => {
+      const { xywh, style, url, caption, title, description } = props;
+
+      const embedFigmaId = this.host.service.addBlock(
+        'affine:embed-figma',
+        {
+          xywh,
+          style,
+          url,
+          caption,
+          title,
+          description,
+        },
+        this.surface.model.id
+      );
+      return embedFigmaId;
+    });
+    return embedFigmaIds;
+  }
+
   private _createLinkedDocEmbedBlocks(linkedDocEmbeds: BlockSnapshot[]) {
     const embedLinkedDocIds = linkedDocEmbeds.map(({ props }) => {
       const { xywh, style, caption, pageId } = props;
 
-      return this.surface.addElement(
+      return this.host.service.addBlock(
         'affine:embed-linked-doc',
         {
           xywh,
@@ -574,9 +604,11 @@ export class EdgelessClipboardController extends PageClipboard {
                 ? 'githubEmbeds'
                 : isEmbedYoutubeBlock(data as unknown as Selectable)
                   ? 'youtubeEmbeds'
-                  : isEmbedLinkedDocBlock(data as unknown as Selectable)
-                    ? 'linkedDocEmbeds'
-                    : 'elements'
+                  : isEmbedFigmaBlock(data as unknown as Selectable)
+                    ? 'figmaEmbeds'
+                    : isEmbedLinkedDocBlock(data as unknown as Selectable)
+                      ? 'linkedDocEmbeds'
+                      : 'elements'
     ) as unknown as {
       frames: BlockSnapshot[];
       notes?: BlockSnapshot[];
@@ -584,12 +616,13 @@ export class EdgelessClipboardController extends PageClipboard {
       bookmarks?: BlockSnapshot[];
       githubEmbeds?: BlockSnapshot[];
       youtubeEmbeds?: BlockSnapshot[];
+      figmaEmbeds?: BlockSnapshot[];
       linkedDocEmbeds?: BlockSnapshot[];
       elements?: { type: CanvasElement['type'] }[];
     };
     pasteCenter =
       pasteCenter ??
-      this.surface.toModelCoord(
+      this.host.service.viewport.toModelCoord(
         this.toolManager.lastMousePos.x,
         this.toolManager.lastMousePos.y
       );
@@ -612,6 +645,9 @@ export class EdgelessClipboardController extends PageClipboard {
     const embedYoutubeIds = this._createYoutubeEmbedBlocks(
       groupedByType.youtubeEmbeds ?? []
     );
+    const embedFigmaIds = this._createFigmaEmbedBlocks(
+      groupedByType.figmaEmbeds ?? []
+    );
     const embedLinkedDocIds = this._createLinkedDocEmbedBlocks(
       groupedByType.linkedDocEmbeds ?? []
     );
@@ -625,23 +661,27 @@ export class EdgelessClipboardController extends PageClipboard {
     ) as FrameBlockModel[];
 
     const images = imageIds.map(id =>
-      this.surface.pickById(id)
+      this.host.service.getElementById(id)
     ) as ImageBlockModel[];
 
     const bookmarks = bookmarkIds.map(id =>
-      this.surface.pickById(id)
+      this.host.service.getElementById(id)
     ) as BookmarkBlockModel[];
 
     const githubEmbeds = embedGithubIds.map(id =>
-      this.surface.pickById(id)
+      this.host.service.getElementById(id)
     ) as EmbedGithubModel[];
 
     const youtubeEmbeds = embedYoutubeIds.map(id =>
-      this.surface.pickById(id)
+      this.host.service.getElementById(id)
     ) as EmbedYoutubeModel[];
 
+    const figmaEmbeds = embedFigmaIds.map(id =>
+      this.host.service.getElementById(id)
+    ) as EmbedFigmaModel[];
+
     const linkedDocEmbeds = embedLinkedDocIds.map(id =>
-      this.surface.pickById(id)
+      this.host.service.getElementById(id)
     ) as EmbedLinkedDocModel[];
 
     const elements = this._createCanvasElements(
@@ -659,6 +699,7 @@ export class EdgelessClipboardController extends PageClipboard {
       ...bookmarks,
       ...githubEmbeds,
       ...youtubeEmbeds,
+      ...figmaEmbeds,
       ...linkedDocEmbeds,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
@@ -672,10 +713,10 @@ export class EdgelessClipboardController extends PageClipboard {
         ele.w,
         ele.h
       );
-      if (ele instanceof ConnectorElement) {
-        this.surface.connector.updateXYWH(ele, newBound);
+      if (ele instanceof ConnectorElementModel) {
+        ele.moveTo(newBound);
       } else {
-        this.surface.updateElement(ele.id, {
+        this.host.service.updateElement(ele.id, {
           xywh: newBound.serialize(),
         });
       }
@@ -687,7 +728,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
       bound.x += pasteX - oldCommonBound.x;
       bound.y += pasteY - oldCommonBound.y;
-      this.surface.updateElement(block.id, {
+      this.surface.edgeless.service.updateElement(block.id, {
         xywh: bound.serialize(),
       });
     });
@@ -817,8 +858,11 @@ export class EdgelessClipboardController extends PageClipboard {
     const pathname = location.pathname;
     const pageMode = isInsideDocEditor(host);
 
-    const editorContainer = getEditorContainer(host);
-    const container = editorContainer.querySelector(
+    const pageElement = getPageByEditorHost(host);
+    assertExists(pageElement);
+    const viewportElement = pageElement.viewportElement;
+
+    const container = pageElement.querySelector(
       '.affine-block-children-container'
     );
     if (!container) return;
@@ -837,14 +881,14 @@ export class EdgelessClipboardController extends PageClipboard {
     const replaceRichTextWithSvgElementFunc =
       this._replaceRichTextWithSvgElement.bind(this);
 
+    // TODO: use image proxy endpoint middleware shared with image block
     let _imageProxyEndpoint: string | undefined;
     if (
       !_imageProxyEndpoint &&
       location.protocol === 'https:' &&
       location.hostname.split('.').includes('affine')
     ) {
-      _imageProxyEndpoint =
-        'https://workers.toeverything.workers.dev/proxy/image';
+      _imageProxyEndpoint = DEFAULT_IMAGE_PROXY_ENDPOINT;
     }
 
     const html2canvasOption = {
@@ -878,7 +922,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
         await replaceRichTextWithSvgElementFunc(element);
       },
-      backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
+      backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
       useCORS: _imageProxyEndpoint ? false : true,
       proxy: _imageProxyEndpoint,
     };
@@ -914,7 +958,12 @@ export class EdgelessClipboardController extends PageClipboard {
       );
     };
 
-    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
+    const nodeElements =
+      nodes ??
+      (edgeless.service.pickElementsByBound(
+        bound,
+        'blocks'
+      ) as TopLevelBlockModel[]);
     for (const nodeElement of nodeElements) {
       await _drawTopLevelBlock(nodeElement);
 
@@ -924,9 +973,9 @@ export class EdgelessClipboardController extends PageClipboard {
           .getElementsInFrame(nodeElement, false)
           .forEach(ele => {
             if (isTopLevelBlock(ele)) {
-              blocksInsideFrame.push(ele);
+              blocksInsideFrame.push(ele as TopLevelBlockModel);
             } else {
-              canvasElements.push(ele);
+              canvasElements.push(ele as CanvasElement);
             }
           });
 
@@ -939,7 +988,7 @@ export class EdgelessClipboardController extends PageClipboard {
       this._checkCanContinueToCanvas(host, pathname, pageMode);
     }
 
-    const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(
+    const surfaceCanvas = edgeless.surface.renderer.getCanvasByBound(
       bound,
       canvasElements
     );
@@ -964,18 +1013,19 @@ export class EdgelessClipboardController extends PageClipboard {
 
 export function getCopyElements(
   surface: SurfaceBlockComponent,
-  elements: EdgelessElement[]
+  elements: EdgelessModel[]
 ) {
-  const set = new Set<EdgelessElement>();
+  const set = new Set<EdgelessModel>();
 
   elements.forEach(element => {
     if (isFrameBlock(element)) {
       set.add(element);
       surface.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
-    } else if (element instanceof GroupElement) {
-      getCopyElements(surface, element.childElements).forEach(ele =>
-        set.add(ele)
-      );
+    } else if (element instanceof GroupElementModel) {
+      getCopyElements(
+        surface,
+        (element as GroupElementModel).childElements
+      ).forEach(ele => set.add(ele));
       set.add(element);
     } else {
       set.add(element);
@@ -985,7 +1035,7 @@ export function getCopyElements(
 }
 
 function prepareConnectorClipboardData(
-  connector: ConnectorElement,
+  connector: ConnectorElementModel,
   selected: Selectable[]
 ) {
   const sourceId = connector.source?.id;
@@ -1030,13 +1080,16 @@ export async function prepareClipboardData(
       } else if (isEmbedYoutubeBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
+      } else if (isEmbedFigmaBlock(selected)) {
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
       } else if (isEmbedLinkedDocBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
-      } else if (selected instanceof ConnectorElement) {
+      } else if (selected instanceof ConnectorElementModel) {
         return prepareConnectorClipboardData(selected, selectedAll);
       } else {
-        return selected.serialize();
+        return (selected as ElementModel).serialize();
       }
     })
   );

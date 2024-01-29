@@ -208,17 +208,13 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  private get _service() {
-    return this.edgeless.surface.service;
-  }
-
   override connectedCallback(): void {
     super.connectedCallback();
 
     this.addEventListener('keydown', stopPropagation, false);
     this._disposables.add(() => {
       if (this._currentCategory) {
-        this._service.editSession.setItem(
+        this.edgeless.service.editSession.setItem(
           'templateCache',
           this._currentCategory
         );
@@ -298,27 +294,27 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
   }
 
   private _getLocalSelectedCategory() {
-    return this._service.editSession.getItem('templateCache');
+    return this.edgeless.service.editSession.getItem('templateCache');
   }
 
   private _createTemplateJob(type: string) {
     const middlewares: ((job: TemplateJob) => void)[] = [];
-    const surface = this.edgeless.surface;
+    const service = this.edgeless.service;
 
     if (type === 'template') {
       const currentContentBound = getCommonBound(
         (
-          surface.blocks.map(block => Bound.deserialize(block.xywh)) as IBound[]
-        ).concat(surface.getElements())
+          service.blocks.map(block => Bound.deserialize(block.xywh)) as IBound[]
+        ).concat(service.elements)
       );
 
       if (currentContentBound) {
         currentContentBound.x +=
-          currentContentBound.w + 20 / surface.viewport.zoom;
+          currentContentBound.w + 20 / service.viewport.zoom;
         middlewares.push(createInsertPlaceMiddleware(currentContentBound));
       }
 
-      const idxGenerator = surface.layer.preservedIndexGenerator(true);
+      const idxGenerator = service.layer.createIndexGenerator(true);
 
       middlewares.push(
         createRegenerateIndexMiddleware((type: string) => idxGenerator(type))
@@ -327,8 +323,8 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
 
     if (type === 'sticker') {
       middlewares.push(
-        createStickerMiddleware(surface.viewport.center, () =>
-          surface.layer.generateIndex('affine:image')
+        createStickerMiddleware(service.viewport.center, () =>
+          service.layer.generateIndex('affine:image')
         )
       );
     }
@@ -348,7 +344,7 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     template = cloneDeep(template);
 
     const templateJob = this._createTemplateJob(template.type);
-    const surface = this.edgeless.surface;
+    const service = this.edgeless.service;
 
     try {
       const { assets } = template;
@@ -366,8 +362,8 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
       const insertedBound = await templateJob.insertTemplate(template.content);
 
       if (insertedBound && template.type === 'template') {
-        const padding = 20 / surface.viewport.zoom;
-        surface.viewport.setViewportByBound(
+        const padding = 20 / service.viewport.zoom;
+        service.viewport.setViewportByBound(
           insertedBound,
           [padding, padding, padding, padding],
           true

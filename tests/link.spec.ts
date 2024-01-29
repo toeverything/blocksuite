@@ -54,6 +54,9 @@ test('basic link', async ({ page }) => {
   const linkLocator = page.locator('affine-link a');
   await expect(linkLocator).toHaveAttribute('href', link);
 
+  // clear text selection
+  await page.keyboard.press('ArrowLeft');
+
   const viewLinkPopoverLocator = page.locator('.affine-link-popover.view');
   // Hover link
   await expect(viewLinkPopoverLocator).not.toBeVisible();
@@ -89,6 +92,7 @@ test('basic link', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -380,6 +384,7 @@ test('convert link to card', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -471,6 +476,7 @@ test.skip('convert link to embed', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {

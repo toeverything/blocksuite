@@ -141,6 +141,7 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -201,6 +202,7 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -234,6 +236,7 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -284,6 +287,7 @@ test('native range delete with indent', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:displayMode="both"
   prop:edgeless={
     Object {
       "style": Object {
@@ -1240,16 +1244,9 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.click(0, 0);
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
-  // ←
-  await page.mouse.move(coord.x - 15, coord.y, { steps: 20 });
-  await page.mouse.up();
-  expect(await getSelectedTextByInlineEditor(page)).toBe('45');
-
-  // blur
-  await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x, coord.y);
-  await page.mouse.down();
-  // ←
+  // 123
+  // 45|6
+  // 789|
   await page.mouse.move(coord.x + 26, coord.y + 90, { steps: 20 });
   await page.mouse.up();
   await page.keyboard.press('Backspace');
@@ -1293,6 +1290,7 @@ test('should ndent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1347,6 +1345,7 @@ test('should unindent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1394,6 +1393,7 @@ test('should unindent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:displayMode="both"
     prop:edgeless={
       Object {
         "style": Object {
@@ -1722,7 +1722,7 @@ test('should collapse to end when press arrow-right on multi-line selection', as
   expect(await getSelectedText(page)).toBe('12345');
   await pressArrowRight(page);
   await pressBackspace(page);
-  await assertRichTexts(page, ['12', '456', '789']);
+  await assertRichTexts(page, ['123', '46', '789']);
 });
 
 test('should collapse to start when press arrow-left on multi-line selection', async ({

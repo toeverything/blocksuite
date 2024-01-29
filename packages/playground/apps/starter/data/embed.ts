@@ -1,7 +1,8 @@
 import { Text, type Workspace } from '@blocksuite/store';
 
-import { type InitFn } from './utils';
+import { type InitFn } from './utils.js';
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 export const embed: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.getPage(id) ?? workspace.createPage({ id });
   page.clear();

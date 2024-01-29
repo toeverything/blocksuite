@@ -11,6 +11,7 @@ import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
+import { EmbedFigmaBlockSpec } from '../embed-figma-block/embed-figma-spec.js';
 import { EmbedGithubBlockSpec } from '../embed-github-block/index.js';
 import { EmbedHtmlBlockSpec } from '../embed-html-block/embed-html-spec.js';
 import { EmbedLinkedDocBlockSpec } from '../embed-linked-doc-block/index.js';
@@ -40,6 +41,7 @@ import { AFFINE_SLASH_MENU_WIDGET } from '../page-block/widgets/slash-menu/index
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { ParagraphService } from '../paragraph-block/paragraph-service.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+import { SurfacePageService } from '../surface-block/surface-page-service.js';
 import { SurfaceService } from '../surface-block/surface-service.js';
 import {
   SurfaceRefBlockSchema,
@@ -112,13 +114,6 @@ const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
 
 const CommonFirstPartyBlockSpecs: BlockSpec[] = [
   {
-    schema: SurfaceBlockSchema,
-    view: {
-      component: literal`affine-surface`,
-    },
-    service: SurfaceService,
-  },
-  {
     schema: ListBlockSchema,
     view: {
       component: literal`affine-list`,
@@ -188,6 +183,23 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
     },
     service: AttachmentService,
   },
+  EmbedFigmaBlockSpec,
+  EmbedYoutubeBlockSpec,
+  EmbedGithubBlockSpec,
+  EmbedHtmlBlockSpec,
+  EmbedLinkedDocBlockSpec,
+];
+
+export const DocEditorBlockSpecs: BlockSpec[] = [
+  DocPageSpec,
+  ...CommonFirstPartyBlockSpecs,
+  {
+    schema: SurfaceBlockSchema,
+    view: {
+      component: literal`affine-surface`,
+    },
+    service: SurfacePageService,
+  },
   {
     schema: SurfaceRefBlockSchema,
     service: SurfaceRefBlockService,
@@ -198,24 +210,29 @@ const CommonFirstPartyBlockSpecs: BlockSpec[] = [
       },
     },
   },
-  EmbedYoutubeBlockSpec,
-  EmbedGithubBlockSpec,
-  EmbedHtmlBlockSpec,
-  EmbedLinkedDocBlockSpec,
-];
-
-export const DocEditorBlockSpecs: BlockSpec[] = [
-  DocPageSpec,
-  ...CommonFirstPartyBlockSpecs,
 ];
 
 export const EdgelessEditorBlockSpecs: BlockSpec[] = [
   EdgelessPageSpec,
   ...CommonFirstPartyBlockSpecs,
   {
+    schema: SurfaceBlockSchema,
+    view: {
+      component: literal`affine-surface`,
+    },
+    service: SurfaceService,
+  },
+  {
     schema: FrameBlockSchema,
     view: {
       component: literal`affine-frame`,
+    },
+  },
+  {
+    schema: SurfaceRefBlockSchema,
+    service: SurfaceRefBlockService,
+    view: {
+      component: literal`affine-edgeless-surface-ref`,
     },
   },
 ];

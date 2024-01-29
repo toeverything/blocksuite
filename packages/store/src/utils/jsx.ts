@@ -34,6 +34,7 @@ function isValidRecord(data: unknown): data is DocRecord {
 
 const IGNORED_PROPS = [
   'sys:id',
+  'sys:version',
   'sys:flavour',
   'sys:children',
   'prop:xywh',

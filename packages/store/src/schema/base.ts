@@ -174,6 +174,7 @@ function MagicProps(): {
 export class BlockModel<
   Props extends object = object,
 > extends MagicProps()<Props> {
+  version!: number;
   flavour!: string;
   role!: RoleType;
   page!: Page;

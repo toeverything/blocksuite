@@ -194,6 +194,13 @@ export const styles = css`
     font-weight: 400;
     line-height: 20px;
   }
+  .affine-embed-youtube-content-url:hover > span {
+    color: var(--affine-link-color);
+  }
+  .affine-embed-youtube-content-url:hover .open-icon {
+    fill: var(--affine-link-color);
+  }
+
   .affine-embed-youtube-content-url-icon {
     display: flex;
     align-items: center;
@@ -201,14 +208,24 @@ export const styles = css`
     width: 12px;
     height: 12px;
   }
-  .affine-embed-youtube-content-url-icon svg {
+  .affine-embed-youtube-content-url-icon .open-icon {
     height: 12px;
     width: 12px;
+    fill: var(--affine-text-secondary-color);
   }
 
   .affine-embed-youtube-block.loading {
     .affine-embed-youtube-content-title-text {
       color: var(--affine-placeholder-color);
+    }
+  }
+
+  .affine-embed-youtube-block.selected {
+    .affine-embed-youtube-content-url > span {
+      color: var(--affine-link-color);
+    }
+    .affine-embed-youtube-content-url .open-icon {
+      fill: var(--affine-link-color);
     }
   }
 `;
