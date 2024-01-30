@@ -15,6 +15,7 @@ import {
   getCurrentHTMLTheme,
   initEmptyEdgelessState,
   initEmptyParagraphState,
+  initThreeParagraphs,
   pressArrowLeft,
   pressArrowRight,
   pressBackspace,
@@ -691,4 +692,32 @@ test('extended inline format', async ({ page }) => {
       insert: 'aaa',
     },
   ]);
+});
+
+test('keep same scroll position when switch back to doc mode', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  for (let i = 0; i <= 15; i++) {
+    await initThreeParagraphs(page);
+  }
+
+  await page.mouse.wheel(0, 100);
+  await waitNextFrame(page, 1000);
+  const top = await page.evaluate(() => {
+    const doc = document.querySelector('div.affine-doc-viewport');
+    if (!doc) throw new Error('affine-doc-viewport not found');
+    return doc.scrollTop;
+  });
+
+  await switchEditorMode(page);
+  await switchEditorMode(page);
+  const currentTop = await page.evaluate(() => {
+    const doc = document.querySelector('div.affine-doc-viewport');
+    if (!doc) throw new Error('affine-doc-viewport not found');
+    return doc.scrollTop;
+  });
+
+  expect(currentTop).toBe(top);
 });
