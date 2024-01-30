@@ -1,5 +1,6 @@
 import '../buttons/tool-icon-button.js';
 import '../toolbar/shape/shape-menu.js';
+import '../../../../_common/components/menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';

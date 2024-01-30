@@ -110,6 +110,7 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
       >
         ${NavigatorSettingsIcon}
       </edgeless-tool-icon-button>
+
       <div
         class="navigator-setting-menu"
         @click=${(e: MouseEvent) => {
@@ -119,16 +120,20 @@ export class EdgelessNavigatorSettingButton extends WithDisposable(LitElement) {
         <div class="item-container">
           <div class="text title">Playback Settings</div>
         </div>
+
         <div class="item-container">
           <div class="text">Dark background</div>
+
           <toggle-switch
             .on=${this.blackBackground}
             .onChange=${this._onBlackBackgroundChange}
           >
           </toggle-switch>
         </div>
+
         <div class="item-container">
           <div class="text">Hide toolbar</div>
+
           <toggle-switch
             .on=${this.hideToolbar}
             .onChange=${(checked: boolean) => {
