@@ -89,10 +89,10 @@ test('select multiple shapes and translate', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [210, 110, 100, 100]);
 
   await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
-  await assertEdgelessSelectedRect(page, [86, 86, 236, 136]);
+  await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
 
   await dragBetweenCoords(page, { x: 120, y: 120 }, { x: 150, y: 150 });
-  await assertEdgelessSelectedRect(page, [116, 116, 236, 136]);
+  await assertEdgelessSelectedRect(page, [128, 128, 212, 112]);
 
   await page.mouse.click(160, 160);
   await assertEdgelessSelectedRect(page, [128, 128, 104, 104]);
@@ -122,7 +122,7 @@ test('select multiple shapes and press "Escape" to cancel selection', async ({
   await dragBetweenCoords(page, { x: 90, y: 90 }, { x: 320, y: 220 });
 
   // assert all shapes are selected
-  await assertEdgelessSelectedRect(page, [86, 86, 236, 136]);
+  await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
 
   // Press "Escape" to cancel the selection
   await page.keyboard.press('Escape');

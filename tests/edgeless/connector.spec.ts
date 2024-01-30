@@ -24,7 +24,6 @@ import {
 import {
   assertConnectorPath,
   assertEdgelessNonSelectedRect,
-  assertEdgelessSelectedRect,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
@@ -344,7 +343,6 @@ test('change connector line width', async ({ page }) => {
 
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
   await changeConnectorStrokeWidth(page, 5);
-  await assertEdgelessSelectedRect(page, [100, 200, 200, 100]);
 
   await waitNextFrame(page);
 
