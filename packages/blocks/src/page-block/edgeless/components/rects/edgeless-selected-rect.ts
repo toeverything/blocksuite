@@ -40,11 +40,7 @@ import {
   serializeXYWH,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import {
-  NOTE_MIN_HEIGHT,
-  NOTE_MIN_WIDTH,
-  SELECTED_RECT_PADDING,
-} from '../../utils/consts.js';
+import { NOTE_MIN_HEIGHT, NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import { getElementsWithoutGroup } from '../../utils/group.js';
 import {
   getSelectableBounds,
@@ -842,15 +838,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       rotate = elements[0].rotate;
     }
 
-    const padding = elements.length > 1 ? SELECTED_RECT_PADDING : 0;
-
     this._selectedRect = {
-      width: width + padding * 2,
-      height: height + padding * 2,
+      width: width,
+      height: height,
       borderWidth: selection.editing ? 2 : 1,
       borderStyle: 'solid',
-      left: left - padding,
-      top: top - padding,
+      left: left,
+      top: top,
       rotate,
     };
   }, this);
@@ -1079,6 +1073,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const isSingleGroup =
       elements.length === 1 && elements[0] instanceof GroupElementModel;
+
+    if (elements.length === 1 && elements[0] instanceof ConnectorElementModel) {
+      _selectedRect.width = 0;
+      _selectedRect.height = 0;
+      _selectedRect.borderWidth = 0;
+    }
+
     _selectedRect.borderStyle = isSingleGroup ? 'dashed' : 'solid';
 
     return html`
