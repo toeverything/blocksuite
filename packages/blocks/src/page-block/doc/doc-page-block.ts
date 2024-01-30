@@ -390,7 +390,7 @@ export class DocPageBlockComponent extends BlockElement<
           !!note.displayMode &&
           note.displayMode === NoteDisplayMode.EdgelessOnly;
         // Should remove deprecated `hidden` property in the future
-        return !(isNote && (displayOnEdgeless || note.hidden));
+        return !(isNote && displayOnEdgeless);
       }),
       child => child.id,
       child => this.renderModel(child)
