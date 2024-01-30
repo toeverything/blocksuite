@@ -12,6 +12,7 @@ import {
   getDocTitleInlineEditor,
   matchFlavours,
   NoteDisplayMode,
+  requestConnectedFrame,
 } from '../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { PageClipboard } from '../clipboard/index.js';
@@ -232,7 +233,10 @@ export class DocPageBlockComponent extends BlockElement<
     ) as HTMLElement;
     if (scrollElement) {
       this._scrollTop = this.service.editSession.getItem('docScrollTop') ?? 0;
-      requestAnimationFrame(() => scrollElement.scrollTo(0, this._scrollTop));
+      requestConnectedFrame(
+        () => scrollElement.scrollTo(0, this._scrollTop),
+        this
+      );
 
       this._disposables.addFromEvent(
         scrollElement,
