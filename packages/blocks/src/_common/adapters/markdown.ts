@@ -591,8 +591,11 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context.skipAllChildren();
           break;
         }
+        case 'affine:embed-github':
+        case 'affine:embed-youtube':
+        case 'affine:embed-figma':
         case 'affine:bookmark': {
-          // Parse bookmark as link
+          // Parse as link
           if (
             typeof o.node.props.title !== 'string' ||
             typeof o.node.props.url !== 'string'
