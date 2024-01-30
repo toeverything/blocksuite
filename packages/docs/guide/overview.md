@@ -2,12 +2,14 @@
 
 BlockSuite is a toolkit for building diverse collaborative editors and applications. It implements a series of collaborative editing infrastructures and editors independently. With BlockSuite, you can choose to:
 
-- Build new editors from the ground up based on the BlockSuite framework.
-- Or, reuse multiple first-party BlockSuite editors right out of the box:
-  - [**`DocEditor`**](../presets/doc-editor): **Built entirely from scratch**, `DocEditor` is a comprehensive block-based document editor, offering extensive customization and flexibility.
-  - [**`EdgelessEditor`**](../presets/edgeless-editor): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
+- Reuse multiple first-party BlockSuite editors right out of the box:
+  - [**`DocEditor`**](../components/doc-editor): **Built entirely from scratch**, `DocEditor` is a comprehensive block-based document editor, offering extensive customization and flexibility.
+  - [**`EdgelessEditor`**](../components/edgeless-editor): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
+- Or, build new editors from scratch based on the underlying vallina framework.
 
-These editors are being used in [AFFiNE](https://github.com/toeverything/AFFiNE), click 🔁 in following example to switch between them dynamically - they are fully compatible!
+First party BlockSuite editors are being used in [AFFiNE](https://github.com/toeverything/AFFiNE), click 🔁 in following example to switch between them dynamically - they are fully compatible!
+
+> 🚧 BlockSuite is currently in its early stage, with components and extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
 
 <iframe src="https://try-blocksuite.vercel.app/starter/?init" width="100%" height="500"></iframe>
 
@@ -63,5 +65,3 @@ The BlockSuite project is structured around key packages that are categorized in
 This can be illustrated as the diagram below:
 
 ![package-overview.png](../images/package-overview.png)
-
-> 🚧 BlockSuite is currently in its early stage, with some extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
