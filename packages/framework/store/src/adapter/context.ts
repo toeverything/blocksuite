@@ -26,6 +26,10 @@ export class ASTWalkerContext<TNode extends object> {
     return this._stack[this._stack.length - 1];
   }
 
+  previousNode() {
+    return this._stack[this._stack.length - 2]?.node;
+  }
+
   currentNode() {
     return this.current()?.node;
   }
@@ -42,6 +46,10 @@ export class ASTWalkerContext<TNode extends object> {
   setNodeContext(key: string, value: unknown) {
     this._stack[this._stack.length - 1].context[key] = value;
     return this;
+  }
+
+  getPreviousNodeContext(key: string) {
+    return this._stack[this._stack.length - 2]?.context[key];
   }
 
   getNodeContext(key: string) {

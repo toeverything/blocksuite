@@ -631,6 +631,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     });
     walker.setLeave(async (o, context) => {
       const currentTNode = context.currentNode();
+      const previousTNode = context.previousNode();
       switch (o.node.flavour) {
         case 'affine:paragraph': {
           context.setGlobalContext(
@@ -641,15 +642,24 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
         case 'affine:list': {
           if (
-            context.getNodeContext('affine:list:parent') === o.parent &&
-            currentTNode.type === 'list' &&
-            currentTNode.ordered === (o.node.props.type === 'numbered') &&
-            currentTNode.children[0].checked ===
+            context.getPreviousNodeContext('affine:list:parent') === o.parent &&
+            currentTNode.type === 'listItem' &&
+            previousTNode?.type === 'list' &&
+            previousTNode.ordered === (o.node.props.type === 'numbered') &&
+            previousTNode.children[0]?.checked ===
               (o.node.props.type === 'todo'
                 ? (o.node.props.checked as boolean)
                 : undefined)
           ) {
             context.closeNode();
+            const nextONode = o.parent!.children[o.index! + 1];
+            if (
+              !nextONode ||
+              (nextONode && nextONode.flavour !== 'affine:list')
+            ) {
+              // If the next node is not a list, close the list
+              context.closeNode();
+            }
           } else {
             context.closeNode().closeNode();
           }
