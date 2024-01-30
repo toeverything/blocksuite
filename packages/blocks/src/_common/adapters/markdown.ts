@@ -58,9 +58,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     assets,
   }: FromPageSnapshotPayload): Promise<FromPageSnapshotResult<Markdown>> {
     let buffer = '';
-    if (snapshot.meta.title) {
-      buffer += `# ${snapshot.meta.title}\n\n`;
-    }
     const { file, assetsIds } = await this.fromBlockSnapshot({
       snapshot: snapshot.blocks,
       assets,
@@ -456,7 +453,8 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context
             .openNode(
               {
-                type: 'paragraph',
+                type: 'heading',
+                depth: 1,
                 children: this._deltaToMdAST(title.delta, 0),
               },
               'children'
