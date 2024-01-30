@@ -3,55 +3,6 @@ import type { Template, TemplateManager } from './template-type.js';
 
 export const templates = [
   {
-    name: 'Marketing',
-    templates: {
-      Storyboard: () =>
-        import('./templates/storyboard.js').then(val => val.default),
-      '4P Marketing Matrix': () =>
-        import('./templates/4p-marketing-matrix.js').then(val => val.default),
-      'User Journey Map': () =>
-        import('./templates/user-journey.js').then(val => val.default),
-    },
-  },
-  {
-    name: 'Project management',
-    templates: {
-      Gantt: () =>
-        import('./templates/gantt-chart.js').then(val => val.default),
-      Kanban: () => import('./templates/kanban.js').then(val => val.default),
-      'Montly Calendar': () =>
-        import('./templates/monthly-calendar.js').then(val => val.default),
-      Fishbone: () =>
-        import('./templates/fishbone.js').then(val => val.default),
-      'Project Planning': () =>
-        import('./templates/project-planning.js').then(val => val.default),
-    },
-  },
-  {
-    name: 'Brainstorming',
-    templates: {
-      SWOT: () => import('./templates/swot.js').then(val => val.default),
-      '5W2H': () => import('./templates/2h5w.js').then(val => val.default),
-      'Flow Chart': () =>
-        import('./templates/flow-chart.js').then(val => val.default),
-      'Concept Map': () =>
-        import('./templates/concept-map.js').then(val => val.default),
-      'SMART Principles': () =>
-        import('./templates/smart-principles.js').then(val => val.default),
-    },
-  },
-  {
-    name: 'Presentation',
-    templates: {
-      'Data Analysis': () =>
-        import('./templates/data-analysis.js').then(val => val.default),
-      'Simple Presentation': () =>
-        import('./templates/simple-presentation.js').then(val => val.default),
-      'Business Proposal': () =>
-        import('./templates/business-proposal.js').then(val => val.default),
-    },
-  },
-  {
     name: 'Paws and pals',
     templates: () => import('./templates/stickers.js').then(val => val.default),
   },
@@ -74,24 +25,45 @@ function lcs(text1: string, text2: string) {
 
   return dp[text1.length][text2.length];
 }
+const extendTemplate: TemplateManager[] = [];
+
+const flat = <T>(arr: T[][]) =>
+  arr.reduce((pre, current) => pre.concat(current), []);
 
 export const builtInTemplates = {
   list: async (category: string) => {
-    const cate = templates.find(cate => cate.name === category);
-    if (!cate) return [];
+    const extendTemplates = flat(
+      await Promise.all(extendTemplate.map(manager => manager.list(category)))
+    );
 
-    return cate.templates instanceof Function
-      ? await cate.templates()
-      : // @ts-ignore
-        Promise.all(keys(cate.templates).map(key => cate.templates[key]()));
+    const cate = templates.find(cate => cate.name === category);
+    if (!cate) return extendTemplates;
+
+    const result: Template[] =
+      cate.templates instanceof Function
+        ? await cate.templates()
+        : await Promise.all(
+            // @ts-ignore
+            keys(cate.templates).map(key => cate.templates[key]())
+          );
+
+    return result.concat(extendTemplates);
   },
 
   categories: async () => {
-    return templates.map(cate => cate.name);
+    const extendCates = flat(
+      await Promise.all(extendTemplate.map(manager => manager.categories()))
+    );
+
+    return templates.map(cate => cate.name).concat(extendCates);
   },
 
   search: async (keyword: string, cateName?: string) => {
-    const candidates: Template[] = [];
+    const candidates: Template[] = flat(
+      await Promise.all(
+        extendTemplate.map(manager => manager.search(keyword, cateName))
+      )
+    );
 
     keyword = keyword.trim().toLocaleLowerCase();
 
@@ -107,7 +79,10 @@ export const builtInTemplates = {
 
         return Promise.all(
           keys(categroy.templates).map(async name => {
-            if (lcs(keyword, name.toLocaleLowerCase()) === keyword.length) {
+            if (
+              lcs(keyword, (name as string).toLocaleLowerCase()) ===
+              keyword.length
+            ) {
               // @ts-ignore
               const template = await categroy.templates[name]();
 
@@ -119,5 +94,9 @@ export const builtInTemplates = {
     );
 
     return candidates;
+  },
+
+  extend(manager: TemplateManager) {
+    extendTemplate.push(manager);
   },
 } satisfies TemplateManager;
