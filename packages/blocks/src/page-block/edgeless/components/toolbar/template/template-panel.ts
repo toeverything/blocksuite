@@ -125,7 +125,8 @@ export class EdgelessTemplatePanel extends WithDisposable(LitElement) {
     .template-item > svg {
       display: block;
       margin: 0 auto;
-      transform: translateY(20%);
+      width: 135px;
+      height: 80px;
       color: var(--affine-background-primary-color);
     }
 

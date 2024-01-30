@@ -28,7 +28,13 @@ function lcs(text1: string, text2: string) {
 const extendTemplate: TemplateManager[] = [];
 
 const flat = <T>(arr: T[][]) =>
-  arr.reduce((pre, current) => pre.concat(current), []);
+  arr.reduce((pre, current) => {
+    if (current) {
+      pre.concat(current);
+    }
+
+    return pre;
+  }, []);
 
 export const builtInTemplates = {
   list: async (category: string) => {
@@ -97,6 +103,8 @@ export const builtInTemplates = {
   },
 
   extend(manager: TemplateManager) {
+    if (extendTemplate.includes(manager)) return;
+
     extendTemplate.push(manager);
   },
 } satisfies TemplateManager;
