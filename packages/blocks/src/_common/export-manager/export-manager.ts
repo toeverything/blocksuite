@@ -158,6 +158,7 @@ export class ExportManager {
         });
 
         await this._replaceRichTextWithSvgElement(element);
+        await this.replaceImgSrcWithSvg(element);
       },
       useCORS: this._exportOptions.imageProxyEndpoint ? false : true,
       proxy: this._exportOptions.imageProxyEndpoint,
@@ -325,8 +326,9 @@ export class ExportManager {
     const pageLeft = rect?.left ?? 0;
     const viewportHeight = viewportElement?.scrollHeight;
 
-    const replaceRichTextWithSvgElementFunc =
+    const replaceRichTextWithSvgElement =
       this._replaceRichTextWithSvgElement.bind(this);
+    const replaceImgSrcWithSvg = this.replaceImgSrcWithSvg;
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
@@ -350,7 +352,8 @@ export class ExportManager {
       },
       onclone: async function (_documentClone: Document, element: HTMLElement) {
         element.style.height = `${viewportHeight}px`;
-        await replaceRichTextWithSvgElementFunc(element);
+        await replaceRichTextWithSvgElement(element);
+        await replaceImgSrcWithSvg(element);
       },
       backgroundColor: window.getComputedStyle(viewportElement).backgroundColor,
       x: pageLeft - viewport.left,
@@ -452,6 +455,68 @@ export class ExportManager {
       (this.page.root as PageBlockModel).title.toString(),
       canvasImage.toDataURL('image/png')
     );
+  }
+
+  public async replaceImgSrcWithSvg(element: HTMLElement) {
+    const imgList = Array.from(element.querySelectorAll('img'));
+    // Create an array of promises
+    const promises = imgList.map(img => {
+      // Return a new promise
+      return new Promise<void>((resolve, reject) => {
+        // Fetch the SVG content
+        fetch(img.src)
+          .then(response => response.blob())
+          .then(blob => {
+            // If the file type is SVG, set svg width and height
+            if (blob.type === 'image/svg+xml') {
+              const reader = new FileReader();
+              reader.readAsText(blob);
+              reader.onloadend = () => {
+                // Parse the SVG
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(
+                  reader.result as string,
+                  'image/svg+xml'
+                );
+                const svgElement =
+                  svgDoc.documentElement as unknown as SVGSVGElement;
+
+                // Check if the SVG has width and height attributes
+                if (
+                  !svgElement.hasAttribute('width') &&
+                  !svgElement.hasAttribute('height')
+                ) {
+                  // Get the viewBox
+                  const viewBox = svgElement.viewBox.baseVal;
+                  // Set the SVG width and height
+                  svgElement.setAttribute('width', `${viewBox.width}px`);
+                  svgElement.setAttribute('height', `${viewBox.height}px`);
+                }
+
+                // Replace the img src with the modified SVG
+                const serializer = new XMLSerializer();
+                const newSvgStr = serializer.serializeToString(svgElement);
+                img.src =
+                  'data:image/svg+xml;charset=utf-8,' +
+                  encodeURIComponent(newSvgStr);
+
+                // Resolve the promise
+                resolve();
+              };
+            } else {
+              // If the file type is not SVG, resolve the promise
+              resolve();
+            }
+          })
+          .catch(error => {
+            // If there is an error, reject the promise
+            reject(error);
+          });
+      });
+    });
+
+    // Wait for all promises to resolve
+    await Promise.all(promises);
   }
 
   public async exportPdf() {
