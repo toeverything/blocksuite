@@ -1,5 +1,5 @@
 import { PathFinder, type PointerEventState } from '@blocksuite/block-std';
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { assertExists, debounce, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -113,6 +113,8 @@ export class DocPageBlockComponent extends BlockElement<
     viewportUpdated: new Slot<Viewport>(),
   };
 
+  private _scrollTop = 0;
+
   private _viewportElement: HTMLDivElement | null = null;
 
   get viewportElement(): HTMLDivElement {
@@ -224,6 +226,23 @@ export class DocPageBlockComponent extends BlockElement<
         })
       );
     });
+
+    const scrollElement = this.closest(
+      'div.affine-doc-viewport'
+    ) as HTMLElement;
+    if (scrollElement) {
+      this._scrollTop = this.service.editSession.getItem('docScrollTop') ?? 0;
+      requestAnimationFrame(() => scrollElement.scrollTo(0, this._scrollTop));
+
+      this._disposables.addFromEvent(
+        scrollElement,
+        'scroll',
+        debounce(e => {
+          this._scrollTop = (e.target as HTMLElement).scrollTop;
+          this.service.editSession.setItem('docScrollTop', this._scrollTop);
+        }, 500)
+      );
+    }
   }
 
   override connectedCallback() {
@@ -379,6 +398,7 @@ export class DocPageBlockComponent extends BlockElement<
     this.clipboardController.hostDisconnected();
     this._disposables.dispose();
     this.keyboardManager = null;
+    this.service.editSession.setItem('docScrollTop', this._scrollTop);
   }
 
   override renderBlock() {

@@ -1,4 +1,3 @@
-import type { PageService } from '@blocksuite/blocks';
 import { DocEditorBlockSpecs } from '@blocksuite/blocks';
 import { noop } from '@blocksuite/global/utils';
 import { EditorHost, ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -21,8 +20,6 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
   hasViewport = true;
 
   private _host: Ref<EditorHost> = createRef<EditorHost>();
-
-  private _scrollTop = 0;
 
   get host() {
     return this._host.value as EditorHost;
@@ -74,26 +71,6 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
         ></editor-host>
       </div>
     `;
-  }
-
-  protected override firstUpdated() {
-    if (!this.parentElement || !this.host) return;
-
-    const pageService = this.host.spec.getService('affine:page') as PageService;
-    this._scrollTop = pageService.editSession.getItem('docScrollTop') ?? 0;
-    requestAnimationFrame(() =>
-      this.parentElement?.scrollTo(0, this._scrollTop)
-    );
-
-    this._disposables.addFromEvent(this.parentElement, 'scroll', e => {
-      this._scrollTop = (e.target as HTMLElement).scrollTop;
-    });
-  }
-
-  override disconnectedCallback(): void {
-    (
-      this.host.spec.getService('affine:page') as PageService
-    ).editSession.setItem('docScrollTop', this._scrollTop);
   }
 }
 
