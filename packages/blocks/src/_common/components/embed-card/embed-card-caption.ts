@@ -7,6 +7,7 @@ import type { AttachmentBlockComponent } from '../../../attachment-block/attachm
 import type { BookmarkBlockComponent } from '../../../bookmark-block/bookmark-block.js';
 import type { EmbedFigmaBlockComponent } from '../../../embed-figma-block/embed-figma-block.js';
 import type { EmbedGithubBlockComponent } from '../../../embed-github-block/embed-github-block.js';
+import type { EmbedHtmlBlockComponent } from '../../../embed-html-block/embed-html-block.js';
 import type { EmbedLinkedDocBlockComponent } from '../../../embed-linked-doc-block/embed-linked-doc-block.js';
 import type { EmbedYoutubeBlockComponent } from '../../../embed-youtube-block/embed-youtube-block.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
@@ -42,6 +43,7 @@ export class EmbedCardCaption extends WithDisposable(ShadowlessElement) {
     | EmbedYoutubeBlockComponent
     | EmbedFigmaBlockComponent
     | EmbedLinkedDocBlockComponent
+    | EmbedHtmlBlockComponent
     | SurfaceRefBlockComponent;
 
   @state()

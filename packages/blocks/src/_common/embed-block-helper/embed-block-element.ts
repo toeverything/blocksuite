@@ -42,7 +42,9 @@ export class EmbedBlockElement<
   }
 
   get edgeless() {
-    if (this._isInSurface) return null;
+    if (!this._isInSurface) {
+      return null;
+    }
     return this.host.querySelector('affine-edgeless-page');
   }
 
@@ -180,6 +182,7 @@ export class EmbedBlockElement<
         <div
           class="embed-block-container"
           style=${styleMap({
+            position: 'relative',
             width: '100%',
             margin: '18px 0px',
           })}

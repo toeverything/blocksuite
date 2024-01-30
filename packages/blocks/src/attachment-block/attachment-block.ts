@@ -71,6 +71,8 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   private _isDragging = false;
 
+  private _isResizing = false;
+
   private readonly _themeObserver = new ThemeObserver();
 
   private _isInSurface = false;
@@ -80,7 +82,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   }
 
   get edgeless() {
-    if (this._isInSurface) return null;
+    if (!this._isInSurface) {
+      return null;
+    }
     return this.host.querySelector('affine-edgeless-page');
   }
 
@@ -246,14 +250,29 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         this._isSelected = sels.some(sel =>
           PathFinder.equals(sel.path, this.path)
         );
-        this._showOverlay = this._isDragging || !this._isSelected;
+        this._showOverlay =
+          this._isResizing || this._isDragging || !this._isSelected;
       })
     );
     // this is required to prevent iframe from capturing pointer events
     this.handleEvent('pointerMove', ctx => {
       this._isDragging = ctx.get('pointerState').dragging;
-      if (this._isDragging) this._showOverlay = true;
+      this._showOverlay =
+        this._isResizing || this._isDragging || !this._isSelected;
     });
+
+    if (this.isInSurface) {
+      this.edgeless?.slots.elementResizeStart.on(() => {
+        this._isResizing = true;
+        this._showOverlay = true;
+      });
+
+      this.edgeless?.slots.elementResizeEnd.on(() => {
+        this._isResizing = false;
+        this._showOverlay =
+          this._isResizing || this._isDragging || !this._isSelected;
+      });
+    }
   }
 
   override disconnectedCallback() {

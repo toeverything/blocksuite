@@ -77,7 +77,9 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   get edgeless() {
-    if (this._isInSurface) return null;
+    if (!this._isInSurface) {
+      return null;
+    }
     return this.host.querySelector('affine-edgeless-page');
   }
 
