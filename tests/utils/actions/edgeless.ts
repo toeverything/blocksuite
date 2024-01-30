@@ -98,6 +98,12 @@ export async function extendFormatBar(page: Page) {
   await waitNextFrame(page);
 }
 
+export async function toggleFramePanel(page: Page) {
+  await page.click('sl-button:text("Test Operations")');
+  await page.click('sl-menu-item:text("Toggle Frame Panel")');
+  await waitNextFrame(page);
+}
+
 export async function switchEditorMode(page: Page) {
   await page.click('sl-tooltip[content="Switch Editor Mode"]');
   // FIXME: listen to editor loaded event
@@ -118,7 +124,8 @@ type EdgelessTool =
   | 'eraser'
   | 'text'
   | 'connector'
-  | 'frame';
+  | 'frame'
+  | 'frameNavigator';
 type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
@@ -137,6 +144,7 @@ export function locatorEdgelessToolButton(
     connector: '.edgeless-connector-button',
     note: '.edgeless-note-button',
     frame: '.edgeless-frame-button',
+    frameNavigator: '.edgeless-frame-navigator-button',
   }[type];
 
   let buttonType;
