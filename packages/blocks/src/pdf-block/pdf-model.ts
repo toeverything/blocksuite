@@ -24,6 +24,9 @@ export const PDFBlockSchema = defineBlockSchema({
     role: 'hub',
     parent: ['affine:page'],
   },
+  toModel() {
+    return new PDFBlockModel();
+  },
 });
 
 export class PDFBlockModel extends selectable<PDFProps>(BlockModel) {}

@@ -29,7 +29,8 @@ export type EdgelessBlockType =
   | 'affine:embed-github'
   | 'affine:embed-youtube'
   | 'affine:embed-figma'
-  | 'affine:embed-linked-doc';
+  | 'affine:embed-linked-doc'
+  | 'affine:pdf';
 
 export type EdgelessElementType =
   | EdgelessBlockType

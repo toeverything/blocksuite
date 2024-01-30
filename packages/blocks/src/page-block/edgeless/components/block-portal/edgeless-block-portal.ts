@@ -10,6 +10,7 @@ import '../rects/edgeless-dragging-area-rect.js';
 import '../../components/auto-connect/edgeless-index-label.js';
 import '../component-toolbar/component-toolbar.js';
 import '../presentation/edgeless-navigator-black-background.js';
+import './pdf/edgeless-pdf.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -49,6 +50,7 @@ const portalMap = new Map<EdgelessBlockType | RegExp, string>([
   ['affine:bookmark', 'edgeless-block-portal-bookmark'],
   ['affine:attachment', 'edgeless-block-portal-attachment'],
   [/affine:embed-*/, 'edgeless-block-portal-embed'],
+  ['affine:pdf', 'edgeless-block-portal-pdf'],
 ]);
 
 @customElement('edgeless-block-portal-container')

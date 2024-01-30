@@ -3,14 +3,22 @@ import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 
+import {
+  FrameNavigatorNextIcon,
+  FrameNavigatorPrevIcon,
+} from '../_common/icons/edgeless.js';
 import type { PDFBlockModel } from './pdf-model.js';
 import { PDFException, type PDFService } from './pdf-service.js';
 
 @customElement('affine-pdf')
 export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
   static override styles = css`
-    .affine-pdf-canvas-container {
+    .affine-pdf-block {
       position: relative;
+    }
+
+    .affine-pdf-canvas-container {
+      text-align: center;
     }
 
     .pdf-pagination {
@@ -25,11 +33,27 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
       background-color: rgba(0, 0, 0, 0.5);
       color: white;
       font-size: 0.75rem;
-      text-align: right;
+      user-select: none;
     }
 
-    .affine-pdf-canvas-container:hover .pdf-pagination {
-      display: block;
+    .affine-pdf-block:hover .pdf-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .page-btn {
+      background: none;
+      border: none;
+      width: 16px;
+      height: 16px;
+      color: var(--affine-white);
+      padding: 0;
+    }
+
+    .page-btn svg {
+      width: 16px;
+      height: 16px;
     }
   `;
 
@@ -52,7 +76,32 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
     return super.service as PDFService;
   }
 
-  private async _initPDF() {
+  private async _renderPage(num: number) {
+    try {
+      const pdfPage = await this._pdfDoc.getPage(num);
+      const viewport = pdfPage.getViewport({ scale: 2 });
+      const context = this.pdfCanvas.getContext('2d')!;
+
+      this.pdfCanvas.height = viewport.height;
+      this.pdfCanvas.width = viewport.width;
+      this.pdfCanvas.style.height = `${viewport.height / 2}px`;
+      this.pdfCanvas.style.width = `${viewport.width / 2}px`;
+
+      const renderContext = {
+        canvasContext: context,
+        viewport,
+      };
+
+      await pdfPage.render(renderContext).promise;
+    } catch (e) {
+      console.error(e);
+      this._status = 'render-failed';
+    } finally {
+      this.isConnected && this.requestUpdate();
+    }
+  }
+
+  private async _setupPDF() {
     const blob = await this.page.blob.get(this.model.sourceId);
 
     if (!blob) {
@@ -64,24 +113,12 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
 
     try {
       const pdfDoc = await this.service.parsePDF(URL.createObjectURL(blob));
-      const pdfPage = await pdfDoc.getPage(1);
 
       if (!this.isConnected || !this.pdfCanvas) return;
 
       this._pdfDoc = pdfDoc;
 
-      const viewport = pdfPage.getViewport({ scale: 1 });
-      const context = this.pdfCanvas.getContext('2d')!;
-
-      this.pdfCanvas.height = viewport.height;
-      this.pdfCanvas.width = viewport.width;
-
-      const renderContext = {
-        canvasContext: context,
-        viewport,
-      };
-
-      await pdfPage.render(renderContext).promise;
+      await this._renderPage(1);
     } catch (err) {
       this._status =
         err instanceof PDFException
@@ -96,8 +133,20 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
     }
   }
 
+  private _prev() {
+    if (this._pdfPageNum === 1) return;
+
+    this._renderPage(--this._pdfPageNum).catch(() => {});
+  }
+
+  private _next() {
+    if (this._pdfPageNum === this._pdfDoc.numPages) return;
+
+    this._renderPage(++this._pdfPageNum).catch(() => {});
+  }
+
   override firstUpdated() {
-    this._initPDF().catch(() => {});
+    this._setupPDF().catch(() => {});
   }
 
   override render() {
@@ -108,12 +157,18 @@ export class PDFBlockComponent extends BlockElement<PDFBlockModel, PDFService> {
     return html`<div class="affine-pdf-block">
       <div class="affine-pdf-canvas-container">
         <canvas class="pdf-canvas"></canvas>
-        ${this._pdfDoc
-          ? html`<div class="pdf-pagination">
-              ${this._pdfPageNum}/${this._pdfDoc.numPages}
-            </div>`
-          : nothing}
       </div>
+      ${this._pdfDoc
+        ? html`<div class="pdf-pagination">
+            <button class="page-btn" type="button" @click=${this._prev}>
+              ${FrameNavigatorPrevIcon}
+            </button>
+            ${this._pdfPageNum} / ${this._pdfDoc.numPages}
+            <button class="page-btn" type="button" @click=${this._next}>
+              ${FrameNavigatorNextIcon}
+            </button>
+          </div>`
+        : nothing}
     </div>`;
   }
 }
