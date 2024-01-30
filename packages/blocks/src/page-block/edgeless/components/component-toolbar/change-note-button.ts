@@ -91,6 +91,10 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         line-height: 20px;
       }
 
+      .display-mode-button-label {
+        white-space: nowrap;
+      }
+
       .display-mode-button {
         display: flex;
         border-radius: 4px;
@@ -418,7 +422,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     return html`
       ${length === 1
         ? html`<div class="display-mode-button-group">
-              <span>Show in</span>
+              <span class="display-mode-button-label">Show in</span>
               <edgeless-tool-icon-button
                 .tooltip=${this._showPopper ? '' : 'Display Mode'}
                 .iconContainerPadding=${0}
