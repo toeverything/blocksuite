@@ -124,9 +124,9 @@ const reference: DefaultTheme.NavItem[] = [
   },
 ];
 
-const presets: DefaultTheme.NavItem[] = [
-  { text: '📝 DocEditor', link: 'presets/doc-editor' },
-  { text: '🎨 EdgelessEditor', link: 'presets/edgeless-editor' },
+const components: DefaultTheme.NavItem[] = [
+  { text: '📝 DocEditor', link: 'components/doc-editor' },
+  { text: '🎨 EdgelessEditor', link: 'components/edgeless-editor' },
 ];
 
 // https://vitepress.dev/reference/site-config
@@ -144,14 +144,19 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       {
-        text: 'Presets',
+        text: 'Components 🚧',
         items: [
-          { text: '📝 DocEditor', link: '/presets/doc-editor' },
-          { text: '🎨 EdgelessEditor', link: '/presets/edgeless-editor' },
+          { text: '📝 DocEditor', link: '/components/doc-editor' },
+          { text: '🎨 EdgelessEditor', link: '/components/edgeless-editor' },
         ],
       },
-      { text: 'Guide', link: '/guide/overview' },
-      { text: 'API', link: '/api/' },
+      {
+        text: 'Framework',
+        items: [
+          { text: 'Guide', link: '/guide/overview' },
+          { text: 'API', link: '/api/' },
+        ],
+      },
       // { text: 'Blog', link: '/blog/' },
       {
         text: 'Releases',
@@ -162,7 +167,7 @@ export default defineConfig({
     sidebar: {
       '/guide/': { base: '/', items: guide },
       '/api/': { base: '/', items: reference },
-      '/presets/': { base: '/', items: presets },
+      '/components/': { base: '/', items: components },
     },
 
     socialLinks: [

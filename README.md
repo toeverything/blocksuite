@@ -25,12 +25,14 @@
 
 BlockSuite is a toolkit for building diverse collaborative editors and applications. It implements a series of collaborative editing infrastructures and editors independently. With BlockSuite, you can choose to:
 
-- Build a new editor from scratch based on the BlockSuite framework.
-- Or, reuse multiple first-party editors based on BlockSuite right out of the box:
-  - [**`DocEditor`**](https://blocksuite.io/presets/doc-editor.html): **Built entirely from scratch**, `DocEditor` is a comprehensive block-based document editor, offering extensive customization and flexibility.
-  - [**`EdgelessEditor`**](https://blocksuite.io/presets/edgeless-editor.html): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
+- Reuse multiple first-party editors based on BlockSuite right out of the box:
+  - [**`DocEditor`**](https://blocksuite.io/components/doc-editor.html): **Built entirely from scratch**, `DocEditor` is a comprehensive block-based document editor, offering extensive customization and flexibility.
+  - [**`EdgelessEditor`**](https://blocksuite.io/components/edgeless-editor.html): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
+- Or, build new editors from scratch based on the underlying vallina framework.
 
 These editors are being used in [AFFiNE](https://github.com/toeverything/AFFiNE).
+
+> 🚧 BlockSuite is currently in its early stage, with components and extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
 
 ![showcase-doc-edgeless-editors](./packages/docs/images/showcase-doc-edgeless-editors.jpg)
 
@@ -86,8 +88,6 @@ The BlockSuite project is structured around key packages that are categorized in
 This can be illustrated as the diagram below:
 
 ![package-overview.png](./packages/docs/images/package-overview.png)
-
-> 🚧 BlockSuite is currently in its early stage, with some extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
 
 ## Resources
 

@@ -2,7 +2,7 @@
 import { h } from 'vue';
 import Theme from 'vitepress/theme';
 import Logo from './logo.vue';
-import CodeSandbox from '../../components/code-sandbox.vue';
+import CodeSandbox from './code-sandbox.vue';
 import 'vitepress-plugin-sandpack/dist/style.css';
 import './style.css';
 
