@@ -131,6 +131,7 @@ const SessionPropsSchema = z.object({
   templateCache: z.string(),
   remoteColor: z.string(),
   showBidirectional: z.boolean(),
+  docScrollTop: z.number(),
 });
 
 type SessionProps = z.infer<typeof SessionPropsSchema>;
