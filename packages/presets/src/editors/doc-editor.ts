@@ -81,7 +81,6 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
 
     const pageService = this.host.spec.getService('affine:page') as PageService;
     this._scrollTop = pageService.editSession.getItem('docScrollTop') ?? 0;
-
     requestAnimationFrame(() =>
       this.parentElement?.scrollTo(0, this._scrollTop)
     );
@@ -92,11 +91,9 @@ export class DocEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override disconnectedCallback(): void {
-    const host = this.host;
-    if (!host) return;
-    const pageService = host.spec.getService('affine:page') as PageService;
-
-    pageService.editSession.setItem('docScrollTop', this._scrollTop);
+    (
+      this.host.spec.getService('affine:page') as PageService
+    ).editSession.setItem('docScrollTop', this._scrollTop);
   }
 }
 
