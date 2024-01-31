@@ -20,5 +20,5 @@ export interface TemplateManager {
 
   search(keyword: string, category?: string): Promise<Template[]>;
 
-  extend(manager: TemplateManager): void;
+  extend?(manager: TemplateManager): void;
 }
