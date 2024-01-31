@@ -11,8 +11,8 @@ import {
   RenameIcon,
   UngroupButtonIcon,
 } from '../../../../_common/icons/index.js';
+import { NoteDisplayMode } from '../../../../_common/types.js';
 import { matchFlavours } from '../../../../_common/utils/model.js';
-import { NoteDisplayMode } from '../../../../index.js';
 import type { GroupElementModel } from '../../../../surface-block/index.js';
 import {
   deserializeXYWH,
