@@ -62,7 +62,7 @@ export default defineConfig({
           { text: 'API', link: '/api/' },
         ],
       },
-      // { text: 'Blog', link: '/blog/' },
+      { text: 'Blog', link: '/blog/', activeMatch: '/blog/*' },
       {
         text: 'Releases',
         link: 'https://github.com/toeverything/blocksuite/releases',

@@ -287,6 +287,9 @@ importers:
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../framework/store
+      date-fns:
+        specifier: ^3.3.0
+        version: 3.3.0
       markdown-it-container:
         specifier: ^4.0.0
         version: 4.0.0
@@ -1687,8 +1690,8 @@ packages:
     engines: {node: '>=12.4.0'}
     dev: true
 
-  /@nolyfill/is-generator-function@1.0.24:
-    resolution: {integrity: sha512-1b5eOnqdmfMusjU5YNvojLlZguoENQfA3wa1AQNEvBsR5pi41i2Zn1WNvk4Ph1QI3hpW8xWOmAJS1ouMF5cNkA==}
+  /@nolyfill/is-generator-function@1.0.28:
+    resolution: {integrity: sha512-Lmb7ihogbV5G5S5FRQTvyiQWpPZmZp9UB4rW5J28pMv41eBFFK0PWfY1DpfHdzRzLS6mVuh9RECPyjVrrXiX5g==}
     engines: {node: '>=12.4.0'}
     dev: true
 
@@ -5126,7 +5129,7 @@ packages:
       fresh: 0.5.2
       http-assert: 1.5.0
       http-errors: 1.8.1
-      is-generator-function: /@nolyfill/is-generator-function@1.0.24
+      is-generator-function: /@nolyfill/is-generator-function@1.0.28
       koa-compose: 4.1.0
       koa-convert: 2.0.0
       on-finished: 2.4.1
