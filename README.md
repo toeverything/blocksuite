@@ -30,7 +30,7 @@ BlockSuite is a toolkit for building diverse collaborative editors and applicati
   - [**`EdgelessEditor`**](https://blocksuite.io/components/edgeless-editor.html): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
 - Or, build new editors from scratch based on the underlying vallina framework.
 
-These editors are being used in [AFFiNE](https://github.com/toeverything/AFFiNE).
+First-party BlockSuite editors are built for the beloved [AFFiNE](https://github.com/toeverything/AFFiNE) knowledge base.
 
 > 🚧 BlockSuite is currently in its early stage, with components and extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
 

@@ -7,11 +7,11 @@ BlockSuite is a toolkit for building diverse collaborative editors and applicati
   - [**`EdgelessEditor`**](../components/edgeless-editor): **Featuring canvas-based graphics rendering** at its core with sophisticated rich-text features, `EdgelessEditor` offers unique functionalities and decent performance in whiteboard editing.
 - Or, build new editors from scratch based on the underlying vallina framework.
 
-First party BlockSuite editors are being used in [AFFiNE](https://github.com/toeverything/AFFiNE), click 🔁 in following example to switch between them dynamically - they are fully compatible!
+First-party BlockSuite editors are built for the beloved [AFFiNE](https://github.com/toeverything/AFFiNE) knowledge base.
 
 > 🚧 BlockSuite is currently in its early stage, with components and extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!
 
-<iframe src="https://try-blocksuite.vercel.app/starter/?init" width="100%" height="500"></iframe>
+![showcase-doc-edgeless-editors](../images/showcase-doc-edgeless-editors.jpg)
 
 In addition to [extending custom blocks](./working-with-block-tree#defining-new-blocks), here are what you can also conveniently achieve with BlockSuite:
 
