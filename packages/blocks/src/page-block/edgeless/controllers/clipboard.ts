@@ -101,6 +101,10 @@ export class EdgelessClipboardController extends PageClipboard {
     return this.host.surface;
   }
 
+  private get edgeless() {
+    return this.surface.edgeless;
+  }
+
   private get toolManager() {
     return this.host.tools;
   }
@@ -837,7 +841,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
       bound.x += pasteX - oldCommonBound.x;
       bound.y += pasteY - oldCommonBound.y;
-      this.surface.edgeless.service.updateElement(block.id, {
+      this.edgeless.service.updateElement(block.id, {
         xywh: bound.serialize(),
       });
     });
@@ -1081,7 +1085,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
       if (matchFlavours(nodeElement, ['affine:frame'])) {
         const blocksInsideFrame: TopLevelBlockModel[] = [];
-        this.surface.frame
+        this.edgeless.service.frame
           .getElementsInFrame(nodeElement, false)
           .forEach(ele => {
             if (isTopLevelBlock(ele)) {
@@ -1132,7 +1136,9 @@ export function getCopyElements(
   elements.forEach(element => {
     if (isFrameBlock(element)) {
       set.add(element);
-      surface.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
+      surface.edgeless.service.frame
+        .getElementsInFrame(element)
+        .forEach(ele => set.add(ele));
     } else if (element instanceof GroupElementModel) {
       getCopyElements(
         surface,

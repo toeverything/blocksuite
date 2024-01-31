@@ -64,6 +64,7 @@ import {
   getClosestNoteBlock,
   getDragHandleContainerHeight,
   getDragHandleLeftPadding,
+  getDuplicateBlocks,
   getNoteId,
   includeTextSelection,
   insideDatabaseTable,
@@ -366,12 +367,15 @@ export class AffineDragHandleWidget extends WidgetElement<
       const offset = this._calculatePreviewOffset(blockElements, state);
       const posX = state.raw.x - offset.x;
       const posY = state.raw.y - offset.y;
+      const altKey = state.raw.altKey;
 
       dragPreview = new DragPreview(offset);
       dragPreview.style.width = `${width / this.scale}px`;
       dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
         this.scale * this.noteScale
       })`;
+
+      dragPreview.style.opacity = altKey ? '1' : '0.5';
       dragPreview.appendChild(fragment);
     }
     this.pageBlockElement.appendChild(dragPreview);
@@ -405,6 +409,9 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
       this.scale * this.noteScale
     })`;
+
+    const altKey = state.raw.altKey;
+    this.dragPreview.style.opacity = altKey ? '1' : '0.5';
   };
 
   private _updateDragPreviewOnViewportUpdate = () => {
@@ -434,11 +441,16 @@ export class AffineDragHandleWidget extends WidgetElement<
     dragPreviewEl?: HTMLElement,
     dragPreviewOffset?: Point
   ) => {
-    if (!blockElements.length) return;
+    if (!blockElements.length) {
+      return;
+    }
 
     this.draggingElements = blockElements;
 
-    if (this.dragPreview) this._removeDragPreview();
+    if (this.dragPreview) {
+      this._removeDragPreview();
+    }
+
     this.dragPreview = this._createDragPreview(
       blockElements,
       state,
@@ -462,10 +474,13 @@ export class AffineDragHandleWidget extends WidgetElement<
     this._anchorBlockId = '';
     this._anchorBlockPath = null;
 
-    if (this._dragHandleContainer)
+    if (this._dragHandleContainer) {
       this._dragHandleContainer.style.display = 'none';
+    }
 
-    if (force) this._reset();
+    if (force) {
+      this._reset();
+    }
   };
 
   private _reset = () => {
@@ -1143,7 +1158,14 @@ export class AffineDragHandleWidget extends WidgetElement<
         },
       });
 
-      this.page.moveBlocks(selectedBlocks, newNoteBlock);
+      const altKey = state.raw.altKey;
+      if (altKey) {
+        const duplicateBlocks = getDuplicateBlocks(selectedBlocks);
+
+        this.page.addBlocks(duplicateBlocks, newNoteBlock);
+      } else {
+        this.page.moveBlocks(selectedBlocks, newNoteBlock);
+      }
 
       return true;
     }
@@ -1154,13 +1176,16 @@ export class AffineDragHandleWidget extends WidgetElement<
         this.selectedBlocks.map(selection => selection.blockId),
         targetBlockId
       )
-    )
+    ) {
       return false;
+    }
 
     const selectedBlocks = getBlockElementsExcludeSubtrees(draggingElements)
       .map(element => getModelByBlockComponent(element))
       .filter((x): x is BlockModel => !!x);
-    if (!selectedBlocks.length) return false;
+    if (!selectedBlocks.length) {
+      return false;
+    }
 
     const targetBlock = this.page.getBlockById(targetBlockId);
     assertExists(targetBlock);
@@ -1172,15 +1197,32 @@ export class AffineDragHandleWidget extends WidgetElement<
       : this.page.getParent(targetBlockId);
     assertExists(parent);
 
+    const altKey = state.raw.altKey;
+
     if (shouldInsertIn) {
-      this.page.moveBlocks(selectedBlocks, targetBlock);
+      if (altKey) {
+        const duplicateBlocks = getDuplicateBlocks(selectedBlocks);
+
+        this.page.addBlocks(duplicateBlocks, targetBlock);
+      } else {
+        this.page.moveBlocks(selectedBlocks, targetBlock);
+      }
     } else {
-      this.page.moveBlocks(
-        selectedBlocks,
-        parent,
-        targetBlock,
-        dropType === 'before'
-      );
+      if (altKey) {
+        const duplicateBlocks = getDuplicateBlocks(selectedBlocks);
+
+        const parentIndex =
+          parent.children.indexOf(targetBlock) + (dropType === 'after' ? 1 : 0);
+
+        this.page.addBlocks(duplicateBlocks, parent, parentIndex);
+      } else {
+        this.page.moveBlocks(
+          selectedBlocks,
+          parent,
+          targetBlock,
+          dropType === 'before'
+        );
+      }
     }
 
     // TODO: need a better way to update selection
@@ -1216,7 +1258,9 @@ export class AffineDragHandleWidget extends WidgetElement<
     const state = ctx.get('pointerState');
     // If not click left button to start dragging, should do nothing
     const { button } = state.raw;
-    if (button !== 0) return false;
+    if (button !== 0) {
+      return false;
+    }
 
     // call default drag start handler if no option return true
     for (const option of this.optionRunner.options) {
@@ -1298,7 +1342,11 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     // call default drag end handler if no option return true
     this._onDragEnd(state);
-    if (isInsideEdgelessEditor(this.host)) this._checkTopLevelBlockSelection();
+
+    if (isInsideEdgelessEditor(this.host)) {
+      this._checkTopLevelBlockSelection();
+    }
+
     return true;
   };
 
@@ -1320,6 +1368,20 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const inDragHandle = !!relatedElement?.closest(AFFINE_DRAG_HANDLE_WIDGET);
     if (outOfPageViewPort && !inDragHandle && !inPage) this._hide();
+  };
+
+  private _keyboardHandler: UIEventHandler = ctx => {
+    if (!this.dragging || !this.dragPreview) {
+      return;
+    }
+
+    const state = ctx.get('defaultState');
+    const event = state.event as KeyboardEvent;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const altKey = event.key === 'Alt' && event.altKey;
+    this.dragPreview.style.opacity = altKey ? '1' : '0.5';
   };
 
   private _onDragHandlePointerEnter = () => {
@@ -1529,6 +1591,8 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.handleEvent('dragEnd', this._dragEndHandler);
     this.handleEvent('pointerOut', this._pointerOutHandler);
     this.handleEvent('beforeInput', () => this._hide());
+    this.handleEvent('keyDown', this._keyboardHandler, { global: true });
+    this.handleEvent('keyUp', this._keyboardHandler, { global: true });
   }
 
   override disconnectedCallback() {

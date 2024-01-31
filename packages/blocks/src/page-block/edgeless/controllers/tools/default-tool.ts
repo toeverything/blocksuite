@@ -459,7 +459,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const toBeMoved = new Set(elements);
     elements.forEach(element => {
       if (isFrameBlock(element)) {
-        this._surface.frame
+        this._edgeless.service.frame
           .getElementsInFrame(element)
           .forEach(ele => toBeMoved.add(ele));
       } else if (element instanceof GroupElementModel) {
@@ -482,7 +482,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._selectedBounds = this._toBeMoved.map(element =>
       Bound.deserialize(element.xywh)
     );
-    this._alignBound = this._surface.snap.setupAlignables(this._toBeMoved);
+
+    this._alignBound = this._edgeless.service.snap.setupAlignables(
+      this._toBeMoved
+    );
 
     // If the drag type is selecting, set up the dragging area disposable group
     // If the viewport updates when dragging, should update the dragging area and selection
@@ -537,7 +540,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         curBound.x += dx;
         curBound.y += dy;
 
-        const alignRst = surface.snap.align(curBound);
+        const alignRst = this._edgeless.service.snap.align(curBound);
         const delta = [dx + alignRst.dx, dy + alignRst.dy];
 
         this._toBeMoved.forEach((element, index) => {
@@ -556,7 +559,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             );
           }
         });
-        const frame = surface.frame.selectFrame(this._toBeMoved);
+        const frame = this._edgeless.service.frame.selectFrame(this._toBeMoved);
         frame
           ? surface.overlays.frame.highlight(frame as FrameBlockModel)
           : surface.overlays.frame.clear();
@@ -589,7 +592,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = [0, 0];
     this._dragLastPos = [0, 0];
     this._selectedBounds = [];
-    surface.snap.cleanupAlignables();
+    this._edgeless.service.snap.cleanupAlignables();
     surface.overlays.frame.clear();
     this._toBeMoved = [];
     this._clearSelectingState();

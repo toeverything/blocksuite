@@ -208,7 +208,9 @@ export class BiDirectionalLinkPanel extends WithDisposable(LitElement) {
     config.setInteractable(false);
     config.setPage(this.page);
     config.setCustomContent((reference: AffineReference) => {
-      const title = reference.page.meta.title ?? 'Untitled';
+      const title = reference.page.meta.title
+        ? reference.page.meta.title
+        : 'Untitled';
       return html`<style>
           .custom-reference-content svg {
             position: relative;
