@@ -333,7 +333,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.leftSidePanel.toggle(this.pagesPanel);
   }
 
-  private async _initWebsocketProvider(room: string): Promise<boolean> {
+  private async _initWebsocketProvider(room: string) {
     this._initws = true;
     const result = await initCollaborationSocket(this.workspace, room);
     this._initws = false;
