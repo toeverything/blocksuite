@@ -1,6 +1,6 @@
 import '../../../../surface-ref-block/surface-ref-portal.js';
 
-import { DisposableGroup, throttle } from '@blocksuite/global/utils';
+import { debounce, DisposableGroup } from '@blocksuite/global/utils';
 import {
   type EditorHost,
   ShadowlessElement,
@@ -12,10 +12,12 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessModel } from '../../../../_common/types.js';
-// import { buildPath } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
-import type { SurfaceBlockModel } from '../../../../surface-block/surface-model.js';
+import type {
+  ElementUpdatedData,
+  SurfaceBlockModel,
+} from '../../../../surface-block/surface-model.js';
 import { Bound } from '../../../../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
 import type { SurfaceRefPortal } from '../../../../surface-ref-block/surface-ref-portal.js';
@@ -225,6 +227,35 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     };
   };
 
+  private _overlapWithFrame = (id: string) => {
+    const ele = this.edgeless?.service.getElementById(id);
+    if (!ele || !ele.xywh) return false;
+
+    const frameBound = Bound.deserialize(this.frame.xywh);
+    const eleBound = Bound.deserialize(ele.xywh);
+    return frameBound.isOverlapWithBound(eleBound);
+  };
+
+  private _handleElementUpdated = (data: ElementUpdatedData) => {
+    const { id, oldValues } = data;
+    // if element is moved in frame, refresh viewport
+    if (this._overlapWithFrame(id)) {
+      this._refreshViewport();
+    } else if (oldValues.xywh) {
+      // if element is moved out of frame, refresh viewport
+      const oldBound = Bound.deserialize(oldValues.xywh as string);
+      const frameBound = Bound.deserialize(this.frame.xywh);
+      if (oldBound.isOverlapWithBound(frameBound)) {
+        this._refreshViewport();
+      }
+    }
+  };
+
+  private _debounceHandleElementUpdated = debounce(
+    this._handleElementUpdated,
+    200
+  );
+
   private _clearEdgelessDisposables = () => {
     this._edgelessDisposables?.dispose();
     this._edgelessDisposables = null;
@@ -253,11 +284,15 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       })
     );
     this._edgelessDisposables.add(
-      edgeless.service.surface.elementAdded.on(() => this._refreshViewport())
+      edgeless.service.surface.elementAdded.on(({ id }) => {
+        if (this._overlapWithFrame(id)) {
+          this._refreshViewport();
+        }
+      })
     );
     this._edgelessDisposables.add(
       edgeless.service.surface.elementUpdated.on(
-        throttle(() => this._refreshViewport(), 100)
+        this._debounceHandleElementUpdated
       )
     );
     this._edgelessDisposables.add(
