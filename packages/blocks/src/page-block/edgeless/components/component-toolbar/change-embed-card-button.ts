@@ -526,7 +526,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                 <card-style-panel
                   .value=${model.style}
                   .options=${this._getCardStyleOptions}
-                  .onSelect=${this._setCardStyle}
+                  .onSelect=${(value: EmbedCardStyle) =>
+                    this._setCardStyle(value)}
                 >
                 </card-style-panel>
               </div>
