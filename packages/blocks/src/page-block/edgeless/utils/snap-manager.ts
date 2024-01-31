@@ -1,13 +1,18 @@
 import type { Alignable } from '../../../_common/types.js';
+import { buildPath } from '../../../_common/utils/query.js';
 import { Point } from '../../../_common/utils/rect.js';
-import type { ConnectorElementModel } from '../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../index.js';
+import type {
+  ConnectorElementModel,
+  SurfaceBlockModel,
+} from '../../../surface-block/index.js';
 import {
   Bound,
   deserializeXYWH,
   getBoundsWithRotation,
   Overlay,
 } from '../../../surface-block/index.js';
-import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import type { EdgelessPageService } from '../edgeless-page-service.js';
 import { isConnectable, isTopLevelBlock } from '../utils/query.js';
 
 interface Distance {
@@ -22,7 +27,7 @@ interface Distance {
 const ALIGN_THRESHOLD = 5;
 
 export class EdgelessSnapManager extends Overlay {
-  constructor(public container: EdgelessPageBlockComponent) {
+  constructor(private _pageService: EdgelessPageService) {
     super();
   }
 
@@ -50,11 +55,22 @@ export class EdgelessSnapManager extends Overlay {
     return Bound.from(getBoundsWithRotation({ x, y, w, h, rotate }));
   }
 
+  private get _surface() {
+    const surfaceModel = this._pageService.page.getBlockByFlavour(
+      'affine:surface'
+    )[0] as SurfaceBlockModel;
+
+    return this._pageService.std.view.viewFromPath(
+      'block',
+      buildPath(surfaceModel)
+    ) as SurfaceBlockComponent;
+  }
+
   setupAlignables(alignables: Alignable[]): Bound {
     if (alignables.length === 0) return new Bound();
-    const { surface, service } = this.container;
+
     const connectors = alignables.filter(isConnectable).reduce((prev, el) => {
-      const connectors = service.getConnectors(el);
+      const connectors = this._pageService.getConnectors(el);
 
       if (connectors.length > 0) {
         prev = prev.concat(connectors);
@@ -63,21 +79,23 @@ export class EdgelessSnapManager extends Overlay {
       return prev;
     }, [] as ConnectorElementModel[]);
 
-    const { viewport } = service;
+    const { viewport } = this._pageService;
     const viewportBounds = Bound.from(viewport.viewportBounds);
-    surface.renderer.addOverlay(this);
-    const canvasElements = service.elements;
+    this._surface.renderer.addOverlay(this);
+    const canvasElements = this._pageService.elements;
     const excludes = [...alignables, ...connectors];
     this._alignableBounds = [];
-    (<Alignable[]>[...service.blocks, ...canvasElements]).forEach(alignable => {
-      const bounds = this._getBoundsWithRotationByAlignable(alignable);
-      if (
-        viewportBounds.isOverlapWithBound(bounds) &&
-        !excludes.includes(alignable)
-      ) {
-        this._alignableBounds.push(bounds);
+    (<Alignable[]>[...this._pageService.blocks, ...canvasElements]).forEach(
+      alignable => {
+        const bounds = this._getBoundsWithRotationByAlignable(alignable);
+        if (
+          viewportBounds.isOverlapWithBound(bounds) &&
+          !excludes.includes(alignable)
+        ) {
+          this._alignableBounds.push(bounds);
+        }
       }
-    });
+    );
 
     return alignables.reduce((prev, element) => {
       const bounds = this._getBoundsWithRotationByAlignable(element);
@@ -86,18 +104,17 @@ export class EdgelessSnapManager extends Overlay {
   }
 
   cleanupAlignables() {
-    const { renderer } = this.container.surface;
     this._alignableBounds = [];
     this._intraGraphicAlignLines = [];
     this._distributedAlignLines = [];
-    renderer.removeOverlay(this);
+    this._surface.renderer.removeOverlay(this);
   }
 
   align(bound: Bound): { dx: number; dy: number } {
     const rst = { dx: 0, dy: 0 };
     const threshold = ALIGN_THRESHOLD;
-    const { service } = this.container;
-    const { viewport } = service;
+
+    const { viewport } = this._pageService;
 
     this._intraGraphicAlignLines = [];
     this._distributedAlignLines = [];
@@ -384,18 +401,16 @@ export class EdgelessSnapManager extends Overlay {
   }
 
   private _draw() {
-    const { surface } = this.container;
-    surface.refresh();
+    this._surface.refresh();
   }
 
   override render(ctx: CanvasRenderingContext2D) {
-    // return
     if (
       this._intraGraphicAlignLines.length === 0 &&
       this._distributedAlignLines.length === 0
     )
       return;
-    const { viewport } = this.container.service;
+    const { viewport } = this._pageService;
     const strokeWidth = 1 / viewport.zoom;
     const offset = 5 / viewport.zoom;
     ctx.strokeStyle = '#1672F3';

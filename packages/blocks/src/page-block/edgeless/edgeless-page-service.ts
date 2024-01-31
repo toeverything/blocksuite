@@ -16,6 +16,7 @@ import type { ReorderingDirection } from '../../surface-block/managers/layer-man
 import { LayerManager } from '../../surface-block/managers/layer-manager.js';
 import { Bound } from '../../surface-block/utils/bound.js';
 import { PageService } from '../page-service.js';
+import { EdgelessFrameManager } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { TemplateJob } from './services/template.js';
 import {
@@ -31,6 +32,7 @@ import type {
   EdgelessModel,
   HitTestOptions,
 } from './type.js';
+import { EdgelessSnapManager } from './utils/snap-manager.js';
 import { Viewport } from './utils/viewport.js';
 
 export class EdgelessPageService extends PageService {
@@ -38,6 +40,8 @@ export class EdgelessPageService extends PageService {
 
   private _surface!: SurfaceBlockModel;
   private _layer!: LayerManager;
+  private _frame!: EdgelessFrameManager;
+  private _snap!: EdgelessSnapManager;
   private _selection!: EdgelessSelectionManager;
   private _viewport!: Viewport;
   private _tool!: EdgelessToolsManager;
@@ -54,6 +58,8 @@ export class EdgelessPageService extends PageService {
     }
 
     this._layer = LayerManager.create(this.page, this._surface);
+    this._frame = new EdgelessFrameManager(this);
+    this._snap = new EdgelessSnapManager(this);
     this._viewport = new Viewport();
     this._selection = new EdgelessSelectionManager(this);
     this._tool = EdgelessToolsManager.create(this, []);
@@ -86,6 +92,14 @@ export class EdgelessPageService extends PageService {
 
   get viewport() {
     return this._viewport;
+  }
+
+  get frame() {
+    return this._frame;
+  }
+
+  get snap() {
+    return this._snap;
   }
 
   /**

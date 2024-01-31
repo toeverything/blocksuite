@@ -6,6 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { FrameIcon } from '../../../../_common/icons/index.js';
+import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-add-frame-button')
@@ -17,7 +18,8 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
     return html`<edgeless-tool-icon-button
       .iconContainerPadding=${2}
       @click=${() => {
-        this.edgeless.surface.frame.createFrameOnSelected();
+        const frame = this.edgeless.service.frame.createFrameOnSelected();
+        this.edgeless.surface.fitToViewport(Bound.deserialize(frame.xywh));
       }}
     >
       ${FrameIcon}<span

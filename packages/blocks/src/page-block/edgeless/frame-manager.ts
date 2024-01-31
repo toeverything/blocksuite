@@ -8,13 +8,13 @@ import type {
   TopLevelBlockModel,
 } from '../../_common/types.js';
 import { matchFlavours } from '../../_common/utils/model.js';
+import type { EdgelessPageService } from '../../index.js';
 import type {
   FrameBlockModel,
   NoteBlockModel,
   SurfaceBlockModel,
 } from '../../models.js';
 import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
-import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { isFrameBlock } from './utils/query.js';
 
@@ -58,10 +58,10 @@ export class FrameOverlay extends Overlay {
 }
 
 export class EdgelessFrameManager {
-  constructor(private _edgeless: EdgelessPageBlockComponent) {}
+  constructor(private _pageService: EdgelessPageService) {}
 
   selectFrame(eles: Selectable[]) {
-    const frames = this._edgeless.service.frames;
+    const frames = this._pageService.frames;
     if (frames.length === 0) return null;
 
     const selectedFrames = eles.filter(ele => isFrameBlock(ele));
@@ -78,19 +78,22 @@ export class EdgelessFrameManager {
 
   getElementsInFrame(frame: FrameBlockModel, fullyContained = true) {
     const bound = Bound.deserialize(frame.xywh);
-    const elements: EdgelessModel[] =
-      this._edgeless.service.layer.canvasGrid.search(bound, true);
+    const elements: EdgelessModel[] = this._pageService.layer.canvasGrid.search(
+      bound,
+      true
+    );
 
     return elements.concat(
-      getBlocksInFrame(this._edgeless.page, frame, fullyContained)
+      getBlocksInFrame(this._pageService.page, frame, fullyContained)
     );
   }
 
   createFrameOnSelected() {
-    const { _edgeless } = this;
-    const { surface, service } = _edgeless;
-    const frames = service.frames;
-    let bound = edgelessElementsBound(_edgeless.service.selection.elements);
+    const frames = this._pageService.frames;
+    const surfaceModel =
+      this._pageService.page.getBlockByFlavour('affine:surface')[0];
+
+    let bound = edgelessElementsBound(this._pageService.selection.elements);
     bound = bound.expand(FRAME_PADDING);
     if (bound.w < MIN_FRAME_WIDTH) {
       const offset = (MIN_FRAME_WIDTH - bound.w) / 2;
@@ -100,22 +103,24 @@ export class EdgelessFrameManager {
       const offset = (MIN_FRAME_HEIGHT - bound.h) / 2;
       bound = bound.expand(0, offset);
     }
-    const id = service.addBlock(
+    const id = this._pageService.addBlock(
       'affine:frame',
       {
         title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
         xywh: bound.serialize(),
       },
-      surface.model
+      surfaceModel
     );
-    const frameModel = service.getElementById(id);
-    _edgeless.page.captureSync();
+    const frameModel = this._pageService.getElementById(id);
+    this._pageService.page.captureSync();
     assertExists(frameModel);
-    surface.fitToViewport(bound);
-    _edgeless.service.selection.set({
+
+    this._pageService.selection.set({
       elements: [frameModel.id],
       editing: false,
     });
+
+    return this._pageService.getElementById(id);
   }
 }
 
