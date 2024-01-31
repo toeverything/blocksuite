@@ -96,7 +96,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             this.pageElement.service.selection.elements.length !== 0 &&
             !this.pageElement.service.selection.editing
           ) {
-            pageElement.surface.frame.createFrameOnSelected();
+            const frame = pageElement.service.frame.createFrameOnSelected();
+            pageElement.surface.fitToViewport(Bound.deserialize(frame.xywh));
           } else if (!this.pageElement.service.selection.editing) {
             this._setEdgelessTool(pageElement, { type: 'frame' });
           }

@@ -10,11 +10,7 @@ import { values } from '../_common/utils/iterable.js';
 import { isShape } from '../page-block/edgeless/components/auto-complete/utils.js';
 import type { EdgelessBlockPortalContainer } from '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
-import {
-  EdgelessFrameManager,
-  FrameOverlay,
-} from '../page-block/edgeless/frame-manager.js';
-import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
+import { FrameOverlay } from '../page-block/edgeless/frame-manager.js';
 import { Renderer } from './canvas-renderer/renderer.js';
 import { ConnectorElementModel } from './element-model/index.js';
 import { ConnectionOverlay } from './managers/connector-manager.js';
@@ -92,10 +88,6 @@ export class SurfaceBlockComponent extends BlockElement<
   `;
 
   private _renderer!: Renderer;
-
-  snap!: EdgelessSnapManager;
-  frame!: EdgelessFrameManager;
-
   private _lastTime = 0;
   private _cachedViewport = new Bound();
 
@@ -131,14 +123,9 @@ export class SurfaceBlockComponent extends BlockElement<
 
     if (!this._isEdgeless) return;
 
-    const { edgeless } = this;
-
     this._initThemeObserver();
     this._initRenderer();
     this._initOverlay();
-
-    this.frame = new EdgelessFrameManager(edgeless);
-    this.snap = new EdgelessSnapManager(edgeless);
   }
 
   private _initOverlay() {
