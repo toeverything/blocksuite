@@ -428,7 +428,8 @@ export function convertDragPreviewEdgelessToDoc({
   assertExists(parentBlock);
   const parentIndex = shouldInsertIn
     ? 0
-    : parentBlock.children.indexOf(targetBlock);
+    : parentBlock.children.indexOf(targetBlock) +
+      (dropType === 'after' ? 1 : 0);
 
   const blockModel = blockComponent.model;
   const { width, height, xywh, rotate, zIndex, ...blockProps } =
