@@ -6,7 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { FrameIcon } from '../../../../_common/icons/index.js';
-import { Bound } from '../../../../index.js';
+import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-add-frame-button')
