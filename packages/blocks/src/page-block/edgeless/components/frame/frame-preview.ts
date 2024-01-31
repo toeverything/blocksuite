@@ -18,6 +18,7 @@ import type {
   ElementUpdatedData,
   SurfaceBlockModel,
 } from '../../../../surface-block/surface-model.js';
+import type { SurfaceService } from '../../../../surface-block/surface-service.js';
 import { Bound } from '../../../../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
 import type { SurfaceRefPortal } from '../../../../surface-ref-block/surface-ref-portal.js';
@@ -135,6 +136,10 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     }
   }
 
+  private get _surfaceService() {
+    return this.host?.std.spec.getService('affine:surface') as SurfaceService;
+  }
+
   private get _surfaceRefService() {
     const service = this.host.spec.getService('affine:surface-ref') as
       | SurfaceRefBlockService
@@ -184,7 +189,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   }
 
   private _refreshViewport() {
-    if (!this.frame) {
+    if (!this.frame || !this._surfaceService) {
       return;
     }
 
@@ -237,7 +242,8 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   };
 
   private _handleElementUpdated = (data: ElementUpdatedData) => {
-    const { id, oldValues } = data;
+    const { id, oldValues, props } = data;
+    if (!props.xywh && !props.externalXYWH) return;
     // if element is moved in frame, refresh viewport
     if (this._overlapWithFrame(id)) {
       this._refreshViewport();
@@ -390,6 +396,9 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       } else {
         this._clearEdgelessDisposables();
       }
+      setTimeout(() => {
+        this._refreshViewport();
+      });
     }
 
     if (_changedProperties.has('page')) {
@@ -410,8 +419,9 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const { _surfaceModel, frame, host } = this;
-    const noContent = !_surfaceModel || !frame || !frame.xywh || !host;
+    const { _surfaceModel, frame, host, _surfaceService } = this;
+    const noContent =
+      !_surfaceModel || !frame || !frame.xywh || !host || !_surfaceService;
 
     return html`<div class="frame-preview-container">
       ${noContent ? nothing : this._renderSurfaceContent(frame)}
