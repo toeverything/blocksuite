@@ -9,6 +9,8 @@ excerpt: 'This article presents the document-centric way for building editors, a
 
 # Building Document-Centric, CRDT-Native Editors
 
+<BlogPostMeta />
+
 ## Motivation
 
 For years, web frameworks such as React and Vue have popularized the mental model of component based development. This approach allows us to break down complex front-end applications into components for better composition and maintenance.

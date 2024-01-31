@@ -3,7 +3,7 @@ import { createContentLoader } from 'vitepress';
 
 interface Post {
   title: string;
-  authors: string[];
+  authors: { name: string; link: string }[];
   url: string;
   date: {
     raw: string;
@@ -34,7 +34,7 @@ export default createContentLoader('blog/*.md', {
       .filter(item => item.url !== '/blog/')
       .map(({ url, frontmatter }) => ({
         title: frontmatter.title,
-        authors: frontmatter.authors ?? ['Unknown'],
+        authors: frontmatter.authors ?? [],
         excerpt: frontmatter.excerpt ?? '',
         url,
         date: formatDate(frontmatter.date),

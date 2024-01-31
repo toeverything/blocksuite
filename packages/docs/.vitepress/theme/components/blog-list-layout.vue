@@ -58,6 +58,7 @@ h1 {
 
 .blog-post-date {
   font-size: 14px;
+  color: var(--vp-c-text-3);
 }
 
 .blog-post-excerpt {
@@ -68,10 +69,6 @@ h1 {
 
 .dark .blog-post {
   border-bottom: 1px solid #343a40;
-}
-
-.blog-post-date {
-  color: var(--vp-c-text-3);
 }
 
 .blog-post-read-more:hover {
