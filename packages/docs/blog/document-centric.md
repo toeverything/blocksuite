@@ -1,5 +1,10 @@
 ---
-layout: doc
+title: Building Document-Centric, CRDT-Native Editors
+date: 2024-01-10
+authors:
+  - name: Yifeng Wang
+    link: 'https://twitter.com/ewind1994'
+excerpt: 'This article presents the document-centric way for building editors, and why CRDT is required to make this happpen.'
 ---
 
 # Building Document-Centric, CRDT-Native Editors

@@ -1,9 +1,10 @@
 // https://vitepress.dev/guide/custom-theme
 import { h } from 'vue';
 import Theme from 'vitepress/theme';
-import Logo from './logo.vue';
-import Playground from './playground.vue';
-import CodeSandbox from './code-sandbox.vue';
+import Logo from './components/logo.vue';
+import Playground from './components/playground.vue';
+import BlogListLayout from './components/blog-list-layout.vue';
+import CodeSandbox from './components/code-sandbox.vue';
 import 'vitepress-plugin-sandpack/dist/style.css';
 import './style.css';
 
@@ -17,6 +18,7 @@ export default {
     });
   },
   enhanceApp({ app, router, siteData }) {
+    app.component('BlogListLayout', BlogListLayout);
     app.component('CodeSandbox', CodeSandbox);
   },
 };
