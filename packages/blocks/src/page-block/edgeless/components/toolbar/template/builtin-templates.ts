@@ -30,7 +30,7 @@ const extendTemplate: TemplateManager[] = [];
 const flat = <T>(arr: T[][]) =>
   arr.reduce((pre, current) => {
     if (current) {
-      pre.concat(current);
+      return pre.concat(current);
     }
 
     return pre;
