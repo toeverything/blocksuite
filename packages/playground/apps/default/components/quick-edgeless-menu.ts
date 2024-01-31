@@ -517,7 +517,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
               </sl-tooltip>
             </sl-button-group>
 
-            <sl-tooltip content="Start collaboration" placement="bottom" hoist>
+            <sl-tooltip content="Start Collaboration" placement="bottom" hoist>
               <sl-button
                 @click=${this._startCollaboration}
                 size="small"
@@ -527,7 +527,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 <sl-icon name="people" label="Collaboration"></sl-icon>
               </sl-button>
             </sl-tooltip>
-            <sl-tooltip content="Start collaboration" placement="bottom" hoist>
+            <sl-tooltip content="Pages" placement="bottom" hoist>
               <sl-button
                 @click=${this._togglePagesPanel}
                 size="small"

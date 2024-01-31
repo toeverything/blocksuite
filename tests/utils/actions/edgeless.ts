@@ -105,7 +105,7 @@ export async function toggleFramePanel(page: Page) {
 }
 
 export async function switchEditorMode(page: Page) {
-  await page.click('sl-tooltip[content="Switch Editor Mode"]');
+  await page.click('sl-tooltip[content="Switch Editor"]');
   // FIXME: listen to editor loaded event
   await waitNextFrame(page);
 }
