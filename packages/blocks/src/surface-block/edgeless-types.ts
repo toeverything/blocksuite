@@ -13,8 +13,8 @@ export type EdgelessBlockModelMap = {
   'affine:frame': FrameBlockModel;
   'affine:note': NoteBlockModel;
   'affine:image': ImageBlockModel;
-  'affine:bookmark': BookmarkBlockModel;
   'affine:attachment': AttachmentBlockModel;
+  'affine:bookmark': BookmarkBlockModel;
   'affine:embed-github': EmbedGithubModel;
   'affine:embed-youtube': EmbedYoutubeModel;
   'affine:embed-figma': EmbedFigmaModel;
@@ -26,8 +26,8 @@ export type EdgelessBlockType =
   | 'affine:frame'
   | 'affine:note'
   | 'affine:image'
-  | 'affine:bookmark'
   | 'affine:attachment'
+  | 'affine:bookmark'
   | 'affine:embed-github'
   | 'affine:embed-youtube'
   | 'affine:embed-figma'
