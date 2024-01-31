@@ -58,7 +58,7 @@ export default defineConfig({
       {
         text: 'Framework',
         items: [
-          { text: 'Guide', link: '/guide/overview' },
+          { text: 'Documentation', link: '/guide/overview' },
           { text: 'API', link: '/api/' },
         ],
       },

@@ -19,15 +19,15 @@ hero:
 
 features:
   - title: 🧩 Headless Editor Framework
-    details: BlockSuite defines a vallina framework for building various editors, enabling the design of diverse editing interfaces.
+    details: BlockSuite creates a vallina framework for building various editors, enabling the design of diverse editing interfaces.
     link: /guide/overview
     linkText: Learn More
   - title: 🎨 Extensive Components
-    details: Based on our framework, BlockSuite ships components for building complex editor UIs, which are highly interoperable.
+    details: Based on the framework, BlockSuite ships components for building complex editor UIs, which are highly interoperable.
     link: /guide/component-types
     linkText: Learn More
   - title: 🧬 Collaborative at Core
-    details: Powered by CRDT, BlockSuite supports document streaming and conflict resolution at its heart, ready for collaboration inherently.
+    details: Natively powered by CRDT, BlockSuite supports document streaming and conflict resolution at its heart, ready for collaboration inherently.
     link: /blog/crdt-native-data-flow
     linkText: Learn More
 ---

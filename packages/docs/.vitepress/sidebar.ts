@@ -2,14 +2,14 @@ import { DefaultTheme } from 'vitepress';
 
 export const guide: DefaultTheme.NavItem[] = [
   {
-    text: 'Getting Started',
+    text: 'Introduction',
     items: [
       { text: 'Overview', link: 'guide/overview' },
       { text: 'Quick Start', link: 'guide/quick-start' },
     ],
   },
   {
-    text: 'Framework Tutorial',
+    text: 'Framework Guide',
     items: [
       { text: 'Component Types', link: 'guide/component-types' },
       {
@@ -43,7 +43,7 @@ export const guide: DefaultTheme.NavItem[] = [
     ],
   },
   {
-    text: 'API Walkthrough',
+    text: 'Framework Handbook',
     items: [
       {
         text: '<code>block-std</code>',
