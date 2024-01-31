@@ -1,6 +1,6 @@
 import '../../../../surface-ref-block/surface-ref-portal.js';
 
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { DisposableGroup, throttle } from '@blocksuite/global/utils';
 import {
   type EditorHost,
   ShadowlessElement,
@@ -11,11 +11,8 @@ import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  EdgelessModel,
-  TopLevelBlockModel,
-} from '../../../../_common/types.js';
-import { buildPath } from '../../../../_common/utils/index.js';
+import type { EdgelessModel } from '../../../../_common/types.js';
+// import { buildPath } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/frame-model.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import type { SurfaceBlockModel } from '../../../../surface-block/surface-model.js';
@@ -25,6 +22,7 @@ import type { SurfaceRefPortal } from '../../../../surface-ref-block/surface-ref
 import type { SurfaceRefRenderer } from '../../../../surface-ref-block/surface-ref-renderer.js';
 import type { SurfaceRefBlockService } from '../../../../surface-ref-block/surface-ref-service.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { isTopLevelBlock } from '../../utils/query.js';
 
 type RefElement = Exclude<EdgelessModel, NoteBlockModel>;
 
@@ -77,6 +75,9 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
   frame!: FrameBlockModel;
 
   @property({ attribute: false })
+  page!: Page;
+
+  @property({ attribute: false })
   host!: EditorHost;
 
   @property({ attribute: false })
@@ -103,10 +104,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   @query('.frame-preview-surface-container surface-ref-portal')
   blocksPortal!: SurfaceRefPortal;
-
-  get page() {
-    return this.host.page;
-  }
 
   get surfaceRenderer() {
     return this._surfaceRefRenderer.surfaceRenderer;
@@ -228,17 +225,6 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     };
   };
 
-  private _updateOnElementChange = (element: string | { id: string }) => {
-    const id = typeof element === 'string' ? element : element.id;
-    const ele = this.edgeless?.service.getElementById(id);
-    if (!ele || !ele.xywh) return;
-    const frameBound = Bound.deserialize(this.frame.xywh);
-    const eleBound = Bound.deserialize(ele.xywh);
-    if (!frameBound.isOverlapWithBound(eleBound)) return;
-
-    this._refreshViewport();
-  };
-
   private _clearEdgelessDisposables = () => {
     this._edgelessDisposables?.dispose();
     this._edgelessDisposables = null;
@@ -267,15 +253,15 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       })
     );
     this._edgelessDisposables.add(
-      edgeless.service.surface.elementAdded.on(this._updateOnElementChange)
+      edgeless.service.surface.elementAdded.on(() => this._refreshViewport())
     );
     this._edgelessDisposables.add(
-      edgeless.service.surface.elementUpdated.on(this._updateOnElementChange)
+      edgeless.service.surface.elementUpdated.on(
+        throttle(() => this._refreshViewport(), 100)
+      )
     );
     this._edgelessDisposables.add(
-      edgeless.service.surface.elementRemoved.on(() => {
-        this._refreshViewport();
-      })
+      edgeless.service.surface.elementRemoved.on(() => this._refreshViewport())
     );
   }
 
@@ -285,32 +271,15 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
     this._pageDisposables.add(
       page.slots.blockUpdated.on(event => {
-        const { type, flavour } = event;
-        const isTopLevelBlock = ['affine:image', 'affine:note'].includes(
-          flavour
-        );
-        if (!isTopLevelBlock) return;
+        const { type } = event;
+        const model =
+          type === 'delete' ? event.model : page.getBlockById(event.id);
+        if (!model || !isTopLevelBlock(model) || !model.xywh) return;
 
         const frameBound = Bound.deserialize(this.frame.xywh);
-        if (type === 'delete') {
-          const deleteModel = event.model as TopLevelBlockModel;
-          const deleteBound = Bound.deserialize(deleteModel.xywh);
-          if (frameBound.containsPoint([deleteBound.x, deleteBound.y])) {
-            this._refreshViewport();
-          }
-        } else {
-          const topLevelModel = page.getBlockById(event.id);
-          const topLevelBlock = this.host.view.viewFromPath(
-            'block',
-            buildPath(topLevelModel)
-          );
-          if (!topLevelBlock) return;
-          const newBound = Bound.deserialize(
-            (topLevelModel as TopLevelBlockModel).xywh
-          );
-          if (frameBound.containsPoint([newBound.x, newBound.y])) {
-            this._refreshViewport();
-          }
+        const modelBound = Bound.deserialize(model.xywh);
+        if (frameBound.containsPoint([modelBound.x, modelBound.y])) {
+          this._refreshViewport();
         }
       })
     );
@@ -388,7 +357,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
       }
     }
 
-    if (_changedProperties.has('host')) {
+    if (_changedProperties.has('page')) {
       if (this.page) {
         this._setPageDisposables(this.page);
       }
