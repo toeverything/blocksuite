@@ -11,7 +11,7 @@ import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js
 @customElement('edgeless-frame-order-menu')
 export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
   static override styles = css`
-    .edgeelss-frame-order-items-container {
+    .edgeless-frame-order-items-container {
       max-height: 281px;
       border-radius: 8px;
       padding: 8px 0px 8px 8px;
@@ -113,7 +113,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   frames!: FrameBlockModel[];
 
-  @query('.edgeelss-frame-order-items-container')
+  @query('.edgeless-frame-order-items-container')
   private _container!: HTMLDivElement;
 
   @query('.indicator-line')
@@ -218,7 +218,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
 
     return html`
       <div
-        class="edgeelss-frame-order-items-container"
+        class="edgeless-frame-order-items-container"
         @click=${(e: MouseEvent) => e.stopPropagation()}
       >
         ${repeat(

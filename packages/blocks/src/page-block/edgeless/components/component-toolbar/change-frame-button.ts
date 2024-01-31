@@ -1,3 +1,4 @@
+import '../buttons/tool-icon-button.js';
 import './component-toolbar-menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/lit';
@@ -164,9 +165,12 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
               @click=${this._insertIntoPage}
             >
               ${NoteIcon}
+
               <span style="margin-left: 2px;">Insert into Page</span>
             </edgeless-tool-icon-button>
+
             <component-toolbar-menu-divider></component-toolbar-menu-divider>
+
             <edgeless-tool-icon-button
               .tooltip=${'Rename'}
               .tipPosition=${'bottom'}
@@ -176,6 +180,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
             >
               ${RenameIcon}
             </edgeless-tool-icon-button>
+
             <component-toolbar-menu-divider></component-toolbar-menu-divider>
           `
         : nothing}
@@ -190,6 +195,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       >
         <div class="fill-color-container">${ColorUnit(background)}</div>
       </edgeless-tool-icon-button>
+
       <div class="color-panel-container fill-color">
         <edgeless-color-panel
           .value=${background}
