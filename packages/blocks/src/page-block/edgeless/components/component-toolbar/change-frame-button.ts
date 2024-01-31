@@ -9,6 +9,8 @@ import { html } from 'lit/static-html.js';
 import { toast } from '../../../../_common/components/toast.js';
 import { NoteIcon, RenameIcon } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import { NoteDisplayMode } from '../../../../_common/types.js';
+import { matchFlavours } from '../../../../_common/utils/model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import {
   deserializeXYWH,
@@ -107,13 +109,17 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     if (!this.surface.page.root) return;
 
     const root = this.surface.page.root;
-    const pageChildren = root.children;
-    const last = pageChildren[pageChildren.length - 1];
+    const notes = root.children.filter(
+      model =>
+        matchFlavours(model, ['affine:note']) &&
+        model.displayMode !== NoteDisplayMode.EdgelessOnly
+    );
+    const lastNote = notes[notes.length - 1];
     const referenceFrame = this.frames[0];
 
-    let targetParent = last?.id;
+    let targetParent = lastNote?.id;
 
-    if (last?.flavour !== 'affine:note') {
+    if (!lastNote) {
       const targetXYWH = deserializeXYWH(referenceFrame.xywh);
 
       targetXYWH[1] = targetXYWH[1] + targetXYWH[3];
