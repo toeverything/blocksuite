@@ -13,9 +13,7 @@ excerpt: To make editors intuitive and collaboration-ready, BlockSuite ensure th
 
 <BlogPostMeta />
 
-To make the editor logic based on BlockSuite intuitive and collaboration-ready, there is one major goal in BlockSuite: **Regardless of whether it is in a multi-user collaboration state, the application-layer code based on BlockSuite should be unaware of it**.
-
-We will introduce how this is designed in BlockSuite.
+To make editors intuitive and collaboration-ready, BlockSuite ensure that regardless of whether you are collaborating with others or not, the application code should be unaware of it. This article introduce how this is designed.
 
 ## CRDT as Single Source of Truth
 

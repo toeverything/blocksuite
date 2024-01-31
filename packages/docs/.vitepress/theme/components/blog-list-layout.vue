@@ -40,7 +40,9 @@ h1 {
 
 .blog-posts-container {
   max-width: 800px;
-  margin: 0 auto;
+  margin: auto;
+  padding-left: 30px;
+  padding-right: 30px;
 }
 
 .blog-post {

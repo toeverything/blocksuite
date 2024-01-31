@@ -10,4 +10,4 @@ This editor component is great at whiteboard graphics editing capabilites. It co
 import { EdgelessEditor } from '@blocksuite/presets';
 ```
 
-<iframe src="https://try-blocksuite.vercel.app/starter/?init&mode=edgeless" width="100%" height="500"></iframe>
+<iframe src="https://try-blocksuite.vercel.app/starter/?init&mode=edgeless" frameborder="no" width="100%" height="500"></iframe>
