@@ -346,7 +346,7 @@ export function updateDragHandleClassName(blockElements: BlockElement[] = []) {
   blockElements.forEach(blockElement => blockElement.classList.add(className));
 }
 
-function getBlockProps(model: BlockModel) {
+export function getBlockProps(model: BlockModel): { [index: string]: unknown } {
   const keys = model.keys as (keyof typeof model)[];
   const values = keys.map(key => model[key]);
   const blockProps = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
@@ -360,6 +360,7 @@ export function convertDragPreviewDocToEdgeless({
   width,
   height,
   noteScale,
+  state,
 }: OnDragEndProps & {
   blockComponent: BlockElement;
   cssSelector: string;
@@ -369,7 +370,9 @@ export function convertDragPreviewDocToEdgeless({
   const edgelessPage = blockComponent.closest(
     'affine-edgeless-page'
   ) as EdgelessPageBlockComponent;
-  if (!edgelessPage) return false;
+  if (!edgelessPage) {
+    return false;
+  }
 
   const previewEl = dragPreview.querySelector(cssSelector);
   assertExists(previewEl);
@@ -397,7 +400,12 @@ export function convertDragPreviewDocToEdgeless({
     },
     edgelessPage.surfaceBlockModel
   );
-  blockComponent.page.deleteBlock(blockModel);
+
+  const altKey = state.raw.altKey;
+  if (!altKey) {
+    blockComponent.page.deleteBlock(blockModel);
+  }
+
   return true;
 }
 
@@ -405,6 +413,7 @@ export function convertDragPreviewEdgelessToDoc({
   blockComponent,
   dropBlockId,
   dropType,
+  state,
 }: OnDragEndProps & {
   blockComponent: BlockElement;
 }): boolean {
@@ -425,6 +434,11 @@ export function convertDragPreviewEdgelessToDoc({
   const { width, height, xywh, rotate, zIndex, ...blockProps } =
     getBlockProps(blockModel);
   page.addBlock(blockModel.flavour, blockProps, parentBlock, parentIndex);
-  page.deleteBlock(blockModel);
+
+  const altKey = state.raw.altKey;
+  if (!altKey) {
+    page.deleteBlock(blockModel);
+  }
+
   return true;
 }

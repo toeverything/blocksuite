@@ -60,6 +60,7 @@ import {
   captureEventTarget,
   containBlock,
   containChildBlock,
+  getBlockProps,
   getClosestBlockByPoint,
   getClosestNoteBlock,
   getDragHandleContainerHeight,
@@ -103,6 +104,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   noteScale = 1;
   center: IVec = [0, 0];
   rafID = 0;
+  altKey = false;
 
   @state()
   private _dragHoverRect: {
@@ -372,6 +374,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
         this.scale * this.noteScale
       })`;
+      dragPreview.style.opacity = this.altKey ? '1' : '0.5';
       dragPreview.appendChild(fragment);
     }
     this.pageBlockElement.appendChild(dragPreview);
@@ -405,6 +408,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
       this.scale * this.noteScale
     })`;
+    this.dragPreview.style.opacity = this.altKey ? '1' : '0.5';
   };
 
   private _updateDragPreviewOnViewportUpdate = () => {
@@ -434,11 +438,16 @@ export class AffineDragHandleWidget extends WidgetElement<
     dragPreviewEl?: HTMLElement,
     dragPreviewOffset?: Point
   ) => {
-    if (!blockElements.length) return;
+    if (!blockElements.length) {
+      return;
+    }
 
     this.draggingElements = blockElements;
 
-    if (this.dragPreview) this._removeDragPreview();
+    if (this.dragPreview) {
+      this._removeDragPreview();
+    }
+
     this.dragPreview = this._createDragPreview(
       blockElements,
       state,
@@ -462,10 +471,13 @@ export class AffineDragHandleWidget extends WidgetElement<
     this._anchorBlockId = '';
     this._anchorBlockPath = null;
 
-    if (this._dragHandleContainer)
+    if (this._dragHandleContainer) {
       this._dragHandleContainer.style.display = 'none';
+    }
 
-    if (force) this._reset();
+    if (force) {
+      this._reset();
+    }
   };
 
   private _reset = () => {
@@ -1143,7 +1155,15 @@ export class AffineDragHandleWidget extends WidgetElement<
         },
       });
 
-      this.page.moveBlocks(selectedBlocks, newNoteBlock);
+      if (this.altKey) {
+        const duplicateBlocks = selectedBlocks.map(block => ({
+          flavour: block.flavour,
+          blockProps: getBlockProps(block),
+        }));
+        this.page.addBlocks(duplicateBlocks, newNoteBlock);
+      } else {
+        this.page.moveBlocks(selectedBlocks, newNoteBlock);
+      }
 
       return true;
     }
@@ -1154,13 +1174,16 @@ export class AffineDragHandleWidget extends WidgetElement<
         this.selectedBlocks.map(selection => selection.blockId),
         targetBlockId
       )
-    )
+    ) {
       return false;
+    }
 
     const selectedBlocks = getBlockElementsExcludeSubtrees(draggingElements)
       .map(element => getModelByBlockComponent(element))
       .filter((x): x is BlockModel => !!x);
-    if (!selectedBlocks.length) return false;
+    if (!selectedBlocks.length) {
+      return false;
+    }
 
     const targetBlock = this.page.getBlockById(targetBlockId);
     assertExists(targetBlock);
@@ -1173,14 +1196,32 @@ export class AffineDragHandleWidget extends WidgetElement<
     assertExists(parent);
 
     if (shouldInsertIn) {
-      this.page.moveBlocks(selectedBlocks, targetBlock);
+      if (this.altKey) {
+        const duplicateBlocks = selectedBlocks.map(block => ({
+          flavour: block.flavour,
+          blockProps: getBlockProps(block),
+        }));
+        this.page.addBlocks(duplicateBlocks, targetBlock);
+      } else {
+        this.page.moveBlocks(selectedBlocks, targetBlock);
+      }
     } else {
-      this.page.moveBlocks(
-        selectedBlocks,
-        parent,
-        targetBlock,
-        dropType === 'before'
-      );
+      if (this.altKey) {
+        const duplicateBlocks = selectedBlocks.map(block => ({
+          flavour: block.flavour,
+          blockProps: getBlockProps(block),
+        }));
+        const parentIndex =
+          parent.children.indexOf(targetBlock) + (dropType === 'after' ? 1 : 0);
+        this.page.addBlocks(duplicateBlocks, parent, parentIndex);
+      } else {
+        this.page.moveBlocks(
+          selectedBlocks,
+          parent,
+          targetBlock,
+          dropType === 'before'
+        );
+      }
     }
 
     // TODO: need a better way to update selection
@@ -1216,7 +1257,11 @@ export class AffineDragHandleWidget extends WidgetElement<
     const state = ctx.get('pointerState');
     // If not click left button to start dragging, should do nothing
     const { button } = state.raw;
-    if (button !== 0) return false;
+    if (button !== 0) {
+      return false;
+    }
+
+    this.altKey = state.raw.altKey;
 
     // call default drag start handler if no option return true
     for (const option of this.optionRunner.options) {
@@ -1253,6 +1298,8 @@ export class AffineDragHandleWidget extends WidgetElement<
     ctx.get('defaultState').event.preventDefault();
     const state = ctx.get('pointerState');
 
+    this.altKey = state.raw.altKey;
+
     for (const option of this.optionRunner.options) {
       if (option.onDragMove?.(state, this.draggingElements)) {
         return true;
@@ -1277,6 +1324,8 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const state = ctx.get('pointerState');
 
+    this.altKey = state.raw.altKey;
+
     for (const option of this.optionRunner.options) {
       if (
         option.onDragEnd?.({
@@ -1298,7 +1347,11 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     // call default drag end handler if no option return true
     this._onDragEnd(state);
-    if (isInsideEdgelessEditor(this.host)) this._checkTopLevelBlockSelection();
+
+    if (isInsideEdgelessEditor(this.host)) {
+      this._checkTopLevelBlockSelection();
+    }
+
     return true;
   };
 
@@ -1529,6 +1582,40 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.handleEvent('dragEnd', this._dragEndHandler);
     this.handleEvent('pointerOut', this._pointerOutHandler);
     this.handleEvent('beforeInput', () => this._hide());
+    this.handleEvent(
+      'keyDown',
+      ctx => {
+        if (!this.dragging || !this.dragPreview) {
+          return;
+        }
+
+        const state = ctx.get('defaultState');
+        const event = state.event as KeyboardEvent;
+        event.preventDefault();
+        event.stopPropagation();
+
+        this.altKey = event.key === 'Alt' && event.altKey;
+        this.dragPreview.style.opacity = this.altKey ? '1' : '0.5';
+      },
+      { global: true }
+    );
+    this.handleEvent(
+      'keyUp',
+      ctx => {
+        if (!this.dragging || !this.dragPreview) {
+          return;
+        }
+
+        const state = ctx.get('defaultState');
+        const event = state.event as KeyboardEvent;
+        event.preventDefault();
+        event.stopPropagation();
+
+        this.altKey = event.key === 'Alt' && event.altKey;
+        this.dragPreview.style.opacity = this.altKey ? '1' : '0.5';
+      },
+      { global: true }
+    );
   }
 
   override disconnectedCallback() {
