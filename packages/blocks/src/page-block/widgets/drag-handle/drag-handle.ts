@@ -60,11 +60,11 @@ import {
   captureEventTarget,
   containBlock,
   containChildBlock,
-  getBlockProps,
   getClosestBlockByPoint,
   getClosestNoteBlock,
   getDragHandleContainerHeight,
   getDragHandleLeftPadding,
+  getDuplicateBlocks,
   getNoteId,
   includeTextSelection,
   insideDatabaseTable,
@@ -104,7 +104,6 @@ export class AffineDragHandleWidget extends WidgetElement<
   noteScale = 1;
   center: IVec = [0, 0];
   rafID = 0;
-  altKey = false;
 
   @state()
   private _dragHoverRect: {
@@ -368,13 +367,15 @@ export class AffineDragHandleWidget extends WidgetElement<
       const offset = this._calculatePreviewOffset(blockElements, state);
       const posX = state.raw.x - offset.x;
       const posY = state.raw.y - offset.y;
+      const altKey = state.raw.altKey;
 
       dragPreview = new DragPreview(offset);
       dragPreview.style.width = `${width / this.scale}px`;
       dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
         this.scale * this.noteScale
       })`;
-      dragPreview.style.opacity = this.altKey ? '1' : '0.5';
+
+      dragPreview.style.opacity = altKey ? '1' : '0.5';
       dragPreview.appendChild(fragment);
     }
     this.pageBlockElement.appendChild(dragPreview);
@@ -408,7 +409,9 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${
       this.scale * this.noteScale
     })`;
-    this.dragPreview.style.opacity = this.altKey ? '1' : '0.5';
+
+    const altKey = state.raw.altKey;
+    this.dragPreview.style.opacity = altKey ? '1' : '0.5';
   };
 
   private _updateDragPreviewOnViewportUpdate = () => {
@@ -1155,11 +1158,10 @@ export class AffineDragHandleWidget extends WidgetElement<
         },
       });
 
-      if (this.altKey) {
-        const duplicateBlocks = selectedBlocks.map(block => ({
-          flavour: block.flavour,
-          blockProps: getBlockProps(block),
-        }));
+      const altKey = state.raw.altKey;
+      if (altKey) {
+        const duplicateBlocks = getDuplicateBlocks(selectedBlocks);
+
         this.page.addBlocks(duplicateBlocks, newNoteBlock);
       } else {
         this.page.moveBlocks(selectedBlocks, newNoteBlock);
@@ -1195,24 +1197,23 @@ export class AffineDragHandleWidget extends WidgetElement<
       : this.page.getParent(targetBlockId);
     assertExists(parent);
 
+    const altKey = state.raw.altKey;
+
     if (shouldInsertIn) {
-      if (this.altKey) {
-        const duplicateBlocks = selectedBlocks.map(block => ({
-          flavour: block.flavour,
-          blockProps: getBlockProps(block),
-        }));
+      if (altKey) {
+        const duplicateBlocks = getDuplicateBlocks(selectedBlocks);
+
         this.page.addBlocks(duplicateBlocks, targetBlock);
       } else {
         this.page.moveBlocks(selectedBlocks, targetBlock);
       }
     } else {
-      if (this.altKey) {
-        const duplicateBlocks = selectedBlocks.map(block => ({
-          flavour: block.flavour,
-          blockProps: getBlockProps(block),
-        }));
+      if (altKey) {
+        const duplicateBlocks = getDuplicateBlocks(selectedBlocks);
+
         const parentIndex =
           parent.children.indexOf(targetBlock) + (dropType === 'after' ? 1 : 0);
+
         this.page.addBlocks(duplicateBlocks, parent, parentIndex);
       } else {
         this.page.moveBlocks(
@@ -1261,8 +1262,6 @@ export class AffineDragHandleWidget extends WidgetElement<
       return false;
     }
 
-    this.altKey = state.raw.altKey;
-
     // call default drag start handler if no option return true
     for (const option of this.optionRunner.options) {
       if (
@@ -1298,8 +1297,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     ctx.get('defaultState').event.preventDefault();
     const state = ctx.get('pointerState');
 
-    this.altKey = state.raw.altKey;
-
     for (const option of this.optionRunner.options) {
       if (option.onDragMove?.(state, this.draggingElements)) {
         return true;
@@ -1323,8 +1320,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     const state = ctx.get('pointerState');
-
-    this.altKey = state.raw.altKey;
 
     for (const option of this.optionRunner.options) {
       if (
@@ -1373,6 +1368,20 @@ export class AffineDragHandleWidget extends WidgetElement<
 
     const inDragHandle = !!relatedElement?.closest(AFFINE_DRAG_HANDLE_WIDGET);
     if (outOfPageViewPort && !inDragHandle && !inPage) this._hide();
+  };
+
+  private _keyboardHandler: UIEventHandler = ctx => {
+    if (!this.dragging || !this.dragPreview) {
+      return;
+    }
+
+    const state = ctx.get('defaultState');
+    const event = state.event as KeyboardEvent;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const altKey = event.key === 'Alt' && event.altKey;
+    this.dragPreview.style.opacity = altKey ? '1' : '0.5';
   };
 
   private _onDragHandlePointerEnter = () => {
@@ -1582,40 +1591,8 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.handleEvent('dragEnd', this._dragEndHandler);
     this.handleEvent('pointerOut', this._pointerOutHandler);
     this.handleEvent('beforeInput', () => this._hide());
-    this.handleEvent(
-      'keyDown',
-      ctx => {
-        if (!this.dragging || !this.dragPreview) {
-          return;
-        }
-
-        const state = ctx.get('defaultState');
-        const event = state.event as KeyboardEvent;
-        event.preventDefault();
-        event.stopPropagation();
-
-        this.altKey = event.key === 'Alt' && event.altKey;
-        this.dragPreview.style.opacity = this.altKey ? '1' : '0.5';
-      },
-      { global: true }
-    );
-    this.handleEvent(
-      'keyUp',
-      ctx => {
-        if (!this.dragging || !this.dragPreview) {
-          return;
-        }
-
-        const state = ctx.get('defaultState');
-        const event = state.event as KeyboardEvent;
-        event.preventDefault();
-        event.stopPropagation();
-
-        this.altKey = event.key === 'Alt' && event.altKey;
-        this.dragPreview.style.opacity = this.altKey ? '1' : '0.5';
-      },
-      { global: true }
-    );
+    this.handleEvent('keyDown', this._keyboardHandler, { global: true });
+    this.handleEvent('keyUp', this._keyboardHandler, { global: true });
   }
 
   override disconnectedCallback() {

@@ -346,11 +346,19 @@ export function updateDragHandleClassName(blockElements: BlockElement[] = []) {
   blockElements.forEach(blockElement => blockElement.classList.add(className));
 }
 
-export function getBlockProps(model: BlockModel): { [index: string]: unknown } {
+function getBlockProps(model: BlockModel): { [index: string]: unknown } {
   const keys = model.keys as (keyof typeof model)[];
   const values = keys.map(key => model[key]);
   const blockProps = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
   return blockProps;
+}
+
+export function getDuplicateBlocks(blocks: BlockModel[]) {
+  const duplicateBlocks = blocks.map(block => ({
+    flavour: block.flavour,
+    blockProps: getBlockProps(block),
+  }));
+  return duplicateBlocks;
 }
 
 export function convertDragPreviewDocToEdgeless({

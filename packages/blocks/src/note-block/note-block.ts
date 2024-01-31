@@ -12,7 +12,7 @@ import {
 } from '../page-block/widgets/drag-handle/drag-handle.js';
 import {
   captureEventTarget,
-  getBlockProps,
+  getDuplicateBlocks,
 } from '../page-block/widgets/drag-handle/utils.js';
 import { KeymapController } from './keymap-controller.js';
 import { type NoteBlockModel, NoteBlockSchema } from './note-model.js';
@@ -104,10 +104,7 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
 
       const altKey = state.raw.altKey;
       if (altKey) {
-        const duplicateBlocks = noteBlock.children.map(block => ({
-          flavour: block.flavour,
-          blockProps: getBlockProps(block),
-        }));
+        const duplicateBlocks = getDuplicateBlocks(noteBlock.children);
 
         const parentIndex =
           parentBlock.children.indexOf(targetBlock) +
