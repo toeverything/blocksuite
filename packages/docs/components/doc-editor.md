@@ -10,4 +10,4 @@ This editor component is great at block-based rich text editng, with drag handle
 import { DocEditor } from '@blocksuite/presets';
 ```
 
-<iframe src="https://try-blocksuite.vercel.app/starter/?init" width="100%" height="500"></iframe>
+<iframe src="https://try-blocksuite.vercel.app/starter/?init" frameborder="no" width="100%" height="500"></iframe>
