@@ -243,7 +243,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   private _handleElementUpdated = (data: ElementUpdatedData) => {
     const { id, oldValues, props } = data;
-    if (!props.xywh && !props.externalXYWH) return;
+    if (!props.xywh) return;
     // if element is moved in frame, refresh viewport
     if (this._overlapWithFrame(id)) {
       this._refreshViewport();
@@ -259,7 +259,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   private _debounceHandleElementUpdated = debounce(
     this._handleElementUpdated,
-    200
+    100
   );
 
   private _clearEdgelessDisposables = () => {
