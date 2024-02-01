@@ -465,6 +465,10 @@ class DatabaseBlockViewSource implements ViewSource {
         },
         delete: () => {
           this.model.page.captureSync();
+          if (this.model.getViewList().length === 1) {
+            this.model.page.deleteBlock(this.model);
+            return;
+          }
           this.model.deleteView(id);
           this.currentId = undefined;
           this.model.applyViewsUpdate();
