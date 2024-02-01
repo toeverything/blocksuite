@@ -22,6 +22,7 @@ import {
   CopyIcon,
   EditIcon,
   EmbedWebIcon,
+  ExpandFullIcon,
   OpenIcon,
   PaletteIcon,
   RefreshIcon,
@@ -40,7 +41,10 @@ import type { EmbedLinkedDocBlockComponent } from '../../../../embed-linked-doc-
 import type { EmbedLinkedDocModel } from '../../../../embed-linked-doc-block/embed-linked-doc-model.js';
 import type { EmbedYoutubeBlockComponent } from '../../../../embed-youtube-block/embed-youtube-block.js';
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
-import type { BookmarkBlockComponent } from '../../../../index.js';
+import type {
+  BookmarkBlockComponent,
+  EmbedHtmlModel,
+} from '../../../../index.js';
 import {
   Bound,
   type EdgelessBlockType,
@@ -50,6 +54,7 @@ import type { EmbedOptions, PageService } from '../../../page-service.js';
 import {
   isBookmarkBlock,
   isEmbedGithubBlock,
+  isEmbedHtmlBlock,
   isEmbedLinkedDocBlock,
 } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
@@ -70,6 +75,11 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+
+    .change-embed-card-button svg {
+      width: 20px;
+      height: 20px;
     }
 
     .change-embed-card-button.url {
@@ -148,7 +158,8 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
     | EmbedGithubModel
     | EmbedYoutubeModel
     | EmbedFigmaModel
-    | EmbedLinkedDocModel;
+    | EmbedLinkedDocModel
+    | EmbedHtmlModel;
 
   @property({ attribute: false })
   std!: BlockStdScope;
@@ -220,6 +231,10 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
 
   private get _canShowOpenButton() {
     return isEmbedLinkedDocBlock(this.model);
+  }
+
+  private get _canShowFullScreenButton() {
+    return isEmbedHtmlBlock(this.model);
   }
 
   private get _isCardView() {
@@ -451,10 +466,18 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                 .vertical=${true}
               ></component-toolbar-menu-divider>`
           : nothing}
-
-        <div class="change-embed-card-view-style">
-          ${this._canConvertToEmbedView
-            ? html`
+        ${this._canShowFullScreenButton
+          ? html`<edgeless-tool-icon-button
+              .tooltip=${'Full screen'}
+              class="change-embed-card-button expand"
+              @click=${this._open}
+            >
+              ${ExpandFullIcon}
+            </edgeless-tool-icon-button> `
+          : nothing}
+        ${this._canConvertToEmbedView
+          ? html`
+              <div class="change-embed-card-view-style">
                 <div class="change-embed-card-button-view-selector">
                   <edgeless-tool-icon-button
                     class=${classMap({
@@ -486,29 +509,30 @@ export class EdgelessChangeEmbedCardButton extends WithDisposable(LitElement) {
                     ${EmbedWebIcon}
                   </edgeless-tool-icon-button>
                 </div>
-              `
-            : nothing}
-          ${this._canShowCardStylePanel
-            ? html`
-                <div class="change-embed-card-button card-style">
-                  <edgeless-tool-icon-button
-                    .tooltip=${this._showPopper ? '' : 'Card style'}
-                    ?disabled=${this._page.readonly}
-                    @click=${() => this._cardStylePopper?.toggle()}
-                  >
-                    ${PaletteIcon}
-                  </edgeless-tool-icon-button>
+              </div>
+            `
+          : nothing}
+        ${this._canShowCardStylePanel
+          ? html`
+              <div class="change-embed-card-button card-style">
+                <edgeless-tool-icon-button
+                  .tooltip=${this._showPopper ? '' : 'Card style'}
+                  ?disabled=${this._page.readonly}
+                  @click=${() => this._cardStylePopper?.toggle()}
+                >
+                  ${PaletteIcon}
+                </edgeless-tool-icon-button>
 
-                  <card-style-panel
-                    .value=${model.style}
-                    .options=${this._getCardStyleOptions}
-                    .onSelect=${this._setCardStyle}
-                  >
-                  </card-style-panel>
-                </div>
-              `
-            : nothing}
-        </div>
+                <card-style-panel
+                  .value=${model.style}
+                  .options=${this._getCardStyleOptions}
+                  .onSelect=${(value: EmbedCardStyle) =>
+                    this._setCardStyle(value)}
+                >
+                </card-style-panel>
+              </div>
+            `
+          : nothing}
 
         <component-toolbar-menu-divider
           .vertical=${true}

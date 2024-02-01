@@ -20,6 +20,11 @@ import {
 } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
 import { clamp } from '../../../../_common/utils/math.js';
+import {
+  EMBED_HTML_MIN_HEIGHT,
+  EMBED_HTML_MIN_WIDTH,
+} from '../../../../embed-html-block/styles.js';
+import type { EmbedHtmlModel } from '../../../../index.js';
 import type { BookmarkBlockModel } from '../../../../models.js';
 import { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { normalizeTextBound } from '../../../../surface-block/canvas-renderer/element-renderer/text/utils.js';
@@ -40,11 +45,7 @@ import {
   serializeXYWH,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import {
-  NOTE_MIN_HEIGHT,
-  NOTE_MIN_WIDTH,
-  SELECTED_RECT_PADDING,
-} from '../../utils/consts.js';
+import { NOTE_MIN_HEIGHT, NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import { getElementsWithoutGroup } from '../../utils/group.js';
 import {
   getSelectableBounds,
@@ -53,6 +54,11 @@ import {
   isBookmarkBlock,
   isCanvasElement,
   isEmbeddedBlock,
+  isEmbedFigmaBlock,
+  isEmbedGithubBlock,
+  isEmbedHtmlBlock,
+  isEmbedLinkedDocBlock,
+  isEmbedYoutubeBlock,
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
@@ -426,10 +432,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _scaleDirection?: HandleDirection;
 
   @state()
-  private _isNoteWidthLimit = false;
+  private _isWidthLimit = false;
 
   @state()
-  private _isNoteHeightLimit = false;
+  private _isHeightLimit = false;
 
   @state()
   private _shiftKey = false;
@@ -497,6 +503,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           areAllShapes = false;
           areAllTexts = false;
         }
+      } else if (isEmbedHtmlBlock(element)) {
+        areAllConnectors = false;
       } else if (isFrameBlock(element)) {
         areAllConnectors = false;
       } else if (this._isProportionalElement(element)) {
@@ -525,10 +533,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _isProportionalElement(element: EdgelessModel) {
     return (
+      isAttachmentBlock(element) ||
       isImageBlock(element) ||
       isBookmarkBlock(element) ||
-      isAttachmentBlock(element) ||
-      isEmbeddedBlock(element)
+      isEmbedFigmaBlock(element) ||
+      isEmbedGithubBlock(element) ||
+      isEmbedYoutubeBlock(element) ||
+      isEmbedLinkedDocBlock(element)
     );
   }
 
@@ -621,10 +632,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         height = clamp(height, NOTE_MIN_HEIGHT, Infinity);
         bound.h = height * scale;
 
-        this._isNoteWidthLimit = width === NOTE_MIN_WIDTH ? true : false;
-        this._isNoteHeightLimit = height === NOTE_MIN_HEIGHT ? true : false;
+        this._isWidthLimit = width === NOTE_MIN_WIDTH;
+        this._isHeightLimit = height === NOTE_MIN_HEIGHT;
 
         props.edgeless = { ...element.edgeless, scale };
+        props.xywh = bound.serialize();
+        edgeless.service.updateElement(element.id, props);
+      } else if (isEmbedHtmlBlock(element)) {
+        bound.w = clamp(bound.w, EMBED_HTML_MIN_WIDTH, Infinity);
+        bound.h = clamp(bound.h, EMBED_HTML_MIN_HEIGHT, Infinity);
+
+        this._isWidthLimit = bound.w === EMBED_HTML_MIN_WIDTH;
+        this._isHeightLimit = bound.h === EMBED_HTML_MIN_HEIGHT;
+
+        const props: Partial<EmbedHtmlModel> = {};
         props.xywh = bound.serialize();
         edgeless.service.updateElement(element.id, props);
       } else if (this._isProportionalElement(element)) {
@@ -729,8 +750,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     });
 
     this._dragEndCallback = [];
-    this._isNoteWidthLimit = false;
-    this._isNoteHeightLimit = false;
+    this._isWidthLimit = false;
+    this._isHeightLimit = false;
 
     this._updateCursor(false);
 
@@ -842,15 +863,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       rotate = elements[0].rotate;
     }
 
-    const padding = elements.length > 1 ? SELECTED_RECT_PADDING : 0;
-
     this._selectedRect = {
-      width: width + padding * 2,
-      height: height + padding * 2,
+      width: width,
+      height: height,
       borderWidth: selection.editing ? 2 : 1,
       borderStyle: 'solid',
-      left: left - padding,
-      top: top - padding,
+      left: left,
+      top: top,
       rotate,
     };
   }, this);
@@ -1079,13 +1098,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const isSingleGroup =
       elements.length === 1 && elements[0] instanceof GroupElementModel;
+
+    if (elements.length === 1 && elements[0] instanceof ConnectorElementModel) {
+      _selectedRect.width = 0;
+      _selectedRect.height = 0;
+      _selectedRect.borderWidth = 0;
+    }
+
     _selectedRect.borderStyle = isSingleGroup ? 'dashed' : 'solid';
 
     return html`
       <style>
         .affine-edgeless-selected-rect .handle[aria-label='right']::after {
           content: '';
-          display: ${this._isNoteWidthLimit ? 'initial' : 'none'};
+          display: ${this._isWidthLimit ? 'initial' : 'none'};
           position: absolute;
           top: 0;
           left: 1.5px;
@@ -1097,7 +1123,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
         .affine-edgeless-selected-rect .handle[aria-label='bottom']::after {
           content: '';
-          display: ${this._isNoteHeightLimit ? 'initial' : 'none'};
+          display: ${this._isHeightLimit ? 'initial' : 'none'};
           position: absolute;
           top: 1.5px;
           left: 0px;

@@ -199,7 +199,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       fillScreen?: boolean;
     }>(),
     navigatorFrameChanged: new Slot<FrameBlockModel>(),
-    fullScrennToggled: new Slot(),
+    fullScreenToggled: new Slot(),
 
     elementResizeStart: new Slot(),
     elementResizeEnd: new Slot(),

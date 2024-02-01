@@ -1,7 +1,7 @@
 import { noop } from '@blocksuite/global/utils';
 
-import { EmbedHtmlBlock } from './embed-html-block.js';
-noop(EmbedHtmlBlock);
+import { EmbedHtmlBlockComponent } from './embed-html-block.js';
+noop(EmbedHtmlBlockComponent);
 
 export * from './embed-html-block.js';
 export * from './embed-html-model.js';

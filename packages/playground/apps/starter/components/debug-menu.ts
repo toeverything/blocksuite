@@ -59,6 +59,11 @@ import type { LeftSidePanel } from './left-side-panel.js';
 import type { PagesPanel } from './pages-panel.js';
 import type { SidePanel } from './side-panel.js';
 
+const basePath = import.meta.env.DEV
+  ? '/node_modules/@shoelace-style/shoelace/dist'
+  : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist';
+setBasePath(basePath);
+
 export function getSurfaceElementFromEditor(editorHost: EditorHost) {
   const { page } = editorHost;
   const surfaceModel = page.getBlockByFlavour('affine:surface')[0];
@@ -85,11 +90,6 @@ const OTHER_CSS_VARIABLES = StyleVariables.filter(
     !FontFamilyVariables.includes(variable)
 );
 let styleDebugMenuLoaded = false;
-
-const basePath = import.meta.env.DEV
-  ? '/node_modules/@shoelace-style/shoelace/dist'
-  : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist';
-setBasePath(basePath);
 
 function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
   const sizeFolder = styleMenu.addFolder({ title: 'Size', expanded: false });
@@ -155,6 +155,16 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
       style.setProperty(plateKey, e.value);
     });
   }
+}
+
+function getDarkModeConfig(): boolean {
+  const updatedDarkModeConfig = localStorage.getItem('blocksuite:dark');
+  if (updatedDarkModeConfig !== null) {
+    return updatedDarkModeConfig === 'true';
+  }
+
+  const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+  return matchMedia.matches;
 }
 
 export function getSelectedBlocks(host: EditorHost) {
@@ -246,7 +256,7 @@ export class DebugMenu extends ShadowlessElement {
   private _showStyleDebugMenu = false;
 
   @state()
-  private _dark = localStorage.getItem('blocksuite:dark') === 'true';
+  private _dark = getDarkModeConfig();
 
   get page() {
     return this.editor.page;
@@ -257,8 +267,9 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   override createRenderRoot() {
+    this._setThemeMode(this._dark);
+
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    this._setThemeMode(this._dark && matchMedia.matches);
     matchMedia.addEventListener('change', this._darkModeChange);
 
     return this;
@@ -712,17 +723,9 @@ export class DebugMenu extends ShadowlessElement {
             </sl-menu>
           </sl-dropdown>
 
-          <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
+          <sl-tooltip content="Switch Editor" placement="bottom" hoist>
             <sl-button size="small" @click="${this._switchEditorMode}">
               <sl-icon name="repeat"></sl-icon>
-            </sl-button>
-          </sl-tooltip>
-
-          <sl-tooltip content="Toggle Dark Mode" placement="bottom" hoist>
-            <sl-button size="small" @click="${this._toggleDarkMode}">
-              <sl-icon
-                name="${this._dark ? 'moon' : 'brightness-high'}"
-              ></sl-icon>
             </sl-button>
           </sl-tooltip>
 
@@ -735,6 +738,15 @@ export class DebugMenu extends ShadowlessElement {
               <sl-icon name="stars"></sl-icon>
             </sl-button>
           </sl-tooltip>
+
+          <sl-tooltip content="Toggle Dark Mode" placement="bottom" hoist>
+            <sl-button size="small" @click="${this._toggleDarkMode}">
+              <sl-icon
+                name="${this._dark ? 'moon' : 'brightness-high'}"
+              ></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
           <sl-button
             data-testid="pages-button"
             size="small"

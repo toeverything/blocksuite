@@ -1,8 +1,15 @@
 ---
-layout: doc
+title: Building Document-Centric, CRDT-Native Editors
+date: 2024-01-10
+authors:
+  - name: Yifeng Wang
+    link: 'https://twitter.com/ewind1994'
+excerpt: 'This article presents the document-centric way for building editors, and why CRDT is required to make this happpen.'
 ---
 
 # Building Document-Centric, CRDT-Native Editors
+
+<BlogPostMeta />
 
 ## Motivation
 
@@ -168,7 +175,7 @@ Additionally, the document-centric approach aids in better separation between th
 
 ![context-interleaving](../images/context-interleaving.png)
 
-In contrast, when there are 2000 canvas shapes in the documenzt, tldraw, the DOM-based open-source whiteboard, would reaches its limit. At this point, it exhibits noticeable frame drops during viewport panning and zooming, degrading the content to placeholders with React suspense. However, the canvas renderer in BlockSuite could still maintain a frame rate of over 100fps at this time - and don't forget, you can still use the complete DOM-based rich text editing capability!
+In contrast, when there are 2000 canvas shapes in the document, tldraw, the DOM-based open-source whiteboard, would reaches its limit. At this point, it exhibits noticeable frame drops during viewport panning and zooming, degrading the content to placeholders with React suspense. However, the canvas renderer in BlockSuite could still maintain a frame rate of over 100fps at this time - and don't forget, you can still use the complete DOM-based rich text editing capability!
 
 ![showcase-edgeless-perf](../images/showcase-edgeless-perf.jpg)
 

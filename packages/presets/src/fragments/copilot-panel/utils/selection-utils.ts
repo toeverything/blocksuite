@@ -56,10 +56,9 @@ export async function frameToCanvas(
   frame: FrameBlockModel,
   editor: EditorHost
 ) {
-  const surface = getSurfaceElementFromEditor(editor);
   const edgelessPage = getEdgelessPageBlockFromEditor(editor);
   const { notes, frames, shapes, images } = BlocksUtils.splitElements(
-    surface.frame.getElementsInFrame(frame, true)
+    edgelessPage.service.frame.getElementsInFrame(frame, true)
   );
   if (notes.length + frames.length + images.length + shapes.length === 0) {
     return;
@@ -108,8 +107,8 @@ export const getFirstImageInFrame = (
   frame: FrameBlockModel,
   editor: EditorHost
 ) => {
-  const surface = getSurfaceElementFromEditor(editor);
-  const elements = surface.frame.getElementsInFrame(frame, false);
+  const edgelessPage = getEdgelessPageBlockFromEditor(editor);
+  const elements = edgelessPage.service.frame.getElementsInFrame(frame, false);
   const image = elements.find(ele => {
     if (!BlocksUtils.isCanvasElement(ele)) {
       return (ele as EdgelessBlock).flavour === 'affine:image';

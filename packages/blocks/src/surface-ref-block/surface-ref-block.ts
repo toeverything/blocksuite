@@ -276,6 +276,9 @@ export class SurfaceRefBlockComponent extends BlockElement<
       this.page,
       true
     );
+    this._disposables.add(() => {
+      this.service?.removeRenderer(this._surfaceRefRenderer.id);
+    });
     this._disposables.add(
       this._surfaceRefRenderer.slots.surfaceModelChanged.on(model => {
         this._surfaceModel = model;
@@ -313,12 +316,6 @@ export class SurfaceRefBlockComponent extends BlockElement<
     this._initHotkey();
     this._initReferencedModel();
     this._initSelection();
-  }
-
-  override disconnectedCallback() {
-    if (!this._shouldRender) return;
-    this.service?.removeRenderer(this._surfaceRefRenderer.id);
-    super.disconnectedCallback();
   }
 
   override updated() {

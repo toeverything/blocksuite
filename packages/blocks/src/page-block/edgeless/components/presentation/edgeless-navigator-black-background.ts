@@ -73,7 +73,7 @@ export class EdgelessNavigatorBlackBackground extends WithDisposable(
     );
 
     _disposables.add(
-      edgeless.slots.fullScrennToggled.on(
+      edgeless.slots.fullScreenToggled.on(
         () =>
           setTimeout(() => {
             this.requestUpdate();

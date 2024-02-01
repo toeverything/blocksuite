@@ -57,7 +57,9 @@ export class BookmarkBlockComponent extends BlockElement<
   }
 
   get edgeless() {
-    if (this._isInSurface) return null;
+    if (!this._isInSurface) {
+      return null;
+    }
     return this.host.querySelector('affine-edgeless-page');
   }
 

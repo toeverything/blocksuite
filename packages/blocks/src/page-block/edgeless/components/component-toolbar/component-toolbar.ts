@@ -42,6 +42,7 @@ import type { EmbedLinkedDocModel } from '../../../../embed-linked-doc-block/emb
 import type { EmbedYoutubeModel } from '../../../../embed-youtube-block/embed-youtube-model.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
+import type { EmbedHtmlModel } from '../../../../index.js';
 import type { AttachmentBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import type {
@@ -80,7 +81,8 @@ type CategorizedElements = {
     EmbedGithubModel[] &
     EmbedYoutubeModel[] &
     EmbedFigmaModel[] &
-    EmbedLinkedDocModel[];
+    EmbedLinkedDocModel[] &
+    EmbedHtmlModel[];
 };
 
 type ToolBarCustomAction = {

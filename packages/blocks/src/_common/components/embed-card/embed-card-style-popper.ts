@@ -1,4 +1,5 @@
 import './../button.js';
+import '../tooltip/tooltip.js';
 
 import type { BlockStdScope } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/lit';

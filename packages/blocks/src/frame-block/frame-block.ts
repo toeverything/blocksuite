@@ -24,26 +24,26 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
 
   get isInner() {
     const title = this.titleElement;
-    if (!title) return false;
-    return title.isInner;
+    return !!title?.isInner;
   }
 
-  get surface() {
+  private get _surface() {
     return this.closest('affine-edgeless-page')!.surface;
   }
 
-  get edgeless() {
+  private get _edgeless() {
     return this.closest('affine-edgeless-page');
   }
 
   override connectedCallback() {
     super.connectedCallback();
+
     let lastZoom = 0;
     this._disposables.add(
-      this.edgeless!.service.viewport.viewportUpdated.on(({ zoom }) => {
+      this._edgeless!.service.viewport.viewportUpdated.on(({ zoom }) => {
         if (zoom !== lastZoom) {
-          this.requestUpdate();
           lastZoom = zoom;
+          this.requestUpdate();
         }
       })
     );
@@ -62,7 +62,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   }
 
   override firstUpdated() {
-    this.surface.edgeless.slots.edgelessToolUpdated.on(tool => {
+    this._surface.edgeless.slots.edgelessToolUpdated.on(tool => {
       this._isNavigator = tool.type === 'frameNavigator' ? true : false;
     });
   }

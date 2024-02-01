@@ -1,7 +1,7 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import './portal/image.js';
 import './portal/note.js';
+import './portal/generic-block.js';
 
 import type { EditorHost } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -22,8 +22,12 @@ import type { SurfacePageService } from '../surface-block/surface-page-service.j
 
 const portalMap = {
   'affine:note': 'surface-ref-note-portal',
-  'affine:image': 'surface-ref-image-portal',
 } as Record<EdgelessBlockType, string>;
+
+const getPortalTag = (model: BlockModel) => {
+  const tag = portalMap[model.flavour as EdgelessBlockType];
+  return tag ?? 'surface-ref-generic-block-portal';
+};
 
 @customElement('surface-ref-portal')
 export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
@@ -109,9 +113,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
       blocks,
       model => model.id,
       (model, index) => {
-        const tag = literal`${unsafeStatic(
-          portalMap[model.flavour as EdgelessBlockType]
-        )}`;
+        const tag = literal`${unsafeStatic(getPortalTag(model))}`;
 
         let currentLayer = blockLayers[currentLayerIdx];
         if (!blockLayers[currentLayerIdx].set.has(model)) {
