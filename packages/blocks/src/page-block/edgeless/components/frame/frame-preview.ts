@@ -259,7 +259,7 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
 
   private _debounceHandleElementUpdated = debounce(
     this._handleElementUpdated,
-    100
+    1000 / 30
   );
 
   private _clearEdgelessDisposables = () => {
@@ -313,6 +313,9 @@ export class FramePreview extends WithDisposable(ShadowlessElement) {
     this._pageDisposables.add(
       page.slots.blockUpdated.on(event => {
         const { type } = event;
+        // Should only check for add and delete events, the update event will be handled by the surface renderer
+        if (type === 'update') return;
+
         const model =
           type === 'delete' ? event.model : page.getBlockById(event.id);
         if (!model || !isTopLevelBlock(model) || !model.xywh) return;
