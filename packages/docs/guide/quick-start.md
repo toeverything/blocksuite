@@ -1,11 +1,11 @@
 # Quick Start
 
-The `@blocksuite/presets` package contains the prebuilt editors and opt-in additional UI components. Its `nightly` versions are released daily based on the master branch, which is also recommended for real world usage. You may also need to install `@blocksuite/store` explicitly for working with BlockSuite documents:
+The `@blocksuite/presets` package contains the prebuilt editors and opt-in additional UI components. Its `canary` versions are released daily based on the master branch, which is also recommended for real world usage. You may also need to install `@blocksuite/store` explicitly for working with BlockSuite documents:
 
 ```sh
 pnpm install \
-  @blocksuite/presets@nightly \
-  @blocksuite/store@nightly
+  @blocksuite/presets@canary \
+  @blocksuite/store@canary
 ```
 
 Then you can use the prebuilt `DocEditor` out of the box, with an initialized `page` instance attached as its document model:
