@@ -88,7 +88,7 @@ export const getMenus: (ctx: {
 
   return [
     {
-      name: 'Link to Page',
+      name: 'Link to Doc',
       styles: 'overflow-y: scroll; max-height: 224px;',
       items: filteredPageList.map(page => ({
         key: page.id,
@@ -103,11 +103,11 @@ export const getMenus: (ctx: {
       })),
     },
     {
-      name: 'New page',
+      name: 'New Doc',
       items: [
         {
           key: 'create',
-          name: `Create "${displayPageName}" page`,
+          name: `Create "${displayPageName}" doc`,
           icon: NewPageIcon,
           action: async () => {
             const pageName = query;

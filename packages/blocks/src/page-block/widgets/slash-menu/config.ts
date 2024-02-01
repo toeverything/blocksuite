@@ -188,10 +188,10 @@ export const menuGroups: SlashMenuOptions['menus'] = [
   },
 
   {
-    name: 'Pages',
+    name: 'Docs',
     items: [
       {
-        name: 'New Page',
+        name: 'New Doc',
         icon: NewPageIcon,
         action: async ({ pageElement, model }) => {
           const newPage = await createDefaultPage(pageElement.page.workspace);
@@ -204,7 +204,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         },
       },
       {
-        name: 'Link Page',
+        name: 'Link Doc',
         alias: ['dual link'],
         icon: DualLinkIcon,
         showWhen: (_, pageElement) => {
