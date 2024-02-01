@@ -1,4 +1,3 @@
-import { debounce } from '@blocksuite/global/utils';
 import {
   RangeManager,
   ShadowlessElement,
@@ -42,9 +41,7 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
 
   override firstUpdated() {
     this.disposables.add(
-      this.model.propsUpdated.on(
-        debounce(() => this.requestUpdate(), 1000 / 60)
-      )
+      this.model.propsUpdated.on(() => this.requestUpdate())
     );
   }
 

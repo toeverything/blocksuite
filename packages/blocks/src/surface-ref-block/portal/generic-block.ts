@@ -1,4 +1,3 @@
-import { debounce } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BlockModel } from '@blocksuite/store';
 import { css, type TemplateResult } from 'lit';
@@ -45,9 +44,7 @@ export class SurfaceRefGenericBlockPortal extends WithDisposable(
 
   override firstUpdated() {
     this.disposables.add(
-      this.model.propsUpdated.on(
-        debounce(() => this.requestUpdate(), 1000 / 60)
-      )
+      this.model.propsUpdated.on(() => this.requestUpdate())
     );
   }
 
