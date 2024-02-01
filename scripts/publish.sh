@@ -23,8 +23,8 @@ for package in "${packages[@]}"
 do
   cd "packages/$package"
 
-  if [ "$NIGHTLY" = "true" ]; then
-    pnpm publish --no-git-checks --tag nightly
+  if [ "$CANARY" = "true" ]; then
+    pnpm publish --no-git-checks --tag canary
   else
     pnpm publish
   fi

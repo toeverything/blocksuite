@@ -15,7 +15,7 @@
 [![Checks Status](https://img.shields.io/github/checks-status/toeverything/blocksuite/master)](https://github.com/toeverything/blocksuite/actions?query=branch%3Amaster)
 [![Issues Closed](https://img.shields.io/github/issues-closed/toeverything/blocksuite?color=6880ff)](https://github.com/toeverything/blocksuite/issues?q=is%3Aissue+is%3Aclosed)
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/framework/store/package.json)
-[![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/presets/nightly?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
+[![NPM Canary Release](https://img.shields.io/npm/v/@blocksuite/presets/canary?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/canary-release.yml?query=branch%3Amaster)
 [![Open in StackBlitz](https://img.shields.io/badge/open%20in-StackBlitz-black)](https://stackblitz.com/github/toeverything/blocksuite)
 [![Join Discord](https://img.shields.io/discord/959027316334407691)](https://discord.gg/9vwSWmYYcZ)
 
@@ -107,7 +107,7 @@ This can be illustrated as the diagram below:
 ## Resources
 
 - 🎁 Examples
-  - [Nightly Playground](https://try-blocksuite.vercel.app/starter/?init)
+  - [Canary Playground](https://try-blocksuite.vercel.app/starter/?init)
   - [BlockSuite Monorepo in StackBlitz](https://stackblitz.com/github/toeverything/blocksuite)
   - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
 - 📝 [Documentation](https://blocksuite.io/guide/quick-start.html)

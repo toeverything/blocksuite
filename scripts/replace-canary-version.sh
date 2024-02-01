@@ -24,7 +24,7 @@ replace() {
   VERSION="$MAJOR.$MINOR.$PATCH"
 
   # https://github.com/toeverything/set-build-version
-  pnpm version "$VERSION-nightly-$BUILD_VERSION" --no-git-tag-version  --no-commit-hooks
+  pnpm version "$VERSION-canary-$BUILD_VERSION" --no-git-tag-version  --no-commit-hooks
 }
 
 for package in "${packages[@]}"
